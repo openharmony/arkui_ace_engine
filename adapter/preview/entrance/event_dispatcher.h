@@ -47,10 +47,6 @@ private:
     FlutterDesktopWindowControllerRef controller_ = nullptr;
     CallbackGetKeyboardStatus callbackGetCapsLockStatus_;
     CallbackGetKeyboardStatus callbackGetNumLockStatus_;
-#ifdef USE_GLFW_WINDOW
-    // Use to receive event from glfw window
-    bool HandleTouchEvent(const std::vector<uint8_t>& data);
-#endif
 };
 
 } // namespace OHOS::Ace::Platform

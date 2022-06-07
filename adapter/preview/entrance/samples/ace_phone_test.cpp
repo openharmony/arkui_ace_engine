@@ -20,6 +20,8 @@
 
 #include "adapter/preview/entrance/ace_ability.h"
 #include "adapter/preview/entrance/ace_run_args.h"
+#include "adapter/preview/entrance/samples/key_input_handler.h"
+#include "adapter/preview/entrance/samples/touch_event_handler.h"
 
 namespace {
 
@@ -92,6 +94,9 @@ int main(int argc, const char* argv[])
         std::cerr << "Could not create AceAbility!" << std::endl;
         return -1;
     }
+
+    OHOS::Ace::Platform::KeyInputHandler::InitialTextInputCallback(ability->GetGlfwWindowController());
+    OHOS::Ace::Platform::TouchEventHandler::InitialTouchEventCallback();
 
     std::thread timer([&ability]() {
         int32_t getJSONTreeTimes = GET_INSPECTOR_TREE_TIMES;

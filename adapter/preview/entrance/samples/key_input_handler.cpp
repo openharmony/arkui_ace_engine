@@ -13,10 +13,14 @@
  * limitations under the License.
  */
 
-#include "adapter/preview/entrance/editing/text_input_plugin.h"
+#include "adapter/preview/entrance/samples/key_input_handler.h"
 
 #include <map>
 #include "base/log/log.h"
+#include "core/common/clipboard/clipboard_proxy.h"
+#include "adapter/preview/entrance/clipboard/clipboard_impl.h"
+#include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
+#include "adapter/preview/entrance/event_dispatcher.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -61,37 +65,36 @@ const std::map<int, KeyCode> CODE_MAP = {
 
 }
 
-void TextInputPlugin::KeyboardHook(GLFWwindow* window, int key, int scancode, int action, int mods)
+void KeyInputHandler::InitialTextInputCallback(FlutterDesktopWindowControllerRef controller)
 {
-    if (keyboardHookCallback_ && RecognizeKeyEvent(key, action, mods)) {
-        keyboardHookCallback_(keyEvent_);
+    // Register clipboard callback functions.
+    auto callbackSetClipboardData = [controller](const std::string& data) {
+        FlutterDesktopSetClipboardData(controller, data.c_str());
+    };
+    auto callbackGetClipboardData = [controller]() {
+        return FlutterDesktopGetClipboardData(controller);
+    };
+    ClipboardProxy::GetInstance()->SetDelegate(
+        std::make_unique<ClipboardProxyImpl>(callbackSetClipboardData, callbackGetClipboardData));
+    // Register key event and input method callback functions.
+    FlutterDesktopAddKeyboardHookHandler(controller, std::make_unique<KeyInputHandler>());
+}
+
+void KeyInputHandler::KeyboardHook(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (RecognizeKeyEvent(key, action, mods)) {
+        EventDispatcher::GetInstance().DispatchKeyEvent(keyEvent_);
     } else {
         LOGW("Unrecognized key type.");
     }
 }
 
-void TextInputPlugin::CharHook(GLFWwindow* window, unsigned int code_point)
+void KeyInputHandler::CharHook(GLFWwindow* window, unsigned int code_point)
 {
-    if (charHookCallback_) {
-        charHookCallback_(code_point);
-    }
+    EventDispatcher::GetInstance().DispatchInputMethodEvent(code_point);
 }
 
-void TextInputPlugin::RegisterKeyboardHookCallback(KeyboardHookCallback&& keyboardHookCallback)
-{
-    if (keyboardHookCallback) {
-        keyboardHookCallback_ = std::move(keyboardHookCallback);
-    }
-}
-
-void TextInputPlugin::RegisterCharHookCallback(CharHookCallback&& charHookCallback)
-{
-    if (charHookCallback) {
-        charHookCallback_ = std::move(charHookCallback);
-    }
-}
-
-bool TextInputPlugin::RecognizeKeyEvent(int key, int action, int mods)
+bool KeyInputHandler::RecognizeKeyEvent(int key, int action, int mods)
 {
     auto iterAction = ACTION_MAP.find(action);
     if (iterAction == ACTION_MAP.end()) {
