@@ -1517,6 +1517,8 @@ private:
     RefPtr<Clipboard> clipboard_;
     RefPtr<RenderNode> initRenderNode_;
     std::string customDragInfo_;
+    std::string selectedText_;
+    std::string imageSrc_;
     Offset pageOffset_;
     Offset rootOffset_;
 

@@ -78,6 +78,7 @@
 #include "core/components/semi_modal/semi_modal_theme.h"
 #include "core/components/stage/stage_component.h"
 #include "core/components/stage/stage_element.h"
+#include "core/components/text_field/render_text_field.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
@@ -3072,6 +3073,8 @@ void PipelineContext::ProcessDragEvent(
     auto initDragDropNode = AceType::DynamicCast<DragDropEvent>(GetInitRenderNode());
     auto extraParams = JsonUtil::Create(true);
     extraParams->Put("customDragInfo", customDragInfo_.c_str());
+    extraParams->Put("selectedText", selectedText_.c_str());
+    extraParams->Put("imageSrc", imageSrc_.c_str());
     auto info = GestureEvent();
     info.SetGlobalPoint(globalPoint);
     auto preTargetDragDropNode = GetPreTargetRenderNode();
@@ -3118,9 +3121,18 @@ void PipelineContext::ProcessDragEventEnd(
     auto initDragDropNode = AceType::DynamicCast<DragDropEvent>(GetInitRenderNode());
     auto extraParams = JsonUtil::Create(true);
     extraParams->Put("customDragInfo", customDragInfo_.c_str());
+    extraParams->Put("selectedText", selectedText_.c_str());
+    extraParams->Put("imageSrc", imageSrc_.c_str());
     auto info = GestureEvent();
     info.SetGlobalPoint(globalPoint);
     auto preTargetDragDropNode = GetPreTargetRenderNode();
+
+    auto textfield = renderNode->FindChildNodeOfClass<RenderTextField>(globalPoint, globalPoint);
+    if (textfield) {
+        auto value = textfield->GetEditingValue();
+        value.Append(selectedText_);
+        textfield->SetEditingValue(std::move(value));
+    }
 
     if (targetDragDropNode && targetDragDropNode->GetOnDrop()) {
         auto renderList = renderNode->FindChildNodeOfClass<V2::RenderList>(globalPoint, globalPoint);
@@ -3166,6 +3178,8 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
                 pipelineContext->selectedItemSize_.SetHeight(json->GetDouble("height"));
                 pipelineContext->selectedIndex_ = json->GetInt("selectedIndex");
                 pipelineContext->customDragInfo_ = json->GetString("customDragInfo");
+                pipelineContext->selectedText_ = json->GetString("selectedText");
+                pipelineContext->imageSrc_ = json->GetString("imageSrc");
             }
         };
 
