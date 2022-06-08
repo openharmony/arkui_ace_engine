@@ -15,12 +15,17 @@
 
 #include "core/components/picker/flutter_render_picker_base.h"
 
+#include "lib/ui/painting/rrect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
 namespace OHOS::Ace {
 namespace {
 
 const uint32_t SEARCH_MAX_DEPTH = 16;
+constexpr Dimension DIVIDER_PADDING = 4.0_vp;
+constexpr Dimension FOCUS_RADIUS = 8.0_vp;
+constexpr Dimension FOCUS_BORDER_THICKNESS = 2.0_vp;
+constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF254FF7;
 
 } // namespace
 
@@ -83,6 +88,7 @@ void FlutterRenderPickerBase::Paint(RenderContext& context, const Offset& offset
         // No divider and no gradient, directly return.
         return;
     }
+    InitializeSelectedOption(anchorColumn);
     // Draw two dividers on both sides of selected option.
     flutter::Paint paint;
     flutter::PaintData paintData;
@@ -94,12 +100,19 @@ void FlutterRenderPickerBase::Paint(RenderContext& context, const Offset& offset
     }
     double upperLine = rect.Top() + rect.Height() / 2.0 - dividerSpacing / 2.0;
     double downLine = rect.Top() + rect.Height() / 2.0 + dividerSpacing / 2.0;
+    double leftLine = data_->GetIsDialog() ? rect.Left() : focusBoxOffset_.GetX() - NormalizeToPx(DIVIDER_PADDING);
+    double rightLine =
+        data_->GetIsDialog() ? rect.Right() : leftLine + focusBoxSize_.Width() + NormalizeToPx(DIVIDER_PADDING) * 2.0;
     if (!NearZero(dividerThickness) && !data_->GetSubsidiary()) {
-        canvas->drawRect(rect.Left(), upperLine, rect.Right(), upperLine + dividerThickness, paint, paintData);
-        canvas->drawRect(rect.Left(), downLine, rect.Right(), downLine + dividerThickness, paint, paintData);
+        canvas->drawRect(leftLine, upperLine - dividerThickness, rightLine, upperLine, paint, paintData);
+        canvas->drawRect(leftLine, downLine, rightLine, downLine + dividerThickness, paint, paintData);
     }
     // Paint gradient at top and bottom.
     PaintGradient(canvas, offset, rect, theme);
+
+    if (anchorColumn->IsFocused()) {
+        PaintFocusOptionBorder(canvas, anchorColumn);
+    }
 }
 
 void FlutterRenderPickerBase::PaintGradient(
@@ -146,6 +159,29 @@ void FlutterRenderPickerBase::PaintGradient(
     std::vector<Color> colors { Color(0x00000000), Color(0xff000000), Color(0xff000000), Color(0x00000000) };
     layer_->SetPoints(points);
     layer_->SetColors(colors);
+}
+
+void FlutterRenderPickerBase::PaintFocusOptionBorder(
+    const ScopedCanvas& canvas, const RefPtr<RenderPickerColumn>& pickerColumn)
+{
+    double focusBorderThickness = NormalizeToPx(FOCUS_BORDER_THICKNESS);
+    double focusOffsetX = focusBoxOffset_.GetX() - focusBorderThickness / 2.0;
+    double focusOffsetY = focusBoxOffset_.GetY() - focusBorderThickness / 2.0;
+    double focusBorderWidth = focusBoxSize_.Width() + focusBorderThickness;
+    double focusBorderHeight = focusBoxSize_.Height() + focusBorderThickness;
+    double focusRadius = NormalizeToPx(FOCUS_RADIUS);
+    flutter::Paint paint;
+    flutter::PaintData paintData;
+    paint.paint()->setColor(FOCUS_BORDER_COLOR);
+    paint.paint()->setStyle(SkPaint::Style::kStroke_Style);
+    paint.paint()->setStrokeWidth(focusBorderThickness);
+    paint.paint()->setAntiAlias(true);
+    flutter::RRect rRect;
+    SkRRect rect;
+    rect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+    rect.offset(focusOffsetX, focusOffsetY);
+    rRect.sk_rrect = rect;
+    canvas->drawRRect(rRect, paint, paintData);
 }
 
 } // namespace OHOS::Ace
