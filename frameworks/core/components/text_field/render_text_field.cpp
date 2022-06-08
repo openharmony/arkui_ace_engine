@@ -393,7 +393,6 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
             int32_t start = GetEditingValue().selection.baseOffset;
             int32_t end = GetCursorPositionForClick(event.GetOffset());
             UpdateSelection(start, end);
-            StopTwinkling();
             MarkNeedRender();
         } else {
             LOGD("on left button release");

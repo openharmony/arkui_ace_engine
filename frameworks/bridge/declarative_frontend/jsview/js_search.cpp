@@ -228,11 +228,11 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("textFont", &JSSearch::SetTextFont, opt);
     JSClass<JSSearch>::StaticMethod("onSubmit", &JSSearch::OnSubmit, opt);
     JSClass<JSSearch>::StaticMethod("onChange", &JSSearch::OnChange, opt);
-    JSClass<JSSearch>::StaticMethod("border", &JSTextField::JsBorder);
-    JSClass<JSSearch>::StaticMethod("borderWidth", &JSTextField::JsBorderWidth);
-    JSClass<JSSearch>::StaticMethod("borderColor", &JSTextField::JsBorderColor);
-    JSClass<JSSearch>::StaticMethod("borderStyle", &JSTextField::JsBorderStyle);
-    JSClass<JSSearch>::StaticMethod("borderRadius", &JSTextField::JsBorderRadius);
+    JSClass<JSSearch>::StaticMethod("border", &JSSearch::JsBorder);
+    JSClass<JSSearch>::StaticMethod("borderWidth", &JSSearch::JsBorderWidth);
+    JSClass<JSSearch>::StaticMethod("borderColor", &JSSearch::JsBorderColor);
+    JSClass<JSSearch>::StaticMethod("borderStyle", &JSSearch::JsBorderStyle);
+    JSClass<JSSearch>::StaticMethod("borderRadius", &JSSearch::JsBorderRadius);
     JSClass<JSSearch>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSearch>::StaticMethod("height", &JSSearch::SetHeight);
     JSClass<JSSearch>::StaticMethod("width", &JSViewAbstract::JsWidth);
@@ -352,10 +352,20 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
         LOGE("search component error");
         return;
     }
+    auto childComponent = searchComponent->GetChild();
+    if (!childComponent) {
+        LOGE("component error");
+        return;
+    }
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    if (!textFieldComponent) {
+        LOGE("text component error");
+        return;
+    }
 
-    auto size = param->GetProperty("size");
     TextStyle textStyle = searchComponent->GetPlaceHoldStyle();
 
+    auto size = param->GetProperty("size");
     if (!size->IsNull() && size->IsNumber()) {
         Dimension fontSize;
         if (ParseJsDimensionFp(size, fontSize)) {
@@ -364,9 +374,14 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
     }
 
     auto weight = param->GetProperty("weight");
-    if (!weight->IsNull() && weight->IsNumber()) {
-        FontWeight weightVal = static_cast<FontWeight>(weight->ToNumber<int32_t>());
-        textStyle.SetFontWeight(weightVal);
+    if (!weight->IsNull()) {
+        std::string weightVal;
+        if (weight->IsNumber()) {
+            weightVal = std::to_string(weight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(weight, weightVal);
+        }
+        textStyle.SetFontWeight(ConvertStrToFontWeight(weightVal));
     }
 
     auto family = param->GetProperty("family");
@@ -380,7 +395,7 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
         FontStyle styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
         textStyle.SetFontStyle(styleVal);
     }
-    searchComponent->SetPlaceHoldStyle(textStyle);
+    textFieldComponent->SetPlaceHoldStyle(textStyle);
 }
 
 void JSSearch::SetTextFont(const JSCallbackInfo& info)
@@ -392,10 +407,20 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
         LOGE("search component error");
         return;
     }
+    auto childComponent = searchComponent->GetChild();
+    if (!childComponent) {
+        LOGE("component error");
+        return;
+    }
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    if (!textFieldComponent) {
+        LOGE("text component error");
+        return;
+    }
 
-    auto size = param->GetProperty("size");
     TextStyle textStyle = searchComponent->GetEditingStyle();
 
+    auto size = param->GetProperty("size");
     if (!size->IsNull() && size->IsNumber()) {
         Dimension fontSize;
         if (ParseJsDimensionFp(size, fontSize)) {
@@ -404,9 +429,14 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     }
 
     auto weight = param->GetProperty("weight");
-    if (!weight->IsNull() && weight->IsNumber()) {
-        FontWeight weightVal = static_cast<FontWeight>(weight->ToNumber<int32_t>());
-        textStyle.SetFontWeight(weightVal);
+    if (!weight->IsNull()) {
+        std::string weightVal;
+        if (weight->IsNumber()) {
+            weightVal = std::to_string(weight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(weight, weightVal);
+        }
+        textStyle.SetFontWeight(ConvertStrToFontWeight(weightVal));
     }
 
     auto family = param->GetProperty("family");
@@ -420,7 +450,164 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
         FontStyle styleVal = static_cast<FontStyle>(style->ToNumber<int32_t>());
         textStyle.SetFontStyle(styleVal);
     }
-    searchComponent->SetEditingStyle(textStyle);
+    textFieldComponent->SetEditingStyle(textStyle);
+}
+
+void JSSearch::JsBorder(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        LOGE("args is not a object. %s", info[0]->ToString().c_str());
+        return;
+    }
+    RefPtr<Decoration> decoration = nullptr;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
+    if (!searchComponent) {
+        LOGE("search component error");
+        return;
+    }
+    auto childComponent = searchComponent->GetChild();
+    if (!childComponent) {
+        LOGE("component error");
+        return;
+    }
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    if (!textFieldComponent) {
+        LOGE("text component error");
+        return;
+    }
+    decoration = textFieldComponent->GetDecoration();
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    auto valueWidth = object->GetProperty("width");
+    if (!valueWidth->IsUndefined()) {
+        ParseBorderWidth(valueWidth, decoration);
+    }
+    auto valueColor = object->GetProperty("color");
+    if (!valueColor->IsUndefined()) {
+        ParseBorderColor(valueColor, decoration);
+    }
+    auto valueRadius = object->GetProperty("radius");
+    if (!valueRadius->IsUndefined()) {
+        ParseBorderRadius(valueRadius, decoration);
+    }
+    auto valueStyle = object->GetProperty("style");
+    if (!valueStyle->IsUndefined()) {
+        ParseBorderStyle(valueStyle, decoration);
+    }
+    textFieldComponent->SetOriginBorder(decoration->GetBorder());
+    info.ReturnSelf();
+}
+
+void JSSearch::JsBorderWidth(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
+        LOGE("args need a string or number or object");
+        return;
+    }
+    RefPtr<Decoration> decoration = nullptr;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
+    if (!searchComponent) {
+        LOGE("search component error");
+        return;
+    }
+    auto childComponent = searchComponent->GetChild();
+    if (!childComponent) {
+        LOGE("component error");
+        return;
+    }
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    if (!textFieldComponent) {
+        LOGE("text component error");
+        return;
+    }
+    decoration = textFieldComponent->GetDecoration();
+    JSViewAbstract::ParseBorderWidth(info[0], decoration);
+    textFieldComponent->SetOriginBorder(decoration->GetBorder());
+}
+
+void JSSearch::JsBorderColor(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
+        LOGE("args need a string or number or object");
+        return;
+    }
+    RefPtr<Decoration> decoration = nullptr;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
+    if (!searchComponent) {
+        LOGE("search component error");
+        return;
+    }
+    auto childComponent = searchComponent->GetChild();
+    if (!childComponent) {
+        LOGE("component error");
+        return;
+    }
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    if (!textFieldComponent) {
+        LOGE("text component error");
+        return;
+    }
+    decoration = textFieldComponent->GetDecoration();
+    JSViewAbstract::ParseBorderColor(info[0], decoration);
+    textFieldComponent->SetOriginBorder(decoration->GetBorder());
+}
+
+void JSSearch::JsBorderStyle(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject() && !info[0]->IsNumber()) {
+        LOGE("args need a string or number or object");
+        return;
+    }
+    RefPtr<Decoration> decoration = nullptr;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
+    if (!searchComponent) {
+        LOGE("search component error");
+        return;
+    }
+    auto childComponent = searchComponent->GetChild();
+    if (!childComponent) {
+        LOGE("component error");
+        return;
+    }
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    if (!textFieldComponent) {
+        LOGE("text component error");
+        return;
+    }
+    decoration = textFieldComponent->GetDecoration();
+    JSViewAbstract::ParseBorderStyle(info[0], decoration);
+    textFieldComponent->SetOriginBorder(decoration->GetBorder());
+}
+
+void JSSearch::JsBorderRadius(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
+        LOGE("args need a string or number or object");
+        return;
+    }
+    RefPtr<Decoration> decoration = nullptr;
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto searchComponent = AceType::DynamicCast<SearchComponent>(component);
+    if (!searchComponent) {
+        LOGE("search component error");
+        return;
+    }
+    auto childComponent = searchComponent->GetChild();
+    if (!childComponent) {
+        LOGE("component error");
+        return;
+    }
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    if (!textFieldComponent) {
+        LOGE("text component error");
+        return;
+    }
+    decoration = textFieldComponent->GetDecoration();
+    JSViewAbstract::ParseBorderRadius(info[0], decoration);
+    textFieldComponent->SetOriginBorder(decoration->GetBorder());
 }
 
 void JSSearch::OnSubmit(const JSCallbackInfo& info)
