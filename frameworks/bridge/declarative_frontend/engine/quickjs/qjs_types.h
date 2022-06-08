@@ -132,6 +132,7 @@ class QJSObjTemplate : public QJSValue {
 public:
     QJSObjTemplate() = default;
     explicit QJSObjTemplate(JSValue val);
+    ~QJSObjTemplate() override = default;
 
     void SetInternalFieldCount(int32_t count) const;
     QJSRef<QJSObject> NewInstance() const;
