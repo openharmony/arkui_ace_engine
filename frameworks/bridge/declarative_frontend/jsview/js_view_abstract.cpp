@@ -1787,6 +1787,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
             auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
 
+            optionComponent->SetTextStyle(optionTheme->GetOptionTextStyle());
             optionComponent->SetTheme(optionTheme);
             optionComponent->SetText(textComponent);
             optionComponent->SetValue(value);
