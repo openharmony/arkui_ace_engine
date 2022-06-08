@@ -49,34 +49,14 @@ void ClipboardImpl::SetData(const std::string& data)
 void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
-    if (taskExecutor_) {
-        std::string result;
-        taskExecutor_->PostSyncTask(
-            [&result]() {
-                auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
-                if (!has) {
-                    LOGE("SystemKeyboardData is not exist from MiscServices");
-                    return;
-                }
-                OHOS::MiscServices::PasteData pasteData;
-                auto ok = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
-                if (!ok) {
-                    LOGE("Get SystemKeyboardData fail from MiscServices");
-                    return;
-                }
-                auto textData = pasteData.GetPrimaryText();
-                if (!textData) {
-                    LOGE("Get SystemKeyboardTextData fail from MiscServices");
-                    return;
-                }
-                result = *textData;
-            },
-            TaskExecutor::TaskType::PLATFORM);
-        if (syncMode) {
-            callback(result);
-        } else {
-            taskExecutor_->PostTask([callback, result]() { callback(result); }, TaskExecutor::TaskType::UI);
-        }
+    if (!taskExecutor_ || !callback) {
+        return;
+    }
+
+    if (syncMode) {
+        GetDataSync(callback);
+    } else {
+        GetDataAsync(callback);
     }
 #else
     LOGI("Current device doesn't support system clipboard");
@@ -91,6 +71,69 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
     }
 #endif
 }
+
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+void ClipboardImpl::GetDataSync(const std::function<void(const std::string&)>& callback)
+{
+    std::string result;
+    taskExecutor_->PostSyncTask(
+        [&result]() {
+            auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
+            if (!has) {
+                LOGE("SystemKeyboardData is not exist from MiscServices");
+                return;
+            }
+            OHOS::MiscServices::PasteData pasteData;
+            auto ok = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
+            if (!ok) {
+                LOGE("Get SystemKeyboardData fail from MiscServices");
+                return;
+            }
+            auto textData = pasteData.GetPrimaryText();
+            if (!textData) {
+                LOGE("Get SystemKeyboardTextData fail from MiscServices");
+                return;
+            }
+            result = *textData;
+        },
+        TaskExecutor::TaskType::PLATFORM);
+    callback(result);
+}
+
+void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& callback)
+{
+    taskExecutor_->PostTask(
+        [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_))]() {
+            auto taskExecutor = weakExecutor.Upgrade();
+            if (!taskExecutor) {
+                LOGE("TaskExecutor is not exist");
+                return;
+            }
+            auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
+            if (!has) {
+                LOGE("SystemKeyboardData is not exist from MiscServices");
+                taskExecutor->PostTask([callback]() { callback(""); }, TaskExecutor::TaskType::UI);
+                return;
+            }
+            OHOS::MiscServices::PasteData pasteData;
+            auto ok = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
+            if (!ok) {
+                LOGE("Get SystemKeyboardData fail from MiscServices");
+                taskExecutor->PostTask([callback]() { callback(""); }, TaskExecutor::TaskType::UI);
+                return;
+            }
+            auto textData = pasteData.GetPrimaryText();
+            if (!textData) {
+                LOGE("Get SystemKeyboardTextData fail from MiscServices");
+                taskExecutor->PostTask([callback]() { callback(""); }, TaskExecutor::TaskType::UI);
+                return;
+            }
+            auto result = *textData;
+            taskExecutor->PostTask([callback, result]() { callback(result); }, TaskExecutor::TaskType::UI);
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+#endif
 
 void ClipboardImpl::Clear() {}
 
