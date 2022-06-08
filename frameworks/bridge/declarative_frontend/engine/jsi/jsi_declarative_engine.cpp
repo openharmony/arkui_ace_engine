@@ -680,6 +680,7 @@ void JsiDeclarativeEngine::Destroy()
         nativeEngine_->CancelCheckUVLoop();
 #endif
         engineInstance_->DestroyAllRootViewHandle();
+        nativeEngine_->DeleteEngine();
         delete nativeEngine_;
         nativeEngine_ = nullptr;
     }

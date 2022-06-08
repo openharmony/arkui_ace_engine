@@ -3344,6 +3344,7 @@ QjsEngine::~QjsEngine()
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
 #endif
+        nativeEngine_->DeleteEngine();
         delete nativeEngine_;
     }
     if (engineInstance_ && engineInstance_->GetQjsRuntime()) {
