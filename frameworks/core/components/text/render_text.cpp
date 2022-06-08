@@ -25,6 +25,7 @@
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
+#include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
 
@@ -288,6 +289,7 @@ void RenderText::OnTouchTestHit(
             if (renderText) {
                 SetStartOffset(GetHandleOffset(0));
                 SetEndOffset(GetHandleOffset(textValue_.GetWideText().length()));
+                textValue_.UpdateSelection(0, textValue_.GetWideText().length());
             }
             result.emplace_back(dragDropGesture_);
         }
@@ -1064,6 +1066,9 @@ void RenderText::PanOnActionEnd(const GestureEvent& info)
             auto value = textfield->GetEditingValue();
             value.Append(textValue_.GetSelectedText());
             textfield->SetEditingValue(std::move(value));
+        }
+        if (info.GetSourceDevice() == SourceType::TOUCH) {
+            textValue_.UpdateSelection(0, 0);
         }
     }
 
