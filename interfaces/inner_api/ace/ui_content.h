@@ -77,6 +77,7 @@ public:
     // distribute
     virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) = 0;
     virtual std::string GetContentInfo() const = 0;
+    virtual void DestroyUIDirector() = 0;
 
     // UI content event process
     virtual bool ProcessBackPressed() = 0;

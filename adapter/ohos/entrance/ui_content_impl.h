@@ -38,7 +38,10 @@ class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime);
     UIContentImpl(OHOS::AppExecFwk::Ability* ability);
-    ~UIContentImpl() = default;
+    ~UIContentImpl()
+    {
+        DestroyUIDirector();
+    }
 
     // UI content lifecycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
@@ -52,6 +55,7 @@ public:
     // distribute
     void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override;
     std::string GetContentInfo() const override;
+    void DestroyUIDirector() override;
 
     // UI content event process
     bool ProcessBackPressed() override;
