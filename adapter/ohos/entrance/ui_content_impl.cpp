@@ -208,6 +208,24 @@ UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
     LOGI("Create UIContentImpl successfully.");
 }
 
+void UIContentImpl::DestroyUIDirector()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return;
+    }
+    auto rsUIDirector = pipelineContext->GetRSUIDirector();
+    if (!rsUIDirector) {
+        return;
+    }
+    LOGI("Destroying old rsUIDirectory");
+    rsUIDirector->Destroy();
+}
+
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
     CommonInitialize(window, url, storage);
@@ -220,10 +238,7 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
 
 void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
 {
-    if (instanceId_ == -1) {
-        LOGI("UIContentImpl::Restore new migration, will initialize");
-        CommonInitialize(window, contentInfo, storage);
-    }
+    CommonInitialize(window, contentInfo, storage);
     startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
     if (startUrl_.empty()) {
         LOGW("UIContent Restore start url is empty");
