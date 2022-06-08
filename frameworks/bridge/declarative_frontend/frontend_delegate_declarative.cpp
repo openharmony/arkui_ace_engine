@@ -1509,11 +1509,11 @@ void FrontendDelegateDeclarative::OnPageReady(
                         auto delegate = weak.Upgrade();
                         if (delegate) {
                             delegate->PushPageTransitionListener(event, page);
+                            delegate->SetCurrentPage(page->GetPageId());
+                            delegate->OnMediaQueryUpdate();
                         }
                     });
                 pipelineContext->PushPage(page->BuildPage(url), page->GetStageElement());
-                delegate->SetCurrentPage(page->GetPageId());
-                delegate->OnMediaQueryUpdate();
             } else {
                 // This page has been loaded but become useless now, the corresponding js instance
                 // must be destroyed to avoid memory leak.
