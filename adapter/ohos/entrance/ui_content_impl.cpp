@@ -220,10 +220,7 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
 
 void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
 {
-    if (instanceId_ == -1) {
-        LOGI("UIContentImpl::Restore new migration, will initialize");
-        CommonInitialize(window, contentInfo, storage);
-    }
+    CommonInitialize(window, contentInfo, storage);
     startUrl_ = Platform::AceContainer::RestoreRouterStack(instanceId_, contentInfo);
     if (startUrl_.empty()) {
         LOGW("UIContent Restore start url is empty");
