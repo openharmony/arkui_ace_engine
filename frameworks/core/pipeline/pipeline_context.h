@@ -1258,6 +1258,16 @@ public:
         return isTabKeyPressed_;
     }
 
+    bool GetIsFocusingByTab() const
+    {
+        return isFocusingByTab_;
+    }
+
+    void SetIsFocusingByTab(bool isFocusingByTab)
+    {
+        isFocusingByTab_ = isFocusingByTab;
+    }
+
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
@@ -1486,6 +1496,7 @@ private:
     bool isCtrlDown_ = false;
     bool isKeyboardA_ = false;
     bool isTabKeyPressed_ = false;
+    bool isFocusingByTab_ = false;
     SubscribeCtrlACallback subscribeCtrlA_;
 
     int32_t appLabelId_ = 0;
