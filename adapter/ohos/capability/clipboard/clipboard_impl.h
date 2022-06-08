@@ -29,6 +29,12 @@ public:
     void SetData(const std::string& data) override;
     void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false) override;
     void Clear() override;
+
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+private:
+    void GetDataSync(const std::function<void(const std::string&)>& callback);
+    void GetDataAsync(const std::function<void(const std::string&)>& callback);
+#endif
 };
 
 class ClipboardProxyImpl final : public ClipboardInterface {
