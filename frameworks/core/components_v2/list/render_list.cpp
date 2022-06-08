@@ -242,7 +242,7 @@ void RenderList::Update(const RefPtr<Component>& component)
     isMultiSelectable_ = component_->GetMultiSelectable();
     hasHeight_ = component_->GetHasHeight();
     hasWidth_ = component_->GetHasWidth();
-
+    isLaneList_ = (component_->GetLanes() != -1) || (component_->GetLaneConstrain() != std::nullopt);
     MarkNeedLayout();
 }
 
@@ -422,7 +422,7 @@ void RenderList::CalculateLanes()
     }
 }
 
-void RenderList::RequestNewItemsAtEnd(double& curMainPos, double mainSize, const LayoutParam& innerLayout)
+void RenderList::RequestNewItemsAtEndForLaneList(double& curMainPos, double mainSize, const LayoutParam& innerLayout)
 {
     int newItemCntInLine = 0;
     double lineMainSize = 0;
@@ -455,7 +455,35 @@ void RenderList::RequestNewItemsAtEnd(double& curMainPos, double mainSize, const
     }
 }
 
-void RenderList::RequestNewItemsAtStart(const LayoutParam& innerLayout)
+void RenderList::RequestNewItemsAtEnd(double& curMainPos, double mainSize, const LayoutParam& innerLayout)
+{
+    for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
+        if (cachedCount_ != 0) {
+            if (endCachedCount_ >= cachedCount_) {
+                break;
+            }
+        } else {
+            if (GreatOrEqual(curMainPos, endMainPos_)) {
+                break;
+            }
+        }
+        auto child = RequestAndLayoutNewItem(newIndex, innerLayout);
+        if (!child) {
+            startIndex_ = std::min(startIndex_, TotalCount());
+            break;
+        }
+        if (GreatOrEqual(curMainPos, mainSize)) {
+            ++endCachedCount_;
+        }
+        curMainPos += GetMainSize(child->GetLayoutSize()) + spaceWidth_;
+    }
+
+    if (selectedItem_ && selectedItemIndex_ < startIndex_) {
+        curMainPos += GetMainSize(selectedItem_->GetLayoutSize()) + spaceWidth_;
+    }
+}
+
+void RenderList::RequestNewItemsAtStartForLaneList(const LayoutParam& innerLayout)
 {
     int newItemCntInLine = 0;
     double lineMainSize = 0;
@@ -490,6 +518,32 @@ void RenderList::RequestNewItemsAtStart(const LayoutParam& innerLayout)
     }
 }
 
+void RenderList::RequestNewItemsAtStart(const LayoutParam& innerLayout)
+{
+    for (; startIndex_ > 0; --startIndex_) {
+        if (cachedCount_ != 0) {
+            if (startCachedCount_ >= cachedCount_) {
+                break;
+            }
+        } else {
+            if (LessOrEqual(currentOffset_, startMainPos_)) {
+                break;
+            }
+        }
+        auto child = RequestAndLayoutNewItem(startIndex_ - 1, innerLayout);
+        if (!child) {
+            break;
+        }
+        if (selectedItemIndex_ == startIndex_) {
+            continue;
+        }
+        if (LessOrEqual(currentOffset_, 0.0)) {
+            ++startCachedCount_;
+        }
+        currentOffset_ -= GetMainSize(child->GetLayoutSize()) + spaceWidth_;
+    }
+}
+
 void RenderList::PerformLayout()
 {
     UpdateAccessibilityAttr();
@@ -499,11 +553,23 @@ void RenderList::PerformLayout()
         LOGW("Cannot layout using invalid view port");
         return;
     }
-    CalculateLanes();
+    if (isLaneList_) {
+        CalculateLanes();
+    }
     const auto innerLayout = MakeInnerLayout();
-    double curMainPos = LayoutOrRecycleCurrentItems(innerLayout, mainSize);
+    double curMainPos = 0.0;
+    if (isLaneList_) {
+        curMainPos = LayoutOrRecycleCurrentItemsForLaneList(innerLayout, mainSize);
+    } else {
+        curMainPos = LayoutOrRecycleCurrentItems(innerLayout, mainSize);
+    }
+
     // Try to request new items at end if needed
-    RequestNewItemsAtEnd(curMainPos, mainSize, innerLayout);
+    if (isLaneList_) {
+        RequestNewItemsAtEndForLaneList(curMainPos, mainSize, innerLayout);
+    } else {
+        RequestNewItemsAtEnd(curMainPos, mainSize, innerLayout);
+    }
 
     if (selectedItem_ && selectedItemIndex_ < startIndex_) {
         curMainPos += GetMainSize(selectedItem_->GetLayoutSize()) + spaceWidth_;
@@ -522,7 +588,11 @@ void RenderList::PerformLayout()
     }
 
     // Try to request new items at start if needed
-    RequestNewItemsAtStart(innerLayout);
+    if (isLaneList_) {
+        RequestNewItemsAtStartForLaneList(innerLayout);
+    } else {
+        RequestNewItemsAtStart(innerLayout);
+    }
 
     if (IsReachStart()) {
         listEventFlags_[ListEvents::REACH_START] = true;
@@ -547,7 +617,12 @@ void RenderList::PerformLayout()
     CalculateMainScrollExtent(curMainPos, mainSize);
 
     // Set position for each child
-    auto layoutSize = SetItemsPosition(mainSize, innerLayout);
+    Size layoutSize;
+    if (isLaneList_) {
+        layoutSize = SetItemsPositionForLaneList(mainSize, innerLayout);
+    } else {
+        layoutSize = SetItemsPosition(mainSize, innerLayout);
+    }
 
     // Set layout size of list component itself
     if ((hasHeight_ && vertical_) || (hasWidth_ && !vertical_)) {
@@ -609,7 +684,7 @@ double RenderList::CalculateLaneCrossOffset(double crossSize, double childCrossS
     }
 }
 
-Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutParam)
+Size RenderList::SetItemsPositionForLaneList(double mainSize, const LayoutParam& layoutParam)
 {
     double crossSize = fixedCrossSize_ ? GetCrossSize(GetLayoutParam().GetMaxSize()) : 0.0;
     if (items_.empty()) {
@@ -748,6 +823,120 @@ Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutPara
     return MakeValue<Size>(mainSize, crossSize);
 }
 
+Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutParam)
+{
+    double crossSize = fixedCrossSize_ ? GetCrossSize(GetLayoutParam().GetMaxSize()) : 0.0;
+    if (items_.empty()) {
+        return MakeValue<Size>(fixedMainSize_ ? mainSize : 0.0, crossSize);
+    }
+
+    double curMainPos = currentOffset_;
+    size_t index = startIndex_;
+    size_t newStickyIndex = 0;
+    RefPtr<RenderListItem> newStickyItem;
+    RefPtr<RenderListItem> nextStickyItem;
+    double nextStickyMainAxis = Size::INFINITE_SIZE;
+    size_t firstIdx = INITIAL_CHILD_INDEX;
+    size_t lastIdx = 0;
+    double selectedItemMainSize = selectedItem_ ? GetMainSize(selectedItem_->GetLayoutSize()) : 0.0;
+
+    for (const auto& child : items_) {
+        const auto& childLayoutSize = child->GetLayoutSize();
+        double childMainSize = GetMainSize(childLayoutSize);
+
+        if (selectedItem_) {
+            double range = std::min(selectedItemMainSize, childMainSize) / 2.0;
+            bool beforeSelectedItem = index <= selectedItemIndex_;
+            if (beforeSelectedItem && targetIndex_ == index) {
+                targetMainAxis_ = curMainPos;
+                curMainPos += selectedItemMainSize + spaceWidth_;
+            }
+
+            if (movingForward_) {
+                double axis = selectedItemMainAxis_;
+                if (GreatOrEqual(axis, curMainPos) && LessNotEqual(axis, curMainPos + range)) {
+                    targetIndex_ = beforeSelectedItem ? index : index - 1;
+                    targetMainAxis_ = curMainPos;
+                    curMainPos += selectedItemMainSize + spaceWidth_;
+                }
+            } else {
+                double axis = selectedItemMainAxis_ + selectedItemMainSize;
+                double limit = curMainPos + childMainSize;
+                if (GreatNotEqual(axis, limit - range) && LessOrEqual(axis, limit)) {
+                    targetIndex_ = beforeSelectedItem ? index + 1 : index;
+                    targetMainAxis_ = curMainPos;
+                    curMainPos -= selectedItemMainSize + spaceWidth_;
+                }
+            }
+        }
+
+        auto offset = MakeValue<Offset>(curMainPos, 0.0);
+        if (chainAnimation_) {
+            offset += MakeValue<Offset>(-GetChainDelta(index), 0.0);
+        }
+
+        child->SetPosition(offset);
+        // Disable sticky mode while expand all items
+        if (fixedMainSize_ && child->GetSticky() != StickyMode::NONE) {
+            if (LessOrEqual(curMainPos, 0.0)) {
+                newStickyItem = child;
+                newStickyIndex = index;
+            } else if (!nextStickyItem) {
+                nextStickyItem = child;
+                nextStickyMainAxis = curMainPos;
+            }
+        }
+
+        childMainSize += spaceWidth_;
+        if (LessNotEqual(curMainPos, mainSize) && GreatNotEqual(curMainPos + childMainSize, 0.0)) {
+            if (!fixedCrossSize_) {
+                crossSize = std::max(crossSize, GetCrossSize(childLayoutSize));
+            }
+            firstIdx = std::min(firstIdx, index);
+            lastIdx = std::max(lastIdx, index);
+        }
+
+        if (child != selectedItem_) {
+            curMainPos += childMainSize;
+        }
+
+        if (selectedItem_ && index > selectedItemIndex_ && targetIndex_ == index) {
+            targetMainAxis_ = curMainPos;
+            curMainPos += selectedItemMainSize + spaceWidth_;
+        }
+
+        ++index;
+    }
+    if (firstIdx != firstDisplayIndex_ || lastIdx != lastDisplayIndex_) {
+        firstDisplayIndex_ = firstIdx;
+        lastDisplayIndex_ = lastIdx;
+        ResumeEventCallback(component_, &ListComponent::GetOnScrollIndex, static_cast<int32_t>(firstDisplayIndex_),
+            static_cast<int32_t>(lastDisplayIndex_));
+    }
+
+    // Disable sticky mode while expand all items
+    if (!fixedMainSize_) {
+        return MakeValue<Size>(curMainPos - spaceWidth_, crossSize);
+    }
+
+    UpdateStickyListItem(newStickyItem, newStickyIndex, nextStickyItem, layoutParam);
+    if (currentStickyItem_) {
+        const auto& stickyItemLayoutSize = currentStickyItem_->GetLayoutSize();
+        const double mainStickySize = GetMainSize(stickyItemLayoutSize) + spaceWidth_;
+        if (nextStickyItem && LessNotEqual(nextStickyMainAxis, mainStickySize)) {
+            currentStickyItem_->SetPosition(MakeValue<Offset>(nextStickyMainAxis - mainStickySize, 0.0));
+        } else {
+            currentStickyItem_->SetPosition(MakeValue<Offset>(0.0, 0.0));
+        }
+
+        if (!fixedCrossSize_) {
+            crossSize = std::max(crossSize, GetCrossSize(stickyItemLayoutSize));
+        }
+    }
+
+    return MakeValue<Size>(mainSize, crossSize);
+}
+
 void RenderList::UpdateStickyListItem(const RefPtr<RenderListItem>& newStickyItem, size_t newStickyItemIndex,
     const RefPtr<RenderListItem>& nextStickyItem, const LayoutParam& layoutParam)
 {
@@ -779,11 +968,23 @@ LayoutParam RenderList::MakeInnerLayout()
 {
     Size maxSize;
     Size minSize;
+    if (isLaneList_) {
+        if (vertical_) {
+            maxSize =
+                Size(std::min(GetLayoutParam().GetMaxSize().Width() / lanes_, maxLaneLength_), Size::INFINITE_SIZE);
+            minSize = Size(GetLayoutParam().GetMinSize().Width(), 0.0);
+        } else {
+            maxSize =
+                Size(Size::INFINITE_SIZE, std::min(GetLayoutParam().GetMaxSize().Height() / lanes_, maxLaneLength_));
+            minSize = Size(0.0, GetLayoutParam().GetMinSize().Height());
+        }
+        return LayoutParam(maxSize, minSize);
+    }
     if (vertical_) {
-        maxSize = Size(std::min(GetLayoutParam().GetMaxSize().Width() / lanes_, maxLaneLength_), Size::INFINITE_SIZE);
+        maxSize = Size(GetLayoutParam().GetMaxSize().Width(), Size::INFINITE_SIZE);
         minSize = Size(GetLayoutParam().GetMinSize().Width(), 0.0);
     } else {
-        maxSize = Size(Size::INFINITE_SIZE, std::min(GetLayoutParam().GetMaxSize().Width() / lanes_, maxLaneLength_));
+        maxSize = Size(Size::INFINITE_SIZE, GetLayoutParam().GetMaxSize().Height());
         minSize = Size(0.0, GetLayoutParam().GetMinSize().Height());
     }
     return LayoutParam(maxSize, minSize);
@@ -798,7 +999,11 @@ bool RenderList::GetCurMainPosAndMainSize(double& curMainPos, double& mainSize)
         return false;
     }
     const auto innerLayout = MakeInnerLayout();
-    curMainPos = LayoutOrRecycleCurrentItems(innerLayout, mainSize);
+    if (isLaneList_) {
+        curMainPos = LayoutOrRecycleCurrentItemsForLaneList(innerLayout, mainSize);
+    } else {
+        curMainPos = LayoutOrRecycleCurrentItems(innerLayout, mainSize);
+    }
     // Try to request new items at end if needed
     for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
         if (cachedCount_ != 0) {
@@ -996,7 +1201,7 @@ ItemPositionState RenderList::GetItemPositionState(double curMainPos, double las
         }                                                                                    \
     } while (0);
 
-double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, double mainSize)
+double RenderList::LayoutOrRecycleCurrentItemsForLaneList(const LayoutParam& layoutParam, double mainSize)
 {
     if (currentStickyItem_) {
         currentStickyItem_->Layout(layoutParam);
@@ -1066,6 +1271,92 @@ double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, d
                 break;
         }
     }
+    return curMainPos;
+}
+
+double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, double mainSize)
+{
+    if (currentStickyItem_) {
+        currentStickyItem_->Layout(layoutParam);
+    }
+
+    double curMainPos = currentOffset_;
+    size_t curIndex = startIndex_;
+    if (cachedCount_ != 0) {
+        startCachedCount_ = 0;
+        endCachedCount_ = 0;
+        bool recycleAll = false;
+        if (GreatOrEqual(curMainPos, mainSize)) {
+            recycleAll = true;
+        }
+        for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
+            const auto& child = *(it);
+            if (recycleAll || endCachedCount_ >= cachedCount_) {
+                if (currentStickyItem_ != child && selectedItem_ != child) {
+                    // Recycle list items out of view port
+                    RecycleListItem(curIndex);
+                }
+                it = items_.erase(it);
+                continue;
+            }
+
+            if (GreatOrEqual(curMainPos, mainSize)) {
+                ++endCachedCount_;
+            }
+
+            child->Layout(layoutParam);
+            double childMainSize = GetMainSize(child->GetLayoutSize());
+            curMainPos += childMainSize + spaceWidth_;
+
+            if (LessOrEqual(curMainPos, 0.0)) {
+                ++startCachedCount_;
+            }
+            ++it;
+        }
+
+        double curMainPosForRecycle = currentOffset_;
+        curIndex = startIndex_;
+        for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
+            if (startCachedCount_ > cachedCount_) {
+                const auto& child = *(it);
+                double childSize = GetMainSize(child->GetLayoutSize());
+                curMainPosForRecycle += childSize + spaceWidth_;
+                currentOffset_ = curMainPosForRecycle;
+                startIndex_ = curIndex + 1;
+
+                if (currentStickyItem_ != child && selectedItem_ != child) {
+                    // Recycle list items out of view port
+                    RecycleListItem(curIndex);
+                }
+                it = items_.erase(it);
+                --startCachedCount_;
+            } else {
+                break;
+            }
+        }
+    } else {
+        for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
+            const auto& child = *(it);
+            if (LessOrEqual(curMainPos, endMainPos_)) {
+                child->Layout(layoutParam);
+                double childSize = GetMainSize(child->GetLayoutSize());
+                curMainPos += childSize + spaceWidth_;
+                if (GreatOrEqual(curMainPos, startMainPos_)) {
+                    ++it;
+                    continue;
+                }
+                currentOffset_ = curMainPos;
+                startIndex_ = curIndex + 1;
+            }
+
+            if (currentStickyItem_ != child && selectedItem_ != child) {
+                // Recycle list items out of view port
+                RecycleListItem(curIndex);
+            }
+            it = items_.erase(it);
+        }
+    }
+
     return curMainPos;
 }
 
