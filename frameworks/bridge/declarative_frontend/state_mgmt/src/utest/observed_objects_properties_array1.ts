@@ -35,7 +35,7 @@ const array1ObsObjProps = tsuite("Array of Observed Object and Properties", () =
     }
 
     // globally unique id
-    id(): number {
+    id__(): number {
       return this.id_;
     }
 
@@ -43,7 +43,7 @@ const array1ObsObjProps = tsuite("Array of Observed Object and Properties", () =
     // that the subscriber is about to be deleted
     // hence , unsubscribe
     aboutToBeDeleted(): void {
-      SubscriberManager.Get().delete(this.id());
+      SubscriberManager.Get().delete(this.id__());
     }
 
     // implements IMultiPropertiesChangePublisher

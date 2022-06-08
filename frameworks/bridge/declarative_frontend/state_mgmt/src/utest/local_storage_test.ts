@@ -28,7 +28,7 @@ const testLocalStorage = tsuite("LocalStorage Tests", () => {
     }
 
       // globally unique id
-      id(): number {
+      id__(): number {
         return this.id_;
       }
 
@@ -36,7 +36,7 @@ const testLocalStorage = tsuite("LocalStorage Tests", () => {
       // that the subscriber is about to be deleted
       // hence , unsubscribe
       aboutToBeDeleted(): void {
-        SubscriberManager.Get().delete(this.id());
+        SubscriberManager.Get().delete(this.id__());
       }
 
       // implements IMultiPropertiesChangePublisher
@@ -129,10 +129,10 @@ const testLocalStorage = tsuite("LocalStorage Tests", () => {
   });
 
   tcase("cleanup ok", () => {
-    storage.unsubscribeFromChangesOf("aBool", boolChangeListener.id());
+    storage.unsubscribeFromChangesOf("aBool", boolChangeListener.id__());
     boolChangeListener.aboutToBeDeleted();
 
-    storage.unsubscribeFromChangesOf("objAClass", objAChangeListener.id());
+    storage.unsubscribeFromChangesOf("objAClass", objAChangeListener.id__());
     objAChangeListener.aboutToBeDeleted();
 
     const deleteOk = storage.delete("name") && storage.delete("say") && storage.delete("aBool") && storage.delete("favorite") && storage.delete("objAClass");

@@ -18,7 +18,6 @@
     "src/lib/local_storage_native.d.ts",
     "src/lib/local_storage.ts",
     "src/lib/app_storage.ts",
-    "src/lib/local_storage_lookup",
     "src/lib/view_native.d.ts",
     "src/lib/view.ts",
     "src/lib/persistent_storage.ts",
