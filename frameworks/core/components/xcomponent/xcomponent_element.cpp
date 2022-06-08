@@ -391,7 +391,7 @@ void XComponentElement::SetMethodCall()
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     xcomponentController_->SetConfigSurfaceImpl([weak = WeakClaim(this), uiTaskExecutor]
                                                 (uint32_t surfaceWidth, uint32_t surfaceHeight) {
-        uiTaskExecutor.PostTask([weak, surfaceWidth, surfaceHeight]() {
+        uiTaskExecutor.PostSyncTask([weak, surfaceWidth, surfaceHeight]() {
             auto xComponentElement = weak.Upgrade();
             if (xComponentElement) {
                 xComponentElement->ConfigSurface(surfaceWidth, surfaceHeight);
