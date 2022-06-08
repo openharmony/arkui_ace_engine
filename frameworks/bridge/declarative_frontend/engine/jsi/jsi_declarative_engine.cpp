@@ -744,11 +744,12 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
                 arkNativeEngine->SetPackagePath(packagePath);
             }
         }
+
+        RegisterWorker();
     } else {
         LOGI("Using sharedRuntime, UVLoop handled by AbilityRuntime");
     }
 
-    RegisterWorker();
     return result;
 }
 
