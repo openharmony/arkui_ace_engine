@@ -3044,12 +3044,12 @@ void PipelineContext::StartSystemDrag(const std::string& str, const RefPtr<Pixel
     dragEventHandler_(str, pixmap);
 }
 
-void PipelineContext::SetPreTargetRenderNode(const RefPtr<RenderNode>& preTargetRenderNode)
+void PipelineContext::SetPreTargetRenderNode(const RefPtr<DragDropEvent>& preDragDropNode)
 {
-    preTargetRenderNode_ = preTargetRenderNode;
+    preTargetRenderNode_ = preDragDropNode;
 }
 
-const RefPtr<RenderNode> PipelineContext::GetPreTargetRenderNode() const
+const RefPtr<DragDropEvent>& PipelineContext::GetPreTargetRenderNode() const
 {
     return preTargetRenderNode_;
 }
@@ -3067,84 +3067,84 @@ const RefPtr<RenderNode>& PipelineContext::GetInitRenderNode() const
 void PipelineContext::ProcessDragEvent(
     const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint)
 {
-    auto targetRenderBox =
-        AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint - pageOffset_));
-    auto initRenderBox = AceType::DynamicCast<RenderBox>(GetInitRenderNode());
+    auto targetDragDropNode =
+        AceType::DynamicCast<DragDropEvent>(renderNode->FindDropChild(globalPoint, globalPoint - pageOffset_));
+    auto initDragDropNode = AceType::DynamicCast<DragDropEvent>(GetInitRenderNode());
     auto extraParams = JsonUtil::Create(true);
     extraParams->Put("customDragInfo", customDragInfo_.c_str());
     auto info = GestureEvent();
     info.SetGlobalPoint(globalPoint);
-    auto preTargetRenderBox = AceType::DynamicCast<RenderBox>(GetPreTargetRenderNode());
+    auto preTargetDragDropNode = GetPreTargetRenderNode();
 
-    if (targetRenderBox == preTargetRenderBox) {
-        if (targetRenderBox && targetRenderBox->GetOnDragMove()) {
+    if (targetDragDropNode == preTargetDragDropNode) {
+        if (targetDragDropNode && targetDragDropNode->GetOnDragMove()) {
             auto renderList = renderNode->FindChildNodeOfClass<V2::RenderList>(globalPoint, globalPoint);
             if (renderList) {
                 insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
             }
 
             if (insertIndex_ == RenderNode::DEFAULT_INDEX) {
-                (targetRenderBox->GetOnDragMove())(event, extraParams->ToString());
+                (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
                 return;
             }
 
-            if (targetRenderBox != initRenderBox) {
+            if (targetDragDropNode != initDragDropNode) {
                 extraParams->Put("selectedIndex", -1);
             } else {
                 extraParams->Put("selectedIndex", selectedIndex_);
             }
 
             extraParams->Put("insertIndex", insertIndex_);
-            (targetRenderBox->GetOnDragMove())(event, extraParams->ToString());
+            (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
         }
     } else {
-        if (preTargetRenderBox && preTargetRenderBox->GetOnDragLeave()) {
-            (preTargetRenderBox->GetOnDragLeave())(event, extraParams->ToString());
+        if (preTargetDragDropNode && preTargetDragDropNode->GetOnDragLeave()) {
+            (preTargetDragDropNode->GetOnDragLeave())(event, extraParams->ToString());
         }
 
-        if (targetRenderBox && targetRenderBox->GetOnDragEnter()) {
-            (targetRenderBox->GetOnDragEnter())(event, extraParams->ToString());
+        if (targetDragDropNode && targetDragDropNode->GetOnDragEnter()) {
+            (targetDragDropNode->GetOnDragEnter())(event, extraParams->ToString());
         }
 
-        SetPreTargetRenderNode(targetRenderBox);
+        SetPreTargetRenderNode(targetDragDropNode);
     }
 }
 
 void PipelineContext::ProcessDragEventEnd(
     const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint)
 {
-    auto targetRenderBox =
-        AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint - pageOffset_));
-    auto initRenderBox = AceType::DynamicCast<RenderBox>(GetInitRenderNode());
+    auto targetDragDropNode =
+        AceType::DynamicCast<DragDropEvent>(renderNode->FindDropChild(globalPoint, globalPoint - pageOffset_));
+    auto initDragDropNode = AceType::DynamicCast<DragDropEvent>(GetInitRenderNode());
     auto extraParams = JsonUtil::Create(true);
     extraParams->Put("customDragInfo", customDragInfo_.c_str());
     auto info = GestureEvent();
     info.SetGlobalPoint(globalPoint);
-    auto preTargetRenderBox = AceType::DynamicCast<RenderBox>(GetPreTargetRenderNode());
+    auto preTargetDragDropNode = GetPreTargetRenderNode();
 
-    if (targetRenderBox && targetRenderBox->GetOnDrop()) {
+    if (targetDragDropNode && targetDragDropNode->GetOnDrop()) {
         auto renderList = renderNode->FindChildNodeOfClass<V2::RenderList>(globalPoint, globalPoint);
         if (renderList) {
             insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
         }
 
         if (insertIndex_ == RenderNode::DEFAULT_INDEX) {
-            (targetRenderBox->GetOnDrop())(event, extraParams->ToString());
+            (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
             return;
         }
 
-        if (targetRenderBox != initRenderBox) {
+        if (targetDragDropNode != initDragDropNode) {
             extraParams->Put("selectedIndex", -1);
         } else {
             extraParams->Put("selectedIndex", selectedIndex_);
         }
 
         extraParams->Put("insertIndex", insertIndex_);
-        (targetRenderBox->GetOnDrop())(event, extraParams->ToString());
+        (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
     }
 
-    if (initRenderBox && initRenderBox->GetOnDrop()) {
-        (initRenderBox->GetOnDrop())(event, extraParams->ToString());
+    if (initDragDropNode && initDragDropNode->GetOnDrop()) {
+        (initDragDropNode->GetOnDrop())(event, extraParams->ToString());
     }
 
     SetPreTargetRenderNode(nullptr);
