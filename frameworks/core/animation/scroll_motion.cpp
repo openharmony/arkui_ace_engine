@@ -54,7 +54,7 @@ bool ScrollMotion::IsValid() const
 
 void ScrollMotion::Move(float offsetTime)
 {
-    // SpringMotion is null when not OverScoll&UnderScroll.
+    // SpringMotion is null when not OverScroll & UnderScroll.
     if (!springMotion_) {
         return;
     }
