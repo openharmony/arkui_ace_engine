@@ -692,6 +692,7 @@ void RenderBoxBase::Update(const RefPtr<Component>& component)
         displayType_ = box->GetDisplayType();
         paddingOrigin_ = box->GetPadding();
         marginOrigin_ = box->GetMargin();
+        hasMargin_ = box->HasMargin();
         additionalPadding_ = box->GetAdditionalPadding();
         flex_ = box->GetFlex();
         boxSizing_ = box->GetBoxSizing();

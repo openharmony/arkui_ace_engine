@@ -1750,4 +1750,36 @@ void RenderBox::OnStatusStyleChanged(const VisualState state)
     }
 };
 
+void RenderBox::UpdateTouchRect()
+{
+    auto context = context_.Upgrade();
+    if (!isResponseRegion_) {
+        touchRect_ = GetTransformRect(GetPaintRect());
+        if (context && context->GetIsDeclarative() && hasMargin_) {
+            touchRectList_.emplace_back(GetTouchArea());
+            return;
+        }
+        touchRectList_.emplace_back(touchRect_);
+        SetTouchRectList(touchRectList_);
+        return;
+    }
+
+    responseRegionList_.clear();
+    touchRect_ = GetTransformRect(GetPaintRect());
+    if (context && context->GetIsDeclarative() && hasMargin_) {
+        touchRect_ = GetTouchArea();
+    }
+
+    for (auto& region : responseRegion_) {
+        double x = GetPxValue(touchRect_.Width(), region.GetOffset().GetX());
+        double y = GetPxValue(touchRect_.Height(), region.GetOffset().GetY());
+        double width = GetPxValue(touchRect_.Width(), region.GetWidth());
+        double height = GetPxValue(touchRect_.Height(), region.GetHeight());
+        Rect responseRegion(touchRect_.GetOffset().GetX() + x, touchRect_.GetOffset().GetY() + y, width, height);
+        responseRegionList_.emplace_back(responseRegion);
+    }
+
+    touchRectList_ = responseRegionList_;
+    SetTouchRectList(touchRectList_);
+}
 } // namespace OHOS::Ace

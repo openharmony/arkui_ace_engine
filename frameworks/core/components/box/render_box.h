@@ -217,6 +217,7 @@ public:
     void ResetController(RefPtr<Animator>& controller);
     void CreateColorAnimation(
         RefPtr<KeyframeAnimation<Color>>& colorAnimation, const Color& beginValue, const Color& endValue);
+    void UpdateTouchRect() override;
 
 protected:
     void ClearRenderObject() override;
