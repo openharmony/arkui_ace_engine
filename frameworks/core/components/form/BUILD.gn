@@ -33,8 +33,8 @@ build_component("form") {
       "ability_runtime:app_manager",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
-      "form_runtime:fmskit_native",
-      "form_runtime:form_manager",
+      "form_fwk:fmskit_native",
+      "form_fwk:form_manager",
       "ipc:ipc_core",
     ]
   }
