@@ -230,6 +230,7 @@ void ArkJSRuntime::ExecutePendingJob()
     JSNApi::ExecutePendingJob(vm_);
 }
 
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
 void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
 {
     if (vm_ == nullptr) {
@@ -238,6 +239,12 @@ void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
     LocalScope scope(vm_);
     panda::DFXJSNApi::DumpHeapSnapshot(vm_, FORMAT_JSON, true, isPrivate);
 }
+#else
+void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
+{
+    LOGE("Do not support Ark DumpHeapSnapshot on Windows or MacOS");
+}
+#endif
 
 Local<JSValueRef> PandaFunctionData::Callback(panda::JsiRuntimeCallInfo* info) const
 {
