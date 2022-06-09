@@ -996,9 +996,8 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
         if (!pagePath.empty()) {
             LoadPage(pageId_, PageTarget(pagePath), false, params, true);
             return;
-        } else {
-            LOGW("back to invalid restore page");
         }
+        LOGI("run in normal back");
         PopPage();
     } else {
         std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
@@ -1606,10 +1605,12 @@ void FrontendDelegateDeclarative::PopToPage(const std::string& url)
             }
             auto pageId = delegate->GetPageIdByUrl(url);
             if (pageId == INVALID_PAGE_ID) {
+                delegate->ProcessRouterTask();
                 return;
             }
             auto pipelineContext = delegate->pipelineContextHolder_.Get();
             if (!pipelineContext->CanPopPage()) {
+                LOGW("router pop to page run in unexpected process");
                 delegate->ResetStagingPage();
                 return;
             }
@@ -1823,6 +1824,8 @@ void FrontendDelegateDeclarative::ClearInvisiblePages()
                 })) {
                 auto pageId = delegate->OnClearInvisiblePagesSuccess();
                 delegate->SetCurrentPage(pageId);
+            } else {
+                delegate->ProcessRouterTask();
             }
         },
         TaskExecutor::TaskType::UI);
