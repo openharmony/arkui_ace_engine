@@ -646,7 +646,12 @@ bool RenderTextOverlay::TouchTest(const Point& globalPoint, const Point& parentL
     if (!isSingleHandle_ || showOption_.showMenu) {
         for (auto iter = GetChildren().rbegin(); iter != GetChildren().rend(); ++iter) {
             const auto& child = *iter;
+            auto childResult = result.size();
             if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
+                return true;
+            }
+            // here is to handle some cases when the touch test doesnt bubble up.
+            if (childResult != result.size()) {
                 return true;
             }
         }
