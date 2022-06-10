@@ -118,6 +118,7 @@ public:
     {
         // Margin need to support negative number.
         margin_ = margin;
+        hasMargin_ = true;
     }
 
     void SetPadding(const Edge& padding, const Edge& additionalPadding = Edge())
@@ -369,6 +370,11 @@ public:
     {
         displayType_ = displayType;
     }
+
+    bool HasMargin() const
+    {
+        return hasMargin_;
+    }
 private:
     Alignment align_;
     LayoutParam constraints_ = LayoutParam(Size(), Size()); // no constraints when init
@@ -399,6 +405,7 @@ private:
     AlignDeclaration::Edge alignSide_ { AlignDeclaration::Edge::AUTO };
     Dimension alignOffset_;
     DisplayType displayType_ = DisplayType::NO_SETTING;
+    bool hasMargin_ = false;
 };
 
 } // namespace OHOS::Ace
