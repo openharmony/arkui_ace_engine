@@ -182,7 +182,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "autoCancel", &asyncContext->autoCancel);
             napi_typeof(env, asyncContext->titleNApi, &valueType);
             if (valueType == napi_string) {
-                size_t titleLen = GetParamLen(asyncContext->titleNApi);
+                size_t titleLen = GetParamLen(asyncContext->titleNApi) + 1;
                 std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(titleLen);
                 napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
                 asyncContext->titleString = titleChar.get();
