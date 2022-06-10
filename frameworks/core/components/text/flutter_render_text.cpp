@@ -544,11 +544,12 @@ void FlutterRenderText::ChangeDirectionIfNeeded(const std::string& data)
         if (u_charDirection(charOfShowingText) == UCharDirection::U_LEFT_TO_RIGHT) {
             defaultTextDirection_ = TextDirection::LTR;
             break;
-        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT) {
+        } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT ||
+                   u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
             defaultTextDirection_ = TextDirection::RTL;
             break;
         } else if (!IsCompatibleVersion() &&
-                   u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
+                   u_charDirection(charOfShowingText) == UCharDirection::U_ARABIC_NUMBER) {
             defaultTextDirection_ = TextDirection::RTL;
             break;
         }

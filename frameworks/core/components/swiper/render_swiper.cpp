@@ -1048,27 +1048,27 @@ void RenderSwiper::MoveItems(double dragVelocity)
     } else {
         minOffset = MIN_SCROLL_OFFSET * (swiperWidth_ - prevMargin_ - nextMargin_);
     }
+    auto nextItemOffset = needReverse_ ? -nextItemOffset_ : nextItemOffset_;
+    auto prevItemOffset = needReverse_ ? -prevItemOffset_ : prevItemOffset_;
     if (std::abs(dragVelocity) > NormalizeToPx(MIN_TURN_PAGE_VELOCITY) &&
         std::abs(scrollOffset_) > NormalizeToPx(MIN_DRAG_DISTANCE)) {
         if (dragVelocity > 0.0) {
             toIndex = GetPrevIndex();
-            end = currentIndex_ == toIndex ? 0.0
-                : (scrollOffset_ < 0.0 ? 0.0 : (needReverse_ ? -nextItemOffset_ : nextItemOffset_));
+            end = currentIndex_ == toIndex ? 0.0 : (scrollOffset_ < 0.0 ? 0.0 : nextItemOffset);
             if (scrollOffset_ < 0.0) {
                 fromIndex = GetNextIndex();
-                start += nextItemOffset_;
+                start += nextItemOffset;
                 toIndex = currentIndex_;
-                end += nextItemOffset_;
+                end += nextItemOffset;
             }
         } else {
             toIndex = GetNextIndex();
-            end = currentIndex_ == toIndex ? 0.0
-                : (scrollOffset_ > 0.0 ? 0.0 : (needReverse_ ? -prevItemOffset_ : prevItemOffset_));
+            end = currentIndex_ == toIndex ? 0.0 : (scrollOffset_ > 0.0 ? 0.0 : prevItemOffset);
             if (scrollOffset_ > 0.0) {
                 fromIndex = GetPrevIndex();
-                start += prevItemOffset_;
+                start += prevItemOffset;
                 toIndex = currentIndex_;
-                end += prevItemOffset_;
+                end += prevItemOffset;
             }
         }
         targetIndex_ = toIndex;
@@ -1076,10 +1076,10 @@ void RenderSwiper::MoveItems(double dragVelocity)
     } else if (std::abs(scrollOffset_) > minOffset) {
         if (scrollOffset_ > 0.0) {
             toIndex = GetPrevIndex();
-            end = nextItemOffset_;
+            end = nextItemOffset;
         } else {
             toIndex = GetNextIndex();
-            end = prevItemOffset_;
+            end = prevItemOffset;
         }
         targetIndex_ = toIndex;
         nextIndex_ = targetIndex_;
