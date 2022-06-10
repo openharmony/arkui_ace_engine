@@ -92,7 +92,7 @@ std::string ButtonComposedElement::GetFontSize() const
         return "";
     }
     auto fontSize = render ? render->GetTextStyle().GetFontSize() : Dimension();
-    return std::to_string(static_cast<int32_t>(fontSize.ConvertToVp()));
+    return fontSize.ToString();
 }
 
 std::string ButtonComposedElement::GetFontWeight() const
