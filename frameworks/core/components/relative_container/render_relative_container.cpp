@@ -21,6 +21,15 @@
 
 namespace OHOS::Ace {
 
+namespace {
+
+inline bool IsAnchorContainer(const std::string& anchor)
+{
+    return anchor == "__container__";
+}
+
+}
+
 void RenderRelativeContainer::Update(const RefPtr<Component>& component)
 {
     const auto relativeContainer = AceType::DynamicCast<RelativeContainerComponent>(component);
@@ -36,8 +45,13 @@ void RenderRelativeContainer::CollectNodesById()
     for (const auto& child : GetChildren()) {
         auto flexItem = AceType::DynamicCast<RenderFlexItem>(child);
         if (flexItem) {
+            if (flexItem->GetId().empty()) {
+                continue;
+            }
+            if (idNodeMap_.find(flexItem->GetId()) != idNodeMap_.end()) {
+                LOGE("Component %{public}s ID is duplicated", flexItem->GetId().c_str());
+            }
             idNodeMap_.emplace(flexItem->GetId(), flexItem);
-            continue;
         }
         // Component who does not have align Rules will have default offset and layout param
         LayoutParam itemLayout;
@@ -50,13 +64,14 @@ void RenderRelativeContainer::CollectNodesById()
 
 void RenderRelativeContainer::GetDependencyRelationship()
 {
-    for (const auto& child : GetChildren()) {
-        auto flexItem = AceType::DynamicCast<RenderFlexItem>(child);
+    for (const auto& node : idNodeMap_) {
+        auto flexItem = node.second;
         if (!flexItem) {
             continue;
         }
         for (const auto& alignRule : flexItem->GetAlignRules()) {
-            if (alignRule.second.anchor == "container") {
+            if (IsAnchorContainer(alignRule.second.anchor) ||
+                idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end()) {
                 continue;
             }
             if (reliedOnMap_.count(alignRule.second.anchor) == 0) {
@@ -70,37 +85,25 @@ void RenderRelativeContainer::GetDependencyRelationship()
     }
 }
 
-void RenderRelativeContainer::BuildIncomingDegreeMap()
-{
-    for (const auto& child : GetChildren()) {
-        std::set<std::string> anchorSet;
-        auto flexItem = AceType::DynamicCast<RenderFlexItem>(child);
-        if (!flexItem) {
-            continue;
-        }
-        for (const auto& alignRule : flexItem->GetAlignRules()) {
-            if (alignRule.second.anchor != "container") {
-                anchorSet.insert(alignRule.second.anchor);
-            }
-        }
-        incomingDegreeMap_[flexItem->GetId()] = anchorSet.size();
-    }
-}
-
 bool RenderRelativeContainer::PreTopologicalLoopDetection()
 {
     std::queue<std::string> visitedNode;
     std::queue<std::string> layoutQueue;
     
-    for (const auto& child : GetChildren()) {
-        auto flexItem = AceType::DynamicCast<RenderFlexItem>(child);
+    for (const auto& node : idNodeMap_) {
+        auto flexItem = node.second;
         if (!flexItem) {
             continue;
         }
         std::set<std::string> anchorSet;
         for (const auto& alignRule : flexItem->GetAlignRules()) {
-            if (alignRule.second.anchor != "container") {
-                anchorSet.insert(alignRule.second.anchor);
+            if (IsAnchorContainer(alignRule.second.anchor) ||
+                idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end()) {
+                continue;
+            }
+            anchorSet.insert(alignRule.second.anchor);
+            if (alignRule.second.anchor == node.first) {
+                LOGE("Component %{public}s has dependency on itself", node.first.c_str());
             }
         }
         incomingDegreeMap_[flexItem->GetId()] = anchorSet.size();
@@ -115,14 +118,24 @@ bool RenderRelativeContainer::PreTopologicalLoopDetection()
         layoutQueue.pop();
         auto reliedSet = reliedOnMap_[currentNodeName];
         for (const auto& node : reliedSet) {
+            if (incomingDegreeMapCopy.find(node) == incomingDegreeMapCopy.end() || IsAnchorContainer(node)) {
+                continue;
+            }
             incomingDegreeMapCopy[node] -= 1;
             if (incomingDegreeMapCopy[node] == 0) {
                 layoutQueue.push(node);
             }
         }
+        incomingDegreeMapCopy.erase(currentNodeName);
         visitedNode.push(currentNodeName);
     }
     if (visitedNode.size() != idNodeMap_.size()) {
+        std::string loopDependentNodes = "";
+        for (const auto& node : incomingDegreeMapCopy) {
+            loopDependentNodes += node.first + ",";
+        }
+        LOGE("Perform Layout failed, components [%{public}s] has loop dependency",
+            loopDependentNodes.substr(0, loopDependentNodes.size() - 1).c_str());
         return false;
     }
     return true;
@@ -135,17 +148,22 @@ void RenderRelativeContainer::CalcHorizontalLayoutParam(AlignDirection alignDire
     if (!flexItem) {
         return;
     }
-    double anchorHorizontalSize = alignRule.anchor == "container" ?
-            GetLayoutSize().Width() : idNodeMap_[alignRule.anchor]->GetLayoutSize().Width();
     switch (alignRule.horizontal) {
         case HorizontalAlign::START:
-            flexItem->SetAlignValue(alignDirection, 0.0);
+            flexItem->SetAlignValue(alignDirection, IsAnchorContainer(alignRule.anchor) ?
+                0.0 : idNodeMap_[alignRule.anchor]->GetPosition().GetX());
             break;
         case HorizontalAlign::CENTER:
-            flexItem->SetAlignValue(alignDirection, anchorHorizontalSize / 2);
+            flexItem->SetAlignValue(alignDirection, IsAnchorContainer(alignRule.anchor) ?
+                GetLayoutSize().Width() / 2 :
+                idNodeMap_[alignRule.anchor]->GetLayoutSize().Width() / 2 +
+                idNodeMap_[alignRule.anchor]->GetPosition().GetX());
             break;
         case HorizontalAlign::END:
-            flexItem->SetAlignValue(alignDirection, anchorHorizontalSize);
+            flexItem->SetAlignValue(alignDirection, IsAnchorContainer(alignRule.anchor) ?
+                GetLayoutSize().Width() :
+                idNodeMap_[alignRule.anchor]->GetLayoutSize().Width() +
+                idNodeMap_[alignRule.anchor]->GetPosition().GetX());
             break;
         default:
             LOGE("Unsupported align direction");
@@ -159,17 +177,22 @@ void RenderRelativeContainer::CalcVerticalLayoutParam(AlignDirection alignDirect
     if (!flexItem) {
         return;
     }
-    double anchorVerticalSize = alignRule.anchor == "container" ?
-            GetLayoutSize().Height() : idNodeMap_[alignRule.anchor]->GetLayoutSize().Height();
     switch (alignRule.vertical) {
         case VerticalAlign::TOP:
-            flexItem->SetAlignValue(alignDirection, 0.0);
+            flexItem->SetAlignValue(alignDirection, IsAnchorContainer(alignRule.anchor) ?
+                0.0 : idNodeMap_[alignRule.anchor]->GetPosition().GetY());
             break;
         case VerticalAlign::CENTER:
-            flexItem->SetAlignValue(alignDirection, anchorVerticalSize / 2);
+            flexItem->SetAlignValue(alignDirection, IsAnchorContainer(alignRule.anchor) ?
+            GetLayoutSize().Height() / 2 :
+            idNodeMap_[alignRule.anchor]->GetLayoutSize().Height() / 2 +
+            idNodeMap_[alignRule.anchor]->GetPosition().GetY());
             break;
         case VerticalAlign::BOTTOM:
-            flexItem->SetAlignValue(alignDirection, anchorVerticalSize);
+            flexItem->SetAlignValue(alignDirection, IsAnchorContainer(alignRule.anchor) ?
+            GetLayoutSize().Height() :
+            idNodeMap_[alignRule.anchor]->GetLayoutSize().Height() +
+            idNodeMap_[alignRule.anchor]->GetPosition().GetY());
             break;
         default:
             LOGE("Unsupported align direction");
@@ -179,8 +202,8 @@ void RenderRelativeContainer::CalcVerticalLayoutParam(AlignDirection alignDirect
 void RenderRelativeContainer::TopologicalSort(std::list<std::string>& renderList)
 {
     std::queue<std::string> layoutQueue;
-    for (const auto& child : GetChildren()) {
-        auto flexItem = AceType::DynamicCast<RenderFlexItem>(child);
+    for (const auto& node : idNodeMap_) {
+        auto flexItem = node.second;
         if (!flexItem) {
             continue;
         }
@@ -194,6 +217,9 @@ void RenderRelativeContainer::TopologicalSort(std::list<std::string>& renderList
         // reduce incoming degree of nodes relied on currentNode
         auto reliedList = reliedOnMap_[currentNodeName];
         for (const auto& node : reliedList) {
+            if (incomingDegreeMap_.find(node) == incomingDegreeMap_.end() || IsAnchorContainer(node)) {
+                continue;
+            }
             incomingDegreeMap_[node] -= 1;
             if (incomingDegreeMap_[node] == 0) {
                 layoutQueue.push(node);
@@ -214,6 +240,10 @@ void RenderRelativeContainer::CalcLayoutParam(std::map<AlignDirection, AlignRule
     Offset containerOffset = GetPosition();
     // set first two boudnaries of each direction
     for (const auto& alignRule : alignRules) {
+        if (idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end() &&
+            !IsAnchorContainer(alignRule.second.anchor)) {
+            continue;
+        }
         if (static_cast<uint32_t>(alignRule.first) < DIRECTION_RANGE) {
             if (!flexItem->GetTwoHorizontalDirectionAligned()) {
                 CalcHorizontalLayoutParam(alignRule.first, alignRule.second, nodeName);
@@ -260,7 +290,7 @@ void RenderRelativeContainer::CalcLayoutParam(std::map<AlignDirection, AlignRule
         if (widthValue <= 0.0) {
             itemLayout.SetMinSize(Size(0.0, 0.0));
             itemLayout.SetMaxSize(Size(0.0, 0.0));
-            LOGW("Horizontal alignment illegal, node %{public}s will layout with size (0, 0)", nodeName.c_str());
+            LOGE("Component %{public}s horizontal alignment illegal, will layout with size (0, 0)", nodeName.c_str());
             return;
         }
     }
@@ -294,7 +324,7 @@ void RenderRelativeContainer::CalcLayoutParam(std::map<AlignDirection, AlignRule
         if (heightValue <= 0.0) {
             itemLayout.SetMinSize(Size(0.0, 0.0));
             itemLayout.SetMaxSize(Size(0.0, 0.0));
-            LOGW("Vertical alignment illegal, node %{public}s will layout with size (0, 0)", nodeName.c_str());
+            LOGE("Component %{public}s vertical alignment illegal, will layout with size (0, 0)", nodeName.c_str());
             return;
         }
     }
@@ -320,7 +350,13 @@ void RenderRelativeContainer::PerformLayout()
     CollectNodesById();
     GetDependencyRelationship();
     if (!PreTopologicalLoopDetection()) {
-        LOGE("Perform Layout failed, components has loop dependency");
+        for (const auto& node : idNodeMap_) {
+            auto flexItem = idNodeMap_[node.first];
+            LayoutParam itemLayout;
+            itemLayout.SetMinSize(Size(0.0, 0.0));
+            itemLayout.SetMaxSize(Size(0.0, 0.0));
+            flexItem->Layout(itemLayout);
+        }
         return;
     }
     TopologicalSort(renderList_);
@@ -339,6 +375,12 @@ void RenderRelativeContainer::PerformLayout()
         double offsetY = 0.0;
         bool offsetYCalculated = false;
         for (const auto& alignRule : alignRules) {
+            if (idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end() &&
+                !IsAnchorContainer(alignRule.second.anchor)) {
+                LOGW("Anchor %{public}s of component %{public}s is not found, will be ignored",
+                    alignRule.second.anchor.c_str(), nodeName.c_str());
+                continue;
+            }
             if (static_cast<uint32_t>(alignRule.first) < DIRECTION_RANGE) {
                 if (!offsetXCalculated) {
                     offsetX = CalcHorizontalOffset(alignRule.first, alignRule.second, containerSize.Width(), nodeName);
@@ -351,8 +393,7 @@ void RenderRelativeContainer::PerformLayout()
                 }
             }
         }
-        LOGI("Item %{public}s set offsetX %{public}f, offsetY is %{public}f", nodeName.c_str(),
-            offsetX, offsetY);
+        LOGI("Component %{public}s set offsetX %{public}f, offsetY %{public}f", nodeName.c_str(), offsetX, offsetY);
         flexItem->SetPosition(Offset(offsetX, offsetY));
     }
 }
@@ -363,8 +404,8 @@ double RenderRelativeContainer::CalcHorizontalOffset(AlignDirection alignDirecti
     double offsetX = 0.0;
     auto flexItem = idNodeMap_[nodeName];
     double flexItemWidth = flexItem->GetLayoutSize().Width();
-    double anchorWidth = alignRule.anchor == "container" ?
-        containerWidth : anchorWidth = idNodeMap_[alignRule.anchor]->GetLayoutSize().Width();
+    double anchorWidth = IsAnchorContainer(alignRule.anchor) ?
+        containerWidth : idNodeMap_[alignRule.anchor]->GetLayoutSize().Width();
     switch (alignDirection) {
         case AlignDirection::LEFT:
             switch (alignRule.horizontal) {
@@ -414,7 +455,7 @@ double RenderRelativeContainer::CalcHorizontalOffset(AlignDirection alignDirecti
         default:
             LOGE("Unsupported layout position");
     }
-    offsetX += alignRule.anchor == "container" ? 0.0 : idNodeMap_[alignRule.anchor]->GetPosition().GetX();
+    offsetX += IsAnchorContainer(alignRule.anchor) ? 0.0 : idNodeMap_[alignRule.anchor]->GetPosition().GetX();
     return offsetX;
 }
 
@@ -424,7 +465,7 @@ double RenderRelativeContainer::CalcVerticalOffset(AlignDirection alignDirection
     double offsetY = 0.0;
     auto flexItem = idNodeMap_[nodeName];
     double flexItemHeight = flexItem->GetLayoutSize().Height();
-    double anchorHeight = alignRule.anchor == "container" ?
+    double anchorHeight = IsAnchorContainer(alignRule.anchor) ?
         containerHeight : idNodeMap_[alignRule.anchor]->GetLayoutSize().Height();
     switch (alignDirection) {
         case AlignDirection::TOP:
@@ -475,7 +516,7 @@ double RenderRelativeContainer::CalcVerticalOffset(AlignDirection alignDirection
         default:
             LOGE("Unsupported layout position");
     }
-    offsetY += alignRule.anchor == "container" ? 0.0 : idNodeMap_[alignRule.anchor]->GetPosition().GetY();
+    offsetY += IsAnchorContainer(alignRule.anchor) ? 0.0 : idNodeMap_[alignRule.anchor]->GetPosition().GetY();
     return offsetY;
 }
 
