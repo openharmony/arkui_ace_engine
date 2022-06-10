@@ -39,10 +39,12 @@ public:
     void Refresh(const JSCallbackInfo& args);
     void StopLoading(const JSCallbackInfo& args);
     void GetHitTestResult(const JSCallbackInfo& args);
+    void GetHitTestValue(const JSCallbackInfo& args);
     void GetCookieManager(const JSCallbackInfo& args);
     void GetPageHeight(const JSCallbackInfo& args);
     void GetTitle(const JSCallbackInfo& args);
     void GetWebId(const JSCallbackInfo& args);
+    void GetDefaultUserAgent(const JSCallbackInfo& args);
     void AddJavascriptInterface(const JSCallbackInfo& args);
     void RemoveJavascriptInterface(const JSCallbackInfo& args);
     void SetJavascriptInterface(const JSCallbackInfo& args);

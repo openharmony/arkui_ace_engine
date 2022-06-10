@@ -29,7 +29,6 @@
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
 #include "nweb_adapter_helper.h"
-#include "nweb_hit_testresult.h"
 #include "web_javascript_execute_callback.h"
 #include "web_javascript_result_callback.h"
 #endif
@@ -597,11 +596,9 @@ void WebDelegate::RequestFocus()
         TaskExecutor::TaskType::PLATFORM);
 }
 
-int WebDelegate::GetHitTestResult()
+int WebDelegate::ConverToWebHitTestType(int hitType)
 {
-    WebHitTestType webHitType = WebHitTestType::UNKNOWN;
-    if (nweb_) {
-        int hitType = nweb_->GetHitTestResult().GetType();
+    WebHitTestType webHitType;
         switch (hitType) {
             case OHOS::NWeb::HitTestResult::UNKNOWN_TYPE:
                 webHitType = WebHitTestType::UNKNOWN;
@@ -635,10 +632,27 @@ int WebDelegate::GetHitTestResult()
                 break;
             default:
                 LOGW("unknow hit test type:%{public}d", static_cast<int>(hitType));
+                webHitType = WebHitTestType::UNKNOWN;
                 break;
         }
-    }
     return static_cast<int>(webHitType);
+}
+
+int WebDelegate::GetHitTestResult()
+{
+    if (nweb_) {
+        return ConverToWebHitTestType(nweb_->GetHitTestResult().GetType());
+    }
+    return static_cast<int>(WebHitTestType::UNKNOWN);
+}
+
+void WebDelegate::GetHitTestValue(HitTestResult& result)
+{
+    if (nweb_) {
+        OHOS::NWeb::HitTestResult nwebResult = nweb_->GetHitTestResult();
+        result.SetExtraData(nwebResult.GetExtra());
+        result.SetHitTpye(ConverToWebHitTestType(nwebResult.GetType()));
+    }
 }
 
 int WebDelegate::GetPageHeight()
@@ -663,6 +677,18 @@ std::string WebDelegate::GetTitle()
         return nweb_->Title();
     }
     return "";
+}
+
+std::string WebDelegate::GetDefaultUserAgent()
+{
+    if (!nweb_) {
+        return "";
+    }
+    std::shared_ptr<OHOS::NWeb::NWebPreference> setting = nweb_->GetPreference();
+    if (!setting) {
+        return "";
+    }
+    return setting->DefaultUserAgent();
 }
 
 bool WebDelegate::SaveCookieSync()
@@ -1043,6 +1069,13 @@ void WebDelegate::SetWebCallBack()
                 }
                 return 0;
             });
+        webController->SetGetHitTestValueImpl(
+            [weak = WeakClaim(this)](HitTestResult& result) {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->GetHitTestValue(result);
+                }
+            });
         webController->SetGetPageHeightImpl(
             [weak = WeakClaim(this)]() {
                 auto delegate = weak.Upgrade();
@@ -1064,6 +1097,14 @@ void WebDelegate::SetWebCallBack()
                 auto delegate = weak.Upgrade();
                 if (delegate) {
                     return delegate->GetTitle();
+                }
+                return std::string();
+            });
+        webController->SetGetDefaultUserAgentImpl(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    return delegate->GetDefaultUserAgent();
                 }
                 return std::string();
             });

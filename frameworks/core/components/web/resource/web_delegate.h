@@ -30,6 +30,7 @@
 #include "core/components/web/web_event.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "nweb_helper.h"
+#include "nweb_hit_testresult.h"
 #include "window.h"
 #endif
 
@@ -231,10 +232,13 @@ private:
     void Zoom(float factor);
     bool ZoomIn();
     bool ZoomOut();
+    int ConverToWebHitTestType(int hitType);
     int GetHitTestResult();
+    void GetHitTestValue(HitTestResult& result);
     int GetPageHeight();
     int GetWebId();
     std::string GetTitle();
+    std::string GetDefaultUserAgent();
     bool SaveCookieSync();
     bool SetCookie(const std::string& url, const std::string& value);
     std::string GetCookie(const std::string& url) const;

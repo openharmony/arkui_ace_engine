@@ -155,6 +155,55 @@ private:
     WebCookie* manager_;
 };
 
+class JSHitTestValue : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSHitTestValue>::Declare("HitTestValue");
+        JSClass<JSHitTestValue>::CustomMethod("getType", &JSHitTestValue::GetType);
+        JSClass<JSHitTestValue>::CustomMethod("getExtra", &JSHitTestValue::GetExtra);
+        JSClass<JSHitTestValue>::Bind(globalObj, JSHitTestValue::Constructor, JSHitTestValue::Destructor);
+    }
+
+    void SetType(int type)
+    {
+        type_ = type;
+    }
+
+    void SetExtra(const std::string& extra)
+    {
+        extra_ = extra;
+    }
+
+    void GetType(const JSCallbackInfo& args)
+    {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(type_)));
+    }
+
+    void GetExtra(const JSCallbackInfo& args)
+    {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(extra_)));
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jSHitTestResult = Referenced::MakeRefPtr<JSHitTestValue>();
+        jSHitTestResult->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jSHitTestResult));
+    }
+
+    static void Destructor(JSHitTestValue* jSHitTestResult)
+    {
+        if (jSHitTestResult != nullptr) {
+            jSHitTestResult->DecRefCount();
+        }
+    }
+
+    std::string extra_;
+    int type_ = static_cast<int>(WebHitTestType::UNKNOWN);
+};
+
 JSWebController::JSWebController()
 {
     instanceId_ = Container::CurrentId();
@@ -211,14 +260,17 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("accessBackward", &JSWebController::AccessBackward);
     JSClass<JSWebController>::CustomMethod("clearHistory", &JSWebController::ClearHistory);
     JSClass<JSWebController>::CustomMethod("getCookieManager", &JSWebController::GetCookieManager);
+    JSClass<JSWebController>::CustomMethod("getHitTestValue", &JSWebController::GetHitTestValue);
     JSClass<JSWebController>::CustomMethod("backOrForward", &JSWebController::BackOrForward);
     JSClass<JSWebController>::CustomMethod("zoomIn", &JSWebController::ZoomIn);
     JSClass<JSWebController>::CustomMethod("zoomOut", &JSWebController::ZoomOut);
     JSClass<JSWebController>::CustomMethod("getPageHeight", &JSWebController::GetPageHeight);
     JSClass<JSWebController>::CustomMethod("getTitle", &JSWebController::GetTitle);
     JSClass<JSWebController>::CustomMethod("getWebId", &JSWebController::GetWebId);
+    JSClass<JSWebController>::CustomMethod("getDefaultUserAgent", &JSWebController::GetDefaultUserAgent);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
     JSWebCookie::JSBind(globalObj);
+    JSHitTestValue::JSBind(globalObj);
 }
 
 void JSWebController::Constructor(const JSCallbackInfo& args)
@@ -457,6 +509,22 @@ void JSWebController::GetHitTestResult(const JSCallbackInfo& args)
     }
 }
 
+void JSWebController::GetHitTestValue(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController Start GetHitTestValue");
+    ContainerScope scope(instanceId_);
+    if (!webController_) {
+        return;
+    }
+    HitTestResult hitResult;
+    webController_->GetHitTestValue(hitResult);
+    JSRef<JSObject> resultObj = JSClass<JSHitTestValue>::NewInstance();
+    auto result = Referenced::Claim(resultObj->Unwrap<JSHitTestValue>());
+    result->SetType(hitResult.GetHitType());
+    result->SetExtra(hitResult.GetExtraData());
+    args.SetReturnValue(resultObj);
+}
+
 void JSWebController::GetCookieManager(const JSCallbackInfo& args)
 {
     LOGI("JSWebController Start GetCookieManager");
@@ -532,6 +600,16 @@ void JSWebController::GetWebId(const JSCallbackInfo& args)
     ContainerScope scope(instanceId_);
     if (webController_) {
         int result = webController_->GetWebId();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    }
+}
+
+void JSWebController::GetDefaultUserAgent(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController GetDefaultUserAgent");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        std::string result = webController_->GetDefaultUserAgent();
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
     }
 }
