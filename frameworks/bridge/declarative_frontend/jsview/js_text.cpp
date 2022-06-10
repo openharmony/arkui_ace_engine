@@ -461,7 +461,7 @@ void JSText::Create(const JSCallbackInfo& info)
 
     auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponentV2>(data);
     ViewStackProcessor::GetInstance()->Push(textComponent);
-    JSInteractableView::SetFocusable(false);
+    JSInteractableView::SetFocusable(false, false);
     JSInteractableView::SetFocusNode(false);
 
     // Init text style, allowScale is not supported in declarative.
