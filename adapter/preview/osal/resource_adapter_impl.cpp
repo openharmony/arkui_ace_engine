@@ -95,6 +95,8 @@ Global::Resource::DEVICE_TYPE ConvertDeviceType(DeviceType type)
             return Global::Resource::DEVICE_TYPE::DEVICE_TYPE_WATCH;
         case DeviceType::CAR:
             return Global::Resource::DEVICE_TYPE::DEVICE_TYPE_CAR;
+        case DeviceType::TABLET:
+            return Global::Resource::DEVICE_TYPE::DEVICE_TYPE_TABLET;
         default:
             return Global::Resource::DEVICE_TYPE::DEVICE_TYPE_UNDEFINED;
     }
