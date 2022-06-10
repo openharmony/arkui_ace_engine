@@ -1189,6 +1189,10 @@ void JsiDeclarativeEngine::TimerCallback(const std::string& callbackId, const st
 {
     TimerCallJs(callbackId);
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
+    if (!runtime) {
+        LOGE("get runtime failed");
+        return;
+    }
     auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");

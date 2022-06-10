@@ -427,10 +427,10 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onDragMove", &JSImage::JsOnDragMove);
     JSClass<JSImage>::StaticMethod("onDragLeave", &JSImage::JsOnDragLeave);
     JSClass<JSImage>::StaticMethod("onDrop", &JSImage::JsOnDrop);
-    JSClass<JSImage>::Inherit<JSViewAbstract>();
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
+    JSClass<JSImage>::Inherit<JSViewAbstract>();
     JSClass<JSImage>::Bind<>(globalObj);
 }
 

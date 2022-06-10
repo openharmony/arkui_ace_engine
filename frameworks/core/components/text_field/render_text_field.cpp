@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
 #include "core/common/clipboard/clipboard_proxy.h"
+#include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text/text_utils.h"
@@ -1198,6 +1199,7 @@ void RenderTextField::EditingValueFilter(TextEditingValue& result)
 
 void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
+    ContainerScope scope(instanceId_);
     if (!value) {
         LOGE("the value is nullptr");
         return;
@@ -1251,6 +1253,7 @@ void RenderTextField::PerformDefaultAction()
 void RenderTextField::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
     LOGD("PerformAction  %{public}d", static_cast<int32_t>(action));
+    ContainerScope scope(instanceId_);
     if (action == TextInputAction::NEXT && moveNextFocusEvent_) {
         moveNextFocusEvent_();
     } else {

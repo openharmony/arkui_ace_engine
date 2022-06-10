@@ -82,14 +82,16 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
     JSRef<JSVal> textParam = paramObject->GetProperty("text");
     JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
+    auto isTextEmpty = textParam->IsEmpty() || textParam->IsUndefined() || textParam->IsNull();
+    auto isIconEmpty = iconParam->IsEmpty() || iconParam->IsUndefined() || iconParam->IsNull();
     if (builderFuncParam->IsFunction()) {
         tabBarChild = ProcessTabBarBuilderFunction(tabContentItemComponent, builderFuncParam);
         // for custom build, no need for indicator.
         tabBar->ResetIndicator();
         tabBar->SetAlignment(Alignment::TOP_LEFT);
-    } else if (!textParam->IsEmpty() && !iconParam->IsEmpty()) {
+    } else if (!isTextEmpty && !isIconEmpty) {
         tabBarChild = ProcessTabBarTextIconPair(tabContentItemComponent, textParam, iconParam);
-    } else if (!textParam->IsEmpty() && iconParam->IsEmpty()) {
+    } else if (!isTextEmpty && isIconEmpty) {
         tabBarChild = ProcessTabBarLabel(tabContentItemComponent, textParam);
     } else {
         LOGE("invalid parameters: expecting either builder func, text & icon pair, or label");

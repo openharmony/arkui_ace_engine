@@ -1635,6 +1635,9 @@ void FlutterDecorationPainter::PaintColorAndImage(
     Color animationColor = decoration_->GetAnimationColor();
     if (backColor != Color::TRANSPARENT) {
         paint.setColor(backColor.GetValue());
+        if (opacity_ != UINT8_MAX) {
+            paint.setAlpha(opacity_);
+        }
         canvas->drawRect(
             SkRect::MakeXYWH(offset.GetX() + NormalizeToPx(margin_.Left()),
                 offset.GetY() + NormalizeToPx(margin_.Top()), GetLayoutSize().Width() - NormalizeToPx(margin_.Right()),
@@ -1644,6 +1647,9 @@ void FlutterDecorationPainter::PaintColorAndImage(
     }
     if (animationColor != Color::TRANSPARENT) {
         paint.setColor(animationColor.GetValue());
+        if (opacity_ != UINT8_MAX) {
+            paint.setAlpha(opacity_);
+        }
         canvas->drawRect(
             SkRect::MakeXYWH(offset.GetX() + NormalizeToPx(margin_.Left()),
                 offset.GetY() + NormalizeToPx(margin_.Top()), GetLayoutSize().Width() - NormalizeToPx(margin_.Right()),
