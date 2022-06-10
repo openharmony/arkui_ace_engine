@@ -650,7 +650,7 @@ bool RenderTextOverlay::HandleMouseEvent(const MouseEvent& event)
         PopOverlay();
         return true;
     }
-    return false;
+    return event.button == MouseButton::LEFT_BUTTON;
 }
 
 void RenderTextOverlay::HandleClick(const Offset& clickOffset)

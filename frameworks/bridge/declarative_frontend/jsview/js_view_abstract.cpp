@@ -1375,6 +1375,13 @@ void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
 
         display->SetVisibleChangeEvent(eventMarker);
     }
+
+    auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+    if (!focusComponent) {
+        LOGE("The focusComponent is null");
+        return;
+    }
+    focusComponent->SetShow(VisibleType(info[0]->ToNumber<int32_t>()) == VisibleType::VISIBLE);
 }
 
 void JSViewAbstract::JsFlexBasis(const JSCallbackInfo& info)
