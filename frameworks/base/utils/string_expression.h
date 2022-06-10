@@ -18,118 +18,19 @@
 
 #include <functional>
 #include <map>
-#include <regex>
 #include <string>
 #include <vector>
 
+#include "base/geometry/dimension.h"
+
 namespace OHOS::Ace::StringExpression {
-void InitMapping(std::map<std::string, int> &mapping)
-{
-    mapping["+"] = 0;
-    mapping["-"] = 0;
-    mapping["*"] = 1;
-    mapping["/"] = 1;
-    mapping["("] = 2;
-    mapping[")"] = 2;
-}
 
-std::vector<std::string> ConvertDal2Rpn(std::string formula)
-{
-    std::vector<std::string> result;
-    std::vector<std::string> opStack;
-    std::map<std::string, int> OpMapping;
-    std::string curNum, curOp;
-    std::regex calc("calc");
-    std::regex space(" ");
-    std::string ops = "+-*/()";
-    formula = regex_replace(formula, calc, "");
-    formula = regex_replace(formula, space, "");
-    for (std::size_t i = 0; i < formula.size(); ++i) {
-        if (ops.find(formula[i]) == ops.npos) {
-            curNum += formula[i];
-        } else {
-            if (!curNum.empty()) {
-                result.push_back(curNum);
-                curNum.clear();
-            }
-            curOp = formula[i];
-            if (opStack.empty()) {
-                opStack.push_back(curOp);
-            } else if (curOp == "(") {
-                opStack.push_back(curOp);
-            } else if (curOp == ")") {
-                while (opStack.back() != "(") {
-                    result.push_back(opStack.back());
-                    opStack.pop_back();
-                    if (opStack.empty()) {
-                        LOGE("ExpressionError, opStack is empty");
-                        result.push_back("0");
-                        return result;
-                    }
-                }
-                opStack.pop_back();
-            } else if (opStack.back() == "(") {
-                opStack.push_back(curOp);
-            } else if (OpMapping[curOp] > OpMapping[opStack.back()] && (!opStack.empty())) {
-                opStack.push_back(curOp);
-            } else {
-                while ((opStack.back() != "(") && (OpMapping[opStack.back()] >= OpMapping[curOp]))  {
-                    result.push_back(opStack.back());
-                    opStack.pop_back();
-                    if (opStack.empty())
-                        break;
-                }
-                opStack.push_back(curOp);
-            }
-        }
-    }
-    if (!opStack.empty()) {
-        LOGE("opStack is not empty");
-    }
-    return result;
-}
+void InitMapping(std::map<std::string, int>& mapping);
 
-double CalculateExp(std::string expression, const std::function<double(const Dimension&)> calcFunc)
-{
-    std::vector<std::string> rpnexp = ConvertDal2Rpn(expression);
-    std::vector<double> result;
-    double num = 0.0;
-    std::string ops = "+-*/()";
-    for (std::size_t i = 0; i < rpnexp.size(); ++i) {
-        if (ops.find(rpnexp[i]) == ops.npos) {
-            std::string value = rpnexp[i];
-            Dimension dim = StringUtils::StringToDimensionWithUnit(value);
-            num = calcFunc(dim);
-            result.push_back(num);
-        } else {
-            if (result.size() < 2) {
-                LOGE("ExpressionError, size < 2");
-                return 0.0;
-            }
-            double num1 = result.back();
-            result.pop_back();
-            double num2 = result.back();
-            result.pop_back();
-            double opRes = 0.0;
-            if (rpnexp[i] == "+") {
-                opRes = num2 + num1;
-            } else if (rpnexp[i] == "-") {
-                opRes = num2 - num1;
-            } else if (rpnexp[i] == "*") {
-                opRes = num2 * num1;
-            } else if (rpnexp[i] == "/" && num1 != 0) {
-                opRes = num2 / num1;
-            }
-            result.push_back(opRes);
-        }
-    }
-    if (result.size() == 1) {
-        return result.back();
-    } else {
-        LOGE("ExpressionError");
-        return 0.0;
-    }
-}
+std::vector<std::string> ConvertDal2Rpn(std::string formula);
+
+double CalculateExp(const std::string& expression, const std::function<double(const Dimension&)>& calcFunc);
+
 } // namespace OHOS::Ace::StringExpression
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_STRING_EXPRESSION_H

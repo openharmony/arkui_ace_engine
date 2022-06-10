@@ -25,7 +25,8 @@ namespace OHOS::Ace::NG {
 void RowView::Create()
 {
     auto pattern = AceType::MakeRefPtr<LinearLayoutPattern>(false);
-    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, pattern);
+    // TODO: Add unique id.
+    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, V2::ROW_ETS_TAG, pattern);
     ViewStackProcessor::GetInstance()->Push(frameNode);
 }
 

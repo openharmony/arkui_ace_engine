@@ -26,7 +26,8 @@ namespace OHOS::Ace::NG {
 void TextView::Create(const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, AceType::MakeRefPtr<TextPattern>());
+    // TODO: Add unique id.
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, V2::TEXT_ETS_TAG, AceType::MakeRefPtr<TextPattern>());
     stack->Push(frameNode);
     stack->PushLayoutTask(ContentModifier(content));
 }

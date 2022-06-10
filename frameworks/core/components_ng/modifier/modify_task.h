@@ -51,7 +51,7 @@ public:
         return renderTask_;
     }
 
-    std::list<Modifier<RenderContext>>& GetRenderContext()
+    std::list<Modifier<RenderContext>>& GetRenderContextTask()
     {
         return renderContext_;
     }
@@ -66,12 +66,12 @@ public:
         return renderTask_;
     }
 
-    const std::list<Modifier<RenderContext>>& GetRenderContext() const
+    const std::list<Modifier<RenderContext>>& GetRenderContextTask() const
     {
         return renderContext_;
     }
 
-    std::list<Modifier<RenderContext>> MoveRenderContext()
+    std::list<Modifier<RenderContext>> MoveRenderContextTask()
     {
         return std::move(renderContext_);
     }

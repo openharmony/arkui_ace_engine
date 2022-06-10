@@ -49,44 +49,64 @@ inline bool NearZero(const double value, const double epsilon)
 
 inline bool NearEqual(const double left, const double right)
 {
-    static constexpr double epsilon = 0.000001f;
+    static constexpr double epsilon = 0.001f;
     return NearEqual(left, right, epsilon);
 }
 
 inline bool NearZero(const double left)
 {
-    static constexpr double epsilon = 0.000001f;
+    static constexpr double epsilon = 0.001f;
     return NearZero(left, epsilon);
 }
 
 inline bool LessOrEqual(double left, double right)
 {
-    static constexpr double epsilon = 0.000001f;
+    static constexpr double epsilon = 0.001f;
     return (left - right) < epsilon;
 }
 
 inline bool LessNotEqual(double left, double right)
 {
-    static constexpr double epsilon = -0.000001f;
+    static constexpr double epsilon = -0.001f;
     return (left - right) < epsilon;
 }
 
 inline bool GreatOrEqual(double left, double right)
 {
-    static constexpr double epsilon = -0.000001f;
+    static constexpr double epsilon = -0.001f;
     return (left - right) > epsilon;
 }
 
 inline bool GreatNotEqual(double left, double right)
 {
-    static constexpr double epsilon = 0.000001f;
+    static constexpr double epsilon = 0.001f;
     return (left - right) > epsilon;
 }
 
 inline double Round(double rawNum)
 {
-    static constexpr double epsilon = 0.000001f;
+    static constexpr double epsilon = 0.001f;
     return std::round(rawNum + epsilon);
+}
+
+inline bool Negative(double value)
+{
+    return LessNotEqual(value, 0);
+}
+
+inline bool NonNegative(double value)
+{
+    return GreatOrEqual(value, 0);
+}
+
+inline bool Positive(double value)
+{
+    return GreatNotEqual(value, 0);
+}
+
+inline bool NonPositive(double value)
+{
+    return LessOrEqual(value, 0);
 }
 
 inline bool InRegion(double lowerBound, double upperBound, double destNum)

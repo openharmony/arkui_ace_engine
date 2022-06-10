@@ -27,7 +27,7 @@ class BgColorModifier : public PropertyModifier<Color, RenderContext> {
 public:
     BgColorModifier(const Color& value) : PropertyModifier<Color, RenderContext>(value)
     {
-        LayoutProperty(RenderContext, RenderContext, BgColor);
+        ACE_DEFINE_MODIFIER_TASK(RenderContext, RenderContext, BgColor);
     };
 
     ~BgColorModifier() override = default;

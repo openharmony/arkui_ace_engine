@@ -179,17 +179,22 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo *runtim
     JsiDeclarativeEngineInstance::RootViewHandle(obj);
 
     LOGI("Load Document setting root view, page[%{public}d]", page->GetPageId());
-    auto rootComponent = view->CreateComponent();
-    std::list<RefPtr<Component>> stackChildren;
-    stackChildren.emplace_back(rootComponent);
-    auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(
-        Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, stackChildren);
-    rootStackComponent->SetMainStackSize(MainStackSize::MAX);
-    auto rootComposed = AceType::MakeRefPtr<ComposedComponent>("0", "root");
-    rootComposed->SetChild(rootStackComponent);
-    page->SetRootComponent(rootComposed);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto pageRootNode = view->CreateNode();
+        page->SetRootNode(pageRootNode);
+    } else {
+        auto rootComponent = view->CreateComponent();
+        std::list<RefPtr<Component>> stackChildren;
+        stackChildren.emplace_back(rootComponent);
+        auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(
+            Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, stackChildren);
+        rootStackComponent->SetMainStackSize(MainStackSize::MAX);
+        auto rootComposed = AceType::MakeRefPtr<ComposedComponent>("0", "root");
+        rootComposed->SetChild(rootStackComponent);
+        page->SetRootComponent(rootComposed);
+        page->SetPageTransition(view->BuildPageTransitionComponent());
+    }
 
-    page->SetPageTransition(view->BuildPageTransitionComponent());
     // We are done, tell to the JSAgePage
     page->SetPageCreated();
     page->SetDeclarativeOnPageAppearCallback([view]() { view->FireOnShow(); });

@@ -320,7 +320,7 @@ void JsAcePage::AddCurve(const std::string& curveString, const RefPtr<Curve>& cu
     curves_[curveString] = curve;
 }
 
-void JsAcePage::AddAnimatorInfo(const std::string animatorId, const RefPtr<AnimatorInfo>& animatorInfo)
+void JsAcePage::AddAnimatorInfo(const std::string& animatorId, const RefPtr<AnimatorInfo>& animatorInfo)
 {
     if (!animatorInfo) {
         LOGE("AddAnimation failed. Animation is null.");

@@ -786,7 +786,7 @@ void PipelineContext::SetClipHole(double left, double top, double width, double 
     transparentHole_.SetHeight(height);
 }
 
-RefPtr<Element> PipelineContext::SetupRootElement()
+void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
     RefPtr<StageComponent> rootStage = AceType::MakeRefPtr<StageComponent>(std::list<RefPtr<Component>>());
@@ -831,7 +831,7 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     if (!rootElement_) {
         LOGE("SetupRootElement failed!");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-        return RefPtr<Element>();
+        return;
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
@@ -856,7 +856,6 @@ RefPtr<Element> PipelineContext::SetupRootElement()
 
     requestedRenderNode_.Reset();
     LOGI("SetupRootElement success!");
-    return rootElement_;
 }
 
 RefPtr<Element> PipelineContext::SetupSubRootElement()
@@ -2181,7 +2180,7 @@ void PipelineContext::SetRootSize(double density, int32_t width, int32_t height)
         TaskExecutor::TaskType::UI);
 }
 
-void PipelineContext::SetRootRect(double width, double height, double offset) const
+void PipelineContext::SetRootRect(double width, double height, double offset)
 {
     CHECK_RUN_ON(UI);
     if (NearZero(viewScale_) || !rootElement_) {
@@ -3719,19 +3718,19 @@ void PipelineContext::RemoveTouchPipeline(WeakPtr<PipelineContext> context)
     }
 }
 
-void PipelineContext::PostAsyncEvent(TaskExecutor::Task&& task)
+void PipelineContext::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
-        taskExecutor_->PostTask(std::move(task), TaskExecutor::TaskType::UI);
+        taskExecutor_->PostTask(std::move(task), type);
     } else {
         LOGE("the task executor is nullptr");
     }
 }
 
-void PipelineContext::PostAsyncEvent(const TaskExecutor::Task& task)
+void PipelineContext::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+        taskExecutor_->PostTask(task, type);
     } else {
         LOGE("the task executor is nullptr");
     }

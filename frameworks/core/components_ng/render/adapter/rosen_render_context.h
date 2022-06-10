@@ -62,6 +62,13 @@ public:
         }
     }
 
+    void SetClipToFrame(bool useClip) override
+    {
+        if (rsNode_) {
+            rsNode_->SetClipToFrame(useClip);
+        }
+    }
+
 private:
     void ReCreateRsNodeTree(FrameNode* node);
 

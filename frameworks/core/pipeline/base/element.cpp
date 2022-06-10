@@ -204,7 +204,7 @@ inline RefPtr<Element> Element::DoUpdateChildWithNewComponent(
 RefPtr<Element> Element::UpdateChildWithSlot(
     const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot)
 {
-    LOGI("%{public}p->%{public}s::UpdateChildWithSlot(%{public}s, %{public}s, %{public}d, %{public}d)",
+    LOGD("%{public}p->%{public}s::UpdateChildWithSlot(%{public}s, %{public}s, %{public}d, %{public}d)",
         this, AceType::TypeName(this), AceType::TypeName(child), AceType::TypeName(newComponent), slot, renderSlot);
 
     // Considering 4 cases:

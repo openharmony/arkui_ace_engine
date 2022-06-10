@@ -56,29 +56,32 @@ bool CheckNoChanged(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNodeTreeFlag(PropertyChangeFlag propertyChangeFlag);
 
-#define ACE_DEFINE_CLASS_PROPERTY_GROUP(group, type)    \
-public:                                                 \
-    const std::unique_ptr<type>& GetOrCreate##group()   \
-    {                                                   \
-        if (!prop##group##_) {                          \
-            prop##group##_ = std::make_unique<type>();  \
-        }                                               \
-        return prop##group##_;                          \
-    }                                                   \
-    const std::unique_ptr<type>& Get##group() const     \
-    {                                                   \
-        return prop##group##_;                          \
-    }                                                   \
-    std::unique_ptr<type> Clone##group() const          \
-    {                                                   \
-        return std::make_unique<type>(*prop##group##_); \
-    }                                                   \
-    void Reset##group()                                 \
-    {                                                   \
-        return prop##group##_.reset();                  \
-    }                                                   \
-                                                        \
-private:                                                \
+#define ACE_DEFINE_CLASS_PROPERTY_GROUP(group, type)        \
+public:                                                     \
+    const std::unique_ptr<type>& GetOrCreate##group()       \
+    {                                                       \
+        if (!prop##group##_) {                              \
+            prop##group##_ = std::make_unique<type>();      \
+        }                                                   \
+        return prop##group##_;                              \
+    }                                                       \
+    const std::unique_ptr<type>& Get##group() const         \
+    {                                                       \
+        return prop##group##_;                              \
+    }                                                       \
+    std::unique_ptr<type> Clone##group() const              \
+    {                                                       \
+        if (prop##group##_) {                               \
+            return std::make_unique<type>(*prop##group##_); \
+        }                                                   \
+        return nullptr;                                     \
+    }                                                       \
+    void Reset##group()                                     \
+    {                                                       \
+        return prop##group##_.reset();                      \
+    }                                                       \
+                                                            \
+private:                                                    \
     std::unique_ptr<type> prop##group##_;
 
 #define ACE_DEFINE_CLASS_PROPERTY(group, name, type, changeFlag) \
@@ -93,6 +96,41 @@ public:                                                          \
         groupProperty->Update##name(value);                      \
         UpdatePropertyChangeFlag(changeFlag);                    \
     }
+
+#define ACE_DEFINE_CLASS_PROPERTY_WITHOUT_GROUP(name, type, changeFlag) \
+public:                                                                 \
+    const std::optional<type>& Get##name()                              \
+    {                                                                   \
+        return prop##name##_;                                           \
+    }                                                                   \
+    bool Has##name() const                                              \
+    {                                                                   \
+        return prop##name##_.has_value();                               \
+    }                                                                   \
+    const type& Get##name##Value() const                                \
+    {                                                                   \
+        return prop##name##_.value();                                   \
+    }                                                                   \
+    std::optional<type> Clone##name() const                             \
+    {                                                                   \
+        return prop##name##_;                                           \
+    }                                                                   \
+    void Reset##name()                                                  \
+    {                                                                   \
+        return prop##name##_.reset();                                   \
+    }                                                                   \
+    void Update##name(const type& value)                                \
+    {                                                                   \
+        if (prop##name##_ == value) {                                   \
+            LOGD("the %{public}s is same, just ignore", #name);         \
+            return;                                                     \
+        }                                                               \
+        prop##name##_ = value;                                          \
+        UpdatePropertyChangeFlag(changeFlag);                           \
+    }                                                                   \
+                                                                        \
+private:                                                                \
+    std::optional<type> prop##name##_;
 
 #define ACE_DEFINE_STRUCT_PROPERTY(name, type)                \
     std::optional<type> prop##name;                           \

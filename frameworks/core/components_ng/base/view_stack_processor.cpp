@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 
+#include "core/components_ng/base/custom_node.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -35,7 +36,7 @@ RefPtr<FrameNode> ViewStackProcessor::GetMainFrameNode() const
     return AceType::DynamicCast<FrameNode>(GetMainElementNode());
 }
 
-RefPtr<ElementNode> ViewStackProcessor::GetMainElementNode() const
+RefPtr<FrameNode> ViewStackProcessor::GetMainElementNode() const
 {
     if (elementsStack_.empty()) {
         return nullptr;
@@ -48,12 +49,12 @@ RefPtr<ElementNode> ViewStackProcessor::GetMainElementNode() const
     return main->second;
 }
 
-void ViewStackProcessor::Push(const RefPtr<ElementNode>& element, bool isCustomView)
+void ViewStackProcessor::Push(const RefPtr<FrameNode>& element, bool isCustomView)
 {
     if (ShouldPopImmediately()) {
         Pop();
     }
-    std::unordered_map<std::string, RefPtr<ElementNode>> wrappingComponentsMap;
+    std::unordered_map<std::string, RefPtr<FrameNode>> wrappingComponentsMap;
     wrappingComponentsMap.emplace("main", element);
     elementsStack_.push(wrappingComponentsMap);
     if (AceType::InstanceOf<FrameNode>(element)) {
@@ -85,7 +86,7 @@ void ViewStackProcessor::PushRenderContextTask(Modifier<RenderContext>&& task)
         LOGE("the modify task is null");
         return;
     }
-    modifyTaskStack_.top()->GetRenderContext().emplace_back(std::move(task));
+    modifyTaskStack_.top()->GetRenderContextTask().emplace_back(std::move(task));
 }
 
 bool ViewStackProcessor::ShouldPopImmediately()
@@ -93,7 +94,7 @@ bool ViewStackProcessor::ShouldPopImmediately()
     if (elementsStack_.size() <= 1) {
         return false;
     }
-    return GetMainElementNode()->GetType() == ElementNode::ElementType::COMPOSED_ELEMENT;
+    return AceType::InstanceOf<CustomNode>(GetMainElementNode());
 }
 
 void ViewStackProcessor::Pop()
@@ -106,13 +107,8 @@ void ViewStackProcessor::Pop()
     elementsStack_.pop();
     element->MountToParent(GetMainElementNode());
     if (!modifyTaskStack_.empty() && AceType::InstanceOf<FrameNode>(element)) {
-        auto task = [modify = std::move(modifyTaskStack_.top()),
-                        frameNode = AceType::DynamicCast<FrameNode>(element)]() {
-            if (frameNode) {
-                frameNode->FlushModifyTask(*modify);
-            }
-        };
-        modifyTasks_.emplace_back(std::move(task));
+        // TODO: Add Task create on rerender case.
+        element->FlushModifyTaskOnCreate(*modifyTaskStack_.top());
         modifyTaskStack_.pop();
     }
     LOGD("ViewStackProcessor Pop size %{public}zu", elementsStack_.size());
@@ -121,40 +117,35 @@ void ViewStackProcessor::Pop()
 void ViewStackProcessor::PopContainer()
 {
     auto element = GetMainElementNode();
-    if (element->GetType() != ElementNode::ElementType::COMPOSED_ELEMENT) {
+    if (!AceType::InstanceOf<CustomNode>(element)) {
         Pop();
         return;
     }
 
-    while (element->GetType() == ElementNode::ElementType::COMPOSED_ELEMENT) {
+    while (AceType::InstanceOf<CustomNode>(element)) {
         Pop();
         element = GetMainElementNode();
     }
     Pop();
 }
 
-RefPtr<ElementNode> ViewStackProcessor::WrapElements()
+RefPtr<FrameNode> ViewStackProcessor::WrapElements()
 {
     auto& wrappingMap = elementsStack_.top();
     return wrappingMap["main"];
 }
 
-std::pair<RefPtr<ElementNode>, std::list<CancelableCallback<void()>>> ViewStackProcessor::Finish()
+RefPtr<FrameNode> ViewStackProcessor::Finish()
 {
     if (elementsStack_.empty()) {
         LOGE("ViewStackProcessor Finish failed, input empty render or invalid root component");
-        return { nullptr, std::list<CancelableCallback<void()>>() };
+        return nullptr;
     }
     auto element = WrapElements();
     elementsStack_.pop();
     if (!modifyTaskStack_.empty() && AceType::InstanceOf<FrameNode>(element)) {
-        auto task = [modify = std::move(modifyTaskStack_.top()),
-                        frameNode = AceType::DynamicCast<FrameNode>(element)]() {
-            if (frameNode) {
-                frameNode->FlushModifyTask(*modify);
-            }
-        };
-        modifyTasks_.emplace_back(std::move(task));
+        // TODO: Add Task create on rerender case.
+        element->FlushModifyTaskOnCreate(*modifyTaskStack_.top());
         modifyTaskStack_.pop();
     }
     if (!elementsStack_.empty()) {
@@ -169,7 +160,7 @@ std::pair<RefPtr<ElementNode>, std::list<CancelableCallback<void()>>> ViewStackP
             modifyTaskStack_.pop();
         } while (!modifyTaskStack_.empty());
     }
-    return { element, std::move(modifyTasks_) };
+    return element;
 }
 
 void ViewStackProcessor::PushKey(const std::string& key)

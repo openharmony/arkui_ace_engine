@@ -27,7 +27,8 @@ void ColumnView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto pattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, pattern);
+    // TODO: Add unique id.
+    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, V2::COLUMN_ETS_TAG, pattern);
     stack->Push(frameNode);
 }
 

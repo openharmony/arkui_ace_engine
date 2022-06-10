@@ -29,6 +29,20 @@ bool CheckNeedLayoutSelf(PropertyChangeFlag propertyChangeFlag)
            ((propertyChangeFlag & PROPERTY_UPDATE_CHILD_REQUEST) == PROPERTY_UPDATE_CHILD_REQUEST);
 }
 
+void ResetLayoutFlag(PropertyChangeFlag& propertyChangeFlag)
+{
+    propertyChangeFlag ^= PROPERTY_UPDATE_MEASURE;
+    propertyChangeFlag ^= PROPERTY_UPDATE_LAYOUT;
+    propertyChangeFlag ^= PROPERTY_UPDATE_CHILD_REQUEST;
+}
+
+void ResetRenderFlag(PropertyChangeFlag& propertyChangeFlag)
+{
+    propertyChangeFlag ^= PROPERTY_UPDATE_POSITION;
+    propertyChangeFlag ^= PROPERTY_UPDATE_RENDER;
+    propertyChangeFlag ^= PROPERTY_UPDATE_RENDER_PROPERTY;
+}
+
 bool CheckNeedParentLayout(PropertyChangeFlag propertyChangeFlag)
 {
     return CheckNeedLayoutSelf(propertyChangeFlag) ||

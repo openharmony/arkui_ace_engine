@@ -21,8 +21,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "core/components_ng/base/composed_node.h"
-#include "core/components_ng/base/element_node.h"
+#include "base/memory/referenced.h"
+#include "core/components_ng/base/custom_node.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/modifier/modify_task.h"
@@ -49,11 +49,11 @@ public:
     RefPtr<FrameNode> GetMainFrameNode() const;
 
     // Get main component include composed component created by js view.
-    RefPtr<ElementNode> GetMainElementNode() const;
+    RefPtr<FrameNode> GetMainElementNode() const;
 
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
-    void Push(const RefPtr<ElementNode>& element, bool isCustomView = false);
+    void Push(const RefPtr<FrameNode>& element, bool isCustomView = false);
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrappedcomponent has child of the new stack top's main component.
@@ -63,7 +63,7 @@ public:
     void PopContainer();
 
     // End of Render function, create component tree and flush modify task.
-    NG::ComposedNode::RenderResult Finish();
+    RefPtr<FrameNode> Finish();
 
     void PushLayoutTask(Modifier<LayoutProperty>&& task);
 
@@ -105,7 +105,7 @@ public:
 
     void ClearStack()
     {
-        auto emptyStack = std::stack<std::unordered_map<std::string, RefPtr<ElementNode>>>();
+        auto emptyStack = std::stack<std::unordered_map<std::string, RefPtr<FrameNode>>>();
         elementsStack_.swap(emptyStack);
     }
 
@@ -116,18 +116,16 @@ private:
 
     // Go through the wrappingComponentsMap and wrap the components
     // should be done before pushing to the stack.
-    RefPtr<ElementNode> WrapElements();
+    RefPtr<FrameNode> WrapElements();
 
     // Singleton instance
     static thread_local std::unique_ptr<ViewStackProcessor> instance;
 
     // render component stack
-    std::stack<std::unordered_map<std::string, RefPtr<ElementNode>>> elementsStack_;
+    std::stack<std::unordered_map<std::string, RefPtr<FrameNode>>> elementsStack_;
 
     // modifier task
     std::stack<RefPtr<StateModifyTask>> modifyTaskStack_;
-
-    std::list<CancelableCallback<void()>> modifyTasks_;
 
     std::string viewKey_;
     std::stack<size_t> keyStack_;

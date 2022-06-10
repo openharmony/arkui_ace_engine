@@ -36,7 +36,7 @@ public:
 
     ~TextLayoutAlgorithm() override = default;
 
-    void Reset() override;
+    void OnReset() override;
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;

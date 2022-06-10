@@ -40,7 +40,8 @@
 namespace OHOS::Ace::NG {
 class FrameNode;
 
-class LayoutWrapper : public virtual Referenced {
+class LayoutWrapper : public virtual AceType {
+    DECLARE_ACE_TYPE(LayoutWrapper, AceType)
 public:
     LayoutWrapper(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
         : hostNode_(std::move(hostNode)), geometryNode_(std::move(geometryNode)),

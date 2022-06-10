@@ -128,7 +128,7 @@ void RosenRenderContext::RebuildFrame(FrameNode* self)
 void RosenRenderContext::ReCreateRsNodeTree(FrameNode* node)
 {
     rsNode_->ClearChildren();
-    for (const auto& child : node->GetFrameChildrenByZIndex()) {
+    for (const auto& child : node->GetChildren()) {
         auto rosenRenderContext = DynamicCast<RosenRenderContext>(child->renderContext_);
         if (!rosenRenderContext) {
             continue;

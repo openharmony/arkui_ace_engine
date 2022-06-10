@@ -91,12 +91,12 @@ std::string LayoutWrapper::GetHostTag() const
 // This will call child and self measure process.
 void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    if (!layoutAlgorithm_ || !layoutProperty_ || !geometryNode_) {
-        LOGE("Measure failed: the layoutAlgorithm_ or layoutProperty_ or geometryNode_ is nullptr");
+    if (!layoutAlgorithm_ || layoutAlgorithm_->SkipMeasure()) {
+        LOGD("the layoutAlgorithm skip measure");
         return;
     }
-    if (layoutAlgorithm_->SkipMeasure()) {
-        LOGE("the layoutAlgorithm_ skip measure");
+    if (!layoutProperty_ || !geometryNode_) {
+        LOGE("Measure failed: the layoutAlgorithm_ or layoutProperty_ or geometryNode_ is nullptr");
         return;
     }
     layoutProperty_->UpdateLayoutConstraint(parentConstraint.value_or(LayoutConstraintF()));
@@ -115,12 +115,12 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 // Called to perform layout children.
 void LayoutWrapper::Layout(const std::optional<OffsetF>& parentGlobalOffset)
 {
-    if (!layoutAlgorithm_ || !layoutProperty_ || !geometryNode_) {
-        LOGE("Layout failed: the layoutAlgorithm_ or layoutProperty_ or geometryNode_ or frameNode is nullptr");
+    if (!layoutAlgorithm_ || layoutAlgorithm_->SkipLayout()) {
+        LOGD("the layoutAlgorithm skip layout");
         return;
     }
-    if (layoutAlgorithm_->SkipLayout()) {
-        LOGE("the layoutAlgorithm_ skip layout");
+    if (!layoutProperty_ || !geometryNode_) {
+        LOGE("Layout failed: the layoutAlgorithm_ or layoutProperty_ or geometryNode_ or frameNode is nullptr");
         return;
     }
     geometryNode_->SetParentGlobalOffset(parentGlobalOffset.value_or(OffsetF(0, 0)));

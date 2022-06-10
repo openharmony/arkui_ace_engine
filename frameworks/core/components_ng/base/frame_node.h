@@ -25,7 +25,6 @@
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/macros.h"
-#include "core/components_ng/base/element_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -37,6 +36,7 @@
 #include "core/components_v2/inspector/inspector_node.h"
 
 namespace OHOS::Ace::NG {
+class PipelineContext;
 class Pattern;
 class StateModifyTask;
 
@@ -46,74 +46,79 @@ using LayoutTask = CancelableCallback<void()>;
 using RenderTask = CancelableCallback<void()>;
 
 // FrameNode will display rendering region in the screen.
-class ACE_EXPORT FrameNode : public ElementNode {
-    DECLARE_ACE_TYPE(FrameNode, ElementNode);
+class ACE_EXPORT FrameNode : public virtual UiNodeId {
+    DECLARE_ACE_TYPE(FrameNode, UiNodeId);
 
 public:
     // create a new child element and mount to element tree.
-    static RefPtr<FrameNode> CreateFrameNodeAndMounToParent(
-        const std::string& tag, const RefPtr<Pattern>& pattern, const RefPtr<ElementNode>& parent, int32_t slot);
+    static RefPtr<FrameNode> CreateFrameNodeAndMounToParent(const std::string& tag, const std::string& id,
+        const RefPtr<Pattern>& pattern, const RefPtr<FrameNode>& parent, int32_t slot);
 
     // create a new child element with new element tree.
-    static RefPtr<FrameNode> CreateFrameNodeWithTree(
-        const std::string& tag, const RefPtr<Pattern>& pattern, const RefPtr<PipelineContext>& context);
+    static RefPtr<FrameNode> CreateFrameNodeWithTree(const std::string& tag, const std::string& id,
+        const RefPtr<Pattern>& pattern, const RefPtr<PipelineContext>& context);
 
     // create a new element with new pattern.
     static RefPtr<FrameNode> CreateFrameNode(
-        const std::string& tag, const RefPtr<Pattern>& pattern, bool isRoot = false);
+        const std::string& tag, const std::string& id, const RefPtr<Pattern>& pattern, bool isRoot = false);
 
     // avoid use creator function, use CreateFrameNode
-    FrameNode(const std::string& tag, const RefPtr<Pattern>& pattern, bool isRoot = false);
+    FrameNode(const std::string& tag, const std::string& id, const RefPtr<Pattern>& pattern, bool isRoot = false);
     ~FrameNode() override;
 
-    // tree operations start
-    void AddFrameChild(const RefPtr<FrameNode>& child, int32_t slot = -1);
+    void InitializePatternAndContext();
 
-    void RemoveFrameChild(const RefPtr<FrameNode>& child);
+    // Tree operation start.
+    void AddChild(const RefPtr<FrameNode>& child, int32_t slot = DEFAULT_FRAME_SLOT);
+    void RemoveChild(const RefPtr<FrameNode>& child);
+    void MovePosition(int32_t slot);
+    void ClearChildren();
+    RefPtr<FrameNode> GetChildBySlot(int32_t slot);
+    void MountToParent(const RefPtr<FrameNode>& parent, int32_t slot = DEFAULT_FRAME_SLOT);
 
-    void MoveFramePosition(int32_t slot);
-
-    void ClearFrameChildren();
-
-    // unmount from render tree
-    void Unmount()
+    const std::list<RefPtr<FrameNode>>& GetChildren() const
     {
-        auto parent = frameParent_.Upgrade();
-        if (parent) {
-            parent->RemoveFrameChild(AceType::Claim(this));
-        }
+        return children_;
     }
 
-    void SetFrameParent(const WeakPtr<FrameNode>& parent)
+    void SetSlot(int32_t slot)
     {
-        frameParent_ = parent;
+        slot_ = slot;
     }
 
-    WeakPtr<FrameNode> GetFrameParent() const
+    int32_t GetSlot() const
     {
-        return frameParent_;
+        return slot_;
     }
 
-    const std::list<RefPtr<FrameNode>>& GetFrameChildren() const
+    const WeakPtr<FrameNode>& GetParent() const
     {
-        return frameChildren_;
+        return parent_;
     }
 
-    const std::list<RefPtr<FrameNode>>& GetFrameChildrenByZIndex() const
+    void SetParent(const WeakPtr<FrameNode>& parent)
     {
-        return frameChildren_;
+        parent_ = parent;
     }
-    // tree operations end
+    // Tree operation end.
 
-    void FlushModifyTask(StateModifyTask& stateModifyTask);
+    void AttachContextrecursively(const RefPtr<PipelineContext>& context);
 
-    std::shared_ptr<LayoutTask> CreateLayoutTask();
+    RefPtr<PipelineContext> GetContext() const;
 
-    std::shared_ptr<LayoutTask> CreateRenderTask();
+    void FlushModifyTaskOnCreate(StateModifyTask& stateModifyTask);
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
-    const RefPtr<RenderContext>& GetRenderContext() const
+    void FlushModifyTaskOnRerender(StateModifyTask& stateModifyTask);
+
+    RefPtr<LayoutWrapper> CreateLayoutWrapperOnCreate();
+
+    std::shared_ptr<LayoutTask> CreateLayoutTask(bool onCreate = false);
+
+    std::shared_ptr<RenderTask> CreateRenderTask();
+
+    const RefPtr<RenderContext>& GetRenderContextTask() const
     {
         return renderContext_;
     }
@@ -127,27 +132,17 @@ public:
         return geometryNode_;
     }
 
-    void SetFrameSlot(int32_t slot)
-    {
-        frameSlot_ = slot;
-    }
-
-    int32_t GetFrameSlot() const
-    {
-        return frameSlot_;
-    }
-
     const RefPtr<LayoutProperty>& GetLayoutProperty() const
     {
         return layoutProperty_;
     }
 
-    void PostUITask(std::function<void()>&& task);
+    void PostUiTask(std::function<void()>&& task);
 
-    // ui thread options
+    // UI thread options start
     void SwapDirtyLayoutWrapperFromUiThread(const RefPtr<LayoutWrapper>& dirty);
     void RebuildRenderContextTree();
-    RefPtr<GeometryNode> GetGeometryNode() const
+    const RefPtr<GeometryNode>& GetGeometryNode() const
     {
         return geometryNode_;
     }
@@ -156,39 +151,64 @@ public:
         std::lock_guard<std::mutex> lock(mutex_);
         geometryNode_.Swap(std::move(node));
     }
+    // UI thread options end
+
+    // DFX info.
+    void DumpTree(int32_t depth);
+
+    const std::string& GetTag() const
+    {
+        return tag_;
+    }
+
+    const std::string& GetId() const
+    {
+        return id_;
+    }
+
+    void SetDepth(int32_t depth)
+    {
+        depth_ = depth;
+        for (auto& child : children_) {
+            child->SetDepth(depth_ + 1);
+        }
+    }
+
+    int32_t GetDepth() const
+    {
+        return depth_;
+    }
+
+protected:
+    virtual void OnContextAttached() {}
+    // dump self info.
+    virtual void DumpInfo() {}
+
+    std::list<RefPtr<FrameNode>> children_;
+    WeakPtr<PipelineContext> context_;
+    WeakPtr<FrameNode> parent_;
 
 private:
+    void SetPipelineContext(const RefPtr<PipelineContext>& context);
+
     void UpdateLayoutPropertyFlag();
     RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self);
+
     std::optional<LayoutConstraintF> GetLayoutConstraint() const;
     std::optional<OffsetF> GetParentGlobalOffset() const;
 
     RefPtr<RenderWrapper> CreateRenderWrapper();
 
-    void MarkDirtyRender(bool forceParent = true);
-    void MarkDirtyLayoutBox(PropertyChangeFlag propertyChangeFlag = PROPERTY_UPDATE_NORMAL);
-    void MarkDirtyLayoutBox(bool selfOnly, PropertyChangeFlag propertyChangeFlag);
-
-    void OnDepthUpdate() override;
+    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+    void MarkDirtyNode(
+        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
     bool IsMeasureBoundary();
-
-    void DumpInfo() override;
-    void OnContextAttached() override;
-    void OnChildAdded(const RefPtr<ElementNode>& child) override;
+    bool IsRenderBoundary();
     void RequestNextFrame();
 
-    void UpdateAccessibilityNode();
-
-    void UmountRender();
-
-    int32_t CountRenderNode() const override
-    {
-        return 1;
-    }
-
-    std::list<RefPtr<FrameNode>> frameChildren_;
-    WeakPtr<FrameNode> frameParent_;
+    std::string tag_ = "FrameNode";
+    std::string id_;
 
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
@@ -205,14 +225,16 @@ private:
 
     std::mutex mutex_;
     std::atomic<bool> isLayouting_ = false;
+    std::atomic<bool> needSyncRenderTree_ = false;
 
-    int32_t frameSlot_ = DEFAULT_FRAME_SLOT;
     int32_t depth_ = 0;
+    int32_t slot_ = DEFAULT_FRAME_SLOT;
 
     bool isLayoutDirtyMarked_ = false;
     bool isRenderDirtyMarked_ = false;
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
+    bool isRoot_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;
