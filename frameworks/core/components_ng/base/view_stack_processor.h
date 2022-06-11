@@ -71,10 +71,10 @@ public:
 
     void PushRenderContextTask(Modifier<RenderContext>&& task);
 
-    // Set key to be used for next custom component on the stack
+    // Set key to be used for next node on the stack
     void PushKey(const std::string& key);
 
-    // Returns a key for the CustomComponent if it has been pushed to the stack. Default is ""
+    // Returns a key for the node if it has been pushed to the stack. Default is ""
     std::string GetKey();
 
     // Takes care of the viewId wrt to foreach

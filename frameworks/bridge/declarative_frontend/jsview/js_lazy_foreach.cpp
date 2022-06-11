@@ -19,15 +19,22 @@
 #include <set>
 #include <string>
 
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/syntax/foreach/for_each.h"
+#include "core/components_ng/syntax/foreach/lazy_for_each_builder.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/composed_component.h"
+#include "core/pipeline/base/element.h"
 #include "core/pipeline/base/multi_composed_component.h"
 
 namespace OHOS::Ace::Framework {
@@ -245,14 +252,14 @@ private:
 
 using ItemKeyGenerator = std::function<std::string(const JSRef<JSVal>&, size_t)>;
 
-class JSLazyForEachComponent : public V2::LazyForEachComponent {
-    DECLARE_ACE_TYPE(JSLazyForEachComponent, V2::LazyForEachComponent);
+class JSLazyForEachActuator : public virtual AceType {
+    DECLARE_ACE_TYPE(JSLazyForEachActuator, AceType);
 
 public:
-    explicit JSLazyForEachComponent(const std::string& id) : V2::LazyForEachComponent(id) {}
-    ~JSLazyForEachComponent() override
+    JSLazyForEachActuator() = default;
+    ~JSLazyForEachActuator() override
     {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
         JSRef<JSObject> listenerObj = listenerProxyObj_.Lock();
         if (listenerObj.IsEmpty() || unregisterListenerFunc_.IsEmpty()) {
             return;
@@ -262,26 +269,132 @@ public:
         unregisterListenerFunc_->Call(dataSourceObj_, ArraySize(args), args);
     }
 
-    size_t OnGetTotalCount() override
+    int32_t GetTotalIndexCount()
     {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, 0);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, 0);
         if (totalCountFunc_.IsEmpty()) {
             return 0;
         }
 
-        int64_t value = 0;
+        int32_t value = 0;
         if (!ConvertFromJSValue(totalCountFunc_->Call(dataSourceObj_), value)) {
             return 0;
         }
-        if (value < 0 || static_cast<uint64_t>(value) >= std::numeric_limits<size_t>::max() - 1) {
+        if (value < 0) {
             return 0;
         }
-        return static_cast<size_t>(value);
+        return value;
+    }
+
+    void RegisterListener(const RefPtr<V2::DataChangeListener>& listener)
+    {
+        if (!listener) {
+            return;
+        }
+
+        auto listenerProxy = listenerProxy_.Upgrade();
+        if (listenerProxy) {
+            listenerProxy->AddListener(listener);
+            return;
+        }
+
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+        if (registerListenerFunc_.IsEmpty()) {
+            return;
+        }
+
+        JSRef<JSObject> listenerObj = JSClass<JSDataChangeListener>::NewInstance();
+        auto* unwrapObj = listenerObj->Unwrap<JSDataChangeListener>();
+        if (unwrapObj == nullptr) {
+            return;
+        }
+        listenerProxy = Referenced::Claim(unwrapObj);
+        listenerProxy->AddListener(listener);
+        listenerProxyObj_ = listenerObj;
+        listenerProxy_ = listenerProxy;
+
+        JSRef<JSVal> args[] = { listenerObj };
+        registerListenerFunc_->Call(dataSourceObj_, ArraySize(args), args);
+    }
+
+    void UnregisterListener(const RefPtr<V2::DataChangeListener>& listener)
+    {
+        if (!listener) {
+            return;
+        }
+
+        auto listenerProxy = listenerProxy_.Upgrade();
+        if (listenerProxy) {
+            listenerProxy->RemoveListener(listener);
+        }
+    }
+
+    void SetJSExecutionContext(const JSExecutionContext& context)
+    {
+        executionContext_ = context;
+    }
+
+    void SetParentViewObj(const JSRef<JSObject>& parentViewObj)
+    {
+        parentView_ = parentViewObj->Unwrap<JSView>();
+    }
+
+    void SetDataSourceObj(const JSRef<JSObject>& dataSourceObj)
+    {
+        dataSourceObj_ = dataSourceObj;
+        totalCountFunc_ = GetFunctionFromObject(dataSourceObj, "totalCount");
+        getDataFunc_ = GetFunctionFromObject(dataSourceObj, "getData");
+        registerListenerFunc_ = GetFunctionFromObject(dataSourceObj, "registerDataChangeListener");
+        unregisterListenerFunc_ = GetFunctionFromObject(dataSourceObj, "unregisterDataChangeListener");
+    }
+
+    void SetItemGenerator(const JSRef<JSFunc>& itemGenFunc, ItemKeyGenerator&& keyGenFunc)
+    {
+        itemGenFunc_ = itemGenFunc;
+        keyGenFunc_ = std::move(keyGenFunc);
+    }
+
+    void ReleaseChildGroupByComposedId(const std::string& composedId)
+    {
+        if (parentView_ != nullptr) {
+            parentView_->RemoveChildGroupById(composedId);
+        }
+    }
+
+protected:
+    JSExecutionContext executionContext_;
+
+    JSView* parentView_ = nullptr;
+
+    JSRef<JSObject> dataSourceObj_;
+    JSRef<JSFunc> totalCountFunc_;
+    JSRef<JSFunc> getDataFunc_;
+    JSRef<JSFunc> registerListenerFunc_;
+    JSRef<JSFunc> unregisterListenerFunc_;
+
+    JSRef<JSFunc> itemGenFunc_;
+    ItemKeyGenerator keyGenFunc_;
+
+    JSWeak<JSObject> listenerProxyObj_;
+    WeakPtr<JSDataChangeListener> listenerProxy_;
+    RefPtr<DefaultDataChangeListener> defaultListener_;
+};
+
+class JSLazyForEachComponent : public V2::LazyForEachComponent, public JSLazyForEachActuator {
+    DECLARE_ACE_TYPE(JSLazyForEachComponent, V2::LazyForEachComponent, JSLazyForEachActuator);
+
+public:
+    explicit JSLazyForEachComponent(const std::string& id) : V2::LazyForEachComponent(id) {}
+    ~JSLazyForEachComponent() override = default;
+
+    size_t OnGetTotalCount() override
+    {
+        return static_cast<size_t>(GetTotalIndexCount());
     }
 
     RefPtr<Component> OnGetChildByIndex(size_t index) override
     {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, nullptr);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, nullptr);
         if (getDataFunc_.IsEmpty()) {
             return nullptr;
         }
@@ -290,7 +403,7 @@ public:
         std::string key = keyGenFunc_(result, index);
 
         ScopedViewStackProcessor scopedViewStackProcessor;
-        auto viewStack = ViewStackProcessor::GetInstance();
+        auto* viewStack = ViewStackProcessor::GetInstance();
         auto multiComposed = AceType::MakeRefPtr<MultiComposedComponent>(key, "LazyForEach");
         viewStack->Push(multiComposed);
         if (parentView_) {
@@ -318,79 +431,19 @@ public:
         return AceType::MakeRefPtr<ComposedComponent>(key, "LazyForEachItem", component);
     }
 
+    void ReleaseChildGroupByComposedId(const std::string& composedId) override
+    {
+        JSLazyForEachActuator::ReleaseChildGroupByComposedId(composedId);
+    }
+
     void RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) override
     {
-        if (!listener) {
-            return;
-        }
-
-        auto listenerProxy = listenerProxy_.Upgrade();
-        if (listenerProxy) {
-            listenerProxy->AddListener(listener);
-            return;
-        }
-
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_);
-        if (registerListenerFunc_.IsEmpty()) {
-            return;
-        }
-
-        JSRef<JSObject> listenerObj = JSClass<JSDataChangeListener>::NewInstance();
-        auto unwrapObj = listenerObj->Unwrap<JSDataChangeListener>();
-        if (unwrapObj == nullptr) {
-            return;
-        }
-        listenerProxy = Referenced::Claim(unwrapObj);
-        listenerProxy->AddListener(listener);
-        listenerProxyObj_ = listenerObj;
-        listenerProxy_ = listenerProxy;
-
-        JSRef<JSVal> args[] = { listenerObj };
-        registerListenerFunc_->Call(dataSourceObj_, ArraySize(args), args);
+        JSLazyForEachActuator::RegisterListener(listener);
     }
 
     void UnregisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) override
     {
-        if (!listener) {
-            return;
-        }
-
-        auto listenerProxy = listenerProxy_.Upgrade();
-        if (listenerProxy) {
-            listenerProxy->RemoveListener(listener);
-        }
-    }
-
-    void SetJSExecutionContext(const JSExecutionContext& context)
-    {
-        context_ = context;
-    }
-
-    void SetParentViewObj(const JSRef<JSObject>& parentViewObj)
-    {
-        parentView_ = parentViewObj->Unwrap<JSView>();
-    }
-
-    void SetDataSourceObj(const JSRef<JSObject>& dataSourceObj)
-    {
-        dataSourceObj_ = dataSourceObj;
-        totalCountFunc_ = GetFunctionFromObject(dataSourceObj, "totalCount");
-        getDataFunc_ = GetFunctionFromObject(dataSourceObj, "getData");
-        registerListenerFunc_ = GetFunctionFromObject(dataSourceObj, "registerDataChangeListener");
-        unregisterListenerFunc_ = GetFunctionFromObject(dataSourceObj, "unregisterDataChangeListener");
-    }
-
-    void SetItemGenerator(const JSRef<JSFunc>& itemGenFunc, ItemKeyGenerator&& keyGenFunc)
-    {
-        itemGenFunc_ = itemGenFunc;
-        keyGenFunc_ = std::move(keyGenFunc);
-    }
-
-    void ReleaseChildGroupByComposedId(const std::string& composedId) override
-    {
-        if (parentView_ != nullptr) {
-            parentView_->RemoveChildGroupById(composedId);
-        }
+        JSLazyForEachActuator::UnregisterListener(listener);
     }
 
 private:
@@ -404,24 +457,63 @@ private:
         return LazyForEachComponent::ExpandChildren();
     }
 
-    JSExecutionContext context_;
-
-    JSView* parentView_ = nullptr;
-
-    JSRef<JSObject> dataSourceObj_;
-    JSRef<JSFunc> totalCountFunc_;
-    JSRef<JSFunc> getDataFunc_;
-    JSRef<JSFunc> registerListenerFunc_;
-    JSRef<JSFunc> unregisterListenerFunc_;
-
-    JSRef<JSFunc> itemGenFunc_;
-    ItemKeyGenerator keyGenFunc_;
-
-    JSWeak<JSObject> listenerProxyObj_;
-    WeakPtr<JSDataChangeListener> listenerProxy_;
-    RefPtr<DefaultDataChangeListener> defaultListener_;
-
     ACE_DISALLOW_COPY_AND_MOVE(JSLazyForEachComponent);
+};
+
+class JSLazyForEachBuilder : public virtual NG::LazyForEachBuilder, public JSLazyForEachActuator {
+    DECLARE_ACE_TYPE(JSLazyForEachBuilder, LazyForEachBuilder, JSLazyForEachActuator);
+public:
+    JSLazyForEachBuilder() = default;
+    ~JSLazyForEachBuilder() override = default;
+
+    int32_t OnGetTotalCount() override
+    {
+        return GetTotalIndexCount();
+    }
+
+    std::pair<std::string, RefPtr<NG::FrameNode>> OnGetChildByIndex(int32_t index) override
+    {
+        std::pair<std::string, RefPtr<NG::FrameNode>> info;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, info);
+        if (getDataFunc_.IsEmpty()) {
+            return info;
+        }
+
+        JSRef<JSVal> result = CallJSFunction(getDataFunc_, dataSourceObj_, index);
+        std::string key = keyGenFunc_(result, index);
+
+        ScopedViewStackProcessor scopedViewStackProcessor;
+        auto* viewStack = NG::ViewStackProcessor::GetInstance();
+        if (parentView_) {
+            parentView_->MarkLazyForEachProcess(key);
+        }
+        viewStack->PushKey(key);
+        itemGenFunc_->Call(JSRef<JSObject>(), 1, &result);
+        viewStack->PopKey();
+        if (parentView_) {
+            parentView_->ResetLazyForEachProcess();
+        }
+        info.first = key;
+        info.second = viewStack->Finish();
+        return info;
+    }
+
+    void ReleaseChildGroupById(const std::string& id) override
+    {
+        JSLazyForEachActuator::ReleaseChildGroupByComposedId(id);
+    }
+
+    void RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) override
+    {
+        JSLazyForEachActuator::RegisterListener(listener);
+    }
+
+    void UnregisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) override
+    {
+        JSLazyForEachActuator::UnregisterListener(listener);
+    }
+
+    ACE_DISALLOW_COPY_AND_MOVE(JSLazyForEachBuilder);
 };
 
 } // namespace
@@ -459,6 +551,15 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
             return viewId + "-" + (key->IsString() || key->IsNumber() ? key->ToString() : std::to_string(index));
         };
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto builder = AceType::MakeRefPtr<JSLazyForEachBuilder>();
+        builder->SetJSExecutionContext(info.GetExecutionContext());
+        builder->SetParentViewObj(parentViewObj);
+        builder->SetDataSourceObj(dataSourceObj);
+        builder->SetItemGenerator(itemGenerator, std::move(keyGenFunc));
+        NG::ForEach::Create(builder);
+        return;
+    }
 
     auto component = AceType::MakeRefPtr<JSLazyForEachComponent>(viewId);
     component->SetJSExecutionContext(info.GetExecutionContext());
@@ -471,6 +572,9 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
 
 void JSLazyForEach::Pop()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     ViewStackProcessor::GetInstance()->PopContainer();
 }
 

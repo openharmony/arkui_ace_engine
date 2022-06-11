@@ -34,6 +34,7 @@ public:
         if (isBuildDone_) {
             return MakeRefPtr<CustomNodeLayoutAlgorithm>(nullptr);
         }
+        isBuildDone_ = true;
         return MakeRefPtr<CustomNodeLayoutAlgorithm>(renderFunction_);
     }
 
@@ -43,11 +44,6 @@ public:
     }
 
 private:
-    void OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty) override
-    {
-        isBuildDone_ = true;
-    }
-
     RenderFunction renderFunction_;
     bool isBuildDone_ = false;
 };

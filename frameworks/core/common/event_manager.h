@@ -28,7 +28,9 @@
 #include "core/focus/focus_node.h"
 
 namespace OHOS::Ace {
-
+namespace NG {
+class FrameNode;
+}
 class RenderNode;
 class Element;
 class TextOverlayManager;
@@ -41,6 +43,9 @@ public:
     void TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
         const TouchRestrict& touchRestrict, bool needAppend = false);
     void TouchTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict);
+
+    void TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
+        const TouchRestrict& touchRestrict, bool needAppend = false);
 
     bool DispatchTouchEvent(const TouchEvent& point);
     bool DispatchTouchEvent(const AxisEvent& event);

@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/custom_node.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 thread_local std::unique_ptr<ViewStackProcessor> ViewStackProcessor::instance = nullptr;
@@ -105,12 +106,16 @@ void ViewStackProcessor::Pop()
 
     auto element = WrapElements();
     elementsStack_.pop();
-    element->MountToParent(GetMainElementNode());
     if (!modifyTaskStack_.empty() && AceType::InstanceOf<FrameNode>(element)) {
         // TODO: Add Task create on rerender case.
         element->FlushModifyTaskOnCreate(*modifyTaskStack_.top());
         modifyTaskStack_.pop();
     }
+    if (strcmp(element->GetTag().c_str(), V2::LIST_ITEM_ETS_TAG) == 0) {
+        // for list item, hold in item builder.
+        return;
+    }
+    element->MountToParent(GetMainElementNode());
     LOGD("ViewStackProcessor Pop size %{public}zu", elementsStack_.size());
 }
 

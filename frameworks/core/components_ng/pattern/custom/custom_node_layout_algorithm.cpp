@@ -30,12 +30,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->AddChild(childWrapper);
     }
     // then use normal measure step.
-    auto layoutConstraint =
-        layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint().value_or(LayoutConstraintF());
-    if (!layoutConstraint.selfIdealSize.has_value()) {
-        // custom node deliver parent ideal size to child.
-        layoutConstraint.selfIdealSize = layoutConstraint.parentIdealSize;
-    }
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
 
     for (auto&& child : layoutWrapper->GetChildren()) {
         child->Measure(layoutConstraint);

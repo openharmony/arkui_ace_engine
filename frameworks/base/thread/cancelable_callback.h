@@ -25,6 +25,12 @@
 
 namespace OHOS::Ace {
 
+using TaskThread = uint32_t;
+constexpr TaskThread PLATFORM_TASK = 0;
+constexpr TaskThread MAIN_TASK = 1;
+constexpr TaskThread BACKGROUND_TASK = 1 << 1;
+constexpr TaskThread UNDEFINED_TASK = 1 << 2;
+
 template<class>
 class CancelableCallback;
 
@@ -40,7 +46,20 @@ public:
     explicit CancelableCallback(FunctionType&& callback)
         : impl_(callback ? Referenced::MakeRefPtr<Callback>(std::move(callback)) : nullptr)
     {}
+    CancelableCallback(const FunctionType& callback, TaskThread taskThread)
+        : impl_(callback ? Referenced::MakeRefPtr<Callback>(callback) : nullptr), taskThread_(taskThread)
+    {}
+    CancelableCallback(FunctionType&& callback, TaskThread taskThread)
+        : impl_(callback ? Referenced::MakeRefPtr<Callback>(std::move(callback)) : nullptr), taskThread_(taskThread)
+    {}
     ~CancelableCallback() = default;
+
+    void SetTaskThreadType(TaskThread taskThread) {}
+
+    TaskThread GetTaskThreadType() const
+    {
+        return MAIN_TASK;
+    }
 
     void Reset(const FunctionType& callback, bool needCancel = true, bool waitUntilCompleted = false);
     void Reset(FunctionType&& callback, bool needCancel = true, bool waitUntilCompleted = false);
@@ -79,6 +98,7 @@ private:
     };
 
     RefPtr<Callback> impl_;
+    TaskThread taskThread_ = MAIN_TASK;
 };
 
 template<class... V>

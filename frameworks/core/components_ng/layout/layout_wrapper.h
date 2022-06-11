@@ -98,15 +98,39 @@ public:
         return children_;
     }
 
+    std::list<RefPtr<LayoutWrapper>>& ModifyChildren()
+    {
+        return children_;
+    }
+
     void ResetHostNode();
 
     RefPtr<FrameNode> GetHostNode() const;
 
+    std::optional<uint32_t> GetHostNodeSlotId() const;
+
     std::string GetHostTag() const;
 
+    bool CheckShouldRunOnMain() const
+    {
+        return (CanRunOnWhichThread() & MAIN_TASK) == MAIN_TASK;
+    }
+
+    TaskThread CanRunOnWhichThread() const
+    {
+        TaskThread taskThread = UNDEFINED_TASK;
+        if (layoutAlgorithm_) {
+            taskThread = taskThread | layoutAlgorithm_->CanRunOnWhichThread();
+        }
+        for (const auto& child : children_) {
+            taskThread = taskThread | child->CanRunOnWhichThread();
+        }
+        return taskThread;
+    }
+
     // dirty layoutBox mount to host and switch layoutBox.
-    void MountToHostOnUiThread();
-    void SwapDirtyLayoutWrapperFromUiThread();
+    void MountToHostOnMainThread();
+    void SwapDirtyLayoutWrapperOnMainThread();
 
 private:
     std::list<RefPtr<LayoutWrapper>> children_;
