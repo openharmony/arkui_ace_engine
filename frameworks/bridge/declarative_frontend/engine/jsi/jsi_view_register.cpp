@@ -156,22 +156,8 @@
 
 namespace OHOS::Ace::Framework {
 
-panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+void UpdateRootComponent(const panda::Local<panda::ObjectRef> &obj)
 {
-    LOGI("Load Document start");
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
-    if (argc != 1) {
-        LOGE("The arg is wrong, must have one argument");
-        return panda::JSValueRef::Undefined(vm);
-    }
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsObject()) {
-        LOGE("The arg is wrong, value must be object");
-        return panda::JSValueRef::Undefined(vm);
-    }
-
-    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
     JSView* view = static_cast<JSView*>(obj->GetNativePointerField(0));
 
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
@@ -207,6 +193,91 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo *runtim
                 view->ExecuteUpdateWithValueParams(params);
             }
         });
+}
+
+panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+{
+    LOGI("Load Document start");
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    size_t argc = runtimeCallInfo->GetArgsNumber();
+    if (argc != 1) {
+        LOGE("The arg is wrong, must have one argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject()) {
+        LOGE("The arg is wrong, value must be object");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+    UpdateRootComponent(obj);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> JsPreviewerComponent(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+{
+    LOGD("PreviewerComponent start");
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+
+    auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
+    shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    std::string requiredComponentName = arkRuntime->GetRequiredComponent();
+    panda::Global<panda::ObjectRef> obj = arkRuntime->GetPreviewComponent(vm, requiredComponentName);
+    if (obj->IsUndefined()) {
+        LOGE("Get PreviewComponent object from map failed");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    UpdateRootComponent(obj.ToLocal());
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> JsGetPreviewComponentFlag(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+{
+    LOGD("Get PreviewComponentFlag start");
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+
+    auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
+    shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    bool isComponentPreview = arkRuntime->GetPreviewFlag();
+    if (!isComponentPreview) {
+        return panda::JSValueRef::False(vm);
+    }
+    arkRuntime->SetPreviewFlag(false);
+    return panda::JSValueRef::True(vm);
+}
+
+panda::Local<panda::JSValueRef> JsStorePreviewComponents(panda::JsiRuntimeCallInfo *runtimeCallInfo)
+{
+    LOGD("Store PreviewerComponents start");
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+
+    auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
+    shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNumber()) {
+        LOGE("The first value must be a number when calling JsStorePreviewComponents");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<NumberRef> componentNum = firstArg->ToNumber(vm);
+    uint32_t numOfComponent = componentNum->Value();
+    for (uint32_t index = 1; index <= numOfComponent * 2; index++) { // 2: each component pass two args, name and itself
+        Local<JSValueRef> componentName = runtimeCallInfo->GetCallArgRef(index);
+        if (!componentName->IsString()) {
+            LOGE("The %{private}d componentName passed by StorePreviewComponents is not a string", index);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        std::string name = componentName->ToString(vm)->ToString();
+        Local<JSValueRef> componentObj = runtimeCallInfo->GetCallArgRef(++index);
+        if (componentObj->IsUndefined()) {
+            LOGE("The %{private}d component passed by StorePreviewComponents is undefined", index);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        panda::Global<panda::ObjectRef> obj(vm, componentObj->ToObject(vm));
+        arkRuntime->AddPreviewComponent(name, obj);
+    }
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1040,6 +1111,12 @@ void JsRegisterViews(BindingTarget globalObj)
     auto vm = runtime->GetEcmaVm();
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewComponent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsPreviewerComponent));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPreviewComponentFlag"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetPreviewComponentFlag));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "storePreviewComponents"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsStorePreviewComponents));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "dumpMemoryStats"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsDumpMemoryStats));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "$s"),

@@ -25,7 +25,9 @@
 namespace OHOS::Ace::Framework {
 // NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto PANDA_MAIN_FUNCTION = "_GLOBAL::func_main_0";
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
 constexpr int32_t FORMAT_JSON = 1;
+#endif
 
 Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo* info)
 {
@@ -85,6 +87,7 @@ void ArkJSRuntime::Reset()
         delete data;
     }
     dataList_.clear();
+    previewComponents_.clear();
 }
 
 void ArkJSRuntime::SetLogPrint(LOG_PRINT out)

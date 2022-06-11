@@ -320,10 +320,6 @@ private:
     void* runtime_ = nullptr;
     shared_ptr<JsValue> renderContext_;
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    std::string preContent_ = "";
-#endif
-
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 
