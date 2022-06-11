@@ -21,29 +21,18 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/core/animation/curve.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 
 shared_ptr<JsValue> CurvesInterpolate(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    auto jsPageId = thisObj->GetProperty(runtime, "__pageId");
-    auto pageId = jsPageId->ToInt32(runtime);
     auto jsCurveString = thisObj->GetProperty(runtime, "__curveString");
     auto curveString = jsCurveString->ToString(runtime);
 
     double time = argv[0]->ToDouble(runtime);
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
-        return runtime->NewNull();
-    }
-    auto delegate = instance->GetDelegate();
-    if (delegate == nullptr) {
-        LOGE("delegate is null.");
-        return runtime->NewNull();
-    }
-    auto page = delegate->GetPage(pageId);
+    auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     if (page == nullptr) {
         LOGE("page is null.");
         return runtime->NewNull();
@@ -74,12 +63,7 @@ shared_ptr<JsValue> CurvesInit(const shared_ptr<JsRuntime>& runtime, const share
         curveString = "linear";
     }
     curve = CreateCurve(curveString);
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
-        return runtime->NewNull();
-    }
-    auto page = instance->GetStagingPage();
+    auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     if (page == nullptr) {
         LOGE("page is nullptr");
         return runtime->NewNull();
@@ -168,12 +152,7 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
         return runtime->NewNull();
     }
     auto customCurve = curve->ToString();
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
-        return runtime->NewNull();
-    }
-    auto page = instance->GetStagingPage();
+    auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
     if (page == nullptr) {
         LOGE("page is nullptr");
         return runtime->NewNull();
