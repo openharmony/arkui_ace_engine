@@ -334,7 +334,6 @@ protected:
     bool layoutInBox_ = false;
     Edge paddingOrigin_;
     Edge marginOrigin_;
-    bool hasMargin_ = false;
     DisplayType displayType_;
     LayoutCallback layoutCallback_;
     bool useLiteStyle_ = false;
