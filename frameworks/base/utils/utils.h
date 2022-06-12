@@ -20,6 +20,24 @@
 #include <cmath>
 #include <cstdint>
 
+#include "base/log/log.h"
+
+#define CHECK_NULL_VOID(ptr)                                            \
+    do {                                                                \
+        if (!(ptr)) {                                                   \
+            LOGW(#ptr " is null, return on line %{public}d", __LINE__); \
+            return;                                                     \
+        }                                                               \
+    } while (0)
+
+#define CHECK_NULL_RETURN(ptr, ret)                                     \
+    do {                                                                \
+        if (!(ptr)) {                                                   \
+            LOGW(#ptr " is null, return on line %{public}d", __LINE__); \
+            return ret;                                                 \
+        }                                                               \
+    } while (0)
+
 namespace OHOS::Ace {
 
 template<typename T, std::size_t N>

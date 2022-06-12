@@ -20,6 +20,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 
 namespace OHOS::Ace::NG {
@@ -35,15 +36,16 @@ void RosenRenderContext::StartRecording(float x, float y, float width, float hei
     }
     auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>();
     if (rsCanvasNode) {
-        rosenCanvas_ = rsCanvasNode->BeginRecording(ceil(rsNode_->GetStagingProperties().GetFrameWidth()),
-            ceil(rsNode_->GetStagingProperties().GetFrameHeight()));
+        rosenCanvas_ =
+            Canvas::Create(rsCanvasNode->BeginRecording(ceil(rsNode_->GetStagingProperties().GetFrameWidth()),
+                ceil(rsNode_->GetStagingProperties().GetFrameHeight())));
     }
 }
 
 void RosenRenderContext::StartPictureRecording(float x, float y, float width, float height)
 {
     recorder_ = new SkPictureRecorder();
-    recordingCanvas_ = recorder_->beginRecording(SkRect::MakeXYWH(x, y, width, height));
+    recordingCanvas_ = Canvas::Create(recorder_->beginRecording(SkRect::MakeXYWH(x, y, width, height)));
 }
 
 void RosenRenderContext::StopRecordingIfNeeded()
@@ -57,7 +59,7 @@ void RosenRenderContext::StopRecordingIfNeeded()
     if (IsRecording()) {
         delete recorder_;
         recorder_ = nullptr;
-        recordingCanvas_ = nullptr;
+        recordingCanvas_.Reset();
     }
 }
 
@@ -93,7 +95,7 @@ void RosenRenderContext::UpdateBgColor(const Color& value)
     RequestNextFrame();
 }
 
-void* RosenRenderContext::GetCanvas()
+RefPtr<Canvas> RosenRenderContext::GetCanvas()
 {
     // if picture recording, return recording canvas
     return recordingCanvas_ ? recordingCanvas_ : rosenCanvas_;
@@ -114,9 +116,9 @@ sk_sp<SkPicture> RosenRenderContext::FinishRecordingAsPicture()
 
 void RosenRenderContext::Restore()
 {
-    auto* canvas = static_cast<SkCanvas*>(GetCanvas());
+    const auto& canvas = GetCanvas();
     if (canvas != nullptr) {
-        canvas->restore();
+        canvas->Restore();
     }
 }
 
