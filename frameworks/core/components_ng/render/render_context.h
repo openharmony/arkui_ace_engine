@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/render/canvas.h"
 
 namespace OHOS::Ace::NG {
 class GeometryNode;
@@ -55,8 +56,8 @@ public:
 
     virtual void SetClipToFrame(bool useClip) {}
 
-    // cast to SkCanvas.
-    virtual void* GetCanvas() = 0;
+    virtual RefPtr<Canvas> GetCanvas() = 0;
+
     virtual void Restore() = 0;
 
     void RequestNextFrame() const

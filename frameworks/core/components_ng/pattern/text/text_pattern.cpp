@@ -15,29 +15,19 @@
 
 #include "core/components_ng/pattern/text/text_pattern.h"
 
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
-
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/render/canvas.h"
 #include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace::NG {
 void TextPattern::PaintContent(RenderContext* renderContext, const OffsetF& offset)
 {
-    if (!textLayoutAlgorithm_) {
-        LOGE("textLayoutAlgorithm is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(textLayoutAlgorithm_);
     const auto& paragraph = textLayoutAlgorithm_->GetTxtParagraph();
-    if (!paragraph) {
-        LOGE("paragraph is nullptr");
-        return;
-    }
-    // TODO: canvas adapter.
-    auto* canvas = static_cast<SkCanvas*>(renderContext->GetCanvas());
-    if (canvas == nullptr) {
-        LOGE("canvas is nullptr");
-        return;
-    }
+    CHECK_NULL_VOID(paragraph);
+
+    const auto& canvas = renderContext->GetCanvas();
     renderContext->SetDrawContentAtLast(true);
     paragraph->Paint(canvas, offset.GetX(), offset.GetY());
 }
@@ -45,15 +35,9 @@ void TextPattern::PaintContent(RenderContext* renderContext, const OffsetF& offs
 void TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty)
 {
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    if (!layoutAlgorithmWrapper) {
-        LOGE("can not find text layout algorithm due to layoutAlgorithmWrapper is null");
-        return;
-    }
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    if (!textLayoutAlgorithm) {
-        LOGE("can not find text layout algorithm due to textLayoutAlgorithm is null");
-        return;
-    }
+    CHECK_NULL_VOID(textLayoutAlgorithm);
     textLayoutAlgorithm_ = textLayoutAlgorithm;
 }
 } // namespace OHOS::Ace::NG
