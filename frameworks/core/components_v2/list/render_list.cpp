@@ -15,6 +15,7 @@
 
 #include "core/components_v2/list/render_list.h"
 
+#include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -1362,6 +1363,7 @@ double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, d
 
 RefPtr<RenderListItem> RenderList::RequestAndLayoutNewItem(size_t index, const LayoutParam& layoutParam)
 {
+    ACE_FUNCTION_TRACE();
     RefPtr<RenderListItem> newChild;
     if (index == currentStickyIndex_ && currentStickyItem_) {
         newChild = currentStickyItem_;

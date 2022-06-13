@@ -26,7 +26,7 @@ class CrossAxisAlignModifier : public PropertyModifier<FlexAlign, LayoutProperty
 public:
     CrossAxisAlignModifier(const FlexAlign& value) : PropertyModifier<FlexAlign, LayoutProperty>(value)
     {
-        ACE_DEFINE_LAYOUT_MODIFIER_TASK(LinearLayoutProperty, CrossAxisAlign);
+        ACE_DEFINE_MODIFIER_TASK(LinearLayoutProperty, LayoutProperty, CrossAxisAlign);
     };
     ~CrossAxisAlignModifier() override = default;
 };

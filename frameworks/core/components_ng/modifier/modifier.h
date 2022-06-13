@@ -29,9 +29,9 @@
             return;                                                       \
         }                                                                 \
         auto task = [value = GetValue()](Base* prop##Base) {              \
-            auto prop##Target = AceType::DynamicCast<Target>(prop##Base); \
-            if (prop##Target) {                                           \
-                prop##Target->Update##Type(value);                        \
+            auto cast##Target = AceType::DynamicCast<Target>(prop##Base); \
+            if (cast##Target) {                                           \
+                cast##Target->Update##Type(value);                        \
             }                                                             \
         };                                                                \
         SetModifierTask(std::move(task));                                 \

@@ -26,8 +26,6 @@ public:
     BoxLayoutAlgorithm() = default;
     ~BoxLayoutAlgorithm() override = default;
 
-    void Reset() override {}
-
     // override measureSelf and measureChildren.
     void Measure(LayoutWrapper* layoutWrapper) override;
 

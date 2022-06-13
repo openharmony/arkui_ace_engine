@@ -19,7 +19,7 @@
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
-class ElementNode;
+class FrameNode;
 class FrameNode;
 class StagePattern;
 
@@ -31,7 +31,7 @@ public:
     explicit StageManager(const RefPtr<FrameNode>& root);
     ~StageManager() override = default;
 
-    void PushPage(const RefPtr<ElementNode>& node);
+    void PushPage(const RefPtr<FrameNode>& node);
 
 private:
     RefPtr<FrameNode> rootNode_;

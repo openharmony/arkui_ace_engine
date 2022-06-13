@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {

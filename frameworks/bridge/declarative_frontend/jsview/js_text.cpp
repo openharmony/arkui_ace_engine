@@ -23,6 +23,7 @@
 #include "base/log/ace_trace.h"
 #include "core/components/declaration/text/text_declaration.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/pattern/text/text_view.h"
 #include "core/event/ace_event_handler.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -44,6 +45,9 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 void JSText::SetWidth(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsWidth(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     if (!box) {
         LOGE("box is not valid");
@@ -60,6 +64,9 @@ void JSText::SetWidth(const JSCallbackInfo& info)
 void JSText::SetHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     if (!box) {
         LOGE("box is not valid");
@@ -76,6 +83,10 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     }
     Dimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::FontSize(fontSize);
         return;
     }
     auto component = GetComponent();
@@ -110,6 +121,10 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::TextColor(textColor);
         return;
     }
     auto component = GetComponent();
@@ -457,6 +472,11 @@ void JSText::Create(const JSCallbackInfo& info)
     std::string data;
     if (info.Length() > 0) {
         ParseJsString(info[0], data);
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::Create(data);
+        return;
     }
 
     auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponentV2>(data);

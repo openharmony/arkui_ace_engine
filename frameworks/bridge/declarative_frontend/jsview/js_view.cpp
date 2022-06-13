@@ -16,6 +16,11 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 
 #include "base/log/ace_trace.h"
+#include "base/memory/referenced.h"
+#include "core/components_ng/base/custom_node.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/composed_element.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
@@ -102,6 +107,47 @@ RefPtr<OHOS::Ace::PageTransitionComponent> JSView::BuildPageTransitionComponent(
     return pageTransitionComponent;
 }
 
+RefPtr<NG::FrameNode> JSView::CreateNode()
+{
+    ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
+    // create component, return new something, need to set proper ID
+    std::string key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
+    auto composedNode = NG::CustomNode::CreateCustomNode(key);
+
+    // add callback for element creation to component, and get pointer reference
+    // to the element on creation. When state of this view changes, mark the
+    // element to dirty.
+    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<NG::FrameNode> {
+        auto jsView = weak.Upgrade();
+        return jsView ? jsView->InternalRender() : nullptr;
+    };
+
+    auto appearFunction = [weak = AceType::WeakClaim(this)]() {
+        auto jsView = weak.Upgrade();
+        if (!jsView) {
+            LOGE("the js view is nullptr in appear function");
+            return;
+        }
+        ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
+        if (jsView->jsViewFunction_) {
+            jsView->jsViewFunction_->ExecuteAppear();
+        }
+    };
+
+    auto updateJsView = [weak = AceType::WeakClaim(this)](WeakPtr<NG::CustomNode> newNode) {
+        auto jsView = weak.Upgrade();
+        if (!jsView) {
+            LOGE("the js view is nullptr in appear function");
+            return;
+        }
+        jsView->node_ = std::move(newNode);
+    };
+    composedNode->SetRenderFunction(std::move(renderFunction));
+    composedNode->SetAppearFunction(std::move(appearFunction));
+    composedNode->SetUpdateJsViewFunction(std::move(updateJsView));
+    return composedNode;
+}
+
 RefPtr<OHOS::Ace::Component> JSView::InternalRender(const RefPtr<Component>& parent)
 {
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
@@ -128,6 +174,31 @@ RefPtr<OHOS::Ace::Component> JSView::InternalRender(const RefPtr<Component>& par
     return buildComponent;
 }
 
+RefPtr<NG::FrameNode> JSView::InternalRender()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
+    needsUpdate_ = false;
+    if (!jsViewFunction_) {
+        LOGE("JSView: InternalRender jsViewFunction_ error");
+        return nullptr;
+    }
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToRender");
+        jsViewFunction_->ExecuteAboutToRender();
+    }
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].Build");
+        jsViewFunction_->ExecuteRender();
+    }
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].OnRenderDone");
+        jsViewFunction_->ExecuteOnRenderDone();
+    }
+    CleanUpAbandonedChild();
+    jsViewFunction_->Destroy(this);
+    return NG::ViewStackProcessor::GetInstance()->Finish();
+}
+
 /**
  * marks the JSView's composed component as needing update / rerender
  */
@@ -136,9 +207,16 @@ void JSView::MarkNeedUpdate()
     ACE_DCHECK((!GetElement().Invalid()));
     ACE_SCOPED_TRACE("JSView::MarkNeedUpdate");
 
-    auto element = GetElement().Upgrade();
-    if (element) {
-        element->MarkDirty();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto node = node_.Upgrade();
+        if (node) {
+            node->MarkNeedRebuild();
+        }
+    } else {
+        auto element = GetElement().Upgrade();
+        if (element) {
+            element->MarkDirty();
+        }
     }
     needsUpdate_ = true;
 }
@@ -178,7 +256,11 @@ void JSView::Create(const JSCallbackInfo& info)
             LOGE("JSView is null");
             return;
         }
-        ViewStackProcessor::GetInstance()->Push(view->CreateComponent(), true);
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewStackProcessor::GetInstance()->Push(view->CreateNode(), true);
+        } else {
+            ViewStackProcessor::GetInstance()->Push(view->CreateComponent(), true);
+        }
     } else {
         LOGE("JSView Object is expected.");
     }

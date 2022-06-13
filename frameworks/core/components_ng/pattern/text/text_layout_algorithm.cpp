@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 TextLayoutAlgorithm::TextLayoutAlgorithm() = default;
 
-void TextLayoutAlgorithm::Reset()
+void TextLayoutAlgorithm::OnReset()
 {
     paragraph_.reset();
 }
@@ -41,7 +41,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         LOGE("fail to measure context due to frame node is nullptr");
         return std::nullopt;
     }
-    auto pipeline = frameNode->GetContext().Upgrade();
+    auto pipeline = frameNode->GetContext();
     if (!pipeline) {
         LOGE("fail to measure context due to context nullptr");
         return std::nullopt;

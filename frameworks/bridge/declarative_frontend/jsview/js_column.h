@@ -27,6 +27,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SetInspectorTag(const std::string& inspectorTag);
     static void ClearInspectorTag();
+    static void SetAlignItems(int32_t value);
 private:
     static std::string inspectorTag_;
 };

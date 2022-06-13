@@ -71,6 +71,12 @@ public:
     ~Dimension() = default;
     constexpr explicit Dimension(double value, DimensionUnit unit = DimensionUnit::PX) : value_(value), unit_(unit) {}
 
+    void Reset()
+    {
+        value_ = 0.0;
+        unit_ = DimensionUnit::PX;
+    }
+
     constexpr double Value() const
     {
         return value_;
@@ -96,13 +102,17 @@ public:
         return (value_ > 0.0) && (!NearZero(value_));
     }
 
+    bool IsNonNegative() const
+    {
+        return NonNegative(value_);
+    }
+
     double ConvertToPx(double dipScale) const
     {
         if (unit_ == DimensionUnit::VP || unit_ == DimensionUnit::FP) {
             return value_ * dipScale;
-        } else {
-            return value_;
         }
+        return value_;
     }
 
     double ConvertToVp() const
@@ -127,6 +137,8 @@ public:
         return 0;
     }
 
+    bool NormalizeToPx(double vpScale, double fpScale, double lpxScale, double parentLength, double& result) const;
+
     constexpr Dimension operator*(double value) const
     {
         return Dimension(value_ * value, unit_);
@@ -136,7 +148,7 @@ public:
     {
         // NearZero cannot be used in a constant expression
         if (NEAR_ZERO(value)) {
-            return Dimension();
+            return {};
         }
         return Dimension(value_ / value, unit_);
     }

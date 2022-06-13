@@ -77,7 +77,7 @@ public:
     bool IsValid() const
     {
         if (calcValue_.empty()) {
-            return dimension_.NonNegative();
+            return dimension_.IsNonNegative();
         }
         return true;
     }

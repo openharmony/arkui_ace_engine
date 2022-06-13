@@ -27,20 +27,19 @@ StageManager::StageManager(const RefPtr<FrameNode>& root) : rootNode_(root)
     stagePattern_ = DynamicCast<StagePattern>(rootNode_->GetPattern());
 }
 
-void StageManager::PushPage(const RefPtr<ElementNode>& node)
+void StageManager::PushPage(const RefPtr<FrameNode>& node)
 {
     if (!rootNode_) {
         LOGE("the root node is nullptr");
         return;
     }
-
-    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, MakeRefPtr<PagePattern>());
-    pageNode->SetHostPageId(node->GetPageId());
-    pageNode->SetHostRootId(rootNode_->GetRootId());
+    // Add unique id.
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, V2::PAGE_ETS_TAG, MakeRefPtr<PagePattern>());
     node->MountToParent(pageNode);
     pageNode->MountToParent(rootNode_);
     // TODO: change page index
     stagePattern_->currentPageIndex_ = 0;
-    UiTaskScheduler::GetInstance()->FlushTask();
+    // flush layout task.
+    (*rootNode_->CreateLayoutTask(true))();
 }
 } // namespace OHOS::Ace::NG

@@ -17,7 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_PROPERTIES_H
 
 #include <array>
+#include <cstdint>
+#include <iomanip>
 #include <optional>
+#include <sstream>
+#include <string>
 
 #include "core/components_ng/property/calc_length.h"
 
@@ -89,14 +93,27 @@ public:
         return true;
     }
 
+    std::string ToString() const
+    {
+        static const int32_t precision = 2;
+        std::stringstream ss;
+        ss << "[" << std::fixed << std::setprecision(precision);
+        ss << width_.ToString();
+        ss << " x ";
+        ss << height_.ToString();
+        ss << "]";
+        std::string output = ss.str();
+        return output;
+    }
+
 private:
     CalcLength width_ { -1 };
     CalcLength height_ { -1 };
 };
 
 struct MeasureProperty {
-    std::optional<CalcSize> maxSize;
     std::optional<CalcSize> minSize;
+    std::optional<CalcSize> maxSize;
     std::optional<CalcSize> selfIdealSize;
 
     void Reset()
@@ -146,6 +163,15 @@ struct MeasureProperty {
         }
         minSize = size;
         return true;
+    }
+
+    std::string ToString() const
+    {
+        std::string str;
+        str.append("minSize: [").append(minSize.has_value() ? minSize->ToString() : "NA").append("]");
+        str.append("maxSize: [").append(maxSize.has_value() ? maxSize->ToString() : "NA").append("]");
+        str.append("selfIdealSize: [").append(selfIdealSize.has_value() ? selfIdealSize->ToString() : "NA").append("]");
+        return str;
     }
 };
 

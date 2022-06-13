@@ -31,6 +31,7 @@
 #include "core/common/thread_checker.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
@@ -1473,6 +1474,21 @@ void FrontendDelegateDeclarative::OnPageReady(
 
     auto pipelineContext = pipelineContextHolder_.Get();
     page->SetPipelineContext(pipelineContext);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
+        auto stageManager = context ? context->GetStageManager() : nullptr;
+        if (stageManager) {
+            stageManager->PushPage(page->GetRootNode());
+        } else {
+            LOGE("fail to push page due to stage manager is nullptr");
+        }
+        isStagingPageExist_ = false;
+        if (isMainPage) {
+            OnPageShow();
+        }
+        return;
+    }
+
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, url, jsCommands, isMainPage, isRestore] {
             auto delegate = weak.Upgrade();
@@ -1738,15 +1754,12 @@ void FrontendDelegateDeclarative::RestorePopPage(const RefPtr<JsAcePage>& page, 
             }
             LOGI("RestorePopPage begin");
             auto pipelineContext = delegate->pipelineContextHolder_.Get();
-            bool isLastPage = false;
             if (delegate->GetStackSize() == 1) {
                 if (delegate->disallowPopLastPage_) {
                     LOGW("Not allow back because this is the last page!");
                     delegate->ProcessRouterTask();
                     return;
                 }
-
-                isLastPage = true;
                 delegate->OnPageHide();
                 delegate->OnPageDestroy(delegate->GetRunningPageId());
                 delegate->OnPopPageSuccess();

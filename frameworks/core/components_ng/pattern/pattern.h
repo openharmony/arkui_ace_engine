@@ -90,11 +90,6 @@ public:
         return false;
     }
 
-    virtual bool IsLayoutBoundary() const
-    {
-        return true;
-    }
-
     virtual bool IsRenderBoundary() const
     {
         return true;

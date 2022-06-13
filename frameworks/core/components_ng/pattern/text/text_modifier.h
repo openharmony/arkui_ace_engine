@@ -27,7 +27,7 @@ class FontSizeModifier : public PropertyModifier<Dimension, LayoutProperty> {
 public:
     FontSizeModifier(const Dimension& value) : PropertyModifier<Dimension, LayoutProperty>(value)
     {
-        ACE_DEFINE_LAYOUT_MODIFIER_TASK(TextLayoutProperty, FontSize);
+        ACE_DEFINE_MODIFIER_TASK(TextLayoutProperty, LayoutProperty, FontSize);
     }
     ~FontSizeModifier() override = default;
 };
@@ -36,7 +36,7 @@ class FontColorModifier : public PropertyModifier<Color, LayoutProperty> {
 public:
     FontColorModifier(const Color& value) : PropertyModifier<Color, LayoutProperty>(value)
     {
-        ACE_DEFINE_LAYOUT_MODIFIER_TASK(TextLayoutProperty, TextColor)
+        ACE_DEFINE_MODIFIER_TASK(TextLayoutProperty, LayoutProperty, TextColor);
     }
     ~FontColorModifier() override = default;
 };
@@ -45,7 +45,7 @@ class ContentModifier : public PropertyModifier<std::string, LayoutProperty> {
 public:
     ContentModifier(const std::string& value) : PropertyModifier<std::string, LayoutProperty>(value)
     {
-        ACE_DEFINE_LAYOUT_MODIFIER_TASK(TextLayoutProperty, Content)
+        ACE_DEFINE_MODIFIER_TASK(TextLayoutProperty, LayoutProperty, Content);
     }
     ~ContentModifier() override = default;
 };

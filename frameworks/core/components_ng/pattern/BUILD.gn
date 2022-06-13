@@ -16,6 +16,7 @@ import(
 
 build_component_ng("pattern_ng") {
   sources = [
+    "custom/custom_node_layout_algorithm.cpp",
     "linear_layout/column_view.cpp",
     "linear_layout/linear_layout_algorithm.cpp",
     "linear_layout/linear_layout_utils.cpp",

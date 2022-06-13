@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 void LayoutProperty::Reset()
 {
     layoutConstraint_.reset();
-    calLayoutConstraint_.reset();
+    calcLayoutConstraint_.reset();
     padding_.reset();
     magicItemProperty_.reset();
     positionProperty_.reset();
@@ -40,8 +40,8 @@ RefPtr<LayoutProperty> LayoutProperty::Clone() const
 void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
 {
     layoutConstraint_ = layoutProperty->layoutConstraint_;
-    if (layoutProperty->calLayoutConstraint_) {
-        calLayoutConstraint_ = std::make_unique<MeasureProperty>(*layoutProperty->calLayoutConstraint_);
+    if (layoutProperty->calcLayoutConstraint_) {
+        calcLayoutConstraint_ = std::make_unique<MeasureProperty>(*layoutProperty->calcLayoutConstraint_);
     }
     if (layoutProperty->padding_) {
         padding_ = std::make_unique<PaddingProperty>(*layoutProperty->padding_);
@@ -58,39 +58,37 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 {
-    if (!calLayoutConstraint_) {
-        calLayoutConstraint_ = std::make_unique<MeasureProperty>(constraint);
+    if (!calcLayoutConstraint_) {
+        calcLayoutConstraint_ = std::make_unique<MeasureProperty>(constraint);
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         return;
     }
-    if (*calLayoutConstraint_ == constraint) {
+    if (*calcLayoutConstraint_ == constraint) {
         return;
     }
-    calLayoutConstraint_->selfIdealSize = constraint.selfIdealSize;
-    calLayoutConstraint_->maxSize = constraint.maxSize;
-    calLayoutConstraint_->minSize = constraint.minSize;
+    calcLayoutConstraint_->selfIdealSize = constraint.selfIdealSize;
+    calcLayoutConstraint_->maxSize = constraint.maxSize;
+    calcLayoutConstraint_->minSize = constraint.minSize;
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
 }
 
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint, bool updateFlag)
 {
-    if (!layoutConstraint_) {
-        layoutConstraint_ = LayoutConstraintF();
-    }
-    LOGD("UpdateLayoutConstraint: %{public}s", parentConstraint.ToString().c_str());
+    layoutConstraint_ = LayoutConstraintF();
+    LOGD("UpdateLayoutConstraint parentConstraint: %{public}s", parentConstraint.ToString().c_str());
     auto changed = false;
-    if (calLayoutConstraint_) {
-        if (calLayoutConstraint_->maxSize.has_value()) {
-            changed = layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calLayoutConstraint_->maxSize.value(),
+    if (calcLayoutConstraint_) {
+        if (calcLayoutConstraint_->maxSize.has_value()) {
+            changed = layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
                 parentConstraint.scaleProperty, parentConstraint.selfIdealSize.value_or(SizeF(-1, -1)))) || changed;
         }
-        if (calLayoutConstraint_->minSize.has_value()) {
-            changed = layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calLayoutConstraint_->minSize.value(),
+        if (calcLayoutConstraint_->minSize.has_value()) {
+            changed = layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
                 parentConstraint.scaleProperty, parentConstraint.selfIdealSize.value_or(SizeF(-1, -1)))) || changed;
         }
-        if (calLayoutConstraint_->selfIdealSize.has_value()) {
+        if (calcLayoutConstraint_->selfIdealSize.has_value()) {
             changed = layoutConstraint_->UpdateSelfIdealSizeWithCheck(
-                ConvertToSize(calLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
+                ConvertToSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
                 parentConstraint.selfIdealSize.value_or(SizeF(-1, -1)))) || changed;
         }
     }
@@ -104,7 +102,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         changed = true;
     }
     CheckSelfIdealSize(updateFlag);
-    LOGD("UpdateLayoutConstraint: %{public}s", layoutConstraint_->ToString().c_str());
+    LOGD("UpdateLayoutConstraint self: %{public}s", layoutConstraint_->ToString().c_str());
     if (!changed || !updateFlag) {
         return;
     }

@@ -175,10 +175,27 @@ public:
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static void UpdateCurrent(int32_t id);
 
+    void SetUseNewPipeline()
+    {
+        useNewPipeline_ = true;
+    }
+
+    static bool IsCurrentUseNewPipeline()
+    {
+        auto container = Current();
+        return container ? container->useNewPipeline_ : false;
+    }
+
+    bool IsUseNewPipeline() const
+    {
+        return useNewPipeline_;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;
     std::string cardHapPath_;
+    bool useNewPipeline_ = false;
 
 private:
     std::string moduleName_;

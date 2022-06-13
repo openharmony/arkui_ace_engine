@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/common/container.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -48,6 +49,8 @@
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/option/option_component.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/gestures/long_press_gesture.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -904,6 +907,11 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         value.SetValue(0.0);
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetWidth(NG::CalcLength(value));
+        return true;
+    }
+
     bool isPercentSize = value.Unit() == DimensionUnit::PERCENT ? true : false;
     if (isPercentSize) {
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -948,6 +956,11 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
 
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetHeight(NG::CalcLength(value));
+        return true;
     }
 
     bool isPercentSize = value.Unit() == DimensionUnit::PERCENT ? true : false;
@@ -1173,6 +1186,11 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
         value = info[0]->ToNumber<int32_t>();
     } else {
         value = static_cast<int32_t>(StringUtils::StringToUint(info[0]->ToString()));
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetLayoutWeight(value);
+        return;
     }
 
     auto flex = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
@@ -1566,6 +1584,11 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetBackgroundColor(backgroundColor);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto boxComponent = stack->GetBoxComponent();
     if (!boxComponent) {
@@ -1864,6 +1887,29 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
     }
 
     if (info[0]->IsObject()) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+            NG::PaddingProperty padding;
+            Dimension leftDimen;
+            if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
+                padding.left = NG::CalcLength(leftDimen);
+            }
+            Dimension rightDimen;
+            if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
+                padding.right = NG::CalcLength(rightDimen);
+            }
+            Dimension topDimen;
+            if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
+                padding.top = NG::CalcLength(topDimen);
+            }
+            Dimension bottomDimen;
+            if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
+                padding.bottom = NG::CalcLength(bottomDimen);
+            }
+            NG::ViewAbstract::SetPadding(padding);
+            return;
+        }
+
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
             LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
@@ -1887,6 +1933,15 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
             return;
         }
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        Dimension length;
+        if (ParseJsDimensionVp(info[0], length)) {
+            NG::ViewAbstract::SetPadding(NG::CalcLength(length));
+        }
+        return;
+    }
+
     AnimatableDimension length;
     if (!ParseJsAnimatableDimensionVp(info[0], length)) {
         return;
@@ -2288,7 +2343,6 @@ void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
 bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& result, DimensionUnit defaultUnit)
 {
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        LOGE("arg is not Number, String or Object.");
         return false;
     }
 
@@ -2346,7 +2400,6 @@ bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, Dimension& 
 bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
 {
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        LOGE("arg is not Number, String or Object.");
         return false;
     }
     if (jsValue->IsNumber()) {
@@ -2376,7 +2429,6 @@ bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
 bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
 {
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        LOGE("arg is not Number, String or Object.");
         return false;
     }
     if (jsValue->IsNumber()) {
@@ -2406,7 +2458,6 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 {
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
-        LOGE("arg is not Number, String or Object.");
         return false;
     }
     if (jsValue->IsNumber()) {
@@ -2932,6 +2983,10 @@ void JSViewAbstract::JsZIndex(const JSCallbackInfo& info)
 
 void JSViewAbstract::Pop()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewStackProcessor::GetInstance()->Pop();
+        return;
+    }
     ViewStackProcessor::GetInstance()->Pop();
 }
 

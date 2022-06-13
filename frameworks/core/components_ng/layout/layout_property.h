@@ -69,12 +69,12 @@ public:
 
     const std::unique_ptr<MeasureProperty>& GetCalcLayoutConstraint() const
     {
-        return calLayoutConstraint_;
+        return calcLayoutConstraint_;
     }
 
     MeasureType GetMeasureType() const
     {
-        return measureType_.value_or(MeasureType::WRAP_CONTENT);
+        return measureType_.value_or(MeasureType::MATCH_CONTENT);
     }
 
     void UpdatePadding(const PaddingProperty& value)
@@ -121,10 +121,10 @@ public:
 
     void UpdateCalcSelfIdealSize(const CalcSize& value)
     {
-        if (!calLayoutConstraint_) {
-            calLayoutConstraint_ = std::make_unique<MeasureProperty>();
+        if (!calcLayoutConstraint_) {
+            calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
         }
-        if (calLayoutConstraint_->UpdateSelfIdealSizeWithCheck(value)) {
+        if (calcLayoutConstraint_->UpdateSelfIdealSizeWithCheck(value)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }
@@ -156,7 +156,7 @@ private:
     std::optional<LayoutConstraintF> layoutConstraint_;
     std::optional<LayoutConstraintF> contentConstraint_;
 
-    std::unique_ptr<MeasureProperty> calLayoutConstraint_;
+    std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
     std::unique_ptr<PaddingProperty> padding_;
     std::unique_ptr<MagicItemProperty> magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;

@@ -32,7 +32,10 @@ public:
     LayoutAlgorithm() = default;
     ~LayoutAlgorithm() override = default;
 
-    virtual void Reset() {}
+    void Reset()
+    {
+        OnReset();
+    }
 
     virtual std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
@@ -53,6 +56,9 @@ public:
     {
         return false;
     }
+
+protected:
+    virtual void OnReset() {}
 };
 
 class ACE_EXPORT LayoutAlgorithmWrapper : public LayoutAlgorithm {
@@ -65,7 +71,7 @@ public:
     {}
     ~LayoutAlgorithmWrapper() override = default;
 
-    void Reset() override
+    void OnReset() override
     {
         layoutAlgorithm_.Reset();
         skipMeasure_ = false;

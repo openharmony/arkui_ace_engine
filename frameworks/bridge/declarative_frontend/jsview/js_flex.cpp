@@ -112,6 +112,9 @@ void JSFlex::JsHeight(const JSCallbackInfo& info)
 void JSFlex::SetHeight(const JSRef<JSVal>& jsValue)
 {
     JSViewAbstract::JsHeight(jsValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
 
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto columComponent = AceType::DynamicCast<ColumnComponent>(component);
@@ -137,6 +140,9 @@ void JSFlex::JsWidth(const JSCallbackInfo& info)
 void JSFlex::SetWidth(const JSRef<JSVal>& jsValue)
 {
     JSViewAbstract::JsWidth(jsValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
 
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto columComponent = AceType::DynamicCast<ColumnComponent>(component);

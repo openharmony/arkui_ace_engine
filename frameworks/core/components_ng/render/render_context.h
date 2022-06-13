@@ -53,6 +53,8 @@ public:
 
     virtual void UpdateBgColor(const Color& value) {}
 
+    virtual void SetClipToFrame(bool useClip) {}
+
     // cast to SkCanvas.
     virtual void* GetCanvas() = 0;
     virtual void Restore() = 0;

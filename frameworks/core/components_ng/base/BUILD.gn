@@ -16,8 +16,7 @@ import(
 
 build_component_ng("base_ng") {
   sources = [
-    "composed_node.cpp",
-    "element_node.cpp",
+    "custom_node.cpp",
     "frame_node.cpp",
     "geometry_node.cpp",
     "view_abstract.cpp",

@@ -17,12 +17,17 @@
 
 #include "base/log/ace_trace.h"
 #include "core/components/wrap/wrap_component.h"
+#include "core/components_ng/pattern/linear_layout/row_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSRow::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::RowView::Create();
+        return;
+    }
     std::list<RefPtr<Component>> children;
     RefPtr<RowComponent> rowComponent =
         AceType::MakeRefPtr<OHOS::Ace::RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, children);
@@ -39,8 +44,7 @@ void JSRow::Create(const JSCallbackInfo& info)
 
         JSRef<JSVal> useAlign = obj->GetProperty("useAlign");
         if (useAlign->IsObject()) {
-            VerticalAlignDeclaration* declaration =
-                JSRef<JSObject>::Cast(useAlign)->Unwrap<VerticalAlignDeclaration>();
+            VerticalAlignDeclaration* declaration = JSRef<JSObject>::Cast(useAlign)->Unwrap<VerticalAlignDeclaration>();
             if (declaration != nullptr) {
                 rowComponent->SetAlignDeclarationPtr(declaration);
             }
@@ -62,6 +66,22 @@ void JSRow::CreateWithWrap(const JSCallbackInfo& info)
     component->SetDialogStretch(false);
 
     ViewStackProcessor::GetInstance()->Push(component);
+}
+
+void JSRow::SetAlignItems(int32_t value)
+{
+    if ((value == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
+        (value == static_cast<int32_t>(FlexAlign::FLEX_END)) || (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
+        (value == static_cast<int32_t>(FlexAlign::STRETCH))) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::RowView::AlignItems(static_cast<FlexAlign>(value));
+            return;
+        }
+        JSFlex::SetAlignItems(value);
+    } else {
+        // FIXME: we have a design issue here, setters return void, can not signal error to JS
+        LOGE("invalid value for justifyContent");
+    }
 }
 
 void VerticalAlignDeclaration::ConstructorCallback(const JSCallbackInfo& args)
@@ -91,7 +111,7 @@ void JSRow::JSBind(BindingTarget globalObj)
     JSClass<JSRow>::StaticMethod("fillParent", &JSFlex::SetFillParent, opt);
     JSClass<JSRow>::StaticMethod("wrapContent", &JSFlex::SetWrapContent, opt);
     JSClass<JSRow>::StaticMethod("justifyContent", &JSFlex::SetJustifyContent, opt);
-    JSClass<JSRow>::StaticMethod("alignItems", &JSFlex::SetAlignItems, opt);
+    JSClass<JSRow>::StaticMethod("alignItems", &JSRow::SetAlignItems, opt);
     JSClass<JSRow>::StaticMethod("alignContent", &JSFlex::SetAlignContent, opt);
     JSClass<JSRow>::StaticMethod("height", &JSFlex::JsHeight, opt);
     JSClass<JSRow>::StaticMethod("width", &JSFlex::JsWidth, opt);
