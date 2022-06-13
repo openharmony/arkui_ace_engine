@@ -71,16 +71,15 @@ void RosenRenderSvgPolygon::PaintDirectly(RenderContext& context, const Offset& 
     if (!GetPath(&out)) {
         return;
     }
+    SkAutoCanvasRestore save(canvas, false);
     if (NeedTransform()) {
-        canvas->save();
         canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
     }
+    PaintMaskLayer(context, offset, offset);
+
     UpdateGradient(fillState_);
     RosenSvgPainter::SetFillStyle(canvas, out, fillState_, opacity_);
     RosenSvgPainter::SetStrokeStyle(canvas, out, strokeState_, opacity_);
-    if (NeedTransform()) {
-        canvas->restore();
-    }
 }
 
 bool RosenRenderSvgPolygon::CreateSkPath(const std::string& pointsStr, std::vector<SkPoint>& skPoints)
