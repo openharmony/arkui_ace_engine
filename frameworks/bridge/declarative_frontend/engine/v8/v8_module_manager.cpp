@@ -538,6 +538,49 @@ void CurvesSpring(const v8::FunctionCallbackInfo<v8::Value>& args)
     ParseCurves(args, curveString);
 }
 
+void CurvesSteps(const v8::FunctionCallbackInfo<v8::Value>& args)
+{
+    int32_t STEPS_ARGS_NUMBER = 2;
+    auto argc = args.Length();
+    if (argc != 1 && argc != STEPS_ARGS_NUMBER) {
+        LOGE("Steps curve: the number of parameters is illegal");
+        return;
+    }
+    v8::Isolate* isolate = args.GetIsolate();
+    v8::HandleScope handleScope(isolate);
+    auto context = isolate->GetCurrentContext();
+    auto curveContext = v8::Object::New(isolate);
+    curveContext->Set(context, v8::String::NewFromUtf8(isolate, "interpolate").ToLocalChecked(),
+                        v8::Function::New(context, CurvesInterpolate).ToLocalChecked()).ToChecked();
+    RefPtr<Curve> curve;
+    int32_t stepSize = 0;
+    if (argc == STEPS_ARGS_NUMBER) {
+        stepSize = args[0]->ToInt32(context).ToLocalChecked()->Value();
+        bool isEnd = args[1]->ToBoolean(isolate)->Value();
+        if (isEnd) {
+            curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::END);
+        } else {
+            curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::START);
+        }
+    } else {
+        stepSize = args[0]->ToInt32(context).ToLocalChecked()->Value();
+        curve = AceType::MakeRefPtr<StepsCurve>(stepSize);
+    }
+
+    auto page = static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8DeclarativeEngineInstance::STAGING_PAGE));
+    if ((*page) == nullptr) {
+        LOGE("page is nullptr");
+        return;
+    }
+    (*page)->AddCurve(curve->ToString(), curve);
+    int32_t pageId = (*page)->GetPageId();
+    curveContext->Set(context, v8::String::NewFromUtf8(isolate, "__pageId").ToLocalChecked(),
+                        v8::Int32::New(isolate, pageId)).ToChecked();
+    curveContext->Set(context, v8::String::NewFromUtf8(isolate, "__curveString").ToLocalChecked(),
+                        v8::String::NewFromUtf8(isolate, curve->ToString().c_str()).ToLocalChecked()).ToChecked();
+    args.GetReturnValue().Set(curveContext);
+}
+
 void InitCurvesModule(v8::Local<v8::Object> moduleObj, v8::Isolate* isolate)
 {
     auto context = isolate->GetCurrentContext();
@@ -546,11 +589,13 @@ void InitCurvesModule(v8::Local<v8::Object> moduleObj, v8::Isolate* isolate)
         return;
     }
     moduleObj->Set(context, v8::String::NewFromUtf8(isolate, "init").ToLocalChecked(),
-                   v8::Function::New(context, CurvesInit).ToLocalChecked()).ToChecked();
+                    v8::Function::New(context, CurvesInit).ToLocalChecked()).ToChecked();
     moduleObj->Set(context, v8::String::NewFromUtf8(isolate, "cubicBezier").ToLocalChecked(),
-                   v8::Function::New(context, CurvesBezier).ToLocalChecked()).ToChecked();
+                    v8::Function::New(context, CurvesBezier).ToLocalChecked()).ToChecked();
     moduleObj->Set(context, v8::String::NewFromUtf8(isolate, "spring").ToLocalChecked(),
-                   v8::Function::New(context, CurvesSpring).ToLocalChecked()).ToChecked();
+                    v8::Function::New(context, CurvesSpring).ToLocalChecked()).ToChecked();
+    moduleObj->Set(context, v8::String::NewFromUtf8(isolate, "steps").ToLocalChecked(),
+                    v8::Function::New(context, CurvesSteps).ToLocalChecked()).ToChecked();
 }
 
 void InitMatrix(v8::Local<v8::Object> moduleObj, v8::Isolate* isolate)
