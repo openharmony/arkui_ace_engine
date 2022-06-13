@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 // Pattern is the base class for different measure, layout and paint behavior.
 class Pattern : public virtual AceType {
-    DECLARE_ACE_TYPE(V2::Pattern, AceType);
+    DECLARE_ACE_TYPE(Pattern, AceType);
 
 public:
     Pattern() = default;
