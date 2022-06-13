@@ -33,13 +33,6 @@ constexpr double SPRING_SCROLL_DAMPING = 15.55635;
 constexpr double MAX_FRICTION = 0.766;
 const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
-#ifdef PRODUCT_RK
-constexpr double FRICTION = 0.6;
-constexpr double VELOCITY_SCALE = 1.0;
-constexpr double MAX_VELOCITY = 2000.0;
-constexpr double MIN_VELOCITY = -2000.0;
-constexpr double ADJUSTABLE_VELOCITY = 3000.0;
-#else
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 1.0;
 constexpr double VELOCITY_SCALE = 1.0;
@@ -53,7 +46,6 @@ constexpr double VELOCITY_SCALE = 0.8;
 constexpr double MAX_VELOCITY = 5000.0;
 constexpr double MIN_VELOCITY = -5000.0;
 constexpr double ADJUSTABLE_VELOCITY = 0.0;
-#endif
 #endif
 
 #ifdef OHOS_PLATFORM
