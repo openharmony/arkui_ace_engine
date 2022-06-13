@@ -62,7 +62,7 @@ template("ace_osal_preview_source_set") {
 
     deps = [
       ":utilsecurec_source_$platform",
-      "//third_party/curl:curl",
+      "//third_party/curl:curl_shared",
     ]
     if (is_standard_system) {
       sources += [
