@@ -428,30 +428,34 @@ void RenderList::RequestNewItemsAtEndForLaneList(double& curMainPos, double main
     int newItemCntInLine = 0;
     double lineMainSize = 0;
     for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
-        bool doneRequestNewItem = false;
+        bool breakWhenRequestNewItem = false;
         do {
             if (GreatOrEqual(curMainPos, endMainPos_)) {
-                doneRequestNewItem = true;
+                breakWhenRequestNewItem = true;
                 break;
             }
             auto child = RequestAndLayoutNewItem(newIndex, innerLayout);
             if (!child) {
                 startIndex_ = std::min(startIndex_, TotalCount());
-                doneRequestNewItem = true;
+                breakWhenRequestNewItem = true;
                 break;
             }
             if (GreatOrEqual(curMainPos, mainSize)) {
                 ++endCachedCount_;
             }
             lineMainSize = std::max(lineMainSize, GetMainSize(child->GetLayoutSize()));
+            ++newItemCntInLine;
         } while (0);
-        if (++newItemCntInLine == lanes_ || doneRequestNewItem) {
+        bool singleLaneDoneAddItem = (lanes_ == 1) && !breakWhenRequestNewItem;
+        bool multiLaneDoneSupplyOneLine = (lanes_ > 1) && (newItemCntInLine == lanes_);
+        bool multiLaneStartSupplyLine = breakWhenRequestNewItem && (newItemCntInLine >= 1);
+        if (singleLaneDoneAddItem || multiLaneDoneSupplyOneLine || multiLaneStartSupplyLine) {
             curMainPos += lineMainSize + spaceWidth_;
             newItemCntInLine = 0;
             lineMainSize = 0;
-            if (doneRequestNewItem) {
-                break;
-            }
+        }
+        if (breakWhenRequestNewItem) {
+            break;
         }
     }
 }
@@ -489,15 +493,15 @@ void RenderList::RequestNewItemsAtStartForLaneList(const LayoutParam& innerLayou
     int newItemCntInLine = 0;
     double lineMainSize = 0;
     for (; startIndex_ > 0; --startIndex_) {
-        bool doneRequestNewItem = false;
+        bool breakWhenRequestNewItem = false;
         do {
             if (LessOrEqual(currentOffset_, startMainPos_)) {
-                doneRequestNewItem = true;
+                breakWhenRequestNewItem = true;
                 break;
             }
             auto child = RequestAndLayoutNewItem(startIndex_ - 1, innerLayout);
             if (!child) {
-                doneRequestNewItem = true;
+                breakWhenRequestNewItem = true;
                 break;
             }
             if (selectedItemIndex_ == startIndex_) {
@@ -507,14 +511,18 @@ void RenderList::RequestNewItemsAtStartForLaneList(const LayoutParam& innerLayou
                 ++startCachedCount_;
             }
             lineMainSize = std::max(lineMainSize, GetMainSize(child->GetLayoutSize()));
+            ++newItemCntInLine;
         } while (0);
-        if (++newItemCntInLine == lanes_ || (doneRequestNewItem)) {
-            currentOffset_ = currentOffset_ - lineMainSize;
+        bool singleLaneDoneAddItem = (lanes_ == 1) && !breakWhenRequestNewItem;
+        bool multiLaneDoneSupplyOneLine = (lanes_ > 1) && (newItemCntInLine == lanes_);
+        bool multiLaneStartSupplyLine = breakWhenRequestNewItem && (newItemCntInLine >= 1);
+        if (singleLaneDoneAddItem || multiLaneDoneSupplyOneLine || multiLaneStartSupplyLine) {
+            currentOffset_ -= lineMainSize + spaceWidth_;
             newItemCntInLine = 0;
             lineMainSize = 0;
-            if (doneRequestNewItem) {
-                break;
-            }
+        }
+        if (breakWhenRequestNewItem) {
+            break;
         }
     }
 }
@@ -1214,7 +1222,7 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(const LayoutParam& lay
     int32_t lackItemCount = 0;
     for (auto it = items_.begin(); it != items_.end();) {
         // 1. layout children in a row
-        double mainSize;
+        double mainSize = 0.0;
         itemsInOneRow.clear();
         for (int32_t i = 0; i < lanes_; i++) {
             RefPtr<RenderListItem> child = *(it);
