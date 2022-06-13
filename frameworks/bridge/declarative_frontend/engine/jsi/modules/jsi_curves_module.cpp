@@ -136,9 +136,9 @@ bool CreateStepsCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsV
         stepSize = argv[0]->ToInt32(runtime);
         bool isEnd = argv[1]->ToBoolean(runtime);
         if (isEnd) {
-            curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::START);
-        } else {
             curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::END);
+        } else {
+            curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::START);
         }
     } else {
         stepSize = argv[0]->ToInt32(runtime);
