@@ -52,17 +52,14 @@ void RosenRenderSvgText::PaintDirectly(RenderContext& context, const Offset& off
         return;
     }
 
+    SkAutoCanvasRestore save(canvas, false);
     if (NeedTransform()) {
-        canvas->save();
         canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
     }
+    PaintMaskLayer(context, offset, offset);
 
     DrawOffset drawOffset = { offset, offset, false };
     DrawText(context, drawOffset);
-
-    if (NeedTransform()) {
-        canvas->restore();
-    }
 }
 
 Rect RosenRenderSvgText::GetPaintBounds(const Offset& offset)
