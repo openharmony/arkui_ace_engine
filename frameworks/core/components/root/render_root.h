@@ -35,7 +35,10 @@ public:
     // Set the design size directly proportional to the real physical pixels.
     void SetScale(float scale)
     {
-        scale_ = scale;
+        if (!NearEqual(scale_, scale)) {
+            scale_ = scale;
+            MarkNeedSyncGeometryProperties();
+        }
     }
 
     float GetScale() const
