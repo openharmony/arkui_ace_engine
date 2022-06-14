@@ -416,11 +416,6 @@ void AceAbility::OnStart(const Want& want)
 void AceAbility::OnStop()
 {
     LOGI("AceAbility::OnStop called ");
-#ifdef ENABLE_ROSEN_BACKEND
-    if (auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext()) {
-        context->SetRSUIDirector(nullptr);
-    }
-#endif
     Ability::OnStop();
     Platform::AceContainer::DestroyContainer(abilityId_);
     LOGI("AceAbility::OnStop called End");
