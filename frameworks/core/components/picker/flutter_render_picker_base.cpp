@@ -22,7 +22,6 @@ namespace OHOS::Ace {
 namespace {
 
 const uint32_t SEARCH_MAX_DEPTH = 16;
-constexpr Dimension DIVIDER_PADDING = 4.0_vp;
 constexpr Dimension FOCUS_RADIUS = 8.0_vp;
 constexpr Dimension FOCUS_BORDER_THICKNESS = 2.0_vp;
 constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF254FF7;
@@ -100,9 +99,8 @@ void FlutterRenderPickerBase::Paint(RenderContext& context, const Offset& offset
     }
     double upperLine = rect.Top() + rect.Height() / 2.0 - dividerSpacing / 2.0;
     double downLine = rect.Top() + rect.Height() / 2.0 + dividerSpacing / 2.0;
-    double leftLine = data_->GetIsDialog() ? rect.Left() : focusBoxOffset_.GetX() - NormalizeToPx(DIVIDER_PADDING);
-    double rightLine =
-        data_->GetIsDialog() ? rect.Right() : leftLine + focusBoxSize_.Width() + NormalizeToPx(DIVIDER_PADDING) * 2.0;
+    double leftLine = rect.Left();
+    double rightLine = rect.Right();
     if (!NearZero(dividerThickness) && !data_->GetSubsidiary()) {
         canvas->drawRect(leftLine, upperLine - dividerThickness, rightLine, upperLine, paint, paintData);
         canvas->drawRect(leftLine, downLine, rightLine, downLine + dividerThickness, paint, paintData);
