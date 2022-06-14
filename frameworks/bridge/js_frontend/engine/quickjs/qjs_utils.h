@@ -87,11 +87,11 @@ public:
     static JSValue Eval(JSContext* ctx, const char* input, size_t inputLen, const char* filename, int32_t evalFlags);
     static JSValue GetPropertyStr(JSContext* ctx, JSValueConst thisObj, const char* prop);
     static void JsStdDumpErrorAce(JSContext* ctx, JsErrorType errorType = JsErrorType::JS_CRASH, int32_t instanceId = 0,
-        const char* pageUrl = nullptr, const RefPtr<JsAcePage>& page = nullptr);
+        const char* pageUrl = nullptr, const RefPtr<JsAcePage>& page = nullptr, bool isEts = false);
     static void ExtractEachInfo(const std::string& tempStack, std::vector<std::string>& res);
     static void GetPosInfo(const std::string& temp, int32_t start, std::string& line);
     static std::string GetSourceInfo(const std::string& line, const RefPtr<RevSourceMap>& pageMap,
-        const RefPtr<RevSourceMap>& appMap, bool isAppPage);
+        const RefPtr<RevSourceMap>& appMap, bool isAppPage, bool isEts = false);
     static void JsDumpMemoryStats(JSContext* ctx);
     static int32_t JsGetArrayLength(JSContext* ctx, JSValueConst arrayObject);
 
@@ -104,7 +104,7 @@ public:
     static JSValue GetArgvSafe(int idx, int argc, JSValueConst* argv);
     static void DefineGlobalFunction(JSContext* ctx, JSCFunction jsFunc, const char* name, const int paramNum);
     static std::string JsDumpSourceFile(const char* stack, const RefPtr<RevSourceMap>& pageMap,
-        const RefPtr<RevSourceMap>& appMap);
+        const RefPtr<RevSourceMap>& appMap, bool isEts = false);
 };
 
 /**
