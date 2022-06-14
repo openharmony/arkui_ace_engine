@@ -57,8 +57,11 @@ template("ace_osal_ohos_source_set") {
         [ "//base/startup/init_lite/interfaces/innerkits:libbegetutil" ]
 
     if (is_standard_system) {
-      sources += [ "resource_adapter_impl.cpp" ]
-      sources += [ "resource_convertor.cpp" ]
+      sources += [
+        "resource_adapter_impl.cpp",
+        "resource_convertor.cpp",
+        "resource_theme_style.cpp",
+      ]
       deps = [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
       public_deps += [
         "//base/global/resource_management/frameworks/resmgr:global_resmgr",

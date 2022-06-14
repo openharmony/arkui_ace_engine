@@ -162,7 +162,7 @@ Color ThemeManager::GetBackgroundColor() const
     }
 }
 
-void ThemeManager::ReloadThemes()
+void ThemeManager::LoadResourceThemes()
 {
     themes_.clear();
     themeConstants_->LoadTheme(currentThemeId_);

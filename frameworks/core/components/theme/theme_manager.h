@@ -90,7 +90,7 @@ public:
         return AceType::DynamicCast<T>(GetTheme(T::TypeId()));
     }
 
-    void ReloadThemes();
+    void LoadResourceThemes();
 
 private:
     std::unordered_map<ThemeType, RefPtr<Theme>> themes_;

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H
 
+#include <string>
+
 namespace OHOS::Ace {
 
 // theme attributes
@@ -135,6 +137,8 @@ extern const char BUTTON_DOWNLOAD_TEXT_COLOR[];
 extern const char BUTTON_DOWNLOAD_BORDER_COLOR[];
 extern const char BUTTON_BORDER_COLOR[];
 extern const char BUTTON_BORDER_WIDTH[];
+// pattern external attributes for button
+extern const char BUTTON_BG_COLOR_DISABLED_APLPHA[];
 
 // pattern attributes for toolbar
 extern const char TOOLBAR_ICON_MORE_COLOR[];
