@@ -38,7 +38,6 @@ public:
 private:
     void CollectNodesById();
     void GetDependencyRelationship();
-    void BuildIncomingDegreeMap();
     bool PreTopologicalLoopDetection();
     void TopologicalSort(std::list<std::string>& renderList);
 
