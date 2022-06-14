@@ -97,7 +97,7 @@ std::string TextComposedElement::GetLineHeight() const
     auto renderText = GetRenderText();
     auto lineHeight =
         renderText ? renderText->GetTextStyle().GetLineHeight() : Dimension();
-    return std::to_string(static_cast<int32_t>(lineHeight.Value()));
+    return lineHeight.ToString();
 }
 
 std::string TextComposedElement::GetTextDecoration() const
