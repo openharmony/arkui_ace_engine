@@ -2475,6 +2475,7 @@ void RenderSwiper::DragIndicator(double offset)
         dragBaseOffset_ += longPressDragSwitchFocus * animationDirect_;
         ResetIndicatorPosition();
         MarkNeedLayout();
+        FireItemChangedEvent(true);
     } else {
         double dragRate = (fabsOffset - longPressDragStart) / longPressDragMaxDiff;
         UpdateIndicatorHeadPosition(INDICATOR_FOCUS_HEAD->MoveInternal(dragRate));
