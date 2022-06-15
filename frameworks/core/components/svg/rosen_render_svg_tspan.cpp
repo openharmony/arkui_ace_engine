@@ -76,7 +76,7 @@ void RosenRenderSvgTspan::DrawTextPath(RenderContext& context, PathOffset& pathO
         return;
     }
 
-    SkAutoCanvasRestore save(canvas, false);
+    SkAutoCanvasRestore save(canvas, true);
     PaintMaskLayer(context, pathOffset.svg, GetPaintRect());
 
     if (!textData_.empty()) {
