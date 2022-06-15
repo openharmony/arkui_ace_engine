@@ -149,19 +149,23 @@ public:
         return settings_;
     }
 
-    void SetBundlePath(const std::string& path) {
+    void SetBundlePath(const std::string& path)
+    {
         bundlePath_ = path;
     }
 
-    const std::string& GetBundlePath() const {
+    const std::string& GetBundlePath() const
+    {
         return bundlePath_;
     }
 
-    void SetFilesDataPath(const std::string& path) {
+    void SetFilesDataPath(const std::string& path)
+    {
         filesDataPath_ = path;
     }
 
-    const std::string& GetFilesDataPath() const {
+    const std::string& GetFilesDataPath() const
+    {
         return filesDataPath_;
     }
 
@@ -189,6 +193,12 @@ public:
     bool IsUseNewPipeline() const
     {
         return useNewPipeline_;
+    }
+
+    Window* GetWindow()
+    {
+        auto context = GetPipelineContext();
+        return context ? context->GetWindow() : nullptr;
     }
 
 protected:

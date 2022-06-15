@@ -22,5 +22,8 @@ build_component_ng("render_ng") {
     "render_context_creator.cpp",
     "render_wrapper.cpp",
   ]
-  rosen_sources = [ "adapter/rosen_render_context.cpp" ]
+  rosen_sources = [
+    "adapter/rosen_render_context.cpp",
+    "adapter/rosen_window.cpp",
+  ]
 }

@@ -1282,7 +1282,7 @@ protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     virtual void SetRootRect(double width, double height, double offset = 0.0);
     virtual void FlushPipelineWithoutAnimation();
-    void FlushMessages();
+    virtual void FlushMessages();
 
     std::unique_ptr<Window> window_;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
