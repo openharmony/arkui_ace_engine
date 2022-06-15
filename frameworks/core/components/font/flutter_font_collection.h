@@ -24,14 +24,15 @@
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/font/font_collection.h"
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT FlutterFontCollection : public NonCopyable {
+class ACE_EXPORT FlutterFontCollection : public FontCollection {
 public:
     static FlutterFontCollection& GetInstance();
 
-    std::shared_ptr<txt::FontCollection> GetFontCollection();
+    std::shared_ptr<txt::FontCollection> GetFontCollection() override;
 
     void LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName);
 

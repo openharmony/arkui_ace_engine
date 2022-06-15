@@ -14,15 +14,60 @@
  */
 
 #include "base/geometry/dimension.h"
+
+#include <array>
+
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
-    std::string Dimension::ToString() const
-    {
-        static std::string units[6] = {"px", "vp", "fp", "%", "lpx", "auto"};
-        if (units[static_cast<int>(unit_)] == units[3]) {
-            return StringUtils::DoubleToString(value_ * 100).append(units[static_cast<int>(unit_)]);
-        }
-        return StringUtils::DoubleToString(value_).append(units[static_cast<int>(unit_)]);
+std::string Dimension::ToString() const
+{
+    static const int32_t unitsNum = 6;
+    static const int32_t percentIndex = 3;
+    static const int32_t percentUnit = 100;
+    static std::array<std::string, unitsNum> units = { "px", "vp", "fp", "%", "lpx", "auto" };
+    if (units[static_cast<int>(unit_)] == units[percentIndex]) {
+        return StringUtils::DoubleToString(value_ * percentUnit).append(units[static_cast<int>(unit_)]);
     }
+    return StringUtils::DoubleToString(value_).append(units[static_cast<int>(unit_)]);
+}
+
+bool Dimension::NormalizeToPx(
+    double vpScale, double fpScale, double lpxScale, double parentLength, double& result) const
+{
+    if (unit_ == DimensionUnit::PX) {
+        result = value_;
+        return true;
+    }
+    if (unit_ == DimensionUnit::PERCENT) {
+        if (NonNegative(parentLength)) {
+            result = value_ * parentLength;
+            return true;
+        }
+        return false;
+    }
+    if (unit_ == DimensionUnit::VP) {
+        if (Positive(vpScale)) {
+            result = value_ * vpScale;
+            return true;
+        }
+        return false;
+    }
+    if (unit_ == DimensionUnit::FP) {
+        if (Positive(fpScale)) {
+            result = value_ * fpScale;
+            return true;
+        }
+        return false;
+    }
+    if (unit_ == DimensionUnit::LPX) {
+        if (Positive(lpxScale)) {
+            result = value_ * lpxScale;
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
 } // namespace OHOS::Ace

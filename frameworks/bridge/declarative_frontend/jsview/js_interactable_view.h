@@ -33,7 +33,7 @@ public:
     static void JsOnHover(const JSCallbackInfo& args);
     static EventMarker GetClickEventMarker(const JSCallbackInfo& info);
     static void JsOnKey(const JSCallbackInfo& args);
-    static void SetFocusable(bool focusable);
+    static void SetFocusable(bool focusable, bool createIfNotExist = true);
     static void SetFocusNode(bool isFocusNode);
 
     static void JsOnAppear(const JSCallbackInfo& info);

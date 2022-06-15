@@ -216,6 +216,7 @@ template("ace_core_source_set") {
       "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
       "$ace_flutter_engine_root/skia:ace_skia_$platform",
       "pipeline:ace_core_pipeline_$platform",
+      "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
 
     deps += [
@@ -331,6 +332,15 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/water_flow:ace_core_components_water_flow_v2_$platform",
     ]
 
+    deps += [
+      "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/modifier:ace_core_components_modifier_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
+    ]
+
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources += [ "animation/native_curve_helper.cpp" ]
       deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
@@ -362,7 +372,7 @@ template("ace_core_source_set") {
       if (!use_mingw_win && !use_mac) {
         sources += [ "common/form_manager.cpp" ]
         deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
-        external_deps = [ "form_runtime:form_manager" ]
+        external_deps = [ "form_fwk:form_manager" ]
       }
     }
 

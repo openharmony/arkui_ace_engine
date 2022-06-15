@@ -499,4 +499,10 @@ void TextOverlayManager::HandleCtrlC() const
     clipboard->SetData(textOverlayBase->GetSelectedContent());
 }
 
+bool TextOverlayBase::IsSelectedText(const Offset& pos, const Offset& globalOffset)
+{
+    int32_t tempText = GetCursorPositionForClick(pos, globalOffset);
+    return (tempText >= textValue_.selection.GetStart() && tempText <= textValue_.selection.GetEnd());
+}
+
 } // namespace OHOS::Ace

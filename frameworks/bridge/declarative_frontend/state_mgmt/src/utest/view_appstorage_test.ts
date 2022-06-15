@@ -43,20 +43,20 @@ const testViewAppStorage = tsuite("View AppStorge", () => {
 
     // will be called on 2nd render (generated)
     public updateWithValueParams(params: {}): void {
-      console.debug(`${this.id()}:${this.constructor.name}: updateWithValueParams start`);
-      console.debug(`${this.id()}:${this.constructor.name}: updateWithValueParams done`);
+      console.debug(`${this.id__()}:${this.constructor.name}: updateWithValueParams start`);
+      console.debug(`${this.id__()}:${this.constructor.name}: updateWithValueParams done`);
     }
 
 
     // will be called when View is no longer used (like destructor, generated)
     public aboutToBeDeleted() {
-      console.debug(`${this.id()}:${this.constructor.name}: aboutToBeDeleted`);
+      console.debug(`${this.id__()}:${this.constructor.name}: aboutToBeDeleted`);
       this.__playCount.aboutToBeDeleted();
-      SubscriberManager.Get().delete(this.id());
+      SubscriberManager.Get().delete(this.id__());
     }
 
     render() {
-      console.debug(`${this.id()}:${this.constructor.name}: render playCount ${this.playCount}`);
+      console.debug(`${this.id__()}:${this.constructor.name}: render playCount ${this.playCount}`);
     }
   }
 

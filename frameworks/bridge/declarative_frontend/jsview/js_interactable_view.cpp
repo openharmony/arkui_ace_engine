@@ -211,9 +211,9 @@ RefPtr<Gesture> JSInteractableView::GetRemoteMessageTapGesture(const JSCallbackI
     return tapGesture;
 }
 
-void JSInteractableView::SetFocusable(bool focusable)
+void JSInteractableView::SetFocusable(bool focusable, bool createIfNotExist)
 {
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(createIfNotExist);
     if (focusableComponent) {
         focusableComponent->SetFocusable(focusable);
     }

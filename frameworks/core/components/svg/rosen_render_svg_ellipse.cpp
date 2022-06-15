@@ -61,19 +61,17 @@ void RosenRenderSvgEllipse::PaintDirectly(RenderContext& context, const Offset& 
         LOGE("Paint canvas is null");
         return;
     }
+    SkAutoCanvasRestore save(canvas, false);
     if (NeedTransform()) {
-        canvas->save();
-        canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4()));
+        canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
     }
+    PaintMaskLayer(context, offset, offset);
 
     SkPath path;
     GetPath(path);
     UpdateGradient(fillState_);
     RosenSvgPainter::SetFillStyle(canvas, path, fillState_, opacity_);
     RosenSvgPainter::SetStrokeStyle(canvas, path, strokeState_, opacity_);
-    if (NeedTransform()) {
-        canvas->restore();
-    }
 }
 
 void RosenRenderSvgEllipse::UpdateMotion(const std::string& path, const std::string& rotate, double percent)

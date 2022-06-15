@@ -121,6 +121,11 @@ public:
         return selectedRect_;
     }
 
+    double GetSelectHeight() const
+    {
+        return selectHeight_;
+    }
+
     void ChangeSelection(int32_t start, int32_t end);
     void InitAnimation(const WeakPtr<PipelineContext>& pipelineContext);
     bool GetCaretRect(int32_t extent, Rect& caretRect, double caretHeightOffset = 0.0) const;
@@ -133,6 +138,7 @@ public:
     virtual Offset GetHandleOffset(int32_t extend) = 0;
     virtual std::string GetSelectedContent() const = 0;
     RefPtr<TextOverlayManager> GetTextOverlayManager(const WeakPtr<PipelineContext>& pipelineContext);
+    bool IsSelectedText(const Offset& pos, const Offset& globalOffset);
 
 protected:
     std::shared_ptr<txt::Paragraph> paragraph_;
@@ -199,6 +205,21 @@ public:
         return textOverlayBase;
     }
 
+    const std::vector<Rect>& GetTextOverlayRect() const
+    {
+        return textOverlayRect_;
+    }
+
+    void AddTextOverlayRect(const Rect& textOverlayRect)
+    {
+        textOverlayRect_.emplace_back(textOverlayRect);
+    }
+
+    void ClearTextOverlayRect()
+    {
+        textOverlayRect_.clear();
+    }
+
     const RefPtr<RenderNode> GetTargetNode() const;
     void PopTextOverlay();
     void PushTextOverlayToStack(const RefPtr<TextOverlayComponent>& textOverlay,
@@ -210,6 +231,7 @@ private:
     WeakPtr<TextOverlayBase> textOverlayBase_;
     WeakPtr<StackElement> stackElement_;
     WeakPtr<PipelineContext> context_;
+    std::vector<Rect> textOverlayRect_;
 };
 
 } // namespace OHOS::Ace

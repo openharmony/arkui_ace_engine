@@ -170,11 +170,11 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     });
 
     this.links_.clear();
-    SubscriberManager.Get().delete(this.id());
+    SubscriberManager.Get().delete(this.id__());
     PersistentStorage.Storage_.clear();
   }
 
-  public id(): number {
+  public id__(): number {
     return this.id_;
   }
 

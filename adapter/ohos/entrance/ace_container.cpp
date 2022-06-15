@@ -42,6 +42,7 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/pipeline/pipeline_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
@@ -84,11 +85,14 @@ const char* GetDeclarativeSharedLibrary(bool isArkApp)
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
-    bool useCurrentEventRunner)
+    bool useCurrentEventRunner, bool useNewPipeline)
     : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), aceAbility_(aceAbility),
       useCurrentEventRunner_(useCurrentEventRunner)
 {
     ACE_DCHECK(callback);
+    if (useNewPipeline) {
+        SetUseNewPipeline();
+    }
     InitializeTask();
     platformEventCallback_ = std::move(callback);
     useStageModel_ = false;
@@ -98,8 +102,9 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
     bool useCurrentEventRunner, bool isSubAceContainer)
-    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), runtimeContext_(runtimeContext),
-      abilityInfo_(abilityInfo), useCurrentEventRunner_(useCurrentEventRunner), isSubContainer_(isSubAceContainer)
+    : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), runtimeContext_(std::move(runtimeContext)),
+      abilityInfo_(std::move(abilityInfo)), useCurrentEventRunner_(useCurrentEventRunner),
+      isSubContainer_(isSubAceContainer)
 {
     ACE_DCHECK(callback);
     if (!isSubContainer_) {
@@ -166,6 +171,7 @@ void AceContainer::DestroyView()
         if (flutterAceView) {
             flutterAceView->DecRefCount();
         }
+        aceView_ = nullptr;
     }
 }
 
@@ -227,9 +233,8 @@ RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
     if (container != nullptr) {
         auto aceContainer = AceType::DynamicCast<AceContainer>(container);
         return aceContainer;
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
 
 bool AceContainer::OnBackPressed(int32_t instanceId)
@@ -616,12 +621,12 @@ void AceContainer::InitializeCallback()
     InitWindowCallback();
 }
 
-void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
-    std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
-    bool useCurrentEventRunner)
+void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp,
+    const std::string& instanceName, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
+    std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner, bool useNewPipeline)
 {
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(
-        instanceId, type, isArkApp, aceAbility, std::move(callback), useCurrentEventRunner);
+        instanceId, type, isArkApp, aceAbility, std::move(callback), useCurrentEventRunner, useNewPipeline);
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     HdcRegister::Get().StartHdcRegister(instanceId);
@@ -638,7 +643,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
     if (!jsFront) {
         return;
     }
-    jsFront->SetInstanceName(instanceName.c_str());
+    jsFront->SetInstanceName(instanceName);
 }
 
 void AceContainer::DestroyContainer(int32_t instanceId)
@@ -930,8 +935,14 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         aceView_->SetCreateTime(createTime_);
     }
     resRegister_ = aceView_->GetPlatformResRegister();
-    pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
-        std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+    if (useNewPipeline_) {
+        LOGI("New pipeline version creating...");
+        pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
+            std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+    } else {
+        pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
+            std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+    }
     pipelineContext_->SetRootSize(density, width, height);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
@@ -1031,8 +1042,11 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         themeManager->InitResource(resourceInfo_);
         taskExecutor_->PostTask(
             [themeManager, assetManager = assetManager_, colorScheme = colorScheme_] {
+                ACE_SCOPED_TRACE("OHOS::LoadThemes()");
+                LOGI("UIContent load theme");
                 themeManager->SetColorScheme(colorScheme);
                 themeManager->LoadCustomTheme(assetManager);
+                themeManager->LoadResourceThemes();
             },
             TaskExecutor::TaskType::UI);
     }

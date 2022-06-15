@@ -42,9 +42,6 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
-constexpr int32_t DEFAULT_FINGERS = 1;
-constexpr int32_t DEFAULT_DURATION = 150;
-constexpr int32_t DEFAULT_DISTANCE = 0;
 
 }; // namespace
 
@@ -138,7 +135,7 @@ void RenderBox::Update(const RefPtr<Component>& component)
         onDrop_ = box->GetOnDropId();
         enableDragStart_ = box->GetEnableDragStart();
         if (onDragStart_) {
-            CreateDragDropRecognizer();
+            CreateDragDropRecognizer(context_);
         }
 
         if (!box->GetOnDomDragEnter().IsEmpty()) {
@@ -255,58 +252,8 @@ void RenderBox::SetAccessibilityClickImpl()
     }
 }
 
-void RenderBox::CreateDragDropRecognizer()
-{
-    if (dragDropGesture_) {
-        return;
-    }
-
-    auto context = GetContext();
-    auto longPressRecognizer = AceType::MakeRefPtr<OHOS::Ace::LongPressRecognizer>(
-        context, DEFAULT_DURATION, DEFAULT_FINGERS, false, true, false);
-    PanDirection panDirection;
-    auto panRecognizer =
-        AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, DEFAULT_FINGERS, panDirection, DEFAULT_DISTANCE);
-    panRecognizer->SetOnActionStart(std::bind(&RenderBox::PanOnActionStart, this, std::placeholders::_1));
-    panRecognizer->SetOnActionUpdate(std::bind(&RenderBox::PanOnActionUpdate, this, std::placeholders::_1));
-    panRecognizer->SetOnActionEnd(std::bind(&RenderBox::PanOnActionEnd, this, std::placeholders::_1));
-    panRecognizer->SetOnActionCancel([weakRenderBox = AceType::WeakClaim<RenderBox>(this), context = context_]() {
-        auto pipelineContext = context.Upgrade();
-        if (!pipelineContext) {
-            LOGE("Context is null.");
-            return;
-        }
-
-        auto renderBox = weakRenderBox.Upgrade();
-        if (!renderBox) {
-            LOGE("RenderBox is null.");
-            return;
-        }
-
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        if (renderBox->isDragRenderBox_) {
-            renderBox->isDragRenderBox_ = false;
-        }
-
-        if (renderBox->dragWindow_) {
-            renderBox->dragWindow_->Destory();
-            renderBox->dragWindow_ = nullptr;
-        }
-#endif
-        if (renderBox->hasDragItem_) {
-            auto stackElement = pipelineContext->GetLastStack();
-            stackElement->PopComponent();
-            renderBox->hasDragItem_ = false;
-        }
-        renderBox->SetPreTargetRenderBox(nullptr);
-    });
-
-    std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer, panRecognizer };
-    dragDropGesture_ = AceType::MakeRefPtr<OHOS::Ace::SequencedRecognizer>(GetContext(), recognizers);
-    dragDropGesture_->SetIsExternalGesture(true);
-}
-
-void RenderBox::AddDataToClipboard(const RefPtr<PipelineContext>& context, const std::string& extraInfo)
+void RenderBox::AddDataToClipboard(const RefPtr<PipelineContext>& context, const std::string& extraInfo,
+    const std::string& selectedText, const std::string& imageSrc)
 {
     auto seleItemSizeStr = JsonUtil::Create(true);
     seleItemSizeStr->Put("width", selectedItemSize_.Width());
@@ -339,65 +286,62 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
         LOGI("drag start is disabled.");
         return;
     }
-    if (onDragStart_) {
-        auto pipelineContext = context_.Upgrade();
-        if (!pipelineContext) {
-            LOGE("Context is null.");
-            return;
-        }
 
-        auto dragItemInfo = GenerateDragItemInfo(pipelineContext, info);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-        if (dragItemInfo.pixelMap) {
-            auto wp = AceType::WeakClaim(this);
-            auto initRenderNode = wp.Upgrade();
-            if (!initRenderNode) {
-                LOGE("initRenderNode is null.");
-                return;
-            }
-
-            isDragRenderBox_ = true;
-            pipelineContext->SetInitRenderNode(initRenderNode);
-
-            AddDataToClipboard(pipelineContext, dragItemInfo.extraInfo);
-            if (!dragWindow_) {
-                auto rect = pipelineContext->GetCurrentWindowRect();
-                dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
-                    static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
-                    static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(), dragItemInfo.pixelMap->GetWidth(),
-                    dragItemInfo.pixelMap->GetHeight());
-                dragWindow_->SetOffset(rect.Left(), rect.Top());
-                dragWindow_->DrawPixelMap(dragItemInfo.pixelMap);
-            }
-            return;
-        }
-#endif
-        if (!dragItemInfo.customComponent) {
-            LOGW("the drag custom component is null");
-            return;
-        }
-        hasDragItem_ = true;
-        auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(dragItemInfo.customComponent);
-        positionedComponent->SetTop(Dimension(GetGlobalOffset().GetY()));
-        positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
-        SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
-        auto updatePosition = [renderBox = AceType::Claim(this)](
-                                  const std::function<void(const Dimension&, const Dimension&)>& func) {
-            if (!renderBox) {
-                return;
-            }
-            renderBox->SetUpdateBuilderFuncId(func);
-        };
-        positionedComponent->SetUpdatePositionFuncId(updatePosition);
-        auto stackElement = pipelineContext->GetLastStack();
-        stackElement->PushComponent(positionedComponent);
+    if (!onDragStart_) {
+        return;
     }
+
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+    auto dragItemInfo = GenerateDragItemInfo(pipelineContext, info);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (dragItemInfo.pixelMap) {
+        auto initRenderNode = AceType::Claim(this);
+        isDragDropNode_  = true;
+        pipelineContext->SetInitRenderNode(initRenderNode);
+
+        AddDataToClipboard(pipelineContext, dragItemInfo.extraInfo, "", "");
+        if (!dragWindow_) {
+            auto rect = pipelineContext->GetCurrentWindowRect();
+            dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
+                static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
+                static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(), dragItemInfo.pixelMap->GetWidth(),
+                dragItemInfo.pixelMap->GetHeight());
+            dragWindow_->SetOffset(rect.Left(), rect.Top());
+            dragWindow_->DrawPixelMap(dragItemInfo.pixelMap);
+        }
+        return;
+    }
+#endif
+    if (!dragItemInfo.customComponent) {
+        LOGW("the drag custom component is null");
+        return;
+    }
+    hasDragItem_ = true;
+    auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(dragItemInfo.customComponent);
+    positionedComponent->SetTop(Dimension(GetGlobalOffset().GetY()));
+    positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
+    SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
+    auto updatePosition = [renderBox = AceType::Claim(this)](
+                                const std::function<void(const Dimension&, const Dimension&)>& func) {
+        if (!renderBox) {
+            return;
+        }
+        renderBox->SetUpdateBuilderFuncId(func);
+    };
+    positionedComponent->SetUpdatePositionFuncId(updatePosition);
+    auto stackElement = pipelineContext->GetLastStack();
+    stackElement->PushComponent(positionedComponent);
 }
 
 void RenderBox::PanOnActionUpdate(const GestureEvent& info)
 {
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-    if (isDragRenderBox_ && dragWindow_) {
+    if (isDragDropNode_  && dragWindow_) {
         int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
         int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
         if (dragWindow_) {
@@ -422,32 +366,32 @@ void RenderBox::PanOnActionUpdate(const GestureEvent& info)
     }
 
     auto extraParams = JsonUtil::Create(true);
-    auto targetRenderBox = FindTargetRenderBox(pipelineContext, info);
-    auto preTargetRenderBox = GetPreTargetRenderBox();
-    if (preTargetRenderBox == targetRenderBox) {
-        if (targetRenderBox && targetRenderBox->GetOnDragMove()) {
-            SetInsertIndex(targetRenderBox, info);
+    auto targetDragDropNode = FindDragDropNode(pipelineContext, info);
+    auto preDragDropNode = GetPreDragDropNode();
+    if (preDragDropNode == targetDragDropNode) {
+        if (targetDragDropNode && targetDragDropNode->GetOnDragMove()) {
+            SetInsertIndex(targetDragDropNode, info);
             if (insertIndex_ != DEFAULT_INDEX) {
-                (targetRenderBox->GetOnDragMove())(event, extraParams->ToString());
+                (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
                 return;
             }
-            if (targetRenderBox != initialRenderBox_) {
+            if (targetDragDropNode != initialDragDropNode_) {
                 extraParams->Put("selectedIndex", -1);
             } else {
                 extraParams->Put("selectedIndex", selectedIndex_);
             }
             extraParams->Put("insertIndex", insertIndex_);
-            (targetRenderBox->GetOnDragMove())(event, extraParams->ToString());
+            (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
         }
         return;
     }
-    if (preTargetRenderBox && preTargetRenderBox->GetOnDragLeave()) {
-        (preTargetRenderBox->GetOnDragLeave())(event, extraParams->ToString());
+    if (preDragDropNode && preDragDropNode->GetOnDragLeave()) {
+        (preDragDropNode->GetOnDragLeave())(event, extraParams->ToString());
     }
-    if (targetRenderBox && targetRenderBox->GetOnDragEnter()) {
-        (targetRenderBox->GetOnDragEnter())(event, extraParams->ToString());
+    if (targetDragDropNode && targetDragDropNode->GetOnDragEnter()) {
+        (targetDragDropNode->GetOnDragEnter())(event, extraParams->ToString());
     }
-    SetPreTargetRenderBox(targetRenderBox);
+    SetPreDragDropNode(targetDragDropNode);
 }
 
 void RenderBox::PanOnActionEnd(const GestureEvent& info)
@@ -458,8 +402,8 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
         return;
     }
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
-    if (isDragRenderBox_) {
-        isDragRenderBox_ = false;
+    if (isDragDropNode_ ) {
+        isDragDropNode_  = false;
 
         if (GetOnDrop()) {
             RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
@@ -498,28 +442,54 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
     }
     hasDragItem_ = false;
 
-    ACE_DCHECK(GetPreTargetRenderBox() == FindTargetRenderNode<RenderBox>(pipelineContext, info));
-    auto targetRenderBox = GetPreTargetRenderBox();
-    if (!targetRenderBox) {
+    ACE_DCHECK(GetPreDragDropNode() == FindTargetRenderNode<RenderBox>(pipelineContext, info));
+    auto targetDragDropNode = GetPreDragDropNode();
+    if (!targetDragDropNode) {
         return;
     }
-    if (targetRenderBox->GetOnDrop()) {
+    if (targetDragDropNode->GetOnDrop()) {
         auto extraParams = JsonUtil::Create(true);
-        SetInsertIndex(targetRenderBox, info);
+        SetInsertIndex(targetDragDropNode, info);
         if (insertIndex_ == DEFAULT_INDEX) {
-            (targetRenderBox->GetOnDrop())(event, extraParams->ToString());
-            SetPreTargetRenderBox(nullptr);
+            (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
+            SetPreDragDropNode(nullptr);
             return;
         }
-        if (targetRenderBox != initialRenderBox_) {
+        if (targetDragDropNode != initialDragDropNode_) {
             extraParams->Put("selectedIndex", -1);
         } else {
             extraParams->Put("selectedIndex", selectedIndex_);
         }
         extraParams->Put("insertIndex", insertIndex_);
-        (targetRenderBox->GetOnDrop())(event, extraParams->ToString());
+        (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
     }
-    SetPreTargetRenderBox(nullptr);
+    SetPreDragDropNode(nullptr);
+}
+
+void RenderBox::PanOnActionCancel()
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (isDragDropNode_) {
+        isDragDropNode_ = false;
+    }
+
+    if (dragWindow_) {
+        dragWindow_->Destory();
+        dragWindow_ = nullptr;
+    }
+#endif
+    if (hasDragItem_) {
+        auto stackElement = pipelineContext->GetLastStack();
+        stackElement->PopComponent();
+        hasDragItem_ = false;
+    }
+    SetPreDragDropNode(nullptr);
 }
 
 void RenderBox::SetSelectedIndex(const GestureEvent& info)
@@ -527,34 +497,20 @@ void RenderBox::SetSelectedIndex(const GestureEvent& info)
     auto renderList = FindTargetRenderNode<V2::RenderList>(context_.Upgrade(), info);
     if (renderList) {
         selectedIndex_ = renderList->CalculateSelectedIndex(renderList, info, selectedItemSize_);
-        initialRenderBox_ = FindTargetRenderBox(context_.Upgrade(), info);
+        initialDragDropNode_ = FindDragDropNode(context_.Upgrade(), info);
     }
 }
 
-void RenderBox::SetInsertIndex(const RefPtr<RenderBox>& targetRenderBox, const GestureEvent& info)
+void RenderBox::SetInsertIndex(const RefPtr<DragDropEvent>& targetDragDropNode, const GestureEvent& info)
 {
-    auto renderList = targetRenderBox->FindTargetRenderNode<V2::RenderList>(context_.Upgrade(), info);
+    auto renderNode = AceType::DynamicCast<RenderNode>(targetDragDropNode);
+    if (!renderNode) {
+        return;
+    }
+    auto renderList = renderNode->FindTargetRenderNode<V2::RenderList>(context_.Upgrade(), info);
     if (renderList) {
         insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
     }
-}
-
-RefPtr<RenderBox> RenderBox::FindTargetRenderBox(const RefPtr<PipelineContext> context, const GestureEvent& info)
-{
-    if (!context) {
-        return nullptr;
-    }
-
-    auto pageRenderNode = context->GetLastPageRender();
-    if (!pageRenderNode) {
-        return nullptr;
-    }
-    auto offset = context->GetStageRect().GetOffset();
-    auto targetRenderNode = pageRenderNode->FindDropChild(info.GetGlobalPoint(), info.GetGlobalPoint() - offset);
-    if (!targetRenderNode) {
-        return nullptr;
-    }
-    return AceType::DynamicCast<RenderBox>(targetRenderNode);
 }
 
 void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
@@ -850,8 +806,8 @@ void RenderBox::ClearRenderObject()
     }
 
     dragDropGesture_ = nullptr;
-    preTargetRenderBox_ = nullptr;
-    initialRenderBox_ = nullptr;
+    preDragDropNode_  = nullptr;
+    initialDragDropNode_ = nullptr;
     updateBuilder_ = nullptr;
     onDragStart_ = nullptr;
     onDragEnter_ = nullptr;

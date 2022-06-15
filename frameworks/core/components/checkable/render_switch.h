@@ -99,6 +99,7 @@ protected:
     bool isSwitchDuringAnimation_ = false;
     RefPtr<SwitchComponent> component_;
 
+    bool isDraging = false;
 private:
     void SetAccessibilityClickImpl();
 };

@@ -97,6 +97,11 @@ public:
             theme->focusedDisableColor_ = themeConstants->GetColor(THEME_SELECT_OPTION_FOCUSED_DISABLE_COLOR);
             theme->normalTextDisableColor_ = themeConstants->GetColor(THEME_SELECT_OPTION_DISABLE_TEXT_COLOR);
             theme->focusedTextDisableColor_ = themeConstants->GetColor(THEME_SELECT_OPTION_FOCUSED_DISABLE_TEXT_COLOR);
+            theme->optionTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_OHOS_TEXT_SIZE_BODY1));
+            theme->optionTextStyle_.SetFontFamilies({ themeConstants->GetString(THEME_OHOS_TEXT_FONT_FAMILY_REGULAR) });
+            theme->optionTextStyle_.SetFontWeight(FontWeight::NORMAL);
+            theme->optionTextStyle_.SetTextColor(themeConstants->GetColor(THEME_SELECT_FONT_COLOR));
+            theme->optionTextStyle_.SetTextDecoration(TextDecoration::NONE);
             Parse(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -164,6 +169,7 @@ public:
         theme->hoverColor_ = hoverColor_;
         theme->selectedColorText_ = selectedColorText_;
         theme->lineColor_ = lineColor_;
+        theme->optionTextStyle_ = optionTextStyle_;
         return theme;
     }
 
@@ -491,6 +497,11 @@ public:
         return lineColor_;
     }
 
+    const TextStyle& GetOptionTextStyle() const
+    {
+        return optionTextStyle_;
+    }
+
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -537,6 +548,7 @@ private:
     Color normalTextDisableColor_;
 
     TextStyle titleStyle_;
+    TextStyle optionTextStyle_;
     bool isTV_ = false;
     uint32_t menuShowTime_ = 0;
     uint32_t selectShowTime_ = 0;

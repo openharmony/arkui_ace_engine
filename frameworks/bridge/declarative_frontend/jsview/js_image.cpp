@@ -21,6 +21,7 @@
 
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -296,7 +297,7 @@ void JSImage::Create(const JSCallbackInfo& info)
         return;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if defined(IMAGE_SUPPORTED)
     imageComponent->SetPixmap(CreatePixelMapFromNapiValue(info[0]));
 #endif
 }
@@ -421,11 +422,113 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onFinish", &JSImage::OnFinish);
     JSClass<JSImage>::StaticMethod("syncLoad", &JSImage::SetSyncLoad);
     JSClass<JSImage>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSImage>::Inherit<JSViewAbstract>();
+    JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
+    JSClass<JSImage>::StaticMethod("onDragEnter", &JSImage::JsOnDragEnter);
+    JSClass<JSImage>::StaticMethod("onDragMove", &JSImage::JsOnDragMove);
+    JSClass<JSImage>::StaticMethod("onDragLeave", &JSImage::JsOnDragLeave);
+    JSClass<JSImage>::StaticMethod("onDrop", &JSImage::JsOnDrop);
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
+    JSClass<JSImage>::Inherit<JSViewAbstract>();
     JSClass<JSImage>::Bind<>(globalObj);
+}
+
+void JSImage::JsOnDragStart(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
+        DragItemInfo itemInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
+
+        auto ret = func->Execute(info, extraParams);
+        if (!ret->IsObject()) {
+            LOGE("builder param is not an object.");
+            return itemInfo;
+        }
+        auto component = ParseDragItemComponent(ret);
+        if (component) {
+            LOGI("use custom builder param.");
+            itemInfo.customComponent = component;
+            return itemInfo;
+        }
+
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        auto pixmap = builderObj->GetProperty("pixelMap");
+        itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
+#endif
+        auto extraInfo = builderObj->GetProperty("extraInfo");
+        ParseJsString(extraInfo, itemInfo.extraInfo);
+        component = ParseDragItemComponent(builderObj->GetProperty("builder"));
+        itemInfo.customComponent = component;
+        return itemInfo;
+    };
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetOnDragStartId(onDragStartId);
+    }
+}
+
+void JSImage::JsOnDragEnter(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragEnter");
+        func->Execute(info, extraParams);
+    };
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetOnDragEnterId(onDragEnterId);
+    }
+}
+
+void JSImage::JsOnDragMove(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+                            const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragMove");
+        func->Execute(info, extraParams);
+    };
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetOnDragMoveId(onDragMoveId);
+    }
+}
+
+void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragLeave");
+        func->Execute(info, extraParams);
+    };
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetOnDragLeaveId(onDragLeaveId);
+    }
+}
+
+void JSImage::JsOnDrop(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+                        const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDrop");
+        func->Execute(info, extraParams);
+    };
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetOnDropId(onDropId);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

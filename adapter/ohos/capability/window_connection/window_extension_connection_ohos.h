@@ -27,6 +27,8 @@ public:
     void ConnectExtension(const std::string& want, const Rect& rect, WeakPtr<RenderNode> node) override;
     void RemoveExtension() override;
     void UpdateRect(const Rect& rect) override;
+    void Show() override;
+    void Hide() override;
 
 private:
     std::unique_ptr<Rosen::WindowExtensionConnection> windowExtension_;

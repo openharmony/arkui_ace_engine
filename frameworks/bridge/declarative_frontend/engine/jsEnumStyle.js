@@ -779,3 +779,17 @@ var MessageLevel
   MessageLevel[MessageLevel["Error"] = 4] = "Error";
   MessageLevel[MessageLevel["Log"] = 5] = "Log";
 })(MessageLevel || (MessageLevel = {}));
+
+var CopyOption;
+(function (CopyOption) {
+  CopyOption[CopyOption["InApp"] = 0] = "InApp";
+  CopyOption[CopyOption["LocalDevice"] = 1] = "LocalDevice";
+  CopyOption[CopyOption["CrossDevice"] = 2] = "CrossDevice";
+})(CopyOption || (CopyOption = {}));
+
+var ListItemAlign;
+(function (ListItemAlign) {
+  ListItemAlign[ListItemAlign["Start"] = 0] = "Start";
+  ListItemAlign[ListItemAlign["Center"] = 1] = "Center";
+  ListItemAlign[ListItemAlign["End"] = 2] = "End";
+})(ListItemAlign || (ListItemAlign = {}));

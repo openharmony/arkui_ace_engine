@@ -92,10 +92,17 @@ abstract class View extends NativeView implements
   }
 
   // globally unique id, this is different from compilerAssignedUniqueChildId!
-  id(): number {
+  id__(): number {
     return this.id_;
   }
 
+  // temporary function, do not use, it will be removed soon!
+  // prupsoe is to allow eDSL transpiler to fix a bug that 
+  // relies on this method
+  id() {
+    return this.id__();
+  }
+  
   // inform the subscribed property
   // that the View and thereby all properties
   // are about to be deleted

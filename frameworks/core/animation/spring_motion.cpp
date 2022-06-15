@@ -31,6 +31,10 @@ SpringMotion::SpringMotion(double start, double end, double velocity, const RefP
 
 SpringModelType SpringMotion::GetType()
 {
+    if (model_ == nullptr) {
+        LOGE("SpringModel is nullptr.");
+        return SpringModelType::CRITICAL_DAMPED;
+    }
     return model_->GetType();
 }
 
@@ -74,6 +78,10 @@ void SpringMotion::Reset(double start, double end, double velocity, const RefPtr
 
 void SpringMotion::Move(float offsetTime)
 {
+    if (model_ == nullptr) {
+        LOGE("SpringModel is nullptr.");
+        return;
+    }
     // change millisecond to second.
     float offsetTimeInSecond = offsetTime / UNIT_CONVERT;
     currentPosition_ = endPosition_ + model_->Position(offsetTimeInSecond);
@@ -100,6 +108,10 @@ double ScrollSpringMotion::GetCurrentPosition()
 
 void ScrollSpringMotion::Move(float offsetTime)
 {
+    if (model_ == nullptr) {
+        LOGE("SpringModel is nullptr.");
+        return;
+    }
     // change millisecond to second.
     float offsetTimeInSecond = offsetTime / UNIT_CONVERT;
     currentPosition_ = endPosition_ + model_->Position(offsetTimeInSecond);

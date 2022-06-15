@@ -25,7 +25,7 @@ namespace OHOS::Ace::Framework {
 class JsiObjectTemplate {
 public:
     JsiObjectTemplate();
-    ~JsiObjectTemplate();
+    ~JsiObjectTemplate() = default;
 
 protected:
     panda::Local<panda::ObjectRef> operator*() const;
@@ -36,7 +36,7 @@ protected:
     panda::Local<panda::ObjectRef> NewInstance() const;
 
 private:
-    panda::Global<panda::ObjectRef> proto_;
+    panda::CopyableGlobal<panda::ObjectRef> proto_;
 };
 
 } // namespace OHOS::Ace::Framework

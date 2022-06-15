@@ -267,26 +267,6 @@ void AceAbility::RunEventLoop()
     controller_ = nullptr;
 }
 
-bool AceAbility::DispatchTouchEvent(const TouchEvent& event)
-{
-    return EventDispatcher::GetInstance().DispatchTouchEvent(event);
-}
-
-bool AceAbility::DispatchBackPressedEvent()
-{
-    return EventDispatcher::GetInstance().DispatchBackPressedEvent();
-}
-
-bool AceAbility::DispatchInputMethodEvent(unsigned int code_point)
-{
-    return EventDispatcher::GetInstance().DispatchInputMethodEvent(code_point);
-}
-
-bool AceAbility::DispatchKeyEvent(const KeyEvent& event)
-{
-    return EventDispatcher::GetInstance().DispatchKeyEvent(event);
-}
-
 void AceAbility::SetConfigChanges(const std::string& configChanges)
 {
     if (configChanges == "") {
@@ -318,20 +298,21 @@ void AceAbility::SetConfigChanges(const std::string& configChanges)
 
 void AceAbility::OnConfigurationChanged(const DeviceConfig& newConfig)
 {
+    if (newConfig.colorMode == runArgs_.deviceConfig.colorMode) {
+        return;
+    }
+    int32_t width = runArgs_.deviceWidth;
+    int32_t height = runArgs_.deviceHeight;
+    SurfaceChanged(runArgs_.deviceConfig.orientation, runArgs_.deviceConfig.density, width, height);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
         LOGE("container is null, change configuration failed.");
         return;
     }
-    if (newConfig.colorMode != runArgs_.deviceConfig.colorMode) {
-        container->UpdateDeviceConfig(newConfig);
-        runArgs_.deviceConfig.colorMode = newConfig.colorMode;
-
-        auto type = container->GetType();
-        if (type == FrontendType::DECLARATIVE_JS) {
-            container->NativeOnConfigurationUpdated(ACE_INSTANCE_ID);
-            return;
-        }
+    container->UpdateDeviceConfig(newConfig);
+    runArgs_.deviceConfig.colorMode = newConfig.colorMode;
+    if (container->GetType() == FrontendType::DECLARATIVE_JS) {
+        container->NativeOnConfigurationUpdated(ACE_INSTANCE_ID);
     }
 }
 

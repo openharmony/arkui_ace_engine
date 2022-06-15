@@ -29,6 +29,9 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr Dimension DIVIDER_THICKNESS = 1.0_px;
+} // namespace
 
 class PickerTheme final : public virtual Theme {
     DECLARE_ACE_TYPE(PickerTheme, Theme);
@@ -88,7 +91,7 @@ public:
             auto timeSplitter = themeConstants->GetInt(THEME_PICKER_TIME_SPLITTER);
             theme->timeSplitter_ = timeSplitter < 0 ? theme->timeSplitter_ : static_cast<uint32_t>(timeSplitter);
             theme->rotateInterval_ = 15.0; // when rotate 15.0 angle handle scroll of picker column.
-            theme->dividerThickness_ = themeConstants->GetDimension(THEME_PICKER_SELECT_DIVIDER_THICKNESS);
+            theme->dividerThickness_ = DIVIDER_THICKNESS;
             theme->dividerSpacing_ = themeConstants->GetDimension(THEME_PICKER_SELECT_DIVIDER_SPACING);
             theme->dividerColor_ = themeConstants->GetColor(THEME_PICKER_SELECT_DIVIDER_COLOR);
             theme->gradientHeight_ = themeConstants->GetDimension(THEME_PICKER_GRADIENT_HEIGHT);

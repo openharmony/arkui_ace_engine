@@ -160,6 +160,16 @@ public:
 
     virtual void OnClick(const KeyEvent& event);
 
+    int32_t GetTabIndex() const
+    {
+        return tabIndex_;
+    }
+
+    void SetTabIndex(int32_t tabIndex)
+    {
+        tabIndex_ = tabIndex;
+    }
+
 protected:
     virtual bool OnKeyEvent(const KeyEvent& keyEvent);
 
@@ -216,6 +226,7 @@ protected:
     std::function<void(int)> onFocusMove_;
     std::function<void()> onFocus_;
     std::function<void()> onBlur_;
+    int32_t tabIndex_ = 0;
 
 private:
     static int32_t GenerateFocusIndex();

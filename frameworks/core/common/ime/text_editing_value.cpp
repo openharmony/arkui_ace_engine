@@ -271,4 +271,9 @@ void TextEditingValue::Delete(int32_t start, int32_t end)
     selection.Update(startPos);
 }
 
+void TextEditingValue::Append(const std::string& newText)
+{
+    text = text + newText;
+}
+
 } // namespace OHOS::Ace

@@ -15,6 +15,7 @@
 
 #include "core/components/tab_bar/flutter_render_tab_bar_item.h"
 
+#include "core/components/common/painter/debug_boundary_painter.h"
 #include "core/components/common/painter/flutter_decoration_painter.h"
 #include "core/pipeline/base/flutter_render_context.h"
 

@@ -3268,6 +3268,7 @@ JsiEngine::~JsiEngine()
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
 #endif
+        nativeEngine_->DeleteEngine();
         delete nativeEngine_;
         nativeEngine_ = nullptr;
     }
@@ -3617,7 +3618,7 @@ std::string JsiEngine::GetStacktraceMessage()
     }
     std::string stack;
     arkNativeEngine->SuspendVM();
-    bool getStackSuccess = arkNativeEngine->BuildNativeAndJsBackStackTrace(stack);
+    bool getStackSuccess = arkNativeEngine->BuildJsStackTrace(stack);
     arkNativeEngine->ResumeVM();
     if (!getStackSuccess) {
         LOGE("GetStacktraceMessage arkNativeEngine get stack failed");

@@ -42,6 +42,12 @@ enum class ListEvents {
     REACH_END,
 };
 
+enum class ItemPositionState {
+    AHEAD_OF_VIEWPORT = 0,
+    IN_VIEWPORT,
+    BEHIND_VIEWPORT,
+};
+
 class ListItemGenerator : virtual public Referenced {
 public:
     static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
@@ -261,6 +267,7 @@ protected:
     bool HandleActionScroll(bool forward);
     LayoutParam MakeInnerLayout();
     Size SetItemsPosition(double mainSize, const LayoutParam& layoutParam);
+    Size SetItemsPositionForLaneList(double mainSize, const LayoutParam& layoutParam);
     bool UpdateScrollPosition(double offset, int32_t source);
 
     bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
@@ -270,6 +277,7 @@ protected:
 
     double ApplyLayoutParam();
     double LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, double mainSize);
+    double LayoutOrRecycleCurrentItemsForLaneList(const LayoutParam& layoutParam, double mainSize);
     RefPtr<RenderListItem> RequestAndLayoutNewItem(size_t index, const LayoutParam& layoutParam);
 
     RefPtr<RenderListItem> RequestListItem(size_t index);
@@ -316,6 +324,14 @@ protected:
     {
         return chainProperty_;
     }
+    void CalculateLanes();
+    ItemPositionState GetItemPositionState(double curMainPos, double lastItemMainSize);
+    double GetLaneLengthInPx(const Dimension& length);
+    double CalculateLaneCrossOffset(double crossSize, double childCrossSize);
+    void RequestNewItemsAtEnd(double& curMainPos, double mainSize, const LayoutParam& innerLayout);
+    void RequestNewItemsAtEndForLaneList(double& curMainPos, double mainSize, const LayoutParam& innerLayout);
+    void RequestNewItemsAtStart(const LayoutParam& innerLayout);
+    void RequestNewItemsAtStartForLaneList(const LayoutParam& innerLayout);
 
     RefPtr<ListComponent> component_;
 
@@ -392,6 +408,10 @@ protected:
     double estimatedHeight_ = 0.0;
 
 private:
+    int32_t lanes_ = -1;
+    double minLaneLength_ = -1.0; // in vertical list, [minLaneLength_] means the minimum width of a lane
+    double maxLaneLength_ = -1.0; // in vertical list, [maxLaneLength_] means the maximum width of a lane
+    bool isLaneList_ = false;
     bool IsReachStart();
     void HandleListEvent();
     bool ActionByScroll(bool forward, ScrollEventBack scrollEventBack);

@@ -23,15 +23,6 @@
 #include "adapter/preview/entrance/editing/text_input_client_mgr.h"
 #include "adapter/preview/entrance/flutter_ace_view.h"
 
-#ifdef USE_GLFW_WINDOW
-#include "core/common/clipboard/clipboard_proxy.h"
-#include "adapter/preview/entrance/clipboard/clipboard_impl.h"
-#include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
-#include "adapter/preview/entrance/editing/text_input_plugin.h"
-#include "flutter/shell/platform/embedder/embedder.h"
-#include "core/pipeline/layers/flutter_scene_builder.h"
-#endif
-
 namespace OHOS::Ace::Platform {
 namespace {
 
@@ -75,66 +66,6 @@ const std::map<KeyCode, wchar_t> SHIFT_PRINTABEL_SYMBOLS = {
     {KeyCode::KEY_SLASH, L'?'},
 };
 
-#ifdef USE_GLFW_WINDOW
-TouchPoint ConvertTouchPoint(flutter::PointerData* pointerItem)
-{
-    TouchPoint touchPoint;
-    // just get the max of width and height
-    touchPoint.size = pointerItem->size;
-    touchPoint.id = pointerItem->device;
-    touchPoint.force = pointerItem->pressure;
-    touchPoint.x = pointerItem->physical_x;
-    touchPoint.y = pointerItem->physical_y;
-    touchPoint.screenX = pointerItem->physical_x;
-    touchPoint.screenY = pointerItem->physical_y;
-    return touchPoint;
-}
-
-void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>& events)
-{
-    constexpr int32_t DEFAULT_ACTION_ID = 0;
-    const auto* origin = reinterpret_cast<const flutter::PointerData*>(data.data());
-    size_t size = data.size() / sizeof(flutter::PointerData);
-    auto current = const_cast<flutter::PointerData*>(origin);
-    auto end = current + size;
-
-    while (current < end) {
-        std::chrono::microseconds micros(current->time_stamp);
-        TimeStamp time(micros);
-        TouchEvent point {
-            static_cast<int32_t>(DEFAULT_ACTION_ID), static_cast<float>(current->physical_x),
-            static_cast<float>(current->physical_y), static_cast<float>(current->physical_x),
-            static_cast<float>(current->physical_y), TouchType::UNKNOWN, time, current->size,
-            static_cast<float>(current->pressure), static_cast<int64_t>(current->device)
-        };
-        point.pointers.emplace_back(ConvertTouchPoint(current));
-        switch (current->change) {
-            case flutter::PointerData::Change::kCancel:
-                point.type = TouchType::CANCEL;
-                events.push_back(point);
-                break;
-            case flutter::PointerData::Change::kAdd:
-            case flutter::PointerData::Change::kRemove:
-            case flutter::PointerData::Change::kHover:
-                break;
-            case flutter::PointerData::Change::kDown:
-                point.type = TouchType::DOWN;
-                events.push_back(point);
-                break;
-            case flutter::PointerData::Change::kMove:
-                point.type = TouchType::MOVE;
-                events.push_back(point);
-                break;
-            case flutter::PointerData::Change::kUp:
-                point.type = TouchType::UP;
-                events.push_back(point);
-                break;
-        }
-        current++;
-    }
-}
-#endif
-
 }
 
 EventDispatcher::EventDispatcher()
@@ -157,34 +88,6 @@ void EventDispatcher::Initialize()
         EventDispatcher::GetInstance().DispatchIdleEvent(deadline);
     };
     FlutterDesktopSetIdleCallback(controller_, idleNoticeCallback);
-#ifdef USE_GLFW_WINDOW
-    // Register touch eventcallback function.
-    HandleTouchEventCallback touchEventCallback = [](std::unique_ptr<flutter::PointerDataPacket>& packet) -> bool {
-        return packet && EventDispatcher::GetInstance().HandleTouchEvent(packet->data());
-    };
-    FlutterEngineRegisterHandleTouchEventCallback(std::move(touchEventCallback));
-    // Register key event and input method callback functions.
-    std::unique_ptr<TextInputPlugin> textInputPlugin = std::make_unique<TextInputPlugin>();
-    KeyboardHookCallback keyboardHookCallback = [] (const KeyEvent& event) -> bool {
-        return EventDispatcher::GetInstance().DispatchKeyEvent(event);
-    };
-    CharHookCallback charHookCallback = [] (unsigned int code_point) -> bool {
-        return EventDispatcher::GetInstance().DispatchInputMethodEvent(code_point);
-    };
-    textInputPlugin->RegisterKeyboardHookCallback(std::move(keyboardHookCallback));
-    textInputPlugin->RegisterCharHookCallback(std::move(charHookCallback));
-    FlutterDesktopAddKeyboardHookHandler(controller_, std::move(textInputPlugin));
-
-    // Register clipboard callback functions.
-    auto callbackSetClipboardData = [controller = controller_](const std::string& data) {
-        FlutterDesktopSetClipboardData(controller, data.c_str());
-    };
-    auto callbackGetClipboardData = [controller = controller_]() {
-        return FlutterDesktopGetClipboardData(controller);
-    };
-    ClipboardProxy::GetInstance()->SetDelegate(
-        std::make_unique<ClipboardProxyImpl>(callbackSetClipboardData, callbackGetClipboardData));
-#endif
 }
 
 void EventDispatcher::DispatchIdleEvent(int64_t deadline)
@@ -201,11 +104,7 @@ void EventDispatcher::DispatchIdleEvent(int64_t deadline)
         return;
     }
 
-    container->GetTaskExecutor()->PostTask(
-        [aceView, deadline] () {
-            aceView->ProcessIdleEvent(deadline);
-        },
-        TaskExecutor::TaskType::PLATFORM);
+    aceView->ProcessIdleEvent(deadline);
 }
 
 bool EventDispatcher::DispatchTouchEvent(const TouchEvent& event)
@@ -223,15 +122,7 @@ bool EventDispatcher::DispatchTouchEvent(const TouchEvent& event)
         return false;
     }
 
-    std::promise<bool> touchPromise;
-    std::future<bool> touchFuture = touchPromise.get_future();
-    container->GetTaskExecutor()->PostTask(
-        [aceView, event, &touchPromise]() {
-            bool isHandled = aceView->HandleTouchEvent(event);
-            touchPromise.set_value(isHandled);
-        },
-        TaskExecutor::TaskType::PLATFORM);
-    return touchFuture.get();
+    return aceView->HandleTouchEvent(event);
 }
 
 bool EventDispatcher::DispatchBackPressedEvent()
@@ -293,8 +184,16 @@ bool EventDispatcher::DispatchKeyEvent(const KeyEvent& event)
         LOGE("aceView is null");
         return false;
     }
-
+#ifdef USE_GLFW_WINDOW
+    container->GetTaskExecutor()->PostTask(
+        [aceView, event]() {
+            aceView->HandleKeyEvent(event);
+        },
+        TaskExecutor::TaskType::UI);
+    return true;
+#else
     return aceView->HandleKeyEvent(event);
+#endif
 }
 
 void EventDispatcher::RegisterCallbackGetCapsLockStatus(CallbackGetKeyboardStatus callback)
@@ -363,30 +262,5 @@ bool EventDispatcher::HandleTextKeyEvent(const KeyEvent& event)
     return TextInputClientMgr::GetInstance().AddCharacter(keyChar);
 #endif
 }
-
-#ifdef USE_GLFW_WINDOW
-bool EventDispatcher::HandleTouchEvent(const std::vector<uint8_t>& data)
-{
-    LOGI("Handle touch event in previewer samples.");
-    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null");
-        return false;
-    }
-
-    auto aceView = container->GetAceView();
-    if (!aceView) {
-        LOGE("aceView is null");
-        return false;
-    }
-        
-    std::vector<TouchEvent> touchEvents;
-    ConvertTouchEvent(data, touchEvents);
-    for (const auto& point : touchEvents) {
-        aceView->HandleTouchEvent(point);
-    }
-    return true;
-}
-#endif
 
 } // namespace OHOS::Ace::Platform

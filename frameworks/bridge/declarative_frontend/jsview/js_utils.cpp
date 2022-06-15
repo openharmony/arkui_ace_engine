@@ -49,7 +49,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 #elif USE_QUICKJS_ENGINE
     JSValue value = obj.Get().GetHandle();
 #elif USE_ARK_ENGINE
-    panda::Local<JsiValue> value = obj.Get().GetHandle();
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
     NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
@@ -69,7 +69,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
     return PixelMap::CreatePixelMap(pixmapPtrAddr);
 }
 
-const std::shared_ptr<Rosen::RSSurfaceNode>& CreateRSSurfaceNodeFromNapiValue(JSRef<JSVal> obj)
+const std::shared_ptr<Rosen::RSSurfaceNode> CreateRSSurfaceNodeFromNapiValue(JSRef<JSVal> obj)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!obj->IsObject()) {
@@ -91,7 +91,7 @@ const std::shared_ptr<Rosen::RSSurfaceNode>& CreateRSSurfaceNodeFromNapiValue(JS
 #elif USE_QUICKJS_ENGINE
     JSValue value = obj.Get().GetHandle();
 #elif USE_ARK_ENGINE
-    panda::Local<JsiValue> value = obj.Get().GetHandle();
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
     NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);

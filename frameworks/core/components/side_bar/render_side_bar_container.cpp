@@ -304,8 +304,19 @@ Dimension RenderSideBarContainer::ConvertWidthToPercent(const Dimension& width) 
     }
 
     auto percentValue = 0.0;
-    if (!NearZero(GetLayoutSize().Width())) {
-        percentValue = width.Value() / GetLayoutSize().Width();
+    if (NearZero(GetLayoutSize().Width())) {
+        return Dimension(percentValue, DimensionUnit::PERCENT);
+    }
+
+    switch (width.Unit()) {
+        case DimensionUnit::VP:
+            percentValue = width.ConvertToPx() / GetLayoutSize().Width();
+            break;
+        case DimensionUnit::PX:
+            percentValue = width.Value() / GetLayoutSize().Width();
+            break;
+        default:
+            break;
     }
 
     return Dimension(percentValue, DimensionUnit::PERCENT);
@@ -462,11 +473,12 @@ void RenderSideBarContainer::HandleDragUpdate(double xOffset)
     if (status_ != SideStatus::SHOW) {
         return;
     }
+    bool isSideBarWidthUnitPercent = sidebarWidth_.Unit() == DimensionUnit::PERCENT;
     auto sideBarLine = ConvertWidthToVp(preSidebarWidth_).ConvertToPx() + xOffset;
     auto minValue = ConvertWidthToVp(minSidebarWidth_).ConvertToPx();
     auto maxValue = ConvertWidthToVp(maxSidebarWidth_).ConvertToPx();
     if (sideBarLine > minValue && sideBarLine < maxValue) {
-        if (sidebarWidth_.Unit() == DimensionUnit::PERCENT) {
+        if (isSideBarWidthUnitPercent) {
             sidebarWidth_ = ConvertWidthToPercent(Dimension(SystemProperties::Px2Vp(sideBarLine), DimensionUnit::VP));
         } else {
             sidebarWidth_ = Dimension(SystemProperties::Px2Vp(sideBarLine), DimensionUnit::VP);
@@ -476,16 +488,16 @@ void RenderSideBarContainer::HandleDragUpdate(double xOffset)
         return;
     }
     if (sideBarLine > maxValue) {
-        sidebarWidth_ = maxSidebarWidth_;
+        sidebarWidth_ = isSideBarWidthUnitPercent ? ConvertWidthToPercent(maxSidebarWidth_) : maxSidebarWidth_;
         SetChildrenStatus();
         return;
     }
     if (sideBarLine > minValue - DEFAULT_DRAG_REGION.ConvertToPx()) {
-        sidebarWidth_ = minSidebarWidth_;
+        sidebarWidth_ = isSideBarWidthUnitPercent ? ConvertWidthToPercent(minSidebarWidth_) : minSidebarWidth_;
         SetChildrenStatus();
         return;
     }
-    sidebarWidth_ = minSidebarWidth_;
+    sidebarWidth_ = isSideBarWidthUnitPercent ? ConvertWidthToPercent(minSidebarWidth_) : minSidebarWidth_;
     if (autoHide_) {
         DoSideBarAnimation();
     }

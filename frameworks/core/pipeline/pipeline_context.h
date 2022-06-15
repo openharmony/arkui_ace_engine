@@ -45,6 +45,7 @@
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/window_animation_config.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/page/page_component.h"
@@ -100,7 +101,7 @@ struct WindowBlurInfo {
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 using SubscribeCtrlACallback = std::function<void()>;
 
-class ACE_EXPORT PipelineContext final : public AceType {
+class ACE_EXPORT PipelineContext : public AceType {
     DECLARE_ACE_TYPE(PipelineContext, AceType);
 
 public:
@@ -120,7 +121,7 @@ public:
 
     ~PipelineContext() override;
 
-    RefPtr<Element> SetupRootElement();
+    virtual void SetupRootElement();
 
     // This is used for subwindow, when the subwindow is created,a new subrootElement will be built
     RefPtr<Element> SetupSubRootElement();
@@ -156,7 +157,7 @@ public:
 
     bool CanReplacePage();
 
-    bool ClearInvisiblePages();
+    bool ClearInvisiblePages(const std::function<void()>& listener = nullptr);
 
     bool CallRouterBackToPopPage();
 
@@ -265,9 +266,9 @@ public:
         eventTrigger_.TriggerSyncEvent(marker, std::forward<Args>(args)...);
     }
 
-    void PostAsyncEvent(TaskExecutor::Task&& task);
+    void PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    void PostAsyncEvent(const TaskExecutor::Task& task);
+    void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED);
@@ -391,7 +392,6 @@ public:
     }
     void NotifyDispatchTouchEventDismiss(const TouchEvent& event) const;
 
-
     float GetViewScale() const
     {
         return viewScale_;
@@ -401,6 +401,18 @@ public:
     double GetDipScale() const
     {
         return dipScale_;
+    }
+
+    // Get the widnow design scale used to covert lpx to logic px.
+    double GetLogicScale() const
+    {
+        return designWidthScale_;
+    }
+
+    // Get the font scale used to covert fp to logic px.
+    double GetFontUnitScale() const
+    {
+        return dipScale_ * fontScale_;
     }
 
     double GetRootHeight() const
@@ -947,8 +959,8 @@ public:
     void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
     void OnDragEvent(int32_t x, int32_t y, DragEventAction action);
-    void SetPreTargetRenderNode(const RefPtr<RenderNode>& preTargetRenderNode);
-    const RefPtr<RenderNode> GetPreTargetRenderNode() const;
+    void SetPreTargetRenderNode(const RefPtr<DragDropEvent>& preDragDropNode);
+    const RefPtr<DragDropEvent>& GetPreTargetRenderNode() const;
     void SetInitRenderNode(const RefPtr<RenderNode>& initRenderNode);
     const RefPtr<RenderNode>& GetInitRenderNode() const;
 
@@ -1257,13 +1269,32 @@ public:
         return isTabKeyPressed_;
     }
 
+    bool GetIsFocusingByTab() const
+    {
+        return isFocusingByTab_;
+    }
+
+    void SetIsFocusingByTab(bool isFocusingByTab)
+    {
+        isFocusingByTab_ = isFocusingByTab;
+    }
+protected:
+    virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
+    virtual void SetRootRect(double width, double height, double offset = 0.0);
+    virtual void FlushPipelineWithoutAnimation();
+    void FlushMessages();
+
+    std::unique_ptr<Window> window_;
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
+    RefPtr<ThemeManager> themeManager_;
+    double rootHeight_ = 0.0;
+    double rootWidth_ = 0.0;
+    bool hasIdleTasks_ = false;
+
 private:
-    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
-    void FlushPipelineWithoutAnimation();
     void FlushLayout();
     void FlushGeometryProperties();
     void FlushRender();
-    void FlushMessages();
     void FlushRenderFinish();
     void FireVisibleChangeEvent();
     void FlushPredictLayout(int64_t deadline);
@@ -1273,7 +1304,6 @@ private:
     void ProcessPreFlush();
     void ProcessPostFlush();
     void SetRootSizeWithWidthHeight(int32_t width, int32_t height, int32_t offset = 0);
-    void SetRootRect(double width, double height, double offset = 0.0) const;
     void FlushBuildAndLayoutBeforeSurfaceReady();
     void FlushAnimationTasks();
     void DumpAccessibility(const std::vector<std::string>& params) const;
@@ -1291,7 +1321,8 @@ private:
         {
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
-            } else if (nodeLeft->GetDepth() == nodeRight->GetDepth()) {
+            }
+            if (nodeLeft->GetDepth() == nodeRight->GetDepth()) {
                 return nodeLeft < nodeRight;
             }
             return false;
@@ -1329,7 +1360,6 @@ private:
     std::list<RefPtr<FlushEvent>> postFlushListeners_;
     std::list<RefPtr<FlushEvent>> postAnimationFlushListeners_;
     std::list<RefPtr<FlushEvent>> preFlushListeners_;
-    std::unique_ptr<Window> window_;
     RefPtr<FocusAnimationManager> focusAnimationManager_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
@@ -1341,7 +1371,6 @@ private:
     WeakPtr<Frontend> weakFrontend_;
     RefPtr<ImageCache> imageCache_;
     RefPtr<FontManager> fontManager_;
-    RefPtr<ThemeManager> themeManager_;
     RefPtr<SharedImageManager> sharedImageManager_;
     std::list<std::function<void()>> buildAfterCallback_;
     RefPtr<RenderFactory> renderFactory_;
@@ -1405,7 +1434,7 @@ private:
     std::function<void()> queryIfWindowInScreenCallback_;
     std::atomic<bool> isWindowInScreen_ = true;
 
-    RefPtr<RenderNode> preTargetRenderNode_;
+    RefPtr<DragDropEvent> preTargetRenderNode_;
 
     bool isRightToLeft_ = false;
     bool isSurfaceReady_ = false;
@@ -1418,11 +1447,8 @@ private:
     int32_t cardAppearingDuration_ = 0;
     double statusBarHeight_ = 0.0;     // dp
     double navigationBarHeight_ = 0.0; // dp
-    double rootHeight_ = 0.0;
-    double rootWidth_ = 0.0;
     bool needForcedRefresh_ = false;
     bool isFlushingAnimation_ = false;
-    bool hasIdleTasks_ = false;
     bool isMoving_ = false;
     std::atomic<bool> onShow_ = true;
     bool isKeyEvent_ = false;
@@ -1477,7 +1503,6 @@ private:
     Offset pluginEventOffset_ { 0, 0 };
 
     bool isRebuildFinished_ = false;
-    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
 
     std::function<void(const std::string&)> onVsyncProfiler_;
 
@@ -1485,6 +1510,7 @@ private:
     bool isCtrlDown_ = false;
     bool isKeyboardA_ = false;
     bool isTabKeyPressed_ = false;
+    bool isFocusingByTab_ = false;
     SubscribeCtrlACallback subscribeCtrlA_;
 
     int32_t appLabelId_ = 0;
@@ -1505,6 +1531,8 @@ private:
     RefPtr<Clipboard> clipboard_;
     RefPtr<RenderNode> initRenderNode_;
     std::string customDragInfo_;
+    std::string selectedText_;
+    std::string imageSrc_;
     Offset pageOffset_;
     Offset rootOffset_;
 

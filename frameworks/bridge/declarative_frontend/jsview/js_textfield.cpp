@@ -591,6 +591,23 @@ void JSTextField::SetOnClick(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+void JSTextField::SetCopyOption(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        return;
+    }
+    auto copyOption = CopyOption::NoCopy;
+    if (info[0]->IsBoolean()) {
+        auto enable = info[0]->ToBoolean();
+        copyOption = enable ? CopyOption::Distributed : CopyOption::NoCopy;
+    } else if (info[0]->IsNumber()) {
+        auto emunNumber = info[0]->ToNumber<int>() + 1;
+        copyOption = static_cast<CopyOption>(emunNumber);
+    }
+    LOGI("copy option: %{public}d", copyOption);
+    JSViewSetProperty(&TextFieldComponent::SetCopyOption, copyOption);
+}
+
 void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
     const RefPtr<TextFieldComponent>& component, const Border& boxBorder,
     const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)

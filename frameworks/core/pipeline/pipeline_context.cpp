@@ -78,6 +78,7 @@
 #include "core/components/semi_modal/semi_modal_theme.h"
 #include "core/components/stage/stage_component.h"
 #include "core/components/stage/stage_element.h"
+#include "core/components/text_field/render_text_field.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
@@ -785,7 +786,7 @@ void PipelineContext::SetClipHole(double left, double top, double width, double 
     transparentHole_.SetHeight(height);
 }
 
-RefPtr<Element> PipelineContext::SetupRootElement()
+void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
     RefPtr<StageComponent> rootStage = AceType::MakeRefPtr<StageComponent>(std::list<RefPtr<Component>>());
@@ -830,7 +831,7 @@ RefPtr<Element> PipelineContext::SetupRootElement()
     if (!rootElement_) {
         LOGE("SetupRootElement failed!");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-        return RefPtr<Element>();
+        return;
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
@@ -855,7 +856,6 @@ RefPtr<Element> PipelineContext::SetupRootElement()
 
     requestedRenderNode_.Reset();
     LOGI("SetupRootElement success!");
-    return rootElement_;
 }
 
 RefPtr<Element> PipelineContext::SetupSubRootElement()
@@ -1285,11 +1285,11 @@ void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent)
     ReplacePage(pageComponent, nullptr);
 }
 
-bool PipelineContext::ClearInvisiblePages()
+bool PipelineContext::ClearInvisiblePages(const std::function<void()>& listener)
 {
     LOGD("ClearInvisiblePageComponents");
     auto stageElement = GetStageElement();
-    return stageElement && stageElement->ClearOffStage();
+    return stageElement && stageElement->ClearOffStage(listener);
 }
 
 void PipelineContext::ExitAnimation()
@@ -1556,6 +1556,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         LOGD("receive touch down event, first use touch test to collect touch event target");
         eventManager_->HandleGlobalEvent(scalePoint, textOverlayManager_);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = point.sourceType;
         auto frontEnd = GetFrontend();
         if (frontEnd && (frontEnd->GetType() == FrontendType::JS_CARD)) {
             touchRestrict.UpdateForbiddenType(TouchRestrict::LONG_PRESS);
@@ -1635,10 +1636,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
     }
 
-    if (event.code == KeyCode::KEY_TAB && !isTabKeyPressed_) {
+    if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN && !isTabKeyPressed_) {
         isTabKeyPressed_ = true;
         FlushFocus();
-        return true;
     }
     return eventManager_->DispatchKeyEvent(event, rootElement_);
 }
@@ -2180,7 +2180,7 @@ void PipelineContext::SetRootSize(double density, int32_t width, int32_t height)
         TaskExecutor::TaskType::UI);
 }
 
-void PipelineContext::SetRootRect(double width, double height, double offset) const
+void PipelineContext::SetRootRect(double width, double height, double offset)
 {
     CHECK_RUN_ON(UI);
     if (NearZero(viewScale_) || !rootElement_) {
@@ -2767,6 +2767,7 @@ void PipelineContext::OnPageShow()
 {
     CHECK_RUN_ON(UI);
     isTabKeyPressed_ = false;
+    eventManager_->SetIsTabNodesCollected(false);
     if (onPageShowCallBack_) {
         onPageShowCallBack_();
     }
@@ -3043,12 +3044,12 @@ void PipelineContext::StartSystemDrag(const std::string& str, const RefPtr<Pixel
     dragEventHandler_(str, pixmap);
 }
 
-void PipelineContext::SetPreTargetRenderNode(const RefPtr<RenderNode>& preTargetRenderNode)
+void PipelineContext::SetPreTargetRenderNode(const RefPtr<DragDropEvent>& preDragDropNode)
 {
-    preTargetRenderNode_ = preTargetRenderNode;
+    preTargetRenderNode_ = preDragDropNode;
 }
 
-const RefPtr<RenderNode> PipelineContext::GetPreTargetRenderNode() const
+const RefPtr<DragDropEvent>& PipelineContext::GetPreTargetRenderNode() const
 {
     return preTargetRenderNode_;
 }
@@ -3066,84 +3067,95 @@ const RefPtr<RenderNode>& PipelineContext::GetInitRenderNode() const
 void PipelineContext::ProcessDragEvent(
     const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint)
 {
-    auto targetRenderBox =
-        AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint - pageOffset_));
-    auto initRenderBox = AceType::DynamicCast<RenderBox>(GetInitRenderNode());
+    auto targetDragDropNode =
+        AceType::DynamicCast<DragDropEvent>(renderNode->FindDropChild(globalPoint, globalPoint - pageOffset_));
+    auto initDragDropNode = AceType::DynamicCast<DragDropEvent>(GetInitRenderNode());
     auto extraParams = JsonUtil::Create(true);
     extraParams->Put("customDragInfo", customDragInfo_.c_str());
+    extraParams->Put("selectedText", selectedText_.c_str());
+    extraParams->Put("imageSrc", imageSrc_.c_str());
     auto info = GestureEvent();
     info.SetGlobalPoint(globalPoint);
-    auto preTargetRenderBox = AceType::DynamicCast<RenderBox>(GetPreTargetRenderNode());
+    auto preTargetDragDropNode = GetPreTargetRenderNode();
 
-    if (targetRenderBox == preTargetRenderBox) {
-        if (targetRenderBox && targetRenderBox->GetOnDragMove()) {
+    if (targetDragDropNode == preTargetDragDropNode) {
+        if (targetDragDropNode && targetDragDropNode->GetOnDragMove()) {
             auto renderList = renderNode->FindChildNodeOfClass<V2::RenderList>(globalPoint, globalPoint);
             if (renderList) {
                 insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
             }
 
             if (insertIndex_ == RenderNode::DEFAULT_INDEX) {
-                (targetRenderBox->GetOnDragMove())(event, extraParams->ToString());
+                (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
                 return;
             }
 
-            if (targetRenderBox != initRenderBox) {
+            if (targetDragDropNode != initDragDropNode) {
                 extraParams->Put("selectedIndex", -1);
             } else {
                 extraParams->Put("selectedIndex", selectedIndex_);
             }
 
             extraParams->Put("insertIndex", insertIndex_);
-            (targetRenderBox->GetOnDragMove())(event, extraParams->ToString());
+            (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
         }
     } else {
-        if (preTargetRenderBox && preTargetRenderBox->GetOnDragLeave()) {
-            (preTargetRenderBox->GetOnDragLeave())(event, extraParams->ToString());
+        if (preTargetDragDropNode && preTargetDragDropNode->GetOnDragLeave()) {
+            (preTargetDragDropNode->GetOnDragLeave())(event, extraParams->ToString());
         }
 
-        if (targetRenderBox && targetRenderBox->GetOnDragEnter()) {
-            (targetRenderBox->GetOnDragEnter())(event, extraParams->ToString());
+        if (targetDragDropNode && targetDragDropNode->GetOnDragEnter()) {
+            (targetDragDropNode->GetOnDragEnter())(event, extraParams->ToString());
         }
 
-        SetPreTargetRenderNode(targetRenderBox);
+        SetPreTargetRenderNode(targetDragDropNode);
     }
 }
 
 void PipelineContext::ProcessDragEventEnd(
     const RefPtr<RenderNode>& renderNode, const RefPtr<DragEvent>& event, const Point& globalPoint)
 {
-    auto targetRenderBox =
-        AceType::DynamicCast<RenderBox>(renderNode->FindDropChild(globalPoint, globalPoint - pageOffset_));
-    auto initRenderBox = AceType::DynamicCast<RenderBox>(GetInitRenderNode());
+    auto targetDragDropNode =
+        AceType::DynamicCast<DragDropEvent>(renderNode->FindDropChild(globalPoint, globalPoint - pageOffset_));
+    auto initDragDropNode = AceType::DynamicCast<DragDropEvent>(GetInitRenderNode());
     auto extraParams = JsonUtil::Create(true);
     extraParams->Put("customDragInfo", customDragInfo_.c_str());
+    extraParams->Put("selectedText", selectedText_.c_str());
+    extraParams->Put("imageSrc", imageSrc_.c_str());
     auto info = GestureEvent();
     info.SetGlobalPoint(globalPoint);
-    auto preTargetRenderBox = AceType::DynamicCast<RenderBox>(GetPreTargetRenderNode());
+    auto preTargetDragDropNode = GetPreTargetRenderNode();
 
-    if (targetRenderBox && targetRenderBox->GetOnDrop()) {
+    auto textfield = renderNode->FindChildNodeOfClass<RenderTextField>(globalPoint, globalPoint);
+    if (textfield) {
+        auto value = textfield->GetEditingValue();
+        value.Append(selectedText_);
+        textfield->SetEditingValue(std::move(value));
+    }
+
+    if (targetDragDropNode && targetDragDropNode->GetOnDrop()) {
         auto renderList = renderNode->FindChildNodeOfClass<V2::RenderList>(globalPoint, globalPoint);
         if (renderList) {
             insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
         }
 
         if (insertIndex_ == RenderNode::DEFAULT_INDEX) {
-            (targetRenderBox->GetOnDrop())(event, extraParams->ToString());
+            (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
             return;
         }
 
-        if (targetRenderBox != initRenderBox) {
+        if (targetDragDropNode != initDragDropNode) {
             extraParams->Put("selectedIndex", -1);
         } else {
             extraParams->Put("selectedIndex", selectedIndex_);
         }
 
         extraParams->Put("insertIndex", insertIndex_);
-        (targetRenderBox->GetOnDrop())(event, extraParams->ToString());
+        (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
     }
 
-    if (initRenderBox && initRenderBox->GetOnDrop()) {
-        (initRenderBox->GetOnDrop())(event, extraParams->ToString());
+    if (initDragDropNode && initDragDropNode->GetOnDrop()) {
+        (initDragDropNode->GetOnDrop())(event, extraParams->ToString());
     }
 
     SetPreTargetRenderNode(nullptr);
@@ -3165,6 +3177,8 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
                 pipelineContext->selectedItemSize_.SetHeight(json->GetDouble("height"));
                 pipelineContext->selectedIndex_ = json->GetInt("selectedIndex");
                 pipelineContext->customDragInfo_ = json->GetString("customDragInfo");
+                pipelineContext->selectedText_ = json->GetString("selectedText");
+                pipelineContext->imageSrc_ = json->GetString("imageSrc");
             }
         };
 
@@ -3704,19 +3718,19 @@ void PipelineContext::RemoveTouchPipeline(WeakPtr<PipelineContext> context)
     }
 }
 
-void PipelineContext::PostAsyncEvent(TaskExecutor::Task&& task)
+void PipelineContext::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
-        taskExecutor_->PostTask(std::move(task), TaskExecutor::TaskType::UI);
+        taskExecutor_->PostTask(std::move(task), type);
     } else {
         LOGE("the task executor is nullptr");
     }
 }
 
-void PipelineContext::PostAsyncEvent(const TaskExecutor::Task& task)
+void PipelineContext::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+        taskExecutor_->PostTask(task, type);
     } else {
         LOGE("the task executor is nullptr");
     }

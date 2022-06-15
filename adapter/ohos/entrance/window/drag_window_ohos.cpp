@@ -16,6 +16,12 @@
 #include "drag_window_ohos.h"
 
 #include "base/log/log_wrapper.h"
+#include "core/components/text/render_text.h"
+
+#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "flutter/fml/memory/ref_counted.h"
+#include "flutter/lib/ui/painting/image.h"
+#include "fml/memory/ref_ptr.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -92,6 +98,24 @@ void DrawSkImage(SkCanvas* canvas, const RefPtr<PixelMap>& pixelmap, int32_t wid
     paint.setColor(paint.getColor4f(), colorSpace.get());
 #endif
     auto skSrcRect = SkRect::MakeXYWH(0, 0, pixelmap->GetWidth(), pixelmap->GetHeight());
+    auto skDstRect = SkRect::MakeXYWH(0, 0, width, height);
+    canvas->drawImageRect(skImage, skSrcRect, skDstRect, &paint);
+}
+
+void DrawSkImage(SkCanvas* canvas, const sk_sp<SkImage>& skImage, int32_t width, int32_t height)
+{
+    if (!skImage) {
+        LOGE("sk image is nullptr");
+        return;
+    }
+    SkPaint paint;
+    sk_sp<SkColorSpace> colorSpace = skImage->refColorSpace();
+#ifdef USE_SYSTEM_SKIA
+    paint.setColor4f(paint.getColor4f(), colorSpace.get());
+#else
+    paint.setColor(paint.getColor4f(), colorSpace.get());
+#endif
+    auto skSrcRect = SkRect::MakeXYWH(0, 0, skImage->width(), skImage->height());
     auto skDstRect = SkRect::MakeXYWH(0, 0, width, height);
     canvas->drawImageRect(skImage, skSrcRect, skDstRect, &paint);
 }
@@ -174,6 +198,104 @@ void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
     auto skia = canvasNode->BeginRecording(rect.width_, rect.height_);
     DrawSkImage(skia, pixelmap, rect.width_, rect.height_);
+    canvasNode->FinishRecording();
+    rsUiDirector_->SendMessages();
+}
+
+void DragWindowOhos::DrawImage(void* skImage)
+{
+    if (!skImage) {
+        LOGE("Skimage is nullptr");
+        return;
+    }
+    fml::RefPtr<flutter::CanvasImage>* canvasImagePtr =
+        reinterpret_cast<fml::RefPtr<flutter::CanvasImage>*>(skImage);
+    if (!canvasImagePtr) {
+        LOGE("CanvasImagePtr is nullptr");
+        return;
+    }
+    fml::RefPtr<flutter::CanvasImage> canvasImage = *canvasImagePtr;
+    if (!canvasImage) {
+        LOGE("CanvasImage is nullptr");
+        return;
+    }
+    auto rect = dragWindow_->GetRect();
+    auto surfaceNode = dragWindow_->GetSurfaceNode();
+    rsUiDirector_ = Rosen::RSUIDirector::Create();
+    rsUiDirector_->Init();
+    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+    rsUiDirector_->SetRSSurfaceNode(surfaceNode);
+    rootNode_ = Rosen::RSRootNode::Create();
+    rootNode_->SetBounds(0, 0, rect.width_, rect.height_);
+    rootNode_->SetFrame(0, 0, rect.width_, rect.height_);
+    rsUiDirector_->SetRoot(rootNode_->GetId());
+    auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
+    auto skia = canvasNode->BeginRecording(rect.width_, rect.height_);
+    DrawSkImage(skia, canvasImage->image(), rect.width_, rect.height_);
+    canvasNode->FinishRecording();
+    rsUiDirector_->SendMessages();
+}
+
+void DragWindowOhos::DrawText(std::shared_ptr<txt::Paragraph> paragraph,
+    const Offset& offset, const RefPtr<RenderText>& renderText)
+{
+    if (!paragraph) {
+        LOGE("Paragraph is nullptr");
+        return;
+    }
+    auto rect = dragWindow_->GetRect();
+    auto surfaceNode = dragWindow_->GetSurfaceNode();
+    rsUiDirector_ = Rosen::RSUIDirector::Create();
+    rsUiDirector_->Init();
+    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+    rsUiDirector_->SetRSSurfaceNode(surfaceNode);
+    rootNode_ = Rosen::RSRootNode::Create();
+    rootNode_->SetBounds(0, 0, rect.width_, rect.height_);
+    rootNode_->SetFrame(0, 0, rect.width_, rect.height_);
+    rsUiDirector_->SetRoot(rootNode_->GetId());
+    auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
+    SkPath path;
+    if (renderText->GetStartOffset().GetY() == renderText->GetEndOffset().GetY()) {
+        path.moveTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
+        path.lineTo(renderText->GetEndOffset().GetX() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetEndOffset().GetY() - renderText->GetGlobalOffset().GetY());
+        path.lineTo(renderText->GetEndOffset().GetX() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetEndOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
+        path.lineTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetStartOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
+        path.lineTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
+    } else {
+        path.moveTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
+        path.lineTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetStartOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
+        path.lineTo(renderText->GetPaintRect().Right() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetStartOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
+        path.lineTo(renderText->GetPaintRect().Right() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetEndOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
+        path.lineTo(renderText->GetEndOffset().GetX() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetEndOffset().GetY() - renderText->GetSelectHeight() - renderText->GetGlobalOffset().GetY());
+        path.lineTo(renderText->GetEndOffset().GetX() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetEndOffset().GetY() - renderText->GetGlobalOffset().GetY());
+        path.lineTo(renderText->GetPaintRect().Left() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetEndOffset().GetY() - renderText->GetGlobalOffset().GetY());
+        path.lineTo(renderText->GetPaintRect().Left() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
+        path.lineTo(renderText->GetStartOffset().GetX() - renderText->GetGlobalOffset().GetX(),
+            renderText->GetStartOffset().GetY() - renderText->GetGlobalOffset().GetY());
+    }
+    rootNode_->SetClipToBounds(true);
+    rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
+    auto skia = canvasNode->BeginRecording(rect.width_, rect.height_);
+    paragraph->Paint(skia, offset.GetX(), offset.GetY());
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 }

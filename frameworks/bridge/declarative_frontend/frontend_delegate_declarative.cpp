@@ -31,6 +31,7 @@
 #include "core/common/thread_checker.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
@@ -689,7 +690,6 @@ bool FrontendDelegateDeclarative::FireSyncEvent(
     return (resultStr == "true");
 }
 
-
 void FrontendDelegateDeclarative::FireExternalEvent(
     const std::string& eventId, const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
@@ -739,155 +739,53 @@ void FrontendDelegateDeclarative::InitializeAccessibilityCallback()
 // Start FrontendDelegate overrides.
 void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string& params)
 {
+    {
+        std::lock_guard<std::mutex> lock(routerQueueMutex_);
+        if (!routerQueue_.empty()) {
+            AddRouterTask(RouterTask { RouterAction::PUSH, uri, params });
+            return;
+        }
+        AddRouterTask(RouterTask { RouterAction::PUSH, uri, params });
+    }
     Push(PageTarget(uri), params);
 }
 
 void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::string& params)
 {
+    {
+        std::lock_guard<std::mutex> lock(routerQueueMutex_);
+        if (!routerQueue_.empty()) {
+            AddRouterTask(RouterTask { RouterAction::REPLACE, uri, params });
+            return;
+        }
+        AddRouterTask(RouterTask { RouterAction::REPLACE, uri, params });
+    }
     Replace(PageTarget(uri), params);
 }
 
 void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string& params)
 {
     {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (pageRouteStack_.empty()) {
-            LOGI("page route stack is empty");
+        std::lock_guard<std::mutex> lock(routerQueueMutex_);
+        if (!routerQueue_.empty()) {
+            AddRouterTask(RouterTask { RouterAction::BACK, uri, params });
             return;
         }
-        auto& currentPage = pageRouteStack_.back();
-        if (currentPage.isAlertBeforeBackPage) {
-            backUri_ = uri;
-            backParam_ = params;
-            taskExecutor_->PostTask(
-                [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
-                    isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
-                        if (context) {
-                            context->ShowDialog(dialogProperties, isRightToLeft);
-                        }
-                    },
-                TaskExecutor::TaskType::UI);
-            return;
-        }
+        AddRouterTask(RouterTask { RouterAction::BACK, uri, params });
     }
-    BackWithTarget(PageTarget(uri), params);
-}
-
-void FrontendDelegateDeclarative::Push(const PageTarget& target, const std::string& params)
-{
-    if (target.url.empty()) {
-        LOGE("router.Push uri is empty");
-        return;
-    }
-    if (isRouteStackFull_) {
-        LOGE("the router stack has reached its max size, you can't push any more pages.");
-        EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, target.url);
-        return;
-    }
-
-    std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
-    LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
-    if (!pagePath.empty()) {
-        LoadPage(GenerateNextPageId(), PageTarget(pagePath, target.container), false, params);
-    } else {
-        LOGW("[Engine Log] this uri not support in route push.");
-    }
-}
-
-void FrontendDelegateDeclarative::Replace(const PageTarget& target, const std::string& params)
-{
-    if (target.url.empty()) {
-        LOGE("router.Replace uri is empty");
-        return;
-    }
-
-    std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
-    LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
-    if (!pagePath.empty()) {
-        LoadReplacePage(GenerateNextPageId(), PageTarget(pagePath, target.container), params);
-    } else {
-        LOGW("[Engine Log] this uri not support in route replace.");
-    }
-}
-
-void FrontendDelegateDeclarative::PostponePageTransition()
-{
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this)] {
-          auto delegate = weak.Upgrade();
-          if (!delegate) {
-              return;
-          }
-          auto pipelineContext = delegate->pipelineContextHolder_.Get();
-          pipelineContext->PostponePageTransition();
-        },
-        TaskExecutor::TaskType::UI);
-}
-
-void FrontendDelegateDeclarative::LaunchPageTransition()
-{
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this)] {
-          auto delegate = weak.Upgrade();
-          if (!delegate) {
-              return;
-          }
-          auto pipelineContext = delegate->pipelineContextHolder_.Get();
-          pipelineContext->LaunchPageTransition();
-        },
-        TaskExecutor::TaskType::UI);
-}
-
-void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const std::string& params)
-{
-    LOGD("router.Back path = %{private}s", target.url.c_str());
-    if (target.url.empty()) {
-        std::string pagePath;
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            size_t pageRouteSize = pageRouteStack_.size();
-            if (pageRouteSize > 1) {
-                pageId_ = pageRouteStack_[pageRouteSize - 2].pageId;
-                if (!params.empty()) {
-                    pageParamMap_[pageId_] = params;
-                }
-                // determine whether the previous page needs to be loaded
-                if (pageRouteStack_[pageRouteSize - 2].isRestore) {
-                    pagePath =
-                        manifestParser_->GetRouter()->GetPagePath(pageRouteStack_[pageRouteSize - 2].url);
-                }
-            }
-        }
-        if (!pagePath.empty()) {
-            LoadPage(pageId_, PageTarget(pagePath), false, params, true);
-            return;
-        } else {
-            LOGW("back to invalid restore page");
-        }
-        PopPage();
-    } else {
-        std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
-        LOGD("router.Back pagePath = %{private}s", pagePath.c_str());
-        if (!pagePath.empty()) {
-            bool isRestore = false;
-            pageId_ = GetPageIdByUrl(pagePath, isRestore);
-            if (isRestore) {
-                LoadPage(pageId_, PageTarget(pagePath), false, params, true);
-                return;
-            }
-            if (!params.empty()) {
-                std::lock_guard<std::mutex> lock(mutex_);
-                pageParamMap_[pageId_] = params;
-            }
-            PopToPage(pagePath);
-        } else {
-            LOGW("[Engine Log] this uri not support in route Back.");
-        }
-    }
+    BackCheckAlert(uri, params);
 }
 
 void FrontendDelegateDeclarative::Clear()
 {
+    {
+        std::lock_guard<std::mutex> lock(routerQueueMutex_);
+        if (!routerQueue_.empty()) {
+            AddRouterTask(RouterTask { RouterAction::CLEAR });
+            return;
+        }
+        AddRouterTask(RouterTask { RouterAction::CLEAR });
+    }
     ClearInvisiblePages();
 }
 
@@ -919,6 +817,211 @@ void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, st
     }
 }
 
+std::string FrontendDelegateDeclarative::GetParams()
+{
+    if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {
+        return pageParamMap_.find(pageId_)->second;
+    } else {
+        return "";
+    }
+}
+
+void FrontendDelegateDeclarative::AddRouterTask(const RouterTask& task)
+{
+    if (routerQueue_.size() < MAX_ROUTER_STACK) {
+        routerQueue_.emplace(task);
+        LOGI("router queue's size = %{public}zu, action = %{public}d, url = %{public}s", routerQueue_.size(),
+            static_cast<uint32_t>(task.action), task.url.c_str());
+    } else {
+        LOGW("router queue is full");
+    }
+}
+
+void FrontendDelegateDeclarative::ProcessRouterTask()
+{
+    RouterTask currentTask;
+    {
+        std::lock_guard<std::mutex> lock(routerQueueMutex_);
+        if (!routerQueue_.empty()) {
+            routerQueue_.pop();
+        }
+        if (routerQueue_.empty()) {
+            return;
+        }
+        currentTask = routerQueue_.front();
+        LOGI("ProcessRouterTask current size = %{public}zu, action = %{public}d, url = %{public}s", routerQueue_.size(),
+            static_cast<uint32_t>(currentTask.action), currentTask.url.c_str());
+    }
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), currentTask] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            switch (currentTask.action) {
+                case RouterAction::PUSH:
+                    delegate->Push(PageTarget(currentTask.url), currentTask.params);
+                    break;
+                case RouterAction::REPLACE:
+                    delegate->Replace(PageTarget(currentTask.url), currentTask.params);
+                    break;
+                case RouterAction::BACK:
+                    delegate->BackCheckAlert(currentTask.url, currentTask.params);
+                    break;
+                case RouterAction::CLEAR:
+                    delegate->ClearInvisiblePages();
+                    break;
+                default:
+                    break;
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarative::Push(const PageTarget& target, const std::string& params)
+{
+    if (target.url.empty()) {
+        LOGE("router.Push uri is empty");
+        ProcessRouterTask();
+        return;
+    }
+    if (isRouteStackFull_) {
+        LOGE("the router stack has reached its max size, you can't push any more pages.");
+        EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, target.url);
+        ProcessRouterTask();
+        return;
+    }
+
+    std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
+    LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
+    if (!pagePath.empty()) {
+        LoadPage(GenerateNextPageId(), PageTarget(pagePath, target.container), false, params);
+    } else {
+        LOGW("[Engine Log] this uri not support in route push.");
+        ProcessRouterTask();
+    }
+}
+
+void FrontendDelegateDeclarative::Replace(const PageTarget& target, const std::string& params)
+{
+    if (target.url.empty()) {
+        LOGE("router.Replace uri is empty");
+        ProcessRouterTask();
+        return;
+    }
+
+    std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
+    LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
+    if (!pagePath.empty()) {
+        LoadReplacePage(GenerateNextPageId(), PageTarget(pagePath, target.container), params);
+    } else {
+        LOGW("[Engine Log] this uri not support in route replace.");
+        ProcessRouterTask();
+    }
+}
+
+void FrontendDelegateDeclarative::PostponePageTransition()
+{
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this)] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            pipelineContext->PostponePageTransition();
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void FrontendDelegateDeclarative::LaunchPageTransition()
+{
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this)] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            pipelineContext->LaunchPageTransition();
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void FrontendDelegateDeclarative::BackCheckAlert(const std::string& uri, const std::string& params)
+{
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (pageRouteStack_.empty()) {
+            LOGI("page route stack is empty");
+            ProcessRouterTask();
+            return;
+        }
+        auto& currentPage = pageRouteStack_.back();
+        if (currentPage.isAlertBeforeBackPage) {
+            backUri_ = uri;
+            backParam_ = params;
+            taskExecutor_->PostTask(
+                [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
+                    isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
+                    if (context) {
+                        context->ShowDialog(dialogProperties, isRightToLeft);
+                    }
+                },
+                TaskExecutor::TaskType::UI);
+            return;
+        }
+    }
+    BackWithTarget(PageTarget(uri), params);
+}
+
+void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const std::string& params)
+{
+    LOGD("router.Back path = %{private}s", target.url.c_str());
+    if (target.url.empty()) {
+        std::string pagePath;
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            size_t pageRouteSize = pageRouteStack_.size();
+            if (pageRouteSize > 1) {
+                pageId_ = pageRouteStack_[pageRouteSize - 2].pageId;
+                if (!params.empty()) {
+                    pageParamMap_[pageId_] = params;
+                }
+                // determine whether the previous page needs to be loaded
+                if (pageRouteStack_[pageRouteSize - 2].isRestore) {
+                    pagePath = manifestParser_->GetRouter()->GetPagePath(pageRouteStack_[pageRouteSize - 2].url);
+                }
+            }
+        }
+        if (!pagePath.empty()) {
+            LoadPage(pageId_, PageTarget(pagePath), false, params, true);
+            return;
+        }
+        LOGI("run in normal back");
+        PopPage();
+    } else {
+        std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
+        LOGD("router.Back pagePath = %{private}s", pagePath.c_str());
+        if (!pagePath.empty()) {
+            bool isRestore = false;
+            pageId_ = GetPageIdByUrl(pagePath, isRestore);
+            if (isRestore) {
+                LoadPage(pageId_, PageTarget(pagePath), false, params, true);
+                return;
+            }
+            if (!params.empty()) {
+                std::lock_guard<std::mutex> lock(mutex_);
+                pageParamMap_[pageId_] = params;
+            }
+            PopToPage(pagePath);
+        } else {
+            LOGW("[Engine Log] this uri not support in route Back.");
+            ProcessRouterTask();
+        }
+    }
+}
+
 size_t FrontendDelegateDeclarative::GetComponentsCount()
 {
     auto pipelineContext = pipelineContextHolder_.Get();
@@ -927,15 +1030,6 @@ size_t FrontendDelegateDeclarative::GetComponentsCount()
         return pageElement->GetComponentsCount();
     }
     return 0;
-}
-
-std::string FrontendDelegateDeclarative::GetParams()
-{
-    if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {
-        return pageParamMap_.find(pageId_)->second;
-    } else {
-        return "";
-    }
 }
 
 void FrontendDelegateDeclarative::TriggerPageUpdate(int32_t pageId, bool directExecute)
@@ -1046,8 +1140,7 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
         BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(
             successEventMarker, [callback, taskExecutor = taskExecutor_](int32_t successType) {
-                taskExecutor->PostTask(
-                    [callback, successType]() { callback(CALLBACK_ERRORCODE_SUCCESS, successType); },
+                taskExecutor->PostTask([callback, successType]() { callback(CALLBACK_ERRORCODE_SUCCESS, successType); },
                     TaskExecutor::TaskType::JS);
             });
         callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
@@ -1083,8 +1176,8 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
     pipelineContextHolder_.Get()->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
 }
 
-void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
-    std::function<void(int32_t, int32_t)>&& callback)
+void FrontendDelegateDeclarative::ShowActionMenu(
+    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     std::unordered_map<std::string, EventMarker> callbackMarkers;
     auto successEventMarker = BackEndEventManager<void(int32_t)>::GetInstance().GetAvailableMarker();
@@ -1094,12 +1187,12 @@ void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const
                 [callback, number, successType]() {
                     // if callback index is larger than button's number, cancel button is selected
                     if (static_cast<size_t>(successType) == number) {
-                            callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO);
+                        callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO);
                     } else {
                         callback(CALLBACK_ERRORCODE_SUCCESS, successType);
                     }
                 },
-            TaskExecutor::TaskType::JS);
+                TaskExecutor::TaskType::JS);
         });
     callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
 
@@ -1118,16 +1211,13 @@ void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const
         .buttons = button,
         .callbacks = std::move(callbackMarkers),
     };
-    ButtonInfo buttonInfo = {
-        .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
-        .textColor = ""
-    };
+    ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     pipelineContextHolder_.Get()->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
 }
 
-void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(const std::string& message,
-    std::function<void(int32_t)>&& callback)
+void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
+    const std::string& message, std::function<void(int32_t)>&& callback)
 {
     if (!taskExecutor_) {
         LOGE("task executor is null.");
@@ -1289,11 +1379,13 @@ void FrontendDelegateDeclarative::LoadPage(
     if (pageId == INVALID_PAGE_ID) {
         LOGE("FrontendDelegateDeclarative, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, url);
+        ProcessRouterTask();
         return;
     }
     if (isStagingPageExist_) {
         LOGE("FrontendDelegateDeclarative, load page failed, waiting for current page loading finish.");
         RecyclePageId(pageId);
+        ProcessRouterTask();
         return;
     }
     isStagingPageExist_ = true;
@@ -1304,6 +1396,9 @@ void FrontendDelegateDeclarative::LoadPage(
         auto delegate = weak.Upgrade();
         if (delegate && acePage) {
             delegate->FlushPageCommand(acePage, acePage->GetUrl(), isMainPage, isRestore);
+        } else {
+            LOGE("flush callback called unexpected");
+            delegate->ProcessRouterTask();
         }
     });
     taskExecutor_->PostTask(
@@ -1379,6 +1474,21 @@ void FrontendDelegateDeclarative::OnPageReady(
 
     auto pipelineContext = pipelineContextHolder_.Get();
     page->SetPipelineContext(pipelineContext);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
+        auto stageManager = context ? context->GetStageManager() : nullptr;
+        if (stageManager) {
+            stageManager->PushPage(page->GetRootNode());
+        } else {
+            LOGE("fail to push page due to stage manager is nullptr");
+        }
+        isStagingPageExist_ = false;
+        if (isMainPage) {
+            OnPageShow();
+        }
+        return;
+    }
+
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, url, jsCommands, isMainPage, isRestore] {
             auto delegate = weak.Upgrade();
@@ -1407,13 +1517,22 @@ void FrontendDelegateDeclarative::OnPageReady(
                     delegate->OnPageHide();
                 }
                 delegate->OnPrePageChange(page);
+                pipelineContext->RemovePageTransitionListener(delegate->pageTransitionListenerId_);
+                delegate->pageTransitionListenerId_ = pipelineContext->AddPageTransitionListener(
+                    [weak, page](
+                        const TransitionEvent& event, const WeakPtr<PageElement>& in, const WeakPtr<PageElement>& out) {
+                        auto delegate = weak.Upgrade();
+                        if (delegate) {
+                            delegate->PushPageTransitionListener(event, page);
+                            delegate->SetCurrentPage(page->GetPageId());
+                            delegate->OnMediaQueryUpdate();
+                        }
+                    });
                 pipelineContext->PushPage(page->BuildPage(url), page->GetStageElement());
-                delegate->OnPushPageSuccess(page, url);
-                delegate->SetCurrentPage(page->GetPageId());
-                delegate->OnMediaQueryUpdate();
             } else {
                 // This page has been loaded but become useless now, the corresponding js instance
                 // must be destroyed to avoid memory leak.
+                LOGW("router push run in unexpected process");
                 delegate->OnPageDestroy(page->GetPageId());
                 delegate->ResetStagingPage();
             }
@@ -1423,6 +1542,28 @@ void FrontendDelegateDeclarative::OnPageReady(
             }
         },
         TaskExecutor::TaskType::UI);
+}
+
+void FrontendDelegateDeclarative::PushPageTransitionListener(
+    const TransitionEvent& event, const RefPtr<JsAcePage>& page)
+{
+    if (event == TransitionEvent::PUSH_END) {
+        OnPushPageSuccess(page, page->GetUrl());
+        ProcessRouterTask();
+    }
+}
+
+void FrontendDelegateDeclarative::OnPushPageSuccess(const RefPtr<JsAcePage>& page, const std::string& url)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    AddPageLocked(page);
+    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), page->GetUrl() });
+    if (pageRouteStack_.size() >= MAX_ROUTER_STACK) {
+        isRouteStackFull_ = true;
+        EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, page->GetUrl());
+    }
+    LOGI("OnPushPageSuccess size=%{private}zu,pageId=%{private}d,url=%{private}s", pageRouteStack_.size(),
+        pageRouteStack_.back().pageId, pageRouteStack_.back().url.c_str());
 }
 
 void FrontendDelegateDeclarative::OnPrePageChange(const RefPtr<JsAcePage>& page)
@@ -1437,6 +1578,7 @@ void FrontendDelegateDeclarative::FlushPageCommand(
     const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage, bool isRestore)
 {
     if (!page) {
+        ProcessRouterTask();
         return;
     }
     LOGI("FlushPageCommand FragmentCount(%{public}d)", page->FragmentCount());
@@ -1468,38 +1610,6 @@ void FrontendDelegateDeclarative::SetCurrentPage(int32_t pageId)
     }
 }
 
-void FrontendDelegateDeclarative::OnPushPageSuccess(
-    const RefPtr<JsAcePage>& page, const std::string& url)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    AddPageLocked(page);
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
-    if (pageRouteStack_.size() >= MAX_ROUTER_STACK) {
-        isRouteStackFull_ = true;
-        EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, page->GetUrl());
-    }
-    LOGI("OnPushPageSuccess size=%{private}zu,pageId=%{private}d,url=%{private}s", pageRouteStack_.size(),
-        pageRouteStack_.back().pageId, pageRouteStack_.back().url.c_str());
-}
-
-void FrontendDelegateDeclarative::OnPopToPageSuccess(const std::string& url)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    while (!pageRouteStack_.empty()) {
-        if (pageRouteStack_.back().url == url) {
-            break;
-        }
-        OnPageDestroy(pageRouteStack_.back().pageId);
-        pageMap_.erase(pageRouteStack_.back().pageId);
-        pageParamMap_.erase(pageRouteStack_.back().pageId);
-        pageRouteStack_.pop_back();
-    }
-
-    if (isRouteStackFull_) {
-        isRouteStackFull_ = false;
-    }
-}
-
 void FrontendDelegateDeclarative::PopToPage(const std::string& url)
 {
     LOGD("FrontendDelegateDeclarative PopToPage url = %{private}s", url.c_str());
@@ -1511,10 +1621,12 @@ void FrontendDelegateDeclarative::PopToPage(const std::string& url)
             }
             auto pageId = delegate->GetPageIdByUrl(url);
             if (pageId == INVALID_PAGE_ID) {
+                delegate->ProcessRouterTask();
                 return;
             }
             auto pipelineContext = delegate->pipelineContextHolder_.Get();
             if (!pipelineContext->CanPopPage()) {
+                LOGW("router pop to page run in unexpected process");
                 delegate->ResetStagingPage();
                 return;
             }
@@ -1541,6 +1653,25 @@ void FrontendDelegateDeclarative::PopToPageTransitionListener(
         SetCurrentPage(pageId);
         OnPageShow();
         OnMediaQueryUpdate();
+        ProcessRouterTask();
+    }
+}
+
+void FrontendDelegateDeclarative::OnPopToPageSuccess(const std::string& url)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    while (!pageRouteStack_.empty()) {
+        if (pageRouteStack_.back().url == url) {
+            break;
+        }
+        OnPageDestroy(pageRouteStack_.back().pageId);
+        pageMap_.erase(pageRouteStack_.back().pageId);
+        pageParamMap_.erase(pageRouteStack_.back().pageId);
+        pageRouteStack_.pop_back();
+    }
+
+    if (isRouteStackFull_) {
+        isRouteStackFull_ = false;
     }
 }
 
@@ -1572,6 +1703,7 @@ void FrontendDelegateDeclarative::PopPage()
             if (delegate->GetStackSize() == 1) {
                 if (delegate->disallowPopLastPage_) {
                     LOGW("Not allow back because this is the last page!");
+                    delegate->ProcessRouterTask();
                     return;
                 }
                 delegate->OnPageHide();
@@ -1582,6 +1714,7 @@ void FrontendDelegateDeclarative::PopPage()
             }
             if (!pipelineContext->CanPopPage()) {
                 delegate->ResetStagingPage();
+                LOGW("router pop run in unexpected process");
                 return;
             }
             delegate->OnPageHide();
@@ -1599,8 +1732,7 @@ void FrontendDelegateDeclarative::PopPage()
         TaskExecutor::TaskType::UI);
 }
 
-void FrontendDelegateDeclarative::PopPageTransitionListener(
-    const TransitionEvent& event, int32_t destroyPageId)
+void FrontendDelegateDeclarative::PopPageTransitionListener(const TransitionEvent& event, int32_t destroyPageId)
 {
     if (event == TransitionEvent::POP_END) {
         OnPageDestroy(destroyPageId);
@@ -1608,6 +1740,7 @@ void FrontendDelegateDeclarative::PopPageTransitionListener(
         SetCurrentPage(pageId);
         OnPageShow();
         OnMediaQueryUpdate();
+        ProcessRouterTask();
     }
 }
 
@@ -1621,14 +1754,12 @@ void FrontendDelegateDeclarative::RestorePopPage(const RefPtr<JsAcePage>& page, 
             }
             LOGI("RestorePopPage begin");
             auto pipelineContext = delegate->pipelineContextHolder_.Get();
-            bool isLastPage = false;
             if (delegate->GetStackSize() == 1) {
                 if (delegate->disallowPopLastPage_) {
                     LOGW("Not allow back because this is the last page!");
+                    delegate->ProcessRouterTask();
                     return;
                 }
-
-                isLastPage = true;
                 delegate->OnPageHide();
                 delegate->OnPageDestroy(delegate->GetRunningPageId());
                 delegate->OnPopPageSuccess();
@@ -1665,6 +1796,7 @@ void FrontendDelegateDeclarative::RestorePageTransitionListener(
         SetCurrentPage(GetPageIdByUrl(url));
         OnPageShow();
         OnMediaQueryUpdate();
+        ProcessRouterTask();
     }
 }
 
@@ -1696,16 +1828,23 @@ void FrontendDelegateDeclarative::ClearInvisiblePages()
                 return;
             }
             auto pipelineContext = delegate->pipelineContextHolder_.Get();
-            if (pipelineContext->ClearInvisiblePages()) {
+            if (pipelineContext->ClearInvisiblePages([weak]() {
+                    auto delegate = weak.Upgrade();
+                    if (!delegate) {
+                        return;
+                    }
+                    delegate->ProcessRouterTask();
+                })) {
                 auto pageId = delegate->OnClearInvisiblePagesSuccess();
                 delegate->SetCurrentPage(pageId);
+            } else {
+                delegate->ProcessRouterTask();
             }
         },
         TaskExecutor::TaskType::UI);
 }
 
-void FrontendDelegateDeclarative::OnReplacePageSuccess(
-    const RefPtr<JsAcePage>& page, const std::string& url)
+void FrontendDelegateDeclarative::OnReplacePageSuccess(const RefPtr<JsAcePage>& page, const std::string& url)
 {
     if (!page) {
         return;
@@ -1717,11 +1856,10 @@ void FrontendDelegateDeclarative::OnReplacePageSuccess(
         pageParamMap_.erase(pageRouteStack_.back().pageId);
         pageRouteStack_.pop_back();
     }
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url});
+    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
 }
 
-void FrontendDelegateDeclarative::ReplacePage(
-    const RefPtr<JsAcePage>& page, const std::string& url)
+void FrontendDelegateDeclarative::ReplacePage(const RefPtr<JsAcePage>& page, const std::string& url)
 {
     LOGI("ReplacePage url = %{private}s", url.c_str());
     // Pop all JS command and execute them in UI thread.
@@ -1753,9 +1891,11 @@ void FrontendDelegateDeclarative::ReplacePage(
                 delegate->OnReplacePageSuccess(page, url);
                 delegate->SetCurrentPage(page->GetPageId());
                 delegate->OnMediaQueryUpdate();
+                delegate->ProcessRouterTask();
             } else {
                 // This page has been loaded but become useless now, the corresponding js instance
                 // must be destroyed to avoid memory leak.
+                LOGW("replace run in unexpected process");
                 delegate->OnPageDestroy(page->GetPageId());
                 delegate->ResetStagingPage();
             }
@@ -1776,11 +1916,13 @@ void FrontendDelegateDeclarative::LoadReplacePage(int32_t pageId, const PageTarg
     if (pageId == INVALID_PAGE_ID) {
         LOGW("FrontendDelegateDeclarative, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
+        ProcessRouterTask();
         return;
     }
     if (isStagingPageExist_) {
         LOGW("FrontendDelegateDeclarative, replace page failed, waiting for current page loading finish.");
         EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
+        ProcessRouterTask();
         return;
     }
     isStagingPageExist_ = true;
@@ -2019,8 +2161,7 @@ std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& c
     for (int32_t index = 0; index < stackSize - 1; ++index) {
         std::string url = routerStack->GetArrayItem(index)->ToString();
         // remove 2 useless character, as "XXX" to XXX
-        pageRouteStack_.emplace_back(
-            PageInfo { GenerateNextPageId(), url.substr(1, url.size() - 2), true });
+        pageRouteStack_.emplace_back(PageInfo { GenerateNextPageId(), url.substr(1, url.size() - 2), true });
     }
     std::string startUrl = routerStack->GetArrayItem(stackSize - 1)->ToString();
     // remove 5 useless character, as "XXX.js" to XXX

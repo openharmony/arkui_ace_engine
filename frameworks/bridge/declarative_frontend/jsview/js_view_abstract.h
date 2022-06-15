@@ -141,6 +141,7 @@ public:
     static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, Dimension& result);
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, Dimension& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
+    static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
 
@@ -210,6 +211,7 @@ public:
     static void JsOnFocusMove(const JSCallbackInfo& args);
     static void JsOnFocus(const JSCallbackInfo& args);
     static void JsOnBlur(const JSCallbackInfo& args);
+    static void JsTabIndex(const JSCallbackInfo& info);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     static void JsDebugLine(const JSCallbackInfo& info);
 #endif

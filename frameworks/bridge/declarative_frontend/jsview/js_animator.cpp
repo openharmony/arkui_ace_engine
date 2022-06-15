@@ -30,7 +30,7 @@
 namespace OHOS::Ace::Framework {
 namespace {
 
-constexpr int32_t FRICITION_MOTION_LENGTH = 3;
+constexpr int32_t FRICTION_MOTION_LENGTH = 3;
 constexpr int32_t SPRING_MOTION_LENGTH = 4;
 constexpr int32_t SCROLL_MOTION_LENGTH = 5;
 
@@ -513,12 +513,12 @@ void JSSpringProp::DestructorCallback(JSSpringProp* obj)
 void JSMotion::ConstructorCallback(const JSCallbackInfo& info)
 {
     int32_t len = info.Length();
-    if (len != FRICITION_MOTION_LENGTH && len != SPRING_MOTION_LENGTH && len != SCROLL_MOTION_LENGTH) {
+    if (len != FRICTION_MOTION_LENGTH && len != SPRING_MOTION_LENGTH && len != SCROLL_MOTION_LENGTH) {
         LOGE("The arg is wrong, it is supposed to have 3 or 4 or 5 arguments");
         return;
     }
     auto obj = AceType::MakeRefPtr<JSMotion>();
-    if (len == FRICITION_MOTION_LENGTH) {
+    if (len == FRICTION_MOTION_LENGTH) {
         if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber()) {
             LOGE("The friction args is wrong");
             return;

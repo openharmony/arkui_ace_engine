@@ -219,12 +219,13 @@ void StageElement::Replace(const RefPtr<Component>& newComponent)
     MarkDirty();
 }
 
-bool StageElement::ClearOffStage()
+bool StageElement::ClearOffStage(const std::function<void()>& listener)
 {
     if (!CanPopPage()) {
         return false;
     }
     operation_ = StackOperation::CLEAR;
+    AddListenerForClear(listener);
     MarkDirty();
     return true;
 }
@@ -268,6 +269,10 @@ void StageElement::PerformBuild()
             break;
     }
     isWaitingForBuild_ = false;
+    if (operation_ == StackOperation::CLEAR && clearListener_) {
+        clearListener_();
+        clearListener_ = nullptr;
+    }
 }
 
 void StageElement::RefreshFocus()

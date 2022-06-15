@@ -44,6 +44,7 @@ public:
     void UpdateTextFocus(bool focus);
     void UpdateScrollDelta(double delta);
     void UpdateRenders();
+    void HandleMouseHoverEvent(MouseState mouseState) override;
 
     const Color& GetFocusAnimationColor() const
     {
@@ -64,6 +65,11 @@ public:
             return Color::TRANSPARENT;
         }
         return selectedDecoration_->GetBackgroundColor();
+    }
+
+    RefPtr<RenderBox> GetRenderBox() const
+    {
+        return renderBox_;
     }
 
 protected:

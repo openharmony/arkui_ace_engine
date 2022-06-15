@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/aafwk/standard/aafwk.gni")
+import("//foundation/ability/ability_runtime/aafwk.gni")
 
 module_output_path = "ui_service/ui_service"
 

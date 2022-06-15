@@ -31,7 +31,8 @@ void JSGridItem::SetColumnStart(int32_t columnStart)
     auto gridItem =
         AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (gridItem) {
-        gridItem->SetColumnIndex(columnStart);
+        auto columnStartValue = columnStart < 0 ? 0 : columnStart;
+        gridItem->SetColumnIndex(columnStartValue);
     }
 }
 
@@ -41,7 +42,8 @@ void JSGridItem::SetColumnEnd(int32_t columnEnd)
     auto gridItem =
         AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (gridItem) {
-        gridItem->SetColumnSpan(columnEnd - gridItem->GetColumnIndex() + 1);
+        auto columnEndValue = columnEnd < 0 ? 0 : columnEnd;
+        gridItem->SetColumnSpan(columnEndValue - gridItem->GetColumnIndex() + 1);
     }
 }
 
@@ -50,7 +52,8 @@ void JSGridItem::SetRowStart(int32_t rowStart)
     auto gridItem =
         AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (gridItem) {
-        gridItem->SetRowIndex(rowStart);
+        auto rowStartValue = rowStart < 0 ? 0 : rowStart;
+        gridItem->SetRowIndex(rowStartValue);
     }
 }
 
@@ -60,7 +63,8 @@ void JSGridItem::SetRowEnd(int32_t rowEnd)
     auto gridItem =
         AceType::DynamicCast<GridLayoutItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (gridItem) {
-        gridItem->SetRowSpan(rowEnd - gridItem->GetRowIndex() + 1);
+        auto rowEndValue = rowEnd < 0 ? 0 : rowEnd;
+        gridItem->SetRowSpan(rowEndValue - gridItem->GetRowIndex() + 1);
     }
 }
 

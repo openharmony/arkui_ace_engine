@@ -202,7 +202,7 @@ void JsiClass<C>::StaticConstant(const char* name, T val)
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     panda::Local<panda::JSValueRef> key = panda::StringRef::NewFromUtf8(vm, name);
-    classFunction_->Set(vm, key, JsiValueConvertor::toJsiValue<std::string>(val));
+    classFunction_->Set(vm, key, JsiValueConvertor::toJsiValueWithVM<std::string>(vm, val));
 }
 
 template<typename C>
@@ -217,25 +217,25 @@ void JsiClass<C>::Bind(BindingTarget t, FunctionCallback ctor)
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
     auto prototype = Local<ObjectRef>(classFunction_->GetFunctionPrototype(vm));
     prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, "constructor"),
-        panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
+        panda::Local<panda::JSValueRef>(classFunction_.ToLocal()));
     for (const auto& [name, val] : staticFunctions_) {
-        classFunction_->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
+        classFunction_->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal());
     }
     for (const auto& [name, val] : customFunctions_) {
-        prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
+        prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal());
     }
 
     for (const auto& [nameGet, valGet] : customGetFunctions_) {
         for (const auto& [nameSet, valSet] : customSetFunctions_) {
             if (nameGet == nameSet) {
                 prototype->SetAccessorProperty(vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()),
-                    valGet.ToLocal(vm), valSet.ToLocal(vm));
+                    valGet.ToLocal(), valSet.ToLocal());
             }
         }
     }
 
     t->Set(vm, panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName()),
-        panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
+        panda::Local<panda::JSValueRef>(classFunction_.ToLocal()));
 }
 
 template<typename C>
@@ -253,25 +253,25 @@ void JsiClass<C>::Bind(
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
     auto prototype = panda::Local<panda::ObjectRef>(classFunction_->GetFunctionPrototype(vm));
     prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, "constructor"),
-        panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
+        panda::Local<panda::JSValueRef>(classFunction_.ToLocal()));
     for (const auto& [name, val] : staticFunctions_) {
-        classFunction_->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
+        classFunction_->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal());
     }
     for (const auto& [name, val] : customFunctions_) {
-        prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
+        prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal());
     }
 
     for (const auto& [nameGet, valGet] : customGetFunctions_) {
         for (const auto& [nameSet, valSet] : customSetFunctions_) {
             if (nameGet == nameSet) {
                 prototype->SetAccessorProperty(vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()),
-                    valGet.ToLocal(vm), valSet.ToLocal(vm));
+                    valGet.ToLocal(), valSet.ToLocal());
             }
         }
     }
 
     t->Set(vm, panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName())),
-        panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
+        panda::Local<panda::JSValueRef>(classFunction_.ToLocal()));
 }
 
 template<typename C>
@@ -288,25 +288,25 @@ void JsiClass<C>::Bind(BindingTarget t, JSDestructorCallback<C> dtor, JSGCMarkCa
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
     auto prototype = panda::Local<panda::ObjectRef>(classFunction_->GetFunctionPrototype(vm));
     prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, "constructor"),
-        panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
+        panda::Local<panda::JSValueRef>(classFunction_.ToLocal()));
     for (const auto& [name, val] : staticFunctions_) {
-        classFunction_->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
+        classFunction_->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal());
     }
     for (const auto& [name, val] : customFunctions_) {
-        prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal(vm));
+        prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, name.c_str()), val.ToLocal());
     }
 
     for (const auto& [nameGet, valGet] : customGetFunctions_) {
         for (const auto& [nameSet, valSet] : customSetFunctions_) {
             if (nameGet == nameSet) {
                 prototype->SetAccessorProperty(vm, panda::StringRef::NewFromUtf8(vm, nameGet.c_str()),
-                    valGet.ToLocal(vm), valSet.ToLocal(vm));
+                    valGet.ToLocal(), valSet.ToLocal());
             }
         }
     }
 
     t->Set(vm, panda::Local<panda::JSValueRef>(panda::StringRef::NewFromUtf8(vm, ThisJSClass::JSName())),
-        panda::Local<panda::JSValueRef>(classFunction_.ToLocal(vm)));
+        panda::Local<panda::JSValueRef>(classFunction_.ToLocal()));
 }
 
 template<typename C>
@@ -371,11 +371,11 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
     JsiCallbackInfo info(runtimeCallInfo);
     (instance->*fnPtr)(info);
 
-    std::variant<void*, panda::Global<panda::JSValueRef>> retVal = info.GetReturnValue();
+    std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal = info.GetReturnValue();
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    auto jsVal = std::get_if<panda::Global<panda::JSValueRef>>(&retVal);
+    auto jsVal = std::get_if<panda::CopyableGlobal<panda::JSValueRef>>(&retVal);
     if (jsVal) {
-        return jsVal->ToLocal(vm);
+        return jsVal->ToLocal();
     }
     return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
 }
@@ -409,11 +409,11 @@ panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCal
     } else if constexpr (!isVoid && hasArguments) {
         // R C::MemberFunction(Args...)
         auto result = FunctionUtils::CallMemberFunction(instance, fnPtr, tuple);
-        return JsiValueConvertor::toJsiValue<R>(result);
+        return JsiValueConvertor::toJsiValueWithVM<R>(vm, result);
     } else if constexpr (!isVoid && !hasArguments) {
         // R C::MemberFunction()
         auto res = (instance->*fnPtr)();
-        return JsiValueConvertor::toJsiValue<R>(res);
+        return JsiValueConvertor::toJsiValueWithVM<R>(vm, res);
     }
 }
 
@@ -459,11 +459,11 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
     } else if constexpr (!isVoid && hasArguments) {
         // R C::MemberFunction(Args...)
         auto result = FunctionUtils::CallStaticMemberFunction(fnPtr, tuple);
-        return JsiValueConvertor::toJsiValue(result);
+        return JsiValueConvertor::toJsiValueWithVM(vm, result);
     } else if constexpr (!isVoid && !hasArguments) {
         // R C::MemberFunction()
         auto res = fnPtr();
-        return JsiValueConvertor::toJsiValue(res);
+        return JsiValueConvertor::toJsiValueWithVM(vm, res);
     }
 }
 
@@ -477,10 +477,10 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRu
     JsiCallbackInfo info(runtimeCallInfo);
     fnPtr(info);
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    std::variant<void*, panda::Global<panda::JSValueRef>> retVal = info.GetReturnValue();
-    auto jsVal = std::get_if<panda::Global<panda::JSValueRef>>(&retVal);
+    std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal = info.GetReturnValue();
+    auto jsVal = std::get_if<panda::CopyableGlobal<panda::JSValueRef>>(&retVal);
     if (jsVal) {
-        return jsVal->ToLocal(vm);
+        return jsVal->ToLocal();
     }
     return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
 }

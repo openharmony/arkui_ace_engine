@@ -15,11 +15,16 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 void JSContainerBase::Pop()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
+        return;
+    }
     ViewStackProcessor::GetInstance()->PopContainer();
 }
 

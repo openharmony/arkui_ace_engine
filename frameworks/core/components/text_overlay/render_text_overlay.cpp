@@ -15,6 +15,8 @@
 
 #include "core/components/text_overlay/render_text_overlay.h"
 
+#include "base/geometry/rect.h"
+#include "core/animation/scheduler.h"
 #include "core/components/focus_collaboration/render_focus_collaboration.h"
 #include "core/components/stack/stack_element.h"
 
@@ -510,6 +512,36 @@ void RenderTextOverlay::PerformLayout()
     }
 
     InitAnimation();
+
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        return;
+    }
+    if (!GetChildren().empty()) {
+        const auto& child = GetChildren().front();
+        if (!child) {
+            LOGE("child is null");
+            return;
+        }
+        Rect textOverlayRect(child->GetGlobalOffset(), child->GetLayoutSize());
+        auto startHandleOffset = startHandleOffset_ + Offset(-hotZoneRadius, -lineHeight_ - hotZoneDiameter);
+        auto startHandlebottomRightPoint = startHandleOffset_ + Offset(hotZoneRadius, -lineHeight_);
+        Rect startHandleRect(startHandleOffset.GetX(), startHandleOffset.GetY(),
+            startHandlebottomRightPoint.GetX() - startHandleOffset.GetX(),
+            startHandlebottomRightPoint.GetY() - startHandleOffset.GetY());
+        auto endHandleOffset = endHandleOffset_ + Offset(-hotZoneRadius, 0.0);
+        auto endHandlebottomRightPoint = endHandleOffset_ + Offset(hotZoneRadius, hotZoneDiameter);
+        Rect endHandleRect(endHandleOffset.GetX(), endHandleOffset.GetY(),
+            endHandlebottomRightPoint.GetX() - endHandleOffset.GetX(),
+            endHandlebottomRightPoint.GetY() - endHandleOffset.GetY());
+        auto textOverlayManager = context->GetTextOverlayManager();
+        if (textOverlayManager) {
+            textOverlayManager->ClearTextOverlayRect();
+            textOverlayManager->AddTextOverlayRect(textOverlayRect);
+            textOverlayManager->AddTextOverlayRect(startHandleRect);
+            textOverlayManager->AddTextOverlayRect(endHandleRect);
+        }
+    }
 }
 
 Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)
@@ -614,7 +646,12 @@ bool RenderTextOverlay::TouchTest(const Point& globalPoint, const Point& parentL
     if (!isSingleHandle_ || showOption_.showMenu) {
         for (auto iter = GetChildren().rbegin(); iter != GetChildren().rend(); ++iter) {
             const auto& child = *iter;
+            auto childResult = result.size();
             if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
+                return true;
+            }
+            // here is to handle some cases when the touch test doesnt bubble up.
+            if (childResult != result.size()) {
                 return true;
             }
         }
@@ -650,7 +687,7 @@ bool RenderTextOverlay::HandleMouseEvent(const MouseEvent& event)
         PopOverlay();
         return true;
     }
-    return false;
+    return event.button == MouseButton::LEFT_BUTTON;
 }
 
 void RenderTextOverlay::HandleClick(const Offset& clickOffset)

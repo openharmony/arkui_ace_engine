@@ -29,9 +29,8 @@ JsiRef<JsiValue> JsConverter::ConvertNativeValueToJsVal(NativeValue* nativeValue
         LOGE("ConvertNativeValueToJsVal wrong nativeValue or js runtime not ready");
         return JsiRef<JsiValue>::Make();
     }
-    Global<JSValueRef> globalRef = *nativeValue;
-    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    auto localRef = globalRef.ToLocal(arkRuntime->GetEcmaVm());
+    panda::CopyableGlobal<JSValueRef> globalRef = *nativeValue;
+    auto localRef = globalRef.ToLocal();
     JsiValue jsiValue(localRef);
     return JsiRef<JsiValue>::Make(jsiValue);
 }

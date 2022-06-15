@@ -208,6 +208,24 @@ UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
     LOGI("Create UIContentImpl successfully.");
 }
 
+void UIContentImpl::DestroyUIDirector()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        return;
+    }
+    auto rsUIDirector = pipelineContext->GetRSUIDirector();
+    if (!rsUIDirector) {
+        return;
+    }
+    LOGI("Destroying old rsUIDirectory");
+    rsUIDirector->Destroy();
+}
+
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
     CommonInitialize(window, url, storage);
@@ -475,6 +493,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     aceResCfg.SetOrientation(SystemProperties::GetDevcieOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
+    aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetAssetManager(flutterAssetManager);

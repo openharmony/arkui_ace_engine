@@ -79,4 +79,41 @@ AceScopedTraceFlag::~AceScopedTraceFlag()
     }
 }
 
+std::string ACE_EXPORT AceAsyncTraceBeginWithArgv(int32_t taskId, const char* format, va_list args)
+{
+    char name[MAX_STRING_SIZE] = { 0 };
+    if (vsnprintf_s(name, sizeof(name), sizeof(name) - 1, format, args) < 0) {
+        return "";
+    }
+    AceAsyncTraceBegin(taskId, name);
+    return name;
+}
+
+std::string ACE_EXPORT AceAsyncTraceBeginWithArgs(int32_t taskId, char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    std::string name = AceAsyncTraceBeginWithArgv(taskId, format, args);
+    va_end(args);
+    return name;
+}
+
+std::atomic<std::int32_t> AceAsyncScopedTrace::id_ = 0;
+
+AceAsyncScopedTrace::AceAsyncScopedTrace(const char* format, ...) : asyncTraceEnabled_(AceTraceEnabled())
+{
+    taskId_ = id_++;
+    if (asyncTraceEnabled_) {
+        va_list args;
+        va_start(args, format);
+        name_ = AceAsyncTraceBeginWithArgv(taskId_, format, args);
+    }
+}
+
+AceAsyncScopedTrace::~AceAsyncScopedTrace()
+{
+    if (!name_.empty()) {
+        AceAsyncTraceEnd(taskId_, name_.c_str());
+    }
+}
 } // namespace OHOS::Ace

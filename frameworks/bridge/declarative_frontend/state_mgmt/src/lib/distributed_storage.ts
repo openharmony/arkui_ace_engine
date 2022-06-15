@@ -65,7 +65,7 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
       console.warn(`DistributedStorage: linkProp: ${propName} is already exist`);
         return false;
     }
-    let link = AppStorage.GetOrCreate().link(propName, this);
+    let link = AppStorage.Link(propName, this);
     if (link) {
       console.debug(`DistributedStorage: linkProp ${propName} in AppStorage, using that`);
         this.links_.set(propName, link);
@@ -83,7 +83,7 @@ class DistributedStorage implements IMultiPropertiesChangeSubscriber {
                 returnValue = newValue;
             }
         }
-        link = AppStorage.GetOrCreate().setAndLink(propName, returnValue, this);
+        link = AppStorage.SetAndLink(propName, returnValue, this);
         this.links_.set(propName, link);
         console.debug(`DistributedStorage: created new linkProp prop for ${propName}`);
     }

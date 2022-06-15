@@ -680,6 +680,7 @@ void JsiDeclarativeEngine::Destroy()
         nativeEngine_->CancelCheckUVLoop();
 #endif
         engineInstance_->DestroyAllRootViewHandle();
+        nativeEngine_->DeleteEngine();
         delete nativeEngine_;
         nativeEngine_ = nullptr;
     }
@@ -744,11 +745,12 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
                 arkNativeEngine->SetPackagePath(packagePath);
             }
         }
+
+        RegisterWorker();
     } else {
         LOGI("Using sharedRuntime, UVLoop handled by AbilityRuntime");
     }
 
-    RegisterWorker();
     return result;
 }
 
@@ -1189,6 +1191,10 @@ void JsiDeclarativeEngine::TimerCallback(const std::string& callbackId, const st
 {
     TimerCallJs(callbackId);
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
+    if (!runtime) {
+        LOGE("get runtime failed");
+        return;
+    }
     auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");
@@ -1321,7 +1327,7 @@ std::string JsiDeclarativeEngine::GetStacktraceMessage()
     }
     std::string stack;
     arkNativeEngine->SuspendVM();
-    bool getStackSuccess = arkNativeEngine->BuildNativeAndJsBackStackTrace(stack);
+    bool getStackSuccess = arkNativeEngine->BuildJsStackTrace(stack);
     arkNativeEngine->ResumeVM();
     if (!getStackSuccess) {
         LOGE("GetStacktraceMessage arkNativeEngine get stack failed");

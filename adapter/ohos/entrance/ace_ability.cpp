@@ -253,7 +253,7 @@ void AceAbility::OnStart(const Want& want)
         packagePathStr += "/" + moduleInfo->name + "/";
     }
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
-    std::string srcPath = "";
+    std::string srcPath;
     if (info != nullptr && !info->srcPath.empty()) {
         srcPath = info->srcPath;
     }
@@ -269,7 +269,7 @@ void AceAbility::OnStart(const Want& want)
     std::vector<ModuleInfo> moduleList = appInfo->moduleInfos;
 
     std::string resPath;
-    for (auto module : moduleList) {
+    for (const auto& module : moduleList) {
         if (module.moduleName == moduleName) {
             std::regex pattern(ABS_BUNDLE_CODE_PATH + info->bundleName + FILE_SEPARATOR);
             auto moduleSourceDir = std::regex_replace(module.moduleSourceDir, pattern, LOCAL_BUNDLE_CODE_PATH);
@@ -284,6 +284,7 @@ void AceAbility::OnStart(const Want& want)
     PluginManager::GetInstance().SetAceAbility(this, pluginUtils);
 
     // create container
+    // TODO: add new pipeline.
     Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, shared_from_this(),
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); },
             [this](const std::string& address) {
@@ -291,25 +292,25 @@ void AceAbility::OnStart(const Want& want)
                 want.AddEntity(Want::ENTITY_BROWSER);
                 want.SetParam("address", address);
                 this->StartAbility(want);
-            }));
+            }), false);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
         LOGE("container is null, set configuration failed.");
-    } else {
-        auto aceResCfg = container->GetResourceConfiguration();
-        aceResCfg.SetOrientation(SystemProperties::GetDevcieOrientation());
-        aceResCfg.SetDensity(SystemProperties::GetResolution());
-        aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
-        container->SetResourceConfiguration(aceResCfg);
-        container->SetPackagePathStr(resPath);
-        container->SetBundlePath(abilityContext->GetBundleCodeDir());
-        container->SetFilesDataPath(abilityContext->GetFilesDir());
-        if (window->IsDecorEnable()) {
-            LOGI("AceAbility: Container modal is enabled.");
-            container->SetWindowModal(WindowModal::CONTAINER_MODAL);
-        }
-        container->SetWindowName(window->GetWindowName());
+        return;
     }
+    auto aceResCfg = container->GetResourceConfiguration();
+    aceResCfg.SetOrientation(SystemProperties::GetDevcieOrientation());
+    aceResCfg.SetDensity(SystemProperties::GetResolution());
+    aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
+    container->SetResourceConfiguration(aceResCfg);
+    container->SetPackagePathStr(resPath);
+    container->SetBundlePath(abilityContext->GetBundleCodeDir());
+    container->SetFilesDataPath(abilityContext->GetFilesDir());
+    if (window->IsDecorEnable()) {
+        LOGI("AceAbility: Container modal is enabled.");
+        container->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    }
+    container->SetWindowName(window->GetWindowName());
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), abilityId_);
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);

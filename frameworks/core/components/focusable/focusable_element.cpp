@@ -54,6 +54,7 @@ void FocusableElement::Update()
     onFocusMove_ = focusableComponent->GetOnFocusMove();
     onFocus_ = focusableComponent->GetOnFocus();
     onBlur_ = focusableComponent->GetOnBlur();
+    tabIndex_ = focusableComponent->GetTabIndex();
 
     if (!onClickId.IsEmpty()) {
         auto context = context_.Upgrade();

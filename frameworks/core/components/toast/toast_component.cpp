@@ -81,6 +81,9 @@ void ToastComponent::BuildToastContent(const RefPtr<TextComponent>& text, const 
     }
     TextStyle toastTextStyle = toastTheme->GetTextStyle();
     auto deviceType = SystemProperties::GetDeviceType();
+#ifdef OHOS_PLATFORM
+    toastTextStyle.SetTextAlign(TextAlign::CENTER);
+#endif
     if (deviceType == DeviceType::WATCH) {
         toastTextStyle.SetAdaptTextSize(toastTextStyle.GetFontSize(), toastTheme->GetMinFontSize());
         toastTextStyle.SetMaxLines(toastTheme->GetTextMaxLines());

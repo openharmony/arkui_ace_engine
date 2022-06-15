@@ -89,6 +89,9 @@ protected:
     bool MaybeRelease() override;
     void ClearRenderObject() override;
     void LayoutImageObject() override;
+    void* GetSkImage() override {
+        return reinterpret_cast<void *>(&image_);
+    }
 
 private:
     void InitializeCallbacks();

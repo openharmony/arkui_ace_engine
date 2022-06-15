@@ -23,9 +23,11 @@
 #include "base/log/ace_trace.h"
 #include "core/components/declaration/text/text_declaration.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/pattern/text/text_view.h"
 #include "core/event/ace_event_handler.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -43,6 +45,9 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 void JSText::SetWidth(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsWidth(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     if (!box) {
         LOGE("box is not valid");
@@ -59,6 +64,9 @@ void JSText::SetWidth(const JSCallbackInfo& info)
 void JSText::SetHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     if (!box) {
         LOGE("box is not valid");
@@ -75,6 +83,10 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     }
     Dimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::FontSize(fontSize);
         return;
     }
     auto component = GetComponent();
@@ -109,6 +121,10 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::TextColor(textColor);
         return;
     }
     auto component = GetComponent();
@@ -441,6 +457,11 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
+    JSClass<JSText>::StaticMethod("onDragEnter", &JSText::JsOnDragEnter);
+    JSClass<JSText>::StaticMethod("onDragMove", &JSText::JsOnDragMove);
+    JSClass<JSText>::StaticMethod("onDragLeave", &JSText::JsOnDragLeave);
+    JSClass<JSText>::StaticMethod("onDrop", &JSText::JsOnDrop);
     JSClass<JSText>::Inherit<JSContainerBase>();
     JSClass<JSText>::Inherit<JSViewAbstract>();
     JSClass<JSText>::Bind<>(globalObj);
@@ -453,9 +474,14 @@ void JSText::Create(const JSCallbackInfo& info)
         ParseJsString(info[0], data);
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::Create(data);
+        return;
+    }
+
     auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponentV2>(data);
     ViewStackProcessor::GetInstance()->Push(textComponent);
-    JSInteractableView::SetFocusable(false);
+    JSInteractableView::SetFocusable(false, false);
     JSInteractableView::SetFocusNode(false);
 
     // Init text style, allowScale is not supported in declarative.
@@ -485,16 +511,124 @@ void JSText::SetCopyOption(const JSCallbackInfo& info)
         LOGE("component is not valid");
         return;
     }
-    auto enable = false;
     auto copyOption = CopyOption::NoCopy;
     if (info[0]->IsBoolean()) {
-        enable = info[0]->ToBoolean();
+        auto enable = info[0]->ToBoolean();
         copyOption = enable ? CopyOption::Distributed : CopyOption::NoCopy;
     } else if (info[0]->IsNumber()) {
         auto emunNumber = info[0]->ToNumber<int>() + 1;
         copyOption = static_cast<CopyOption>(emunNumber);
     }
+    LOGI("copy option: %{public}d", copyOption);
     component->SetCopyOption(copyOption);
+}
+
+void JSText::JsOnDragStart(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
+        DragItemInfo itemInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
+
+        auto ret = func->Execute(info, extraParams);
+        if (!ret->IsObject()) {
+            LOGE("builder param is not an object.");
+            return itemInfo;
+        }
+        auto component = ParseDragItemComponent(ret);
+        if (component) {
+            LOGI("use custom builder param.");
+            itemInfo.customComponent = component;
+            return itemInfo;
+        }
+
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        auto pixmap = builderObj->GetProperty("pixelMap");
+        itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
+#endif
+        auto extraInfo = builderObj->GetProperty("extraInfo");
+        ParseJsString(extraInfo, itemInfo.extraInfo);
+        component = ParseDragItemComponent(builderObj->GetProperty("builder"));
+        itemInfo.customComponent = component;
+        return itemInfo;
+    };
+
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+    component->SetOnDragStartId(onDragStartId);
+}
+
+void JSText::JsOnDragEnter(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragEnter");
+        func->Execute(info, extraParams);
+    };
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+    component->SetOnDragEnterId(onDragEnterId);
+}
+
+void JSText::JsOnDragMove(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+                            const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragMove");
+        func->Execute(info, extraParams);
+    };
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+    component->SetOnDragMoveId(onDragMoveId);
+}
+
+void JSText::JsOnDragLeave(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragLeave");
+        func->Execute(info, extraParams);
+    };
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+    component->SetOnDragLeaveId(onDragLeaveId);
+}
+
+void JSText::JsOnDrop(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+                        const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDrop");
+        func->Execute(info, extraParams);
+    };
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+    component->SetOnDropId(onDropId);
 }
 
 } // namespace OHOS::Ace::Framework

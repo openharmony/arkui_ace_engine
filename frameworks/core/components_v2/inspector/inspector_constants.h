@@ -53,6 +53,15 @@ ACE_EXPORT extern const char ATTRS_COMMON_ENABLE[];
 // zindex
 ACE_EXPORT extern const char ATTRS_COMMON_ZINDEX[];
 
+// root view
+ACE_EXPORT extern const char ROOT_ETS_TAG[];
+// page view
+ACE_EXPORT extern const char PAGE_ETS_TAG[];
+// js custom view
+ACE_EXPORT extern const char JS_VIEW_ETS_TAG[];
+// js lazy foreach view
+ACE_EXPORT extern const char JS_LAZY_FOR_EACH_ETS_TAG[];
+
 // column
 ACE_EXPORT extern const char COLUMN_COMPONENT_TAG[];
 ACE_EXPORT extern const char COLUMN_ETS_TAG[];

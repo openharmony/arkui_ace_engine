@@ -82,7 +82,7 @@ DistributedObjectPtr::DistributedObjectPtr(const std::string& sessionId, OnDataC
         store->SetStatusNotifier(std::make_shared<DistributedObjectStatusNotifier>(callback));
     });
 
-    uint32_t ret = store->Get(sessionId, object_);
+    uint32_t ret = store->Get(sessionId, &object_);
     if (ret != OHOS::ObjectStore::SUCCESS) {
         LOGW("DistributedObjectStore get object[%{private}s] failed, try to create", sessionId.c_str());
         object_ = store->CreateObject(sessionId);

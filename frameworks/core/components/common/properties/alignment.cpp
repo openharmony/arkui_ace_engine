@@ -37,7 +37,7 @@ const Alignment Alignment::BOTTOM_RIGHT = Alignment(1.0, 1.0);
  * @param alignment A variable by which to decide the position of a child in parent.
  * @return A relative position toward top-left point of parent.
  */
-const Offset Alignment::GetAlignPosition(const Size& parentSize, const Size& childSize, const Alignment& alignment)
+Offset Alignment::GetAlignPosition(const Size& parentSize, const Size& childSize, const Alignment& alignment)
 {
     Offset offset;
     if (GreatOrEqual(parentSize.Width(), childSize.Width())) {
@@ -49,9 +49,22 @@ const Offset Alignment::GetAlignPosition(const Size& parentSize, const Size& chi
     return offset;
 }
 
+NG::OffsetF Alignment::GetAlignPosition(
+    const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment)
+{
+    NG::OffsetF offset;
+    if (GreatOrEqual(parentSize.Width(), childSize.Width())) {
+        offset.SetX((1.0 + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / 2.0);
+    }
+    if (GreatOrEqual(parentSize.Height(), childSize.Height())) {
+        offset.SetY((1.0 + alignment.GetVertical()) * (parentSize.Height() - childSize.Height()) / 2.0);
+    }
+    return offset;
+}
+
 std::string Alignment::GetAlignmentStr(TextDirection direction) const
 {
-    std::string result = "";
+    std::string result;
     Alignment alignment = Alignment(horizontal_, vertical_);
     if (alignment == TOP_LEFT) {
         result = direction == TextDirection::RTL ? "Alignment.TopEnd" : "Alignment.TopStart";

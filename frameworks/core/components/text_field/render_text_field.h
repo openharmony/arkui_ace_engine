@@ -84,6 +84,7 @@ public:
     void OnStatusChanged(RenderStatus renderStatus) override;
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
     void OnPaintFinish() override;
+    void Dump() override;
 
     bool OnKeyEvent(const KeyEvent& event);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling = false);
@@ -310,6 +311,7 @@ public:
     int32_t instanceId_ = -1;
 
     bool hasFocus_ = false;
+    void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
 
 protected:
     // Describe where caret is and how tall visually.
@@ -347,7 +349,6 @@ protected:
     void AnimateMouseHoverEnter() override;
     void AnimateMouseHoverExit() override;
 
-    void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
     std::u16string GetTextForDisplay(const std::string& text) const;
 
     void UpdateStartSelection(int32_t end, const Offset& pos, bool isSingleHandle, bool isLongPress);
@@ -568,6 +569,7 @@ private:
     Color hoverColor_;
     TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
+    CopyOption copyOption_ = CopyOption::Distributed;
     std::function<void()> onValueChange_;
     std::function<void(bool)> onKeyboardClose_;
     std::function<void(const Rect&)> onClipRectChanged_;

@@ -58,12 +58,6 @@ public:
     void InitEnv();    
     void Start();
     static void Stop();
-
-    static bool DispatchTouchEvent(const TouchEvent& event);
-    static bool DispatchBackPressedEvent();
-    static bool DispatchInputMethodEvent(unsigned int code_point);
-    static bool DispatchKeyEvent(const KeyEvent& keyEvent);
-
     void OnConfigurationChanged(const DeviceConfig& newConfig);
     void SurfaceChanged(
         const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height);
@@ -73,6 +67,10 @@ public:
     std::string GetJSONTree();
     std::string GetDefaultJSONTree();
     bool OperateComponent(const std::string& attrsJson);
+    FlutterDesktopWindowControllerRef GetGlfwWindowController()
+    {
+        return controller_;
+    }
 
 private:
     void RunEventLoop();

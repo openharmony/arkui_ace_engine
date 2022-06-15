@@ -45,9 +45,11 @@ public:
         auto rect = nodeStrong->GetPaintRect();
         auto offset = rect.GetOffset();
         auto size = rect.GetSize();
-        rsSurfaceNode->SetBounds(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()),
-            static_cast<float>(size.Width()), static_cast<float>(size.Height()));
+        rsSurfaceNode->SetBounds(0, 0, static_cast<float>(size.Width()), static_cast<float>(size.Height()));
         rsSurfaceNode->SetBackgroundColor(Color::WHITE.GetValue());
+        if (!originNode_) {
+            originNode_ = nodeStrong->GetRSNode();
+        }
         nodeStrong->SyncRSNode(std::static_pointer_cast<RSNode>(rsSurfaceNode));
         nodeStrong->MarkNeedLayout();
         auto ability = AceType::DynamicCast<V2::RenderAbilityComponent>(nodeStrong);
@@ -58,8 +60,12 @@ public:
 
     void OnExtensionDisconnected() override
     {
+        LOGI("window extension disconnect");
         auto ability = AceType::DynamicCast<V2::RenderAbilityComponent>(node_.Upgrade());
         if (ability) {
+            if (originNode_) {
+                ability->SyncRSNode(originNode_);
+            }
             ability->FireDisconnect();
         }
     }
@@ -69,6 +75,7 @@ public:
     void OnBackPress() override {}
 
 private:
+    std::shared_ptr<RSNode> originNode_;
     WeakPtr<RenderNode> node_;
 };
 
@@ -113,9 +120,30 @@ void WindowExtensionConnectionAdapterOhos::ConnectExtension(
 void WindowExtensionConnectionAdapterOhos::RemoveExtension()
 {
     if (windowExtension_) {
-        LOGI("no implement for remove");
+        LOGI("remove extension");
+        windowExtension_->DisconnectExtension();
     } else {
         LOGI("ability doesn't connect to window extension. remove extension fail");
+    }
+}
+
+void WindowExtensionConnectionAdapterOhos::Show()
+{
+    LOGI("show WindowExtensionConnectionAdapterOhos");
+    if (windowExtension_) {
+        windowExtension_->Show();
+    } else {
+        LOGI("ability doesn't connect to window extension. show extension fail");
+    }
+}
+
+void WindowExtensionConnectionAdapterOhos::Hide()
+{
+    LOGI("hide WindowExtensionConnectionAdapterOhos");
+    if (windowExtension_) {
+        windowExtension_->Hide();
+    } else {
+        LOGI("ability doesn't connect to window extension. show extension fail");
     }
 }
 

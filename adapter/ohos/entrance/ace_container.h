@@ -39,7 +39,7 @@ class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatch
 public:
     AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
-        bool useCurrentEventRunner = false);
+        bool useCurrentEventRunner = false, bool useNewPipeline = false);
     AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
@@ -72,7 +72,7 @@ public:
         return taskExecutor_;
     }
 
-    void SetAssetManager(RefPtr<AssetManager> assetManager)
+    void SetAssetManager(const RefPtr<AssetManager>& assetManager)
     {
         assetManager_ = assetManager;
         if (frontend_) {
@@ -211,14 +211,14 @@ public:
         parentId_ = parentId;
     }
 
-    int32_t GetParentId()
+    int32_t GetParentId() const
     {
         return parentId_;
     }
 
-    static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, std::string instanceName,
+    static void CreateContainer(int32_t instanceId, FrontendType type, bool isArkApp, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
-        bool useCurrentEventRunner = false);
+        bool useCurrentEventRunner = false, bool useNewPipeline = false);
 
     static void DestroyContainer(int32_t instanceId);
     static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params);

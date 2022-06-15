@@ -18,16 +18,19 @@
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
+#include "base/log/dump_log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
 #include "core/common/clipboard/clipboard_proxy.h"
+#include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text/text_utils.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/text_overlay/text_overlay_element.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -124,6 +127,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         maxLength_ = textField->GetMaxLength();
     }
 
+    copyOption_ = textField->GetCopyOption();
     selection_ = textField->GetSelection();
     placeholder_ = textField->GetPlaceholder();
     inputFilter_ = textField->GetInputFilter();
@@ -390,7 +394,6 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
             int32_t start = GetEditingValue().selection.baseOffset;
             int32_t end = GetCursorPositionForClick(event.GetOffset());
             UpdateSelection(start, end);
-            StopTwinkling();
             MarkNeedRender();
         } else {
             LOGD("on left button release");
@@ -1195,6 +1198,7 @@ void RenderTextField::EditingValueFilter(TextEditingValue& result)
 
 void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
+    ContainerScope scope(instanceId_);
     if (!value) {
         LOGE("the value is nullptr");
         return;
@@ -1248,6 +1252,7 @@ void RenderTextField::PerformDefaultAction()
 void RenderTextField::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
     LOGD("PerformAction  %{public}d", static_cast<int32_t>(action));
+    ContainerScope scope(instanceId_);
     if (action == TextInputAction::NEXT && moveNextFocusEvent_) {
         moveNextFocusEvent_();
     } else {
@@ -1871,7 +1876,9 @@ void RenderTextField::HandleOnCut()
     if (GetEditingValue().GetSelectedText().empty()) {
         return;
     }
-    clipboard_->SetData(GetEditingValue().GetSelectedText());
+    if (copyOption_ != CopyOption::NoCopy) {
+        clipboard_->SetData(GetEditingValue().GetSelectedText());
+    }
     if (onCut_) {
         onCut_(GetEditingValue().GetSelectedText());
     }
@@ -1892,7 +1899,9 @@ void RenderTextField::HandleOnCopy()
     if (GetEditingValue().GetSelectedText().empty()) {
         return;
     }
-    clipboard_->SetData(GetEditingValue().GetSelectedText());
+    if (copyOption_ != CopyOption::NoCopy) {
+        clipboard_->SetData(GetEditingValue().GetSelectedText());
+    }
     if (onCopy_) {
         onCopy_(GetEditingValue().GetSelectedText());
     }
@@ -2303,6 +2312,11 @@ void RenderTextField::ApplyAspectRatio()
         }
         parent = parent->GetParent().Upgrade();
     }
+}
+
+void RenderTextField::Dump()
+{
+    DumpLog::GetInstance().AddDesc(std::string("CopyOption: ").append(V2::ConvertWrapCopyOptionToStirng(copyOption_)));
 }
 
 } // namespace OHOS::Ace
