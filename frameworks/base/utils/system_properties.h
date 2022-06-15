@@ -176,6 +176,8 @@ public:
 
     static std::string GetRegion();
 
+    static std::string GetNewPipePkg();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;

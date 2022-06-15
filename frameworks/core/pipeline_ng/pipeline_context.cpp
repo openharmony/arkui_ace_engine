@@ -17,20 +17,12 @@
 
 #include <memory>
 
-#include "base/memory/referenced.h"
-#include "base/thread/task_executor.h"
-
-#ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_node.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
-
-#include "core/animation/native_curve_helper.h"
-#endif
-
 #include "base/log/ace_trace.h"
 #include "base/log/ace_tracker.h"
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
+#include "base/memory/referenced.h"
+#include "base/thread/task_executor.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
@@ -41,9 +33,6 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
-#ifdef ENABLE_ROSEN_BACKEND
-#include "core/components_ng/render/adapter/rosen_render_context.h"
-#endif
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -117,15 +106,17 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
-                                      ? AceApplicationInfo::GetInstance().GetPackageName()
-                                      : AceApplicationInfo::GetInstance().GetProcessName();
-        rsUIDirector_->SetTimeStamp(nanoTimestamp, abilityName);
-    }
-#endif
+    static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
+                                               ? AceApplicationInfo::GetInstance().GetPackageName()
+                                               : AceApplicationInfo::GetInstance().GetProcessName();
+    window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushPipelineWithoutAnimation();
+}
+
+void PipelineContext::FlushMessages()
+{
+    ACE_FUNCTION_TRACK();
+    window_->FlushTasks();
 }
 
 void PipelineContext::FlushPipelineWithoutAnimation()
@@ -150,12 +141,7 @@ void PipelineContext::SetupRootElement()
     layoutConstraint.selfIdealSize = idealSize;
     layoutConstraint.maxSize = idealSize;
     rootNode_->UpdateLayoutConstraint(layoutConstraint);
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        auto rosenRenderContext = DynamicCast<RosenRenderContext>(rootNode_->GetRenderContextTask());
-        rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
-    }
-#endif
+    window_->SetRootFrameNode(rootNode_);
     stageManager_ = MakeRefPtr<StageManager>(rootNode_);
     LOGI("SetupRootElement success!");
 }
@@ -172,6 +158,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         LOGE("rootNode_ is nullptr");
         return;
     }
+    LOGI("SetRootRect %{public}f %{public}f", width, height);
     auto jsTask = [width, height, rootNode = rootNode_]() {
         SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
         if (rootNode->GetGeometryNode()->GetFrameSize() != sizeF) {

@@ -41,6 +41,7 @@
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
@@ -326,14 +327,16 @@ void AceContainer::OnActive(int32_t instanceId)
         return;
     }
 
-    taskExecutor->PostTask([container]() {
-        auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("pipeline context is null, OnActive failed.");
-            return;
-        }
-        pipelineContext->WindowFocus(true);
-    }, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(
+        [container]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("pipeline context is null, OnActive failed.");
+                return;
+            }
+            pipelineContext->WindowFocus(true);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::OnInactive(int32_t instanceId)
@@ -357,15 +360,17 @@ void AceContainer::OnInactive(int32_t instanceId)
         return;
     }
 
-    taskExecutor->PostTask([container]() {
-        auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("pipeline context is null, OnInactive failed.");
-            return;
-        }
-        pipelineContext->WindowFocus(false);
-        pipelineContext->RootLostFocus();
-    }, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(
+        [container]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("pipeline context is null, OnInactive failed.");
+                return;
+            }
+            pipelineContext->WindowFocus(false);
+            pipelineContext->RootLostFocus();
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::OnNewWant(int32_t instanceId, const std::string& data)
@@ -546,9 +551,7 @@ void AceContainer::InitializeCallback()
     auto&& mouseEventCallback = [context = pipelineContext_, id = instanceId_](const MouseEvent& event) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event]() {
-                context->OnMouseEvent(event);
-            }, TaskExecutor::TaskType::UI);
+            [context, event]() { context->OnMouseEvent(event); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
@@ -664,12 +667,14 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     }
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
     if (taskExecutor) {
-        taskExecutor->PostTask([instanceId] {
-            LOGI("Remove on Platform thread...");
-            EngineHelper::RemoveEngine(instanceId);
-            AceEngine::Get().RemoveContainer(instanceId);
-            ConnectServerManager::Get().RemoveInstance(instanceId);
-        }, TaskExecutor::TaskType::PLATFORM);
+        taskExecutor->PostTask(
+            [instanceId] {
+                LOGI("Remove on Platform thread...");
+                EngineHelper::RemoveEngine(instanceId);
+                AceEngine::Get().RemoveContainer(instanceId);
+                ConnectServerManager::Get().RemoveInstance(instanceId);
+            },
+            TaskExecutor::TaskType::PLATFORM);
     }
 }
 
@@ -691,6 +696,20 @@ void AceContainer::SetView(
     }
     std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
     container->AttachView(std::move(window), view, density, width, height, windowId, callback);
+}
+
+void AceContainer::SetViewNew(
+    AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow)
+{
+    CHECK_NULL_VOID(view);
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    std::unique_ptr<Window> window =
+        std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), nullptr);
 }
 
 void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow)

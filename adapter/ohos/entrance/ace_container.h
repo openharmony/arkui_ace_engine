@@ -241,6 +241,8 @@ public:
     static void AddLibPath(int32_t instanceId, const std::string& libPath);
     static void SetView(AceView* view, double density, int32_t width, int32_t height, int32_t windowId,
         UIEnvCallback callback = nullptr);
+    static void SetViewNew(
+        AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);

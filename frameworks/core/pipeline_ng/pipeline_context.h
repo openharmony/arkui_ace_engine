@@ -53,6 +53,7 @@ public:
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
+    void FlushMessages() override;
 
 private:
     // Called on JS thread.
