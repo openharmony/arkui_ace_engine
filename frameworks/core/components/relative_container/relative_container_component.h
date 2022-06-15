@@ -26,7 +26,7 @@
 namespace OHOS::Ace {
 
 class ACE_EXPORT RelativeContainerComponent : public ComponentGroup {
-    DECLARE_ACE_TYPE(RelativeComponent, ComponentGroup);
+    DECLARE_ACE_TYPE(RelativeContainerComponent, ComponentGroup);
 
 public:
     RelativeContainerComponent(const std::list<RefPtr<Component>>& children)
