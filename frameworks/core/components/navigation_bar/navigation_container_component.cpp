@@ -98,7 +98,7 @@ RefPtr<ComposedComponent> NavigationContainerComponent::BuildToolBar(
     RefPtr<BoxComponent> tabBarBox = AceType::MakeRefPtr<BoxComponent>();
     tabBarBox->SetChild(display);
     tabBarBox->SetDeliverMinToChild(false);
-
+    tabBarBox->SetEnableDebugBoundary(true);
     if (!declaration->HasToolBar()) {
         display->SetOpacity(0.0, declaration->animationOption);
         tabBarBox->SetHeight(Dimension(0.0, DimensionUnit::VP), declaration->animationOption);

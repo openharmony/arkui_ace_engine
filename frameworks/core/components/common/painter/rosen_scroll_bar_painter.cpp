@@ -98,6 +98,22 @@ void RosenScrollBarPainter::PaintRectBar(
         SkRect foregroundRect =
             SkRect::MakeLTRB(activeRect.Left(), activeRect.Top(), activeRect.Right(), activeRect.Bottom());
         canvas->drawRoundRect(foregroundRect, filletRadius, filletRadius, paint);
+        RenderScrollBarBoundary(canvas, activeRect.GetOffset(), activeRect.Width(), activeRect.Height());
+    }
+}
+
+void RosenScrollBarPainter::RenderScrollBarBoundary(SkCanvas* canvas, const Offset& offset, double width, double height)
+{
+    if (SystemProperties::GetDebugBoundaryEnabled()) {
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        Size layoutSize;
+        layoutSize.SetWidth(width);
+        layoutSize.SetHeight(height);
+        DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, layoutSize);
+        DebugBoundaryPainter::PaintDebugCorner(canvas, offset, layoutSize);
     }
 }
 

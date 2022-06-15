@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TAB_BAR_FLUTTER_RENDER_TAB_BAR_ITEM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TAB_BAR_FLUTTER_RENDER_TAB_BAR_ITEM_H
 
+#include "core/components/common/painter/debug_boundary_painter.h"
 #include "core/components/tab_bar/render_tab_bar_item.h"
 #include "core/pipeline/layers/clip_layer.h"
 
@@ -27,6 +28,7 @@ class FlutterRenderTabBarItem : public RenderTabBarItem {
 public:
     RenderLayer GetRenderLayer() override;
     void Paint(RenderContext& context, const Offset& offset) override;
+    void RenderTabBarItemBoundary(SkCanvas* canvas, const Offset& offset, double width, double height);
 
 private:
     RefPtr<Flutter::ClipLayer> layer_;

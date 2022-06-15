@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components/common/painter/debug_boundary_painter.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -34,6 +35,7 @@ public:
         const Offset& globalOffset, int32_t alpha);
 
 private:
+    void RenderScrollBarBoundary(SkCanvas* canvas, const Offset& offset, double width, double height);
     void PaintCircleBar(
         SkCanvas* canvas, const Offset& offset, const Rect& paintRect, const RefPtr<ScrollBar>& scrollBar);
     void PaintRectBar(SkCanvas* canvas, const Offset& offset, const RefPtr<ScrollBar>& scrollBar, int32_t alpha);

@@ -15,6 +15,8 @@
 
 #include "core/components_v2/list/render_list_item.h"
 
+#include "core/components/box/box_component.h"
+#include "core/components/box/render_box.h"
 #include "core/components/button/button_component.h"
 #include "core/components/image/image_component.h"
 
@@ -161,7 +163,14 @@ void RenderListItem::CreateDeleteButton()
         image->Attach(context_);
         image->Update(imageComponent);
 
-        button->AddChild(image);
+        auto boxComponent = AceType::MakeRefPtr<BoxComponent>();
+        boxComponent->SetEnableDebugBoundary(true);
+        auto buttonBox = boxComponent->CreateRenderNode();
+        buttonBox->Attach(context_);
+        buttonBox->Update(boxComponent);
+        
+        button->AddChild(buttonBox);
+        buttonBox->AddChild(image);
         button_ = button;
     }
 }
