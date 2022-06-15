@@ -35,6 +35,7 @@ void DOMButtonUtil::InitDefaultValue(
     component->SetFocusColor(theme->GetBgFocusColor());
     component->SetFocusAnimationColor(theme->GetBgFocusColor());
     component->SetHoverColor(theme->GetHoverColor());
+    component->SetCatchMode(false);
     textChild->SetFocusColor(theme->GetTextFocusColor());
     // set text styles
     auto textStyle = theme->GetTextStyle();
