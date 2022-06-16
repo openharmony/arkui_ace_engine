@@ -31,12 +31,16 @@
 
 namespace OHOS::Ace {
 
+#ifndef UPLOAD_GPU_DISABLED
+class EnvironmentGL;
+#endif
+
 class RosenRenderCustomPaint : public RenderCustomPaint {
     DECLARE_ACE_TYPE(RosenRenderCustomPaint, RenderCustomPaint);
 
 public:
     RosenRenderCustomPaint();
-    ~RosenRenderCustomPaint() override = default;
+    ~RosenRenderCustomPaint() override;
 
     void Paint(RenderContext& context, const Offset& offset) override;
 
@@ -91,7 +95,7 @@ public:
 
 private:
     void InitImagePaint();
-    void InitCachePaint();
+    void InitPaintBlend(SkPaint& paint);
     bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = true);
     void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = true);
     double GetAlignOffset(TextAlign align);
@@ -119,18 +123,25 @@ private:
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed();
     void DrawSvgImage(const Offset& offset, const CanvasImage& canvasImage);
+    sk_sp<SkImage> GetImage(const std::string& src);
+    void CreateBitmap(double viewScale);
+    bool CreateSurface(double viewScale);
 
     bool antiAlias_ = false;
     std::unique_ptr<txt::Paragraph> paragraph_;
     SkPath skPath_;
     SkPath strokePath_;
     SkPaint imagePaint_;
-    SkPaint cachePaint_;
-    SkBitmap cacheBitmap_;
     SkBitmap canvasCache_;
     SkBitmap webglBitmap_;
-    std::unique_ptr<SkCanvas> skCanvas_;
-    std::unique_ptr<SkCanvas> cacheCanvas_;
+    std::unique_ptr<SkCanvas> bitmapCanvas_;
+    SkCanvas* skCanvas_;
+#ifndef UPLOAD_GPU_DISABLED
+    void InitializeEglContext();
+
+    RefPtr<EnvironmentGL> environment_;
+    sk_sp<SkSurface> surface_;
+#endif
 
     ImageSourceInfo loadingSource_;
     ImageSourceInfo currentSource_;
@@ -143,6 +154,7 @@ private:
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     CanvasImage canvasImage_;
     Size lastLayoutSize_;
+    RefPtr<ImageCache> imageCache_;
 };
 
 } // namespace OHOS::Ace
