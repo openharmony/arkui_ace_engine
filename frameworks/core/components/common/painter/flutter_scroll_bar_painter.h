@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components/common/painter/debug_boundary_painter.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/pipeline/base/flutter_render_context.h"
 
@@ -37,6 +38,7 @@ private:
     void PaintCircleBar(
         flutter::Canvas* canvas, const Offset& offset, const Rect& paintRect, const RefPtr<ScrollBar>& scrollBar);
     void PaintRectBar(flutter::Canvas* canvas, const Offset& offset, const RefPtr<ScrollBar>& scrollBar, int32_t alpha);
+    void RenderScrollBarBoundary(SkCanvas* canvas, const Offset& offset, double width, double height);
 };
 
 } // namespace OHOS::Ace

@@ -62,15 +62,22 @@ void FlutterRenderTabBarItem::Paint(RenderContext& context, const Offset& offset
         return;
     }
     decorationPainter->PaintDecoration(offset, canvas->canvas(), context);
-    if (RenderTabBarItem::needPaintDebugBoundary_ && SystemProperties::GetDebugBoundaryEnabled()) {
-        flutter::Canvas* canvas = renderContext->GetCanvas();
+    RenderTabBarItemBoundary(canvas->canvas(), offset, GetLayoutSize().Width(), GetLayoutSize().Height());
+}
+
+void FlutterRenderTabBarItem::RenderTabBarItemBoundary(SkCanvas* canvas, const Offset& offset,
+    double width, double height)
+{
+    if (SystemProperties::GetDebugBoundaryEnabled()) {
         if (canvas == nullptr) {
             LOGE("Paint canvas is null.");
             return;
         }
-        DebugBoundaryPainter::PaintDebugBoundary(canvas->canvas(), offset, GetLayoutSize());
-        DebugBoundaryPainter::PaintDebugCorner(canvas->canvas(), offset, GetLayoutSize());
-        DebugBoundaryPainter::PaintDebugMargin(canvas->canvas(), offset, GetLayoutSize(), margin_);
+        Size layoutSize;
+        layoutSize.SetWidth(width);
+        layoutSize.SetHeight(height);
+        DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, layoutSize);
+        DebugBoundaryPainter::PaintDebugCorner(canvas, offset, layoutSize);
     }
 }
 
