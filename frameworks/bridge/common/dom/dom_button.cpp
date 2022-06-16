@@ -66,6 +66,7 @@ DOMButton::DOMButton(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
 {
     std::list<RefPtr<Component>> buttonChildren;
     buttonChild_ = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
+    buttonChild_->SetCatchMode(false);
     textChild_ = AceType::MakeRefPtr<TextComponent>("");
     imageChild_ = AceType::MakeRefPtr<ImageComponent>("");
     paddingChild_ = AceType::MakeRefPtr<PaddingComponent>();
