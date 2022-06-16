@@ -137,8 +137,8 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         LOGE("list component is null while trying set lanes");
         return;
     }
-    int32_t laneNum = 0;
-    if (ParseJsInt32(info[0], laneNum)) {
+    int32_t laneNum = 1;
+    if (ParseJsInteger<int32_t>(info[0], laneNum)) {
         // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
         listComponent->SetLanes(laneNum);
         return;
