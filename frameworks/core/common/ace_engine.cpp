@@ -32,8 +32,8 @@
 namespace OHOS::Ace {
 namespace {
 
-constexpr int SIGNAL_JS_HEAP = 37;
-constexpr int SIGNAL_JS_HEAP_PRIV = 38;
+constexpr int SIGNAL_JS_HEAP = 39;
+constexpr int SIGNAL_JS_HEAP_PRIV = 40;
 
 void HandleSignal(int signo)
 {
