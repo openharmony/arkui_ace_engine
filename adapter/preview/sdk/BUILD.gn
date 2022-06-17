@@ -65,7 +65,10 @@ if (is_standard_system) {
         "$ace_root/adapter/preview/build:libace_engine_mac(${mac_buildtool})",
       ]
       if (enable_glfw_window) {
-        deps += [ "$ace_root/adapter/preview/build:ace_for_mac" ]
+        deps += [
+          "$ace_root/adapter/preview/build:ace_for_mac",
+          "$ace_root/adapter/preview/entrance/test:test_bridge_mac",
+        ]
       }
       sources = [ mac_shared_library_path ]
       outputs =
@@ -78,7 +81,10 @@ if (is_standard_system) {
           "/common/common/libace_engine_windows.dll"
       deps = [ "$ace_root/adapter/preview/build:libace_engine_windows" ]
       if (enable_glfw_window) {
-        deps += [ "$ace_root/adapter/preview/build:ace_for_windows" ]
+        deps += [
+          "$ace_root/adapter/preview/build:ace_for_windows",
+          "$ace_root/adapter/preview/entrance/test:test_bridge_windows",
+        ]
       }
       sources = [ windows_shared_library_path ]
       outputs =
