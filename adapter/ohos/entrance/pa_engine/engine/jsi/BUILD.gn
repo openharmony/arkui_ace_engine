@@ -53,7 +53,7 @@ template("js_pa_engine_ark") {
 
     include_dirs = [
       "$aafwk_inner_api_path/ability_manager/include",
-      "$aafwk_kits_path/ability/native/include",
+      "$aafwk_path/interfaces/kits/native/ability/native",
       "$aafwk_services_path/common/include",
       "$aafwk_services_path/abilitymgr/include",
       "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
@@ -63,8 +63,8 @@ template("js_pa_engine_ark") {
       "//foundation/arkui/ace_engine/adapter/ohos/entrance/pa_engine/engine/common",
     ]
     deps = [
-      "$aafwk_kits_path/ability/native:abilitykit_native",
-      "$aafwk_kits_path/appkit:appkit_native",
+      "$aafwk_path/frameworks/native/ability/native:abilitykit_native",
+      "$aafwk_path/frameworks/native/appkit:appkit_native",
       "//ark/js_runtime:libark_jsruntime",
       "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
       "//foundation/arkui/napi:ace_napi",

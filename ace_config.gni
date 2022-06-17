@@ -57,6 +57,7 @@ aafwk_inner_api_path =
 aafwk_inner_kits_path = "//foundation/ability/ability_runtime/interfaces/kits"
 aafwk_kits_path = "//foundation/ability/ability_runtime/frameworks/kits"
 aafwk_services_path = "//foundation/ability/ability_runtime/services"
+aafwk_path = "//foundation/ability/ability_runtime"
 flutter_root = "//third_party/flutter"
 ace_flutter_engine_root = "$flutter_root/build"
 expat_root = "//third_party/expat"
