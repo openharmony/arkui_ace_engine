@@ -782,7 +782,7 @@ static napi_module PlugInComonentModule = {
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_register_func = PluginComponentExport,
-    .nm_modname = "plugincomponent",
+    .nm_modname = "pluginComponent",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
