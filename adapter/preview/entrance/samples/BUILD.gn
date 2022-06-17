@@ -212,7 +212,7 @@ if (enable_ark_preview) {
       sources = [
         "$shared_library_path/arkui/napi/libace_napi.dylib",
         "$shared_library_path/arkui/napi/libace_napi_quickjs.dylib",
-        "$shared_library_path/arkui/napi/libuv.dylib",
+        "$shared_library_path/thirdparty/libuv/libuv.dylib",
       ]
       outputs =
           [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
@@ -220,7 +220,7 @@ if (enable_ark_preview) {
       sources = [
         "$shared_library_path/arkui/napi/libace_napi.dll",
         "$shared_library_path/arkui/napi/libace_napi_quickjs.dll",
-        "$shared_library_path/arkui/napi/libuv.dll",
+        "$shared_library_path/thirdparty/libuv/libuv.dll",
       ]
       outputs = [ root_build_dir +
                   "/mingw_x86_64/common/common/{{source_file_part}}" ]
