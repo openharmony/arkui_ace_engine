@@ -19,9 +19,6 @@ config("standard_camera_config") {
 
   include_dirs = [
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include/",
-    "//drivers/adapter/uhdf2/include/hdi",
-    "//drivers/adapter/uhdf2/osal/include/",
-    "//drivers/framework/include/utils",
     "//drivers/peripheral/camera/interfaces/include/",
     "//drivers/peripheral/camera/interfaces/include/callback/device/",
     "//drivers/peripheral/camera/interfaces/include/callback/host/",
