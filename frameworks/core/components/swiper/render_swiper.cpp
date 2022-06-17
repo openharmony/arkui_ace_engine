@@ -3043,6 +3043,10 @@ void RenderSwiper::BuildLazyItems()
             index = index % itemCount_;
         }
     }
+
+    if (swipeToIndex_ < cacheStart_ || swipeToIndex_ > cacheEnd_) {
+        buildChildByIndex_(swipeToIndex_);
+    }
 }
 
 void RenderSwiper::LoadItems()
@@ -3092,7 +3096,9 @@ void RenderSwiper::LoadLazyItems(bool swipeToNext)
             if (cacheStart_ + cacheEnd_ >= lazyLoadCacheSize_) {
                 buildChildByIndex_(--cacheStart_);
             }
-            deleteChildByIndex_(cacheEnd_--);
+            if (currentIndex_ < (itemCount_ - 1)) {
+                deleteChildByIndex_(cacheEnd_--);
+            }
         } else {
             if (--cacheStart_ < 0) {
                 cacheStart_ = itemCount_ - 1;
