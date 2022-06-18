@@ -51,6 +51,8 @@ public:
         return show_ && focusable_ && parentFocusable_;
     }
 
+    virtual bool IsFocusableByTab() const;
+
     virtual bool AcceptFocusByRectOfLastFocus(const Rect& rect)
     {
         return IsFocusable();
@@ -261,6 +263,8 @@ public:
     ~FocusGroup() override = default;
 
     bool IsFocusable() const override;
+
+    bool IsFocusableByTab() const override;
 
     void AddChild(const RefPtr<FocusNode>& focusNode);
     void AddChild(const RefPtr<FocusNode>& focusNode, const RefPtr<FocusNode>& nextFocusNode);

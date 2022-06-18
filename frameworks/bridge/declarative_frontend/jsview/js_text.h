@@ -53,6 +53,7 @@ public:
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
+    static void JsFocusable(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();
