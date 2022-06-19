@@ -32,12 +32,16 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#ifndef WEARABLE_PRODUCT
+#include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_distributed.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
@@ -45,9 +49,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
-#ifndef WEARABLE_PRODUCT
-#include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
-#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
@@ -707,6 +708,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"WaterFlow", JSWaterFLow::JSBind},
     {"FlowItem", JSFLowItem::JSBind},
     {"RelativeContainer", JSRelativeContainer::JSBind},
+    {"__Common__", JSCommonView::JSBind},
 };
 
 void RegisterAllModule(BindingTarget globalObj)

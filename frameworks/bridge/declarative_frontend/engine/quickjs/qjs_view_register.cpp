@@ -34,6 +34,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#ifndef WEARABLE_PRODUCT
+#include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
@@ -46,12 +49,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
-#ifndef WEARABLE_PRODUCT
-#include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
-#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
@@ -960,6 +961,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSWaterFlow::JSBind(globalObj);
     JSWaterFlowItem::JSBind(globalObj);
     JSRelativeContainer::JSBind(globalObj);
+    JSCommonView::JSBind(globalObj);
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);
