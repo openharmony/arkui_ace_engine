@@ -340,6 +340,8 @@ bool ThreadWatcher::IsThreadStuck()
             LOGE("thread stuck, ability: %{public}s, instanceId: %{public}d, thread: %{public}s, looptime: %{public}d, "
                  "checktime: %{public}d",
                 abilityName.c_str(), instanceId_, threadName_.c_str(), loopTime_, threadTag_);
+            // or threadTag_ != loopTime_ will always be true
+            threadTag_ = loopTime_;
             res = true;
         }
     }
