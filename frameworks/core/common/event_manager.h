@@ -39,7 +39,8 @@ public:
     // After the touch down event is triggered, the touch test is performed to collect the corresponding
     // touch event target list.
     void TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
-        const TouchRestrict& touchRestrict, bool needAppend = false);
+        const TouchRestrict& touchRestrict, const Offset& offset = Offset(),
+            float viewScale = 1.0f, bool needAppend = false);
     void TouchTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict);
 
     bool DispatchTouchEvent(const TouchEvent& point);
