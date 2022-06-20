@@ -56,6 +56,11 @@ public:
         return MakeRefPtr<TextLayoutAlgorithm>();
     }
 
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
 private:
     void PaintContent(RenderContext* renderContext, const OffsetF& offset);
 

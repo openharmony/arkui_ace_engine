@@ -42,11 +42,9 @@ namespace OHOS::Ace::NG {
 class PipelineContext;
 class Pattern;
 class StateModifyTask;
+class UITask;
 
 constexpr int32_t DEFAULT_FRAME_SLOT = -1;
-
-using LayoutTask = CancelableCallback<void()>;
-using RenderTask = CancelableCallback<void()>;
 
 // FrameNode will display rendering region in the screen.
 class ACE_EXPORT FrameNode : public virtual UiNodeId {
@@ -54,7 +52,7 @@ class ACE_EXPORT FrameNode : public virtual UiNodeId {
 
 public:
     // create a new child element and mount to element tree.
-    static RefPtr<FrameNode> CreateFrameNodeAndMounToParent(const std::string& tag, const std::string& id,
+    static RefPtr<FrameNode> CreateFrameNodeAndMountToParent(const std::string& tag, const std::string& id,
         const RefPtr<Pattern>& pattern, const RefPtr<FrameNode>& parent, int32_t slot);
 
     // create a new child element with new element tree.
@@ -95,7 +93,7 @@ public:
     }
     // Tree operation end.
 
-    void AttachContextrecursively(const RefPtr<PipelineContext>& context);
+    void AttachContextRecursively(const RefPtr<PipelineContext>& context);
 
     RefPtr<PipelineContext> GetContext() const;
 
@@ -112,9 +110,9 @@ public:
 
     RefPtr<LayoutWrapper> CreateLayoutWrapperOnCreate();
 
-    LayoutTask CreateLayoutTask(bool onCreate = false, bool forceUseMainThread = false);
+    std::optional<UITask> CreateLayoutTask(bool onCreate = false, bool forceUseMainThread = false);
 
-    RenderTask CreateRenderTask(bool forceUseMainThread = false);
+    std::optional<UITask> CreateRenderTask(bool forceUseMainThread = false);
 
     void SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty);
 
@@ -187,10 +185,17 @@ public:
     bool TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,
         TouchTestResult& result);
 
+    bool IsAtomicNode() const;
+
+    void RequestNextFrame();
+
 protected:
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
+
+    void OnInActive();
+    void OnActive();
 
     std::list<RefPtr<FrameNode>> children_;
     WeakPtr<PipelineContext> context_;
@@ -210,7 +215,6 @@ private:
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
-    void RequestNextFrame();
 
     std::string tag_ = "FrameNode";
     std::string id_;

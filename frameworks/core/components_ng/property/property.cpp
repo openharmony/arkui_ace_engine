@@ -18,7 +18,8 @@
 namespace OHOS::Ace::NG {
 bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag)
 {
-    return ((propertyChangeFlag & PROPERTY_UPDATE_RENDER) == PROPERTY_UPDATE_RENDER);
+    return ((propertyChangeFlag & PROPERTY_UPDATE_RENDER) == PROPERTY_UPDATE_RENDER) ||
+           ((propertyChangeFlag & PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST) == PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST);
 }
 
 bool CheckNeedRequestMeasureAndLayout(PropertyChangeFlag propertyChangeFlag)

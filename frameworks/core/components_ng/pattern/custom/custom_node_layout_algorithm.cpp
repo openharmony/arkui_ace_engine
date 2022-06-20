@@ -23,6 +23,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
     if (renderFunction_ && host) {
+        ACE_SCOPED_TRACE("CustomNode:BuildItem");
         // first create child node and wrapper.
         auto child = renderFunction_();
         child->MountToParent(host);

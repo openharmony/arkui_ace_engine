@@ -47,7 +47,7 @@ FrameNode::~FrameNode()
     pattern_->DetachFromFrameNode();
 }
 
-RefPtr<FrameNode> FrameNode::CreateFrameNodeAndMounToParent(const std::string& tag, const std::string& id,
+RefPtr<FrameNode> FrameNode::CreateFrameNodeAndMountToParent(const std::string& tag, const std::string& id,
     const RefPtr<Pattern>& pattern, const RefPtr<FrameNode>& parent, int32_t slot)
 {
     auto newChild = CreateFrameNode(tag, id, pattern);
@@ -60,7 +60,7 @@ RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(const std::string& tag, con
 {
     auto newChild = CreateFrameNode(tag, id, pattern, true);
     newChild->SetDepth(1);
-    newChild->AttachContextrecursively(context);
+    newChild->AttachContextRecursively(context);
     newChild->SetSlotId(0);
     return newChild;
 }
@@ -101,6 +101,7 @@ void FrameNode::AddChild(const RefPtr<FrameNode>& child, int32_t slot)
     std::advance(it, slot);
     auto result = children_.insert(it, child);
     child->SetSlotId(std::distance(children_.begin(), result));
+    child->OnActive();
     needSyncRenderTree_ = true;
 }
 
@@ -110,7 +111,24 @@ void FrameNode::RemoveChild(const RefPtr<FrameNode>& child)
         return;
     }
     children_.remove(child);
+    child->OnInActive();
     needSyncRenderTree_ = true;
+}
+
+void FrameNode::OnInActive()
+{
+    pattern_->OnActive();
+    for (const auto& child : children_) {
+        child->OnInActive();
+    }
+}
+
+void FrameNode::OnActive()
+{
+    pattern_->OnActive();
+    for (const auto& child : children_) {
+        child->OnActive();
+    }
 }
 
 RefPtr<FrameNode> FrameNode::GetChildBySlot(uint32_t slot)
@@ -150,7 +168,7 @@ void FrameNode::MountToParent(const RefPtr<FrameNode>& parent, int32_t slot)
     if (parent) {
         parent->AddChild(AceType::Claim(this), slot);
     }
-    AttachContextrecursively(parent != nullptr ? parent->context_.Upgrade() : nullptr);
+    AttachContextRecursively(parent != nullptr ? parent->context_.Upgrade() : nullptr);
 }
 
 void FrameNode::SetPipelineContext(const RefPtr<PipelineContext>& context)
@@ -164,14 +182,14 @@ void FrameNode::SetPipelineContext(const RefPtr<PipelineContext>& context)
     OnContextAttached();
 }
 
-void FrameNode::AttachContextrecursively(const RefPtr<PipelineContext>& context)
+void FrameNode::AttachContextRecursively(const RefPtr<PipelineContext>& context)
 {
     if (!context) {
         return;
     }
     SetPipelineContext(context);
     for (auto& child : children_) {
-        child->AttachContextrecursively(context);
+        child->AttachContextRecursively(context);
     }
 }
 
@@ -287,8 +305,8 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(
         dirty, layoutAlgorithmWrapper->SkipMeasure(), layoutAlgorithmWrapper->SkipLayout());
-    if (needRerender) {
-        UiTaskScheduler::GetInstance()->AddDirtyRenderNode(Claim(this));
+    if (needRerender || CheckNeedRender(renderProperty_->GetPropertyChangeFlag())) {
+        MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     if (geometryNode_->GetFrame().GetRect() != dirty->GetGeometryNode()->GetFrame().GetRect()) {
         renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
@@ -301,8 +319,12 @@ void FrameNode::SetGeometryNode(RefPtr<GeometryNode>&& node)
     geometryNode_.Swap(std::move(node));
 }
 
-LayoutTask FrameNode::CreateLayoutTask(bool onCreate, bool forceUseMainThread)
+std::optional<UITask> FrameNode::CreateLayoutTask(bool onCreate, bool forceUseMainThread)
 {
+    if (!isLayoutDirtyMarked_) {
+        return std::nullopt;
+    }
+    ACE_SCOPED_TRACE("prepare layout task");
     RefPtr<LayoutWrapper> layoutWrapper;
     if (!onCreate) {
         UpdateLayoutPropertyFlag();
@@ -333,13 +355,17 @@ LayoutTask FrameNode::CreateLayoutTask(bool onCreate, bool forceUseMainThread)
         }
     };
     if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
-        return { std::move(task), MAIN_TASK };
+        return UITask(std::move(task), MAIN_TASK);
     }
-    return { std::move(task), layoutWrapper->CanRunOnWhichThread() };
+    return UITask(std::move(task), layoutWrapper->CanRunOnWhichThread());
 }
 
-RenderTask FrameNode::CreateRenderTask(bool forceUseMainThread)
+std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
 {
+    if (!isRenderDirtyMarked_) {
+        return std::nullopt;
+    }
+    ACE_SCOPED_TRACE("prepare render task");
     LOGD("create ui render task");
     auto wrapper = CreateRenderWrapper();
     auto task = [wrapper]() {
@@ -347,9 +373,9 @@ RenderTask FrameNode::CreateRenderTask(bool forceUseMainThread)
         wrapper->FlushRender();
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
-        return { std::move(task), MAIN_TASK };
+        return UITask(std::move(task), MAIN_TASK);
     }
-    return { std::move(task), wrapper->CanRunOnWhichThread() };
+    return UITask(std::move(task), wrapper->CanRunOnWhichThread());
 }
 
 std::optional<LayoutConstraintF> FrameNode::GetLayoutConstraint() const
@@ -388,7 +414,7 @@ void FrameNode::UpdateLayoutPropertyFlag()
     if ((flag & PROPERTY_UPDATE_POSITION) == PROPERTY_UPDATE_POSITION) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     }
-    layoutProperty_->AjdustPropertyChangeFlagByChild(flag);
+    layoutProperty_->AdjustPropertyChangeFlagByChild(flag);
 }
 
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapperOnCreate()
@@ -486,16 +512,17 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
             }
             return;
         }
-        UiTaskScheduler::GetInstance()->AddDirtyLayoutNode(Claim(this));
+        UITaskScheduler::GetInstance()->AddDirtyLayoutNode(Claim(this));
         return;
     }
+    layoutProperty_->CleanDirty();
     // If has dirtyLayoutBox, need to mark dirty after layout done.
     if (isRenderDirtyMarked_ || isLayoutDirtyMarked_) {
         return;
     }
     isRenderDirtyMarked_ = true;
     if (isRenderBoundary) {
-        UiTaskScheduler::GetInstance()->AddDirtyRenderNode(Claim(this));
+        UITaskScheduler::GetInstance()->AddDirtyRenderNode(Claim(this));
         return;
     }
     auto parent = parent_.Upgrade();
@@ -517,6 +544,11 @@ bool FrameNode::IsRenderBoundary()
 const RefPtr<Pattern>& FrameNode::GetPattern() const
 {
     return pattern_;
+}
+
+bool FrameNode::IsAtomicNode() const
+{
+    return pattern_->IsAtomicNode();
 }
 
 bool FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,

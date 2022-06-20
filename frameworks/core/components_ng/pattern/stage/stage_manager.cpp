@@ -41,6 +41,6 @@ void StageManager::PushPage(const RefPtr<FrameNode>& node)
     stagePattern_->currentPageIndex_ = 0;
     // flush layout task.
     rootNode_->MarkDirtyNode();
-    UiTaskScheduler::GetInstance()->FlushLayoutTask(true, true);
+    UITaskScheduler::GetInstance()->FlushLayoutTask(true, true);
 }
 } // namespace OHOS::Ace::NG

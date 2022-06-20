@@ -13,30 +13,24 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/stack/stack_view.h"
+#include "core/components_ng/pattern/image/image_view.h"
 
-#include "base/log/ace_trace.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/image/image_modifier.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void StackView::Create()
+void ImageView::Create(const std::string& src)
 {
+    auto* stack = ViewStackProcessor::GetInstance();
     // TODO: Add unique id.
     auto frameNode =
-        FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, V2::STACK_ETS_TAG, AceType::MakeRefPtr<StackPattern>());
-    ViewStackProcessor::GetInstance()->Push(frameNode);
+        FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, V2::IMAGE_ETS_TAG, AceType::MakeRefPtr<ImagePattern>());
+    stack->Push(frameNode);
+    ImageSourceInfo imageSourceInfo(src);
+    stack->PushLayoutTask(ImageSourceInfoModifier(imageSourceInfo));
 }
 
-void StackView::Create(Alignment alignment)
-{
-    // TODO: Add unique id.
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, V2::STACK_ETS_TAG, AceType::MakeRefPtr<StackPattern>());
-    frameNode->GetLayoutProperty()->UpdateAlignment(alignment);
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-}
 } // namespace OHOS::Ace::NG

@@ -31,6 +31,11 @@ public:
     ListPattern() = default;
     ~ListPattern() override = default;
 
+    bool IsAtomicNode() const override 
+    {
+        return false;
+    }
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ListLayoutProperty>();

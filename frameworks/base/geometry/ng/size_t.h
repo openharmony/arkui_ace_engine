@@ -119,6 +119,11 @@ public:
         return Negative(width_) && Negative(height_);
     }
 
+    bool IsNonPositive() const
+    {
+        return NonPositive(width_) && NonPositive(height_);
+    }
+
     bool UpdateSizeWithCheck(const SizeT& size)
     {
         bool isModified = false;
@@ -269,7 +274,7 @@ public:
         return false;
     }
 
-    double CalcRatio()
+    double CalcRatio() const
     {
         return static_cast<double>(width_) / static_cast<double>(height_);
     }

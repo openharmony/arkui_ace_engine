@@ -16,16 +16,60 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_UI_TASK_SCHEDULER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_UI_TASK_SCHEDULER_H
 
+#include <cstdint>
+#include <functional>
+#include <mutex>
+#include <set>
+#include <unordered_map>
+
+#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT UiTaskScheduler final {
-public:
-    ~UiTaskScheduler() = default;
+class FrameNode;
 
-    static UiTaskScheduler* GetInstance();
+using TaskThread = uint32_t;
+constexpr TaskThread PLATFORM_TASK = 0;
+constexpr TaskThread MAIN_TASK = 1;
+constexpr TaskThread BACKGROUND_TASK = 1 << 1;
+constexpr TaskThread UNDEFINED_TASK = 1 << 2;
+
+class UITask {
+public:
+    explicit UITask(std::function<void()>&& task) : task_(std::move(task)) {}
+
+    UITask(std::function<void()>&& task, TaskThread taskThread) : task_(std::move(task)), taskThread_(taskThread) {}
+
+    ~UITask() = default;
+
+    void SetTaskThreadType(TaskThread taskThread)
+    {
+        taskThread_ = taskThread;
+    }
+
+    TaskThread GetTaskThreadType() const
+    {
+        return taskThread_;
+    }
+
+    void operator()() const
+    {
+        if (task_) {
+            task_();
+        }
+    }
+
+private:
+    std::function<void()> task_;
+    TaskThread taskThread_ = MAIN_TASK;
+};
+
+class ACE_EXPORT UITaskScheduler final {
+public:
+    ~UITaskScheduler() = default;
+
+    static UITaskScheduler* GetInstance();
 
     // Called on Main Thread.
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
@@ -45,7 +89,7 @@ public:
     }
 
 private:
-    UiTaskScheduler() = default;
+    UITaskScheduler() = default;
 
     template<typename T>
     struct NodeCompare {
@@ -69,14 +113,14 @@ private:
     std::unordered_map<uint32_t, RootDirtyMap> dirtyRenderNodes_;
 
     // Singleton instance
-    static std::unique_ptr<UiTaskScheduler> instance_;
+    static std::unique_ptr<UITaskScheduler> instance_;
 
     static std::mutex mutex_;
 
     uint32_t currentRootId_ = 0;
     uint32_t currentPageId_ = 0;
 
-    ACE_DISALLOW_COPY_AND_MOVE(UiTaskScheduler);
+    ACE_DISALLOW_COPY_AND_MOVE(UITaskScheduler);
 };
 
 } // namespace OHOS::Ace::NG

@@ -248,14 +248,20 @@ std::pair<int32_t, float> ListLayoutAlgorithm::RequestNewItemsForward(LayoutWrap
     auto currentEndPos = startPos;
     while (currentEndPos < endMainPos_) {
         // build more item and layout.
-        ACE_SCOPED_TRACE("ListLayoutAlgorithm::BuildAndMeasureListItem");
-        auto newChild = builder_->GetChildByIndex(nextIndex);
-        if (!newChild) {
-            break;
+        RefPtr<FrameNode> newChild;
+        {
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::BuildListItem");
+            newChild = builder_->GetChildByIndex(nextIndex);
+            if (!newChild) {
+                break;
+            }
         }
         newChild->MountToParent(host);
         auto childWrapper = newChild->CreateLayoutWrapperOnCreate();
-        childWrapper->Measure(layoutConstraint);
+        {
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
+            childWrapper->Measure(layoutConstraint);
+        }
         auto mainLength = GetMainAxisSize(childWrapper->GetGeometryNode()->GetFrameSize(), axis);
         currentStartPos = currentEndPos;
         currentEndPos = currentEndPos + mainLength;
@@ -283,14 +289,20 @@ std::pair<int32_t, float> ListLayoutAlgorithm::RequestNewItemsBackward(LayoutWra
     auto currentEndPos = startPos;
     while (currentStartPos > startMainPos_) {
         // build more item and layout.
-        ACE_SCOPED_TRACE("ListLayoutAlgorithm::BuildAndMeasureListItem");
-        auto newChild = builder_->GetChildByIndex(nextIndex);
-        if (!newChild) {
-            break;
+        RefPtr<FrameNode> newChild;
+        {
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::BuildListItem");
+            newChild = builder_->GetChildByIndex(nextIndex);
+            if (!newChild) {
+                break;
+            }
         }
         newChild->MountToParent(host, 0);
         auto childWrapper = newChild->CreateLayoutWrapperOnCreate();
-        childWrapper->Measure(layoutConstraint);
+        {
+            ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem");
+            childWrapper->Measure(layoutConstraint);
+        }
         auto mainLength = GetMainAxisSize(childWrapper->GetGeometryNode()->GetFrameSize(), axis);
         currentEndPos = currentStartPos;
         currentStartPos = currentStartPos - mainLength;

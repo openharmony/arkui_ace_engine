@@ -21,6 +21,7 @@
 
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
+#include "core/components_ng/pattern/image/image_view.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -288,6 +289,12 @@ void JSImage::Create(const JSCallbackInfo& info)
     }
     std::string src;
     auto noPixMap = ParseJsMedia(info[0], src);
+
+    if (Container::IsCurrentUseNewPipeline() && noPixMap) {
+        NG::ImageView::Create(src);
+        return;
+    }
+
     RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
     imageComponent->SetUseSkiaSvg(false);
     ViewStackProcessor::GetInstance()->Push(imageComponent);

@@ -157,6 +157,15 @@ public:
         return layoutConstraint;
     }
 
+    LayoutConstraintF CreateContentConstraint() const
+    {
+        auto layoutConstraint = contentConstraint_.value_or(LayoutConstraintF());
+        if (layoutConstraint.selfIdealSize) {
+            layoutConstraint.maxSize.UpdateSizeWhenSmaller(layoutConstraint.selfIdealSize.value());
+        }
+        return layoutConstraint;
+    }
+
     PaddingPropertyF CreatePaddingPropertyF();
 
 protected:

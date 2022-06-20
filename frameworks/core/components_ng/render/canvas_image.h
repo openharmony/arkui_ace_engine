@@ -13,28 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PAGE_PAGE_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PAGE_PAGE_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H
 
-#include "core/components_ng/pattern/pattern.h"
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
-// PagePattern is the base class for page render node.
-class PagePattern : public Pattern {
-    DECLARE_ACE_TYPE(PagePattern, Pattern);
+
+// CanvasImage is interface for drawing image.
+class CanvasImage : public virtual AceType {
+    DECLARE_ACE_TYPE(CanvasImage, AceType)
 
 public:
-    PagePattern() = default;
-    ~PagePattern() override = default;
-
-    bool IsAtomicNode() const override
-    {
-        return false;
-    }
-
-private:
-    void OnAttachToFrameNode() override;
+    static RefPtr<CanvasImage> Create(void* rawImage);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PAGE_PAGE_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H

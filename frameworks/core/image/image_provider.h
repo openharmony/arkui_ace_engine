@@ -89,16 +89,16 @@ public:
 
     // get out source image data asynchronously.
     static void FetchImageObject(
-        ImageSourceInfo imageInfo,
-        ImageObjSuccessCallback successCallback,
-        UploadSuccessCallback uploadSuccessCallback,
-        FailedCallback failedCallback,
-        const WeakPtr<PipelineContext> context,
+        const ImageSourceInfo& imageInfo,
+        const ImageObjSuccessCallback& successCallback,
+        const UploadSuccessCallback& uploadSuccessCallback,
+        const FailedCallback& failedCallback,
+        const WeakPtr<PipelineContext>& context,
         bool syncMode,
         bool useSkiaSvg,
         bool needAutoResize,
-        RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-        OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
+        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+        const OnPostBackgroundTask& onBackgroundTaskPostCallback = nullptr);
 
     static sk_sp<SkImage> ResizeSkImage(
         const sk_sp<SkImage>& rawImage,

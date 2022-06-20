@@ -64,6 +64,9 @@ public:
 
     TextParagraph& operator=(const TextParagraph& value)
     {
+        if (this == &value) {
+            return *this;
+        }
         content_ = value.content_;
         if (value.propFontStyle_) {
             propFontStyle_ = std::make_unique<FontStyle>(*value.propFontStyle_);

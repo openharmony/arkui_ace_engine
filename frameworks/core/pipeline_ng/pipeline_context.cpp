@@ -61,33 +61,10 @@ void PipelineContext::AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElemen
     window_->RequestFrame();
 }
 
-void PipelineContext::BuildDirtyElement()
-{
-    CHECK_RUN_ON(UI);
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().BeginFlushBuild();
-    }
-    if (!dirtyComposedNodes_.empty()) {
-        LOGI("flush build dirty node");
-        decltype(dirtyComposedNodes_) dirtyElements(std::move(dirtyComposedNodes_));
-        for (const auto& elementWeak : dirtyElements) {
-            auto element = elementWeak.Upgrade();
-            // maybe unavailable when update parent
-            if (element) {
-                element->Rebuild();
-            }
-        }
-        UiTaskScheduler::GetInstance()->FlushTask();
-    }
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().EndFlushBuild();
-    }
-}
-
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACK();
+    ACE_FUNCTION_TRACE();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
@@ -98,15 +75,14 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
 void PipelineContext::FlushMessages()
 {
-    ACE_FUNCTION_TRACK();
+    ACE_FUNCTION_TRACE();
     window_->FlushTasks();
 }
 
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
     FlushTouchEvents();
-    BuildDirtyElement();
-    ClearDeactivateElements();
+    UITaskScheduler::GetInstance()->FlushTask();
     FlushMessages();
 }
 
@@ -151,7 +127,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         layoutConstraint.maxSize = idealSize;
         rootNode_->UpdateLayoutConstraint(layoutConstraint);
         rootNode_->MarkDirtyNode();
-        UiTaskScheduler::GetInstance()->FlushLayoutTask(false, true);
+        UITaskScheduler::GetInstance()->FlushLayoutTask(false, true);
     }
 }
 
@@ -186,7 +162,6 @@ void PipelineContext::FlushTouchEvents()
             eventManager_->DispatchTouchEvent(scalePoint);
         }
     }
-    UiTaskScheduler::GetInstance()->FlushLayoutTask(false, true);
 }
 
 } // namespace OHOS::Ace::NG

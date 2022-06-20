@@ -22,24 +22,24 @@
 
 namespace OHOS::Ace::NG {
 
-std::unique_ptr<UiTaskScheduler> UiTaskScheduler::instance_ = nullptr;
+std::unique_ptr<UITaskScheduler> UITaskScheduler::instance_ = nullptr;
 
-std::mutex UiTaskScheduler::mutex_ = std::mutex();
+std::mutex UITaskScheduler::mutex_ = std::mutex();
 
-UiTaskScheduler* UiTaskScheduler::GetInstance()
+UITaskScheduler* UITaskScheduler::GetInstance()
 {
     if (!instance_) {
         std::lock_guard<std::mutex> lockGuard(mutex_);
         if (!instance_) {
-            instance_.reset(new UiTaskScheduler);
+            instance_.reset(new UITaskScheduler);
         }
     }
     return instance_.get();
 }
 
-void UiTaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
+void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
-    CHECK_RUN_ON(JS);
+    CHECK_RUN_ON(UI);
     if (!dirty) {
         LOGW("dirty is null");
         return;
@@ -47,9 +47,9 @@ void UiTaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     dirtyLayoutNodes_[dirty->GetRootId()][dirty->GetPageId()].emplace(dirty);
 }
 
-void UiTaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
+void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
-    CHECK_RUN_ON(JS);
+    CHECK_RUN_ON(UI);
     if (!dirty) {
         LOGW("dirty is null");
         return;
@@ -57,71 +57,54 @@ void UiTaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     dirtyRenderNodes_[dirty->GetRootId()][dirty->GetPageId()].emplace(dirty);
 }
 
-void UiTaskScheduler::FlushLayoutTask(bool onCreate, bool forceUseMainThread)
+void UITaskScheduler::FlushLayoutTask(bool onCreate, bool forceUseMainThread)
 {
-    CHECK_RUN_ON(JS);
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     // Priority task creation
     for (auto&& rootNodes : dirtyLayoutNodes) {
-        std::list<LayoutTask> tasks;
-        RefPtr<FrameNode> lastNode = nullptr;
         for (auto&& pageNodes : rootNodes.second) {
             for (auto&& node : pageNodes.second) {
-                tasks.emplace_back(node->CreateLayoutTask(onCreate, forceUseMainThread));
-                lastNode = node;
+                auto task = node->CreateLayoutTask(onCreate, forceUseMainThread);
+                if (task) {
+                    if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
+                        (*task)();
+                    } else {
+                        LOGW("need to use multithread feature");
+                    }
+                }
             }
-        }
-        if (forceUseMainThread) {
-            for (const auto& task : tasks) {
-                task();
-            }
-            return;
-        }
-        // TODO: Priority task exec.
-        for (const auto& task : tasks) {
-            if (task.GetTaskThreadType() == MAIN_TASK) {
-                task();
-                continue;
-            }
-            LOGW("need to use multithread feature");
         }
     }
 }
 
-void UiTaskScheduler::FlushRenderTask(bool forceUseMainThread)
+void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
 {
-    CHECK_RUN_ON(JS);
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
     for (auto&& rootNodes : dirtyRenderNodes) {
-        std::list<RenderTask> tasks;
-        RefPtr<FrameNode> lastNode = nullptr;
         for (auto&& pageNodes : rootNodes.second) {
             for (auto&& node : pageNodes.second) {
-                tasks.emplace_back(node->CreateRenderTask(forceUseMainThread));
-                lastNode = node;
+                auto task = node->CreateRenderTask(forceUseMainThread);
+                if (task) {
+                    if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
+                        (*task)();
+                    } else {
+                        LOGW("need to use multithread feature");
+                    }
+                }
             }
-        }
-        if (forceUseMainThread) {
-            for (const auto& task : tasks) {
-                task();
-            }
-            return;
-        }
-        // TODO: Priority task exec.
-        for (const auto& task : tasks) {
-            if (task.GetTaskThreadType() == MAIN_TASK) {
-                task();
-                continue;
-            }
-            LOGW("need to use multithread feature");
         }
     }
 }
 
-void UiTaskScheduler::FlushTask()
+void UITaskScheduler::FlushTask()
 {
     CHECK_RUN_ON(UI);
+    ACE_SCOPED_TRACE("UITaskScheduler::FlushTask");
     FlushLayoutTask();
     FlushRenderTask();
 }
