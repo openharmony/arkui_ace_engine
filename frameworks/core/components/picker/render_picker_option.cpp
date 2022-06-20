@@ -34,7 +34,8 @@ const Color HOVER_COLOR(0x0C000000);
 
 RenderPickerOption::RenderPickerOption()
 {
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
+    if (SystemProperties::GetDeviceType() == DeviceType::WATCH ||
+        SystemProperties::GetDeviceType() == DeviceType::UNKNOWN) {
         return;
     }
 
