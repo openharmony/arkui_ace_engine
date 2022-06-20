@@ -489,6 +489,7 @@ void FrontendDelegateDeclarative::OnConfigurationUpdated(const std::string& data
             onConfigurationUpdated(data);
         },
         TaskExecutor::TaskType::JS);
+    OnMediaQueryUpdate();
 }
 
 bool FrontendDelegateDeclarative::OnStartContinuation()

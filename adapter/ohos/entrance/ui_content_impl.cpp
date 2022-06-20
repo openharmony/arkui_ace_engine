@@ -734,7 +734,11 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         container->SetColorScheme(ColorScheme::SCHEME_DARK);
         resConfig.SetColorMode(ColorMode::DARK);
     }
+    if (instanceId_ == -1) {
+        LOGE("Get Instance failed");
+    }
     container->SetResourceConfiguration(resConfig);
+    Platform::AceContainer::OnConfigurationUpdated(instanceId_, (*config).GetName());
     themeManager->UpdateConfig(resConfig);
 }
 
