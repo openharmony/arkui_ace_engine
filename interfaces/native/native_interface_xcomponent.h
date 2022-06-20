@@ -91,11 +91,11 @@ enum OH_NativeXComponent_MouseEventAction {
  */
 enum OH_NativeXComponent_MouseEventButton {
     OH_NATIVEXCOMPONENT_NONE_BUTTON = 0,
-    OH_NATIVEXCOMPONENT_LEFT_BUTTON = 1,
-    OH_NATIVEXCOMPONENT_RIGHT_BUTTON = 2,
-    OH_NATIVEXCOMPONENT_MIDDLE_BUTTON = 4,
-    OH_NATIVEXCOMPONENT_BACK_BUTTON = 8,
-    OH_NATIVEXCOMPONENT_FORWARD_BUTTON = 16,
+    OH_NATIVEXCOMPONENT_LEFT_BUTTON = 0x01,
+    OH_NATIVEXCOMPONENT_RIGHT_BUTTON = 0x02,
+    OH_NATIVEXCOMPONENT_MIDDLE_BUTTON = 0x04,
+    OH_NATIVEXCOMPONENT_BACK_BUTTON = 0x08,
+    OH_NATIVEXCOMPONENT_FORWARD_BUTTON = 0x10,
 };
 
 #define OH_NATIVE_XCOMPONENT_OBJ ("__NATIVE_XCOMPONENT_OBJ__")
@@ -193,11 +193,7 @@ typedef struct OH_NativeXComponent OH_NativeXComponent;
 typedef struct OH_NativeXComponent_Callback {
     /** Called when the surface is created. */
     void (*OnSurfaceCreated)(OH_NativeXComponent* component, void* window);
-    /**
-     * Called when the surface is changed.\n
-     * This API is defined but not implemented in OpenHarmony 3.1 Release. It will be available for use in\n
-     * OpenHarmony 3.1 MR.
-     */
+    /** Called when the surface is changed. */
     void (*OnSurfaceChanged)(OH_NativeXComponent* component, void* window);
     /** Called when the surface is destroyed. */
     void (*OnSurfaceDestroyed)(OH_NativeXComponent* component, void* window);
