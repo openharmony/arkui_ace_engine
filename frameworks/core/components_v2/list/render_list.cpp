@@ -53,7 +53,6 @@ constexpr bool DIR_REVERSE = true;
 constexpr int32_t STEP_FORWARD = 1;
 constexpr int32_t STEP_BACK = -1;
 constexpr int32_t STEP_INVALID = 10;
-constexpr double MIN_LANE_LENGTH = 1.0;
 constexpr int32_t CENTER_ALIGN_DIVIDER = 2;
 
 // IsRightToLeft | IsListVertical | IsDirectionVertical | IsDirectionReverse
@@ -341,6 +340,23 @@ double RenderList::GetLaneLengthInPx(const Dimension& length)
     return NormalizeToPx(length);
 }
 
+void RenderList::ModifyLaneLength(const std::optional<std::pair<Dimension, Dimension>>& laneConstrain)
+{
+    minLaneLength_ = GetLaneLengthInPx(laneConstrain.value().first);
+    maxLaneLength_ = GetLaneLengthInPx(laneConstrain.value().second);
+    if (LessOrEqual(maxLaneLength_, 0.0)) {
+        maxLaneLength_ = GetCrossSize(GetLayoutSize());
+    }
+    if (LessOrEqual(minLaneLength_, 0.0)) {
+        minLaneLength_ = std::min(GetCrossSize(GetLayoutSize()), maxLaneLength_);
+    }
+    if (GreatNotEqual(minLaneLength_, maxLaneLength_)) {
+        LOGI("minLaneLength: %{public}f is greater than maxLaneLength: %{public}f, assign minLaneLength to"
+            " maxLaneLength", minLaneLength_, maxLaneLength_);
+        maxLaneLength_ = minLaneLength_;
+    }
+}
+
 void RenderList::CalculateLanes()
 {
     auto lanes = component_->GetLanes();
@@ -350,7 +366,7 @@ void RenderList::CalculateLanes()
         //      1.1: use [lanes_] set by user if [lanes_] is set
         //      1.2: set [lanes_] to 1 if [lanes_] is not set
         if (!laneConstrain) {
-            if (lanes == -1 || lanes == 0) {
+            if (lanes <= 0) {
                 lanes = 1;
             }
             maxLaneLength_ = GetCrossSize(GetLayoutParam().GetMaxSize()) / lanes;
@@ -369,16 +385,7 @@ void RenderList::CalculateLanes()
 
         // set layout size temporarily to calculate percent unit of constrain
         SetLayoutSize(GetLayoutParam().GetMaxSize());
-        minLaneLength_ = GetLaneLengthInPx(laneConstrain.value().first);
-        maxLaneLength_ = GetLaneLengthInPx(laneConstrain.value().second);
-        if (LessOrEqual(minLaneLength_, 0.0)) {
-            minLaneLength_ = MIN_LANE_LENGTH;
-        }
-        if (GreatNotEqual(minLaneLength_, maxLaneLength_)) {
-            LOGI("minLaneLength: %{public}f is greater than maxLaneLength: %{public}f, set minLaneLength to"
-                " maxLaneLength", minLaneLength_, maxLaneLength_);
-            maxLaneLength_ = minLaneLength_;
-        }
+        ModifyLaneLength(laneConstrain);
 
         // if minLaneLength is 40, maxLaneLength is 60
         // when list's width is 120, lanes_ = 3

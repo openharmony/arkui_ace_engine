@@ -155,6 +155,7 @@ public:
 
     static bool ParseJsBool(const JSRef<JSVal>& jsValue, bool& result);
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& result);
+    static bool ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result);
     static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
 
@@ -262,6 +263,7 @@ protected:
     static RefPtr<ThemeConstants> GetThemeConstants();
     static bool JsWidth(const JSRef<JSVal>& jsValue);
     static bool JsHeight(const JSRef<JSVal>& jsValue);
+
     template<typename T>
     static RefPtr<T> GetTheme()
     {
@@ -281,6 +283,47 @@ protected:
             return nullptr;
         }
         return themeManager->GetTheme<T>();
+    }
+
+    template<typename T>
+    static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)
+    {
+        if (!jsValue->IsNumber() && !jsValue->IsObject()) {
+            LOGE("arg is not number or Object.");
+            return false;
+        }
+
+        if (jsValue->IsNumber()) {
+            LOGD("jsValue->IsNumber()");
+            result = jsValue->ToNumber<T>();
+            return true;
+        }
+
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        JSRef<JSVal> type = jsObj->GetProperty("type");
+        if (!type->IsNumber()) {
+            LOGW("type is not number");
+            return false;
+        }
+
+        JSRef<JSVal> resId = jsObj->GetProperty("id");
+        if (!resId->IsNumber()) {
+            LOGW("resId is not number");
+            return false;
+        }
+
+        auto themeConstants = GetThemeConstants();
+        if (!themeConstants) {
+            LOGW("themeConstants is nullptr");
+            return false;
+        }
+
+        if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+            result = static_cast<T>(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
+            return true;
+        } else {
+            return false;
+        }
     }
 };
 } // namespace OHOS::Ace::Framework

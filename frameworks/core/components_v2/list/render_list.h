@@ -325,6 +325,7 @@ protected:
         return chainProperty_;
     }
     void CalculateLanes();
+    void ModifyLaneLength(const std::optional<std::pair<Dimension, Dimension>>& laneConstrain);
     ItemPositionState GetItemPositionState(double curMainPos, double lastItemMainSize);
     double GetLaneLengthInPx(const Dimension& length);
     double CalculateLaneCrossOffset(double crossSize, double childCrossSize);
