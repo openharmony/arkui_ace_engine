@@ -252,8 +252,10 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         controller_->RemoveObserver(WeakClaim(this));
         controller_->AddObserver(WeakClaim(this));
         controller_->SetHint(placeholder_);
-        if (textField->IsValueUpdated()) {
-            controller_->SetText(textField->GetValue(), false);
+        if (textField->IsValueUpdated() && textField->GetValue() != GetEditingValue().text) {
+            auto newValue = std::make_shared<TextEditingValue>();
+            newValue->text = textField->GetValue();
+            UpdateEditingValue(newValue);
         }
     }
     ApplyRestoreInfo();
