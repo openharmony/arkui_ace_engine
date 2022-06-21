@@ -322,6 +322,15 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         jsBackendEngine->OnCommand(want, startId);
     };
 
+    builder.dumpHeapSnapshotCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
+            bool isPrivate) {
+        auto jsBackendEngine = weakEngine.Upgrade();
+        if (!jsBackendEngine) {
+            return;
+        }
+        jsBackendEngine->DumpHeapSnapshot(isPrivate);
+    };
+
     builder.taskExecutor = taskExecutor;
     builder.type = type_;
 
@@ -509,4 +518,8 @@ void PaBackend::OnDisConnect(const OHOS::AAFwk::Want& want)
     delegate_->OnDisConnect(want);
 }
 
+void PaBackend::DumpHeapSnapshot(bool isPrivate)
+{
+    delegate_->DumpHeapSnapshot(isPrivate);
+}
 } // namespace OHOS::Ace

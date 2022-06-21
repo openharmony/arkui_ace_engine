@@ -113,6 +113,7 @@ public:
     }
 
     void OnCommand(const OHOS::AAFwk::Want &want, int startId);
+    void DumpHeapSnapshot(bool isPrivate) override;
 
 private:
     void InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecutor);

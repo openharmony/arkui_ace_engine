@@ -1368,4 +1368,10 @@ int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want &want)
     return formState;
 }
 
+void JsiPaEngine::DumpHeapSnapshot(bool isPrivate)
+{
+    if (engineInstance_ && engineInstance_->GetJsRuntime()) {
+        engineInstance_->GetJsRuntime()->DumpHeapSnapshot(isPrivate);
+    }
+}
 } // namespace OHOS::Ace

@@ -646,4 +646,15 @@ void PaContainer::OnCommand(const OHOS::AAFwk::Want &want, int startId, int32_t 
     }
 }
 
+void PaContainer::DumpHeapSnapshot(bool isPrivate)
+{
+    taskExecutor_->PostTask(
+        [isPrivate, backend = WeakPtr<Backend>(backend_)] {
+            auto sp = backend.Upgrade();
+            if (sp) {
+                sp->DumpHeapSnapshot(isPrivate);
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
 } // namespace OHOS::Ace::Platform
