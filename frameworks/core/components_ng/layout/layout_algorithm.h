@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/memory/ace_type.h"
+#include "base/thread/cancelable_callback.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/property/layout_constraint.h"
 
@@ -55,6 +56,11 @@ public:
     virtual bool SkipLayout()
     {
         return false;
+    }
+
+    virtual TaskThread CanRunOnWhichThread()
+    {
+        return MAIN_TASK;
     }
 
 protected:

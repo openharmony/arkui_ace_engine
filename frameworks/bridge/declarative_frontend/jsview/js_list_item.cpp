@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/list/list_item_view.h"
 #include "core/components_v2/list/list_item_component.h"
 
 namespace OHOS::Ace::Framework {
@@ -28,6 +29,11 @@ const V2::StickyMode STICKY_MODE_TABLE[] = { V2::StickyMode::NONE, V2::StickyMod
 
 void JSListItem::Create(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ListItemView::Create();
+        return;
+    }
+
     auto listItemComponent = AceType::MakeRefPtr<V2::ListItemComponent>();
     if (args.Length() >= 1 && args[0]->IsString()) {
         listItemComponent->SetType(args[0]->ToString());
@@ -77,8 +83,7 @@ void JSListItem::SetEditable(const JSCallbackInfo& args)
 
 void JSListItem::SetSelectable(bool selectable)
 {
-    auto listItem =
-        AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    auto listItem = AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (listItem) {
         listItem->SetSelectable(selectable);
     }
@@ -96,8 +101,7 @@ void JSListItem::SelectCallback(const JSCallbackInfo& args)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->SelectExecute(isSelected);
     };
-    auto listItem =
-        AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    auto listItem = AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!listItem) {
         LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListItemComponent>());
         return;

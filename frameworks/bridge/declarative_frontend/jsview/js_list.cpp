@@ -15,11 +15,13 @@
 
 #include "bridge/declarative_frontend/jsview/js_list.h"
 
+#include "base/geometry/axis.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/list/list_view.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/list_position_controller.h"
 
@@ -31,13 +33,17 @@ using ThisComponent = V2::ListComponent;
 constexpr DisplayMode DISPLAY_MODE_TABLE[] = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
 constexpr EdgeEffect EDGE_EFFECT_TABLE[] = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
 constexpr Axis DIRECTION_TABLE[] = { Axis::VERTICAL, Axis::HORIZONTAL };
-constexpr V2::ListItemAlign LIST_ITEM_ALIGN_TABLE[] =
-    { V2::ListItemAlign::START, V2::ListItemAlign::CENTER, V2::ListItemAlign::END };
+constexpr V2::ListItemAlign LIST_ITEM_ALIGN_TABLE[] = { V2::ListItemAlign::START, V2::ListItemAlign::CENTER,
+    V2::ListItemAlign::END };
 
 } // namespace
 
 void JSList::SetDirection(int32_t direction)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ListView::SetListDirection(static_cast<Axis>(direction));
+        return;
+    }
     JSViewSetProperty(&V2::ListComponent::SetDirection, direction, DIRECTION_TABLE, Axis::VERTICAL);
 }
 
@@ -48,6 +54,10 @@ void JSList::SetScrollBar(int32_t scrollBar)
 
 void JSList::SetEdgeEffect(int32_t edgeEffect)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ListView::SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+        return;
+    }
     JSViewSetProperty(&V2::ListComponent::SetEdgeEffect, edgeEffect, EDGE_EFFECT_TABLE, EdgeEffect::SPRING);
 }
 
@@ -63,6 +73,11 @@ void JSList::SetCachedCount(int32_t cachedCount)
 
 void JSList::Create(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ListView::Create();
+        return;
+    }
+
     auto listComponent = AceType::MakeRefPtr<V2::ListComponent>();
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
@@ -110,12 +125,18 @@ void JSList::SetChainAnimation(bool enableChainAnimation)
 void JSList::JsWidth(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsWidth(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     JSViewSetProperty(&V2::ListComponent::SetHasWidth, true);
 }
 
 void JSList::JsHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     JSViewSetProperty(&V2::ListComponent::SetHasHeight, true);
 }
 
@@ -153,14 +174,12 @@ void JSList::SetLanes(const JSCallbackInfo& info)
     }
     Dimension minLengthValue;
     Dimension maxLengthValue;
-    if (!ParseJsDimensionVp(minLengthParam, minLengthValue) ||
-        !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
+    if (!ParseJsDimensionVp(minLengthParam, minLengthValue) || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
         LOGW("minLength param or maxLength param is invalid");
         return;
     }
     listComponent->SetLaneConstrain(minLengthValue, maxLengthValue);
 }
-
 
 void JSList::JSBind(BindingTarget globalObj)
 {
@@ -306,7 +325,7 @@ void JSList::ItemDragStartCallback(const JSCallbackInfo& info)
 
     RefPtr<JsDragFunction> jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc)](
-                        const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<Component> {
+                                 const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<Component> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         auto ret = func->ItemDragStartExecute(dragInfo, itemIndex);
         if (!ret->IsObject()) {
@@ -355,7 +374,7 @@ void JSList::ItemDragEnterCallback(const JSCallbackInfo& info)
 
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
-                                const ItemDragInfo& dragInfo) {
+                                 const ItemDragInfo& dragInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDragEnter");
         func->ItemDragEnterExecute(dragInfo);
@@ -377,7 +396,7 @@ void JSList::ItemDragMoveCallback(const JSCallbackInfo& info)
 
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
-                            const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
+                                const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDragMove");
         func->ItemDragMoveExecute(dragInfo, itemIndex, insertIndex);
@@ -399,7 +418,7 @@ void JSList::ItemDragLeaveCallback(const JSCallbackInfo& info)
 
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
-                                const ItemDragInfo& dragInfo, int32_t itemIndex) {
+                                 const ItemDragInfo& dragInfo, int32_t itemIndex) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDragLeave");
         func->ItemDragLeaveExecute(dragInfo, itemIndex);
@@ -421,7 +440,7 @@ void JSList::ItemDropCallback(const JSCallbackInfo& info)
 
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
-                        const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+                            const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("List.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);

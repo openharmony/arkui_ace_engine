@@ -27,16 +27,12 @@ public:
 
     static UiTaskScheduler* GetInstance();
 
-    // Called on Js Thread.
+    // Called on Main Thread.
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
-    void FlushLayoutTask();
-    void FlushRenderTask();
+    void FlushLayoutTask(bool onCreate = false, bool forceUseMainThread = false);
+    void FlushRenderTask(bool forceUseMainThread = false);
     void FlushTask();
-
-    // Called on Ui Thread.
-    void AddDirtyRenderNodeInUiThread(const RefPtr<FrameNode>& dirty);
-    void FlushRenderTaskInUiThread();
 
     void UpdateCurrentRootId(uint32_t id)
     {
@@ -71,8 +67,6 @@ private:
     std::unordered_map<uint32_t, RootDirtyMap> dirtyLayoutNodes_;
 
     std::unordered_map<uint32_t, RootDirtyMap> dirtyRenderNodes_;
-
-    std::unordered_map<uint32_t, RootDirtyMap> dirtyRenderNodesInUI_;
 
     // Singleton instance
     static std::unique_ptr<UiTaskScheduler> instance_;

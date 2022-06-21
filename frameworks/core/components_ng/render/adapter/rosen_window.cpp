@@ -91,7 +91,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
     LOGI("Rosenwindow set root frame node");
     CHECK_NULL_VOID(root);
     rootNode_ = root;
-    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(rootNode_->GetRenderContextTask());
+    auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(rootNode_->GetRenderContext());
     CHECK_NULL_VOID(rosenRenderContext);
     if (rosenRenderContext->GetRSNode()) {
         rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());

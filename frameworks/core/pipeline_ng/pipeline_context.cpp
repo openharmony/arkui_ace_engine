@@ -51,7 +51,7 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
 
 void PipelineContext::AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElement)
 {
-    CHECK_RUN_ON(JS);
+    CHECK_RUN_ON(UI);
     if (!dirtyElement) {
         LOGW("dirtyElement is null");
         return;
@@ -61,45 +61,27 @@ void PipelineContext::AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElemen
     window_->RequestFrame();
 }
 
-void PipelineContext::AddDirtyRenderTree(const RefPtr<FrameNode>& dirtyNode)
-{
-    CHECK_RUN_ON(UI);
-    if (!dirtyNode) {
-        LOGW("dirtyNode is null");
-        return;
-    }
-    dirtyRenderTree_.emplace(dirtyNode);
-    hasIdleTasks_ = true;
-    window_->RequestFrame();
-}
-
 void PipelineContext::BuildDirtyElement()
 {
-    auto task = [weak = WeakClaim(this)]() {
-        auto context = weak.Upgrade();
-        if (!context) {
-            return;
-        }
-        if (FrameReport::GetInstance().GetEnable()) {
-            FrameReport::GetInstance().BeginFlushBuild();
-        }
-        if (!context->dirtyComposedNodes_.empty()) {
-            LOGI("flush build dirty node");
-            decltype(dirtyComposedNodes_) dirtyElements(std::move(context->dirtyComposedNodes_));
-            for (const auto& elementWeak : dirtyElements) {
-                auto element = elementWeak.Upgrade();
-                // maybe unavailable when update parent
-                if (element) {
-                    element->Rebuild();
-                }
+    CHECK_RUN_ON(UI);
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushBuild();
+    }
+    if (!dirtyComposedNodes_.empty()) {
+        LOGI("flush build dirty node");
+        decltype(dirtyComposedNodes_) dirtyElements(std::move(dirtyComposedNodes_));
+        for (const auto& elementWeak : dirtyElements) {
+            auto element = elementWeak.Upgrade();
+            // maybe unavailable when update parent
+            if (element) {
+                element->Rebuild();
             }
-            UiTaskScheduler::GetInstance()->FlushTask();
         }
-        if (FrameReport::GetInstance().GetEnable()) {
-            FrameReport::GetInstance().EndFlushBuild();
-        }
-    };
-    PostAsyncEvent(std::move(task), TaskExecutor::TaskType::JS);
+        UiTaskScheduler::GetInstance()->FlushTask();
+    }
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushBuild();
+    }
 }
 
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
@@ -110,6 +92,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
+    FlushAnimation(GetTimeFromExternalTimer());
     FlushPipelineWithoutAnimation();
 }
 
@@ -121,6 +104,7 @@ void PipelineContext::FlushMessages()
 
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
+    FlushTouchEvents();
     BuildDirtyElement();
     ClearDeactivateElements();
     FlushMessages();
@@ -159,18 +143,50 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         return;
     }
     LOGI("SetRootRect %{public}f %{public}f", width, height);
-    auto jsTask = [width, height, rootNode = rootNode_]() {
-        SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
-        if (rootNode->GetGeometryNode()->GetFrameSize() != sizeF) {
-            CalcSize idealSize { CalcLength(width), CalcLength(height) };
-            MeasureProperty layoutConstraint;
-            layoutConstraint.selfIdealSize = idealSize;
-            layoutConstraint.maxSize = idealSize;
-            rootNode->UpdateLayoutConstraint(layoutConstraint);
-            (*rootNode->CreateLayoutTask())();
+    SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
+    if (rootNode_->GetGeometryNode()->GetFrameSize() != sizeF) {
+        CalcSize idealSize { CalcLength(width), CalcLength(height) };
+        MeasureProperty layoutConstraint;
+        layoutConstraint.selfIdealSize = idealSize;
+        layoutConstraint.maxSize = idealSize;
+        rootNode_->UpdateLayoutConstraint(layoutConstraint);
+        rootNode_->MarkDirtyNode();
+        UiTaskScheduler::GetInstance()->FlushLayoutTask(false, true);
+    }
+}
+
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
+{
+    CHECK_RUN_ON(UI);
+    touchEvents_.emplace_back(point);
+    hasIdleTasks_ = true;
+    window_->RequestFrame();
+}
+
+void PipelineContext::FlushTouchEvents()
+{
+    CHECK_RUN_ON(UI);
+    if (!rootNode_) {
+        LOGE("root node is nullptr");
+        return;
+    }
+    {
+        ACE_SCOPED_TRACE("PipelineContext::DispatchTouchEvent");
+        decltype(touchEvents_) touchEvents(std::move(touchEvents_));
+        for (const auto& touchEvent : touchEvents) {
+            auto scalePoint = touchEvent.CreateScalePoint(GetViewScale());
+            LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
+                scalePoint.type);
+            if (scalePoint.type == TouchType::DOWN) {
+                LOGD("receive touch down event, first use touch test to collect touch event target");
+                TouchRestrict touchRestrict { TouchRestrict::NONE };
+                touchRestrict.sourceType = touchEvent.sourceType;
+                eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, false);
+            }
+            eventManager_->DispatchTouchEvent(scalePoint);
         }
-    };
-    PostAsyncEvent(std::move(jsTask), TaskExecutor::TaskType::JS);
+    }
+    UiTaskScheduler::GetInstance()->FlushLayoutTask(false, true);
 }
 
 } // namespace OHOS::Ace::NG

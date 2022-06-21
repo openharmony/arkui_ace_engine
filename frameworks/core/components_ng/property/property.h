@@ -32,17 +32,21 @@ inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE = 1;
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_LAYOUT = 1 << 1;
 // Affects self position.
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_POSITION = 1 << 2;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_NODE_TREE = 1 << 3;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_CHILD_REQUEST = 1 << 4;
+
+inline constexpr PropertyChangeFlag PROPERTY_REQUEST_NEW_CHILD_NODE = 1 << 3;
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_BY_CHILD_REQUEST = 1 << 4;
+
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER = 1 << 5;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_PROPERTY = 1 << 6;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 7;
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST = 1 << 6;
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_PROPERTY = 1 << 7;
+
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 8;
 
 bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckNeedLayoutSelf(PropertyChangeFlag propertyChangeFlag);
+bool CheckNeedRequestMeasureAndLayout(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckNeedParentLayout(PropertyChangeFlag propertyChangeFlag);
+bool CheckNeedRequestParent(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
@@ -50,11 +54,9 @@ bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckPositionFlag(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckTreeChangedFlag(PropertyChangeFlag propertyChangeFlag);
+bool CheckRequestNewChildNodeFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNoChanged(PropertyChangeFlag propertyChangeFlag);
-
-bool CheckNodeTreeFlag(PropertyChangeFlag propertyChangeFlag);
 
 #define ACE_DEFINE_CLASS_PROPERTY_GROUP(group, type)        \
 public:                                                     \

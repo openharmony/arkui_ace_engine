@@ -22,12 +22,7 @@ namespace OHOS::Ace::NG {
 // override meausreSelf and measureChildren.
 void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto layoutConstraint =
-        layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint().value_or(LayoutConstraintF());
-    if (!layoutConstraint.selfIdealSize.has_value()) {
-        // deliver parent ideal size to child.
-        layoutConstraint.selfIdealSize = layoutConstraint.parentIdealSize;
-    }
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetChildren()) {
         child->Measure(layoutConstraint);
     }

@@ -144,6 +144,19 @@ public:
     void UpdateContentConstraint(
         const std::optional<LayoutConstraintF>& replace = std::nullopt, bool updateFlag = false);
 
+    std::optional<LayoutConstraintF> CreateChildConstraint() const
+    {
+        auto layoutConstraint = contentConstraint_;
+        if (layoutConstraint.has_value()) {
+            if (layoutConstraint->selfIdealSize.has_value()) {
+                layoutConstraint->parentIdealSize = layoutConstraint->selfIdealSize;
+            }
+            // for child constraint, reset parent selfIdealSize.
+            layoutConstraint->selfIdealSize.reset();
+        }
+        return layoutConstraint;
+    }
+
     PaddingPropertyF CreatePaddingPropertyF();
 
 protected:

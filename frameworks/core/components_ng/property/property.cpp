@@ -21,43 +21,24 @@ bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag)
     return ((propertyChangeFlag & PROPERTY_UPDATE_RENDER) == PROPERTY_UPDATE_RENDER);
 }
 
-bool CheckNeedLayoutSelf(PropertyChangeFlag propertyChangeFlag)
+bool CheckNeedRequestMeasureAndLayout(PropertyChangeFlag propertyChangeFlag)
 {
     return ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
            ((propertyChangeFlag & PROPERTY_UPDATE_LAYOUT) == PROPERTY_UPDATE_LAYOUT) ||
-           ((propertyChangeFlag & PROPERTY_UPDATE_NODE_TREE) == PROPERTY_UPDATE_NODE_TREE) ||
-           ((propertyChangeFlag & PROPERTY_UPDATE_CHILD_REQUEST) == PROPERTY_UPDATE_CHILD_REQUEST);
-}
-
-void ResetLayoutFlag(PropertyChangeFlag& propertyChangeFlag)
-{
-    propertyChangeFlag ^= PROPERTY_UPDATE_MEASURE;
-    propertyChangeFlag ^= PROPERTY_UPDATE_LAYOUT;
-    propertyChangeFlag ^= PROPERTY_UPDATE_CHILD_REQUEST;
-}
-
-void ResetRenderFlag(PropertyChangeFlag& propertyChangeFlag)
-{
-    propertyChangeFlag ^= PROPERTY_UPDATE_POSITION;
-    propertyChangeFlag ^= PROPERTY_UPDATE_RENDER;
-    propertyChangeFlag ^= PROPERTY_UPDATE_RENDER_PROPERTY;
-}
-
-bool CheckNeedParentLayout(PropertyChangeFlag propertyChangeFlag)
-{
-    return CheckNeedLayoutSelf(propertyChangeFlag) ||
+           ((propertyChangeFlag & PROPERTY_REQUEST_NEW_CHILD_NODE) == PROPERTY_REQUEST_NEW_CHILD_NODE) ||
+           ((propertyChangeFlag & PROPERTY_UPDATE_BY_CHILD_REQUEST) == PROPERTY_UPDATE_BY_CHILD_REQUEST) ||
            ((propertyChangeFlag & PROPERTY_UPDATE_POSITION) == PROPERTY_UPDATE_POSITION);
+}
+
+bool CheckNeedRequestParent(PropertyChangeFlag propertyChangeFlag)
+{
+    return CheckMeasureFlag(propertyChangeFlag) || CheckPositionFlag(propertyChangeFlag);
 }
 
 bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag)
 {
     return ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
-           ((propertyChangeFlag & PROPERTY_UPDATE_CHILD_REQUEST) == PROPERTY_UPDATE_CHILD_REQUEST);
-}
-
-bool CheckNodeTreeFlag(PropertyChangeFlag propertyChangeFlag)
-{
-    return ((propertyChangeFlag & PROPERTY_UPDATE_NODE_TREE) == PROPERTY_UPDATE_NODE_TREE);
+           ((propertyChangeFlag & PROPERTY_UPDATE_BY_CHILD_REQUEST) == PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
 bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag)
@@ -70,13 +51,14 @@ bool CheckPositionFlag(PropertyChangeFlag propertyChangeFlag)
     return ((propertyChangeFlag & PROPERTY_UPDATE_POSITION) == PROPERTY_UPDATE_POSITION);
 }
 
-bool CheckTreeChangedFlag(PropertyChangeFlag propertyChangeFlag)
+bool CheckRequestNewChildNodeFlag(PropertyChangeFlag propertyChangeFlag)
 {
-    return ((propertyChangeFlag & PROPERTY_UPDATE_NODE_TREE) == PROPERTY_UPDATE_NODE_TREE);
+    return ((propertyChangeFlag & PROPERTY_REQUEST_NEW_CHILD_NODE) == PROPERTY_REQUEST_NEW_CHILD_NODE);
 }
 
 bool CheckNoChanged(PropertyChangeFlag propertyChangeFlag)
 {
     return (propertyChangeFlag == PROPERTY_UPDATE_NORMAL);
 }
+
 } // namespace OHOS::Ace::NG

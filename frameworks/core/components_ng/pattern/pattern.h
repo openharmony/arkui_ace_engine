@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_property.h"
@@ -69,10 +70,14 @@ public:
         return nullptr;
     }
 
+    virtual RefPtr<EventHub> CreateEventHub()
+    {
+        return MakeRefPtr<EventHub>();
+    }
+
     virtual void OnContextAttached() {}
 
-    // Called to perform update before the render node base update operation.
-    virtual void OnUpdateDone() {}
+    virtual void OnModifyDone() {}
 
     virtual RefPtr<LayoutWrapper> AdjustChildLayoutWrapper(
         const RefPtr<LayoutWrapper>& self, const RefPtr<LayoutWrapper>& child)
@@ -95,7 +100,11 @@ public:
         return true;
     }
 
-    virtual void OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty) {}
+    // Called on main thread to check if need rerender of the content.
+    virtual bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+    {
+        return false;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}
