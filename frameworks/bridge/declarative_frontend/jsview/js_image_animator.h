@@ -43,7 +43,7 @@ public:
     static void OnFinish(const JSCallbackInfo& info);
 
 private:
-    static void ParseImages(const std::unique_ptr<JsonValue>& image, ImageProperties& imageProperties);
+    static void ParseImages(const JSRef<JSVal>& image, ImageProperties& imageProperties);
     static EventMarker GetEventMarker(const JSCallbackInfo& info);
 };
 
