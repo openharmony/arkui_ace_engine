@@ -38,7 +38,6 @@ inline constexpr PropertyChangeFlag PROPERTY_UPDATE_BY_CHILD_REQUEST = 1 << 4;
 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER = 1 << 5;
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST = 1 << 6;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_PROPERTY = 1 << 7;
 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 8;
 
@@ -96,7 +95,7 @@ public:                                                          \
             return;                                              \
         }                                                        \
         groupProperty->Update##name(value);                      \
-        UpdatePropertyChangeFlag(changeFlag);                    \
+        UpdatePropertyChangeFlag(#name, changeFlag);             \
     }
 
 #define ACE_DEFINE_CLASS_PROPERTY_WITHOUT_GROUP(name, type, changeFlag) \
@@ -128,7 +127,7 @@ public:                                                                 \
             return;                                                     \
         }                                                               \
         prop##name##_ = value;                                          \
-        UpdatePropertyChangeFlag(changeFlag);                           \
+        UpdatePropertyChangeFlag(#name, changeFlag);                    \
     }                                                                   \
                                                                         \
 private:                                                                \
@@ -181,7 +180,7 @@ public:
 
     ~Property() override = default;
 
-    uint32_t GetPropertyChangeFlag() const
+    PropertyChangeFlag GetPropertyChangeFlag() const
     {
         return propertyChangeFlag_;
     }
@@ -196,9 +195,17 @@ public:
         propertyChangeFlag_ = propertyChangeFlag_ | propertyChangeFlag;
     }
 
-    virtual void AjdustPropertyChangeFlagByChild(PropertyChangeFlag propertyChangeFlag) {}
+    void UpdatePropertyChangeFlag(const char* propertyName, PropertyChangeFlag propertyChangeFlag)
+    {
+        propertyChangeFlag_ = propertyChangeFlag_ | propertyChangeFlag;
+        OnPropertyChange(propertyName);
+    }
+
+    virtual void AdjustPropertyChangeFlagByChild(PropertyChangeFlag propertyChangeFlag) {}
 
 protected:
+    virtual void OnPropertyChange(const char* propertyName) {}
+
     PropertyChangeFlag propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
 };
 } // namespace OHOS::Ace::NG

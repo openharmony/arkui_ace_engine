@@ -1378,13 +1378,16 @@ double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, d
 
 RefPtr<RenderListItem> RenderList::RequestAndLayoutNewItem(size_t index, const LayoutParam& layoutParam)
 {
-    ACE_FUNCTION_TRACE();
     RefPtr<RenderListItem> newChild;
     if (index == currentStickyIndex_ && currentStickyItem_) {
         newChild = currentStickyItem_;
     } else {
-        newChild = RequestListItem(index);
+        {
+            ACE_SCOPED_TRACE("RenderList:BuildListItem");
+            newChild = RequestListItem(index);
+        }
         if (newChild) {
+            ACE_SCOPED_TRACE("RenderList:MeasureListItem");
             AddChild(newChild);
             newChild->Layout(layoutParam);
         }

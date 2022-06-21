@@ -33,7 +33,7 @@ public:
 
     RectT(T x, T y, T width, T height)
     {
-        SetRectT(x, y, width, height);
+        SetRect(x, y, width, height);
     }
 
     RectT(const OffsetF& offset, const SizeF& size)
@@ -50,7 +50,7 @@ public:
         height_ = 0;
     }
 
-    void SetRectT(T x, T y, T width, T height)
+    void SetRect(T x, T y, T width, T height)
     {
         x_ = x;
         y_ = y;
@@ -58,7 +58,7 @@ public:
         height_ = height;
     }
 
-    void SetRectT(const OffsetT<T>& offset, const SizeT<T>& size)
+    void SetRect(const OffsetT<T>& offset, const SizeT<T>& size)
     {
         SetOffset(offset);
         SetSize(size);

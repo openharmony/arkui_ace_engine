@@ -35,6 +35,13 @@ public:
     Pattern() = default;
     ~Pattern() override = default;
 
+    // atomic node is like button, image, custom node and so on.
+    // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
+    virtual bool IsAtomicNode() const
+    {
+        return true;
+    }
+
     void DetachFromFrameNode()
     {
         frameNode_.Reset();
@@ -105,6 +112,40 @@ public:
     {
         return false;
     }
+
+    std::optional<SizeF> GetHostFrameSize() const
+    {
+        auto frameNode = frameNode_.Upgrade();
+        if (!frameNode) {
+            return std::nullopt;
+        }
+        return frameNode->GetGeometryNode()->GetFrameSize();
+    }
+
+    std::optional<OffsetF> GetHostFrameOffset() const
+    {
+        auto frameNode = frameNode_.Upgrade();
+        if (!frameNode) {
+            return std::nullopt;
+        }
+        return frameNode->GetGeometryNode()->GetFrameOffset();
+    }
+
+    std::optional<SizeF> GetHostContentSize() const
+    {
+        auto frameNode = frameNode_.Upgrade();
+        if (!frameNode) {
+            return std::nullopt;
+        }
+        const auto& content = frameNode->GetGeometryNode()->GetContent();
+        if (!content) {
+            return std::nullopt;
+        }
+        return content->GetRect().GetSize();
+    }
+
+    virtual void OnInActive() {}
+    virtual void OnActive() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

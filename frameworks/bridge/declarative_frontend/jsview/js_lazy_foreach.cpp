@@ -460,8 +460,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSLazyForEachComponent);
 };
 
-class JSLazyForEachBuilder : public virtual NG::LazyForEachBuilder, public JSLazyForEachActuator {
-    DECLARE_ACE_TYPE(JSLazyForEachBuilder, LazyForEachBuilder, JSLazyForEachActuator);
+class JSLazyForEachBuilder : public NG::LazyForEachBuilder, public JSLazyForEachActuator {
+    DECLARE_ACE_TYPE(JSLazyForEachBuilder, NG::LazyForEachBuilder, JSLazyForEachActuator);
 public:
     JSLazyForEachBuilder() = default;
     ~JSLazyForEachBuilder() override = default;

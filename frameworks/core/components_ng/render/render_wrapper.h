@@ -26,6 +26,7 @@
 #include "core/components_ng/property/render_property.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/render/render_property.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 // RenderWrapper are used to flush dirty render task.

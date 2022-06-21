@@ -34,6 +34,7 @@ public:
     virtual RefPtr<RenderProperty> Clone() const
     {
         auto renderProperty = MakeRefPtr<RenderProperty>();
+        renderProperty->UpdateRenderProperty(this);
         return renderProperty;
     }
 

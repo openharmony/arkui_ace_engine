@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -26,8 +27,8 @@ void ListItemView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     // TODO: Add unique id.
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, V2::LIST_ITEM_ETS_TAG, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, V2::LIST_ITEM_ETS_TAG, AceType::MakeRefPtr<ListItemPattern>());
     auto listPattern = stack->GetMainFrameNodePattern<NG::ListPattern>();
     if (listPattern) {
         listPattern->AddNonLazyItem(frameNode);

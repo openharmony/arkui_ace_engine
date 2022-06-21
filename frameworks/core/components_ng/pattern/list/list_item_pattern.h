@@ -13,28 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PAGE_PAGE_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PAGE_PAGE_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_PATTERN_H
 
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-// PagePattern is the base class for page render node.
-class PagePattern : public Pattern {
-    DECLARE_ACE_TYPE(PagePattern, Pattern);
+
+class ACE_EXPORT ListItemPattern : public Pattern {
+    DECLARE_ACE_TYPE(ListItemPattern, Pattern);
 
 public:
-    PagePattern() = default;
-    ~PagePattern() override = default;
+    ListItemPattern() = default;
+    ~ListItemPattern() override = default;
 
     bool IsAtomicNode() const override
     {
         return false;
     }
-
-private:
-    void OnAttachToFrameNode() override;
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PAGE_PAGE_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_PATTERN_H

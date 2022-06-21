@@ -46,6 +46,7 @@ void ListPattern::OnModifyDone()
         }
         return true;
     };
+
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();

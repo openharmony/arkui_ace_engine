@@ -114,7 +114,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     layoutProperty_->UpdateContentConstraint();
     LOGD("Measure: %{public}s, Constraint: %{public}s", GetHostTag().c_str(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
-    auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->GetContentLayoutConstraint().value(), this);
+    auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
     if (size.has_value()) {
         geometryNode_->SetContentSize(size.value());
     }
@@ -144,7 +144,7 @@ void LayoutWrapper::Layout(const std::optional<OffsetF>& parentGlobalOffset)
 void LayoutWrapper::MountToHostOnMainThread()
 {
     SwapDirtyLayoutWrapperOnMainThread();
-    UiTaskScheduler::GetInstance()->FlushRenderTask();
+    UITaskScheduler::GetInstance()->FlushRenderTask();
 }
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()

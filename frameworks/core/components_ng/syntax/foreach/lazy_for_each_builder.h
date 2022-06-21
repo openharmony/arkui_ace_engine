@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT LazyForEachBuilder : public ForEachBuilder, public V2::DataChangeListener {
-    DECLARE_ACE_TYPE(LazyForEachBuilder, ForEachBuilder)
+    DECLARE_ACE_TYPE(NG::LazyForEachBuilder, ForEachBuilder)
 public:
     LazyForEachBuilder() = default;
     ~LazyForEachBuilder() override = default;

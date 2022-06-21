@@ -38,6 +38,11 @@ public:
         return true;
     }
 
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
 private:
     void OnAttachToFrameNode() override;
 
