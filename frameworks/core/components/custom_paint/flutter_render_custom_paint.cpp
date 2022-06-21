@@ -164,7 +164,11 @@ void FlutterRenderCustomPaint::Paint(RenderContext& context, const Offset& offse
         }
         return;
     }
-    if (!canvasCache_.readyToDraw()) {
+    if (!canvasCache_.readyToDraw() || lastLayoutSize_ != GetLayoutSize()) {
+        if (layer_) {
+            layer_->SetClip(0, GetLayoutSize().Width(), 0, GetLayoutSize().Height(), Flutter::Clip::HARD_EDGE);
+        }
+        lastLayoutSize_ = GetLayoutSize();
         auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale,
             SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
         canvasCache_.allocPixels(imageInfo);
