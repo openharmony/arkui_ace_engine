@@ -49,7 +49,8 @@ enum WebCacheMode {
 enum DialogEventType {
     DIALOG_EVENT_ALERT = 0,
     DIALOG_EVENT_BEFORE_UNLOAD = 1,
-    DIALOG_EVENT_CONFIRM = 2
+    DIALOG_EVENT_CONFIRM = 2,
+    DIALOG_EVENT_PROMPT = 3
 };
 
 constexpr int default_text_zoom_atio = 100;
@@ -995,6 +996,8 @@ public:
             return onAlertImpl_(info);
         } else if (dialogEventType == DialogEventType::DIALOG_EVENT_CONFIRM && onConfirmImpl_) {
             return onConfirmImpl_(info);
+        } else if (dialogEventType == DialogEventType::DIALOG_EVENT_PROMPT && onPromptImpl_) {
+            return onPromptImpl_(info);
         } else if (dialogEventType == DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD && onBeforeUnloadImpl_) {
             return onBeforeUnloadImpl_(info);
         } else {
@@ -1013,6 +1016,9 @@ public:
                 break;
             case DialogEventType::DIALOG_EVENT_CONFIRM:
                 onConfirmImpl_ = std::move(onCommonDialogImpl);
+                break;
+            case DialogEventType::DIALOG_EVENT_PROMPT:
+                onPromptImpl_ = std::move(onCommonDialogImpl);
                 break;
             case DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD:
                 onBeforeUnloadImpl_ = std::move(onCommonDialogImpl);
@@ -1096,6 +1102,7 @@ private:
     RefPtr<WebController> webController_;
     OnCommonDialogImpl onAlertImpl_;
     OnCommonDialogImpl onConfirmImpl_;
+    OnCommonDialogImpl onPromptImpl_;
     OnCommonDialogImpl onBeforeUnloadImpl_;
     OnConsoleImpl consoleImpl_;
     OnFileSelectorShowImpl onFileSelectorShowImpl_;
