@@ -16,10 +16,16 @@
 #include "core/components/tab_bar/tab_bar_item_component.h"
 
 #include "core/components/flex/flex_component.h"
+#include "core/components/padding/padding_component.h"
 #include "core/components/tab_bar/render_tab_bar_item.h"
 #include "core/components/tab_bar/tab_bar_item_element.h"
 
 namespace OHOS::Ace {
+
+constexpr Dimension DEFAULT_SINGLE_TEXT_FONT_SIZE = 16.0_fp;
+constexpr Dimension DEFAULT_SMALL_TEXT_FONT_SIZE = 10.0_fp;
+constexpr Dimension DEFAULT_SMALL_IMAGE_WIDTH = 24.0_vp;
+constexpr Dimension DEFAULT_SMALL_IMAGE_HEIGHT = 26.0_vp;
 
 TabBarItemComponent::TabBarItemComponent(const RefPtr<Component>& child)
 {
@@ -94,6 +100,45 @@ void TabBarItemComponent::UpdateStyle(const TextStyle& textStyle, const Color& c
             FindChildren(component, allChildren);
         }
     }
+}
+
+RefPtr<Component> TabBarItemComponent::BuildWithTextIcon(const std::string& textStr, const std::string& iconUri)
+{
+    if (!textStr.empty() && !iconUri.empty()) {
+        auto imageComponent = AceType::MakeRefPtr<ImageComponent>(iconUri);
+        auto box = AceType::MakeRefPtr<BoxComponent>();
+        auto padding = AceType::MakeRefPtr<PaddingComponent>();
+        padding->SetPadding(Edge(0, 0, 0, 2, DimensionUnit::VP));
+        padding->SetChild(imageComponent);
+        box->SetChild(padding);
+        box->SetWidth(DEFAULT_SMALL_IMAGE_WIDTH);
+        box->SetHeight(DEFAULT_SMALL_IMAGE_HEIGHT);
+        auto textComponent = AceType::MakeRefPtr<TextComponent>(textStr);
+        auto textStyle = textComponent->GetTextStyle();
+        textStyle.SetFontSize(DEFAULT_SMALL_TEXT_FONT_SIZE);
+        textStyle.SetMaxLines(1);
+        textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+        textComponent->SetTextStyle(textStyle);
+        std::list<RefPtr<Component>> children;
+        children.emplace_back(box);
+        children.emplace_back(textComponent);
+        auto columnComponent = AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, children);
+        columnComponent->SetMainAxisSize(MainAxisSize::MIN);
+        return columnComponent;
+    }
+
+    if (!textStr.empty()) {
+        auto text = AceType::MakeRefPtr<TextComponent>(textStr);
+        auto textStyle = text->GetTextStyle();
+        textStyle.SetFontSize(DEFAULT_SINGLE_TEXT_FONT_SIZE);
+        textStyle.SetMaxLines(1);
+        textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+        text->SetTextStyle(textStyle);
+        text->SetAutoMaxLines(false);
+        return text;
+    }
+
+    return nullptr;
 }
 
 } // namespace OHOS::Ace
