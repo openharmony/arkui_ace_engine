@@ -753,7 +753,7 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
                 canvas->save();
                 canvas->clipRRect(outerRRect.sk_rrect, SkClipOp::kIntersect, true);
                 canvas->clipRRect(innerRRect.sk_rrect, SkClipOp::kDifference, true);
-                PaintBorder(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint);
+                PaintBorderWithPath(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint);
                 canvas->restore();
             }
         }
@@ -761,7 +761,7 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
 }
 
 void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* canvas,
-    RenderContext& context, const sk_sp<SkImage>& image)
+    RenderContext& context, const sk_sp<SkImage>& image, bool paintBorder)
 {
     if (!canvas) {
         LOGE("PaintDecoration failed, canvas is null.");
@@ -777,7 +777,6 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
         Border border = decoration_->GetBorder();
         flutter::RRect outerRRect = GetOuterRRect(offset + margin_.GetOffsetInPx(scale_), border);
         flutter::RRect innerRRect = GetInnerRRect(offset + margin_.GetOffsetInPx(scale_), border);
-        flutter::RRect clipRRect = GetClipRRect(offset + margin_.GetOffsetInPx(scale_), border);
 
         if (clipLayer_) {
             // If you want to clip the rounded edges, you need to set a Cliplayer first.
@@ -827,21 +826,8 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
             if (decoration_->GetHasBorderImageSource() || decoration_->GetHasBorderImageGradient()) {
                 return;
             }
-            AdjustBorderStyle(border);
-            if (CanUseFourLine(border)) {
-                PaintBorderWithLine(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint);
-            } else if (CanUseFillStyle(border, paint)) {
-                canvas->drawDRRect(outerRRect.sk_rrect, innerRRect.sk_rrect, paint);
-            } else if (CanUsePathRRect(border, paint)) {
-                SkPath borderPath;
-                borderPath.addRRect(clipRRect.sk_rrect);
-                canvas->drawPath(borderPath, paint);
-            } else {
-                canvas->save();
-                canvas->clipRRect(outerRRect.sk_rrect, SkClipOp::kIntersect, true);
-                canvas->clipRRect(innerRRect.sk_rrect, SkClipOp::kDifference, true);
-                PaintBorder(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint);
-                canvas->restore();
+            if (paintBorder) {
+                PaintBorder(offset, canvas);
             }
         }
     }
@@ -1919,7 +1905,38 @@ void FlutterDecorationPainter::SetBorderStyle(const BorderEdge& borderEdge, SkPa
     }
 }
 
-void FlutterDecorationPainter::PaintBorder(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint)
+void FlutterDecorationPainter::PaintBorder(const Offset& offset, SkCanvas* canvas)
+{
+    SkPaint paint;
+    if (opacity_ != UINT8_MAX) {
+        paint.setAlpha(opacity_);
+    }
+    paint.setAntiAlias(true);
+
+    Border border = decoration_->GetBorder();
+    flutter::RRect outerRRect = GetOuterRRect(offset + margin_.GetOffsetInPx(scale_), border);
+    flutter::RRect innerRRect = GetInnerRRect(offset + margin_.GetOffsetInPx(scale_), border);
+    flutter::RRect clipRRect = GetClipRRect(offset + margin_.GetOffsetInPx(scale_), border);
+
+    AdjustBorderStyle(border);
+    if (CanUseFourLine(border)) {
+        PaintBorderWithLine(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint);
+    } else if (CanUseFillStyle(border, paint)) {
+        canvas->drawDRRect(outerRRect.sk_rrect, innerRRect.sk_rrect, paint);
+    } else if (CanUsePathRRect(border, paint)) {
+        SkPath borderPath;
+        borderPath.addRRect(clipRRect.sk_rrect);
+        canvas->drawPath(borderPath, paint);
+    } else {
+        canvas->save();
+        canvas->clipRRect(outerRRect.sk_rrect, SkClipOp::kIntersect, true);
+        canvas->clipRRect(innerRRect.sk_rrect, SkClipOp::kDifference, true);
+        PaintBorderWithPath(offset + margin_.GetOffsetInPx(scale_), border, canvas, paint);
+        canvas->restore();
+    }
+}
+
+void FlutterDecorationPainter::PaintBorderWithPath(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint)
 {
     float offsetX = offset.GetX();
     float offsetY = offset.GetY();

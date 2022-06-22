@@ -56,7 +56,8 @@ public:
 
     static float ConvertRadiusToSigma(float radius);
 
-    void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context, const sk_sp<SkImage>& image);
+    void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context,
+        const sk_sp<SkImage>& image, bool paintBorder = true);
 
     void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context);
 
@@ -88,6 +89,8 @@ public:
                          const Color& color);
 
     void PaintGradient(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
+
+    void PaintBorder(const Offset& offset, SkCanvas* canvas);
 
     bool GetGradientPaint(SkPaint& paint);
 
@@ -127,7 +130,7 @@ protected:
     void SetBorderStyle(const BorderEdge& borderEdge, SkPaint& paint,
         bool useDefaultColor = false, double spaceBetweenDot = 0.0, double borderLength = 0.0);
 
-    void PaintBorder(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint);
+    void PaintBorderWithPath(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint);
     void PaintBorderWithLine(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint);
     void PaintBorderImage(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint,
         const sk_sp<SkImage>& image);
