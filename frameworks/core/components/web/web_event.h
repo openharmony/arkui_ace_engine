@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H
 
+#include "web_component.h"
+
 namespace OHOS::Ace {
 
 class WebConsoleLog : public AceType {
@@ -191,8 +193,9 @@ class ACE_EXPORT WebDialogEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(WebDialogEvent, BaseEventInfo);
 
 public:
-    WebDialogEvent(const std::string& url, const std::string& message, const RefPtr<Result>& result)
-        : BaseEventInfo("WebDialogEvent"), url_(url), message_(message), result_(result) {}
+    WebDialogEvent(const std::string& url, const std::string& message, const std::string& value, 
+        const DialogEventType& type, const RefPtr<Result>& result)
+        : BaseEventInfo("WebDialogEvent"), url_(url), message_(message), value_(value), type_(type), result_(result) {}
     ~WebDialogEvent() = default;
 
     const std::string& GetUrl() const
@@ -205,14 +208,26 @@ public:
         return message_;
     }
 
+    const std::string& GetValue() const
+    {
+        return value_;
+    }
+
     const RefPtr<Result>& GetResult() const
     {
         return result_;
     }
 
+    const DialogEventType& GetType() const
+    {
+        return type_;
+    }
+
 private:
     std::string url_;
     std::string message_;
+    std::string value_;
+    DialogEventType type_;
     RefPtr<Result> result_;
 };
 
