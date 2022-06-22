@@ -74,7 +74,7 @@ if (!defined(default_aosp_source_dir)) {
 }
 objcopy_default = "${default_aosp_source_dir}/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/aarch64-linux-android/bin/objcopy"
 objcopy_mingw = "${default_aosp_source_dir}/prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8/x86_64-w64-mingw32/bin/objcopy"
-objcopy_x86_64 = "${default_aosp_source_dir}/prebuilts/gcc/linux-x86/x86/x86_64-linux-android-4.9/x86_64-linux-android/bin/objcopy"
+objcopy_x86_64 = "${default_clang_base_path}/bin/llvm-objcopy"
 mac_buildtool = "//build/toolchain/mac:clang_x64"
 objcopy_clang = "$clang_base_path/bin/llvm-objcopy"
 

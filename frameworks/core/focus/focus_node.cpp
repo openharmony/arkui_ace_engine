@@ -110,6 +110,15 @@ void FocusNode::DumpFocusTree(int32_t depth)
     }
 }
 
+bool FocusNode::IsFocusableByTab() const
+{
+    auto parent = GetParent().Upgrade();
+    if (parent) {
+        return (tabIndex_ == 0) && (parent->tabIndex_ == 0);
+    }
+    return tabIndex_ == 0;
+}
+
 bool FocusNode::RequestFocusImmediately()
 {
     auto renderNode = GetRenderNode(AceType::Claim(this));
@@ -118,9 +127,8 @@ bool FocusNode::RequestFocusImmediately()
         if (context && context->IsJsCard()) {
             return false;
         }
-        auto parent = GetParent().Upgrade();
         if (context && context->GetIsFocusingByTab()) {
-            if ((tabIndex_ != 0) || (parent && parent->tabIndex_ != 0)) {
+            if (!IsFocusableByTab()) {
                 return false;
             }
         }
@@ -403,6 +411,15 @@ bool FocusGroup::IsFocusable() const
     }
     return std::any_of(focusNodes_.begin(), focusNodes_.end(),
         [](const RefPtr<FocusNode>& focusNode) { return focusNode->IsFocusable(); });
+}
+
+bool FocusGroup::IsFocusableByTab() const
+{
+    if (!FocusNode::IsFocusableByTab()) {
+        return false;
+    }
+    return std::any_of(focusNodes_.begin(), focusNodes_.end(),
+        [](const RefPtr<FocusNode>& focusNode) { return focusNode->IsFocusableByTab(); });
 }
 
 bool FocusGroup::GoToNextFocus(bool reverse, const Rect& rect)

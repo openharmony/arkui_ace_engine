@@ -30,6 +30,11 @@ public:
     explicit LinearLayoutPattern(bool isVertical) : isVertical_(isVertical) {};
     ~LinearLayoutPattern() override = default;
 
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<LinearLayoutProperty>(isVertical_);

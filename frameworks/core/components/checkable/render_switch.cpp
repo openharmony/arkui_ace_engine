@@ -87,7 +87,9 @@ void RenderSwitch::Update(const RefPtr<Component>& component)
     if (theme) {
         borderWidth_ = theme->GetBorderWidth();
     }
-    UpdateUIStatus();
+    if (!isDraging && !controller_->IsRunning()) {
+        UpdateUIStatus();
+    }
     HandleDrag();
     UpdateAccessibilityAttr();
 #ifndef WEARABLE_PRODUCT
@@ -224,7 +226,7 @@ void RenderSwitch::PerformLayout()
     double widthOverflow = layoutSize.Width() - switchSize_.Width();
     paintPosition_ = Alignment::GetAlignPosition(layoutSize, switchSize_, Alignment::CENTER) +
                      Offset(widthOverflow > 0.0 ? 0.0 : widthOverflow - NormalizeToPx(hotZoneHorizontalPadding_), 0.0);
-    if (!isDraging) {
+    if (!isDraging && !controller_->IsRunning()) {
         InitCurrentPointPosition();
     }
     UpdateAccessibilityPosition();
@@ -337,6 +339,9 @@ void RenderSwitch::OnDrag(const Offset& updatePoint)
 
 void RenderSwitch::HandleClick()
 {
+    if (controller_->IsRunning()) {
+        controller_->Stop();
+    }
     UpdateAnimation();
     controller_->Play();
 

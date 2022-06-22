@@ -55,6 +55,9 @@ public:
     void DrawRRect(const RRect& rect, const RefPtr<Paint>& paint) override;
     void DrawCircle(float centerX, float centerY, float radius, const RefPtr<Paint>& paint) override;
 
+    void DrawImage(const RefPtr<CanvasImage>& image, const RectF& srcRect, const RectF& dstRect,
+        const RefPtr<Paint>& paint) override;
+
     SkCanvas* RawCanvas()
     {
         return rawCanvas_;

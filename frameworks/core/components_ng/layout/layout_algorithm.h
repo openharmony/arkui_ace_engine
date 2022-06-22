@@ -19,8 +19,10 @@
 #include <optional>
 
 #include "base/memory/ace_type.h"
+#include "base/thread/cancelable_callback.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 class LayoutWrapper;
@@ -55,6 +57,11 @@ public:
     virtual bool SkipLayout()
     {
         return false;
+    }
+
+    virtual TaskThread CanRunOnWhichThread()
+    {
+        return MAIN_TASK;
     }
 
 protected:

@@ -17,12 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_H
 
 #include "base/geometry/matrix3.h"
-#include "base/geometry/rrect.h"
-#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/rect_t.h"
+#include "base/geometry/rrect.h"
 #include "base/memory/ace_type.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/clip_path.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/paint.h"
 
 namespace OHOS::Ace::NG {
@@ -65,6 +66,9 @@ public:
     virtual void DrawRRect(const RRect& rect, const RefPtr<Paint>& paint) = 0;
     virtual void DrawCircle(float centerX, float centerY, float radius, const RefPtr<Paint>& paint) = 0;
 
+    // drawing image.
+    virtual void DrawImage(
+        const RefPtr<CanvasImage>& image, const RectF& srcRect, const RectF& dstRect, const RefPtr<Paint>& paint) = 0;
 };
 } // namespace OHOS::Ace::NG
 

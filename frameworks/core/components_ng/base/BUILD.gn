@@ -23,6 +23,7 @@ build_component_ng("base_ng") {
     "view_stack_processor.cpp",
   ]
   component_ng_deps = [
+    "event_ng",
     "layout_ng",
     "modifier_ng",
     "pattern_ng",

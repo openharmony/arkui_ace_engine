@@ -21,6 +21,7 @@
 #include "third_party/skia/include/core/SkRect.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/render/adapter/skia_canvas_image.h"
 #include "core/components_ng/render/adapter/skia_paint.h"
 
 namespace OHOS::Ace::NG {
@@ -165,6 +166,19 @@ void SkiaCanvas::DrawCircle(float centerX, float centerY, float radius, const Re
     auto skiaPaint = AceType::DynamicCast<SkiaPaint>(paint);
     CHECK_NULL_VOID(skiaPaint);
     rawCanvas_->drawCircle(centerX, centerY, radius, skiaPaint->GetRawPaint());
+}
+
+void SkiaCanvas::DrawImage(
+    const RefPtr<CanvasImage>& image, const RectF& srcRect, const RectF& dstRect, const RefPtr<Paint>& paint)
+{
+    CHECK_NULL_VOID(rawCanvas_);
+    auto skiaPaint = AceType::DynamicCast<SkiaPaint>(paint);
+    CHECK_NULL_VOID(skiaPaint);
+    auto skiaImage = AceType::DynamicCast<SkiaCanvasImage>(image);
+    CHECK_NULL_VOID(skiaImage);
+    auto imageObj = skiaImage->GetCanvasImage();
+    CHECK_NULL_VOID(imageObj);
+    rawCanvas_->drawImageRect(imageObj, ToSkRect(srcRect), ToSkRect(dstRect), &skiaPaint->GetRawPaint());
 }
 
 } // namespace OHOS::Ace::NG

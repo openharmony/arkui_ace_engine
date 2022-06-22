@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/custom_node.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 thread_local std::unique_ptr<ViewStackProcessor> ViewStackProcessor::instance = nullptr;
@@ -41,12 +42,7 @@ RefPtr<FrameNode> ViewStackProcessor::GetMainElementNode() const
     if (elementsStack_.empty()) {
         return nullptr;
     }
-    const auto& wrappingComponentsMap = elementsStack_.top();
-    auto main = wrappingComponentsMap.find("main");
-    if (main == wrappingComponentsMap.end()) {
-        return nullptr;
-    }
-    return main->second;
+    return elementsStack_.top();
 }
 
 void ViewStackProcessor::Push(const RefPtr<FrameNode>& element, bool isCustomView)
@@ -54,9 +50,7 @@ void ViewStackProcessor::Push(const RefPtr<FrameNode>& element, bool isCustomVie
     if (ShouldPopImmediately()) {
         Pop();
     }
-    std::unordered_map<std::string, RefPtr<FrameNode>> wrappingComponentsMap;
-    wrappingComponentsMap.emplace("main", element);
-    elementsStack_.push(wrappingComponentsMap);
+    elementsStack_.push(element);
     if (AceType::InstanceOf<FrameNode>(element)) {
         modifyTaskStack_.push(Referenced::MakeRefPtr<StateModifyTask>());
     }
@@ -94,7 +88,8 @@ bool ViewStackProcessor::ShouldPopImmediately()
     if (elementsStack_.size() <= 1) {
         return false;
     }
-    return AceType::InstanceOf<CustomNode>(GetMainElementNode());
+    // for custom node and atomic node, just pop top node when next node is coming.
+    return GetMainElementNode()->IsAtomicNode();
 }
 
 void ViewStackProcessor::Pop()
@@ -105,34 +100,38 @@ void ViewStackProcessor::Pop()
 
     auto element = WrapElements();
     elementsStack_.pop();
-    element->MountToParent(GetMainElementNode());
     if (!modifyTaskStack_.empty() && AceType::InstanceOf<FrameNode>(element)) {
         // TODO: Add Task create on rerender case.
         element->FlushModifyTaskOnCreate(*modifyTaskStack_.top());
         modifyTaskStack_.pop();
     }
+    if (strcmp(element->GetTag().c_str(), V2::LIST_ITEM_ETS_TAG) == 0) {
+        // for list item, hold in item builder.
+        return;
+    }
+    element->MountToParent(GetMainElementNode());
     LOGD("ViewStackProcessor Pop size %{public}zu", elementsStack_.size());
 }
 
 void ViewStackProcessor::PopContainer()
 {
-    auto element = GetMainElementNode();
-    if (!AceType::InstanceOf<CustomNode>(element)) {
+    auto top = GetMainElementNode();
+    // for container node.
+    if (!top->IsAtomicNode()) {
         Pop();
         return;
     }
 
-    while (AceType::InstanceOf<CustomNode>(element)) {
+    while (top->IsAtomicNode()) {
         Pop();
-        element = GetMainElementNode();
+        top = GetMainElementNode();
     }
     Pop();
 }
 
 RefPtr<FrameNode> ViewStackProcessor::WrapElements()
 {
-    auto& wrappingMap = elementsStack_.top();
-    return wrappingMap["main"];
+    return elementsStack_.top();
 }
 
 RefPtr<FrameNode> ViewStackProcessor::Finish()

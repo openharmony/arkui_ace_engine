@@ -462,6 +462,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onDragMove", &JSText::JsOnDragMove);
     JSClass<JSText>::StaticMethod("onDragLeave", &JSText::JsOnDragLeave);
     JSClass<JSText>::StaticMethod("onDrop", &JSText::JsOnDrop);
+    JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::Inherit<JSContainerBase>();
     JSClass<JSText>::Inherit<JSViewAbstract>();
     JSClass<JSText>::Bind<>(globalObj);
@@ -629,6 +630,16 @@ void JSText::JsOnDrop(const JSCallbackInfo& info)
         return;
     }
     component->SetOnDropId(onDropId);
+}
+
+void JSText::JsFocusable(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        LOGE("The info is wrong, it is supposed to be an boolean");
+        return;
+    }
+    JSInteractableView::SetFocusable(info[0]->IsBoolean());
+    JSInteractableView::SetFocusNode(false);
 }
 
 } // namespace OHOS::Ace::Framework

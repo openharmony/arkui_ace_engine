@@ -79,6 +79,15 @@ RefPtr<FrameNode> LayoutWrapper::GetHostNode() const
     return hostNode_.Upgrade();
 }
 
+std::optional<uint32_t> LayoutWrapper::GetHostNodeSlotId() const
+{
+    auto host = hostNode_.Upgrade();
+    if (host) {
+        return host->GetSlotId();
+    }
+    return std::nullopt;
+}
+
 std::string LayoutWrapper::GetHostTag() const
 {
     auto host = GetHostNode();
@@ -95,15 +104,17 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         LOGD("the layoutAlgorithm skip measure");
         return;
     }
-    if (!layoutProperty_ || !geometryNode_) {
-        LOGE("Measure failed: the layoutAlgorithm_ or layoutProperty_ or geometryNode_ is nullptr");
+    auto host = GetHostNode();
+    if (!layoutProperty_ || !geometryNode_ || !host) {
+        LOGE("Measure failed: the layoutProperty_ or geometryNode_ or host is nullptr");
         return;
     }
+    geometryNode_->SetParentLayoutConstraint(parentConstraint.value_or(LayoutConstraintF()));
     layoutProperty_->UpdateLayoutConstraint(parentConstraint.value_or(LayoutConstraintF()));
     layoutProperty_->UpdateContentConstraint();
     LOGD("Measure: %{public}s, Constraint: %{public}s", GetHostTag().c_str(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
-    auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->GetContentLayoutConstraint().value(), this);
+    auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
     if (size.has_value()) {
         geometryNode_->SetContentSize(size.value());
     }
@@ -119,8 +130,9 @@ void LayoutWrapper::Layout(const std::optional<OffsetF>& parentGlobalOffset)
         LOGD("the layoutAlgorithm skip layout");
         return;
     }
-    if (!layoutProperty_ || !geometryNode_) {
-        LOGE("Layout failed: the layoutAlgorithm_ or layoutProperty_ or geometryNode_ or frameNode is nullptr");
+    auto host = GetHostNode();
+    if (!layoutProperty_ || !geometryNode_ || !host) {
+        LOGE("Layout failed: the layoutProperty_ or geometryNode_ or host or frameNode is nullptr");
         return;
     }
     geometryNode_->SetParentGlobalOffset(parentGlobalOffset.value_or(OffsetF(0, 0)));
@@ -129,23 +141,23 @@ void LayoutWrapper::Layout(const std::optional<OffsetF>& parentGlobalOffset)
         geometryNode_->GetFrameOffset().ToString().c_str());
 }
 
-void LayoutWrapper::MountToHostOnUiThread()
+void LayoutWrapper::MountToHostOnMainThread()
 {
-    SwapDirtyLayoutWrapperFromUiThread();
-    UiTaskScheduler::GetInstance()->FlushRenderTaskInUiThread();
+    SwapDirtyLayoutWrapperOnMainThread();
+    UITaskScheduler::GetInstance()->FlushRenderTask();
 }
 
-void LayoutWrapper::SwapDirtyLayoutWrapperFromUiThread()
+void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
     auto host = hostNode_.Upgrade();
     if (!host) {
         LOGE("the host is nullptr");
         return;
     }
-    host->SwapDirtyLayoutWrapperFromUiThread(Claim(this));
+    host->SwapDirtyLayoutWrapperOnMainThread(Claim(this));
 
     for (const auto& child : children_) {
-        child->SwapDirtyLayoutWrapperFromUiThread();
+        child->SwapDirtyLayoutWrapperOnMainThread();
     }
 }
 } // namespace OHOS::Ace::NG

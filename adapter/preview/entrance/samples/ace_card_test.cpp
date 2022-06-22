@@ -61,7 +61,7 @@ int main(int argc, const char* argv[])
     constexpr double density = 1;
 #endif
     std::string pageProfile = "form_config";
-    std::string url = "widget1/pages/index/index";
+    std::string url = "widget/pages/index/index";
 
 
     OHOS::Ace::Platform::AceRunArgs args = {

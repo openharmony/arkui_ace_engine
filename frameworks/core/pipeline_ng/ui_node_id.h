@@ -50,9 +50,20 @@ public:
         hostPageId_ = id;
     }
 
+    void SetSlotId(uint32_t id)
+    {
+        slotId_ = id;
+    }
+
+    uint32_t GetSlotId() const
+    {
+        return slotId_;
+    }
+
 private:
     uint32_t hostRootId_ = 0;
     uint32_t hostPageId_ = 0;
+    uint32_t slotId_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

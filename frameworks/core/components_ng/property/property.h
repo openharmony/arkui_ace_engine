@@ -32,17 +32,20 @@ inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE = 1;
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_LAYOUT = 1 << 1;
 // Affects self position.
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_POSITION = 1 << 2;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_NODE_TREE = 1 << 3;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_CHILD_REQUEST = 1 << 4;
+
+inline constexpr PropertyChangeFlag PROPERTY_REQUEST_NEW_CHILD_NODE = 1 << 3;
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_BY_CHILD_REQUEST = 1 << 4;
+
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER = 1 << 5;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_PROPERTY = 1 << 6;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 7;
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST = 1 << 6;
+
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 8;
 
 bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckNeedLayoutSelf(PropertyChangeFlag propertyChangeFlag);
+bool CheckNeedRequestMeasureAndLayout(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckNeedParentLayout(PropertyChangeFlag propertyChangeFlag);
+bool CheckNeedRequestParent(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
@@ -50,11 +53,9 @@ bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckPositionFlag(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckTreeChangedFlag(PropertyChangeFlag propertyChangeFlag);
+bool CheckRequestNewChildNodeFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNoChanged(PropertyChangeFlag propertyChangeFlag);
-
-bool CheckNodeTreeFlag(PropertyChangeFlag propertyChangeFlag);
 
 #define ACE_DEFINE_CLASS_PROPERTY_GROUP(group, type)        \
 public:                                                     \
@@ -94,7 +95,7 @@ public:                                                          \
             return;                                              \
         }                                                        \
         groupProperty->Update##name(value);                      \
-        UpdatePropertyChangeFlag(changeFlag);                    \
+        UpdatePropertyChangeFlag(#name, changeFlag);             \
     }
 
 #define ACE_DEFINE_CLASS_PROPERTY_WITHOUT_GROUP(name, type, changeFlag) \
@@ -126,7 +127,7 @@ public:                                                                 \
             return;                                                     \
         }                                                               \
         prop##name##_ = value;                                          \
-        UpdatePropertyChangeFlag(changeFlag);                           \
+        UpdatePropertyChangeFlag(#name, changeFlag);                    \
     }                                                                   \
                                                                         \
 private:                                                                \
@@ -179,7 +180,7 @@ public:
 
     ~Property() override = default;
 
-    uint32_t GetPropertyChangeFlag() const
+    PropertyChangeFlag GetPropertyChangeFlag() const
     {
         return propertyChangeFlag_;
     }
@@ -194,9 +195,17 @@ public:
         propertyChangeFlag_ = propertyChangeFlag_ | propertyChangeFlag;
     }
 
-    virtual void AjdustPropertyChangeFlagByChild(PropertyChangeFlag propertyChangeFlag) {}
+    void UpdatePropertyChangeFlag(const char* propertyName, PropertyChangeFlag propertyChangeFlag)
+    {
+        propertyChangeFlag_ = propertyChangeFlag_ | propertyChangeFlag;
+        OnPropertyChange(propertyName);
+    }
+
+    virtual void AdjustPropertyChangeFlagByChild(PropertyChangeFlag propertyChangeFlag) {}
 
 protected:
+    virtual void OnPropertyChange(const char* propertyName) {}
+
     PropertyChangeFlag propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
 };
 } // namespace OHOS::Ace::NG

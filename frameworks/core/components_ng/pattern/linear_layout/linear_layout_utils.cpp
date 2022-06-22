@@ -50,12 +50,16 @@ float GetMainSize(const SizeF& size, bool isVertical)
     return size.Height();
 }
 
-void SetIdealMainSize(LayoutWrapper* layoutWrapper, float value, bool isVertical)
+void SetIdealMainSize(std::optional<LayoutConstraintF>& origin, float value, bool isVertical)
 {
+    if (!origin.has_value()) {
+        return;
+    }
+    origin->selfIdealSize.reset();
     if (!isVertical) {
-        layoutWrapper->GetLayoutProperty()->UpdateCalcSelfIdealSize(CalcSize(CalcLength(value), CalcLength(-1)));
+        origin->UpdateSelfIdealSizeWithCheck(SizeF(value, -1));
     } else {
-        layoutWrapper->GetLayoutProperty()->UpdateCalcSelfIdealSize(CalcSize(CalcLength(-1), CalcLength(value)));
+        origin->UpdateSelfIdealSizeWithCheck(SizeF(-1, value));
     }
 }
 
@@ -134,8 +138,9 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
 
     // measure child.
     TravelChildrenFlexProps(layoutWrapper, linearMeasureProperty);
+    auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (auto& child : linearMeasureProperty.relativeNodes) {
-        child->Measure(layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint());
+        child->Measure(childConstraint);
         linearMeasureProperty.allocatedSize += GetMainSize(AceType::RawPtr(child), isVertical);
         auto crossSize = GetCrossSize(AceType::RawPtr(child), isVertical);
         linearMeasureProperty.crossSize =
@@ -148,8 +153,8 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
         auto childMainSize = remainSize *
                              child->GetLayoutProperty()->GetMagicItemProperty()->GetLayoutWeight().value() /
                              linearMeasureProperty.totalFlexWeight;
-        SetIdealMainSize(AceType::RawPtr(child), childMainSize, isVertical);
-        child->Measure(layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint());
+        SetIdealMainSize(childConstraint, childMainSize, isVertical);
+        child->Measure(childConstraint);
         linearMeasureProperty.allocatedSize += GetMainSize(AceType::RawPtr(child), isVertical);
         auto crossSize = GetCrossSize(AceType::RawPtr(child), isVertical);
         linearMeasureProperty.crossSize =

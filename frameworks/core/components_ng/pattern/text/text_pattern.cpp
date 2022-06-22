@@ -32,12 +32,16 @@ void TextPattern::PaintContent(RenderContext* renderContext, const OffsetF& offs
     paragraph->Paint(canvas, offset.GetX(), offset.GetY());
 }
 
-void TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty)
+bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
 {
+    if (skipMeasure) {
+        return false;
+    }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_VOID(textLayoutAlgorithm);
+    CHECK_NULL_RETURN(textLayoutAlgorithm, false);
     textLayoutAlgorithm_ = textLayoutAlgorithm;
+    return true;
 }
 } // namespace OHOS::Ace::NG

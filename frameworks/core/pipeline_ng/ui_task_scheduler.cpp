@@ -16,29 +16,30 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 #include "base/thread/background_task_executor.h"
+#include "base/thread/cancelable_callback.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
-std::unique_ptr<UiTaskScheduler> UiTaskScheduler::instance_ = nullptr;
+std::unique_ptr<UITaskScheduler> UITaskScheduler::instance_ = nullptr;
 
-std::mutex UiTaskScheduler::mutex_ = std::mutex();
+std::mutex UITaskScheduler::mutex_ = std::mutex();
 
-UiTaskScheduler* UiTaskScheduler::GetInstance()
+UITaskScheduler* UITaskScheduler::GetInstance()
 {
     if (!instance_) {
         std::lock_guard<std::mutex> lockGuard(mutex_);
         if (!instance_) {
-            instance_.reset(new UiTaskScheduler);
+            instance_.reset(new UITaskScheduler);
         }
     }
     return instance_.get();
 }
 
-void UiTaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
+void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
-    CHECK_RUN_ON(JS);
+    CHECK_RUN_ON(UI);
     if (!dirty) {
         LOGW("dirty is null");
         return;
@@ -46,9 +47,9 @@ void UiTaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     dirtyLayoutNodes_[dirty->GetRootId()][dirty->GetPageId()].emplace(dirty);
 }
 
-void UiTaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
+void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
-    CHECK_RUN_ON(JS);
+    CHECK_RUN_ON(UI);
     if (!dirty) {
         LOGW("dirty is null");
         return;
@@ -56,91 +57,56 @@ void UiTaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     dirtyRenderNodes_[dirty->GetRootId()][dirty->GetPageId()].emplace(dirty);
 }
 
-// Called on Ui Thread.
-void UiTaskScheduler::AddDirtyRenderNodeInUiThread(const RefPtr<FrameNode>& dirty)
+void UITaskScheduler::FlushLayoutTask(bool onCreate, bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
-    if (!dirty) {
-        LOGW("dirty is null");
-        return;
-    }
-    dirtyRenderNodesInUI_[dirty->GetRootId()][dirty->GetPageId()].emplace(dirty);
-}
-
-void UiTaskScheduler::FlushLayoutTask()
-{
-    CHECK_RUN_ON(JS);
+    ACE_FUNCTION_TRACE();
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     // Priority task creation
     for (auto&& rootNodes : dirtyLayoutNodes) {
-        std::list<std::shared_ptr<LayoutTask>> tasks;
-        RefPtr<FrameNode> lastNode = nullptr;
         for (auto&& pageNodes : rootNodes.second) {
             for (auto&& node : pageNodes.second) {
-                tasks.emplace_back(node->CreateLayoutTask());
-                lastNode = node;
-            }
-        }
-        if (lastNode) {
-            lastNode->PostUiTask([tasks = std::move(tasks)]() {
-                // Priority task exec.
-                for (const auto& task : tasks) {
-                    (*task)();
+                auto task = node->CreateLayoutTask(onCreate, forceUseMainThread);
+                if (task) {
+                    if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
+                        (*task)();
+                    } else {
+                        LOGW("need to use multithread feature");
+                    }
                 }
-            });
+            }
         }
     }
 }
 
-void UiTaskScheduler::FlushRenderTask()
+void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
 {
-    CHECK_RUN_ON(JS);
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
     for (auto&& rootNodes : dirtyRenderNodes) {
-        std::list<std::shared_ptr<RenderTask>> tasks;
-        RefPtr<FrameNode> lastNode = nullptr;
         for (auto&& pageNodes : rootNodes.second) {
             for (auto&& node : pageNodes.second) {
-                tasks.emplace_back(node->CreateRenderTask());
-                lastNode = node;
-            }
-        }
-        if (lastNode) {
-            lastNode->PostUiTask([tasks = std::move(tasks)]() {
-                // Priority task exec.
-                for (const auto& task : tasks) {
-                    (*task)();
+                auto task = node->CreateRenderTask(forceUseMainThread);
+                if (task) {
+                    if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
+                        (*task)();
+                    } else {
+                        LOGW("need to use multithread feature");
+                    }
                 }
-            });
+            }
         }
     }
 }
 
-void UiTaskScheduler::FlushTask()
-{
-    CHECK_RUN_ON(JS);
-    FlushLayoutTask();
-    FlushRenderTask();
-}
-
-void UiTaskScheduler::FlushRenderTaskInUiThread()
+void UITaskScheduler::FlushTask()
 {
     CHECK_RUN_ON(UI);
-    auto dirtyRenderNodesInUI = std::move(dirtyRenderNodesInUI_);
-    // Priority task creation
-    for (auto&& rootNodes : dirtyRenderNodesInUI) {
-        std::list<std::shared_ptr<RenderTask>> tasks;
-        for (auto&& pageNodes : rootNodes.second) {
-            for (auto&& node : pageNodes.second) {
-                tasks.emplace_back(node->CreateRenderTask());
-            }
-        }
-        // Priority task exec.
-        for (const auto& task : tasks) {
-            (*task)();
-        }
-    }
+    ACE_SCOPED_TRACE("UITaskScheduler::FlushTask");
+    FlushLayoutTask();
+    FlushRenderTask();
 }
 
 } // namespace OHOS::Ace::NG

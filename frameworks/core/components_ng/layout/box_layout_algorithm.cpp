@@ -19,15 +19,10 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
-// override meausreSelf and measureChildren.
+
 void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto layoutConstraint =
-        layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint().value_or(LayoutConstraintF());
-    if (!layoutConstraint.selfIdealSize.has_value()) {
-        // deliver parent ideal size to child.
-        layoutConstraint.selfIdealSize = layoutConstraint.parentIdealSize;
-    }
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetChildren()) {
         child->Measure(layoutConstraint);
     }
@@ -88,7 +83,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             AddPaddingToSize(padding, childFrame);
             frameSize.UpdateIllegalSizeWithCheck(childFrame);
         }
-        frameSize.UpdateIllegalSizeWithCheck(minSize);
+        frameSize.UpdateIllegalSizeWithCheck({ 0.0f, 0.0f });
     } while (false);
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);

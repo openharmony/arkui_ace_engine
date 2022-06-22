@@ -48,9 +48,9 @@ template("ace_test") {
       "key_input_handler.cpp",
       "touch_event_handler.cpp",
     ]
-
     deps = [
-      ":copy_napi_modules_shared_library_for_test(${current_toolchain})",
+      ":copy_curl_shared_library(${current_toolchain})",
+      ":copy_napi_modules_shared_library(${current_toolchain})",
       ":copy_resource_dynamic_library(${current_toolchain})",
       "$ace_napi:ace_napi(${current_toolchain})",
       "$ace_root/adapter/preview/build:libace_engine_$platform(${current_toolchain})",
@@ -63,7 +63,7 @@ template("ace_test") {
         ":copy_napi_shared_library(${current_toolchain})",
       ]
     } else {
-      deps += [ ":copy_napi_shared_library_for_test(${current_toolchain})" ]
+      deps += [ ":copy_napi_shared_library(${current_toolchain})" ]
     }
     if (platform == "windows") {
       libs = [ "pthread" ]
@@ -200,7 +200,7 @@ if (enable_ark_preview) {
     }
   }
 } else {
-  ohos_copy("copy_napi_shared_library_for_test") {
+  ohos_copy("copy_napi_shared_library") {
     shared_library_path =
         get_label_info("$ace_napi:ace_napi(${current_toolchain})",
                        "root_out_dir")
@@ -212,7 +212,7 @@ if (enable_ark_preview) {
       sources = [
         "$shared_library_path/arkui/napi/libace_napi.dylib",
         "$shared_library_path/arkui/napi/libace_napi_quickjs.dylib",
-        "$shared_library_path/arkui/napi/libuv.dylib",
+        "$shared_library_path/thirdparty/libuv/libuv.dylib",
       ]
       outputs =
           [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
@@ -220,7 +220,7 @@ if (enable_ark_preview) {
       sources = [
         "$shared_library_path/arkui/napi/libace_napi.dll",
         "$shared_library_path/arkui/napi/libace_napi_quickjs.dll",
-        "$shared_library_path/arkui/napi/libuv.dll",
+        "$shared_library_path/thirdparty/libuv/libuv.dll",
       ]
       outputs = [ root_build_dir +
                   "/mingw_x86_64/common/common/{{source_file_part}}" ]
@@ -228,7 +228,7 @@ if (enable_ark_preview) {
   }
 }
 
-ohos_copy("copy_napi_modules_shared_library_for_test") {
+ohos_copy("copy_napi_modules_shared_library") {
   deps = []
   sources = []
   foreach(module, common_napi_libs) {
@@ -248,6 +248,21 @@ ohos_copy("copy_napi_modules_shared_library_for_test") {
   } else {
     outputs = [ root_build_dir +
                 "/mingw_x86_64/common/common/module/{{source_file_part}}" ]
+  }
+}
+
+ohos_copy("copy_curl_shared_library") {
+  shared_library_path =
+      get_label_info("//third_party/curl:curl_shared", "root_out_dir")
+  deps = [ "//third_party/curl:curl_shared" ]
+  if (use_mac) {
+    sources = [ shared_library_path + "/thirdparty/curl/libcurl_shared.dylib" ]
+    outputs =
+        [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
+  } else {
+    sources = [ shared_library_path + "/thirdparty/curl/libcurl_shared.dll" ]
+    outputs =
+        [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
   }
 }
 

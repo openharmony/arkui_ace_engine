@@ -19,20 +19,23 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void StackView::Create()
 {
     // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, V2::STACK_ETS_TAG, AceType::MakeRefPtr<Pattern>());
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, V2::STACK_ETS_TAG, AceType::MakeRefPtr<StackPattern>());
     ViewStackProcessor::GetInstance()->Push(frameNode);
 }
 
 void StackView::Create(Alignment alignment)
 {
     // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, V2::STACK_ETS_TAG, AceType::MakeRefPtr<Pattern>());
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, V2::STACK_ETS_TAG, AceType::MakeRefPtr<StackPattern>());
     frameNode->GetLayoutProperty()->UpdateAlignment(alignment);
     ViewStackProcessor::GetInstance()->Push(frameNode);
 }

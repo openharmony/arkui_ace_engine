@@ -27,6 +27,11 @@ public:
     PagePattern() = default;
     ~PagePattern() override = default;
 
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
 private:
     void OnAttachToFrameNode() override;
 };

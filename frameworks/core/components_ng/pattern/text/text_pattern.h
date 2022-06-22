@@ -56,10 +56,15 @@ public:
         return MakeRefPtr<TextLayoutAlgorithm>();
     }
 
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
 private:
     void PaintContent(RenderContext* renderContext, const OffsetF& offset);
 
-    void OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     RefPtr<TextLayoutAlgorithm> textLayoutAlgorithm_;
 };

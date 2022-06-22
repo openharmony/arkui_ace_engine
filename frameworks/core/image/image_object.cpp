@@ -103,11 +103,11 @@ Size SvgSkiaImageObject::MeasureForImage(RefPtr<RenderImage> image)
 }
 
 void StaticImageObject::UploadToGpuForRender(
-    const WeakPtr<PipelineContext> context,
-    RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-    UploadSuccessCallback successCallback,
-    FailedCallback failedCallback,
-    Size imageSize,
+    const WeakPtr<PipelineContext>& context,
+    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+    const UploadSuccessCallback& successCallback,
+    const FailedCallback& failedCallback,
+    const Size& imageSize,
     bool forceResize,
     bool syncMode)
 {
@@ -190,11 +190,11 @@ bool StaticImageObject::CancelBackgroundTasks()
 }
 
 void AnimatedImageObject::UploadToGpuForRender(
-    const WeakPtr<PipelineContext> context,
-    RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-    UploadSuccessCallback successCallback,
-    FailedCallback failedCallback,
-    Size imageSize,
+    const WeakPtr<PipelineContext>& context,
+    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+    const UploadSuccessCallback& successCallback,
+    const FailedCallback& failedCallback,
+    const Size& imageSize,
     bool forceResize,
     bool syncMode)
 {

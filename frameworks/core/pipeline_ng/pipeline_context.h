@@ -21,6 +21,7 @@
 #include "core/components_ng/base/custom_node.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -39,10 +40,7 @@ public:
 
     ~PipelineContext() override = default;
 
-    // Called on js thread.
     void AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElement);
-
-    void AddDirtyRenderTree(const RefPtr<FrameNode>& dirtyNode);
 
     void SetupRootElement() override;
 
@@ -50,14 +48,15 @@ public:
 
     RefPtr<StageManager> GetStageManager();
 
+    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
+
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
 
 private:
-    // Called on JS thread.
-    void BuildDirtyElement();
+    void FlushTouchEvents();
 
     template<typename T>
     struct NodeCompare {
@@ -88,8 +87,7 @@ private:
     };
 
     std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyComposedNodes_;
-    std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyFrameNode_;
-    std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyRenderTree_;
+    std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_ = nullptr;
     RefPtr<StageManager> stageManager_ = nullptr;

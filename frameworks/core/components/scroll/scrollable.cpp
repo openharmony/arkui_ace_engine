@@ -18,8 +18,8 @@
 #include <chrono>
 
 #include "base/log/ace_trace.h"
-#include "base/log/log.h"
 #include "base/log/frame_report.h"
+#include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/time_util.h"
 #include "core/event/ace_events.h"
@@ -517,7 +517,7 @@ void Scrollable::ProcessScrollOverCallback(double velocity)
 
 void Scrollable::SetSlipFactor(double SlipFactor)
 {
-    slipFactor_ = std::clamp(SlipFactor, 0.0, ADJUSTABLE_VELOCITY);
+    slipFactor_ = std::clamp(SlipFactor, -ADJUSTABLE_VELOCITY, ADJUSTABLE_VELOCITY);
 }
 
 const RefPtr<SpringProperty>& Scrollable::GetDefaultOverSpringProperty()
