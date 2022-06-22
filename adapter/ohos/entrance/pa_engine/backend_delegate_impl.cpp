@@ -477,8 +477,9 @@ void BackendDelegateImpl::OnCommand(const OHOS::AAFwk::Want &want, int startId)
 
 void BackendDelegateImpl::DumpHeapSnapshot(bool isPrivate)
 {
-    taskExecutor_->PostTask([dumpHeapSnapshotCallback = dumpHeapSnapshotCallback_, isPrivate] {
-        dumpHeapSnapshotCallback(isPrivate); }, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostTask(
+        [dumpHeapSnapshotCallback = dumpHeapSnapshotCallback_, isPrivate] { dumpHeapSnapshotCallback(isPrivate); },
+        TaskExecutor::TaskType::JS);
 }
 
 bool BackendDelegateImpl::ParseFileUri(
