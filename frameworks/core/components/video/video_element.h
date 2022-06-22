@@ -29,7 +29,6 @@
 #ifdef OHOS_STANDARD_SYSTEM
 #include "core/components/video/media_player_callback.h"
 #include "foundation/multimedia/media_standard/interfaces/inner_api/native/player.h"
-#include "window_manager.h"
 #endif
 
 namespace OHOS::Ace {
@@ -183,14 +182,12 @@ private:
     FullscreenEvent fullscreenEvent_;
 
 #ifdef OHOS_STANDARD_SYSTEM
-    ::OHOS::sptr<::OHOS::Subwindow> CreateSubwindow();
     void RegistMediaPlayerEvent();
     void CreateMediaPlayer();
     void PreparePlayer();
     std::string GetAssetAbsolutePath(const std::string& fileName);
 
     std::shared_ptr<OHOS::Media::Player> mediaPlayer_ = nullptr;
-    ::OHOS::sptr<::OHOS::Subwindow> subWindow_ = nullptr;
     std::shared_ptr<MediaPlayerCallback> mediaPlayerCallback_ = nullptr;
 #endif
 };
