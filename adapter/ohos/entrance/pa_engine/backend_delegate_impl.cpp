@@ -50,6 +50,7 @@ BackendDelegateImpl::BackendDelegateImpl(const BackendDelegateImplBuilder& build
       visibilityChangedCallback_(builder.visibilityChangedCallback),
       acquireStateCallback_(builder.acquireStateCallback),
       commandCallback_(builder.commandCallback),
+      dumpHeapSnapshotCallback_(builder.dumpHeapSnapshotCallback),
       manifestParser_(AceType::MakeRefPtr<Framework::ManifestParser>()),
       type_(builder.type),
       taskExecutor_(builder.taskExecutor)
@@ -471,6 +472,13 @@ int32_t BackendDelegateImpl::OnAcquireFormState(const OHOS::AAFwk::Want &want)
 void BackendDelegateImpl::OnCommand(const OHOS::AAFwk::Want &want, int startId)
 {
     taskExecutor_->PostTask([commandCallback = commandCallback_, want, startId] { commandCallback(want, startId); },
+        TaskExecutor::TaskType::JS);
+}
+
+void BackendDelegateImpl::DumpHeapSnapshot(bool isPrivate)
+{
+    taskExecutor_->PostTask(
+        [dumpHeapSnapshotCallback = dumpHeapSnapshotCallback_, isPrivate] { dumpHeapSnapshotCallback(isPrivate); },
         TaskExecutor::TaskType::JS);
 }
 

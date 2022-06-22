@@ -172,6 +172,7 @@ public:
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
     int32_t OnAcquireFormState(const OHOS::AAFwk::Want &want) override;
     void OnCommand(const OHOS::AAFwk::Want &want, int startId) override;
+    void DumpHeapSnapshot(bool isPrivate) override {}
 
 private:
     void GetLoadOptions(std::string& optionStr);
