@@ -49,7 +49,7 @@ build_component("camera") {
     sources += [ "standard_system/camera.cpp" ]
 
     deps = [
-      "//foundation/graphic/graphic_2d:libwmclient",
+      "//foundation/graphic/graphic_2d:libsurface",
       "//foundation/multimedia/camera_standard/frameworks/native/camera:camera_framework",
       "//utils/native/base:utils",
     ]
