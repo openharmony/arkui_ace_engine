@@ -72,7 +72,7 @@ public:
     bool OnConfirmDialogByJS(const std::string &url,
                              const std::string &message,
                              std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
-    bool OnPromptDialogByJs(const std::string &url,
+    bool OnPromptDialogByJS(const std::string &url,
                              const std::string &message,
                              const std::string &defaultValue,
                              std::shared_ptr<NWeb::NWebJSDialogResult> result) override;
