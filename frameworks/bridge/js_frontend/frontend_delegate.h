@@ -26,9 +26,10 @@
 #include "frameworks/bridge/common/media_query/media_query_info.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
-#include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 namespace OHOS::Ace::Framework {
+
+class JsAcePage;
 
 // A virtual interface which must be implemented as a backing for
 // FrontendDelegateImpl instances.

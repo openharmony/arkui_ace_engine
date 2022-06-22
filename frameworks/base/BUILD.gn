@@ -76,10 +76,12 @@ template("ace_base_source_set") {
     if (defined(config.use_curl_download) && config.use_curl_download) {
       configs += [ "//third_party/curl:curl_config" ]
       sources += [ "$ace_root/frameworks/base/network/download_manager.cpp" ]
-      deps += [
-        "$ace_root/frameworks/base/network:cacert.pem",
-        "//third_party/curl:curl_shared",
-      ]
+      deps += [ "$ace_root/frameworks/base/network:cacert.pem" ]
+      if (is_cross_platform_build) {
+        deps += [ "//third_party/curl:curl" ]
+      } else {
+        deps += [ "//third_party/curl:curl_shared" ]
+      }
     }
 
     cflags_cc = []
