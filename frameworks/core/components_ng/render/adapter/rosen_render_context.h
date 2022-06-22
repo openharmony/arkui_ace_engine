@@ -38,7 +38,7 @@ public:
 
     void UpdateBgColor(const Color& value) override;
 
-    void* GetCanvas() override;
+    RefPtr<Canvas> GetCanvas() override;
     void Restore() override;
 
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
@@ -55,10 +55,10 @@ public:
     void StartPictureRecording(float x, float y, float width, float height);
     sk_sp<SkPicture> FinishRecordingAsPicture();
 
-    void SetDrawContentAtLast(bool usedrawContentLastOrder) override
+    void SetDrawContentAtLast(bool useDrawContentLastOrder) override
     {
         if (rsNode_) {
-            rsNode_->SetPaintOrder(usedrawContentLastOrder);
+            rsNode_->SetPaintOrder(useDrawContentLastOrder);
         }
     }
 
@@ -74,8 +74,8 @@ private:
 
     std::shared_ptr<Rosen::RSNode> rsNode_ = nullptr;
     SkPictureRecorder* recorder_ = nullptr;
-    SkCanvas* recordingCanvas_ = nullptr;
-    SkCanvas* rosenCanvas_ = nullptr;
+    RefPtr<Canvas> recordingCanvas_ = nullptr;
+    RefPtr<Canvas> rosenCanvas_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

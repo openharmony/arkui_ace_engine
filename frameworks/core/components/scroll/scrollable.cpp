@@ -18,8 +18,8 @@
 #include <chrono>
 
 #include "base/log/ace_trace.h"
-#include "base/log/log.h"
 #include "base/log/frame_report.h"
+#include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/time_util.h"
 #include "core/event/ace_events.h"
@@ -33,13 +33,6 @@ constexpr double SPRING_SCROLL_DAMPING = 15.55635;
 constexpr double MAX_FRICTION = 0.766;
 const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
-#ifdef PRODUCT_RK
-constexpr double FRICTION = 0.6;
-constexpr double VELOCITY_SCALE = 1.0;
-constexpr double MAX_VELOCITY = 2000.0;
-constexpr double MIN_VELOCITY = -2000.0;
-constexpr double ADJUSTABLE_VELOCITY = 3000.0;
-#else
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 1.0;
 constexpr double VELOCITY_SCALE = 1.0;
@@ -53,7 +46,6 @@ constexpr double VELOCITY_SCALE = 0.8;
 constexpr double MAX_VELOCITY = 5000.0;
 constexpr double MIN_VELOCITY = -5000.0;
 constexpr double ADJUSTABLE_VELOCITY = 0.0;
-#endif
 #endif
 
 #ifdef OHOS_PLATFORM
@@ -525,7 +517,7 @@ void Scrollable::ProcessScrollOverCallback(double velocity)
 
 void Scrollable::SetSlipFactor(double SlipFactor)
 {
-    slipFactor_ = std::clamp(SlipFactor, 0.0, ADJUSTABLE_VELOCITY);
+    slipFactor_ = std::clamp(SlipFactor, -ADJUSTABLE_VELOCITY, ADJUSTABLE_VELOCITY);
 }
 
 const RefPtr<SpringProperty>& Scrollable::GetDefaultOverSpringProperty()

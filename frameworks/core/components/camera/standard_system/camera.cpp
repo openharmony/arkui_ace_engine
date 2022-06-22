@@ -55,11 +55,7 @@ const char REGION_POSITION_Y[] = "region_position_y";
 const char REGION_WIDTH[] = "region_width";
 const char REGION_HEIGHT[] = "region_height";
 constexpr int32_t DEFAULT_WIDTH = 640;
-#ifdef PRODUCT_RK
 constexpr int32_t DEFAULT_HEIGHT = 480;
-#else
-constexpr int32_t DEFAULT_HEIGHT = 360;
-#endif
 constexpr int32_t SURFACE_STRIDE_ALIGNMENT_VAL = 8;
 constexpr int32_t PREVIEW_SURFACE_WIDTH = 640;
 constexpr int32_t PREVIEW_SURFACE_HEIGHT = 480;
@@ -68,11 +64,9 @@ constexpr int32_t PHOTO_SURFACE_HEIGHT = 960;
 constexpr int32_t MAX_DURATION = 36000;
 constexpr int32_t FRAME_RATE = 30;
 constexpr int32_t RATE = 48000;
-#ifndef PRODUCT_RK
 constexpr int32_t AUDIO_CHANNEL_COUNT = 2;
 constexpr int32_t AUDIO_SAMPLE_RATE = 48000;
 constexpr int32_t AUDIO_ENCODING_BITRATE = 48000;
-#endif
 #ifndef ENABLE_ROSEN_BACKEND
 constexpr int32_t QUEUE_SIZE = 10;
 #endif
@@ -114,10 +108,8 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
     LOGI("Camera CreateRecorder start.");
     int ret = 0;
     Media::VideoSourceType videoSource = Media::VIDEO_SOURCE_SURFACE_ES;
-#ifndef PRODUCT_RK
     Media::AudioSourceType audioSource = Media::AUDIO_MIC;
     int32_t audioSourceId = 0;
-#endif
     int32_t videoSourceId = 0;
     int32_t width = DEFAULT_WIDTH;
     int32_t height = DEFAULT_HEIGHT;
@@ -128,12 +120,10 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
         LOGE("SetVideoSource failed. ret= %{private}d.", ret);
         return nullptr;
     }
-#ifndef PRODUCT_RK
     if ((ret = recorder->SetAudioSource(audioSource, audioSourceId)) != ERR_OK) {
         LOGE("SetAudioSource failed. ret= %{private}d.", ret);
         return nullptr;
     }
-#endif
     if ((ret = recorder->SetOutputFormat(Media::FORMAT_MPEG_4)) != ERR_OK) {
         LOGE("SetOutputFormat failed. ret= %{private}d.", ret);
         return nullptr;
@@ -158,7 +148,6 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
         LOGE("SetCaptureRate failed. ret= %{private}d.", ret);
         return nullptr;
     }
-#ifndef PRODUCT_RK
     if ((ret = recorder->SetAudioEncoder(audioSourceId, Media::AAC_LC)) != ERR_OK) {
         LOGE("SetAudioEncoder failed. ret= %{private}d.", ret);
         return nullptr;
@@ -175,7 +164,6 @@ std::shared_ptr<Media::Recorder> CameraCallback::CreateRecorder()
         LOGE("SetAudioEncodingBitRate failed. ret= %{private}d.", ret);
         return nullptr;
     }
-#endif
     if ((ret = recorder->SetMaxDuration(MAX_DURATION)) != ERR_OK) { // 36000s=10h
         LOGE("SetMaxDuration failed. ret= %{private}d.", ret);
         return nullptr;
@@ -244,11 +232,7 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
         option->SetHeight(windowSize_.Height());
         option->SetX(windowOffset_.GetX());
         option->SetY(windowOffset_.GetY());
-#ifdef PRODUCT_RK
         option->SetWindowType(SUBWINDOW_TYPE_NORMAL);
-#else
-        option->SetWindowType(SUBWINDOW_TYPE_VIDEO);
-#endif
         auto window = wmi->GetWindowByID(context->GetWindowId());
         if (window == nullptr) {
             LOGE("Camera:fail to get window to create Camera");
@@ -275,15 +259,9 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
     }
 
     previewSurface_->SetUserData(SURFACE_STRIDE_ALIGNMENT, std::to_string(SURFACE_STRIDE_ALIGNMENT_VAL));
-#ifdef PRODUCT_RK
     previewSurface_->SetUserData(SURFACE_FORMAT, std::to_string(PIXEL_FMT_RGBA_8888));
     previewSurface_->SetUserData(CameraStandard::CameraManager::surfaceFormat,
                                  std::to_string(OHOS_CAMERA_FORMAT_RGBA_8888));
-#else
-    previewSurface_->SetUserData(SURFACE_FORMAT, std::to_string(PIXEL_FMT_YCRCB_420_SP));
-    previewSurface_->SetUserData(CameraStandard::CameraManager::surfaceFormat,
-                                 std::to_string(OHOS_CAMERA_FORMAT_YCRCB_420_SP));
-#endif
     previewSurface_->SetUserData(SURFACE_WIDTH, std::to_string(PREVIEW_SURFACE_WIDTH));
     previewSurface_->SetUserData(SURFACE_HEIGHT, std::to_string(PREVIEW_SURFACE_HEIGHT));
     previewSurface_->SetUserData(REGION_WIDTH, std::to_string(windowSize_.Width()));
@@ -399,13 +377,8 @@ int32_t CameraCallback::PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> c
         return -1;
     }
     sptr<Surface> recorderSurface = (recorder_->GetSurface(videoSourceId_));
-#ifdef PRODUCT_RK
     recorderSurface->SetUserData(CameraStandard::CameraManager::surfaceFormat,
                                  std::to_string(OHOS_CAMERA_FORMAT_RGBA_8888));
-#else
-    recorderSurface->SetUserData(CameraStandard::CameraManager::surfaceFormat,
-                                 std::to_string(OHOS_CAMERA_FORMAT_YCRCB_420_SP));
-#endif
     videoOutput_ = camManagerObj->CreateVideoOutput(recorderSurface);
     if (videoOutput_ == nullptr) {
         LOGE("Create Video Output Failed");
@@ -458,19 +431,14 @@ int32_t CameraCallback::PrepareCamera(bool bIsRecorder)
         return -1;
     }
     surface = createSubWindowSurface();
-    LOGI("Preview surface width: %{public}d, height: %{public}d", surface->GetDefaultWidth(),
-        surface->GetDefaultHeight());
     if (surface == nullptr) {
         LOGE("Preview surface is null");
         return -1;
     }
-#ifdef PRODUCT_RK
+    LOGI("Preview surface width: %{public}d, height: %{public}d", surface->GetDefaultWidth(),
+        surface->GetDefaultHeight());
     previewOutput_ = camManagerObj->CreateCustomPreviewOutput(surface, PREVIEW_SURFACE_WIDTH,
                                                               PREVIEW_SURFACE_HEIGHT);
-#else
-    previewOutput_ = camManagerObj->CreateCustomPreviewOutput(surface, surface->GetDefaultHeight(),
-                                                              surface->GetDefaultWidth());
-#endif
     if (previewOutput_ == nullptr) {
         LOGE("Failed to create PreviewOutput");
         return -1;

@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_property.h"
@@ -28,11 +29,18 @@
 namespace OHOS::Ace::NG {
 // Pattern is the base class for different measure, layout and paint behavior.
 class Pattern : public virtual AceType {
-    DECLARE_ACE_TYPE(V2::Pattern, AceType);
+    DECLARE_ACE_TYPE(Pattern, AceType);
 
 public:
     Pattern() = default;
     ~Pattern() override = default;
+
+    // atomic node is like button, image, custom node and so on.
+    // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
+    virtual bool IsAtomicNode() const
+    {
+        return true;
+    }
 
     void DetachFromFrameNode()
     {
@@ -69,10 +77,14 @@ public:
         return nullptr;
     }
 
+    virtual RefPtr<EventHub> CreateEventHub()
+    {
+        return MakeRefPtr<EventHub>();
+    }
+
     virtual void OnContextAttached() {}
 
-    // Called to perform update before the render node base update operation.
-    virtual void OnUpdateDone() {}
+    virtual void OnModifyDone() {}
 
     virtual RefPtr<LayoutWrapper> AdjustChildLayoutWrapper(
         const RefPtr<LayoutWrapper>& self, const RefPtr<LayoutWrapper>& child)
@@ -95,7 +107,45 @@ public:
         return true;
     }
 
-    virtual void OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty) {}
+    // Called on main thread to check if need rerender of the content.
+    virtual bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+    {
+        return false;
+    }
+
+    std::optional<SizeF> GetHostFrameSize() const
+    {
+        auto frameNode = frameNode_.Upgrade();
+        if (!frameNode) {
+            return std::nullopt;
+        }
+        return frameNode->GetGeometryNode()->GetFrameSize();
+    }
+
+    std::optional<OffsetF> GetHostFrameOffset() const
+    {
+        auto frameNode = frameNode_.Upgrade();
+        if (!frameNode) {
+            return std::nullopt;
+        }
+        return frameNode->GetGeometryNode()->GetFrameOffset();
+    }
+
+    std::optional<SizeF> GetHostContentSize() const
+    {
+        auto frameNode = frameNode_.Upgrade();
+        if (!frameNode) {
+            return std::nullopt;
+        }
+        const auto& content = frameNode->GetGeometryNode()->GetContent();
+        if (!content) {
+            return std::nullopt;
+        }
+        return content->GetRect().GetSize();
+    }
+
+    virtual void OnInActive() {}
+    virtual void OnActive() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

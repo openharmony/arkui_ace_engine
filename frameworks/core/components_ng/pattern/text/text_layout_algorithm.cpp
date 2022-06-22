@@ -15,9 +15,10 @@
 
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include <unicode/uchar.h>
 
 #include "base/i18n/localization.h"
+#include "base/utils/utils.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/font_collection.h"
 #include "core/components/text/text_theme.h"
@@ -30,28 +31,19 @@ TextLayoutAlgorithm::TextLayoutAlgorithm() = default;
 
 void TextLayoutAlgorithm::OnReset()
 {
-    paragraph_.reset();
+    CHECK_NULL_VOID(paragraph_);
+    paragraph_->Reset();
 }
 
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
-    if (!frameNode) {
-        LOGE("fail to measure context due to frame node is nullptr");
-        return std::nullopt;
-    }
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto pipeline = frameNode->GetContext();
-    if (!pipeline) {
-        LOGE("fail to measure context due to context nullptr");
-        return std::nullopt;
-    }
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    if (!textLayoutProperty) {
-        LOGE("fail to measure context due to textLayoutProperty nullptr");
-        return std::nullopt;
-    }
-
+    CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
     const auto& textParagraph = textLayoutProperty->GetTextParagraph();
     auto themeManager = pipeline->GetThemeManager();
     TextStyle textStyle =
@@ -79,27 +71,23 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 bool TextLayoutAlgorithm::CreateParagraph(
     const TextStyle& textStyle, const RefPtr<PipelineContext>& context, std::string content)
 {
-    using namespace Constants;
-    txt::ParagraphStyle style;
-    const auto& textAlign = textStyle.GetTextAlign();
-    style.text_direction = ConvertTxtTextDirection(GetTextDirection(content));
-    style.text_align = ConvertTxtTextAlign(textAlign);
-    style.max_lines = textStyle.GetMaxLines();
-    style.locale = Localization::GetInstance()->GetFontLocale();
-    style.word_break_type = static_cast<minikin::WordBreakType>(textStyle.GetWordBreak());
+    ParagraphStyle paraStyle = { .direction = GetTextDirection(content),
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = Localization::GetInstance()->GetFontLocale(),
+        .wordBreak = textStyle.GetWordBreak() };
+
     auto fontCollection = FontCollection::GetInstance()->GetFontCollection();
     if (!fontCollection) {
         LOGW("UpdateParagraph: fontCollection is null");
         return false;
     }
-    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
 
-    txt::TextStyle txtStyle;
-    ConvertTxtStyle(textStyle, context, txtStyle);
-    builder->PushStyle(txtStyle);
+    paragraph_ = Paragraph::Create(context, paraStyle, &fontCollection);
+    paragraph_->PushStyle(textStyle);
     StringUtils::TransfromStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    builder->AddText(StringUtils::Str8ToStr16(content));
-    paragraph_ = builder->Build();
+    paragraph_->AddText(StringUtils::Str8ToStr16(content));
+    paragraph_->Build();
     return true;
 }
 
@@ -121,18 +109,13 @@ TextDirection TextLayoutAlgorithm::GetTextDirection(const std::string& content)
 
 double TextLayoutAlgorithm::GetTextWidth() const
 {
-    if (!paragraph_) {
-        return 0.0;
-    }
-    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
-    if (paragraphTxt != nullptr && paragraphTxt->GetLineCount() == 1) {
-        return std::max(paragraph_->GetLongestLine(), paragraph_->GetMaxIntrinsicWidth());
-    }
-    return paragraph_->GetLongestLine();
+    CHECK_NULL_RETURN(paragraph_, 0.0);
+    return paragraph_->GetTextWidth();
 }
 
-const std::unique_ptr<txt::Paragraph>& TextLayoutAlgorithm::GetTxtParagraph()
+const RefPtr<Paragraph>& TextLayoutAlgorithm::GetTxtParagraph()
 {
     return paragraph_;
 }
+
 } // namespace OHOS::Ace::NG

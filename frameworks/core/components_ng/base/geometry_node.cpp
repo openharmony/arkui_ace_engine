@@ -23,6 +23,7 @@ void GeometryNode::Reset()
     bound_.reset();
     content_.reset();
     parentGlobalOffset_.Reset();
+    parentLayoutConstraint_.reset();
 }
 
 RefPtr<GeometryNode> GeometryNode::Clone() const
@@ -36,6 +37,7 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
         node->content_ = std::make_unique<GeometryProperty>(*content_);
     }
     node->parentGlobalOffset_ = parentGlobalOffset_;
+    node->parentLayoutConstraint_ = parentLayoutConstraint_;
     return node;
 }
 

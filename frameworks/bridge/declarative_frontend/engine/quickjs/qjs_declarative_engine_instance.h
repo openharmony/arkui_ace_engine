@@ -30,8 +30,8 @@ namespace OHOS::Ace::Framework {
 
 class QJSDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
 public:
-    explicit QJSDeclarativeEngineInstance(const RefPtr<FrontendDelegate>& delegate)
-        : context_(nullptr), frontendDelegate_(delegate), dispatcher_(nullptr)
+    explicit QJSDeclarativeEngineInstance(const RefPtr<FrontendDelegate>& delegate, int32_t instanceId = 0)
+        : context_(nullptr), frontendDelegate_(delegate), instanceId_(instanceId), dispatcher_(nullptr)
     {}
 
     ~QJSDeclarativeEngineInstance() override;
@@ -163,6 +163,7 @@ private:
     thread_local static JSRuntime* runtime_;
     JSContext* context_ = nullptr;
     RefPtr<FrontendDelegate> frontendDelegate_;
+    int32_t instanceId_;
     static std::map<std::string, std::string> mediaResourceFileMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
 

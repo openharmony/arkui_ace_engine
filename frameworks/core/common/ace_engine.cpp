@@ -32,10 +32,8 @@
 namespace OHOS::Ace {
 namespace {
 
-std::unique_ptr<AceEngine> g_aceEngine;
-
-constexpr int SIGNAL_JS_HEAP = 37;
-constexpr int SIGNAL_JS_HEAP_PRIV = 38;
+constexpr int SIGNAL_JS_HEAP = 39;
+constexpr int SIGNAL_JS_HEAP_PRIV = 40;
 
 void HandleSignal(int signo)
 {
@@ -60,11 +58,8 @@ AceEngine::AceEngine()
 
 AceEngine& AceEngine::Get()
 {
-    if (!g_aceEngine) {
-        LOGI("AceEngine initialized in first time");
-        g_aceEngine.reset(new AceEngine());
-    }
-    return *g_aceEngine;
+    static AceEngine engine;
+    return engine;
 }
 
 void AceEngine::InitJsDumpHeadSignal()

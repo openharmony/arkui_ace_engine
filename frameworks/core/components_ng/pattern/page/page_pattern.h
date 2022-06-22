@@ -21,11 +21,16 @@
 namespace OHOS::Ace::NG {
 // PagePattern is the base class for page render node.
 class PagePattern : public Pattern {
-    DECLARE_ACE_TYPE(StagePattern, Pattern);
+    DECLARE_ACE_TYPE(PagePattern, Pattern);
 
 public:
     PagePattern() = default;
     ~PagePattern() override = default;
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
 
 private:
     void OnAttachToFrameNode() override;

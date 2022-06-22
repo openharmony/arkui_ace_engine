@@ -71,7 +71,7 @@ bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         context = JS_NewContext(runtime);
     }
 
-    engineInstance_ = AceType::MakeRefPtr<QJSDeclarativeEngineInstance>(delegate);
+    engineInstance_ = AceType::MakeRefPtr<QJSDeclarativeEngineInstance>(delegate, instanceId_);
     nativeEngine_ = new QuickJSNativeEngine(runtime, context, static_cast<void*>(this));
     engineInstance_->SetNativeEngine(nativeEngine_);
     bool res = engineInstance_->InitJSEnv(runtime, context, GetExtraNativeObject());
@@ -209,6 +209,14 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             CallAppFunc("onCreate", 0, nullptr);
         }
     }
+
+    std::string pageMap;
+    if (engineInstance_->GetDelegate()->GetAssetContent(url+".map", pageMap)) {
+        page->SetPageMap(pageMap);
+    } else {
+        LOGI("the source map of page load failed!");
+    }
+
     std::string jsContent;
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
@@ -240,6 +248,8 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     JSValue compiled = engineInstance_->CompileSource(GetInstanceName(), url, jsContent.c_str(), jsContent.size());
     if (JS_IsException(compiled)) {
         LOGE("js compilation failed url=[%{public}s]", url.c_str());
+        QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_,
+            page->GetUrl().c_str(), page, true);
         return;
     }
     engineInstance_->ExecuteDocumentJS(compiled);

@@ -67,10 +67,11 @@ void RosenRenderSvgCircle::PaintDirectly(RenderContext& context, const Offset& o
         return;
     }
 
+    SkAutoCanvasRestore save(canvas, true);
     if (NeedTransform()) {
-        canvas->save();
-        canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4()));
+        canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
     }
+    PaintMaskLayer(context, offset, offset);
 
     SkPath path;
     path.addCircle(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL), ConvertDimensionToPx(cy_, LengthType::VERTICAL),
@@ -78,10 +79,6 @@ void RosenRenderSvgCircle::PaintDirectly(RenderContext& context, const Offset& o
     UpdateGradient(fillState_);
     RosenSvgPainter::SetFillStyle(canvas, path, fillState_, opacity_);
     RosenSvgPainter::SetStrokeStyle(canvas, path, strokeState_, opacity_);
-
-    if (NeedTransform()) {
-        canvas->restore();
-    }
 }
 
 void RosenRenderSvgCircle::UpdateMotion(const std::string& path, const std::string& rotate, double percent)

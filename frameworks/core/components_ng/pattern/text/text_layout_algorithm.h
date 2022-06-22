@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUR_ALGORITHM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUR_ALGORITHM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_H
 
 #include <string>
-
-#include "flutter/lib/ui/text/paragraph_builder.h"
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/text_paragraph.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -41,18 +40,17 @@ public:
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
-    const std::unique_ptr<txt::Paragraph>& GetTxtParagraph();
+    const RefPtr<Paragraph>& GetTxtParagraph();
 
 private:
     bool CreateParagraph(const TextStyle& textStyle, const RefPtr<PipelineContext>& context, std::string content);
     TextDirection GetTextDirection(const std::string& content);
     double GetTextWidth() const;
 
-    // TODO: Delete the txt::Paragraph deps, use adpater.
-    std::unique_ptr<txt::Paragraph> paragraph_ = nullptr;
+    RefPtr<Paragraph> paragraph_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUR_ALGORITHM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_H

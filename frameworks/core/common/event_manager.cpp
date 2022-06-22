@@ -15,8 +15,10 @@
 
 #include "core/common/event_manager.h"
 
+#include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/event/key_event.h"
 #include "core/gestures/gesture_referee.h"
 #include "core/pipeline/base/element.h"
@@ -25,7 +27,7 @@
 namespace OHOS::Ace {
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
-    const TouchRestrict& touchRestrict, bool needAppend)
+    const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
     ContainerScope scope(instanceId_);
 
@@ -41,6 +43,37 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
     const Point point { touchPoint.x, touchPoint.y, touchPoint.sourceType };
     // For root node, the parent local point is the same as global point.
     renderNode->TouchTest(point, point, touchRestrict, hitTestResult);
+    if (needAppend) {
+#ifdef OHOS_STANDARD_SYSTEM
+        for (auto entry = hitTestResult.begin(); entry != hitTestResult.end(); ++entry) {
+            if ((*entry)) {
+                (*entry)->SetSubPipelineGlobalOffset(offset, viewScale);
+            }
+        }
+#endif
+        TouchTestResult prevHitTestResult = touchTestResults_[touchPoint.id];
+        hitTestResult.splice(hitTestResult.end(), prevHitTestResult);
+    }
+    touchTestResults_[touchPoint.id] = std::move(hitTestResult);
+}
+
+void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
+    const TouchRestrict& touchRestrict, bool needAppend)
+{
+    ContainerScope scope(instanceId_);
+
+    ACE_FUNCTION_TRACE();
+    if (!frameNode) {
+        LOGW("renderNode is null.");
+        return;
+    }
+    // first clean.
+    GestureReferee::GetInstance().CleanGestureScope(touchPoint.id);
+    // collect
+    TouchTestResult hitTestResult;
+    const NG::PointF point { touchPoint.x, touchPoint.y };
+    // For root node, the parent local point is the same as global point.
+    frameNode->TouchTest(point, point, touchRestrict, hitTestResult);
     if (needAppend) {
         TouchTestResult prevHitTestResult = touchTestResults_[touchPoint.id];
         hitTestResult.splice(hitTestResult.end(), prevHitTestResult);
@@ -109,7 +142,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
     if (iter != touchTestResults_.end()) {
         bool dispatchSuccess = true;
         for (auto entry = iter->second.rbegin(); entry != iter->second.rend(); ++entry) {
-            if (!(*entry)->DispatchEvent(point)) {
+            if (!(*entry)->DispatchMultiContainerEvent(point)) {
                 dispatchSuccess = false;
                 break;
             }
@@ -118,7 +151,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
         // the event, each recognizer needs to filter the extra events by itself.
         if (dispatchSuccess) {
             for (const auto& entry : iter->second) {
-                if (!entry->HandleEvent(point)) {
+                if (!entry->HandleMultiContainerEvent(point)) {
                     break;
                 }
             }
@@ -187,17 +220,15 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN) {
         tabIndexNodes_.clear();
         CollectTabIndexNodes(focusNode);
-        tabIndexNodes_.sort(
-            [](std::pair<int32_t, WeakPtr<FocusNode>>& a, std::pair<int32_t, WeakPtr<FocusNode>>& b) {
-                return a.first < b.first;
-            }
-        );
+        tabIndexNodes_.sort([](std::pair<int32_t, WeakPtr<FocusNode>>& a, std::pair<int32_t, WeakPtr<FocusNode>>& b) {
+            return a.first < b.first;
+        });
         if (!isTabNodesCollected_) {
             isTabNodesCollected_ = true;
             tabPressedIndex_ = -1;
         }
         if (event.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }) ||
-                event.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_TAB })) {
+            event.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_TAB })) {
             LOGI("RequestNextFocus by 'SHIFT-TAB'");
             tabStep = -1;
             --tabPressedIndex_;

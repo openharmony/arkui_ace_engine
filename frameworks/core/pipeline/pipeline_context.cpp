@@ -1561,7 +1561,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         if (frontEnd && (frontEnd->GetType() == FrontendType::JS_CARD)) {
             touchRestrict.UpdateForbiddenType(TouchRestrict::LONG_PRESS);
         }
-        eventManager_->TouchTest(scalePoint, rootElement_->GetRenderNode(), touchRestrict, isSubPipe);
+        eventManager_->TouchTest(scalePoint, rootElement_->GetRenderNode(), touchRestrict,
+            GetPluginEventOffset(), viewScale_, isSubPipe);
 
         for (size_t i = 0; i < touchPluginPipelineContext_.size(); i++) {
             auto pipelineContext = touchPluginPipelineContext_[i].Upgrade();
@@ -1970,11 +1971,11 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
         }
         case WindowSizeChangeReason::DRAG_START: {
             isDragStart_ = true;
+            BlurWindowWithDrag(true);
             break;
         }
         case WindowSizeChangeReason::DRAG: {
             isFirstDrag_ = false;
-            BlurWindowWithDrag(true);
             // Refresh once when first dragging.
             SetRootSizeWithWidthHeight(width, height);
             break;

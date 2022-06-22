@@ -53,7 +53,6 @@ constexpr bool DIR_REVERSE = true;
 constexpr int32_t STEP_FORWARD = 1;
 constexpr int32_t STEP_BACK = -1;
 constexpr int32_t STEP_INVALID = 10;
-constexpr double MIN_LANE_LENGTH = 1.0;
 constexpr int32_t CENTER_ALIGN_DIVIDER = 2;
 
 // IsRightToLeft | IsListVertical | IsDirectionVertical | IsDirectionReverse
@@ -341,6 +340,23 @@ double RenderList::GetLaneLengthInPx(const Dimension& length)
     return NormalizeToPx(length);
 }
 
+void RenderList::ModifyLaneLength(const std::optional<std::pair<Dimension, Dimension>>& laneConstrain)
+{
+    minLaneLength_ = GetLaneLengthInPx(laneConstrain.value().first);
+    maxLaneLength_ = GetLaneLengthInPx(laneConstrain.value().second);
+    if (LessOrEqual(maxLaneLength_, 0.0)) {
+        maxLaneLength_ = GetCrossSize(GetLayoutSize());
+    }
+    if (LessOrEqual(minLaneLength_, 0.0)) {
+        minLaneLength_ = std::min(GetCrossSize(GetLayoutSize()), maxLaneLength_);
+    }
+    if (GreatNotEqual(minLaneLength_, maxLaneLength_)) {
+        LOGI("minLaneLength: %{public}f is greater than maxLaneLength: %{public}f, assign minLaneLength to"
+            " maxLaneLength", minLaneLength_, maxLaneLength_);
+        maxLaneLength_ = minLaneLength_;
+    }
+}
+
 void RenderList::CalculateLanes()
 {
     auto lanes = component_->GetLanes();
@@ -350,7 +366,7 @@ void RenderList::CalculateLanes()
         //      1.1: use [lanes_] set by user if [lanes_] is set
         //      1.2: set [lanes_] to 1 if [lanes_] is not set
         if (!laneConstrain) {
-            if (lanes == -1 || lanes == 0) {
+            if (lanes <= 0) {
                 lanes = 1;
             }
             maxLaneLength_ = GetCrossSize(GetLayoutParam().GetMaxSize()) / lanes;
@@ -369,16 +385,7 @@ void RenderList::CalculateLanes()
 
         // set layout size temporarily to calculate percent unit of constrain
         SetLayoutSize(GetLayoutParam().GetMaxSize());
-        minLaneLength_ = GetLaneLengthInPx(laneConstrain.value().first);
-        maxLaneLength_ = GetLaneLengthInPx(laneConstrain.value().second);
-        if (LessOrEqual(minLaneLength_, 0.0)) {
-            minLaneLength_ = MIN_LANE_LENGTH;
-        }
-        if (GreatNotEqual(minLaneLength_, maxLaneLength_)) {
-            LOGI("minLaneLength: %{public}f is greater than maxLaneLength: %{public}f, set minLaneLength to"
-                " maxLaneLength", minLaneLength_, maxLaneLength_);
-            maxLaneLength_ = minLaneLength_;
-        }
+        ModifyLaneLength(laneConstrain);
 
         // if minLaneLength is 40, maxLaneLength is 60
         // when list's width is 120, lanes_ = 3
@@ -428,30 +435,34 @@ void RenderList::RequestNewItemsAtEndForLaneList(double& curMainPos, double main
     int newItemCntInLine = 0;
     double lineMainSize = 0;
     for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
-        bool doneRequestNewItem = false;
+        bool breakWhenRequestNewItem = false;
         do {
             if (GreatOrEqual(curMainPos, endMainPos_)) {
-                doneRequestNewItem = true;
+                breakWhenRequestNewItem = true;
                 break;
             }
             auto child = RequestAndLayoutNewItem(newIndex, innerLayout);
             if (!child) {
                 startIndex_ = std::min(startIndex_, TotalCount());
-                doneRequestNewItem = true;
+                breakWhenRequestNewItem = true;
                 break;
             }
             if (GreatOrEqual(curMainPos, mainSize)) {
                 ++endCachedCount_;
             }
             lineMainSize = std::max(lineMainSize, GetMainSize(child->GetLayoutSize()));
+            ++newItemCntInLine;
         } while (0);
-        if (++newItemCntInLine == lanes_ || doneRequestNewItem) {
+        bool singleLaneDoneAddItem = (lanes_ == 1) && !breakWhenRequestNewItem;
+        bool multiLaneDoneSupplyOneLine = (lanes_ > 1) && (newItemCntInLine == lanes_);
+        bool multiLaneStartSupplyLine = breakWhenRequestNewItem && (newItemCntInLine >= 1);
+        if (singleLaneDoneAddItem || multiLaneDoneSupplyOneLine || multiLaneStartSupplyLine) {
             curMainPos += lineMainSize + spaceWidth_;
             newItemCntInLine = 0;
             lineMainSize = 0;
-            if (doneRequestNewItem) {
-                break;
-            }
+        }
+        if (breakWhenRequestNewItem) {
+            break;
         }
     }
 }
@@ -489,15 +500,15 @@ void RenderList::RequestNewItemsAtStartForLaneList(const LayoutParam& innerLayou
     int newItemCntInLine = 0;
     double lineMainSize = 0;
     for (; startIndex_ > 0; --startIndex_) {
-        bool doneRequestNewItem = false;
+        bool breakWhenRequestNewItem = false;
         do {
             if (LessOrEqual(currentOffset_, startMainPos_)) {
-                doneRequestNewItem = true;
+                breakWhenRequestNewItem = true;
                 break;
             }
             auto child = RequestAndLayoutNewItem(startIndex_ - 1, innerLayout);
             if (!child) {
-                doneRequestNewItem = true;
+                breakWhenRequestNewItem = true;
                 break;
             }
             if (selectedItemIndex_ == startIndex_) {
@@ -507,14 +518,18 @@ void RenderList::RequestNewItemsAtStartForLaneList(const LayoutParam& innerLayou
                 ++startCachedCount_;
             }
             lineMainSize = std::max(lineMainSize, GetMainSize(child->GetLayoutSize()));
+            ++newItemCntInLine;
         } while (0);
-        if (++newItemCntInLine == lanes_ || (doneRequestNewItem)) {
-            currentOffset_ = currentOffset_ - lineMainSize;
+        bool singleLaneDoneAddItem = (lanes_ == 1) && !breakWhenRequestNewItem;
+        bool multiLaneDoneSupplyOneLine = (lanes_ > 1) && (newItemCntInLine == lanes_);
+        bool multiLaneStartSupplyLine = breakWhenRequestNewItem && (newItemCntInLine >= 1);
+        if (singleLaneDoneAddItem || multiLaneDoneSupplyOneLine || multiLaneStartSupplyLine) {
+            currentOffset_ -= lineMainSize + spaceWidth_;
             newItemCntInLine = 0;
             lineMainSize = 0;
-            if (doneRequestNewItem) {
-                break;
-            }
+        }
+        if (breakWhenRequestNewItem) {
+            break;
         }
     }
 }
@@ -1214,7 +1229,7 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(const LayoutParam& lay
     int32_t lackItemCount = 0;
     for (auto it = items_.begin(); it != items_.end();) {
         // 1. layout children in a row
-        double mainSize;
+        double mainSize = 0.0;
         itemsInOneRow.clear();
         for (int32_t i = 0; i < lanes_; i++) {
             RefPtr<RenderListItem> child = *(it);
@@ -1363,13 +1378,16 @@ double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, d
 
 RefPtr<RenderListItem> RenderList::RequestAndLayoutNewItem(size_t index, const LayoutParam& layoutParam)
 {
-    ACE_FUNCTION_TRACE();
     RefPtr<RenderListItem> newChild;
     if (index == currentStickyIndex_ && currentStickyItem_) {
         newChild = currentStickyItem_;
     } else {
-        newChild = RequestListItem(index);
+        {
+            ACE_SCOPED_TRACE("RenderList:BuildListItem");
+            newChild = RequestListItem(index);
+        }
         if (newChild) {
+            ACE_SCOPED_TRACE("RenderList:MeasureListItem");
             AddChild(newChild);
             newChild->Layout(layoutParam);
         }

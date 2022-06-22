@@ -41,28 +41,19 @@ void RosenRenderSvgG::Paint(RenderContext& context, const Offset& offset)
 
 void RosenRenderSvgG::PaintDirectly(RenderContext& context, const Offset& offset)
 {
-    const auto renderContext = static_cast<RosenRenderContext*>(&context);
-    auto canvas = renderContext->GetCanvas();
+    auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (!canvas) {
         LOGE("Paint canvas is null");
         return;
     }
-    SkCanvas* skCanvas = canvas;
-    if (!skCanvas) {
-        LOGE("Paint skCanvas is null");
-        return;
-    }
 
+    SkAutoCanvasRestore save(canvas, true);
     if (NeedTransform()) {
-        skCanvas->save();
-        skCanvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
+        canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
     }
+    PaintMaskLayer(context, offset, offset);
 
     RenderSvgBase::PaintDirectly(context, offset);
-
-    if (NeedTransform()) {
-        skCanvas->restore();
-    }
 }
 
 } // namespace OHOS::Ace

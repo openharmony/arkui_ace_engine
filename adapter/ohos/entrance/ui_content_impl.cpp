@@ -493,6 +493,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     aceResCfg.SetOrientation(SystemProperties::GetDevcieOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
+    aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetAssetManager(flutterAssetManager);
@@ -733,7 +734,11 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         container->SetColorScheme(ColorScheme::SCHEME_DARK);
         resConfig.SetColorMode(ColorMode::DARK);
     }
+    if (instanceId_ == -1) {
+        LOGE("Get Instance failed");
+    }
     container->SetResourceConfiguration(resConfig);
+    Platform::AceContainer::OnConfigurationUpdated(instanceId_, (*config).GetName());
     themeManager->UpdateConfig(resConfig);
 }
 

@@ -57,6 +57,11 @@ public:
         return frameCount_;
     }
 
+    bool IsSingleFrame() const
+    {
+        return frameCount_ == 1;
+    }
+
     ImageSourceInfo GetSourceInfo()
     {
         return imageSource_;
@@ -68,11 +73,11 @@ public:
     }
 
     virtual void UploadToGpuForRender(
-        const WeakPtr<PipelineContext> context,
-        RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-        UploadSuccessCallback successCallback,
-        FailedCallback failedCallback,
-        Size imageSize,
+        const WeakPtr<PipelineContext>& context,
+        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+        const UploadSuccessCallback& successCallback,
+        const FailedCallback& failedCallback,
+        const Size& imageSize,
         bool forceResize,
         bool syncMode = false)
     {}
@@ -164,11 +169,11 @@ public:
     ~StaticImageObject() override = default;
 
     void UploadToGpuForRender(
-        const WeakPtr<PipelineContext> context,
-        RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-        UploadSuccessCallback successCallback,
-        FailedCallback failedCallback,
-        Size imageSize,
+        const WeakPtr<PipelineContext>& context,
+        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+        const UploadSuccessCallback& successCallback,
+        const FailedCallback& failedCallback,
+        const Size& imageSize,
         bool forceResize,
         bool syncMode = false) override;
 
@@ -198,11 +203,11 @@ public:
     ~AnimatedImageObject() override = default;
 
     void UploadToGpuForRender(
-        const WeakPtr<PipelineContext> context,
-        RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-        UploadSuccessCallback successCallback,
-        FailedCallback failedCallback,
-        Size imageSize,
+        const WeakPtr<PipelineContext>& context,
+        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+        const UploadSuccessCallback& successCallback,
+        const FailedCallback& failedCallback,
+        const Size& imageSize,
         bool forceResize,
         bool syncMode = false) override;
 

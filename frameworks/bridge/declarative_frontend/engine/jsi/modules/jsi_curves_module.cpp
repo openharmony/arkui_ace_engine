@@ -46,7 +46,7 @@ shared_ptr<JsValue> CurvesInterpolate(const shared_ptr<JsRuntime>& runtime, cons
     return runtime->NewNumber(curveValue);
 }
 
-shared_ptr<JsValue> CurvesInit(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+shared_ptr<JsValue> CurvesInitInternal(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     auto curveObj = runtime->NewObject();
@@ -74,6 +74,18 @@ shared_ptr<JsValue> CurvesInit(const shared_ptr<JsRuntime>& runtime, const share
     curveObj->SetProperty(runtime, "__pageId", runtime->NewInt32(pageId));
     curveObj->SetProperty(runtime, "__curveString", runtime->NewString(curveString));
     return curveObj;
+}
+
+shared_ptr<JsValue> CurvesInit(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    return CurvesInitInternal(runtime, thisObj, argv, argc);
+}
+
+shared_ptr<JsValue> InitCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    return CurvesInitInternal(runtime, thisObj, argv, argc);
 }
 
 bool CreateSpringCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -120,9 +132,9 @@ bool CreateStepsCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsV
         stepSize = argv[0]->ToInt32(runtime);
         bool isEnd = argv[1]->ToBoolean(runtime);
         if (isEnd) {
-            curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::START);
-        } else {
             curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::END);
+        } else {
+            curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::START);
         }
     } else {
         stepSize = argv[0]->ToInt32(runtime);
@@ -138,11 +150,11 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
     curveObj->SetProperty(runtime, CURVE_INTERPOLATE, runtime->NewFunction(CurvesInterpolate));
     RefPtr<Curve> curve;
     bool curveCreated;
-    if (curveString == "spring") {
+    if (curveString == CURVES_SPRING || curveString == SPRING_CURVE) {
         curveCreated = CreateSpringCurve(runtime, thisObj, argv, argc, curve);
-    } else if (curveString == "cubic-bezier") {
+    } else if (curveString == CURVES_CUBIC_BEZIER || curveString == CUBIC_BEZIER_CURVE) {
         curveCreated = CreateCubicCurve(runtime, thisObj, argv, argc, curve);
-    } else if (curveString == "steps") {
+    } else if (curveString == CURVES_STEPS || curveString == STEPS_CURVE) {
         curveCreated = CreateStepsCurve(runtime, thisObj, argv, argc, curve);
     } else {
         LOGE("curve params: %{public}s is illegal", curveString.c_str());
@@ -167,30 +179,55 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
 shared_ptr<JsValue> CurvesBezier(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    std::string curveString("cubic-bezier");
+    std::string curveString(CURVES_CUBIC_BEZIER);
+    return ParseCurves(runtime, thisObj, argv, argc, curveString);
+}
+
+shared_ptr<JsValue> BezierCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string curveString(CUBIC_BEZIER_CURVE);
     return ParseCurves(runtime, thisObj, argv, argc, curveString);
 }
 
 shared_ptr<JsValue> CurvesSpring(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    std::string curveString("spring");
+    std::string curveString(CURVES_SPRING);
+    return ParseCurves(runtime, thisObj, argv, argc, curveString);
+}
+
+shared_ptr<JsValue> SpringCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string curveString(SPRING_CURVE);
     return ParseCurves(runtime, thisObj, argv, argc, curveString);
 }
 
 shared_ptr<JsValue> CurvesSteps(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    std::string curveString("steps");
+    std::string curveString(CURVES_STEPS);
+    return ParseCurves(runtime, thisObj, argv, argc, curveString);
+}
+
+shared_ptr<JsValue> StepsCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string curveString(STEPS_CURVE);
     return ParseCurves(runtime, thisObj, argv, argc, curveString);
 }
 
 void InitCurvesModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& moduleObj)
 {
     moduleObj->SetProperty(runtime, CURVES_INIT, runtime->NewFunction(CurvesInit));
+    moduleObj->SetProperty(runtime, INIT_CURVE, runtime->NewFunction(InitCurve));
     moduleObj->SetProperty(runtime, CURVES_CUBIC_BEZIER, runtime->NewFunction(CurvesBezier));
+    moduleObj->SetProperty(runtime, CUBIC_BEZIER_CURVE, runtime->NewFunction(BezierCurve));
     moduleObj->SetProperty(runtime, CURVES_SPRING, runtime->NewFunction(CurvesSpring));
+    moduleObj->SetProperty(runtime, SPRING_CURVE, runtime->NewFunction(SpringCurve));
     moduleObj->SetProperty(runtime, CURVES_STEPS, runtime->NewFunction(CurvesSteps));
+    moduleObj->SetProperty(runtime, STEPS_CURVE, runtime->NewFunction(StepsCurve));
 }
 
 } // namespace OHOS::Ace::Framework

@@ -22,9 +22,11 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/thread/cancelable_callback.h"
 #include "core/components_ng/property/render_property.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/render/render_property.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 // RenderWrapper are used to flush dirty render task.
@@ -46,13 +48,29 @@ public:
         contentPaintImpl_ = std::move(contentPaintImpl);
     }
 
+    void SetTaskThread(TaskThread taskThread)
+    {
+        taskThread_ = taskThread;
+    }
+
     void FlushRender();
+
+    TaskThread CanRunOnWhichThread() const
+    {
+        return taskThread_;
+    }
+
+    bool CheckShouldRunOnMain() const
+    {
+        return (CanRunOnWhichThread() & MAIN_TASK) == MAIN_TASK;
+    }
 
 private:
     WeakPtr<RenderContext> renderContext_;
     RefPtr<GeometryNode> geometryNode_;
     RefPtr<RenderProperty> renderProperty_;
     ContentPaintImpl contentPaintImpl_;
+    TaskThread taskThread_ = MAIN_TASK;
 };
 } // namespace OHOS::Ace::NG
 

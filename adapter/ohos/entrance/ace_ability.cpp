@@ -131,7 +131,8 @@ class AcePlatformEventCallback final : public Platform::PlatformEventCallback {
 public:
     explicit AcePlatformEventCallback(AcePlatformFinish onFinish) : onFinish_(onFinish) {}
     AcePlatformEventCallback(AcePlatformFinish onFinish, AcePlatformStartAbility onStartAbility)
-        : onFinish_(onFinish), onStartAbility_(onStartAbility) {}
+        : onFinish_(onFinish), onStartAbility_(onStartAbility)
+    {}
 
     ~AcePlatformEventCallback() = default;
 
@@ -185,9 +186,12 @@ void AceAbility::OnStart(const Want& want)
         ImageCache::SetCacheFileInfo();
         AceEngine::InitJsDumpHeadSignal();
     });
+
+    // TODO: now choose pipeline using param set as package name, later enable for all.
+    bool useNewPipe = AceApplicationInfo::GetInstance().GetPackageName() == SystemProperties::GetNewPipePkg();
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
-    if (SystemProperties::GetRosenBackendEnabled()) {
+    if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
         rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
         rsUiDirector->Init();
@@ -284,7 +288,6 @@ void AceAbility::OnStart(const Want& want)
     PluginManager::GetInstance().SetAceAbility(this, pluginUtils);
 
     // create container
-    // TODO: add new pipeline.
     Platform::AceContainer::CreateContainer(abilityId_, frontendType, isArkApp, srcPath, shared_from_this(),
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); },
             [this](const std::string& address) {
@@ -292,7 +295,8 @@ void AceAbility::OnStart(const Want& want)
                 want.AddEntity(Want::ENTITY_BROWSER);
                 want.SetParam("address", address);
                 this->StartAbility(want);
-            }), false);
+            }),
+        false, useNewPipe);
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
         LOGE("container is null, set configuration failed.");
@@ -338,29 +342,34 @@ void AceAbility::OnStart(const Want& want)
         Platform::AceContainer::AddLibPath(abilityId_, libPath);
     }
 
-    Ace::Platform::UIEnvCallback callback = nullptr;
+    if (!useNewPipe) {
+        Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
-    callback = [window, id = abilityId_, flutterAceView, rsUiDirector](
-                    const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
-        if (rsUiDirector) {
-            rsUiDirector->SetUITaskRunner(
-                [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
-                    const std::function<void()>& task) {
-                    ContainerScope scope(id);
-                    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                });
-            if (context != nullptr) {
-                context->SetRSUIDirector(rsUiDirector);
+        callback = [window, id = abilityId_, flutterAceView, rsUiDirector](
+                       const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
+            if (rsUiDirector) {
+                rsUiDirector->SetUITaskRunner(
+                    [taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor(), id](
+                        const std::function<void()>& task) {
+                        ContainerScope scope(id);
+                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                    });
+                if (context != nullptr) {
+                    context->SetRSUIDirector(rsUiDirector);
+                }
+                flutterAceView->InitIOManager(Platform::AceContainer::GetContainer(id)->GetTaskExecutor());
+                LOGI("Init Rosen Backend");
+            } else {
+                LOGI("not Init Rosen Backend");
             }
-            flutterAceView->InitIOManager(Platform::AceContainer::GetContainer(id)->GetTaskExecutor());
-            LOGI("Init Rosen Backend");
-        } else {
-            LOGI("not Init Rosen Backend");
-        }
-    };
+        };
 #endif
-    // set view
-    Platform::AceContainer::SetView(flutterAceView, density_, 0, 0, window->GetWindowId(), callback);
+        // set view
+        Platform::AceContainer::SetView(flutterAceView, density_, 0, 0, window->GetWindowId(), callback);
+    } else {
+        Platform::AceContainer::SetViewNew(flutterAceView, density_, 0, 0, window);
+    }
+
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
 
     // action event handler
@@ -416,11 +425,6 @@ void AceAbility::OnStart(const Want& want)
 void AceAbility::OnStop()
 {
     LOGI("AceAbility::OnStop called ");
-#ifdef ENABLE_ROSEN_BACKEND
-    if (auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext()) {
-        context->SetRSUIDirector(nullptr);
-    }
-#endif
     Ability::OnStop();
     Platform::AceContainer::DestroyContainer(abilityId_);
     LOGI("AceAbility::OnStop called End");
@@ -598,20 +602,22 @@ void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeCha
         LOGE("OnSizeChange: taskExecutor is null.");
         return;
     }
-    taskExecutor->PostTask([rect, density = density_, reason, container]() {
-        auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-        if (!flutterAceView) {
-            LOGE("OnSizeChange: flutterAceView is null.");
-            return;
-        }
-        flutter::ViewportMetrics metrics;
-        metrics.physical_width = rect.width_;
-        metrics.physical_height = rect.height_;
-        metrics.device_pixel_ratio = density;
-        Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-        Platform::FlutterAceView::SurfaceChanged(flutterAceView, rect.width_, rect.height_,
-            rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason));
-    }, TaskExecutor::TaskType::PLATFORM);
+    taskExecutor->PostTask(
+        [rect, density = density_, reason, container]() {
+            auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
+            if (!flutterAceView) {
+                LOGE("OnSizeChange: flutterAceView is null.");
+                return;
+            }
+            flutter::ViewportMetrics metrics;
+            metrics.physical_width = rect.width_;
+            metrics.physical_height = rect.height_;
+            metrics.device_pixel_ratio = density;
+            Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
+            Platform::FlutterAceView::SurfaceChanged(flutterAceView, rect.width_, rect.height_,
+                rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason));
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
@@ -628,20 +634,22 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
         return;
     }
     ContainerScope scope(abilityId_);
-    taskExecutor->PostTask([container, mode]() {
-        auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("OnModeChange failed, pipeline context is null.");
-            return;
-        }
-        if (mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN ||
-            mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-            pipelineContext->ShowContainerTitle(false);
-        } else {
-            pipelineContext->ShowContainerTitle(true);
-        }
-    }, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(
+        [container, mode]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("OnModeChange failed, pipeline context is null.");
+                return;
+            }
+            if (mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FULLSCREEN ||
+                mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                mode == OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+                pipelineContext->ShowContainerTitle(false);
+            } else {
+                pipelineContext->ShowContainerTitle(true);
+            }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
@@ -663,12 +671,14 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
         }
 
         ContainerScope scope(abilityId_);
-        taskExecutor->PostTask([container, keyboardRect] {
-            auto context = container->GetPipelineContext();
-            if (context != nullptr) {
-                context->OnVirtualKeyboardAreaChange(keyboardRect);
-            }
-        }, TaskExecutor::TaskType::UI);
+        taskExecutor->PostTask(
+            [container, keyboardRect] {
+                auto context = container->GetPipelineContext();
+                if (context != nullptr) {
+                    context->OnVirtualKeyboardAreaChange(keyboardRect);
+                }
+            },
+            TaskExecutor::TaskType::UI);
     }
 }
 
@@ -685,12 +695,14 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
         return;
     }
     ContainerScope scope(abilityId_);
-    taskExecutor->PostSyncTask([container, params, &info] {
-        auto context = container->GetPipelineContext();
-        if (context != nullptr) {
-            context->DumpInfo(params, info);
-        }
-    }, TaskExecutor::TaskType::UI);
+    taskExecutor->PostSyncTask(
+        [container, params, &info] {
+            auto context = container->GetPipelineContext();
+            if (context != nullptr) {
+                context->DumpInfo(params, info);
+            }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
@@ -773,14 +785,16 @@ void AceAbility::SetBackgroundColor(uint32_t color)
         LOGE("SetBackgroundColor failed: taskExecutor is null.");
         return;
     }
-    taskExecutor->PostSyncTask([container, bgColor = color]() {
-        auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("SetBackgroundColor failed, pipeline context is null.");
-            return;
-        }
-        pipelineContext->SetAppBgColor(Color(bgColor));
-    }, TaskExecutor::TaskType::UI);
+    taskExecutor->PostSyncTask(
+        [container, bgColor = color]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("SetBackgroundColor failed, pipeline context is null.");
+                return;
+            }
+            pipelineContext->SetAppBgColor(Color(bgColor));
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 uint32_t AceAbility::GetBackgroundColor()
@@ -797,7 +811,8 @@ uint32_t AceAbility::GetBackgroundColor()
     }
     ContainerScope scope(abilityId_);
     uint32_t bgColor = 0x000000;
-    taskExecutor->PostSyncTask([&bgColor, container]() {
+    taskExecutor->PostSyncTask(
+        [&bgColor, container]() {
             if (!container) {
                 LOGE("Post sync task GetBackgroundColor failed: container is null. return 0x000000");
                 return;
@@ -808,7 +823,8 @@ uint32_t AceAbility::GetBackgroundColor()
                 return;
             }
             bgColor = pipelineContext->GetAppBgColor().GetValue();
-        }, TaskExecutor::TaskType::UI);
+        },
+        TaskExecutor::TaskType::UI);
 
     LOGI("AceAbilityHandler::GetBackgroundColor, value is %{public}u", bgColor);
     return bgColor;

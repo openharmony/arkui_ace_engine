@@ -42,7 +42,8 @@ public:
     bool CheckUnchanged(const GeometryNode& geometryNode)
     {
         return (frame_ == geometryNode.frame_) && (bound_ == geometryNode.bound_) &&
-               (content_ == geometryNode.content_) && (parentGlobalOffset_ == geometryNode.parentGlobalOffset_);
+               (content_ == geometryNode.content_) && (parentGlobalOffset_ == geometryNode.parentGlobalOffset_) &&
+               (parentLayoutConstraint_ == geometryNode.parentLayoutConstraint_);
     }
 
     RefPtr<GeometryNode> Clone() const;
@@ -108,7 +109,20 @@ public:
         parentGlobalOffset_ = parentGlobalOffset;
     }
 
+    void SetParentLayoutConstraint(const LayoutConstraintF& layoutConstraint)
+    {
+        parentLayoutConstraint_ = layoutConstraint;
+    }
+
+    const std::optional<LayoutConstraintF>& GetParentLayoutConstraint() const
+    {
+        return parentLayoutConstraint_;
+    }
+
 private:
+    // the layoutConstraint of prev measure task.
+    std::optional<LayoutConstraintF> parentLayoutConstraint_;
+
     // the frame size in parent local coordinate.
     GeometryProperty frame_;
     // the size of border rect in current node local coordinate.

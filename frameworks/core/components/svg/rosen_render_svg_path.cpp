@@ -65,18 +65,17 @@ void RosenRenderSvgPath::PaintDirectly(RenderContext& context, const Offset& off
         LOGE("Paint canvas is null");
         return;
     }
+    SkAutoCanvasRestore save(canvas, true);
     if (NeedTransform()) {
-        canvas->save();
         canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
     }
+    PaintMaskLayer(context, offset, offset);
+
     SkPath out;
     GetPath(out);
     UpdateGradient(fillState_);
     RosenSvgPainter::SetFillStyle(canvas, out, fillState_, opacity_);
     RosenSvgPainter::SetStrokeStyle(canvas, out, strokeState_, opacity_);
-    if (NeedTransform()) {
-        canvas->restore();
-    }
 }
 
 void RosenRenderSvgPath::UpdateMotion(const std::string& path, const std::string& rotate, double percent)

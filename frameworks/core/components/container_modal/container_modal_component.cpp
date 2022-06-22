@@ -125,6 +125,7 @@ RefPtr<ButtonComponent> ContainerModalComponent::BuildControlButton(
     button->SetBackgroundColor(isFocus ? TITLE_BUTTON_BACKGROUND_COLOR : TITLE_BUTTON_BACKGROUND_COLOR_LOST_FOCUS);
     button->SetClickedColor(TITLE_BUTTON_CLICKED_COLOR);
     button->SetClickFunction(std::move(clickCallback));
+    button->SetFocusable(false);
     return button;
 }
 

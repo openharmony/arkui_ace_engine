@@ -302,4 +302,10 @@ std::string SystemProperties::GetRegion()
 {
     return system::GetParameter("const.global.region", INVALID_PARAM);
 }
+
+std::string SystemProperties::GetNewPipePkg()
+{
+    return system::GetParameter("persist.ace.newpipe.pkgname", "");
+}
+
 } // namespace OHOS::Ace

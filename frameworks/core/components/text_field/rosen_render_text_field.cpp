@@ -43,7 +43,7 @@ namespace {
 
 constexpr char16_t NEWLINE_CODE = u'\n';
 // pixel for how far the caret to the top of paint rect. Sometimes may leave some space for the floor.
-constexpr double CARET_HEIGHT_OFFSET = 2.0;
+constexpr double CARET_HEIGHT_OFFSET = -2.0;
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr Dimension COUNT_SPACING = 4.0_vp;
 constexpr double MAGNIFIER_GAIN = 1.25;

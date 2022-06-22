@@ -31,6 +31,8 @@ public:
     void Init(const ResourceInfo& resourceInfo) override;
     void UpdateConfig(const ResourceConfiguration& config) override;
 
+    RefPtr<ThemeStyle> GetTheme(int32_t themeId) override;
+
     Color GetColor(uint32_t resId) override;
     Dimension GetDimension(uint32_t resId) override;
     std::string GetString(uint32_t resId) override;

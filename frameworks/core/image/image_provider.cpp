@@ -37,16 +37,16 @@ constexpr double SRGB_GAMUT_AREA = 0.104149;
 } // namespace
 
 void ImageProvider::FetchImageObject(
-    ImageSourceInfo imageInfo,
-    ImageObjSuccessCallback successCallback,
-    UploadSuccessCallback uploadSuccessCallback,
-    FailedCallback failedCallback,
-    const WeakPtr<PipelineContext> context,
+    const ImageSourceInfo& imageInfo,
+    const ImageObjSuccessCallback& successCallback,
+    const UploadSuccessCallback& uploadSuccessCallback,
+    const FailedCallback& failedCallback,
+    const WeakPtr<PipelineContext>& context,
     bool syncMode,
     bool useSkiaSvg,
     bool needAutoResize,
-    RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-    OnPostBackgroundTask onBackgroundTaskPostCallback)
+    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+    const OnPostBackgroundTask& onBackgroundTaskPostCallback)
 {
     auto task = [context, imageInfo, successCallback, failedCallback, useSkiaSvg, renderTaskHolder,
                     uploadSuccessCallback, needAutoResize, id = Container::CurrentId(), syncMode]() mutable {
@@ -83,8 +83,8 @@ void ImageProvider::FetchImageObject(
         bool canStartUploadImageObj = !needAutoResize && (imageObj->GetFrameCount() == 1);
         if (canStartUploadImageObj) {
             bool forceResize = (!imageObj->IsSvg()) && (imageInfo.IsSourceDimensionValid());
-            FlutterRenderImage::UploadImageObjToGpuForRender(imageObj, context, renderTaskHolder, uploadSuccessCallback,
-                failedCallback, imageObj->GetImageSize(), forceResize, true);
+            imageObj->UploadToGpuForRender(context, renderTaskHolder, uploadSuccessCallback, failedCallback,
+                imageObj->GetImageSize(), forceResize, true);
         }
     };
     if (syncMode) {

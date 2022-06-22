@@ -39,13 +39,16 @@ const char COMPILE_AND_RUN_BUNDLE_FAILED[] = "Js compile and run bundle failed";
 const char LOAD_JS_FRAMEWORK_FAILED[] = "Loading JS framework failed";
 const char FIRE_EVENT_FAILED[] = "Fire event failed";
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-/* JS Bundle is added several lines before input to qjs-engine.
- * When we need to output dump info in previewer,
- * the offset must be considered to ensure the accuracy of dump info.
- */
-const int32_t OFFSET_PREVIEW = 9;
-#endif
+// The quickjs engine reports that the line number is biased, so the "OFFSET_PREVIEW_JS"
+// and "OFFSET_PREVIEW_ETS" are used for correction.
+const int32_t OFFSET_PREVIEW_JS = 9;
+const int32_t OFFSET_PREVIEW_ETS = 14;
+// The "STATE_MGMT_FILE" is used to filter the file "stateMgmt.js" in the error message,
+// which belongs to the framework.
+const char STATE_MGMT_FILE[] = "(stateMgmt.js";
+// The "BUNDLE_FILE_FLAG" is used to filter the files in the error message, which belongs
+// to the js bundle.
+const char BUNDLE_FILE_FLAG[] = "(./";
 
 std::string GetReason(JsErrorType errorType)
 {
@@ -287,7 +290,7 @@ JSValue QJSUtils::GetPropertyStr(JSContext* ctx, JSValueConst thisObj, const cha
 }
 
 void QJSUtils::JsStdDumpErrorAce(JSContext* ctx, JsErrorType errorType, int32_t instanceId, const char* pageUrl,
-    const RefPtr<JsAcePage>& page)
+    const RefPtr<JsAcePage>& page, bool isEts)
 {
     RefPtr<RevSourceMap> pageMap;
     RefPtr<RevSourceMap> appMap;
@@ -301,11 +304,8 @@ void QJSUtils::JsStdDumpErrorAce(JSContext* ctx, JsErrorType errorType, int32_t 
         LOGE("Throw: ");
     }
     ScopedString printLog(ctx, exceptionVal);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     LOGE("[Engine Log] [DUMP] %{public}s", printLog.get());
-#else
-    LOGE("[DUMP] %{public}s", printLog.get());
-#endif
+
     QJSHandleScope handleScope(ctx);
     if (isError) {
         JSValue val = QJSUtils::GetPropertyStr(ctx, exceptionVal, "stack");
@@ -314,17 +314,10 @@ void QJSUtils::JsStdDumpErrorAce(JSContext* ctx, JsErrorType errorType, int32_t 
             std::string stack = stackTrace;
             if (stackTrace != nullptr) {
                 if (pageMap || appMap) {
-                    stack = JsDumpSourceFile(stackTrace, pageMap, appMap);
+                    stack = JsDumpSourceFile(stackTrace, pageMap, appMap, isEts);
                 }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-                if (strcmp(stack.c_str(), stackTrace) != 0) {
-                    LOGE("[Engine Log] %{public}s", stack.c_str());
-                } else {
-                    LOGE("%{public}s", stack.c_str());
-                }
-#else
-                LOGE("%{public}s", stack.c_str());
-#endif
+                LOGE("[Engine Log] %{public}s", stack.c_str());
+
                 std::string reasonStr = GetReason(errorType);
                 std::string summaryBody = GenerateSummaryBody(printLog.get(), stack.c_str(), instanceId, pageUrl);
                 EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), reasonStr, summaryBody);
@@ -336,19 +329,15 @@ void QJSUtils::JsStdDumpErrorAce(JSContext* ctx, JsErrorType errorType, int32_t 
 }
 
 std::string QJSUtils::JsDumpSourceFile(const char* stack, const RefPtr<RevSourceMap>& pageMap,
-    const RefPtr<RevSourceMap>& appMap)
+    const RefPtr<RevSourceMap>& appMap, bool isEts)
 {
     const std::string closeBrace = ")";
     const std::string openBrace = "(";
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     const std::string suffix = ".js";
-#else
-    const std::string suffix = ".jtc";
-#endif
     std::string ans = "";
     std::string tempStack = stack;
     std::string::size_type appFlag = tempStack.find("app.js");
-    bool isAppPage = appFlag > 0 && appMap;
+    bool isAppPage = appMap && (appFlag != std::string::npos);
 
     // find per line of stack
     std::vector<std::string> res;
@@ -356,6 +345,9 @@ std::string QJSUtils::JsDumpSourceFile(const char* stack, const RefPtr<RevSource
 
     for (uint32_t i = 0; i < res.size(); i++) {
         std::string temp = res[i];
+        if (isEts && temp.find(STATE_MGMT_FILE) != std::string::npos) {
+            continue;
+        }
         std::string::size_type closeBracePos = temp.find(closeBrace);
         std::string::size_type openBracePos = temp.find(openBrace);
 
@@ -365,14 +357,20 @@ std::string QJSUtils::JsDumpSourceFile(const char* stack, const RefPtr<RevSource
         // is that the line is empty. So, this can be the terminal judgement
         if (line == "") {
             LOGI("the stack without line info");
+            if (isEts) {
+                continue;
+            }
             break;
         }
 
         // if the page is end with ".jtc", push into stack
         if (temp.find(suffix) != suffix.npos) {
-            const std::string sourceInfo = GetSourceInfo(line, pageMap, appMap, isAppPage);
+            const std::string sourceInfo = GetSourceInfo(line, pageMap, appMap, isAppPage, isEts);
             if (sourceInfo == "") {
                 break;
+            }
+            if (isEts && sourceInfo.find(BUNDLE_FILE_FLAG) == 0) {
+                continue;
             }
             temp.replace(openBracePos, closeBracePos - openBracePos + 1, sourceInfo);
         }
@@ -403,7 +401,7 @@ void QJSUtils::GetPosInfo(const std::string& temp, int32_t start, std::string& l
 {
     // find line, column
     for (int32_t i = start - 1; i > 0; i--) {
-        if (temp[i] >= '0' && temp[i] <= '9') {
+        if ((temp[i] >= '0' && temp[i] <= '9') || temp[i] == '-') {
             line = temp[i] + line;
         } else {
             break;
@@ -412,19 +410,12 @@ void QJSUtils::GetPosInfo(const std::string& temp, int32_t start, std::string& l
 }
 
 std::string QJSUtils::GetSourceInfo(const std::string& line, const RefPtr<RevSourceMap>& pageMap,
-    const RefPtr<RevSourceMap>& appMap, bool isAppPage)
+    const RefPtr<RevSourceMap>& appMap, bool isAppPage, bool isEts)
 {
     std::string sourceInfo;
-    MappingInfo mapInfo;
-    if (isAppPage) {
-        mapInfo = appMap->Find(StringToInt(line), 1);
-    } else {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-        mapInfo = pageMap->Find(StringToInt(line) + OFFSET_PREVIEW, 1);
-#else
-        mapInfo = pageMap->Find(StringToInt(line), 1);
-#endif
-    }
+    MappingInfo mapInfo = isAppPage ?
+        appMap->Find(StringToInt(line) + (isEts ? OFFSET_PREVIEW_ETS : OFFSET_PREVIEW_JS),1) :
+        pageMap->Find(StringToInt(line) + (isEts ? OFFSET_PREVIEW_ETS : OFFSET_PREVIEW_JS), 1);
     if (mapInfo.row == 0) {
         return "";
     }

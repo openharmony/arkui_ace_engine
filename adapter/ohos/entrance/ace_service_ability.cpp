@@ -23,6 +23,7 @@
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/log.h"
+#include "core/common/ace_engine.h"
 #include "core/common/backend.h"
 
 namespace OHOS {
@@ -85,6 +86,7 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want)
     Platform::PaContainer::CreateContainer(abilityId_, backendType, isArkApp, this,
         std::make_unique<ServicePlatformEventCallback>([this]() { TerminateAbility(); }));
 
+    AceEngine::InitJsDumpHeadSignal();
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     if (info != nullptr && !info->srcPath.empty()) {
         LOGI("AceServiceAbility::OnStar assetBasePathStr: %{public}s, parsedUrl: %{public}s",

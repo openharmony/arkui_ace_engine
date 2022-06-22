@@ -56,7 +56,7 @@ public:
     void Push(const RefPtr<FrameNode>& element, bool isCustomView = false);
 
     // Wrap the components map for the stack top and then pop the stack.
-    // Add the wrappedcomponent has child of the new stack top's main component.
+    // Add the wrapped component has child of the new stack top's main component.
     void Pop();
 
     // pop the last container
@@ -71,10 +71,10 @@ public:
 
     void PushRenderContextTask(Modifier<RenderContext>&& task);
 
-    // Set key to be used for next custom component on the stack
+    // Set key to be used for next node on the stack
     void PushKey(const std::string& key);
 
-    // Returns a key for the CustomComponent if it has been pushed to the stack. Default is ""
+    // Returns a key for the node if it has been pushed to the stack. Default is ""
     std::string GetKey();
 
     // Takes care of the viewId wrt to foreach
@@ -105,7 +105,7 @@ public:
 
     void ClearStack()
     {
-        auto emptyStack = std::stack<std::unordered_map<std::string, RefPtr<FrameNode>>>();
+        auto emptyStack = std::stack<RefPtr<FrameNode>>();
         elementsStack_.swap(emptyStack);
     }
 
@@ -122,7 +122,7 @@ private:
     static thread_local std::unique_ptr<ViewStackProcessor> instance;
 
     // render component stack
-    std::stack<std::unordered_map<std::string, RefPtr<FrameNode>>> elementsStack_;
+    std::stack<RefPtr<FrameNode>> elementsStack_;
 
     // modifier task
     std::stack<RefPtr<StateModifyTask>> modifyTaskStack_;

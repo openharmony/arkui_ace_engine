@@ -65,7 +65,7 @@ JSValue CurvesInterpolate(JSContext* ctx, JSValueConst value, int32_t argc, JSVa
     return curveNum;
 }
 
-JSValue CurvesInit(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+JSValue CurvesInitInternal(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
     JS_SetPropertyStr(ctx, value, CURVE_INTERPOLATE, JS_NewCFunction(ctx, CurvesInterpolate, CURVE_INTERPOLATE, 1));
     if ((!argv) || ((argc != 1) && (argc != 0))) {
@@ -95,7 +95,18 @@ JSValue CurvesInit(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCons
     int32_t pageId = page->GetPageId();
     JS_SetPropertyStr(ctx, value, "__pageId", JS_NewInt32(ctx, pageId));
     JS_SetPropertyStr(ctx, value, "__curveString", JS_NewString(ctx, curveString.c_str()));
+    JS_DupValue(ctx, value);
     return value;
+}
+
+JSValue CurvesInit(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    return CurvesInitInternal(ctx, value, argc, argv);
+}
+
+JSValue InitCurve(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    return CurvesInitInternal(ctx, value, argc, argv);
 }
 
 bool CreateSpringCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
@@ -164,11 +175,11 @@ JSValue ParseCurves(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCon
     JS_SetPropertyStr(ctx, value, CURVE_INTERPOLATE, JS_NewCFunction(ctx, CurvesInterpolate, CURVE_INTERPOLATE, 1));
     RefPtr<Curve> curve;
     bool curveCreated;
-    if (curveString == "spring") {
+    if (curveString == CURVES_SPRING || curveString == SPRING_CURVE) {
         curveCreated = CreateSpringCurve(ctx, value, argc, argv, curve);
-    } else if (curveString == "cubic-bezier") {
+    } else if (curveString == CURVES_CUBIC_BEZIER || curveString == CUBIC_BEZIER_CURVE) {
         curveCreated = CreateCubicCurve(ctx, value, argc, argv, curve);
-    } else if (curveString == "steps") {
+    } else if (curveString == CURVES_STEPS || curveString == STEPS_CURVE) {
         curveCreated = CreateStepsCurve(ctx, value, argc, argv, curve);
     } else {
         return JS_NULL;
@@ -197,27 +208,49 @@ JSValue ParseCurves(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCon
 
 JSValue CurvesBezier(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
-    std::string curveString("cubic-bezier");
+    std::string curveString(CURVES_CUBIC_BEZIER);
+    return ParseCurves(ctx, value, argc, argv, curveString);
+}
+
+JSValue BezierCurve(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    std::string curveString(CUBIC_BEZIER_CURVE);
     return ParseCurves(ctx, value, argc, argv, curveString);
 }
 
 JSValue CurvesSpring(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
-    std::string curveString("spring");
+    std::string curveString(CURVES_SPRING);
+    return ParseCurves(ctx, value, argc, argv, curveString);
+}
+
+JSValue SpringCurve(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    std::string curveString(SPRING_CURVE);
     return ParseCurves(ctx, value, argc, argv, curveString);
 }
 
 JSValue CurvesSteps(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
-    std::string curveString("steps");
+    std::string curveString(CURVES_STEPS);
+    return ParseCurves(ctx, value, argc, argv, curveString);
+}
+
+JSValue StepsCurve(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    std::string curveString(STEPS_CURVE);
     return ParseCurves(ctx, value, argc, argv, curveString);
 }
 
 void InitCurvesModule(JSContext* ctx, JSValue& moduleObj)
 {
     JS_SetPropertyStr(ctx, moduleObj, CURVES_INIT, JS_NewCFunction(ctx, CurvesInit, CURVES_INIT, 1));
+    JS_SetPropertyStr(ctx, moduleObj, INIT_CURVE, JS_NewCFunction(ctx, InitCurve, INIT_CURVE, 1));
     JS_SetPropertyStr(ctx, moduleObj, CURVES_CUBIC_BEZIER, JS_NewCFunction(ctx, CurvesBezier, CURVES_CUBIC_BEZIER, 4));
+    JS_SetPropertyStr(ctx, moduleObj, CUBIC_BEZIER_CURVE, JS_NewCFunction(ctx, BezierCurve, CUBIC_BEZIER_CURVE, 4));
     JS_SetPropertyStr(ctx, moduleObj, CURVES_SPRING, JS_NewCFunction(ctx, CurvesSpring, CURVES_SPRING, 4));
+    JS_SetPropertyStr(ctx, moduleObj, SPRING_CURVE, JS_NewCFunction(ctx, SpringCurve, SPRING_CURVE, 4));
     JS_SetPropertyStr(ctx, moduleObj, CURVES_STEPS, JS_NewCFunction(ctx, CurvesSteps, CURVES_STEPS, 2));
+    JS_SetPropertyStr(ctx, moduleObj, STEPS_CURVE, JS_NewCFunction(ctx, StepsCurve, STEPS_CURVE, 2));
 }
 } // namespace OHOS::Ace::Framework

@@ -1394,13 +1394,6 @@ void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
 
         display->SetVisibleChangeEvent(eventMarker);
     }
-
-    auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-    if (!focusComponent) {
-        LOGE("The focusComponent is null");
-        return;
-    }
-    focusComponent->SetShow(VisibleType(info[0]->ToNumber<int32_t>()) == VisibleType::VISIBLE);
 }
 
 void JSViewAbstract::JsFlexBasis(const JSCallbackInfo& info)
@@ -2660,42 +2653,12 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
 
 bool JSViewAbstract::ParseJsInteger(const JSRef<JSVal>& jsValue, uint32_t& result)
 {
-    if (!jsValue->IsNumber() && !jsValue->IsObject()) {
-        LOGE("arg is not number or Object.");
-        return false;
-    }
+    return ParseJsInteger<uint32_t>(jsValue, result);
+}
 
-    if (jsValue->IsNumber()) {
-        LOGD("jsValue->IsNumber()");
-        result = jsValue->ToNumber<uint32_t>();
-        return true;
-    }
-
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    JSRef<JSVal> type = jsObj->GetProperty("type");
-    if (!type->IsNumber()) {
-        LOGW("type is not number");
-        return false;
-    }
-
-    JSRef<JSVal> resId = jsObj->GetProperty("id");
-    if (!resId->IsNumber()) {
-        LOGW("resId is not number");
-        return false;
-    }
-
-    auto themeConstants = GetThemeConstants();
-    if (!themeConstants) {
-        LOGW("themeConstants is nullptr");
-        return false;
-    }
-
-    if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        result = static_cast<uint32_t>(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
-        return true;
-    } else {
-        return false;
-    }
+bool JSViewAbstract::ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result)
+{
+    return ParseJsInteger<int32_t>(jsValue, result);
 }
 
 bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result)

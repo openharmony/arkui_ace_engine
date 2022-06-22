@@ -22,11 +22,13 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_page.h"
 #include "core/common/platform_window.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace {
 
 class ACE_EXPORT Window {
 public:
+    Window() = default;
     explicit Window(std::unique_ptr<PlatformWindow> platformWindow);
     virtual ~Window() = default;
 
@@ -39,6 +41,12 @@ public:
     }
 
     virtual void SetRootRenderNode(const RefPtr<RenderNode>& root);
+
+    virtual void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) {}
+
+    virtual void RecordFrameTime(uint64_t timeStamp, const std::string name) {}
+
+    virtual void FlushTasks() {}
 
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
 
@@ -62,11 +70,13 @@ public:
         return !onShow_;
     }
 
-private:
-    std::unique_ptr<PlatformWindow> platformWindow_;
-    std::list<AceVsyncCallback> callbacks_;
+protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
+    std::list<AceVsyncCallback> callbacks_;
+
+private:
+    std::unique_ptr<PlatformWindow> platformWindow_;
 
     ACE_DISALLOW_COPY_AND_MOVE(Window);
 };

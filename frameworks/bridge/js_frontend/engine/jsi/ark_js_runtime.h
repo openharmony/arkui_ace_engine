@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
 
+#include <unordered_map>
 #include <memory>
 
 #include "ecmascript/napi/include/jsnapi.h"
@@ -86,6 +87,41 @@ public:
         return vm_;
     }
 
+    void SetPreviewFlag(bool flag)
+    {
+        isComponentPreview_ = flag;
+    }
+
+    bool GetPreviewFlag() const
+    {
+        return isComponentPreview_;
+    }
+
+    std::string GetRequiredComponent() const
+    {
+        return requiredComponent_;
+    }
+
+    void SetRequiredComponent(const std::string &componentName)
+    {
+        requiredComponent_ = componentName;
+    }
+
+    void AddPreviewComponent(const std::string &componentName, const panda::Global<panda::ObjectRef> &componentObj)
+    {
+        previewComponents_.insert_or_assign(componentName, componentObj);
+    }
+
+    panda::Global<panda::ObjectRef> GetPreviewComponent(EcmaVM* vm, const std::string &componentName)
+    {
+        auto iter = previewComponents_.find(componentName);
+        if (iter != previewComponents_.end()) {
+            return iter->second;
+        }
+        panda::Global<panda::ObjectRef> undefined(vm, panda::JSValueRef::Undefined(vm));
+        return undefined;
+    }
+
 private:
     EcmaVM* vm_ = nullptr;
     int32_t instanceId_ = 0;
@@ -95,6 +131,9 @@ private:
     std::string libPath_ {};
     bool usingExistVM_ = false;
     bool isDebugMode_ = true;
+    bool isComponentPreview_ = false;
+    std::string requiredComponent_ {};
+    std::unordered_map<std::string, panda::Global<panda::ObjectRef>> previewComponents_;
 };
 
 class PandaFunctionData {

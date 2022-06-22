@@ -219,7 +219,7 @@ public:
     void RemoveScheduleTask(uint32_t id);
 
     // Called by view when touch event received.
-    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false);
+    virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false);
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
@@ -1300,8 +1300,10 @@ protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     virtual void SetRootRect(double width, double height, double offset = 0.0);
     virtual void FlushPipelineWithoutAnimation();
-    void FlushMessages();
+    virtual void FlushMessages();
+    void FlushAnimation(uint64_t nanoTimestamp);
 
+    RefPtr<EventManager> eventManager_;
     std::unique_ptr<Window> window_;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     RefPtr<ThemeManager> themeManager_;
@@ -1316,7 +1318,6 @@ private:
     void FlushRenderFinish();
     void FireVisibleChangeEvent();
     void FlushPredictLayout(int64_t deadline);
-    void FlushAnimation(uint64_t nanoTimestamp);
     void FlushPostAnimation();
     void FlushPageUpdateTasks();
     void ProcessPreFlush();
@@ -1417,7 +1418,6 @@ private:
 #endif
     RefPtr<SharedTransitionController> sharedTransitionController_;
     RefPtr<CardTransitionController> cardTransitionController_;
-    RefPtr<EventManager> eventManager_;
     RefPtr<TextOverlayManager> textOverlayManager_;
     EventTrigger eventTrigger_;
     FinishEventHandler finishEventHandler_;
