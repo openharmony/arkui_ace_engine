@@ -252,10 +252,11 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         controller_->RemoveObserver(WeakClaim(this));
         controller_->AddObserver(WeakClaim(this));
         controller_->SetHint(placeholder_);
-        if (textField->IsValueUpdated() && textField->GetValue() != GetEditingValue().text) {
-            auto newValue = std::make_shared<TextEditingValue>();
-            newValue->text = textField->GetValue();
-            UpdateEditingValue(newValue);
+        if (textField->IsValueUpdated()) {
+            if (textField->GetValue() != GetEditingValue().text) {
+                PopTextOverlay();
+            }
+            controller_->SetText(textField->GetValue(), false);
         }
     }
     ApplyRestoreInfo();
