@@ -114,6 +114,7 @@ void RenderList::Update(const RefPtr<Component>& component)
     if (startIndex_ == INITIAL_CHILD_INDEX) {
         initialIndex_ = static_cast<size_t>(component_->GetInitialIndex());
         startIndex_ = initialIndex_ > 0 ? initialIndex_ : 0;
+        useEstimateCurrentOffset_ = true;
     }
     ApplyRestoreInfo();
 
@@ -427,6 +428,7 @@ void RenderList::CalculateLanes()
         lanes_ = lanes;
         currentOffset_ = 0.0;
         startIndex_ = 0;
+        startIndexOffset_ = 0.0;
     }
 }
 
@@ -525,6 +527,7 @@ void RenderList::RequestNewItemsAtStartForLaneList(const LayoutParam& innerLayou
         bool multiLaneStartSupplyLine = breakWhenRequestNewItem && (newItemCntInLine >= 1);
         if (singleLaneDoneAddItem || multiLaneDoneSupplyOneLine || multiLaneStartSupplyLine) {
             currentOffset_ -= lineMainSize + spaceWidth_;
+            startIndexOffset_ -= lineMainSize + spaceWidth_;
             newItemCntInLine = 0;
             lineMainSize = 0;
         }
@@ -557,6 +560,7 @@ void RenderList::RequestNewItemsAtStart(const LayoutParam& innerLayout)
             ++startCachedCount_;
         }
         currentOffset_ -= GetMainSize(child->GetLayoutSize()) + spaceWidth_;
+        startIndexOffset_ -= GetMainSize(child->GetLayoutSize()) + spaceWidth_;
     }
 }
 
@@ -1087,7 +1091,7 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
     if (source == SCROLL_FROM_UPDATE) {
         ResumeEventCallback(component_, &ListComponent::GetOnScroll, Dimension(offset_ / dipScale_, DimensionUnit::VP),
             ScrollState(SCROLL_STATE_SCROLL));
-    } else if (source == SCROLL_FROM_ANIMATION) {
+    } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
         ResumeEventCallback(component_, &ListComponent::GetOnScroll, Dimension(offset_ / dipScale_, DimensionUnit::VP),
             ScrollState(SCROLL_STATE_FLING));
     }
@@ -1166,6 +1170,7 @@ double RenderList::ApplyLayoutParam()
             // Clear all child items
             RemoveAllItems();
             startIndex_ = 0;
+            startIndexOffset_ = 0.0;
             currentOffset_ = 0.0;
 
             startMainPos_ = 0.0;
@@ -1256,6 +1261,7 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(const LayoutParam& lay
             // 2. recycle items and erase them from [items_]
             case ItemPositionState::AHEAD_OF_VIEWPORT: {
                 startIndex_ = curIndex + 1;
+                startIndexOffset_ += curMainPos - currentOffset_;
                 currentOffset_ = curMainPos;
                 RECYCLE_AND_ERASE_ITEMS_OUT_OF_VIEWPORT();
                 break;
@@ -1337,6 +1343,7 @@ double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, d
                 const auto& child = *(it);
                 double childSize = GetMainSize(child->GetLayoutSize());
                 curMainPosForRecycle += childSize + spaceWidth_;
+                startIndexOffset_ += curMainPosForRecycle - currentOffset_;
                 currentOffset_ = curMainPosForRecycle;
                 startIndex_ = curIndex + 1;
 
@@ -1361,6 +1368,7 @@ double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, d
                     ++it;
                     continue;
                 }
+                startIndexOffset_ += curMainPos - currentOffset_;
                 currentOffset_ = curMainPos;
                 startIndex_ = curIndex + 1;
             }
@@ -1467,6 +1475,7 @@ void RenderList::OnItemDelete(const RefPtr<RenderListItem>& item)
 
     if (index < startIndex_) {
         --startIndex_;
+        useEstimateCurrentOffset_ = true;
     }
 }
 
@@ -1527,6 +1536,7 @@ void RenderList::JumpToIndex(int32_t idx, int32_t source)
 {
     RemoveAllItems();
     startIndex_ = static_cast<size_t>(idx);
+    useEstimateCurrentOffset_ = true;
     currentOffset_ = 0.0;
     MarkNeedLayout(true);
 }
@@ -1561,6 +1571,17 @@ void RenderList::AnimateTo(const Dimension& position, float duration, const RefP
     animator_->SetDuration(std::min(duration, SCROLL_MAX_TIME));
     animator_->ClearStopListeners();
     animator_->Play();
+}
+
+Offset RenderList::CurrentOffset()
+{
+    double currentOffset = startIndexOffset_ - currentOffset_;
+    auto ctx = GetContext().Upgrade();
+    if (!ctx) {
+        return vertical_ ? Offset(0.0, currentOffset) : Offset(currentOffset, 0.0);
+    }
+    auto mainOffset = ctx->ConvertPxToVp(Dimension(currentOffset, DimensionUnit::PX));
+    return vertical_ ? Offset(0.0, mainOffset) : Offset(mainOffset, 0.0);
 }
 
 void RenderList::AdjustOffset(Offset& delta, int32_t source)
@@ -1681,6 +1702,12 @@ void RenderList::CalculateMainScrollExtent(double curMainPos, double mainSize)
     auto averageItemHeight = GetMainSize(itemSize) / GetChildren().size() + spaceWidth_;
     estimatedHeight_ = averageItemHeight * TotalCount();
     lastOffset_ = startIndex_ * averageItemHeight - currentOffset_;
+    if (startIndex_ == 0) {
+        startIndexOffset_ = 0.0;
+    } else if (useEstimateCurrentOffset_) {
+        useEstimateCurrentOffset_ = false;
+        startIndexOffset_ = startIndex_ * averageItemHeight;
+    }
     if (estimatedHeight_ <= GetMainSize(GetLayoutSize()) && scrollBar_) {
         LOGD("SetScrollable false, do not show scroll bar.");
         scrollBar_->SetScrollable(false);

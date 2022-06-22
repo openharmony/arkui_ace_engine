@@ -189,6 +189,8 @@ public:
         return vertical_ ? Offset(0.0, lastOffset_) : Offset(lastOffset_, 0.0);
     }
 
+    Offset CurrentOffset();
+
     Dimension GetListSpace() const
     {
         return listSpace_;
@@ -345,11 +347,13 @@ protected:
 
     double spaceWidth_ = 0.0;
     double lastOffset_ = 0.0;
+    double startIndexOffset_ = 0.0;
     double startMainPos_ = 0.0;
     double endMainPos_ = 0.0;
     double currentOffset_ = 0.0;
     double mainScrollExtent_ = 0.0;
 
+    bool useEstimateCurrentOffset_ = false;
     bool reachStart_ = false;
     bool reachEnd_ = false;
     bool isOutOfBoundary_ = false;
