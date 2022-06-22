@@ -61,7 +61,7 @@ void RosenRenderSvgRect::PaintDirectly(RenderContext& context, const Offset& off
         return;
     }
 
-    SkAutoCanvasRestore save(canvas, false);
+    SkAutoCanvasRestore save(canvas, true);
     if (NeedTransform()) {
         canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
     }

@@ -52,7 +52,7 @@ void RosenRenderSvgUse::PaintDirectly(RenderContext& context, const Offset& offs
         return;
     }
 
-    SkAutoCanvasRestore save(skCanvas, false);
+    SkAutoCanvasRestore save(skCanvas, true);
     bool translateXY = GreatNotEqual(x_.Value(), 0.0) || GreatNotEqual(y_.Value(), 0.0);
     if (translateXY) {
         skCanvas->translate(
