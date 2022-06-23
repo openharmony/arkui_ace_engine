@@ -1609,6 +1609,10 @@ void RenderSwiper::SetSwiperEffect(double dragOffset)
 
 void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool inLayout)
 {
+    if (itemCount_ <= 0) {
+        LOGW("No child in swiper. return.");
+        return;
+    }
     if (std::abs(currentIndex_ - fromIndex) == 1) {
         scrollOffset_ = offset + (currentIndex_ - fromIndex) * nextItemOffset_;
     } else { // for loop reversal
