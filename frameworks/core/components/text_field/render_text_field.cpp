@@ -253,6 +253,9 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         controller_->AddObserver(WeakClaim(this));
         controller_->SetHint(placeholder_);
         if (textField->IsValueUpdated()) {
+            if (textField->GetValue() != GetEditingValue().text) {
+                PopTextOverlay();
+            }
             controller_->SetText(textField->GetValue(), false);
         }
     }

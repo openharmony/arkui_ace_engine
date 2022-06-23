@@ -155,12 +155,12 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
     if (state_ != DetectState::DETECTED) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        state_ = DetectState::READY;
         return;
     }
 
     SendCallbackMsg(onActionEnd_, false);
     Reset();
-    pendingEnd_ = true; // TODO: Need confirm
 }
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
@@ -217,8 +217,20 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         return;
     }
 
-    delta_ = Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE,
-        -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+    if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
+        // PanRecognizer Direction: Vertical
+        delta_ = Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE,
+            -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+    } else if ((direction_.type & PanDirection::VERTICAL) == 0) {
+        // PanRecognizer Direction: Horizontal
+        if (NearZero(event.horizontalAxis)) {
+            delta_ = Offset(-event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE, 0);
+        } else {
+            delta_ = Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE,
+                -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
+        }
+    }
+
     mainDelta_ = GetMainAxisDelta();
     averageDistance_ += delta_;
     lastAxisEvent_ = event;
