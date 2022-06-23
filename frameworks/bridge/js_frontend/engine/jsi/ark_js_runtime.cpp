@@ -87,7 +87,9 @@ void ArkJSRuntime::Reset()
         delete data;
     }
     dataList_.clear();
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     previewComponents_.clear();
+#endif
 }
 
 void ArkJSRuntime::SetLogPrint(LOG_PRINT out)
