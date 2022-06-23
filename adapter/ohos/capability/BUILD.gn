@@ -29,12 +29,12 @@ template("ace_capability_ohos_source_set") {
       "distributed/storage/distributed_storage.cpp",
       "preference/storage_impl.cpp",
     ]
-    include_dirs = [ "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/preferences/include/" ]
+    include_dirs = [ "//foundation/distributeddatamgr/appdatamgr/preference/interfaces/inner_api/include/" ]
     external_deps = [
       "ability_base:want",
       "distributeddataobject:distributeddataobject_impl",
       "ipc:ipc_core",
-      "preferences:native_preferences",
+      "preference:native_preference",
     ]
     if (defined(config.enable_system_clipboard) &&
         config.enable_system_clipboard) {
