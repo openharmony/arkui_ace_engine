@@ -24,6 +24,8 @@
 namespace OHOS::Ace {
 namespace {
 
+constexpr int32_t OVERFLOW_PLATFORM_VERSION = 7;
+
 inline bool ShouldPaint(const RefPtr<RenderNode>& node)
 {
     return node != nullptr && node->GetVisible() && !node->GetHidden();
@@ -61,8 +63,13 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
         return;
     }
     auto pipelineContext = child->GetContext().Upgrade();
+    if (!pipelineContext) {
+        LOGE("pipelineContext is null.");
+        return;
+    }
+    bool canChildOverflow = pipelineContext->GetMinPlatformVersion() >= OVERFLOW_PLATFORM_VERSION;
     Rect rect = child->GetTransitionPaintRect() + offset;
-    if (!child->IsPaintOutOfParent() && !estimatedRect_.IsIntersectWith(rect)) {
+    if (!(child->IsPaintOutOfParent() || canChildOverflow) && !estimatedRect_.IsIntersectWith(rect)) {
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
         child->ClearAccessibilityRect();
 #endif
@@ -76,7 +83,6 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
         if (name != "RosenRenderForm" && name != "RosenRenderPlugin") {
             if (child->NeedRender()) {
                 RosenRenderContext context;
-                auto pipelineContext = child->GetContext().Upgrade();
                 auto transparentHole = pipelineContext->GetTransparentHole();
                 if (transparentHole.IsValid() && child->GetNeedClip()) {
                     Offset childOffset = rect.GetOffset();
@@ -97,9 +103,6 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
             }
             auto pluginContext = renderPlugin->GetSubPipelineContext();
             if (!pluginContext) {
-                return;
-            }
-            if (!pipelineContext) {
                 return;
             }
             auto density = pipelineContext->GetDensity();
