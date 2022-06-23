@@ -46,6 +46,11 @@ public:
 
     void UpdateTouchRect() override;
 
+    bool IsUseOnly() override
+    {
+        return true;
+    }
+
     void PerformLayout() override;
 
     void OnPaintFinish() override;
