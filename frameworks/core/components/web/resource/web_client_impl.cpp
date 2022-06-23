@@ -21,14 +21,16 @@
 namespace OHOS::Ace {
 
 bool OnJsCommonDialog(
+    const WebClientImpl* webClientImpl,
+    DialogEventType dialogEventType,
+    std::shared_ptr<NWeb::NWebJSDialogResult> result,
     const std::string &url,
     const std::string &message,
-    std::shared_ptr<NWeb::NWebJSDialogResult> result,
-    DialogEventType dialogEventType,
-    const WebClientImpl* webClientImpl)
+    const std::string &value = "")
 {
     bool jsResult = false;
-    auto param = std::make_shared<WebDialogEvent>(url, message, AceType::MakeRefPtr<ResultOhos>(result));
+    auto param = std::make_shared<WebDialogEvent>(url, message, value, dialogEventType,
+        AceType::MakeRefPtr<ResultOhos>(result));
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
         LOGW("can't get task executor");
@@ -223,7 +225,7 @@ bool WebClientImpl::OnAlertDialogByJS(
 {
     LOGI("OnAlertDialogByJS");
     ContainerScope scope(instanceId_);
-    return OnJsCommonDialog(url, message, result, DialogEventType::DIALOG_EVENT_ALERT, this);
+    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_ALERT, result, url, message);
 }
 
 bool WebClientImpl::OnBeforeUnloadByJS(
@@ -231,7 +233,7 @@ bool WebClientImpl::OnBeforeUnloadByJS(
 {
     LOGI("OnBeforeUnloadByJS");
     ContainerScope scope(instanceId_);
-    return OnJsCommonDialog(url, message, result, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD, this);
+    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD, result, url, message);
 }
 
 bool WebClientImpl::OnConfirmDialogByJS(
@@ -239,7 +241,15 @@ bool WebClientImpl::OnConfirmDialogByJS(
 {
     LOGI("OnConfirmDialogByJS");
     ContainerScope scope(instanceId_);
-    return OnJsCommonDialog(url, message, result, DialogEventType::DIALOG_EVENT_CONFIRM, this);
+    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_CONFIRM, result, url, message);
+}
+
+bool WebClientImpl::OnPromptDialogByJS(const std::string &url, const std::string &message,
+    const std::string &defaultValue, std::shared_ptr<NWeb::NWebJSDialogResult> result)
+{
+    LOGI("OnPromptDialogByJS: %{public}s", defaultValue.c_str());
+    ContainerScope scope(instanceId_);
+    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_PROMPT, result, url, message, defaultValue);
 }
 
 void WebClientImpl::OnRenderExited(OHOS::NWeb::RenderExitReason reason)
