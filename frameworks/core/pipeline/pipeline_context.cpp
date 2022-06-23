@@ -1335,6 +1335,22 @@ bool PipelineContext::CallRouterBackToPopPage()
     }
 }
 
+bool PipelineContext::PopPageStackOverlay()
+{
+    auto pageStack = GetLastStack();
+    if (!pageStack) {
+        LOGW("No page stack in page.");
+        return false;
+    }
+    if (!pageStack->HasOverlayChild()) {
+        LOGI("No overlay in page, try to pop page.");
+        return false;
+    }
+    LOGI("Pop page overlays");
+    pageStack->PopComponent();
+    return true;
+}
+
 void PipelineContext::NotifyAppStorage(const std::string& key, const std::string& value)
 {
     LOGD("NotifyAppStorage");

@@ -71,6 +71,7 @@ public:
     void PopVideo();
     void PopInstant();
     void PushInstant(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
+    bool HasOverlayChild();
     virtual bool isPageElement()
     {
         return false;
