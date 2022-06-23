@@ -93,7 +93,7 @@ private:
     bool isRoot_ = false;
 };
 
-class ACE_EXPORT JsonUtil final {
+class ACE_EXPORT_WITH_PREVIEW JsonUtil final {
 public:
     JsonUtil() = delete;
     ~JsonUtil() = delete;
