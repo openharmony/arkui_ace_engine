@@ -216,6 +216,7 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo *runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 panda::Local<panda::JSValueRef> JsPreviewerComponent(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
     LOGD("PreviewerComponent start");
@@ -281,6 +282,7 @@ panda::Local<panda::JSValueRef> JsStorePreviewComponents(panda::JsiRuntimeCallIn
 
     return panda::JSValueRef::Undefined(vm);
 }
+#endif
 
 panda::Local<panda::JSValueRef> JsDumpMemoryStats(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
@@ -1111,12 +1113,14 @@ void JsRegisterViews(BindingTarget globalObj)
     auto vm = runtime->GetEcmaVm();
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument));
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewComponent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsPreviewerComponent));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPreviewComponentFlag"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetPreviewComponentFlag));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "storePreviewComponents"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsStorePreviewComponents));
+#endif
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "dumpMemoryStats"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsDumpMemoryStats));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "$s"),
