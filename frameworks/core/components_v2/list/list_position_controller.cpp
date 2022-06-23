@@ -47,4 +47,13 @@ Axis ListPositionController::GetScrollDirection() const
     return list->GetDirection() ? Axis::VERTICAL : Axis::HORIZONTAL;
 }
 
+Offset ListPositionController::GetCurrentOffset() const
+{
+    auto list = AceType::DynamicCast<V2::RenderList>(scroll_.Upgrade());
+    if (!list) {
+        return Offset::Zero();
+    }
+    return list->CurrentOffset();
+}
+
 } // namespace OHOS::Ace::V2
