@@ -16,7 +16,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 ohos_shared_library("plugincomponent") {
   include_dirs = [
-    "$aafwk_services_path/common/include",
+    "$ability_runtime_services_path/common/include",
     "$ace_root",
     "$ace_root/frameworks",
     "$root_out_dir/arkui/framework",
@@ -34,7 +34,7 @@ ohos_shared_library("plugincomponent") {
   ]
 
   deps = [
-    "$aafwk_kits_path/ability/native:abilitykit_native",
+    "$ability_runtime_kits_path/ability/native:abilitykit_native",
     "$ace_root/build:libace",
     "$ace_root/build:libace_engine_declarative",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
