@@ -27,6 +27,7 @@
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/utils/SkParsePath.h"
 
+#include "base/geometry/offset.h"
 #include "core/common/frontend.h"
 #include "core/components/box/flutter_mask_painter.h"
 #include "core/components/common/painter/flutter_decoration_painter.h"
@@ -300,6 +301,9 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
         decorationPainter->SetRenderImage(renderImage_);
     }
 
+    static int32_t BORDER_COMPATIBLE_VERSION = 9;
+    bool paintBorderAfterChild = pipeline->GetMinPlatformVersion() >= BORDER_COMPATIBLE_VERSION;
+
     Color bgColor = pipeline->GetAppBgColor();
     if (backDecoration_) {
         flutter::Canvas* canvas = renderContext->GetCanvas();
@@ -315,7 +319,7 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
             SetWindowBlurStyle(backDecoration_->GetWindowBlurStyle());
             MarkNeedWindowBlur(true);
         }
-        decorationPainter->PaintDecoration(offset, canvas->canvas(), context, image_);
+        decorationPainter->PaintDecoration(offset, canvas->canvas(), context, image_, !paintBorderAfterChild);
         decorationPainter->PaintBlur(outerRRect, canvas->canvas(), backDecoration_->GetBlurRadius(), bgColor);
         auto context = context_.Upgrade();
         if (context->GetIsDeclarative()) {
@@ -334,6 +338,13 @@ void FlutterRenderBox::Paint(RenderContext& context, const Offset& offset)
         UpdateLayer();
     }
     RenderNode::Paint(context, offset);
+
+    // Paint border after children.
+    flutter::Canvas* canvas = renderContext->GetCanvas();
+    if (canvas != nullptr && paintBorderAfterChild) {
+        decorationPainter->PaintBorder(offset, canvas->canvas());
+    }
+
     if (frontDecoration_) {
         flutter::Canvas* canvas = renderContext->GetCanvas();
         if (canvas == nullptr) {
