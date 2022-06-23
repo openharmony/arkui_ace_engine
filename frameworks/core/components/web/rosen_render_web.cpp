@@ -70,7 +70,7 @@ void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
         LOGI("Web paint drawSize width = %{public}f, height = %{public}f", drawSize_.Width(), drawSize_.Height());
         delegate_->Resize(drawSize_.Width(), drawSize_.Height());
         if (!isUrlLoaded_) {
-            if (delegate_->LoadDataWithRichText() == false) {
+            if (!delegate_->LoadDataWithRichText()) {
                 delegate_->LoadUrl();
             }
             isUrlLoaded_ = true;

@@ -461,21 +461,26 @@ void WebDelegate::LoadDataWithBaseUrl(const std::string& baseUrl, const std::str
 
 bool WebDelegate::LoadDataWithRichText()
 {
-    if (webComponent_->GetData().empty()) {
-        return false;
-    }
     auto context = context_.Upgrade();
     if (!context) {
         return false;
     }
+
+    if (webComponent_ == nullptr) {
+        return false;
+    }
+    if (webComponent_->GetData().empty()) {
+        return false;
+    }
+    const std::string& data = webComponent_->GetData();
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this)]() {
+        [weak = WeakClaim(this), data]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
             if (delegate->nweb_) {
-                delegate->nweb_->LoadWithDataAndBaseUrl("", delegate->webComponent_->GetData(), "", "", "");
+                delegate->nweb_->LoadWithDataAndBaseUrl("", data, "", "", "");
             }
         },
         TaskExecutor::TaskType::PLATFORM);
