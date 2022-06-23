@@ -211,11 +211,17 @@ bool StageElement::CanReplacePage()
 
 void StageElement::Replace(const RefPtr<Component>& newComponent)
 {
+    Replace(newComponent, nullptr);
+}
+
+void StageElement::Replace(const RefPtr<Component>& newComponent, const std::function<void()>& listener)
+{
     if (!CanReplacePage()) {
         return;
     }
     operation_ = StackOperation::REPLACE;
     newComponent_ = newComponent;
+    AddListener(listener);
     MarkDirty();
 }
 
@@ -225,7 +231,7 @@ bool StageElement::ClearOffStage(const std::function<void()>& listener)
         return false;
     }
     operation_ = StackOperation::CLEAR;
-    AddListenerForClear(listener);
+    AddListener(listener);
     MarkDirty();
     return true;
 }
@@ -269,9 +275,9 @@ void StageElement::PerformBuild()
             break;
     }
     isWaitingForBuild_ = false;
-    if (operation_ == StackOperation::CLEAR && clearListener_) {
-        clearListener_();
-        clearListener_ = nullptr;
+    if (routerListener_ && (operation_ == StackOperation::REPLACE || operation_ == StackOperation::CLEAR)) {
+        routerListener_();
+        routerListener_ = nullptr;
     }
 }
 

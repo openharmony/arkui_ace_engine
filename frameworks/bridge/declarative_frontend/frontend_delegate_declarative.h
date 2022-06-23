@@ -45,7 +45,7 @@ enum class RouterAction {
 
 struct RouterTask {
     RouterAction action = RouterAction::PUSH;
-    std::string url;
+    PageTarget target = PageTarget("");
     std::string params;
 };
 
@@ -309,7 +309,10 @@ private:
     void ResetStagingPage();
     void FlushAnimationTasks();
 
-    void BackCheckAlert(const std::string& uri, const std::string& params);
+    void StartPush(const PageTarget& target, const std::string& params);
+    void StartReplace(const PageTarget& target, const std::string& params);
+    void StartBack(const PageTarget& target, const std::string& params);
+    void BackCheckAlert(const PageTarget& target, const std::string& params);
     void ProcessRouterTask();
     void AddRouterTask(const RouterTask& task);
 
@@ -319,7 +322,7 @@ private:
     bool isRouteStackFull_ = false;
     bool isStagingPageExist_ = false;
     std::string mainPagePath_;
-    std::string backUri_;
+    PageTarget backUri_ = PageTarget("");
     std::string backParam_;
     std::vector<PageInfo> pageRouteStack_;
     std::unordered_map<int32_t, RefPtr<JsAcePage>> pageMap_;
