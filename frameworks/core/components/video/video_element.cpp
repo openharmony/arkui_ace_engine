@@ -1730,11 +1730,7 @@ void VideoElement::ExitFullScreen()
         if (!stackElement) {
             return;
         }
-        if (IsDeclarativePara()) {
-            stackElement->PopVideo();
-        } else {
-            stackElement->PopComponent();
-        }
+        stackElement->PopVideo();
         currentPlatformVersion_ = context->GetMinPlatformVersion();
         if (player_ && currentPlatformVersion_ > COMPATIBLE_VERSION) {
 #ifndef OHOS_STANDARD_SYSTEM
