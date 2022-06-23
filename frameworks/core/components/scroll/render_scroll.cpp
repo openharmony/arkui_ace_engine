@@ -89,7 +89,18 @@ bool RenderScroll::ValidateOffset(int32_t source)
                 currentOffset_.SetX(std::clamp(currentOffset_.GetX(), 0.0, mainScrollExtent_ - viewPort_.Width()));
             }
         } else {
+            // Refresh support spring when pulling up.
+#ifdef WEARABLE_PRODUCT
+            if (refreshParent_.Upgrade() &&
+                GetMainOffset(currentOffset_) >= (mainScrollExtent_ - GetMainSize(viewPort_)) && ReachMaxCount()) {
+                scrollBarOutBoundaryExtent_ = GetMainOffset(currentOffset_) -
+                    (mainScrollExtent_ - GetMainSize(viewPort_));
+            } else {
+                currentOffset_.SetY(std::clamp(currentOffset_.GetY(), 0.0, mainScrollExtent_ - viewPort_.Height()));
+            }
+#else
             currentOffset_.SetY(std::clamp(currentOffset_.GetY(), 0.0, mainScrollExtent_ - viewPort_.Height()));
+#endif
         }
     } else {
         if (IsRowReverse()) {
