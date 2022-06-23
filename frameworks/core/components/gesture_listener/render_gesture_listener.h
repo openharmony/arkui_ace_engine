@@ -35,6 +35,7 @@ public:
     void Update(const RefPtr<Component>& component) override;
 
     bool GetVisible() const override;
+    void UpdateTouchRect() override;
 
     void SetRemoteMessageCallback(const ClickCallback& callback);
     void SetOnClickCallback(const ClickCallback& callback);
