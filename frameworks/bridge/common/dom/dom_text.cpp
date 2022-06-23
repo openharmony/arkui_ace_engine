@@ -31,6 +31,11 @@ void DOMText::ResetInitializedStyle()
     if (declaration_) {
         declaration_->InitializeStyle();
     }
+    CheckAndSetAllSpanStyle();
+}
+
+void DOMText::CheckAndSetAllSpanStyle()
+{
     for (const auto& child : GetChildList()) {
         auto domSpan = AceType::DynamicCast<DOMSpan>(child);
         if (!domSpan) {
@@ -139,6 +144,7 @@ void DOMText::PrepareSpecializedComponent()
         }
     }
     textDeclaration->SetIsMaxWidthLayout(boxComponent_->GetWidthDimension().IsValid());
+    CheckAndSetAllSpanStyle();
     textChild_->SetDeclaration(textDeclaration);
 
     // set box align
