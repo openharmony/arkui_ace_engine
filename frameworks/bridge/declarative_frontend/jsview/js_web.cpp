@@ -635,7 +635,7 @@ JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
 
     obj->SetProperty("url", eventInfo.GetUrl());
     obj->SetProperty("message", eventInfo.GetMessage());
-    if (eventInfo.GetType() == DialogEventType::DIALOG_EVENT_CONFIRM) {
+    if (eventInfo.GetType() == DialogEventType::DIALOG_EVENT_PROMPT) {
         obj->SetProperty("value", eventInfo.GetValue());
     }
     obj->SetPropertyObject("result", resultObj);
