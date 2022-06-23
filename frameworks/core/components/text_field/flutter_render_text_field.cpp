@@ -1397,4 +1397,9 @@ void FlutterRenderTextField::PaintTextField(
     }
 }
 
+void FlutterRenderTextField::ResetStatus()
+{
+    template_.reset();
+}
+
 } // namespace OHOS::Ace

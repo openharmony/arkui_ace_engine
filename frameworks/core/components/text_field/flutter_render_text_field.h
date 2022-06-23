@@ -71,6 +71,7 @@ protected:
     DirectionStatus GetDirectionStatusOfPosition(int32_t position) const override;
     Offset GetHandleOffset(int32_t extend) override;
     Size ComputeDeflateSizeOfErrorAndCountText() const override;
+    void ResetStatus() override;
 
 private:
     std::unique_ptr<txt::ParagraphStyle> CreateParagraphStyle(bool isErrorText = false);

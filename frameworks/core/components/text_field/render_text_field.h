@@ -337,6 +337,7 @@ protected:
     virtual int32_t AdjustCursorAndSelection(int32_t currentCursorPosition) = 0;
     virtual DirectionStatus GetDirectionStatusOfPosition(int32_t position) const = 0;
     virtual Size ComputeDeflateSizeOfErrorAndCountText() const = 0;
+    virtual void ResetStatus() {};
 
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
