@@ -51,7 +51,6 @@
 
 #include "display_type.h"
 #include "surface.h"
-#include "window_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/video/rosen_render_texture.h"
@@ -70,8 +69,6 @@ const char* EXIT_FULLSCREEN_LABEL = "exitFullscreen";
 #ifdef OHOS_STANDARD_SYSTEM
 const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
-constexpr int32_t WINDOW_HEIGHT_DEFAULT = 1;
-constexpr int32_t WINDOW_WIDTH_DEFAULT = 1;
 constexpr int32_t FILE_PREFIX_LENGTH = 7;
 #endif
 constexpr float ILLEGAL_SPEED = 0.0f;
@@ -211,41 +208,6 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
-::OHOS::sptr<::OHOS::Subwindow> VideoElement::CreateSubwindow()
-{
-    const auto& wmi = ::OHOS::WindowManager::GetInstance();
-    if (wmi == nullptr) {
-        LOGE("Window manager get instance failed");
-        return nullptr;
-    }
-
-    auto context = context_.Upgrade();
-    if (context == nullptr) {
-        LOGE("context is nullptr");
-        return nullptr;
-    }
-
-    auto option = SubwindowOption::Get();
-    option->SetWidth(WINDOW_WIDTH_DEFAULT);
-    option->SetHeight(WINDOW_HEIGHT_DEFAULT);
-    option->SetX(0);
-    option->SetY(0);
-    option->SetWindowType(SUBWINDOW_TYPE_NORMAL);
-    auto window = wmi->GetWindowByID(context->GetWindowId());
-    if (window == nullptr) {
-        LOGE("window is nullptr");
-        return nullptr;
-    }
-
-    ::OHOS::sptr<::OHOS::Subwindow> ret = nullptr;
-    auto wret = wmi->CreateSubwindow(ret, window, option);
-    if (wret != WM_OK) {
-        LOGE("create subwindow failed, because %{public}s", WMErrorStr(wret).c_str());
-        return nullptr;
-    }
-    return ret;
-}
-
 void VideoElement::RegistMediaPlayerEvent()
 {
     auto context = context_.Upgrade();
@@ -287,13 +249,6 @@ void VideoElement::CreateMediaPlayer()
     if (mediaPlayer_ != nullptr) {
         return;
     }
-#ifndef ENABLE_ROSEN_BACKEND
-    subWindow_ = CreateSubwindow();
-    if (subWindow_ == nullptr) {
-        LOGE("Create subwindow failed");
-        return;
-    }
-#endif
 
     mediaPlayer_ = OHOS::Media::PlayerFactory::CreatePlayer();
     if (mediaPlayer_ == nullptr) {
@@ -382,8 +337,6 @@ void VideoElement::PreparePlayer()
             producerSurface = rosenTexture->GetSurface();
         }
     }
-#else
-    producerSurface = subWindow_->GetSurface();
 #endif
 
     if (producerSurface == nullptr) {
@@ -494,37 +447,7 @@ void VideoElement::Prepare(const WeakPtr<Element>& parent)
 
 void VideoElement::OnTextureSize(int64_t textureId, int32_t textureWidth, int32_t textureHeight)
 {
-#ifdef OHOS_STANDARD_SYSTEM
-
-#ifndef ENABLE_ROSEN_BACKEND
-    if (subWindow_ != nullptr) {
-        auto context = context_.Upgrade();
-        if (!context) {
-            LOGE("context is nullptr");
-            return;
-        }
-        int32_t height = textureHeight;
-        if (needControls_) {
-            height -= theme_->GetBtnSize().Height();
-            height -= theme_->GetBtnEdge().Top().Value();
-            height -= theme_->GetBtnEdge().Bottom().Value();
-        }
-        if (height <= 0) {
-            height = textureHeight;
-        }
-        float viewScale = context->GetViewScale();
-        subWindow_->Resize(textureWidth * viewScale, height * viewScale);
-        LOGI("SetSubWindowSize width: %{public}f, height: %{public}f", textureWidth * viewScale, height * viewScale);
-
-        if (renderNode_ != nullptr) {
-            Offset offset = renderNode_->GetGlobalOffset();
-            subWindow_->Move(offset.GetX() * viewScale, offset.GetY() * viewScale);
-            LOGI("SubWindow move X: %{public}f, Y: %{public}f", offset.GetX() * viewScale, offset.GetY() * viewScale);
-        }
-    }
-#endif
-
-#else
+#ifndef OHOS_STANDARD_SYSTEM
     if (texture_) {
         texture_->OnSize(textureId, textureWidth, textureHeight);
     }
