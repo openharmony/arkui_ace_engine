@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 #include <unordered_map>
+#endif
 #include <memory>
 
 #include "ecmascript/napi/include/jsnapi.h"
@@ -87,6 +89,7 @@ public:
         return vm_;
     }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     void SetPreviewFlag(bool flag)
     {
         isComponentPreview_ = flag;
@@ -121,6 +124,7 @@ public:
         panda::Global<panda::ObjectRef> undefined(vm, panda::JSValueRef::Undefined(vm));
         return undefined;
     }
+#endif
 
 private:
     EcmaVM* vm_ = nullptr;
@@ -131,9 +135,11 @@ private:
     std::string libPath_ {};
     bool usingExistVM_ = false;
     bool isDebugMode_ = true;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     bool isComponentPreview_ = false;
     std::string requiredComponent_ {};
     std::unordered_map<std::string, panda::Global<panda::ObjectRef>> previewComponents_;
+#endif
 };
 
 class PandaFunctionData {

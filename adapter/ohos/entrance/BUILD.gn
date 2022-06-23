@@ -63,12 +63,12 @@ template("ace_ohos_standard_source_set") {
       "${ability_runtime_napi_path}/featureAbility",
       "//foundation/arkui/napi/interfaces/kits",
       "//foundation/arkui/napi/native_engine",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/dataability/include",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/rdb/include",
+      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/dataability/include",
+      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/rdb/include",
       "//foundation/windowmanager/interfaces/innerkits",
       "//third_party/node/src",
       "//utils/native/base/include",
-      "//foundation/distributeddatamgr/appdatamgr/interfaces/inner_api/native/preferences/include/",
+      "//foundation/distributeddatamgr/appdatamgr/preference/interfaces/inner_api/include/",
     ]
 
     deps = [
@@ -96,13 +96,13 @@ template("ace_ohos_standard_source_set") {
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "data_share:datashare_abilitykit",
-      "dataability:native_dataability",
       "eventhandler:libeventhandler",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
       "ipc:ipc_core",
       "napi:ace_napi",
-      "preferences:native_preferences",
+      "preference:native_preference",
+      "relational_store:native_dataability",
       "relational_store:native_rdb",
     ]
   }

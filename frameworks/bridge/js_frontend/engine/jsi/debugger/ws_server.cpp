@@ -33,7 +33,6 @@ void WsServer::RunServer()
 {
     terminateExecution_ = false;
     try {
-        boost::asio::io_context ioContext;
         int appPid = getpid();
         tid_ = pthread_self();
         std::string pidStr = std::to_string(appPid);

@@ -74,9 +74,8 @@ void JSImageAnimator::SetImages(const JSCallbackInfo& info)
     JSRef<JSArray> imageArray = JSRef<JSArray>::Cast(info[0]);
     std::vector<ImageProperties> images;
     for (uint32_t i = 0; i < imageArray->Length(); ++i) {
-        auto imageArgs = JsonUtil::ParseJsonString(imageArray->GetValueAt(i)->ToString());
         ImageProperties imageProperties;
-        ParseImages(imageArgs, imageProperties);
+        ParseImages(imageArray->GetValueAt(i), imageProperties);
         images.push_back(imageProperties);
     }
 
@@ -235,22 +234,31 @@ EventMarker JSImageAnimator::GetEventMarker(const JSCallbackInfo& info)
     return eventMarker;
 }
 
-void JSImageAnimator::ParseImages(const std::unique_ptr<JsonValue>& image, ImageProperties& imageProperties)
+void JSImageAnimator::ParseImages(const JSRef<JSVal>& image, ImageProperties& imageProperties)
 {
-    imageProperties.src = image->GetString("src");
-    if (!ParseJsonDimensionVp(image->GetValue("width"), imageProperties.width)) {
+    if (!image->IsObject()) {
+        LOGE("image is not Object.");
+        return;
+    }
+    JSRef<JSObject> jsObjImage = JSRef<JSObject>::Cast(image);
+    if (!ParseJsMedia(jsObjImage->GetProperty("src"), imageProperties.src)) {
+        LOGE("parse image property src failed!");
+    }
+    if (!ParseJsDimensionVp(jsObjImage->GetProperty("width"), imageProperties.width)) {
         LOGW("parse image property width failed!");
     }
-    if (!ParseJsonDimensionVp(image->GetValue("height"), imageProperties.height)) {
+    if (!ParseJsDimensionVp(jsObjImage->GetProperty("height"), imageProperties.height)) {
         LOGW("parse image property height failed!");
     }
-    if (!ParseJsonDimensionVp(image->GetValue("top"), imageProperties.top)) {
+    if (!ParseJsDimensionVp(jsObjImage->GetProperty("top"), imageProperties.top)) {
         LOGW("parse image property top failed!");
     }
-    if (!ParseJsonDimensionVp(image->GetValue("left"), imageProperties.left)) {
+    if (!ParseJsDimensionVp(jsObjImage->GetProperty("left"), imageProperties.left)) {
         LOGW("parse image property left failed!");
     }
-    imageProperties.duration = image->GetInt("duration");
+    if (!ParseJsInt32(jsObjImage->GetProperty("duration"), imageProperties.duration)) {
+        LOGW("parse image property duration failed!");
+    }
 }
 
 } // namespace OHOS::Ace::Framework

@@ -53,9 +53,9 @@ private:
         RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc);
     static RefPtr<Component> ProcessTabBarTextIconPair(
         RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSVal> text, JSRef<JSVal> icon);
-    static RefPtr<TextComponent> CreateTabBarLabelComponent(
+    static RefPtr<Component> CreateTabBarLabelComponent(
         RefPtr<V2::TabContentItemComponent>& tabContent, const std::string& labelStr);
-    static RefPtr<TextComponent> ProcessTabBarLabel(
+    static RefPtr<Component> ProcessTabBarLabel(
         RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSVal> labelVal);
 };
 

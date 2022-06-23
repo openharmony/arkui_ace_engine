@@ -21,7 +21,6 @@
 #include "core/components/common/layout/constants.h"
 
 #include "recorder.h"
-#include "window_manager.h"
 #include "input/camera_manager.h"
 namespace OHOS::Ace {
 
@@ -127,7 +126,6 @@ private:
     int32_t recordFileId_ = -1;
     std::string recordPath_;
 
-    ::OHOS::sptr<::OHOS::Subwindow> subwindow_ = nullptr;
     WeakPtr<RenderNode> renderNode_;
     WeakPtr<PipelineContext> context_;
     sptr<Surface> captureSurface_;
@@ -207,7 +205,6 @@ private:
     RecordListener onRecordListener_;
 
     CameraCallback cameraCallback_;
-    std::unique_ptr<OHOS::Window> window_;
     sptr<OHOS::CameraStandard::CaptureInput> camInput_;
 };
 

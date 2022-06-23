@@ -390,7 +390,7 @@ void StackElement::PerformPopVideo()
 {
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
         auto element = DynamicCast<ComposedElement>(*iter);
-        if (element && element->GetName() == "fullscreen") {
+        if (element && StringUtils::EndWith(element->GetName(), "fullscreen")) {
             UpdateChild(*iter, nullptr);
             break;
         }

@@ -29,7 +29,6 @@
 
 #include "base/log/log.h"
 #include "display_type.h"
-#include "window_manager.h"
 
 #include "core/image/image_cache.h"
 
@@ -219,38 +218,6 @@ sptr<Surface> CameraCallback::createSubWindowSurface()
         LOGE("Camera:fail to get context to create Camera");
         return nullptr;
     }
-
-    if (subwindow_ == nullptr) {
-        const auto &wmi = ::OHOS::WindowManager::GetInstance();
-        if (wmi == nullptr) {
-            LOGE("Camera:fail to get window manager to create Camera");
-            return nullptr;
-        }
-
-        auto option = ::OHOS::SubwindowOption::Get();
-        option->SetWidth(windowSize_.Width());
-        option->SetHeight(windowSize_.Height());
-        option->SetX(windowOffset_.GetX());
-        option->SetY(windowOffset_.GetY());
-        option->SetWindowType(SUBWINDOW_TYPE_NORMAL);
-        auto window = wmi->GetWindowByID(context->GetWindowId());
-        if (window == nullptr) {
-            LOGE("Camera:fail to get window to create Camera");
-            return nullptr;
-        }
-
-        auto wret = ::OHOS::WindowManager::GetInstance()->CreateSubwindow(subwindow_, window, option);
-        if (wret != WM_OK) {
-            LOGE("Camera:create subwindow failed, because %{public}s", WMErrorStr(wret).c_str());
-            return nullptr;
-        }
-        subwindow_->GetSurface()->SetQueueSize(QUEUE_SIZE);
-        hasMarkWhole_ = false;
-        subwindow_->OnBeforeFrameSubmit([this]() {
-            OnFirstBufferAvailable();
-        });
-    }
-    previewSurface_ = subwindow_->GetSurface();
 #endif
 
     if (previewSurface_ == nullptr) {
@@ -302,10 +269,6 @@ void CameraCallback::SetLayoutOffset(double x, double y)
 {
     layoutOffset_.SetX(x);
     layoutOffset_.SetY(y);
-    if (hasMarkWhole_ && subwindow_) {
-        LOGI("CameraCallback:Hole change  %{public}lf  %{public}lf ", x, y);
-        MarkWhole();
-    }
 }
 
 int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> camManagerObj)
@@ -570,16 +533,6 @@ void CameraCallback::Release()
         capSession_ = nullptr;
     }
     PreviousReadyMode_ = ReadyMode::NONE;
-    if (subwindow_ != nullptr) {
-        LOGI("CameraCallback: Destroy subWindow.");
-        subwindow_ = nullptr;
-        auto context = context_.Upgrade();
-        context->SetClipHole(0, 0, 0, 0);
-        auto renderNode = renderNode_.Upgrade();
-        if (renderNode) {
-            renderNode->SetHasSubWindow(false);
-        }
-    }
     LOGI("CameraCallback: Release end.");
 }
 
@@ -663,15 +616,8 @@ void CameraCallback::OnCameraSizeChange(double width, double height)
 
 void CameraCallback::OnCameraOffsetChange(double x, double y)
 {
-    std::vector<struct ::OHOS::WMDisplayInfo> displays;
-    ::OHOS::WindowManager::GetInstance()->GetDisplays(displays);
-    if (displays.size() <= 0) {
-        LOGE("WindowManager::GetDisplays return no screen.");
-        return;
-    }
-
-    auto maxWidth = displays[0].width;
-    auto maxHeight = displays[0].height;
+    auto maxWidth = 0;
+    auto maxHeight = 0;
     bool isIllegalOffset = (int32_t)x + (int32_t)windowSize_.Width() > maxWidth
                     || (int32_t)y + (int32_t)windowSize_.Height() > maxHeight;
     if (isIllegalOffset) {
@@ -686,15 +632,6 @@ void CameraCallback::OnCameraOffsetChange(double x, double y)
     if (!offsetInitSucceeded_) {
         offsetInitSucceeded_ = true;
         PrepareCamera(false);
-    }
-
-    if (subwindow_) {
-        LOGI("CameraCallback: subwindow move: %{public}d  %{public}d.",
-            (int32_t)windowOffset_.GetX(), (int32_t)windowOffset_.GetY());
-        WMError moveRet = subwindow_->Move((int32_t)windowOffset_.GetX(), (int32_t)windowOffset_.GetY());
-        if (moveRet != WM_OK) {
-            LOGE("CameraCallback: subwindow move failed.");
-        }
     }
 }
 
