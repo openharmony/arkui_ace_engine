@@ -558,6 +558,7 @@ void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
     backDecoration_->SetColorBlend(newDecoration->GetColorBlend());
     backDecoration_->SetSepia(newDecoration->GetSepia());
     backDecoration_->SetBackgroundColor(newDecoration->GetBackgroundColor());
+    backDecoration_->SetBlurStyle(newDecoration->GetBlurStyle());
 }
 
 void RenderBox::UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration)
