@@ -1049,7 +1049,10 @@ void RosenRenderBox::SyncDecorationToRSNode()
             );
         }
         RosenDecorationPainter::PaintBoxShadows(backDecoration_->GetShadows(), rsNode);
-        if (backDecoration_->GetBlurRadius().IsValid()) {
+        if (backDecoration_->GetBlurStyle() != BlurStyle::NoMaterial) {
+            backFilter = Rosen::RSFilter::CreateMaterialFilter(
+                static_cast<int>(backDecoration_->GetBlurStyle()), dipScale_);
+        } else if (backDecoration_->GetBlurRadius().IsValid()) {
             float radius = backDecoration_->GetBlurRadius().ConvertToPx(dipScale_);
             float backblurRadius = RosenDecorationPainter::ConvertRadiusToSigma(radius);
             backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);

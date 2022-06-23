@@ -1642,6 +1642,22 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     decoration->SetImage(image);
 }
 
+void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
+    if (!CheckJSCallbackInfo("JsBackgroundBlurStyle", info, checkList)) {
+        return;
+    }
+    auto decoration = GetBackDecoration();
+    if (!decoration) {
+        LOGE("The decoration is nullptr.");
+        return;
+    }
+    if (info[0]->IsNumber()) {
+        decoration->SetBlurStyle(static_cast<BlurStyle>(info[0]->ToNumber<int32_t>()));
+    }
+}
+
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
@@ -3954,6 +3970,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("backgroundImage", &JSViewAbstract::JsBackgroundImage);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);
+    JSClass<JSViewAbstract>::StaticMethod("backgroundBlurStyle", &JSViewAbstract::JsBackgroundBlurStyle);
     JSClass<JSViewAbstract>::StaticMethod("border", &JSViewAbstract::JsBorder);
     JSClass<JSViewAbstract>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
     JSClass<JSViewAbstract>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
