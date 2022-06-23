@@ -64,6 +64,7 @@ private:
     bool LoadLibrary();
     void CloseLibrary();
     void *LoadSymbol(const char *symName);
+    int GetFrameReportEnable();
     void *frameSchedHandle_ = nullptr;
     bool frameSchedSoLoaded_ = false;
 
