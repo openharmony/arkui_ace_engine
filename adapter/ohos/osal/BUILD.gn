@@ -53,8 +53,7 @@ template("ace_osal_ohos_source_set") {
       "trace_id_impl.cpp",
     ]
 
-    public_deps =
-        [ "//base/startup/init_lite/interfaces/innerkits:libbegetutil" ]
+    public_deps = [ "//base/startup/init/interfaces/innerkits:libbegetutil" ]
 
     if (is_standard_system) {
       sources += [
