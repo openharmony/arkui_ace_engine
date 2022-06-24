@@ -2077,13 +2077,14 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decorati
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
-    if (!decoration) {
-        decoration = GetBackDecoration();
+    RefPtr<Decoration> tarDecoration = decoration;
+    if (!tarDecoration) {
+        tarDecoration = GetBackDecoration();
     }
-    Dimension radiusTopLeft = BoxComponentHelper::GetBorderRadiusTopLeft(decoration).GetX();
-    Dimension radiusTopRight = BoxComponentHelper::GetBorderRadiusTopRight(decoration).GetX();
-    Dimension radiusBottomLeft = BoxComponentHelper::GetBorderRadiusBottomLeft(decoration).GetX();
-    Dimension radiusBottomRight = BoxComponentHelper::GetBorderRadiusBottomRight(decoration).GetX();
+    Dimension radiusTopLeft = BoxComponentHelper::GetBorderRadiusTopLeft(tarDecoration).GetX();
+    Dimension radiusTopRight = BoxComponentHelper::GetBorderRadiusTopRight(tarDecoration).GetX();
+    Dimension radiusBottomLeft = BoxComponentHelper::GetBorderRadiusBottomLeft(tarDecoration).GetX();
+    Dimension radiusBottomRight = BoxComponentHelper::GetBorderRadiusBottomRight(tarDecoration).GetX();
     Dimension borderRadius;
     if (ParseJsDimensionVp(args, borderRadius)) {
         radiusTopLeft = borderRadius;
@@ -2116,8 +2117,12 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decorati
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
+        if (decoration) {
+            BoxComponentHelper::SetBorderRadius(
+                tarDecoration, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight, option);
+        }
         BoxComponentHelper::SetBorderRadius(
-            decoration, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight, option);
+            GetBackDecoration(), radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight, option);
     } else {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
         if (!boxComponent) {
@@ -3631,7 +3636,7 @@ void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
             ACE_SCORING_EVENT("onFocus");
             func->Execute();
         };
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
         if (focusableComponent) {
             focusableComponent->SetOnFocus(onFocus);
         }
@@ -3647,7 +3652,7 @@ void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args)
             ACE_SCORING_EVENT("onBlur");
             func->Execute();
         };
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
         if (focusableComponent) {
             focusableComponent->SetOnBlur(onBlur_);
         }
@@ -3773,6 +3778,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
             }
             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                 auto showMenu = refPtr->GetTargetCallback();
+                info.SetStopPropagation(true);
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
                 showMenu("", info.GetScreenLocation());
 #else

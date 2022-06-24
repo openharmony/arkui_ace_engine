@@ -122,6 +122,7 @@ public:
     void StartTwinkling();
     void StopTwinkling();
     void EditingValueFilter(TextEditingValue& result);
+    void PopTextOverlay();
 
     void SetInputFilter(const std::string& inputFilter)
     {
@@ -320,6 +321,8 @@ public:
 
     int32_t instanceId_ = -1;
 
+    bool hasFocus_ = false;
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -353,6 +356,8 @@ protected:
     void OnDoubleClick(const ClickInfo& clickInfo);
     void OnLongPress(const LongPressInfo& longPressInfo);
     bool HandleMouseEvent(const MouseEvent& event) override;
+    void AnimateMouseHoverEnter() override;
+    void AnimateMouseHoverExit() override;
 
     void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
     std::u16string GetTextForDisplay(const std::string& text) const;
@@ -513,6 +518,7 @@ protected:
 private:
     void SetCallback(const RefPtr<TextFieldComponent>& textField);
     void StartPressAnimation(bool isPressDown);
+    void StartHoverAnimation(bool isHovered);
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
     void CursorMoveOnClick(const Offset& offset);
@@ -551,7 +557,6 @@ private:
     void OnOverlayFocusChange(bool isFocus, bool needCloseKeyboard);
     void FireSelectChangeIfNeeded(const TextEditingValue& newValue, bool needFireSelectChangeEvent) const;
     int32_t GetInstanceId() const;
-    void PopTextOverlay();
     void ApplyAspectRatio(); // If aspect ratio is setted, height will follow box parent.
 
     /**
@@ -567,12 +572,12 @@ private:
     bool isOverlayFocus_ = false;
     bool isShiftDown_ = false;
     bool isCtrlDown_ = false;
-    bool hasFocus_ = false;
     double fontScale_ = 1.0;
     bool isSingleHandle_ = false;
     bool hasTextOverlayPushed_ = false;
     bool softKeyboardEnabled_ = true;
     Color pressColor_;
+    Color hoverColor_;
     TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     std::function<void()> onValueChange_;
@@ -620,6 +625,7 @@ private:
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<Animator> pressController_;
+    RefPtr<Animator> hoverController_;
     RefPtr<Animator> animator_;
     std::vector<TextEditingValue> operationRecords_;
     std::vector<TextEditingValue> inverseOperationRecords_;

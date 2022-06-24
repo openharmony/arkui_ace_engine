@@ -159,6 +159,7 @@ bool EventManager::DispatchMouseEvent(const MouseEvent& event)
             auto hoverNode = wp.Upgrade();
             if (hoverNode) {
                 if (hoverNode->HandleMouseEvent(event)) {
+                    LOGI("Do HandleMouseEvent. Dispatch node: %{public}s", AceType::TypeName(hoverNode));
                     break;
                 }
             }
