@@ -459,12 +459,20 @@ void WebDelegate::LoadDataWithBaseUrl(const std::string& baseUrl, const std::str
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void WebDelegate::LoadDataWithRichText(const std::string& data)
+bool WebDelegate::LoadDataWithRichText()
 {
     auto context = context_.Upgrade();
     if (!context) {
-        return;
+        return false;
     }
+
+    if (webComponent_ == nullptr) {
+        return false;
+    }
+    if (webComponent_->GetData().empty()) {
+        return false;
+    }
+    const std::string& data = webComponent_->GetData();
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), data]() {
             auto delegate = weak.Upgrade();
@@ -476,6 +484,7 @@ void WebDelegate::LoadDataWithRichText(const std::string& data)
             }
         },
         TaskExecutor::TaskType::PLATFORM);
+    return true;
 }
 
 void WebDelegate::Refresh()
@@ -1293,9 +1302,6 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             auto component = delegate->webComponent_;
             if (component == nullptr) {
                 return;
-            }
-            if (!component->GetData().empty()) {
-                delegate->LoadDataWithRichText(component->GetData());
             }
             auto nweb_handler = std::make_shared<WebClientImpl>(Container::CurrentId());
             nweb_handler->SetWebDelegate(weak);
