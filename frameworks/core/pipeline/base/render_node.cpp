@@ -1210,6 +1210,18 @@ Offset RenderNode::GetGlobalOffsetExternal() const
     return renderNode ? GetPosition() + renderNode->GetGlobalOffsetExternal() : GetPosition();
 }
 
+RefPtr<RenderNode> RenderNode::GetHeadRenderNode()
+{
+    if (IsHeadRenderNode()) {
+        return AceType::Claim(this);
+    }
+    auto renderNode = parent_.Upgrade();
+    if (!renderNode) {
+        return nullptr;
+    }
+    return renderNode->GetHeadRenderNode();
+}
+
 bool RenderNode::IsVisible(const Rect& rect, bool totally) const
 {
     Rect intersectRect = Rect(Offset(), GetLayoutSize());
