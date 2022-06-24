@@ -208,6 +208,71 @@ void EventManager::CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode)
     }
 }
 
+void EventManager::AdjustTabIndexNodes()
+{
+    tabIndexNodes_.sort([](std::pair<int32_t, WeakPtr<FocusNode>>& a, std::pair<int32_t, WeakPtr<FocusNode>>& b) {
+        return a.first < b.first;
+    });
+    curTabFocusedIndex_ = NONE_TAB_FOCUSED_INDEX;
+    int32_t i = 0;
+    for (auto& wpNode : tabIndexNodes_) {
+        auto node = wpNode.second.Upgrade();
+        if (node && node->IsCurrentFocus()) {
+            curTabFocusedIndex_ = i;
+            break;
+        }
+        ++i;
+    }
+    if (!isTabNodesCollected_) {
+        isTabNodesCollected_ = true;
+        curTabFocusedIndex_ = DEFAULT_TAB_FOCUSED_INDEX;
+    }
+}
+
+bool EventManager::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
+{
+    if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
+        return false;
+    }
+    tabIndexNodes_.clear();
+    CollectTabIndexNodes(focusNode);
+    AdjustTabIndexNodes();
+    if ((curTabFocusedIndex_ < 0 || curTabFocusedIndex_ >= static_cast<int32_t>(tabIndexNodes_.size())) &&
+        curTabFocusedIndex_ != DEFAULT_TAB_FOCUSED_INDEX) {
+        LOGI("Not focusing on any tab index node. Use default focus system.");
+        return false;
+    }
+    if (curTabFocusedIndex_ == DEFAULT_TAB_FOCUSED_INDEX) {
+        curTabFocusedIndex_ = 0;
+    } else {
+        if (event.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }) ||
+            event.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_TAB })) {
+            LOGI("RequestNextFocus by 'SHIFT-TAB'");
+            --curTabFocusedIndex_;
+        } else {
+            LOGI("RequestNextFocus by 'TAB'");
+            ++curTabFocusedIndex_;
+        }
+    }
+    if (curTabFocusedIndex_ < 0 || curTabFocusedIndex_ >= static_cast<int32_t>(tabIndexNodes_.size())) {
+        LOGI("Focus from tab index node to normal node. Use default focus system.");
+        return false;
+    }
+    auto iter = tabIndexNodes_.begin();
+    std::advance(iter, curTabFocusedIndex_);
+    if (iter == tabIndexNodes_.end()) {
+        LOGE("Tab index node is not found");
+        return false;
+    }
+    auto nodeNeedToFocus = (*iter).second.Upgrade();
+    if (!nodeNeedToFocus) {
+        LOGE("Tab index node is null");
+        return false;
+    }
+    LOGI("Focus on tab index node(%{public}d)", curTabFocusedIndex_);
+    return nodeNeedToFocus->RequestFocusImmediately();
+}
+
 bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
 {
     if (!focusNode) {
@@ -216,50 +281,16 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
     }
     LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
         event.action, event.repeatTime);
-    int32_t tabStep = 0;
-    if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN) {
-        tabIndexNodes_.clear();
-        CollectTabIndexNodes(focusNode);
-        tabIndexNodes_.sort([](std::pair<int32_t, WeakPtr<FocusNode>>& a, std::pair<int32_t, WeakPtr<FocusNode>>& b) {
-            return a.first < b.first;
-        });
-        if (!isTabNodesCollected_) {
-            isTabNodesCollected_ = true;
-            tabPressedIndex_ = -1;
-        }
-        if (event.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }) ||
-            event.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_TAB })) {
-            LOGI("RequestNextFocus by 'SHIFT-TAB'");
-            tabStep = -1;
-            --tabPressedIndex_;
-        } else {
-            LOGI("RequestNextFocus by 'TAB'");
-            tabStep = 1;
-            ++tabPressedIndex_;
-        }
-        if (0 <= tabPressedIndex_ && tabPressedIndex_ < static_cast<int32_t>(tabIndexNodes_.size())) {
-            auto iter = tabIndexNodes_.begin();
-            std::advance(iter, tabPressedIndex_);
-            if (iter == tabIndexNodes_.end()) {
-                LOGE("Tab node index is out of boundary");
-                return false;
-            }
-            auto nodeNeedToFocus = (*iter).second.Upgrade();
-            if (!nodeNeedToFocus) {
-                LOGE("Tab focus node is null");
-                return false;
-            }
-            nodeNeedToFocus->RequestFocusImmediately();
-            isLastInTabNodes_ = true;
-            return true;
-        }
+    if (HandleFocusByTabIndex(event, focusNode)) {
+        LOGI("Tab index focus system handled this event");
+        return true;
     }
-    if (!focusNode->HandleKeyEvent(event)) {
-        LOGD("use platform to handle this event");
-        tabPressedIndex_ -= tabStep;
-        return false;
+    if (focusNode->HandleKeyEvent(event)) {
+        LOGI("Default focus system handled this event");
+        return true;
     }
-    return true;
+    LOGI("Use platform to handle this event");
+    return false;
 }
 
 void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& renderNode)

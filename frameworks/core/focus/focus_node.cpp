@@ -201,6 +201,14 @@ void FocusNode::SetFocusable(bool focusable)
     RefreshFocus();
 }
 
+void FocusNode::SetEnabled(bool enabled)
+{
+    enabled_ = enabled;
+    if (!enabled) {
+        RefreshFocus();
+    }
+}
+
 void FocusNode::SetShow(bool show)
 {
     show_ = show;
@@ -594,6 +602,12 @@ void FocusGroup::OnBlur()
 void FocusGroup::SetShow(bool show)
 {
     FocusNode::SetShow(show);
+    RefreshParentFocusable(FocusNode::IsFocusable());
+}
+
+void FocusGroup::SetEnabled(bool enabled)
+{
+    FocusNode::SetEnabled(enabled);
     RefreshParentFocusable(FocusNode::IsFocusable());
 }
 

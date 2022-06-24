@@ -28,6 +28,10 @@
 #include "core/focus/focus_node.h"
 
 namespace OHOS::Ace {
+
+constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
+constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
+
 namespace NG {
 class FrameNode;
 }
@@ -97,6 +101,10 @@ public:
 
     void CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode);
 
+    void AdjustTabIndexNodes();
+
+    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusNode>& focusNode);
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
@@ -107,8 +115,7 @@ private:
     WeakPtr<RenderNode> mouseHoverNode_;
     WeakPtr<RenderNode> axisNode_;
     bool isTabNodesCollected_ = false;
-    bool isLastInTabNodes_ = false;
-    int32_t tabPressedIndex_ = -1;
+    int32_t curTabFocusedIndex_ = DEFAULT_TAB_FOCUSED_INDEX;
     std::list<std::pair<int32_t, WeakPtr<FocusNode>>> tabIndexNodes_;
     WeakPtr<FocusNode> firstZeroNode_;
     int32_t instanceId_ = 0;
