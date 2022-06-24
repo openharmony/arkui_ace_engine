@@ -258,6 +258,9 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
     if (!context) {
         return false;
     }
+    if (context->PopPageStackOverlay()) {
+        return true;
+    }
     return context->CallRouterBackToPopPage();
 }
 

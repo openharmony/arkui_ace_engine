@@ -165,6 +165,8 @@ public:
 
     bool CallRouterBackToPopPage();
 
+    bool PopPageStackOverlay();
+
     void NotifyAppStorage(const std::string& key, const std::string& value);
 
     bool Dump(const std::vector<std::string>& params) const;

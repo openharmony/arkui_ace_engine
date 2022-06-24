@@ -70,6 +70,7 @@ constexpr double EPSILON = 0.000002f;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
+constexpr double ROUND_UNIT = 360.0;
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -3629,6 +3630,14 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
     if (degree) {
         deg = degree.value();
         degree.reset();
+    }
+    // Deal with numbers out of (0, 360)
+    int32_t round = deg / ROUND_UNIT;
+    LOGI("degree is %{public}lf, round is %{public}d", deg, round);
+    if (round >= 0) {
+        deg = deg - round * ROUND_UNIT;
+    } else {
+        deg = deg - (round - 1) * ROUND_UNIT;
     }
     auto decoration = GetFrontDecoration();
     if (decoration) {
