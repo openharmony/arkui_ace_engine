@@ -171,7 +171,7 @@ void JSSelect::Font(const JSCallbackInfo& info)
 
     auto size = param->GetProperty("size");
     TextStyle textStyle = selectComponent->GetSelectStyle();
-    if (!size->IsNull() && size->IsNumber()) {
+    if (!size->IsNull()) {
         Dimension fontSize;
         if (ParseJsDimensionFp(size, fontSize)) {
             textStyle.SetFontSize(fontSize);
@@ -281,7 +281,7 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
         auto size = param->GetProperty("size");
         TextStyle textStyle = optionItem->GetSelectedTextStyle();
 
-        if (!size->IsNull() && size->IsNumber()) {
+        if (!size->IsNull()) {
             Dimension fontSize;
             if (ParseJsDimensionFp(size, fontSize)) {
                 textStyle.SetFontSize(fontSize);
@@ -400,7 +400,7 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
     for (auto& optionItem : option) {
         TextStyle textStyle = optionItem->GetTextStyle();
         auto size = param->GetProperty("size");
-        if (!size->IsNull() && size->IsNumber()) {
+        if (!size->IsNull()) {
             Dimension fontSize;
             if (ParseJsDimensionFp(size, fontSize)) {
                 textStyle.SetFontSize(fontSize);
