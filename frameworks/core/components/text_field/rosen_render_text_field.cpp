@@ -1390,4 +1390,9 @@ void RosenRenderTextField::PaintTextField(
     }
 }
 
+void RosenRenderTextField::ResetStatus()
+{
+    template_.reset();
+}
+
 } // namespace OHOS::Ace
