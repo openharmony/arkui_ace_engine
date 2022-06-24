@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/osal/resource_adapter_impl.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
 #include "adapter/ohos/osal/resource_theme_style.h"
 #include "core/components/theme/theme_attributes.h"
@@ -50,7 +51,8 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     LOGI("AddRes result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}d, "
          "device=%{public}d",
         resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType());
-    resourceManager_ = newResMgr;
+    sysResourceManager_ = newResMgr;
+    resourceManager_ = sysResourceManager_;
     packagePathStr_ = resPath;
 }
 
@@ -232,6 +234,40 @@ std::string ResourceAdapterImpl::GetMediaPath(uint32_t resId)
 std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
 {
     return "file:///" + packagePathStr_ + "resources/rawfile/" + fileName;
+}
+
+void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, const std::string& moduleName)
+{
+    if (bundleName.empty() || moduleName.empty()) {
+        resourceManager_ = sysResourceManager_;
+        return;
+    }
+
+    auto resourceMgrIter = resourceManagers_.find({ bundleName, moduleName });
+    if (resourceMgrIter != resourceManagers_.end()) {
+        resourceManager_ = resourceMgrIter->second;
+        return;
+    } else {
+        auto container = Container::Current();
+        if (!container) {
+            LOGW("container is null");
+            return;
+        }
+
+        auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+        if (!aceContainer) {
+            LOGW("container's type is not AceContainer.");
+            return;
+        }
+
+        auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
+        if (!context) {
+            LOGW("get ability context failed");
+            return;
+        }
+        resourceManagers_[{ bundleName, moduleName }] = context->GetResourceManager();
+        resourceManager_ = context->GetResourceManager();
+    }
 }
 
 } // namespace OHOS::Ace

@@ -76,6 +76,8 @@ public:
     {
         return false;
     }
+
+    virtual void UpdateResourceManager(const std::string& bundleName, const std::string& moduleName) {}
 };
 
 } // namespace OHOS::Ace

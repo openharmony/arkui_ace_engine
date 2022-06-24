@@ -274,6 +274,8 @@ public:
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
+    std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(const std::string& bundle,
+        const std::string& module);
 private:
     void InitializeFrontend();
     void InitializeCallback();

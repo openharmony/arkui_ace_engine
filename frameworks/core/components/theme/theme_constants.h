@@ -185,6 +185,12 @@ public:
         return customStyleMap_.find(key) != customStyleMap_.end();
     }
 
+    void UpdateThemeConstants(const std::string& bundleName, const std::string& moduleName)
+    {
+        if (resAdapter_) {
+            resAdapter_->UpdateResourceManager(bundleName, moduleName);
+        }
+    }
 private:
     static const ResValueWrapper* GetPlatformConstants(uint32_t key);
     static const ResValueWrapper* styleMapDefault[];
