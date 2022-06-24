@@ -359,13 +359,24 @@ void RenderBoxBase::CalculateGridLayoutSize()
 
     auto offset = gridColumnInfo_->GetOffset();
     if (offset != UNDEFINED_DIMENSION) {
-        auto context = context_.Upgrade();
-        positionParam_.type =
-            (context && context->GetIsDeclarative()) ? PositionType::SEMI_RELATIVE : PositionType::ABSOLUTE;
-        std::pair<AnimatableDimension, bool>& edge =
-            (GetTextDirection() == TextDirection::RTL) ? positionParam_.right : positionParam_.left;
-        edge.first = offset;
-        edge.second = true;
+        if (IsHeadRenderNode()) {
+            auto context = context_.Upgrade();
+            positionParam_.type =
+                (context && context->GetIsDeclarative()) ? PositionType::SEMI_RELATIVE : PositionType::ABSOLUTE;
+            std::pair<AnimatableDimension, bool>& edge =
+                (GetTextDirection() == TextDirection::RTL) ? positionParam_.right : positionParam_.left;
+            edge.first = offset;
+            edge.second = true;
+        } else {
+            auto headRenderNode = GetHeadRenderNode();
+            if (headRenderNode) {
+                auto context = headRenderNode->GetContext().Upgrade();
+                headRenderNode->SetPositionType((context && context->GetIsDeclarative()) ?
+                    PositionType::SEMI_RELATIVE : PositionType::ABSOLUTE);
+                headRenderNode->GetTextDirection() == TextDirection::RTL ?
+                    headRenderNode->SetRight(offset) : headRenderNode->SetLeft(offset);
+            }
+        }
     }
 
     double defaultWidth = gridColumnInfo_->GetWidth();
