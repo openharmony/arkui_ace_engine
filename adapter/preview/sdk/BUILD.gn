@@ -190,10 +190,9 @@ if (is_standard_system) {
                                 "root_out_dir")
       deps += [ "$ace_root/interfaces/napi/kits:${module}" ]
       if (use_mac) {
-        sources +=
-            [ "${out_path}/arkui/ace_engine_standard/lib${module}.dylib" ]
+        sources += [ "${out_path}/arkui/ace_engine/lib${module}.dylib" ]
       } else {
-        sources += [ "${out_path}/arkui/ace_engine_standard/lib${module}.dll" ]
+        sources += [ "${out_path}/arkui/ace_engine/lib${module}.dll" ]
       }
     }
 

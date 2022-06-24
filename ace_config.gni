@@ -91,7 +91,7 @@ if (is_standard_system) {
 
 # Config part name
 if (is_standard_system) {
-  ace_engine_part = "ace_engine_standard"
+  ace_engine_part = "ace_engine"
   hilog_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   ark_runtime_path = "//ark/runtime_core"
 } else {
