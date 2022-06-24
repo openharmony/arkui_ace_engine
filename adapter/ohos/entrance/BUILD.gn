@@ -72,7 +72,7 @@ template("ace_ohos_standard_source_set") {
     ]
 
     deps = [
-      "$aafwk_kits_path/ability/native:abilitykit_native",
+      "$aafwk_path/frameworks/native/ability/native:abilitykit_native",
       "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
       "$ace_flutter_engine_root/skia:ace_skia_$platform",
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",

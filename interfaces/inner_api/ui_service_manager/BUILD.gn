@@ -25,7 +25,7 @@ config("uiservice_manager_public_config") {
     "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
     "$innerkits_path/ability_manager/include/",
-    "$kits_path/ability/native/include",
+    "$aafwk_path/interfaces/kits/native/ability/native",
     "$services_path/uiservicemgr/include",
     "//third_party/icu/icu4c/source/common",
     "//third_party/icu/icu4c/source/i18n",

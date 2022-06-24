@@ -25,7 +25,7 @@ template("pa_backend") {
 
     include_dirs = [
       "$aafwk_services_path/common/include",
-      "$aafwk_kits_path/ability/native/include",
+      "$aafwk_path/interfaces/kits/native/ability/native",
       "$aafwk_inner_api_path/ability_manager/include",
       "$aafwk_services_path/abilitymgr/include",
       "$aafwk_services_path/common/include",
@@ -35,8 +35,8 @@ template("pa_backend") {
       "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common",
     ]
     deps = [
-      "$aafwk_kits_path/ability/native:abilitykit_native",
-      "$aafwk_kits_path/appkit:appkit_native",
+      "$aafwk_path/frameworks/native/ability/native:abilitykit_native",
+      "$aafwk_path/frameworks/native/appkit:appkit_native",
       "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
       "//foundation/arkui/napi:ace_napi",
       "//foundation/arkui/napi:ace_napi_quickjs",

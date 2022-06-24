@@ -74,7 +74,7 @@ template("uiservice_static") {
     ]
 
     deps = [
-      "$aafwk_kits_path/ability/native:abilitykit_native",
+      "$aafwk_path/frameworks/native/ability/native:abilitykit_native",
       "//base/global/resource_management/frameworks/resmgr:global_resmgr",
       "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
