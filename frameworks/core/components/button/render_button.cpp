@@ -495,6 +495,9 @@ void RenderButton::PerformLayout()
     SetLayoutSize(CalculateLayoutSize());
     SetChildrenAlignment();
     buttonSize_ = GetLayoutSize() - Size(widthDelta_, widthDelta_);
+    if (type_ == ButtonType::CAPSULE) {
+        rrectRadius_ = buttonSize_.Height() / 2;
+    }
 }
 
 void RenderButton::SetChildrenLayoutSize()
@@ -508,7 +511,7 @@ void RenderButton::SetChildrenLayoutSize()
     }
     double height = buttonSize_.Height();
     if (buttonComponent_->GetDeclarativeFlag()) {
-        if (!heightDefined_ && type_ == ButtonType::NORMAL) {
+        if (!heightDefined_ && type_ != ButtonType::CIRCLE) {
             height = GetLayoutParam().GetMaxSize().Height();
         }
     }
@@ -544,6 +547,9 @@ Size RenderButton::CalculateLayoutSize()
 
 bool RenderButton::NeedAdaptiveChild()
 {
+    if (buttonComponent_->GetDeclarativeFlag() && type_ != ButtonType::CIRCLE) {
+        return true;
+    }
     if ((type_ == ButtonType::TEXT) && isWatch_) {
         return true;
     }
