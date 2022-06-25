@@ -1107,7 +1107,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     pipelineContext_->SetDataProviderManager(dataProviderManager);
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
-    pipelineContext_->SetPostRSTaskCallBack([](std::function<void()>&& task) {
+    pipelineContext_->SetPostRTTaskCallBack([](std::function<void()>&& task) {
         auto syncTask = std::make_shared<AceRosenSyncTask>(std::move(task));
         Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
     });
