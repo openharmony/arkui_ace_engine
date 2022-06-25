@@ -429,8 +429,8 @@ void RenderCalendar::UpdateBreakInformation()
     std::vector<int32_t> workDays;
     auto holidaysValue = dataAdapter_->GetHolidays();
     auto workDayValue = dataAdapter_->GetWorkDays();
-    StringUtils::StringSpliter(holidaysValue, ',', holidays);
-    StringUtils::StringSpliter(workDayValue, ',', workDays);
+    StringUtils::StringSplitter(holidaysValue, ',', holidays);
+    StringUtils::StringSplitter(workDayValue, ',', workDays);
     for (auto& day : calendarDays_) {
         day.dayMark = "";
         day.dayMarkValue = "";

@@ -33,7 +33,7 @@ void SpanDeclaration::InitCommonEvent()
 {
     AddCommonEvent(EventTag::COMMON_RAW_EVENT);
     AddCommonEvent(EventTag::COMMON_GESTURE_EVENT);
-    AddCommonEvent(EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT);
+    AddCommonEvent(EventTag::COMMON_REMOTE_MESSAGE_GESTURE_EVENT);
 }
 
 void SpanDeclaration::InitSpecialized()

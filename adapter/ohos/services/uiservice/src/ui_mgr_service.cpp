@@ -237,7 +237,7 @@ int UIMgrService::ShowDialog(const std::string& name,
             HILOG_ERROR("container is null, set configuration failed.");
         } else {
             auto aceResCfg = container->GetResourceConfiguration();
-            aceResCfg.SetOrientation(Ace::SystemProperties::GetDevcieOrientation());
+            aceResCfg.SetOrientation(Ace::SystemProperties::GetDeviceOrientation());
             aceResCfg.SetDensity(Ace::SystemProperties::GetResolution());
             aceResCfg.SetDeviceType(Ace::SystemProperties::GetDeviceType());
             container->SetResourceConfiguration(aceResCfg);

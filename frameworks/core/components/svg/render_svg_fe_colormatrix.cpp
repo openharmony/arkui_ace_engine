@@ -36,9 +36,9 @@ void RenderSvgFeColorMatrix::Update(const RefPtr<Component> &component)
             return;
         }
         std::vector<float> matrix;
-        StringUtils::StringSpliter(values_, ' ', matrix);
+        StringUtils::StringSplitter(values_, ' ', matrix);
         if (matrix.empty()) {
-            StringUtils::StringSpliter(values_, ',', matrix);
+            StringUtils::StringSplitter(values_, ',', matrix);
         }
         for (int i = 0; i < int(sizeof(matrix_) / sizeof(float)) && i < (int)matrix.size(); i++) {
 #ifdef USE_SYSTEM_SKIA

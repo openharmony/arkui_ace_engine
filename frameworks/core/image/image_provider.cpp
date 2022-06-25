@@ -53,7 +53,7 @@ void ImageProvider::FetchImageObject(
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
-            LOGE("pipline context has been released. imageInfo: %{private}s", imageInfo.ToString().c_str());
+            LOGE("pipeline context has been released. imageInfo: %{private}s", imageInfo.ToString().c_str());
             return;
         }
         auto taskExecutor = pipelineContext->GetTaskExecutor();

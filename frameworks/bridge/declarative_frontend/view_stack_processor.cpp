@@ -59,12 +59,12 @@ ViewStackProcessor::ViewStackProcessor()
     checkboxGroups_ = std::make_shared<JsPageCheckboxGroups>();
 }
 
-std::shared_ptr<JsPageRadioGroups> ViewStackProcessor::GetRadioGroupCompnent()
+std::shared_ptr<JsPageRadioGroups> ViewStackProcessor::GetRadioGroupComponent()
 {
     return radioGroups_;
 }
 
-std::shared_ptr<JsPageCheckboxGroups> ViewStackProcessor::GetCheckboxGroupCompnent()
+std::shared_ptr<JsPageCheckboxGroups> ViewStackProcessor::GetCheckboxGroupComponent()
 {
     return checkboxGroups_;
 }

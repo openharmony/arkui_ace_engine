@@ -40,7 +40,7 @@ void FlutterRenderTextSpan::UpdateText(txt::ParagraphBuilder& builder,
     }
     UpdateTouchRegions(touchRegions);
     auto displayText = spanComponent_->GetSpanData();
-    StringUtils::TransfromStrCase(displayText, (int32_t)spanStyle_.GetTextCase());
+    StringUtils::TransformStrCase(displayText, (int32_t)spanStyle_.GetTextCase());
     builder.AddText(StringUtils::Str8ToStr16(displayText));
     textValue.append(displayText);
     for (const auto& child : GetChildren()) {
@@ -76,7 +76,7 @@ void FlutterRenderTextSpan::UpdateTouchRegions(std::map<int32_t, std::map<Gestur
         }
 
         auto& remoteMessageEvent = static_cast<CommonGestureEvent&>(declaration->GetEvent(
-            EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT));
+            EventTag::COMMON_REMOTE_MESSAGE_GESTURE_EVENT));
         if (remoteMessageEvent.IsValid()) {
             if (!remoteMessageEvent.click.eventMarker.IsEmpty()) {
                 markersMap.try_emplace(GestureType::REMOTE_MESSAGE, remoteMessageEvent.click.eventMarker);

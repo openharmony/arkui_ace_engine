@@ -101,7 +101,7 @@ bool OptionComponent::Initialize(const RefPtr<AccessibilityManager>& manager)
     } else {
         textStyle = text_->GetTextStyle();
         std::vector<std::string> fontFamilies;
-        StringUtils::StringSpliter(GetFontFamily(), ',', fontFamilies);
+        StringUtils::StringSplitter(GetFontFamily(), ',', fontFamilies);
         if (!fontFamilies.empty()) {
             textStyle.SetFontFamilies(fontFamilies);
         }

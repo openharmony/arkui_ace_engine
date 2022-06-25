@@ -119,7 +119,7 @@ private:
     void TranspareCmdToPath(const RefPtr<CanvasPath2D>& path);
     bool IsPointInPathByColor(double x, double y, SkPath& path, SkColor colorMatch);
     void SetPaintImage();
-    void InitFliterFunc();
+    void InitFilterFunc();
     bool GetFilterType(std::string& filterType, std::string& filterParam);
     void SetGrayFilter(const std::string& percent);
     void SetSepiaFilter(const std::string& percent);

@@ -269,7 +269,7 @@ RefPtr<Inset> ClipPath::CreateInsetSize(const std::string& data)
 RefPtr<Polygon> ClipPath::CreatePolygon(const std::string& data)
 {
     std::vector<std::string> points;
-    StringUtils::StringSpliter(StringUtils::TrimStr(data), ',', points);
+    StringUtils::StringSplitter(StringUtils::TrimStr(data), ',', points);
     if (points.empty()) {
         return nullptr;
     }

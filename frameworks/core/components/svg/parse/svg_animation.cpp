@@ -107,7 +107,7 @@ void SvgAnimation::SetAttr(const std::string& name, const std::string& value)
                     return;
                 }
                 std::vector<double> keyTimes;
-                StringUtils::StringSpliter(val, ';', keyTimes);
+                StringUtils::StringSplitter(val, ';', keyTimes);
                 animateComponent->SetKeyTimes(keyTimes);
             } },
         { DOM_SVG_ANIMATION_KEY_SPLINES,
@@ -137,7 +137,7 @@ void SvgAnimation::SetAttr(const std::string& name, const std::string& value)
                     return;
                 }
                 std::vector<std::string> keyPoints;
-                StringUtils::StringSpliter(val, ';', keyPoints);
+                StringUtils::StringSplitter(val, ';', keyPoints);
                 animateComponent->SetKeyPoints(keyPoints);
             } },
         { DOM_SVG_ANIMATION_PATH,

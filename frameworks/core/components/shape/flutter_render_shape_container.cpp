@@ -23,17 +23,17 @@
 namespace OHOS::Ace {
 namespace {
 
-struct ZIndexCompartor {
+struct ZIndexComparator {
     bool operator()(const RefPtr<RenderNode>& left, const RefPtr<RenderNode>& right) const
     {
         return (left->GetZIndex() < right->GetZIndex());
     }
 };
 
-inline std::multiset<RefPtr<RenderNode>, ZIndexCompartor> SortChildrenByZIndex(
+inline std::multiset<RefPtr<RenderNode>, ZIndexComparator> SortChildrenByZIndex(
     const std::list<RefPtr<RenderNode>>& children)
 {
-    return std::multiset<RefPtr<RenderNode>, ZIndexCompartor>(children.begin(), children.end());
+    return std::multiset<RefPtr<RenderNode>, ZIndexComparator>(children.begin(), children.end());
 }
 
 } // namespace
@@ -89,16 +89,14 @@ RefPtr<FlutterRenderShape> FlutterRenderShapeContainer::GetShapeChild(const RefP
 
 void FlutterRenderShapeContainer::BitmapMesh(RenderContext& context, const Offset& offset)
 {
-    // new no-gpu cancas;
+    // new no-gpu canvas;
     auto pipelineContext = GetContext().Upgrade();
-
 
     auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width(), GetLayoutSize().Height(),
         SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
     skOffBitmap_.allocPixels(imageInfo);
     skOffBitmap_.eraseColor(SK_ColorTRANSPARENT);
     skOffCanvas_ = std::make_unique<SkCanvas>(skOffBitmap_);
-
 
     // for the child
     const auto& children = GetChildren();

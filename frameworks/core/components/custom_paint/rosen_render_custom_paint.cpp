@@ -81,7 +81,7 @@ std::string GetMimeType(const std::string& args)
 {
     // Args example: ["image/png"]
     std::vector<std::string> values;
-    StringUtils::StringSpliter(args, '"', values);
+    StringUtils::StringSplitter(args, '"', values);
     if (values.size() < 3) {
         return IMAGE_PNG;
     } else {
@@ -98,7 +98,7 @@ double GetQuality(const std::string& args)
 {
     // Args example: ["image/jpeg", 0.8]
     std::vector<std::string> values;
-    StringUtils::StringSpliter(args, ',', values);
+    StringUtils::StringSplitter(args, ',', values);
     if (values.size() < 2) {
         return DEFAULT_QUALITY;
     }

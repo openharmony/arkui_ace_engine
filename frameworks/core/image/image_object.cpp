@@ -116,7 +116,7 @@ void StaticImageObject::UploadToGpuForRender(
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
-            LOGE("pipline context has been released.");
+            LOGE("pipeline context has been released.");
             return;
         }
         auto taskExecutor = pipelineContext->GetTaskExecutor();

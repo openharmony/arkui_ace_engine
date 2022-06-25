@@ -79,7 +79,7 @@ public:
     void SetTableValues(const std::string& tableValues)
     {
         auto& attribute = MaybeResetAttribute<SvgFeFuncAttribute>(AttributeTag::SPECIALIZED_ATTR);
-        StringUtils::StringSpliter(tableValues, ' ', attribute.tableValues);
+        StringUtils::StringSplitter(tableValues, ' ', attribute.tableValues);
     }
 
     void SetType(const std::string& type)

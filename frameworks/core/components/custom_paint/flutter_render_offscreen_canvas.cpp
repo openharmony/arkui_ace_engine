@@ -128,7 +128,7 @@ FlutterRenderOffscreenCanvas::FlutterRenderOffscreenCanvas(const WeakPtr<Pipelin
         currentDartState->GetIOManager(),
         currentDartState->GetTaskRunners().GetIOTaskRunner());
 
-    InitFliterFunc();
+    InitFilterFunc();
 }
 void FlutterRenderOffscreenCanvas::AddRect(const Rect& rect)
 {
@@ -1405,7 +1405,7 @@ void FlutterRenderOffscreenCanvas::ResetTransform()
     skCanvas_->setMatrix(skMatrix);
 }
 
-void FlutterRenderOffscreenCanvas::InitFliterFunc()
+void FlutterRenderOffscreenCanvas::InitFilterFunc()
 {
     filterFunc_["grayscale"] = [&](const std::string& percentage) {
         SetGrayFilter(percentage);
@@ -1631,7 +1631,7 @@ void FlutterRenderOffscreenCanvas::SetBlurFilter(const std::string& percent)
 void FlutterRenderOffscreenCanvas::SetDropShadowFilter(const std::string& percent)
 {
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(percent, ' ', offsets);
+    StringUtils::StringSplitter(percent, ' ', offsets);
     if (offsets.empty() || offsets.size() != 4) {
         return;
     }

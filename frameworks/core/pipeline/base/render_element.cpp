@@ -92,7 +92,7 @@ void RenderElement::SetAccessibilityNode(const WeakPtr<Element>& parent)
             }
             auto composedElement = AceType::DynamicCast<V2::InspectorComposedElement>(parentNode);
             if (composedElement) {
-                composeId_ = std::to_string(composedElement->GetinspectorId());
+                composeId_ = std::to_string(composedElement->GetInspectorId());
                 SetAccessibilityNodeById(composeId_);
                 renderNode_->SetInspectorNode(composedElement);
                 break;

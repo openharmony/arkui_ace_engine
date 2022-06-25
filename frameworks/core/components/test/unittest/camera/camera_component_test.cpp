@@ -23,7 +23,7 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
 
-const std::string CALLBACK_SUCESS = "success";
+const std::string CALLBACK_SUCCESS = "success";
 const std::string CALLBACK_FAIL = "fail";
 const std::string CALLBACK_COMPLETE = "complete";
 const std::string DEFAULT_RECORD_ID = "0";
@@ -90,12 +90,12 @@ HWTEST_F(CameraComponentTest, CameraComponentTest003, TestSize.Level1)
     RefPtr<CameraComponent> cameraComponent = AceType::MakeRefPtr<CameraComponent>();
     RefPtr<CameraController> controller = cameraComponent->GetCameraController();
     controller->SetTakePhotoImpl([](const TakePhotoParams& params) {
-        ASSERT_TRUE(params.success == CALLBACK_SUCESS);
+        ASSERT_TRUE(params.success == CALLBACK_SUCCESS);
         ASSERT_TRUE(params.fail == CALLBACK_FAIL);
         ASSERT_TRUE(params.complete == CALLBACK_COMPLETE);
     });
     TakePhotoParams takePhotoParams;
-    takePhotoParams.success = CALLBACK_SUCESS;
+    takePhotoParams.success = CALLBACK_SUCCESS;
     takePhotoParams.fail = CALLBACK_FAIL;
     takePhotoParams.complete = CALLBACK_COMPLETE;
     controller->TakePhoto(takePhotoParams);

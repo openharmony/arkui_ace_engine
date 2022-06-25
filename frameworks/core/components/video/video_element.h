@@ -96,7 +96,7 @@ private:
     void CreatePlatformResource();
     void CreatePlayer(int64_t id, ErrorCallback&& errorCallback);
     void ReleasePlatformResource();
-    void UpdataChild(const RefPtr<Component>& childComponent);
+    void UpdateChildInner(const RefPtr<Component>& childComponent);
     void InitListener();
     void ResetStatus();
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
@@ -182,7 +182,7 @@ private:
     FullscreenEvent fullscreenEvent_;
 
 #ifdef OHOS_STANDARD_SYSTEM
-    void RegistMediaPlayerEvent();
+    void RegisterMediaPlayerEvent();
     void CreateMediaPlayer();
     void PreparePlayer();
     std::string GetAssetAbsolutePath(const std::string& fileName);

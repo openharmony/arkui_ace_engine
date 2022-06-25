@@ -500,7 +500,7 @@ bool RosenRenderText::UpdateParagraph()
         textValue_.text = textValue;
         textForDisplay_ = textValue;
     } else {
-        StringUtils::TransfromStrCase(displayData, (int32_t)textStyle_.GetTextCase());
+        StringUtils::TransformStrCase(displayData, (int32_t)textStyle_.GetTextCase());
         builder->AddText(StringUtils::Str8ToStr16(displayData));
     }
     paragraph_ = builder->Build();

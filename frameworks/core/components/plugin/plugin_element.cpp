@@ -57,7 +57,7 @@ void PluginElement::Update()
 {
     auto plugin = AceType::DynamicCast<PluginComponent>(component_);
     if (!plugin) {
-        LOGE("could not get plugin componet for update");
+        LOGE("could not get plugin component for update");
         return;
     }
 
@@ -67,7 +67,7 @@ void PluginElement::Update()
         info.dimension != pluginInfo_.dimension) {
         pluginInfo_ = info;
     } else {
-        // for update plugin componet
+        // for update plugin component
         if (pluginInfo_.allowUpate != info.allowUpate) {
             pluginInfo_.allowUpate = info.allowUpate;
             if (pluginSubContainer_) {
@@ -239,7 +239,7 @@ void PluginElement::RunPluginContainer()
     }
     auto plugin = AceType::DynamicCast<PluginComponent>(component_);
     if (!plugin) {
-        LOGE("plugin componet is null when try adding nonmatched container to plugin manager.");
+        LOGE("plugin component is null when try adding nonmatched container to plugin manager.");
         return;
     }
 

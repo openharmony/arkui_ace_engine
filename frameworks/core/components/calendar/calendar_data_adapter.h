@@ -479,7 +479,7 @@ namespace StringUtils {
 inline bool StringToCalendarDay(const std::string& str, CalendarDay& day)
 {
     std::vector<int> date;
-    StringSpliter(str, '-', date);
+    StringSplitter(str, '-', date);
     if (date.size() == 3) {
         day.month.year = date[0];
         day.month.month = date[1] - 1;

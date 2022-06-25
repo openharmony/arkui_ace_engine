@@ -56,7 +56,7 @@ bool SvgFilterDeclaration::SetSpecializedAttr(const std::pair<std::string, std::
     };
 
     std::string key = attr.first;
-    StringUtils::TransfromStrCase(key, StringUtils::TEXT_CASE_LOWERCASR);
+    StringUtils::TransformStrCase(key, StringUtils::TEXT_CASE_LOWERCASE);
     auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), key.c_str());
     if (attrIter != -1) {
         attrs[attrIter].value(attr.second, *this);

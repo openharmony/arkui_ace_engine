@@ -188,7 +188,7 @@ void DOMTabBar::PrepareSpecializedComponent()
 
 void DOMTabBar::PrepareChangeListener()
 {
-    // used for initailzed the active tabBarItem
+    // used for initalized the active tabBarItem
     auto weak = AceType::WeakClaim(this);
     auto changeCallback = [weak](uint32_t currentIndex) {
         auto tabBarNode = weak.Upgrade();
@@ -215,7 +215,7 @@ Edge DOMTabBar::ParseEdge(const std::string& value) const
 {
     Edge edge;
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
+    StringUtils::StringSplitter(value, ' ', offsets);
     switch (offsets.size()) {
         case 1:
             edge.SetLeft(ParseDimension(offsets[0]));

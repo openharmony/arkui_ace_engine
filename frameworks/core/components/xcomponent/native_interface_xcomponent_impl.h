@@ -33,12 +33,12 @@ public:
 
     void SetXComponentId(const std::string& id)
     {
-        xcomponetId_ = id;
+        xcomponentId_ = id;
     }
 
     const std::string& GetXComponentId() const
     {
-        return xcomponetId_;
+        return xcomponentId_;
     }
 
     void SetXComponentWidth(const int width)
@@ -132,7 +132,7 @@ public:
     }
 
 private:
-    std::string xcomponetId_;
+    std::string xcomponentId_;
     void* window_ = nullptr;
     int width_ = 0;
     int height_ = 0;

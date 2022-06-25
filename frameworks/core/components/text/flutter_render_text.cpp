@@ -161,13 +161,13 @@ Size FlutterRenderText::Measure()
     if (!textStyle_.GetAdaptTextSize()) {
         if (!UpdateParagraph()) {
             LOGE("fail to initialize text paragraph");
-            return Size();
+            return {};
         }
         paragraph_->Layout(lastLayoutMaxWidth_);
     } else {
         if (!AdaptTextSize(lastLayoutMaxWidth_)) {
             LOGE("fail to initialize text paragraph in adapt text size step");
-            return Size();
+            return {};
         }
     }
     needMeasure_ = false;
@@ -490,7 +490,7 @@ bool FlutterRenderText::UpdateParagraph()
             }
         }
     } else {
-        StringUtils::TransfromStrCase(displayData, (int32_t)textStyle_.GetTextCase());
+        StringUtils::TransformStrCase(displayData, (int32_t)textStyle_.GetTextCase());
         builder->AddText(StringUtils::Str8ToStr16(displayData));
     }
     paragraph_ = builder->Build();

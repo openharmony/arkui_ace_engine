@@ -123,7 +123,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     container->InitDeviceInfo(ACE_INSTANCE_ID, runArgs);
     SetConfigChanges(runArgs.configChanges);
     auto resConfig = container->GetResourceConfiguration();
-    resConfig.SetOrientation(SystemProperties::GetDevcieOrientation());
+    resConfig.SetOrientation(SystemProperties::GetDeviceOrientation());
     resConfig.SetDensity(SystemProperties::GetResolution());
     resConfig.SetDeviceType(SystemProperties::GetDeviceType());
     container->SetResourceConfiguration(resConfig);
@@ -272,9 +272,9 @@ void AceAbility::SetConfigChanges(const std::string& configChanges)
     if (configChanges == "") {
         return;
     }
-    std::vector<std::string> configChangesSpliter;
-    OHOS::Ace::StringUtils::StringSpliter(configChanges, ',', configChangesSpliter);
-    for (const auto& singleConfig : configChangesSpliter) {
+    std::vector<std::string> configChangesSplitter;
+    OHOS::Ace::StringUtils::StringSplitter(configChanges, ',', configChangesSplitter);
+    for (const auto& singleConfig : configChangesSplitter) {
         if (singleConfig == "locale") {
             configChanges_.watchLocale = true;
             continue;

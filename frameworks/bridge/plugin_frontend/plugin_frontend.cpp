@@ -630,7 +630,7 @@ bool PluginFrontend::OnBackPressed()
 void PluginFrontend::OnShow()
 {
     if (delegate_) {
-        delegate_->OnForground();
+        delegate_->OnForeground();
     }
 }
 

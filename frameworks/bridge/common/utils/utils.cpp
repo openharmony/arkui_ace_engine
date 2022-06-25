@@ -244,7 +244,7 @@ RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc)
         return nullptr;
     }
     std::vector<std::string> paramsVector;
-    StringUtils::StringSpliter(params, ',', paramsVector);
+    StringUtils::StringSplitter(params, ',', paramsVector);
     for (auto& param : paramsVector) {
         RemoveHeadTailSpace(param);
     }
@@ -311,7 +311,7 @@ bool ParseBackgroundImagePosition(const std::string& value, BackgroundImagePosit
     };
 
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
+    StringUtils::StringSplitter(value, ' ', offsets);
     if (!offsets.empty()) {
         std::string valueX = "";
         std::string valueY = "";
@@ -465,7 +465,7 @@ ImageObjectPosition ParseImageObjectPosition(const std::string& value)
     };
 
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
+    StringUtils::StringSplitter(value, ' ', offsets);
     if (!offsets.empty()) {
         std::string valueX = "";
         std::string valueY = "";

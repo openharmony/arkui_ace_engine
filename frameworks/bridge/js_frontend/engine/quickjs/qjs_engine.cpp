@@ -1843,19 +1843,19 @@ JSValue SetSwipeToDismiss(JSContext* ctx, JSValueConst argv)
         return JS_EXCEPTION;
     }
 
-    bool forbideQuit = false;
+    bool forbidQuit = false;
     JSValue jsObject = JS_GetProperty(ctx, argv, pTab[0].atom);
     if (JS_IsBool(jsObject)) {
-        forbideQuit = JS_ToBool(ctx, jsObject);
+        forbidQuit = JS_ToBool(ctx, jsObject);
     }
 
     QjsEngineInstance* instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     WeakPtr<PipelineContext> pipelineContextWeak = instance->GetDelegate()->GetPipelineContext();
     auto uiTaskExecutor = instance->GetDelegate()->GetUiTask();
-    uiTaskExecutor.PostTask([pipelineContextWeak, forbideQuit]() mutable {
+    uiTaskExecutor.PostTask([pipelineContextWeak, forbidQuit]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
-            pipelineContext->SetForbidePlatformQuit(forbideQuit);
+            pipelineContext->SetForbidPlatformQuit(forbidQuit);
         }
     });
 

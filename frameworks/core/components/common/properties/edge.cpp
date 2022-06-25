@@ -39,7 +39,7 @@ bool Edge::FromString(const std::string& value, Edge& edge)
 {
     bool result = true;
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
+    StringUtils::StringSplitter(value, ' ', offsets);
     switch (offsets.size()) {
         case 1: // example: 1px
             edge.top_ = StringUtils::StringToDimension(offsets[0]);

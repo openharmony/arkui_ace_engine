@@ -2364,7 +2364,7 @@ HWTEST_F(RenderGridTest, RenderGridTest033, TestSize.Level1)
      */
     std::string scrollEventId = "grid_scroll_id";
     index_ = 0;
-    RefPtr<TestGridEventHander> eventHander = AceType::MakeRefPtr<TestGridEventHander>(
+    RefPtr<TestGridEventHandler> eventHandler = AceType::MakeRefPtr<TestGridEventHandler>(
         [this, scrollEventId](const std::string& eventId, const std::string& param) {
             std::string scrollResult = std::string("\"scroll\",{\"scrollX\":")
                 .append(std::to_string(450.0 * (index_ % 3)))
@@ -2377,7 +2377,7 @@ HWTEST_F(RenderGridTest, RenderGridTest033, TestSize.Level1)
             EXPECT_EQ(eventId, scrollEventId);
             index_++;
         });
-    mockContext_->RegisterEventHandler(eventHander);
+    mockContext_->RegisterEventHandler(eventHandler);
 
     /**
      * @tc.steps: step2. Create RenderGrid and add 10 child by row Direction.
@@ -2422,14 +2422,14 @@ HWTEST_F(RenderGridTest, RenderGridTest034, TestSize.Level1)
      */
     std::string scrollEventId = "grid_scrollbottom_id";
     index_ = 0;
-    RefPtr<TestGridEventHander> eventHander = AceType::MakeRefPtr<TestGridEventHander>(
+    RefPtr<TestGridEventHandler> eventHandler = AceType::MakeRefPtr<TestGridEventHandler>(
         [this, scrollEventId](const std::string& eventId, const std::string& param) {
             std::string ret = std::string("\"scrollbottom\",null");
             EXPECT_EQ(param, ret);
             EXPECT_EQ(eventId, scrollEventId);
             index_++;
         });
-    mockContext_->RegisterEventHandler(eventHander);
+    mockContext_->RegisterEventHandler(eventHandler);
 
     /**
      * @tc.steps: step2. Create RenderGrid and add 10 child by COLUMN Direction.
@@ -2472,14 +2472,14 @@ HWTEST_F(RenderGridTest, RenderGridTest035, TestSize.Level1)
      */
     std::string scrollEventId = "grid_scrolltop_id";
     index_ = 0;
-    RefPtr<TestGridEventHander> eventHander = AceType::MakeRefPtr<TestGridEventHander>(
+    RefPtr<TestGridEventHandler> eventHandler = AceType::MakeRefPtr<TestGridEventHandler>(
         [this, scrollEventId](const std::string& eventId, const std::string& param) {
             std::string ret = std::string("\"scrolltop\",null");
             EXPECT_EQ(param, ret);
             EXPECT_EQ(eventId, scrollEventId);
             index_++;
         });
-    mockContext_->RegisterEventHandler(eventHander);
+    mockContext_->RegisterEventHandler(eventHandler);
 
     /**
      * @tc.steps: step2. Create RenderGrid and add 10 child by ROW_REVERSE Direction.
@@ -2522,14 +2522,14 @@ HWTEST_F(RenderGridTest, RenderGridTest036, TestSize.Level1)
      */
     std::string scrollEventId = "grid_scrollend_id";
     index_ = 0;
-    RefPtr<TestGridEventHander> eventHander = AceType::MakeRefPtr<TestGridEventHander>(
+    RefPtr<TestGridEventHandler> eventHandler = AceType::MakeRefPtr<TestGridEventHandler>(
         [this, scrollEventId](const std::string& eventId, const std::string& param) {
             std::string ret = std::string("\"scrollend\",null");
             EXPECT_EQ(param, ret);
             EXPECT_EQ(eventId, scrollEventId);
             index_++;
         });
-    mockContext_->RegisterEventHandler(eventHander);
+    mockContext_->RegisterEventHandler(eventHandler);
 
     /**
      * @tc.steps: step2. Create RenderGrid and add 10 child by COLUMN_REVERSE Direction.
@@ -2570,14 +2570,14 @@ HWTEST_F(RenderGridTest, RenderGridTest037, TestSize.Level1)
      */
     std::string scrollEventId = "grid_scrolltouchup_id";
     index_ = 0;
-    RefPtr<TestGridEventHander> eventHander = AceType::MakeRefPtr<TestGridEventHander>(
+    RefPtr<TestGridEventHandler> eventHandler = AceType::MakeRefPtr<TestGridEventHandler>(
         [this, scrollEventId](const std::string& eventId, const std::string& param) {
             std::string ret = std::string("\"scrolltouchup\",null");
             EXPECT_EQ(param, ret);
             EXPECT_EQ(eventId, scrollEventId);
             index_++;
         });
-    mockContext_->RegisterEventHandler(eventHander);
+    mockContext_->RegisterEventHandler(eventHandler);
 
     /**
      * @tc.steps: step2. Create RenderGrid and add 10 child by COLUMN Direction.

@@ -43,7 +43,7 @@ public:
     //            { "scale", {1, 0.5} }, { "matrix", {1, 2, 3, 4, 5, 6} } }"
     static std::map<std::string, std::vector<float>> CreateMap(const std::string& transform);
 
-    static TransformInfo CreateMatrix4(const std::map<std::string, std::vector<float>>& transfrom);
+    static TransformInfo CreateMatrix4(const std::map<std::string, std::vector<float>>& transform);
 
     static bool SetProperty(const std::string& type, const std::vector<float>& from, const std::vector<float>& to,
         double value, std::map<std::string, std::vector<float>>& transformAttrs);

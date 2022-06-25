@@ -92,10 +92,10 @@ int64_t GetTickCount()
     return g_timeStamp;
 }
 
-class TestCheckableEventHander : public MockEventHandler {
+class TestCheckableEventHandler : public MockEventHandler {
 public:
-    explicit TestCheckableEventHander(const CheckableEventCallback& eventCallback) : eventCallback_(eventCallback) {}
-    ~TestCheckableEventHander() = default;
+    explicit TestCheckableEventHandler(const CheckableEventCallback& eventCallback) : eventCallback_(eventCallback) {}
+    ~TestCheckableEventHandler() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)
     {
@@ -332,7 +332,7 @@ void CheckableComponentTest::DragSwitch(const TestGestureType gestureType)
 void CheckableComponentTest::TestCheckboxChangedEvent(const bool initValue, const std::string& expectValue)
 {
     bool testSuccess = false;
-    RefPtr<TestCheckableEventHander> eventHander = AceType::MakeRefPtr<TestCheckableEventHander>(
+    RefPtr<TestCheckableEventHandler> eventHandler = AceType::MakeRefPtr<TestCheckableEventHandler>(
         [this, expectValue, &testSuccess](const std::string& eventId, const std::string& param) mutable {
             std::string value = expectValue;
             std::string expectChangeResult = std::string("\"change\",{\"checked\":").append(value.append("},null"));
@@ -341,7 +341,7 @@ void CheckableComponentTest::TestCheckboxChangedEvent(const bool initValue, cons
             testSuccess = true;
         });
 
-    context_->RegisterEventHandler(eventHander);
+    context_->RegisterEventHandler(eventHandler);
 
     CreateCheckboxAndRender([this, initValue](const RefPtr<CheckboxComponent>& checkbox) {
         EventMarker changeEvent { TEST_CHANGE_EVENT_ID };
@@ -357,7 +357,7 @@ void CheckableComponentTest::TestSwitchChangedEvent(
     bool initValue, const std::string& expectValue, const TestGestureType& gestureType)
 {
     bool testSuccess = false;
-    RefPtr<TestCheckableEventHander> eventHander = AceType::MakeRefPtr<TestCheckableEventHander>(
+    RefPtr<TestCheckableEventHandler> eventHandler = AceType::MakeRefPtr<TestCheckableEventHandler>(
         [this, expectValue, &testSuccess](const std::string& eventId, const std::string& param) mutable {
             std::string value = expectValue;
             std::string expectChangeResult = std::string("\"change\",{\"checked\":").append(value.append("},null"));
@@ -366,7 +366,7 @@ void CheckableComponentTest::TestSwitchChangedEvent(
             testSuccess = true;
         });
 
-    context_->RegisterEventHandler(eventHander);
+    context_->RegisterEventHandler(eventHandler);
 
     CreateSwitchAndRender([this, initValue](const RefPtr<SwitchComponent>& switchComponent) {
         EventMarker changeEvent { TEST_CHANGE_EVENT_ID };
@@ -425,7 +425,7 @@ void CheckableComponentTest::TestRadioChangedEvent(bool clickStatusOn)
     // [radioSelected] only changes via [ChangeEvent] triggered by radio whose [value] is "red".
     bool radioSelected = false;
 
-    RefPtr<TestCheckableEventHander> eventHander = AceType::MakeRefPtr<TestCheckableEventHander>(
+    RefPtr<TestCheckableEventHandler> eventHandler = AceType::MakeRefPtr<TestCheckableEventHandler>(
         [this, &radioSelected](const std::string& eventId, const std::string& param) mutable {
             if (param.find("\"checked\":true") == std::string::npos) {
                 return;
@@ -442,7 +442,7 @@ void CheckableComponentTest::TestRadioChangedEvent(bool clickStatusOn)
             radioSelected = (param == expectChangeResult);
         });
 
-    context_->RegisterEventHandler(eventHander);
+    context_->RegisterEventHandler(eventHandler);
 
     std::list<RefPtr<OHOS::Ace::Component>> children;
     RadioGroupComponent<std::string> radioGroup;

@@ -224,7 +224,7 @@ public:
     void OnJsCallback(const std::string& callbackId, const std::string& data);
     bool OnPageBackPress();
     void OnBackGround();
-    void OnForground();
+    void OnForeground();
     void OnConfigurationUpdated(const std::string& configurationData);
     void OnActive();
     void OnInactive();

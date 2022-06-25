@@ -620,7 +620,7 @@ bool JsFrontend::OnBackPressed()
 void JsFrontend::OnShow()
 {
     if (delegate_) {
-        delegate_->OnForground();
+        delegate_->OnForeground();
         foregroundFrontend_ = true;
     }
 }

@@ -63,7 +63,7 @@ public:
         while (iter != listenerSets_.end()) {
             iter->second.erase(this);
             if (iter->second.empty()) {
-                iter->first->UnregistMediaUpdateCallback();
+                iter->first->UnregisterMediaUpdateCallback();
                 iter = listenerSets_.erase(iter);
             } else {
                 iter++;
@@ -113,7 +113,7 @@ public:
             LOGE("get jsEngine failed");
             return nullptr;
         }
-        jsEngine->RegistMediaUpdateCallback(NapiCallback);
+        jsEngine->RegisterMediaUpdateCallback(NapiCallback);
 
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
@@ -170,7 +170,7 @@ public:
         }
         const std::lock_guard<std::mutex> lock(mutex_);
         if (listenerSets_[AceType::RawPtr(jsEngine)].empty()) {
-            jsEngine->UnregistMediaUpdateCallback();
+            jsEngine->UnregisterMediaUpdateCallback();
             listenerSets_.erase(AceType::RawPtr(jsEngine));
         }
         return nullptr;

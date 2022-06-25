@@ -481,7 +481,7 @@ protected:
     int32_t dragPosColumnIndex_ = -1;
 
     // The index of the item currently being dragged.
-    int32_t dragingItemIndex_ = -1;
+    int32_t draggingItemIndex_ = -1;
 
     // Whether to send changes to the grid where the drag coordinate is located
     bool dragPosChanged_ = false;
@@ -506,7 +506,7 @@ protected:
 
     bool reEnter_ = false;
 
-    WeakPtr<RenderNode> dragingItemRenderNode_;
+    WeakPtr<RenderNode> draggingItemRenderNode_;
     WeakPtr<RenderGridLayout> subGrid_;
     WeakPtr<RenderGridLayout> mainGrid_;
     RefPtr<GridLayoutComponent> component_;

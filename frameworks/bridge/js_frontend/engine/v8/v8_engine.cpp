@@ -865,19 +865,19 @@ void SetSwipeToDismiss(const v8::FunctionCallbackInfo<v8::Value>& args, int32_t 
         return;
     }
 
-    bool forbideQuit = false;
+    bool forbidQuit = false;
     v8::Local<v8::Value> flag = arrayVal->Get(context, 0).ToLocalChecked();
     if (flag->IsBoolean()) {
-        forbideQuit = flag->BooleanValue(isolate);
+        forbidQuit = flag->BooleanValue(isolate);
     }
 
     auto delegate = static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8EngineInstance::FRONTEND_DELEGATE));
     WeakPtr<PipelineContext> pipelineContextWeak = (*delegate)->GetPipelineContext();
     auto uiTaskExecutor = (*delegate)->GetUiTask();
-    uiTaskExecutor.PostTask([pipelineContextWeak, forbideQuit]() mutable {
+    uiTaskExecutor.PostTask([pipelineContextWeak, forbidQuit]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
-            pipelineContext->SetForbidePlatformQuit(forbideQuit);
+            pipelineContext->SetForbidPlatformQuit(forbidQuit);
         }
     });
 }

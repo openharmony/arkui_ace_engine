@@ -140,11 +140,11 @@ private:
 
 namespace StringUtils {
 
-inline void StringSpliter(const std::string& source, char delimiter, std::vector<Color>& out)
+inline void StringSplitter(const std::string& source, char delimiter, std::vector<Color>& out)
 {
     using Func = Color (*)(const std::string&);
     Func func = [](const std::string& value) { return Color::FromString(value); };
-    StringSpliter(source, delimiter, func, out);
+    StringSplitter(source, delimiter, func, out);
 }
 
 } // namespace StringUtils

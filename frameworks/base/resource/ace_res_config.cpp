@@ -730,7 +730,7 @@ std::string AceResConfig::GetCurrentDeviceResTag()
 {
     ResolutionType resolutionType = AceResConfig::GetResolutionType(SystemProperties::GetResolution());
     AceResConfig deviceResConfig = AceResConfig(SystemProperties::GetMcc(), SystemProperties::GetMnc(),
-        SystemProperties::GetDevcieOrientation(), SystemProperties::GetColorMode(),
+        SystemProperties::GetDeviceOrientation(), SystemProperties::GetColorMode(),
         SystemProperties::GetParamDeviceType() == "tablet" ? DeviceType::TABLET : SystemProperties::GetDeviceType(),
         resolutionType);
     return AceResConfig::ConvertResConfigToTag(deviceResConfig, false);
@@ -747,7 +747,7 @@ std::string AceResConfig::GetCurrentDeviceDeclarativeResTag()
     AceResConfig deviceResConfig;
 
     deviceResConfig = AceResConfig(language, script, region, longScreenType, SystemProperties::GetScreenShape(),
-        SystemProperties::GetDevcieOrientation(), SystemProperties::GetColorMode(),
+        SystemProperties::GetDeviceOrientation(), SystemProperties::GetColorMode(),
         SystemProperties::GetParamDeviceType() == "tablet" ? DeviceType::TABLET : SystemProperties::GetDeviceType(),
         resolutionType);
 

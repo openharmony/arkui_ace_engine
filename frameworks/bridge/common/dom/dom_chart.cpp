@@ -149,7 +149,7 @@ bool DOMChart::SetSpecializedStyle(const std::pair<std::string, std::string>& st
         { DOM_COLORS_ARRAY,
             [](const std::string& val, DOMChart& chart) {
                 chart.colors_.clear();
-                StringUtils::StringSpliter(val, ',', chart.colors_);
+                StringUtils::StringSplitter(val, ',', chart.colors_);
             } },
         { DOM_TEXT_FONT_FAMILY,
             [](const std::string& val, DOMChart& chart) {
@@ -182,7 +182,7 @@ bool DOMChart::SetSpecializedStyle(const std::pair<std::string, std::string>& st
         { DOM_WEIGHTS_ARRAY,
             [](const std::string& val, DOMChart& chart) {
                 chart.weights_.clear();
-                StringUtils::StringSpliter(val, ',', chart.weights_);
+                StringUtils::StringSplitter(val, ',', chart.weights_);
             } },
     };
     auto operatorIter =
@@ -201,7 +201,7 @@ void DOMChart::OnSetStyleFinished()
         colors_.push_back(ParseColor(LIGHT_RED_COLOR));
         colors_.push_back(ParseColor(LIGHT_GREEN_COLOR));
         colors_.push_back(ParseColor(LIGHT_BLUE_COLOR));
-        // equally seprate the range
+        // equally separate the range
         weights_.push_back(1);
         weights_.push_back(1);
         weights_.push_back(1);
@@ -459,7 +459,7 @@ void DOMChart::CallSpecializedMethod(const std::string& method, const std::strin
     lineData_[seriesNum_].first = position_;
     lineData_[seriesNum_].second = isResetPosition_;
 
-    UpdateTopButtomPoint(chartDatas);
+    UpdateTopBottomPoint(chartDatas);
 
     chartChild_->SetMainCharts(chartDatas);
     auto node = DOMNode::GetRootComponent();
@@ -472,7 +472,7 @@ void DOMChart::CallSpecializedMethod(const std::string& method, const std::strin
     pipelineContext->ScheduleUpdate(node);
 }
 
-void DOMChart::UpdateTopButtomPoint(std::vector<MainChart>& data)
+void DOMChart::UpdateTopBottomPoint(std::vector<MainChart>& data)
 {
     Point bottomPt = Point(0, 0);
     Point topPt = Point(0, 0);

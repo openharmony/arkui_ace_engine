@@ -2369,9 +2369,9 @@ void PipelineContext::NotifyRouterBackDismiss() const
 void PipelineContext::NotifyPopPageSuccessDismiss(const std::string& pageUrl, const int32_t pageId) const
 {
     CHECK_RUN_ON(UI);
-    for (auto& iterPopSuccessHander : popPageSuccessEventHandler_) {
-        if (iterPopSuccessHander) {
-            iterPopSuccessHander(pageUrl, pageId);
+    for (auto& iterPopSuccessHandler : popPageSuccessEventHandler_) {
+        if (iterPopSuccessHandler) {
+            iterPopSuccessHandler(pageUrl, pageId);
         }
     }
 }
@@ -2389,9 +2389,9 @@ void PipelineContext::NotifyIsPagePathInvalidDismiss(bool isPageInvalid) const
 void PipelineContext::NotifyDestroyEventDismiss() const
 {
     CHECK_RUN_ON(UI);
-    for (auto& iterDestroyEventHander : destroyEventHandler_) {
-        if (iterDestroyEventHander) {
-            iterDestroyEventHander();
+    for (auto& iterDestroyEventHandler : destroyEventHandler_) {
+        if (iterDestroyEventHandler) {
+            iterDestroyEventHandler();
         }
     }
 }
@@ -2399,9 +2399,9 @@ void PipelineContext::NotifyDestroyEventDismiss() const
 void PipelineContext::NotifyDispatchTouchEventDismiss(const TouchEvent& event) const
 {
     CHECK_RUN_ON(UI);
-    for (auto& iterDispatchTouchEventHander : dispatchTouchEventHandler_) {
-        if (iterDispatchTouchEventHander) {
-            iterDispatchTouchEventHander(event);
+    for (auto& iterDispatchTouchEventHandler : dispatchTouchEventHandler_) {
+        if (iterDispatchTouchEventHandler) {
+            iterDispatchTouchEventHandler(event);
         }
     }
 }
@@ -3571,9 +3571,9 @@ bool PipelineContext::GetIsDeclarative() const
     return false;
 }
 
-void PipelineContext::SetForbidePlatformQuit(bool forbidePlatformQuit)
+void PipelineContext::SetForbidPlatformQuit(bool forbidPlatformQuit)
 {
-    forbidePlatformQuit_ = forbidePlatformQuit;
+    forbidPlatformQuit_ = forbidPlatformQuit;
     auto stageElement = GetStageElement();
     if (!stageElement) {
         LOGE("Stage is null.");
@@ -3584,7 +3584,7 @@ void PipelineContext::SetForbidePlatformQuit(bool forbidePlatformQuit)
         LOGE("RenderStage is null.");
         return;
     }
-    renderStage->SetForbidSwipeToRight(forbidePlatformQuit_);
+    renderStage->SetForbidSwipeToRight(forbidPlatformQuit_);
 }
 
 void PipelineContext::AddLayoutTransitionNode(const RefPtr<RenderNode>& node)

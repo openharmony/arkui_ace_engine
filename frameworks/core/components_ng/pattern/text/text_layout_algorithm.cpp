@@ -85,7 +85,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
 
     paragraph_ = Paragraph::Create(context, paraStyle, &fontCollection);
     paragraph_->PushStyle(textStyle);
-    StringUtils::TransfromStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
+    StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
     paragraph_->AddText(StringUtils::Str8ToStr16(content));
     paragraph_->Build();
     return true;

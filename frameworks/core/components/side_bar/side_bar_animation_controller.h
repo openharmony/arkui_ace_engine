@@ -92,7 +92,7 @@ public:
     void PlaySideBarContainerToAnimation(SideStatus status);
 
 private:
-    void CreateAniamtion();
+    void CreateAnimation();
     void PlayHideAnimation();
     void StopHideAnimation();
     void PlayShowAnimation();

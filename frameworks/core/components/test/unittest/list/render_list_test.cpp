@@ -220,7 +220,7 @@ HWTEST_F(RenderListTest, RenderListTest004, TestSize.Level1)
      */
     std::string scrollEventId = "list_scroll_id";
     index_ = 0;
-    RefPtr<TestListEventHander> eventHander = AceType::MakeRefPtr<TestListEventHander>(
+    RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
         [this, scrollEventId](const std::string& eventId, const std::string& param) {
             std::string scrollResult = std::string("\"scroll\",{\"scrollX\":")
                                            .append(std::to_string(450.0 * (index_ % 3)))
@@ -233,7 +233,7 @@ HWTEST_F(RenderListTest, RenderListTest004, TestSize.Level1)
             EXPECT_EQ(eventId, scrollEventId);
             index_++;
         });
-    mockContext_->RegisterEventHandler(eventHander);
+    mockContext_->RegisterEventHandler(eventHandler);
 
     /**
      * @tc.steps: step2. Create RenderList and add 10 child by row Direction.
@@ -269,13 +269,13 @@ HWTEST_F(RenderListTest, RenderListTest005, TestSize.Level1)
      * @tc.expected: step1. Event listener create success.
      */
     std::string scrollEventId = "list_scrollbottom_id";
-    RefPtr<TestListEventHander> eventHander = AceType::MakeRefPtr<TestListEventHander>(
+    RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
         [this, scrollEventId](const std::string& eventId, const std::string& param) {
             std::string ret = std::string("\"scrollbottom\",null");
             EXPECT_EQ(param, ret);
             EXPECT_EQ(eventId, scrollEventId);
         });
-    mockContext_->RegisterEventHandler(eventHander);
+    mockContext_->RegisterEventHandler(eventHandler);
 
     /**
      * @tc.steps: step2. Create RenderList and add 10 child by COLUMN Direction.
@@ -311,14 +311,14 @@ HWTEST_F(RenderListTest, RenderListTest006, TestSize.Level1)
      */
     std::string scrollEventId = "list_scrolltop_id";
     index_ = 0;
-    RefPtr<TestListEventHander> eventHander = AceType::MakeRefPtr<TestListEventHander>(
+    RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
         [this, scrollEventId](const std::string& eventId, const std::string& param) {
             std::string ret = std::string("\"scrolltop\",null");
             EXPECT_EQ(param, ret);
             EXPECT_EQ(eventId, scrollEventId);
             index_++;
         });
-    mockContext_->RegisterEventHandler(eventHander);
+    mockContext_->RegisterEventHandler(eventHandler);
 
     /**
      * @tc.steps: step2. Create RenderList and add 10 child by ROW_REVERSE Direction.
@@ -354,14 +354,14 @@ HWTEST_F(RenderListTest, RenderListTest007, TestSize.Level1)
      */
     std::string scrollEventId = "list_scrollend_id";
     index_ = 0;
-    RefPtr<TestListEventHander> eventHander = AceType::MakeRefPtr<TestListEventHander>(
+    RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
         [this, scrollEventId](const std::string& eventId, const std::string& param) {
             std::string ret = std::string("\"scrollend\",null");
             EXPECT_EQ(param, ret);
             EXPECT_EQ(eventId, scrollEventId);
             index_++;
         });
-    mockContext_->RegisterEventHandler(eventHander);
+    mockContext_->RegisterEventHandler(eventHandler);
 
     /**
      * @tc.steps: step2. Create RenderList and add 10 child by COLUMN_REVERSE Direction.
@@ -395,14 +395,14 @@ HWTEST_F(RenderListTest, RenderListTest008, TestSize.Level1)
      */
     std::string scrollEventId = "list_scrolltouchup_id";
     index_ = 0;
-    RefPtr<TestListEventHander> eventHander = AceType::MakeRefPtr<TestListEventHander>(
+    RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
         [this, scrollEventId](const std::string& eventId, const std::string& param) {
             std::string ret = std::string("\"scrolltouchup\",null");
             EXPECT_EQ(param, ret);
             EXPECT_EQ(eventId, scrollEventId);
             index_++;
         });
-    mockContext_->RegisterEventHandler(eventHander);
+    mockContext_->RegisterEventHandler(eventHandler);
 
     /**
      * @tc.steps: step2. Create RenderList and add 10 child by ROW Direction.
@@ -1771,7 +1771,7 @@ HWTEST_F(RenderListTest, AceListExpansion006, TestSize.Level1)
             RefPtr<RenderNode> node = ListTestUtils::CreateRenderItemGroup(300.0, 200.0, mockContext_, true, false);
             std::string scrollEventId = "groupclick_id";
             index_ = 0;
-            RefPtr<TestListEventHander> eventHander = AceType::MakeRefPtr<TestListEventHander>(
+            RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
                 [this, scrollEventId](const std::string& eventId, const std::string& param) {
                     std::string scrollResult = std::string("\"")
                                                    .append(LIST_ITEM_GROUP_EVENT_GROUPCLICK)
@@ -1783,7 +1783,7 @@ HWTEST_F(RenderListTest, AceListExpansion006, TestSize.Level1)
                     EXPECT_EQ(eventId, scrollEventId);
                     index_++;
                 });
-            mockContext_->RegisterEventHandler(eventHander);
+            mockContext_->RegisterEventHandler(eventHandler);
             renderList_->AddListItem(index, node);
         } else {
             RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(300.0, 200.0, mockContext_);
@@ -1842,7 +1842,7 @@ HWTEST_F(RenderListTest, AceListExpansion007, TestSize.Level1)
             RefPtr<RenderNode> node = ListTestUtils::CreateRenderItemGroup(300.0, 200.0, mockContext_, true, false);
             std::string scrollEventId = "groupcollapse_id";
             index_ = 0;
-            RefPtr<TestListEventHander> eventHander = AceType::MakeRefPtr<TestListEventHander>(
+            RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
                 [this, scrollEventId](const std::string& eventId, const std::string& param) {
                     std::string scrollResult = std::string("\"")
                                                    .append(LIST_ITEM_GROUP_EVENT_GROUPCLICK)
@@ -1854,7 +1854,7 @@ HWTEST_F(RenderListTest, AceListExpansion007, TestSize.Level1)
                     EXPECT_EQ(eventId, scrollEventId);
                     index_++;
                 });
-            mockContext_->RegisterEventHandler(eventHander);
+            mockContext_->RegisterEventHandler(eventHandler);
             renderList_->AddListItem(index, node);
         } else {
             RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(300.0, 200.0, mockContext_);
@@ -1913,7 +1913,7 @@ HWTEST_F(RenderListTest, AceListExpansion008, TestSize.Level1)
             RefPtr<RenderNode> node = ListTestUtils::CreateRenderItemGroup(300.0, 200.0, mockContext_, true, false);
             std::string scrollEventId = "groupexpand_id";
             index_ = 0;
-            RefPtr<TestListEventHander> eventHander = AceType::MakeRefPtr<TestListEventHander>(
+            RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
                 [this, scrollEventId](const std::string& eventId, const std::string& param) {
                     std::string scrollResult = std::string("\"")
                                                    .append(LIST_ITEM_GROUP_EVENT_GROUPCLICK)
@@ -1925,7 +1925,7 @@ HWTEST_F(RenderListTest, AceListExpansion008, TestSize.Level1)
                     EXPECT_EQ(eventId, scrollEventId);
                     index_++;
                 });
-            mockContext_->RegisterEventHandler(eventHander);
+            mockContext_->RegisterEventHandler(eventHandler);
             renderList_->AddListItem(index, node);
         } else {
             RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(300.0, 200.0, mockContext_);

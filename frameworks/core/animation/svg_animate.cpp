@@ -28,9 +28,9 @@ bool SvgAnimate::GetValuesRange(std::vector<float>& from, std::vector<float>& to
     }
 
     char tag = (from_.find(',') != std::string::npos) ? ',' : ' ';
-    StringUtils::StringSpliter(from_, tag, from);
+    StringUtils::StringSplitter(from_, tag, from);
     tag = (to_.find(',') != std::string::npos) ? ',' : ' ';
-    StringUtils::StringSpliter(to_, tag, to);
+    StringUtils::StringSplitter(to_, tag, to);
     if (to.empty()) {
         return false;
     }
@@ -49,7 +49,7 @@ bool SvgAnimate::GetFrames(std::vector<std::vector<float>>& frames, std::string&
     std::vector<float> frame;
     for (const auto& value : values_) {
         char tag = (value.find(',') != std::string::npos) ? ',' : ' ';
-        StringUtils::StringSpliter(value, tag, frame);
+        StringUtils::StringSplitter(value, tag, frame);
         if (!SvgTransform::AlignmentFrame(type, frame)) {
             return false;
         }

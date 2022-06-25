@@ -247,10 +247,10 @@ class MockEventHandler : public AceEventHandler {
         const bool isDestroy) override {};
 };
 
-class TestListEventHander : public MockEventHandler {
+class TestListEventHandler : public MockEventHandler {
 public:
-    explicit TestListEventHander(ListEventCallback eventCallback) : eventCallback_(eventCallback) {}
-    ~TestListEventHander() = default;
+    explicit TestListEventHandler(ListEventCallback eventCallback) : eventCallback_(eventCallback) {}
+    ~TestListEventHandler() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)
     {

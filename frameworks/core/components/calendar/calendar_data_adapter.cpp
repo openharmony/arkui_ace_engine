@@ -350,7 +350,7 @@ void CalendarDataAdapter::SetOffDays(CalendarDay& dayInfo)
 {
     auto weekday = Date::CalculateWeekDay(dayInfo.month.year, dayInfo.month.month + 1, dayInfo.day);
     std::vector<std::string> days;
-    StringUtils::StringSpliter(offDays_, ',', days);
+    StringUtils::StringSplitter(offDays_, ',', days);
     bool setOffDay = true;
     for (const auto& day : days) {
         auto num = StringUtils::StringToInt(day);

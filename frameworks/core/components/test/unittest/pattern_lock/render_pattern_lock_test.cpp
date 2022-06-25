@@ -57,10 +57,10 @@ Offset GetPointOutOfActiveAreaBoundary(const Offset& cellCenter)
 {
     return Offset(cellCenter.GetX() + UT_CIRCLE_ACTIVE_RADIUS.Value() + 1, cellCenter.GetY());
 }
-class TestPatternLockEventHander : public AceEventHandler {
+class TestPatternLockEventHandler : public AceEventHandler {
 public:
-    explicit TestPatternLockEventHander(PatternLockEventCallback eventCallback) : eventCallback_(eventCallback) {}
-    ~TestPatternLockEventHander() = default;
+    explicit TestPatternLockEventHandler(PatternLockEventCallback eventCallback) : eventCallback_(eventCallback) {}
+    ~TestPatternLockEventHandler() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param) override {};
     void HandleAsyncEvent(const EventMarker& eventMarker) override {};
@@ -569,7 +569,7 @@ HWTEST_F(RenderPatternLockTest, RenderPatternLockHandleReset002_ByController, Te
 HWTEST_F(RenderPatternLockTest, RenderPatternLockEvent001, TestSize.Level1)
 {
     std::string lockEventId = "patternCompleteEvent";
-    RefPtr<TestPatternLockEventHander> eventHandler = AceType::MakeRefPtr<TestPatternLockEventHander>(
+    RefPtr<TestPatternLockEventHandler> eventHandler = AceType::MakeRefPtr<TestPatternLockEventHandler>(
         [this, lockEventId](const std::string& eventId, const BaseEventInfo& info) {
             GTEST_LOG_(INFO) << "RenderPatternLockEvent001 handler run";
             auto lockEvent = TypeInfoHelper::DynamicCast<V2::PatternCompleteEvent>(&info);

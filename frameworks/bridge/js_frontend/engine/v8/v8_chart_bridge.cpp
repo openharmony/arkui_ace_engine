@@ -444,7 +444,7 @@ void ParseTextInfoAndSegmentInfo(v8::Local<v8::Context> ctx, v8::Local<v8::Value
         }
     } else if (strcmp(keyStr, "lineDash") == 0) {
         std::vector<std::string> dash;
-        StringUtils::StringSpliter(valStr, ',', dash);
+        StringUtils::StringSplitter(valStr, ',', dash);
         if (dash.size() == 1 || dash.size() == 3) {
             if (dash[0] == "dashed") {
                 segmentInfo.SetLineType(LineType::DASHED);
