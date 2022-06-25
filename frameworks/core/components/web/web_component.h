@@ -55,6 +55,39 @@ enum DialogEventType {
 
 constexpr int default_text_zoom_atio = 100;
 
+class HitTestResult : public virtual AceType {
+    DECLARE_ACE_TYPE(HitTestResult, AceType);
+
+public:
+    HitTestResult(const std::string& extraData, int hitType) : extraData_(extraData), hitType_(hitType) {}
+    HitTestResult() = default;
+    ~HitTestResult() = default;
+
+    const std::string& GetExtraData() const
+    {
+        return extraData_;
+    }
+
+    void SetExtraData(const std::string& extraData)
+    {
+        extraData_ = extraData;
+    }
+
+    int GetHitType() const
+    {
+        return hitType_;
+    }
+
+    void SetHitTpye(int hitType)
+    {
+        hitType_ = hitType;
+    }
+
+private:
+    std::string extraData_;
+    int hitType_ = static_cast<int>(WebHitTestType::UNKNOWN);
+};
+
 class WebCookie : public virtual AceType {
     DECLARE_ACE_TYPE(WebCookie, AceType);
 
@@ -370,13 +403,24 @@ public:
     {
         if (getHitTestResultImpl_) {
             return getHitTestResultImpl_();
-        } else {
-            return 0;
         }
+        return 0;
     }
-    void SetGetHitTestResultImpl(GetHitTestResultImpl && getHitTestResultImpl)
+    void SetGetHitTestResultImpl(GetHitTestResultImpl&& getHitTestResultImpl)
     {
         getHitTestResultImpl_ = std::move(getHitTestResultImpl);
+    }
+
+    using GetHitTestValueImpl = std::function<void(HitTestResult&)>;
+    void GetHitTestValue(HitTestResult& result)
+    {
+        if (getHitTestValueImpl_) {
+            getHitTestValueImpl_(result);
+        }
+    }
+    void SetGetHitTestValueImpl(GetHitTestValueImpl&& getHitTestValueImpl)
+    {
+        getHitTestValueImpl_ = getHitTestValueImpl;
     }
 
     WebCookie* GetCookieManager()
@@ -432,6 +476,19 @@ public:
     void SetGetTitleImpl(GetTitleImpl&& getTitleImpl)
     {
         getTitleImpl_ = getTitleImpl;
+    }
+
+    using GetDefaultUserAgentImpl = std::function<std::string()>;
+    std::string GetDefaultUserAgent()
+    {
+        if (getDefaultUserAgentImpl_) {
+            return getDefaultUserAgentImpl_();
+        }
+        return "";
+    }
+    void SetGetDefaultUserAgentImpl(GetDefaultUserAgentImpl&& getDefaultUserAgentImpl)
+    {
+        getDefaultUserAgentImpl_ = getDefaultUserAgentImpl;
     }
 
     using SetCookieImpl = std::function<bool(const std::string&, const std::string&)>;
@@ -572,9 +629,11 @@ private:
     RefreshImpl refreshImpl_;
     StopLoadingImpl stopLoadingImpl_;
     GetHitTestResultImpl getHitTestResultImpl_;
+    GetHitTestValueImpl getHitTestValueImpl_;
     GetPageHeightImpl getPageHeightImpl_;
     GetWebIdImpl getWebIdImpl_;
     GetTitleImpl getTitleImpl_;
+    GetDefaultUserAgentImpl getDefaultUserAgentImpl_;
     SaveCookieSyncImpl saveCookieSyncImpl_;
     SetCookieImpl setCookieImpl_;
     GetCookieImpl getCookieImpl_;
