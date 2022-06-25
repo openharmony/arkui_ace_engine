@@ -2371,7 +2371,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
         return false;
     }
 
-    auto themeConstants = GetThemeConstants();
+    auto themeConstants = GetThemeConstants(jsObj);
     if (!themeConstants) {
         LOGE("themeConstants is nullptr");
         return false;
@@ -2427,7 +2427,7 @@ bool JSViewAbstract::ParseJsDouble(const JSRef<JSVal>& jsValue, double& result)
         return false;
     }
 
-    auto themeConstants = GetThemeConstants();
+    auto themeConstants = GetThemeConstants(jsObj);
     if (!themeConstants) {
         LOGW("themeConstants is nullptr");
         return false;
@@ -2456,7 +2456,7 @@ bool JSViewAbstract::ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result)
         return false;
     }
 
-    auto themeConstants = GetThemeConstants();
+    auto themeConstants = GetThemeConstants(jsObj);
     if (!themeConstants) {
         LOGW("themeConstants is nullptr");
         return false;
@@ -2485,7 +2485,7 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
         return false;
     }
 
-    auto themeConstants = GetThemeConstants();
+    auto themeConstants = GetThemeConstants(jsObj);
     if (!themeConstants) {
         LOGW("themeConstants is nullptr");
         return false;
@@ -2512,7 +2512,7 @@ bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vecto
         return false;
     }
 
-    auto themeConstants = GetThemeConstants();
+    auto themeConstants = GetThemeConstants(jsObj);
     if (!themeConstants) {
         LOGW("themeConstants is nullptr");
         return false;
@@ -2547,7 +2547,7 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         return false;
     }
 
-    auto themeConstants = GetThemeConstants();
+    auto themeConstants = GetThemeConstants(jsObj);
     if (!themeConstants) {
         LOGW("themeConstants is nullptr");
         return false;
@@ -2596,7 +2596,7 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
     JSRef<JSVal> type = jsObj->GetProperty("type");
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (!resId->IsNull() && !type->IsNull() && type->IsNumber() && resId->IsNumber()) {
-        auto themeConstants = GetThemeConstants();
+        auto themeConstants = GetThemeConstants(jsObj);
         if (!themeConstants) {
             LOGW("themeConstants is nullptr");
             return false;
@@ -2654,7 +2654,7 @@ bool JSViewAbstract::ParseJsBool(const JSRef<JSVal>& jsValue, bool& result)
         return false;
     }
 
-    auto themeConstants = GetThemeConstants();
+    auto themeConstants = GetThemeConstants(jsObj);
     if (!themeConstants) {
         LOGW("themeConstants is nullptr");
         return false;
@@ -2718,7 +2718,7 @@ bool JSViewAbstract::ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vecto
         return false;
     }
 
-    auto themeConstants = GetThemeConstants();
+    auto themeConstants = GetThemeConstants(jsObj);
     if (!themeConstants) {
         LOGW("themeConstants is nullptr");
         return false;
@@ -2772,7 +2772,7 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         return false;
     }
 
-    auto themeConstants = GetThemeConstants();
+    auto themeConstants = GetThemeConstants(jsObj);
     if (!themeConstants) {
         LOGW("themeConstants is nullptr");
         return false;
@@ -4508,8 +4508,18 @@ void JSViewAbstract::SetDirection(const std::string& dir)
     }
 }
 
-RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants()
+RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& jsObj)
 {
+    std::string bundleName = "";
+    std::string moduleName = "";
+    if (!jsObj->IsUndefined()) {
+        JSRef<JSVal> bundle = jsObj->GetProperty("bundleName");
+        JSRef<JSVal> module = jsObj->GetProperty("moduleName");
+        if (bundle->IsString() && module->IsString()) {
+            bundleName = bundle->ToString();
+            moduleName = module->ToString();
+        }
+    }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
         auto pluginContainer = PluginManager::GetInstance().GetPluginSubContainer(Container::CurrentId());
@@ -4527,7 +4537,7 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants()
             LOGE("pluginThemeManager is null!");
             return nullptr;
         }
-        return pluginThemeManager->GetThemeConstants();
+        return pluginThemeManager->GetThemeConstants(bundleName, moduleName);
     }
 #endif
     auto container = Container::Current();
@@ -4545,7 +4555,7 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants()
         LOGE("themeManager is null!");
         return nullptr;
     }
-    return themeManager->GetThemeConstants();
+    return themeManager->GetThemeConstants(bundleName, moduleName);
 }
 
 void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)

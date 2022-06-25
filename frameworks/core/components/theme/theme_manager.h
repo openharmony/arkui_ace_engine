@@ -73,8 +73,10 @@ public:
      */
     Color GetBackgroundColor() const;
 
-    RefPtr<ThemeConstants> GetThemeConstants() const
+    RefPtr<ThemeConstants> GetThemeConstants(const std::string& bundleName = "",
+                                             const std::string& moduleName = "") const
     {
+        themeConstants_->UpdateThemeConstants(bundleName, moduleName);
         return themeConstants_;
     }
 

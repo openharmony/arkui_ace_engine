@@ -26,6 +26,7 @@ ohos_unittest("ThemeManagerTest") {
   sources = [
     #base
     "$ace_root/frameworks/base/log/ace_trace.cpp",
+    "$ace_root/frameworks/core/mock/mock_ace_container.cpp",
 
     # properties
     "$ace_root/frameworks/core/components/common/properties/border.cpp",

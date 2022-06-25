@@ -45,6 +45,7 @@ public:
     bool GetBoolean(uint32_t resId) const override;
     std::string GetMediaPath(uint32_t resId) override;
     std::string GetRawfile(const std::string& fileName) override;
+    void UpdateResourceManager(const std::string& bundleName, const std::string& moduleName) override;
 
 private:
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_;
