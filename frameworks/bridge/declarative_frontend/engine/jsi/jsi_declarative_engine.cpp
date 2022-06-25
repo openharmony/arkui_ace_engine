@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
 #include <unistd.h>
+#include "scope_manager/native_scope_manager.h"
 
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
@@ -667,11 +668,11 @@ void JsiDeclarativeEngine::Destroy()
 #endif
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
+    engineInstance_->DestroyAllRootViewHandle();
     if (!runtime_ && nativeEngine_ != nullptr) {
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
 #endif
-        engineInstance_->DestroyAllRootViewHandle();
         nativeEngine_->DeleteEngine();
         delete nativeEngine_;
         nativeEngine_ = nullptr;
@@ -1311,6 +1312,8 @@ void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativ
 {
     LOGI("SetContext instanceId:%{public}d", instanceId);
 #ifdef USE_ARK_ENGINE
+    NativeScopeManager* scopeManager = nativeEngine_->GetScopeManager();
+    auto nativeScope = scopeManager->Open();
     NativeValue* value = *nativeValue;
     Global<JSValueRef> globalRef = *value;
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
@@ -1318,6 +1321,7 @@ void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativ
         LOGE("SetContext null ark runtime");
         return;
     }
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     auto localRef = globalRef.ToLocal(arkRuntime->GetEcmaVm());
     std::shared_ptr<JsValue> jsValue = std::make_shared<ArkJSValue>(arkRuntime, localRef);
     if (jsValue->IsObject(arkRuntime)) {
@@ -1325,6 +1329,7 @@ void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativ
     } else {
         LOGI("SetContext instanceId:%{public}d invalid context", instanceId);
     }
+    scopeManager->Close(nativeScope);
 #endif
 }
 
