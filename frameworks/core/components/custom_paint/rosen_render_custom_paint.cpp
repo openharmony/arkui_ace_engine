@@ -157,7 +157,7 @@ RosenRenderCustomPaint::~RosenRenderCustomPaint()
     if (!pipeline) {
         return;
     }
-    pipeline->PostTaskToRS([this]() { environment_ = nullptr; });
+    pipeline->PostTaskToRT([this]() { environment_ = nullptr; });
 #endif
 }
 
@@ -176,7 +176,7 @@ void RosenRenderCustomPaint::InitializeEglContext()
     if (!pipeline) {
         return;
     }
-    pipeline->PostTaskToRS([this]() { environment_ = EnvironmentGL::MakeSharedGLContext(); });
+    pipeline->PostTaskToRT([this]() { environment_ = EnvironmentGL::MakeSharedGLContext(); });
     if (!environment_) {
         LOGE("Make shared GLContext failed.");
         return;
