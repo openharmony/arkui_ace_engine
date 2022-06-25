@@ -25,6 +25,7 @@ class EcmaVM;
 
 namespace OHOS::Ace::Framework {
 using EcmaVM = panda::ecmascript::EcmaVM;
+using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -32,7 +33,8 @@ extern "C" {
 #endif
 #endif /* End of #ifdef __cplusplus */
 
-bool StartDebug(const std::string& componentName, void *vm, bool isDebugMode, int32_t instanceId);
+bool StartDebug(const std::string& componentName, void* vm, bool isDebugMode, int32_t instanceId,
+    const DebuggerPostTask& debuggerPostTask);
 
 void StopDebug(const std::string& componentName);
 
@@ -47,15 +49,14 @@ public:
     Inspector() = default;
     ~Inspector() = default;
 
-    void OnMessage();
-    void InitializeInspector(const std::string& componentName, int32_t instanceId);
+    void OnMessage(std::string&& msg);
 
-    pthread_t tid_;
+    static constexpr int32_t DELAY_CHECK_DISPATCH_STATUS = 100;
+
+    pthread_t tid_ = 0;
+    void* vm_ = nullptr;
     std::unique_ptr<WsServer> websocketServer_;
-    void *vm_ = nullptr;
-    static constexpr int DEBUGGER_WAIT_SLEEP_TIME = 100;
-    volatile bool waitingForDebugger_ = true;
-    volatile bool isDispatchingMsg_ = false;
+    DebuggerPostTask debuggerPostTask_;
 };
 } // namespace OHOS::Ace::Framework
 

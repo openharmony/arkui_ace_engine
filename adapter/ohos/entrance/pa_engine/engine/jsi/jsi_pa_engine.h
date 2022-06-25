@@ -91,6 +91,7 @@ private:
     void RegisterPaModule();
     void RegisterConsoleModule();
     void EvaluateJsCode();
+    void SetDebuggerPostTask();
 
     std::shared_ptr<JsRuntime> runtime_;
     RefPtr<BackendDelegate> backendDelegate_;

@@ -116,7 +116,8 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string& fileName)
     JSExecutionScope executionScope(vm_);
     if (!libPath_.empty()) {
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
-        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_);
+        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_,
+            debuggerPostTask_);
 #endif
     }
     LocalScope scope(vm_);
