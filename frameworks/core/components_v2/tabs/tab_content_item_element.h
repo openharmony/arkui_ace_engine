@@ -36,6 +36,8 @@ public:
         return barText_;
     }
 
+    void PerformBuild() override;
+
 private:
     std::string barIcon_;
     std::string barText_;
