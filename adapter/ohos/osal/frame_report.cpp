@@ -19,6 +19,8 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
+#include <frame_collector.h>
+
 #include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace {
@@ -95,6 +97,11 @@ void FrameReport::Init()
 
 int FrameReport::GetEnable()
 {
+    return true;
+}
+
+int FrameReport::GetFrameReportEnable()
+{
     if (!frameSchedSoLoaded_) {
         return 0;
     }
@@ -102,13 +109,17 @@ int FrameReport::GetEnable()
     if (frameGetEnableFunc_ != nullptr) {
         return frameGetEnableFunc_();
     } else {
-        LOGE("frame-ace:[GetEnable]load GetSenseSchedEnable function failed!");
+        LOGE("frame-ace:[GetFrameReportEnable]load GetSenseSchedEnable function failed!");
         return 0;
     }
 }
 
 void FrameReport::BeginFlushAnimation()
 {
+    Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::AnimateStart);
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     beginFlushAnimationFunc_ = (BeginFlushAnimationFunc)LoadSymbol("BeginFlushAnimation");
     if (beginFlushAnimationFunc_ != nullptr) {
         beginFlushAnimationFunc_();
@@ -119,6 +130,10 @@ void FrameReport::BeginFlushAnimation()
 
 void FrameReport::EndFlushAnimation()
 {
+    Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::AnimateEnd);
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     endFlushAnimationFunc_ = (EndFlushAnimationFunc)LoadSymbol("EndFlushAnimation");
     if (endFlushAnimationFunc_ != nullptr) {
         endFlushAnimationFunc_();
@@ -129,6 +144,10 @@ void FrameReport::EndFlushAnimation()
 
 void FrameReport::BeginFlushBuild()
 {
+    Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::BuildStart);
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     beginFlushBuildFunc_ = (BeginFlushBuildFunc)LoadSymbol("BeginFlushBuild");
     if (beginFlushBuildFunc_ != nullptr) {
         beginFlushBuildFunc_();
@@ -139,6 +158,10 @@ void FrameReport::BeginFlushBuild()
 
 void FrameReport::EndFlushBuild()
 {
+    Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::BuildEnd);
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     endFlushBuildFunc_ = (EndFlushBuildFunc)LoadSymbol("EndFlushBuild");
     if (endFlushBuildFunc_ != nullptr) {
         endFlushBuildFunc_();
@@ -149,6 +172,10 @@ void FrameReport::EndFlushBuild()
 
 void FrameReport::BeginFlushLayout()
 {
+    Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::LayoutStart);
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     beginFlushLayoutFunc_ = (BeginFlushLayoutFunc)LoadSymbol("BeginFlushLayout");
     if (beginFlushLayoutFunc_ != nullptr) {
         beginFlushLayoutFunc_();
@@ -159,6 +186,10 @@ void FrameReport::BeginFlushLayout()
 
 void FrameReport::EndFlushLayout()
 {
+    Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::LayoutEnd);
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     endFlushLayoutFunc_ = (EndFlushLayoutFunc)LoadSymbol("EndFlushLayout");
     if (endFlushLayoutFunc_ != nullptr) {
         endFlushLayoutFunc_();
@@ -169,6 +200,10 @@ void FrameReport::EndFlushLayout()
 
 void FrameReport::BeginFlushRender()
 {
+    Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::DrawStart);
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     beginFlushRenderFunc_ = (BeginFlushRenderFunc)LoadSymbol("BeginFlushRender");
     if (beginFlushRenderFunc_ != nullptr) {
         beginFlushRenderFunc_();
@@ -179,6 +214,9 @@ void FrameReport::BeginFlushRender()
 
 void FrameReport::EndFlushRender()
 {
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     endFlushRenderFunc_ = (EndFlushRenderFunc)LoadSymbol("EndFlushRender");
     if (endFlushRenderFunc_ != nullptr) {
         endFlushRenderFunc_();
@@ -189,6 +227,9 @@ void FrameReport::EndFlushRender()
 
 void FrameReport::BeginFlushRenderFinish()
 {
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     beginFlushRenderFinishFunc_ = (BeginFlushRenderFinishFunc)LoadSymbol("BeginFlushRenderFinish");
     if (beginFlushRenderFinishFunc_ != nullptr) {
         beginFlushRenderFinishFunc_();
@@ -199,6 +240,10 @@ void FrameReport::BeginFlushRenderFinish()
 
 void FrameReport::EndFlushRenderFinish()
 {
+    Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::DrawEnd);
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     endFlushRenderFinishFunc_ = (EndFlushRenderFinishFunc)LoadSymbol("EndFlushRenderFinish");
     if (endFlushRenderFinishFunc_ != nullptr) {
         endFlushRenderFinishFunc_();
@@ -209,6 +254,9 @@ void FrameReport::EndFlushRenderFinish()
 
 void FrameReport::BeginProcessPostFlush()
 {
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     beginProcessPostFunc_ = (BeginProcessPostFlushFunc)LoadSymbol("BeginProcessPostFlush");
     if (beginProcessPostFunc_ != nullptr) {
         beginProcessPostFunc_();
@@ -219,6 +267,9 @@ void FrameReport::BeginProcessPostFlush()
 
 void FrameReport::BeginListFling()
 {
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     beginListFlingFunc_ = (BeginListFlingFunc)LoadSymbol("BeginListFling");
     if (beginListFlingFunc_ != nullptr) {
         beginListFlingFunc_();
@@ -229,6 +280,9 @@ void FrameReport::BeginListFling()
 
 void FrameReport::EndListFling()
 {
+    if (GetFrameReportEnable() == 0) {
+        return;
+    }
     endListFlingFunc_ = (EndListFlingFunc)LoadSymbol("EndListFling");
     if (endListFlingFunc_ != nullptr) {
         endListFlingFunc_();
