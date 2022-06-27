@@ -66,6 +66,7 @@ using VisibilityChangedCallback = std::function<void(const std::map<int64_t, int
 using AcquireStateCallback = std::function<int32_t(const OHOS::AAFwk::Want &want)>;
 using CommandCallback = std::function<void(const OHOS::AAFwk::Want &want, int startId)>;
 using CommandApplicationCallback = std::function<void(const std::string& intent, int startId)>;
+using DumpHeapSnapshotCallback = std::function<void(bool isPrivate)>;
 
 struct BackendDelegateImplBuilder {
     RefPtr<TaskExecutor> taskExecutor;
@@ -96,6 +97,7 @@ struct BackendDelegateImplBuilder {
     AcquireStateCallback acquireStateCallback;
     CommandCallback commandCallback;
     CommandApplicationCallback commandApplicationCallback;
+    DumpHeapSnapshotCallback dumpHeapSnapshotCallback;
     BackendType type;
 };
 
@@ -154,6 +156,7 @@ public:
     void OnDisConnect(const OHOS::AAFwk::Want &want);
     void OnCommand(const OHOS::AAFwk::Want &want, int startId);
     void OnApplicationCommand(const std::string& intent, int startId);
+    void DumpHeapSnapshot(bool isPrivate);
 
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const;
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const;
@@ -227,6 +230,7 @@ private:
     VisibilityChangedCallback visibilityChangedCallback_;
     AcquireStateCallback acquireStateCallback_;
     CommandCallback commandCallback_;
+    DumpHeapSnapshotCallback dumpHeapSnapshotCallback_;
 
     RefPtr<Framework::ManifestParser> manifestParser_;
     BackendType type_ = BackendType::SERVICE;
