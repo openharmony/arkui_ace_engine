@@ -79,8 +79,8 @@ double RenderBoxBase::ConvertMarginToPx(CalcDimension dimension, bool vertical, 
         std::string value = dimension.CalcValue();
         auto node = AceType::Claim(const_cast<RenderBoxBase*>(this));
         return StringExpression::CalculateExp(value, [vertical, node](const Dimension& dim) -> double {
-                return node->NormalizePercentToPx(dim, vertical, false);
-            });
+            return node->NormalizePercentToPx(dim, vertical, false);
+        });
     } else if (dimension.Unit() == DimensionUnit::PERCENT) {
         double parentLimit = 0.0;
         if (vertical) {
@@ -118,8 +118,8 @@ double RenderBoxBase::ConvertDimensionToPx(CalcDimension dimension, bool vertica
         std::string value = dimension.CalcValue();
         auto node = AceType::Claim(const_cast<RenderBoxBase*>(this));
         return StringExpression::CalculateExp(value, [vertical, node](const Dimension& dim) -> double {
-                return node->NormalizePercentToPx(dim, vertical, false);
-            });
+            return node->NormalizePercentToPx(dim, vertical, false);
+        });
     } else if (dimension.Unit() == DimensionUnit::PERCENT) {
         double parentLimit = GetLayoutParam().GetMaxSize().Width();
         if (vertical) {
@@ -274,7 +274,8 @@ void RenderBoxBase::CalculateAutoMargin()
         }
         LayoutParam param = GetLayoutParam();
         if ((flexDir == FlexDirection::COLUMN ||
-            (flexDir == FlexDirection::ROW && displayType_ == DisplayType::BLOCK)) && width_.Value() == -1.0) {
+                (flexDir == FlexDirection::ROW && displayType_ == DisplayType::BLOCK)) &&
+            width_.Value() == -1.0) {
             if (childWidth_ != 0.0) {
                 width = childWidth_;
                 freeSpace = param.GetMaxSize().Width() - width;
@@ -286,7 +287,8 @@ void RenderBoxBase::CalculateAutoMargin()
                 needReCalc_ = true;
             }
         } else if ((flexDir == FlexDirection::COLUMN ||
-            (flexDir == FlexDirection::ROW && displayType_ == DisplayType::BLOCK)) && width_.Value() != -1.0) {
+                       (flexDir == FlexDirection::ROW && displayType_ == DisplayType::BLOCK)) &&
+                   width_.Value() != -1.0) {
             width = width_.Value();
             freeSpace = param.GetMaxSize().Width() - width;
             SetAutoMargin(FlexDirection::COLUMN, freeSpace, true);
@@ -600,15 +602,15 @@ void RenderBoxBase::CalculateSelfLayoutSize()
         width = width > minWidth ? width : minWidth;
         height = height > minHeight ? height : minHeight;
     }
-    // allow force layoutsize for parend
+    // allow force layoutsize for parent
+
     if (layoutSetByParent.GetMaxSize().Width() == layoutSetByParent.GetMinSize().Width()) {
-        width = layoutSetByParent.GetMinSize().Width();
+        width = layoutSetByParent.GetMinSize().Width() - margin_.GetLayoutSize().Width();
     }
     if (layoutSetByParent.GetMaxSize().Height() == layoutSetByParent.GetMinSize().Height()) {
-        height = layoutSetByParent.GetMinSize().Height();
+        height = layoutSetByParent.GetMinSize().Height() - margin_.GetLayoutSize().Height();
     }
     paintSize_ = Size(width, height);
-
     if (context && context->GetIsDeclarative()) {
         // box layout size = paint size + margin size
         if (LessNotEqual(margin_.LeftPx(), 0.0)) {
