@@ -413,7 +413,7 @@ void RenderTransform::PerformLayout()
     Size layoutSize;
     LayoutParam innerLayout;
     Size maxLayoutSize = GetLayoutParam().GetMaxSize();
-    if (maxLayoutSize.IsValid()) {
+    if (!(maxLayoutSize < Size())) {
         innerLayout.SetMaxSize(maxLayoutSize);
         child->Layout(innerLayout);
         layoutSize = child->GetLayoutSize();
