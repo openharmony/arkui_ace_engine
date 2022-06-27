@@ -108,8 +108,8 @@ JSRef<JSObject> CreateEventTargetObject(const BaseEventInfo& info)
     offset->SetProperty<double>("y", localOffset.GetY().ConvertToVp());
     globalOffset->SetProperty<double>("x", (origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp()));
     globalOffset->SetProperty<double>("y", (origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp()));
-    area->SetPropertyObject("pos", offset);
-    area->SetPropertyObject("globalPos", globalOffset);
+    area->SetPropertyObject("position", offset);
+    area->SetPropertyObject("globalPosition", globalOffset);
     area->SetProperty<double>("width", info.GetTarget().area.GetWidth().ConvertToVp());
     area->SetProperty<double>("height", info.GetTarget().area.GetHeight().ConvertToVp());
     target->SetPropertyObject("area", area);
