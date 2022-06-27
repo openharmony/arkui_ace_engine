@@ -37,6 +37,7 @@ public:
     void ScrollPage(const JSCallbackInfo& args);
     void CurrentOffset(const JSCallbackInfo& args);
     void ScrollToIndex(const JSCallbackInfo& args);
+    void ScrollBy(const JSCallbackInfo& args);
 
     const RefPtr<ScrollController>& GetController() const
     {

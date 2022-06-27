@@ -206,6 +206,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onItemDelete", &JSList::ItemDeleteCallback);
     JSClass<JSList>::StaticMethod("onItemMove", &JSList::ItemMoveCallback);
     JSClass<JSList>::StaticMethod("onScrollIndex", &JSList::ScrollIndexCallback);
+    JSClass<JSList>::StaticMethod("onPreScroll", &JSList::PreScrollCallback);
 
     JSClass<JSList>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSList>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -456,6 +457,50 @@ void JSList::ItemDropCallback(const JSCallbackInfo& info)
 void JSList::SetMultiSelectable(bool multiSelectable)
 {
     JSViewSetProperty(&V2::ListComponent::SetMultiSelectable, multiSelectable);
+}
+
+void JSList::PreScrollCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onPreScroll =
+            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
+                (const Dimension& dx, const Dimension& dy) -> ScrollInfo {
+                    LOGE("CCCC ScrollCallback dx: %{public}lf, dy: %{public}lf", dx.Value(), dy.Value());
+                    ScrollInfo scrollInfo { .dx = dx, .dy = dy };
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollInfo);
+                    auto params = ConvertToJSValues(dx, dy);
+                    auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+                    if (result.IsEmpty()) {
+                        LOGE("Error calling onPreScroll, result is empty.");
+                        return scrollInfo;
+                    }
+
+                    if (!result->IsObject()) {
+                        LOGE("Error calling onPreScroll, result is not object.");
+                        return scrollInfo;
+                    }
+
+                    auto resObj = JSRef<JSObject>::Cast(result);
+                    auto dxRemainValue = resObj->GetProperty("dxRemain");
+                    if (dxRemainValue->IsNumber()) {
+                        scrollInfo.dx = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+                    }
+                    auto dyRemainValue = resObj->GetProperty("dyRemain");
+                    if (dyRemainValue->IsNumber()) {
+                        scrollInfo.dy = Dimension(dyRemainValue->ToNumber<float>(), DimensionUnit::VP);
+                    }
+                    LOGE("CCCC ScrollCallback dxRemain: %{public}lf, dyRemain: %{public}lf",
+                        scrollInfo.dx.Value(), scrollInfo.dy.Value());
+                    return scrollInfo;
+                };
+
+        auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        if (!component) {
+            LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListComponent>());
+            return;
+        }
+        component->SetOnPreScroll(onPreScroll);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

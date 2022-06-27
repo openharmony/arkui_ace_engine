@@ -199,9 +199,20 @@ public:
         return listItemAlign_;
     }
 
+    void SetOnPreScroll(const PreScrollCallback& onPreScroll)
+    {
+        onPreScroll_ = onPreScroll;
+    }
+
+    const PreScrollCallback& GetOnPreScroll() const
+    {
+        return onPreScroll_;
+    }
+
 private:
     std::unique_ptr<ItemDivider> itemDivider_;
 
+    PreScrollCallback onPreScroll_;
     OnItemDragStartFunc onItemDragStartId_;
     OnItemDragEnterFunc onItemDragEnterId_;
     OnItemDragMoveFunc onItemDragMoveId_;

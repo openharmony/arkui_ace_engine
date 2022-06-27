@@ -125,72 +125,7 @@ void RenderList::Update(const RefPtr<Component>& component)
     LOGI("cached count: %{public}zu", cachedCount_);
     spaceWidth_ = std::max(NormalizePercentToPx(component_->GetSpace(), vertical_),
         divider ? NormalizePercentToPx(divider->strokeWidth, vertical_) : 0.0);
-
-    if (scrollable_) {
-        scrollable_->SetAxis(axis);
-    } else {
-        auto callback = [weak = AceType::WeakClaim(this)](double offset, int32_t source) {
-            auto renderList = weak.Upgrade();
-
-            if (!renderList) {
-                return false;
-            }
-
-            if (source == SCROLL_FROM_START) {
-                renderList->ProcessDragStart(offset);
-                return true;
-            }
-
-            Offset delta;
-            if (renderList->vertical_) {
-                delta.SetX(0.0);
-                delta.SetY(offset);
-            } else {
-                delta.SetX(offset);
-                delta.SetY(0.0);
-            }
-            renderList->AdjustOffset(delta, source);
-            if ((source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION_SPRING) &&
-                renderList->currentOffset_ >= 0.0) {
-                if (renderList->scrollable_->RelatedScrollEventDoing(Offset(0.0, -offset))) {
-                    return false;
-                }
-            }
-            renderList->ProcessDragUpdate(renderList->GetMainAxis(delta));
-
-            // Stop animator of scroll bar.
-            auto scrollBarProxy = renderList->scrollBarProxy_;
-            if (scrollBarProxy) {
-                scrollBarProxy->StopScrollBarAnimator();
-            }
-            return renderList->UpdateScrollPosition(renderList->GetMainAxis(delta), source);
-        };
-        scrollable_ = AceType::MakeRefPtr<Scrollable>(callback, axis);
-        scrollable_->SetNotifyScrollOverCallBack([weak = AceType::WeakClaim(this)](double velocity) {
-            auto list = weak.Upgrade();
-            if (!list) {
-                return;
-            }
-            list->ProcessScrollOverCallback(velocity);
-        });
-        scrollable_->SetScrollEndCallback([weak = AceType::WeakClaim(this)]() {
-            auto list = weak.Upgrade();
-            if (!list) {
-                LOGW("render list Upgrade fail in scroll end callback");
-                return;
-            }
-            auto proxy = list->scrollBarProxy_;
-            if (proxy) {
-                proxy->StartScrollBarAnimator();
-            }
-            list->listEventFlags_[ListEvents::SCROLL_STOP] = true;
-            list->HandleListEvent();
-        });
-        if (vertical_) {
-            scrollable_->InitRelatedParent(GetParent());
-        }
-        scrollable_->Initialize(context_);
-    }
+    InitScrollable(axis);
     // now only support spring
     if (component_->GetEdgeEffect() == EdgeEffect::SPRING) {
         if (!scrollEffect_ || scrollEffect_->GetEdgeEffect() != EdgeEffect::SPRING) {
@@ -245,6 +180,83 @@ void RenderList::Update(const RefPtr<Component>& component)
     hasWidth_ = component_->GetHasWidth();
     isLaneList_ = (component_->GetLanes() != -1) || (component_->GetLaneConstrain() != std::nullopt);
     MarkNeedLayout();
+}
+
+void RenderList::InitScrollable(Axis axis)
+{
+    if (scrollable_) {
+        scrollable_->SetAxis(axis);
+        scrollable_->SetOnPreScroll(component_->GetOnPreScroll());
+        return;
+    }
+
+    auto callback = [weak = AceType::WeakClaim(this)](double offset, int32_t source) {
+        auto renderList = weak.Upgrade();
+
+        if (!renderList) {
+            return false;
+        }
+
+        if (source == SCROLL_FROM_START) {
+            renderList->ProcessDragStart(offset);
+            return true;
+        }
+
+        Offset delta;
+        if (renderList->vertical_) {
+            delta.SetX(0.0); 
+            delta.SetY(offset);
+        } else {
+            delta.SetX(offset);
+            delta.SetY(0.0);
+        }
+        renderList->AdjustOffset(delta, source);
+        if ((source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION_SPRING) &&
+            renderList->currentOffset_ >= 0.0) {
+            if (renderList->scrollable_->RelatedScrollEventDoing(Offset(0.0, -offset))) {
+                return false;
+            }
+        }
+        renderList->ProcessDragUpdate(renderList->GetMainAxis(delta));
+
+        // Stop animator of scroll bar.
+        auto scrollBarProxy = renderList->scrollBarProxy_;
+        if (scrollBarProxy) {
+            scrollBarProxy->StopScrollBarAnimator();
+        }
+
+        if (renderList->IsReachStart()) {
+            renderList->listEventFlags_[ListEvents::REACH_START] = true;
+            renderList->HandleListEvent();
+        }
+        return renderList->UpdateScrollPosition(renderList->GetMainAxis(delta), source);
+    };
+    scrollable_ = AceType::MakeRefPtr<Scrollable>(callback, axis);
+    scrollable_->SetNotifyScrollOverCallBack([weak = AceType::WeakClaim(this)](double velocity) {
+        auto list = weak.Upgrade();
+        if (!list) {
+            return;
+        }
+        list->ProcessScrollOverCallback(velocity);
+    });
+    scrollable_->SetScrollEndCallback([weak = AceType::WeakClaim(this)]() {
+        auto list = weak.Upgrade();
+        if (!list) {
+            LOGW("render list Upgrade fail in scroll end callback");
+            return;
+        }
+        auto proxy = list->scrollBarProxy_;
+        if (proxy) {
+            proxy->StartScrollBarAnimator();
+        }
+        list->listEventFlags_[ListEvents::SCROLL_STOP] = true;
+        list->HandleListEvent();
+    });
+    scrollable_->SetOnPreScroll(component_->GetOnPreScroll());
+    if (vertical_) {
+        scrollable_->InitRelatedParent(GetParent());
+    }
+    scrollable_->Initialize(context_);
 }
 
 void RenderList::InitScrollBarProxy()

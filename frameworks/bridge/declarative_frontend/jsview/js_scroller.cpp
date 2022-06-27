@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/animation/curves.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/align_declaration.h"
 
 namespace OHOS::Ace::Framework {
@@ -61,6 +62,7 @@ void JSScroller::JSBind(BindingTarget globalObj)
     JSClass<JSScroller>::CustomMethod("scrollPage", &JSScroller::ScrollPage);
     JSClass<JSScroller>::CustomMethod("currentOffset", &JSScroller::CurrentOffset);
     JSClass<JSScroller>::CustomMethod("scrollToIndex", &JSScroller::ScrollToIndex);
+    JSClass<JSScroller>::CustomMethod("scrollBy", &JSScroller::ScrollBy);
     JSClass<JSScroller>::Bind(globalObj, JSScroller::Constructor, JSScroller::Destructor);
 }
 
@@ -190,6 +192,43 @@ void JSScroller::CurrentOffset(const JSCallbackInfo& args)
     retObj->SetProperty("xOffset", offset.GetX());
     retObj->SetProperty("yOffset", offset.GetY());
     args.SetReturnValue(retObj);
+}
+
+void JSScroller::ScrollBy(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        LOGW("Invalid params");
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    Dimension xOffset;
+    Dimension yOffset;
+    if (!ConvertFromJSValue(obj->GetProperty("dx"), xOffset) ||
+        !ConvertFromJSValue(obj->GetProperty("dy"), yOffset)) {
+        LOGW("Failed to parse param 'dx' or 'dy'");
+        return;
+    }
+
+    bool smooth = true;
+    auto smoothValue = obj->GetProperty("smooth");
+    if (smoothValue->IsBoolean()) {
+        smooth = smoothValue->ToBoolean();
+    }
+
+    LOGE("CCCC JSScroller::ScrollBy x: %{public}lf, y: %{public}lf, smooth: %{public}d", xOffset.Value(), yOffset.Value(), smooth);
+    auto deltaX = xOffset.Value();
+    auto deltaY = yOffset.Value();
+    auto container = Container::Current();
+    if (container) {
+        auto context = container->GetPipelineContext();
+        if (context) {
+            deltaX = context->NormalizeToPx(xOffset);
+            deltaY = context->NormalizeToPx(yOffset);
+        }
+    }
+
+    controller_->ScrollBy(deltaX, deltaY, smooth);
 }
 
 } // namespace OHOS::Ace::Framework
