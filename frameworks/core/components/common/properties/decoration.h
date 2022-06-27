@@ -83,6 +83,13 @@ enum class SpreadMethod {
     REPEAT,
 };
 
+enum class BlurStyle {
+    NoMaterial,
+    THIN,
+    REGULAR,
+    THICK,
+};
+
 struct LinearGradientInfo {
     double x1 = 0.0;
     double x2 = 0.0;
@@ -933,6 +940,11 @@ public:
         windowBlurStyle_ = style;
     }
 
+    void SetBlurStyle(BlurStyle style)
+    {
+        blurStyle = style;
+    }
+
     const Border& GetBorder() const
     {
         return border_;
@@ -1116,6 +1128,11 @@ public:
         return windowBlurStyle_;
     }
 
+    BlurStyle GetBlurStyle()
+    {
+        return blurStyle;
+    }
+
     // Indicate how much size the decoration taken, excluding the content size.
     Size GetOccupiedSize(double dipScale) const;
     double HorizontalSpaceOccupied(double dipScale) const;
@@ -1166,6 +1183,8 @@ private:
     // window blur style;
     WindowBlurStyle windowBlurStyle_ = WindowBlurStyle::STYLE_BACKGROUND_SMALL_LIGHT;
     Color colorBlend;
+    // window blur form rosen
+    BlurStyle blurStyle = BlurStyle::NoMaterial;
 };
 
 class Pattern final {

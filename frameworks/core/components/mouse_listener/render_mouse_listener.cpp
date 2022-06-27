@@ -52,4 +52,15 @@ void RenderMouseListener::HandleMouseHoverEvent(MouseState mouseState)
     }
 }
 
+void RenderMouseListener::UpdateTouchRect()
+{
+    const auto& children = GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        auto childTouchRectList = child->GetTouchRectList();
+        touchRectList_ = childTouchRectList;
+        SetTouchRectList(touchRectList_);
+    }
+}
+
 } // namespace OHOS::Ace

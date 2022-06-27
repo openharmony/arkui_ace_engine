@@ -62,16 +62,22 @@ template("ace_osal_ohos_source_set") {
         "resource_convertor.cpp",
         "resource_theme_style.cpp",
       ]
-      deps = [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
+      deps = [
+        "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
+        "$ace_flutter_engine_root/icu:ace_libicu_ohos",
+      ]
       public_deps += [
         "//base/global/resource_management/frameworks/resmgr:global_resmgr",
       ]
-      external_deps += [ "multimedia_image_standard:image" ]
+      external_deps += [
+        "ability_base:want",
+        "multimedia_image_standard:image",
+        "napi:ace_napi",
+      ]
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {
         sources += [ "js_accessibility_manager.cpp" ]
         external_deps += [
-          "ability_base:want",
           "ability_runtime:ability_manager",
           "accessibility:accessibilityclient",
         ]

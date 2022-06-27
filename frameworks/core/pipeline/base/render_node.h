@@ -364,6 +364,11 @@ public:
 
     void SetDepth(int32_t depth);
 
+    void SetPositionType(PositionType type)
+    {
+        positionParam_.type = type;
+    }
+
     int32_t GetDepth() const
     {
         return depth_;
@@ -604,6 +609,8 @@ public:
     virtual Offset GetGlobalOffset() const;
 
     virtual Offset GetGlobalOffsetExternal() const;
+
+    RefPtr<RenderNode> GetHeadRenderNode();
 
     // Whether |rect| is in the paint rect of render tree recursively.
     bool IsVisible(const Rect& rect, bool totally = false) const;

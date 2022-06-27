@@ -34,7 +34,7 @@ ohos_shared_library("plugincomponent") {
   ]
 
   deps = [
-    "$ability_runtime_kits_path/ability/native:abilitykit_native",
+    "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
     "$ace_root/build:libace",
     "$ace_root/build:libace_engine_declarative",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",

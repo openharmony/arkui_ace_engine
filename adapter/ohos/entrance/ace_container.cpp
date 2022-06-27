@@ -258,6 +258,9 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
     if (!context) {
         return false;
     }
+    if (context->PopPageStackOverlay()) {
+        return true;
+    }
     return context->CallRouterBackToPopPage();
 }
 
@@ -1254,5 +1257,16 @@ void AceContainer::InitWindowCallback()
     });
 
     pipelineContext_->SetWindowGetModeCallBack([window]() -> WindowMode { return (WindowMode)window->GetMode(); });
+}
+
+std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(const std::string& bundle,
+    const std::string& module)
+{
+    auto context = runtimeContext_.lock();
+    if (!context) {
+        LOGE("runtimeContext is null.");
+        return nullptr;
+    }
+    return context->CreateModuleContext(bundle, module);
 }
 } // namespace OHOS::Ace::Platform

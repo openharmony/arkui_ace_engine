@@ -37,6 +37,7 @@ public:
     void PopToPage(int32_t pageId);
     void RestorePopPage(const RefPtr<Component>& newComponent);
     virtual void Replace(const RefPtr<Component>& newComponent);
+    void Replace(const RefPtr<Component>& newComponent, const std::function<void()>& listener);
     bool ClearOffStage(const std::function<void()>& listener);
     bool CanPopPage();
     bool CanPushPage();
@@ -93,9 +94,9 @@ private:
     void MakeTopPageTouchable();
 
     void RestorePop();
-    void AddListenerForClear(const std::function<void()>& listener)
+    void AddListener(const std::function<void()>& listener)
     {
-        clearListener_ = listener;
+        routerListener_ = listener;
     }
 
     StackOperation operation_ { StackOperation::NONE };
@@ -108,7 +109,7 @@ private:
     int32_t directedPageId_ = 0;
     bool isWaitingForBuild_ = false;
 
-    std::function<void()> clearListener_ = nullptr;
+    std::function<void()> routerListener_ = nullptr;
 };
 
 class SectionStageElement : public StageElement {

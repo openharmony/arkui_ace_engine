@@ -30,6 +30,7 @@
 #include "core/components/web/web_event.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "nweb_helper.h"
+#include "nweb_hit_testresult.h"
 #include "window.h"
 #endif
 
@@ -198,6 +199,7 @@ public:
     bool OnHandleInterceptUrlLoading(const std::string& url);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);
+    bool LoadDataWithRichText();
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -219,7 +221,6 @@ private:
     void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
     void LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
         const std::string& encoding, const std::string& historyUrl);
-    void LoadDataWithRichText(const std::string& data);
     void Refresh();
     void StopLoading();
     void AddJavascriptInterface(const std::string& objectName, const std::vector<std::string>& methodList);
@@ -231,10 +232,13 @@ private:
     void Zoom(float factor);
     bool ZoomIn();
     bool ZoomOut();
+    int ConverToWebHitTestType(int hitType);
     int GetHitTestResult();
+    void GetHitTestValue(HitTestResult& result);
     int GetPageHeight();
     int GetWebId();
     std::string GetTitle();
+    std::string GetDefaultUserAgent();
     bool SaveCookieSync();
     bool SetCookie(const std::string& url, const std::string& value);
     std::string GetCookie(const std::string& url) const;

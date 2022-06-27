@@ -78,6 +78,11 @@ void StackElement::PushPanel(const RefPtr<Component>& newComponent, bool disable
     MarkDirty();
 }
 
+bool StackElement::HasOverlayChild()
+{
+    return children_.size() > 1;
+}
+
 void StackElement::PopPanel()
 {
     PopDialog();

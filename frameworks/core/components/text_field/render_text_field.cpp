@@ -146,6 +146,9 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         focusBgColor_ = Color::TRANSPARENT;
     }
     originBorder_ = textField->GetOriginBorder();
+    if (style_ != textField->GetTextStyle()) {
+        ResetStatus();
+    }
     style_ = textField->GetTextStyle();
     placeHoldStyle_ = textField->GetPlaceHoldStyle();
     editingStyle_ = textField->GetEditingStyle();

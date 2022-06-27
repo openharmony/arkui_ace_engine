@@ -793,3 +793,11 @@ var ListItemAlign;
   ListItemAlign[ListItemAlign["Center"] = 1] = "Center";
   ListItemAlign[ListItemAlign["End"] = 2] = "End";
 })(ListItemAlign || (ListItemAlign = {}));
+
+var BlurStyle;
+(function (BlurStyle) {
+  BlurStyle[BlurStyle["NoMaterial"] = 0] = "NoMaterial";
+  BlurStyle[BlurStyle["Thin"] = 1] = "Thin";
+  BlurStyle[BlurStyle["Regular"] = 2] = "Regular";
+  BlurStyle[BlurStyle["Thick"] = 3] = "Thick";
+})(BlurStyle || (BlurStyle = {}));

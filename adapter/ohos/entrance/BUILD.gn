@@ -60,7 +60,7 @@ template("ace_ohos_standard_source_set") {
 
     include_dirs = [
       "$ability_runtime_inner_api_path/runtime/include/",
-      "${ability_runtime_napi_path}/featureAbility",
+      "$ability_runtime_path/frameworks/js/napi/aafwk/featureAbility",
       "//foundation/arkui/napi/interfaces/kits",
       "//foundation/arkui/napi/native_engine",
       "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/dataability/include",
@@ -72,7 +72,8 @@ template("ace_ohos_standard_source_set") {
     ]
 
     deps = [
-      "$ability_runtime_kits_path/ability/native:abilitykit_native",
+      "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
+      "$ability_runtime_path/frameworks/native/ability/native:data_ability_helper",
       "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
       "$ace_flutter_engine_root/skia:ace_skia_$platform",
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",

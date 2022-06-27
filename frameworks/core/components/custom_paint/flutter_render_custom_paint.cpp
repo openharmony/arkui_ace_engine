@@ -1003,8 +1003,8 @@ void FlutterRenderCustomPaint::Path2DRect(const Offset& offset, const PathArgs& 
 {
     double left = args.para1 + offset.GetX();
     double top = args.para2 + offset.GetY();
-    double right = args.para3 + offset.GetX();
-    double bottom = args.para4 + offset.GetY();
+    double right = args.para3 + args.para1 + offset.GetX();
+    double bottom = args.para4 + args.para2 + offset.GetY();
     strokePath_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
 }
 

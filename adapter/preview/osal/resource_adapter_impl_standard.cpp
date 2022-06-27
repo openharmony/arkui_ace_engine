@@ -199,4 +199,8 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
     return "file://" + packagePathStr_ + "/resources/rawfile/" + fileName;
 }
 
+void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, const std::string& moduleName)
+{
+    return;
+}
 } // namespace OHOS::Ace

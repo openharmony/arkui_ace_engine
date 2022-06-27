@@ -20,6 +20,8 @@
 #include <sstream>
 #include <unistd.h>
 
+#include "base/memory/ace_type.h"
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_canvas_node.h"
 
@@ -228,7 +230,13 @@ void RenderNode::ClearChildren()
 void RenderNode::UpdateTouchRect()
 {
     if (!isResponseRegion_) {
-        touchRect_ = GetTransformRect(GetPaintRect());
+        touchRect_ = GetPaintRect();
+        auto box = AceType::DynamicCast<RenderBox>(this);
+        if (box && box->GetTouchArea().GetOffset().IsPositiveOffset()) {
+            touchRect_.SetOffset(box->GetTouchArea().GetOffset() + touchRect_.GetOffset());
+            touchRect_.SetSize(box->GetTouchArea().GetSize());
+        }
+        touchRect_ = GetTransformRect(touchRect_);
         touchRectList_.emplace_back(touchRect_);
         SetTouchRectList(touchRectList_);
         return;
@@ -274,7 +282,7 @@ void RenderNode::CompareTouchRectList(std::vector<Rect>& touchRectList,
         auto rect = childRect;
         for (auto& parentRect : parentTouchRectList) {
             // unified coordinate system
-            rect.SetOffset(childRect.GetOffset() + parentRect.GetOffset());
+            rect.SetOffset(childRect.GetOffset() + GetPaintRect().GetOffset());
             if (CompareTouchRect(parentRect, rect)) {
                 isInRegion = true;
                 break;
@@ -1200,6 +1208,18 @@ Offset RenderNode::GetGlobalOffsetExternal() const
 {
     auto renderNode = parent_.Upgrade();
     return renderNode ? GetPosition() + renderNode->GetGlobalOffsetExternal() : GetPosition();
+}
+
+RefPtr<RenderNode> RenderNode::GetHeadRenderNode()
+{
+    if (IsHeadRenderNode()) {
+        return AceType::Claim(this);
+    }
+    auto renderNode = parent_.Upgrade();
+    if (!renderNode) {
+        return nullptr;
+    }
+    return renderNode->GetHeadRenderNode();
 }
 
 bool RenderNode::IsVisible(const Rect& rect, bool totally) const

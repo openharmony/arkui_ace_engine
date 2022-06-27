@@ -52,12 +52,12 @@ if (!defined(aosp_libs_dir)) {
 }
 libs_root = "${aosp_libs_dir}/sdk"
 
+ability_runtime_path = "//foundation/ability/ability_runtime"
 ability_runtime_inner_api_path =
-    "//foundation/ability/ability_runtime/interfaces/inner_api"
-ability_runtime_inner_kits_path = "//foundation/ability/ability_runtime/interfaces/kits"
-ability_runtime_kits_path = "//foundation/ability/ability_runtime/frameworks/kits"
-ability_runtime_napi_path = "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk"
-ability_runtime_services_path = "//foundation/ability/ability_runtime/services"
+    "${ability_runtime_path}/interfaces/inner_api"
+ability_runtime_inner_kits_path = "${ability_runtime_path}/interfaces/kits"
+ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
+ability_runtime_services_path = "${ability_runtime_path}/services"
 flutter_root = "//third_party/flutter"
 ace_flutter_engine_root = "$flutter_root/build"
 expat_root = "//third_party/expat"

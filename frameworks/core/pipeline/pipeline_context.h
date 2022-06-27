@@ -155,7 +155,8 @@ public:
 
     bool CanPopPage();
 
-    void ReplacePage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage);
+    void ReplacePage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage,
+        const std::function<void()>& listener = nullptr);
     void ReplacePage(const RefPtr<PageComponent>& pageComponent);
 
     bool CanReplacePage();
@@ -163,6 +164,8 @@ public:
     bool ClearInvisiblePages(const std::function<void()>& listener = nullptr);
 
     bool CallRouterBackToPopPage();
+
+    bool PopPageStackOverlay();
 
     void NotifyAppStorage(const std::string& key, const std::string& value);
 

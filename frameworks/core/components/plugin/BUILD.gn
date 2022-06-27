@@ -38,7 +38,7 @@ build_component("plugin") {
 
     deps = [
       "$ability_runtime_inner_api_path/ability_manager:ability_manager",
-      "$ability_runtime_kits_path/ability/native:abilitykit_native",
+      "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
       "$ability_runtime_services_path/abilitymgr:abilityms",
       "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",

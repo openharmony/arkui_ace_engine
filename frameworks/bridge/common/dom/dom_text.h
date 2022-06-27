@@ -44,6 +44,7 @@ protected:
     RefPtr<TextComponent> textChild_;
 
 private:
+    void CheckAndSetAllSpanStyle();
     void CheckAndSetSpanStyle(const RefPtr<DOMSpan>& dmoSpan, TextStyle& spanStyle);
     void SetBoxAlignForText();
 };

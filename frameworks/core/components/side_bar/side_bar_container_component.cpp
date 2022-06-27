@@ -95,6 +95,7 @@ void SideBarContainerComponent::Build()
     btnbox->SetWidth(Dimension(declaration_->GetImageWidth(), DimensionUnit::VP));
     btnbox->SetHeight(Dimension(declaration_->GetImageHeight(), DimensionUnit::VP));
     btnbox->SetFlex(BoxFlex::FLEX_XY);
+    btnbox->SetEnableDebugBoundary(true);
     RefPtr<DisplayComponent> displayBtn = AceType::MakeRefPtr<DisplayComponent>(btnbox);
     displayBtn->SetLeft(Dimension(declaration_->GetLeft(), DimensionUnit::VP));
     displayBtn->SetTop(Dimension(declaration_->GetTop(), DimensionUnit::VP));

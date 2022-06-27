@@ -35,6 +35,7 @@ public:
         JSClass<JSWebDialog>::Declare("WebDialog");
         JSClass<JSWebDialog>::CustomMethod("handleConfirm", &JSWebDialog::Confirm);
         JSClass<JSWebDialog>::CustomMethod("handleCancel", &JSWebDialog::Cancel);
+        JSClass<JSWebDialog>::CustomMethod("handlePromptConfirm", &JSWebDialog::PromptConfirm);
         JSClass<JSWebDialog>::Bind(globalObj, &JSWebDialog::Constructor, &JSWebDialog::Destructor);
     }
 
@@ -47,6 +48,18 @@ public:
     {
         if (result_) {
             result_->Confirm();
+        }
+    }
+
+    void PromptConfirm(const JSCallbackInfo& args)
+    {
+        std::string message;
+        if (!result_) {
+            return;
+        }
+        if (args.Length() == 1 && args[0]->IsString()) {
+            message = args[0]->ToString();
+            result_->Confirm(message);
         }
     }
 
@@ -547,6 +560,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAlert", &JSWeb::OnAlert);
     JSClass<JSWeb>::StaticMethod("onBeforeUnload", &JSWeb::OnBeforeUnload);
     JSClass<JSWeb>::StaticMethod("onConfirm", &JSWeb::OnConfirm);
+    JSClass<JSWeb>::StaticMethod("onPrompt", &JSWeb::OnPrompt);
     JSClass<JSWeb>::StaticMethod("onConsole", &JSWeb::OnConsoleLog);
     JSClass<JSWeb>::StaticMethod("onPageBegin", &JSWeb::OnPageStart);
     JSClass<JSWeb>::StaticMethod("onPageEnd", &JSWeb::OnPageFinish);
@@ -621,6 +635,9 @@ JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
 
     obj->SetProperty("url", eventInfo.GetUrl());
     obj->SetProperty("message", eventInfo.GetMessage());
+    if (eventInfo.GetType() == DialogEventType::DIALOG_EVENT_PROMPT) {
+        obj->SetProperty("value", eventInfo.GetValue());
+    }
     obj->SetPropertyObject("result", resultObj);
 
     return JSRef<JSVal>::Cast(obj);
@@ -747,6 +764,11 @@ void JSWeb::OnBeforeUnload(const JSCallbackInfo& args)
 void JSWeb::OnConfirm(const JSCallbackInfo& args)
 {
     JSWeb::OnCommonDialog(args, DialogEventType::DIALOG_EVENT_CONFIRM);
+}
+
+void JSWeb::OnPrompt(const JSCallbackInfo& args)
+{
+    JSWeb::OnCommonDialog(args, DialogEventType::DIALOG_EVENT_PROMPT);
 }
 
 void JSWeb::OnCommonDialog(const JSCallbackInfo& args, int dialogEventType)

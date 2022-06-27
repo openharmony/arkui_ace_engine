@@ -1258,7 +1258,8 @@ void PipelineContext::ClearPageTransitionListeners()
     }
 }
 
-void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage)
+void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage,
+    const std::function<void()>& listener)
 {
     LOGD("ReplacePageComponent");
     CHECK_RUN_ON(UI);
@@ -1272,11 +1273,11 @@ void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent, co
     }
     if (PageTransitionComponent::HasTransitionComponent(AceType::DynamicCast<Component>(pageComponent))) {
         LOGD("replace page with transition.");
-        stageElement->Replace(pageComponent);
+        stageElement->Replace(pageComponent, listener);
     } else {
         LOGD("replace page without transition, do not support transition.");
         RefPtr<DisplayComponent> display = AceType::MakeRefPtr<DisplayComponent>(pageComponent);
-        stageElement->Replace(display);
+        stageElement->Replace(display, listener);
     }
 }
 
@@ -1333,6 +1334,22 @@ bool PipelineContext::CallRouterBackToPopPage()
         frontend->CallRouterBack();
         return true;
     }
+}
+
+bool PipelineContext::PopPageStackOverlay()
+{
+    auto pageStack = GetLastStack();
+    if (!pageStack) {
+        LOGW("No page stack in page.");
+        return false;
+    }
+    if (!pageStack->HasOverlayChild()) {
+        LOGI("No overlay in page, try to pop page.");
+        return false;
+    }
+    LOGI("Pop page overlays");
+    pageStack->PopComponent();
+    return true;
 }
 
 void PipelineContext::NotifyAppStorage(const std::string& key, const std::string& value)
