@@ -20,6 +20,7 @@
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/dir_asset_provider.h"
 #include "adapter/preview/osal/stage_card_parser.h"
+#include "adapter/preview/osal/stage_module_parser.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -166,6 +167,23 @@ void AceContainer::InitializeFrontend()
 void AceContainer::RunNativeEngineLoop()
 {
     taskExecutor_->PostTask([frontend = frontend_]() { frontend->RunNativeEngineLoop(); }, TaskExecutor::TaskType::JS);
+}
+
+void AceContainer::SetStageAppConfig()
+{
+    const char* configFilename = "module.json";
+    std::string appConfig;
+    if (!Framework::GetAssetContentImpl(assetManager_, configFilename, appConfig)) {
+        LOGI("Can not load the application config of stage model.");
+        return;
+    }
+    RefPtr<StageModuleParser> stageModuleParser = AceType::MakeRefPtr<StageModuleParser>();
+    stageModuleParser->Parse(appConfig);
+    auto appInfo = stageModuleParser->GetAppInfo();
+    if (pipelineContext_ && appInfo) {
+        LOGI("Set MinPlatformVersion to %{public}d", appInfo->GetMinAPIVersion());
+        pipelineContext_->SetMinPlatformVersion(appInfo->GetMinAPIVersion());
+    }
 }
 
 void AceContainer::SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl)

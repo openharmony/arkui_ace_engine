@@ -126,4 +126,4 @@ WindowConfig& StageCardParser::GetWindowConfig() const
     return manifestWindow_->GetWindowConfig();
 }
 
-} // namespace OHOS::Ace::Framework
+} // namespace OHOS::Ace
