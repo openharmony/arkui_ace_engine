@@ -388,6 +388,12 @@ void JsAccessibilityManager::InitializeCallback()
         return;
     }
 
+    auto pipelineContext = GetPipelineContext().Upgrade();
+    if (!pipelineContext) {
+        return;
+    }
+    windowId_ = pipelineContext->GetWindowId();
+
     auto client = AccessibilitySystemAbilityClient::GetInstance();
     if (!client) {
         return;
@@ -395,13 +401,9 @@ void JsAccessibilityManager::InitializeCallback()
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(client->IsEnabled());
 
     SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
-
-    auto pipelineContext = GetPipelineContext().Upgrade();
-    if (!pipelineContext) {
-        return;
+    if (client->IsEnabled()) {
+        RegisterInteractionOperation(windowId_);
     }
-
-    RegisterInteractionOperation(pipelineContext->GetWindowId());
 }
 
 bool JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent& accessibilityEvent)
@@ -746,14 +748,15 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
     if (elementId == -1) {
         nodeId = 0;
     }
+    std::list<AccessibilityElementInfo> infos;
     auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage(nodeId);
     if (!node) {
         LOGW("AccessibilityNodeInfo can't attach component by Id = %{public}d", nodeId);
+        callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
         return;
     }
-    LOGI("SearchElementInfoByAccessibilityId nodeId(%{public}d)", node->GetNodeId());
+
     AccessibilityElementInfo nodeInfo;
-    std::list<AccessibilityElementInfo> infos;
     jsAccessibilityManager->UpdateNodeChildIds(node);
     UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
         jsAccessibilityManager->GetRootNodeId());
@@ -790,7 +793,6 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
         }
     }
 
-    LOGI("SetSearchElementInfoByAccessibilityIdResult");
     callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
 }
 
@@ -1075,8 +1077,7 @@ int JsAccessibilityManager::RegisterInteractionOperation(const int windowId)
     if (IsRegister()) {
         return 0;
     }
-    
-    SetWindowId(windowId);
+
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     if (instance == nullptr) {
         return (-1);
