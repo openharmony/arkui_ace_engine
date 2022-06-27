@@ -41,7 +41,6 @@ namespace {
 constexpr int32_t DOUBLE_WIDTH = 2;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr float EXTRA_WIDTH = 1.5f;
-constexpr float EXTRA_CLIP_WIDTH = 20.0f;
 constexpr float SCALE_DEFAULT = 1.0f;
 constexpr float SCALE_CHANGED = 1.05f;
 const Color BOARD_CHANGED = Color::FromRGBO(0, 0, 0, 0.05);
@@ -336,9 +335,15 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             return;
         }
         SkAutoCanvasRestore acr(canvas, true);
+        auto rsnode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
         auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-        recordingCanvas->ClipOutsetRect(EXTRA_CLIP_WIDTH, EXTRA_CLIP_WIDTH);
+        recordingCanvas->ClipOutsetRect(rsnode->GetStagingProperties().GetBoundsWidth(),
+            rsnode->GetStagingProperties().GetBoundsHeight());
         auto size = GetLayoutSize() + Size(EXTRA_WIDTH, EXTRA_WIDTH);
+        if (rsnode->GetStagingProperties().GetFrameWidth() <= 0 ||
+            rsnode->GetStagingProperties().GetFrameHeight() <= 0) {
+            rsnode->SetFrameSize(GetLayoutSize().Width(), GetLayoutSize().Height());
+        }
         DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, size);
         DebugBoundaryPainter::PaintDebugCorner(canvas, offset, size);
         DebugBoundaryPainter::PaintDebugMargin(canvas, offset, size, RenderBoxBase::margin_);

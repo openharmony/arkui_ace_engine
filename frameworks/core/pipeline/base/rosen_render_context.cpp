@@ -177,7 +177,10 @@ void RosenRenderContext::InitContext(
     rsNode_->ClearChildren();
     if (auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>()) {
         rosenCanvas_ = rsCanvasNode->BeginRecording(
-            rsNode_->GetStagingProperties().GetFrameWidth(), rsNode_->GetStagingProperties().GetFrameHeight());
+            rsNode_->GetStagingProperties().GetFrameWidth() <= 0 ?
+            rsNode_->GetStagingProperties().GetBoundsWidth() : rsNode_->GetStagingProperties().GetFrameWidth(),
+            rsNode_->GetStagingProperties().GetFrameHeight()<= 0 ?
+            rsNode_->GetStagingProperties().GetBoundsHeight() : rsNode_->GetStagingProperties().GetFrameHeight());
     }
 }
 
