@@ -556,11 +556,14 @@ void RenderSlider::UpdateBlockPosition(const Offset& touchPosition, bool isClick
     double totalRatio = diff / trackLength_;
     if (LessOrEqual(diff, 0.0)) {
         value_ = min_;
+        SetTotalRatio(0.0);
     } else if (GreatOrEqual(totalRatio, 1.0)) {
         value_ = max_;
+        SetTotalRatio(1.0);
     } else {
         double stepRatio = step_ / (max_ - min_);
         double endRatio = stepRatio * std::floor((totalRatio + HALF * stepRatio) / stepRatio);
+        SetTotalRatio(endRatio);
         value_ = (max_ - min_) * endRatio + min_;
         if (GreatOrEqual(value_, max_)) {
             value_ = max_;
