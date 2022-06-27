@@ -133,6 +133,26 @@ public:
         return isSelected_;
     }
 
+    void SetGridItemWidth(const Dimension& width)
+    {
+        itemWidth_ = width;
+    }
+
+    const Dimension& GetGridItemWidth() const
+    {
+        return itemWidth_;
+    }
+
+    void SetGridItemHeight(const Dimension& height)
+    {
+        itemHeight_ = height;
+    }
+
+    const Dimension& GetGridItemHeight() const
+    {
+        return itemHeight_;
+    }
+
 private:
     int32_t index_ = -1;
     int32_t columnIndex_ = -1;
@@ -146,6 +166,8 @@ private:
     OnSelectFunc onSelectId_;
     bool selectable_ = true;
     bool isSelected_ = false;
+    Dimension itemWidth_ {-1};
+    Dimension itemHeight_ {-1};
 };
 
 } // namespace OHOS::Ace
