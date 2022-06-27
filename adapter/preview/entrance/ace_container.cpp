@@ -120,7 +120,7 @@ void AceContainer::Destroy()
     assetManager_.Reset();
     pipelineContext_.Reset();
     aceView_ = nullptr;
-    LOGI("AceContainer::Destory end");
+    LOGI("AceContainer::Destroy end");
 }
 
 void AceContainer::DestroyView()

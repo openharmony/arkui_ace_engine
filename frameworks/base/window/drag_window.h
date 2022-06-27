@@ -35,7 +35,7 @@ public:
     static RefPtr<DragWindow> CreateDragWindow(const std::string& windowName, int32_t x, int32_t y, uint32_t width,
         uint32_t height);
     virtual void MoveTo(int32_t x, int32_t y) const = 0;
-    virtual void Destory() const = 0;
+    virtual void Destroy() const = 0;
     virtual void DrawPixelMap(const RefPtr<PixelMap>& pixelmap) = 0;
     virtual void DrawImage(void* skImage) = 0;
     virtual void DrawText(std::shared_ptr<txt::Paragraph> paragraph_,

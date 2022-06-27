@@ -421,7 +421,7 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
     }
 
     if (dragWindow_) {
-        dragWindow_->Destory();
+        dragWindow_->Destroy();
         dragWindow_ = nullptr;
         return;
     }
@@ -480,7 +480,7 @@ void RenderBox::PanOnActionCancel()
     }
 
     if (dragWindow_) {
-        dragWindow_->Destory();
+        dragWindow_->Destroy();
         dragWindow_ = nullptr;
     }
 #endif

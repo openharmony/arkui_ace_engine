@@ -118,7 +118,7 @@ void RenderGestureListener::SetDragCallBack(RefPtr<FreeDragRecognizer>& recogniz
             }
             if (dragInfo.pixelMap && renderNode->dragWindow_) {
                 if (renderNode->dragWindow_) {
-                    renderNode->dragWindow_->Destory();
+                    renderNode->dragWindow_->Destroy();
                     renderNode->dragWindow_ = nullptr;
                 }
             }
