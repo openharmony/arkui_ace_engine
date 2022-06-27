@@ -52,7 +52,7 @@ public:
 
     bool ISAllowUpdate() const
     {
-        return cardInfo_.allowUpate;
+        return cardInfo_.allowUpdate;
     }
 
 private:

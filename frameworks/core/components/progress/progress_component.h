@@ -152,14 +152,14 @@ public:
         return track_->SetScaleWidth(width);
     }
 
-    void SetLableMarkedText(const std::string markedValue)
+    void SetLabelMarkedText(const std::string markedValue)
     {
-        track_->SetLableMarkedText(markedValue);
+        track_->SetLabelMarkedText(markedValue);
     }
 
     void SetMarkedTextColor(const Color& color)
     {
-        track_->SetLableMarkedColor(color);
+        track_->SetLabelMarkedColor(color);
     }
 
     void SetIndicatorFlag(bool flag)

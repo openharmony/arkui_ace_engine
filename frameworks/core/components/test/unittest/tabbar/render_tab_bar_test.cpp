@@ -37,7 +37,7 @@ const Size ITEM_SIZE = Size(250.0, 250.0);
 void AddItem(const RefPtr<MockRenderTabBar>& tabBar, const RefPtr<PipelineContext>& context, int32_t size)
 {
     auto flex = BoxFlex::FLEX_XY;
-    if (tabBar->GetMode() == TabBarMode::SCROLLABEL) {
+    if (tabBar->GetMode() == TabBarMode::SCROLLABLE) {
         flex = BoxFlex::FLEX_Y;
     }
 
@@ -143,7 +143,7 @@ HWTEST_F(RenderTabBarTest, RenderTabBarTest002, TestSize.Level1)
      * @tc.steps: step1. construct TabBarComponent with mod scrollable.
      * @tc.expected: step1. properties set correctly.
      */
-    TabBarMode mode = TabBarMode::SCROLLABEL;
+    TabBarMode mode = TabBarMode::SCROLLABLE;
     RefPtr<TabBarComponent> tabBarComponent = AceType::MakeRefPtr<TabBarComponent>(
         std::list<RefPtr<Component>>(), TabController::GetController(CONTROLLER_ID));
     tabBarComponent->SetMode(mode);
@@ -184,7 +184,7 @@ HWTEST_F(RenderTabBarTest, RenderTabBarTest003, TestSize.Level1)
      * @tc.steps: step1. construct TabBarComponent with mod scrollable.
      * @tc.expected: step1. properties set correctly.
      */
-    TabBarMode mode = TabBarMode::SCROLLABEL;
+    TabBarMode mode = TabBarMode::SCROLLABLE;
     RefPtr<TabBarComponent> tabBarComponent = AceType::MakeRefPtr<TabBarComponent>(
         std::list<RefPtr<Component>>(), TabController::GetController(CONTROLLER_ID));
     tabBarComponent->SetMode(mode);
@@ -225,7 +225,7 @@ HWTEST_F(RenderTabBarTest, RenderTabBarTest004, TestSize.Level1)
      * @tc.steps: step1. construct TabBarComponent with mod scrollable and set index less than zero.
      * @tc.expected: step1. properties set correctly.
      */
-    TabBarMode mode = TabBarMode::SCROLLABEL;
+    TabBarMode mode = TabBarMode::SCROLLABLE;
     RefPtr<TabBarComponent> tabBarComponent = AceType::MakeRefPtr<TabBarComponent>(
         std::list<RefPtr<Component>>(), TabController::GetController(CONTROLLER_ID));
     tabBarComponent->SetMode(mode);

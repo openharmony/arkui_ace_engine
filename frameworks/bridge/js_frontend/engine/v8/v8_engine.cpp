@@ -64,7 +64,7 @@ namespace {
 
 const int32_t CUSTOM_FULL_WINDOW_LENGTH = 2;
 const int32_t MAX_READ_TEXT_LENGTH = 4096;
-const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
+const std::regex URI_PATTERN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
 constexpr int32_t V8_MAX_STACK_SIZE = 1 * 1024 * 1024;
 void* g_debugger = nullptr;
 bool g_flagNeedDebugBreakPoint = false;
@@ -1844,7 +1844,7 @@ void JsReadArrayBuffer(const v8::FunctionCallbackInfo<v8::Value>& args, int32_t 
     v8::Persistent<v8::Context, v8::CopyablePersistentTraits<v8::Context>> pContext;
     pContext.Reset(isolate, context);
     std::smatch result;
-    if (!std::regex_match(uri, result, URI_PARTTEN)) {
+    if (!std::regex_match(uri, result, URI_PATTERN)) {
         LOGE("JsReadArrayBuffer uri regex match failed");
         V8EngineInstance::CallJs(
             isolate, pContext, callbackId, R"({"arguments":["file uri pattern not correct", 200],"method":"fail"})");
@@ -1906,7 +1906,7 @@ void JsReadText(const v8::FunctionCallbackInfo<v8::Value>& args, int32_t index)
     v8::Persistent<v8::Context, v8::CopyablePersistentTraits<v8::Context>> pContext;
     pContext.Reset(isolate, context);
     std::smatch result;
-    if (!std::regex_match(uri, result, URI_PARTTEN)) {
+    if (!std::regex_match(uri, result, URI_PATTERN)) {
         LOGE("JsReadText uri regex match failed");
         V8EngineInstance::CallJs(
             isolate, pContext, callbackId, R"({"arguments":["file uri pattern not correct", 202],"method":"fail"})");
@@ -3820,14 +3820,14 @@ void V8Engine::GetLoadOptions(std::string& optionStr, bool isMainPage, const Ref
         if ((*delegate)->GetAssetContent("commons.js", commonsJsContent)) {
             bool commonsJsResult = CallEvalBuf(isolate, commonsJsContent.c_str(), instanceId_, "commons.js");
             if (!commonsJsResult) {
-                LOGE("fail to excute load commonsjs script commonsJsResult");
+                LOGE("fail to execute load commonsjs script commonsJsResult");
             }
         }
         std::string vendorsJsContent;
         if ((*delegate)->GetAssetContent("vendors.js", vendorsJsContent)) {
             bool vendorsJsResult = CallEvalBuf(isolate, vendorsJsContent.c_str(), instanceId_, "vendors.js");
             if (!vendorsJsResult) {
-                LOGE("fail to excute load vendorsjs script");
+                LOGE("fail to execute load vendorsjs script");
             }
         }
         std::string code;

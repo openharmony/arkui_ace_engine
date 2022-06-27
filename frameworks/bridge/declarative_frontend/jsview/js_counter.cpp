@@ -28,7 +28,7 @@ namespace {
 
 constexpr Dimension COUNTER_DEFAULT_HEIGHT = 32.0_vp;
 constexpr Dimension COUNTER_DEFAULT_WIDTH = 100.0_vp;
-constexpr Dimension COUNTER_DEFAULT_CONTROLWIDTH = 32.0_vp;
+constexpr Dimension COUNTER_DEFAULT_CONTROL_WIDTH = 32.0_vp;
 constexpr Dimension COUNTER_DEFAULT_RADIUS = 4.0_vp;
 
 } // namespace
@@ -42,7 +42,7 @@ void JSCounter::JSBind(BindingTarget globalObj)
     JSClass<JSCounter>::StaticMethod("height", &JSCounter::JSHeight);
     JSClass<JSCounter>::StaticMethod("width", &JSCounter::JSWidth);
     JSClass<JSCounter>::StaticMethod("size", &JSCounter::SetSize);
-    JSClass<JSCounter>::StaticMethod("controlWidth", &JSCounter::JSControlwidth);
+    JSClass<JSCounter>::StaticMethod("controlWidth", &JSCounter::JSControlWidth);
     JSClass<JSCounter>::StaticMethod("state", &JSCounter::JSStateChange);
     JSClass<JSCounter>::StaticMethod("backgroundColor", &JSCounter::JsBackgroundColor);
     JSClass<JSCounter>::Inherit<JSContainerBase>();
@@ -129,7 +129,7 @@ void JSCounter::SetSize(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
-void JSCounter::JSControlwidth(const JSCallbackInfo& args)
+void JSCounter::JSControlWidth(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
@@ -138,7 +138,7 @@ void JSCounter::JSControlwidth(const JSCallbackInfo& args)
 
     Dimension value;
     if (!ConvertFromJSValue(args[0], value)) {
-        LOGE("args can not set controlwidth");
+        LOGE("args can not set control width");
         return;
     }
 
@@ -180,7 +180,7 @@ void JSCounter::Create()
 
     component->SetHeight(COUNTER_DEFAULT_HEIGHT);
     component->SetWidth(COUNTER_DEFAULT_WIDTH);
-    component->SetControlWidth(COUNTER_DEFAULT_CONTROLWIDTH);
+    component->SetControlWidth(COUNTER_DEFAULT_CONTROL_WIDTH);
     component->SetControlRadius(COUNTER_DEFAULT_RADIUS);
 }
 

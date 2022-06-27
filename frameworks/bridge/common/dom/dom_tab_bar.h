@@ -69,7 +69,7 @@ private:
     uint32_t lastIndex_ = 0;
     uint32_t controllerId_ = 0;
     bool vertical_ = false;
-    TabBarMode tabBarMode_ = TabBarMode::SCROLLABEL;
+    TabBarMode tabBarMode_ = TabBarMode::SCROLLABLE;
     Edge padding_;
 };
 

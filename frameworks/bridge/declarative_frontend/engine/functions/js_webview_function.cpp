@@ -20,7 +20,7 @@
 namespace OHOS::Ace::Framework {
 void JsWebViewFunction::Execute(const std::string& result)
 {
-    LOGD("JsWebViewFunction excute result[%{public}s]", result.c_str());
+    LOGD("JsWebViewFunction execute result[%{public}s]", result.c_str());
     JSRef<JSVal> params[1];
     params[0] = JSRef<JSVal>::Make(ToJSValue(result));
     JsFunction::ExecuteJS(1, params);

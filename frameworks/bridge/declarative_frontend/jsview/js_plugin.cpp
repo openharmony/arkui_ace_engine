@@ -53,7 +53,7 @@ void JSPlugin::Create(const JSCallbackInfo& info)
         plugin->SetData(dataValue->ToString());
     }
 
-    plugin->SetPluginRequestionInfo(pluginInfo);
+    plugin->SetPluginRequestInfo(pluginInfo);
     ViewStackProcessor::GetInstance()->Push(plugin, false);
 }
 

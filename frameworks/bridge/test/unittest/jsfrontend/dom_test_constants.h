@@ -375,7 +375,7 @@ const std::vector<std::string> TABBAR_ATTR_LIST = {
 
 // tab-content node attribute list
 const std::vector<std::string> TABCONTENT_ATTR_LIST = {
-    DOM_TAB_CONTENT_SCROLLABEL,
+    DOM_TAB_CONTENT_SCROLLABLE,
 };
 
 // video node attribute, style and event list

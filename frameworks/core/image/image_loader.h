@@ -104,8 +104,8 @@ public:
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context = nullptr) override;
 
 private:
-    bool GetResourceId(const std::string& uri, const RefPtr<ThemeConstants>& themeContants, uint32_t& resId) const;
-    bool GetResourceId(const std::string& uri, const RefPtr<ThemeConstants>& themeContants, std::string& path) const;
+    bool GetResourceId(const std::string& uri, const RefPtr<ThemeConstants>& themeConstants, uint32_t& resId) const;
+    bool GetResourceId(const std::string& uri, const RefPtr<ThemeConstants>& themeConstants, std::string& path) const;
 };
 
 } // namespace OHOS::Ace

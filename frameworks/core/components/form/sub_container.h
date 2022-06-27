@@ -58,7 +58,7 @@ public:
         return formElement_;
     }
 
-    void SetFormComponet(const RefPtr<Component>& mountPoint)
+    void SetFormComponent(const RefPtr<Component>& mountPoint)
     {
         formComponent_ = mountPoint;
     }
@@ -73,7 +73,7 @@ public:
         return pipelineContext_;
     }
 
-    void UpdateRootElmentSize();
+    void UpdateRootElementSize();
     void UpdateSurfaceSize();
 
     void AddFormAcquireCallback(const OnFormAcquiredCallback& callback)

@@ -57,7 +57,7 @@ void JSCamera::Create(const JSCallbackInfo& info)
     box->SetColor(Color::BLACK);
 }
 
-void JSCamera::JsDeviceposition(int32_t value)
+void JSCamera::JsDevicePosition(int32_t value)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto cameraComponent = AceType::DynamicCast<CameraComponent>(stack->GetMainComponent());
@@ -73,7 +73,7 @@ void JSCamera::JSBind(BindingTarget globalObj)
     JSClass<JSCamera>::Declare("Camera");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSCamera>::StaticMethod("create", &JSCamera::Create, opt);
-    JSClass<JSCamera>::StaticMethod("devicePosition", &JSCamera::JsDeviceposition, opt);
+    JSClass<JSCamera>::StaticMethod("devicePosition", &JSCamera::JsDevicePosition, opt);
 
     JSClass<JSCamera>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCamera>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

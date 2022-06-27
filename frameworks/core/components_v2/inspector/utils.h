@@ -87,7 +87,7 @@ inline std::string ConvertTabBarModeToString(TabBarMode barMode)
 {
     std::string result = "";
     switch (barMode) {
-        case TabBarMode::SCROLLABEL:
+        case TabBarMode::SCROLLABLE:
             result = "BarMode.Scrollable";
             break;
         case TabBarMode::FIXED_START:

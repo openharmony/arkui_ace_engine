@@ -119,7 +119,7 @@ void ListElementTest::TearDown()
 RefPtr<ComposedComponent> ListElementTest::MakeListChild(
     std::string id, std::string name, std::string type, double width, double height)
 {
-    auto child = AceType::MakeRefPtr<FocusComponet>();
+    auto child = AceType::MakeRefPtr<FocusComponent>();
     child->SetWidth(width);
     child->SetHeight(height);
     auto listItem = AceType::MakeRefPtr<ListItemComponent>(type, child);

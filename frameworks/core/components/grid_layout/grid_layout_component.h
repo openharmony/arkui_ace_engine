@@ -259,7 +259,7 @@ public:
         return supportDragAnimation_;
     }
 
-    void SetEdgeEffection(EdgeEffect value)
+    void SetEdgeEffect(EdgeEffect value)
     {
         if (value < EdgeEffect::SPRING || value > EdgeEffect::NONE) {
             LOGW("Invalid edgeEffect %{public}d", value);
@@ -268,7 +268,7 @@ public:
         edgeEffect_ = value;
     }
 
-    EdgeEffect GetEdgeEffection()
+    EdgeEffect GetEdgeEffect()
     {
         return edgeEffect_;
     }

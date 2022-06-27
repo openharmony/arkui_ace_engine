@@ -158,7 +158,7 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
 void JSGauge::SetLabelConfig(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 && !info[0]->IsObject()) {
-        LOGE("JSGauge::SetLableTextConfig::The info is wrong, it is supposed to have atleast 1 arguments");
+        LOGE("JSGauge::SetLabelTextConfig::The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -168,7 +168,7 @@ void JSGauge::SetLabelConfig(const JSCallbackInfo& info)
     auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
 
     if (labelText->IsString()) {
-        gaugeComponent->SetLableMarkedText(labelText->ToString());
+        gaugeComponent->SetLabelMarkedText(labelText->ToString());
     }
     Color currentColor;
     if (ParseJsColor(labelColor, currentColor)) {

@@ -533,10 +533,10 @@ HWTEST_F(RenderWaterFlowTest, RenderWaterFlowTest_SetChildPosition_001, TestSize
     renderNode_->flowCells_ = size;
     auto item = renderNode_->items_.find(3);
     int32_t itemMainSpan = renderNode_->GetItemSpan(item->second, false);
-    int32_t itemCrosspan = renderNode_->GetItemSpan(item->second, true);
+    int32_t itemCrossSpan = renderNode_->GetItemSpan(item->second, true);
     int32_t itemMain = renderNode_->GetItemMainIndex(1);
     item->second->SetLayoutSize(Size(160, 160));
-    renderNode_->SetChildPosition(item->second, itemMain, 1, itemMainSpan, itemCrosspan);
+    renderNode_->SetChildPosition(item->second, itemMain, 1, itemMainSpan, itemCrossSpan);
     EXPECT_TRUE(item->second->GetPosition() == Offset(210.0, 0.0));
 }
 

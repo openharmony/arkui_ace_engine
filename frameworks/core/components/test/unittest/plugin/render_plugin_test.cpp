@@ -58,7 +58,7 @@ HWTEST_F(RenderPluginTest, UpdatePlugin001, TestSize.Level1)
 
     pluginInfo.width = PLUGIN_WIDTH;
     pluginInfo.height = PLUGIN_HEIGHT;
-    pluginComponent->SetPluginRequestionInfo(pluginInfo);
+    pluginComponent->SetPluginRequestInfo(pluginInfo);
 
     /**
      * @tc.steps: step2. Update RenderPlugin with PluginComponent.
@@ -93,7 +93,7 @@ HWTEST_F(RenderPluginTest, RenderPluginPerformLayout001, TestSize.Level1)
     pluginInfo.moduleName = " moduleName";
     GTEST_LOG_(INFO) << "pluginInfo is:"<< pluginInfo.ToString();
 
-    pluginComponent->SetPluginRequestionInfo(pluginInfo);
+    pluginComponent->SetPluginRequestInfo(pluginInfo);
 
     /**
      * @tc.steps: step2. Update RenderPlugin with PluginComponent.

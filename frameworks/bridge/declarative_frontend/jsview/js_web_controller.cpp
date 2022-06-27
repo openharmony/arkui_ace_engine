@@ -352,10 +352,10 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
 
 void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)
 {
-    LOGI("JSWebController excute typescript");
+    LOGI("JSWebController execute typescript");
     ContainerScope scope(instanceId_);
     if (args.Length() < 1 || !args[0]->IsObject()) {
-        LOGW("invalid excute params");
+        LOGW("invalid execute params");
         return;
     }
 

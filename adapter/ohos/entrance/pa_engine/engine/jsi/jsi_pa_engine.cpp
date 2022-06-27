@@ -363,7 +363,7 @@ bool JsiPaEngineInstance::CallPlatformFunction(const std::string& channel, std::
         dispatcher->Dispatch(channel, std::move(data), id);
         return true;
     } else {
-        LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+        LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
         return false;
     }
 }
@@ -375,7 +375,7 @@ bool JsiPaEngineInstance::PluginErrorCallback(int32_t callbackId, int32_t errorC
         dispatcher->DispatchPluginError(callbackId, errorCode, std::move(errorMessage));
         return true;
     } else {
-        LOGW("Dispatcher Upgrade fail when dispatch error mesaage to platform");
+        LOGW("Dispatcher Upgrade fail when dispatch error message to platform");
         return false;
     }
 }

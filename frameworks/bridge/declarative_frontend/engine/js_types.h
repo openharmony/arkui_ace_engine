@@ -33,7 +33,7 @@ namespace OHOS::Ace::Framework {
 using JSVal = V8Value;
 using JSObject = V8Object;
 // QJS has JSFunction typedef
-using JSFunc = V8Funktion;
+using JSFunc = V8Function;
 using JSArray = V8Array;
 using JSCallbackInfo = V8CallbackInfo;
 using JSGCMarkCallbackInfo = V8GCMarkCallbackInfo;

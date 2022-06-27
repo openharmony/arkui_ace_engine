@@ -322,22 +322,22 @@ public:
         showAnimation_ = isAnimation;
     }
 
-    void SetLableMarkedText(std::string markedText)
+    void SetLabelMarkedText(std::string markedText)
     {
         markedText_ = markedText;
     }
 
-    void SetLableMarkedColor(Color markedColor)
+    void SetLabelMarkedColor(Color markedColor)
     {
         markedTextColor_ = markedColor;
     }
 
-    std::string GetLableMarkedText()
+    std::string GetLabelMarkedText()
     {
         return markedText_;
     }
 
-    Color GetLableMarkedColor()
+    Color GetLabelMarkedColor()
     {
         return markedTextColor_;
     }

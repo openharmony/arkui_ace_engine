@@ -587,7 +587,7 @@ std::unique_ptr<JsonValue> QJSDeclarativeEngineInstance::GetI18nStringResource(c
     return JsonUtil::Create(true);
 }
 
-std::string QJSDeclarativeEngineInstance::GetMeidaResource(const std::string& targetMediaFileName)
+std::string QJSDeclarativeEngineInstance::GetMediaResource(const std::string& targetMediaFileName)
 {
     auto iter = mediaResourceFileMap_.find(targetMediaFileName);
 

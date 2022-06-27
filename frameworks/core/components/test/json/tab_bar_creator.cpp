@@ -32,7 +32,7 @@ namespace {
 
 const static std::map<std::string, TabBarMode> MODE_VALUE_MAP = {
     { "fixed", TabBarMode::FIXED },
-    { "scrollable", TabBarMode::SCROLLABEL },
+    { "scrollable", TabBarMode::SCROLLABLE },
 };
 
 const static std::map<std::string, TabBarIndicatorType> INDICATOR_SIZE_VALUE_MAP = {

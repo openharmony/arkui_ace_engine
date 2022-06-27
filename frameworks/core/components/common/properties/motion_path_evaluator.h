@@ -57,7 +57,7 @@ public:
         return AceType::MakeRefPtr<DoubleEvaluator>(AceType::Claim(this), false);
     }
 
-    RefPtr<Evaluator<DimensionOffset>> CreateDimensionOffstEvaluator()
+    RefPtr<Evaluator<DimensionOffset>> CreateDimensionOffsetEvaluator()
     {
         return AceType::MakeRefPtr<DimensionOffsetEvaluator>(AceType::Claim(this));
     }

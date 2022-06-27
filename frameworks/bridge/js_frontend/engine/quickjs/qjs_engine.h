@@ -118,7 +118,7 @@ public:
             dispatcher->Dispatch(channel, std::move(data), id);
             return true;
         } else {
-            LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+            LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
             return false;
         }
     }
@@ -131,7 +131,7 @@ public:
             dispatcher->DispatchSync(channel, std::move(data), resData, position);
             return true;
         } else {
-            LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+            LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
             return false;
         }
     }
@@ -144,7 +144,7 @@ public:
             dispatcher->CallCurlFunction(requestData, callbackId);
             return true;
         } else {
-            LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+            LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
             return false;
         }
     }
@@ -157,7 +157,7 @@ public:
             dispatcher->DispatchPluginError(callbackId, errorCode, std::move(errorMessage));
             return true;
         } else {
-            LOGW("Dispatcher Upgrade fail when dispatch error mesaage to platform");
+            LOGW("Dispatcher Upgrade fail when dispatch error message to platform");
             return false;
         }
     }

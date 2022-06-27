@@ -78,20 +78,20 @@ std::string CustomDialogComposedElement::GetAlignment() const
 {
     auto renderDialog = GetRenderDialog();
     auto Alignment = renderDialog ? renderDialog->GetDialogProperties().alignment : DialogAlignment::DEFAULT;
-    return ConverDialogAlignmentToString(Alignment);
+    return ConvertDialogAlignmentToString(Alignment);
 }
 
 std::unique_ptr<JsonValue> CustomDialogComposedElement::GetDialogOffset() const
 {
     auto renderDialog = GetRenderDialog();
-    auto dialogoffset = renderDialog->GetDialogProperties().offset;
+    auto dialogOffset = renderDialog->GetDialogProperties().offset;
     auto jsonValue = JsonUtil::Create(true);
-    jsonValue->Put("dX", dialogoffset.GetX().Value());
-    jsonValue->Put("dY", dialogoffset.GetY().Value());
+    jsonValue->Put("dX", dialogOffset.GetX().Value());
+    jsonValue->Put("dY", dialogOffset.GetY().Value());
     return jsonValue;
 }
 
-std::string CustomDialogComposedElement::ConverDialogAlignmentToString(DialogAlignment dialogAlignment) const
+std::string CustomDialogComposedElement::ConvertDialogAlignmentToString(DialogAlignment dialogAlignment) const
 {
     std::string Alignment = "";
     switch (dialogAlignment) {

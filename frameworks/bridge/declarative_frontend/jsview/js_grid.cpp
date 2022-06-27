@@ -182,7 +182,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("cellLength", &JSGrid::CellLength, opt);
     JSClass<JSGrid>::StaticMethod("layoutDirection", &JSGrid::SetLayoutDirection, opt);
     JSClass<JSGrid>::StaticMethod("dragAnimation", &JSGrid::SetDragAnimation, opt);
-    JSClass<JSGrid>::StaticMethod("edgeEffection", &JSGrid::SetEdgeEffection, opt);
+    JSClass<JSGrid>::StaticMethod("edgeEffect", &JSGrid::SetEdgeEffect, opt);
     JSClass<JSGrid>::StaticMethod("direction", &JSGrid::SetDirection, opt);
     JSClass<JSGrid>::StaticMethod("supportAnimation", &JSGrid::SetSupportAnimation, opt);
     JSClass<JSGrid>::StaticMethod("onItemDragEnter", &JSGrid::JsOnGridDragEnter);
@@ -290,13 +290,13 @@ void JSGrid::SetDragAnimation(bool value)
     }
 }
 
-void JSGrid::SetEdgeEffection(int32_t value)
+void JSGrid::SetEdgeEffect(int32_t value)
 {
     if (value >= 0 && value < static_cast<int32_t>(EDGE_EFFECT.size())) {
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
         if (grid) {
-            grid->SetEdgeEffection(EDGE_EFFECT[value]);
+            grid->SetEdgeEffect(EDGE_EFFECT[value]);
         }
     }
 }

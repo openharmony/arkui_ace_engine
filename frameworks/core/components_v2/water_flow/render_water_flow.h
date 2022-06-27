@@ -190,9 +190,9 @@ protected:
 
     void CallGap();
     void InitialFlowProp();
-    void CaculateViewPortSceneOne();
-    bool CaculateViewPortSceneTwo(bool& NeedContinue);
-    void CaculateViewPort();
+    void CalculateViewPortSceneOne();
+    bool CalculateViewPortSceneTwo(bool& NeedContinue);
+    void CalculateViewPort();
     double BuildLazyFlowLayout(int32_t index, double sizeNeed);
     bool GetFlowSize();
     void BuildFlow(std::vector<double>& cols);
@@ -231,9 +231,9 @@ protected:
 
     void CheckAndInsertItems(int32_t mainIndex, int32_t itemIndex);
 
-    void OutPutMarix(int32_t rows, bool before);
+    void OutputMatrix(int32_t rows, bool before);
 
-    bool DeleteItemsInMarix(size_t rows, int32_t itemIndex);
+    bool DeleteItemsInMatrix(size_t rows, int32_t itemIndex);
 
     enum class SCROLLABLE : uint32_t {
         NO_SCROLL = 0,

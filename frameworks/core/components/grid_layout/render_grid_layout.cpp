@@ -105,7 +105,7 @@ void RenderGridLayout::Update(const RefPtr<Component>& component)
 
     supportAnimation_ = grid->GetSupportAnimation();
     dragAnimation_ = grid->GetDragAnimation();
-    edgeEffect_ = grid->GetEdgeEffection();
+    edgeEffect_ = grid->GetEdgeEffect();
     onGridDragStartFunc_ = grid->GetOnGridDragStartId();
     OnGridDragEnterFunc_ = grid->GetOnGridDragEnterId();
     onGridDragMoveFunc_ = grid->GetOnGridDragMoveId();

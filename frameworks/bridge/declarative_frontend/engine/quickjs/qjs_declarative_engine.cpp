@@ -39,7 +39,7 @@ namespace {
 const char COMPONENT_PREVIEW[] = "_preview_";
 const char COMPONENT_PREVIEW_LOAD_DOCUMENT[] = "loadDocument";
 const char COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW[] = "loadDocument(new";
-const char LEFT_PARENTTHESIS[] = "(";
+const char LEFT_PARENTHESIS[] = "(";
 constexpr int32_t LOAD_DOCUMENT_STR_LENGTH = 16;
 #endif
 } // namespace
@@ -178,7 +178,7 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             auto commonsJsResult = QJSDeclarativeEngineInstance::EvalBuf(
                 ctx, commonsJsContent.c_str(), commonsJsContent.length(), "commons.js", JS_EVAL_TYPE_GLOBAL);
             if (commonsJsResult == -1) {
-                LOGE("fail to excute load commonsjs script");
+                LOGE("fail to execute load commonsjs script");
                 return;
             }
         }
@@ -187,7 +187,7 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             auto vendorsJsResult = QJSDeclarativeEngineInstance::EvalBuf(
                 ctx, vendorsJsContent.c_str(), vendorsJsContent.length(), "vendors.js", JS_EVAL_TYPE_GLOBAL);
             if (vendorsJsResult == -1) {
-                LOGE("fail to excute load vendorsjs script");
+                LOGE("fail to execute load vendorsjs script");
                 return;
             }
         }
@@ -270,7 +270,7 @@ void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::s
 
     std::string::size_type position = lastLoadDocumentPos + LOAD_DOCUMENT_STR_LENGTH;
     std::string::size_type finalPostion = 0;
-    while ((position = preContent_.find(LEFT_PARENTTHESIS, position)) != std::string::npos) {
+    while ((position = preContent_.find(LEFT_PARENTHESIS, position)) != std::string::npos) {
         if (position > loadDocumentPos + LOAD_DOCUMENT_STR_LENGTH) {
             finalPostion = position;
             break;

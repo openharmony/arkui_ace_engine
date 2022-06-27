@@ -76,7 +76,7 @@ constexpr int32_t CUSTOM_FULL_WINDOW_LENGTH = 3;
 constexpr int32_t ARGS_FULL_WINDOW_LENGTH = 2;
 constexpr int32_t ARGS_READ_RESOURCE_LENGTH = 2;
 constexpr int32_t MAX_READ_TEXT_LENGTH = 4096;
-const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
+const std::regex URI_PATTERN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
 
 static int32_t globalNodeId = 100000;
 std::map<const std::string, std::string> dataMap_;
@@ -480,7 +480,7 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
     }
 
     if (isIine) {
-        std::vector < std::pair < std::string, std::string >> stylesFinaly;
+        std::vector < std::pair < std::string, std::string >> stylesFinally;
         for (int32_t i = 0; i < static_cast<int32_t>(styles.size()); i++) {
             std::string key = styles[i].first;
             std::string value = styles[i].second;
@@ -488,10 +488,10 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
                 key.find("padding") != std::string::npos) {
                 continue;
             } else {
-                stylesFinaly.emplace_back(key, value);
+                stylesFinally.emplace_back(key, value);
             }
         }
-        command.SetStyles(std::move(stylesFinaly));
+        command.SetStyles(std::move(stylesFinally));
     } else {
         command.SetStyles(std::move(styles));
     }
@@ -1374,7 +1374,7 @@ JSValue JsReadArrayBuffer(JSContext* ctx, JSValueConst argv)
     ScopedString callbackId(ctx, jsCallbackId);
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     std::smatch result;
-    if (!std::regex_match(uri, result, URI_PARTTEN)) {
+    if (!std::regex_match(uri, result, URI_PATTERN)) {
         LOGE("JsReadArrayBuffer file uri pattern not correct");
         instance->CallJs(callbackId.get(),
             R"({"arguments":["file uri pattern not correct",202],"method":"fail"})");
@@ -1430,7 +1430,7 @@ JSValue JsReadText(JSContext* ctx, JSValueConst argv)
     ScopedString callbackId(ctx, jsCallbackId);
     auto instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
     std::smatch result;
-    if (!std::regex_match(uri, result, URI_PARTTEN)) {
+    if (!std::regex_match(uri, result, URI_PATTERN)) {
         instance->CallJs(callbackId.get(),
             R"({"arguments":["file uri pattern not correct",202],"method":"fail"})");
         JS_FreeValue(ctx, jsCallbackId);
@@ -3019,8 +3019,8 @@ JSValue QjsEngineInstance::FireJsEvent(const std::string& param)
         if (JS_IsObject(itemVal)) {
             JSValue args = JS_GetPropertyStr(ctx, itemVal, "args");
             if (JS_IsArray(ctx, args)) {
-                JSValue stdDrage = JS_GetPropertyUint32(ctx, args, 1);
-                if (IsDragEvent(ScopedString::Stringify(ctx, stdDrage))) {
+                JSValue stdDrag = JS_GetPropertyUint32(ctx, args, 1);
+                if (IsDragEvent(ScopedString::Stringify(ctx, stdDrag))) {
                     JSValue arg2 = JS_GetPropertyUint32(ctx, args, 2);
                     if (JS_IsObject(arg2)) {
                         JSValue arg1 = JS_NewObject(ctx);
@@ -3087,7 +3087,7 @@ void QjsEngineInstance::CallJs(const std::string& callbackId, const std::string&
     JSValue retVal = QJSUtils::Call(ctx, callJsFunc, globalObj, countof(argv), argv);
 
     if (JS_IsException(retVal)) {
-        LOGE("JS framework excute callback failed");
+        LOGE("JS framework execute callback failed");
         JS_FreeValue(ctx, globalObj);
         QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::JS_CALLBACK_ERROR, instanceId_, stagingPage_->GetUrl().c_str(),
             stagingPage_);
@@ -3111,7 +3111,7 @@ void QjsEngineInstance::CallAnimationStartJs(JSValue animationContext)
     JSValue globalObj = JS_GetGlobalObject(ctx);
 
     if (JS_IsException(retVal)) {
-        LOGE("JS framework excute callAnimationStart failed");
+        LOGE("JS framework execute callAnimationStart failed");
         JS_FreeValue(ctx, globalObj);
         QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::JS_CALLBACK_ERROR, instanceId_, stagingPage_->GetUrl().c_str(),
             stagingPage_);
@@ -3134,7 +3134,7 @@ void QjsEngineInstance::CallAnimationFinishJs(JSValue animationContext)
     JSValue globalObj = JS_GetGlobalObject(ctx);
 
     if (JS_IsException(retVal)) {
-        LOGE("JS framework excute callAnimationFininsh failed");
+        LOGE("JS framework execute callAnimationFinish failed");
         JS_FreeValue(ctx, globalObj);
         QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::JS_CALLBACK_ERROR, instanceId_, stagingPage_->GetUrl().c_str(),
             stagingPage_);
@@ -3157,7 +3157,7 @@ void QjsEngineInstance::CallAnimationCancelJs(JSValue animationContext)
     JSValue globalObj = JS_GetGlobalObject(ctx);
 
     if (JS_IsException(retVal)) {
-        LOGE("JS framework excute callAnimationCancel failed");
+        LOGE("JS framework execute callAnimationCancel failed");
         JS_FreeValue(ctx, globalObj);
         QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::JS_CALLBACK_ERROR, instanceId_, stagingPage_->GetUrl().c_str(),
             stagingPage_);
@@ -3180,7 +3180,7 @@ void QjsEngineInstance::CallAnimationRepeatJs(JSValue animationContext)
     JSValue globalObj = JS_GetGlobalObject(ctx);
 
     if (JS_IsException(retVal)) {
-        LOGE("JS framework excute callAnimationRepeatJs failed");
+        LOGE("JS framework execute callAnimationRepeatJs failed");
         JS_FreeValue(ctx, globalObj);
         QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::JS_CALLBACK_ERROR, instanceId_, stagingPage_->GetUrl().c_str(),
             stagingPage_);
@@ -3381,7 +3381,7 @@ void QjsEngine::GetLoadOptions(std::string& optionStr, bool isMainPage, const Re
             auto commonsJsResult = CallEvalBuf(ctx, commonsJsContent.c_str(), commonsJsContent.size(),
                 "commons.js", JS_EVAL_TYPE_MODULE, instanceId_);
             if (commonsJsResult == JS_CALL_FAIL) {
-                LOGE("fail to excute load commonsjs script");
+                LOGE("fail to execute load commonsjs script");
             }
         }
         std::string vendorsJsContent;
@@ -3389,7 +3389,7 @@ void QjsEngine::GetLoadOptions(std::string& optionStr, bool isMainPage, const Re
             bool vendorsJsResult = CallEvalBuf(ctx, vendorsJsContent.c_str(), vendorsJsContent.size(),
                 "vendors.js", JS_EVAL_TYPE_MODULE, instanceId_);
             if (vendorsJsResult == JS_CALL_FAIL) {
-                LOGE("fail to excute load vendorsjs script");
+                LOGE("fail to execute load vendorsjs script");
             }
         }
         std::string code;

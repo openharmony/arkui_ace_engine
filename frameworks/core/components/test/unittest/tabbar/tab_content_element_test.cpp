@@ -107,7 +107,7 @@ void TabContentElementTest::InitFocusTree()
     std::list<RefPtr<Component>> children;
     children.clear();
     for (int32_t i = 0; i < ITEM_COUNT; i++) {
-        children.emplace_back(AceType::MakeRefPtr<TabBarItemComponent>(AceType::MakeRefPtr<FocusComponet>()));
+        children.emplace_back(AceType::MakeRefPtr<TabBarItemComponent>(AceType::MakeRefPtr<FocusComponent>()));
     }
     tabBar_->SetNewComponent(AceType::MakeRefPtr<TabBarComponent>(children, controller_));
 
@@ -137,7 +137,7 @@ RefPtr<FlexComponent> TabContentElementTest::CreateContent()
 {
     std::list<RefPtr<Component>> children;
     for (int32_t i = 0; i < ITEM_COUNT; i++) {
-        children.emplace_back(AceType::MakeRefPtr<FocusComponet>());
+        children.emplace_back(AceType::MakeRefPtr<FocusComponent>());
     }
 
     return AceType::MakeRefPtr<ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::FLEX_START, children);
