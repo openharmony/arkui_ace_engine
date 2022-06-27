@@ -309,6 +309,7 @@ void TextOverlayComponent::BuildMenuForDeclative(bool isSingleHandle)
 
 RefPtr<Component> TextOverlayComponent::BuildMenu(bool isSingleHandle)
 {
+    LOGE("yyc build menu");
     if (!menu_) {
         menu_ = AceType::MakeRefPtr<SelectPopupComponent>();
         menu_->ClearAllOptions();

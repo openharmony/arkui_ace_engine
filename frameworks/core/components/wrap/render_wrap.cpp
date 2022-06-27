@@ -70,6 +70,7 @@ void RenderWrap::Update(const RefPtr<Component>& component)
 
 void RenderWrap::PerformLayout()
 {
+    LOGE("RenderWrap::PerformLayout()");
     if (GetChildren().empty()) {
         // no child will set current to empty and return
         SetLayoutSize(Size(0.0, 0.0));
@@ -624,7 +625,7 @@ void RenderWrap::PositionedItem(
 void RenderWrap::PlaceItemAndLog(const RefPtr<RenderNode>& node, const Offset& position, const std::string& align) const
 {
     node->SetPosition(position);
-    LOGD("Wrap::PositionedItem %s item position x:%lf, y:%lf", align.c_str(), position.GetX(), position.GetY());
+    LOGI("Wrap::PositionedItem %{public}s item position x:%{public}lf, y:%{public}lf", align.c_str(), position.GetX(), position.GetY());
 }
 
 void RenderWrap::HandleCenterAlignment(double totalCrossSpace, const RefPtr<RenderNode>& item, const Offset& position,
