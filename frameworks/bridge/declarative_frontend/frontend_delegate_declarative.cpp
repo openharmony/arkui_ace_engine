@@ -739,41 +739,17 @@ void FrontendDelegateDeclarative::InitializeAccessibilityCallback()
 // Start FrontendDelegate overrides.
 void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string& params)
 {
-    {
-        std::lock_guard<std::mutex> lock(routerQueueMutex_);
-        if (!routerQueue_.empty()) {
-            AddRouterTask(RouterTask { RouterAction::PUSH, uri, params });
-            return;
-        }
-        AddRouterTask(RouterTask { RouterAction::PUSH, uri, params });
-    }
     Push(PageTarget(uri), params);
 }
 
 void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::string& params)
 {
-    {
-        std::lock_guard<std::mutex> lock(routerQueueMutex_);
-        if (!routerQueue_.empty()) {
-            AddRouterTask(RouterTask { RouterAction::REPLACE, uri, params });
-            return;
-        }
-        AddRouterTask(RouterTask { RouterAction::REPLACE, uri, params });
-    }
     Replace(PageTarget(uri), params);
 }
 
 void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string& params)
 {
-    {
-        std::lock_guard<std::mutex> lock(routerQueueMutex_);
-        if (!routerQueue_.empty()) {
-            AddRouterTask(RouterTask { RouterAction::BACK, uri, params });
-            return;
-        }
-        AddRouterTask(RouterTask { RouterAction::BACK, uri, params });
-    }
-    BackCheckAlert(uri, params);
+    BackWithTarget(PageTarget(uri), params);
 }
 
 void FrontendDelegateDeclarative::Clear()
@@ -831,7 +807,7 @@ void FrontendDelegateDeclarative::AddRouterTask(const RouterTask& task)
     if (routerQueue_.size() < MAX_ROUTER_STACK) {
         routerQueue_.emplace(task);
         LOGI("router queue's size = %{public}zu, action = %{public}d, url = %{public}s", routerQueue_.size(),
-            static_cast<uint32_t>(task.action), task.url.c_str());
+            static_cast<uint32_t>(task.action), task.target.url.c_str());
     } else {
         LOGW("router queue is full");
     }
@@ -839,19 +815,16 @@ void FrontendDelegateDeclarative::AddRouterTask(const RouterTask& task)
 
 void FrontendDelegateDeclarative::ProcessRouterTask()
 {
-    RouterTask currentTask;
-    {
-        std::lock_guard<std::mutex> lock(routerQueueMutex_);
-        if (!routerQueue_.empty()) {
-            routerQueue_.pop();
-        }
-        if (routerQueue_.empty()) {
-            return;
-        }
-        currentTask = routerQueue_.front();
-        LOGI("ProcessRouterTask current size = %{public}zu, action = %{public}d, url = %{public}s", routerQueue_.size(),
-            static_cast<uint32_t>(currentTask.action), currentTask.url.c_str());
+    std::lock_guard<std::mutex> lock(routerQueueMutex_);
+    if (!routerQueue_.empty()) {
+        routerQueue_.pop();
     }
+    if (routerQueue_.empty()) {
+        return;
+    }
+    RouterTask currentTask = routerQueue_.front();
+    LOGI("ProcessRouterTask current size = %{public}zu, action = %{public}d, url = %{public}s", routerQueue_.size(),
+        static_cast<uint32_t>(currentTask.action), currentTask.target.url.c_str());
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), currentTask] {
             auto delegate = weak.Upgrade();
@@ -860,13 +833,13 @@ void FrontendDelegateDeclarative::ProcessRouterTask()
             }
             switch (currentTask.action) {
                 case RouterAction::PUSH:
-                    delegate->Push(PageTarget(currentTask.url), currentTask.params);
+                    delegate->StartPush(currentTask.target, currentTask.params);
                     break;
                 case RouterAction::REPLACE:
-                    delegate->Replace(PageTarget(currentTask.url), currentTask.params);
+                    delegate->StartReplace(currentTask.target, currentTask.params);
                     break;
                 case RouterAction::BACK:
-                    delegate->BackCheckAlert(currentTask.url, currentTask.params);
+                    delegate->BackCheckAlert(currentTask.target, currentTask.params);
                     break;
                 case RouterAction::CLEAR:
                     delegate->ClearInvisiblePages();
@@ -879,6 +852,19 @@ void FrontendDelegateDeclarative::ProcessRouterTask()
 }
 
 void FrontendDelegateDeclarative::Push(const PageTarget& target, const std::string& params)
+{
+    {
+        std::lock_guard<std::mutex> lock(routerQueueMutex_);
+        if (!routerQueue_.empty()) {
+            AddRouterTask(RouterTask { RouterAction::PUSH, target, params });
+            return;
+        }
+        AddRouterTask(RouterTask { RouterAction::PUSH, target, params });
+    }
+    StartPush(target, params);
+}
+
+void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std::string& params)
 {
     if (target.url.empty()) {
         LOGE("router.Push uri is empty");
@@ -903,6 +889,19 @@ void FrontendDelegateDeclarative::Push(const PageTarget& target, const std::stri
 }
 
 void FrontendDelegateDeclarative::Replace(const PageTarget& target, const std::string& params)
+{
+    {
+        std::lock_guard<std::mutex> lock(routerQueueMutex_);
+        if (!routerQueue_.empty()) {
+            AddRouterTask(RouterTask { RouterAction::REPLACE, target, params });
+            return;
+        }
+        AddRouterTask(RouterTask { RouterAction::REPLACE, target, params });
+    }
+    StartReplace(target, params);
+}
+
+void FrontendDelegateDeclarative::StartReplace(const PageTarget& target, const std::string& params)
 {
     if (target.url.empty()) {
         LOGE("router.Replace uri is empty");
@@ -948,7 +947,7 @@ void FrontendDelegateDeclarative::LaunchPageTransition()
         TaskExecutor::TaskType::UI);
 }
 
-void FrontendDelegateDeclarative::BackCheckAlert(const std::string& uri, const std::string& params)
+void FrontendDelegateDeclarative::BackCheckAlert(const PageTarget& target, const std::string& params)
 {
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -959,7 +958,7 @@ void FrontendDelegateDeclarative::BackCheckAlert(const std::string& uri, const s
         }
         auto& currentPage = pageRouteStack_.back();
         if (currentPage.isAlertBeforeBackPage) {
-            backUri_ = uri;
+            backUri_ = target;
             backParam_ = params;
             taskExecutor_->PostTask(
                 [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
@@ -972,12 +971,25 @@ void FrontendDelegateDeclarative::BackCheckAlert(const std::string& uri, const s
             return;
         }
     }
-    BackWithTarget(PageTarget(uri), params);
+    StartBack(target, params);
 }
 
 void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const std::string& params)
 {
+    {
+        std::lock_guard<std::mutex> lock(routerQueueMutex_);
+        if (!routerQueue_.empty()) {
+            AddRouterTask(RouterTask { RouterAction::BACK, target, params });
+            return;
+        }
+        AddRouterTask(RouterTask { RouterAction::BACK, target, params });
+    }
     LOGD("router.Back path = %{private}s", target.url.c_str());
+    BackCheckAlert(target, params);
+}
+
+void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std::string& params)
+{
     if (target.url.empty()) {
         std::string pagePath;
         {
@@ -1231,15 +1243,16 @@ void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
             taskExecutor->PostTask(
                 [weak, callback, successType]() {
                     callback(successType);
-                    if (!successType) {
-                        LOGI("dialog choose cancel button, can not back");
-                        return;
-                    }
                     auto delegate = weak.Upgrade();
                     if (!delegate) {
                         return;
                     }
-                    delegate->BackWithTarget(PageTarget(delegate->backUri_), delegate->backParam_);
+                    if (!successType) {
+                        LOGI("dialog choose cancel button, can not back");
+                        delegate->ProcessRouterTask();
+                        return;
+                    }
+                    delegate->StartBack(delegate->backUri_, delegate->backParam_);
                 },
                 TaskExecutor::TaskType::JS);
         });
@@ -1524,8 +1537,6 @@ void FrontendDelegateDeclarative::OnPageReady(
                         auto delegate = weak.Upgrade();
                         if (delegate) {
                             delegate->PushPageTransitionListener(event, page);
-                            delegate->SetCurrentPage(page->GetPageId());
-                            delegate->OnMediaQueryUpdate();
                         }
                     });
                 pipelineContext->PushPage(page->BuildPage(url), page->GetStageElement());
@@ -1535,6 +1546,7 @@ void FrontendDelegateDeclarative::OnPageReady(
                 LOGW("router push run in unexpected process");
                 delegate->OnPageDestroy(page->GetPageId());
                 delegate->ResetStagingPage();
+                delegate->ProcessRouterTask();
             }
             delegate->isStagingPageExist_ = false;
             if (isMainPage) {
@@ -1549,6 +1561,8 @@ void FrontendDelegateDeclarative::PushPageTransitionListener(
 {
     if (event == TransitionEvent::PUSH_END) {
         OnPushPageSuccess(page, page->GetUrl());
+        SetCurrentPage(page->GetPageId());
+        OnMediaQueryUpdate();
         ProcessRouterTask();
     }
 }
@@ -1628,6 +1642,7 @@ void FrontendDelegateDeclarative::PopToPage(const std::string& url)
             if (!pipelineContext->CanPopPage()) {
                 LOGW("router pop to page run in unexpected process");
                 delegate->ResetStagingPage();
+                delegate->ProcessRouterTask();
                 return;
             }
             delegate->OnPageHide();
@@ -1715,6 +1730,7 @@ void FrontendDelegateDeclarative::PopPage()
             if (!pipelineContext->CanPopPage()) {
                 delegate->ResetStagingPage();
                 LOGW("router pop run in unexpected process");
+                delegate->ProcessRouterTask();
                 return;
             }
             delegate->OnPageHide();
@@ -1887,17 +1903,23 @@ void FrontendDelegateDeclarative::ReplacePage(const RefPtr<JsAcePage>& page, con
                 delegate->OnPageHide();
                 delegate->OnPageDestroy(delegate->GetRunningPageId());
                 delegate->OnPrePageChange(page);
-                pipelineContext->ReplacePage(page->BuildPage(url), page->GetStageElement());
-                delegate->OnReplacePageSuccess(page, url);
-                delegate->SetCurrentPage(page->GetPageId());
-                delegate->OnMediaQueryUpdate();
-                delegate->ProcessRouterTask();
+                pipelineContext->ReplacePage(page->BuildPage(url), page->GetStageElement(), [weak, page, url]() {
+                    auto delegate = weak.Upgrade();
+                    if (!delegate) {
+                        return;
+                    }
+                    delegate->OnReplacePageSuccess(page, url);
+                    delegate->SetCurrentPage(page->GetPageId());
+                    delegate->OnMediaQueryUpdate();
+                    delegate->ProcessRouterTask();
+                });
             } else {
                 // This page has been loaded but become useless now, the corresponding js instance
                 // must be destroyed to avoid memory leak.
                 LOGW("replace run in unexpected process");
                 delegate->OnPageDestroy(page->GetPageId());
                 delegate->ResetStagingPage();
+                delegate->ProcessRouterTask();
             }
             delegate->isStagingPageExist_ = false;
         },

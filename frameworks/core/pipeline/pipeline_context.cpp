@@ -1258,7 +1258,8 @@ void PipelineContext::ClearPageTransitionListeners()
     }
 }
 
-void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage)
+void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage,
+    const std::function<void()>& listener)
 {
     LOGD("ReplacePageComponent");
     CHECK_RUN_ON(UI);
@@ -1272,11 +1273,11 @@ void PipelineContext::ReplacePage(const RefPtr<PageComponent>& pageComponent, co
     }
     if (PageTransitionComponent::HasTransitionComponent(AceType::DynamicCast<Component>(pageComponent))) {
         LOGD("replace page with transition.");
-        stageElement->Replace(pageComponent);
+        stageElement->Replace(pageComponent, listener);
     } else {
         LOGD("replace page without transition, do not support transition.");
         RefPtr<DisplayComponent> display = AceType::MakeRefPtr<DisplayComponent>(pageComponent);
-        stageElement->Replace(display);
+        stageElement->Replace(display, listener);
     }
 }
 
