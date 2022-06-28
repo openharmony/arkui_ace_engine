@@ -196,7 +196,8 @@ public:
     }
 
 protected:
-    virtual LayoutParam MakeInnerLayoutParam(int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan) const;
+    virtual LayoutParam MakeInnerLayoutParam(
+        int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan, bool itemIsPercentUnit = false) const;
 
     void SetItemIndex(const RefPtr<RenderNode>& child, int32_t index);
 

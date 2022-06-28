@@ -488,7 +488,19 @@ bool RenderGridScroll::CheckGridPlaced(
 void RenderGridScroll::LayoutChild(const RefPtr<RenderNode>& child, int32_t main, int32_t cross, int32_t mainSpan,
     int32_t crossSpan, bool needPosition)
 {
-    child->Layout(MakeInnerLayoutParam(main, cross, mainSpan, crossSpan));
+    auto gridLayoutItem = AceType::DynamicCast<RenderGridLayoutItem>(child);
+    if (!gridLayoutItem) {
+        LOGE("child of GridScroll is not GridLayoutItem!");
+        return;
+    }
+    Dimension itemMainSize;
+    if (useScrollable_ == SCROLLABLE::HORIZONTAL) {
+        itemMainSize = gridLayoutItem->GetGridItemWidth();
+    } else {
+        itemMainSize = gridLayoutItem->GetGridItemHeight();
+    }
+    bool itemMainIsPercent = itemMainSize.Unit() == DimensionUnit::PERCENT;
+    child->Layout(MakeInnerLayoutParam(main, cross, mainSpan, crossSpan, itemMainIsPercent));
     SetMainSize(gridCells_.at(main).at(cross), child->GetLayoutSize());
     if (GetSize(gridCells_.at(main).at(0)) < GetSize(gridCells_.at(main).at(cross))) {
         SetMainSize(gridCells_.at(main).at(0), gridCells_.at(main).at(cross));
@@ -522,18 +534,23 @@ void RenderGridScroll::GetPreviousGrid(int32_t& curMain, int32_t& curCross)
 }
 
 LayoutParam RenderGridScroll::MakeInnerLayoutParam(
-    int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan) const
+    int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan, bool itemIsPercentUnit) const
 {
     LayoutParam innerLayout;
     double mainLen = 0.0;
     double crossLen = 0.0;
-    for (int32_t i = 0; i < mainSpan; ++i) {
-        if (gridCells_.find(main + i) != gridCells_.end() &&
-            gridCells_.at(main + i).find(cross) != gridCells_.at(main + i).end()) {
-            mainLen += GetSize(gridCells_.at(main + i).at(cross));
+    if (itemIsPercentUnit) {
+        auto maxMainSize = GetSize(GetLayoutParam().GetMaxSize());
+        mainLen += Size::IsValueInfinite(maxMainSize) ? GetSize(viewPort_) : maxMainSize;
+    } else {
+        for (int32_t i = 0; i < mainSpan; ++i) {
+            if (gridCells_.find(main + i) != gridCells_.end() &&
+                gridCells_.at(main + i).find(cross) != gridCells_.at(main + i).end()) {
+                mainLen += GetSize(gridCells_.at(main + i).at(cross));
+            }
         }
+        mainLen += (mainSpan - 1) * (*mainGap_);
     }
-    mainLen += (mainSpan - 1) * (*mainGap_);
     for (int32_t i = 0; i < crossSpan; ++i) {
         if (gridCells_.find(main) != gridCells_.end() &&
             gridCells_.at(main).find(cross + i) != gridCells_.at(main).end()) {

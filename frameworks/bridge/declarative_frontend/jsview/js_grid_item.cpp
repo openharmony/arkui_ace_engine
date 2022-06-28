@@ -16,8 +16,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_mouse_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_item.h"
 
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-
 namespace OHOS::Ace::Framework {
 
 void JSGridItem::Create()
@@ -91,6 +89,8 @@ void JSGridItem::JSBind(BindingTarget globalObj)
     JSClass<JSGridItem>::StaticMethod("forceRebuild", &JSGridItem::ForceRebuild, opt);
     JSClass<JSGridItem>::StaticMethod("selectable", &JSGridItem::SetSelectable, opt);
     JSClass<JSGridItem>::StaticMethod("onSelect", &JSGridItem::SelectCallback);
+    JSClass<JSGridItem>::StaticMethod("width", &JSGridItem::SetGridItemWidth);
+    JSClass<JSGridItem>::StaticMethod("height", &JSGridItem::SetGridItemHeight);
     JSClass<JSGridItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSGridItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSGridItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
