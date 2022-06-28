@@ -129,6 +129,7 @@ public:
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
+    static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
 
     // response region
     static void JsResponseRegion(const JSCallbackInfo& info);

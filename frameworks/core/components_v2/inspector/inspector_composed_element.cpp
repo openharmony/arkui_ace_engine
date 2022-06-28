@@ -164,6 +164,9 @@ const std::unordered_map<std::string, JsonValueJsonFunc> CREATE_JSON_JSON_VALUE_
     { "radialGradient", [](const InspectorNode& inspector) { return inspector.GetRadialGradient(); } },
 };
 
+constexpr double VISIBLE_RATIO_MIN = 0.0;
+constexpr double VISIBLE_RATIO_MAX = 1.0;
+
 }; // namespace
 
 InspectorComposedElement::InspectorComposedElement(const ComposeId& id) : ComposedElement(id) {}
@@ -1640,6 +1643,93 @@ bool InspectorComposedElement::IsFocused() const
         return false;
     }
     return node->GetFocusedState();
+}
+
+void InspectorComposedElement::TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList)
+{
+    auto renderBox = GetRenderBox();
+    if (!renderBox) {
+        LOGE("TriggerVisibleAreaChangeCallback: Get render box failed.");
+        return;
+    }
+
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGW("get context failed");
+        return;
+    }
+
+    const auto& renderNode = GetRenderNode();
+    if (!renderNode) {
+        LOGE("Get render node failed!");
+        return;
+    }
+
+    if (!context->GetOnShow() || renderNode->GetHidden() || inspectorId_ == -1) {
+        ProcessAllVisibleCallback(callbackInfoList, VISIBLE_RATIO_MIN);
+        return;
+    }
+
+    auto margin = renderBox->GetMargin();
+    auto renderRect = GetRenderRect() + Offset(margin.LeftPx(), margin.TopPx());
+    renderRect -= margin.GetLayoutSize();
+
+    Rect visibleRect = renderRect;
+    Rect parentRect;
+    auto parent = renderNode->GetParent().Upgrade();
+    while (parent) {
+        parentRect = parent->GetRectBasedWindowTopLeft();
+        visibleRect = visibleRect.Constrain(parentRect);
+        parent = parent->GetParent().Upgrade();
+    }
+
+    double currentVisibleRatio =
+        std::clamp(CalculateCurrentVisibleRatio(visibleRect, renderRect), VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
+    ProcessAllVisibleCallback(callbackInfoList, currentVisibleRatio);
+}
+
+double InspectorComposedElement::CalculateCurrentVisibleRatio(const Rect& visibleRect, const Rect& renderRect)
+{
+    if (!visibleRect.IsValid() || !renderRect.IsValid()) {
+        return 0.0;
+    }
+
+    return visibleRect.Width() * visibleRect.Height() / (renderRect.Width() * renderRect.Height());
+}
+
+void InspectorComposedElement::ProcessAllVisibleCallback(
+    std::list<VisibleCallbackInfo>& callbackInfoList, double currentVisibleRatio)
+{
+    for (auto& nodeCallbackInfo : callbackInfoList) {
+        if (GreatNotEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) && !nodeCallbackInfo.isCurrentVisible) {
+            OnVisibleAreaChangeCallback(nodeCallbackInfo, true, currentVisibleRatio);
+            continue;
+        }
+
+        if (LessNotEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio) && nodeCallbackInfo.isCurrentVisible) {
+            OnVisibleAreaChangeCallback(nodeCallbackInfo, false, currentVisibleRatio);
+            continue;
+        }
+
+        if (NearEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio)) {
+            if (NearEqual(nodeCallbackInfo.visibleRatio, VISIBLE_RATIO_MIN) && nodeCallbackInfo.isCurrentVisible) {
+                OnVisibleAreaChangeCallback(nodeCallbackInfo, false, currentVisibleRatio);
+            }
+
+            if (NearEqual(nodeCallbackInfo.visibleRatio, VISIBLE_RATIO_MAX) && !nodeCallbackInfo.isCurrentVisible) {
+                OnVisibleAreaChangeCallback(nodeCallbackInfo, true, currentVisibleRatio);
+            }
+        }
+    }
+}
+
+void InspectorComposedElement::OnVisibleAreaChangeCallback(
+    VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio)
+{
+    callbackInfo.isCurrentVisible = visibleType;
+    if (callbackInfo.callback) {
+        callbackInfo.callback(visibleType, currentVisibleRatio);
+    }
 }
 
 } // namespace OHOS::Ace::V2

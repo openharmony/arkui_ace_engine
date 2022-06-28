@@ -18,6 +18,7 @@
 #include <fstream>
 #include <utility>
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/event/ace_events.h"
@@ -320,9 +321,33 @@ void PipelineContext::FlushFocus()
 void PipelineContext::FireVisibleChangeEvent()
 {
     ACE_FUNCTION_TRACK();
+    if (GetIsDeclarative()) {
+        HandleVisibleAreaChangeEvent();
+        return;
+    }
+
     auto accessibilityManager = GetAccessibilityManager();
     if (accessibilityManager) {
         accessibilityManager->TriggerVisibleChangeEvent();
+    }
+}
+
+void PipelineContext::HandleVisibleAreaChangeEvent()
+{
+    if (visibleAreaChangeNodes_.empty()) {
+        return;
+    }
+    for (auto& visibleChangeNode : visibleAreaChangeNodes_) {
+        auto visibleNodeId = visibleChangeNode.first;
+        auto composedElement = GetComposedElementById(visibleNodeId);
+        if (!composedElement) {
+            continue;
+        }
+
+        auto inspectorComposedElement = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement);
+        if (inspectorComposedElement) {
+            inspectorComposedElement->TriggerVisibleAreaChangeCallback(visibleChangeNode.second);
+        }
     }
 }
 
@@ -3700,6 +3725,24 @@ void PipelineContext::PushVisibleCallback(NodeId id, double ratio, std::function
         return;
     }
     accessibilityManager->AddVisibleChangeNode(id, ratio, func);
+}
+
+void PipelineContext::AddVisibleAreaChangeNode(
+    const ComposeId& nodeId, double ratio, const VisibleRatioCallback& callback)
+{
+    VisibleCallbackInfo info;
+    info.callback = callback;
+    info.visibleRatio = ratio;
+    info.isCurrentVisible = false;
+    auto iter = visibleAreaChangeNodes_.find(nodeId);
+    if (iter != visibleAreaChangeNodes_.end()) {
+        auto& callbackList = iter->second;
+        callbackList.emplace_back(info);
+    } else {
+        std::list<VisibleCallbackInfo> callbackList;
+        callbackList.emplace_back(info);
+        visibleAreaChangeNodes_[nodeId] = callbackList;
+    }
 }
 
 void PipelineContext::RemoveVisibleChangeNode(NodeId id)
