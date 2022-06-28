@@ -1971,6 +1971,7 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
         case WindowSizeChangeReason::DRAG_START: {
             isDragStart_ = true;
             BlurWindowWithDrag(true);
+            NotifyWebPaint();
             break;
         }
         case WindowSizeChangeReason::DRAG: {
@@ -1984,6 +1985,7 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             isFirstDrag_ = true;
             BlurWindowWithDrag(false);
             SetRootSizeWithWidthHeight(width, height);
+            NotifyWebPaint();
             break;
         }
         case WindowSizeChangeReason::ROTATION:
@@ -1992,6 +1994,16 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
         default: {
             LOGD("PipelineContext::RootNodeAnimation : unsupported type, no animation added");
             SetRootSizeWithWidthHeight(width, height);
+        }
+    }
+}
+
+void PipelineContext::NotifyWebPaint() const
+{
+    CHECK_RUN_ON(UI);
+    for (auto& iterWebPaintCallback : webPaintCallback_) {
+        if (iterWebPaintCallback) {
+            iterWebPaintCallback();
         }
     }
 }
@@ -2488,6 +2500,7 @@ void PipelineContext::Destroy()
     sharedImageManager_.Reset();
     window_->Destroy();
     touchPluginPipelineContext_.clear();
+    webPaintCallback_.clear();
     LOGI("PipelineContext::Destroy end.");
 }
 
