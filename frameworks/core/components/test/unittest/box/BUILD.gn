@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
-  module_output_path = "ace_engine_standard/backenduicomponent/box"
+  module_output_path = "ace_engine/backenduicomponent/box"
 } else {
   module_output_path = "ace_engine_full/backenduicomponent/box"
 }
@@ -38,13 +38,7 @@ ohos_unittest("BoxCreatorTest") {
     "$ace_root/frameworks/core/components/test:json",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 ohos_unittest("RenderBoxTest") {
@@ -61,13 +55,7 @@ ohos_unittest("RenderBoxTest") {
 
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 ohos_unittest("RenderBoxPercentTest") {
@@ -93,13 +81,7 @@ ohos_unittest("RenderBoxPercentTest") {
     "$ace_flutter_engine_root/icu:icu_config_ohos",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 ohos_unittest("MouseHoverTest") {
@@ -116,13 +98,7 @@ ohos_unittest("MouseHoverTest") {
 
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 ohos_unittest("MouseHoverAnimationTest") {
@@ -139,13 +115,7 @@ ohos_unittest("MouseHoverAnimationTest") {
 
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 group("unittest") {

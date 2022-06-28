@@ -31,13 +31,7 @@ ohos_unittest("ImageCreatorTest") {
     "$ace_root/frameworks/core/components/test:json",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 config("config_json_creator_test") {
@@ -211,13 +205,7 @@ ohos_unittest("RenderImageTest") {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   }
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 config("config_render_test") {

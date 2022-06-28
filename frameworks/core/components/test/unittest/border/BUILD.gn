@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
-  module_output_path = "ace_engine_standard/backenduicomponent/border"
+  module_output_path = "ace_engine/backenduicomponent/border"
 } else {
   module_output_path = "ace_engine_full/backenduicomponent/border"
 }
@@ -39,13 +39,7 @@ ohos_unittest("BorderCreatorTest") {
     "$ace_root/frameworks/core/components/test:json",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 config("config_json_creator_test") {

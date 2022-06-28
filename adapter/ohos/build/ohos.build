@@ -1,7 +1,7 @@
 {
   "subsystem": "arkui",
   "parts": {
-    "ace_engine_standard": {
+    "ace_engine": {
       "version": "1.0.0",
       "interface-version": {},
       "variants": [
