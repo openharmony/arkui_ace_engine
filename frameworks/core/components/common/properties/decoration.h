@@ -1162,7 +1162,7 @@ private:
     // Contrast
     Dimension contrast_;
     // Saturate
-    Dimension saturate_;
+    Dimension saturate_ = 1.0_px;
     // Sepia
     Dimension sepia_;
     // invert
