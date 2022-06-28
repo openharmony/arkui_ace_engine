@@ -1237,6 +1237,11 @@ public:
         return isDragStart_;
     }
 
+    bool GetIsTabKeyPressed() const
+    {
+        return isTabKeyPressed_;
+    }
+
 private:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     void FlushPipelineWithoutAnimation();
@@ -1463,7 +1468,7 @@ private:
     bool isShiftDown_ = false;
     bool isCtrlDown_ = false;
     bool isKeyboardA_ = false;
-    bool isKeyTabDown_ = false;
+    bool isTabKeyPressed_ = false;
     SubscribeCtrlACallback subscribeCtrlA_;
 
     int32_t appLabelId_ = 0;

@@ -24,6 +24,7 @@
 #include "core/components/declaration/common/declaration.h"
 #include "core/components/declaration/input/input_declaration.h"
 #include "core/components/text_field/text_field_controller.h"
+#include "core/pipeline/base/component.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/core/components/text_field/text_field_controller.h"
 
@@ -111,6 +112,7 @@ struct TextFieldStyle : Style {
     Dimension errorBorderWidth;
     Color errorBorderColor;
     Border originBorder;
+    HoverAnimationType hoverAnimationType;
 
     RefPtr<Decoration> decoration;
 };
@@ -872,6 +874,18 @@ public:
     {
         auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
         return style.overCountStyleOuter;
+    }
+
+    void SetHoverAnimationType(HoverAnimationType animationType)
+    {
+        auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        style.hoverAnimationType = animationType;
+    }
+
+    HoverAnimationType GetHoverAnimationType() const
+    {
+        auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.hoverAnimationType;
     }
 
     void SetInputOptions(const std::vector<InputOption>& inputOptions)

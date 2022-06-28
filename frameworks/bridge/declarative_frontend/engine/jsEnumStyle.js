@@ -630,6 +630,7 @@ var InputType;
 (function (InputType) {
   InputType[InputType["Normal"] = 0] = "Normal";
   InputType[InputType["Number"] = 2] = "Number";
+  InputType[InputType["Phone"] = 3] = "Phone";
   InputType[InputType["Email"] = 5] = "Email";
   InputType[InputType["Password"] = 7] = "Password";
 })(InputType || (InputType = {}));

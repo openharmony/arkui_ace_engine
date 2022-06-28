@@ -283,7 +283,7 @@ void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
-    if (isKeyTabDown_) {
+    if (isTabKeyPressed_) {
         if (dirtyFocusNode_) {
             dirtyFocusNode_->RequestFocusImmediately();
             dirtyFocusNode_.Reset();
@@ -1626,8 +1626,8 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
     }
 
-    if (event.code == KeyCode::KEY_TAB && !isKeyTabDown_) {
-        isKeyTabDown_ = true;
+    if (event.code == KeyCode::KEY_TAB && !isTabKeyPressed_) {
+        isTabKeyPressed_ = true;
         FlushFocus();
         return true;
     }
@@ -2750,7 +2750,7 @@ void PipelineContext::SetOnPageShow(OnPageShowCallBack&& onPageShowCallBack)
 void PipelineContext::OnPageShow()
 {
     CHECK_RUN_ON(UI);
-    isKeyTabDown_ = false;
+    isTabKeyPressed_ = false;
     if (onPageShowCallBack_) {
         onPageShowCallBack_();
     }

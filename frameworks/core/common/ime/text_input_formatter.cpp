@@ -33,7 +33,7 @@ void BlackListCharsFormatter::Format(const TextEditingValue& oldValue, TextEditi
 NumberFormatter::NumberFormatter() : BlackListCharsFormatter(std::wregex(L"[^\\d.\\-e]+")) {}
 
 // Only allow \d-+
-PhoneNumberFormatter::PhoneNumberFormatter() : BlackListCharsFormatter(std::wregex(L"[^\\d\\-\\+]+")) {}
+PhoneNumberFormatter::PhoneNumberFormatter() : BlackListCharsFormatter(std::wregex(L"[^\\d\\-\\+\\*\\#]+")) {}
 
 // Only allow \d\w-_.@
 EmailFormatter::EmailFormatter() : BlackListCharsFormatter(std::wregex(L"[^\\d\\w\\-\\._@]+")) {}

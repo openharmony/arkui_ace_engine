@@ -48,6 +48,9 @@ constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr Dimension COUNT_SPACING = 4.0_vp;
 constexpr double MAGNIFIER_GAIN = 1.25;
 const char ELLIPSIS[] = "...";
+constexpr Dimension DEFAULT_FOCUS_BORDER_WIDTH = 2.0_vp;
+constexpr uint32_t DEFAULT_FOCUS_BORDER_COLOR = 0xFF254FF7;
+constexpr double HALF = 0.5;
 
 } // namespace
 
@@ -344,12 +347,18 @@ void FlutterRenderTextField::PaintCountText(SkCanvas* canvas) const
     }
 }
 
-void FlutterRenderTextField::PaintOverlayForHoverAndPress(SkCanvas* canvas) const
+SkVector FlutterRenderTextField::GetSkRadii(const Radius& radius) const
+{
+    SkVector fRadii;
+    fRadii.set(SkDoubleToScalar(NormalizeToPx(radius.GetX())), SkDoubleToScalar(NormalizeToPx(radius.GetY())));
+    return fRadii;
+}
+
+void FlutterRenderTextField::PaintOverlayForHoverAndPress(const Offset& offset, SkCanvas* canvas) const
 {
     if (canvas == nullptr) {
         return;
     }
-    SkPaint paint;
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         return;
@@ -364,11 +373,54 @@ void FlutterRenderTextField::PaintOverlayForHoverAndPress(SkCanvas* canvas) cons
     flutter::RRect clipRRect = decorationPainter->GetBoxRRect(Offset(), border, 0.0, true);
     canvas->save();
     canvas->clipRRect(clipRRect.sk_rrect, true);
-    // Background overlay 5% opacity black when hover, 10% opacity black when press.
+
+    SkPaint paint;
     paint.setColor(GetEventEffectColor().GetValue());
-    Rect rect(Offset::Zero(), GetLayoutSize());
-    canvas->drawRect(SkRect::MakeLTRB(rect.Left(), rect.Top(), rect.Width(), rect.Height()), paint);
+    paint.setStyle(SkPaint::Style::kFill_Style);
+    paint.setAntiAlias(true);
+
+    SkRect skRect = SkRect::MakeXYWH(offset.GetX(), offset.GetY(), GetLayoutSize().Width(), GetLayoutSize().Height());
+    flutter::RRect rrect;
+    SkVector fRadii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    fRadii[SkRRect::kUpperLeft_Corner] = GetSkRadii(border.TopLeftRadius());
+    fRadii[SkRRect::kUpperRight_Corner] = GetSkRadii(border.TopRightRadius());
+    fRadii[SkRRect::kLowerRight_Corner] = GetSkRadii(border.BottomRightRadius());
+    fRadii[SkRRect::kLowerLeft_Corner] = GetSkRadii(border.BottomLeftRadius());
+    rrect.sk_rrect.setRectRadii(skRect, fRadii);
+    canvas->drawRRect(rrect.sk_rrect, paint);
     canvas->restore();
+}
+
+void FlutterRenderTextField::PaintFocus(const Offset& offset, const Size& widthHeight, RenderContext& context)
+{
+    auto canvas = ScopedCanvas::Create(context);
+    SkCanvas* skCanvas = canvas->canvas();
+    if (!skCanvas) {
+        LOGE("Paint skCanvas is null");
+        return;
+    }
+    if (!skCanvas) {
+        LOGE("Paint canvas is null");
+        return;
+    }
+    SkPaint paint;
+    paint.setColor(DEFAULT_FOCUS_BORDER_COLOR);
+    paint.setStrokeWidth(NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH));
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setAntiAlias(true);
+
+    SkRect skRect = SkRect::MakeXYWH(offset.GetX() + NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH) * HALF,
+                                     offset.GetY() + NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH) * HALF,
+                                     widthHeight.Width() - NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH),
+                                     widthHeight.Height() - NormalizeToPx(DEFAULT_FOCUS_BORDER_WIDTH));
+    flutter::RRect rrect;
+    SkVector fRadii[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    fRadii[SkRRect::kUpperLeft_Corner] = GetSkRadii(decoration_->GetBorder().TopLeftRadius());
+    fRadii[SkRRect::kUpperRight_Corner] = GetSkRadii(decoration_->GetBorder().TopRightRadius());
+    fRadii[SkRRect::kLowerRight_Corner] = GetSkRadii(decoration_->GetBorder().BottomRightRadius());
+    fRadii[SkRRect::kLowerLeft_Corner] = GetSkRadii(decoration_->GetBorder().BottomLeftRadius());
+    rrect.sk_rrect.setRectRadii(skRect, fRadii);
+    skCanvas->drawRRect(rrect.sk_rrect, paint);
 }
 
 void FlutterRenderTextField::Paint(RenderContext& context, const Offset& offset)
@@ -406,6 +458,11 @@ void FlutterRenderTextField::Paint(RenderContext& context, const Offset& offset)
     PaintTextField(offset, context, magnifierCanvas_.get(), true);
 
     magnifierCanvas_->scale(1.0 / (viewScale * MAGNIFIER_GAIN), 1.0 / (viewScale * MAGNIFIER_GAIN));
+
+    if ((SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+        SystemProperties::GetDeviceType() == DeviceType::TABLET) && hasFocus_) {
+        PaintFocus(offset, GetPaintRect().GetSize(), context);
+    }
 }
 
 Size FlutterRenderTextField::Measure()
@@ -1318,7 +1375,7 @@ void FlutterRenderTextField::PaintTextField(
         SkRect::MakeLTRB(clipRect.Left(), clipRect.Top(), clipRect.Right(), clipRect.Bottom()), SkClipOp::kIntersect);
     if (!isMagnifier) {
         PaintDecoration(offset, canvas, GetPaintRect().GetSize(), context);
-        PaintOverlayForHoverAndPress(canvas);
+        PaintOverlayForHoverAndPress(offset, canvas);
         PaintIcon(offset, context);
     }
 

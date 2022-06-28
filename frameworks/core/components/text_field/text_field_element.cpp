@@ -190,7 +190,10 @@ void TextFieldElement::OnFocus()
         textField->StartTwinkling();
     }
     FocusNode::OnFocus();
-    renderNode_->ChangeStatus(RenderStatus::FOCUS);
+    auto context = context_.Upgrade();
+    if (context && context->GetIsTabKeyPressed() && renderNode_) {
+        renderNode_->ChangeStatus(RenderStatus::FOCUS);
+    }
 }
 
 void TextFieldElement::OnBlur()
@@ -198,15 +201,17 @@ void TextFieldElement::OnBlur()
     if (!enabled_) {
         return;
     }
-    if (renderNode_) {
-        renderNode_->ChangeStatus(RenderStatus::BLUR);
-    }
     auto textField = DynamicCast<RenderTextField>(renderNode_);
     if (textField) {
         textField->StopTwinkling();
+        textField->PopTextOverlay();
     }
     CloseKeyboard();
     FocusNode::OnBlur();
+    auto context = context_.Upgrade();
+    if (context && context->GetIsTabKeyPressed() && renderNode_) {
+        renderNode_->ChangeStatus(RenderStatus::BLUR);
+    }
 }
 
 void TextFieldElement::OnSurfaceChanged(int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight)

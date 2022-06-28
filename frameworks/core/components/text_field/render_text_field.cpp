@@ -130,6 +130,8 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     focusTextColor_ = textField->GetFocusTextColor();
     selectedColor_ = textField->GetSelectedColor();
     pressColor_ = textField->GetPressColor();
+    hoverColor_ = textField->GetHoverColor();
+    hoverAnimationType_ = textField->GetHoverAnimationType();
     decoration_ = textField->GetDecoration();
     inactiveBgColor_ = textField->GetBgColor();
     if (decoration_ && (decoration_->GetImage() || decoration_->GetGradient().IsValid())) {
@@ -244,6 +246,9 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         controller_->AddObserver(WeakClaim(this));
         controller_->SetHint(placeholder_);
         if (textField->IsValueUpdated()) {
+            if (textField->GetValue() != GetEditingValue().text) {
+                PopTextOverlay();
+            }
             controller_->SetText(textField->GetValue(), false);
         }
     }
@@ -385,7 +390,6 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
             int32_t start = GetEditingValue().selection.baseOffset;
             int32_t end = GetCursorPositionForClick(event.GetOffset());
             UpdateSelection(start, end);
-            StopTwinkling();
             MarkNeedRender();
         } else {
             LOGD("on left button release");
@@ -397,7 +401,7 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
         ShowTextOverlay(rightClickOffset, false);
     }
 
-    return true;
+    return false;
 }
 
 void RenderTextField::OnTouchTestHit(
@@ -489,6 +493,9 @@ void RenderTextField::StartPressAnimation(bool pressDown)
     if (pressController_->IsRunning()) {
         pressController_->Stop();
     }
+    if (hoverController_ && hoverController_->IsRunning()) {
+        hoverController_->Stop();
+    }
     pressController_->ClearInterpolators();
     RefPtr<KeyframeAnimation<Color>> animation = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
     if (pressDown) {
@@ -500,6 +507,40 @@ void RenderTextField::StartPressAnimation(bool pressDown)
     pressController_->SetDuration(PRESS_DURATION);
     pressController_->SetFillMode(FillMode::FORWARDS);
     pressController_->Forward();
+}
+
+void RenderTextField::StartHoverAnimation(bool isHovered)
+{
+    if (pressController_ && pressController_->IsRunning()) {
+        return;
+    }
+    if (!hoverController_) {
+        hoverController_ = AceType::MakeRefPtr<Animator>(context_);
+    }
+    if (hoverController_->IsRunning()) {
+        hoverController_->Stop();
+    }
+    hoverController_->ClearInterpolators();
+    RefPtr<KeyframeAnimation<Color>> animation = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
+    if (isHovered) {
+        CreateMouseAnimation(animation, GetEventEffectColor(), hoverColor_);
+    } else {
+        CreateMouseAnimation(animation, GetEventEffectColor(), Color::TRANSPARENT);
+    }
+    hoverController_->AddInterpolator(animation);
+    hoverController_->SetDuration(HOVER_DURATION);
+    hoverController_->SetFillMode(FillMode::FORWARDS);
+    hoverController_->Forward();
+}
+
+void RenderTextField::AnimateMouseHoverEnter()
+{
+    StartHoverAnimation(true);
+}
+
+void RenderTextField::AnimateMouseHoverExit()
+{
+    StartHoverAnimation(false);
 }
 
 void RenderTextField::OnClick(const ClickInfo& clickInfo)
@@ -2130,7 +2171,10 @@ void RenderTextField::ChangeBorderToErrorStyle()
     } else {
         errorBorder = Border(errorBorderEdge);
     }
-    errorBorder.SetBorderRadius(decoration_->GetBorder().TopLeftRadius());
+    errorBorder.SetTopLeftRadius(decoration_->GetBorder().TopLeftRadius());
+    errorBorder.SetTopRightRadius(decoration_->GetBorder().TopRightRadius());
+    errorBorder.SetBottomLeftRadius(decoration_->GetBorder().BottomLeftRadius());
+    errorBorder.SetBottomRightRadius(decoration_->GetBorder().BottomRightRadius());
     decoration_->SetBorder(errorBorder);
 }
 

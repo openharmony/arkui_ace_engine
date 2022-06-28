@@ -45,6 +45,9 @@ enum class MouseButton : int32_t {
     MIDDLE_BUTTON = 4,
     BACK_BUTTON = 8,
     FORWARD_BUTTON = 16,
+    SIDE_BUTTON = 32,
+    EXTRA_BUTTON = 64,
+    TASK_BUTTON = 128,
 };
 
 struct MouseEvent final {

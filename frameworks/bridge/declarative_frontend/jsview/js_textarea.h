@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTAREA_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTAREA_H
+
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/core/components/text_field/text_field_controller.h"
 #include "frameworks/core/components/text_field/text_field_component.h"
 #include "frameworks/core/components/text_field/textfield_theme.h"
-
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTAREA_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTAREA_H
 
 namespace OHOS::Ace::Framework {
 
@@ -28,26 +28,6 @@ class JSTextArea : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
-    static void SetPlaceholderColor(const JSCallbackInfo& info);
-    static void SetPlaceholderFont(const JSCallbackInfo& info);
-    static void SetTextAlign(int32_t value);
-    static void SetCaretColor(const JSCallbackInfo& info);
-    static void JsHeight(const JSCallbackInfo& info);
-    static void JsPadding(const JSCallbackInfo& info);
-    static void SetFontSize(const JSCallbackInfo& info);
-    static void SetFontWeight(const std::string& value);
-    static void SetTextColor(const JSCallbackInfo& info);
-    static void SetInputFilter(const JSCallbackInfo& info);
-    static void SetFontStyle(int32_t value);
-    static void SetFontFamily(const JSCallbackInfo& info);
-    static void SetOnChange(const JSCallbackInfo& info);
-    static void SetOnCopy(const JSCallbackInfo& info);
-    static void SetOnCut(const JSCallbackInfo& info);
-    static void SetOnPaste(const JSCallbackInfo& info);
-    static void SetBackgroundColor(const JSCallbackInfo& info);
-    static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
-        const RefPtr<TextFieldComponent>& component, const Border& boxBorder,
-        const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
 
 private:
     static void InitDefaultStyle();
