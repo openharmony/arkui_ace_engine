@@ -3622,7 +3622,7 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
     if (info[0]->IsString()) {
         degree = static_cast<float>(StringUtils::StringToDegree(info[0]->ToString()));
     } else if (info[0]->IsNumber()) {
-        degree = static_cast<float>(info[0]->ToNumber<uint32_t>());
+        degree = static_cast<float>(info[0]->ToNumber<int32_t>());
     } else {
         LOGE("Invalid value type");
     }
@@ -3631,14 +3631,7 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
         deg = degree.value();
         degree.reset();
     }
-    // Deal with numbers out of (0, 360)
-    int32_t round = deg / ROUND_UNIT;
-    LOGI("degree is %{public}lf, round is %{public}d", deg, round);
-    if (round >= 0) {
-        deg = deg - round * ROUND_UNIT;
-    } else {
-        deg = deg - (round - 1) * ROUND_UNIT;
-    }
+    deg = std::fmod(deg, ROUND_UNIT);
     auto decoration = GetFrontDecoration();
     if (decoration) {
         decoration->SetHueRotate(deg);
