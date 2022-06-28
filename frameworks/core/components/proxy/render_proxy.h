@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PROXY_RENDER_PROXY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PROXY_RENDER_PROXY_H
 
+#include "base/memory/ace_type.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -29,9 +30,12 @@ public:
 
     static RefPtr<RenderNode> Create();
 
-    void Update(const RefPtr<Component>& component) override {}
+    void Update(const RefPtr<Component>& component) override;
 
     void PerformLayout() override;
+
+private:
+    bool passMinSize_ = true;
 };
 
 } // namespace OHOS::Ace

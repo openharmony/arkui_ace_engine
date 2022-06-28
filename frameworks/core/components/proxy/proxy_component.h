@@ -36,6 +36,19 @@ public:
 
     RefPtr<Element> CreateElement() override;
 
+    void SetPassMinSize(bool flag)
+    {
+        passMinSize_ = flag;
+    }
+
+    bool GetPassMinSize()
+    {
+        return passMinSize_;
+    }
+
+private:
+    bool passMinSize_ = true;
+
 };
 
 } // namespace OHOS::Ace
