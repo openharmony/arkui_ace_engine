@@ -139,6 +139,7 @@ template("declarative_js_engine") {
       "jsview/js_clipboard.cpp",
       "jsview/js_column.cpp",
       "jsview/js_column_split.cpp",
+      "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",

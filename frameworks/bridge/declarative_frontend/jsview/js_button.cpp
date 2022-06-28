@@ -47,7 +47,15 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
         textStyle.SetAdaptTextSize(fontSize, fontSize);
         textComponent->SetTextStyle(std::move(textStyle));
     }
-    ResetButtonHeight();
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
+    if (!buttonComponent) {
+        return;
+    }
+    if (buttonComponent->NeedResetHeight()) {
+        ResetButtonHeight();
+    }
 }
 
 void JSButton::SetFontWeight(std::string value)
@@ -242,6 +250,9 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
     JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
     buttonComponent->SetMouseAnimationType(HoverAnimationType::SCALE);
+    if (buttonComponent->NeedResetHeight()) {
+        ResetButtonHeight();
+    }
 }
 
 void JSButton::SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonComponent)
@@ -276,7 +287,7 @@ void JSButton::ResetButtonHeight()
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
     if (buttonComponent) {
-        if (buttonComponent->GetType() != ButtonType::NORMAL) {
+        if (buttonComponent->GetType() == ButtonType::CIRCLE) {
             return;
         }
         const Dimension initialHeight = Dimension(-1.0, DimensionUnit::VP);
@@ -323,8 +334,10 @@ void JSButton::JsPadding(const JSCallbackInfo& info)
         if (paddingChild) {
             paddingChild->SetPadding(padding);
         }
+        if (component->NeedResetHeight()) {
+            ResetButtonHeight();
+        }
     }
-    ResetButtonHeight();
 }
 
 void JSButton::JsOnClick(const JSCallbackInfo& info)
@@ -456,6 +469,7 @@ void JSButton::JsHeight(const JSCallbackInfo& info)
     if (!buttonComponent) {
         return;
     }
+    buttonComponent->IsNeedResetHeight(false);
     if (!stack->IsVisualStateSet()) {
         buttonComponent->SetHeight(value, option);
         buttonComponent->SetDeclareHeight(true);
@@ -507,6 +521,7 @@ void JSButton::JsSize(const JSCallbackInfo& info)
     JSRef<JSVal> heightValue = sizeObj->GetProperty("height");
     Dimension height;
     if (ParseJsDimensionVp(heightValue, height)) {
+        buttonComponent->IsNeedResetHeight(false);
         if (!stack->IsVisualStateSet()) {
             buttonComponent->SetHeight(height, stack->GetImplicitAnimationOption());
             buttonComponent->SetDeclareHeight(true);

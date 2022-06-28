@@ -32,7 +32,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr double HANDLE_HOT_ZONE = 10.0;
-}
+} // namespace
 
 RenderText::~RenderText()
 {
@@ -105,7 +105,7 @@ void RenderText::Update(const RefPtr<Component>& component)
     textAffinity_ = TextAffinity::UPSTREAM;
     textValue_.text = text_->GetData();
     cursorWidth_ = NormalizeToPx(CURSOR_WIDTH);
-    
+
     onDragStart_ = text_->GetOnDragStartId();
     onDragEnter_ = text_->GetOnDragEnterId();
     onDragMove_ = text_->GetOnDragMoveId();
@@ -228,8 +228,8 @@ bool RenderText::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
         !GetEventMarker(GetTouchPosition(localOffset), GestureType::TOUCH_CANCEL).IsEmpty()) {
         needTouchDetector_ = true;
     }
-    if (!needClickDetector_ && !needLongPressDetector_ && !needTouchDetector_ &&
-        copyOption_ == CopyOption::NoCopy && !onDragStart_) {
+    if (!needClickDetector_ && !needLongPressDetector_ && !needTouchDetector_ && copyOption_ == CopyOption::NoCopy &&
+        !onDragStart_) {
         return false;
     }
 
@@ -457,6 +457,22 @@ bool RenderText::HandleMouseEvent(const MouseEvent& event)
     }
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         Offset rightClickOffset = event.GetOffset();
+
+        auto textOverlayManager = GetTextOverlayManager(context_);
+        if (textOverlayManager) {
+            auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
+            if (textOverlayBase) {
+                auto targetNode = textOverlayManager->GetTargetNode();
+                if (targetNode) {
+                    textOverlayManager->PopTextOverlay();
+                    textOverlayBase->ChangeSelection(0, 0);
+                    textOverlayBase->MarkIsOverlayShowed(false);
+                    targetNode->MarkNeedRender();
+                }
+            }
+            textOverlayManager->SetTextOverlayBase(AceType::WeakClaim(this));
+        }
+        InitSelection(rightClickOffset, GetGlobalOffset());
         ShowTextOverlay(rightClickOffset, true);
         return true;
     }
@@ -506,8 +522,8 @@ void RenderText::ShowTextOverlay(const Offset& showOffset, bool isUsingMouse)
         AceType::MakeRefPtr<TextOverlayComponent>(GetThemeManager(), context_.Upgrade()->GetAccessibilityManager());
     textOverlay_->SetWeakText(WeakClaim(this));
     textOverlay_->SetLineHeight(selectHeight_);
-    textOverlay_->SetClipRect(GetPaintRect() + Size(HANDLE_HOT_ZONE, HANDLE_HOT_ZONE) +
-        GetOffsetToPage() - Offset(HANDLE_HOT_ZONE / 2.0, 0.0));
+    textOverlay_->SetClipRect(GetPaintRect() + Size(HANDLE_HOT_ZONE, HANDLE_HOT_ZONE) + GetOffsetToPage() -
+                              Offset(HANDLE_HOT_ZONE / 2.0, 0.0));
     textOverlay_->SetTextDirection(defaultTextDirection_);
     textOverlay_->SetStartHandleOffset(startHandleOffset);
     textOverlay_->SetEndHandleOffset(endHandleOffset);
@@ -557,8 +573,8 @@ void RenderText::RegisterCallbacksToOverlay()
         }
     });
 
-    auto callback = [weak = WeakClaim(this), pipelineContext = context_,
-        textOverlay = textOverlay_](const std::string& data) {
+    auto callback = [weak = WeakClaim(this), pipelineContext = context_, textOverlay = textOverlay_](
+                        const std::string& data) {
         auto context = pipelineContext.Upgrade();
         if (!context) {
             return;
@@ -985,7 +1001,7 @@ void RenderText::PanOnActionStart(const GestureEvent& info)
     positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
     SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
     auto updatePosition = [renderBox = AceType::Claim(this)](
-                                const std::function<void(const Dimension&, const Dimension&)>& func) {
+                              const std::function<void(const Dimension&, const Dimension&)>& func) {
         if (!renderBox) {
             return;
         }
@@ -1147,8 +1163,7 @@ void RenderText::CreateSelectRecognizer()
     }
 
     PanDirection panDirection;
-    selectRecognizer_ =
-        AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, 1, panDirection, 0);
+    selectRecognizer_ = AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, 1, panDirection, 0);
     selectRecognizer_->SetOnActionStart([weak = WeakClaim(this), context = context_](const GestureEvent& info) {
         if (info.GetSourceDevice() != SourceType::MOUSE) {
             return;

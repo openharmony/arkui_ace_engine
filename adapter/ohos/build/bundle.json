@@ -1,5 +1,5 @@
 {
-    "name": "@ohos/ace_engine_standard",
+    "name": "@ohos/ace_engine",
     "description": "ArkUI Cross-Platform Engine for UI layout measure and paint",
     "version": "3.1",
     "license": "Apache 2.0",
@@ -10,7 +10,7 @@
     "dirs": {},
     "scripts": {},
     "component": {
-        "name": "ace_engine_standard",
+        "name": "ace_engine",
         "subsystem": "arkui",
         "syscap": [],
         "features": [],

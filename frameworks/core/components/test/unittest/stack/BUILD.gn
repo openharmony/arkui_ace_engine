@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
-  module_output_path = "ace_engine_standard/backenduicomponent/stack"
+  module_output_path = "ace_engine/backenduicomponent/stack"
 } else {
   module_output_path = "ace_engine_full/backenduicomponent/stack"
 }
@@ -38,13 +38,7 @@ ohos_unittest("StackCreatorTest") {
     "$ace_root/frameworks/core/components/test:json",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 config("config_json_creator_test") {
@@ -71,13 +65,7 @@ ohos_unittest("RenderStackTest") {
 
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 config("config_render_flex_test") {

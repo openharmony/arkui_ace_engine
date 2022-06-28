@@ -51,6 +51,11 @@ int FrameReport::GetEnable()
     return false;
 }
 
+int FrameReport::GetFrameReportEnable()
+{
+    return false;
+}
+
 void FrameReport::BeginFlushAnimation()
 {
     beginFlushAnimationFunc_ = nullptr;

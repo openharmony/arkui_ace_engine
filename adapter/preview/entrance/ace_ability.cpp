@@ -170,12 +170,12 @@ void AceAbility::InitEnv()
         appResourcesPath.append(DELIMITER);
     }
     if (runArgs_.projectModel == ProjectModel::STAGE) {
+        paths.push_back(appResourcesPath);
         paths.push_back(appResourcesPath + ASSET_PATH_SHARE_STAGE);
     } else {
         paths.push_back(GetCustomAssetPath(runArgs_.assetPath) + ASSET_PATH_SHARE);
     }
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
-
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
         LOGE("container is null, initialize the environment failed.");
@@ -199,10 +199,11 @@ void AceAbility::InitEnv()
         AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
         AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
     }
-
+    if (runArgs_.projectModel == ProjectModel::STAGE && !runArgs_.formsEnabled) {
+        container->SetStageAppConfig();
+    }
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
-
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
     view->NotifySurfaceChanged(runArgs_.deviceWidth, runArgs_.deviceHeight);
     view->NotifyDensityChanged(runArgs_.deviceConfig.density);

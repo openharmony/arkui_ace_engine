@@ -61,10 +61,35 @@ public:
         return barText_;
     }
 
+    RefPtr<Component> ExecuteBuilder() const
+    {
+        if (builder_) {
+            return (*builder_)();
+        } else {
+            LOGD("No builder function for tab.");
+            return nullptr;
+        }
+    }
+
+    void SetBuilder(std::function<RefPtr<Component>()>&& builder)
+    {
+        if (builder) {
+            builder_ = std::make_unique<std::function<RefPtr<Component>()>>(std::move(builder));
+        } else {
+            builder_.reset();
+        }
+    }
+
+    bool HasBuilder()
+    {
+        return builder_ != nullptr;
+    }
+
 private:
     WeakPtr<TabsComponent> tabsComponent_;
     std::string barIcon_;
     std::string barText_;
+    std::unique_ptr<std::function<RefPtr<Component>()>> builder_ = nullptr;
 };
 
 } // namespace OHOS::Ace::V2

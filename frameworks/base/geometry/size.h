@@ -32,6 +32,11 @@ public:
     ~Size() = default;
     Size(double width, double height) : width_(width), height_(height) {}
 
+    inline static bool IsValueInfinite(double inputValue)
+    {
+        return NearEqual(inputValue, INFINITE_SIZE);
+    }
+
     double Width() const
     {
         return width_;

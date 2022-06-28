@@ -31,13 +31,7 @@ ohos_unittest("DomDividerTest") {
 
   deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 config("config_domnode_test") {

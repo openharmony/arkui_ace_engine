@@ -40,6 +40,8 @@ void RenderGridLayoutItem::Update(const RefPtr<Component>& component)
     InitAnimationController(GetContext());
     onSelectId_ = gridItem->GetOnSelectId();
     selectable_ = gridItem->GetSelectable();
+    itemWidth_ = gridItem->GetGridItemWidth();
+    itemHeight_ = gridItem->GetGridItemHeight();
     MarkNeedLayout();
 }
 

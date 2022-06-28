@@ -181,6 +181,16 @@ public:
         return isDeclareHeight_;
     }
 
+    void IsNeedResetHeight(bool needResetHeight)
+    {
+        needResetHeight_ = needResetHeight;
+    }
+
+    bool NeedResetHeight()
+    {
+        return needResetHeight_;
+    }
+
     void FitTextHeight(AnimatableDimension& height);
 
     uint32_t Compare(const RefPtr<Component>& component) const override;
@@ -217,6 +227,7 @@ private:
     bool isInputButton_ = false;
     bool isCatchMode_ = true;
     bool isDeclareHeight_ = false;
+    bool needResetHeight_ = true;
     uint32_t layoutFlag_ = 0;
     // for custom button type
     std::array<Radius, 4> radii_ = { Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp) };

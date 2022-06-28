@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 config("uiservice_manager_public_config") {
   visibility = [ ":*" ]
@@ -77,5 +78,5 @@ ohos_shared_library("ui_service_mgr") {
   ]
 
   subsystem_name = "arkui"
-  part_name = "ace_engine_standard"
+  part_name = ace_engine_part
 }

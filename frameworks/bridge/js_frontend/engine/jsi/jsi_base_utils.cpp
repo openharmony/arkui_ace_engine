@@ -44,8 +44,9 @@ std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, st
 
     RefPtr<RevSourceMap> pageMap;
     RefPtr<RevSourceMap> appMap;
+    std::string pageUrl;
     if (runningPage) {
-        auto pageUrl = runningPage->GetUrl();
+        pageUrl = runningPage->GetUrl();
         summaryBody.append("page: ").append(pageUrl).append("\n");
 
         pageMap = runningPage->GetPageMap();
@@ -66,7 +67,7 @@ std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, st
     stackStr.append(stack->ToString(runtime));
 
     if (pageMap || appMap) {
-        std::string tempStack = JsiDumpSourceFile(stackStr, pageMap, appMap, data);
+        std::string tempStack = JsiDumpSourceFile(stackStr, pageUrl, pageMap, appMap, data);
         summaryBody.append(tempStack);
     } else {
         summaryBody.append("Cannot get SourceMap info, dump raw stack:\n");
@@ -86,15 +87,16 @@ std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const 
     std::string summaryBody;
     RefPtr<RevSourceMap> pageMap;
     RefPtr<RevSourceMap> appMap;
+    std::string pageUrl;
     if (runningPage) {
-        auto pageUrl = runningPage->GetUrl();
+        pageUrl = runningPage->GetUrl();
         summaryBody.append(" Page: ").append(pageUrl).append("\n");
         pageMap = runningPage->GetPageMap();
         appMap = runningPage->GetAppMap();
     }
 
     if (pageMap || appMap) {
-        std::string tempStack = JsiBaseUtils::JsiDumpSourceFile(stacktrace, pageMap, appMap);
+        std::string tempStack = JsiBaseUtils::JsiDumpSourceFile(stacktrace, pageUrl, pageMap, appMap);
         summaryBody.append(tempStack);
     } else {
         summaryBody.append("Cannot get SourceMap info, dump raw stack:\n");
@@ -104,16 +106,23 @@ std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const 
     return summaryBody;
 }
 
-std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const RefPtr<RevSourceMap>& pageMap,
-    const RefPtr<RevSourceMap>& appMap, const AceType *data)
+std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const std::string& pageUrl,
+    const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, const AceType *data)
 {
     const std::string closeBrace = ")";
     const std::string openBrace = "(";
     std::string ans = "";
     std::string tempStack = stackStr;
-    int32_t appFlag = static_cast<int32_t>(tempStack.find("app_.js"));
+    std::string runningPageTag = "app_.js";
+    int32_t appFlag = static_cast<int32_t>(tempStack.find(runningPageTag));
     bool isAppPage = appFlag > 0 && appMap;
-
+    if (!isAppPage) {
+        std::string ans = std::as_const(pageUrl);
+        char* ch = strrchr((char*)ans.c_str(), '.');
+        int index = ch - ans.c_str();
+        ans.insert(index, "_");
+        runningPageTag = ans;
+    }
     // find per line of stack
     std::vector<std::string> res;
     ExtractEachInfo(tempStack, res);
@@ -135,6 +144,9 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const R
     }
     for (; i < res.size(); i++) {
         std::string temp = res[i];
+        if (temp.find(runningPageTag) == std::string::npos) {
+            continue;
+        }
         int32_t closeBracePos = static_cast<int32_t>(temp.find(closeBrace));
         int32_t openBracePos = static_cast<int32_t>(temp.find(openBrace));
 

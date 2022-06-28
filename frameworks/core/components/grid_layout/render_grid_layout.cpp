@@ -216,7 +216,8 @@ int32_t RenderGridLayout::GetIndexByGrid(int32_t row, int32_t column) const
     return -1;
 }
 
-LayoutParam RenderGridLayout::MakeInnerLayoutParam(int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan) const
+LayoutParam RenderGridLayout::MakeInnerLayoutParam(
+    int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan, bool itemIsPercentUnit) const
 {
     LOGD("%{public}d %{public}d %{public}d %{public}d", row, col, rowSpan, colSpan);
     LayoutParam innerLayout;

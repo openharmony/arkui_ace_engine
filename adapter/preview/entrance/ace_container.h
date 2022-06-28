@@ -180,6 +180,8 @@ public:
 
     void SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl);
 
+    void SetStageAppConfig();
+
     void SetPageProfile(const std::string& pageProfile)
     {
         pageProfile_ = pageProfile;

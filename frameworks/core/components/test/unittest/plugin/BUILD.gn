@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 if (is_standard_system) {
-  module_output_path = "ace_engine_standard/backenduicomponent/plugin"
+  module_output_path = "ace_engine/backenduicomponent/plugin"
 } else {
   module_output_path = "ace_engine_full/backenduicomponent/plugin"
 }
@@ -34,13 +34,7 @@ ohos_unittest("FlutterRenderPluginTest") {
     "$ace_root/build:ace_ohos_unittest_base",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 ohos_unittest("PluginCallBackClientTest") {
@@ -70,13 +64,7 @@ ohos_unittest("PluginCallBackClientTest") {
     "ipc:ipc_core",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 ohos_unittest("PluginComponentTest") {
@@ -103,13 +91,7 @@ ohos_unittest("PluginComponentTest") {
     "ipc:ipc_core",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 ohos_unittest("PluginElementTest") {
@@ -136,13 +118,7 @@ ohos_unittest("PluginElementTest") {
     "ipc:ipc_core",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 ohos_unittest("PluginManagerDelegateTest") {
@@ -171,13 +147,7 @@ ohos_unittest("PluginManagerDelegateTest") {
     "ipc:ipc_core",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 ohos_unittest("PluginManagerResourceTest") {
@@ -194,13 +164,7 @@ ohos_unittest("PluginManagerResourceTest") {
     "$ace_root/build:ace_ohos_unittest_base",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 ohos_unittest("PluginSubContainerTest") {
@@ -220,13 +184,7 @@ ohos_unittest("PluginSubContainerTest") {
 
   external_deps = [ "ability_base:want" ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 ohos_unittest("PluginWindowTest") {
@@ -244,13 +202,7 @@ ohos_unittest("PluginWindowTest") {
     "//third_party/googletest:gmock_main",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 ohos_unittest("RenderPluginTest") {
@@ -265,13 +217,7 @@ ohos_unittest("RenderPluginTest") {
     "$ace_root/build:ace_ohos_unittest_base",
   ]
 
-  if (!is_standard_system) {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_full"
-  } else {
-    subsystem_name = "arkui"
-    part_name = "ace_engine_standard"
-  }
+  part_name = ace_engine_part
 }
 
 config("config_json_creator_test") {

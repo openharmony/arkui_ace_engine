@@ -147,7 +147,8 @@ protected:
     double GetSize(const Size& src, bool isMain = true) const;
     void GetNextGrid(int32_t& curMain, int32_t& curCross) const override;
     void GetPreviousGrid(int32_t& curMain, int32_t& curCross);
-    LayoutParam MakeInnerLayoutParam(int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan) const override;
+    LayoutParam MakeInnerLayoutParam(
+        int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan, bool itemIsPercentUnit = false) const override;
     bool CheckGridPlaced(int32_t index, int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan) override;
 
     // Sets child position, the mainAxis does not contain the offset.

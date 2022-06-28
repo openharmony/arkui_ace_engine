@@ -100,6 +100,26 @@ public:
         onSelectId_ = onSelectId;
     }
 
+    void SetGridItemWidth(const Dimension& width)
+    {
+        itemWidth_ = width;
+    }
+
+    const Dimension& GetGridItemWidth() const
+    {
+        return itemWidth_;
+    }
+
+    void SetGridItemHeight(const Dimension& height)
+    {
+        itemHeight_ = height;
+    }
+
+    const Dimension& GetGridItemHeight() const
+    {
+        return itemHeight_;
+    }
+
 private:
     EventMarker clickEventId_;
     int32_t columnIndex_ = -1;
@@ -109,6 +129,8 @@ private:
     bool forceRebuild_ = false;
     OnSelectFunc onSelectId_;
     bool selectable_ = true;
+    Dimension itemWidth_ {-1};
+    Dimension itemHeight_ {-1};
 };
 
 } // namespace OHOS::Ace

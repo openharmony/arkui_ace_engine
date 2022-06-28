@@ -102,11 +102,13 @@ public:
     void MarkDirtyNode(
         bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
-    void FlushModifyTaskOnCreate(StateModifyTask& stateModifyTask);
+    // When a component is first created, the node properties are refreshed based on the StateModifyTask.
+    void FlushStateModifyTaskOnCreate(StateModifyTask& stateModifyTask);
+
+    // When a component is rerendered, the node properties are refreshed based on the StateModifyTask.
+    void FlushStateModifyTaskOnRerender(StateModifyTask& stateModifyTask);
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
-
-    void FlushModifyTaskOnRerender(StateModifyTask& stateModifyTask);
 
     RefPtr<LayoutWrapper> CreateLayoutWrapperOnCreate();
 
