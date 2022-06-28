@@ -396,6 +396,13 @@ public:
     }
     void NotifyDispatchTouchEventDismiss(const TouchEvent& event) const;
 
+    using WebPaintCallback = std::function<void()>;
+    void SetWebPaintCallback(WebPaintCallback&& listener)
+    {
+        webPaintCallback_.push_back(std::move(listener));
+    }
+    void NotifyWebPaint() const;
+
     float GetViewScale() const
     {
         return viewScale_;
@@ -1429,6 +1436,7 @@ private:
     std::list<IsPagePathInvalidEventHandler> isPagePathInvalidEventHandler_;
     std::list<DestroyEventHandler> destroyEventHandler_;
     std::list<DispatchTouchEventHandler> dispatchTouchEventHandler_;
+    std::list<WebPaintCallback> webPaintCallback_;
 
     RefPtr<ManagerInterface> textFieldManager_;
     RefPtr<PlatformBridge> messageBridge_;
