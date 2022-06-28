@@ -1905,6 +1905,7 @@ class PersistentStorage {
 }
 PersistentStorage.Instance_ = undefined;
 ;
+PersistentStorage.ConfigureBackend(new Storage());
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2182,6 +2183,7 @@ class Environment {
     }
 }
 Environment.Instance_ = undefined;
+Environment.ConfigureBackend(new EnvironmentSetting());
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
