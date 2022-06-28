@@ -95,7 +95,7 @@ void PipelineContext::SetupRootElement()
     rootNode_->SetHostRootId(GetInstanceId());
     StateModifyTask modifyTask;
     modifyTask.GetRenderContextTask().emplace_back(BgColorModifier(Color::WHITE));
-    rootNode_->FlushModifyTaskOnCreate(modifyTask);
+    rootNode_->FlushStateModifyTaskOnCreate(modifyTask);
     CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;

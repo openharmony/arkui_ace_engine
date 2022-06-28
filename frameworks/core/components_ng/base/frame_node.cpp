@@ -247,7 +247,7 @@ RefPtr<PipelineContext> FrameNode::GetContext() const
     return context_.Upgrade();
 }
 
-void FrameNode::FlushModifyTaskOnCreate(StateModifyTask& stateModifyTask)
+void FrameNode::FlushStateModifyTaskOnCreate(StateModifyTask& stateModifyTask)
 {
     if (!stateModifyTask.GetLayoutTask().empty()) {
         for (auto&& task : stateModifyTask.GetLayoutTask()) {
@@ -267,7 +267,7 @@ void FrameNode::FlushModifyTaskOnCreate(StateModifyTask& stateModifyTask)
     pattern_->OnModifyDone();
 }
 
-void FrameNode::FlushModifyTaskOnRerender(StateModifyTask& stateModifyTask)
+void FrameNode::FlushStateModifyTaskOnRerender(StateModifyTask& stateModifyTask)
 {
     if (!stateModifyTask.GetLayoutTask().empty()) {
         for (auto&& task : stateModifyTask.GetLayoutTask()) {
