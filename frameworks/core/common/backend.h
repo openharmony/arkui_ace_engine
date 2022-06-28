@@ -64,6 +64,8 @@ public:
 
     // inform the frontend that onCreate or onDestroy
     virtual void UpdateState(State) = 0;
+
+    virtual void DumpHeapSnapshot(bool isPrivate) = 0;
 };
 
 } // namespace OHOS::Ace
