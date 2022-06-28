@@ -59,6 +59,11 @@ public:
         return displayMode_;
     }
 
+    void SetChildPosition(const Offset& childPosition)
+    {
+        childPosition_ = childPosition;
+    }
+
     void StartAnimator();
     void StopAnimator();
 
@@ -81,6 +86,7 @@ private:
 
     bool isAxisChanged_ = true;
     bool touchInBarRegion_ = true;
+    Offset childPosition_;
     Rect childRect_;
     Axis axis_ = Axis::VERTICAL;
     RefPtr<DragRecognizer> dragRecognizer_;
