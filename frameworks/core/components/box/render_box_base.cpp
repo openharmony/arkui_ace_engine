@@ -373,12 +373,22 @@ void RenderBoxBase::CalculateGridLayoutSize()
             auto headRenderNode = GetHeadRenderNode();
             if (headRenderNode) {
                 auto context = headRenderNode->GetContext().Upgrade();
-                headRenderNode->SetPositionType((context && context->GetIsDeclarative()) ?
-                    PositionType::SEMI_RELATIVE : PositionType::ABSOLUTE);
-                headRenderNode->GetTextDirection() == TextDirection::RTL ?
-                    headRenderNode->SetRight(offset) : headRenderNode->SetLeft(offset);
+                headRenderNode->SetPositionType(
+                    (context && context->GetIsDeclarative()) ? PositionType::SEMI_RELATIVE : PositionType::ABSOLUTE);
+                headRenderNode->GetTextDirection() == TextDirection::RTL ? headRenderNode->SetRight(offset)
+                                                                         : headRenderNode->SetLeft(offset);
             }
         }
+        // the above two cases will only work on rosen, so using below to support on preview.
+#ifndef ENABLE_ROSEN_BACKEND
+        auto context = context_.Upgrade();
+        positionParam_.type =
+            (context && context->GetIsDeclarative()) ? PositionType::SEMI_RELATIVE : PositionType::ABSOLUTE;
+        std::pair<AnimatableDimension, bool>& edge =
+            (GetTextDirection() == TextDirection::RTL) ? positionParam_.right : positionParam_.left;
+        edge.first = offset;
+        edge.second = true;
+#endif
     }
 
     double defaultWidth = gridColumnInfo_->GetWidth();
