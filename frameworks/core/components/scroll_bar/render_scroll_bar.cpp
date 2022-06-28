@@ -143,6 +143,7 @@ void RenderScrollBar::HandleDragUpdate(const DragUpdateInfo& info)
             }
         }
     }
+    childPosition_ = child->GetPosition();
 }
 
 void RenderScrollBar::HandleDragFinish()
@@ -188,7 +189,7 @@ void RenderScrollBar::InitChildPosition()
         LOGD("Axis of ScrollBar is not support: %{public}d", axis_);
         return;
     }
-    child->SetPosition(childPosition);
+    childPosition_ = childPosition;
 }
 
 void RenderScrollBar::InitAnimator()
@@ -269,6 +270,7 @@ void RenderScrollBar::PerformLayout()
     if (!GetChildren().empty()) {
         const auto& child = GetChildren().front();
         child->Layout(LayoutParam(GetLayoutParam().GetMaxSize(), Size()));
+        child->SetPosition(childPosition_);
         childRect_ = Rect(child->GetPosition(), child->GetLayoutSize());
     }
     SetLayoutSize(GetLayoutParam().GetMaxSize());
