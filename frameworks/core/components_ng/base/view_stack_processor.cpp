@@ -102,7 +102,7 @@ void ViewStackProcessor::Pop()
     elementsStack_.pop();
     if (!modifyTaskStack_.empty() && AceType::InstanceOf<FrameNode>(element)) {
         // TODO: Add Task create on rerender case.
-        element->FlushModifyTaskOnCreate(*modifyTaskStack_.top());
+        element->FlushStateModifyTaskOnCreate(*modifyTaskStack_.top());
         modifyTaskStack_.pop();
     }
     if (strcmp(element->GetTag().c_str(), V2::LIST_ITEM_ETS_TAG) == 0) {
@@ -144,7 +144,7 @@ RefPtr<FrameNode> ViewStackProcessor::Finish()
     elementsStack_.pop();
     if (!modifyTaskStack_.empty() && AceType::InstanceOf<FrameNode>(element)) {
         // TODO: Add Task create on rerender case.
-        element->FlushModifyTaskOnCreate(*modifyTaskStack_.top());
+        element->FlushStateModifyTaskOnCreate(*modifyTaskStack_.top());
         modifyTaskStack_.pop();
     }
     if (!elementsStack_.empty()) {
@@ -165,9 +165,11 @@ RefPtr<FrameNode> ViewStackProcessor::Finish()
 void ViewStackProcessor::PushKey(const std::string& key)
 {
     if (viewKey_.empty()) {
+        // For the root node, the key value is xxx.
         viewKey_ = key;
         keyStack_.emplace(key.length());
     } else {
+        // For descendant nodes, the key value is xxx_xxx
         viewKey_.append("_").append(key);
         keyStack_.emplace(key.length() + 1);
     }
