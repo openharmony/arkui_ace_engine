@@ -963,6 +963,7 @@ public:
     void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
     void OnDragEvent(int32_t x, int32_t y, DragEventAction action);
+    void RestoreCilpboardData();
     void SetPreTargetRenderNode(const RefPtr<DragDropEvent>& preDragDropNode);
     const RefPtr<DragDropEvent>& GetPreTargetRenderNode() const;
     void SetInitRenderNode(const RefPtr<RenderNode>& initRenderNode);
@@ -1542,6 +1543,7 @@ private:
     std::function<Rect()> windowRectImpl_ = nullptr;
 
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
+    std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
     Size selectedItemSize_ { 0.0, 0.0 };
     size_t selectedIndex_ = -1;
     size_t insertIndex_ = -1;

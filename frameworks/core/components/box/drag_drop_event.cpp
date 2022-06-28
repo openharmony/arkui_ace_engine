@@ -84,9 +84,29 @@ void DragDropEvent::AddDataToClipboard(const RefPtr<PipelineContext>& context, c
     seleItemSizeStr->Put("customDragInfo", extraInfo.c_str());
     seleItemSizeStr->Put("selectedText", selectedText.c_str());
     seleItemSizeStr->Put("imageSrc", imageSrc.c_str());
+    MergeClipboardData(context, seleItemSizeStr->ToString());
+}
 
-    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-    clipboard->SetData(seleItemSizeStr->ToString());
+void DragDropEvent::MergeClipboardData(const RefPtr<PipelineContext>& context, const std::string& newData)
+{
+    if (!clipboard_) {
+        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+    }
+    if (!clipboardCallback_) {
+        auto callback = [weakDragDropNode = WeakClaim(this), addData = newData](const std::string& data) {
+            auto dragDropNode = weakDragDropNode.Upgrade();
+            if (dragDropNode) {
+                auto clipboardAllData = JsonUtil::Create(true);
+                clipboardAllData->Put("preData", data.c_str());
+                clipboardAllData->Put("newData", addData.c_str());
+                dragDropNode->clipboard_->SetData(clipboardAllData->ToString());
+            }
+        };
+        clipboardCallback_ = callback;
+    }
+    if (clipboardCallback_) {
+        clipboard_->GetData(clipboardCallback_);
+    }
 }
 
 } // namespace OHOS::Ace

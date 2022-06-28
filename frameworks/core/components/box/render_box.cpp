@@ -260,9 +260,7 @@ void RenderBox::AddDataToClipboard(const RefPtr<PipelineContext>& context, const
     seleItemSizeStr->Put("height", selectedItemSize_.Height());
     seleItemSizeStr->Put("selectedIndex", selectedIndex_);
     seleItemSizeStr->Put("customDragInfo", extraInfo.c_str());
-
-    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-    clipboard->SetData(seleItemSizeStr->ToString());
+    MergeClipboardData(context, seleItemSizeStr->ToString());
 }
 
 DragItemInfo RenderBox::GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info)
