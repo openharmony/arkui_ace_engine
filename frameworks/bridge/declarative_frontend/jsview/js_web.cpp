@@ -584,6 +584,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
     JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::TextZoomAtio);
     JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccessEnabled);
+    JSClass<JSWeb>::StaticMethod("password", &JSWeb::Password);
+    JSClass<JSWeb>::StaticMethod("tableData", &JSWeb::TableData);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1369,5 +1371,15 @@ void JSWeb::WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
         return;
     }
     webComponent->SetWebDebuggingAccessEnabled(isWebDebuggingAccessEnabled);
+}
+
+void JSWeb::Password(bool password)
+{
+    LOGI("JSWeb: Password placeholder");
+}
+
+void JSWeb::TableData(bool tableData)
+{
+    LOGI("JSWeb: TableData placeholder");
 }
 } // namespace OHOS::Ace::Framework

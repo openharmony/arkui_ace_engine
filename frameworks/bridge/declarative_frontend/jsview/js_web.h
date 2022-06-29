@@ -64,6 +64,8 @@ public:
     static void DatabaseAccess(bool isDatabaseAccessEnabled);
     static void TextZoomAtio(int32_t textZoomAtioNum);
     static void WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled);
+    static void Password(bool password);
+    static void TableData(bool tableData);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, DialogEventType dialogEventType);
