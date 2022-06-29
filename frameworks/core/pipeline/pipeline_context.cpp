@@ -3174,7 +3174,6 @@ void PipelineContext::ProcessDragEventEnd(
             (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
             SetPreTargetRenderNode(nullptr);
             SetInitRenderNode(nullptr);
-            RestoreCilpboardData();
             return;
         }
 
@@ -3194,7 +3193,6 @@ void PipelineContext::ProcessDragEventEnd(
 
     SetPreTargetRenderNode(nullptr);
     SetInitRenderNode(nullptr);
-    RestoreCilpboardData();
 }
 
 void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
@@ -3246,26 +3244,6 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
         ProcessDragEventEnd(renderNode, event, globalPoint);
     }
 
-}
-void PipelineContext::RestoreCilpboardData()
-{
-    if (!clipboard_) {
-        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(GetTaskExecutor());
-    }
-
-    if (!deleteDataCallback_) {
-        auto callback = [weakPipelineContext = WeakClaim(this)](const std::string& data) {
-            auto pipelineContext = weakPipelineContext.Upgrade();
-            if (pipelineContext) {
-                auto json = JsonUtil::ParseJsonString(data);
-                pipelineContext->clipboard_->SetData(json->GetString("preData"));
-            }
-        };
-        deleteDataCallback_ = callback;
-    }
-    if (deleteDataCallback_) {
-        clipboard_->GetData(deleteDataCallback_);
-    }
 }
 
 void PipelineContext::FlushWindowBlur()

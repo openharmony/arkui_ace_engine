@@ -402,6 +402,7 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (isDragDropNode_ ) {
         isDragDropNode_  = false;
+        RestoreCilpboardData(pipelineContext);
 
         if (GetOnDrop()) {
             RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
@@ -474,6 +475,7 @@ void RenderBox::PanOnActionCancel()
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (isDragDropNode_) {
+        RestoreCilpboardData(pipelineContext);
         isDragDropNode_ = false;
     }
 

@@ -1089,8 +1089,9 @@ void RenderText::PanOnActionEnd(const GestureEvent& info)
         if (info.GetSourceDevice() == SourceType::TOUCH) {
             textValue_.UpdateSelection(0, 0);
         }
+        RestoreCilpboardData(pipelineContext);
     }
-    pipelineContext->RestoreCilpboardData();
+    
     if (dragWindow_) {
         dragWindow_->Destory();
         dragWindow_ = nullptr;
@@ -1136,6 +1137,7 @@ void RenderText::PanOnActionCancel()
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (isDragDropNode_) {
         isDragDropNode_ = false;
+        RestoreCilpboardData(pipelineContext);
     }
 
     if (dragWindow_) {

@@ -104,9 +104,26 @@ void DragDropEvent::MergeClipboardData(const RefPtr<PipelineContext>& context, c
         };
         clipboardCallback_ = callback;
     }
-    if (clipboardCallback_) {
-        clipboard_->GetData(clipboardCallback_);
+    clipboard_->GetData(clipboardCallback_);
+}
+
+void DragDropEvent::RestoreCilpboardData(const RefPtr<PipelineContext>& context)
+{
+    if (!clipboard_) {
+        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
     }
+
+    if (!deleteDataCallback_) {
+        auto callback = [weakDragDropNode = WeakClaim(this)](const std::string& data) {
+            auto dragDropNode = weakDragDropNode.Upgrade();
+            if (dragDropNode) {
+                auto json = JsonUtil::ParseJsonString(data);
+                dragDropNode->clipboard_->SetData(json->GetString("preData"));
+            }
+        };
+        deleteDataCallback_ = callback;
+    }
+    clipboard_->GetData(deleteDataCallback_);
 }
 
 } // namespace OHOS::Ace
