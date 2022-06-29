@@ -18,6 +18,7 @@
 
 #include <functional>
 
+#include "base/geometry/dimension.h"
 #include "core/animation/animator.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
@@ -30,6 +31,16 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
+
+struct ScrollInfo {
+    Dimension dx;
+    Dimension dy;
+
+    bool operator==(const ScrollInfo& scrollInfo) const
+    {
+        return dx == scrollInfo.dx && dy == scrollInfo.dy;
+    }
+};
 
 constexpr int32_t SCROLL_FROM_NONE = 0;
 constexpr int32_t SCROLL_FROM_UPDATE = 1;
@@ -51,6 +62,7 @@ using ScrollOverCallback = std::function<void(double velocity)>;
 using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
 using WatchFixCallback = std::function<double(double final, double current)>;
+using ScrollBeginCallback = std::function<ScrollInfo(Dimension, Dimension)>;
 
 class Scrollable : public TouchEventTarget, public RelatedChild {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
@@ -261,11 +273,17 @@ public:
         return panRecognizer_;
     }
 
+    void SetOnScrollBegin(const ScrollBeginCallback& scrollBeginCallback)
+    {
+        scrollBeginCallback_ = scrollBeginCallback;
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
     void ProcessScrollMotion(double position);
     void FixScrollMotion(double position);
+    void ExecuteScrollBegin(double& mainDelta);
 
     ScrollPositionCallback callback_;
     ScrollEventCallback scrollEnd_;
@@ -277,6 +295,7 @@ private:
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
     WatchFixCallback watchFixCallback_;
+    ScrollBeginCallback scrollBeginCallback_;
     Axis axis_;
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<RawRecognizer> rawRecognizer_;
