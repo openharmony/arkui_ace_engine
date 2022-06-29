@@ -3626,12 +3626,15 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
     } else {
         LOGE("Invalid value type");
     }
-    float deg = 0.0;
+    float deg = 0.0f;
     if (degree) {
         deg = degree.value();
         degree.reset();
     }
     deg = std::fmod(deg, ROUND_UNIT);
+    if (deg < 0.0f) {
+        deg += ROUND_UNIT;
+    }
     auto decoration = GetFrontDecoration();
     if (decoration) {
         decoration->SetHueRotate(deg);
