@@ -614,9 +614,6 @@ void RenderList::PerformLayout()
         RequestNewItemsAtStart(innerLayout);
     }
 
-    if (IsReachStart()) {
-        listEventFlags_[ListEvents::REACH_START] = true;
-    }
     // Check if reach the start of list
     reachStart_ = GreatOrEqual(currentOffset_, 0.0);
     if (noEdgeEffect && reachStart_) {
@@ -624,6 +621,9 @@ void RenderList::PerformLayout()
         currentOffset_ = 0;
     }
 
+    if (IsReachStart()) {
+        listEventFlags_[ListEvents::REACH_START] = true;
+    }
     bool scrollDownToReachEnd = LessNotEqual(prevMainPos_, mainSize) && GreatOrEqual(curMainPos, mainSize);
     bool scrollUpToReachEnd = GreatNotEqual(prevMainPos_, mainSize) && LessOrEqual(curMainPos, mainSize);
     // verify layout size to avoid trigger reach_end event at first [PerformLayout] when layout size is zero
@@ -1054,7 +1054,6 @@ bool RenderList::GetCurMainPosAndMainSize(double& curMainPos, double& mainSize)
 
 bool RenderList::UpdateScrollPosition(double offset, int32_t source)
 {
-    prevOffset_ = currentOffset_;
     if (source == SCROLL_FROM_START) {
         return true;
     }
