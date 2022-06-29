@@ -17,6 +17,9 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JS_EXECUTION_SCOPE_DEFINES_H
 
 #ifdef USE_V8_ENGINE
+#define CHECK_JAVASCRIPT_SCOPE_AND_RETURN
+    if (V8DeclarativeEngineInstance::GetV8Isolate() == nullptr) \
+        return;
 #define CHECK_JAVASCRIPT_SCOPE(exec, ...)                                                  \
     if (V8DeclarativeEngineInstance::GetV8Isolate() == nullptr || exec.isolate == nullptr) \
         return __VA_ARGS__;
@@ -42,6 +45,7 @@
 #elif USE_QUICKJS_ENGINE
 #define JAVASCRIPT_EXECUTION_SCOPE(exec) QJSContext::Scope ___contextScope___(exec.context);
 #define JAVASCRIPT_EXECUTION_SCOPE_STATIC
+#define CHECK_JAVASCRIPT_SCOPE_AND_RETURN
 #define CHECK_JAVASCRIPT_SCOPE(exec, ...)                                                  \
     if (QJSDeclarativeEngineInstance::GetQJSRuntime() == nullptr || exec.context == nullptr) \
         return __VA_ARGS__;
@@ -54,6 +58,9 @@
 #define JAVASCRIPT_EXECUTION_SCOPE_STATIC                                                                \
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime()); \
     panda::LocalScope socpe(runtime->GetEcmaVm());
+#define CHECK_JAVASCRIPT_SCOPE_AND_RETURN                             \
+    if (JsiDeclarativeEngineInstance::GetCurrentRuntime() == nullptr) \
+        return;
 #define CHECK_JAVASCRIPT_SCOPE(exec, ...)                                               \
     if (JsiDeclarativeEngineInstance::GetCurrentRuntime() == nullptr || exec.vm_ == nullptr) \
         return __VA_ARGS__;
@@ -63,6 +70,7 @@
 #else
 #define JAVASCRIPT_EXECUTION_SCOPE(exec)
 #define JAVASCRIPT_EXECUTION_SCOPE_STATIC
+#define CHECK_JAVASCRIPT_SCOPE_AND_RETURN
 #define JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(exec, ...)
 #endif
 
