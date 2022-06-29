@@ -124,8 +124,13 @@ bool CreateSpringCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
     JS_ToFloat64(ctx, &x1, argv[2]);
     double y1;
     JS_ToFloat64(ctx, &y1, argv[3]);
-    curve = AceType::MakeRefPtr<SpringCurve>(x0, y0, x1, y1);
-    return true;
+    if (y0 > 0 &&  x1 > 0 && y1 > 0) {
+        curve = AceType::MakeRefPtr<SpringCurve>(x0, y0, x1, y1);
+        return true;
+    } else {
+        LOGE("Spring curve: the value of the parameters are illegal");
+        return false;
+    }
 }
 
 bool CreateCubicCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
@@ -157,6 +162,10 @@ bool CreateStepsCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
     int32_t stepSize;
     if (argc == 2) {
         JS_ToInt32(ctx, &stepSize, argv[0]);
+        if (stepSize < 0) {
+            LOGE("Steps curve: When two parameters, the value of the stepSize is illegal");
+            return false;
+        }
         bool isEnd = JS_ToBool(ctx, argv[1]);
         if (isEnd) {
             curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::END);
@@ -165,6 +174,10 @@ bool CreateStepsCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
         }
     } else {
         JS_ToInt32(ctx, &stepSize, argv[0]);
+        if (stepSize < 0) {
+            LOGE("Steps curve: When one parameter, the value of the stepSize is illegal");
+            return false;
+        }
         curve = AceType::MakeRefPtr<StepsCurve>(stepSize);
     }
     return true;
