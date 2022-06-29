@@ -124,10 +124,15 @@ void StaticImageObject::UploadToGpuForRender(
             LOGE("task executor is null.");
             return;
         }
+        auto key = GenerateCacheKey(imageSource, imageSize);
+        if (!ImageProvider::TryUploadingImage(key, successCallback, failedCallback)) {
+            LOGI("other thread is uploading same image to gpu : %{public}s", imageSource.ToString().c_str());
+            return;
+        }
         fml::RefPtr<flutter::CanvasImage> cachedFlutterImage;
         auto imageCache = pipelineContext->GetImageCache();
         if (imageCache) {
-            auto cachedImage = imageCache->GetCacheImage(GenerateCacheKey(imageSource, imageSize));
+            auto cachedImage = imageCache->GetCacheImage(key);
             LOGD("image cache valid");
             if (cachedImage) {
                 LOGD("cached image found.");
@@ -135,10 +140,8 @@ void StaticImageObject::UploadToGpuForRender(
             }
         }
         if (cachedFlutterImage) {
-            LOGD("get cached image success: %{public}s", GenerateCacheKey(imageSource, imageSize).c_str());
-            taskExecutor->PostTask([successCallback, imageSource,
-                                       cachedFlutterImage] { successCallback(imageSource, cachedFlutterImage); },
-                TaskExecutor::TaskType::UI);
+            LOGD("get cached image success: %{public}s", key.c_str());
+            ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, cachedFlutterImage);
             return;
         }
 
@@ -147,32 +150,27 @@ void StaticImageObject::UploadToGpuForRender(
             skData = ImageProvider::LoadImageRawData(imageSource, pipelineContext, imageSize);
             if (!skData) {
                 LOGE("reload image data failed. imageSource: %{private}s", imageSource.ToString().c_str());
-                taskExecutor->PostTask(
-                    [failedCallback, imageSource] { failedCallback(imageSource); }, TaskExecutor::TaskType::UI);
+                ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr);
                 return;
             }
         }
         auto rawImage = SkImage::MakeFromEncoded(skData);
         if (!rawImage) {
             LOGE("static image MakeFromEncoded fail! imageSource: %{private}s", imageSource.ToString().c_str());
-            taskExecutor->PostTask(
-                [failedCallback, imageSource] { failedCallback(imageSource); }, TaskExecutor::TaskType::UI);
+            ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr);
             return;
         }
         auto image = ImageProvider::ResizeSkImage(rawImage, imageSource.GetSrc(), imageSize, forceResize);
-        auto callback = [successCallback, imageSource, taskExecutor, imageCache, imageSize,
+        auto callback = [successCallback, imageSource, taskExecutor, imageCache, imageSize, key,
                             id = Container::CurrentId()](flutter::SkiaGPUObject<SkImage> image) {
             ContainerScope scope(id);
             auto canvasImage = flutter::CanvasImage::Create();
             canvasImage->set_image(std::move(image));
             if (imageCache) {
-                LOGD("cache image key: %{public}s", GenerateCacheKey(imageSource, imageSize).c_str());
-                imageCache->CacheImage(
-                    GenerateCacheKey(imageSource, imageSize), std::make_shared<CachedImage>(canvasImage));
+                LOGD("cache image key: %{public}s", key.c_str());
+                imageCache->CacheImage(key, std::make_shared<CachedImage>(canvasImage));
             }
-            taskExecutor->PostTask(
-                [successCallback, imageSource, canvasImage] { successCallback(imageSource, canvasImage); },
-                TaskExecutor::TaskType::UI);
+            ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, canvasImage);
         };
         ImageProvider::UploadImageToGPUForRender(image, callback, renderTaskHolder);
     };

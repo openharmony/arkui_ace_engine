@@ -59,6 +59,19 @@ using FailedCallback = std::function<void(ImageSourceInfo)>;
 using CancelableTask = CancelableCallback<void()>;
 using OnPostBackgroundTask = std::function<void(CancelableTask)>;
 
+struct LoadCallback {
+    LoadCallback(
+        const ImageObjSuccessCallback& success,
+        const UploadSuccessCallback& upload,
+        const FailedCallback& failed)
+        : successCallback(success), uploadCallback(upload), failedCallback(failed) {}
+    ~LoadCallback() = default;
+
+    ImageObjSuccessCallback successCallback;
+    UploadSuccessCallback   uploadCallback;
+    FailedCallback          failedCallback;
+};
+
 class FlutterRenderImage;
 class ImageProvider {
 public:
@@ -138,6 +151,38 @@ public:
     static SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap);
     static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
+
+    static bool TrySetLoadingImage(
+        const ImageSourceInfo& imageInfo,
+        const ImageObjSuccessCallback& successCallback,
+        const UploadSuccessCallback& uploadCallback,
+        const FailedCallback& failedCallback);
+
+    static void ProccessLoadingResult(
+        const RefPtr<TaskExecutor>& taskExecutor,
+        const ImageSourceInfo& imageInfo,
+        bool canStartUploadImageObj,
+        const RefPtr<ImageObject>& imageObj,
+        const RefPtr<PipelineContext>& context,
+        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder);
+
+    static bool TryUploadingImage(
+        const std::string& key,
+        const UploadSuccessCallback& successCallback,
+        const FailedCallback& failedCallback);
+
+    static void ProccessUploadResult(
+        const RefPtr<TaskExecutor>& taskExecutor,
+        const ImageSourceInfo& imageInfo,
+        const Size& imageSize,
+        const fml::RefPtr<flutter::CanvasImage>& canvasImage);
+
+private:
+    static std::mutex loadingImageMutex_;
+    static std::unordered_map<std::string, std::vector<LoadCallback>> loadingImage_;
+
+    static std::mutex uploadMutex_;
+    static std::unordered_map<std::string, std::vector<LoadCallback>> uploadingImage_;
 };
 
 } // namespace OHOS::Ace

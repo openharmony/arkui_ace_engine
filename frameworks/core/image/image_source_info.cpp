@@ -16,8 +16,9 @@
 #include "core/image/image_source_info.h"
 
 #include <regex>
-#include "base/log/log.h"
 
+#include "base/log/log.h"
+#include "core/common/container.h"
 namespace OHOS::Ace {
 
 bool ImageSourceInfo::IsSVGSource(const std::string& src, InternalResource::ResourceId resourceId)
@@ -112,7 +113,7 @@ ImageSourceInfo::ImageSourceInfo(
     if (count > 1) {
         LOGW("multi image source set, only one will be load.");
     }
-    cacheKey_ = std::to_string(std::hash<std::string> {}(src_));
+    cacheKey_ = std::to_string(std::hash<std::string> {}(src_ + std::to_string(Container::CurrentId())));
 }
 
 SrcType ImageSourceInfo::ResolveSrcType() const

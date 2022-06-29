@@ -36,6 +36,114 @@ constexpr double SRGB_GAMUT_AREA = 0.104149;
 
 } // namespace
 
+std::mutex ImageProvider::loadingImageMutex_;
+std::unordered_map<std::string, std::vector<LoadCallback>> ImageProvider::loadingImage_;
+
+std::mutex ImageProvider::uploadMutex_;
+std::unordered_map<std::string, std::vector<LoadCallback>> ImageProvider::uploadingImage_;
+
+bool ImageProvider::TrySetLoadingImage(
+    const ImageSourceInfo& imageInfo,
+    const ImageObjSuccessCallback& successCallback,
+    const UploadSuccessCallback& uploadCallback,
+    const FailedCallback& failedCallback)
+{
+    std::lock_guard lock(loadingImageMutex_);
+    auto key = imageInfo.GetCacheKey();
+    auto iter = loadingImage_.find(key);
+    if (iter == loadingImage_.end()) {
+        std::vector<LoadCallback> callbacks { { successCallback, uploadCallback, failedCallback } };
+        loadingImage_.emplace(key, callbacks);
+        return true;
+    } else {
+        LOGI("other thread is loading same image: %{public}s", imageInfo.ToString().c_str());
+        iter->second.emplace_back(successCallback, uploadCallback, failedCallback);
+        return false;
+    }
+}
+
+void ImageProvider::ProccessLoadingResult(
+    const RefPtr<TaskExecutor>& taskExecutor,
+    const ImageSourceInfo& imageInfo,
+    bool canStartUploadImageObj,
+    const RefPtr<ImageObject>& imageObj,
+    const RefPtr<PipelineContext>& context,
+    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder)
+{
+    std::lock_guard lock(loadingImageMutex_);
+    std::vector<LoadCallback> callbacks;
+    auto key = imageInfo.GetCacheKey();
+    auto iter = loadingImage_.find(key);
+    if (iter != loadingImage_.end()) {
+        std::swap(callbacks, iter->second);
+        for (const auto& callback : callbacks) {
+            if (imageObj != nullptr) {
+                auto obj = imageObj->Clone();
+                taskExecutor->PostTask([obj, imageInfo, callback]() {
+                    callback.successCallback(imageInfo, obj);
+                }, TaskExecutor::TaskType::UI);
+                if (canStartUploadImageObj) {
+                    bool forceResize = (!obj->IsSvg()) && (imageInfo.IsSourceDimensionValid());
+                    obj->UploadToGpuForRender(
+                        context,
+                        renderTaskHolder,
+                        callback.uploadCallback,
+                        callback.failedCallback,
+                        obj->GetImageSize(),
+                        forceResize, true);
+                }
+            }
+        }
+    } else {
+        LOGW("no loading image: %{public}s", imageInfo.ToString().c_str());
+    }
+    loadingImage_.erase(key);
+}
+
+bool ImageProvider::TryUploadingImage(
+    const std::string& key,
+    const UploadSuccessCallback& successCallback,
+    const FailedCallback& failedCallback)
+{
+    std::lock_guard lock(uploadMutex_);
+    auto iter = uploadingImage_.find(key);
+    if (iter == uploadingImage_.end()) {
+        std::vector<LoadCallback> callbacks = { { nullptr, successCallback, failedCallback } };
+        uploadingImage_.emplace(key, callbacks);
+        return true;
+    } else {
+        iter->second.emplace_back(nullptr, successCallback, failedCallback);
+        return false;
+    }
+}
+
+void ImageProvider::ProccessUploadResult(
+    const RefPtr<TaskExecutor>& taskExecutor,
+    const ImageSourceInfo& imageInfo,
+    const Size& imageSize,
+    const fml::RefPtr<flutter::CanvasImage>& canvasImage)
+{
+    std::lock_guard lock(uploadMutex_);
+    std::vector<LoadCallback> callbacks;
+    auto key = ImageObject::GenerateCacheKey(imageInfo, imageSize);
+    auto iter = uploadingImage_.find(key);
+    if (iter != uploadingImage_.end()) {
+        std::swap(callbacks, iter->second);
+        taskExecutor->PostTask([callbacks, imageInfo, canvasImage]() {
+            for (auto callback : callbacks) {
+                if (canvasImage) {
+                    callback.uploadCallback(imageInfo, canvasImage);
+                } else {
+                    callback.failedCallback(imageInfo);
+                }
+            }
+        }, TaskExecutor::TaskType::UI);
+    } else {
+        LOGW("no uploading image: %{public}s", imageInfo.ToString().c_str());
+    }
+    uploadingImage_.erase(key);
+}
+
 void ImageProvider::FetchImageObject(
     const ImageSourceInfo& imageInfo,
     const ImageObjSuccessCallback& successCallback,
@@ -61,6 +169,10 @@ void ImageProvider::FetchImageObject(
             LOGE("task executor is null. imageInfo: %{private}s", imageInfo.ToString().c_str());
             return;
         }
+        if (!syncMode && !TrySetLoadingImage(imageInfo, successCallback, uploadSuccessCallback, failedCallback)) {
+            LOGI("same source is loading: %{private}s", imageInfo.ToString().c_str());
+            return;
+        }
         RefPtr<ImageObject> imageObj = QueryImageObjectFromCache(imageInfo, pipelineContext);
         if (!imageObj) { // if image object is not in cache, generate a new one.
             imageObj = GeneraterAceImageObject(imageInfo, pipelineContext, useSkiaSvg);
@@ -70,21 +182,19 @@ void ImageProvider::FetchImageObject(
                 failedCallback(imageInfo);
                 return;
             }
-            taskExecutor->PostTask(
-                [failedCallback, imageInfo] { failedCallback(imageInfo); }, TaskExecutor::TaskType::UI);
+            ProccessLoadingResult(taskExecutor, imageInfo, false, nullptr, pipelineContext, renderTaskHolder);
             return;
         }
         if (syncMode) {
             successCallback(imageInfo, imageObj);
         } else {
-            taskExecutor->PostTask([successCallback, imageInfo, imageObj]() { successCallback(imageInfo, imageObj); },
-                TaskExecutor::TaskType::UI);
-        }
-        bool canStartUploadImageObj = !needAutoResize && (imageObj->GetFrameCount() == 1);
-        if (canStartUploadImageObj) {
-            bool forceResize = (!imageObj->IsSvg()) && (imageInfo.IsSourceDimensionValid());
-            imageObj->UploadToGpuForRender(context, renderTaskHolder, uploadSuccessCallback, failedCallback,
-                imageObj->GetImageSize(), forceResize, true);
+            ProccessLoadingResult(
+                taskExecutor,
+                imageInfo,
+                !needAutoResize && (imageObj->GetFrameCount() == 1),
+                imageObj,
+                pipelineContext,
+                renderTaskHolder);
         }
     };
     if (syncMode) {

@@ -97,6 +97,11 @@ public:
         return false;
     }
 
+    virtual RefPtr<ImageObject> Clone()
+    {
+        return MakeRefPtr<ImageObject>(imageSource_, imageSize_, frameCount_, isSvg_);
+    }
+
 protected:
     ImageSourceInfo imageSource_;
     Size imageSize_;
@@ -125,6 +130,11 @@ public:
     void PerformLayoutImageObject(RefPtr<RenderImage> image) override;
     Size MeasureForImage(RefPtr<RenderImage> image) override;
 
+    RefPtr<ImageObject> Clone() override
+    {
+        return MakeRefPtr<SvgSkiaImageObject>(imageSource_, Size(), frameCount_, skiaDom_);
+    }
+
 private:
     sk_sp<SkSVGDOM> skiaDom_;
 };
@@ -149,6 +159,11 @@ public:
 
     void PerformLayoutImageObject(RefPtr<RenderImage> image) override;
     Size MeasureForImage(RefPtr<RenderImage> image) override;
+
+    RefPtr<ImageObject> Clone() override
+    {
+        return MakeRefPtr<SvgImageObject>(imageSource_, Size(), frameCount_, svgDom_);
+    }
 
 private:
     RefPtr<SvgDom> svgDom_;
@@ -183,6 +198,11 @@ public:
     }
 
     bool CancelBackgroundTasks() override;
+
+    RefPtr<ImageObject> Clone() override
+    {
+        return MakeRefPtr<StaticImageObject>(imageSource_, imageSize_, frameCount_, skData_);
+    }
 
 private:
     sk_sp<SkData> skData_;
@@ -232,6 +252,11 @@ public:
         skData_ = nullptr;
     }
 
+    RefPtr<ImageObject> Clone() override
+    {
+        return MakeRefPtr<AnimatedImageObject>(imageSource_, imageSize_, frameCount_, skData_);
+    }
+
 private:
     sk_sp<SkData> skData_;
     RefPtr<AnimatedImagePlayer> animatedPlayer_;
@@ -264,6 +289,11 @@ public:
     const RefPtr<PixelMap>& GetPixmap() const
     {
         return pixmap_;
+    }
+
+    RefPtr<ImageObject> Clone() override
+    {
+        return MakeRefPtr<PixelMapImageObject>(pixmap_);
     }
 
 private:
