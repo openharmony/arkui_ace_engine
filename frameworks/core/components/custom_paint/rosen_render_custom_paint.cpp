@@ -252,6 +252,8 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
         lastLayoutSize_ = GetLayoutSize();
     }
     skCanvas_->scale(viewScale, viewScale);
+    TriggerOnReadyEvent();
+
     for (const auto& task : tasks_) {
         task(*this, offset);
     }

@@ -57,13 +57,55 @@ void RenderCustomPaint::Update(const RefPtr<Component>& component)
                 client->PushTask(taskFunc);
             }
         });
+
+        canvasOnReadyEvent_ = taskPool->GetOnReadyEvent();
     }
     MarkNeedLayout();
 }
 
 void RenderCustomPaint::PerformLayout()
 {
-    SetLayoutSize(GetLayoutParam().GetMaxSize());
+    drawSize_ = GetLayoutParam().GetMaxSize();
+    SetLayoutSize(drawSize_);
+}
+
+void RenderCustomPaint::TriggerOnReadyEvent()
+{
+    // The first time enter the Paint(), drawSize is (0, 0)
+    if (NearEqual(drawSize_.Width(), 0) || NearEqual(drawSize_.Height(), 0)) {
+        return;
+    }
+
+    position_ = GetGlobalOffset();
+    if (!isCanvasInit_) {
+        prePosition_ = position_;
+        preDrawSize_ = drawSize_;
+
+        if (canvasOnReadyEvent_ && (!drawSize_.IsHeightInfinite())) {
+            canvasOnReadyEvent_();
+            isCanvasInit_ = true;
+        }
+    } else {
+        if ((!NearEqual(prePosition_.GetX(), position_.GetX())) ||
+            (!NearEqual(prePosition_.GetY(), position_.GetY()))) {
+            prePosition_ = position_;
+            positionChange_ = true;
+        }
+
+        if ((!NearEqual(preDrawSize_.Width(), drawSize_.Width())) ||
+            (!NearEqual(preDrawSize_.Height(), drawSize_.Height()))) {
+            preDrawSize_ = drawSize_;
+            sizeChange_ = true;
+        }
+    }
+
+    if (positionChange_ || sizeChange_) {
+        if (canvasOnReadyEvent_ && (!drawSize_.IsHeightInfinite())) {
+            canvasOnReadyEvent_();
+            sizeChange_ = false;
+            positionChange_ = false;
+        }
+    }
 }
 
 } // namespace OHOS::Ace
