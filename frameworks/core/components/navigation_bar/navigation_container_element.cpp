@@ -31,7 +31,7 @@ void NavigationContainerElement::ConnectNavigator(const RefPtr<StageElement>& ta
         stack.pop();
         auto navigator = AceType::DynamicCast<NavigatorElement>(element);
         if (navigator) {
-            navigator->SetTargetContainer(targetContainer);
+            navigator->SetTargetContainer(targetContainer, true);
             if (isFirstNavigator) {
                 auto context = GetContext().Upgrade();
                 if (!context) {

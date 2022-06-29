@@ -290,6 +290,8 @@ private:
     void ReplacePage(const RefPtr<JsAcePage>& page, const std::string& url);
     void LoadReplacePage(int32_t pageId, const PageTarget& url, const std::string& params);
 
+    void ReplacePageInSubStage(const RefPtr<JsAcePage>& page, const std::string& url);
+
     uint64_t GetSystemRealTime();
 
     // Page lifecycle
