@@ -367,8 +367,7 @@ void TweenElement::Update()
         }
 
         LOGD("add request to pipeline context.");
-        if (operation_ == AnimationOperation::PAUSE || operation_ == AnimationOperation::FINISH
-            || operationCustom_ == AnimationOperation::PAUSE || operationCustom_ == AnimationOperation::FINISH) {
+        if (operation_ != AnimationOperation::NONE || operationCustom_ != AnimationOperation::NONE) {
             pipelineContext->AddPostAnimationFlushListener(AceType::Claim(this));
         }
         pipelineContext->AddPostFlushListener(AceType::Claim(this));
