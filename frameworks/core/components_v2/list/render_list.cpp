@@ -2761,7 +2761,7 @@ void RenderList::ApplyRestoreInfo()
     if (GetRestoreInfo().empty()) {
         return;
     }
-    JumpToIndex(StringUtils::StringToInt(GetRestoreInfo()), DEFAULT_SOURCE);
+    startIndex_ = static_cast<size_t>(StringUtils::StringToInt(GetRestoreInfo()));
     SetRestoreInfo("");
 }
 
