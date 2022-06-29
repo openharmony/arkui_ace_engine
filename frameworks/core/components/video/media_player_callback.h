@@ -83,6 +83,7 @@ public:
 
     void OnInfo(Media::PlayerOnInfoType type, int32_t extra, const Media::Format &InfoBody = {}) override
     {
+        LOGI("OnInfo type: %{public}d, extra: %{public}d", type, extra);
         ContainerScope scope(instanceId_);
         switch (type) {
             case OHOS::Media::INFO_TYPE_SEEKDONE:
