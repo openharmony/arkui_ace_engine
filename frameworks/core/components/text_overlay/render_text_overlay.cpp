@@ -805,6 +805,10 @@ void RenderTextOverlay::HandleCopyAll()
     auto callback = [weak = WeakClaim(this)](const Offset& startHandleOffset, const Offset& endHandleOffset) {
         auto overlay = weak.Upgrade();
         if (overlay) {
+            if (startHandleOffset == overlay->startHandleOffset_ && endHandleOffset == overlay->endHandleOffset_) {
+                LOGI("selection region has not changed");
+                return;
+            }
             overlay->startHandleOffset_ = startHandleOffset;
             overlay->endHandleOffset_ = endHandleOffset;
             overlay->isSingleHandle_ = false;
