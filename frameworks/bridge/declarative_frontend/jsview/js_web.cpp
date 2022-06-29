@@ -600,6 +600,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onMouse", &JSWeb::OnMouse);
     JSClass<JSWeb>::StaticMethod("onResourceLoad", &JSWeb::OnResourceLoad);
     JSClass<JSWeb>::StaticMethod("onScaleChange", &JSWeb::OnScaleChange);
+    JSClass<JSWeb>::StaticMethod("password", &JSWeb::Password);
+    JSClass<JSWeb>::StaticMethod("tableData", &JSWeb::TableData);
+    JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::OnFileSelectorShowAbandoned);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1474,5 +1477,20 @@ void JSWeb::InitialScale(float scale)
         return;
     }
     webComponent->SetInitialScale(scale);
+}
+
+void JSWeb::Password(bool password)
+{
+    LOGI("JSWeb: Password placeholder");
+}
+
+void JSWeb::TableData(bool tableData)
+{
+    LOGI("JSWeb: TableData placeholder");
+}
+
+void JSWeb::OnFileSelectorShowAbandoned(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb: OnFileSelectorShow Abandoned");
 }
 } // namespace OHOS::Ace::Framework
