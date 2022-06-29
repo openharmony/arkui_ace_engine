@@ -15,7 +15,20 @@
 
 #include "core/components/proxy/render_proxy.h"
 
+#include "core/components/proxy/proxy_component.h"
+
+
 namespace OHOS::Ace {
+
+void RenderProxy::Update(const RefPtr<Component>& component)
+{
+    auto proxy = AceType::DynamicCast<ProxyComponent>(component);
+    if (!proxy) {
+        LOGI("Not proxy component, no need to update");
+        return;
+    }
+    passMinSize_ = proxy->GetPassMinSize();
+}
 
 RefPtr<RenderNode> RenderProxy::Create()
 {
@@ -32,7 +45,12 @@ void RenderProxy::PerformLayout()
     const auto& children = GetChildren();
     if (!children.empty()) {
         auto child = children.front();
-        child->Layout(GetLayoutParam());
+        auto layoutParamFromParent = GetLayoutParam();
+        if (!passMinSize_) {
+            // Common view not need to pass min size to child
+            layoutParamFromParent.SetMinSize(Size());
+        }
+        child->Layout(layoutParamFromParent);
         child->SetPosition(Offset::Zero());
         layoutSize = child->GetLayoutSize();
     }
