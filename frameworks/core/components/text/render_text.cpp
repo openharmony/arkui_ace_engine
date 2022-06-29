@@ -1090,7 +1090,7 @@ void RenderText::PanOnActionEnd(const GestureEvent& info)
             textValue_.UpdateSelection(0, 0);
         }
     }
-
+    pipelineContext->RestoreCilpboardData();
     if (dragWindow_) {
         dragWindow_->Destory();
         dragWindow_ = nullptr;

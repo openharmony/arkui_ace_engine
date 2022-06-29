@@ -3172,6 +3172,9 @@ void PipelineContext::ProcessDragEventEnd(
 
         if (insertIndex_ == RenderNode::DEFAULT_INDEX) {
             (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
+            SetPreTargetRenderNode(nullptr);
+            SetInitRenderNode(nullptr);
+            RestoreCilpboardData();
             return;
         }
 
@@ -3191,6 +3194,7 @@ void PipelineContext::ProcessDragEventEnd(
 
     SetPreTargetRenderNode(nullptr);
     SetInitRenderNode(nullptr);
+    RestoreCilpboardData();
 }
 
 void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
@@ -3204,15 +3208,15 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
             auto pipelineContext = weakPipelineContext.Upgrade();
             if (pipelineContext) {
                 auto json = JsonUtil::ParseJsonString(data);
-                pipelineContext->selectedItemSize_.SetWidth(json->GetDouble("width"));
-                pipelineContext->selectedItemSize_.SetHeight(json->GetDouble("height"));
-                pipelineContext->selectedIndex_ = json->GetInt("selectedIndex");
-                pipelineContext->customDragInfo_ = json->GetString("customDragInfo");
-                pipelineContext->selectedText_ = json->GetString("selectedText");
-                pipelineContext->imageSrc_ = json->GetString("imageSrc");
+                auto newData = JsonUtil::ParseJsonString(json->GetString("newData"));
+                pipelineContext->selectedItemSize_.SetWidth(newData->GetDouble("width"));
+                pipelineContext->selectedItemSize_.SetHeight(newData->GetDouble("height"));
+                pipelineContext->selectedIndex_ = newData->GetInt("selectedIndex");
+                pipelineContext->customDragInfo_ = newData->GetString("customDragInfo");
+                pipelineContext->selectedText_ = newData->GetString("selectedText");
+                pipelineContext->imageSrc_ = newData->GetString("imageSrc");
             }
         };
-
         clipboardCallback_ = callback;
     }
 
@@ -3240,6 +3244,27 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
         ProcessDragEvent(renderNode, event, globalPoint);
     } else {
         ProcessDragEventEnd(renderNode, event, globalPoint);
+    }
+
+}
+void PipelineContext::RestoreCilpboardData()
+{
+    if (!clipboard_) {
+        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(GetTaskExecutor());
+    }
+
+    if (!deleteDataCallback_) {
+        auto callback = [weakPipelineContext = WeakClaim(this)](const std::string& data) {
+            auto pipelineContext = weakPipelineContext.Upgrade();
+            if (pipelineContext) {
+                auto json = JsonUtil::ParseJsonString(data);
+                pipelineContext->clipboard_->SetData(json->GetString("preData"));
+            }
+        };
+        deleteDataCallback_ = callback;
+    }
+    if (deleteDataCallback_) {
+        clipboard_->GetData(deleteDataCallback_);
     }
 }
 

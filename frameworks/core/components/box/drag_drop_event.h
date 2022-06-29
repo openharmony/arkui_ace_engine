@@ -21,6 +21,7 @@
 #include "frameworks/base/window/drag_window.h"
 #include "frameworks/core/gestures/gesture_info.h"
 #include "frameworks/core/gestures/gesture_recognizer.h"
+#include "frameworks/core/common/clipboard/clipboard_proxy.h"
 
 namespace OHOS::Ace {
 
@@ -107,6 +108,7 @@ public:
     RefPtr<DragDropEvent> FindDragDropNode(const RefPtr<PipelineContext>& context, const GestureEvent& info);
     virtual void AddDataToClipboard(const RefPtr<PipelineContext>& context, const std::string& extraInfo,
         const std::string& selectedText, const std::string& imageSrc);
+    void MergeClipboardData(const RefPtr<PipelineContext>& context, const std::string& newData);
 
 protected:
     RefPtr<GestureRecognizer> dragDropGesture_;
@@ -123,6 +125,8 @@ protected:
     Size selectedItemSize_;
     Point localPoint_;
     UpdateBuilderFunc updateBuilder_;
+    std::function<void(const std::string&)> clipboardCallback_ = nullptr;
+    RefPtr<Clipboard> clipboard_;
 };
 
 } // namespace OHOS::Ace
