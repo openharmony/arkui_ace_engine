@@ -53,18 +53,6 @@ namespace OHOS {
         return client.ReturnRequest(want, randomString, randomString, randomString) == ERR_OK;
     }
 
-    bool ShowDialogTest(const uint8_t* data)
-    {
-        std::string randomString = reinterpret_cast<const char*>(data);
-        int randomNumber = static_cast<int>(U32_AT(data));
-        DialogCallback callback;
-        int* id = nullptr;
-        OHOS::Ace::UIServiceMgrClient client;
-        return client.ShowDialog(
-            randomString, randomString, OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
-            randomNumber, randomNumber, randomNumber, randomNumber, callback, id) == ERR_OK;
-    }
-
     bool CancelDialogTest(const uint8_t* data)
     {
         int32_t randomNumber = static_cast<int32_t>(U32_AT(data));
@@ -82,9 +70,7 @@ namespace OHOS {
 
     bool ShowAppPickerDialogTest(const uint8_t* data, const AAFwk::Want& want)
     {
-        OHOS::AppExecFwk::AbilityInfo abilityInfo;
         std::vector<OHOS::AppExecFwk::AbilityInfo> abilityInfos;
-        abilityInfos.push_back(abilityInfo);
         OHOS::Ace::UIServiceMgrClient client;
         return client.ShowAppPickerDialog(want, abilityInfos, static_cast<int32_t>(U32_AT(data))) == ERR_OK;
     }
@@ -98,14 +84,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     std::string randomString = reinterpret_cast<const char*>(data);
     want = want.SetUri(randomString);
     OHOS::RegisterCallBackTest(want);
-    OHOS::UnregisterCallBackTest(data, want);
     OHOS::PushTest(data, want);
     OHOS::RequestTest(data, want);
     OHOS::ReturnRequestTest(data, want);
-    OHOS::ShowDialogTest(data);
     OHOS::CancelDialogTest(data);
     OHOS::UpdateDialogTest(data);
     OHOS::ShowAppPickerDialogTest(data, want);
+    OHOS::UnregisterCallBackTest(data, want);
     return 0;
 }
 
