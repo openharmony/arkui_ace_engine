@@ -564,7 +564,7 @@ JSValue JsGetMediaResource(JSContext* ctx, JSValueConst new_target, int argc, JS
 
     ScopedString targetMediaFileJsName(ctx, argv[0]);
     std::string targetMediaFileName = targetMediaFileJsName.get();
-    std::string filePath = QJSDeclarativeEngineInstance::GetMeidaResource(targetMediaFileName);
+    std::string filePath = QJSDeclarativeEngineInstance::GetMediaResource(targetMediaFileName);
     JSValue result = JS_NewString(ctx, filePath.c_str());
     return result;
 }

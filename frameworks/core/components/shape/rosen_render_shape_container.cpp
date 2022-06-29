@@ -23,17 +23,17 @@
 namespace OHOS::Ace {
 namespace {
 
-struct ZIndexCompartor {
+struct ZIndexComparator {
     bool operator()(const RefPtr<RenderNode>& left, const RefPtr<RenderNode>& right) const
     {
         return (left->GetZIndex() < right->GetZIndex());
     }
 };
 
-inline std::multiset<RefPtr<RenderNode>, ZIndexCompartor> SortChildrenByZIndex(
+inline std::multiset<RefPtr<RenderNode>, ZIndexComparator> SortChildrenByZIndex(
     const std::list<RefPtr<RenderNode>>& children)
 {
-    return std::multiset<RefPtr<RenderNode>, ZIndexCompartor>(children.begin(), children.end());
+    return std::multiset<RefPtr<RenderNode>, ZIndexComparator>(children.begin(), children.end());
 }
 
 } // namespace

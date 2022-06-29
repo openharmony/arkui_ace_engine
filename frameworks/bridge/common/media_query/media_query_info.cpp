@@ -42,7 +42,7 @@ std::string MediaQueryInfo::GetDeviceType()
 
 std::string MediaQueryInfo::GetOrientation()
 {
-    switch (SystemProperties::GetDevcieOrientation()) {
+    switch (SystemProperties::GetDeviceOrientation()) {
         case DeviceOrientation::PORTRAIT:
             return "portrait";
         case DeviceOrientation::LANDSCAPE:

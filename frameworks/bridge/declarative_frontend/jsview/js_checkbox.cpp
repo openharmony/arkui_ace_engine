@@ -37,7 +37,7 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
         if (group->IsString()) {
             auto checkboxGroup = group->ToString();
             checkboxComponent->SetBelongGroup(checkboxGroup);
-            auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupCompnent();
+            auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupComponent();
             auto item = checkboxGroupmap->find(checkboxGroup);
             if (item != checkboxGroupmap->end()) {
                 item->second->AddCheckbox(checkboxComponent);

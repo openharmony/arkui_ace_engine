@@ -824,12 +824,12 @@ public:
 
     bool GetIsDeclarative() const;
 
-    bool IsForbidePlatformQuit() const
+    bool IsForbidPlatformQuit() const
     {
-        return forbidePlatformQuit_;
+        return forbidPlatformQuit_;
     }
 
-    void SetForbidePlatformQuit(bool forbidePlatformQuit);
+    void SetForbidPlatformQuit(bool forbidPlatformQuit);
 
     void SetAppBgColor(const Color& color);
 
@@ -1412,7 +1412,7 @@ private:
     bool isKeyCtrlPressed_ = false;
 
     Rect transparentHole_;
-    // use for traversing cliping hole
+    // use for traversing clipping hole
     bool hasMeetSubWindowNode_ = false;
     // use for judge clip hole status
     bool hasClipHole_ = false;
@@ -1506,7 +1506,7 @@ private:
     int32_t height_ = 0;
     bool isFirstPage_ = true;
     bool buildingFirstPage_ = false;
-    bool forbidePlatformQuit_ = false;
+    bool forbidPlatformQuit_ = false;
     FrontendType frontendType_;
     int32_t instanceId_ = 0;
     int32_t minPlatformVersion_ = 0;

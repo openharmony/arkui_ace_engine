@@ -199,11 +199,11 @@ HWTEST_F(PluginSubContainerTest, PluginSubContainerInitializeTest002, TestSize.L
 }
 
 /**
- * @tc.name: PluginSubContainerUpdateRootElmentSizeTest001
- * @tc.desc: Verify the UpdateRootElmentSize Interface of PluginSubContainer work correctly.
+ * @tc.name: PluginSubContainerUpdateRootElementSizeTest001
+ * @tc.desc: Verify the UpdateRootElementSize Interface of PluginSubContainer work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(PluginSubContainerTest, PluginSubContainerUpdateRootElmentSizeTest001, TestSize.Level1)
+HWTEST_F(PluginSubContainerTest, PluginSubContainerUpdateRootElementSizeTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a PluginSubContainer.
@@ -213,14 +213,14 @@ HWTEST_F(PluginSubContainerTest, PluginSubContainerUpdateRootElmentSizeTest001, 
     PluginSubContainer pluginSubContainer(pipelineContext);
 
     /**
-     * @tc.steps: step2. Update Root Elment Size.
-     * @tc.expected: step2. Update Root Elment Size success.
+     * @tc.steps: step2. Update Root Element Size.
+     * @tc.expected: step2. Update Root Element Size success.
      */
     pluginSubContainer.rootWidth_ = 1.0_vp;
     pluginSubContainer.rootHeight_ = 1.0_vp;
     EXPECT_EQ(pluginSubContainer.surfaceWidth_, 1.0f);
     EXPECT_EQ(pluginSubContainer.surfaceHeight_, 1.0f);
-    pluginSubContainer.UpdateRootElmentSize();
+    pluginSubContainer.UpdateRootElementSize();
     EXPECT_EQ(pluginSubContainer.surfaceWidth_, 0.0f);
     EXPECT_EQ(pluginSubContainer.surfaceHeight_, 0.0f);
 }
@@ -314,7 +314,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin001, TestSize.Level1)
     pluginElement->pluginSubContainer_ = pluginSubContainer;
     pluginSubContainer->SetPluginElement(pluginElement);
     RefPtr<PluginComponent> mountPoint = AceType::MakeRefPtr<PluginComponent>();
-    pluginSubContainer->SetPluginComponet(mountPoint);
+    pluginSubContainer->SetPluginComponent(mountPoint);
 
     /**
      * @tc.steps: step3. Initialize.
@@ -384,7 +384,7 @@ HWTEST_F(PluginSubContainerTest, PluginSubContaineRunPlugin003, TestSize.Level1)
     pluginElement->pluginSubContainer_ = pluginSubContainer;
     pluginSubContainer->SetPluginElement(pluginElement);
     RefPtr<PluginComponent> mountPoint = AceType::MakeRefPtr<PluginComponent>();
-    pluginSubContainer->SetPluginComponet(mountPoint);
+    pluginSubContainer->SetPluginComponent(mountPoint);
 
     /**
      * @tc.steps: step3. Initialize.

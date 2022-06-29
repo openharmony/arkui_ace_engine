@@ -128,7 +128,7 @@ private:
     bool HandleScrollablePosition(double);
     bool IsScrollable() const
     {
-        return TabBarMode::SCROLLABEL == mode_ || TabBarMode::FIXED_START == mode_;
+        return TabBarMode::SCROLLABLE == mode_ || TabBarMode::FIXED_START == mode_;
     }
     RefPtr<RenderNode> GetChildByIndex(int32_t index) const;
 

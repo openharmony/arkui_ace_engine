@@ -90,7 +90,7 @@ void SideBarAnimationController::StopAnimation()
 void SideBarAnimationController::PlaySideBarContainerToAnimation(SideStatus status)
 {
     if (!isAnimationCreated_) {
-        CreateAniamtion();
+        CreateAnimation();
     }
 
     StopHideAnimation();
@@ -115,7 +115,7 @@ void SideBarAnimationController::PlaySideBarContainerToAnimation(SideStatus stat
     }
 }
 
-void SideBarAnimationController::CreateAniamtion()
+void SideBarAnimationController::CreateAnimation()
 {
     auto weak = AceType::WeakClaim(this);
 

@@ -48,7 +48,7 @@ private:
     JSRef<JSFunc> onDataOnChange_;
     JSRef<JSFunc> onConnected_;
     JSRef<JSObject> object_;
-    RefPtr<Storage> stroage_;
+    RefPtr<Storage> storage_;
 };
 
 } // namespace OHOS::Ace::Framework

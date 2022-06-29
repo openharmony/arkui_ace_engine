@@ -97,7 +97,7 @@ void TabBarElementTest::InitFocusTree()
 
     // create first TabBar
     for (int32_t i = 0; i < TAB_ITEM_COUNT; i++) {
-        auto child = AceType::MakeRefPtr<FocusComponet>();
+        auto child = AceType::MakeRefPtr<FocusComponent>();
         children.emplace_back(AceType::MakeRefPtr<TabBarItemComponent>(child));
     }
     auto controllerOne = TabController::GetController(CONTROLLER_ID_ONE);
@@ -108,7 +108,7 @@ void TabBarElementTest::InitFocusTree()
     // create second TabBar
     children.clear();
     for (int32_t i = 0; i < TAB_ITEM_COUNT; i++) {
-        auto child = AceType::MakeRefPtr<FocusComponet>();
+        auto child = AceType::MakeRefPtr<FocusComponent>();
         children.emplace_back(AceType::MakeRefPtr<TabBarItemComponent>(child));
     }
     auto controllerTwo = TabController::GetController(CONTROLLER_ID_TWO);

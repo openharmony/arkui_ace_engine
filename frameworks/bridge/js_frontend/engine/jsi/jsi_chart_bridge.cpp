@@ -312,7 +312,7 @@ void ParseTextInfoAndSegmentInfo(const shared_ptr<JsRuntime>& runtime, const sha
         }
     } else if (key == "lineDash") {
         std::vector<std::string> dash;
-        StringUtils::StringSpliter(valStr, ',', dash);
+        StringUtils::StringSplitter(valStr, ',', dash);
         if (!dash.empty()) {
             segmentInfo.SetLineType(dash[0] == "dashed" ? LineType::DASHED : LineType::SOLID);
         }

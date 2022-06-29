@@ -171,7 +171,7 @@ const std::unordered_map<std::string, void (*)(const std::string&, const double&
         { DOM_TRANSLATE,
             [](const std::string& typeValue, const double& time, TransformConvertor& convertor) {
                 std::vector<std::string> offsets;
-                StringUtils::StringSpliter(typeValue, ' ', offsets);
+                StringUtils::StringSplitter(typeValue, ' ', offsets);
                 if (offsets.size() == PARAM_DOUBLE) {
                     auto dx = StringUtils::StringToDimension(offsets[0]);
                     auto dy = StringUtils::StringToDimension(offsets[1]);
@@ -201,7 +201,7 @@ const std::unordered_map<std::string, void (*)(const std::string&, const double&
         { DOM_TRANSLATE_3D,
             [](const std::string& typeValue, const double& time, TransformConvertor& convertor) {
                 std::vector<std::string> offsets;
-                StringUtils::StringSpliter(typeValue, ' ', offsets);
+                StringUtils::StringSplitter(typeValue, ' ', offsets);
                 if (offsets.size() == PARAM_THREE) {
                     auto dx = StringUtils::StringToDimension(offsets[0]);
                     auto dy = StringUtils::StringToDimension(offsets[1]);
@@ -213,7 +213,7 @@ const std::unordered_map<std::string, void (*)(const std::string&, const double&
         { DOM_ROTATE_3D,
             [](const std::string& typeValue, const double& time, TransformConvertor& convertor) {
                 std::vector<std::string> offsets;
-                StringUtils::StringSpliter(typeValue, ' ', offsets);
+                StringUtils::StringSplitter(typeValue, ' ', offsets);
                 if (offsets.size() == PARAM_FOUR) {
                     auto dx = static_cast<float>(StringUtils::StringToDouble(offsets[0]));
                     auto dy = static_cast<float>(StringUtils::StringToDouble(offsets[1]));
@@ -251,7 +251,7 @@ const std::unordered_map<std::string, void (*)(const std::string&, const double&
             [](const std::string& typeValue, const double& time, TransformConvertor& convertor) {
                 if (typeValue.find(' ') != std::string::npos) {
                     std::vector<std::string> values;
-                    StringUtils::StringSpliter(typeValue, ' ', values);
+                    StringUtils::StringSplitter(typeValue, ' ', values);
                     if (values.size() == PARAM_DOUBLE) {
                         double scaleValueX = StringUtils::StringToDouble(values[0]);
                         double scaleValueY = StringUtils::StringToDouble(values[1]);
@@ -281,7 +281,7 @@ const std::unordered_map<std::string, void (*)(const std::string&, const double&
         { DOM_SCALE_3D,
             [](const std::string& typeValue, const double& time, TransformConvertor& convertor) {
                 std::vector<std::string> offsets;
-                StringUtils::StringSpliter(typeValue, ' ', offsets);
+                StringUtils::StringSplitter(typeValue, ' ', offsets);
                 if (offsets.size() == PARAM_THREE) {
                     auto scaleX = static_cast<float>(StringUtils::StringToDouble(offsets[0]));
                     auto scaleY = static_cast<float>(StringUtils::StringToDouble(offsets[1]));
@@ -292,7 +292,7 @@ const std::unordered_map<std::string, void (*)(const std::string&, const double&
         { DOM_SKEW,
             [](const std::string& typeValue, const double& time, TransformConvertor& convertor) {
                 std::vector<std::string> offsets;
-                StringUtils::StringSpliter(typeValue, ' ', offsets);
+                StringUtils::StringSplitter(typeValue, ' ', offsets);
                 if (offsets.size() == PARAM_DOUBLE) {
                     auto degreeX = static_cast<float>(StringUtils::StringToDegree(offsets[0]));
                     auto degreeY = static_cast<float>(StringUtils::StringToDegree(offsets[1]));
@@ -315,7 +315,7 @@ const std::unordered_map<std::string, void (*)(const std::string&, const double&
         { DOM_MATRIX_3D,
             [](const std::string& typeValue, const double& time, TransformConvertor& convertor) {
                 std::vector<std::string> offsets;
-                StringUtils::StringSpliter(typeValue, ' ', offsets);
+                StringUtils::StringSplitter(typeValue, ' ', offsets);
                 if (offsets.size() == PARAM_SIXTEEN) {
                     std::vector<double> matrix;
                     for (const auto& offset : offsets) {
@@ -331,7 +331,7 @@ const std::unordered_map<std::string, void (*)(const std::string&, const double&
         { DOM_MATRIX,
             [](const std::string& typeValue, const double& time, TransformConvertor& convertor) {
                 std::vector<std::string> offsets;
-                StringUtils::StringSpliter(typeValue, ' ', offsets);
+                StringUtils::StringSplitter(typeValue, ' ', offsets);
                 if (offsets.size() == PARAM_SIX) {
                     double scaleX = StringUtils::StringToDouble(offsets[0]);
                     double skewY = StringUtils::StringToDouble(offsets[1]);

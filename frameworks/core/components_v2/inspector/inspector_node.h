@@ -59,7 +59,7 @@ public:
     InspectorNode() = default;
     ~InspectorNode() override = default;
 
-    int32_t GetinspectorId() const
+    int32_t GetInspectorId() const
     {
         return inspectorId_;
     }
@@ -173,7 +173,7 @@ public:
     virtual std::unique_ptr<JsonValue> GetUseSizeType() const = 0;
     virtual RefPtr<GridColumnInfo> GetGridColumnInfo() const = 0;
 
-    // useAlign seeting
+    // useAlign setting
     virtual std::unique_ptr<JsonValue> GetUseAlign() const = 0;
     virtual std::unique_ptr<JsonValue> ToJsonObject() const = 0;
 
@@ -188,10 +188,10 @@ public:
     virtual std::unique_ptr<JsonValue> GetSweepGradient() const = 0;
     virtual std::unique_ptr<JsonValue> GetRadialGradient() const = 0;
 
-    // bindpopup
+    // bind popup
     virtual std::string GetBindPopup() const = 0;
 
-    // bindcontextmenu
+    // bind context menu
     virtual std::string GetBindContextMenu() const = 0;
 
     // auto test

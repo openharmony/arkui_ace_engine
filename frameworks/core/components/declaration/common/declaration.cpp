@@ -369,10 +369,10 @@ void Declaration::AddCommonEvent(EventTag tag)
                 declaration.events_.try_emplace(
                     EventTag::COMMON_GESTURE_EVENT, DeclarationConstants::DEFAULT_GESTURE_EVENT);
             } },
-        { EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT,
+        { EventTag::COMMON_REMOTE_MESSAGE_GESTURE_EVENT,
             [](Declaration& declaration) {
                 declaration.events_.try_emplace(
-                    EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT, DeclarationConstants::DEFAULT_GESTURE_EVENT);
+                    EventTag::COMMON_REMOTE_MESSAGE_GESTURE_EVENT, DeclarationConstants::DEFAULT_GESTURE_EVENT);
             } },
         { EventTag::COMMON_FOCUS_EVENT,
             [](Declaration& declaration) {
@@ -1475,7 +1475,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
                 }
 
                 std::vector<std::string> offsets;
-                StringUtils::StringSpliter(val, ' ', offsets);
+                StringUtils::StringSplitter(val, ' ', offsets);
                 if (offsets.size() == TRANSFORM_SINGLE) {
                     Dimension originDimensionX = TRANSFORM_ORIGIN_DEFAULT;
                     Dimension originDimensionY = TRANSFORM_ORIGIN_DEFAULT;
@@ -1582,7 +1582,7 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
             [](const std::string& value, Declaration& declaration) {
                 declaration.hasDecorationStyle_ = true;
                 std::vector<std::string> offsets;
-                StringUtils::StringSpliter(value, ' ', offsets);
+                StringUtils::StringSplitter(value, ' ', offsets);
                 // progress
                 if (offsets.size() >= 1) {
                     auto parseValue = ParseFunctionValue<Dimension>(offsets[0], DOM_BLUR, StringToDimension);
@@ -2039,7 +2039,7 @@ void Declaration::SetPaddingOverall(const std::string& value, Declaration& decla
     }
 
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
+    StringUtils::StringSplitter(value, ' ', offsets);
     switch (offsets.size()) {
         case 1:
             paddingStyle.padding.SetLeft(declaration.ParseDimension(offsets[0]));
@@ -2080,7 +2080,7 @@ void Declaration::SetMarginOverall(const std::string& value, Declaration& declar
     }
 
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
+    StringUtils::StringSplitter(value, ' ', offsets);
     switch (offsets.size()) {
         case 1:
             marginStyle.margin.SetLeft(declaration.ParseDimension(offsets[0]));
@@ -2116,7 +2116,7 @@ void Declaration::SetBorderImageWidthForFourEdges(const std::string& value, Decl
 {
     auto& borderStyle = declaration.MaybeResetStyle<CommonBorderStyle>(StyleTag::COMMON_BORDER_STYLE);
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
+    StringUtils::StringSplitter(value, ' ', offsets);
     switch (offsets.size()) {
         case 1:
             borderStyle.border.SetBorderImageWidth(declaration.ParseDimension(offsets[0]), BorderImageDirection::TOP);
@@ -2167,7 +2167,7 @@ void Declaration::SetBorderImageSliceForFourEdges(const std::string& value, Decl
 {
     auto& borderStyle = declaration.MaybeResetStyle<CommonBorderStyle>(StyleTag::COMMON_BORDER_STYLE);
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
+    StringUtils::StringSplitter(value, ' ', offsets);
     switch (offsets.size()) {
         case 1:
             borderStyle.border.SetBorderImageSlice(declaration.ParseDimension(offsets[0]), BorderImageDirection::LEFT);
@@ -2218,7 +2218,7 @@ void Declaration::SetBorderImageOutSetForFourEdges(const std::string& value, Dec
 {
     auto& bs = declaration.MaybeResetStyle<CommonBorderStyle>(StyleTag::COMMON_BORDER_STYLE);
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
+    StringUtils::StringSplitter(value, ' ', offsets);
     switch (offsets.size()) {
         case 1:
             bs.border.SetBorderImageOutset(declaration.ParseDimension(offsets[0]), BorderImageDirection::LEFT);
@@ -2507,7 +2507,7 @@ void Declaration::SetBorderOverall(const std::string& value, Declaration& declar
     }
 
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(value, ' ', offsets);
+    StringUtils::StringSplitter(value, ' ', offsets);
     switch (offsets.size()) {
         case 1:
             if (offsets[0].find("px") != std::string::npos) {
@@ -2782,7 +2782,7 @@ void Declaration::SetGradientSize(const std::string& gradientSize, Declaration& 
     }
 
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(gradientSize, ' ', offsets);
+    StringUtils::StringSplitter(gradientSize, ' ', offsets);
     if (offsets.size() == 1) {
         // 2. if circle: <length>
         auto circleSize = StringToDimension(offsets[0]);
@@ -2859,7 +2859,7 @@ void Declaration::SetGradientAngle(const std::string& gradientAngle, Declaration
         return;
     }
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(gradientAngle, ' ', offsets);
+    StringUtils::StringSplitter(gradientAngle, ' ', offsets);
     if (!offsets.empty()) {
         auto startAngle = StringUtils::StringToDegree(offsets[0]);
         backgroundStyle.gradient.GetSweepGradient().startAngle = AnimatableDimension(startAngle);
@@ -2881,7 +2881,7 @@ void Declaration::SetGradientRotation(const std::string& gradientRotation, Decla
         return;
     }
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(gradientRotation, ' ', offsets);
+    StringUtils::StringSplitter(gradientRotation, ' ', offsets);
     if (!offsets.empty()) {
         auto rotationAngle = StringUtils::StringToDegree(offsets[0]);
         backgroundStyle.gradient.GetSweepGradient().rotation = AnimatableDimension(rotationAngle);
@@ -3166,7 +3166,7 @@ void Declaration::ResetDefaultStyles()
     frontDecoration_ = AceType::MakeRefPtr<Decoration>();
 }
 
-// Convert transform style to json format, such as rotate(50deg) to {"ratate":"50deg"}
+// Convert transform style to json format, such as rotate(50deg) to {"rotate":"50deg"}
 std::string Declaration::GetTransformJsonValue(const std::string& value)
 {
     auto rightIndex = value.find('(');
@@ -3328,7 +3328,7 @@ void Declaration::SetClickEvent(const EventMarker& onClick)
 void Declaration::SetRemoteMessageEvent(const EventMarker& remoteMessage)
 {
     LOGI("Declaration::SetRemoteMessageEvent");
-    auto& gestureEvent = MaybeResetEvent<CommonGestureEvent>(EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT);
+    auto& gestureEvent = MaybeResetEvent<CommonGestureEvent>(EventTag::COMMON_REMOTE_MESSAGE_GESTURE_EVENT);
     if (gestureEvent.IsValid()) {
         LOGI("Declaration::SetRemoteMessageEvent IsValid");
         gestureEvent.click.eventMarker = remoteMessage;

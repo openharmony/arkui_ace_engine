@@ -40,7 +40,7 @@ void RosenRenderTextSpan::UpdateText(txt::ParagraphBuilder& builder,
     }
     UpdateTouchRegions(touchRegions);
     auto displayText = spanComponent_->GetSpanData();
-    StringUtils::TransfromStrCase(displayText, (int32_t)spanStyle_.GetTextCase());
+    StringUtils::TransformStrCase(displayText, (int32_t)spanStyle_.GetTextCase());
     builder.AddText(StringUtils::Str8ToStr16(displayText));
     textValue.append(displayText);
     for (const auto& child : GetChildren()) {

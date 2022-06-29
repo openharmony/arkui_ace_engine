@@ -303,7 +303,7 @@ void AceAbility::OnStart(const Want& want)
         return;
     }
     auto aceResCfg = container->GetResourceConfiguration();
-    aceResCfg.SetOrientation(SystemProperties::GetDevcieOrientation());
+    aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     container->SetResourceConfiguration(aceResCfg);

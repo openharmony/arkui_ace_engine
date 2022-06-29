@@ -308,7 +308,7 @@ void ParseFontFeatureSetting(
     }
 
     std::vector<std::string> value;
-    StringUtils::StringSpliter(temp, ' ', value);
+    StringUtils::StringSplitter(temp, ' ', value);
     if (value.empty() || value.size() > FONT_FEATURE_MAX_SIZE || value[0].size() != FONT_FEATURE_KEY_LENGTH) {
         LOGW("ParseFontFeatureSetting param is invalid");
         return;

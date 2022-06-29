@@ -211,7 +211,7 @@ void DOMList::ParseIndexer(const std::string& indexerAlphabet)
         return;
     }
 
-    StringUtils::StringSpliter(indexerAlphabet, INDEXER_ALPHABET_DIV, indexerAlphabet_);
+    StringUtils::StringSplitter(indexerAlphabet, INDEXER_ALPHABET_DIV, indexerAlphabet_);
     int32_t alphabetCount = static_cast<int32_t>(indexerAlphabet_.size());
     indexer_ = alphabetCount > 0;
     LOGI("IndexerFlag:%{public}d, AlphabetCount:%{public}d.", indexer_, alphabetCount);
@@ -562,7 +562,7 @@ bool DOMList::SetSpecializedStyle(const std::pair<std::string, std::string>& sty
         { DOM_SCROLL_SCROLLBAR_OFFSET,
             [](const std::string& val, DOMList& list) {
                 std::vector<std::string> offset;
-                OHOS::Ace::StringUtils::StringSpliter(val, ',', offset);
+                OHOS::Ace::StringUtils::StringSplitter(val, ',', offset);
                 list.scrollbarPositionX_.first = true;
                 auto position = list.ParseDimension(offset[0]);
                 list.scrollbarPositionX_.second = position.IsValid() ? position : Dimension();

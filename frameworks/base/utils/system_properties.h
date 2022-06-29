@@ -90,7 +90,7 @@ public:
     /*
      * Get current orientation of device.
      */
-    static DeviceOrientation GetDevcieOrientation()
+    static DeviceOrientation GetDeviceOrientation()
     {
         return orientation_;
     }

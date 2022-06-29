@@ -19,9 +19,7 @@
 
 namespace OHOS::Ace::Framework {
 
-JSCanvasPath::JSCanvasPath()
-{
-}
+JSCanvasPath::JSCanvasPath() = default;
 
 void JSCanvasPath::JsPath2DSetTransform(const JSCallbackInfo& info)
 {

@@ -775,7 +775,7 @@ void RenderText::HandleRemoteMessage(const ClickInfo& info)
         auto declaration = text_->GetDeclaration();
         if (declaration) {
             auto& gestureEvent =
-                static_cast<CommonGestureEvent&>(declaration->GetEvent(EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT));
+                static_cast<CommonGestureEvent&>(declaration->GetEvent(EventTag::COMMON_REMOTE_MESSAGE_GESTURE_EVENT));
             if (gestureEvent.IsValid() && !gestureEvent.click.eventMarker.IsEmpty()) {
                 clickMarker = gestureEvent.click.eventMarker;
             }
@@ -1093,7 +1093,7 @@ void RenderText::PanOnActionEnd(const GestureEvent& info)
     }
     
     if (dragWindow_) {
-        dragWindow_->Destory();
+        dragWindow_->Destroy();
         dragWindow_ = nullptr;
         return;
     }
@@ -1141,7 +1141,7 @@ void RenderText::PanOnActionCancel()
     }
 
     if (dragWindow_) {
-        dragWindow_->Destory();
+        dragWindow_->Destroy();
         dragWindow_ = nullptr;
     }
 #endif

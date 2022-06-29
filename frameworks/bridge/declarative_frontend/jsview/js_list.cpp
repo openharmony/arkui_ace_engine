@@ -164,7 +164,7 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         listComponent->SetLanes(laneNum);
         return;
     }
-    LOGI("lanes is not number, parse lane length contrain.");
+    LOGI("lanes is not number, parse lane length contraint.");
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
     auto minLengthParam = jsObj->GetProperty("minLength");
     auto maxLengthParam = jsObj->GetProperty("maxLength");

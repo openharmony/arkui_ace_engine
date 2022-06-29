@@ -105,7 +105,7 @@ bool SelectComponent::Initialize()
             textStyle.SetTextColor(theme_->GetFontColor());
         }
         std::vector<std::string> fontFamilies;
-        StringUtils::StringSpliter(theme_->GetFontFamily(), ',', fontFamilies);
+        StringUtils::StringSplitter(theme_->GetFontFamily(), ',', fontFamilies);
         if (!fontFamilies.empty()) {
             textStyle.SetFontFamilies(fontFamilies);
         }

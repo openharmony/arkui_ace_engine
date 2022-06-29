@@ -100,14 +100,14 @@ private:
  *
  *  This class is the entry point for binding classes and methods to Javascript regardless of which engine is
  *  underneath. In the following text, a class C is the C++ class to be bound to Javascript, and engine-specific
- *  implementation is abbeviated as ESI.
+ *  implementation is abbreviated as ESI.
  *
  *  Methods and member variables registered to javascript are equivalent to a property in a javascript object.
  *  \p Method(...) is used to register methods. If a member function is registered directly, the ESI should take care of
  *  the value conversion between Javascript and C++ types.
  *
  *  If more control is required than just mere conversions between JS and C++ (such as error checks, weak types, storing
- * JS objects etc.), methods can be bound to a signature that enables this control. The signautre is <tt> void(*)(const
+ * JS objects etc.), methods can be bound to a signature that enables this control. The signature is <tt> void(*)(const
  * JSCallbackInfo&)</tt>. This is done to work regardless of the engine underneath. See \p JSRef , \p JSRefPtr for more
  * info on usage.
  *

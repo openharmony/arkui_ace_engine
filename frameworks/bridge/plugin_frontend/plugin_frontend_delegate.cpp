@@ -235,9 +235,9 @@ void PluginFrontendDelegate::LoadResourceConfiguration(std::map<std::string, std
     for (const auto& file : files) {
         if (file.find_first_of("/") != std::string::npos) {
             auto mediaPathName = file.substr(file.find_first_of("/"));
-            std::regex mediaPartten("^\\/media\\/\\w*(\\.jpg|\\.png|\\.gif|\\.svg|\\.webp|\\.bmp)$");
+            std::regex mediaPattern(R"(^\/media\/\w*(\.jpg|\.png|\.gif|\.svg|\.webp|\.bmp)$)");
             std::smatch result;
-            if (std::regex_match(mediaPathName, result, mediaPartten)) {
+            if (std::regex_match(mediaPathName, result, mediaPattern)) {
                 mediaFileName.insert(mediaPathName.substr(mediaPathName.find_first_of("/")));
             }
         }
@@ -430,7 +430,7 @@ void PluginFrontendDelegate::OnBackGround()
         TaskExecutor::TaskType::JS);
 }
 
-void PluginFrontendDelegate::OnForground()
+void PluginFrontendDelegate::OnForeground()
 {
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {

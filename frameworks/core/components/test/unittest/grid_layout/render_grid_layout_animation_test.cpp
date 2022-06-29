@@ -158,7 +158,7 @@ bool RenderGridLayoutAnimationTest::CreateGrid(bool isVertical, bool isSpringRec
     }
     gridComponent->SetSupportAnimation(true);
     gridComponent->SetDragAnimation(true);
-    gridComponent->SetEdgeEffection(EdgeEffect::SPRING);
+    gridComponent->SetEdgeEffect(EdgeEffect::SPRING);
     gridComponent->SetEditMode(true);
     if (isVertical) {
         gridComponent->SetDirection(FlexDirection::COLUMN);

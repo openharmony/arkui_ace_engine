@@ -115,14 +115,14 @@ void PluginSubContainer::Destroy()
     EngineHelper::RemoveEngine(instanceId_);
 }
 
-void PluginSubContainer::UpdateRootElmentSize()
+void PluginSubContainer::UpdateRootElementSize()
 {
-    auto pluginComponet = AceType::DynamicCast<PluginComponent>(pluginComponent_);
+    auto pluginComponent = AceType::DynamicCast<PluginComponent>(pluginComponent_);
     Dimension rootWidth = 0.0_vp;
     Dimension rootHeight = 0.0_vp;
-    if (pluginComponet) {
-        rootWidth = pluginComponet->GetWidth();
-        rootHeight = pluginComponet->GetHeight();
+    if (pluginComponent) {
+        rootWidth = pluginComponent->GetWidth();
+        rootHeight = pluginComponent->GetHeight();
     }
 
     if (rootWidth_ == rootWidth && rootHeight_ == rootHeight) {
@@ -177,7 +177,7 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
     density_ = outSidePipelineContext_.Upgrade()->GetDensity();
     auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
     pipelineContext_->SetEventManager(eventManager);
-    UpdateRootElmentSize();
+    UpdateRootElementSize();
     pipelineContext_->SetIsJsPlugin(true);
 
     SetPluginComponentTheme(moduleResPath, flutterAssetManager);

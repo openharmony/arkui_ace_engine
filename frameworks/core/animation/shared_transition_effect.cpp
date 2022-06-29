@@ -266,7 +266,7 @@ bool SharedTransitionExchange::CreateTranslateAnimation(
             if (motionPathOption.IsValid()) {
                 auto motionPathEvaluator =
                     AceType::MakeRefPtr<MotionPathEvaluator>(motionPathOption, Offset(0, 0), destOffset - srcOffset);
-                translateAnimation->SetEvaluator(motionPathEvaluator->CreateDimensionOffstEvaluator());
+                translateAnimation->SetEvaluator(motionPathEvaluator->CreateDimensionOffsetEvaluator());
                 if (motionPathOption.GetRotate()) {
                     auto rotateAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 1.0f, option.GetCurve());
                     rotateAnimation->SetEvaluator(motionPathEvaluator->CreateRotateEvaluator());

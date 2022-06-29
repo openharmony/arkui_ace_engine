@@ -267,9 +267,9 @@ void FrontendDelegateDeclarative::LoadResourceConfiguration(std::map<std::string
             continue;
         }
         auto mediaPathName = file.substr(file.find_first_of("/"));
-        std::regex mediaPartten("^\\/media\\/\\w*(\\.jpg|\\.png|\\.gif|\\.svg|\\.webp|\\.bmp)$");
+        std::regex mediaPattern("^\\/media\\/\\w*(\\.jpg|\\.png|\\.gif|\\.svg|\\.webp|\\.bmp)$");
         std::smatch result;
-        if (std::regex_match(mediaPathName, result, mediaPartten)) {
+        if (std::regex_match(mediaPathName, result, mediaPattern)) {
             mediaFileName.insert(mediaPathName.substr(mediaPathName.find_first_of("/")));
         }
     }

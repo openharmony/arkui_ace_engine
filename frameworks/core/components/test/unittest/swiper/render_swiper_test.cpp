@@ -71,10 +71,10 @@ int64_t GetTickCount()
     return (ts.tv_sec * SEC_TO_NANOSEC + ts.tv_nsec);
 }
 
-class TestSwiperEventHander : public MockEventHandler {
+class TestSwiperEventHandler : public MockEventHandler {
 public:
-    explicit TestSwiperEventHander(SwiperEventCallback eventCallback) : eventCallback_(eventCallback) {}
-    ~TestSwiperEventHander() = default;
+    explicit TestSwiperEventHandler(SwiperEventCallback eventCallback) : eventCallback_(eventCallback) {}
+    ~TestSwiperEventHandler() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)
     {
@@ -330,7 +330,7 @@ HWTEST_F(SwiperComponentTest, RenderSwiper001, TestSize.Level1)
      * @tc.steps: step1. Build a swiper component tree containing subcomponents, and add event listeners in swiper.
      */
     std::string changeEventId = "swiper_change_id";
-    RefPtr<TestSwiperEventHander> eventHander = AceType::MakeRefPtr<TestSwiperEventHander>(
+    RefPtr<TestSwiperEventHandler> eventHandler = AceType::MakeRefPtr<TestSwiperEventHandler>(
         [this, changeEventId](const std::string& eventId, const std::string& param) {
             GTEST_LOG_(INFO) << param;
             std::string expectChangeResult =
@@ -339,7 +339,7 @@ HWTEST_F(SwiperComponentTest, RenderSwiper001, TestSize.Level1)
             EXPECT_EQ(eventId, changeEventId);
         });
 
-    context_->RegisterEventHandler(eventHander);
+    context_->RegisterEventHandler(eventHandler);
     CreateAndRenderSwiper([this, changeEventId](const RefPtr<SwiperComponent>& swiper) {
         swiper->SetChangeEventId(EventMarker(changeEventId));
     });

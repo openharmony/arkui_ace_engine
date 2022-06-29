@@ -122,7 +122,7 @@ public:
         const WeakPtr<PipelineContext> context,
         Size targetSize = Size());
 
-    static RefPtr<ImageObject> GeneraterAceImageObject(
+    static RefPtr<ImageObject> GeneratorAceImageObject(
         const ImageSourceInfo& imageInfo,
         const RefPtr<PipelineContext> context,
         bool useSkiaSvg);

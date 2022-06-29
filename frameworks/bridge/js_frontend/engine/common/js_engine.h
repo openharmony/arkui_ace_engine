@@ -230,12 +230,12 @@ public:
         return nativeEngine_;
     }
 
-    void ACE_EXPORT RegistMediaUpdateCallback(std::function<void(JsEngine*)> cb)
+    void ACE_EXPORT RegisterMediaUpdateCallback(std::function<void(JsEngine*)> cb)
     {
         mediaUpdateCallback_ = cb;
     }
 
-    void ACE_EXPORT UnregistMediaUpdateCallback()
+    void ACE_EXPORT UnregisterMediaUpdateCallback()
     {
         mediaUpdateCallback_ = nullptr;
     }

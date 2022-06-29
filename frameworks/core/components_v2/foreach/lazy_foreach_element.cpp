@@ -33,7 +33,7 @@ void LazyForEachElement::Update()
 void LazyForEachElement::SetNewComponent(const RefPtr<Component>& newComponent)
 {
     if (!newComponent && lazyForEachComponent_) {
-        // Clear all child of lazy foreach component while cleaning componet
+        // Clear all child of lazy foreach component while cleaning component
         lazyForEachComponent_->RemoveChildren();
     }
     ForEachElement::SetNewComponent(newComponent);

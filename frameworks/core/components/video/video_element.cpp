@@ -208,7 +208,7 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
-void VideoElement::RegistMediaPlayerEvent()
+void VideoElement::RegisterMediaPlayerEvent()
 {
     auto context = context_.Upgrade();
     if (context == nullptr) {
@@ -327,7 +327,7 @@ void VideoElement::PreparePlayer()
         }
     }
     
-    RegistMediaPlayerEvent();
+    RegisterMediaPlayerEvent();
 
     sptr<Surface> producerSurface;
 #ifdef ENABLE_ROSEN_BACKEND
@@ -963,7 +963,7 @@ void VideoElement::ReleasePlatformResource()
 #endif
 }
 
-void VideoElement::UpdataChild(const RefPtr<Component>& childComponent)
+void VideoElement::UpdateChildInner(const RefPtr<Component>& childComponent)
 {
     const auto& child = children_.empty() ? nullptr : children_.front();
     UpdateChild(child, childComponent);
@@ -977,7 +977,7 @@ void VideoElement::OnError(const std::string& errorId, const std::string& param)
 #else
     std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
 #endif
-    UpdataChild(CreateErrorText(errorcode));
+    UpdateChildInner(CreateErrorText(errorcode));
 
     if (onError_) {
         std::string param;
@@ -1021,7 +1021,7 @@ void VideoElement::OnPrepared(
     if (renderNode_ != nullptr) {
         renderNode_->Update(video);
     }
-    UpdataChild(CreateChild());
+    UpdateChildInner(CreateChild());
 
     if (needFireEvent && onPrepared_) {
         std::string param;
@@ -1063,7 +1063,7 @@ void VideoElement::OnPlayerStatus(PlaybackStatus status)
 
     isPlaying_ = isPlaying;
     if (!isFullScreen_ || isExternalResource_) {
-        UpdataChild(CreateChild());
+        UpdateChildInner(CreateChild());
     }
 
     if (isPlaying) {
@@ -1142,7 +1142,7 @@ void VideoElement::OnCurrentTimeChange(uint32_t currentPos)
     IntTimeToText(currentPos, currentPosText_);
     currentPos_ = currentPos;
 
-    UpdataChild(CreateChild());
+    UpdateChildInner(CreateChild());
 
     if (onTimeUpdate_) {
         std::string param;
@@ -1165,7 +1165,7 @@ void VideoElement::OnCompletion()
     IntTimeToText(currentPos_, currentPosText_);
 
     isPlaying_ = false;
-    UpdataChild(CreateChild());
+    UpdateChildInner(CreateChild());
 
     if (onFinish_) {
         std::string param;

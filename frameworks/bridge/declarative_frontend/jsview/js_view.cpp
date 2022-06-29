@@ -432,7 +432,7 @@ void JSView::RemoveChildGroupById(const std::string& viewId)
     LOGD("RemoveChildGroupById in lazy for each case: %{public}s", viewId.c_str());
     auto iter = lazyItemGroups_.find(viewId);
     if (iter == lazyItemGroups_.end()) {
-        LOGI("can not find this groud to delete: %{public}s", viewId.c_str());
+        LOGI("can not find this group to delete: %{public}s", viewId.c_str());
         return;
     }
     std::vector<std::string> removedViewIds;

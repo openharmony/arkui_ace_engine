@@ -45,18 +45,18 @@ void FormElement::Update()
         return;
     }
 
-    auto info = form->GetFormRequestionInfo();
+    auto info = form->GetFormRequestInfo();
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension) {
         cardInfo_ = info;
     } else {
         // for update form component
-        if (cardInfo_.allowUpate != info.allowUpate) {
-            cardInfo_.allowUpate = info.allowUpate;
-            LOGI(" update card allow info:%{public}d", cardInfo_.allowUpate);
+        if (cardInfo_.allowUpdate != info.allowUpdate) {
+            cardInfo_.allowUpdate = info.allowUpdate;
+            LOGI(" update card allow info:%{public}d", cardInfo_.allowUpdate);
             if (subContainer_) {
-                subContainer_->SetAllowUpdate(cardInfo_.allowUpate);
+                subContainer_->SetAllowUpdate(cardInfo_.allowUpdate);
             }
         }
 
@@ -66,8 +66,8 @@ void FormElement::Update()
             cardInfo_.width = info.width;
             cardInfo_.height = info.height;
             GetRenderNode()->Update(component_);
-            subContainer_->SetFormComponet(component_);
-            subContainer_->UpdateRootElmentSize();
+            subContainer_->SetFormComponent(component_);
+            subContainer_->UpdateRootElementSize();
             subContainer_->UpdateSurfaceSize();
         }
 
@@ -368,13 +368,13 @@ void FormElement::CreateCardContainer()
         return;
     }
     subContainer_->Initialize();
-    subContainer_->SetFormComponet(component_);
+    subContainer_->SetFormComponent(component_);
     auto form = AceType::DynamicCast<FormComponent>(component_);
     if (!form) {
         LOGE("form component is null when try adding nonmatched container to form manager.");
         return;
     }
-    auto info = form->GetFormRequestionInfo();
+    auto info = form->GetFormRequestInfo();
     auto key = info.ToString();
     FormManager::GetInstance().AddNonmatchedContainer(key, subContainer_);
 
@@ -392,7 +392,7 @@ void FormElement::CreateCardContainer()
         uiTaskExecutor.PostTask([id, weak] {
             auto form = weak.Upgrade();
             if (form) {
-                LOGI("cardid id:%{public}zu", id);
+                LOGI("card id:%{public}zu", id);
                 form->HandleOnAcquireEvent(id);
             }
         });

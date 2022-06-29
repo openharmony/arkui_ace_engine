@@ -816,7 +816,7 @@ protected:
     virtual void UpdateBoxPadding(const Edge& padding);
     virtual void UpdateBoxBorder(const Border& border);
     virtual void UpdatePropAnimations(const PropAnimationMap& animations);
-    virtual void UpdatePositionAnimations(const RefPtr<Component> componet);
+    virtual void UpdatePositionAnimations(const RefPtr<Component> component);
 
     // Subclasses need to override this interface to implement reset initialization style before any frontend style set.
     virtual void ResetInitializedStyle() {}

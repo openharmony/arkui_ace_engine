@@ -68,7 +68,7 @@ bool SvgDeclaration::SetSpecializedValue(const std::pair<std::string, std::strin
                     return;
                 }
                 std::vector<double> viewBox;
-                StringUtils::StringSpliter(val, ' ', viewBox);
+                StringUtils::StringSplitter(val, ' ', viewBox);
                 if (viewBox.size() == 4) {
                     declaration.SetViewBox(Rect(viewBox[0], viewBox[1], viewBox[2], viewBox[3]));
                 }
@@ -79,7 +79,7 @@ bool SvgDeclaration::SetSpecializedValue(const std::pair<std::string, std::strin
                     return;
                 }
                 std::vector<double> viewBox;
-                StringUtils::StringSpliter(val, ' ', viewBox);
+                StringUtils::StringSplitter(val, ' ', viewBox);
                 if (viewBox.size() == 4) {
                     declaration.SetViewBox(Rect(viewBox[0], viewBox[1], viewBox[2], viewBox[3]));
                 }

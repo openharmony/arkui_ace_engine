@@ -116,7 +116,7 @@ void StaticImageObject::UploadToGpuForRender(
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
-            LOGE("pipline context has been released.");
+            LOGE("pipeline context has been released.");
             return;
         }
         auto taskExecutor = pipelineContext->GetTaskExecutor();
@@ -217,14 +217,14 @@ void AnimatedImageObject::UploadToGpuForRender(
             dstHeight);
         ClearData();
     } else if (animatedPlayer_ && forceResize && imageSize.IsValid()) {
-        LOGI("animated player has been construced, forceResize: %{public}s", imageSize.ToString().c_str());
+        LOGI("animated player has been constructed, forceResize: %{public}s", imageSize.ToString().c_str());
         int32_t dstWidth = static_cast<int32_t>(imageSize.Width() + 0.5);
         int32_t dstHeight = static_cast<int32_t>(imageSize.Height() + 0.5);
         animatedPlayer_->SetTargetSize(dstWidth, dstHeight);
     } else if (!animatedPlayer_ && !skData_) {
         LOGE("animated player is not constructed and image data is null, can not construct animated player!");
     } else if (animatedPlayer_ && !forceResize) {
-        LOGI("animated player has been construced, do nothing!");
+        LOGI("animated player has been constructed, do nothing!");
     }
 }
 

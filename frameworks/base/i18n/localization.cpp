@@ -193,11 +193,11 @@ void Localization::SetLocaleImpl(const std::string& language, const std::string&
 
     UErrorCode status = U_ZERO_ERROR;
     std::vector<std::string> keyValuePairs;
-    StringUtils::StringSpliter(keywordsAndValues, ';', keyValuePairs);
+    StringUtils::StringSplitter(keywordsAndValues, ';', keyValuePairs);
     for (const auto& pair : keyValuePairs) {
         // [pair] is like "nu=arab" or "nu=" for most occasions, but may be "=" under extreme scenarios
         std::vector<std::string> res;
-        StringUtils::StringSpliter(pair, '=', res);
+        StringUtils::StringSplitter(pair, '=', res);
         if (res.size() == 0) {
             continue;
         }
@@ -756,7 +756,7 @@ std::string Localization::GetEntryLetters(const std::string& lettersIndex)
     }
 
     std::vector<std::string> jsonLetterIndex;
-    StringUtils::StringSpliter(lettersIndex, JSON_PATH_CARVE, jsonLetterIndex);
+    StringUtils::StringSplitter(lettersIndex, JSON_PATH_CARVE, jsonLetterIndex);
 
     for (const auto& letter : jsonLetterIndex) {
         if (localJsonEntry && localJsonEntry->Contains(letter)) {

@@ -141,7 +141,7 @@ public:
             dispatcher->CallCurlFunction(requestData, callbackId);
             return true;
         } else {
-            LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+            LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
             return false;
         }
     }

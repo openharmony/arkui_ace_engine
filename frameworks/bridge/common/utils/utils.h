@@ -410,7 +410,7 @@ inline TabBarMode ConvertStrToTabBarMode(const std::string& value)
 {
     std::string temp = value;
     transform(temp.begin(), temp.end(), temp.begin(), tolower);
-    return temp == "fixed" ? TabBarMode::FIXED : TabBarMode::SCROLLABEL;
+    return temp == "fixed" ? TabBarMode::FIXED : TabBarMode::SCROLLABLE;
 }
 
 RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc);

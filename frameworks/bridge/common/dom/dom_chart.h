@@ -182,7 +182,7 @@ protected:
     void PrepareSpecializedComponent() override;
 
 private:
-    void UpdateTopButtomPoint(std::vector<MainChart>& data);
+    void UpdateTopBottomPoint(std::vector<MainChart>& data);
     void UpdateChartData(int32_t coorY, std::vector<MainChart>& data);
     void SetPoint(PointInfo& pointInfo, PointInfo getPointInfo);
     void SetChart(MainChart& chartDataset);

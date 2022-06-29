@@ -2206,8 +2206,8 @@ void RenderTextField::ChangeBorderToErrorStyle()
 
 void RenderTextField::HandleDeviceOrientationChange()
 {
-    if (deviceOrientation_ != SystemProperties::GetDevcieOrientation()) {
-        deviceOrientation_ = SystemProperties::GetDevcieOrientation();
+    if (deviceOrientation_ != SystemProperties::GetDeviceOrientation()) {
+        deviceOrientation_ = SystemProperties::GetDeviceOrientation();
         if (isOverlayShowed_) {
             onKeyboardClose_ = nullptr;
             PopTextOverlay();

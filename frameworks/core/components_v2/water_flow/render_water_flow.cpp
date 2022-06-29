@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace::V2 {
 namespace {
-constexpr int32_t TIMETHRESHOLD = 3 * 1000000; // milliseconds
+constexpr int32_t TIME_THRESHOLD = 3 * 1000000; // milliseconds
 constexpr int32_t MICROSEC_TO_NANOSEC = 1000;
 constexpr int32_t DEFAULT_DEPTH = 10;
 constexpr bool HORIZONTAL = false;
@@ -135,13 +135,13 @@ void RenderWaterFlow::CalAndPosItems(double& drawLength, int32_t& main)
             if (item != items_.end()) {
                 childrenInRect_.push_back(item->second);
                 int32_t itemMainSpan = GetItemSpan(item->second, useScrollable_ != SCROLLABLE::HORIZONTAL);
-                int32_t itemCrosspan = GetItemSpan(item->second, useScrollable_ == SCROLLABLE::HORIZONTAL);
+                int32_t itemCrossSpan = GetItemSpan(item->second, useScrollable_ == SCROLLABLE::HORIZONTAL);
                 int32_t itemMain = GetItemMainIndex(crossIter->second);
-                LOGD("PerformLayout. marix_ss itemInfo. itemindex:%{public}d, row:%{public}d, col:%{public}d, "
+                LOGD("PerformLayout. matrix_ss itemInfo. itemindex:%{public}d, row:%{public}d, col:%{public}d, "
                      "rowSpan:%{public}d,"
                      "colSpan:%{public}d.",
-                    crossIter->second, itemMain, cross, itemMainSpan, itemCrosspan);
-                SetChildPosition(item->second, itemMain, cross, itemMainSpan, itemCrosspan);
+                    crossIter->second, itemMain, cross, itemMainSpan, itemCrossSpan);
+                SetChildPosition(item->second, itemMain, cross, itemMainSpan, itemCrossSpan);
             }
         }
         if (main >= startIndex_) {
@@ -159,7 +159,7 @@ void RenderWaterFlow::PerformLayout()
         return;
     }
 
-    // calulate rowSize colSize mainLength
+    // calculate rowSize colSize mainLength
     if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
         mainSize_ = GetLayoutParam().GetMaxSize().Height();
         crossSize_ = GetLayoutParam().GetMaxSize().Width();
@@ -185,7 +185,7 @@ void RenderWaterFlow::PerformLayout()
     }
 
     InitialFlowProp();
-    CaculateViewPort();
+    CalculateViewPort();
     showItem_.clear();
     childrenInRect_.clear();
     double drawLength = 0.0 - firstItemOffset_;
@@ -376,13 +376,13 @@ void RenderWaterFlow::SetChildPosition(
     }
 
     double mainOffset = (mainLen - GetSize(child->GetLayoutSize())) / 2.0;
-    double crosstOffset = (crossLen - GetSize(child->GetLayoutSize(), false)) / 2.0;
+    double crossOffset = (crossLen - GetSize(child->GetLayoutSize(), false)) / 2.0;
 
     Offset offset;
     if (useScrollable_ != SCROLLABLE::HORIZONTAL) {
-        offset = Offset(positionCross + crosstOffset, positionMain + mainOffset - firstItemOffset_);
+        offset = Offset(positionCross + crossOffset, positionMain + mainOffset - firstItemOffset_);
     } else {
-        offset = Offset(positionMain + mainOffset - firstItemOffset_, positionCross + crosstOffset);
+        offset = Offset(positionMain + mainOffset - firstItemOffset_, positionCross + crossOffset);
     }
 
     child->SetPosition(offset);
@@ -722,7 +722,7 @@ void RenderWaterFlow::LoadForward()
     startIndex_ += count;
 }
 
-void RenderWaterFlow::CaculateViewPortSceneOne()
+void RenderWaterFlow::CalculateViewPortSceneOne()
 {
     // move to top/left of first row/column
     if (!NearZero(firstItemOffset_)) {
@@ -755,7 +755,7 @@ void RenderWaterFlow::CaculateViewPortSceneOne()
     currentOffset_ = 0.0;
 }
 
-bool RenderWaterFlow::CaculateViewPortSceneTwo(bool& NeedContinue)
+bool RenderWaterFlow::CalculateViewPortSceneTwo(bool& NeedContinue)
 {
     NeedContinue = false;
     if (!NearZero(firstItemOffset_)) {
@@ -811,14 +811,14 @@ bool RenderWaterFlow::CaculateViewPortSceneTwo(bool& NeedContinue)
     return true;
 }
 
-void RenderWaterFlow::CaculateViewPort()
+void RenderWaterFlow::CalculateViewPort()
 {
     while (!NearZero(currentOffset_) || needCalculateViewPort_) {
         if (currentOffset_ > 0) {
-            CaculateViewPortSceneOne();
+            CalculateViewPortSceneOne();
         } else {
             bool needSkip = false;
-            if (!CaculateViewPortSceneTwo(needSkip)) {
+            if (!CalculateViewPortSceneTwo(needSkip)) {
                 return;
             }
             if (needSkip) {
@@ -995,7 +995,7 @@ void RenderWaterFlow::DealCache(int32_t start, int32_t end)
         if (!(item < start - cacheCount_ || item > end + cacheCount_)) {
             continue;
         }
-        // check all item of inCache_ is in viewprot, if in viewprot the cacheCount_ cann't be delete
+        // check all item of inCache_ is in viewport, if in viewport the cacheCount_ can't be delete
         bool deleteEnable = true;
         auto iter = flowMatrix_.find(item);
         if (iter != flowMatrix_.end()) {
@@ -1072,7 +1072,7 @@ void RenderWaterFlow::ClearLayout(int32_t index)
     if (index > -1) {
         int32_t main = GetItemMainIndex(index);
         size_t rows = flowMatrix_.size();
-        DeleteItemsInMarix(rows, index);
+        DeleteItemsInMatrix(rows, index);
         for (auto it = inCache_.begin(); it != inCache_.end();) {
             if (*it >= main) {
                 inCache_.erase(it++);
@@ -1441,7 +1441,7 @@ void RenderWaterFlow::OnPredictLayout(int64_t deadline)
     }
     LOGD("OnPredictLayout loadingIndex_: %{public}d.", loadingIndex_);
     ACE_SCOPED_TRACE("OnPredictLayout %d", loadingIndex_);
-    if (GetSysTimestamp() - startTime + TIMETHRESHOLD > deadline * MICROSEC_TO_NANOSEC) {
+    if (GetSysTimestamp() - startTime + TIME_THRESHOLD > deadline * MICROSEC_TO_NANOSEC) {
         MarkNeedPredictLayout();
         return;
     }
@@ -1727,18 +1727,18 @@ void RenderWaterFlow::CheckAndInsertItems(int32_t mainIndex, int32_t itemIndex)
     }
 }
 
-void RenderWaterFlow::OutPutMarix(int32_t rows, bool before)
+void RenderWaterFlow::OutputMatrix(int32_t rows, bool before)
 {
     if (before) {
-        LOGD("marix_ss OutPutMarix before");
+        LOGD("matrix_ss OutputMatrix before");
     } else {
-        LOGD("marix_ss OutPutMarix after");
+        LOGD("matrix_ss OutputMatrix after");
     }
     int32_t cols[5];
     for (int32_t i = 0; i < rows; i++) {
         auto iterMain = flowMatrix_.find(i);
         if (iterMain == flowMatrix_.end()) {
-            LOGD("marix_ss marix: %{public}d  %{public}d  %{public}d  %{public}d  %{public}d", -1, -1, -1, -1, -1);
+            LOGD("matrix_ss matrix: %{public}d  %{public}d  %{public}d  %{public}d  %{public}d", -1, -1, -1, -1, -1);
             continue;
         }
         std::map<int32_t, int32_t> crossMap = iterMain->second;
@@ -1753,7 +1753,7 @@ void RenderWaterFlow::OutPutMarix(int32_t rows, bool before)
     }
 }
 
-bool RenderWaterFlow::DeleteItemsInMarix(size_t rows, int32_t itemIndex)
+bool RenderWaterFlow::DeleteItemsInMatrix(size_t rows, int32_t itemIndex)
 {
     bool deleteMainBeDelete = true;
     int32_t main = -1;

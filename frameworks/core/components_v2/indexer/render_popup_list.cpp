@@ -352,7 +352,7 @@ void RenderPopupList::AdjustOffset(Offset& delta, int32_t source)
 
     overscrollPastStart = std::max(GetCurrentPosition(), 0.0);
     overscrollPastEnd = std::max(-GetCurrentPosition() - maxScrollExtent, 0.0);
-    // do not adjust offset if direction oppsite from the overScroll direction when out of boundary
+    // do not adjust offset if direction opposite from the overScroll direction when out of boundary
     if ((overscrollPastStart > 0.0 && offset < 0.0) || (overscrollPastEnd > 0.0 && offset > 0.0)) {
         return;
     }
@@ -406,25 +406,25 @@ void RenderPopupList::ResetEdgeEffect()
     }
 
     scrollEffect_->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() {
-        auto popuplist = weak.Upgrade();
-        if (popuplist) {
-            return popuplist->GetCurrentPosition();
+        auto popupList = weak.Upgrade();
+        if (popupList) {
+            return popupList->GetCurrentPosition();
         }
         return 0.0;
     });
     scrollEffect_->SetLeadingCallback([weak = AceType::WeakClaim(this)]() {
-        auto popuplist = weak.Upgrade();
-        if (popuplist) {
-            return popuplist->GetLayoutSize().Height() - popuplist->mainScrollExtent_;
+        auto popupList = weak.Upgrade();
+        if (popupList) {
+            return popupList->GetLayoutSize().Height() - popupList->mainScrollExtent_;
         }
         return 0.0;
     });
 
     scrollEffect_->SetTrailingCallback([weak = AceType::WeakClaim(this)]() { return 0.0; });
     scrollEffect_->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() {
-        auto popuplist = weak.Upgrade();
-        if (popuplist) {
-            return popuplist->GetLayoutSize().Height() - popuplist->mainScrollExtent_;
+        auto popupList = weak.Upgrade();
+        if (popupList) {
+            return popupList->GetLayoutSize().Height() - popupList->mainScrollExtent_;
         }
         return 0.0;
     });

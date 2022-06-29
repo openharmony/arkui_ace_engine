@@ -314,7 +314,7 @@ void GetAttrOptions(const std::unique_ptr<JsonValue>& jsonOption, ChartOptions& 
 void ParseLineDash(const std::string& val, SegmentInfo& segmentInfo)
 {
     std::vector<std::string> dash;
-    StringUtils::StringSpliter(val, ',', dash);
+    StringUtils::StringSplitter(val, ',', dash);
     if (!dash.empty()) {
         segmentInfo.SetLineType(dash[0] == "dashed" ? LineType::DASHED : LineType::SOLID);
     }
@@ -782,7 +782,7 @@ void JsCardParser::LoadResImageUrl(const std::string& jsonFile, const std::strin
         return;
     }
     std::vector<std::string> keys;
-    StringUtils::StringSpliter(splitStr, '.', keys);
+    StringUtils::StringSplitter(splitStr, '.', keys);
     auto result = GetJsonValue(keys, content);
     if (result && result->IsValid()) {
         value = result->GetString();
@@ -828,7 +828,7 @@ void JsCardParser::GetResImageUrl(std::string& value)
 bool JsCardParser::GetI18nData(std::string& value)
 {
     std::vector<std::string> keys;
-    StringUtils::StringSpliter(value, '.', keys);
+    StringUtils::StringSplitter(value, '.', keys);
     std::vector<std::string> files;
     auto context = context_.Upgrade();
     if (!context) {
@@ -1238,7 +1238,7 @@ bool JsCardParser::ParseArrayExpression(
                     }
                 } else if (tmpKey.find('.') != std::string::npos) {
                     std::vector<std::string> keys;
-                    StringUtils::StringSpliter(tmpKey, '.', keys);
+                    StringUtils::StringSplitter(tmpKey, '.', keys);
                     auto jsonValue = GetJsonValue(keys, dataValue);
                     if (jsonValue && jsonValue->IsValid()) {
                         auto result = jsonValue->IsString() ? jsonValue->GetString() : jsonValue->ToString();
@@ -1629,7 +1629,7 @@ bool JsCardParser::ParsePointOperator(
         data = JsonUtil::ParseJsonString(dataJson);
     }
     std::vector<std::string> keys;
-    StringUtils::StringSpliter(tmpKey, '.', keys);
+    StringUtils::StringSplitter(tmpKey, '.', keys);
     auto result = GetJsonValue(keys, data);
     if (result && result->IsValid()) {
         auto dataStr = result->IsString() ? result->GetString() : result->ToString();

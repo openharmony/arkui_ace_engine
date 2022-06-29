@@ -398,7 +398,7 @@ void AnimationUtil::KeyframesAddKeyFrame(
             { DOM_WINDOW_FILTER,
                 [](const std::string& value, const double& time, const std::string& timeStr, AnimationUtil& util) {
                     std::vector<std::string> offsets;
-                    StringUtils::StringSpliter(value, ' ', offsets);
+                    StringUtils::StringSplitter(value, ' ', offsets);
                     // property animation only support progress
                     if (!offsets.empty()) {
                         auto progress =

@@ -336,7 +336,7 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
         }
     }
     for (const auto& wp : mouseHoverTestResultsPre_) {
-        // get all previous hover nodes while it's not in current hover nodes. Those nodes exit hoverd
+        // get all previous hover nodes while it's not in current hover nodes. Those nodes exit hover
         auto it = std::find(mouseHoverTestResults_.begin(), mouseHoverTestResults_.end(), wp);
         if (it == mouseHoverTestResults_.end()) {
             auto hoverNode = wp.Upgrade();
@@ -346,7 +346,7 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
         }
     }
     for (const auto& wp : mouseHoverTestResults_) {
-        // get all current hover nodes while it's not in previous hover nodes. Thoes nodes are new hoverd
+        // get all current hover nodes while it's not in previous hover nodes. Those nodes are new hover
         auto it = std::find(mouseHoverTestResultsPre_.begin(), mouseHoverTestResultsPre_.end(), wp);
         if (it == mouseHoverTestResultsPre_.end()) {
             auto hoverNode = wp.Upgrade();
@@ -392,7 +392,7 @@ bool EventManager::DispatchRotationEvent(
         LOGD("RotationMatchTest: dispatch rotation to request node.");
         return requestFocusNode->RotationTestForward(event);
     } else {
-        LOGD("RotationMatchTest: dispatch rotation to statck render node.");
+        LOGD("RotationMatchTest: dispatch rotation to stack render node.");
         return renderNode->RotationTest(event);
     }
 }

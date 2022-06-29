@@ -43,7 +43,7 @@ RenderRichText::RenderRichText() : RenderNode(true)
             return;
         }
 
-        sp->PorcessMove(info.GetTouches().front().GetLocalLocation().GetY());
+        sp->ProcessMove(info.GetTouches().front().GetLocalLocation().GetY());
     });
 
     // register this listener for consuming the drag events.
@@ -52,7 +52,7 @@ RenderRichText::RenderRichText() : RenderNode(true)
     dragRecognizer_->SetOnDragEnd([](const DragEndInfo& info) {});
 }
 
-void RenderRichText::PorcessMove(double posY)
+void RenderRichText::ProcessMove(double posY)
 {
     auto diff = prevPos_ - posY;
     double scale = 1.0f;

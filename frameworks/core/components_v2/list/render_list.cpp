@@ -374,7 +374,7 @@ void RenderList::CalculateLanes()
             minLaneLength_ = GetCrossSize(GetLayoutParam().GetMinSize()) / lanes;
             break;
         }
-        // Case 2: lane length constrain is set --> need to calculate [lanes_] according to contrain.
+        // Case 2: lane length constrain is set --> need to calculate [lanes_] according to contraint.
         // We agreed on such rules (assuming we have a vertical list here):
         // rule 1: [minLaneLength_] has a higher priority than [maxLaneLength_] when decide [lanes_], for e.g.,
         //         if [minLaneLength_] is 40, [maxLaneLength_] is 60, list's width is 120,
@@ -395,9 +395,9 @@ void RenderList::CalculateLanes()
         auto maxCrossSize = GetCrossSize(GetLayoutSize());
         double maxLanes = maxCrossSize / minLaneLength_;
         double minLanes = maxCrossSize / maxLaneLength_;
-        // let's considerate senarios when maxCrossSize > 0
+        // let's considerate scenarios when maxCrossSize > 0
         // now it's guaranteed that [minLaneLength_] <= [maxLaneLength_], i.e., maxLanes >= minLanes > 0
-        // there are 3 senarios:
+        // there are 3 scenarios:
         // 1. 1 > maxLanes >= minLanes > 0
         // 2. maxLanes >= 1 >= minLanes > 0
         // 3. maxLanes >= minLanes > 1
@@ -690,7 +690,7 @@ void RenderList::HandleListEvent()
 double RenderList::CalculateLaneCrossOffset(double crossSize, double childCrossSize)
 {
     double delta = crossSize - childCrossSize;
-    // TODO: modify in rtl senario
+    // TODO: modify in rtl scenario
     switch (component_->GetAlignListItemAlign()) {
         case ListItemAlign::START:
             return 0.0;
@@ -1609,7 +1609,7 @@ void RenderList::AdjustOffset(Offset& delta, int32_t source)
 
     overscrollPastStart = std::max(GetCurrentPosition(), 0.0);
     overscrollPastEnd = std::max(-GetCurrentPosition() - maxScrollExtent, 0.0);
-    // do not adjust offset if direction oppsite from the overScroll direction when out of boundary
+    // do not adjust offset if direction opposite from the overScroll direction when out of boundary
     if ((overscrollPastStart > 0.0 && offset < 0.0) || (overscrollPastEnd > 0.0 && offset > 0.0)) {
         return;
     }

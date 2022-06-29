@@ -69,7 +69,7 @@ void JSCheckboxGroup::Create(const JSCallbackInfo& info)
         if (groupName->IsString()) {
             auto checkboxGroupName = groupName->ToString();
             checkboxComponent->SetGroupName(checkboxGroupName);
-            auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupCompnent();
+            auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupComponent();
             auto item = checkboxGroupmap->find(checkboxGroupName);
             if (item != checkboxGroupmap->end()) {
                 checkboxGroupmap->erase(checkboxGroupName);

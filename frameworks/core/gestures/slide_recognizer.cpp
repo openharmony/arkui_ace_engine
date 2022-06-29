@@ -159,7 +159,7 @@ void SlideRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (static_cast<int32_t>(touchPoints_.size()) <= fingers_) {
         if (refereeState_ == RefereeState::SUCCEED) {
             double averageSpeed = 0.0;
-            bool isAvalible = true;
+            bool isAvailable = true;
             for (const auto& element : distanceData) {
                 Offset offset = element.second;
                 double distance = 0.0;
@@ -177,12 +177,12 @@ void SlideRecognizer::HandleTouchUpEvent(const TouchEvent& event)
                     std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1000>>>(slidingTime);
                 double slidingSpeed = (distance / duration_ms.count()) * 1000;
                 if (speed_ >= slidingSpeed) {
-                    isAvalible = false;
+                    isAvailable = false;
                     break;
                 }
                 averageSpeed += slidingSpeed;
             }
-            if (isAvalible) {
+            if (isAvailable) {
                 resultSpeed_ = averageSpeed / distanceData.size();
                 SendCallbackMsg(onAction_);
             }

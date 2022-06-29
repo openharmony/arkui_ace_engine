@@ -210,7 +210,7 @@ void RenderTabBar::LayoutChildren()
         } else {
             scrollableOffset_.SetX(std::clamp(padding - tabItemOffsets_[index_].GetX(), 0.0, MaxScrollableWidth()));
         }
-    } else if (mode_ == TabBarMode::SCROLLABEL && actualWidth_ < GetLayoutParam().GetMaxSize().Width() &&
+    } else if (mode_ == TabBarMode::SCROLLABLE && actualWidth_ < GetLayoutParam().GetMaxSize().Width() &&
                !isVertical_) {
         // In scrollable mod: the sum of Tab's width can less then TabBar width
         double halfWidth = GetLayoutParam().GetMaxSize().Width() / DOUBLE_FACTOR;
@@ -226,7 +226,7 @@ void RenderTabBar::LayoutChildren()
         } else {
             scrollableOffset_ = Offset((GetLayoutParam().GetMaxSize().Width() - actualWidth_) / DOUBLE_FACTOR, 0.0);
         }
-    } else if (mode_ == TabBarMode::SCROLLABEL && actualHeight_ < GetLayoutParam().GetMaxSize().Height() &&
+    } else if (mode_ == TabBarMode::SCROLLABLE && actualHeight_ < GetLayoutParam().GetMaxSize().Height() &&
                isVertical_) {
         // In scrollable mod: the sum of Tab's width can less then TabBar width
         scrollableOffset_ = Offset(0.0, (GetLayoutParam().GetMaxSize().Height() - actualHeight_) / DOUBLE_FACTOR);
@@ -273,7 +273,7 @@ void RenderTabBar::SetIndex(int32_t index, bool force)
             tabBarSizeAnimation_->Start(tabBar, index_, index);
         }
         index_ = index;
-        if (mode_ == TabBarMode::SCROLLABEL) {
+        if (mode_ == TabBarMode::SCROLLABLE) {
             if (actualWidth_ > GetLayoutParam().GetMaxSize().Width() && !isVertical_) {
                 // In scrollable mod: the select tab must in middle of tabBar
                 Offset centerViewPort(GetLayoutParam().GetMaxSize().Width() / DOUBLE_FACTOR, 0.0);

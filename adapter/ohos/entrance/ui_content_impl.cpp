@@ -490,7 +490,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         front->SetJsMessageDispatcher(container);
     }
     auto aceResCfg = container->GetResourceConfiguration();
-    aceResCfg.SetOrientation(SystemProperties::GetDevcieOrientation());
+    aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
@@ -714,12 +714,12 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 
     LOGI("UIContent UpdateConfiguration %{public}s, color mode:%{public}s",
         config->GetName().c_str(), colorMode.c_str());
-    auto pipline = container->GetPipelineContext();
-    if (!pipline) {
-        LOGE("UIContent pipline is null");
+    auto pipeline = container->GetPipelineContext();
+    if (!pipeline) {
+        LOGE("UIContent pipeline is null");
         return;
     }
-    auto themeManager = pipline->GetThemeManager();
+    auto themeManager = pipeline->GetThemeManager();
     if (!themeManager) {
         LOGE("UIContent themeManager is null");
         return;

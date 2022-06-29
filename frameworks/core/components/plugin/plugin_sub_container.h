@@ -47,7 +47,7 @@ public:
         return pluginElement_;
     }
 
-    void SetPluginComponet(const RefPtr<Component>& mountPoint)
+    void SetPluginComponent(const RefPtr<Component>& mountPoint)
     {
         pluginComponent_ = mountPoint;
     }
@@ -62,7 +62,7 @@ public:
         return pipelineContext_;
     }
 
-    void UpdateRootElmentSize();
+    void UpdateRootElementSize();
     void UpdateSurfaceSize();
 
     void SetAllowUpdate(bool update)

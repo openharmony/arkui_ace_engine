@@ -57,21 +57,21 @@ void PluginElement::Update()
 {
     auto plugin = AceType::DynamicCast<PluginComponent>(component_);
     if (!plugin) {
-        LOGE("could not get plugin componet for update");
+        LOGE("could not get plugin component for update");
         return;
     }
 
-    auto info = plugin->GetPluginRequestionInfo();
+    auto info = plugin->GetPluginRequestInfo();
     if (info.bundleName != pluginInfo_.bundleName || info.abilityName != pluginInfo_.abilityName ||
         info.moduleName != pluginInfo_.moduleName || info.pluginName != pluginInfo_.pluginName ||
         info.dimension != pluginInfo_.dimension) {
         pluginInfo_ = info;
     } else {
-        // for update plugin componet
-        if (pluginInfo_.allowUpate != info.allowUpate) {
-            pluginInfo_.allowUpate = info.allowUpate;
+        // for update plugin component
+        if (pluginInfo_.allowUpdate != info.allowUpdate) {
+            pluginInfo_.allowUpdate = info.allowUpdate;
             if (pluginSubContainer_) {
-                pluginSubContainer_->SetAllowUpdate(pluginInfo_.allowUpate);
+                pluginSubContainer_->SetAllowUpdate(pluginInfo_.allowUpdate);
             }
         }
 
@@ -79,8 +79,8 @@ void PluginElement::Update()
             pluginInfo_.width = info.width;
             pluginInfo_.height = info.height;
             GetRenderNode()->Update(component_);
-            pluginSubContainer_->SetPluginComponet(component_);
-            pluginSubContainer_->UpdateRootElmentSize();
+            pluginSubContainer_->SetPluginComponent(component_);
+            pluginSubContainer_->UpdateRootElementSize();
             pluginSubContainer_->UpdateSurfaceSize();
         }
         pluginSubContainer_->UpdatePlugin(plugin->GetData());
@@ -239,7 +239,7 @@ void PluginElement::RunPluginContainer()
     }
     auto plugin = AceType::DynamicCast<PluginComponent>(component_);
     if (!plugin) {
-        LOGE("plugin componet is null when try adding nonmatched container to plugin manager.");
+        LOGE("plugin component is null when try adding nonmatched container to plugin manager.");
         return;
     }
 
@@ -249,7 +249,7 @@ void PluginElement::RunPluginContainer()
     flutter::UIDartState::Current()->AddPluginParentContainer(pluginSubContainerId_, Container::CurrentId());
     pluginSubContainer_->SetInstanceId(pluginSubContainerId_);
     pluginSubContainer_->Initialize();
-    pluginSubContainer_->SetPluginComponet(component_);
+    pluginSubContainer_->SetPluginComponent(component_);
 
     auto weak = WeakClaim(this);
     auto element = weak.Upgrade();
@@ -408,7 +408,7 @@ void PluginElement::RunPluginTask(const WeakPtr<PluginElement>& weak, const RefP
         return;
     }
 
-    RequestPluginInfo info = plugin->GetPluginRequestionInfo();
+    RequestPluginInfo info = plugin->GetPluginRequestInfo();
     auto packagePathStr = pluginElement->GetPackagePath(weak, info);
     if (packagePathStr.empty()) {
         LOGE("package path is empty.");

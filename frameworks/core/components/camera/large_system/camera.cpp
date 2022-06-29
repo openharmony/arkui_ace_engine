@@ -41,7 +41,7 @@ const char CAMERA_PREVIEW_HEIGHT[] = "preViewSizeHeight";
 const char CAMERA_SET_PREVIEW_SIZE[] = "setPreViewSize";
 const char CAMERA_QUALITY[] = "quality";
 const char CAMERA_ON_PREPARE[] = "onPrepare";
-const char CAMERA_CHANGE_COMPONENT_ID_FUNCTION[] = "changeCameraCompenentId";
+const char CAMERA_CHANGE_COMPONENT_ID_FUNCTION[] = "changeCameraComponentId";
 const char CAMERA_CHANGE_COMPONENT_ID[] = "compenentId";
 const char CAMERA_CHANGE_TYPE[] = "changeType";
 
@@ -280,9 +280,9 @@ void Camera::SetPreViewSize(int32_t width, int32_t height)
         });
 }
 
-void Camera::ChangeCameraCompenentId(bool changType, std::string id)
+void Camera::ChangeCameraComponentId(bool changType, std::string id)
 {
-    LOGI("ChangeCameraCompenentId: changType %{private}d.", changType);
+    LOGI("ChangeCameraComponentId: changType %{private}d.", changType);
     std::stringstream paramStream;
     paramStream << CAMERA_CHANGE_COMPONENT_ID << PARAM_EQUALS << id << PARAM_AND << CAMERA_CHANGE_TYPE
                 << PARAM_EQUALS << (changType ? "1" : "0");

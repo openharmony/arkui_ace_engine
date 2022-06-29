@@ -36,7 +36,7 @@
 namespace OHOS::Ace {
 
 enum CameraState : int32_t {
-    STATE_UMDEFINED,
+    STATE_UNDEFINED,
     STATE_ENABLE,
     STATE_DISABLE
 };
@@ -92,7 +92,7 @@ private:
     void OnPreViewSizeChange(int32_t preViewWidth, int32_t preViewHeight);
     void InitDeclarativePara(const RefPtr<CameraComponent>& cameraComponent);
     void HandleDeclarativePara();
-    void RealseDeclarativePara();
+    void ReleaseDeclarativePara();
     void OnTextureRefresh();
 
     RefPtr<Texture> texture_;
@@ -106,7 +106,7 @@ private:
     std::string cameraId_;
 #endif
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    void UpdataChild(const RefPtr<Component>& childComponent);
+    void UpdateChildInner(const RefPtr<Component>& childComponent);
     const RefPtr<Component> CreateErrorText(const std::string& errorMsg);
     TextDirection textDirection_ = TextDirection::LTR;
 #endif
@@ -117,7 +117,7 @@ private:
     RefPtr<CameraTheme> theme_;
     RefPtr<Camera> camera_;
 
-    CameraState cameraState_ = CameraState::STATE_UMDEFINED;
+    CameraState cameraState_ = CameraState::STATE_UNDEFINED;
 };
 
 } // namespace OHOS::Ace

@@ -143,8 +143,8 @@ public:
     void SetZIndex(RefPtr<Component>& component);
 
     void SetIsPercentSize(RefPtr<Component>& component);
-    std::shared_ptr<JsPageRadioGroups> GetRadioGroupCompnent();
-    std::shared_ptr<JsPageCheckboxGroups> GetCheckboxGroupCompnent();
+    std::shared_ptr<JsPageRadioGroups> GetRadioGroupComponent();
+    std::shared_ptr<JsPageCheckboxGroups> GetCheckboxGroupComponent();
 
     RefPtr<Component> GetNewComponent();
     RefPtr<V2::InspectorComposedComponent> GetInspectorComposedComponent() const;

@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 namespace {
 
 const char CALLBACK_COMPLETE[] = "complete";
-const char IS_SUCESS[] = "isSucceed";
+const char IS_SUCCESS[] = "isSucceed";
 const char PHOTO_PATH[] = "uri";
 const char NULL_STRING[] = "";
 const char ERROR_MSG[] = "errormsg";
@@ -85,7 +85,7 @@ void CameraElement::ReleasePlatformResource()
 
         // Release camera first.
         if (camera_) {
-            RealseDeclarativePara();
+            ReleaseDeclarativePara();
             camera_->Release();
 
             if (platformTaskExecutor.IsRunOnCurrentThread()) {
@@ -297,14 +297,14 @@ void CameraElement::OnRecorderCallBack(const std::map<std::string, std::string>&
     }
 
     std::string param = std::string("{\"arguments\":[");
-    if (GetStringFromMap(result, IS_SUCESS) == "1") {
+    if (GetStringFromMap(result, IS_SUCCESS) == "1") {
         param.append("{\"")
             .append(PHOTO_PATH)
             .append("\":\"file://")
             .append(GetStringFromMap(result, PHOTO_PATH))
             .append("\"}],\"method\":\"success\"}");
         ExecuteJsCallback(recorderBackId_, param);
-    } else if (GetStringFromMap(result, IS_SUCESS) != "1") {
+    } else if (GetStringFromMap(result, IS_SUCCESS) != "1") {
         param.append("{\"")
             .append(ERROR_MSG)
             .append("\":\"")
@@ -441,7 +441,7 @@ void CameraElement::CreateCamera(int64_t id, ErrorCallback&& errorCallback)
         camera_->SetBufferSize(theme_->GetBufferSize());
     }
     camera_->SetDeviceOrientation(
-        SystemProperties::GetDevcieOrientation() == DeviceOrientation::PORTRAIT);
+        SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT);
     camera_->Create(nullptr);
     HandleDeclarativePara();
 }
@@ -486,11 +486,11 @@ void CameraElement::HandleDeclarativePara()
     }
 
     if (context->GetIsDeclarative() && camera_) {
-        camera_->ChangeCameraCompenentId(true, cameraId_);
+        camera_->ChangeCameraComponentId(true, cameraId_);
     }
 }
 
-void CameraElement::RealseDeclarativePara()
+void CameraElement::ReleaseDeclarativePara()
 {
     auto context = context_.Upgrade();
     if (!context) {
@@ -498,7 +498,7 @@ void CameraElement::RealseDeclarativePara()
     }
 
     if (context->GetIsDeclarative() && camera_) {
-        camera_->ChangeCameraCompenentId(false, cameraId_);
+        camera_->ChangeCameraComponentId(false, cameraId_);
     }
 }
 
@@ -687,14 +687,14 @@ void CameraElement::InitListener()
 
 void CameraElement::OnTakePhotoCallBack(const std::map<std::string, std::string>& result)
 {
-    if (GetStringFromMap(result, IS_SUCESS) == "1" && !callbackIds_.success.empty()) {
+    if (GetStringFromMap(result, IS_SUCCESS) == "1" && !callbackIds_.success.empty()) {
         std::string param = std::string("{\"")
                                 .append(PHOTO_PATH)
                                 .append("\":\"file://")
                                 .append(GetStringFromMap(result, PHOTO_PATH))
                                 .append("\"}");
         ExecuteJsCallback(callbackIds_.success, param);
-    } else if (GetStringFromMap(result, IS_SUCESS) != "1" && !callbackIds_.fail.empty()) {
+    } else if (GetStringFromMap(result, IS_SUCCESS) != "1" && !callbackIds_.fail.empty()) {
         std::string param = std::string("{\"")
                                 .append(ERROR_MSG)
                                 .append("\":\"")
@@ -725,7 +725,7 @@ const RefPtr<Component> CameraElement::CreateErrorText(const std::string& errorM
     return AceType::MakeRefPtr<AlignComponent>(childrenAlign, Alignment::TOP_CENTER);
 }
 
-void CameraElement::UpdataChild(const RefPtr<Component>& childComponent)
+void CameraElement::UpdateChildInner(const RefPtr<Component>& childComponent)
 {
     const auto& child = children_.empty() ? nullptr : children_.front();
     UpdateChild(child, childComponent);
@@ -736,7 +736,7 @@ void CameraElement::OnError(const std::string& errorcode, const std::string& err
 {
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     std::string errorDescription = "This component is not supported on PC Preview.";
-    UpdataChild(CreateErrorText(errorDescription));
+    UpdateChildInner(CreateErrorText(errorDescription));
 #endif
     if (onError_) {
         std::string param = std::string("\"error\",{\"")
@@ -750,7 +750,7 @@ void CameraElement::OnError(const std::string& errorcode, const std::string& err
                                 .append("\"}");
         onError_(param);
     }
-    cameraState_ = CameraState::STATE_UMDEFINED;
+    cameraState_ = CameraState::STATE_UNDEFINED;
 }
 
 void CameraElement::TakePhoto(const TakePhotoParams& params)

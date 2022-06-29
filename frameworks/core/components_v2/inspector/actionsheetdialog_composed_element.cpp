@@ -118,20 +118,20 @@ std::string ActionSheetDialogComposedElement::GetAlignment() const
 {
     auto renderDialog = GetRenderDialog();
     auto Alignment = renderDialog ? renderDialog->GetDialogProperties().alignment : DialogAlignment::DEFAULT;
-    return ConverDialogAlignmentToString(Alignment);
+    return ConvertDialogAlignmentToString(Alignment);
 }
 
 std::unique_ptr<JsonValue> ActionSheetDialogComposedElement::GetDialogOffset() const
 {
     auto renderDialog = GetRenderDialog();
-    auto dialogoffset = renderDialog->GetDialogProperties().offset;
+    auto dialogOffset = renderDialog->GetDialogProperties().offset;
     auto jsonValue = JsonUtil::Create(true);
-    jsonValue->Put("dX", dialogoffset.GetX().Value());
-    jsonValue->Put("dY", dialogoffset.GetY().Value());
+    jsonValue->Put("dX", dialogOffset.GetX().Value());
+    jsonValue->Put("dY", dialogOffset.GetY().Value());
     return jsonValue;
 }
 
-std::string ActionSheetDialogComposedElement::ConverDialogAlignmentToString(DialogAlignment dialogAlignment) const
+std::string ActionSheetDialogComposedElement::ConvertDialogAlignmentToString(DialogAlignment dialogAlignment) const
 {
     std::string Alignment = "";
     switch (dialogAlignment) {

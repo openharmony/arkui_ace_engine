@@ -36,7 +36,7 @@ void JSRadio::Create(const JSCallbackInfo& info)
     auto radioGroupName = groupName->ToString();
     std::string value = radioValue->ToString();
     radioComponent->SetValue(value);
-    auto radioGroupComponent = ViewStackProcessor::GetInstance()->GetRadioGroupCompnent();
+    auto radioGroupComponent = ViewStackProcessor::GetInstance()->GetRadioGroupComponent();
     radioComponent->SetGroupName(radioGroupName);
     auto& radioGroup = (*radioGroupComponent)[radioGroupName];
     radioGroup.SetIsDeclarative(true);

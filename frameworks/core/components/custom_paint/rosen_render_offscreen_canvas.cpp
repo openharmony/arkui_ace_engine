@@ -122,7 +122,7 @@ RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(const WeakPtr<PipelineCon
         return;
     }
 
-    InitFliterFunc();
+    InitFilterFunc();
     InitImageCallbacks();
 }
 void RosenRenderOffscreenCanvas::AddRect(const Rect& rect)
@@ -1496,7 +1496,7 @@ void RosenRenderOffscreenCanvas::ResetTransform()
     skCanvas_->setMatrix(skMatrix);
 }
 
-void RosenRenderOffscreenCanvas::InitFliterFunc()
+void RosenRenderOffscreenCanvas::InitFilterFunc()
 {
     filterFunc_["grayscale"] = [&](const std::string& percentage) {
         SetGrayFilter(percentage);
@@ -1722,7 +1722,7 @@ void RosenRenderOffscreenCanvas::SetBlurFilter(const std::string& percent)
 void RosenRenderOffscreenCanvas::SetDropShadowFilter(const std::string& percent)
 {
     std::vector<std::string> offsets;
-    StringUtils::StringSpliter(percent, ' ', offsets);
+    StringUtils::StringSplitter(percent, ' ', offsets);
     if (offsets.empty() || offsets.size() != 4) {
         return;
     }

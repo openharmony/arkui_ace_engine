@@ -59,7 +59,7 @@ bool SvgPatternDeclaration::SetSpecializedAttr(const std::pair<std::string, std:
                     return;
                 }
                 std::vector<double> viewBox;
-                StringUtils::StringSpliter(val, ' ', viewBox);
+                StringUtils::StringSplitter(val, ' ', viewBox);
                 if (viewBox.size() == 4) {
                     declaration.SetViewBox(Rect(viewBox[0], viewBox[1], viewBox[2], viewBox[3]));
                 }
@@ -79,7 +79,7 @@ bool SvgPatternDeclaration::SetSpecializedAttr(const std::pair<std::string, std:
     };
 
     std::string key = attr.first;
-    StringUtils::TransfromStrCase(key, StringUtils::TEXT_CASE_LOWERCASR);
+    StringUtils::TransformStrCase(key, StringUtils::TEXT_CASE_LOWERCASE);
     auto attrIter = BinarySearchFindIndex(attrs, ArraySize(attrs), key.c_str());
     if (attrIter != -1) {
         attrs[attrIter].value(attr.second, *this);

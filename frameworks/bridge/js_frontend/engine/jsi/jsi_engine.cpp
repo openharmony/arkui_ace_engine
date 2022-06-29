@@ -71,7 +71,7 @@ const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 #endif
 const int32_t MAX_READ_TEXT_LENGTH = 4096;
-const std::regex URI_PARTTEN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
+const std::regex URI_PATTERN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
 using std::shared_ptr;
 static int32_t globalNodeId = 100000;
 std::map<const std::string, std::string> JsiEngineInstance::dataMap_;
@@ -514,7 +514,7 @@ void SetDomStyle(
     }
 
     if (isIine) {
-        std::vector < std::pair < std::string, std::string >> stylesFinaly;
+        std::vector < std::pair < std::string, std::string >> stylesFinally;
         for (int32_t i = 0; i < static_cast<int32_t>(styles.size()); i++) {
             std::string key = styles[i].first;
             std::string value = styles[i].second;
@@ -522,10 +522,10 @@ void SetDomStyle(
                 key.find("padding") != std::string::npos) {
                 continue;
             } else {
-                stylesFinaly.emplace_back(key, value);
+                stylesFinally.emplace_back(key, value);
             }
         }
-        command.SetStyles(std::move(stylesFinaly));
+        command.SetStyles(std::move(stylesFinally));
     } else {
         command.SetStyles(std::move(styles));
     }
@@ -1237,7 +1237,7 @@ shared_ptr<JsValue> JsReadText(const shared_ptr<JsRuntime>& runtime, const std::
     std::string uri;
     ParseResourceStringParam(READ_KEY_URI, params, uri);
     std::smatch result;
-    if (!std::regex_match(uri, result, URI_PARTTEN)) {
+    if (!std::regex_match(uri, result, URI_PATTERN)) {
         LOGE("JsReadText uri regex match failed");
         engine->CallJs(callbackId, R"({"arguments":["file uri pattern not correct", 202],"method":"fail"})");
         return runtime->NewUndefined();
@@ -1313,7 +1313,7 @@ shared_ptr<JsValue> JsReadArrayBuffer(
     int32_t length = MAX_READ_TEXT_LENGTH;
     ParseResourceParam(params, uri, position, length);
     std::smatch result;
-    if (!std::regex_match(uri, result, URI_PARTTEN)) {
+    if (!std::regex_match(uri, result, URI_PATTERN)) {
         LOGE("JsReadArrayBuffer uri regex match failed");
         engine->CallJs(callbackId, R"({"arguments":["file uri pattern not correct", 200],"method":"fail"})");
         return runtime->NewUndefined();
@@ -3016,20 +3016,20 @@ bool JsiEngineInstance::FireJsEvent(const std::string& eventStr)
     argv.push_back(runtime_->NewString(std::to_string(runningPage_->GetPageId())));
     shared_ptr<JsValue> var1 = runtime_->ParseJson(eventStr);
     if (var1->IsArray(runtime_)) {
-        shared_ptr<JsValue> varArry = var1->GetProperty(runtime_, 0);
-        if (varArry->IsObject(runtime_)) {
-            shared_ptr<JsValue> args = varArry->GetProperty(runtime_, "args");
+        shared_ptr<JsValue> varArray = var1->GetProperty(runtime_, 0);
+        if (varArray->IsObject(runtime_)) {
+            shared_ptr<JsValue> args = varArray->GetProperty(runtime_, "args");
             if (args->IsArray(runtime_)) {
-                shared_ptr<JsValue> stdDrage = args->GetProperty(runtime_, 1);
-                if (IsDragEvent(stdDrage->GetJsonString(runtime_))) {
-                    shared_ptr<JsValue> arryType = args->GetProperty(runtime_, 2);
-                    if (arryType->IsObject(runtime_)) {
+                shared_ptr<JsValue> stdDrag = args->GetProperty(runtime_, 1);
+                if (IsDragEvent(stdDrag->GetJsonString(runtime_))) {
+                    shared_ptr<JsValue> arrayType = args->GetProperty(runtime_, 2);
+                    if (arrayType->IsObject(runtime_)) {
                         shared_ptr<JsValue> dataTransfer = runtime_->NewObject();
                         dataTransfer->SetProperty(runtime_, "clearData", runtime_->NewFunction(AppClearData));
                         dataTransfer->SetProperty(runtime_, "getData", runtime_->NewFunction(AppGetData));
                         dataTransfer->SetProperty(runtime_, "setData", runtime_->NewFunction(AppSetData));
                         dataTransfer->SetProperty(runtime_, "setDragImage", runtime_->NewFunction(AppSetDataImage));
-                        arryType->SetProperty(runtime_, "dataTransfer", dataTransfer);
+                        arrayType->SetProperty(runtime_, "dataTransfer", dataTransfer);
                     }
                 }
             }
@@ -3089,7 +3089,7 @@ bool JsiEngineInstance::CallCurlFunction(const OHOS::Ace::RequestData& requestDa
         dispatcher->CallCurlFunction(requestData, callbackId);
         return true;
     } else {
-        LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+        LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
         return false;
     }
 }

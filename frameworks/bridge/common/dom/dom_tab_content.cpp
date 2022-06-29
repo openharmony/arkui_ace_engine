@@ -30,7 +30,7 @@ DOMTabContent::DOMTabContent(NodeId nodeId, const std::string& nodeName) : DOMNo
 
 bool DOMTabContent::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
 {
-    if (attr.first == DOM_TAB_CONTENT_SCROLLABEL) {
+    if (attr.first == DOM_TAB_CONTENT_SCROLLABLE) {
         scrollable_ = StringToBool(attr.second);
         tabContentChild_->SetScrollable(scrollable_);
         return true;

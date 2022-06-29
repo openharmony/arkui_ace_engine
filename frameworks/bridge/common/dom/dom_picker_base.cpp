@@ -26,9 +26,9 @@ namespace {
 
 const PickerDate DEFAULT_PICKER_DATE(1970, 1, 1);
 const PickerDate DEFAULT_END_PICKER_DATE(2100, 12, 31);
-constexpr char PICKER_DATE_SPLITER = '-';
+constexpr char PICKER_DATE_SPLITTER = '-';
 const PickerTime DEFAULT_PICKER_TIME(0, 0, 0);
-constexpr char PICKER_TIME_SPLITER = ':';
+constexpr char PICKER_TIME_SPLITTER = ':';
 
 } // namespace
 
@@ -104,15 +104,15 @@ bool DOMPickerBase::GetPickerDate(const std::string& strDate, PickerDate& outDat
 {
     std::string strValue;
     std::stringstream streamDate(strDate);
-    if (!std::getline(streamDate, strValue, PICKER_DATE_SPLITER)) {
+    if (!std::getline(streamDate, strValue, PICKER_DATE_SPLITTER)) {
         return false;
     }
     outDate.SetYear(StringUtils::StringToInt(strValue));
-    if (!std::getline(streamDate, strValue, PICKER_DATE_SPLITER)) {
+    if (!std::getline(streamDate, strValue, PICKER_DATE_SPLITTER)) {
         return false;
     }
     outDate.SetMonth(StringUtils::StringToInt(strValue));
-    if (!std::getline(streamDate, strValue, PICKER_DATE_SPLITER)) {
+    if (!std::getline(streamDate, strValue, PICKER_DATE_SPLITTER)) {
         return false;
     }
     outDate.SetDay(StringUtils::StringToInt(strValue));
@@ -123,11 +123,11 @@ bool DOMPickerBase::GetPickerTime(const std::string& strDate, PickerTime& outTim
 {
     std::string strValue;
     std::stringstream streamDate(strDate);
-    if (!std::getline(streamDate, strValue, PICKER_TIME_SPLITER)) {
+    if (!std::getline(streamDate, strValue, PICKER_TIME_SPLITTER)) {
         return false;
     }
     outTime.SetHour(StringUtils::StringToInt(strValue));
-    if (!std::getline(streamDate, strValue, PICKER_TIME_SPLITER)) {
+    if (!std::getline(streamDate, strValue, PICKER_TIME_SPLITTER)) {
         return false;
     }
     outTime.SetMinute(StringUtils::StringToInt(strValue));
@@ -141,7 +141,7 @@ bool DOMPickerBase::GetPickerTime(const std::string& strDate, PickerTime& outTim
 bool DOMPickerBase::GetPickerDateTime(const std::string& strDate, PickerDateTime& outDateTime) const
 {
     std::vector<std::string> strValues;
-    StringUtils::StringSpliter(strDate, PICKER_DATE_SPLITER, strValues);
+    StringUtils::StringSplitter(strDate, PICKER_DATE_SPLITTER, strValues);
     PickerDate outDate = outDateTime.GetDate();
     PickerTime outTime = outDateTime.GetTime();
     if (strValues.size() == 4) { // MM-dd-hh-mm
@@ -580,7 +580,7 @@ bool DOMPickerBase::SetTextSelected(const std::string& value)
         AceType::InstanceOf<PickerMultiTextComponent>(basePickerChild_)) {
         auto picker = AceType::DynamicCast<PickerMultiTextComponent>(basePickerChild_);
         std::vector<std::string> out;
-        StringUtils::StringSpliter(value, DOM_PICKER_SPLIT_ARRAY, out);
+        StringUtils::StringSplitter(value, DOM_PICKER_SPLIT_ARRAY, out);
         std::vector<uint32_t> selectedIndexes;
         for (uint32_t index = 0; index < out.size(); ++index) {
             selectedIndexes.emplace_back(StringUtils::StringToInt(out[index]));
@@ -653,7 +653,7 @@ bool DOMPickerBase::SetRange(const std::string& value)
         AceType::InstanceOf<PickerTextComponent>(basePickerChild_)) {
         auto picker = AceType::DynamicCast<PickerTextComponent>(basePickerChild_);
         std::vector<std::string> out;
-        StringUtils::StringSpliter(value, DOM_PICKER_SPLIT_ARRAY, out);
+        StringUtils::StringSplitter(value, DOM_PICKER_SPLIT_ARRAY, out);
         picker->SetRange(out);
         return true;
     }
@@ -662,11 +662,11 @@ bool DOMPickerBase::SetRange(const std::string& value)
         AceType::InstanceOf<PickerMultiTextComponent>(basePickerChild_)) {
         auto picker = AceType::DynamicCast<PickerMultiTextComponent>(basePickerChild_);
         std::vector<std::string> out;
-        StringUtils::StringSpliter(value, DOM_PICKER_SPLIT_ARRAY, out);
+        StringUtils::StringSplitter(value, DOM_PICKER_SPLIT_ARRAY, out);
         std::vector<std::vector<std::string>> arrayRange;
         for (uint32_t index = 0; index < out.size(); ++index) {
             std::vector<std::string> textRange;
-            StringUtils::StringSpliter(out[index], DOM_PICKER_SPLIT_ITEM, textRange);
+            StringUtils::StringSplitter(out[index], DOM_PICKER_SPLIT_ITEM, textRange);
             arrayRange.emplace_back(textRange);
         }
         picker->SetRange(arrayRange);

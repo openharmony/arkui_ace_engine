@@ -116,7 +116,7 @@ public:
             dispatcher->CallCurlFunction(requestData, callbackId);
             return true;
         } else {
-            LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+            LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
             return false;
         }
     }
@@ -127,8 +127,8 @@ public:
     void FireAsyncEvent(const std::string& eventId, const std::string& param);
 
     /** Pushes the given command on the currently loading page
-     * if conditions apply also flushesd the command queue
-     * if forceFlush=true is specificied the command buffer will be flushed.
+     * if conditions apply also flushed the command queue
+     * if forceFlush=true is specified the command buffer will be flushed.
      * even if conditions are not met.
      */
     void PushJSCommand(const RefPtr<JsCommand>& jsCommand, bool forceFlush = false) const;
@@ -153,7 +153,7 @@ public:
 
     static std::unique_ptr<JsonValue> GetI18nStringResource(const std::string& targetStringKey,
         const std::string& targetStringValue);
-    static std::string GetMeidaResource(const std::string& targetMediaFileName);
+    static std::string GetMediaResource(const std::string& targetMediaFileName);
     static int EvalBuf(JSContext* ctx, const char* buf, size_t bufLen, const char* filename, int evalFlags);
 
 private:

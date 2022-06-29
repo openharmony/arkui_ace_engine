@@ -713,7 +713,7 @@ const char DOM_TRACK_COLOR_OFF[] = "trackColorOff";
 
 // tabs attribute and style constants
 const char DOM_TAB_BAR_MODE[] = "mode";
-const char DOM_TAB_CONTENT_SCROLLABEL[] = "scrollable";
+const char DOM_TAB_CONTENT_SCROLLABLE[] = "scrollable";
 
 // refresh attribute and style constants
 const char DOM_REFRESH[] = "refresh";

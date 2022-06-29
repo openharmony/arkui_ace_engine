@@ -279,7 +279,7 @@ public:
         ACE_SCOPED_TRACE("OnDataReloaded");
 
         if (!lazyForEachComponent_) {
-            LOGE("lazyForEachCompenent_ is nullptr");
+            LOGE("lazyForEachComponent_ is nullptr");
             return;
         }
         LazyForEachCache cache(lazyForEachComponent_);

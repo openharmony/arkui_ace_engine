@@ -128,12 +128,12 @@ RefPtr<TextComponent> JSButton::GetTextComponent()
         LOGE("Button component create failed");
         return nullptr;
     }
-    auto padingComponent = AceType::DynamicCast<PaddingComponent>(buttonComponent->GetChildren().front());
-    if (!padingComponent) {
+    auto paddingComponent = AceType::DynamicCast<PaddingComponent>(buttonComponent->GetChildren().front());
+    if (!paddingComponent) {
         LOGE("Padding component create failed");
         return nullptr;
     }
-    auto textComponent = AceType::DynamicCast<TextComponent>(padingComponent->GetChild());
+    auto textComponent = AceType::DynamicCast<TextComponent>(paddingComponent->GetChild());
     return textComponent;
 }
 

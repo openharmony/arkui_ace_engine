@@ -157,7 +157,7 @@ void RenderBubble::PerformLayout()
     SetLayoutSize(GetLayoutParam().GetMaxSize());
     LayoutParam innerLayout = GetLayoutParam();
     if (!useCustom_) {
-        if (SystemProperties::GetDevcieOrientation() == DeviceOrientation::PORTRAIT) {
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
             innerLayout.SetMaxSize(Size(innerLayout.GetMaxSize().Width() - NormalizeToPx(GRID_MARGIN_PORTRAIT),
                 innerLayout.GetMaxSize().Height()));
         } else {

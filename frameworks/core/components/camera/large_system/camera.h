@@ -62,7 +62,7 @@ public:
         isPortrait_ = isPortrait;
     }
 
-    void ChangeCameraCompenentId(bool changType, std::string id);
+    void ChangeCameraComponentId(bool changType, std::string id);
 
 private:
     void OnAddTakePhotoListener(TakePhotoListener&& listener);

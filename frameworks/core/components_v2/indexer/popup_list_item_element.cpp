@@ -20,8 +20,8 @@
 namespace OHOS::Ace::V2 {
 void PopupListItemElement::PerformBuild()
 {
-    RefPtr<PopupListItemComponent> popupListItemCompoent = AceType::DynamicCast<PopupListItemComponent>(component_);
-    if (popupListItemCompoent) {
+    RefPtr<PopupListItemComponent> popupListItemComponent = AceType::DynamicCast<PopupListItemComponent>(component_);
+    if (popupListItemComponent) {
         ComponentGroupElement::PerformBuild();
     }
 }

@@ -406,12 +406,12 @@ public:
         return needSlide_;
     }
 
-    bool IsV2Componenet() const
+    bool IsV2Component() const
     {
         return isV2Component_;
     }
 
-    void SetV2Componenet(bool isV2Component)
+    void SetV2Component(bool isV2Component)
     {
         isV2Component_ = isV2Component;
     }

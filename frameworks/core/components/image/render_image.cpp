@@ -832,7 +832,7 @@ void RenderImage::PanOnActionEnd(const GestureEvent& info)
     }
 
     if (dragWindow_) {
-        dragWindow_->Destory();
+        dragWindow_->Destroy();
         dragWindow_ = nullptr;
         return;
     }
@@ -880,7 +880,7 @@ void RenderImage::PanOnActionCancel()
     }
 
     if (dragWindow_) {
-        dragWindow_->Destory();
+        dragWindow_->Destroy();
         dragWindow_ = nullptr;
     }
 #endif

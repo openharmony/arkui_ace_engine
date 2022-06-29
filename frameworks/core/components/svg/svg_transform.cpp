@@ -132,12 +132,12 @@ TransformInfo SvgTransform::CreateTransformInfo(const std::string& transform)
     return transformInfo;
 }
 
-TransformInfo SvgTransform::CreateMatrix4(const std::map<std::string, std::vector<float>>& transfrom)
+TransformInfo SvgTransform::CreateMatrix4(const std::map<std::string, std::vector<float>>& transform)
 {
     auto retMat = Matrix4::CreateIdentity();
     auto mat = Matrix4::CreateIdentity();
     TransformInfo transformInfo;
-    for (auto& [type, values] : transfrom) {
+    for (auto& [type, values] : transform) {
         if (values.empty()) {
             continue;
         }
