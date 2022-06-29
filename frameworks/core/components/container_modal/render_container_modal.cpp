@@ -19,9 +19,11 @@
 #include "base/log/event_report.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_component.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/image/image_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 
@@ -122,6 +124,22 @@ void RenderContainerModal::ContainerBoxLayout()
     containerLayoutParam.SetMaxSize(Size(maxSize.Width(), maxSize.Height()));
     containerBox->Layout(containerLayoutParam);
     containerBox->SetPosition(Offset(0.0, 0.0));
+}
+
+Offset RenderContainerModal::GetGlobalOffset() const
+{
+    auto context = GetContext().Upgrade();
+    if (!context) {
+        LOGE("get pipeline context failed");
+        return RenderNode::GetGlobalOffset();
+    }
+
+    auto windowMode = context->FireWindowGetModeCallBack();
+    if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
+        return Offset(-(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
+            -CONTAINER_TITLE_HEIGHT.ConvertToPx());
+    }
+    return RenderNode::GetGlobalOffset();
 }
 
 } // namespace OHOS::Ace
