@@ -1153,6 +1153,9 @@ double RenderList::ApplyLayoutParam()
 {
     auto maxLayoutSize = GetLayoutParam().GetMaxSize();
     if (!maxLayoutSize.IsValid() || maxLayoutSize.IsEmpty()) {
+        if (!GetVisible()) {
+            SetLayoutSize(Size());
+        }
         return 0.0;
     }
 
