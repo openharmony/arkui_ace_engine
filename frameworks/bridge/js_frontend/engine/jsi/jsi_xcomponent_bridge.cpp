@@ -113,6 +113,7 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
     Local<ObjectRef> obj = arkObjectRef->ToObject(pandaRuntime->GetEcmaVm());
     if (obj.CheckException()) {
         LOGE("Get local object failed.");
+        renderContext_.reset();
         return;
     }
     renderContext->SetValue(pandaRuntime, obj);
