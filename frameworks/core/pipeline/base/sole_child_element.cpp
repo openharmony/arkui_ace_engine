@@ -18,6 +18,8 @@
 #include "base/log/log.h"
 #include "base/utils/macros.h"
 #include "core/pipeline/base/sole_child_component.h"
+#include "core/components/grid_layout/grid_layout_item_component.h"
+#include "core/components_v2/list/list_item_component.h"
 
 namespace OHOS::Ace {
 
@@ -35,6 +37,38 @@ void SoleChildElement::PerformBuild()
     }
     const auto& child = children_.empty() ? nullptr : children_.front();
     UpdateChild(child, component->GetChild());
+}
+
+// specialhandling for noGridItem, ListItem
+// whose 'wrapping' copmponent are descendants, not ancestors
+void SoleChildElement::LocalizedUpdateWithItemComponent(
+    const RefPtr<Component>& innerMostWrappingComponent, const RefPtr<Component>& mainComponent)
+{
+    ACE_DCHECK(((AceType::DynamicCast<V2::ListItemComponent>(mainComponent) != nullptr) ||
+                   (AceType::DynamicCast<GridLayoutItemComponent>(mainComponent) != nullptr)) &&
+               CanUpdate(mainComponent));
+
+    LOGD("%{public}s elmtId %{public}d  updating with %{public}s elmtId %{public}d, canUpdate(): %{public}s",
+        AceType::TypeName(this), GetElementId(),
+        AceType::TypeName(mainComponent), mainComponent->GetElementId(), CanUpdate(mainComponent) ? "yes" : "no");
+
+    RefPtr<Element> updateElement = AceType::Claim(this);
+    auto updateComponent = mainComponent;
+
+    for (;;) {
+        LOGD("   ... localizedUpdate %{public}s <- %{public}s",
+            AceType::TypeName(updateElement), AceType::TypeName(updateComponent));
+        updateElement->SetNewComponent(updateComponent);
+        updateElement->LocalizedUpdate(); // virtual
+        updateElement->SetNewComponent(nullptr);
+
+        updateElement = updateElement->GetFirstChild();
+        auto sc = AceType::DynamicCast<SingleChild>(updateComponent);
+        if ((updateElement == nullptr) || (sc == nullptr) || (sc->GetChild() == nullptr)) {
+            break;
+        }
+        updateComponent = sc->GetChild();
+    }
 }
 
 } // namespace OHOS::Ace

@@ -1317,6 +1317,11 @@ public:
         return onShow_;
     }
 
+    bool UsePartialUpdate()
+    {
+        return usePartialupdate_;
+    }
+    
 protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     virtual void SetRootRect(double width, double height, double offset = 0.0);
@@ -1584,6 +1589,8 @@ private:
 
     PostRTTaskCallback postRTTaskCallback_;
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
+
+    bool usePartialupdate_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

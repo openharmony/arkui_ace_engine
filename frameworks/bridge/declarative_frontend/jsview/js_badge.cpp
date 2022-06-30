@@ -39,6 +39,7 @@ void JSBadge::Create(const JSCallbackInfo& info)
     auto obj = JSRef<JSObject>::Cast(info[0]);
     SetCustomizedTheme(obj, badge);
 
+    ViewStackProcessor::GetInstance()->ClaimElementId(badge);
     ViewStackProcessor::GetInstance()->Push(badge);
 }
 

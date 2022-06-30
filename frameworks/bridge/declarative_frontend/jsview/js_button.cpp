@@ -221,6 +221,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         buttonChildren.emplace_back(padding);
     }
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
+    ViewStackProcessor::GetInstance()->ClaimElementId(buttonComponent);
     buttonComponent->SetCatchMode(false);
     SetDefaultAttributes(buttonComponent);
     if (!labelSet && info[0]->IsObject()) {
@@ -240,6 +241,7 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
 {
     std::list<RefPtr<Component>> buttonChildren;
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
+    ViewStackProcessor::GetInstance()->ClaimElementId(buttonComponent);
     buttonComponent->SetCatchMode(false);
     SetDefaultAttributes(buttonComponent);
     if (info[0]->IsObject()) {

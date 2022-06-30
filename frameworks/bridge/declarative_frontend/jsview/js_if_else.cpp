@@ -18,12 +18,15 @@
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/ifelse/if_else_component.h"
+#include "core/components/ifelse/if_else_element.h"
+#include "core/components_v2/common/element_proxy.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSIfElse::Create(const JSCallbackInfo& info)
 {
-    auto component = AceType::MakeRefPtr<OHOS::Ace::IfElseComponent>(std::string(), "IfElse");
+    auto component = AceType::MakeRefPtr<IfElseComponent>(std::string(), "IfElse");
+    ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
 }
 
@@ -50,6 +53,43 @@ void JSIfElse::JSBind(BindingTarget globalObj)
     JSClass<JSIfElse>::StaticMethod("pop", &JSIfElse::Pop);
     JSClass<JSIfElse>::StaticMethod("branchId", &JSIfElse::SetBranchId);
     JSClass<JSIfElse>::Bind<>(globalObj);
+}
+
+void JSIfElse::ComponentToElementLocalizedUpdate(
+    const RefPtr<Component>& component, RefPtr<Element>& element)
+{
+    RefPtr<IfElseElement> ifElseElement = AceType::DynamicCast<IfElseElement>(element);
+    if (!ifElseElement) {
+        LOGE("%{public}s is not a IfElseElement. Internal Error!", AceType::TypeName(element));
+        return;
+    }
+
+    RefPtr<IfElseComponent> ifElseComponent = AceType::DynamicCast<IfElseComponent>(component);
+    if (!ifElseComponent) {
+        LOGE("%{public}s is not a IfElseComponent. Internal Error!", AceType::TypeName(component));
+        return;
+    }
+
+    if (ifElseComponent->BranchId() == ifElseElement->BranchId()) {
+        LOGD("Unchanged branchId. No updates to be done.");
+        return;
+    }
+
+    // even though the IfElement will be deleted, do not put to list of deleted elements
+    // because new Element with same elmtId will be created
+    ElementRegister::GetInstance()->RemoveElementSilently(ifElseElement->GetElementId());
+    ifElseElement->UnregisterChildrenForPartialUpdates();
+
+    auto ifElseParentElement = ifElseElement->GetElementParent().Upgrade();
+    LOGD("Doing a deep update IfElseElement <- %{public}s ...", AceType::TypeName(ifElseComponent));
+    LOGD("IfElseelement slot: %{public}d, renderSlot: %{public}d",
+        ifElseElement->GetSlot(), ifElseElement->GetRenderSlot());
+    LOGD("   IfElseElement parent Element is %{public}s", AceType::TypeName(ifElseParentElement));
+
+    ifElseParentElement->UpdateChildWithSlot(
+        ifElseElement, ifElseComponent, ifElseElement->GetSlot(), ifElseElement->GetRenderSlot());
+
+    LOGD("Doing a deep update on IfElseElement - DONE");
 }
 
 } // namespace OHOS::Ace::Framework

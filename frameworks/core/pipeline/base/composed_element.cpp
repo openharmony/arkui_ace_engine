@@ -89,7 +89,10 @@ void ComposedElement::Update()
 {
     const RefPtr<ComposedComponent> compose = AceType::DynamicCast<ComposedComponent>(component_);
     if (compose != nullptr) {
+        LOGD("Update on %{public}s with %{public}s, elmtId %{public}d",
+            AceType::TypeName(this), AceType::TypeName(compose), compose->GetElementId());
         name_ = compose->GetName();
+        SetElementId(compose->GetElementId());
         if (id_ != compose->GetId()) {
             auto context = context_.Upgrade();
             if (addedToMap_ && context != nullptr) {
@@ -201,6 +204,19 @@ bool ComposedElement::NeedUpdateWithComponent(const RefPtr<Component>& newCompon
         }
     }
     return true;
+}
+
+void ComposedElement::UnregisterForPartialUpdates()
+{
+    LOGD("unregistering %{public}s(%{public}d) with %{public}d children.",
+        AceType::TypeName(this), GetElementId(), static_cast<int32_t>(GetChildren().size()));
+
+    if (HasRemoveFunction()) {
+        LOGD("... calling Remove function to Destroy JSView.");
+        CallRemoveFunction();
+    }
+
+    Element::UnregisterForPartialUpdates();
 }
 
 RefPtr<Element> ComposedElement::UpdateChild(const RefPtr<Element>& child, const RefPtr<Component>& newComponent)

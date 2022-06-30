@@ -106,6 +106,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     }
     RefPtr<ThemeManager> dataPanelManager = AceType::MakeRefPtr<ThemeManager>();
     component->InitalStyle(dataPanelManager);
+    ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
 }
 

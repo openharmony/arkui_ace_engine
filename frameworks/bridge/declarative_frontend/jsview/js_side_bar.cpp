@@ -97,6 +97,7 @@ void JSSideBar::Create(const JSCallbackInfo& info)
 
     std::list<RefPtr<Component>> children;
     auto sideBarContainer = AceType::MakeRefPtr<OHOS::Ace::SideBarContainerComponent>(children);
+    ViewStackProcessor::GetInstance()->ClaimElementId(sideBarContainer);
     sideBarContainer->SetMainStackSize(MainStackSize::MAX);
     sideBarContainer->SetSideBarContainerType(style);
 

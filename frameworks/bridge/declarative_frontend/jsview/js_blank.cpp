@@ -23,6 +23,7 @@ void JSBlank::Create(const JSCallbackInfo& info)
 {
     auto specializedBox = AceType::MakeRefPtr<OHOS::Ace::BoxComponent>();
     // specialized component should be firstly pushed.
+    ViewStackProcessor::GetInstance()->ClaimElementId(specializedBox);
     ViewStackProcessor::GetInstance()->Push(specializedBox);
     // Blank fill the remain space.
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();

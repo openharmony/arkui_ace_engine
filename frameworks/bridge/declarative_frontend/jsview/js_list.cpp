@@ -79,6 +79,8 @@ void JSList::Create(const JSCallbackInfo& args)
     }
 
     auto listComponent = AceType::MakeRefPtr<V2::ListComponent>();
+    ViewStackProcessor::GetInstance()->ClaimElementId(listComponent);
+
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
 

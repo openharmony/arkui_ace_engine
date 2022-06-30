@@ -22,6 +22,7 @@ namespace OHOS::Ace::Framework {
 void JSDivider::Create()
 {
     RefPtr<Component> dividerComponent = AceType::MakeRefPtr<OHOS::Ace::DividerComponent>();
+    ViewStackProcessor::GetInstance()->ClaimElementId(dividerComponent);
     ViewStackProcessor::GetInstance()->Push(dividerComponent);
 }
 

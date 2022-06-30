@@ -39,6 +39,7 @@ void JSVideo::Create(const JSCallbackInfo& info)
         videoComponent->SetTextDirection(TextDirection::RTL);
     }
 
+    ViewStackProcessor::GetInstance()->ClaimElementId(videoComponent);
     ViewStackProcessor::GetInstance()->Push(videoComponent);
     if (info.Length() <= 0 || !info[0]->IsObject()) {
         LOGE("JSVideo: info is invalid.");

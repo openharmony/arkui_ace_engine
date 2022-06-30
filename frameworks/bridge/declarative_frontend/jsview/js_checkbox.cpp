@@ -47,6 +47,7 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
     }
     checkboxComponent->SetInspectorTag("Checkbox");
     checkboxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
+    ViewStackProcessor::GetInstance()->ClaimElementId(checkboxComponent);
     ViewStackProcessor::GetInstance()->Push(checkboxComponent);
 
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();

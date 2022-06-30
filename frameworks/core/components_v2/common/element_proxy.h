@@ -23,12 +23,15 @@
 #include "base/utils/noncopyable.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/element.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::V2 {
 
 class ElementProxyHost;
 
-class ElementProxy : virtual public Referenced {
+class ElementProxy : public virtual AceType {
+    DECLARE_ACE_TYPE(ElementProxy, AceType);
+
 public:
     static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
 
@@ -62,12 +65,32 @@ public:
 
     virtual void Dump(const std::string& prefix) const;
 
+    int32_t GetElementId()
+    {
+        return elmtId_;
+    }
+    void SetElementId(int32_t id)
+    {
+        elmtId_ = id;
+    }
+
+    /**
+     * method needs to be called after localized update
+     * to the proxied Element
+     */
+    virtual void LocalizedUpdate(
+        const RefPtr<Component>& newComponent, const RefPtr<Component>& outmostWrappingComponent)
+    {}
+
 protected:
     WeakPtr<ElementProxyHost> host_;
 
     ComposeId composedId_;
     size_t startIndex_ = INVALID_INDEX;
     size_t count_ = 0;
+
+private:
+    ElementIdType elmtId_ = ElementRegister::UndefinedElementId;
 
     ACE_DISALLOW_COPY_AND_MOVE(ElementProxy);
 };

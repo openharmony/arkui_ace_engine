@@ -48,6 +48,7 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
         RefPtr<RowComponent> row =
             AceType::MakeRefPtr<OHOS::Ace::RowComponent>(FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         row->SetInspectorTag("FlexComponentV2");
+        ViewStackProcessor::GetInstance()->ClaimElementId(row);
         ViewStackProcessor::GetInstance()->Push(row);
         return;
     }
@@ -56,6 +57,7 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
         RefPtr<RowComponent> row =
             AceType::MakeRefPtr<OHOS::Ace::RowComponent>(FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         row->SetInspectorTag("FlexComponentV2");
+        ViewStackProcessor::GetInstance()->ClaimElementId(row);
         ViewStackProcessor::GetInstance()->Push(row);
         return;
     }
@@ -72,6 +74,7 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
     } else {
         mainComponent = CreateFlexComponent(info);
     }
+    ViewStackProcessor::GetInstance()->ClaimElementId(mainComponent);
     ViewStackProcessor::GetInstance()->Push(mainComponent);
 }
 

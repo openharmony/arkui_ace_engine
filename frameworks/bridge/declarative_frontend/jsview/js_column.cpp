@@ -32,6 +32,7 @@ void JSColumn::Create(const JSCallbackInfo& info)
     std::list<RefPtr<Component>> children;
     RefPtr<ColumnComponent> columnComponent =
         AceType::MakeRefPtr<OHOS::Ace::ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, children);
+    ViewStackProcessor::GetInstance()->ClaimElementId(columnComponent);
     columnComponent->SetMainAxisSize(MainAxisSize::MIN);
     columnComponent->SetCrossAxisSize(CrossAxisSize::MIN);
 
@@ -61,6 +62,7 @@ void JSColumn::CreateWithWrap(const JSCallbackInfo& info)
 {
     std::list<RefPtr<Component>> children;
     RefPtr<OHOS::Ace::WrapComponent> component = AceType::MakeRefPtr<WrapComponent>(0.0, 0.0, children);
+    ViewStackProcessor::GetInstance()->ClaimElementId(component);
 
     component->SetDirection(WrapDirection::VERTICAL);
     component->SetMainAlignment(WrapAlignment::START);

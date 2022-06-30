@@ -22,6 +22,7 @@
 #include "core/focus/focus_node.h"
 #include "core/gestures/gesture_recognizer.h"
 #include "core/pipeline/base/component.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -249,6 +250,36 @@ public:
         return ignoreInspector_;
     }
 
+    /* extra public members for partial update */
+
+    /**
+     * perform a localized update with given pair of Components
+     * uses virtual LocalizedUpdate() for each Component to Element update
+     * in the chain mainComponent .... > parent > ... outmostWrappingComponent
+     */
+    void LocalizedUpdateWithComponent(
+        const RefPtr<Component>& newComponent, const RefPtr<Component>& outmostWrappingComponent);
+
+    /*
+     * Element gets the elmtId from the
+     * Component on creation, never changes
+     * afterwards.
+     */
+    void SetElementId(int32_t elmtId);
+    int32_t GetElementId() const
+    {
+        return elmtId_;
+    }
+
+    /**
+     * perform Component to Element localized update on 'this'
+     * does not recurse to children.
+     */
+    virtual void LocalizedUpdate();
+
+    virtual void UnregisterForPartialUpdates();
+    void UnregisterChildrenForPartialUpdates();
+
 protected:
     inline RefPtr<Element> DoUpdateChildWithNewComponent(
         const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot);
@@ -292,6 +323,10 @@ private:
     // One-to-one correspondence with component through retakeId
     int32_t retakeId_ = 0;
     bool ignoreInspector_ = false;
+
+private:
+    // globally unique id for Elements, used by partial update
+    int32_t elmtId_ = ElementRegister::UndefinedElementId;
 };
 
 } // namespace OHOS::Ace

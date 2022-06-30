@@ -71,6 +71,7 @@ void JSProgress::Create(const JSCallbackInfo& info)
     }
 
     auto progressComponent = AceType::MakeRefPtr<OHOS::Ace::ProgressComponent>(0.0, value, 0.0, total, progressType);
+    ViewStackProcessor::GetInstance()->ClaimElementId(progressComponent);
     auto theme = GetTheme<ProgressTheme>();
 
     if (!theme) {

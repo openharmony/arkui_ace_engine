@@ -235,6 +235,7 @@ PickerTime JSDatePicker::ParseTime(const JSRef<JSVal>& timeVal)
 void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
 {
     auto datePicker = AceType::MakeRefPtr<PickerDateComponent>();
+    ViewStackProcessor::GetInstance()->ClaimElementId(datePicker);
     auto startDate = paramObj->GetProperty("start");
     auto endDate = paramObj->GetProperty("end");
     auto selectedDate = paramObj->GetProperty("selected");
@@ -273,6 +274,7 @@ void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
 void JSDatePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
 {
     auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
+    ViewStackProcessor::GetInstance()->ClaimElementId(timePicker);
     auto selectedTime = paramObj->GetProperty("selected");
     if (selectedTime->IsObject()) {
         timePicker->SetSelectedTime(ParseTime(selectedTime));

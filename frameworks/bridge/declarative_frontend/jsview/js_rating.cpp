@@ -46,6 +46,7 @@ void JSRating::Create(const JSCallbackInfo& info)
     component->SetMouseAnimationType(HoverAnimationType::NONE);
     component->SetRatingScore(rating);
     component->SetIndicator(indicator);
+    ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
 
     auto theme = GetTheme<RatingTheme>();

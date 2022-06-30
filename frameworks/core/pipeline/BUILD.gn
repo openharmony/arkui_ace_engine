@@ -33,6 +33,7 @@ template("ace_core_pipeline_source_set") {
       "base/composed_element.cpp",
       "base/constants.cpp",
       "base/element.cpp",
+      "base/element_register.cpp",
       "base/flutter_render_context.cpp",
       "base/multi_composed_component.cpp",
       "base/multi_composed_element.cpp",

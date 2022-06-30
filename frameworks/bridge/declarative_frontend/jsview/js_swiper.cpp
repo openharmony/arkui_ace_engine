@@ -49,6 +49,7 @@ void JSSwiper::Create(const JSCallbackInfo& info)
     component->SetMainSwiperSize(MainSwiperSize::MIN);
     component->SetCachedSize(DEFAULT_SWIPER_CACHED_COUNT);
     component->SetCurve(Curves::LINEAR);
+    ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
     JSInteractableView::SetFocusNode(true);
 }

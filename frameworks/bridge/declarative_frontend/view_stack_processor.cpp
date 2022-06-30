@@ -450,7 +450,7 @@ void ViewStackProcessor::Pop()
         return;
     }
 
-    auto component = WrapComponents();
+    auto component = WrapComponents().first;
     if (AceType::DynamicCast<ComposedComponent>(component)) {
         auto childComponent = AceType::DynamicCast<ComposedComponent>(component)->GetChild();
         SetZIndex(childComponent);
@@ -480,7 +480,7 @@ void ViewStackProcessor::Pop()
 
 RefPtr<Component> ViewStackProcessor::GetNewComponent()
 {
-    auto component = WrapComponents();
+    auto component = WrapComponents().first;
     if (AceType::DynamicCast<ComposedComponent>(component)) {
         auto childComponent = AceType::DynamicCast<ComposedComponent>(component)->GetChild();
         SetZIndex(childComponent);
@@ -543,7 +543,7 @@ void ViewStackProcessor::DumpStack()
 }
 #endif
 
-RefPtr<Component> ViewStackProcessor::WrapComponents()
+std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponents()
 {
     auto& wrappingComponentsMap = componentsStack_.top();
     std::vector<RefPtr<Component>> components;
@@ -681,7 +681,15 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
         component->SetTouchable(mainComponent->IsTouchable());
     }
 
-    return component;
+#ifdef ACE_DEBUG_LOG
+    LOGD("Unwrap result: components size %{public}d (outmost child first, inner most Component last)",
+        static_cast<int32_t>(components.size()));
+    for (int32_t idx = static_cast<int32_t>(components.size()) - 1; idx >= 0; idx--) {
+        LOGD("   %{public}s elmtId: %{public}u", AceType::TypeName(components[idx]), components[idx]->GetElementId());
+    }
+#endif
+
+    return std::pair<RefPtr<Component>, RefPtr<Component>>(components[0], components[components.size() - 1]);
 }
 
 void ViewStackProcessor::UpdateTopComponentProps(const RefPtr<Component>& component)
@@ -712,13 +720,14 @@ void ViewStackProcessor::UpdateTopComponentProps(const RefPtr<Component>& compon
     }
 }
 
-RefPtr<Component> ViewStackProcessor::Finish()
+std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::FinishReturnMain()
 {
     if (componentsStack_.empty()) {
-        LOGE("ViewStackProcessor Finish failed, input empty render or invalid root component");
-        return nullptr;
+        LOGE("ViewStackProcessor FinishInternal failed, input empty render or invalid root component");
+        return std::pair<RefPtr<Component>, RefPtr<Component>>(nullptr, nullptr);
     }
-    auto component = WrapComponents();
+    const auto& componentsPair = WrapComponents();
+    auto component = componentsPair.first;
     if (AceType::DynamicCast<ComposedComponent>(component)) {
         auto childComponent = AceType::DynamicCast<ComposedComponent>(component)->GetChild();
         SetZIndex(childComponent);
@@ -727,8 +736,12 @@ RefPtr<Component> ViewStackProcessor::Finish()
     }
     componentsStack_.pop();
 
-    LOGD("ViewStackProcessor Finish size %{public}zu", componentsStack_.size());
-    return component;
+    LOGD("Done with processing on ViewStackProcessor, returning main Component %{public}s elmtId %{public}d, "
+        "outmost wrapping %{public}s. Remaining stack size %{public}d (should be zero).",
+        AceType::TypeName(componentsPair.second), componentsPair.second->GetElementId(),
+        AceType::TypeName(componentsPair.first), static_cast<int32_t>(componentsStack_.size()));
+
+    return componentsPair;
 }
 
 void ViewStackProcessor::PushKey(const std::string& key)
@@ -856,6 +869,15 @@ void ViewStackProcessor::SetIsPercentSize(RefPtr<Component>& component)
     if (renderComponent) {
         renderComponent->SetIsPercentSize(isPercentSize);
     }
+}
+
+void ViewStackProcessor::ClaimElementId(RefPtr<Component> component)
+{
+    ACE_DCHECK((reservedElementId_ != ElementRegister::UndefinedElementId) && "No reserved elmtId, internal error!");
+    ACE_DCHECK(mainComponent != nullptr);
+    LOGD("Assigning elmtId %{public}u to new %{public}s .", reservedElementId_, AceType::TypeName(component));
+    component->AssignUniqueElementId(reservedElementId_);
+    reservedElementId_ = ElementRegister::UndefinedElementId;
 }
 
 ScopedViewStackProcessor::ScopedViewStackProcessor()

@@ -32,6 +32,7 @@ class ACE_EXPORT ComposedElement : public Element {
 
 public:
     using RenderFunction = std::function<RefPtr<Component>(const RefPtr<Component>&)>;
+    using RemoveFunction = std::function<void()>;
     using PageTransitionFunction = std::function<RefPtr<Component>()>;
     using ApplyFunction = std::function<void(const RefPtr<RenderElement>&)>;
     explicit ComposedElement(const ComposeId& id);
@@ -86,6 +87,23 @@ public:
         return false;
     }
 
+    void CallRemoveFunction()
+    {
+        if (removeFunction_) {
+            return removeFunction_();
+        }
+    }
+
+    void SetRemoveFunction(RemoveFunction&& func)
+    {
+        removeFunction_ = std::move(func);
+    }
+    
+    bool HasRemoveFunction()
+    {
+        return removeFunction_ != nullptr;
+    }
+
     RefPtr<Component> CallPageTransitionFunction()
     {
         if (!pageTransitionFunction_) {
@@ -109,6 +127,8 @@ public:
         return name_;
     }
 
+    void UnregisterForPartialUpdates() override;
+
 protected:
     virtual RefPtr<Component> BuildChild();
     void Apply(const RefPtr<Element>& child) override;
@@ -124,6 +144,7 @@ protected:
     bool addedToMap_ = false;
     int32_t countRenderNode_ = -1;
     RenderFunction renderFunction_;
+    RemoveFunction removeFunction_ = nullptr;
     PageTransitionFunction pageTransitionFunction_;
 
     ApplyFunction applyFunction_;

@@ -27,6 +27,7 @@ void JSLoadingProgress::Create()
 {
     RefPtr<LoadingProgressComponent> loadingProgressComponent =
         AceType::MakeRefPtr<OHOS::Ace::LoadingProgressComponent>();
+    ViewStackProcessor::GetInstance()->ClaimElementId(loadingProgressComponent);
     ViewStackProcessor::GetInstance()->Push(loadingProgressComponent);
 }
 

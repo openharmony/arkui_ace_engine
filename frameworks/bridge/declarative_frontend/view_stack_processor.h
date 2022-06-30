@@ -41,6 +41,7 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/core/components/popup/popup_component_v2.h"
 #endif
+#include "core/pipeline/base/element_register.h"
 #include "frameworks/core/components/positioned/positioned_component.h"
 #include "frameworks/core/components/shared_transition/shared_transition_component.h"
 #include "frameworks/core/components/touch_listener/touch_listener_component.h"
@@ -120,7 +121,20 @@ public:
     void PopContainer();
 
     // End of Render function, create component tree.
-    RefPtr<Component> Finish();
+    RefPtr<Component> Finish()
+    {
+        return FinishReturnMain().first;
+    }
+
+    // return mainComponent ... outmostWrappingComponent
+    // local Component to Element updates will be performed on these any any Component in-between
+    // returns the same cComponent twice if no wrapping Components.
+    std::pair<RefPtr<Component>, RefPtr<Component>> FinishReturnMain();
+
+    int32_t Size() const
+    {
+        return static_cast<int32_t>(componentsStack_.size());
+    }
 
     // Set key to be used for next custom component on the stack
     void PushKey(const std::string& key);
@@ -175,6 +189,56 @@ public:
         componentsStack_.swap(emptyStack);
     }
 
+    /**
+     * start 'get' access recording
+     * account all get access to given elmtId
+     * next component creation will claim the given elmtId
+     * see ClaimElementId()
+     */
+    void StartGetAccessRecordingFor(int32_t elmtId)
+    {
+        accountGetAccessToElmtId_ = elmtId;
+        reservedElementId_ = elmtId;
+    }
+
+    /**
+     * Use reserved elementId for given component
+     * sets the reserved lemntId to none
+     */
+    void ClaimElementId(RefPtr<Component> component);
+
+    int32_t ClaimElementId()
+    {
+        ACE_DCHECK(
+            (reservedElementId_ != ElementRegister::UndefinedElementId) && "No reserved elmtId, internal error!");
+        const auto result = reservedElementId_;
+        reservedElementId_ = ElementRegister::UndefinedElementId;
+        return result;
+    }
+
+    /**
+     * get the elmtId to which all get access should be accounted
+     * ElementRegister::UndefinedElementId; means no get access recording enabled
+     */
+    ElementIdType GetElmtIdToAccountFor()
+    {
+        return accountGetAccessToElmtId_;
+    }
+    void SetElmtIdToAccountFor(ElementIdType elmtId)
+    {
+        accountGetAccessToElmtId_ = elmtId;
+    }
+
+    /**
+     * inverse of StartGetAccessRecordingFor
+     */
+    void StopGetAccessRecording()
+    {
+        accountGetAccessToElmtId_ = ElementRegister::UndefinedElementId;
+        // normally already set like this, but just in case
+        reservedElementId_ = ElementRegister::UndefinedElementId;
+    }
+
 private:
     ViewStackProcessor();
 
@@ -187,7 +251,8 @@ private:
 
     // Go through the wrappingComponentsMap and wrap the components
     // should be done before pushing to the stack.
-    RefPtr<Component> WrapComponents();
+    // returns pair(outmost wrapping Component, main Component)
+    std::pair<RefPtr<Component>, RefPtr<Component>> WrapComponents();
 
     // Update position and enabled status
     void UpdateTopComponentProps(const RefPtr<Component>& component);
@@ -220,6 +285,12 @@ private:
     static thread_local int32_t composedElementId_;
 
     bool isScoringEnable_ = false;
+
+    // elmtId reserved for next component creation
+    ElementIdType reservedElementId_ = ElementRegister::UndefinedElementId;
+
+    // elmtId to accouunt get access to
+    ElementIdType accountGetAccessToElmtId_ = ElementRegister::UndefinedElementId;
 
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };

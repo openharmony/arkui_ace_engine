@@ -152,6 +152,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
 void JSTextInput::Create(const JSCallbackInfo& info)
 {
     RefPtr<TextFieldComponent> textInputComponent = AceType::MakeRefPtr<TextFieldComponent>();
+    ViewStackProcessor::GetInstance()->ClaimElementId(textInputComponent);
     textInputComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     // default type is text, default action is done.
     textInputComponent->SetTextInputType(TextInputType::TEXT);

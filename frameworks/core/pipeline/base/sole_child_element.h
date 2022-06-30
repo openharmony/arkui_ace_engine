@@ -31,6 +31,11 @@ public:
     static RefPtr<Element> Create();
 
     void PerformBuild() override;
+
+    // specialhandling for noGridItem, ListItem
+    // whose 'wrapping' copmponent are descendants, not ancestors
+    void LocalizedUpdateWithItemComponent(
+        const RefPtr<Component>& innerMostWrappingComponent, const RefPtr<Component>& mainComponent);
 };
 
 } // namespace OHOS::Ace

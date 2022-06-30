@@ -30,6 +30,7 @@ namespace {
 void JSSlidingPanel::Create(const JSCallbackInfo& info)
 {
     auto slidingPanel = AceType::MakeRefPtr<SlidingPanelComponentV2>();
+    ViewStackProcessor::GetInstance()->ClaimElementId(slidingPanel);
     slidingPanel->SetHasDragBar(true);
     ViewStackProcessor::GetInstance()->Push(slidingPanel);
     if (info.Length() > 0 && info[0]->IsBoolean()) {

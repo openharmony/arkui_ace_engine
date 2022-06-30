@@ -25,6 +25,7 @@ void JSShape::Create(const JSCallbackInfo& info)
     std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
     RefPtr<OHOS::Ace::ShapeContainerComponent> component =
         AceType::MakeRefPtr<OHOS::Ace::ShapeContainerComponent>(componentChildren);
+    ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
     JSInteractableView::SetFocusable(true);
     InitBox(info);
