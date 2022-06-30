@@ -2156,12 +2156,26 @@ void WebDelegate::HandleTouchCancel()
     }
 }
 
+void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY)
+{
+    if (nweb_) {
+        nweb_->SendMouseWheelEvent(x, y, deltaX, deltaY);
+    }
+}
+
 bool WebDelegate::OnKeyEvent(int32_t keyCode, int32_t keyAction)
 {
     if (nweb_) {
         return nweb_->SendKeyEvent(keyCode, keyAction);
     }
     return false;
+}
+
+void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action)
+{
+    if (nweb_) {
+        nweb_->SendMouseEvent(x, y, static_cast<int>(button), static_cast<int>(action));
+    }
 }
 
 void WebDelegate::OnFocus()
