@@ -616,10 +616,8 @@ void CameraCallback::OnCameraSizeChange(double width, double height)
 
 void CameraCallback::OnCameraOffsetChange(double x, double y)
 {
-    auto maxWidth = 0;
-    auto maxHeight = 0;
-    bool isIllegalOffset = (int32_t)x + (int32_t)windowSize_.Width() > maxWidth
-                    || (int32_t)y + (int32_t)windowSize_.Height() > maxHeight;
+    bool isIllegalOffset = GreatNotEqual(x + windowSize_.Width(), 0.0)
+                    || GreatNotEqual(y + windowSize_.Height(), 0.0);
     if (isIllegalOffset) {
         LOGE("CameraCallback::OnCameraOffsetChange: valid offset(%{public}lf, %{public}lf).", x, y);
         return;
