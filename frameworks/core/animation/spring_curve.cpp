@@ -23,6 +23,8 @@ constexpr float VELOCITY_THRESHOLD_RATIO = 25.0f;
 constexpr float DEFAULT_START_POSITION = 0.0f;
 constexpr float DEFAULT_END_POSITION = 1.0f;
 constexpr int32_t DEFAULT_ESTIMATE_STEPS = 100;
+constexpr float FRACTION_PARAMETER_MAX = 1.0f;
+constexpr float FRACTION_PARAMETER_MIN = 0.0f;
 
 } // namespace
 
@@ -62,6 +64,10 @@ void SpringCurve::InitEstimateDuration()
 
 float SpringCurve::MoveInternal(float time)
 {
+    if (time < FRACTION_PARAMETER_MIN || time > FRACTION_PARAMETER_MAX) {
+        LOGE("SpringCurve MoveInternal: time is less than 0 or larger than 1, return 1");
+        return FRACTION_PARAMETER_MAX;
+    }
     currentPosition_ = endPosition_ - solution_->Position(time * estimateDuration_);
     currentVelocity_ = solution_->Velocity(time * estimateDuration_);
     if (NearEqual(currentPosition_, endPosition_, valueThreshold_) &&

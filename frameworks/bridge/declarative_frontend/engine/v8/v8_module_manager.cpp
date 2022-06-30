@@ -512,7 +512,12 @@ void ParseCurves(const v8::FunctionCallbackInfo<v8::Value>& args, std::string& c
     double y1 = args[3]->NumberValue(context).ToChecked();
     RefPtr<Curve> curve;
     if (curveString == CURVES_SPRING || curveString == SPRING_CURVE) {
-        curve = AceType::MakeRefPtr<SpringCurve>(x0, y0, x1, y1);
+        if (y0 > 0 &&  x1 > 0 && y1 > 0) {
+            curve = AceType::MakeRefPtr<SpringCurve>(x0, y0, x1, y1);
+        } else {
+            LOGE("Spring curve: the value of the parameters are illegal");
+            return false;
+        }
     } else if (curveString == CURVES_CUBIC_BEZIER || curveString == CUBIC_BEZIER_CURVE) {
         curve = AceType::MakeRefPtr<CubicCurve>(x0, y0, x1, y1);
     } else {
@@ -578,6 +583,10 @@ void CurvesStepsInternal(const v8::FunctionCallbackInfo<v8::Value>& args)
     int32_t stepSize = 0;
     if (argc == STEPS_ARGS_NUMBER) {
         stepSize = args[0]->ToInt32(context).ToLocalChecked()->Value();
+        if (stepSize < 0) {
+            LOGE("Steps curve: When two parameters, the value of the stepSize is illegal");
+            return false;
+        }
         bool isEnd = args[1]->ToBoolean(isolate)->Value();
         if (isEnd) {
             curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::END);
@@ -586,6 +595,10 @@ void CurvesStepsInternal(const v8::FunctionCallbackInfo<v8::Value>& args)
         }
     } else {
         stepSize = args[0]->ToInt32(context).ToLocalChecked()->Value();
+        if (stepSize < 0) {
+            LOGE("Steps curve: When one parameter, the value of the stepSize is illegal");
+            return false;
+        }
         curve = AceType::MakeRefPtr<StepsCurve>(stepSize);
     }
 

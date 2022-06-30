@@ -16,13 +16,22 @@
 #include "core/animation/cubic_curve.h"
 
 namespace OHOS::Ace {
+namespace {
 
+constexpr float FRACTION_PARAMETER_MAX = 1.0f;
+constexpr float FRACTION_PARAMETER_MIN = 0.0f;
+
+}   // namespace
 CubicCurve::CubicCurve(float x0, float y0, float x1, float y1)
     : x0_(x0), y0_(y0), x1_(x1), y1_(y1)
 {}
 
 float CubicCurve::MoveInternal(float time)
 {
+    if (time < FRACTION_PARAMETER_MIN || time > FRACTION_PARAMETER_MAX) {
+        LOGE("CubicCurve MoveInternal: time is less than 0 or larger than 1, return 1");
+        return FRACTION_PARAMETER_MAX;
+    }
     // let P0 = (0,0), P3 = (1,1)
     float start = 0.0f;
     float end = 1.0f;
