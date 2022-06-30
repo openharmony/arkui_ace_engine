@@ -69,6 +69,49 @@ void JSScroll::SetScrollable(int32_t value)
     }
 }
 
+void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollBegin =
+            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
+                (const Dimension& dx, const Dimension& dy) -> ScrollInfo {
+                    ScrollInfo scrollInfo { .dx = dx, .dy = dy };
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollInfo);
+                    auto params = ConvertToJSValues(dx, dy);
+                    auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+                    if (result.IsEmpty()) {
+                        LOGE("Error calling onScrollBegin, result is empty.");
+                        return scrollInfo;
+                    }
+
+                    if (!result->IsObject()) {
+                        LOGE("Error calling onScrollBegin, result is not object.");
+                        return scrollInfo;
+                    }
+
+                    auto resObj = JSRef<JSObject>::Cast(result);
+                    auto dxRemainValue = resObj->GetProperty("dxRemain");
+                    if (dxRemainValue->IsNumber()) {
+                        scrollInfo.dx = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+                    }
+                    auto dyRemainValue = resObj->GetProperty("dyRemain");
+                    if (dyRemainValue->IsNumber()) {
+                        scrollInfo.dy = Dimension(dyRemainValue->ToNumber<float>(), DimensionUnit::VP);
+                    }
+                    return scrollInfo;
+                };
+
+        auto scrollComponent =
+            AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        if (scrollComponent) {
+            if (!scrollComponent->GetScrollPositionController()) {
+                scrollComponent->SetScrollPositionController(AceType::MakeRefPtr<ScrollPositionController>());
+            }
+            scrollComponent->SetOnScrollBegin(onScrollBegin);
+        }
+    }
+}
+
 void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -145,6 +188,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSScroll>::StaticMethod("create", &JSScroll::Create, opt);
     JSClass<JSScroll>::StaticMethod("scrollable", &JSScroll::SetScrollable, opt);
+    JSClass<JSScroll>::StaticMethod("onScrollBegin", &JSScroll::OnScrollBeginCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScroll", &JSScroll::OnScrollCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollEdge", &JSScroll::OnScrollEdgeCallback, opt);
     JSClass<JSScroll>::StaticMethod("onScrollEnd", &JSScroll::OnScrollEndCallback, opt);
