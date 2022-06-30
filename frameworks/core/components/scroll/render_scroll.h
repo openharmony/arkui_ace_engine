@@ -259,6 +259,7 @@ protected:
     double friction_ = 0.0;
     RefPtr<SpringProperty> springProperty_;
     RefPtr<ScrollBarProxy> scrollBarProxy_;
+    ScrollBeginCallback onScrollBegin_;
 
 private:
     bool IsOutOfBoundary();

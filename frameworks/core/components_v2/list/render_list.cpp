@@ -224,11 +224,6 @@ void RenderList::InitScrollable(Axis axis)
         if (scrollBarProxy) {
             scrollBarProxy->StopScrollBarAnimator();
         }
-
-        if (renderList->IsReachStart()) {
-            renderList->listEventFlags_[ListEvents::REACH_START] = true;
-            renderList->HandleListEvent();
-        }
         return renderList->UpdateScrollPosition(renderList->GetMainAxis(delta), source);
     };
     scrollable_ = AceType::MakeRefPtr<Scrollable>(callback, axis);

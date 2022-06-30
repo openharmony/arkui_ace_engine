@@ -33,6 +33,7 @@ void RenderSingleChildScroll::Update(const RefPtr<Component>& component)
     }
 
     enable_ = scroll->GetEnable();
+    onScrollBegin_ = scroll->GetOnScrollBegin();
 
     auto axis = scroll->GetAxisDirection();
     if (axis_ != axis) {
