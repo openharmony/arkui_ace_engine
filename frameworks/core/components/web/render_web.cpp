@@ -22,6 +22,7 @@
 #include "base/log/log.h"
 #include "core/common/manager_interface.h"
 #include "core/components/web/resource/web_resource.h"
+#include "core/event/ace_events.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
@@ -92,8 +93,20 @@ void RenderWeb::Update(const RefPtr<Component>& component)
     MarkNeedLayout();
 }
 
+void RenderWeb::OnMouseEvent(const MouseEvent& event)
+{
+    if (!delegate_) {
+        LOGE("Delegate_ is nullptr");
+        return;
+    }
+
+    auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
+    delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action);
+}
+
 bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
 {
+    OnMouseEvent(event);
     if (!onMouse_) {
         LOGW("RenderWeb::HandleMouseEvent, Mouse Event is null");
         return false;
@@ -288,6 +301,26 @@ void RenderWeb::OnTouchTestHit(const Offset& coordinateOffset, const TouchRestri
     }
     touchRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(touchRecognizer_);
+}
+
+bool RenderWeb::IsAxisScrollable(AxisDirection direction)
+{
+    return true;
+}
+
+void RenderWeb::HandleAxisEvent(const AxisEvent& event)
+{
+    if (!delegate_) {
+        LOGE("Delegate_ is nullptr");
+        return;
+    }
+    auto localLocation = Offset(event.x, event.y) - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
+    delegate_->HandleAxisEvent(localLocation.GetX(), localLocation.GetY(), event.horizontalAxis, event.verticalAxis);
+}
+
+WeakPtr<RenderNode> RenderWeb::CheckAxisNode()
+{
+    return AceType::WeakClaim<RenderNode>(this);
 }
 #endif
 } // namespace OHOS::Ace
