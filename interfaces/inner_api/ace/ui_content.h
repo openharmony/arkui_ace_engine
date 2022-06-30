@@ -88,6 +88,7 @@ public:
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) = 0;
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode) = 0;
+    virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
 
     // Window color
     virtual uint32_t GetBackgroundColor() = 0;

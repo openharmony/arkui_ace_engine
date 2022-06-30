@@ -804,6 +804,12 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
     }, TaskExecutor::TaskType::UI);
 }
 
+void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize)
+{
+    LOGI("HideWindowTitleButton hideSplit: %{public}d, hideMaximize: %{public}d, hideMinimize: %{public}d",
+        hideSplit, hideMaximize, hideMinimize);
+}
+
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
