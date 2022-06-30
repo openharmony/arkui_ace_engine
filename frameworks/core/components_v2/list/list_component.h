@@ -199,9 +199,20 @@ public:
         return listItemAlign_;
     }
 
+    void SetOnScrollBegin(const ScrollBeginCallback& onScrollBegin)
+    {
+        onScrollBegin_ = onScrollBegin;
+    }
+
+    const ScrollBeginCallback& GetOnScrollBegin() const
+    {
+        return onScrollBegin_;
+    }
+
 private:
     std::unique_ptr<ItemDivider> itemDivider_;
 
+    ScrollBeginCallback onScrollBegin_;
     OnItemDragStartFunc onItemDragStartId_;
     OnItemDragEnterFunc onItemDragEnterId_;
     OnItemDragMoveFunc onItemDragMoveId_;

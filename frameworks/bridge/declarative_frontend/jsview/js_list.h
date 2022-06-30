@@ -35,6 +35,7 @@ public:
     static void ItemDeleteCallback(const JSCallbackInfo& args);
     static void ItemMoveCallback(const JSCallbackInfo& args);
     static void ScrollIndexCallback(const JSCallbackInfo& args);
+    static void ScrollBeginCallback(const JSCallbackInfo& args);
 
     static void SetDivider(const JSCallbackInfo& args);
     static void SetDirection(int32_t direction);

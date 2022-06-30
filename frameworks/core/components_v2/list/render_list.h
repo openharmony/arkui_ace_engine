@@ -469,6 +469,7 @@ private:
     void MultiSelectAllWhenCtrlA();
 
     void ApplyRestoreInfo();
+    void InitScrollable(Axis axis);
 
     bool hasDragItem_ = false;
     std::map<ListEvents, bool> listEventFlags_;
