@@ -198,6 +198,15 @@ public:
         tabIndex_ = tabIndex;
     }
 
+    bool IsEnabled() const
+    {
+        return enabled_;
+    }
+    void SetEnabled(bool enabled)
+    {
+        enabled_ = enabled;
+    }
+
 private:
     EventMarker onClickId_;
     EventMarker onFocusId_;
@@ -214,6 +223,7 @@ private:
     bool focusable_ { false };
     bool show_ { true };
     bool deleteDisabled_ { false };
+    bool enabled_ { true };
 
     std::function<void(int)> onFocusMove_;
     std::function<void()> onFocus_;

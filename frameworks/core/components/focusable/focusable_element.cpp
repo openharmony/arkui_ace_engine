@@ -41,6 +41,9 @@ void FocusableElement::Update()
     // Save show
     SetShow(focusableComponent->CanShow());
 
+    // Save enabled
+    SetEnabled(focusableComponent->IsEnabled());
+
     // Save styles
     boxStyle_ = focusableComponent->GetBoxStyle();
     focusedBoxStyle_ = focusableComponent->GetFocusedBoxStyle();

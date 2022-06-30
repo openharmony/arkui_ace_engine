@@ -1257,17 +1257,13 @@ void JSViewAbstract::JsEnabled(const JSCallbackInfo& info)
         return;
     }
 
+    bool enabled = info[0]->ToBoolean();
     auto rootComponent = ViewStackProcessor::GetInstance()->GetRootComponent();
-    rootComponent->SetDisabledStatus(!(info[0]->ToBoolean()));
+    rootComponent->SetDisabledStatus(!enabled);
 
-    if (!(info[0]->ToBoolean())) {
-        auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        if (!focusComponent) {
-            LOGE("The focusComponent is null");
-            return;
-        } else {
-            focusComponent->SetFocusable(false);
-        }
+    auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(!enabled);
+    if (focusComponent) {
+        focusComponent->SetEnabled(enabled);
     }
 }
 
