@@ -15,7 +15,6 @@
 
 #include "core/components/swiper/render_swiper.h"
 
-
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
