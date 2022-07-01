@@ -472,6 +472,7 @@ public:
             visible_ = visible;
             AddDirtyRenderBoundaryNode();
             OnVisibleChanged();
+            CheckIfNeedUpdateTouchRect();
             if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
                 MarkParentNeedRender();
             }
