@@ -48,8 +48,8 @@ ohos_unittest("PluginCallBackClientTest") {
   configs = [ "$ace_root:ace_test_config" ]
 
   deps = [
-    "$aafwk_inner_api_path/ability_manager:ability_manager",
-    "$aafwk_services_path/abilitymgr:abilityms",
+    "$ability_runtime_inner_api_path/ability_manager:ability_manager",
+    "$ability_runtime_services_path/abilitymgr:abilityms",
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
@@ -75,8 +75,8 @@ ohos_unittest("PluginComponentTest") {
   configs = [ "$ace_root:ace_test_config" ]
 
   deps = [
-    "$aafwk_inner_api_path/ability_manager:ability_manager",
-    "$aafwk_services_path/abilitymgr:abilityms",
+    "$ability_runtime_inner_api_path/ability_manager:ability_manager",
+    "$ability_runtime_services_path/abilitymgr:abilityms",
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
@@ -102,8 +102,8 @@ ohos_unittest("PluginElementTest") {
   configs = [ "$ace_root:ace_test_config" ]
 
   deps = [
-    "$aafwk_inner_api_path/ability_manager:ability_manager",
-    "$aafwk_services_path/abilitymgr:abilityms",
+    "$ability_runtime_inner_api_path/ability_manager:ability_manager",
+    "$ability_runtime_services_path/abilitymgr:abilityms",
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
@@ -131,8 +131,8 @@ ohos_unittest("PluginManagerDelegateTest") {
   configs = [ "$ace_root:ace_test_config" ]
 
   deps = [
-    "$aafwk_inner_api_path/ability_manager:ability_manager",
-    "$aafwk_services_path/abilitymgr:abilityms",
+    "$ability_runtime_inner_api_path/ability_manager:ability_manager",
+    "$ability_runtime_services_path/abilitymgr:abilityms",
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",

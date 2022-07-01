@@ -24,20 +24,20 @@ template("js_pa_engine_qjs") {
     configs = [ "$ace_root:ace_config" ]
 
     include_dirs = [
-      "$aafwk_inner_api_path/ability_manager/include",
-      "$aafwk_path/interfaces/kits/native/ability/native",
-      "$aafwk_services_path/common/include",
-      "$aafwk_services_path/abilitymgr/include",
+      "$ability_runtime_inner_api_path/ability_manager/include",
+      "$ability_runtime_path/interfaces/kits/native/ability/native",
+      "$ability_runtime_services_path/common/include",
+      "$ability_runtime_services_path/abilitymgr/include",
       "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/dataability/include",
       "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/rdb/include",
-      "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/context",
-      "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common",
+      "$ability_runtime_path/frameworks/js/napi/aafwk/context",
+      "$ability_runtime_path/frameworks/js/napi/aafwk/inner/napi_common",
       "//foundation/arkui/ace_engine/adapter/ohos/entrance/pa_engine/engine/common",
     ]
     deps = [
-      "$aafwk_path/frameworks/native/ability/native:abilitykit_native",
-      "$aafwk_path/frameworks/native/appkit:appkit_native",
-      "//foundation/ability/ability_runtime/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
+      "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
+      "$ability_runtime_path/frameworks/native/appkit:appkit_native",
+      "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
       "//foundation/arkui/napi:ace_napi",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",

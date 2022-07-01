@@ -33,7 +33,7 @@ ohos_unittest("PluginManagerTest") {
   configs = [ "$ace_root:ace_test_config" ]
 
   deps = [
-    "$aafwk_path/frameworks/native/ability/native:abilitykit_native",
+    "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
   ]
