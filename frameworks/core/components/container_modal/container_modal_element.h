@@ -34,6 +34,7 @@ public:
     void BlurWindow(bool isBlur);
     void WindowFocus(bool isFocus);
     void SetAppBgColor(const Color& color);
+    void SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
     void Update() override;
     void PerformBuild() override;
 

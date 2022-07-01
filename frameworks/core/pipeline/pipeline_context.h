@@ -497,6 +497,8 @@ public:
 
     void BlurWindowWithDrag(bool isBlur);
 
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
+
     RefPtr<StageElement> GetStageElement() const;
 
     RefPtr<ComposedElement> GetComposedElementById(const ComposeId& id);

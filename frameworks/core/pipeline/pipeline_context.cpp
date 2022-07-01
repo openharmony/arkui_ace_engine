@@ -375,6 +375,22 @@ void PipelineContext::BlurWindowWithDrag(bool isBlur)
     }
 }
 
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        LOGW("Window modal is not container.");
+        return;
+    }
+    if (!rootElement_) {
+        LOGE("rootElement_ is null.");
+        return;
+    }
+    auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+    if (containerModal) {
+        containerModal->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize);
+    }
+}
+
 RefPtr<StageElement> PipelineContext::GetStageElement() const
 {
     CHECK_RUN_ON(UI);
@@ -2954,7 +2970,7 @@ void PipelineContext::WindowFocus(bool isFocus)
         return;
     }
     if (!rootElement_) {
-        LOGW("WindowFocus failed, rootElement_ is null.");
+        LOGE("WindowFocus failed, rootElement_ is null.");
         return;
     }
     auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
