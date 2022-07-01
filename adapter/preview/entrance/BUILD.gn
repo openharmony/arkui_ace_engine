@@ -56,13 +56,13 @@ template("preview_entrance_source") {
       if (platform == "windows") {
         defines -= [ "UNICODE" ]
         include_dirs = [ "//utils/native/base/include" ]
-        deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
+        deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win" ]
         cflags_cc += [ "-DNONLS" ]
       }
 
       if (platform == "mac") {
         include_dirs = [ "//utils/native/base/include" ]
-        deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
+        deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac" ]
       }
     }
   }

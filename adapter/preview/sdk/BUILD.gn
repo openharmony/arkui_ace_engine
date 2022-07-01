@@ -210,9 +210,13 @@ if (is_standard_system) {
 
   ohos_copy("copy_resource_dynamic_library_standard") {
     if (host_os == "mac") {
-      deps = [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
+      deps = [
+        "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
+      ]
     } else {
-      deps = [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
+      deps = [
+        "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
+      ]
     }
 
     sources = [ resource_manager_library ]
