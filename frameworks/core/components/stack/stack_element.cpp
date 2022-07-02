@@ -80,7 +80,15 @@ void StackElement::PushPanel(const RefPtr<Component>& newComponent, bool disable
 
 bool StackElement::HasOverlayChild()
 {
-    return children_.size() > 1;
+    bool hasMultiChild = children_.size() > 1;
+    // avoid pop toast to protect page not empty.
+    for (const auto& child: children_) {
+        if (!std::none_of(toastStack_.begin(), toastStack_.end(),
+            [child](const ToastInfo& toast) { return toast.child == child; })) {
+            return false;
+        }
+    }
+    return hasMultiChild;
 }
 
 void StackElement::PopPanel()
