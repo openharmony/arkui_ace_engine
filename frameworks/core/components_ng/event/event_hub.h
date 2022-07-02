@@ -34,7 +34,7 @@ public:
     const RefPtr<GestureEventHub>& GetOrCreateGestureEventHub()
     {
         if (!gestureEventHub_) {
-            gestureEventHub_ = MakeRefPtr<GestureEventHub>(host_);
+            gestureEventHub_ = MakeRefPtr<GestureEventHub>(WeakClaim(this));
         }
         return gestureEventHub_;
     }
@@ -45,6 +45,17 @@ public:
     }
 
     void AttachHost(const WeakPtr<FrameNode>& host);
+
+    RefPtr<FrameNode> GetFrameNode() const;
+
+    GetEventTargetImpl CreateGetEventTargetImpl() const;
+
+    void OnContextAttached()
+    {
+        if (gestureEventHub_) {
+            gestureEventHub_->OnContextAttached();
+        }
+    }
 
 private:
     WeakPtr<FrameNode> host_;

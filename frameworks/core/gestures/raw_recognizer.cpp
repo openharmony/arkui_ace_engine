@@ -132,6 +132,7 @@ TouchEventInfo RawRecognizer::CreateTouchEventInfo(
             touchLocationInfo.SetForce(touchPoint.force);
             info.AddTouchLocationInfo(std::move(touchLocationInfo));
         }
+        info.SetTarget(GetEventTarget().value_or(EventTarget()));
         return info;
     }
     if (!isFirstTrack_) {
@@ -155,6 +156,7 @@ TouchEventInfo RawRecognizer::CreateTouchEventInfo(
         .SetSize(point.size);
     currentTouchLocationInfo.SetForce(point.force);
     info.AddTouchLocationInfo(std::move(currentTouchLocationInfo));
+    info.SetTarget(GetEventTarget().value_or(EventTarget()));
     return info;
 }
 

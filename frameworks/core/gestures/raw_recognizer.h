@@ -22,39 +22,6 @@
 
 namespace OHOS::Ace {
 
-class TouchEventInfo : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(TouchEventInfo, BaseEventInfo);
-
-public:
-    explicit TouchEventInfo(const std::string& type) : BaseEventInfo(type) {}
-    ~TouchEventInfo() override = default;
-
-    void AddTouchLocationInfo(TouchLocationInfo&& info)
-    {
-        touches_.emplace_back(info);
-    }
-    void AddChangedTouchLocationInfo(TouchLocationInfo&& info)
-    {
-        changedTouches_.emplace_back(info);
-    }
-
-    const std::list<TouchLocationInfo>& GetTouches() const
-    {
-        return touches_;
-    }
-    const std::list<TouchLocationInfo>& GetChangedTouches() const
-    {
-        return changedTouches_;
-    }
-
-private:
-    std::list<TouchLocationInfo> touches_;
-    std::list<TouchLocationInfo> changedTouches_;
-};
-
-using OnTouchEventCallback = std::function<void(const TouchEventInfo&)>;
-using CatchTouchEventCallback = std::function<void()>;
-
 namespace EventAction {
 constexpr uint32_t SIZE = 2;
 constexpr uint32_t ON = 0;

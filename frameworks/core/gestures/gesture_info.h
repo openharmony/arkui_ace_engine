@@ -1,17 +1,17 @@
 /*
-* Copyright (c) 2021-2022 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_INFO_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_INFO_H
@@ -29,9 +29,9 @@
 #include "base/utils/event_callback.h"
 #include "base/utils/macros.h"
 #include "base/utils/type_definition.h"
+#include "core/event/ace_events.h"
 #include "core/gestures/velocity.h"
 #include "core/gestures/velocity_tracker.h"
-#include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
 
@@ -178,6 +178,7 @@ public:
     {
         onPanDistanceIds_.emplace(onPanDistanceId.GetId(), onPanDistanceId);
     }
+
 private:
     PanDirection direction_;
     double distance_ = DEFAULT_PAN_DISTANCE;
@@ -218,6 +219,7 @@ public:
     {
         return plainText_;
     }
+
 private:
     std::string plainText_ = "";
 };
@@ -574,6 +576,16 @@ public:
     void SetGestureMask(GestureMask gestureMask)
     {
         gestureMask_ = gestureMask;
+    }
+
+    GesturePriority GetPriority() const
+    {
+        return priority_;
+    }
+
+    GestureMask GetGestureMask() const
+    {
+        return gestureMask_;
     }
 
     virtual RefPtr<GestureRecognizer> CreateRecognizer(WeakPtr<PipelineContext> context) = 0;

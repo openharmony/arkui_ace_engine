@@ -413,6 +413,7 @@ void SlideRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         }
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
+        info.SetTarget(GetEventTarget().value_or(EventTarget()));
         (*callback)(info);
     }
 }

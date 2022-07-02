@@ -346,11 +346,15 @@ private:
     TouchType touchType_ = TouchType::UNKNOWN;
 };
 
+using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
+
 class ACE_EXPORT TouchEventTarget : public virtual AceType {
     DECLARE_ACE_TYPE(TouchEventTarget, AceType);
 
 public:
+    // if return false means need to stop event dispatch.
     virtual bool DispatchEvent(const TouchEvent& point) = 0;
+    // if return false means need to stop event bubbling.
     virtual bool HandleEvent(const TouchEvent& point) = 0;
     virtual bool HandleEvent(const AxisEvent& event)
     {
@@ -360,6 +364,31 @@ public:
     void SetTouchRestrict(const TouchRestrict& touchRestrict)
     {
         touchRestrict_ = touchRestrict;
+    }
+
+    void SetGetEventTargetImpl(const GetEventTargetImpl& getEventTargetImpl)
+    {
+        getEventTargetImpl_ = getEventTargetImpl;
+    }
+
+    std::optional<EventTarget> GetEventTarget() const
+    {
+        if (getEventTargetImpl_) {
+            return getEventTargetImpl_();
+        }
+        return std::nullopt;
+    }
+
+    // Coordinate offset is used to calculate the local location of the touch point in the render node.
+    void SetCoordinateOffset(const Offset& coordinateOffset)
+    {
+        coordinateOffset_ = coordinateOffset;
+    }
+
+    // Gets the coordinate offset to calculate the local location of the touch point by manually.
+    const Offset& GetCoordinateOffset() const
+    {
+        return coordinateOffset_;
     }
 
     void SetSubPipelineGlobalOffset(const Offset& subPipelineGlobalOffset, float viewScale)
@@ -372,8 +401,8 @@ public:
     {
 #ifdef OHOS_STANDARD_SYSTEM
         if (!subPipelineGlobalOffset_.IsZero()) {
-            auto multiContainerPoint = point.UpdateScalePoint(viewScale_,
-                subPipelineGlobalOffset_.GetX(), subPipelineGlobalOffset_.GetY(), point.id);
+            auto multiContainerPoint = point.UpdateScalePoint(
+                viewScale_, subPipelineGlobalOffset_.GetX(), subPipelineGlobalOffset_.GetY(), point.id);
             return DispatchEvent(multiContainerPoint);
         }
 #endif
@@ -384,8 +413,8 @@ public:
     {
 #ifdef OHOS_STANDARD_SYSTEM
         if (!subPipelineGlobalOffset_.IsZero()) {
-            auto multiContainerPoint = point.UpdateScalePoint(viewScale_,
-                subPipelineGlobalOffset_.GetX(), subPipelineGlobalOffset_.GetY(), point.id);
+            auto multiContainerPoint = point.UpdateScalePoint(
+                viewScale_, subPipelineGlobalOffset_.GetX(), subPipelineGlobalOffset_.GetY(), point.id);
             return HandleEvent(multiContainerPoint);
         }
 #endif
@@ -393,12 +422,48 @@ public:
     }
 
 protected:
+    Offset coordinateOffset_;
+    GetEventTargetImpl getEventTargetImpl_;
     TouchRestrict touchRestrict_ { TouchRestrict::NONE };
     Offset subPipelineGlobalOffset_;
     float viewScale_ = 1.0f;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;
+
+class TouchEventInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(TouchEventInfo, BaseEventInfo);
+
+public:
+    explicit TouchEventInfo(const std::string& type) : BaseEventInfo(type) {}
+    ~TouchEventInfo() override = default;
+
+    void AddTouchLocationInfo(TouchLocationInfo&& info)
+    {
+        touches_.emplace_back(info);
+    }
+    void AddChangedTouchLocationInfo(TouchLocationInfo&& info)
+    {
+        changedTouches_.emplace_back(info);
+    }
+
+    const std::list<TouchLocationInfo>& GetTouches() const
+    {
+        return touches_;
+    }
+    const std::list<TouchLocationInfo>& GetChangedTouches() const
+    {
+        return changedTouches_;
+    }
+
+private:
+    std::list<TouchLocationInfo> touches_;
+    std::list<TouchLocationInfo> changedTouches_;
+};
+
+using TouchEventFunc = std::function<void(TouchEventInfo&)>;
+using OnTouchEventCallback = std::function<void(const TouchEventInfo&)>;
+using CatchTouchEventCallback = std::function<void()>;
 
 } // namespace OHOS::Ace
 

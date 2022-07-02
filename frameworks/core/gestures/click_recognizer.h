@@ -38,12 +38,13 @@ class ClickRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(ClickRecognizer, MultiFingersRecognizer);
 
 public:
-    ClickRecognizer() {}
+    ClickRecognizer() = default;
     ClickRecognizer(const WeakPtr<PipelineContext>& context, int32_t fingers, int32_t count)
         : count_(count), context_(context)
     {
         fingers_ = fingers;
     }
+    explicit ClickRecognizer(const WeakPtr<PipelineContext>& context) : context_(context) {}
     ~ClickRecognizer() override = default;
 
     void OnAccepted() override;

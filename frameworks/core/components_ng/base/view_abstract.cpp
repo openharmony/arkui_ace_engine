@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/view_abstract.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/modifier/layout/layout_weight_modifier.h"
 #include "core/components_ng/modifier/layout/padding_modifier.h"
@@ -52,6 +53,20 @@ void ViewAbstract::SetPadding(const CalcLength& value)
 void ViewAbstract::SetPadding(const PaddingProperty& value)
 {
     ViewStackProcessor::GetInstance()->PushLayoutTask(PaddingModifier(value));
+}
+
+void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetClickEvent(std::move(clickEventFunc));
+}
+
+void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTouchEvent(std::move(touchEventFunc));
 }
 
 void ViewAbstract::Pop()

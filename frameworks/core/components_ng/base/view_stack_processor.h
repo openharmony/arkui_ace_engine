@@ -26,6 +26,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/modifier/modify_task.h"
+#include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -44,6 +45,25 @@ public:
             return nullptr;
         }
         return AceType::DynamicCast<Pattern>(frameNode->GetPattern());
+    }
+
+    template<typename EventHubType>
+    RefPtr<EventHubType> GetMainFrameNodeEventHub() const
+    {
+        auto frameNode = GetMainFrameNode();
+        if (!frameNode) {
+            return nullptr;
+        }
+        return frameNode->GetEventHub<EventHubType>();
+    }
+
+    RefPtr<GestureEventHub> GetMainFrameNodeGestureEventHub() const
+    {
+        auto frameNode = GetMainFrameNode();
+        if (!frameNode) {
+            return nullptr;
+        }
+        return frameNode->GetOrCreateGestureEventHub();
     }
 
     RefPtr<FrameNode> GetMainFrameNode() const;
@@ -109,6 +129,19 @@ public:
         elementsStack_.swap(emptyStack);
     }
 
+    RefPtr<GestureProcessor> GetOrCreateGestureProcessor()
+    {
+        if (!gestureStack_) {
+            gestureStack_ = AceType::MakeRefPtr<GestureProcessor>();
+        }
+        return gestureStack_;
+    }
+
+    void ResetGestureProcessor()
+    {
+        return gestureStack_.Reset();
+    }
+
 private:
     ViewStackProcessor();
 
@@ -126,6 +159,8 @@ private:
 
     // modifier task
     std::stack<RefPtr<StateModifyTask>> modifyTaskStack_;
+
+    RefPtr<GestureProcessor> gestureStack_;
 
     std::string viewKey_;
     std::stack<size_t> keyStack_;

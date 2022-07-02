@@ -20,6 +20,7 @@
 #include <limits>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 
 namespace OHOS::Ace {
@@ -31,6 +32,10 @@ public:
     DimensionOffset(Dimension deltaX, Dimension deltaY) : deltaX_(deltaX), deltaY_(deltaY) {}
     DimensionOffset(Offset offset) : deltaX_(Dimension(offset.GetX(), DimensionUnit::PX)),
         deltaY_(Dimension(offset.GetY(), DimensionUnit::PX)) {}
+
+    explicit DimensionOffset(const NG::OffsetF& offset)
+        : deltaX_(Dimension(offset.GetX())), deltaY_(Dimension(offset.GetY()))
+    {}
 
     const Dimension& GetX() const
     {

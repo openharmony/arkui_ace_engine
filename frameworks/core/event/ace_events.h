@@ -68,7 +68,7 @@ public:
     {
         return target_;
     }
-    EventTarget& GetTargetWichModify()
+    EventTarget& GetTargetWithModify()
     {
         return target_;
     }

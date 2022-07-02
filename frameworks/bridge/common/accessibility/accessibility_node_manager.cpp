@@ -692,7 +692,7 @@ void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
     auto marginRight = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_RIGHT).ConvertToPx();
     auto marginTop = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_TOP).ConvertToPx();
     auto marginBottom = inspector->GetMargin(AnimatableType::PROPERTY_MARGIN_BOTTOM).ConvertToPx();
-    auto& target = info.GetTargetWichModify();
+    auto& target = info.GetTargetWithModify();
     auto LocalOffset = rectInLocal.GetOffset();
     target.area.SetOffset(DimensionOffset(Offset(LocalOffset.GetX() + marginLeft, LocalOffset.GetY() + marginTop)));
     auto globalOffset = rectInGlobal.GetOffset();
