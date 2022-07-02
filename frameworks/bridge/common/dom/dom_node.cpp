@@ -1527,7 +1527,7 @@ void DOMNode::UpdateBoxComponent()
             backDecoration->SetGradient(backgroundStyle.gradient);
         }
         if (backgroundStyle.IsValid() && backgroundStyle.gradientBorderImage.IsValid()) {
-            backDecoration->SetGradientBorderImage(backgroundStyle.gradientBorderImage);
+            backDecoration->SetBorderImageGradient(backgroundStyle.gradientBorderImage);
         }
 
         if (declaration_->HasShadowStyle()) {

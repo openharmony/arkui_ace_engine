@@ -22,6 +22,7 @@
 #include "core/animation/animation_pub.h"
 #include "core/animation/shared_transition_effect.h"
 #include "core/components/common/properties/border.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"

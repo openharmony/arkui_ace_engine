@@ -537,7 +537,7 @@ void RenderBox::UpdateBackDecoration(const RefPtr<Decoration>& newDecoration)
             renderBox->OnAnimationCallback();
         }
     });
-    backDecoration_->SetGradientBorderImage(newDecoration->GetGradientBorderImage());
+    backDecoration_->SetBorderImageGradient(newDecoration->GetBorderImageGradient());
     backDecoration_->SetHasBorderImageSource(newDecoration->GetHasBorderImageSource());
     backDecoration_->SetHasBorderImageSlice(newDecoration->GetHasBorderImageSlice());
     backDecoration_->SetHasBorderImageWidth(newDecoration->GetHasBorderImageWidth());

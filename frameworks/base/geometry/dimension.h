@@ -65,7 +65,7 @@ enum class DimensionUnit {
  * Dimension contains a value and an unit to represent different
  * scales in one class.
  */
-class Dimension {
+class ACE_EXPORT Dimension {
 public:
     constexpr Dimension() = default;
     ~Dimension() = default;

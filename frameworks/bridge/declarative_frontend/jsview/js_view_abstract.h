@@ -112,6 +112,16 @@ public:
     static void ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decoration> decoration = nullptr);
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoration> decoration = nullptr);
+    static void JsBorderImage(const JSCallbackInfo& info);
+    static void ParseBorderImageSource(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage,
+        RefPtr<Decoration>& boxDecoration);
+    static void ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
+    static void ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
+    static void ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
+    static void ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
+    static void ParseBorderImageDimension(const JSRef<JSVal>& args, Dimension& leftDimension, Dimension& rightDimension,
+        Dimension& topDimension, Dimension& bottomDimension);
+    static void ParseBorderImageLinearGradient(const JSRef<JSVal>& args, RefPtr<Decoration>& backDecoration);
     static void JsBlur(const JSCallbackInfo& info);
     static void JsColorBlend(const JSCallbackInfo& info);
     static void JsBackdropBlur(const JSCallbackInfo& info);

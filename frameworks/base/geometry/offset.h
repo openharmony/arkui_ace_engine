@@ -131,6 +131,13 @@ public:
         return *this;
     }
 
+    Offset& operator-=(const Offset& offset)
+    {
+        deltaX_ -= offset.deltaX_;
+        deltaY_ -= offset.deltaY_;
+        return *this;
+    }
+
     bool operator==(const Offset& offset) const
     {
         return NearEqual(deltaX_, offset.deltaX_) && NearEqual(deltaY_, offset.deltaY_);

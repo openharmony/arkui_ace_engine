@@ -124,6 +124,7 @@ public:
     flutter::RRect GetBoxRRect(const Offset& offset, const Border& border, double shrinkFactor, bool isRound);
 
 protected:
+    void PaintBorderImage(SkPaint& paint, const Offset& offset, SkCanvas* canvas, const sk_sp<SkImage>& image);
     void PaintColorAndImage(const Offset& offset, SkCanvas* canvas, SkPaint& paint, RenderContext& context);
 
     void PaintAllEqualBorder(const flutter::RRect& rrect, const Border& border, SkCanvas* canvas, SkPaint& paint);
@@ -151,11 +152,6 @@ protected:
     double SliceNormalizePercentToPx(const Dimension& dimension, bool isVertical) const;
     double WidthNormalizePercentToPx(const Dimension& dimension, bool isVertical) const;
     double OutsetNormalizePercentToPx(const Dimension& dimension, bool isVertical) const;
-    void PaintBorderImageFourCorner(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
-    void PaintBorderImageFourStretch(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
-    void PaintBorderImageFourRound(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
-    void PaintBorderImageFourSpace(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
-    void PaintBorderImageFourRepeat(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
 
     Size GetLayoutSize() const
     {
