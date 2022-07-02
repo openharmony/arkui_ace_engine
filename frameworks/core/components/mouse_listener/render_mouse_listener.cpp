@@ -57,9 +57,12 @@ void RenderMouseListener::UpdateTouchRect()
     const auto& children = GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-        auto childTouchRectList = child->GetTouchRectList();
-        touchRectList_ = childTouchRectList;
-        SetTouchRectList(touchRectList_);
+        for (auto& rect : child->GetTouchRectList()) {
+            // unified coordinate system
+            Rect newRect = rect;
+            newRect.SetOffset(rect.GetOffset() + GetPaintRect().GetOffset());
+            touchRectList_.emplace_back(newRect);
+        }
     }
 }
 
