@@ -73,6 +73,9 @@ void SubwindowOhos::InitContainer()
             LOGI("create window error return");
             return;
         }
+
+        // This is for window dump tree, set the default background color #00000000.
+        window_->SetBackgroundColor("#00000000");
     }
     std::string url = "";
     window_->SetUIContent(url, nullptr, nullptr, false);
@@ -240,6 +243,39 @@ RefPtr<StackElement> SubwindowOhos::GetStack()
         return nullptr;
     }
     return context->GetLastStack();
+}
+
+void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects)
+{
+    LOGI("Set hot areas for window.");
+    if (!window_) {
+        LOGE("Set hot areas failed, window is null");
+        return;
+    }
+
+    std::vector<Rosen::Rect> hotAreas;
+    Rosen::Rect rosenRect;
+    for (const auto& rect : rects) {
+        RectConverter(rect, rosenRect);
+        hotAreas.emplace_back(rosenRect);
+    }
+
+    OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreas);
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        LOGE("Set hot areas failed with errCode: %{public}d", static_cast<int32_t>(ret));
+        return;
+    }
+    LOGI("Set hot areas successfully.");
+}
+
+void SubwindowOhos::RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
+{
+    rosenRect.posX_ = static_cast<int>(rect.GetOffset().GetX());
+    rosenRect.posY_ = static_cast<int>(rect.GetOffset().GetY());
+    rosenRect.width_ = static_cast<uint32_t>(rect.GetSize().Width());
+    rosenRect.height_ = static_cast<uint32_t>(rect.GetSize().Height());
+    LOGI("Convert rect to rosenRect, x is %{public}d, y is %{public}d, width is %{public}d, height is %{public}d",
+        rosenRect.posX_, rosenRect.posY_, rosenRect.width_, rosenRect.height_);
 }
 
 } // namespace OHOS::Ace

@@ -183,4 +183,12 @@ void SubwindowManager::ClearMenu()
     }
 }
 
+void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects)
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->SetHotAreas(rects);
+    }
+}
+
 } // namespace OHOS::Ace

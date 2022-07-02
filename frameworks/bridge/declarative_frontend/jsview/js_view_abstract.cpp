@@ -3753,7 +3753,7 @@ void JSViewAbstract::JsKey(const std::string& key)
     if (component) {
         component->SetInspectorKey(key);
     }
-    
+
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     if (flexItem) {
         flexItem->SetInspectorKey(key);
@@ -3856,6 +3856,48 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
     menuComponent->SetIsContextMenu(true);
 #endif
+
+    // Check the parameters
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
+        auto builder = menuObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            LOGE("builder param is not a function.");
+            return;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        if (!builderFunc) {
+            LOGE("builder function is null.");
+            return;
+        }
+
+        // use another VSP instance while executing the builder function
+        ScopedViewStackProcessor builderViewStackProcessor;
+        {
+            ACE_SCORING_EVENT("contextMenu.builder");
+            builderFunc->Execute();
+        }
+        auto customComponent = ViewStackProcessor::GetInstance()->Finish();
+        if (!customComponent) {
+            LOGE("Custom component is null.");
+            return;
+        }
+
+        // Set the theme
+        auto menuTheme = GetTheme<SelectTheme>();
+        menuComponent->SetTheme(menuTheme);
+        auto optionTheme = GetTheme<SelectTheme>();
+        auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+
+        // Set the custom component
+        optionComponent->SetCustomComponent(customComponent);
+        menuComponent->ClearOptions();
+        menuComponent->AppendOption(optionComponent);
+        LOGI("Context menu is added.");
+    } else {
+        LOGE("Builder param is invalid, not an object.");
+        return;
+    }
     int32_t responseType = static_cast<int32_t>(ResponseType::LONGPRESS);
     if (info.Length() == 2 && info[1]->IsNumber()) {
         responseType = info[1]->ToNumber<int32_t>();
@@ -3867,11 +3909,13 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         box->SetOnMouseId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](MouseInfo& info) {
             auto refPtr = weak.Upgrade();
             if (!refPtr) {
+                LOGE("Menu component is null.");
                 return;
             }
             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                 auto showMenu = refPtr->GetTargetCallback();
                 info.SetStopPropagation(true);
+                LOGI("Context menu is triggered, type is right click.");
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
                 showMenu("", info.GetScreenLocation());
 #else
@@ -3886,8 +3930,10 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         longGesture->SetOnActionId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](const GestureEvent& info) {
             auto refPtr = weak.Upgrade();
             if (!refPtr) {
+                LOGE("Menu component is null.");
                 return;
             }
+            LOGI("Context menu is triggered, type is long press.");
             auto showMenu = refPtr->GetTargetCallback();
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
             showMenu("", info.GetScreenLocation());
@@ -3898,43 +3944,6 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         box->SetOnLongPress(longGesture);
     } else {
         LOGE("The arg responseType is invalid.");
-        return;
-    }
-    auto menuTheme = GetTheme<SelectTheme>();
-    menuComponent->SetTheme(menuTheme);
-
-    if (info[0]->IsObject()) {
-        JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
-
-        auto builder = menuObj->GetProperty("builder");
-        if (!builder->IsFunction()) {
-            LOGE("builder param is not a function.");
-            return;
-        }
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-        if (!builderFunc) {
-            LOGE("builder function is null.");
-            return;
-        }
-        // use another VSP instance while executing the builder function
-        ScopedViewStackProcessor builderViewStackProcessor;
-        {
-            ACE_SCORING_EVENT("contextMenu.builder");
-            builderFunc->Execute();
-        }
-        auto customComponent = ViewStackProcessor::GetInstance()->Finish();
-        if (!customComponent) {
-            LOGE("Custom component is null.");
-            return;
-        }
-
-        auto optionTheme = GetTheme<SelectTheme>();
-        auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-        optionComponent->SetCustomComponent(customComponent);
-        menuComponent->ClearOptions();
-        menuComponent->AppendOption(optionComponent);
-    } else {
-        LOGE("Param is invalid");
         return;
     }
 }

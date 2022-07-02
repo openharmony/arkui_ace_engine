@@ -183,6 +183,21 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class TouchOutsideListener : public OHOS::Rosen::ITouchOutsideListener {
+public:
+    explicit TouchOutsideListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~TouchOutsideListener() = default;
+
+    void OnTouchOutside() const
+    {
+        LOGI("window is touching outside. instance id is %{public}d", instanceId_);
+        SubwindowManager::GetInstance()->ClearMenu();
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
 {
     if (context == nullptr) {
@@ -907,6 +922,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window)
         false, true);
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
+    touchOutsideListener_ = new TouchOutsideListener(instanceId_);
+    window_->RegisterTouchOutsideListener(touchOutsideListener_);
 }
 
 } // namespace OHOS::Ace

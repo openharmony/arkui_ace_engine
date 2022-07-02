@@ -62,6 +62,8 @@ public:
     void CloseMenu();
     void ClearMenu();
 
+    void SetHotAreas(const std::vector<Rect>& rects);
+
 private:
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;

@@ -15,6 +15,7 @@
 
 #include "core/components/select_popup/render_select_popup.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/option/render_option.h"
@@ -69,6 +70,15 @@ void RenderSelectPopup::OnPaintFinish()
     node->SetCheckableState(false);
     node->SetClickableState(false);
     node->SetFocusableState(false);
+    if (isContextMenu_) {
+        std::vector<Rect> rects;
+
+        // When the menu is context menu, set the hot area.
+        // Now only one menu is supported, so just add one area.
+        // When the framework support multiple menus, add all the areas.
+        rects.emplace_back(renderPositioned_->GetRectBasedWindowTopLeft());
+        SubwindowManager::GetInstance()->SetHotAreas(rects);
+    }
 }
 
 void RenderSelectPopup::Update(const RefPtr<Component>& component)
