@@ -40,8 +40,19 @@ public:
         return pageId_;
     }
 
+    void SetSubStage(bool useSubStage)
+    {
+        useSubStage_ = useSubStage;
+    }
+
+    bool GetSubStageFlag() const
+    {
+        return useSubStage_;
+    }
+
 private:
     int32_t pageId_ = 0;
+    bool useSubStage_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(AcePage);
 };
