@@ -41,7 +41,12 @@ void ConnectServer::RunServer()
         webSocket_->accept();
         while (!terminateExecution_) {
             beast::flat_buffer buffer;
-            webSocket_->read(buffer);
+            boost::system::error_code error;
+            webSocket_->read(buffer, error);
+            if (error) {
+                webSocket_.reset();
+                return;
+            }
             std::string message = boost::beast::buffers_to_string(buffer.data());
             LOGI("Connect Server OnMessage: %{private}s", message.c_str());
             wsOnMessage_(std::move(message));
