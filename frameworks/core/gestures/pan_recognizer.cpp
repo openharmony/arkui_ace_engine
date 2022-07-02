@@ -352,6 +352,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             info.SetVelocity(Velocity());
             info.SetMainVelocity(0.0);
         }
+        info.SetTarget(GetEventTarget().value_or(EventTarget()));
         (*callback)(info);
     }
 }

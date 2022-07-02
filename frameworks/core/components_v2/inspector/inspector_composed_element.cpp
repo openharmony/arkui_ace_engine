@@ -1396,7 +1396,7 @@ std::string InspectorComposedElement::GetColorBlend() const
 void InspectorComposedElement::UpdateEventTarget(BaseEventInfo& info) const
 {
     auto area = GetCurrentRectAndOrigin();
-    auto& target = info.GetTargetWichModify();
+    auto& target = info.GetTargetWithModify();
     target.area.SetOffset(area.first.GetOffset());
     target.area.SetHeight(Dimension(area.first.GetSize().Height()));
     target.area.SetWidth(Dimension(area.first.GetSize().Width()));

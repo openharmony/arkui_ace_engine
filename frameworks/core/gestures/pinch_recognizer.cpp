@@ -252,6 +252,7 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         info.SetPinchCenter(pinchCenter_);
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
+        info.SetTarget(GetEventTarget().value_or(EventTarget()));
         (*callback)(info);
     }
 }

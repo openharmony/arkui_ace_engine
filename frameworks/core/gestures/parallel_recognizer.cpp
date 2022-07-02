@@ -185,8 +185,10 @@ bool ParallelRecognizer::ReconcileFrom(const RefPtr<GestureRecognizer>& recogniz
         return false;
     }
 
-    for (size_t i = 0; i < recognizers_.size(); i++) {
-        if (!recognizers_[i]->ReconcileFrom(curr->recognizers_[i])) {
+    auto currIter = curr->recognizers_.begin();
+
+    for (auto iter = recognizers_.begin(); iter != recognizers_.end(); iter++, currIter++) {
+        if (!(*iter)->ReconcileFrom(*currIter)) {
             Reset();
             return false;
         }

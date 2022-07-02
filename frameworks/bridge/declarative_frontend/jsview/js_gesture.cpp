@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -69,9 +70,14 @@ void JSGesture::Create(const JSCallbackInfo& info)
         }
     }
 
-    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    RefPtr<GestureProcessor> gestureProcessor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    } else {
+        gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    }
 
-    gestureComponent->SetPriority(priority);
+    gestureProcessor->SetPriority(priority);
 
     GestureMask gestureMask = GestureMask::Normal;
     if (info.Length() > 1 && info[1]->IsNumber()) {
@@ -81,31 +87,48 @@ void JSGesture::Create(const JSCallbackInfo& info)
             gestureMask = static_cast<GestureMask>(gestureMaskNum);
         }
     }
-    gestureComponent->SetGestureMask(gestureMask);
+    gestureProcessor->SetGestureMask(gestureMask);
 }
 
 void JSGesture::Finish()
 {
     LOGD("JS gesture finish");
-    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
-    auto gesture = gestureComponent->FinishGesture();
+    RefPtr<GestureProcessor> gestureProcessor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+        NG::ViewStackProcessor::GetInstance()->ResetGestureProcessor();
+    } else {
+        gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    };
+    auto gesture = gestureProcessor->FinishGesture();
     if (!gesture) {
         LOGE("gesture is not exist when component finish");
         return;
     }
-
-    gesture->SetGestureMask(gestureComponent->GetGestureMask());
+    gesture->SetGestureMask(gestureProcessor->GetGestureMask());
+    gesture->SetPriority(gestureProcessor->GetPriority());
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto gestureEventHub = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+        if (gestureEventHub) {
+            gestureEventHub->AddGesture(gesture);
+        }
+        return;
+    }
 
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-
-    boxComponent->AddGesture(gestureComponent->GetPriority(), gesture);
+    boxComponent->AddGesture(gestureProcessor->GetPriority(), gesture);
 }
 
 void JSGesture::Pop()
 {
     LOGD("JS gesture pop");
-    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
-    gestureComponent->PopGesture();
+    RefPtr<GestureProcessor> gestureProcessor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    } else {
+        gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    };
+    gestureProcessor->PopGesture();
 }
 
 void JSTapGesture::Create(const JSCallbackInfo& args)
@@ -129,9 +152,14 @@ void JSTapGesture::Create(const JSCallbackInfo& args)
     }
 
     LOGD("JS Tap gesture created with count %{public}d, fingers %{public}d", countNum, fingersNum);
-    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    RefPtr<GestureProcessor> gestureProcessor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    } else {
+        gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    }
     auto gesture = AceType::MakeRefPtr<OHOS::Ace::TapGesture>(countNum, fingersNum);
-    gestureComponent->PushGesture(gesture);
+    gestureProcessor->PushGesture(gesture);
 }
 
 void JSLongPressGesture::Create(const JSCallbackInfo& args)
@@ -162,9 +190,14 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
         }
     }
 
-    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    RefPtr<GestureProcessor> gestureProcessor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    } else {
+        gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    }
     auto gesture = AceType::MakeRefPtr<OHOS::Ace::LongPressGesture>(fingersNum, repeatResult, durationNum);
-    gestureComponent->PushGesture(gesture);
+    gestureProcessor->PushGesture(gesture);
 }
 
 void JSPanGesture::Create(const JSCallbackInfo& args)
@@ -174,10 +207,15 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     int32_t fingersNum = DEFAULT_PAN_FINGER;
     double distanceNum = DEFAULT_PAN_DISTANCE;
     PanDirection panDirection;
-    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    RefPtr<GestureProcessor> gestureProcessor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    } else {
+        gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    }
     if (args.Length() <= 0 || !args[0]->IsObject()) {
         auto gesture = AceType::MakeRefPtr<OHOS::Ace::PanGesture>(fingersNum, panDirection, distanceNum);
-        gestureComponent->PushGesture(gesture);
+        gestureProcessor->PushGesture(gesture);
         return;
     }
 
@@ -185,7 +223,7 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     JSPanGestureOption* panGestureOption = obj->Unwrap<JSPanGestureOption>();
     if (panGestureOption != nullptr) {
         auto gesture = AceType::MakeRefPtr<OHOS::Ace::PanGesture>(panGestureOption->GetPanGestureOption());
-        gestureComponent->PushGesture(gesture);
+        gestureProcessor->PushGesture(gesture);
         return;
     }
 
@@ -211,7 +249,7 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
         }
     }
     auto gesture = AceType::MakeRefPtr<OHOS::Ace::PanGesture>(fingersNum, panDirection, distanceNum);
-    gestureComponent->PushGesture(gesture);
+    gestureProcessor->PushGesture(gesture);
 }
 
 void JSSwipeGesture::Create(const JSCallbackInfo& args)
@@ -219,10 +257,15 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
     int32_t fingersNum = DEFAULT_SLIDE_FINGER;
     double speedNum = DEFAULT_SLIDE_SPEED;
     SwipeDirection slideDirection;
-    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    RefPtr<GestureProcessor> gestureProcessor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    } else {
+        gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    };
     if (args.Length() <= 0 || !args[0]->IsObject()) {
         auto gesture = AceType::MakeRefPtr<SwipeGesture>(fingersNum, slideDirection, speedNum);
-        gestureComponent->PushGesture(gesture);
+        gestureProcessor->PushGesture(gesture);
         return;
     }
 
@@ -250,7 +293,7 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
         }
     }
     auto gesture = AceType::MakeRefPtr<SwipeGesture>(fingersNum, slideDirection, speedNum);
-    gestureComponent->PushGesture(gesture);
+    gestureProcessor->PushGesture(gesture);
 }
 
 void JSPinchGesture::Create(const JSCallbackInfo& args)
@@ -274,9 +317,14 @@ void JSPinchGesture::Create(const JSCallbackInfo& args)
         }
     }
 
-    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    RefPtr<GestureProcessor> gestureProcessor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    } else {
+        gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    };
     auto gesture = AceType::MakeRefPtr<OHOS::Ace::PinchGesture>(fingersNum, distanceNum);
-    gestureComponent->PushGesture(gesture);
+    gestureProcessor->PushGesture(gesture);
 }
 
 void JSRotationGesture::Create(const JSCallbackInfo& args)
@@ -301,9 +349,14 @@ void JSRotationGesture::Create(const JSCallbackInfo& args)
         }
     }
 
-    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    RefPtr<GestureProcessor> gestureProcessor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    } else {
+        gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    };
     auto gesture = AceType::MakeRefPtr<OHOS::Ace::RotationGesture>(fingersNum, angleNum);
-    gestureComponent->PushGesture(gesture);
+    gestureProcessor->PushGesture(gesture);
 }
 
 void JSGestureGroup::Create(const JSCallbackInfo& args)
@@ -315,9 +368,14 @@ void JSGestureGroup::Create(const JSCallbackInfo& args)
     }
 
     LOGD("Js Gesture group create with mode %{public}d", gestureMode);
-    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    RefPtr<GestureProcessor> gestureProcessor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    } else {
+        gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    };
     auto gesture = AceType::MakeRefPtr<OHOS::Ace::GestureGroup>(static_cast<GestureMode>(gestureMode));
-    gestureComponent->PushGesture(gesture);
+    gestureProcessor->PushGesture(gesture);
 }
 
 void JSGesture::JsHandlerOnGestureEvent(JSGestureEvent action, const JSCallbackInfo& args)
@@ -327,20 +385,30 @@ void JSGesture::JsHandlerOnGestureEvent(JSGestureEvent action, const JSCallbackI
         return;
     }
 
-    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
-    auto gesture = gestureComponent->TopGesture();
+    RefPtr<GestureProcessor> gestureProcessor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    } else {
+        gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    };
+    auto gesture = gestureProcessor->TopGesture();
     if (!gesture) {
         LOGE("top gesture is illegal");
         return;
     }
-    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-    if (!inspector) {
-        LOGE("fail to get inspector for on handle event");
-        return;
-    }
-    auto impl = inspector->GetInspectorFunctionImpl();
 
     RefPtr<JsGestureFunction> handlerFunc = AceType::MakeRefPtr<JsGestureFunction>(JSRef<JSFunc>::Cast(args[0]));
+
+    RefPtr<V2::InspectorFunctionImpl> impl;
+
+    if (!Container::IsCurrentUseNewPipeline()) {
+        auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+        if (!inspector) {
+            LOGE("fail to get inspector for on handle event");
+            return;
+        }
+        impl = inspector->GetInspectorFunctionImpl();
+    }
 
     if (action == JSGestureEvent::CANCEL) {
         auto onActionCancelFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc), impl]() {
@@ -566,10 +634,14 @@ void JSTimeoutGesture::Create(const JSCallbackInfo& args)
         return;
     }
 
-    auto gestureComponent = ViewStackProcessor::GetInstance()->GetGestureComponent();
-    auto gesture = AceType::MakeRefPtr<TimeoutGesture>(
-                std::chrono::duration<float>(args[0]->ToNumber<float>()));
-    gestureComponent->PushGesture(gesture);
+    RefPtr<GestureProcessor> gestureProcessor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    } else {
+        gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
+    };
+    auto gesture = AceType::MakeRefPtr<TimeoutGesture>(std::chrono::duration<float>(args[0]->ToNumber<float>()));
+    gestureProcessor->PushGesture(gesture);
 }
 
 void JSTimeoutGesture::JSBind(BindingTarget globalObj)
@@ -583,4 +655,3 @@ void JSTimeoutGesture::JSBind(BindingTarget globalObj)
 }
 
 }; // namespace OHOS::Ace::Framework
-

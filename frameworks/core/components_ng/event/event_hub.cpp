@@ -24,4 +24,31 @@ void EventHub::AttachHost(const WeakPtr<FrameNode>& host)
     host_ = host;
 }
 
+RefPtr<FrameNode> EventHub::GetFrameNode() const
+{
+    return host_.Upgrade();
+}
+
+GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
+{
+    auto impl = [weak = host_]() -> std::optional<EventTarget> {
+        auto host = weak.Upgrade();
+        if (!host) {
+            return std::nullopt;
+        }
+        EventTarget eventTarget;
+        eventTarget.id = host->GetId();
+        eventTarget.type = host->GetTag();
+        auto geometryNode = host->GetGeometryNode();
+        auto offset = geometryNode->GetFrameOffset();
+        auto size = geometryNode->GetFrameSize();
+        eventTarget.area.SetOffset(DimensionOffset(offset));
+        eventTarget.area.SetHeight(Dimension(size.Height()));
+        eventTarget.area.SetWidth(Dimension(size.Width()));
+        eventTarget.origin = DimensionOffset(geometryNode->GetParentGlobalOffset());
+        return eventTarget;
+    };
+    return impl;
+}
+
 } // namespace OHOS::Ace::NG

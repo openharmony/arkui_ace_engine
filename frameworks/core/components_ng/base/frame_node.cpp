@@ -175,6 +175,7 @@ void FrameNode::SetPipelineContext(const RefPtr<PipelineContext>& context)
 {
     context_ = context;
     pattern_->OnContextAttached();
+    eventHub_->OnContextAttached();
     if (hasPendingRequest_) {
         context->RequestFrame();
         hasPendingRequest_ = false;
@@ -560,23 +561,33 @@ bool FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPo
     if (!rect.IsInRegion(parentLocalPoint)) {
         return false;
     }
+
     bool preventBubbling = false;
+
+    // Child nodes are repackaged into gesture groups (parallel gesture groups, exclusive gesture groups, etc.) based on
+    // the gesture attributes set by the current parent node (high and low priority, parallel gestures, etc.), the
+    // newComingTargets is the template object to collect child nodes gesture and used by gestureHub to pack gesture
+    // group.
+    TouchTestResult newComingTargets;
     const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
         auto& child = *iter;
-        if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
+        if (child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets)) {
             preventBubbling = true;
             break;
         }
     }
-    if (preventBubbling) {
-        return true;
+    if (!preventBubbling) {
+        auto gestureHub = eventHub_->GetGestureEventHub();
+        if (gestureHub) {
+            TouchTestResult finalResult;
+            const auto coordinateOffset = globalPoint - localPoint;
+            preventBubbling =
+                gestureHub->ProcessTouchTestHit(coordinateOffset, touchRestrict, newComingTargets, finalResult);
+            newComingTargets.swap(finalResult);
+        }
     }
-    auto gestureHub = eventHub_->GetGestureEventHub();
-    if (gestureHub) {
-        const auto coordinateOffset = globalPoint - localPoint;
-        return gestureHub->OnTouchTestHit(coordinateOffset, touchRestrict, result);
-    }
-    return false;
+    result.splice(result.end(), std::move(newComingTargets));
+    return preventBubbling;
 }
 } // namespace OHOS::Ace::NG

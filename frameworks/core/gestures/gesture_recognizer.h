@@ -61,18 +61,6 @@ public:
     bool HandleEvent(const TouchEvent& point) override;
     bool HandleEvent(const AxisEvent& event) override;
 
-    // Coordinate offset is used to calculate the local location of the touch point in the render node.
-    void SetCoordinateOffset(const Offset& coordinateOffset)
-    {
-        coordinateOffset_ = coordinateOffset;
-    }
-
-    // Gets the coordinate offset to calculate the local location of the touch point by manually.
-    const Offset& GetCoordinateOffset() const
-    {
-        return coordinateOffset_;
-    }
-
     GesturePriority GetPriority() const
     {
         return priority_;
@@ -170,7 +158,6 @@ protected:
     virtual void BatchAdjudicate(
         const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
 
-    Offset coordinateOffset_;
     DetectState state_ { DetectState::READY };
     RefereeState refereeState_ { RefereeState::DETECTING };
     GesturePriority priority_ = GesturePriority::Low;

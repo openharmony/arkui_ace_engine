@@ -16,15 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GESTURE_LISTENER_GESTURE_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_GESTURE_LISTENER_GESTURE_COMPONENT_H
 
-#include "core/gestures/gesture_group.h"
-#include "core/gestures/single_child_gesture.h"
-
+#include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace {
 
-class GestureComponent final : public SoleChildComponent {
-    DECLARE_ACE_TYPE(GestureComponent, SoleChildComponent);
+class GestureComponent final : public SoleChildComponent, public GestureProcessor {
+    DECLARE_ACE_TYPE(GestureComponent, SoleChildComponent, GestureProcessor);
 
 public:
     GestureComponent() = default;
@@ -35,76 +33,6 @@ public:
     {
         return nullptr;
     }
-
-    void SetPriority(GesturePriority priority)
-    {
-        priority_ = priority;
-    }
-
-    GesturePriority GetPriority()
-    {
-        return priority_;
-    }
-
-    void SetGestureMask(GestureMask gestureMask)
-    {
-        gestureMask_ = gestureMask;
-    }
-
-    GestureMask GetGestureMask()
-    {
-        return gestureMask_;
-    }
-
-    void PushGesture(RefPtr<Gesture> gesture)
-    {
-        gestureStack_.push(gesture);
-    }
-
-    void PopGesture()
-    {
-        if (gestureStack_.size() <= 1) {
-            return;
-        }
-
-        auto gesture = gestureStack_.top();
-        gestureStack_.pop();
-
-        auto gestureGroup = AceType::DynamicCast<GestureGroup>(gestureStack_.top());
-        if (gestureGroup) {
-            gestureGroup->AddGesture(gesture);
-        }
-
-        auto container = AceType::DynamicCast<SingleChildGesture>(gestureStack_.top());
-        if (container) {
-            container->SetChild(std::move(gesture));
-        }
-    }
-
-    RefPtr<Gesture> TopGesture()
-    {
-        if (gestureStack_.empty()) {
-            return nullptr;
-        }
-        return gestureStack_.top();
-    }
-
-    RefPtr<Gesture> FinishGesture()
-    {
-        if (gestureStack_.empty()) {
-            return nullptr;
-        }
-
-        auto gesture = gestureStack_.top();
-        gestureStack_.pop();
-
-        return gesture;
-    }
-
-private:
-    GesturePriority priority_ = GesturePriority::Low;
-    GestureMask gestureMask_ = GestureMask::Normal;
-    std::stack<RefPtr<Gesture>> gestureStack_;
 };
 } // namespace OHOS::Ace
 
