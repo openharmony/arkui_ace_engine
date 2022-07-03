@@ -22,6 +22,21 @@
 #include "core/components_v2/grid_layout/render_grid_col.h"
 
 namespace OHOS::Ace::V2 {
+namespace {
+struct OrderCompartor {
+    bool operator()(const RefPtr<RenderNode>& left, const RefPtr<RenderNode>& right) const
+    {
+        auto leftGrid = AceType::DynamicCast<RenderGridCol>(left);
+        auto rightGrid = AceType::DynamicCast<RenderGridCol>(right);
+        return (leftGrid->GetOrder() < rightGrid->GetOrder());
+    }
+};
+
+inline std::list<RefPtr<RenderNode>, OrderCompartor> SortChildrenByOrder(const std::list<RefPtr<RenderNode>>& children)
+{
+    return std::list<RefPtr<RenderNode>, OrderCompartor>(children.begin(), children.end());
+}
+} // namespace
 
 RefPtr<RenderNode> RenderGridRow::Create()
 {
@@ -57,10 +72,15 @@ void RenderGridRow::PerformLayout()
     int32_t columnNum = GridContainerUtils::ProcessColumn(sizeType, component->GetTotalCol());
     double childWidthLimit = GridContainerUtils::ProcessColumnWidth(getterInDouble, columnNum, maxSize);
     LOGI("yyc childWidthLimit %{public}lf", childWidthLimit);
-    LayoutEachChild(childWidthLimit, maxSize.Height());
+    LayoutEachChild(childWidthLimit, maxSize.Height(), getterInDouble.first);
+    int offset = 0;
+    std::pair<double, double> pos = {0, 0};
+    for (auto child : gridColChildren_) {
+
+    }
 }
 
-void RenderGridRow::LayoutEachChild(double childWidthLimit, double childHeightLimit)
+void RenderGridRow::LayoutEachChild(double childWidthLimit, double childHeightLimit, double getter)
 {
     auto children = GetChildren();
     for (auto child : children) {
@@ -69,9 +89,12 @@ void RenderGridRow::LayoutEachChild(double childWidthLimit, double childHeightLi
             LOGI("check the component inside grid_row is grid_col");
             return;
         }
-        LayoutParam childLayout(Size(childWidthLimit, childHeightLimit), Size(0, 0));
+        auto span = gridCol->GetSpan();
+        LayoutParam childLayout(Size(childWidthLimit * span + (span - 1) * getter, childHeightLimit),
+            Size(childWidthLimit * span + (span - 1) * getter, 0));
         child->Layout(childLayout);
     }
+    gridColChildren_ = SortChildrenByOrder(children);
 }
 
 } // namespace OHOS::Ace::V2

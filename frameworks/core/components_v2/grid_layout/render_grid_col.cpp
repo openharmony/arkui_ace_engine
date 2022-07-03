@@ -22,7 +22,13 @@ RefPtr<RenderNode> RenderGridCol::Create()
     return AceType::MakeRefPtr<RenderGridCol>();
 }
 
-void Update(const RefPtr<Component>& component) {}
+void Update(const RefPtr<Component>& component) 
+{
+    auto gridCol = AceType::DynamicCast<GridColComponent>(component);
+    if (gridCol) {
+        component_ = gridCol;
+    }
+}
 
 void PerformLayout() {}
 

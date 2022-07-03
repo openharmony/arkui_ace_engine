@@ -31,10 +31,11 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
-    void LayoutEachChild(double childWidthLimit, double childHeightLimit);
+    void LayoutEachChild(double childWidthLimit, double childHeightLimit, double getter);
 
 private:
     RefPtr<Component> gridRowComponent_;
+    std::list<RefPtr<RenderNode>> gridColChildren_;
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_RENDER_GRID_ROW_H

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_RENDER_GRID_COL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_RENDER_GRID_COL_H
 
+#include <stdint.h>
+#include "grid_col_component.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace::V2 {
@@ -31,6 +33,37 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
+
+    int32_t GetSpan() const
+    {
+        if (component_) {
+            LOGI("child component error return span 1");
+            return 1;
+        }
+        return component_->GetSpan() < 1 ? 1 : component_->GetSpan();
+    }
+
+    int32_t GetOffset() const
+    {
+        if (component_) {
+            LOGI("child component error return offset 0");
+            return 0;
+        }
+        return component_->GetOffset();
+    }
+
+    int32_t GetOrder() const
+    {
+        if (component_) {
+            LOGI("child component error return order 0");
+            return 0;
+        }
+        return component_->GetOrder();
+    }
+
+private:
+    RefPtr<GridColComponent> component_;
+
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_RENDER_GRID_COL_H
