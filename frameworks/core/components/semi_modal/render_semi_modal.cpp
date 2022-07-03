@@ -158,11 +158,11 @@ void RenderSemiModal::InnerLayout()
     // Not first layout, use blankHeight_ control all children's size and layout.
 
     // update blankHeight_ when device orientation changed
-    if (orientation_ != SystemProperties::GetDevcieOrientation()) {
+    if (orientation_ != SystemProperties::GetDeviceOrientation()) {
         updateMinBlank_ = true;
         UpdateMinBlankHeight();
         blankHeight_ = UpdateTargetBlankHeight(blankHeight_);
-        orientation_ = SystemProperties::GetDevcieOrientation();
+        orientation_ = SystemProperties::GetDeviceOrientation();
     }
 
     auto maxSize = GetLayoutParam().GetMaxSize();

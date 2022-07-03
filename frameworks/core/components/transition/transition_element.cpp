@@ -88,8 +88,8 @@ void TransitionElement::PerformBuild()
 void TransitionElement::ReplaceAnimation(TweenOption& transitionOption)
 {
     auto& propertyAnimationMap = transitionOption.GetFloatPropertyAnimation();
-    auto& colorAniamtion = transitionOption.GetColorAnimation();
-    auto& opacityAniamtion = transitionOption.GetOpacityAnimation();
+    auto& colorAnimation = transitionOption.GetColorAnimation();
+    auto& opacityAnimation = transitionOption.GetOpacityAnimation();
     auto elementBox = GetChildBox();
     if (!elementBox) {
         LOGE("box element get failed.");
@@ -116,21 +116,21 @@ void TransitionElement::ReplaceAnimation(TweenOption& transitionOption)
                 (propertyAnimationMap[PropertyAnimatableType::PROPERTY_HEIGHT])->ReplaceKeyframe(keyframeHeightBegin);
         }
     }
-    if (colorAniamtion) {
+    if (colorAnimation) {
         renderBox->UpdateStyleFromRenderNode(PropertyAnimatableType::PROPERTY_BACK_DECORATION_COLOR);
         Color color = renderBox->GetColor();
         auto keyframeColorBegin = AceType::MakeRefPtr<Keyframe<Color>>(0.0f, color);
-        AceType::DynamicCast<KeyframeAnimation<Color>>(colorAniamtion)->ReplaceKeyframe(keyframeColorBegin);
+        AceType::DynamicCast<KeyframeAnimation<Color>>(colorAnimation)->ReplaceKeyframe(keyframeColorBegin);
     }
 
     auto display = GetChildDisplay();
-    if (display && opacityAniamtion) {
+    if (display && opacityAnimation) {
         auto renderDisplay = AceType::DynamicCast<RenderDisplay>(display->GetRenderNode());
         if (renderDisplay) {
             renderDisplay->UpdateOpacity();
             auto opacity = renderDisplay->GetOpacity() * (1.0 / UINT8_MAX);
             auto keyframeOpacityBegin = AceType::MakeRefPtr<Keyframe<float>>(0.0f, opacity);
-            AceType::DynamicCast<KeyframeAnimation<float>>(opacityAniamtion)->ReplaceKeyframe(keyframeOpacityBegin);
+            AceType::DynamicCast<KeyframeAnimation<float>>(opacityAnimation)->ReplaceKeyframe(keyframeOpacityBegin);
         }
     }
 }

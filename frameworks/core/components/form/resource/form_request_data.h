@@ -28,7 +28,7 @@ struct RequestFormInfo {
     std::string moduleName;
     bool temporary = false;
     int32_t dimension = -1;
-    bool allowUpate = true;
+    bool allowUpdate = true;
     Dimension width;
     Dimension height;
     uint64_t index = GetNanoseconds();

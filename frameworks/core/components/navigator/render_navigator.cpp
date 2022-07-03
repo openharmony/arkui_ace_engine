@@ -74,7 +74,8 @@ void RenderNavigator::NavigatePage()
         return;
     }
 
-    pipelineContext->NavigatePage(static_cast<uint8_t>(type_), PageTarget(uri_, targetContainer_), params_);
+    pipelineContext->NavigatePage(
+        static_cast<uint8_t>(type_), PageTarget(uri_, targetContainer_, useSubStage_), params_);
 }
 
 void RenderNavigator::Update(const RefPtr<Component>& component)

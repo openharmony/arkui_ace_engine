@@ -79,14 +79,14 @@ void SubContainer::Destroy()
     pipelineContext_.Reset();
 }
 
-void SubContainer::UpdateRootElmentSize()
+void SubContainer::UpdateRootElementSize()
 {
-    auto formComponet = AceType::DynamicCast<FormComponent>(formComponent_);
+    auto formComponent = AceType::DynamicCast<FormComponent>(formComponent_);
     Dimension rootWidth = 0.0_vp;
     Dimension rootHeight = 0.0_vp;
-    if (formComponet) {
-        rootWidth = formComponet->GetWidth();
-        rootHeight = formComponet->GetHeight();
+    if (formComponent) {
+        rootWidth = formComponent->GetWidth();
+        rootHeight = formComponent->GetHeight();
     }
 
     if (rootWidht_ == rootWidth && rootHeight_ == rootHeight) {
@@ -170,7 +170,7 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
     auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
     pipelineContext_->SetEventManager(eventManager);
     ProcessSharedImage(imageDataMap);
-    UpdateRootElmentSize();
+    UpdateRootElementSize();
     pipelineContext_->SetIsJsCard(true);
 
     ResourceInfo cardResourceInfo;

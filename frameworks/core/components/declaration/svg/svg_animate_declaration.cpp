@@ -81,7 +81,7 @@ bool SvgAnimateDeclaration::SetAnimateAttr(const std::pair<std::string, std::str
                     return;
                 }
                 auto& attrs = declaration.MaybeResetAttribute<SvgAnimateAttribute>(AttributeTag::SPECIALIZED_ATTR);
-                StringUtils::StringSpliter(val, ';', attrs.keyTimes);
+                StringUtils::StringSplitter(val, ';', attrs.keyTimes);
             } },
         { DOM_SVG_ANIMATION_KEY_SPLINES,
             [](const std::string& val, SvgAnimateDeclaration& declaration) {
@@ -110,7 +110,7 @@ bool SvgAnimateDeclaration::SetAnimateAttr(const std::pair<std::string, std::str
                 }
                 auto& attrs = declaration.MaybeResetAttribute<SvgAnimateAttribute>(
                     AttributeTag::SPECIALIZED_ATTR);
-                StringUtils::StringSpliter(val, ';', attrs.keyPoints);
+                StringUtils::StringSplitter(val, ';', attrs.keyPoints);
             } },
         { DOM_SVG_ANIMATION_PATH,
             [](const std::string& val, SvgAnimateDeclaration& declaration) {

@@ -48,7 +48,7 @@ public:
 
     virtual bool IsFocusable() const
     {
-        return show_ && focusable_ && parentFocusable_;
+        return enabled_ && show_ && focusable_ && parentFocusable_;
     }
 
     virtual bool IsFocusableByTab() const;
@@ -144,6 +144,12 @@ public:
         return show_;
     }
     virtual void SetShow(bool show);
+
+    bool IsEnabled() const
+    {
+        return enabled_;
+    }
+    virtual void SetEnabled(bool enabled);
 
     virtual void DumpFocusTree(int32_t depth);
 
@@ -251,6 +257,7 @@ private:
     bool parentFocusable_ { true };
     bool currentFocus_ { false };
     bool show_ { true };
+    bool enabled_ { true };
 
     Rect rectFromOrigin_;
 };
@@ -287,6 +294,8 @@ public:
     void DumpFocusTree(int32_t depth) override;
 
     void SetShow(bool show) override;
+
+    void SetEnabled(bool enabled) override;
 
     void RefreshParentFocusable(bool focusable) override;
 

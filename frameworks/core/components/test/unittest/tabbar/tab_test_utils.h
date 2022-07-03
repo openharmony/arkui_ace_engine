@@ -68,8 +68,8 @@ class FocusElement : public BoxElement, public FocusNode {
     DECLARE_ACE_TYPE(FocusElement, BoxElement, FocusNode);
 };
 
-class FocusComponet : public BoxComponent {
-    DECLARE_ACE_TYPE(FocusComponet, BoxComponent)
+class FocusComponent : public BoxComponent {
+    DECLARE_ACE_TYPE(FocusComponent, BoxComponent)
 
 public:
     RefPtr<Element> CreateElement() override

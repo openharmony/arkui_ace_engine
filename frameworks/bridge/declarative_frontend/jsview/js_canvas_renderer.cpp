@@ -284,7 +284,7 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
     JSViewAbstract::ParseJsString(info[0], fontStr);
 
     std::vector<std::string> fontProps;
-    StringUtils::StringSpliter(fontStr.c_str(), ' ', fontProps);
+    StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
     bool updateFontStyle = false;
     for (const auto& fontProp : fontProps) {
         if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {

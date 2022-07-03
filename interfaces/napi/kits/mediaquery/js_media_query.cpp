@@ -38,7 +38,7 @@ struct MediaQueryResult {
 
     MediaQueryResult(bool match, const std::string& media) : matches_(match), media_(media) {}
     virtual ~MediaQueryResult() = default;
-    virtual void NapiSerilizer(napi_env& env, napi_value& result)
+    virtual void NapiSerializer(napi_env& env, napi_value& result)
     {
         /* construct a MediaQueryListener object */
         napi_create_object(env, &result);
@@ -63,7 +63,7 @@ public:
         while (iter != listenerSets_.end()) {
             iter->second.erase(this);
             if (iter->second.empty()) {
-                iter->first->UnregistMediaUpdateCallback();
+                iter->first->UnregisterMediaUpdateCallback();
                 iter = listenerSets_.erase(iter);
             } else {
                 iter++;
@@ -96,10 +96,10 @@ public:
                 napi_get_reference_value(listener->env_, cbRef, &cb);
 
                 napi_value resultArg = nullptr;
-                listener->MediaQueryResult::NapiSerilizer(listener->env_, resultArg);
+                listener->MediaQueryResult::NapiSerializer(listener->env_, resultArg);
 
                 napi_value result = nullptr;
-                LOGI("NAPI MeidaQueryCallback call js");
+                LOGI("NAPI MediaQueryCallback call js");
                 napi_call_function(listener->env_, thisVal, cb, 1, &resultArg, &result);
             }
         }
@@ -107,13 +107,13 @@ public:
 
     static napi_value On(napi_env env, napi_callback_info info)
     {
-        LOGI("NAPI MeidaQuery On called");
+        LOGI("NAPI MediaQuery On called");
         auto jsEngine = EngineHelper::GetCurrentEngine();
         if (!jsEngine) {
             LOGE("get jsEngine failed");
             return nullptr;
         }
-        jsEngine->RegistMediaUpdateCallback(NapiCallback);
+        jsEngine->RegisterMediaUpdateCallback(NapiCallback);
 
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
@@ -170,7 +170,7 @@ public:
         }
         const std::lock_guard<std::mutex> lock(mutex_);
         if (listenerSets_[AceType::RawPtr(jsEngine)].empty()) {
-            jsEngine->UnregistMediaUpdateCallback();
+            jsEngine->UnregisterMediaUpdateCallback();
             listenerSets_.erase(AceType::RawPtr(jsEngine));
         }
         return nullptr;
@@ -187,9 +187,9 @@ public:
         });
     }
 
-    void NapiSerilizer(napi_env& env, napi_value& result) override
+    void NapiSerializer(napi_env& env, napi_value& result) override
     {
-        MediaQueryResult::NapiSerilizer(env, result);
+        MediaQueryResult::NapiSerializer(env, result);
 
         napi_wrap(
             env, result, this,
@@ -301,7 +301,7 @@ static napi_value JSMatchMediaSync(napi_env env, napi_callback_info info)
     bool matchResult = queryer.MatchCondition(conditionStr, mediaFeature);
     MediaQueryListener* listener = new MediaQueryListener(matchResult, conditionStr);
     napi_value result = nullptr;
-    listener->NapiSerilizer(env, result);
+    listener->NapiSerializer(env, result);
     return result;
 }
 

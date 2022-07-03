@@ -34,7 +34,7 @@ public:
     static void JsOnDec(const JSCallbackInfo& args);
     static void JSHeight(const JSCallbackInfo& args);
     static void JSWidth(const JSCallbackInfo& args);
-    static void JSControlwidth(const JSCallbackInfo& args);
+    static void JSControlWidth(const JSCallbackInfo& args);
     static void JSStateChange(bool state);
     static void SetSize(const JSCallbackInfo& args);
     static void JsBackgroundColor(const JSCallbackInfo& args);

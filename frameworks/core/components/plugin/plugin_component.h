@@ -31,12 +31,12 @@ public:
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
 
-    void SetPluginRequestionInfo(const RequestPluginInfo& info)
+    void SetPluginRequestInfo(const RequestPluginInfo& info)
     {
         info_ = info;
     }
 
-    const RequestPluginInfo& GetPluginRequestionInfo() const
+    const RequestPluginInfo& GetPluginRequestInfo() const
     {
         return info_;
     }

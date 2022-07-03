@@ -73,7 +73,7 @@ enum class FlexAlign {
     SPACE_EVENLY,
 
     // User-defined space, only used in MainAxisAlign.
-    SPACE_CUSOMIZATION,
+    SPACE_CUSTOMIZATION,
 };
 
 enum class MainAxisSize {
@@ -174,7 +174,7 @@ enum class PositionType {
     RELATIVE = 0,
     FIXED,
     ABSOLUTE,
-    OFFSET, // percetage layout based on RELATIVE
+    OFFSET, // percentage layout based on RELATIVE
     SEMI_RELATIVE, // absolute offset based on RELATIVE
 };
 
@@ -448,7 +448,7 @@ enum class RefreshType {
 
 enum class TabBarMode {
     FIXED,
-    SCROLLABEL,
+    SCROLLABLE,
     FIXED_START,
 };
 

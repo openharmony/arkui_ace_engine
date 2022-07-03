@@ -122,7 +122,7 @@ inline std::vector<double> GetJsDashValue(const shared_ptr<JsRuntime>& runtime, 
     }
     auto valueStr = value->ToString(runtime);
     std::vector<std::string> props;
-    StringUtils::StringSpliter(valueStr, ',', props);
+    StringUtils::StringSplitter(valueStr, ',', props);
     for (const auto& prop : props) {
         auto val = StringUtils::StringToDouble(prop);
         // if there only exists 0 in props, it means that there is no dash style
@@ -228,7 +228,7 @@ inline PaintState JsParseTextState(const shared_ptr<JsRuntime>& runtime, const s
     style.SetTextBaseline(
         ConvertStrToEnum(baselineStr.c_str(), BASELINE_TABLE, ArraySize(BASELINE_TABLE), TextBaseline::ALPHABETIC));
     std::vector<std::string> fontProps;
-    StringUtils::StringSpliter(fontStr, ' ', fontProps);
+    StringUtils::StringSplitter(fontStr, ' ', fontProps);
     bool updateFontStyle = false;
     for (const auto& fontProp : fontProps) {
         if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
@@ -1684,7 +1684,7 @@ void JsiCanvasBridge::ParseImageData(const shared_ptr<JsRuntime>& runtime, const
 
     auto jsData = argv[0]->GetProperty(runtime, "data");
     auto jsDataStr = jsData->ToString(runtime);
-    StringUtils::StringSpliter(jsDataStr, ',', array);
+    StringUtils::StringSplitter(jsDataStr, ',', array);
 
     imageData.x = argv[1]->ToInt32(runtime);
     imageData.y = argv[2]->ToInt32(runtime);
@@ -2232,7 +2232,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsFontSetter(const shared_ptr<JsRuntime>& r
     }
     auto fontStr = proto->ToString(runtime);
     std::vector<std::string> fontProps;
-    StringUtils::StringSpliter(fontStr, ' ', fontProps);
+    StringUtils::StringSplitter(fontStr, ' ', fontProps);
     for (const auto& fontProp : fontProps) {
         if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
             auto fontStyle = ConvertStrToFontStyle(fontProp);

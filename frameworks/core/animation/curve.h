@@ -114,8 +114,15 @@ class LinearCurve final : public Curve {
 public:
     float MoveInternal(float time) override
     {
+        if (time < fractionMin || time > fractionMax) {
+            LOGE("LinearCurve MoveInternal: time is less than 0 or larger than 1, return 1");
+            return fractionMax;
+        }
         return time;
     }
+private:
+    float fractionMin = 0.0f;
+    float fractionMax = 1.0f;
 };
 
 class SineCurve final : public Curve {
@@ -160,6 +167,10 @@ public:
 
     float MoveInternal(float time) override
     {
+        if (time < fractionMin || time > fractionMax) {
+            LOGE("StepsCurve MoveInternal: time is less than 0 or larger than 1, return 1");
+            return fractionMax;
+        }
         auto currentStep = static_cast<int32_t>(time * steps_);
         if (position_ == StepsCurvePosition::START) {
             currentStep++;
@@ -182,6 +193,8 @@ public:
 private:
     int32_t steps_;
     const StepsCurvePosition position_;
+    float fractionMin = 0.0f;
+    float fractionMax = 1.0f;
 };
 
 class CustomCurve final : public Curve {

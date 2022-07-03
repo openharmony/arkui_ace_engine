@@ -17,7 +17,7 @@ import(
 if (is_standard_system) {
   config("ohos_web_config") {
     include_dirs = [
-      "$aafwk_path/interfaces/kits/native/appkit/app",
+      "$ability_runtime_path/interfaces/kits/native/appkit/app",
       "//utils/native/base/include",
       "//foundation/windowmanager/interfaces/innerkits/wm",
     ]
@@ -45,7 +45,7 @@ build_component("web") {
   if (is_standard_system) {
     configs = [ ":ohos_web_config" ]
     deps = [
-      "$aafwk_path/frameworks/native/appkit:appkit_native",
+      "$ability_runtime_path/frameworks/native/appkit:appkit_native",
       "//foundation/windowmanager/utils:libwmutil",
       "//foundation/windowmanager/wm:libwm",
     ]

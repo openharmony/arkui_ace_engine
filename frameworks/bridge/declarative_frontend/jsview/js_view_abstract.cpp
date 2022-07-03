@@ -346,13 +346,13 @@ void ReplaceHolder(std::string& originStr, JSRef<JSArray> params, int32_t contai
     }
     std::string::const_iterator start = originStr.begin();
     std::string::const_iterator end = originStr.end();
-    std::smatch matchs;
+    std::smatch matches;
     bool shortHolderType = false;
     bool firstMatch = true;
     int searchTime = 0;
-    while (std::regex_search(start, end, matchs, RESOURCE_APP_STRING_PLACEHOLDER)) {
-        std::string pos = matchs[2];
-        std::string type = matchs[4];
+    while (std::regex_search(start, end, matches, RESOURCE_APP_STRING_PLACEHOLDER)) {
+        std::string pos = matches[2];
+        std::string type = matches[4];
         if (firstMatch) {
             firstMatch = false;
             shortHolderType = pos.length() == 0;
@@ -370,8 +370,8 @@ void ReplaceHolder(std::string& originStr, JSRef<JSArray> params, int32_t contai
             replaceContentStr = GetReplaceContentStr(StringToInt(pos) - 1, type, params, containCount);
         }
 
-        originStr.replace(matchs[0].first - originStr.begin(), matchs[0].length(), replaceContentStr);
-        start = originStr.begin() + matchs.prefix().length() + replaceContentStr.length();
+        originStr.replace(matches[0].first - originStr.begin(), matches[0].length(), replaceContentStr);
+        start = originStr.begin() + matches.prefix().length() + replaceContentStr.length();
         end = originStr.end();
         searchTime++;
     }
@@ -1258,17 +1258,13 @@ void JSViewAbstract::JsEnabled(const JSCallbackInfo& info)
         return;
     }
 
+    bool enabled = info[0]->ToBoolean();
     auto rootComponent = ViewStackProcessor::GetInstance()->GetRootComponent();
-    rootComponent->SetDisabledStatus(!(info[0]->ToBoolean()));
+    rootComponent->SetDisabledStatus(!enabled);
 
-    if (!(info[0]->ToBoolean())) {
-        auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-        if (!focusComponent) {
-            LOGE("The focusComponent is null");
-            return;
-        } else {
-            focusComponent->SetFocusable(false);
-        }
+    auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(!enabled);
+    if (focusComponent) {
+        focusComponent->SetEnabled(enabled);
     }
 }
 
@@ -3932,22 +3928,18 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
     if (info[0]->IsString()) {
         degree = static_cast<float>(StringUtils::StringToDegree(info[0]->ToString()));
     } else if (info[0]->IsNumber()) {
-        degree = static_cast<float>(info[0]->ToNumber<uint32_t>());
+        degree = static_cast<float>(info[0]->ToNumber<int32_t>());
     } else {
         LOGE("Invalid value type");
     }
-    float deg = 0.0;
+    float deg = 0.0f;
     if (degree) {
         deg = degree.value();
         degree.reset();
     }
-    // Deal with numbers out of (0, 360)
-    int32_t round = deg / ROUND_UNIT;
-    LOGI("degree is %{public}lf, round is %{public}d", deg, round);
-    if (round >= 0) {
-        deg = deg - round * ROUND_UNIT;
-    } else {
-        deg = deg - (round - 1) * ROUND_UNIT;
+    deg = std::fmod(deg, ROUND_UNIT);
+    if (deg < 0.0f) {
+        deg += ROUND_UNIT;
     }
     auto decoration = GetFrontDecoration();
     if (decoration) {
@@ -4842,12 +4834,12 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
             LOGW("pluginContainer is null");
             return nullptr;
         }
-        auto pliginPipelineContext = pluginContainer->GetPipelineContext();
-        if (!pliginPipelineContext) {
-            LOGE("pliginPipelineContext is null!");
+        auto pluginPipelineContext = pluginContainer->GetPipelineContext();
+        if (!pluginPipelineContext) {
+            LOGE("pluginPipelineContext is null!");
             return nullptr;
         }
-        auto pluginThemeManager = pliginPipelineContext->GetThemeManager();
+        auto pluginThemeManager = pluginPipelineContext->GetThemeManager();
         if (!pluginThemeManager) {
             LOGE("pluginThemeManager is null!");
             return nullptr;

@@ -328,7 +328,7 @@ bool SvgBaseDeclaration::SetPresentationAttr(const std::pair<std::string, std::s
                 }
                 auto& attrs = declaration.MaybeResetAttribute<SvgBaseAttribute>(AttributeTag::SPECIALIZED_ATTR);
                 std::vector<double> lineDashVector;
-                StringUtils::StringSpliter(val, ' ', lineDashVector);
+                StringUtils::StringSplitter(val, ' ', lineDashVector);
                 attrs.strokeState.SetLineDash(lineDashVector);
             } },
         { DOM_SVG_SRC_STROKE_DASHOFFSET,
@@ -374,7 +374,7 @@ bool SvgBaseDeclaration::SetPresentationAttr(const std::pair<std::string, std::s
                 }
                 auto& attrs = declaration.MaybeResetAttribute<SvgBaseAttribute>(AttributeTag::SPECIALIZED_ATTR);
                 std::vector<double> lineDashVector;
-                StringUtils::StringSpliter(val, ' ', lineDashVector);
+                StringUtils::StringSplitter(val, ' ', lineDashVector);
                 attrs.strokeState.SetLineDash(lineDashVector);
             } },
         { DOM_SVG_STROKE_DASHOFFSET,
@@ -456,7 +456,7 @@ void SvgBaseDeclaration::Inherit(const RefPtr<Declaration>& parent)
         if (svgDeclaration->HasOpacity()) {
             attrs.opacity = svgDeclaration->GetOpacity();
         } else {
-            attrs.opacity = 1.0; // defualt opacity is 1.0
+            attrs.opacity = 1.0; // default opacity is 1.0
         }
     }
     attrs.fillState.Inherit(svgDeclaration->GetFillState());

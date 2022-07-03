@@ -295,7 +295,7 @@ bool DOMNode::ParseTransitionPropertyStyle(const std::string& transitionProperty
 bool DOMNode::ParseTransitionNameStyle(const std::string& transitionName)
 {
     std::vector<std::string> transitions;
-    StringUtils::StringSpliter(transitionName, ' ', transitions);
+    StringUtils::StringSplitter(transitionName, ' ', transitions);
     if (transitions.size() != TRANSITION_NAME_LENGTH) {
         LOGE("transition length is invalid");
         return false;
@@ -863,7 +863,7 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
     if (!node.transformComponent_) {
         node.transformComponent_ = AceType::MakeRefPtr<TransformComponent>();
     }
-    node.transformComponent_->ResetTransform(); // Avoid transfrom effect overlay.
+    node.transformComponent_->ResetTransform(); // Avoid transform effect overlay.
     auto jsonValue = node.GetTransformJsonValue(value);
     std::unique_ptr<JsonValue> transformJson = JsonUtil::ParseJsonString(jsonValue);
     for (int32_t index = 0; index < transformJson->GetArraySize(); ++index) {
@@ -879,7 +879,7 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
                 { DOM_ROTATE_3D,
                     [](const std::string& typeValue, DOMNode& node) {
                         std::vector<std::string> offsets;
-                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        StringUtils::StringSplitter(typeValue, ' ', offsets);
                         if (offsets.size() == FOUR_VALUES) {
                             auto dx = StringToDouble(offsets[0]);
                             auto dy = StringToDouble(offsets[1]);
@@ -913,7 +913,7 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
                 { DOM_SCALE_3D,
                     [](const std::string& typeValue, DOMNode& node) {
                         std::vector<std::string> offsets;
-                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        StringUtils::StringSplitter(typeValue, ' ', offsets);
                         if (offsets.size() == THREE_VALUES) {
                             auto scaleX = StringToDouble(offsets[0]);
                             auto scaleY = StringToDouble(offsets[1]);
@@ -930,7 +930,7 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
                 { DOM_TRANSLATE,
                     [](const std::string& typeValue, DOMNode& node) {
                         std::vector<std::string> offsets;
-                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        StringUtils::StringSplitter(typeValue, ' ', offsets);
                         if (offsets.size() == TRANSFORM_DUAL) {
                             node.transformComponent_->Translate(
                                 node.ParseDimension(offsets[0]), node.ParseDimension(offsets[1]));
@@ -941,7 +941,7 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
                 { DOM_TRANSLATE_3D,
                     [](const std::string& typeValue, DOMNode& node) {
                         std::vector<std::string> offsets;
-                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        StringUtils::StringSplitter(typeValue, ' ', offsets);
                         if (offsets.size() == THREE_VALUES) {
                             auto dx = node.ParseDimension(offsets[0]);
                             auto dy = node.ParseDimension(offsets[1]);
@@ -964,7 +964,7 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
                 { DOM_SKEW,
                     [](const std::string& typeValue, DOMNode& node) {
                         std::vector<std::string> offsets;
-                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        StringUtils::StringSplitter(typeValue, ' ', offsets);
                         if (offsets.size() == TRANSFORM_DUAL) {
                             auto degreeX = StringUtils::StringToDegree(offsets[0]);
                             auto degreeY = StringUtils::StringToDegree(offsets[1]);
@@ -985,7 +985,7 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
                 { DOM_MATRIX,
                     [](const std::string& typeValue, DOMNode& node) {
                         std::vector<std::string> offsets;
-                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        StringUtils::StringSplitter(typeValue, ' ', offsets);
                         if (offsets.size() == TRANSFORM_SIX) {
                             double scaleX = StringToDouble(offsets[0]);
                             double skewY = StringToDouble(offsets[1]);
@@ -999,7 +999,7 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
                 { DOM_MATRIX_3D,
                     [](const std::string& typeValue, DOMNode& node) {
                         std::vector<std::string> offsets;
-                        StringUtils::StringSpliter(typeValue, ' ', offsets);
+                        StringUtils::StringSplitter(typeValue, ' ', offsets);
                         if (offsets.size() == TRANSFORM_SIXTEEN) {
                             std::vector<double> matrix;
                             for (const auto& offset : offsets) {
@@ -1024,7 +1024,7 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
     }
 }
 
-// Convert transform style to json format, such as rotate(50deg) to {"ratate":"50deg"}
+// Convert transform style to json format, such as rotate(50deg) to {"rotate":"50deg"}
 std::string DOMNode::GetTransformJsonValue(const std::string& value)
 {
     auto rightIndex = value.find('(');
@@ -1172,9 +1172,9 @@ void DOMNode::UpdatePropAnimations(const PropAnimationMap& animations)
     }
 }
 
-void DOMNode::UpdatePositionAnimations(const RefPtr<Component> componet)
+void DOMNode::UpdatePositionAnimations(const RefPtr<Component> component)
 {
-    if (componet != nullptr) {
+    if (component != nullptr) {
         static const AnimatableType positionAnimatableType[] = {
             AnimatableType::PROPERTY_POSITION_LEFT,
             AnimatableType::PROPERTY_POSITION_TOP,
@@ -1185,7 +1185,7 @@ void DOMNode::UpdatePositionAnimations(const RefPtr<Component> componet)
         for (const auto& type : positionAnimatableType) {
             const auto& animation = propAnimations_[type];
             if (animation) {
-                componet->AddAnimatable(type, animation);
+                component->AddAnimatable(type, animation);
             }
         }
     }

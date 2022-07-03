@@ -170,9 +170,9 @@ InspectorComposedElement::InspectorComposedElement(const ComposeId& id) : Compos
 
 InspectorComposedElement::~InspectorComposedElement()
 {
-    auto popupElemnt = GetPopupElement();
-    if (popupElemnt && popupElemnt->GetPopupComponent()) {
-        auto popupComponent = popupElemnt->GetPopupComponent();
+    auto popupElement = GetPopupElement();
+    if (popupElement && popupElement->GetPopupComponent()) {
+        auto popupComponent = popupElement->GetPopupComponent();
         if (popupComponent && popupComponent->GetPopupController()) {
             popupComponent->GetPopupController()->CancelPopup();
         }
@@ -309,7 +309,7 @@ void InspectorComposedElement::Update()
     });
     if (accessibilityNode_) {
         accessibilityNode_->SetAccessible(component->IsAccessibilityGroup());
-        accessibilityNode_->SetAccessibilityLabel(component->GetAccessibilitytext());
+        accessibilityNode_->SetAccessibilityLabel(component->GetAccessibilityText());
         accessibilityNode_->SetAccessibilityHint(component->GetAccessibilityDescription());
         accessibilityNode_->SetImportantForAccessibility(component->GetAccessibilityImportance());
         accessibilityNode_->SetFocusChangeEventMarker(component->GetAccessibilityEvent());
@@ -1375,7 +1375,7 @@ std::string InspectorComposedElement::GetBindContextMenu() const
         if (responseType->GetOnMouseId()) {
             return "ResponseType.RightClick";
         } else if (responseType->GetOnLongPress()) {
-            return "ResponseType.Longpress";
+            return "ResponseType.LongPress";
         } else {
             return "-";
         }
@@ -1396,7 +1396,7 @@ std::string InspectorComposedElement::GetColorBlend() const
 void InspectorComposedElement::UpdateEventTarget(BaseEventInfo& info) const
 {
     auto area = GetCurrentRectAndOrigin();
-    auto& target = info.GetTargetWichModify();
+    auto& target = info.GetTargetWithModify();
     target.area.SetOffset(area.first.GetOffset());
     target.area.SetHeight(Dimension(area.first.GetSize().Height()));
     target.area.SetWidth(Dimension(area.first.GetSize().Width()));
@@ -1411,11 +1411,11 @@ std::pair<Rect, Offset> InspectorComposedElement::GetCurrentRectAndOrigin() cons
     auto marginRight = GetMargin(AnimatableType::PROPERTY_MARGIN_RIGHT).ConvertToPx();
     auto marginTop = GetMargin(AnimatableType::PROPERTY_MARGIN_TOP).ConvertToPx();
     auto marginBottom = GetMargin(AnimatableType::PROPERTY_MARGIN_BOTTOM).ConvertToPx();
-    auto Localoffset = rectInLocal.GetOffset();
-    auto offset = Offset(Localoffset.GetX() + marginLeft, Localoffset.GetY() + marginTop);
+    auto LocalOffset = rectInLocal.GetOffset();
+    auto offset = Offset(LocalOffset.GetX() + marginLeft, LocalOffset.GetY() + marginTop);
     auto size = Size(rectInLocal.Width() - marginLeft - marginRight, rectInLocal.Height() - marginTop - marginBottom);
     auto globalOffset = rectInGlobal.GetOffset();
-    return { { offset, size }, { globalOffset.GetX() - Localoffset.GetX(), globalOffset.GetY() - Localoffset.GetY() } };
+    return { { offset, size }, { globalOffset.GetX() - LocalOffset.GetX(), globalOffset.GetY() - LocalOffset.GetY() } };
 }
 
 void InspectorComposedElement::GetColorsAndRepeating(

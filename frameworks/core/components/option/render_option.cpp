@@ -332,7 +332,7 @@ void RenderOption::UpdateOthersStatus()
     backColor_ = isTv_ ? Color(0x33FFFFFF) : data_->GetBackgroundColor();
     auto upOption = GetUpOption();
     needLine_ = (!(data_->GetFocused() && pipe->IsKeyEvent()) && upOption && upOption->IsNormalStatus()) &&
-        needDrawDividerLine_;
+                needDrawDividerLine_;
     UpdateNormalText();
     MarkNeedRender();
 }
@@ -373,8 +373,7 @@ bool RenderOption::IsNormalStatus() const
         return false;
     }
 
-    return (!data_->GetClicked() && !hovered_ && !data_->GetSelected() &&
-        !(data_->GetFocused() && pipe->IsKeyEvent()));
+    return (!data_->GetClicked() && !hovered_ && !data_->GetSelected() && !(data_->GetFocused() && pipe->IsKeyEvent()));
 }
 
 void RenderOption::UpdateNormalText()
@@ -557,7 +556,7 @@ void RenderOption::Update(const RefPtr<Component>& component)
         eventEffectController_ = AceType::MakeRefPtr<Animator>(context_);
     }
     auto theme = data_->GetTheme();
-    lineColor_  = theme->GetLineColor();
+    lineColor_ = theme->GetLineColor();
     clickedColor_ = theme->GetClickedColor();
     hoveredColor_ = theme->GetHoverColor();
     onClickEvent_ = AceAsyncEvent<void()>::Create(data_->GetClickEvent(), context_);

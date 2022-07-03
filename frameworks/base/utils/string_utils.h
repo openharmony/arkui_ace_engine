@@ -33,8 +33,8 @@ namespace OHOS::Ace::StringUtils {
 ACE_EXPORT extern const char DEFAULT_STRING[];
 ACE_EXPORT extern const std::wstring DEFAULT_WSTRING;
 ACE_EXPORT extern const std::u16string DEFAULT_USTRING;
-constexpr int32_t TEXT_CASE_LOWERCASR = 1;
-constexpr int32_t TEXT_CASE_UPPERCASR = 2;
+constexpr int32_t TEXT_CASE_LOWERCASE = 1;
+constexpr int32_t TEXT_CASE_UPPERCASE = 2;
 
 inline std::u16string Str8ToStr16(const std::string& str)
 {
@@ -260,7 +260,8 @@ inline double StringToDegree(const std::string& value)
 }
 
 template<class T>
-inline void StringSpliter(const std::string& source, char delimiter, T (*func)(const std::string&), std::vector<T>& out)
+inline void StringSplitter(
+    const std::string& source, char delimiter, T (*func)(const std::string&), std::vector<T>& out)
 {
     out.erase(out.begin(), out.end());
 
@@ -285,39 +286,39 @@ inline void StringSpliter(const std::string& source, char delimiter, T (*func)(c
     }
 }
 
-inline void StringSpliter(const std::string& source, char delimiter, std::vector<std::string>& out)
+inline void StringSplitter(const std::string& source, char delimiter, std::vector<std::string>& out)
 {
     using Func = std::string (*)(const std::string&);
     Func func = [](const std::string& value) { return value; };
-    StringSpliter(source, delimiter, func, out);
+    StringSplitter(source, delimiter, func, out);
 }
 
-inline void StringSpliter(const std::string& source, char delimiter, std::vector<double>& out)
+inline void StringSplitter(const std::string& source, char delimiter, std::vector<double>& out)
 {
     using Func = double (*)(const std::string&);
     Func func = [](const std::string& value) { return StringToDouble(value); };
-    StringSpliter(source, delimiter, func, out);
+    StringSplitter(source, delimiter, func, out);
 }
 
-inline void StringSpliter(const std::string& source, char delimiter, std::vector<float>& out)
+inline void StringSplitter(const std::string& source, char delimiter, std::vector<float>& out)
 {
     using Func = float (*)(const std::string&);
     Func func = [](const std::string& value) { return StringToFloat(value); };
-    StringSpliter(source, delimiter, func, out);
+    StringSplitter(source, delimiter, func, out);
 }
 
-inline void StringSpliter(const std::string& source, char delimiter, std::vector<int>& out)
+inline void StringSplitter(const std::string& source, char delimiter, std::vector<int>& out)
 {
     using Func = int32_t (*)(const std::string&);
     Func func = [](const std::string& value) { return StringToInt(value); };
-    StringSpliter(source, delimiter, func, out);
+    StringSplitter(source, delimiter, func, out);
 }
 
-inline void StringSpliter(const std::string& source, char delimiter, std::vector<Dimension>& out)
+inline void StringSplitter(const std::string& source, char delimiter, std::vector<Dimension>& out)
 {
     using Func = Dimension (*)(const std::string&);
     Func func = [](const std::string& value) { return StringToDimension(value); };
-    StringSpliter(source, delimiter, func, out);
+    StringSplitter(source, delimiter, func, out);
 }
 
 inline std::string DoubleToString(double value, int32_t precision = 2)
@@ -425,17 +426,17 @@ inline bool EndWith(const std::string& dst, const std::string& suffix)
     return (dst.size() >= suffix.size()) && dst.compare(dst.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
-inline void TransfromStrCase(std::string& str, int32_t textCase)
+inline void TransformStrCase(std::string& str, int32_t textCase)
 {
     if (str.empty()) {
         return;
     }
 
     switch (textCase) {
-        case TEXT_CASE_LOWERCASR:
+        case TEXT_CASE_LOWERCASE:
             transform(str.begin(), str.end(), str.begin(), ::tolower);
             break;
-        case TEXT_CASE_UPPERCASR:
+        case TEXT_CASE_UPPERCASE:
             transform(str.begin(), str.end(), str.begin(), ::toupper);
             break;
         default:

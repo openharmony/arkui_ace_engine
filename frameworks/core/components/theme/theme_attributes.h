@@ -138,7 +138,7 @@ extern const char BUTTON_DOWNLOAD_BORDER_COLOR[];
 extern const char BUTTON_BORDER_COLOR[];
 extern const char BUTTON_BORDER_WIDTH[];
 // pattern external attributes for button
-extern const char BUTTON_BG_COLOR_DISABLED_APLPHA[];
+extern const char BUTTON_BG_COLOR_DISABLED_ALPHA[];
 
 // pattern attributes for toolbar
 extern const char TOOLBAR_ICON_MORE_COLOR[];

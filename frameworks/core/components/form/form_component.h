@@ -32,24 +32,24 @@ public:
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
 
-    void SetFormRequestionInfo(const RequestFormInfo& info)
+    void SetFormRequestInfo(const RequestFormInfo& info)
     {
         info_ = info;
     }
 
-    RequestFormInfo GetFormRequestionInfo() const
+    RequestFormInfo GetFormRequestInfo() const
     {
         return info_;
     }
 
     void SetAllowUpdate(bool allow)
     {
-        info_.allowUpate = allow;
+        info_.allowUpdate = allow;
     }
 
     bool IsAllowUpdate() const
     {
-        return info_.allowUpate;
+        return info_.allowUpdate;
     }
 
     void SetDimension(int32_t dimension)

@@ -74,7 +74,7 @@ void JSCalendar::Create(const JSCallbackInfo& info)
     }
     auto theme = GetTheme<CalendarTheme>();
     calendarComponent->SetCalendarTheme(theme);
-    calendarComponent->SetV2Componenet(true);
+    calendarComponent->SetV2Component(true);
     ViewStackProcessor::GetInstance()->Push(calendarComponent);
 }
 

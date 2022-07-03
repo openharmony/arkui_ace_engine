@@ -717,7 +717,7 @@ ACE_EXPORT extern const char DOM_TRACK_COLOR_OFF[];
 
 // tabs attribute and style constants
 ACE_EXPORT extern const char DOM_TAB_BAR_MODE[];
-ACE_EXPORT extern const char DOM_TAB_CONTENT_SCROLLABEL[];
+ACE_EXPORT extern const char DOM_TAB_CONTENT_SCROLLABLE[];
 
 // refresh attribute and style constants
 ACE_EXPORT extern const char DOM_REFRESH[];

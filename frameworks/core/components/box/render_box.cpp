@@ -260,9 +260,7 @@ void RenderBox::AddDataToClipboard(const RefPtr<PipelineContext>& context, const
     seleItemSizeStr->Put("height", selectedItemSize_.Height());
     seleItemSizeStr->Put("selectedIndex", selectedIndex_);
     seleItemSizeStr->Put("customDragInfo", extraInfo.c_str());
-
-    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-    clipboard->SetData(seleItemSizeStr->ToString());
+    MergeClipboardData(context, seleItemSizeStr->ToString());
 }
 
 DragItemInfo RenderBox::GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info)
@@ -404,6 +402,7 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (isDragDropNode_ ) {
         isDragDropNode_  = false;
+        RestoreCilpboardData(pipelineContext);
 
         if (GetOnDrop()) {
             RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
@@ -421,7 +420,7 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
     }
 
     if (dragWindow_) {
-        dragWindow_->Destory();
+        dragWindow_->Destroy();
         dragWindow_ = nullptr;
         return;
     }
@@ -476,11 +475,12 @@ void RenderBox::PanOnActionCancel()
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (isDragDropNode_) {
+        RestoreCilpboardData(pipelineContext);
         isDragDropNode_ = false;
     }
 
     if (dragWindow_) {
-        dragWindow_->Destory();
+        dragWindow_->Destroy();
         dragWindow_ = nullptr;
     }
 #endif

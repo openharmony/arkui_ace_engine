@@ -39,7 +39,7 @@
 namespace OHOS::Ace {
 namespace {
 
-const char IS_SUCESS[] = "isSucceed";
+const char IS_SUCCESS[] = "isSucceed";
 const char ERROR_CODE[] = "errorcode";
 const char PHOTO_PATH[] = "uri";
 const char NULL_STRING[] = "";
@@ -591,10 +591,10 @@ void CameraCallback::onRecord(bool isSucces, std::string info)
 
     std::map<std::string, std::string> result;
     if (isSucces) {
-        result[IS_SUCESS] = "1";
+        result[IS_SUCCESS] = "1";
         result[PHOTO_PATH] = info;
     } else {
-        result[IS_SUCESS] = "0";
+        result[IS_SUCCESS] = "0";
         result[ERROR_CODE] = info;
     }
     onRecordListener_(result);
@@ -616,10 +616,8 @@ void CameraCallback::OnCameraSizeChange(double width, double height)
 
 void CameraCallback::OnCameraOffsetChange(double x, double y)
 {
-    auto maxWidth = 0;
-    auto maxHeight = 0;
-    bool isIllegalOffset = (int32_t)x + (int32_t)windowSize_.Width() > maxWidth
-                    || (int32_t)y + (int32_t)windowSize_.Height() > maxHeight;
+    bool isIllegalOffset = GreatNotEqual(x + windowSize_.Width(), 0.0)
+                    || GreatNotEqual(y + windowSize_.Height(), 0.0);
     if (isIllegalOffset) {
         LOGE("CameraCallback::OnCameraOffsetChange: valid offset(%{public}lf, %{public}lf).", x, y);
         return;
@@ -686,10 +684,10 @@ void CameraCallback::OnTakePhoto(bool isSucces, std::string info)
 
     std::map<std::string, std::string> result;
     if (isSucces) {
-        result[IS_SUCESS] = "1";
+        result[IS_SUCCESS] = "1";
         result[PHOTO_PATH] = info;
     } else {
-        result[IS_SUCESS] = "0";
+        result[IS_SUCCESS] = "0";
         result[ERROR_CODE] = info;
     }
     takePhotoListener_(result);

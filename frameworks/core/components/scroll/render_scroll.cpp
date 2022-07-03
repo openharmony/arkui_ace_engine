@@ -651,6 +651,7 @@ void RenderScroll::ResetScrollable()
         }
         scrollable_->SetScrollableNode(AceType::WeakClaim(this));
     }
+    scrollable_->SetOnScrollBegin(onScrollBegin_);
     scrollable_->SetNotifyScrollOverCallBack([weak = AceType::WeakClaim(this)](double velocity) {
         auto scroll = weak.Upgrade();
         if (!scroll) {

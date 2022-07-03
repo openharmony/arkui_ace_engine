@@ -26,6 +26,8 @@
 
 namespace OHOS::Ace::NG {
 
+class GestureEventHub;
+
 class ScrollableEvent : public Referenced {
 public:
     explicit ScrollableEvent(Axis axis) : axis_(axis) {};
@@ -55,8 +57,9 @@ private:
 };
 
 class ScrollableActuator : public GestureEventActuator {
+    DECLARE_ACE_TYPE(ScrollableActuator, GestureEventActuator)
 public:
-    explicit ScrollableActuator(const WeakPtr<FrameNode>& host);
+    explicit ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~ScrollableActuator() override = default;
 
     void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
@@ -71,15 +74,15 @@ public:
         initialized_ = false;
     }
 
-    void OnCollectTouchTarget(
-        const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+    void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
 private:
     void InitializeScrollable();
 
     std::unordered_map<Axis, std::list<RefPtr<ScrollableEvent>>> scrollableEvents_;
     std::unordered_map<Axis, RefPtr<Scrollable>> scrollables_;
-    WeakPtr<FrameNode> host_;
+    WeakPtr<GestureEventHub> gestureEventHub_;
     bool initialized_ = false;
 };
 

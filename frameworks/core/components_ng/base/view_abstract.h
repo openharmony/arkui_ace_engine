@@ -33,6 +33,10 @@ public:
     static void SetPadding(const PaddingProperty& value);
     static void SetLayoutWeight(int32_t value);
 
+    // event
+    static void SetOnClick(GestureEventFunc&& clickEventFunc);
+    static void SetOnTouch(TouchEventFunc&& touchEventFunc);
+
     static void Pop();
 };
 } // namespace OHOS::Ace::NG

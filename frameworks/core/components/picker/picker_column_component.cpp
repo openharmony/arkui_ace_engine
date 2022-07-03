@@ -56,7 +56,7 @@ void PickerColumnComponent::Initialize()
     std::list<RefPtr<Component>> showOptions;
     uint32_t showCount = theme_->GetShowOptionCount();
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-        SystemProperties::GetDevcieOrientation() == DeviceOrientation::LANDSCAPE) {
+        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
         showCount = OPTION_COUNT_PHONE_LANDSCAPE;
     }
     uint32_t selectedIndex = showCount / 2; // the middle option is selected that is current.

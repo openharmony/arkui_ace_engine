@@ -404,7 +404,7 @@ extern const char TAB_CONTROLLER_ID[];
 extern const char TAB_INDICATOR[];
 extern const char TAB_INDICATOR_WIDTH[];
 extern const char TAB_CONTENT_ON_CHANGE[];
-extern const char TAB_CONTENT_SCROLLABEL[];
+extern const char TAB_CONTENT_SCROLLABLE[];
 extern const char TAB_INDICATOR_COLOR[];
 extern const char TAB_INDICATOR_PADDING[];
 extern const char TAB_INDICATOR_SIZE[];

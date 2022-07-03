@@ -66,29 +66,29 @@ void JSDistributed::Set(const JSCallbackInfo& args)
         LOGW("fail to set distributed data");
         return;
     }
-    if (!stroage_) {
-        LOGW("distributed stroage is null, faid to set distributed data");
+    if (!storage_) {
+        LOGW("distributed storage is null, failed to set distributed data");
         return;
     }
     std::string key = args[0]->ToString();
     if (args[1]->IsBoolean()) {
         auto val = args[1]->ToBoolean();
         LOGW("JSDistributed::Set [%{public}s--%{public}d]", key.c_str(), val);
-        stroage_->SetBoolean(key, val);
+        storage_->SetBoolean(key, val);
         return;
     }
 
     if (args[1]->IsNumber()) {
         auto val = args[1]->ToNumber<double>();
         LOGW("JSDistributed::Set [%{public}s--%{public}lf]", key.c_str(), val);
-        stroage_->SetDouble(key, val);
+        storage_->SetDouble(key, val);
         return;
     }
 
     if (args[1]->IsString()) {
         auto val = args[1]->ToString();
         LOGW("JSDistributed::Set [%{public}s--%{public}s]", key.c_str(), val.c_str());
-        stroage_->SetString(key, val);
+        storage_->SetString(key, val);
         return;
     }
     LOGW("JSDistributed::Set type not support [%{public}s]", key.c_str());
@@ -108,17 +108,17 @@ void JSDistributed::Get(const JSCallbackInfo& args)
     std::string key = args[0]->ToString();
     LOGW("JSDistributed::Get [%{public}s]", key.c_str());
 
-    if (!stroage_) {
-        LOGW("distributed stroage is null, faid to set distributed data");
+    if (!storage_) {
+        LOGW("distributed storage is null, failed to set distributed data");
         return;
     }
 
-    auto dataType = stroage_->GetDataType(key);
+    auto dataType = storage_->GetDataType(key);
     JSVal returnValue = JSVal();
 
     switch (dataType) {
         case Storage::DataType::STRING: {
-            auto value = stroage_->GetString(key);
+            auto value = storage_->GetString(key);
             if (!value.empty()) {
                 returnValue = JSVal(ToJSValue(value));
                 LOGE("Get distributed data success, key = [%{public}s] value = [%{public}s]", key.c_str(),
@@ -128,7 +128,7 @@ void JSDistributed::Get(const JSCallbackInfo& args)
         }
         case Storage::DataType::DOUBLE: {
             double value = 0.0;
-            if (stroage_->GetDouble(key, value)) {
+            if (storage_->GetDouble(key, value)) {
                 returnValue = JSVal(ToJSValue(value));
                 LOGE("Get distributed data success, key = [%{public}s] value = [%{public}lf]", key.c_str(), value);
             }
@@ -136,7 +136,7 @@ void JSDistributed::Get(const JSCallbackInfo& args)
         }
         case Storage::DataType::BOOLEAN: {
             bool value = false;
-            if (stroage_->GetBoolean(key, value)) {
+            if (storage_->GetBoolean(key, value)) {
                 returnValue = JSVal(ToJSValue(value));
                 LOGE("Get distributed data success, key = [%{public}s] value = [%{public}d]", key.c_str(), value);
             }
@@ -165,7 +165,7 @@ void JSDistributed::Delete(const JSCallbackInfo& args)
         return;
     }
     std::string key = args[0]->ToString();
-    stroage_->Delete(key);
+    storage_->Delete(key);
 }
 
 void JSDistributed::Init(const JSRef<JSObject>& object, const std::string& sessionId)
@@ -199,7 +199,7 @@ void JSDistributed::Init(const JSRef<JSObject>& object, const std::string& sessi
     }
     auto executor = container->GetTaskExecutor();
 
-    stroage_ = StorageProxy::GetInstance()->GetStorage(sessionId, notifier, executor);
+    storage_ = StorageProxy::GetInstance()->GetStorage(sessionId, notifier, executor);
     
     auto onChangeCallback = [weak = WeakClaim(this), weakExecutor = WeakPtr<TaskExecutor>(executor), instanceId](
                                 const std::string& key) {
@@ -218,7 +218,7 @@ void JSDistributed::Init(const JSRef<JSObject>& object, const std::string& sessi
             TaskExecutor::TaskType::JS);
     };
 
-    stroage_->SetDataOnChangeCallback(std::move(onChangeCallback));
+    storage_->SetDataOnChangeCallback(std::move(onChangeCallback));
 }
 
 void JSDistributed::OnDataOnChanged(const std::string& key)

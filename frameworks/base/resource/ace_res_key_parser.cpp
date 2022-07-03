@@ -81,7 +81,7 @@ AceResKeyParser::~AceResKeyParser() = default;
 bool AceResKeyParser::Parse(const std::string& deviceResConfigTag, std::vector<KeyParam> &keyParams, bool styleRes)
 {
     std::vector<std::string> keyParts;
-    StringUtils::StringSpliter(deviceResConfigTag, '-', keyParts);
+    StringUtils::StringSplitter(deviceResConfigTag, '-', keyParts);
 
     static parse_key_function functions[] = {
         ParseMcc,
@@ -107,7 +107,7 @@ bool AceResKeyParser::DeclarativeParse(const std::string& deviceResConfigTag, st
 {
     std::vector<std::string> reskeyParts;
     std::string resConfigTag(deviceResConfigTag);
-    StringUtils::StringSpliter(resConfigTag, '-', reskeyParts);
+    StringUtils::StringSplitter(resConfigTag, '-', reskeyParts);
 
     static parse_key_function functions[] = {
         ParseLongScreen,

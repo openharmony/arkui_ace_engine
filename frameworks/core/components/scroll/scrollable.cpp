@@ -274,11 +274,13 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     }
 #endif
     LOGD("handle drag update, offset is %{public}lf", info.GetMainDelta());
-    if (RelatedScrollEventPrepare(Offset(0.0, info.GetMainDelta()))) {
+    auto mainDelta = info.GetMainDelta();
+    if (RelatedScrollEventPrepare(Offset(0.0, mainDelta))) {
         return;
     }
+    ExecuteScrollBegin(mainDelta);
     auto source = info.GetSourceDevice() == SourceType::MOUSE ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
-    moved_ = UpdateScrollPosition(info.GetMainDelta(), source);
+    moved_ = UpdateScrollPosition(mainDelta, source);
 }
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
@@ -338,6 +340,23 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             }
         });
         controller_->PlayMotion(motion_);
+    }
+}
+
+void Scrollable::ExecuteScrollBegin(double& mainDelta)
+{
+    auto context = context_.Upgrade();
+    if (!scrollBeginCallback_ || !context) {
+        return;
+    }
+
+    ScrollInfo scrollInfo;
+    if (axis_ == Axis::VERTICAL) {
+        scrollInfo = scrollBeginCallback_(0.0_vp, Dimension(mainDelta / context->GetDipScale(), DimensionUnit::VP));
+        mainDelta = context->NormalizeToPx(scrollInfo.dy);
+    } else if (axis_ == Axis::HORIZONTAL) {
+        scrollInfo = scrollBeginCallback_(Dimension(mainDelta / context->GetDipScale(), DimensionUnit::VP), 0.0_vp);
+        mainDelta = context->NormalizeToPx(scrollInfo.dx);
     }
 }
 
@@ -472,7 +491,9 @@ void Scrollable::ProcessScrollMotion(double position)
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION);
     } else {
         // UpdateScrollPosition return false, means reach to scroll limit.
-        if (!UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION)) {
+        auto mainDelta = position - currentPos_;
+        ExecuteScrollBegin(mainDelta);
+        if (!UpdateScrollPosition(mainDelta, SCROLL_FROM_ANIMATION)) {
             controller_->Stop();
         } else if (!touchUp_) {
             if (scrollTouchUpCallback_) {

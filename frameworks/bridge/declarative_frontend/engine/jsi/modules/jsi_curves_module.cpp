@@ -99,9 +99,13 @@ bool CreateSpringCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<Js
     double y0 = argv[1]->ToDouble(runtime);
     double x1 = argv[2]->ToDouble(runtime);
     double y1 = argv[3]->ToDouble(runtime);
-    
-    curve = AceType::MakeRefPtr<SpringCurve>(x0, y0, x1, y1);
-    return true;
+    if (y0 > 0 &&  x1 > 0 && y1 > 0) {
+        curve = AceType::MakeRefPtr<SpringCurve>(x0, y0, x1, y1);
+        return true;
+    } else {
+        LOGE("Spring curve: the value of the parameters are illegal");
+        return false;
+    }
 }
 
 bool CreateCubicCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -130,6 +134,10 @@ bool CreateStepsCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsV
     int32_t stepSize;
     if (argc == 2) {
         stepSize = argv[0]->ToInt32(runtime);
+        if (stepSize < 0) {
+            LOGE("Steps curve: When two parameters, the value of the stepSize is illegal");
+            return false;
+        }
         bool isEnd = argv[1]->ToBoolean(runtime);
         if (isEnd) {
             curve = AceType::MakeRefPtr<StepsCurve>(stepSize, StepsCurvePosition::END);
@@ -138,6 +146,10 @@ bool CreateStepsCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsV
         }
     } else {
         stepSize = argv[0]->ToInt32(runtime);
+        if (stepSize < 0) {
+            LOGE("Steps curve: When one parameter, the value of the stepSize is illegal");
+            return false;
+        }
         curve = AceType::MakeRefPtr<StepsCurve>(stepSize);
     }
     return true;

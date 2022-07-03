@@ -105,7 +105,7 @@ void RenderGridLayout::Update(const RefPtr<Component>& component)
 
     supportAnimation_ = grid->GetSupportAnimation();
     dragAnimation_ = grid->GetDragAnimation();
-    edgeEffect_ = grid->GetEdgeEffection();
+    edgeEffect_ = grid->GetEdgeEffect();
     onGridDragStartFunc_ = grid->GetOnGridDragStartId();
     OnGridDragEnterFunc_ = grid->GetOnGridDragEnterId();
     onGridDragMoveFunc_ = grid->GetOnGridDragMoveId();
@@ -386,9 +386,9 @@ Size RenderGridLayout::GetTargetLayoutSize(int32_t row, int32_t col)
     LayoutParam innerLayout; // Init layout param for auto item.
     innerLayout.SetMaxSize(Size(colSize_, rowSize_));
     std::vector<std::string> rows, cols;
-    StringUtils::StringSpliter(rowsArgs_, ' ', rows);
+    StringUtils::StringSplitter(rowsArgs_, ' ', rows);
     rowCount_ = rows.size() == 0 ? 1 : rows.size();
-    StringUtils::StringSpliter(colsArgs_, ' ', cols);
+    StringUtils::StringSplitter(colsArgs_, ' ', cols);
     colCount_ = cols.size() == 0 ? 1 : cols.size();
     int32_t rowIndex = 0;
     int32_t colIndex = 0;
@@ -428,7 +428,7 @@ std::string RenderGridLayout::PreParseRows()
     }
     std::string rowsArgs;
     std::vector<std::string> strs;
-    StringUtils::StringSpliter(rowsArgs_, ' ', strs);
+    StringUtils::StringSplitter(rowsArgs_, ' ', strs);
     std::string current;
     int32_t rowArgSize = strs.size();
     for (int32_t i = 0; i < rowArgSize; ++i) {
@@ -450,7 +450,7 @@ std::string RenderGridLayout::PreParseCols()
     }
     std::string colsArgs;
     std::vector<std::string> strs;
-    StringUtils::StringSpliter(colsArgs_, ' ', strs);
+    StringUtils::StringSplitter(colsArgs_, ' ', strs);
     std::string current;
     int32_t colArgSize = strs.size();
     for (int32_t i = 0; i < colArgSize; ++i) {
@@ -542,8 +542,8 @@ void RenderGridLayout::UpdateAccessibilityAttr()
 // (1) 50px 100px 60px
 // (2) 1fr 1fr 2fr
 // (3) 30% 20% 50%
-// (4) repeat(2,100px 20%) -- will be prebuild by JS Engine to --- 100px 20% 100px 20%
-// (5) repeat(auto-fill, 100px 300px)  -- will be prebuild by JS Engine to --- auto-fill 100px 300px
+// (4) repeat(2,100px 20%) -- will be prebuilt by JS Engine to --- 100px 20% 100px 20%
+// (5) repeat(auto-fill, 100px 300px)  -- will be prebuilt by JS Engine to --- auto-fill 100px 300px
 std::vector<double> RenderGridLayout::ParseArgs(const std::string& args, double size, double gap)
 {
     std::vector<double> lens;
@@ -556,7 +556,7 @@ std::vector<double> RenderGridLayout::ParseArgs(const std::string& args, double 
     std::vector<std::string> strs;
     std::string handledArg = args;
     ConvertRepeatArgs(handledArg);
-    StringUtils::StringSpliter(handledArg, ' ', strs);
+    StringUtils::StringSplitter(handledArg, ' ', strs);
     if (!strs.empty() && strs[0] == UNIT_AUTO_FILL) {
         return ParseAutoFill(strs, size, gap);
     }
@@ -978,7 +978,7 @@ void RenderGridLayout::ClearAllDragInfo()
     curInsertColumnIndex_ = -1;
     dragPosRowIndex_ = -1;
     dragPosColumnIndex_ = -1;
-    dragingItemIndex_ = -1;
+    draggingItemIndex_ = -1;
     dragPosChanged_ = false;
     itemLongPressed_ = false;
     itemDragEntered_ = false;
@@ -987,7 +987,7 @@ void RenderGridLayout::ClearAllDragInfo()
     isMainGrid_ = false;
     reEnter_ = false;
     isDragChangeLayout_ = false;
-    dragingItemRenderNode_.Reset();
+    draggingItemRenderNode_.Reset();
     subGrid_.Reset();
     mainGrid_.Reset();
 }
@@ -1047,8 +1047,8 @@ void RenderGridLayout::RegisterLongPressedForItems()
                         LOGE("%{public}s .the grid is sliding now", __PRETTY_FUNCTION__);
                         return false;
                     }
-                    render->dragingItemIndex_ = index;
-                    render->dragingItemRenderNode_ = itemRenderNode;
+                    render->draggingItemIndex_ = index;
+                    render->draggingItemRenderNode_ = itemRenderNode;
                     render->itemLongPressed_ = true;
                     return true;
                 });
@@ -1271,11 +1271,11 @@ void RenderGridLayout::OnDragMove(const ItemDragInfo& info)
         if (subGrid && !isInMainGrid_) {
             subGrid->OnDragMove(info);
             if (component_->GetOnGridDragMoveId()) {
-                component_->GetOnGridDragMoveId()(info, dragingItemIndex_, -1);
+                component_->GetOnGridDragMoveId()(info, draggingItemIndex_, -1);
             }
         } else if (!isInMainGrid_) {
             if (component_->GetOnGridDragMoveId()) {
-                component_->GetOnGridDragMoveId()(info, dragingItemIndex_, -1);
+                component_->GetOnGridDragMoveId()(info, draggingItemIndex_, -1);
             }
         }
     }
@@ -1345,8 +1345,8 @@ void RenderGridLayout::ImpDragMove(const ItemDragInfo& info)
         LOGD("%{public}s couldn't be inserted.", __PRETTY_FUNCTION__);
         if (component_->GetOnGridDragMoveId()) {
             LOGD("%{public}s. could not be insert. InsertIndex: %{public}d ,ItemIndex: %{public}d", __PRETTY_FUNCTION__,
-                -1, dragingItemIndex_);
-            component_->GetOnGridDragMoveId()(info, dragingItemIndex_, -1);
+                -1, draggingItemIndex_);
+            component_->GetOnGridDragMoveId()(info, draggingItemIndex_, -1);
         } else {
             LOGE("%{public}s no onGridDragMove registered.", __PRETTY_FUNCTION__);
         }
@@ -1358,8 +1358,8 @@ void RenderGridLayout::ImpDragLeaveMainGrid(const ItemDragInfo& info)
     LOGD("%{public}s begin.", __PRETTY_FUNCTION__);
     isInMainGrid_ = false;
     if (component_->GetOnGridDragLeaveId()) {
-        LOGD("%{public}s. from dragstart ItemIndex: %{public}d", __PRETTY_FUNCTION__, dragingItemIndex_);
-        component_->GetOnGridDragLeaveId()(info, dragingItemIndex_);
+        LOGD("%{public}s. from dragstart ItemIndex: %{public}d", __PRETTY_FUNCTION__, draggingItemIndex_);
+        component_->GetOnGridDragLeaveId()(info, draggingItemIndex_);
     } else {
         LOGE("%{public}s no onGridDragLeave registered.", __PRETTY_FUNCTION__);
     }
@@ -1502,15 +1502,15 @@ void RenderGridLayout::ImpDragStart(const ItemDragInfo& info)
     ClearSpringSlideData();
     BackGridMatrix();
     isDragging_.store(true);
-    auto itemRender = dragingItemRenderNode_.Upgrade();
+    auto itemRender = draggingItemRenderNode_.Upgrade();
     if (itemRender) {
         startGlobalPoint_.SetX(itemRender->GetGlobalOffset().GetX());
         startGlobalPoint_.SetY(itemRender->GetGlobalOffset().GetY());
         itemRender->SetVisible(false);
-        DisableChild(itemRender, dragingItemIndex_);
+        DisableChild(itemRender, draggingItemIndex_);
     }
     if (component_->GetOnGridDragStartId()) {
-        auto customComponent = component_->GetOnGridDragStartId()(info, dragingItemIndex_);
+        auto customComponent = component_->GetOnGridDragStartId()(info, draggingItemIndex_);
         if (customComponent) {
             isExistComponent_ = true;
             ActionStart(info, customComponent);
@@ -1714,10 +1714,10 @@ void RenderGridLayout::PerformLayoutForEditGrid()
             LOGD("%{public}d %{public}d %{public}d %{public}d", rowIndex, colIndex, itemRowSpan, itemColSpan);
         }
     }
-    auto hiddenItem = dragingItemRenderNode_.Upgrade();
+    auto hiddenItem = draggingItemRenderNode_.Upgrade();
     if (hiddenItem) {
         hiddenItem->SetVisible(false);
-        DisableChild(hiddenItem, dragingItemIndex_);
+        DisableChild(hiddenItem, draggingItemIndex_);
     }
 }
 
@@ -2444,8 +2444,8 @@ void RenderGridLayout::TriggerMoveEventForJS(const ItemDragInfo& info)
     int32_t insertIndex = CalIndexForItemByRowAndColum(curInsertRowIndex_, curInsertColumnIndex_);
     if (component_->GetOnGridDragMoveId()) {
         LOGD("%{public}s. could be insert. InsertIndex: %{public}d ,ItemIndex: %{public}d", __PRETTY_FUNCTION__,
-            insertIndex, dragingItemIndex_);
-        component_->GetOnGridDragMoveId()(info, dragingItemIndex_, insertIndex);
+            insertIndex, draggingItemIndex_);
+        component_->GetOnGridDragMoveId()(info, draggingItemIndex_, insertIndex);
     } else {
         LOGE("%{public}s no onGridDragMove registered.", __PRETTY_FUNCTION__);
     }
@@ -2455,8 +2455,8 @@ void RenderGridLayout::TriggerDropEventForJS(const ItemDragInfo& info, int32_t i
 {
     if (component_->GetOnGridDropId()) {
         LOGD("%{public}s. could be insert. ItemIndex: %{public}d, InsertIndex: %{public}d ", __PRETTY_FUNCTION__,
-            dragingItemIndex_, insertIndex);
-        component_->GetOnGridDropId()(info, dragingItemIndex_, insertIndex, success);
+            draggingItemIndex_, insertIndex);
+        component_->GetOnGridDropId()(info, draggingItemIndex_, insertIndex, success);
     } else {
         LOGE("%{public}s no onGridDrop registered.", __PRETTY_FUNCTION__);
     }
@@ -2554,7 +2554,7 @@ void RenderGridLayout::CalcRestoreScenePosition(const ItemDragInfo& info)
     for (auto backIter = backData.begin(); backIter != backData.end(); backIter++) {
         auto recentIter = recentData.find(backIter->first);
         if (recentIter != recentData.end() && backIter->second != recentIter->second &&
-            backIter->first != dragingItemIndex_ && backIter->first >= 0 &&
+            backIter->first != draggingItemIndex_ && backIter->first >= 0 &&
             backIter->first < (int32_t)itemsInGrid_.size()) {
             auto item = itemsInGrid_[backIter->first];
             if (item) {

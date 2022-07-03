@@ -1437,13 +1437,25 @@ void FlutterDecorationPainter::SetBorderStyle(const BorderEdge& borderEdge, SkPa
 
 void FlutterDecorationPainter::PaintBorder(const Offset& offset, SkCanvas* canvas)
 {
+    if (!decoration_) {
+        return;
+    }
+
+    if (decoration_->GetHasBorderImageSource() || decoration_->GetHasBorderImageGradient()) {
+        return;
+    }
+
+    Border border = decoration_->GetBorder();
+    if (!border.HasValue()) {
+        return;
+    }
+
     SkPaint paint;
     if (opacity_ != UINT8_MAX) {
         paint.setAlpha(opacity_);
     }
     paint.setAntiAlias(true);
-
-    Border border = decoration_->GetBorder();
+    paint.setStyle(SkPaint::Style::kFill_Style);
     flutter::RRect outerRRect = GetOuterRRect(offset + margin_.GetOffsetInPx(scale_), border);
     flutter::RRect innerRRect = GetInnerRRect(offset + margin_.GetOffsetInPx(scale_), border);
     flutter::RRect clipRRect = GetClipRRect(offset + margin_.GetOffsetInPx(scale_), border);

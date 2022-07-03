@@ -23,11 +23,15 @@ namespace OHOS::Ace {
 struct PageTarget {
     PageTarget() = delete;
     PageTarget(const std::string& url, const WeakPtr<StageElement>& container) : url(url), container(container) {}
+    PageTarget(const std::string& url, const WeakPtr<StageElement>& container, bool useSubStage)
+        : url(url), container(container), useSubStage(useSubStage)
+    {}
     explicit PageTarget(const std::string& url) : url(url) {}
     ~PageTarget() = default;
 
     std::string url;
     WeakPtr<StageElement> container;
+    bool useSubStage = false;
 };
 
 } // namespace OHOS::Ace

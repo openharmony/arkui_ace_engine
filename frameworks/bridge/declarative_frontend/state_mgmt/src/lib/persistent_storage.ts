@@ -194,3 +194,5 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
       PersistentStorage.GetOrCreate().links_.get(propName).get());
   }
 };
+
+PersistentStorage.ConfigureBackend(new Storage());

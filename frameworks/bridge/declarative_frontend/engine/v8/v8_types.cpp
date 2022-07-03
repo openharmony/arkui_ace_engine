@@ -117,14 +117,14 @@ void V8Object::SetPropertyObject(const char* prop, V8Ref<V8Value> value) const
 V8Object::V8Object() : V8Type() {}
 V8Object::V8Object(v8::Local<v8::Object> obj) : V8Type(obj) {}
 
-V8Funktion::V8Funktion() {}
-V8Funktion::V8Funktion(v8::Local<v8::Function> obj) : V8Type(obj)
+V8Function::V8Function() {}
+V8Function::V8Function(v8::Local<v8::Function> obj) : V8Type(obj)
 {
     isolate_ = v8::Isolate::GetCurrent();
     ctx_.Reset(isolate_, isolate_->GetCurrentContext());
 }
 
-V8Ref<V8Value> V8Funktion::Call(V8Ref<V8Value> thisVal, int argc, V8Ref<V8Value> argv[]) const
+V8Ref<V8Value> V8Function::Call(V8Ref<V8Value> thisVal, int argc, V8Ref<V8Value> argv[]) const
 {
     std::vector<v8::Local<v8::Value>> localArgv;
     v8::Isolate::Scope iScp(isolate_);
@@ -155,7 +155,7 @@ V8Ref<V8Value> V8Funktion::Call(V8Ref<V8Value> thisVal, int argc, V8Ref<V8Value>
     return V8Ref<V8Value>::Make(result);
 }
 
-v8::Local<v8::Function> V8Funktion::New(FunctionCallback func)
+v8::Local<v8::Function> V8Function::New(FunctionCallback func)
 {
     auto isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scp(isolate);

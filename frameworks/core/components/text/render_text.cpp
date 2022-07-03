@@ -775,7 +775,7 @@ void RenderText::HandleRemoteMessage(const ClickInfo& info)
         auto declaration = text_->GetDeclaration();
         if (declaration) {
             auto& gestureEvent =
-                static_cast<CommonGestureEvent&>(declaration->GetEvent(EventTag::COMMON_REMOTE_MESSAGE_GRESURE_EVENT));
+                static_cast<CommonGestureEvent&>(declaration->GetEvent(EventTag::COMMON_REMOTE_MESSAGE_GESTURE_EVENT));
             if (gestureEvent.IsValid() && !gestureEvent.click.eventMarker.IsEmpty()) {
                 clickMarker = gestureEvent.click.eventMarker;
             }
@@ -1089,10 +1089,11 @@ void RenderText::PanOnActionEnd(const GestureEvent& info)
         if (info.GetSourceDevice() == SourceType::TOUCH) {
             textValue_.UpdateSelection(0, 0);
         }
+        RestoreCilpboardData(pipelineContext);
     }
-
+    
     if (dragWindow_) {
-        dragWindow_->Destory();
+        dragWindow_->Destroy();
         dragWindow_ = nullptr;
         return;
     }
@@ -1136,10 +1137,11 @@ void RenderText::PanOnActionCancel()
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (isDragDropNode_) {
         isDragDropNode_ = false;
+        RestoreCilpboardData(pipelineContext);
     }
 
     if (dragWindow_) {
-        dragWindow_->Destory();
+        dragWindow_->Destroy();
         dragWindow_ = nullptr;
     }
 #endif

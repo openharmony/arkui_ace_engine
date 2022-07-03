@@ -1150,7 +1150,7 @@ void V8DeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>
         if ((*delegate)->GetAssetContent("commons.js", commonsJsContent)) {
             bool commonsJsResult = CallEvalBuf(isolate, commonsJsContent.c_str(), -1, "commons.js");
             if (!commonsJsResult) {
-                LOGE("fail to excute load commonsjs script");
+                LOGE("fail to execute load commonsjs script");
                 return;
             }
         }
@@ -1158,7 +1158,7 @@ void V8DeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>
         if ((*delegate)->GetAssetContent("vendors.js", vendorsJsContent)) {
             bool vendorsJsResult = CallEvalBuf(isolate, vendorsJsContent.c_str(), -1, "vendors.js");
             if (!vendorsJsResult) {
-                LOGE("fail to excute load vendorsjs script");
+                LOGE("fail to execute load vendorsjs script");
                 return;
             }
         }

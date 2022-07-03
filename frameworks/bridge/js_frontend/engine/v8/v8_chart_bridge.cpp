@@ -444,7 +444,7 @@ void ParseTextInfoAndSegmentInfo(v8::Local<v8::Context> ctx, v8::Local<v8::Value
         }
     } else if (strcmp(keyStr, "lineDash") == 0) {
         std::vector<std::string> dash;
-        StringUtils::StringSpliter(valStr, ',', dash);
+        StringUtils::StringSplitter(valStr, ',', dash);
         if (dash.size() == 1 || dash.size() == 3) {
             if (dash[0] == "dashed") {
                 segmentInfo.SetLineType(LineType::DASHED);
@@ -542,9 +542,9 @@ void GetAttrDataSetData(v8::Local<v8::Context> ctx, v8::Local<v8::Value> dataArr
         PointInfo pointInfo;
         if (dataArrayItemVal->IsArray()) { // Coordinates are two-dimensional arrays
             v8::Local<v8::Array> itemArray = v8::Local<v8::Array>::Cast(dataArrayItemVal);
-            uint32_t dataArryIterLen = itemArray->Length();
+            uint32_t dataArrayIterLen = itemArray->Length();
 
-            if (dataArryIterLen != VALID_ARRAY_LENGTH) { // Check coordinates are not two-dimensional arrays
+            if (dataArrayIterLen != VALID_ARRAY_LENGTH) { // Check coordinates are not two-dimensional arrays
                 LOGW("Attr Datasets data type unsupported!");
                 continue;
             }

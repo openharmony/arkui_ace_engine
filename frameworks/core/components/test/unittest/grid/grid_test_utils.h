@@ -56,10 +56,10 @@ class MockEventHandler : public AceEventHandler {
         const bool isDestroy) override {};
 };
 
-class TestGridEventHander : public MockEventHandler {
+class TestGridEventHandler : public MockEventHandler {
 public:
-    explicit TestGridEventHander(GridEventCallback eventCallback) : eventCallback_(eventCallback) {}
-    ~TestGridEventHander() = default;
+    explicit TestGridEventHandler(GridEventCallback eventCallback) : eventCallback_(eventCallback) {}
+    ~TestGridEventHandler() = default;
 
     void HandleAsyncEvent(const EventMarker& eventMarker, const std::string& param)
     {

@@ -148,7 +148,7 @@ public:
 
     /**
      * \brief check in mark need layout progress if parent need layout again.
-     * \return true if need layout agagin.
+     * \return true if need layout again.
      */
     virtual bool CheckIfNeedLayoutAgain()
     {
@@ -482,6 +482,7 @@ public:
             visible_ = visible;
             AddDirtyRenderBoundaryNode();
             OnVisibleChanged();
+            CheckIfNeedUpdateTouchRect();
             if (!inRecursion && SystemProperties::GetRosenBackendEnabled()) {
                 MarkParentNeedRender();
             }

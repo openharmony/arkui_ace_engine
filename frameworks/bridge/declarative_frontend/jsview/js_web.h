@@ -62,13 +62,16 @@ public:
     static void OverviewModeAccess(bool isOverviewModeAccessEnabled);
     static void FileFromUrlAccess(bool isFileFromUrlAccessEnabled);
     static void DatabaseAccess(bool isDatabaseAccessEnabled);
-    static void TextZoomAtio(int32_t textZoomAtioNum);
+    static void TextZoomRatio(int32_t textZoomRatioNum);
     static void WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled);
     static void OnMouse(const JSCallbackInfo& args);
     static void OnResourceLoad(const JSCallbackInfo& args);
     static void OnScaleChange(const JSCallbackInfo& args);
     static void BackgroundColor(const JSCallbackInfo& info);
     static void InitialScale(float scale);
+    static void Password(bool password);
+    static void TableData(bool tableData);
+    static void OnFileSelectorShowAbandoned(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

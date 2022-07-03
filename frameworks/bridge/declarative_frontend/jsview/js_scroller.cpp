@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/animation/curves.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/align_declaration.h"
 
 namespace OHOS::Ace::Framework {
@@ -61,6 +62,7 @@ void JSScroller::JSBind(BindingTarget globalObj)
     JSClass<JSScroller>::CustomMethod("scrollPage", &JSScroller::ScrollPage);
     JSClass<JSScroller>::CustomMethod("currentOffset", &JSScroller::CurrentOffset);
     JSClass<JSScroller>::CustomMethod("scrollToIndex", &JSScroller::ScrollToIndex);
+    JSClass<JSScroller>::CustomMethod("scrollBy", &JSScroller::ScrollBy);
     JSClass<JSScroller>::Bind(globalObj, JSScroller::Constructor, JSScroller::Destructor);
 }
 
@@ -190,6 +192,35 @@ void JSScroller::CurrentOffset(const JSCallbackInfo& args)
     retObj->SetProperty("xOffset", offset.GetX());
     retObj->SetProperty("yOffset", offset.GetY());
     args.SetReturnValue(retObj);
+}
+
+void JSScroller::ScrollBy(const JSCallbackInfo& args)
+{
+    if (args.Length() < 2) {
+        LOGW("Invalid params");
+        return;
+    }
+
+    Dimension xOffset;
+    Dimension yOffset;
+    if (!ConvertFromJSValue(args[0], xOffset) ||
+        !ConvertFromJSValue(args[1], yOffset)) {
+        LOGW("Failed to parse param");
+        return;
+    }
+
+    auto deltaX = xOffset.Value();
+    auto deltaY = yOffset.Value();
+    auto container = Container::Current();
+    if (container) {
+        auto context = container->GetPipelineContext();
+        if (context) {
+            deltaX = context->NormalizeToPx(xOffset);
+            deltaY = context->NormalizeToPx(yOffset);
+        }
+    }
+
+    controller_->ScrollBy(deltaX, deltaY, false);
 }
 
 } // namespace OHOS::Ace::Framework

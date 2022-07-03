@@ -57,12 +57,12 @@ const std::string& AceApplicationInfo::GetProcessName() const
 std::string AceApplicationInfo::GetUnicodeSetting() const
 {
     std::vector<std::string> keyValuePairs;
-    StringUtils::StringSpliter(keywordsAndValues_, ';', keyValuePairs);
+    StringUtils::StringSplitter(keywordsAndValues_, ';', keyValuePairs);
     auto keyValuePairsJson = JsonUtil::Create(true);
     for (const auto& pair : keyValuePairs) {
         // [pair] is like "nu=arab" or "nu=" for most occasions, but may be "=" under extreme scenarios
         std::vector<std::string> res;
-        StringUtils::StringSpliter(pair, '=', res);
+        StringUtils::StringSplitter(pair, '=', res);
         if (res.size() == 0) {
             continue;
         }

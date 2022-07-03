@@ -253,7 +253,7 @@ HWTEST_F(DomTabTest, DomTabBarCreatorTest001, TestSize.Level1)
      * @tc.steps: step2. Check styles and attributes of created tab-bar node.
      * @tc.expected: step2. The styles and attributes are as expected.
      */
-    EXPECT_EQ(tabBarComponent->GetMode(), TabBarMode::SCROLLABEL);
+    EXPECT_EQ(tabBarComponent->GetMode(), TabBarMode::SCROLLABLE);
 }
 
 /**

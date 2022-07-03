@@ -58,7 +58,7 @@ inline std::vector<double> GetDashValue(const v8::FunctionCallbackInfo<v8::Value
     if (!(*value)) {
         return segments;
     }
-    StringUtils::StringSpliter(*value, ',', props);
+    StringUtils::StringSplitter(*value, ',', props);
 
     for (const auto& prop : props) {
         auto val = StringToDouble(prop);
@@ -124,7 +124,7 @@ inline PaintState ParseTextState(const v8::Local<v8::Context>& context, v8::Loca
     v8::String::Utf8Value font(context->GetIsolate(), fontStyle);
     std::vector<std::string> fontProps;
     if (*font) {
-        StringUtils::StringSpliter(*font, ' ', fontProps);
+        StringUtils::StringSplitter(*font, ' ', fontProps);
         for (const auto& fontProp : fontProps) {
             if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
                 style.SetFontWeight(ConvertStrToFontWeight(fontProp));
@@ -1698,7 +1698,7 @@ void V8OffscreenCanvasBridge::ParseImageData(
                     .ToLocalChecked();
     v8::String::Utf8Value value(isolate, data);
     if (*value) {
-        StringUtils::StringSpliter(*value, ',', array);
+        StringUtils::StringSplitter(*value, ',', array);
     }
     imageData.x = args[1]->Int32Value(context).ToChecked();
     imageData.y = args[2]->Int32Value(context).ToChecked();
@@ -2107,7 +2107,7 @@ void V8OffscreenCanvasBridge::FontSetter(const v8::FunctionCallbackInfo<v8::Valu
         return;
     }
     std::vector<std::string> fontProps;
-    StringUtils::StringSpliter(*fontStr, ' ', fontProps);
+    StringUtils::StringSplitter(*fontStr, ' ', fontProps);
     bool updateFontStyle = false;
     auto offscreenCanvas = GlobalGetOffscreenCanvas(args);
     if (!offscreenCanvas) {

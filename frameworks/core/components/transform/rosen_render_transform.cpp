@@ -60,7 +60,7 @@ void RosenRenderTransform::SyncTransformToRsNode(const std::shared_ptr<RSNode>& 
 
     DecomposedTransform transform;
     if (!TransformUtil::DecomposeTransform(transform, transformMatrix)) {
-        // failback to basic matrix decompose
+        // fallback to basic matrix decompose
         rsNode->SetTranslate(transformMatrix.Get(0, 3), transformMatrix.Get(1, 3), transformMatrix.Get(2, 3));
         rsNode->SetScale(0);
         return;

@@ -267,9 +267,9 @@ void FrontendDelegateDeclarative::LoadResourceConfiguration(std::map<std::string
             continue;
         }
         auto mediaPathName = file.substr(file.find_first_of("/"));
-        std::regex mediaPartten("^\\/media\\/\\w*(\\.jpg|\\.png|\\.gif|\\.svg|\\.webp|\\.bmp)$");
+        std::regex mediaPattern("^\\/media\\/\\w*(\\.jpg|\\.png|\\.gif|\\.svg|\\.webp|\\.bmp)$");
         std::smatch result;
-        if (std::regex_match(mediaPathName, result, mediaPartten)) {
+        if (std::regex_match(mediaPathName, result, mediaPattern)) {
             mediaFileName.insert(mediaPathName.substr(mediaPathName.find_first_of("/")));
         }
     }
@@ -913,7 +913,7 @@ void FrontendDelegateDeclarative::StartReplace(const PageTarget& target, const s
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
     LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
-        LoadReplacePage(GenerateNextPageId(), PageTarget(pagePath, target.container), params);
+        LoadReplacePage(GenerateNextPageId(), PageTarget(pagePath, target.container, target.useSubStage), params);
     } else {
         LOGW("[Engine Log] this uri not support in route replace.");
         ProcessRouterTask();
@@ -1927,6 +1927,71 @@ void FrontendDelegateDeclarative::ReplacePage(const RefPtr<JsAcePage>& page, con
         TaskExecutor::TaskType::UI);
 }
 
+void FrontendDelegateDeclarative::ReplacePageInSubStage(const RefPtr<JsAcePage>& page, const std::string& url)
+{
+    LOGI("ReplacePageInSubStage url = %{private}s", url.c_str());
+    auto pipelineContext = pipelineContextHolder_.Get();
+    page->SetPipelineContext(pipelineContext);
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), page, url] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            auto pipelineContext = page->GetPipelineContext().Upgrade();
+            if (!pipelineContext) {
+                LOGE("pipelineContext is null");
+                return;
+            }
+            auto stageElement = page->GetStageElement();
+            if (!stageElement) {
+                LOGE("stageElement is null");
+                return;
+            }
+
+            if (stageElement->GetChildren().empty()) {
+                delegate->OnPrePageChange(page);
+                pipelineContext->RemovePageTransitionListener(delegate->pageTransitionListenerId_);
+                delegate->pageTransitionListenerId_ = pipelineContext->AddPageTransitionListener(
+                    [weak, page](
+                        const TransitionEvent& event, const WeakPtr<PageElement>& in, const WeakPtr<PageElement>& out) {
+                        auto delegate = weak.Upgrade();
+                        if (delegate) {
+                            delegate->PushPageTransitionListener(event, page);
+                        }
+                    });
+                pipelineContext->PushPage(page->BuildPage(url), page->GetStageElement());
+                delegate->isStagingPageExist_ = false;
+                return;
+            }
+
+            if (stageElement->CanReplacePage()) {
+                delegate->OnPageHide();
+                delegate->OnPageDestroy(delegate->GetRunningPageId());
+                delegate->OnPrePageChange(page);
+                stageElement->Replace(page->BuildPage(url), [weak, page, url]() {
+                    auto delegate = weak.Upgrade();
+                    if (!delegate) {
+                        return;
+                    }
+                    delegate->OnReplacePageSuccess(page, url);
+                    delegate->SetCurrentPage(page->GetPageId());
+                    delegate->OnMediaQueryUpdate();
+                    delegate->ProcessRouterTask();
+                });
+            } else {
+                // This page has been loaded but become useless now, the corresponding js instance
+                // must be destroyed to avoid memory leak.
+                LOGW("replace run in unexpected process");
+                delegate->OnPageDestroy(page->GetPageId());
+                delegate->ResetStagingPage();
+                delegate->ProcessRouterTask();
+            }
+            delegate->isStagingPageExist_ = false;
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void FrontendDelegateDeclarative::LoadReplacePage(int32_t pageId, const PageTarget& target, const std::string& params)
 {
     {
@@ -1942,22 +2007,28 @@ void FrontendDelegateDeclarative::LoadReplacePage(int32_t pageId, const PageTarg
         ProcessRouterTask();
         return;
     }
-    if (isStagingPageExist_) {
+    auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
+    auto page = AceType::MakeRefPtr<JsAcePage>(pageId, document, target.url, target.container);
+    page->SetSubStage(target.useSubStage);
+    if (isStagingPageExist_ && !page->GetSubStageFlag()) {
         LOGW("FrontendDelegateDeclarative, replace page failed, waiting for current page loading finish.");
         EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
         ProcessRouterTask();
         return;
     }
     isStagingPageExist_ = true;
-    auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
-    auto page = AceType::MakeRefPtr<JsAcePage>(pageId, document, target.url, target.container);
     page->SetPageParams(params);
     taskExecutor_->PostTask(
         [page, url, weak = AceType::WeakClaim(this)] {
             auto delegate = weak.Upgrade();
             if (delegate) {
                 delegate->loadJs_(url, page, false);
-                delegate->ReplacePage(page, url);
+                if (page->GetSubStageFlag()) {
+                    page->FireDeclarativeOnPageAppearCallback();
+                    delegate->ReplacePageInSubStage(page, url);
+                } else {
+                    delegate->ReplacePage(page, url);
+                }
             }
         },
         TaskExecutor::TaskType::JS);

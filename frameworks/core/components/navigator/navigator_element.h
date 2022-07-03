@@ -27,7 +27,7 @@ class NavigatorElement : public SoleChildElement, public FocusNode {
 public:
     void PerformBuild() override;
     void OnClick() override;
-    void SetTargetContainer(const WeakPtr<StageElement>& targetContainer);
+    void SetTargetContainer(const WeakPtr<StageElement>& targetContainer, bool useSubStage = false);
 };
 
 } // namespace OHOS::Ace

@@ -1989,6 +1989,7 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
         case WindowSizeChangeReason::DRAG_START: {
             isDragStart_ = true;
             BlurWindowWithDrag(true);
+            NotifyWebPaint();
             break;
         }
         case WindowSizeChangeReason::DRAG: {
@@ -2002,6 +2003,7 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             isFirstDrag_ = true;
             BlurWindowWithDrag(false);
             SetRootSizeWithWidthHeight(width, height);
+            NotifyWebPaint();
             break;
         }
         case WindowSizeChangeReason::ROTATION:
@@ -2010,6 +2012,16 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
         default: {
             LOGD("PipelineContext::RootNodeAnimation : unsupported type, no animation added");
             SetRootSizeWithWidthHeight(width, height);
+        }
+    }
+}
+
+void PipelineContext::NotifyWebPaint() const
+{
+    CHECK_RUN_ON(UI);
+    for (auto& iterWebPaintCallback : webPaintCallback_) {
+        if (iterWebPaintCallback) {
+            iterWebPaintCallback();
         }
     }
 }
@@ -2369,9 +2381,9 @@ void PipelineContext::NotifyRouterBackDismiss() const
 void PipelineContext::NotifyPopPageSuccessDismiss(const std::string& pageUrl, const int32_t pageId) const
 {
     CHECK_RUN_ON(UI);
-    for (auto& iterPopSuccessHander : popPageSuccessEventHandler_) {
-        if (iterPopSuccessHander) {
-            iterPopSuccessHander(pageUrl, pageId);
+    for (auto& iterPopSuccessHandler : popPageSuccessEventHandler_) {
+        if (iterPopSuccessHandler) {
+            iterPopSuccessHandler(pageUrl, pageId);
         }
     }
 }
@@ -2389,9 +2401,9 @@ void PipelineContext::NotifyIsPagePathInvalidDismiss(bool isPageInvalid) const
 void PipelineContext::NotifyDestroyEventDismiss() const
 {
     CHECK_RUN_ON(UI);
-    for (auto& iterDestroyEventHander : destroyEventHandler_) {
-        if (iterDestroyEventHander) {
-            iterDestroyEventHander();
+    for (auto& iterDestroyEventHandler : destroyEventHandler_) {
+        if (iterDestroyEventHandler) {
+            iterDestroyEventHandler();
         }
     }
 }
@@ -2399,9 +2411,9 @@ void PipelineContext::NotifyDestroyEventDismiss() const
 void PipelineContext::NotifyDispatchTouchEventDismiss(const TouchEvent& event) const
 {
     CHECK_RUN_ON(UI);
-    for (auto& iterDispatchTouchEventHander : dispatchTouchEventHandler_) {
-        if (iterDispatchTouchEventHander) {
-            iterDispatchTouchEventHander(event);
+    for (auto& iterDispatchTouchEventHandler : dispatchTouchEventHandler_) {
+        if (iterDispatchTouchEventHandler) {
+            iterDispatchTouchEventHandler(event);
         }
     }
 }
@@ -2506,6 +2518,7 @@ void PipelineContext::Destroy()
     sharedImageManager_.Reset();
     window_->Destroy();
     touchPluginPipelineContext_.clear();
+    webPaintCallback_.clear();
     LOGI("PipelineContext::Destroy end.");
 }
 
@@ -3159,6 +3172,8 @@ void PipelineContext::ProcessDragEventEnd(
 
         if (insertIndex_ == RenderNode::DEFAULT_INDEX) {
             (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
+            SetPreTargetRenderNode(nullptr);
+            SetInitRenderNode(nullptr);
             return;
         }
 
@@ -3191,15 +3206,15 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
             auto pipelineContext = weakPipelineContext.Upgrade();
             if (pipelineContext) {
                 auto json = JsonUtil::ParseJsonString(data);
-                pipelineContext->selectedItemSize_.SetWidth(json->GetDouble("width"));
-                pipelineContext->selectedItemSize_.SetHeight(json->GetDouble("height"));
-                pipelineContext->selectedIndex_ = json->GetInt("selectedIndex");
-                pipelineContext->customDragInfo_ = json->GetString("customDragInfo");
-                pipelineContext->selectedText_ = json->GetString("selectedText");
-                pipelineContext->imageSrc_ = json->GetString("imageSrc");
+                auto newData = JsonUtil::ParseJsonString(json->GetString("newData"));
+                pipelineContext->selectedItemSize_.SetWidth(newData->GetDouble("width"));
+                pipelineContext->selectedItemSize_.SetHeight(newData->GetDouble("height"));
+                pipelineContext->selectedIndex_ = newData->GetInt("selectedIndex");
+                pipelineContext->customDragInfo_ = newData->GetString("customDragInfo");
+                pipelineContext->selectedText_ = newData->GetString("selectedText");
+                pipelineContext->imageSrc_ = newData->GetString("imageSrc");
             }
         };
-
         clipboardCallback_ = callback;
     }
 
@@ -3228,6 +3243,7 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     } else {
         ProcessDragEventEnd(renderNode, event, globalPoint);
     }
+
 }
 
 void PipelineContext::FlushWindowBlur()
@@ -3571,9 +3587,9 @@ bool PipelineContext::GetIsDeclarative() const
     return false;
 }
 
-void PipelineContext::SetForbidePlatformQuit(bool forbidePlatformQuit)
+void PipelineContext::SetForbidPlatformQuit(bool forbidPlatformQuit)
 {
-    forbidePlatformQuit_ = forbidePlatformQuit;
+    forbidPlatformQuit_ = forbidPlatformQuit;
     auto stageElement = GetStageElement();
     if (!stageElement) {
         LOGE("Stage is null.");
@@ -3584,7 +3600,7 @@ void PipelineContext::SetForbidePlatformQuit(bool forbidePlatformQuit)
         LOGE("RenderStage is null.");
         return;
     }
-    renderStage->SetForbidSwipeToRight(forbidePlatformQuit_);
+    renderStage->SetForbidSwipeToRight(forbidPlatformQuit_);
 }
 
 void PipelineContext::AddLayoutTransitionNode(const RefPtr<RenderNode>& node)

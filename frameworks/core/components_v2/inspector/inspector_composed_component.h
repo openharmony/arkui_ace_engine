@@ -92,7 +92,7 @@ public:
         return accessibilitygroup_;
     }
 
-    const std::string& GetAccessibilitytext() const
+    const std::string& GetAccessibilityText() const
     {
         return accessibilitytext_;
     }

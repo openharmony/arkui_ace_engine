@@ -235,6 +235,16 @@ public:
         return scrollBarProxy_;
     }
 
+    void SetOnScrollBegin(const ScrollBeginCallback& onScrollBegin)
+    {
+        onScrollBegin_ = onScrollBegin;
+    }
+
+    const ScrollBeginCallback& GetOnScrollBegin() const
+    {
+        return onScrollBegin_;
+    }
+
 private:
     Edge padding_;
     Axis axisDirection_ = Axis::VERTICAL;
@@ -255,6 +265,8 @@ private:
     EventMarker onScroll_;
     EventMarker onScrollEdge_;
     EventMarker onScrollEnd_;
+
+    ScrollBeginCallback onScrollBegin_;
 };
 
 } // namespace OHOS::Ace

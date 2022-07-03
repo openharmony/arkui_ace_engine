@@ -163,7 +163,7 @@ void DragWindowOhos::MoveTo(int32_t x, int32_t y) const
     }
 }
 
-void DragWindowOhos::Destory() const
+void DragWindowOhos::Destroy() const
 {
     if (!dragWindow_) {
         LOGE("DragWindowOhos::Destroy, the drag window is null.");

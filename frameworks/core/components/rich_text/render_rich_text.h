@@ -47,7 +47,7 @@ public:
 
 private:
     void CreateRealWeb(int32_t top, int32_t left, bool visible, bool reCreate = false);
-    void PorcessMove(double posY);
+    void ProcessMove(double posY);
 
 protected:
     RefPtr<RichTextDelegate> delegate_;

@@ -1,17 +1,17 @@
 /*
-* Copyright (c) 2021-2022 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_PARALLEL_RECOGNIZER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_PARALLEL_RECOGNIZER_H
@@ -31,11 +31,20 @@ class ACE_EXPORT ParallelRecognizer : public MultiFingersRecognizer {
 public:
     explicit ParallelRecognizer(const std::vector<RefPtr<GestureRecognizer>>& recognizers)
     {
-        for (auto& recognizer : recognizers) {
+        for (const auto& recognizer : recognizers) {
+            recognizer->SetGestureGroup(AceType::WeakClaim(this));
+            recognizers_.emplace_back(recognizer);
+        }
+    }
+
+    explicit ParallelRecognizer(std::list<RefPtr<GestureRecognizer>>&& recognizers)
+    {
+        recognizers_ = std::move(recognizers);
+        for (const auto& recognizer : recognizers_) {
             recognizer->SetGestureGroup(AceType::WeakClaim(this));
         }
-        recognizers_ = recognizers;
     }
+
     ~ParallelRecognizer() override = default;
     void OnAccepted(size_t touchId) override;
     void OnRejected(size_t touchId) override;
@@ -55,10 +64,9 @@ private:
     void DelFromReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer) override {}
     bool IsRecognizeEnd(const RefPtr<GestureRecognizer>& recognizer);
 
-    std::vector<RefPtr<GestureRecognizer>> recognizers_;
+    std::list<RefPtr<GestureRecognizer>> recognizers_;
 };
 
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_PARALLEL_RECOGNIZER_H
-

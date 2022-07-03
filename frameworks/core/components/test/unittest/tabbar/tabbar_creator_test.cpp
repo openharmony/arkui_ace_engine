@@ -422,7 +422,7 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator010, TestSize.Level1)
     EXPECT_EQ(tabBar->GetChildren().size(), std::size_t(2));
     EXPECT_EQ(tabBar->GetController()->GetId(), CONTROLLER_ID);
     EXPECT_EQ(tabBar->GetIndex(), 1);
-    EXPECT_EQ(tabBar->GetMode(), TabBarMode::SCROLLABEL);
+    EXPECT_EQ(tabBar->GetMode(), TabBarMode::SCROLLABLE);
     EXPECT_EQ(tabBar->GetIndicatorSize(), TabBarIndicatorType::LABEL);
     EXPECT_EQ(tabBar->GetLabelPadding(), LABEL_PADDING);
 }

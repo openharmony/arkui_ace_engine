@@ -151,16 +151,16 @@ public:
  * @brief A wrapper around v8::Function
  *
  */
-class V8Funktion : public V8Type<v8::Function> {
+class V8Function : public V8Type<v8::Function> {
 public:
-    V8Funktion();
-    explicit V8Funktion(v8::Local<v8::Function> obj);
-    ~V8Funktion() override = default;
+    V8Function();
+    explicit V8Function(v8::Local<v8::Function> obj);
+    ~V8Function() override = default;
 
     V8Ref<V8Value> Call(V8Ref<V8Value> thisVal, int argc = 0, V8Ref<V8Value> argv[] = nullptr) const;
     static v8::Local<v8::Function> New(FunctionCallback func);
 
-    FAKE_PTR_FOR_FUNCTION_ACCESS(V8Funktion)
+    FAKE_PTR_FOR_FUNCTION_ACCESS(V8Function)
 
 private:
     v8::Isolate* isolate_ = nullptr;

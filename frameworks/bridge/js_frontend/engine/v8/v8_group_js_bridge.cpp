@@ -206,7 +206,7 @@ void V8GroupJsBridge::ProcessJsRequest(const v8::FunctionCallbackInfo<v8::Value>
     if (dispatcherUpgrade != nullptr) {
         dispatcherUpgrade->Dispatch(strGroupName, std::move(encodeBuf), callbackId);
     } else {
-        LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+        LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
         groupJsBridge->TriggerModulePluginGetErrorCallback(callbackId, PLUGIN_REQUEST_FAIL, "send message failed");
     }
 }
@@ -275,7 +275,7 @@ void V8GroupJsBridge::ProcessJsRequestSync(const v8::FunctionCallbackInfo<v8::Va
     if (dispatcherUpgrade != nullptr) {
         dispatcherUpgrade->DispatchSync(strGroupName, std::move(encodeBuf), &resData, position);
     } else {
-        LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+        LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
         return;
     }
 

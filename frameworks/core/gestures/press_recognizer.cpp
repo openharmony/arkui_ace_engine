@@ -31,6 +31,7 @@ void PressRecognizer::OnAccepted(size_t touchId)
         PressInfo info(touchId);
         info.SetTimeStamp(trackPoint_.time);
         info.SetGlobalLocation(trackPoint_.GetOffset()).SetLocalLocation(trackPoint_.GetOffset() - coordinateOffset_);
+        info.SetTarget(GetEventTarget().value_or(EventTarget()));
         onPress_(info);
     }
 }

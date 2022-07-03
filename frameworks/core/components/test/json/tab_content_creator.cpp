@@ -39,8 +39,8 @@ RefPtr<Component> TabContentCreator::CreateFromJson(const JsonValue& componentJs
     RefPtr<TabController> controller = TabController::GetController(controllerId);
     auto contents = AceType::MakeRefPtr<TabContentComponent>(children, controller);
 
-    if (componentJson.Contains(TAB_CONTENT_SCROLLABEL) && componentJson.GetValue(TAB_CONTENT_SCROLLABEL)->IsBool()) {
-        contents->SetScrollable(componentJson.GetValue(TAB_CONTENT_SCROLLABEL)->GetBool());
+    if (componentJson.Contains(TAB_CONTENT_SCROLLABLE) && componentJson.GetValue(TAB_CONTENT_SCROLLABLE)->IsBool()) {
+        contents->SetScrollable(componentJson.GetValue(TAB_CONTENT_SCROLLABLE)->GetBool());
     }
 
     if (componentJson.Contains(TAB_IS_VERTICAL) && componentJson.GetValue(TAB_IS_VERTICAL)->IsBool()) {

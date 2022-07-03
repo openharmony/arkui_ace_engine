@@ -108,11 +108,11 @@ HWTEST_F(PluginComponentTest, FlutterRenderPluginCreateRenderNode001, TestSize.L
 }
 
 /**
- * @tc.name: PluginComponentSetPluginRequestionInfo001
- * @tc.desc: Verify the SetPluginRequestionInfo Interface of PluginComponent work correctly.
+ * @tc.name: PluginComponentSetPluginRequestInfo001
+ * @tc.desc: Verify the SetPluginRequestInfo Interface of PluginComponent work correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(PluginComponentTest, SetPluginRequestionInfo001, TestSize.Level1)
+HWTEST_F(PluginComponentTest, SetPluginRequestInfo001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Build a PluginComponent.
@@ -121,15 +121,15 @@ HWTEST_F(PluginComponentTest, SetPluginRequestionInfo001, TestSize.Level1)
     EXPECT_TRUE(pluginComponent != nullptr);
 
     /**
-     * @tc.steps: step2. Set Plugin Requestion Info.
-     * @tc.expected: step2. Set Plugin Requestion Info success.
+     * @tc.steps: step2. Set Plugin Request Info.
+     * @tc.expected: step2. Set Plugin Request Info success.
      */
     RequestPluginInfo pluginInfo;
     pluginInfo.width = PLUGIN_WIDTH;
     pluginInfo.height = PLUGIN_HEIGHT;
-    pluginComponent->SetPluginRequestionInfo(pluginInfo);
-    EXPECT_EQ(pluginComponent->GetPluginRequestionInfo().width, PLUGIN_WIDTH);
-    EXPECT_EQ(pluginComponent->GetPluginRequestionInfo().height, PLUGIN_HEIGHT);
+    pluginComponent->SetPluginRequestInfo(pluginInfo);
+    EXPECT_EQ(pluginComponent->GetPluginRequestInfo().width, PLUGIN_WIDTH);
+    EXPECT_EQ(pluginComponent->GetPluginRequestInfo().height, PLUGIN_HEIGHT);
 }
 
 /**
@@ -150,7 +150,7 @@ HWTEST_F(PluginComponentTest, PluginComponentSetDimension001, TestSize.Level1)
      * @tc.expected: step2. Set Dimension Update success.
      */
     pluginComponent->SetDimension(0);
-    EXPECT_EQ(pluginComponent->GetPluginRequestionInfo().dimension, 0);
+    EXPECT_EQ(pluginComponent->GetPluginRequestInfo().dimension, 0);
 }
 
 /**
@@ -171,7 +171,7 @@ HWTEST_F(PluginComponentTest, PluginComponentSetModuleName001, TestSize.Level1)
      * @tc.expected: step2. Set Module Name success.
      */
     pluginComponent->SetModuleName("module name");
-    EXPECT_EQ(pluginComponent->GetPluginRequestionInfo().moduleName, "module name");
+    EXPECT_EQ(pluginComponent->GetPluginRequestInfo().moduleName, "module name");
 }
 
 /**

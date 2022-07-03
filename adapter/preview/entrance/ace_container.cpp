@@ -121,7 +121,7 @@ void AceContainer::Destroy()
     assetManager_.Reset();
     pipelineContext_.Reset();
     aceView_ = nullptr;
-    LOGI("AceContainer::Destory end");
+    LOGI("AceContainer::Destroy end");
 }
 
 void AceContainer::DestroyView()
@@ -805,7 +805,7 @@ void AceContainer::InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs)
     }
     auto config = container->GetResourceConfiguration();
     config.SetDeviceType(SystemProperties::GetDeviceType());
-    config.SetOrientation(SystemProperties::GetDevcieOrientation());
+    config.SetOrientation(SystemProperties::GetDeviceOrientation());
     config.SetDensity(runArgs.deviceConfig.density);
     config.SetColorMode(runArgs.deviceConfig.colorMode);
     config.SetFontRatio(runArgs.deviceConfig.fontRatio);

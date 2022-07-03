@@ -42,7 +42,7 @@ public:
     std::string GetGridCount() const;
     std::unique_ptr<JsonValue> GetPrimaryButton() const;
     std::unique_ptr<JsonValue> GetSecondaryButton() const;
-    std::string ConverDialogAlignmentToString(DialogAlignment dialogAlignment) const;
+    std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment) const;
     AceType::IdType GetTargetTypeId() const override
     {
         return DialogElement::TypeId();

@@ -591,7 +591,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("overviewModeAccess", &JSWeb::OverviewModeAccess);
     JSClass<JSWeb>::StaticMethod("fileFromUrlAccess", &JSWeb::FileFromUrlAccess);
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
-    JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::TextZoomAtio);
+    JSClass<JSWeb>::StaticMethod("textZoomRatio", &JSWeb::TextZoomRatio);
     JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccessEnabled);
     JSClass<JSWeb>::StaticMethod("initialScale", &JSWeb::InitialScale);
     JSClass<JSWeb>::StaticMethod("backgroundColor", &JSWeb::BackgroundColor);
@@ -600,6 +600,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onMouse", &JSWeb::OnMouse);
     JSClass<JSWeb>::StaticMethod("onResourceLoad", &JSWeb::OnResourceLoad);
     JSClass<JSWeb>::StaticMethod("onScaleChange", &JSWeb::OnScaleChange);
+    JSClass<JSWeb>::StaticMethod("password", &JSWeb::Password);
+    JSClass<JSWeb>::StaticMethod("tableData", &JSWeb::TableData);
+    JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::OnFileSelectorShowAbandoned);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1352,7 +1355,7 @@ void JSWeb::DatabaseAccess(bool isDatabaseAccessEnabled)
     webComponent->SetDatabaseAccessEnabled(isDatabaseAccessEnabled);
 }
 
-void JSWeb::TextZoomAtio(int32_t textZoomAtioNum)
+void JSWeb::TextZoomRatio(int32_t textZoomRatioNum)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
@@ -1360,7 +1363,7 @@ void JSWeb::TextZoomAtio(int32_t textZoomAtioNum)
         LOGE("JSWeb: MainComponent is null.");
         return;
     }
-    webComponent->SetTextZoomAtio(textZoomAtioNum);
+    webComponent->SetTextZoomRatio(textZoomRatioNum);
 }
 
 void JSWeb::WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
@@ -1474,5 +1477,20 @@ void JSWeb::InitialScale(float scale)
         return;
     }
     webComponent->SetInitialScale(scale);
+}
+
+void JSWeb::Password(bool password)
+{
+    LOGI("JSWeb: Password placeholder");
+}
+
+void JSWeb::TableData(bool tableData)
+{
+    LOGI("JSWeb: TableData placeholder");
+}
+
+void JSWeb::OnFileSelectorShowAbandoned(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb: OnFileSelectorShow Abandoned");
 }
 } // namespace OHOS::Ace::Framework

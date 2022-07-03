@@ -367,7 +367,7 @@ void FrontendDelegateImpl::OnBackGround()
     OnPageHide();
 }
 
-void FrontendDelegateImpl::OnForground()
+void FrontendDelegateImpl::OnForeground()
 {
     OnPageShow();
 }
@@ -1862,9 +1862,9 @@ void FrontendDelegateImpl::LoadResourceConfiguration(std::map<std::string, std::
     std::set<std::string> mediaFileName;
     for (const auto& file : files) {
         auto mediaPathName = file.substr(file.find_first_of("/"));
-        std::regex mediaPartten("^\\/media\\/\\w*(\\.jpg|\\.png|\\.gif|\\.svg|\\.webp|\\.bmp)$");
+        std::regex mediaPattern("^\\/media\\/\\w*(\\.jpg|\\.png|\\.gif|\\.svg|\\.webp|\\.bmp)$");
         std::smatch result;
-        if (std::regex_match(mediaPathName, result, mediaPartten)) {
+        if (std::regex_match(mediaPathName, result, mediaPattern)) {
             mediaFileName.insert(mediaPathName.substr(mediaPathName.find_first_of("/")));
         }
     }
@@ -1891,8 +1891,8 @@ void FrontendDelegateImpl::LoadResourceConfiguration(std::map<std::string, std::
 void FrontendDelegateImpl::PushJsCallbackToRenderNode(NodeId id, double ratio,
     std::function<void(bool, double)>&& callback)
 {
-    auto visibleCallback = [jsCallback = std::move(callback), excutor = taskExecutor_] (bool visible, double ratio) {
-        excutor->PostTask([task = std::move(jsCallback), visible, ratio] {
+    auto visibleCallback = [jsCallback = std::move(callback), executor = taskExecutor_] (bool visible, double ratio) {
+        executor->PostTask([task = std::move(jsCallback), visible, ratio] {
             if (task) {
                 task(visible, ratio);
             }

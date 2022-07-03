@@ -53,7 +53,7 @@ void ImageProvider::FetchImageObject(
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
         if (!pipelineContext) {
-            LOGE("pipline context has been released. imageInfo: %{private}s", imageInfo.ToString().c_str());
+            LOGE("pipeline context has been released. imageInfo: %{private}s", imageInfo.ToString().c_str());
             return;
         }
         auto taskExecutor = pipelineContext->GetTaskExecutor();
@@ -63,7 +63,7 @@ void ImageProvider::FetchImageObject(
         }
         RefPtr<ImageObject> imageObj = QueryImageObjectFromCache(imageInfo, pipelineContext);
         if (!imageObj) { // if image object is not in cache, generate a new one.
-            imageObj = GeneraterAceImageObject(imageInfo, pipelineContext, useSkiaSvg);
+            imageObj = GeneratorAceImageObject(imageInfo, pipelineContext, useSkiaSvg);
         }
         if (!imageObj) { // if it fails to generate an image object, trigger fail callback.
             if (syncMode) {
@@ -108,7 +108,7 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(
     return imageCache->GetCacheImgObj(imageInfo.ToString());
 }
 
-RefPtr<ImageObject> ImageProvider::GeneraterAceImageObject(
+RefPtr<ImageObject> ImageProvider::GeneratorAceImageObject(
     const ImageSourceInfo& imageInfo,
     const RefPtr<PipelineContext> context,
     bool useSkiaSvg)

@@ -24,7 +24,7 @@ namespace OHOS::Ace::Framework {
 class JSCamera : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
-    static void JsDeviceposition(int32_t value);
+    static void JsDevicePosition(int32_t value);
     static void JSBind(BindingTarget globalObj);
 };
 

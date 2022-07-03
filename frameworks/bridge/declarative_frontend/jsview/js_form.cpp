@@ -63,7 +63,7 @@ void JSForm::Create(const JSCallbackInfo& info)
     fomInfo.temporary = temporary->ToBoolean();
 
     RefPtr<FormComponent> form = AceType::MakeRefPtr<OHOS::Ace::FormComponent>();
-    form->SetFormRequestionInfo(fomInfo);
+    form->SetFormRequestInfo(fomInfo);
 #else
     // for PC Preview
     RefPtr<ComposedComponent> form = AceType::MakeRefPtr<OHOS::Ace::ComposedComponent>("", "card");

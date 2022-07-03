@@ -22,6 +22,7 @@ namespace OHOS::Ace::Framework {
 void JSCommonView::Create(const JSCallbackInfo& info)
 {
     auto specializedBox = AceType::MakeRefPtr<OHOS::Ace::ProxyComponent>();
+    specializedBox->SetPassMinSize(false);
     ViewStackProcessor::GetInstance()->Push(specializedBox);
 }
 

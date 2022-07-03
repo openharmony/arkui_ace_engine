@@ -151,6 +151,11 @@ public:
         return DynamicCast<T>(eventHub_);
     }
 
+    RefPtr<GestureEventHub> GetOrCreateGestureEventHub() const
+    {
+        return eventHub_->GetOrCreateGestureEventHub();
+    }
+
     const RefPtr<LayoutProperty>& GetLayoutProperty() const
     {
         return layoutProperty_;
@@ -184,6 +189,7 @@ public:
         return depth_;
     }
 
+    // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     bool TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,
         TouchTestResult& result);
 

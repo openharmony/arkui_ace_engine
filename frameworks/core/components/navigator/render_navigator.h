@@ -37,9 +37,16 @@ public:
 
     void NavigatePage();
 
-    void SetTargetContainer(const WeakPtr<StageElement>& targetContainer)
+    void SetTargetContainer(const WeakPtr<StageElement>& targetContainer, bool useSubStage = false)
     {
         targetContainer_ = targetContainer;
+        useSubStage_ = useSubStage;
+        if (useSubStage_) {
+            // for navigation case, use replace flag.
+            if (type_ == NavigatorType::DEFAULT || type_ == NavigatorType::PUSH) {
+                type_ = NavigatorType::REPLACE;
+            }
+        }
     }
 
     bool GetActive() const
@@ -80,6 +87,8 @@ private:
     bool isDefWidth_ = false;
     std::function<void(const ClickInfo&)> onClickWithInfo_;
     std::function<void()> onClick_;
+
+    bool useSubStage_ = false;
 };
 
 } // namespace OHOS::Ace

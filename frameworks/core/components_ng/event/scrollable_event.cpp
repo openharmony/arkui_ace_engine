@@ -17,20 +17,23 @@
 
 #include "base/geometry/offset.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-ScrollableActuator::ScrollableActuator(const WeakPtr<FrameNode>& host) : host_(host) {}
+ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEventHub)
+    : gestureEventHub_(gestureEventHub)
+{}
 
-void ScrollableActuator::OnCollectTouchTarget(
-    const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
+void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
-    LOGI("TouchTest: OnCollectTouchTarget");
     if (!initialized_) {
         InitializeScrollable();
     }
     for (const auto& [axis, scrollable] : scrollables_) {
+        scrollable->SetGetEventTargetImpl(getEventTargetImpl);
         scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         result.emplace_back(scrollable);
     }
@@ -41,7 +44,8 @@ void ScrollableActuator::InitializeScrollable()
     if (scrollableEvents_.empty()) {
         return;
     }
-    auto host = host_.Upgrade();
+    auto gestureEventHub = gestureEventHub_.Upgrade();
+    auto host = gestureEventHub ? gestureEventHub->GetFrameNode() : nullptr;
     if (!host) {
         LOGE("the host is nullptr");
         return;

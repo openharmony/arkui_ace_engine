@@ -211,7 +211,7 @@ void V8DeclarativeGroupJsBridge::ProcessJsRequest(const v8::FunctionCallbackInfo
     if (dispatcherUpgrade != nullptr) {
         dispatcherUpgrade->Dispatch(strGroupName, std::move(encodeBuf), callbackId);
     } else {
-        LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+        LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
         groupJsBridge->TriggerModulePluginGetErrorCallback(callbackId, PLUGIN_REQUEST_FAIL, "send message failed");
     }
 }
@@ -286,7 +286,7 @@ void V8DeclarativeGroupJsBridge::ProcessJsRequestSync(const v8::FunctionCallback
     if (dispatcherUpgrade != nullptr) {
         dispatcherUpgrade->DispatchSync(strGroupName, std::move(encodeBuf), &resData, position);
     } else {
-        LOGW("Dispatcher Upgrade fail when dispatch request mesaage to platform");
+        LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
         return;
     }
 
@@ -565,7 +565,7 @@ void V8DeclarativeGroupJsBridge::TriggerModuleJsCallback(
         resultString = std::string("{\"code\":")
                             .append(std::to_string(code))
                             .append(",")
-                            .append("\"data\":\"invalid reponse data\"}");
+                            .append("\"data\":\"invalid response data\"}");
     }
     messageData.clear();
 

@@ -31,7 +31,7 @@ inline std::vector<double> GetJsDashValue(JSContext* ctx, JSValueConst value)
 {
     ScopedString scopedString(ctx, value);
     std::vector<std::string> props;
-    StringUtils::StringSpliter(scopedString.get(), ',', props);
+    StringUtils::StringSplitter(scopedString.get(), ',', props);
     std::vector<double> segments;
 
     for (const auto& prop : props) {
@@ -121,7 +121,7 @@ inline PaintState JsParseTextState(JSContext* ctx, JSValue value)
         ConvertStrToEnum(baselineStr.get(), BASELINE_TABLE, ArraySize(BASELINE_TABLE), TextBaseline::ALPHABETIC));
     ScopedString font(ctx, fontStyle);
     std::vector<std::string> fontProps;
-    StringUtils::StringSpliter(font.get(), ' ', fontProps);
+    StringUtils::StringSplitter(font.get(), ' ', fontProps);
     for (const auto& fontProp : fontProps) {
         if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
             style.SetFontWeight(ConvertStrToFontWeight(fontProp));
@@ -1352,7 +1352,7 @@ void OffscreenCanvasBridge::ParseImageData(
     JS_ToInt32(ctx, &width, jsWidth);
     JS_ToInt32(ctx, &height, jsHeight);
     ScopedString scopedString(ctx, jsData);
-    StringUtils::StringSpliter(scopedString.get(), ',', array);
+    StringUtils::StringSplitter(scopedString.get(), ',', array);
 
     JS_ToInt32(ctx, &imageData.x, argv[1]);
     JS_ToInt32(ctx, &imageData.y, argv[2]);
@@ -1713,7 +1713,7 @@ JSValue OffscreenCanvasBridge::JsFontSetter(JSContext* ctx, JSValueConst value, 
 {
     ScopedString fontStr(ctx, proto);
     std::vector<std::string> fontProps;
-    StringUtils::StringSpliter(fontStr.get(), ' ', fontProps);
+    StringUtils::StringSplitter(fontStr.get(), ' ', fontProps);
     bool updateFontStyle = false;
     auto bridge = GetOffscreenCanvasBridge(ctx, value);
     if (!bridge) {

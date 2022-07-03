@@ -47,8 +47,8 @@ void RenderTrack::Update(const RefPtr<Component>& component)
     colors_ = track->GetSectionsColors();
     weights_ = track->GetSectionsWeights();
     showIndicator_ = track->GetIndicatorFlag();
-    markedText_ = track->GetLableMarkedText();
-    markedTextColor_ = track->GetLableMarkedColor();
+    markedText_ = track->GetLabelMarkedText();
+    markedTextColor_ = track->GetLabelMarkedColor();
     direction_ = track->GetDirection();
     isReverse_ = track->IsReverse();
 

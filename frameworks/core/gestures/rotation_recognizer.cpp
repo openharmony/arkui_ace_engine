@@ -177,6 +177,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         info.SetAngle(resultAngle_);
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
+        info.SetTarget(GetEventTarget().value_or(EventTarget()));
         (*callback)(info);
     }
 }

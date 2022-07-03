@@ -357,7 +357,7 @@ void RenderDialogTween::ComputeInnerLayoutParam(LayoutParam& innerLayout)
         innerLayout.SetMinSize(Size(width, 0.0));
         innerLayout.SetMaxSize(Size(width, maxSize.Height()));
     } else if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        if (SystemProperties::GetDevcieOrientation() == DeviceOrientation::LANDSCAPE) {
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
             innerLayout.SetMinSize(Size(width, 0.0));
             innerLayout.SetMaxSize(Size(width, maxSize.Height() * DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE));
         } else {
@@ -420,7 +420,7 @@ Offset RenderDialogTween::ComputeChildPosition(const Size& childSize) const
 
         // Set different positions for different devices
         if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
-            SystemProperties::GetDevcieOrientation() == DeviceOrientation::PORTRAIT) {
+            SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
             topLeftPoint = Offset((maxSize.Width() - childSize.Width()) / 2.0,
                 maxSize.Height() - childSize.Height() - (isSetMargin_ ? 0.0 : NormalizeToPx(theme->GetMarginBottom())));
         } else {

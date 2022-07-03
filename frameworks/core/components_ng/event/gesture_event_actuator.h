@@ -16,20 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_ACTUATOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_ACTUATOR_H
 
-#include <list>
-
+#include "base/geometry/ng/offset_t.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components/scroll/scrollable.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
-class GestureEventActuator : public Referenced {
+class GestureEventActuator : public virtual AceType {
+    DECLARE_ACE_TYPE(GestureEventActuator, AceType)
 public:
     GestureEventActuator() = default;
     ~GestureEventActuator() override = default;
 
-    virtual void OnCollectTouchTarget(
-        const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
+    virtual void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
     {}
 };
 

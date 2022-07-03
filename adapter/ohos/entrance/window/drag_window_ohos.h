@@ -35,7 +35,7 @@ public:
     ~DragWindowOhos() = default;
 
     void MoveTo(int32_t x, int32_t y) const override;
-    void Destory() const override;
+    void Destroy() const override;
     void DrawPixelMap(const RefPtr<PixelMap>& pixelMap) override;
     void DrawImage(void* skImage) override;
     void DrawText(std::shared_ptr<txt::Paragraph> paragraph,

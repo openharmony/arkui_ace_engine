@@ -175,6 +175,7 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<RenderNode>& weakScrollableNo
             positionX = std::clamp(positionX, 0.0, (scrollBarSize - scrollBarChildSize).Width());
             position.SetX(positionX);
         }
+        scrollBar->SetChildPosition(position);
         scrollBarChild->SetPosition(position);
         scrollBar->MarkNeedRender();
     }

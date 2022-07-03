@@ -345,7 +345,7 @@ std::string_view Base64ImageLoader::GetBase64ImageCode(const std::string& uri)
     return code;
 }
 
-bool ResourceImageLoader::GetResourceId(const std::string& uri, const RefPtr<ThemeConstants>& themeContants,
+bool ResourceImageLoader::GetResourceId(const std::string& uri, const RefPtr<ThemeConstants>& themeConstants,
     uint32_t& resId) const
 {
     std::smatch matches;
@@ -363,7 +363,7 @@ bool ResourceImageLoader::GetResourceId(const std::string& uri, const RefPtr<The
     return false;
 }
 
-bool ResourceImageLoader::GetResourceId(const std::string& uri, const RefPtr<ThemeConstants>& themeContants,
+bool ResourceImageLoader::GetResourceId(const std::string& uri, const RefPtr<ThemeConstants>& themeConstants,
     std::string& path) const
 {
     std::smatch matches;
@@ -389,22 +389,22 @@ sk_sp<SkData> ResourceImageLoader::LoadImageData(
         LOGE("get theme manager failed");
         return nullptr;
     }
-    auto themeContants = themeManager->GetThemeConstants();
-    if (!themeContants) {
+    auto themeConstants = themeManager->GetThemeConstants();
+    if (!themeConstants) {
         LOGE("get theme constants failed");
         return nullptr;
     }
     uint32_t resId = 0;
     std::string path;
     std::ostringstream osstream;
-    if (GetResourceId(uri, themeContants, resId)) {
-        auto ret = themeContants->GetMediaResource(resId, osstream);
+    if (GetResourceId(uri, themeConstants, resId)) {
+        auto ret = themeConstants->GetMediaResource(resId, osstream);
         if (!ret) {
             LOGE("get resId image from resource manager failed");
             return nullptr;
         }
-    } else if (GetResourceId(uri, themeContants, path)) {
-        auto ret = themeContants->GetMediaResource(path, osstream);
+    } else if (GetResourceId(uri, themeConstants, path)) {
+        auto ret = themeConstants->GetMediaResource(path, osstream);
         if (!ret) {
             LOGE("get path image from resource manager failed");
             return nullptr;

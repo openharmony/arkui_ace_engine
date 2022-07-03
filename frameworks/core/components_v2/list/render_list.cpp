@@ -125,72 +125,7 @@ void RenderList::Update(const RefPtr<Component>& component)
     LOGI("cached count: %{public}zu", cachedCount_);
     spaceWidth_ = std::max(NormalizePercentToPx(component_->GetSpace(), vertical_),
         divider ? NormalizePercentToPx(divider->strokeWidth, vertical_) : 0.0);
-
-    if (scrollable_) {
-        scrollable_->SetAxis(axis);
-    } else {
-        auto callback = [weak = AceType::WeakClaim(this)](double offset, int32_t source) {
-            auto renderList = weak.Upgrade();
-
-            if (!renderList) {
-                return false;
-            }
-
-            if (source == SCROLL_FROM_START) {
-                renderList->ProcessDragStart(offset);
-                return true;
-            }
-
-            Offset delta;
-            if (renderList->vertical_) {
-                delta.SetX(0.0);
-                delta.SetY(offset);
-            } else {
-                delta.SetX(offset);
-                delta.SetY(0.0);
-            }
-            renderList->AdjustOffset(delta, source);
-            if ((source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION_SPRING) &&
-                renderList->currentOffset_ >= 0.0) {
-                if (renderList->scrollable_->RelatedScrollEventDoing(Offset(0.0, -offset))) {
-                    return false;
-                }
-            }
-            renderList->ProcessDragUpdate(renderList->GetMainAxis(delta));
-
-            // Stop animator of scroll bar.
-            auto scrollBarProxy = renderList->scrollBarProxy_;
-            if (scrollBarProxy) {
-                scrollBarProxy->StopScrollBarAnimator();
-            }
-            return renderList->UpdateScrollPosition(renderList->GetMainAxis(delta), source);
-        };
-        scrollable_ = AceType::MakeRefPtr<Scrollable>(callback, axis);
-        scrollable_->SetNotifyScrollOverCallBack([weak = AceType::WeakClaim(this)](double velocity) {
-            auto list = weak.Upgrade();
-            if (!list) {
-                return;
-            }
-            list->ProcessScrollOverCallback(velocity);
-        });
-        scrollable_->SetScrollEndCallback([weak = AceType::WeakClaim(this)]() {
-            auto list = weak.Upgrade();
-            if (!list) {
-                LOGW("render list Upgrade fail in scroll end callback");
-                return;
-            }
-            auto proxy = list->scrollBarProxy_;
-            if (proxy) {
-                proxy->StartScrollBarAnimator();
-            }
-            list->listEventFlags_[ListEvents::SCROLL_STOP] = true;
-            list->HandleListEvent();
-        });
-        if (vertical_) {
-            scrollable_->InitRelatedParent(GetParent());
-        }
-        scrollable_->Initialize(context_);
-    }
+    InitScrollable(axis);
     // now only support spring
     if (component_->GetEdgeEffect() == EdgeEffect::SPRING) {
         if (!scrollEffect_ || scrollEffect_->GetEdgeEffect() != EdgeEffect::SPRING) {
@@ -245,6 +180,78 @@ void RenderList::Update(const RefPtr<Component>& component)
     hasWidth_ = component_->GetHasWidth();
     isLaneList_ = (component_->GetLanes() != -1) || (component_->GetLaneConstrain() != std::nullopt);
     MarkNeedLayout();
+}
+
+void RenderList::InitScrollable(Axis axis)
+{
+    if (scrollable_) {
+        scrollable_->SetAxis(axis);
+        scrollable_->SetOnScrollBegin(component_->GetOnScrollBegin());
+        return;
+    }
+
+    auto callback = [weak = AceType::WeakClaim(this)](double offset, int32_t source) {
+        auto renderList = weak.Upgrade();
+
+        if (!renderList) {
+            return false;
+        }
+
+        if (source == SCROLL_FROM_START) {
+            renderList->ProcessDragStart(offset);
+            return true;
+        }
+
+        Offset delta;
+        if (renderList->vertical_) {
+            delta.SetX(0.0);
+            delta.SetY(offset);
+        } else {
+            delta.SetX(offset);
+            delta.SetY(0.0);
+        }
+        renderList->AdjustOffset(delta, source);
+        if ((source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION_SPRING) &&
+            renderList->currentOffset_ >= 0.0) {
+            if (renderList->scrollable_->RelatedScrollEventDoing(Offset(0.0, -offset))) {
+                return false;
+            }
+        }
+        renderList->ProcessDragUpdate(renderList->GetMainAxis(delta));
+
+        // Stop animator of scroll bar.
+        auto scrollBarProxy = renderList->scrollBarProxy_;
+        if (scrollBarProxy) {
+            scrollBarProxy->StopScrollBarAnimator();
+        }
+        return renderList->UpdateScrollPosition(renderList->GetMainAxis(delta), source);
+    };
+    scrollable_ = AceType::MakeRefPtr<Scrollable>(callback, axis);
+    scrollable_->SetNotifyScrollOverCallBack([weak = AceType::WeakClaim(this)](double velocity) {
+        auto list = weak.Upgrade();
+        if (!list) {
+            return;
+        }
+        list->ProcessScrollOverCallback(velocity);
+    });
+    scrollable_->SetScrollEndCallback([weak = AceType::WeakClaim(this)]() {
+        auto list = weak.Upgrade();
+        if (!list) {
+            LOGW("render list Upgrade fail in scroll end callback");
+            return;
+        }
+        auto proxy = list->scrollBarProxy_;
+        if (proxy) {
+            proxy->StartScrollBarAnimator();
+        }
+        list->listEventFlags_[ListEvents::SCROLL_STOP] = true;
+        list->HandleListEvent();
+    });
+    scrollable_->SetOnScrollBegin(component_->GetOnScrollBegin());
+    if (vertical_) {
+        scrollable_->InitRelatedParent(GetParent());
+    }
+    scrollable_->Initialize(context_);
 }
 
 void RenderList::InitScrollBarProxy()
@@ -374,7 +381,7 @@ void RenderList::CalculateLanes()
             minLaneLength_ = GetCrossSize(GetLayoutParam().GetMinSize()) / lanes;
             break;
         }
-        // Case 2: lane length constrain is set --> need to calculate [lanes_] according to contrain.
+        // Case 2: lane length constrain is set --> need to calculate [lanes_] according to contraint.
         // We agreed on such rules (assuming we have a vertical list here):
         // rule 1: [minLaneLength_] has a higher priority than [maxLaneLength_] when decide [lanes_], for e.g.,
         //         if [minLaneLength_] is 40, [maxLaneLength_] is 60, list's width is 120,
@@ -395,9 +402,9 @@ void RenderList::CalculateLanes()
         auto maxCrossSize = GetCrossSize(GetLayoutSize());
         double maxLanes = maxCrossSize / minLaneLength_;
         double minLanes = maxCrossSize / maxLaneLength_;
-        // let's considerate senarios when maxCrossSize > 0
+        // let's considerate scenarios when maxCrossSize > 0
         // now it's guaranteed that [minLaneLength_] <= [maxLaneLength_], i.e., maxLanes >= minLanes > 0
-        // there are 3 senarios:
+        // there are 3 scenarios:
         // 1. 1 > maxLanes >= minLanes > 0
         // 2. maxLanes >= 1 >= minLanes > 0
         // 3. maxLanes >= minLanes > 1
@@ -614,9 +621,6 @@ void RenderList::PerformLayout()
         RequestNewItemsAtStart(innerLayout);
     }
 
-    if (IsReachStart()) {
-        listEventFlags_[ListEvents::REACH_START] = true;
-    }
     // Check if reach the start of list
     reachStart_ = GreatOrEqual(currentOffset_, 0.0);
     if (noEdgeEffect && reachStart_) {
@@ -624,6 +628,9 @@ void RenderList::PerformLayout()
         currentOffset_ = 0;
     }
 
+    if (IsReachStart()) {
+        listEventFlags_[ListEvents::REACH_START] = true;
+    }
     bool scrollDownToReachEnd = LessNotEqual(prevMainPos_, mainSize) && GreatOrEqual(curMainPos, mainSize);
     bool scrollUpToReachEnd = GreatNotEqual(prevMainPos_, mainSize) && LessOrEqual(curMainPos, mainSize);
     // verify layout size to avoid trigger reach_end event at first [PerformLayout] when layout size is zero
@@ -690,7 +697,7 @@ void RenderList::HandleListEvent()
 double RenderList::CalculateLaneCrossOffset(double crossSize, double childCrossSize)
 {
     double delta = crossSize - childCrossSize;
-    // TODO: modify in rtl senario
+    // TODO: modify in rtl scenario
     switch (component_->GetAlignListItemAlign()) {
         case ListItemAlign::START:
             return 0.0;
@@ -1054,7 +1061,6 @@ bool RenderList::GetCurMainPosAndMainSize(double& curMainPos, double& mainSize)
 
 bool RenderList::UpdateScrollPosition(double offset, int32_t source)
 {
-    prevOffset_ = currentOffset_;
     if (source == SCROLL_FROM_START) {
         return true;
     }
@@ -1153,6 +1159,9 @@ double RenderList::ApplyLayoutParam()
 {
     auto maxLayoutSize = GetLayoutParam().GetMaxSize();
     if (!maxLayoutSize.IsValid() || maxLayoutSize.IsEmpty()) {
+        if (!GetVisible()) {
+            SetLayoutSize(Size());
+        }
         return 0.0;
     }
 
@@ -1606,7 +1615,7 @@ void RenderList::AdjustOffset(Offset& delta, int32_t source)
 
     overscrollPastStart = std::max(GetCurrentPosition(), 0.0);
     overscrollPastEnd = std::max(-GetCurrentPosition() - maxScrollExtent, 0.0);
-    // do not adjust offset if direction oppsite from the overScroll direction when out of boundary
+    // do not adjust offset if direction opposite from the overScroll direction when out of boundary
     if ((overscrollPastStart > 0.0 && offset < 0.0) || (overscrollPastEnd > 0.0 && offset > 0.0)) {
         return;
     }
@@ -2758,7 +2767,7 @@ void RenderList::ApplyRestoreInfo()
     if (GetRestoreInfo().empty()) {
         return;
     }
-    JumpToIndex(StringUtils::StringToInt(GetRestoreInfo()), DEFAULT_SOURCE);
+    startIndex_ = static_cast<size_t>(StringUtils::StringToInt(GetRestoreInfo()));
     SetRestoreInfo("");
 }
 
