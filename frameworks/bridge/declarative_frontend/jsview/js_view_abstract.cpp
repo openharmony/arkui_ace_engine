@@ -2063,7 +2063,7 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderImage", info, checkList)) {
-        LOGE("args is not a object. %s", info[0]->ToString().c_str());
+        LOGE("args is not a object. %{public}s", info[0]->ToString().c_str());
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
@@ -2088,7 +2088,6 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
     }
     auto valueRepeat = object->GetProperty("repeat");
     if (!valueRepeat->IsNull()) {
-        // LOGE("xxy in repeat");
         boxDecoration->SetHasBorderImageRepeat(true);
         ParseBorderImageRepeat(valueRepeat, borderImage);
     }
@@ -2101,7 +2100,6 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
     ParseBorderImageSource(valueSource, borderImage, boxDecoration);
     auto valueWidth = object->GetProperty("width");
     if (valueWidth->IsNumber() || valueWidth->IsString() || valueWidth->IsObject()) {
-        LOGE("xxy has border image width");
         boxDecoration->SetHasBorderImageWidth(true);
         ParseBorderImageWidth(valueWidth, borderImage);
     }
@@ -2145,7 +2143,7 @@ void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, Re
 {
     auto argsPtrItem = JsonUtil::ParseJsonString(args->ToString());
     if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("xxy Parse border image linear gradient failed. argsPtr is null. %s", args->ToString().c_str());
+        LOGE("Parse border image linear gradient failed. argsPtr is null. %s", args->ToString().c_str());
         return;
     }
     Gradient lineGradient;
@@ -2218,153 +2216,84 @@ void JSViewAbstract::ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<Bor
     }
 }
 
-void JSViewAbstract::ParseBorderImageDimension(const JSRef<JSVal>& args, Dimension& leftDimension,
-    Dimension& rightDimension, Dimension& topDimension, Dimension& bottomDimension)
-{
-    if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        auto leftValue = object->GetProperty("left");
-        if (!leftValue->IsUndefined() && (leftValue->IsNumber() || leftValue->IsString())) {
-            ParseJsDimensionVp(leftValue, leftDimension);
-        }
-        auto rightValue = object->GetProperty("right");
-        if (!rightValue->IsUndefined() && (rightValue->IsNumber() || rightValue->IsString())) {
-            ParseJsDimensionVp(rightValue, rightDimension);
-        }
-        auto topValue = object->GetProperty("top");
-        if (!topValue->IsUndefined() && (topValue->IsNumber() || topValue->IsString())) {
-            ParseJsDimensionVp(topValue, topDimension);
-        }
-        auto bottomValue = object->GetProperty("bottom");
-        if (!bottomValue->IsUndefined() && (bottomValue->IsNumber() || bottomValue->IsString())) {
-            ParseJsDimensionVp(bottomValue, bottomDimension);
-        }
-    } else {
-        // one single number value will apply to all sides
-        ParseJsDimensionVp(args, leftDimension);
-        rightDimension.SetValue(leftDimension.Value());
-        rightDimension.SetUnit(leftDimension.Unit());
-        topDimension.SetValue(leftDimension.Value());
-        topDimension.SetUnit(leftDimension.Unit());
-        bottomDimension.SetValue(leftDimension.Value());
-        bottomDimension.SetUnit(leftDimension.Unit());
-    }
-}
-
 void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    Dimension leftOutset(0.0);
-    Dimension rightOutset(0.0);
-    Dimension topOutset(0.0);
-    Dimension bottomOutset(0.0);
+    Dimension outsetDimension;
     if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        auto leftValue = object->GetProperty("left");
-        if (!leftValue->IsUndefined() && (leftValue->IsNumber() || leftValue->IsString())) {
-            ParseJsDimensionVp(leftValue, leftOutset);
-            if (leftValue->IsNumber()) {
-                leftOutset.SetUnit(DimensionUnit::PERCENT);
+        const char* keys[] = { "left", "right", "top", "bottom" };
+        for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
+            auto dimensionValue = object->GetProperty(keys[i]);
+            if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
+                ParseJsDimensionVp(dimensionValue, outsetDimension);
+                if (dimensionValue->IsNumber()) {
+                    outsetDimension.SetUnit(DimensionUnit::PERCENT);
+                }
+                borderImage->SetEdgeOutset(static_cast<BorderImageDirection>(i), outsetDimension);
+                
             }
-            borderImage->SetEdgeOutset(BorderImageDirection::LEFT, leftOutset);
-        }
-        auto rightValue = object->GetProperty("right");
-        if (!rightValue->IsUndefined() && (rightValue->IsNumber() || rightValue->IsString())) {
-            ParseJsDimensionVp(rightValue, rightOutset);
-            if (rightValue->IsNumber()) {
-                rightOutset.SetUnit(DimensionUnit::PERCENT);
-            }
-            borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, rightOutset);
-        }
-        auto topValue = object->GetProperty("top");
-        if (!topValue->IsUndefined() && (topValue->IsNumber() || topValue->IsString())) {
-            ParseJsDimensionVp(topValue, topOutset);
-            if (topValue->IsNumber()) {
-                topOutset.SetUnit(DimensionUnit::PERCENT);
-            }
-            borderImage->SetEdgeOutset(BorderImageDirection::TOP, topOutset);
-        }
-        auto bottomValue = object->GetProperty("bottom");
-        if (!bottomValue->IsUndefined() && (bottomValue->IsNumber() || bottomValue->IsString())) {
-            ParseJsDimensionVp(bottomValue, bottomOutset);
-            if (bottomValue->IsNumber()) {
-                bottomOutset.SetUnit(DimensionUnit::PERCENT);
-            }
-            borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, bottomOutset);
         }
     } else {
-        ParseJsDimensionVp(args, leftOutset);
+        ParseJsDimensionVp(args, outsetDimension);
         if (args->IsNumber()) {
-            leftOutset.SetUnit(DimensionUnit::PERCENT);
+            outsetDimension.SetUnit(DimensionUnit::PERCENT);
         }
-        borderImage->SetEdgeOutset(BorderImageDirection::LEFT, leftOutset);
-        borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, Dimension(leftOutset.Value(), leftOutset.Unit()));
-        borderImage->SetEdgeOutset(BorderImageDirection::TOP, Dimension(leftOutset.Value(), leftOutset.Unit()));
-        borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, Dimension(leftOutset.Value(), leftOutset.Unit()));
+        borderImage->SetEdgeOutset(BorderImageDirection::LEFT, outsetDimension);
+        borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, outsetDimension);
+        borderImage->SetEdgeOutset(BorderImageDirection::TOP, outsetDimension);
+        borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, outsetDimension);
     }
 }
 
 void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    Dimension leftSlice(0.0);
-    Dimension rightSlice(0.0);
-    Dimension topSlice(0.0);
-    Dimension bottomSlice(0.0);
-    ParseBorderImageDimension(args, leftSlice, rightSlice, topSlice, bottomSlice);
-    borderImage->SetEdgeSlice(BorderImageDirection::LEFT, leftSlice);
-    borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, rightSlice);
-    borderImage->SetEdgeSlice(BorderImageDirection::TOP, topSlice);
-    borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, bottomSlice);
+    Dimension sliceDimension;
+    if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        
+        const char* keys[] = { "left", "right", "top", "bottom" };
+        for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
+            auto dimensionValue = object->GetProperty(keys[i]);
+            if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
+                ParseJsDimensionVp(dimensionValue, sliceDimension);
+                borderImage->SetEdgeSlice(static_cast<BorderImageDirection>(i), sliceDimension);
+            }
+        }
+    } else {
+        ParseJsDimensionVp(args, sliceDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::LEFT, sliceDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, sliceDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::TOP, sliceDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, sliceDimension);
+    }
 }
 
 void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    Dimension leftWidth(0.0);
-    Dimension rightWidth(0.0);
-    Dimension topWidth(0.0);
-    Dimension bottomWidth(0.0);
+    Dimension widthDimension;
     if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        auto leftValue = object->GetProperty("left");
-        if (!leftValue->IsUndefined() && (leftValue->IsNumber() || leftValue->IsString())) {
-            ParseJsDimensionVp(leftValue, leftWidth);
-            if (leftValue->IsNumber()) {
-                leftWidth.SetUnit(DimensionUnit::PERCENT);
+        const char* keys[] = { "left", "right", "top", "bottom" };
+        for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
+            auto dimensionValue = object->GetProperty(keys[i]);
+            if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
+                ParseJsDimensionVp(dimensionValue, widthDimension);
+                if (dimensionValue->IsNumber()) {
+                    widthDimension.SetUnit(DimensionUnit::PERCENT);
+                }
+                borderImage->SetEdgeWidth(static_cast<BorderImageDirection>(i), widthDimension);
+                
             }
-            borderImage->SetEdgeWidth(BorderImageDirection::LEFT, leftWidth);
-        }
-        auto rightValue = object->GetProperty("right");
-        if (!rightValue->IsUndefined() && (rightValue->IsNumber() || rightValue->IsString())) {
-            ParseJsDimensionVp(rightValue, rightWidth);
-            if (rightValue->IsNumber()) {
-                rightWidth.SetUnit(DimensionUnit::PERCENT);
-            }
-            borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, rightWidth);
-        }
-        auto topValue = object->GetProperty("top");
-        if (!topValue->IsUndefined() && (topValue->IsNumber() || topValue->IsString())) {
-            ParseJsDimensionVp(topValue, topWidth);
-            if (topValue->IsNumber()) {
-                topWidth.SetUnit(DimensionUnit::PERCENT);
-            }
-            borderImage->SetEdgeWidth(BorderImageDirection::TOP, topWidth);
-        }
-        auto bottomValue = object->GetProperty("bottom");
-        if (!bottomValue->IsUndefined() && (bottomValue->IsNumber() || bottomValue->IsString())) {
-            ParseJsDimensionVp(bottomValue, bottomWidth);
-            if (bottomValue->IsNumber()) {
-                bottomWidth.SetUnit(DimensionUnit::PERCENT);
-            }
-            borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, bottomWidth);
         }
     } else {
-        ParseJsDimensionVp(args, leftWidth);
+        ParseJsDimensionVp(args, widthDimension);
         if (args->IsNumber()) {
-            leftWidth.SetUnit(DimensionUnit::PERCENT);
+            widthDimension.SetUnit(DimensionUnit::PERCENT);
         }
-        borderImage->SetEdgeWidth(BorderImageDirection::LEFT, leftWidth);
-        borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, Dimension(leftWidth.Value(), leftWidth.Unit()));
-        borderImage->SetEdgeWidth(BorderImageDirection::TOP, Dimension(leftWidth.Value(), leftWidth.Unit()));
-        borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, Dimension(leftWidth.Value(), leftWidth.Unit()));
+        borderImage->SetEdgeWidth(BorderImageDirection::LEFT, widthDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, widthDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::TOP, widthDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, widthDimension);
     }
 }
 
@@ -4758,7 +4687,6 @@ void JSViewAbstract::GetAngle(
 void JSViewAbstract::GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& colorStops)
 {
     if (!colorStops || colorStops->IsNull() || !colorStops->IsArray()) {
-        LOGE("colors null");
         return;
     }
 
@@ -4766,7 +4694,6 @@ void JSViewAbstract::GetGradientColorStops(Gradient& gradient, const std::unique
         GradientColor gradientColor;
         auto item = colorStops->GetArrayItem(i);
         if (item && !item->IsNull() && item->IsArray() && item->GetArraySize() >= 1) {
-            LOGE("xxy parsing colors");
             auto colorParams = item->GetArrayItem(0);
             // color
             Color color;
@@ -4778,13 +4705,11 @@ void JSViewAbstract::GetGradientColorStops(Gradient& gradient, const std::unique
             gradientColor.SetHasValue(false);
             // stop value
             if (item->GetArraySize() <= 1) {
-                LOGE("array size < 1");
                 continue;
             }
             auto stopValue = item->GetArrayItem(1);
             double value = 0.0;
             if (ParseJsonDouble(stopValue, value)) {
-                LOGE("stop value is %{public}f", value);
                 value = std::clamp(value, 0.0, 1.0);
                 gradientColor.SetHasValue(true);
                 //  [0, 1] -> [0, 100.0];

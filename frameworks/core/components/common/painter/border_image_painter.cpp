@@ -23,61 +23,43 @@
 
 namespace OHOS::Ace {
 
-BorderImagePainter::BorderImagePainter(const Size& paintSize, const RefPtr<Decoration>& decoration, 
+BorderImagePainter::BorderImagePainter(const Size& paintSize, const RefPtr<Decoration>& decoration,
     const sk_sp<SkImage>& image, double dipscale)
     : paintSize_(paintSize), decoration_(decoration), image_(image), dipscale_(dipscale)
 {}
 
 void BorderImagePainter::InitPainter()
 {
-    LOGE("xxy init");
     imageWidth_ = image_->width();
     imageHeight_ = image_->height();
-    LOGI("xxy Border image width %{public}f, height %{public}f", imageWidth_, imageHeight_);
     auto border = decoration_->GetBorder();
     auto borderImage = decoration_->GetBorderImage();
 
     InitBorderImageSlice(borderImage);
-    
     InitBorderImageWidth(border, borderImage);
-    
     InitBorderImageOutset(border, borderImage);
 
-    LOGE("xxy dipscale %{public}f", dipscale_);
-    LOGE("xxy outset left %{public}f, right %{public}f, top %{public}f, bottom %{public}f",
-        leftOutset_, rightOutset_, topOutset_, bottomOutset_);
-    LOGE("xxy slice left %{public}f, right %{public}f, top %{public}f, bottom %{public}f",
-        leftSlice_, rightSlice_, topSlice_, bottomSlice_);
-    LOGE("xxy width left %{public}f, right %{public}f, top %{public}f, bottom %{public}f",
-        leftWidth_, rightWidth_, topWidth_, bottomWidth_);
-    
-    // clip paint size for rosen border painting not enabled without rsNode 
-#ifndef ENABLE_ROSEN_BACKEND
-    paintSize_ += Size(leftWidth_ + rightWidth_ + leftOutset_ + rightOutset_,
-        topWidth_ + topOutset_ + bottomWidth_ + bottomOutset_);
-#endif
-    LOGE("xxy paint size width %{public}f, height %{public}f", paintSize_.Width(), paintSize_.Height());
-    srcRectLeft_ = SkRect::MakeXYWH(0, topSlice_, leftSlice_, imageHeight_ - topSlice_ - bottomSlice_);
-    srcRectTop_ = SkRect::MakeXYWH(leftSlice_, 0, imageWidth_ - leftSlice_ - rightSlice_, topSlice_);
+    srcRectLeft_ = SkRect::MakeXYWH(0, topSlice_, leftSlice_, std::fabs(imageHeight_ - topSlice_ - bottomSlice_));
+    srcRectTop_ = SkRect::MakeXYWH(leftSlice_, 0, std::fabs(imageWidth_ - leftSlice_ - rightSlice_), topSlice_);
     srcRectRight_ = SkRect::MakeXYWH(imageWidth_ - rightSlice_, topSlice_, rightSlice_,
-        imageHeight_ - topSlice_ - bottomSlice_);
+        std::fabs(imageHeight_ - topSlice_ - bottomSlice_));
     srcRectBottom_ = SkRect::MakeXYWH(leftSlice_, imageHeight_ - bottomSlice_,
-        imageWidth_ - leftSlice_ - rightSlice_, bottomSlice_);
+        std::fabs(imageWidth_ - leftSlice_ - rightSlice_), bottomSlice_);
+}
+
+void BorderImagePainter::UpdateExtraOffsetToPaintSize(const Offset& extraOffset)
+{
+    paintSize_ += Size(extraOffset.GetX() * 2, extraOffset.GetY() * 2);
 }
 
 void BorderImagePainter::InitBorderImageWidth(Border& border, RefPtr<BorderImage>& borderImage)
 {
     BorderImageEdge imageLeft = borderImage->GetBorderImageEdge(BorderImageDirection::LEFT);
-    // LOGE("xxy-imageleft %{public}s", imageLeft.ToString().c_str());
     BorderImageEdge imageTop = borderImage->GetBorderImageEdge(BorderImageDirection::TOP);
-    // LOGE("xxy-imagetop %{public}s", imageTop.ToString().c_str());
     BorderImageEdge imageRight = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT);
-    // LOGE("xxy-imageright %{public}s", imageRight.ToString().c_str());
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
-    // LOGE("xxy-imagebottom %{public}s", imageBottom.ToString().c_str());
 
     if (decoration_->GetHasBorderImageWidth()) {
-        LOGE("xxy HasBorderImageWidth");
         if (imageLeft.GetBorderImageWidth().Unit() == DimensionUnit::PERCENT) {
             leftWidth_ = border.Left().GetWidthInPx(dipscale_) * imageLeft.GetBorderImageWidth().Value();
         } else {
@@ -99,7 +81,6 @@ void BorderImagePainter::InitBorderImageWidth(Border& border, RefPtr<BorderImage
             bottomWidth_ = DimensionNormalizePercentToPx(imageBottom.GetBorderImageWidth(), false);
         }
     } else {
-        LOGE("xxy no HasBorderImageWidth");
         leftWidth_ = DimensionNormalizePercentToPx(border.Left().GetWidth(), true);
         topWidth_ = DimensionNormalizePercentToPx(border.Top().GetWidth(), false);
         rightWidth_ = DimensionNormalizePercentToPx(border.Right().GetWidth(), true);
@@ -110,43 +91,44 @@ void BorderImagePainter::InitBorderImageWidth(Border& border, RefPtr<BorderImage
 void BorderImagePainter::InitBorderImageSlice(RefPtr<BorderImage>& borderImage)
 {
     BorderImageEdge imageLeft = borderImage->GetBorderImageEdge(BorderImageDirection::LEFT);
-    // LOGE("xxy-imageleft %{public}s", imageLeft.ToString().c_str());
     BorderImageEdge imageTop = borderImage->GetBorderImageEdge(BorderImageDirection::TOP);
-    // LOGE("xxy-imagetop %{public}s", imageTop.ToString().c_str());
     BorderImageEdge imageRight = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT);
-    // LOGE("xxy-imageright %{public}s", imageRight.ToString().c_str());
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
-    // LOGE("xxy-imagebottom %{public}s", imageBottom.ToString().c_str());
+
     if (decoration_->GetHasBorderImageSlice()) {
-        // LOGE("xxy GetBorderImageSlice left %{public}s", imageLeft.GetBorderImageSlice().ToString().c_str());
         if (imageLeft.GetBorderImageSlice().Unit() == DimensionUnit::PERCENT) {
             leftSlice_ = imageWidth_ * imageLeft.GetBorderImageWidth().Value();
         } else {
             leftSlice_ = DimensionNormalizePercentToPx(imageLeft.GetBorderImageSlice(), true);
         }
-
-        // LOGE("xxy GetBorderImageSlice right %{public}s", imageRight.GetBorderImageSlice().ToString().c_str());
         if (imageRight.GetBorderImageSlice().Unit() == DimensionUnit::PERCENT) {
             rightSlice_ = imageWidth_ * imageRight.GetBorderImageSlice().Value();
         } else {
             rightSlice_ = DimensionNormalizePercentToPx(imageRight.GetBorderImageSlice(), true);
         }
-
-        // LOGE("xxy GetBorderImageSlice top %{public}s", imageTop.GetBorderImageSlice().ToString().c_str());
         if (imageTop.GetBorderImageSlice().Unit() == DimensionUnit::PERCENT) {
             topSlice_ = imageHeight_ * imageTop.GetBorderImageSlice().Value();
         } else {
             topSlice_ = DimensionNormalizePercentToPx(imageTop.GetBorderImageSlice(), false);
         }
-
-        // LOGE("xxy GetBorderImageSlice bottom %{public}s", imageBottom.GetBorderImageSlice().ToString().c_str());
         if (imageBottom.GetBorderImageSlice().Unit() == DimensionUnit::PERCENT) {
             bottomSlice_ = imageHeight_ * imageBottom.GetBorderImageSlice().Value();
         } else {
             bottomSlice_ = DimensionNormalizePercentToPx(imageBottom.GetBorderImageSlice(), false);
         }
+        if (GreatNotEqual(leftSlice_, imageWidth_)) {
+            leftSlice_ = imageWidth_;
+        }
+        if (GreatNotEqual(rightSlice_, imageWidth_)) {
+            rightSlice_ = imageWidth_;
+        }
+        if (GreatNotEqual(topSlice_, imageHeight_)) {
+            topSlice_ = imageHeight_;
+        }
+        if (GreatNotEqual(bottomSlice_, imageHeight_)) {
+            bottomSlice_ = imageHeight_;
+        }
     } else {
-        LOGE("xxy no HasBorderImageSlice");
         leftSlice_ = imageWidth_;
         topSlice_ = imageHeight_;
         rightSlice_ = imageWidth_;
@@ -164,40 +146,30 @@ void BorderImagePainter::InitBorderImageOutset(Border& border, RefPtr<BorderImag
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
 
     if (decoration_->GetHasBorderImageOutset()) {
-        LOGE("xxy  HasBorderImageOutset");
         if (imageLeft.GetBorderImageOutset().Unit() == DimensionUnit::PERCENT) {
-            LOGE("xxy leftOutset_ percent");
             leftOutset_ = border.Left().GetWidthInPx(dipscale_) * imageLeft.GetBorderImageOutset().Value();
         } else {
-            LOGE("xxy leftOutset_ num");
             leftOutset_ = DimensionNormalizePercentToPx(imageLeft.GetBorderImageOutset(), true);
         }
 
         if (imageRight.GetBorderImageOutset().Unit() == DimensionUnit::PERCENT) {
-            LOGE("xxy rightOutset_ percent");
             rightOutset_ = border.Right().GetWidthInPx(dipscale_) * imageRight.GetBorderImageOutset().Value();
         } else {
-            LOGE("xxy rightOutset_ num");
             rightOutset_ = DimensionNormalizePercentToPx(imageRight.GetBorderImageOutset(), true);
         }
 
         if (imageTop.GetBorderImageOutset().Unit() == DimensionUnit::PERCENT) {
-            LOGE("xxy topOutset_ percent");
             topOutset_ = border.Top().GetWidthInPx(dipscale_) * imageTop.GetBorderImageOutset().Value();
         } else {
-            LOGE("xxy topOutset_ num");
             topOutset_ = DimensionNormalizePercentToPx(imageTop.GetBorderImageOutset(), false);
         }
 
         if (imageBottom.GetBorderImageOutset().Unit() == DimensionUnit::PERCENT) {
-            LOGE("xxy bottomOutset_ percent");
             bottomOutset_ = border.Bottom().GetWidthInPx(dipscale_) * imageBottom.GetBorderImageOutset().Value();
         } else {
-            LOGE("xxy bottomOutset_ num");
             bottomOutset_ = DimensionNormalizePercentToPx(imageBottom.GetBorderImageOutset(), false);
         }
     } else {
-        LOGE("xxy no HasBorderImageOutset");
         leftOutset_ = 0.0;
         topOutset_ = 0.0;
         rightOutset_ = 0.0;
@@ -207,30 +179,25 @@ void BorderImagePainter::InitBorderImageOutset(Border& border, RefPtr<BorderImag
 
 void BorderImagePainter::PaintBorderImage(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
 {
-    auto clipedOffset = Offset(offset.GetX(), offset.GetY());
-#ifndef ENABLE_ROSEN_BACKEND
-    clipedOffset -= Offset(leftWidth_, rightWidth_);
-#endif
-    PaintBorderImageCorners(clipedOffset, canvas, paint);
     if (paintCornersOnly_) {
         return;
     }
     switch (decoration_->GetBorderImage()->GetRepeatMode()) {
         case BorderImageRepeat::STRETCH:
-            PaintBorderImageStretch(clipedOffset, canvas, paint);
+            PaintBorderImageStretch(offset, canvas, paint);
             break;
         case BorderImageRepeat::SPACE:
-            PaintBorderImageSpace(clipedOffset, canvas, paint);
+            PaintBorderImageSpace(offset, canvas, paint);
             break;
         case BorderImageRepeat::ROUND:
-            PaintBorderImageRound(clipedOffset, canvas, paint);
+            PaintBorderImageRound(offset, canvas, paint);
             break;
         case BorderImageRepeat::REPEAT:
-            PaintBorderImageRepeat(clipedOffset, canvas, paint);
+            PaintBorderImageRepeat(offset, canvas, paint);
             break;
     }
     if (decoration_->GetBorderImage()->GetNeedFillCenter()) {
-        FillBorderImageCenter(clipedOffset, canvas, paint);
+        FillBorderImageCenter(offset, canvas, paint);
     }
     paint.reset();
 }
@@ -238,7 +205,7 @@ void BorderImagePainter::PaintBorderImage(const Offset& offset, SkCanvas* canvas
 void BorderImagePainter::FillBorderImageCenter(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
 {
     SkRect srcRectCenter = SkRect::MakeXYWH(leftSlice_, topSlice_,
-        imageWidth_ - leftSlice_ - rightSlice_, imageHeight_ - topSlice_ - bottomSlice_);
+        std::fabs(imageWidth_ - leftSlice_ - rightSlice_), std::fabs(imageHeight_ - topSlice_ - bottomSlice_));
     double horizontalBorderLength = paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_;
     double verticalBorderLength = paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset_ + bottomOutset_;
     SkRect desRectCenter = SkRect::MakeXYWH(
@@ -255,10 +222,6 @@ void BorderImagePainter::PaintBorderImageCorners(const Offset& offset, SkCanvas*
     double offsetRightX = offset.GetX() + paintSize_.Width() + rightOutset_;
     double offsetTopY = offset.GetY() - topOutset_;
     double offsetBottomY = offset.GetY() + paintSize_.Height() + bottomOutset_;
-    LOGE("xxy=========================================");
-    LOGE("xxy image width %{public}f, height %{public}f", imageWidth_, imageHeight_);
-    LOGE("xxy offset leftX %{public}f, rightX %{public}f, topY %{public}f, buttomY %{public}f",
-        offsetLeftX, offsetRightX, offsetTopY, offsetBottomY);
 
     // top left corner
     SkRect srcRectLeftTop = SkRect::MakeXYWH(0, 0, leftSlice_, topSlice_);
@@ -297,26 +260,21 @@ void BorderImagePainter::PaintBorderImageStretch(const Offset& offset, SkCanvas*
     double offsetRightX = offset.GetX() + paintSize_.Width() + rightOutset_;
     double offsetTopY = offset.GetY() - topOutset_;
     double offsetBottomY = offset.GetY() + paintSize_.Height() + bottomOutset_;
-    LOGE("xxy***********************************");
-    // left border-image_
     SkRect desRectLeft =
         SkRect::MakeXYWH(offsetLeftX, offsetTopY + topWidth_, leftWidth_,
             paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset_ + bottomOutset_);
     canvas->drawImageRect(image_, srcRectLeft_, desRectLeft, &paint);
 
-    // top border-image_
     SkRect desRectTop =
         SkRect::MakeXYWH(offsetLeftX + leftWidth_, offsetTopY,
             paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_, topWidth_);
     canvas->drawImageRect(image_, srcRectTop_, desRectTop, &paint);
 
-    // right border-image_
     SkRect desRectRight =
         SkRect::MakeXYWH(offsetRightX - rightWidth_, offsetTopY + topWidth_,
             rightWidth_, paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset_ + bottomOutset_);
     canvas->drawImageRect(image_, srcRectRight_, desRectRight, &paint);
 
-    // bottom border-image_
     SkRect desRectBottom =
         SkRect::MakeXYWH(offsetLeftX + leftWidth_, offsetBottomY - bottomWidth_,
             paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_, bottomWidth_);
@@ -352,7 +310,7 @@ void BorderImagePainter::PaintBorderImageRound(const Offset& offset, SkCanvas* c
     double roundStartHorizontal = offsetLeftX + leftWidth_;
 
     // draw shrinked border images on top and bottom edge
-    for (int i = 0; i < roundHorizontalCount; i++) {
+    for (int32_t i = 0; i < roundHorizontalCount; i++) {
         // top
         SkRect desRectTopRound =
             SkRect::MakeXYWH(roundStartHorizontal, offsetTopY, roundImageWidth, topWidth_);
@@ -366,7 +324,7 @@ void BorderImagePainter::PaintBorderImageRound(const Offset& offset, SkCanvas* c
     }
     double roundStartVertical = offsetTopY + topWidth_;
     // draw shrinked border images on left and right edge
-    for (int i = 0; i < roundVerticalCount; i++) {
+    for (int32_t i = 0; i < roundVerticalCount; i++) {
         // left
         SkRect desRectLeftRound =
             SkRect::MakeXYWH(offsetLeftX, roundStartVertical, leftWidth_, roundImageHeight);
@@ -401,7 +359,7 @@ void BorderImagePainter::PaintBorderImageSpace(const Offset& offset, SkCanvas* c
     double blankVerticalSize = fmod(verticalBorderLength, imageCenterHeight) / (roundVerticalCount + 1);
 
     double roundStartHorizontal = offsetLeftX + leftWidth_ + blankHorizontalSize;
-    for (int i = 0; i < roundHorizontalCount; i++) {
+    for (int32_t i = 0; i < roundHorizontalCount; i++) {
         // top
         SkRect desRectTopRound =
             SkRect::MakeXYWH(roundStartHorizontal, offsetTopY, imageCenterWidth, topWidth_);
@@ -416,7 +374,7 @@ void BorderImagePainter::PaintBorderImageSpace(const Offset& offset, SkCanvas* c
     }
 
     double roundStartVertical = offsetTopY + topWidth_ + blankVerticalSize;
-    for (int i = 0; i < roundVerticalCount; i++) {
+    for (int32_t i = 0; i < roundVerticalCount; i++) {
         // left
         SkRect desRectLeftRound =
             SkRect::MakeXYWH(offsetLeftX, roundStartVertical, leftWidth_, imageCenterHeight);
@@ -446,7 +404,6 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
     if (GreatNotEqual(imageCenterWidth, 0.0)) {
         widthFactor = horizontalBorderLength / imageCenterWidth;
         if (GreatNotEqual(widthFactor, 0.0) && LessOrEqual(widthFactor, 1.0)) {
-
             double halfSurplusImageCenterWidth = (imageCenterWidth - horizontalBorderLength) / 2;
             SkRect srcRectTop = SkRect::MakeXYWH(halfSurplusImageCenterWidth + leftSlice_, 0,
                 horizontalBorderLength, topSlice_);
@@ -455,7 +412,8 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
             canvas->drawImageRect(image_, srcRectTop, desRectTop, &paint);
 
             SkRect srcRectBottom =
-                SkRect::MakeXYWH(halfSurplusImageCenterWidth + leftSlice_, imageHeight - bottomSlice_, horizontalBorderLength, bottomSlice_);
+                SkRect::MakeXYWH(halfSurplusImageCenterWidth + leftSlice_, imageHeight - bottomSlice_,
+                    horizontalBorderLength, bottomSlice_);
             SkRect desRectBottom =
                 SkRect::MakeXYWH(offsetLeftX + leftWidth_,
                     offset.GetY() + paintSize_.Height() - bottomWidth_ + bottomOutset_,
@@ -463,10 +421,9 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
             canvas->drawImageRect(image_, srcRectBottom, desRectBottom, &paint);
 
         } else if (GreatNotEqual(widthFactor, 1.0)) {
-
             double halfSurplusHorizontalLength = 0;
             halfSurplusHorizontalLength = (horizontalBorderLength - (int)(widthFactor) * imageCenterWidth) / 2;
-            SkRect srcRectTopLeft = SkRect::MakeXYWH(imageWidth - rightSlice_ - halfSurplusHorizontalLength, 0,    
+            SkRect srcRectTopLeft = SkRect::MakeXYWH(imageWidth - rightSlice_ - halfSurplusHorizontalLength, 0,
                 halfSurplusHorizontalLength, topSlice_);
             SkRect desRectTopLeftEnd =
                 SkRect::MakeXYWH(offsetLeftX + leftWidth_, offsetTopY, halfSurplusHorizontalLength, topWidth_);
@@ -493,7 +450,7 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
             canvas->drawImageRect(image_, srcRectBottomRight, desRectBottomRightEnd, &paint);
 
             double repeatHorizontalStart = offsetLeftX + leftWidth_ + halfSurplusHorizontalLength;
-            for (int i = 0; i < (int)(widthFactor); i++) {
+            for (int32_t i = 0; i < (int)(widthFactor); i++) {
                 // top
                 SkRect desRectTopRepeat = SkRect::MakeXYWH(repeatHorizontalStart, offsetTopY,
                     imageCenterWidth, topWidth_);
@@ -514,10 +471,7 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
     double heightFactor = 0;
     if (GreatNotEqual(imageCenterHeight, 0.0)) {
         heightFactor = verticalBorderLength / imageCenterHeight;
-        LOGE("xxy verticalBorderLength %{public}f, imageCenterHeight %{public}f, heightFactor %{public}f",
-            verticalBorderLength, imageCenterHeight, heightFactor);
         if (GreatNotEqual(heightFactor, 0.0) && LessOrEqual(heightFactor, 1.0)) {
-
             double halfSurplusImageCenterHeight = (imageCenterHeight - verticalBorderLength) / 2;
             SkRect srcRectLeft =
                 SkRect::MakeXYWH(0, topSlice_ + halfSurplusImageCenterHeight, leftSlice_, verticalBorderLength);
@@ -533,7 +487,6 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
                     offset.GetY() - topOutset_ + topWidth_, rightWidth_, verticalBorderLength);
             canvas->drawImageRect(image_, srcRectRight, desRectRight, &paint);
         } else if (GreatNotEqual(heightFactor, 1.0)) {
-
             double halfSurplusVerticalLength = 0;
             halfSurplusVerticalLength = (verticalBorderLength - (int)(heightFactor) * imageCenterHeight) / 2;
             SkRect srcRectLeftTop =
@@ -553,18 +506,17 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
 
             SkRect srcRectLeftBottom = SkRect::MakeXYWH(0, topSlice_, leftSlice_, halfSurplusVerticalLength);
             SkRect desRectLeftBottomEnd = SkRect::MakeXYWH(offsetLeftX,
-                    offsetBottomY - bottomWidth_ - halfSurplusVerticalLength,
-                    leftWidth_, halfSurplusVerticalLength);
+                offsetBottomY - bottomWidth_ - halfSurplusVerticalLength, leftWidth_, halfSurplusVerticalLength);
             canvas->drawImageRect(image_, srcRectLeftBottom, desRectLeftBottomEnd, &paint);
 
             SkRect srcRectRightBottom =
                 SkRect::MakeXYWH(imageWidth - rightSlice_, topSlice_, rightSlice_, halfSurplusVerticalLength);
             SkRect desRectRightBottomEnd = SkRect::MakeXYWH(offsetRightX - rightWidth_,
-                    offsetBottomY - bottomWidth_ - halfSurplusVerticalLength, rightWidth_, halfSurplusVerticalLength);
+                offsetBottomY - bottomWidth_ - halfSurplusVerticalLength, rightWidth_, halfSurplusVerticalLength);
             canvas->drawImageRect(image_, srcRectRightBottom, desRectRightBottomEnd, &paint);
 
             double repeatVerticalStart = offsetTopY + topWidth_ + halfSurplusVerticalLength;
-            for (int i = 0; i < (int)(heightFactor); i++) {
+            for (int32_t i = 0; i < (int)(heightFactor); i++) {
                 // left
                 SkRect desRectLeftRepeat =
                     SkRect::MakeXYWH(offsetLeftX, repeatVerticalStart, leftWidth_, imageCenterHeight);

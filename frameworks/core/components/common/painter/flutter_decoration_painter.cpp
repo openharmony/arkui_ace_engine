@@ -761,7 +761,7 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
     }
 }
 
-void FlutterDecorationPainter::PaintBorderImage(SkPaint& paint,const Offset& offset, SkCanvas* canvas,
+void FlutterDecorationPainter::PaintBorderImage(SkPaint& paint, const Offset& offset, SkCanvas* canvas,
     const sk_sp<SkImage>& image)
 {
     paint.setAntiAlias(true);
@@ -771,8 +771,7 @@ void FlutterDecorationPainter::PaintBorderImage(SkPaint& paint,const Offset& off
         }
         canvas->save();
         
-        auto layoutSize = GetLayoutSize();
-        BorderImagePainter borderImagePainter(layoutSize, decoration_, image, dipScale_);
+        BorderImagePainter borderImagePainter(paintSize_, decoration_, image, dipScale_);
         borderImagePainter.InitPainter();
         borderImagePainter.PaintBorderImage(offset + margin_.GetOffsetInPx(dipScale_), canvas, paint);
         canvas->restore();
@@ -830,10 +829,7 @@ void FlutterDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* c
             clipLayer_->SetClipRRect(outerRRect);
         }
         PaintBoxShadows(outerRRect.sk_rrect, decoration_->GetShadows(), canvas);
-        if (!decoration_->GetHasBorderImageSource() && !decoration_->GetHasBorderImageGradient()) {
-            canvas->clipRRect(CanUseInnerRRect(border) ? innerRRect.sk_rrect : outerRRect.sk_rrect, true);
-        }
-        
+        canvas->clipRRect(CanUseInnerRRect(border) ? innerRRect.sk_rrect : outerRRect.sk_rrect, true);
         PaintColorAndImage(offset, canvas, paint, context);
         canvas->restore();
         if (decoration_->GetHasBorderImageSource() || decoration_->GetHasBorderImageGradient()) {

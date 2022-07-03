@@ -288,9 +288,9 @@ enum class BorderImageRepeat {
 };
 
 enum class BorderImageDirection {
-    TOP,
     LEFT,
     RIGHT,
+    TOP,
     BOTTOM,
 };
 

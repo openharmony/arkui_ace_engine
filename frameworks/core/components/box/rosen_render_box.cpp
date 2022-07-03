@@ -150,7 +150,7 @@ void RosenRenderBox::FetchImageData()
         }
         borderSrc_ = borderImage->GetSrc();
         if (borderSrc_.empty()) {
-            LOGE("xxy borderSrc_ is null!");
+            LOGE("borderSrc_ is null!");
             return;
         }
         if (image_) {
@@ -239,7 +239,10 @@ void RosenRenderBox::PerformLayout()
         LOGD("do not need to clip.");
         return;
     }
-
+    if (backDecoration_ &&
+        (backDecoration_->GetHasBorderImageSource() || backDecoration_->GetHasBorderImageGradient())) {
+        return;
+    }
     auto rsNode = GetRSNode();
     if (!rsNode) {
         return;
@@ -291,7 +294,9 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         SkRRect::MakeRect(SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom()));
         SkRect focusRect = SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom());
     Color bgColor = pipeline->GetAppBgColor();
-    FetchImageData();
+    if (backDecoration_->GetHasBorderImageSource() || backDecoration_->GetHasBorderImageGradient()) {
+        FetchImageData();
+    }
     if (backDecoration_) {
         auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
         if (canvas == nullptr) {
@@ -309,15 +314,9 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             RosenDecorationPainter::PaintHueRotate(outerRRect, canvas, backDecoration_->GetHueRotate(), bgColor);
             RosenDecorationPainter::PaintColorBlend(outerRRect, canvas, backDecoration_->GetColorBlend(), bgColor);
         }
-        auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-        auto layoutSize = GetLayoutSize();
-        RosenDecorationPainter::PaintBorderImage(
-            backDecoration_,
-            layoutSize,
-            Offset(offset.GetX() + NormalizeToPx(margin_.Left()),
-                offset.GetY() + NormalizeToPx(margin_.Top())),
-            recordingCanvas,
-            image_,
+        auto position = Offset(GetPosition().GetX() + NormalizeToPx(margin_.Left()),
+            GetPosition().GetY() + NormalizeToPx(margin_.Top()));
+        RosenDecorationPainter::PaintBorderImage(backDecoration_, paintSize_, position, offset, canvas, image_,
             dipScale_);
     }
     RenderNode::Paint(context, offset);

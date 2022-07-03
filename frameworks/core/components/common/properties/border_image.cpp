@@ -32,6 +32,8 @@ void BorderImage::SetEdgeSlice(BorderImageDirection direction, const Dimension& 
         case BorderImageDirection::RIGHT:
             borderImageRight_.SetBorderImageSlice(sliceDimension);
             break;
+        default:
+            LOGE("Unsupported border image direction");
     }
 }
 
@@ -39,21 +41,19 @@ void BorderImage::SetEdgeOutset(BorderImageDirection direction, const Dimension&
 {
     switch (direction) {
         case BorderImageDirection::TOP:
-        // LOGE("xxy BorderImage::outset TOP set %{public}f", outsetDimension.Value());
             borderImageTop_.SetBorderImageOutset(outsetDimension);
             break;
         case BorderImageDirection::BOTTOM:
-        // LOGE("xxy BorderImage::outset BOTTOM set %{public}f", outsetDimension.Value());
             borderImageBottom_.SetBorderImageOutset(outsetDimension);
             break;
         case BorderImageDirection::LEFT:
-        // LOGE("xxy BorderImage::outset LEFT set %{public}f", outsetDimension.Value());
             borderImageLeft_.SetBorderImageOutset(outsetDimension);
             break;
         case BorderImageDirection::RIGHT:
-        // LOGE("xxy BorderImage::outset RIGHT set %{public}f", outsetDimension.Value());
             borderImageRight_.SetBorderImageOutset(outsetDimension);
             break;
+        default:
+            LOGE("Unsupported border image direction");
     }
 }
 
@@ -72,8 +72,10 @@ void BorderImage::SetEdgeWidth(BorderImageDirection direction, const Dimension& 
         case BorderImageDirection::RIGHT:
             borderImageRight_.SetBorderImageWidth(widthDimension);
             break;
+        default:
+            LOGE("Unsupported border image direction");
     }
-    if (!hasBorderImageWidth_ && widthDimension.Value() > 0) {
+    if (!hasBorderImageWidth_ && GreatNotEqual(widthDimension.Value(), 0.0)) {
         hasBorderImageWidth_ = true;
     }
 }
@@ -89,6 +91,8 @@ BorderImageEdge& BorderImage::GetBorderImageEdge(BorderImageDirection direction)
             return borderImageLeft_;
         case BorderImageDirection::RIGHT:
             return borderImageRight_;
+        default:
+            LOGE("Unsupported border image direction");
     }
 }
 }

@@ -31,12 +31,11 @@ namespace OHOS::Ace {
 class BorderImagePainter : public virtual AceType {
     DECLARE_ACE_TYPE(BorderImagePainter, AceType);
 public:
-    BorderImagePainter(const Size& paintSize,
-        const RefPtr<Decoration>& decoration, 
-        const sk_sp<SkImage>& image,
+    BorderImagePainter(const Size& paintSize, const RefPtr<Decoration>& decoration, const sk_sp<SkImage>& image,
         double dipscale);
     ~BorderImagePainter() = default;
     void InitPainter();
+    void UpdateExtraOffsetToPaintSize(const Offset& offset);
     void PaintBorderImage(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
     static sk_sp<SkShader> CreateGradientShader(const Gradient& gradient, const SkSize& size, double dipScale);
 private:
@@ -56,23 +55,23 @@ private:
     Size paintSize_;
     RefPtr<Decoration> decoration_;
     sk_sp<SkImage> image_;
-    double imageWidth_;
-    double imageHeight_;
-    double dipscale_;
-    double leftWidth_;
-    double topWidth_;
-    double rightWidth_;
-    double bottomWidth_;
+    double imageWidth_ = 0.0;
+    double imageHeight_ = 0.0;
+    double dipscale_ = 0.0;
+    double leftWidth_ = 0.0;
+    double topWidth_ = 0.0;
+    double rightWidth_ = 0.0;
+    double bottomWidth_ = 0.0;
 
-    double leftSlice_;
-    double topSlice_;
-    double rightSlice_;
-    double bottomSlice_;
+    double leftSlice_ = 0.0;
+    double topSlice_ = 0.0;
+    double rightSlice_ = 0.0;
+    double bottomSlice_ = 0.0;
 
-    double leftOutset_;
-    double topOutset_;
-    double rightOutset_;
-    double bottomOutset_;
+    double leftOutset_ = 0.0;
+    double topOutset_ = 0.0;
+    double rightOutset_ = 0.0;
+    double bottomOutset_ = 0.0;
 
     SkRect srcRectLeft_;
     SkRect srcRectRight_;

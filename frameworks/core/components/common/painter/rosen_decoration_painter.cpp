@@ -749,36 +749,30 @@ void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* can
     rsNode->SetCornerRadius(cornerRadius);
 }
 
-void RosenDecorationPainter::PaintBorderImage(
-    RefPtr<OHOS::Ace::Decoration>& decoration,
-    Size& paintSize,
-    const Offset& offset,
-    SkCanvas* canvas,
-    const sk_sp<SkImage>& image,
-    double dipScale)
+void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize,
+    const Offset& position, const Offset& extraOffset, SkCanvas* canvas, const sk_sp<SkImage>& image, double dipScale)
 {
     if (decoration->GetHasBorderImageSource() || decoration->GetHasBorderImageGradient()) {
-            // set AntiAlias
+        // set AntiAlias
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setAntiAlias(true);
-       if (decoration->GetHasBorderImageSource()) {
-            LOGE("xxy PaintDecoration HasBorderImageSource");
+        if (decoration->GetHasBorderImageSource()) {
             if (!image) {
                 return;
             }
             canvas->save();
             
-            LOGE("xxy offset x %{public}f, y %{public}f", offset.GetX(), offset.GetY());
             BorderImagePainter borderImagePainter(paintSize, decoration, image, dipScale);
             borderImagePainter.InitPainter();
-            borderImagePainter.PaintBorderImage(offset, canvas, paint);
+            borderImagePainter.UpdateExtraOffsetToPaintSize(extraOffset);
+            borderImagePainter.PaintBorderImage(position, canvas, paint);
             canvas->restore();
         }
         if (decoration->GetHasBorderImageGradient()) {
             Gradient gradient = decoration->GetBorderImageGradient();
             if (!gradient.IsValid()) {
-                LOGE("xxy gradient not valid");
+                LOGE("Gradient not valid");
                 return;
             }
             if (NearZero(paintSize.Width()) || NearZero(paintSize.Height())) {
@@ -800,7 +794,8 @@ void RosenDecorationPainter::PaintBorderImage(
             
             BorderImagePainter borderImagePainter(paintSize, decoration, skImage, dipScale);
             borderImagePainter.InitPainter();
-            borderImagePainter.PaintBorderImage(offset, canvas, paint);
+            borderImagePainter.UpdateExtraOffsetToPaintSize(extraOffset);
+            borderImagePainter.PaintBorderImage(position, canvas, paint);
             paint.setShader(nullptr);
             canvas->restore();
             return;
