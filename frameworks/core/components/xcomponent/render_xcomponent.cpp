@@ -16,6 +16,142 @@
 #include "core/components/xcomponent/render_xcomponent.h"
 
 namespace OHOS::Ace {
+RenderXComponent::RenderXComponent()
+{
+    Initialize();
+}
+
+void RenderXComponent::Initialize()
+{
+    auto wp = AceType::WeakClaim(this);
+    touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
+    touchRecognizer_->SetOnTouchDown([wp](const TouchEventInfo& info) {
+        auto xcomponent = wp.Upgrade();
+        if (xcomponent) {
+            xcomponent->HandleTouchEvent(info, TouchType::DOWN);
+        }
+    });
+    touchRecognizer_->SetOnTouchUp([wp](const TouchEventInfo& info) {
+        auto xcomponent = wp.Upgrade();
+        if (xcomponent) {
+            xcomponent->HandleTouchEvent(info, TouchType::UP);
+        }
+    });
+    touchRecognizer_->SetOnTouchMove([wp](const TouchEventInfo& info) {
+        auto xcomponent = wp.Upgrade();
+        if (xcomponent) {
+            xcomponent->HandleTouchEvent(info, TouchType::MOVE);
+        }
+    });
+    touchRecognizer_->SetOnTouchCancel([wp](const TouchEventInfo& info) {
+        auto xcomponent = wp.Upgrade();
+        if (xcomponent) {
+            xcomponent->HandleTouchEvent(info, TouchType::CANCEL);
+        }
+    });
+}
+
+void RenderXComponent::OnTouchTestHit(
+    const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
+{
+    if (!touchRecognizer_) {
+        return;
+    }
+    touchRecognizer_->SetCoordinateOffset(coordinateOffset);
+    result.emplace_back(touchRecognizer_);
+}
+
+void RenderXComponent::HandleTouchEvent(const TouchEventInfo& info, const TouchType& touchType)
+{
+    std::list<TouchLocationInfo> touchInfoList;
+#ifdef OHOS_STANDARD_SYSTEM
+    touchInfoList = info.GetTouches();
+#else
+    if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        touchInfoList = info.GetChangedTouches();
+    } else {
+        touchInfoList = info.GetTouches();
+    }
+#endif
+    if (touchInfoList.empty()) {
+        return;
+    }
+    const auto& locationInfo = touchInfoList.front();
+    const auto& screenOffset = locationInfo.GetGlobalLocation();
+    const auto& localOffset = locationInfo.GetLocalLocation();
+    touchEventPoint_.id = locationInfo.GetFingerId();
+    touchEventPoint_.screenX = screenOffset.GetX();
+    touchEventPoint_.screenY = screenOffset.GetY();
+    touchEventPoint_.x = localOffset.GetX();
+    touchEventPoint_.y = localOffset.GetY();
+    touchEventPoint_.size = locationInfo.GetSize();
+    touchEventPoint_.force = locationInfo.GetForce();
+    touchEventPoint_.deviceId = locationInfo.GetTouchDeviceId();
+    const auto timeStamp = info.GetTimeStamp().time_since_epoch().count();
+    touchEventPoint_.timeStamp = timeStamp;
+    touchEventPoint_.type = ConvertNativeXComponentTouchEvent(touchType);
+#ifdef OHOS_STANDARD_SYSTEM
+    SetTouchPoint(touchInfoList, timeStamp, touchType);
+#endif
+    NativeXComponentDispatchTouchEvent(touchEventPoint_);
+}
+
+void RenderXComponent::SetTouchPoint(
+    const std::list<TouchLocationInfo>& touchInfoList, const int64_t timeStamp, const TouchType& touchType)
+{
+    touchEventPoint_.numPoints =
+        touchInfoList.size() <= OH_MAX_TOUCH_POINTS_NUMBER ? touchInfoList.size() : OH_MAX_TOUCH_POINTS_NUMBER;
+    uint32_t i = 0;
+    for (auto iterator = touchInfoList.begin(); iterator != touchInfoList.end() && i < OH_MAX_TOUCH_POINTS_NUMBER;
+         iterator++) {
+        OH_NativeXComponent_TouchPoint ohTouchPoint;
+        const auto& pointTouchInfo = *iterator;
+        const auto& pointScreenOffset = pointTouchInfo.GetGlobalLocation();
+        const auto& pointLocalOffset = pointTouchInfo.GetLocalLocation();
+        ohTouchPoint.id = pointTouchInfo.GetFingerId();
+        ohTouchPoint.screenX = pointScreenOffset.GetX();
+        ohTouchPoint.screenY = pointScreenOffset.GetY();
+        ohTouchPoint.x = pointLocalOffset.GetX();
+        ohTouchPoint.y = pointLocalOffset.GetY();
+        ohTouchPoint.type = ConvertNativeXComponentTouchEvent(touchType);
+        ohTouchPoint.size = pointTouchInfo.GetSize();
+        ohTouchPoint.force = pointTouchInfo.GetForce();
+        ohTouchPoint.timeStamp = timeStamp;
+        ohTouchPoint.isPressed = (touchType == TouchType::DOWN);
+        touchEventPoint_.touchPoints[i++] = ohTouchPoint;
+    }
+    while (i < OH_MAX_TOUCH_POINTS_NUMBER) {
+        OH_NativeXComponent_TouchPoint ohTouchPoint;
+        ohTouchPoint.id = 0;
+        ohTouchPoint.screenX = 0;
+        ohTouchPoint.screenY = 0;
+        ohTouchPoint.x = 0;
+        ohTouchPoint.y = 0;
+        ohTouchPoint.type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
+        ohTouchPoint.size = 0;
+        ohTouchPoint.force = 0;
+        ohTouchPoint.timeStamp = 0;
+        ohTouchPoint.isPressed = false;
+        touchEventPoint_.touchPoints[i++] = ohTouchPoint;
+    }
+}
+
+OH_NativeXComponent_TouchEventType RenderXComponent::ConvertNativeXComponentTouchEvent(const TouchType& touchType)
+{
+    switch (touchType) {
+        case TouchType::DOWN:
+            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_DOWN;
+        case TouchType::UP:
+            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UP;
+        case TouchType::MOVE:
+            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_MOVE;
+        case TouchType::CANCEL:
+            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_CANCEL;
+        default:
+            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
+    }
+}
+
 void RenderXComponent::PushTask(const TaskFunction& func)
 {
     tasks_.emplace_back(func);
@@ -195,26 +331,21 @@ void RenderXComponent::NativeXComponentDispatchTouchEvent(const OH_NativeXCompon
         LOGE("NativeXComponentDispatchTouchEvent context null");
         return;
     }
-    float scale = pipelineContext->GetViewScale();
-    float diffX = touchEvent.x - position_.GetX() * scale;
-    float diffY = touchEvent.y - position_.GetY() * scale;
-    if ((diffX >= 0) && (diffX <= drawSize_.Width() * scale) && (diffY >= 0) && (diffY <= drawSize_.Height() * scale)) {
-        pipelineContext->GetTaskExecutor()->PostTask(
-            [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, touchEvent] {
-                auto nXCompImpl = weakNXCompImpl.Upgrade();
-                if (nXComp != nullptr && nXCompImpl) {
-                    nXCompImpl->SetTouchEvent(touchEvent);
-                    auto surface = const_cast<void*>(nXCompImpl->GetSurface());
-                    auto callback = nXCompImpl->GetCallback();
-                    if (callback != nullptr && callback->DispatchTouchEvent != nullptr) {
-                        callback->DispatchTouchEvent(nXComp, surface);
-                    }
-                } else {
-                    LOGE("Native XComponent nullptr");
+    pipelineContext->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, touchEvent] {
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXComp != nullptr && nXCompImpl) {
+                nXCompImpl->SetTouchEvent(touchEvent);
+                auto surface = const_cast<void*>(nXCompImpl->GetSurface());
+                auto callback = nXCompImpl->GetCallback();
+                if (callback != nullptr && callback->DispatchTouchEvent != nullptr) {
+                    callback->DispatchTouchEvent(nXComp, surface);
                 }
-            },
-            TaskExecutor::TaskType::JS);
-    }
+            } else {
+                LOGE("Native XComponent nullptr");
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void RenderXComponent::HandleMouseHoverEvent(MouseState mouseState)
@@ -314,7 +445,7 @@ bool RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXCompon
     return true;
 }
 
-void RenderXComponent::NativeXComponentOffset(const double&x, const double& y)
+void RenderXComponent::NativeXComponentOffset(double x, double y)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
