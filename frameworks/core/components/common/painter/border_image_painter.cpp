@@ -15,11 +15,13 @@
 
 #include "core/components/common/painter/border_image_painter.h"
 
+#include "include/core/SkImage.h"
+
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/border_edge.h"
 #include "core/components/common/properties/border_image_edge.h"
 
-#include "include/core/SkImage.h"
+
 
 namespace OHOS::Ace {
 
@@ -34,11 +36,9 @@ void BorderImagePainter::InitPainter()
     imageHeight_ = image_->height();
     auto border = decoration_->GetBorder();
     auto borderImage = decoration_->GetBorderImage();
-
     InitBorderImageSlice(borderImage);
     InitBorderImageWidth(border, borderImage);
     InitBorderImageOutset(border, borderImage);
-
     srcRectLeft_ = SkRect::MakeXYWH(0, topSlice_, leftSlice_, std::fabs(imageHeight_ - topSlice_ - bottomSlice_));
     srcRectTop_ = SkRect::MakeXYWH(leftSlice_, 0, std::fabs(imageWidth_ - leftSlice_ - rightSlice_), topSlice_);
     srcRectRight_ = SkRect::MakeXYWH(imageWidth_ - rightSlice_, topSlice_, rightSlice_,
@@ -59,32 +59,37 @@ void BorderImagePainter::InitBorderImageWidth(Border& border, RefPtr<BorderImage
     BorderImageEdge imageRight = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT);
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
 
-    if (decoration_->GetHasBorderImageWidth()) {
-        if (imageLeft.GetBorderImageWidth().Unit() == DimensionUnit::PERCENT) {
-            leftWidth_ = border.Left().GetWidthInPx(dipscale_) * imageLeft.GetBorderImageWidth().Value();
-        } else {
-            leftWidth_ = DimensionNormalizePercentToPx(imageLeft.GetBorderImageWidth(), true);
-        }
-        if (imageTop.GetBorderImageWidth().Unit() == DimensionUnit::PERCENT) {
-            topWidth_ = border.Top().GetWidthInPx(dipscale_) * imageTop.GetBorderImageWidth().Value();
-        } else {
-            topWidth_ = DimensionNormalizePercentToPx(imageTop.GetBorderImageWidth(), false);
-        }
-        if (imageRight.GetBorderImageWidth().Unit() == DimensionUnit::PERCENT) {
-            rightWidth_ = border.Right().GetWidthInPx(dipscale_) * imageRight.GetBorderImageWidth().Value();
-        } else {
-            rightWidth_ = DimensionNormalizePercentToPx(imageRight.GetBorderImageWidth(), true);
-        }
-        if (imageBottom.GetBorderImageWidth().Unit() == DimensionUnit::PERCENT) {
-            bottomWidth_ = border.Bottom().GetWidthInPx(dipscale_) * imageBottom.GetBorderImageWidth().Value();
-        } else {
-            bottomWidth_ = DimensionNormalizePercentToPx(imageBottom.GetBorderImageWidth(), false);
-        }
+    if (!decoration_->GetHasBorderImageWidth()) {
+        border.Left().GetWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), leftWidth_);
+        border.Right().GetWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), rightWidth_);
+        border.Top().GetWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), topWidth_);
+        border.Bottom().GetWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), bottomWidth_);
+        return;
+    }
+
+    if (GreatNotEqual(imageLeft.GetBorderImageWidth().Value(), 0.0)) {
+        imageLeft.GetBorderImageWidth().NormalizeToPx(dipscale_, 0, 0,
+            border.Left().GetWidthInPx(dipscale_), leftWidth_);
     } else {
-        leftWidth_ = DimensionNormalizePercentToPx(border.Left().GetWidth(), true);
-        topWidth_ = DimensionNormalizePercentToPx(border.Top().GetWidth(), false);
-        rightWidth_ = DimensionNormalizePercentToPx(border.Right().GetWidth(), true);
-        bottomWidth_ = DimensionNormalizePercentToPx(border.Bottom().GetWidth(), false);
+        border.Left().GetWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), leftWidth_);
+    }
+    if (GreatNotEqual(imageRight.GetBorderImageWidth().Value(), 0.0)) {
+        imageRight.GetBorderImageWidth().NormalizeToPx(dipscale_, 0, 0,
+            border.Right().GetWidthInPx(dipscale_), rightWidth_);
+    } else {
+        border.Right().GetWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), rightWidth_);
+    }
+    if (GreatNotEqual(imageTop.GetBorderImageWidth().Value(), 0.0)) {
+        imageTop.GetBorderImageWidth().NormalizeToPx(dipscale_, 0, 0,
+            border.Top().GetWidthInPx(dipscale_), topWidth_);
+    } else {
+        border.Top().GetWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), topWidth_);
+    }
+    if (GreatNotEqual(imageBottom.GetBorderImageWidth().Value(), 0.0)) {
+        imageBottom.GetBorderImageWidth().NormalizeToPx(dipscale_, 0, 0,
+            border.Bottom().GetWidthInPx(dipscale_), bottomWidth_);
+    } else {
+        border.Bottom().GetWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), bottomWidth_);
     }
 }
 
@@ -95,46 +100,38 @@ void BorderImagePainter::InitBorderImageSlice(RefPtr<BorderImage>& borderImage)
     BorderImageEdge imageRight = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT);
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
 
-    if (decoration_->GetHasBorderImageSlice()) {
-        if (imageLeft.GetBorderImageSlice().Unit() == DimensionUnit::PERCENT) {
-            leftSlice_ = imageWidth_ * imageLeft.GetBorderImageWidth().Value();
-        } else {
-            leftSlice_ = DimensionNormalizePercentToPx(imageLeft.GetBorderImageSlice(), true);
-        }
-        if (imageRight.GetBorderImageSlice().Unit() == DimensionUnit::PERCENT) {
-            rightSlice_ = imageWidth_ * imageRight.GetBorderImageSlice().Value();
-        } else {
-            rightSlice_ = DimensionNormalizePercentToPx(imageRight.GetBorderImageSlice(), true);
-        }
-        if (imageTop.GetBorderImageSlice().Unit() == DimensionUnit::PERCENT) {
-            topSlice_ = imageHeight_ * imageTop.GetBorderImageSlice().Value();
-        } else {
-            topSlice_ = DimensionNormalizePercentToPx(imageTop.GetBorderImageSlice(), false);
-        }
-        if (imageBottom.GetBorderImageSlice().Unit() == DimensionUnit::PERCENT) {
-            bottomSlice_ = imageHeight_ * imageBottom.GetBorderImageSlice().Value();
-        } else {
-            bottomSlice_ = DimensionNormalizePercentToPx(imageBottom.GetBorderImageSlice(), false);
-        }
-        if (GreatNotEqual(leftSlice_, imageWidth_)) {
-            leftSlice_ = imageWidth_;
-        }
-        if (GreatNotEqual(rightSlice_, imageWidth_)) {
-            rightSlice_ = imageWidth_;
-        }
-        if (GreatNotEqual(topSlice_, imageHeight_)) {
-            topSlice_ = imageHeight_;
-        }
-        if (GreatNotEqual(bottomSlice_, imageHeight_)) {
-            bottomSlice_ = imageHeight_;
-        }
-    } else {
+    if (!decoration_->GetHasBorderImageSlice()) {
         leftSlice_ = imageWidth_;
         topSlice_ = imageHeight_;
         rightSlice_ = imageWidth_;
         bottomSlice_ = imageHeight_;
         paintCornersOnly_ = true;
         return;
+    }
+
+    if (GreatNotEqual(imageLeft.GetBorderImageSlice().Value(), 0.0)) {
+        imageLeft.GetBorderImageSlice().NormalizeToPx(dipscale_, 0, 0, imageWidth_, leftSlice_);
+    }
+    if (GreatNotEqual(imageRight.GetBorderImageSlice().Value(), 0.0)) {
+        imageRight.GetBorderImageSlice().NormalizeToPx(dipscale_, 0, 0, imageWidth_, rightSlice_);
+    }
+    if (GreatNotEqual(imageTop.GetBorderImageSlice().Value(), 0.0)) {
+        imageTop.GetBorderImageSlice().NormalizeToPx(dipscale_, 0, 0, imageHeight_, topSlice_);
+    }
+    if (GreatNotEqual(imageBottom.GetBorderImageSlice().Value(), 0.0)) {
+        imageBottom.GetBorderImageSlice().NormalizeToPx(dipscale_, 0, 0, imageHeight_, bottomSlice_);
+    }
+    if (GreatNotEqual(leftSlice_, imageWidth_)) {
+        leftSlice_ = imageWidth_;
+    }
+    if (GreatNotEqual(rightSlice_, imageWidth_)) {
+        rightSlice_ = imageWidth_;
+    }
+    if (GreatNotEqual(topSlice_, imageHeight_)) {
+        topSlice_ = imageHeight_;
+    }
+    if (GreatNotEqual(bottomSlice_, imageHeight_)) {
+        bottomSlice_ = imageHeight_;
     }
 }
 
@@ -144,41 +141,45 @@ void BorderImagePainter::InitBorderImageOutset(Border& border, RefPtr<BorderImag
     BorderImageEdge imageTop = borderImage->GetBorderImageEdge(BorderImageDirection::TOP);
     BorderImageEdge imageRight = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT);
     BorderImageEdge imageBottom = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM);
-
-    if (decoration_->GetHasBorderImageOutset()) {
-        if (imageLeft.GetBorderImageOutset().Unit() == DimensionUnit::PERCENT) {
-            leftOutset_ = border.Left().GetWidthInPx(dipscale_) * imageLeft.GetBorderImageOutset().Value();
-        } else {
-            leftOutset_ = DimensionNormalizePercentToPx(imageLeft.GetBorderImageOutset(), true);
-        }
-
-        if (imageRight.GetBorderImageOutset().Unit() == DimensionUnit::PERCENT) {
-            rightOutset_ = border.Right().GetWidthInPx(dipscale_) * imageRight.GetBorderImageOutset().Value();
-        } else {
-            rightOutset_ = DimensionNormalizePercentToPx(imageRight.GetBorderImageOutset(), true);
-        }
-
-        if (imageTop.GetBorderImageOutset().Unit() == DimensionUnit::PERCENT) {
-            topOutset_ = border.Top().GetWidthInPx(dipscale_) * imageTop.GetBorderImageOutset().Value();
-        } else {
-            topOutset_ = DimensionNormalizePercentToPx(imageTop.GetBorderImageOutset(), false);
-        }
-
-        if (imageBottom.GetBorderImageOutset().Unit() == DimensionUnit::PERCENT) {
-            bottomOutset_ = border.Bottom().GetWidthInPx(dipscale_) * imageBottom.GetBorderImageOutset().Value();
-        } else {
-            bottomOutset_ = DimensionNormalizePercentToPx(imageBottom.GetBorderImageOutset(), false);
-        }
-    } else {
+    if (!decoration_->GetHasBorderImageOutset()) {
         leftOutset_ = 0.0;
         topOutset_ = 0.0;
         rightOutset_ = 0.0;
         bottomOutset_ = 0.0;
+        return;
+    }
+    if (GreatNotEqual(imageLeft.GetBorderImageOutset().Value(), 0.0)) {
+        imageLeft.GetBorderImageOutset().NormalizeToPx(dipscale_, 0, 0,
+            border.Left().GetWidthInPx(dipscale_), leftOutset_);
+    } else {
+        border.Left().GetWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), leftOutset_);
+    }
+
+    if (GreatNotEqual(imageRight.GetBorderImageOutset().Value(), 0.0)) {
+        imageRight.GetBorderImageOutset().NormalizeToPx(dipscale_, 0, 0,
+            border.Right().GetWidthInPx(dipscale_), rightOutset_);
+    } else {
+        border.Right().GetWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Width(), rightOutset_);
+    }
+
+    if (GreatNotEqual(imageTop.GetBorderImageOutset().Value(), 0.0)) {
+        imageTop.GetBorderImageOutset().NormalizeToPx(dipscale_, 0, 0,
+            border.Top().GetWidthInPx(dipscale_), topOutset_);
+    } else {
+        border.Top().GetWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), topOutset_);
+    }
+
+    if (GreatNotEqual(imageBottom.GetBorderImageOutset().Value(), 0.0)) {
+        imageBottom.GetBorderImageOutset().NormalizeToPx(dipscale_, 0, 0,
+            border.Bottom().GetWidthInPx(dipscale_), bottomOutset_);
+    } else {
+        border.Bottom().GetWidth().NormalizeToPx(dipscale_, 0, 0, paintSize_.Height(), bottomOutset_);
     }
 }
 
 void BorderImagePainter::PaintBorderImage(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
 {
+    PaintBorderImageCorners(offset, canvas, paint);
     if (paintCornersOnly_) {
         return;
     }
@@ -195,6 +196,8 @@ void BorderImagePainter::PaintBorderImage(const Offset& offset, SkCanvas* canvas
         case BorderImageRepeat::REPEAT:
             PaintBorderImageRepeat(offset, canvas, paint);
             break;
+        default:
+            LOGE("Unsupported Border Image repeat mode");
     }
     if (decoration_->GetBorderImage()->GetNeedFillCenter()) {
         FillBorderImageCenter(offset, canvas, paint);
@@ -284,16 +287,17 @@ void BorderImagePainter::PaintBorderImageStretch(const Offset& offset, SkCanvas*
 void BorderImagePainter::PaintBorderImageRound(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
 {
     double offsetLeftX = offset.GetX() - leftOutset_;
+    double offsetRightX = offset.GetX() + paintSize_.Width() + rightOutset_;
     double offsetTopY = offset.GetY() - topOutset_;
-
+    double offsetBottomY = offset.GetY() + paintSize_.Height() + bottomOutset_;
     double horizontalBorderLength = paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_;
     double verticalBorderLength = paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset_ + bottomOutset_;
 
     double imageCenterWidth = imageWidth_ - leftSlice_ - rightSlice_;
     double imageCenterHeight = imageHeight_ - topSlice_ - bottomSlice_;
 
-    int roundHorizontalCount = (int)(horizontalBorderLength / imageCenterWidth);
-    int roundVerticalCount = (int)(verticalBorderLength / imageCenterHeight);
+    int32_t roundHorizontalCount = static_cast<int32_t>(horizontalBorderLength / imageCenterWidth);
+    int32_t roundVerticalCount = static_cast<int32_t>(verticalBorderLength / imageCenterHeight);
 
     // Surplus
     if (fmod(horizontalBorderLength, imageCenterWidth) != 0) {
@@ -317,8 +321,7 @@ void BorderImagePainter::PaintBorderImageRound(const Offset& offset, SkCanvas* c
         canvas->drawImageRect(image_, srcRectTop_, desRectTopRound, &paint);
         // bottom
         SkRect desRectBottomRound =
-            SkRect::MakeXYWH(roundStartHorizontal, offset.GetY() + paintSize_.Height() - bottomWidth_ + bottomOutset_,
-                roundImageWidth, bottomWidth_);
+            SkRect::MakeXYWH(roundStartHorizontal, offsetBottomY - bottomWidth_, roundImageWidth, bottomWidth_);
         canvas->drawImageRect(image_, srcRectBottom_, desRectBottomRound, &paint);
         roundStartHorizontal += roundImageWidth;
     }
@@ -331,8 +334,7 @@ void BorderImagePainter::PaintBorderImageRound(const Offset& offset, SkCanvas* c
         canvas->drawImageRect(image_, srcRectLeft_, desRectLeftRound, &paint);
         // right
         SkRect desRectRightRound =
-            SkRect::MakeXYWH(offset.GetX() + paintSize_.Width() - rightWidth_ + rightOutset_,
-                roundStartVertical, rightWidth_, roundImageHeight);
+            SkRect::MakeXYWH(offsetRightX- rightWidth_, roundStartVertical, rightWidth_, roundImageHeight);
         canvas->drawImageRect(image_, srcRectRight_, desRectRightRound, &paint);
         roundStartVertical += roundImageHeight;
     }
@@ -341,18 +343,24 @@ void BorderImagePainter::PaintBorderImageRound(const Offset& offset, SkCanvas* c
 void BorderImagePainter::PaintBorderImageSpace(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
 {
     double offsetLeftX = offset.GetX() - leftOutset_;
+    double offsetRightX = offset.GetX() + paintSize_.Width() + rightOutset_;
     double offsetTopY = offset.GetY() - topOutset_;
-
+    double offsetBottomY = offset.GetY() + paintSize_.Height() + bottomOutset_;
     double horizontalBorderLength = paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_;
     double verticalBorderLength = paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset_ + bottomOutset_;
 
-    double imageCenterWidth = imageWidth_ - leftSlice_ - rightSlice_;
-    double imageCenterHeight = imageHeight_ - topSlice_ - bottomSlice_;
+    double imageCenterWidth = std::fabs(imageWidth_ - leftSlice_ - rightSlice_);
+    double imageCenterHeight = std::fabs(imageHeight_ - topSlice_ - bottomSlice_);
 
     // calculate maximum count of image pieces can fit in border
-    int roundHorizontalCount = (int)(horizontalBorderLength / imageCenterWidth);
-    int roundVerticalCount = (int)(verticalBorderLength / imageCenterHeight);
-
+    int32_t roundHorizontalCount = static_cast<int32_t>(horizontalBorderLength / imageCenterWidth);
+    int32_t roundVerticalCount = static_cast<int32_t>(verticalBorderLength / imageCenterHeight);
+    if (roundHorizontalCount == 0.0) {
+        LOGW("Border image center width exceeds horizontal border center length, left and right side will not paint");
+    }
+    if (roundVerticalCount == 0.0) {
+        LOGW("Border image center height exceeds vertical border center length, top and bottom side will not paint");
+    }
     // fmod(horizontalBorderLength, imageCenterWidth) will return total blank length,
     // and there are roundHorizontalCount + 1 blanks
     double blankHorizontalSize = fmod(horizontalBorderLength, imageCenterWidth) / (roundHorizontalCount + 1);
@@ -366,8 +374,7 @@ void BorderImagePainter::PaintBorderImageSpace(const Offset& offset, SkCanvas* c
         canvas->drawImageRect(image_, srcRectTop_, desRectTopRound, &paint);
         // bottom
         SkRect desRectBottomRound =
-            SkRect::MakeXYWH(roundStartHorizontal, offset.GetY() + paintSize_.Height() + bottomOutset_ - bottomWidth_,
-            imageCenterWidth, bottomWidth_);
+            SkRect::MakeXYWH(roundStartHorizontal, offsetBottomY - bottomWidth_, imageCenterWidth, bottomWidth_);
         canvas->drawImageRect(image_, srcRectBottom_, desRectBottomRound, &paint);
 
         roundStartHorizontal += imageCenterWidth + blankHorizontalSize;
@@ -381,8 +388,7 @@ void BorderImagePainter::PaintBorderImageSpace(const Offset& offset, SkCanvas* c
         canvas->drawImageRect(image_, srcRectLeft_, desRectLeftRound, &paint);
         // right
         SkRect desRectRightRound =
-            SkRect::MakeXYWH(offset.GetX() + paintSize_.Width() - rightWidth_ + rightOutset_,
-                roundStartVertical, rightWidth_, imageCenterHeight);
+            SkRect::MakeXYWH(offsetRightX - rightWidth_, roundStartVertical, rightWidth_, imageCenterHeight);
         canvas->drawImageRect(image_, srcRectRight_, desRectRightRound, &paint);
         roundStartVertical += imageCenterHeight + blankVerticalSize;
     }
@@ -400,7 +406,7 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
 
     double horizontalBorderLength = paintSize_.Width() - leftWidth_ - rightWidth_ + leftOutset_ + rightOutset_;
     double imageCenterWidth = imageWidth - leftSlice_ - rightSlice_;
-    double widthFactor = 0;
+    double widthFactor = 0.0;
     if (GreatNotEqual(imageCenterWidth, 0.0)) {
         widthFactor = horizontalBorderLength / imageCenterWidth;
         if (GreatNotEqual(widthFactor, 0.0) && LessOrEqual(widthFactor, 1.0)) {
@@ -419,7 +425,6 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
                     offset.GetY() + paintSize_.Height() - bottomWidth_ + bottomOutset_,
                     horizontalBorderLength, bottomWidth_);
             canvas->drawImageRect(image_, srcRectBottom, desRectBottom, &paint);
-
         } else if (GreatNotEqual(widthFactor, 1.0)) {
             double halfSurplusHorizontalLength = 0;
             halfSurplusHorizontalLength = (horizontalBorderLength - (int)(widthFactor) * imageCenterWidth) / 2;
@@ -450,7 +455,7 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
             canvas->drawImageRect(image_, srcRectBottomRight, desRectBottomRightEnd, &paint);
 
             double repeatHorizontalStart = offsetLeftX + leftWidth_ + halfSurplusHorizontalLength;
-            for (int32_t i = 0; i < (int)(widthFactor); i++) {
+            for (int32_t i = 0; i < static_cast<int32_t>(widthFactor); i++) {
                 // top
                 SkRect desRectTopRepeat = SkRect::MakeXYWH(repeatHorizontalStart, offsetTopY,
                     imageCenterWidth, topWidth_);
@@ -468,7 +473,7 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
 
     double verticalBorderLength = paintSize_.Height() - topWidth_ - bottomWidth_ + topOutset_ + bottomOutset_;
     double imageCenterHeight = imageHeight - topSlice_ - bottomSlice_;
-    double heightFactor = 0;
+    double heightFactor = 0.0;
     if (GreatNotEqual(imageCenterHeight, 0.0)) {
         heightFactor = verticalBorderLength / imageCenterHeight;
         if (GreatNotEqual(heightFactor, 0.0) && LessOrEqual(heightFactor, 1.0)) {
@@ -516,7 +521,7 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
             canvas->drawImageRect(image_, srcRectRightBottom, desRectRightBottomEnd, &paint);
 
             double repeatVerticalStart = offsetTopY + topWidth_ + halfSurplusVerticalLength;
-            for (int32_t i = 0; i < (int)(heightFactor); i++) {
+            for (int32_t i = 0; i < static_cast<int32_t>(heightFactor); i++) {
                 // left
                 SkRect desRectLeftRepeat =
                     SkRect::MakeXYWH(offsetLeftX, repeatVerticalStart, leftWidth_, imageCenterHeight);
@@ -532,22 +537,5 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
         }
     }
     paint.reset();
-}
-
-double BorderImagePainter::NormalizeToPx(const Dimension& dimension)
-{
-    if ((dimension.Unit() == DimensionUnit::VP) || (dimension.Unit() == DimensionUnit::FP)) {
-        return (dimension.Value() * dipscale_);
-    }
-    return dimension.Value();
-}
-
-double BorderImagePainter::DimensionNormalizePercentToPx(const Dimension& dimension, bool isVertical)
-{
-    if (dimension.Unit() != DimensionUnit::PERCENT) {
-        return NormalizeToPx(dimension);
-    }
-    auto limit = isVertical ? paintSize_.Width() : paintSize_.Height();
-    return limit * dimension.Value();
 }
 }

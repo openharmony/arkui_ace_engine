@@ -93,6 +93,7 @@ BorderImageEdge& BorderImage::GetBorderImageEdge(BorderImageDirection direction)
             return borderImageRight_;
         default:
             LOGE("Unsupported border image direction");
+            return borderImageLeft_;
     }
 }
 }

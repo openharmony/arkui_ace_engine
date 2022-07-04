@@ -50,8 +50,6 @@ private:
     void InitBorderImageSlice(RefPtr<BorderImage>& borderImage);
     void InitBorderImageOutset(Border& border, RefPtr<BorderImage>& borderImage);
 
-    double NormalizeToPx(const Dimension& dimension);
-    double DimensionNormalizePercentToPx(const Dimension& dimension, bool isVertical);
     Size paintSize_;
     RefPtr<Decoration> decoration_;
     sk_sp<SkImage> image_;

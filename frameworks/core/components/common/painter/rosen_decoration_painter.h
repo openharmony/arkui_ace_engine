@@ -77,7 +77,7 @@ public:
 
     void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context);
 
-    static void PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize,const Offset& position,
+    static void PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize, const Offset& position,
         const Offset& extraOffset, SkCanvas* canvas, const sk_sp<SkImage>& image, double dipScale);
 
     static void PaintBoxShadows(const std::vector<Shadow>& shadows, const std::shared_ptr<RSNode>& rsNode);

@@ -752,54 +752,54 @@ void RosenDecorationPainter::PaintDecoration(const Offset& offset, SkCanvas* can
 void RosenDecorationPainter::PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize,
     const Offset& position, const Offset& extraOffset, SkCanvas* canvas, const sk_sp<SkImage>& image, double dipScale)
 {
-    if (decoration->GetHasBorderImageSource() || decoration->GetHasBorderImageGradient()) {
-        // set AntiAlias
-        SkPaint paint;
-        paint.setAntiAlias(true);
-        paint.setAntiAlias(true);
-        if (decoration->GetHasBorderImageSource()) {
-            if (!image) {
-                return;
-            }
-            canvas->save();
-            
-            BorderImagePainter borderImagePainter(paintSize, decoration, image, dipScale);
-            borderImagePainter.InitPainter();
-            borderImagePainter.UpdateExtraOffsetToPaintSize(extraOffset);
-            borderImagePainter.PaintBorderImage(position, canvas, paint);
-            canvas->restore();
-        }
-        if (decoration->GetHasBorderImageGradient()) {
-            Gradient gradient = decoration->GetBorderImageGradient();
-            if (!gradient.IsValid()) {
-                LOGE("Gradient not valid");
-                return;
-            }
-            if (NearZero(paintSize.Width()) || NearZero(paintSize.Height())) {
-                return;
-            }
-            canvas->save();
-            SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize.Width()),
-                SkDoubleToMScalar(paintSize.Height()));
-            auto shader = CreateGradientShader(gradient, skPaintSize, dipScale);
-            paint.setShader(std::move(shader));
-
-            auto imageInfo = SkImageInfo::Make(paintSize.Width(), paintSize.Height(),
-                SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
-            SkBitmap skBitmap;
-            skBitmap.allocPixels(imageInfo);
-            std::unique_ptr<SkCanvas> skCanvas = std::make_unique<SkCanvas>(skBitmap);
-            skCanvas->drawPaint(paint);
-            sk_sp<SkImage> skImage = SkImage::MakeFromBitmap(skBitmap);
-            
-            BorderImagePainter borderImagePainter(paintSize, decoration, skImage, dipScale);
-            borderImagePainter.InitPainter();
-            borderImagePainter.UpdateExtraOffsetToPaintSize(extraOffset);
-            borderImagePainter.PaintBorderImage(position, canvas, paint);
-            paint.setShader(nullptr);
-            canvas->restore();
+    if (!decoration->GetHasBorderImageSource() && !decoration->GetHasBorderImageGradient()) {
+        return;
+    }
+    // set AntiAlias
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    paint.setAntiAlias(true);
+    if (decoration->GetHasBorderImageSource()) {
+        if (!image) {
             return;
         }
+        canvas->save();
+        
+        BorderImagePainter borderImagePainter(paintSize, decoration, image, dipScale);
+        borderImagePainter.InitPainter();
+        borderImagePainter.UpdateExtraOffsetToPaintSize(extraOffset);
+        borderImagePainter.PaintBorderImage(position, canvas, paint);
+        canvas->restore();
+    }
+    if (decoration->GetHasBorderImageGradient()) {
+        Gradient gradient = decoration->GetBorderImageGradient();
+        if (!gradient.IsValid()) {
+            LOGE("Gradient not valid");
+            return;
+        }
+        if (NearZero(paintSize.Width()) || NearZero(paintSize.Height())) {
+            return;
+        }
+        canvas->save();
+        SkSize skPaintSize = SkSize::Make(SkDoubleToMScalar(paintSize.Width()),
+            SkDoubleToMScalar(paintSize.Height()));
+        auto shader = CreateGradientShader(gradient, skPaintSize, dipScale);
+        paint.setShader(std::move(shader));
+
+        auto imageInfo = SkImageInfo::Make(paintSize.Width(), paintSize.Height(),
+            SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+        SkBitmap skBitmap;
+        skBitmap.allocPixels(imageInfo);
+        std::unique_ptr<SkCanvas> skCanvas = std::make_unique<SkCanvas>(skBitmap);
+        skCanvas->drawPaint(paint);
+        sk_sp<SkImage> skImage = SkImage::MakeFromBitmap(skBitmap);
+        
+        BorderImagePainter borderImagePainter(paintSize, decoration, skImage, dipScale);
+        borderImagePainter.InitPainter();
+        borderImagePainter.UpdateExtraOffsetToPaintSize(extraOffset);
+        borderImagePainter.PaintBorderImage(position, canvas, paint);
+        paint.setShader(nullptr);
+        canvas->restore();
     }
 }
 

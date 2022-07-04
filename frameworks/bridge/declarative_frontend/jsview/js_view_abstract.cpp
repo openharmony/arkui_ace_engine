@@ -46,7 +46,6 @@
 #include "core/components/box/box_component_helper.h"
 #include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/position_param.h"
-#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/option/option_component.h"
@@ -2113,6 +2112,41 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+void JSViewAbstract::ParseBorderImageDimension(const JSRef<JSVal>& args,
+    BorderImage::BorderImageOption& borderImageDimension)
+{
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+    static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
+    for (uint32_t i = 0; i < keys.size(); i++) {
+        Dimension currentDimension;
+        auto dimensionValue = object->GetProperty(keys.at(i).c_str());
+        if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
+            ParseJsDimensionVp(dimensionValue, currentDimension);
+            if (dimensionValue->IsNumber()) {
+                currentDimension.SetUnit(DimensionUnit::PERCENT);
+            }
+            auto direction = static_cast<BorderImageDirection>(i);
+            switch (direction) {
+                case BorderImageDirection::LEFT:
+                    borderImageDimension.leftDimension = currentDimension;
+                    break;
+                case BorderImageDirection::RIGHT:
+                    borderImageDimension.rightDimension = currentDimension;
+                    break;
+                case BorderImageDirection::TOP:
+                    borderImageDimension.topDimension = currentDimension;
+                    break;
+                case BorderImageDirection::BOTTOM:
+                    borderImageDimension.bottomDimension = currentDimension;
+                    break;
+                default:
+                    LOGE("Unsupported border image direction");
+                    break;
+            }
+        }
+    }
+}
+
 void JSViewAbstract::ParseBorderImageSource(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage,
     RefPtr<Decoration>& boxDecoration)
 {
@@ -2121,9 +2155,7 @@ void JSViewAbstract::ParseBorderImageSource(const JSRef<JSVal>& args, RefPtr<Bor
     }
     std::string srcResult;
     if (args->IsString()) {
-        if (args->IsString()) {
-            srcResult = args->ToString();
-        }
+        srcResult = args->ToString();
         if (!srcResult.empty()) {
             borderImage->SetSrc(srcResult);
             boxDecoration->SetHasBorderImageSource(true);
@@ -2143,7 +2175,7 @@ void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, Re
 {
     auto argsPtrItem = JsonUtil::ParseJsonString(args->ToString());
     if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Parse border image linear gradient failed. argsPtr is null. %s", args->ToString().c_str());
+        LOGE("Parse border image linear gradient failed. argsPtr is null. %{public}s", args->ToString().c_str());
         return;
     }
     Gradient lineGradient;
@@ -2218,22 +2250,8 @@ void JSViewAbstract::ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<Bor
 
 void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    Dimension outsetDimension;
-    if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        const char* keys[] = { "left", "right", "top", "bottom" };
-        for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
-            auto dimensionValue = object->GetProperty(keys[i]);
-            if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
-                ParseJsDimensionVp(dimensionValue, outsetDimension);
-                if (dimensionValue->IsNumber()) {
-                    outsetDimension.SetUnit(DimensionUnit::PERCENT);
-                }
-                borderImage->SetEdgeOutset(static_cast<BorderImageDirection>(i), outsetDimension);
-                
-            }
-        }
-    } else {
+    if (args->IsNumber()) {
+        Dimension outsetDimension;
         ParseJsDimensionVp(args, outsetDimension);
         if (args->IsNumber()) {
             outsetDimension.SetUnit(DimensionUnit::PERCENT);
@@ -2242,50 +2260,51 @@ void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<Bor
         borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, outsetDimension);
         borderImage->SetEdgeOutset(BorderImageDirection::TOP, outsetDimension);
         borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, outsetDimension);
+        return;
+    }
+    BorderImage::BorderImageOption option;
+    ParseBorderImageDimension(args, option);
+    if (option.leftDimension.has_value()) {
+        borderImage->SetEdgeOutset(BorderImageDirection::LEFT, option.leftDimension.value());
+    }
+    if (option.rightDimension.has_value()) {
+        borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, option.rightDimension.value());
+    }
+    if (option.topDimension.has_value()) {
+        borderImage->SetEdgeOutset(BorderImageDirection::TOP, option.topDimension.value());
+    }
+    if (option.bottomDimension.has_value()) {
+        borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, option.bottomDimension.value());
     }
 }
 
 void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
     Dimension sliceDimension;
-    if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        
-        const char* keys[] = { "left", "right", "top", "bottom" };
-        for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
-            auto dimensionValue = object->GetProperty(keys[i]);
-            if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
-                ParseJsDimensionVp(dimensionValue, sliceDimension);
-                borderImage->SetEdgeSlice(static_cast<BorderImageDirection>(i), sliceDimension);
-            }
-        }
-    } else {
+    if (args->IsNumber()) {
         ParseJsDimensionVp(args, sliceDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::LEFT, sliceDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, sliceDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::TOP, sliceDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, sliceDimension);
+        return;
+    }
+
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+    static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
+    for (uint32_t i = 0; i < keys.size(); i++) {
+        auto dimensionValue = object->GetProperty(keys.at(i).c_str());
+        if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
+            ParseJsDimensionVp(dimensionValue, sliceDimension);
+            borderImage->SetEdgeSlice(static_cast<BorderImageDirection>(i), sliceDimension);
+        }
     }
 }
 
 void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
 {
-    Dimension widthDimension;
-    if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        const char* keys[] = { "left", "right", "top", "bottom" };
-        for (uint32_t i = 0; i < sizeof(keys) / sizeof(const char*); i++) {
-            auto dimensionValue = object->GetProperty(keys[i]);
-            if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
-                ParseJsDimensionVp(dimensionValue, widthDimension);
-                if (dimensionValue->IsNumber()) {
-                    widthDimension.SetUnit(DimensionUnit::PERCENT);
-                }
-                borderImage->SetEdgeWidth(static_cast<BorderImageDirection>(i), widthDimension);
-                
-            }
-        }
-    } else {
+    if (args->IsNumber()) {
+        Dimension widthDimension;
         ParseJsDimensionVp(args, widthDimension);
         if (args->IsNumber()) {
             widthDimension.SetUnit(DimensionUnit::PERCENT);
@@ -2294,6 +2313,22 @@ void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<Bord
         borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, widthDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::TOP, widthDimension);
         borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, widthDimension);
+        return;
+    }
+
+    BorderImage::BorderImageOption option;
+    ParseBorderImageDimension(args, option);
+    if (option.leftDimension.has_value()) {
+        borderImage->SetEdgeWidth(BorderImageDirection::LEFT, option.leftDimension.value());
+    }
+    if (option.rightDimension.has_value()) {
+        borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, option.rightDimension.value());
+    }
+    if (option.topDimension.has_value()) {
+        borderImage->SetEdgeWidth(BorderImageDirection::TOP, option.topDimension.value());
+    }
+    if (option.bottomDimension.has_value()) {
+        borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, option.bottomDimension.value());
     }
 }
 
@@ -4681,7 +4716,6 @@ void JSViewAbstract::GetAngle(
     } else {
         LOGE("Invalid value type");
     }
-    
 }
 
 void JSViewAbstract::GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& colorStops)

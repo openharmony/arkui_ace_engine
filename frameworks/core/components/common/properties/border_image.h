@@ -48,6 +48,13 @@ public:
         src_ = src;
     }
 
+    struct BorderImageOption {
+        std::optional<Dimension> leftDimension;
+        std::optional<Dimension> rightDimension;
+        std::optional<Dimension> topDimension;
+        std::optional<Dimension> bottomDimension;
+    };
+
     void SetEdgeSlice(BorderImageDirection direction, const Dimension& sliceDimension);
 
     void SetEdgeOutset(BorderImageDirection direction, const Dimension& outsetDimension);
