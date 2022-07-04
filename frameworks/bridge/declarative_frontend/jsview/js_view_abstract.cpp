@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "base/json/json_util.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
@@ -71,6 +72,8 @@ const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))",
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 constexpr double ROUND_UNIT = 360.0;
+constexpr double VISIBLE_RATIO_MIN = 0.0;
+constexpr double VISIBLE_RATIO_MAX = 1.0;
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -4074,6 +4077,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("accessibilityImportance", &JSViewAbstract::JsAccessibilityImportance);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
+    JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
 }
 
 void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
@@ -4616,6 +4620,64 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& args)
         };
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
         box->SetOnMouseId(onMouseId);
+    }
+}
+
+void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
+{
+    if (info.Length() != 2) {
+        LOGE("JsOnVisibleAreaChange: The arg is wrong, it is supposed to have 2 arguments");
+        return;
+    }
+
+    if (!info[0]->IsArray() || !info[1]->IsFunction()) {
+        LOGE("JsOnVisibleAreaChange: The param type is invalid.");
+        return;
+    }
+
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("JsOnVisibleAreaChange: This component does not have inspector");
+        return;
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("JsOnVisibleAreaChange: Fail to get container");
+        return;
+    }
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        LOGE("JsOnVisibleAreaChange: Fail to get context");
+        return;
+    }
+
+    auto nodeId = inspector->GetId();
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+    auto onVisibleChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                                       bool visible, double ratio) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onVisibleAreaChange");
+
+        JSRef<JSVal> params[2];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(visible));
+        params[1] = JSRef<JSVal>::Make(ToJSValue(ratio));
+        func->ExecuteJS(2, params);
+    };
+
+    auto ratioArray = JSRef<JSArray>::Cast(info[0]);
+    size_t size = ratioArray->Length();
+    for (size_t i = 0; i < size; i++) {
+        double ratio = 0.0;
+        ParseJsDouble(ratioArray->GetValueAt(i), ratio);
+        if (LessOrEqual(ratio, VISIBLE_RATIO_MIN)) {
+            ratio = VISIBLE_RATIO_MIN;
+        }
+
+        if (GreatOrEqual(ratio, VISIBLE_RATIO_MAX)) {
+            ratio = VISIBLE_RATIO_MAX;
+        }
+        context->AddVisibleAreaChangeNode(nodeId, ratio, onVisibleChangeCallback);
     }
 }
 

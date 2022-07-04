@@ -267,6 +267,7 @@ public:
     bool IsPassword() const override;
     bool IsChecked() const override;
     bool IsFocused() const override;
+    void TriggerVisibleAreaChangeCallback(std::list<VisibleCallbackInfo>& callbackInfoList);
 
 protected:
     RefPtr<RenderBox> GetRenderBox() const;
@@ -277,6 +278,10 @@ protected:
 
 private:
     RefPtr<PopupElementV2> GetPopupElement() const;
+    void ProcessAllVisibleCallback(std::list<VisibleCallbackInfo>& callbackInfoList, double currentVisibleRatio);
+    void OnVisibleAreaChangeCallback(
+        VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
+    double CalculateCurrentVisibleRatio(const Rect& visibleRect, const Rect& renderRect);
     bool isRectValid_;
     std::string key_;
 };

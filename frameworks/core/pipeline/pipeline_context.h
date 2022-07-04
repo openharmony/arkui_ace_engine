@@ -98,6 +98,12 @@ struct WindowBlurInfo {
     std::vector<RRect> coords_;
 };
 
+struct VisibleCallbackInfo {
+    VisibleRatioCallback callback;
+    double visibleRatio = 1.0;
+    bool isCurrentVisible = false;
+};
+
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 using SubscribeCtrlACallback = std::function<void()>;
 
@@ -1304,6 +1310,13 @@ public:
         }
     }
 
+    void AddVisibleAreaChangeNode(const ComposeId& nodeId, double ratio, const VisibleRatioCallback& callback);
+
+    bool GetOnShow() const
+    {
+        return onShow_;
+    }
+
 protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     virtual void SetRootRect(double width, double height, double offset = 0.0);
@@ -1341,6 +1354,7 @@ private:
     void CreateGeometryTransition();
     void CorrectPosition();
     void CreateTouchEventOnZoom(const AxisEvent& event);
+    void HandleVisibleAreaChangeEvent();
 
     template<typename T>
     struct NodeCompare {
@@ -1569,6 +1583,7 @@ private:
     bool isSubPipeline_ = false;
 
     PostRTTaskCallback postRTTaskCallback_;
+    std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
