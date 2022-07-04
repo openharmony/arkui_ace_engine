@@ -44,6 +44,7 @@ void FormElement::Update()
         LOGE("could not get form component for update");
         return;
     }
+    SetElementId(form->GetElementId());
 
     auto info = form->GetFormRequestInfo();
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||

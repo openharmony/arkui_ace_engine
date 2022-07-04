@@ -303,6 +303,8 @@ void InspectorComposedElement::Update()
         LOGE("fail to update due to component is null");
         return;
     }
+    SetElementId(component->GetElementId());
+
     auto inspectorFunctionImpl = component->GetInspectorFunctionImpl();
     inspectorFunctionImpl->SetUpdateEventInfoImpl([weak = WeakClaim(this)](BaseEventInfo& info) {
         auto composedElement = weak.Upgrade();

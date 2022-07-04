@@ -30,6 +30,7 @@ void StepperItemElement::Update()
     auto item = AceType::DynamicCast<StepperItemComponent>(component_);
     if (item) {
         SoleChildElement::Update();
+        SetElementId(item->GetElementId());
     }
 }
 

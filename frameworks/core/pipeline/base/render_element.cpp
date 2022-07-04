@@ -211,6 +211,7 @@ void RenderElement::Update()
         UpdateAccessibilityNode();
         renderNode_->UpdateAll(component_);
         if (component_ && nodeMounted_) {
+            SetElementId(component_->GetElementId());
             if (!component_->GetAppearEventMarker().IsEmpty()) {
                 auto appearCallback = AceAsyncEvent<void()>::Create(component_->GetAppearEventMarker(), context_);
                 appearCallback();

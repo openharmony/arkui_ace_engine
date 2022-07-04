@@ -118,6 +118,7 @@ public:
             retakeId_ = newComponent->GetRetakeId();
             componentTypeId_ = AceType::TypeId(component_);
             ignoreInspector_ = newComponent->IsIgnoreInspector();
+            SetElementId(newComponent->GetElementId());
             MarkNeedRebuild();
         }
     }
@@ -310,10 +311,11 @@ protected:
     IdType componentTypeId_ = 0;
     bool active_ = false;
 
-private:
+protected:
     void ChangeChildSlot(const RefPtr<Element>& child, int32_t slot);
     void ChangeChildRenderSlot(const RefPtr<Element>& child, int32_t renderSlot, bool effectDescendant);
 
+private:
     WeakPtr<Element> parent_;
     int32_t depth_ = 0;
     int32_t slot_ = DEFAULT_ELEMENT_SLOT;

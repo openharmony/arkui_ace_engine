@@ -80,6 +80,7 @@ void JSScrollBar::Create(const JSCallbackInfo& info)
             scrollBarComponent->SetDisplayMode(DISPLAY_MODE[stateValue->ToNumber<int32_t>()]);
         }
     }
+    ViewStackProcessor::GetInstance()->ClaimElementId(scrollBarComponent);
     ViewStackProcessor::GetInstance()->Push(scrollBarComponent);
     // Push DisplayComponent to enable opacity animation.
     ViewStackProcessor::GetInstance()->GetDisplayComponent();

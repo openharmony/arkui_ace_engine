@@ -256,6 +256,11 @@ public:
         return elmtId_;
     }
 
+    void SetElementId(ElementIdType elmtId)
+    {
+        elmtId_ = elmtId;
+    }
+
 protected:
     TextDirection direction_ = TextDirection::LTR;
 

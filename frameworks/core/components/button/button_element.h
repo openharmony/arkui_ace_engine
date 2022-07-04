@@ -32,6 +32,7 @@ public:
 
     void Apply(const RefPtr<Element>& child) override;
     void Update() override;
+    void LocalizedUpdate() override;
 
 private:
     void OnFocus() override;
