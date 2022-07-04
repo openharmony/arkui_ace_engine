@@ -105,7 +105,7 @@ void RenderWrap::PerformLayout()
         for (auto& item : GetChildren()) {
             auto flexItem = AceType::DynamicCast<RenderFlexItem>(item);
             if (flexItem &&
-                (flexItem->GetDisplayType() == DisplayType::BLOCK || flexItem->GetDisplayType() == DisplayType::FLEX)) {
+                (flexItem->GetDisplayType() == DisplayType::BLOCK)) {
                 CalculateMargin(item, beforeIsBlock, beforeMarginBottom);
                 item->Layout(layoutParam);
                 AddBlock(count, item, itemsList, currentMainLength, currentCrossLength, baselineDistance);
