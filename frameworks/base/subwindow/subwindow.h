@@ -33,6 +33,9 @@ public:
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
 
+    // Add interface for hot regions
+    virtual void SetHotAreas(const std::vector<Rect>& rects) {};
+
     int32_t GetSubwindowId()
     {
         return subwindowId_;

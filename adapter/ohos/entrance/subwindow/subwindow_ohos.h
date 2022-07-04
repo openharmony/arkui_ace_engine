@@ -43,11 +43,17 @@ public:
     void CloseMenu() override;
     void ClearMenu() override;
 
+    void SetHotAreas(const std::vector<Rect>& rects) override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
     void ShowWindow();
     void HideWindow();
+
+    // Convert Rect to Rosen::Rect
+    void RectConverter(const Rect& rect, Rosen::Rect& rosenRect);
+
     static int32_t id_;
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;
