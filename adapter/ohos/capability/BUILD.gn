@@ -50,7 +50,7 @@ template("ace_capability_ohos_source_set") {
         "ability_runtime:runtime",
         "bundle_framework:appexecfwk_base",
         "eventhandler:libeventhandler",
-        "graphic_standard:surface",
+        "graphic_graphic_2d:surface",
         "hiviewdfx_hilog_native:libhilog",
         "input:libmmi-client",
         "ipc:ipc_core",
