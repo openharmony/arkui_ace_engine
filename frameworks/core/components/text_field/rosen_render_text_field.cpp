@@ -1119,11 +1119,8 @@ int32_t RosenRenderTextField::GetCursorPositionForClick(const Offset& offset)
     clickOffset_ = offset - GetGlobalOffset() - innerRect_.GetOffset() - textOffsetForShowCaret_;
     // Solve can't select right boundary of RTL language.
     double rightBoundary = GetBoundaryOfParagraph(false);
-    if (GreatOrEqual(clickOffset_.GetX(), rightBoundary)) {
-        int32_t rightBoundaryPosition =
-            static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinateWithCluster(
-                rightBoundary - NormalizeToPx(CURSOR_WIDTH), clickOffset_.GetY()).position);
-        return realTextDirection_ == TextDirection::RTL ? 0 : rightBoundaryPosition;
+    if (realTextDirection_ == TextDirection::RTL && GreatOrEqual(clickOffset_.GetX(), rightBoundary)) {
+        return 0;
     }
     return static_cast<int32_t>(
         paragraph_->GetGlyphPositionAtCoordinateWithCluster(clickOffset_.GetX(), clickOffset_.GetY()).position);
