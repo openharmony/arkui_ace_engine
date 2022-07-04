@@ -362,8 +362,40 @@ public:
         touchRestrict_ = touchRestrict;
     }
 
+    void SetSubPipelineGlobalOffset(const Offset& subPipelineGlobalOffset, float viewScale)
+    {
+        subPipelineGlobalOffset_ = subPipelineGlobalOffset;
+        viewScale_ = viewScale;
+    }
+
+    bool DispatchMultiContainerEvent(const TouchEvent& point)
+    {
+#ifdef OHOS_STANDARD_SYSTEM
+        if (!subPipelineGlobalOffset_.IsZero()) {
+            auto multiContainerPoint = point.UpdateScalePoint(viewScale_,
+                subPipelineGlobalOffset_.GetX(), subPipelineGlobalOffset_.GetY(), point.id);
+            return DispatchEvent(multiContainerPoint);
+        }
+#endif
+        return DispatchEvent(point);
+    }
+
+    bool HandleMultiContainerEvent(const TouchEvent& point)
+    {
+#ifdef OHOS_STANDARD_SYSTEM
+        if (!subPipelineGlobalOffset_.IsZero()) {
+            auto multiContainerPoint = point.UpdateScalePoint(viewScale_,
+                subPipelineGlobalOffset_.GetX(), subPipelineGlobalOffset_.GetY(), point.id);
+            return HandleEvent(multiContainerPoint);
+        }
+#endif
+        return HandleEvent(point);
+    }
+
 protected:
     TouchRestrict touchRestrict_ { TouchRestrict::NONE };
+    Offset subPipelineGlobalOffset_;
+    float viewScale_ = 1.0f;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;

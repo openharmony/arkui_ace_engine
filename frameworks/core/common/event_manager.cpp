@@ -25,7 +25,7 @@
 namespace OHOS::Ace {
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
-    const TouchRestrict& touchRestrict, bool needAppend)
+    const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
     ContainerScope scope(instanceId_);
 
@@ -42,6 +42,13 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
     // For root node, the parent local point is the same as global point.
     renderNode->TouchTest(point, point, touchRestrict, hitTestResult);
     if (needAppend) {
+#ifdef OHOS_STANDARD_SYSTEM
+        for (auto entry = hitTestResult.begin(); entry != hitTestResult.end(); ++entry) {
+            if ((*entry)) {
+                (*entry)->SetSubPipelineGlobalOffset(offset, viewScale);
+            }
+        }
+#endif
         TouchTestResult prevHitTestResult = touchTestResults_[touchPoint.id];
         hitTestResult.splice(hitTestResult.end(), prevHitTestResult);
     }
@@ -109,7 +116,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
     if (iter != touchTestResults_.end()) {
         bool dispatchSuccess = true;
         for (auto entry = iter->second.rbegin(); entry != iter->second.rend(); ++entry) {
-            if (!(*entry)->DispatchEvent(point)) {
+            if (!(*entry)->DispatchMultiContainerEvent(point)) {
                 dispatchSuccess = false;
                 break;
             }
@@ -118,7 +125,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
         // the event, each recognizer needs to filter the extra events by itself.
         if (dispatchSuccess) {
             for (const auto& entry : iter->second) {
-                if (!entry->HandleEvent(point)) {
+                if (!entry->HandleMultiContainerEvent(point)) {
                     break;
                 }
             }

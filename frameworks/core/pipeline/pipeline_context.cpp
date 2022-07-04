@@ -1562,7 +1562,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         if (frontEnd && (frontEnd->GetType() == FrontendType::JS_CARD)) {
             touchRestrict.UpdateForbiddenType(TouchRestrict::LONG_PRESS);
         }
-        eventManager_->TouchTest(scalePoint, rootElement_->GetRenderNode(), touchRestrict, isSubPipe);
+        eventManager_->TouchTest(scalePoint, rootElement_->GetRenderNode(), touchRestrict,
+            GetPluginEventOffset(), viewScale_, isSubPipe);
 
         for (size_t i = 0; i < touchPluginPipelineContext_.size(); i++) {
             auto pipelineContext = touchPluginPipelineContext_[i].Upgrade();
