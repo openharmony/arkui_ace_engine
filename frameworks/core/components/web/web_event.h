@@ -231,6 +231,34 @@ private:
     RefPtr<Result> result_;
 };
 
+class ACE_EXPORT AuthResult : public AceType {
+    DECLARE_ACE_TYPE(AuthResult, AceType)
+
+public:
+    AuthResult() = default;
+    ~AuthResult() = default;
+
+    virtual bool Confirm(std::string &userName, std::string &pwd) = 0;
+    virtual bool IsHttpAuthInfoSaved() = 0;
+    virtual void Cancel() = 0;
+};
+
+class ACE_EXPORT WebHttpAuthEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebHttpAuthEvent, BaseEventInfo);
+
+public:
+    WebHttpAuthEvent(const RefPtr<AuthResult>& result)
+        : BaseEventInfo("WebHttpAuthEvent"), result_(result) {}
+    ~WebHttpAuthEvent() = default;
+
+    const RefPtr<AuthResult>& GetResult() const
+    {
+        return result_;
+    }
+private:
+    RefPtr<AuthResult> result_;
+};
+
 class ACE_EXPORT WebGeolocation : public AceType {
     DECLARE_ACE_TYPE(WebGeolocation, AceType)
 
