@@ -132,6 +132,8 @@ TouchEventInfo RawRecognizer::CreateTouchEventInfo(
             touchLocationInfo.SetForce(touchPoint.force);
             info.AddTouchLocationInfo(std::move(touchLocationInfo));
         }
+        info.SetTimeStamp(point.time);
+        info.SetDeviceId(point.deviceId);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         return info;
     }

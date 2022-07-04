@@ -20,6 +20,7 @@
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "core/components/xcomponent/resource/xcomponent_delegate.h"
 #include "core/components/xcomponent/xcomponent_component.h"
+#include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -32,6 +33,7 @@ public:
 
     static RefPtr<RenderNode> Create();
 
+    RenderXComponent();
     ~RenderXComponent() override = default;
 
     void Update(const RefPtr<Component>& component) override;
@@ -76,6 +78,12 @@ public:
     bool NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
 
 protected:
+    void Initialize();
+    void HandleTouchEvent(const TouchEventInfo& info, const TouchType& touchType = TouchType::UNKNOWN);
+    void OnTouchTestHit(
+        const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+    void NativeXComponentOffset(double x, double y);
+
     RefPtr<XComponentDelegate> delegate_;
     RefPtr<XComponentTaskPool> pool_;
     std::list<TaskFunction> tasks_;
@@ -94,7 +102,13 @@ protected:
     bool sizeChange_ = false;
     std::string id_;
 
-    void NativeXComponentOffset(const double& x, const double& y);
+    RefPtr<RawRecognizer> touchRecognizer_;
+
+private:
+    void SetTouchPoint(
+        const std::list<TouchLocationInfo>& touchInfoList, const int64_t timeStamp, const TouchType& touchType);
+    OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType);
+    OH_NativeXComponent_TouchEvent touchEventPoint_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_XCOMPONENT_RENDER_XCOMPONENT_H
