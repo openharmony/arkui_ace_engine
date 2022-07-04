@@ -147,7 +147,16 @@ void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
                 if (!eventInfo) {
                     return;
                 }
-                auto param = ConvertToJSValue(static_cast<int32_t>(eventInfo->GetType()));
+                int32_t eventType = -1;
+                if (eventInfo->GetType() == ScrollEvent::SCROLL_TOP) {
+                    eventType = 0; // 0 means Edge.Top
+                } else if (eventInfo->GetType() == ScrollEvent::SCROLL_BOTTOM) {
+                    eventType = 2; // 2 means Edge.Bottom
+                } else {
+                    LOGE("EventType is not support: %{public}d", static_cast<int32_t>(eventInfo->GetType()));
+                    return;
+                }
+                auto param = ConvertToJSValue(eventType);
                 func->Call(JSRef<JSObject>(), 1, &param);
             });
         auto scrollComponent =
