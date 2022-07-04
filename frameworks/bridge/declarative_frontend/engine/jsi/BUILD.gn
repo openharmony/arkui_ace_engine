@@ -44,11 +44,13 @@ ts2abc_gen_abc("gen_jsEnumStyle_abc") {
 ts2abc_gen_abc("gen_js_mock_system_plugin_abc") {
   extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
   src_js = rebase_path(
-          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/quickjs/jsMockSystemPlugin.js")
+          "$root_out_dir/obj/third_party/jsframework/dist/jsMockSystemPlugin.js")
   dst_file = rebase_path(base_output_path + "/jsMockSystemPlugin.abc")
 
-  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/quickjs/jsMockSystemPlugin.js" ]
+  in_puts = [ rebase_path(
+          "$root_out_dir/obj/third_party/jsframework/dist/jsMockSystemPlugin.js") ]
   out_puts = [ base_output_path + "/jsMockSystemPlugin.abc" ]
+  extra_dependencies = [ "//third_party/jsframework:gen_snapshot" ]
 }
 
 gen_obj("abc_proxyclass") {

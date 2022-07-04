@@ -46,18 +46,13 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-extern const char* _binary_stateMgmt_abc_start[];
-extern const char* _binary_stateMgmt_abc_end[];
-extern const char* _binary_jsEnumStyle_abc_start[];
-extern const char* _binary_jsEnumStyle_abc_end[];
-extern const char* _binary_jsMockSystemPlugin_abc_start[];
-extern const char* _binary_jsMockSystemPlugin_abc_end[];
-#else
+extern const char _binary_jsMockSystemPlugin_abc_start[];
+extern const char _binary_jsMockSystemPlugin_abc_end[];
+#endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsEnumStyle_abc_end[];
-#endif
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -251,8 +246,10 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         LOGE("EvaluateJsCode jsEnumStyle failed");
     }
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    bool jsMockSystemPlugin = runtime_->EvaluateJsCode((uint8_t*)_binary_jsMockSystemPlugin_abc_start,
-        _binary_jsMockSystemPlugin_abc_end - _binary_jsMockSystemPlugin_abc_start);
+    std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
+                                   _binary_jsMockSystemPlugin_abc_end - _binary_jsMockSystemPlugin_abc_start);
+    bool jsMockSystemPlugin =
+        runtime_->EvaluateJsCode((uint8_t*)(jsMockSystemPluginString.c_str()), jsMockSystemPluginString.length());
     if (!jsMockSystemPlugin) {
         LOGE("EvaluateJsCode jsMockSystemPlugin failed");
     }
