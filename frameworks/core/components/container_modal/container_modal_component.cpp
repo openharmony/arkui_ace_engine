@@ -246,9 +246,16 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     std::list<RefPtr<Component>> titleChildren;
     titleChildren.emplace_back(SetPadding(titleIcon_, TITLE_PADDING_START, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     titleChildren.emplace_back(titleLabel_);
-    titleChildren.emplace_back(SetPadding(titleLeftSplitButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
-    titleChildren.emplace_back(SetPadding(titleMaximizeRecoverButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
-    titleChildren.emplace_back(SetPadding(titleMinimizeButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+    if (!hideSplit_) {
+        titleChildren.emplace_back(SetPadding(titleLeftSplitButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+    }
+    if (!hideMaximize_) {
+        titleChildren.emplace_back(
+            SetPadding(titleMaximizeRecoverButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+    }
+    if (!hideMinimize_) {
+        titleChildren.emplace_back(SetPadding(titleMinimizeButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+    }
     titleChildren.emplace_back(SetPadding(titleCloseButton, ZERO_PADDING, TITLE_PADDING_END));
     return titleChildren;
 }

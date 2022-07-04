@@ -387,25 +387,31 @@ void ContainerModalElement::ChangeFloatingTitleIcon(bool isFocus)
         LOGE("ChangeFloatingTitleIcon failed, row element is null.");
         return;
     }
-    auto renderRow = AceType::DynamicCast<RenderFlex>(rowElement->GetRenderNode());
-    if (!renderRow) {
-        LOGE("ChangeFloatingTitleIcon failed, renderRow is null.");
-        return;
+    RefPtr<RenderPadding> splitButton = nullptr;
+    if (!containerModalComponent_->GetSplitButtonHide()) {
+        auto renderRow = AceType::DynamicCast<RenderFlex>(rowElement->GetRenderNode());
+        if (!renderRow) {
+            LOGE("ChangeFloatingTitleIcon failed, renderRow is null.");
+            return;
+        }
+        auto iterator = renderRow->GetChildren().begin();
+        std::advance(iterator, SPLIT_BUTTON_POSITION);
+        splitButton = AceType::DynamicCast<RenderPadding>(*iterator);
     }
-    auto iterator = renderRow->GetChildren().begin();
-    std::advance(iterator, SPLIT_BUTTON_POSITION);
-    auto splitButton = AceType::DynamicCast<RenderPadding>(*iterator);
 
     if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
         auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(
             FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true, isFocus));
+        floatingTitleChildrenRow->SetUpdateType(UpdateType::REBUILD);
         rowElement->SetUpdateComponent(floatingTitleChildrenRow);
-        splitButton->SetHidden(false);
     } else {
         auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
             FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, isFocus));
+        titleChildrenRow->SetUpdateType(UpdateType::REBUILD);
         rowElement->SetUpdateComponent(titleChildrenRow);
-        splitButton->SetHidden(true);
+    }
+    if (splitButton) {
+        splitButton->SetHidden(windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN);
     }
 }
 
@@ -422,6 +428,7 @@ void ContainerModalElement::ChangeTitleIcon(bool isFocus)
     }
     auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
         FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, isFocus));
+    titleChildrenRow->SetUpdateType(UpdateType::REBUILD);
     rowElement->SetUpdateComponent(titleChildrenRow);
 }
 
@@ -486,6 +493,35 @@ void ContainerModalElement::SetAppBgColor(const Color& color)
     auto backDecoration = renderContentBox->GetBackDecoration();
     backDecoration->SetBackgroundColor(color);
     renderContentBox->SetBackDecoration(backDecoration);
+}
+
+void ContainerModalElement::SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+{
+    if (!titleBox_ || !floatingTitleBox_ || !containerModalComponent_) {
+        LOGE("titleBox_  floatingTitleBox_ or containerModalComponent_ is null.");
+        return;
+    }
+    auto rowElement = AceType::DynamicCast<RowElement>(titleBox_->GetFirstChild());
+    if (!rowElement) {
+        LOGE("row element is null.");
+        return;
+    }
+    auto floatingRowElement = AceType::DynamicCast<RowElement>(floatingTitleBox_->GetFirstChild());
+    if (!floatingRowElement) {
+        LOGE("floating row element is null.");
+        return;
+    }
+    containerModalComponent_->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize);
+
+    auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
+        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false));
+    titleChildrenRow->SetUpdateType(UpdateType::REBUILD);
+    rowElement->SetUpdateComponent(titleChildrenRow);
+
+    auto floatingTitleChildrenRow = AceType::MakeRefPtr<RowComponent>(
+        FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true));
+    floatingTitleChildrenRow->SetUpdateType(UpdateType::REBUILD);
+    floatingRowElement->SetUpdateComponent(floatingTitleChildrenRow);
 }
 
 } // namespace OHOS::Ace

@@ -50,6 +50,18 @@ public:
         return titleLabel_;
     }
 
+    void SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+    {
+        hideSplit_ = hideSplit;
+        hideMaximize_ = hideMaximize;
+        hideMinimize_ = hideMinimize;
+    }
+
+    bool GetSplitButtonHide() const
+    {
+        return hideSplit_;
+    }
+
 private:
     RefPtr<Component> BuildTitle();
     RefPtr<Component> BuildFloatingTitle();
@@ -62,6 +74,9 @@ private:
     WeakPtr<PipelineContext> context_;
     RefPtr<ImageComponent> titleIcon_;
     RefPtr<TextComponent> titleLabel_;
+    bool hideSplit_ = false;
+    bool hideMaximize_ = false;
+    bool hideMinimize_ = false;
 };
 
 } // namespace OHOS::Ace

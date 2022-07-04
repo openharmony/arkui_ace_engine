@@ -793,16 +793,10 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
 {
     LOGI("UpdateWindowMode, window mode is %{public}d", mode);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (!container) {
-        LOGE("UpdateWindowMode failed, get container(id=%{public}d) failed", instanceId_);
-        return;
-    }
-    auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        LOGE("UpdateWindowMode failed: taskExecutor is null.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([container, mode]() {
         auto pipelineContext = container->GetPipelineContext();
         if (!pipelineContext) {
@@ -823,6 +817,20 @@ void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, boo
 {
     LOGI("HideWindowTitleButton hideSplit: %{public}d, hideMaximize: %{public}d, hideMinimize: %{public}d",
         hideSplit, hideMaximize, hideMinimize);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, hideSplit, hideMaximize, hideMinimize]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("pipeline context is null.");
+                return;
+            }
+            pipelineContext->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
+        }, TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
