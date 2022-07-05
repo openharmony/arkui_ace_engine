@@ -30,6 +30,7 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     if (fontStyle) {
         DEFINE_STYLE_UPDATE(fontStyle, FontSize, SetFontSize);
         DEFINE_STYLE_UPDATE(fontStyle, TextColor, SetTextColor);
+        DEFINE_STYLE_UPDATE(fontStyle, ItalicFontStyle, SetFontStyle);
     }
     if (textLineStyle) {
         DEFINE_STYLE_UPDATE(textLineStyle, LineHeight, SetLineHeight);

@@ -21,9 +21,12 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+using ItalicFontStyle = Ace::FontStyle;
+
 struct FontStyle {
     ACE_DEFINE_STRUCT_PROPERTY(FontSize, Dimension);
     ACE_DEFINE_STRUCT_PROPERTY(TextColor, Color);
+    ACE_DEFINE_STRUCT_PROPERTY(ItalicFontStyle, ItalicFontStyle);
 };
 
 struct TextLineStyle {
