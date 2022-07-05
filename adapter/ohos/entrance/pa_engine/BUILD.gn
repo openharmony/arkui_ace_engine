@@ -31,13 +31,13 @@ template("pa_backend") {
       "$ability_runtime_services_path/common/include",
       "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/dataability/include",
       "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/rdb/include",
-      "$ability_runtime_path/frameworks/js/napi/aafwk/context",
-      "$ability_runtime_path/frameworks/js/napi/aafwk/inner/napi_common",
+      "$ability_runtime_napi_path/context",
+      "$ability_runtime_napi_path/inner/napi_common",
     ]
     deps = [
+      "$ability_runtime_napi_path/inner/napi_common:napi_common",
       "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
       "$ability_runtime_path/frameworks/native/appkit:appkit_native",
-      "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
       "//foundation/arkui/napi:ace_napi",
       "//foundation/arkui/napi:ace_napi_quickjs",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
