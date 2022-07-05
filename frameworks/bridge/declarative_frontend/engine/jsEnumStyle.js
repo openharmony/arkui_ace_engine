@@ -86,6 +86,14 @@ var PlayMode;
   PlayMode["AlternateReverse"] = "alternate-reverse";
 })(PlayMode || (PlayMode = {}));
 
+var RepeatMode;
+(function (RepeatMode) {
+  RepeatMode["Repeat"] = "Repeat";
+  RepeatMode["Stretch"] = "Stretch";
+  RepeatMode["Round"] = "Round";
+  RepeatMode["Space"] = "Space";
+})(RepeatMode || (RepeatMode = {}));
+
 var BorderStyle;
 (function (BorderStyle) {
   BorderStyle[BorderStyle["Solid"] = 0] = "Solid";

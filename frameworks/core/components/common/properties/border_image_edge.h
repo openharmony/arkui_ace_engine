@@ -66,17 +66,31 @@ public:
                && (borderImageEdge.GetBorderImageWidth().Unit() == borderImageWidth_.Unit())
                && (borderImageEdge.GetBorderImageRepeat() == repeat_);
     }
-    void SetBorderImageSlice(const Dimension& slice) {
+
+    void SetBorderImageSlice(const Dimension& slice)
+    {
         borderImageSlice_ = slice;
     }
-    void SetBorderImageOutset(const Dimension& outset) {
+
+    void SetBorderImageOutset(const Dimension& outset)
+    {
         borderImageOutset_ = outset;
     }
-    void SetBorderImageWidth(const Dimension& width) {
+
+    void SetBorderImageWidth(const Dimension& width)
+    {
         borderImageWidth_ = width;
     }
-    void SetBorderImageRepeat(BorderImageRepeat repeat) {
+
+    void SetBorderImageRepeat(BorderImageRepeat repeat)
+    {
         repeat_ = repeat;
+    }
+
+    std::string ToString()
+    {
+        return borderImageOutset_.ToString() + ", "+borderImageSlice_.ToString() +
+            ", "+borderImageWidth_.ToString();
     }
 
 private:

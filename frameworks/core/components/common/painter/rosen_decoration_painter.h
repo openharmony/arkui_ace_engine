@@ -77,6 +77,9 @@ public:
 
     void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context);
 
+    static void PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize, const Offset& position,
+        const Offset& extraOffset, SkCanvas* canvas, const sk_sp<SkImage>& image, double dipScale);
+
     static void PaintBoxShadows(const std::vector<Shadow>& shadows, const std::shared_ptr<RSNode>& rsNode);
 
     void PaintBlur(RenderContext& context, const Dimension& blurRadius);
@@ -129,8 +132,6 @@ protected:
 
     void PaintBorder(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint);
     void PaintBorderWithLine(const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint);
-    void PaintBorderImage(
-        const Offset& offset, const Border& border, SkCanvas* canvas, SkPaint& paint, const sk_sp<SkImage>& image);
     void PaintImage(const Offset& offset, RenderContext& context);
     sk_sp<SkShader> CreateGradientShader(const Gradient& gradient, const SkSize& size);
     SkRRect GetOuterRRect(const Offset& offset, const Border& border);
@@ -146,11 +147,6 @@ protected:
     double SliceNormalizePercentToPx(const Dimension& dimension, bool isVertical) const;
     double WidthNormalizePercentToPx(const Dimension& dimension, bool isVertical) const;
     double OutsetNormalizePercentToPx(const Dimension& dimension, bool isVertical) const;
-    void PaintBorderImageFourCorner(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
-    void PaintBorderImageFourStretch(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
-    void PaintBorderImageFourRound(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
-    void PaintBorderImageFourSpace(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
-    void PaintBorderImageFourRepeat(const Offset& offset, SkCanvas* canvas, SkPaint& paint);
 
     Size GetLayoutSize() const
     {

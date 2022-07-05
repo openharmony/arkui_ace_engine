@@ -22,6 +22,7 @@
 #include "core/components/box/render_box.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/border_edge.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/image/image_object.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/flutter_render_context.h"

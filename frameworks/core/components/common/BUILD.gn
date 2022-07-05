@@ -18,6 +18,7 @@ import(
 build_component("common") {
   sources = [
     # painter
+    "painter/border_image_painter.cpp",
     "painter/debug_boundary_painter.cpp",
     "painter/flutter_checkable_painter.cpp",
     "painter/flutter_decoration_painter.cpp",
@@ -31,6 +32,7 @@ build_component("common") {
     "properties/animatable_path.cpp",
     "properties/border.cpp",
     "properties/border_edge.cpp",
+    "properties/border_image.cpp",
     "properties/border_image_edge.cpp",
     "properties/clip_path.cpp",
     "properties/color.cpp",

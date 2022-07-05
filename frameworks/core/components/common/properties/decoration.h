@@ -28,6 +28,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/animatable_color.h"
 #include "core/components/common/properties/border.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/shadow.h"
@@ -680,41 +681,6 @@ private:
     ImageRepeat imageRepeat_ { ImageRepeat::REPEAT };
 };
 
-class BorderImage final : public AceType {
-    DECLARE_ACE_TYPE(BorderImage, AceType);
-public:
-    BorderImage() = default;
-    explicit BorderImage(const std::string& src)
-    {
-        src_ = src;
-    }
-
-    ~BorderImage() override = default;
-
-    const std::string& GetSrc() const
-    {
-        return src_;
-    }
-
-    void SetSrc(const std::string& src)
-    {
-        src_ = src;
-    }
-
-    bool operator==(const BorderImage& image) const
-    {
-        return src_ == image.GetSrc();
-    }
-
-    bool operator!=(const BorderImage& image) const
-    {
-        return !operator==(image);
-    }
-
-private:
-    std::string src_;
-};
-
 class ArcBackground final : public AceType {
     DECLARE_ACE_TYPE(ArcBackground, AceType);
 
@@ -846,7 +812,7 @@ public:
         }
     }
 
-    void SetGradientBorderImage(const Gradient& gradient)
+    void SetBorderImageGradient(const Gradient& gradient)
     {
         gradientBorderImage_ = gradient;
     }
@@ -970,7 +936,7 @@ public:
         return gradient_;
     }
 
-    const Gradient& GetGradientBorderImage() const
+    const Gradient& GetBorderImageGradient() const
     {
         return gradientBorderImage_;
     }

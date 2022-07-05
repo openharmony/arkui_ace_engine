@@ -2061,6 +2061,280 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoratio
     }
 }
 
+void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsBorderImage", info, checkList)) {
+        LOGE("args is not a object. %{public}s", info[0]->ToString().c_str());
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    if (object->IsEmpty()) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto boxComponent = AceType::DynamicCast<BoxComponent>(stack->GetBoxComponent());
+    if (!boxComponent) {
+        LOGE("boxComponent is null");
+        return;
+    }
+    auto boxDecoration = boxComponent->GetBackDecoration();
+    if (!boxDecoration) {
+        boxDecoration = AceType::MakeRefPtr<Decoration>();
+    }
+    RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
+    auto valueOutset = object->GetProperty("outset");
+    if (valueOutset->IsNumber() || valueOutset->IsString() || valueOutset->IsObject()) {
+        boxDecoration->SetHasBorderImageOutset(true);
+        ParseBorderImageOutset(valueOutset, borderImage);
+    }
+    auto valueRepeat = object->GetProperty("repeat");
+    if (!valueRepeat->IsNull()) {
+        boxDecoration->SetHasBorderImageRepeat(true);
+        ParseBorderImageRepeat(valueRepeat, borderImage);
+    }
+    auto valueSlice = object->GetProperty("slice");
+    if (valueSlice->IsNumber() || valueSlice->IsString() || valueSlice->IsObject()) {
+        boxDecoration->SetHasBorderImageSlice(true);
+        ParseBorderImageSlice(valueSlice, borderImage);
+    }
+    auto valueSource = object->GetProperty("source");
+    ParseBorderImageSource(valueSource, borderImage, boxDecoration);
+    auto valueWidth = object->GetProperty("width");
+    if (valueWidth->IsNumber() || valueWidth->IsString() || valueWidth->IsObject()) {
+        boxDecoration->SetHasBorderImageWidth(true);
+        ParseBorderImageWidth(valueWidth, borderImage);
+    }
+    auto needFill = object->GetProperty("fill");
+    if (needFill->IsBoolean()) {
+        borderImage->SetNeedFillCenter(needFill->ToBoolean());
+    }
+    boxDecoration->SetBorderImage(borderImage);
+    
+    boxComponent->SetBackDecoration(boxDecoration);
+    info.ReturnSelf();
+}
+
+void JSViewAbstract::ParseBorderImageDimension(const JSRef<JSVal>& args,
+    BorderImage::BorderImageOption& borderImageDimension)
+{
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+    static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
+    for (uint32_t i = 0; i < keys.size(); i++) {
+        Dimension currentDimension;
+        auto dimensionValue = object->GetProperty(keys.at(i).c_str());
+        if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
+            ParseJsDimensionVp(dimensionValue, currentDimension);
+            if (dimensionValue->IsNumber()) {
+                currentDimension.SetUnit(DimensionUnit::PERCENT);
+            }
+            auto direction = static_cast<BorderImageDirection>(i);
+            switch (direction) {
+                case BorderImageDirection::LEFT:
+                    borderImageDimension.leftDimension = currentDimension;
+                    break;
+                case BorderImageDirection::RIGHT:
+                    borderImageDimension.rightDimension = currentDimension;
+                    break;
+                case BorderImageDirection::TOP:
+                    borderImageDimension.topDimension = currentDimension;
+                    break;
+                case BorderImageDirection::BOTTOM:
+                    borderImageDimension.bottomDimension = currentDimension;
+                    break;
+                default:
+                    LOGE("Unsupported border image direction");
+                    break;
+            }
+        }
+    }
+}
+
+void JSViewAbstract::ParseBorderImageSource(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage,
+    RefPtr<Decoration>& boxDecoration)
+{
+    if (!args->IsString() && !args->IsObject()) {
+        LOGE("Border image source type not recognized");
+    }
+    std::string srcResult;
+    if (args->IsString()) {
+        srcResult = args->ToString();
+        if (!srcResult.empty()) {
+            borderImage->SetSrc(srcResult);
+            boxDecoration->SetHasBorderImageSource(true);
+        }
+    } else if (args->IsObject()) {
+        if (ParseJsMedia(args, srcResult)) {
+            boxDecoration->SetHasBorderImageSource(true);
+            borderImage->SetSrc(srcResult);
+        } else {
+            ParseBorderImageLinearGradient(args, boxDecoration);
+        }
+        
+    }
+}
+
+void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, RefPtr<Decoration>& backDecoration)
+{
+    auto argsPtrItem = JsonUtil::ParseJsonString(args->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Parse border image linear gradient failed. argsPtr is null. %{public}s", args->ToString().c_str());
+        return;
+    }
+    Gradient lineGradient;
+    lineGradient.SetType(GradientType::LINEAR);
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    // angle
+    std::optional<float> degree;
+    GetAngle("angle", argsPtrItem, degree);
+    
+    if (degree) {
+        lineGradient.GetLinearGradient().angle = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
+        degree.reset();
+    }
+    // direction
+    auto direction =
+        static_cast<GradientDirection>(argsPtrItem->GetInt("direction", static_cast<int32_t>(GradientDirection::NONE)));
+    switch (direction) {
+        case GradientDirection::LEFT:
+            lineGradient.GetLinearGradient().linearX = GradientDirection::LEFT;
+            break;
+        case GradientDirection::RIGHT:
+            lineGradient.GetLinearGradient().linearX = GradientDirection::RIGHT;
+            break;
+        case GradientDirection::TOP:
+            lineGradient.GetLinearGradient().linearY = GradientDirection::TOP;
+            break;
+        case GradientDirection::BOTTOM:
+            lineGradient.GetLinearGradient().linearY = GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::LEFT_TOP:
+            lineGradient.GetLinearGradient().linearX = GradientDirection::LEFT;
+            lineGradient.GetLinearGradient().linearY = GradientDirection::TOP;
+            break;
+        case GradientDirection::LEFT_BOTTOM:
+            lineGradient.GetLinearGradient().linearX = GradientDirection::LEFT;
+            lineGradient.GetLinearGradient().linearY = GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::RIGHT_TOP:
+            lineGradient.GetLinearGradient().linearX = GradientDirection::RIGHT;
+            lineGradient.GetLinearGradient().linearY = GradientDirection::TOP;
+            break;
+        case GradientDirection::RIGHT_BOTTOM:
+            lineGradient.GetLinearGradient().linearX = GradientDirection::RIGHT;
+            lineGradient.GetLinearGradient().linearY = GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::NONE:
+        case GradientDirection::START_TO_END:
+        case GradientDirection::END_TO_START:
+        default:
+            break;
+    }
+    auto repeating = argsPtrItem->GetBool("repeating", false);
+    lineGradient.SetRepeat(repeating);
+    GetGradientColorStops(lineGradient, argsPtrItem->GetValue("colors"));
+    backDecoration->SetBorderImageGradient(lineGradient);
+    backDecoration->SetHasBorderImageGradient(true);
+}
+
+void JSViewAbstract::ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
+{
+    auto repeatString = args->ToString();
+    if (repeatString == "Repeat") {
+        borderImage->SetRepeatMode(BorderImageRepeat::REPEAT);
+    } else if (repeatString == "Round") {
+        borderImage->SetRepeatMode(BorderImageRepeat::ROUND);
+    } else if (repeatString == "Space") {
+        borderImage->SetRepeatMode(BorderImageRepeat::SPACE);
+    } else {
+        borderImage->SetRepeatMode(BorderImageRepeat::STRETCH);
+    }
+}
+
+void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
+{
+    if (args->IsNumber()) {
+        Dimension outsetDimension;
+        ParseJsDimensionVp(args, outsetDimension);
+        if (args->IsNumber()) {
+            outsetDimension.SetUnit(DimensionUnit::PERCENT);
+        }
+        borderImage->SetEdgeOutset(BorderImageDirection::LEFT, outsetDimension);
+        borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, outsetDimension);
+        borderImage->SetEdgeOutset(BorderImageDirection::TOP, outsetDimension);
+        borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, outsetDimension);
+        return;
+    }
+    BorderImage::BorderImageOption option;
+    ParseBorderImageDimension(args, option);
+    if (option.leftDimension.has_value()) {
+        borderImage->SetEdgeOutset(BorderImageDirection::LEFT, option.leftDimension.value());
+    }
+    if (option.rightDimension.has_value()) {
+        borderImage->SetEdgeOutset(BorderImageDirection::RIGHT, option.rightDimension.value());
+    }
+    if (option.topDimension.has_value()) {
+        borderImage->SetEdgeOutset(BorderImageDirection::TOP, option.topDimension.value());
+    }
+    if (option.bottomDimension.has_value()) {
+        borderImage->SetEdgeOutset(BorderImageDirection::BOTTOM, option.bottomDimension.value());
+    }
+}
+
+void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
+{
+    Dimension sliceDimension;
+    if (args->IsNumber()) {
+        ParseJsDimensionVp(args, sliceDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::LEFT, sliceDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, sliceDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::TOP, sliceDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, sliceDimension);
+        return;
+    }
+
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+    static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
+    for (uint32_t i = 0; i < keys.size(); i++) {
+        auto dimensionValue = object->GetProperty(keys.at(i).c_str());
+        if (dimensionValue->IsNumber() || dimensionValue->IsString()) {
+            ParseJsDimensionVp(dimensionValue, sliceDimension);
+            borderImage->SetEdgeSlice(static_cast<BorderImageDirection>(i), sliceDimension);
+        }
+    }
+}
+
+void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage)
+{
+    if (args->IsNumber()) {
+        Dimension widthDimension;
+        ParseJsDimensionVp(args, widthDimension);
+        if (args->IsNumber()) {
+            widthDimension.SetUnit(DimensionUnit::PERCENT);
+        }
+        borderImage->SetEdgeWidth(BorderImageDirection::LEFT, widthDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, widthDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::TOP, widthDimension);
+        borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, widthDimension);
+        return;
+    }
+
+    BorderImage::BorderImageOption option;
+    ParseBorderImageDimension(args, option);
+    if (option.leftDimension.has_value()) {
+        borderImage->SetEdgeWidth(BorderImageDirection::LEFT, option.leftDimension.value());
+    }
+    if (option.rightDimension.has_value()) {
+        borderImage->SetEdgeWidth(BorderImageDirection::RIGHT, option.rightDimension.value());
+    }
+    if (option.topDimension.has_value()) {
+        borderImage->SetEdgeWidth(BorderImageDirection::TOP, option.topDimension.value());
+    }
+    if (option.bottomDimension.has_value()) {
+        borderImage->SetEdgeWidth(BorderImageDirection::BOTTOM, option.bottomDimension.value());
+    }
+}
+
 void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
@@ -3989,6 +4263,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
     JSClass<JSViewAbstract>::StaticMethod("borderRadius", &JSViewAbstract::JsBorderRadius);
     JSClass<JSViewAbstract>::StaticMethod("borderStyle", &JSViewAbstract::JsBorderStyle);
+    JSClass<JSViewAbstract>::StaticMethod("borderImage", &JSViewAbstract::JsBorderImage);
 
     JSClass<JSViewAbstract>::StaticMethod("scale", &JSViewAbstract::JsScale);
     JSClass<JSViewAbstract>::StaticMethod("scaleX", &JSViewAbstract::JsScaleX);
@@ -4487,7 +4762,6 @@ void JSViewAbstract::GetGradientColorStops(Gradient& gradient, const std::unique
                 //  [0, 1] -> [0, 100.0];
                 gradientColor.SetDimension(Dimension(value * 100.0, DimensionUnit::PERCENT));
             }
-
             gradient.AddColor(gradientColor);
         }
     }

@@ -239,7 +239,10 @@ void RosenRenderBox::PerformLayout()
         LOGD("do not need to clip.");
         return;
     }
-
+    if (backDecoration_ &&
+        (backDecoration_->GetHasBorderImageSource() || backDecoration_->GetHasBorderImageGradient())) {
+        return;
+    }
     auto rsNode = GetRSNode();
     if (!rsNode) {
         return;
@@ -291,6 +294,9 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         SkRRect::MakeRect(SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom()));
         SkRect focusRect = SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom());
     Color bgColor = pipeline->GetAppBgColor();
+    if (backDecoration_->GetHasBorderImageSource() || backDecoration_->GetHasBorderImageGradient()) {
+        FetchImageData();
+    }
     if (backDecoration_) {
         auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
         if (canvas == nullptr) {
@@ -308,6 +314,10 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             RosenDecorationPainter::PaintHueRotate(outerRRect, canvas, backDecoration_->GetHueRotate(), bgColor);
             RosenDecorationPainter::PaintColorBlend(outerRRect, canvas, backDecoration_->GetColorBlend(), bgColor);
         }
+        auto position = Offset(GetPosition().GetX() + NormalizeToPx(margin_.Left()),
+            GetPosition().GetY() + NormalizeToPx(margin_.Top()));
+        RosenDecorationPainter::PaintBorderImage(backDecoration_, paintSize_, position, offset, canvas, image_,
+            dipScale_);
     }
     RenderNode::Paint(context, offset);
     if (frontDecoration_) {

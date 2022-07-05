@@ -582,9 +582,11 @@ RefPtr<Flutter::ClipLayer> FlutterRenderBox::GetClipLayer()
 {
     auto flex = AceType::DynamicCast<RenderFlex>(GetFirstChild());
     bool childOverflow = flex ? isChildOverflow_ || flex->IsChildOverflow() : isChildOverflow_;
+    // temporarily add return condition for border image case
     if ((overflow_ != Overflow::CLIP || !childOverflow) && mask_ == nullptr && !boxClipFlag_ &&
         overflow_ != Overflow::FORCE_CLIP && (clipPath_ == nullptr || !clipPath_->NeedClip()) &&
-        (pixelMap_ == nullptr)) {
+        (pixelMap_ == nullptr) && !(backDecoration_ &&
+        (backDecoration_->GetHasBorderImageSource() || backDecoration_->GetHasBorderImageGradient()))) {
         LOGD("do not need to create clipLayer.");
         return nullptr;
     }
