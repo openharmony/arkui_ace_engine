@@ -201,9 +201,9 @@ void AceAbility::OnStart(const Want& want)
     OHOS::sptr<OHOS::Rosen::IWindowChangeListener> thisAbility(this);
     window->RegisterWindowChangeListener(thisAbility);
 
-    // register input event callback
-    OHOS::sptr<OHOS::Rosen::IInputEventListener> inputEventListener(this);
-    window->RegisterInputEventListener(inputEventListener);
+    // register input consumer callback
+    std::shared_ptr<OHOS::Rosen::IInputEventConsumer> inputEventConsumer(this);
+    window->SetInputEventConsumer(inputEventConsumer);
 
     // register drag event callback
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener(this);
@@ -735,40 +735,57 @@ void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
     flutterAceView->ProcessDragEvent(x, y, action);
 }
 
-void AceAbility::OnPointerInputEvent(std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
 {
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
         LOGE("OnPointerInputEvent: container may be destroyed.");
-        return;
+        return false;
     }
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
     if (!flutterAceView) {
         LOGE("OnPointerInputEvent: flutterAceView is null.");
-        return;
+        return false;
     }
     flutterAceView->DispatchTouchEvent(flutterAceView, pointerEvent);
+    return true;
 }
 
-void AceAbility::OnKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
+bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
 {
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     if (!container) {
-        LOGE("OnKeyEvent: container may be destroyed.");
-        return;
+        LOGE("OnInputEvent: container may be destroyed.");
+        return false;
     }
     auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
     if (!flutterAceView) {
-        LOGI("OnKeyEvent: flutterAceView is null, keyboard event does not take effect.");
-        return;
+        LOGI("OnInputEvent: flutterAceView is null, keyboard event does not take effect.");
+        return false;
     }
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
-        OnBackPressed();
-        return;
+        LOGI("OnInputEvent: Platform::AceContainer::OnBackPressed called");
+        if (Platform::AceContainer::OnBackPressed(abilityId_)) {
+            LOGI("OnInputEvent: Platform::AceContainer::OnBackPressed return true");
+            return true;
+        }
+        LOGI("OnInputEvent: Platform::AceContainer::OnBackPressed return false");
+        return false;
     }
-    flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent);
+    LOGI("OnInputEvent: dispatch key to arkui");
+    if (flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent)) {
+        LOGI("OnInputEvent: arkui consumed this key event");
+        return true;
+    }
+    LOGI("OnInputEvent: arkui do not consumed this key event");
+    return false;
+}
+
+bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const
+{
+    return false;
 }
 
 void AceAbility::SetBackgroundColor(uint32_t color)

@@ -1329,11 +1329,17 @@ bool PipelineContext::CallRouterBackToPopPage()
 
     if (frontend->OnBackPressed()) {
         // if user accept
-        return true;
-    } else {
-        frontend->CallRouterBack();
+        LOGI("CallRouterBackToPopPage(): user consume the back key event");
         return true;
     }
+    auto stageElement = GetStageElement();
+    if (stageElement && (stageElement->GetChildrenList().empty() || stageElement->GetChildrenList().size() == 1)) {
+        LOGI("CallRouterBackToPopPage(): current page is the last page");
+        return false;
+    }
+    frontend->CallRouterBack();
+    LOGI("CallRouterBackToPopPage(): current page is not the last");
+    return true;
 }
 
 bool PipelineContext::PopPageStackOverlay()

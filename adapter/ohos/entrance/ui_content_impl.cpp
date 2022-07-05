@@ -649,8 +649,13 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
 
 bool UIContentImpl::ProcessBackPressed()
 {
-    LOGI("UIContent ProcessBackPressed");
-    return Platform::AceContainer::OnBackPressed(instanceId_);
+    LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed called");
+    if (Platform::AceContainer::OnBackPressed(instanceId_)) {
+        LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed return true");
+        return true;
+    }
+    LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed return false");
+    return false;
 }
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
