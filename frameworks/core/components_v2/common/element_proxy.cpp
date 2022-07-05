@@ -300,7 +300,7 @@ public:
         std::list<std::pair<size_t, RefPtr<ElementProxy>>> items(children_.begin(), children_.end());
         children_.clear();
         std::list<RefPtr<ElementProxy>> deletedItems;
-        auto checkRange = host ? host->GetReloadedCheckNum() : count_;
+        auto checkRange = items.size() / 3;
         for (const auto& [index, child] : items) {
             size_t newIdx = cache[child->GetId()];
             if (newIdx != INVALID_INDEX) {
