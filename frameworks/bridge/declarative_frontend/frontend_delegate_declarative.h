@@ -143,7 +143,9 @@ public:
     void Replace(const PageTarget& target, const std::string& params);
     void BackWithTarget(const PageTarget& target, const std::string& params);
     void Push(const std::string& uri, const std::string& params) override;
+    void PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
     void Replace(const std::string& uri, const std::string& params) override;
+    void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
     void Back(const std::string& uri, const std::string& params) override;
     void PostponePageTransition() override;
     void LaunchPageTransition() override;
@@ -317,12 +319,15 @@ private:
     void BackCheckAlert(const PageTarget& target, const std::string& params);
     void ProcessRouterTask();
     void AddRouterTask(const RouterTask& task);
+    bool IsNavigationStage(const PageTarget& target);
+    void RecycleSinglePage();
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;
     int32_t pageId_ = -1;
     bool isRouteStackFull_ = false;
     bool isStagingPageExist_ = false;
+    int32_t singlePageId_ = -1;
     std::string mainPagePath_;
     PageTarget backUri_ = PageTarget("");
     std::string backParam_;

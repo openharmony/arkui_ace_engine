@@ -43,6 +43,7 @@ public:
     bool CanPushPage();
     bool CanReplacePage();
     bool CanRouterPage();
+    void SetSinglePageId(int32_t pageId);
     void PostponePageTransition();
     void LaunchPageTransition();
     void RefreshFocus();
@@ -98,6 +99,7 @@ private:
     {
         routerListener_ = listener;
     }
+    void RecycleSinglePage();
 
     StackOperation operation_ { StackOperation::NONE };
     StackOperation pendingOperation_ { StackOperation::NONE };
@@ -108,6 +110,7 @@ private:
     RefPtr<Animator> controllerOut_; // Controller for transition out.
     int32_t directedPageId_ = 0;
     bool isWaitingForBuild_ = false;
+    int32_t singlePageId_ = -1;
 
     std::function<void()> routerListener_ = nullptr;
 };

@@ -743,9 +743,20 @@ void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string
     Push(PageTarget(uri), params);
 }
 
+void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode)
+{
+    Push(PageTarget(uri, RouterMode(routerMode)), params);
+}
+
 void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::string& params)
 {
     Replace(PageTarget(uri), params);
+}
+
+void FrontendDelegateDeclarative::ReplaceWithMode(
+    const std::string& uri, const std::string& params, uint32_t routerMode)
+{
+    Replace(PageTarget(uri, RouterMode(routerMode)), params);
 }
 
 void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string& params)
@@ -852,8 +863,17 @@ void FrontendDelegateDeclarative::ProcessRouterTask()
         TaskExecutor::TaskType::JS);
 }
 
+bool FrontendDelegateDeclarative::IsNavigationStage(const PageTarget& target)
+{
+    return target.container.Upgrade();
+}
+
 void FrontendDelegateDeclarative::Push(const PageTarget& target, const std::string& params)
 {
+    if (IsNavigationStage(target)) {
+        StartPush(target, params);
+        return;
+    }
     {
         std::lock_guard<std::mutex> lock(routerQueueMutex_);
         if (!routerQueue_.empty()) {
@@ -882,7 +902,7 @@ void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std:
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
-        LoadPage(GenerateNextPageId(), PageTarget(pagePath, target.container), false, params);
+        LoadPage(GenerateNextPageId(), PageTarget(target, pagePath), false, params);
     } else {
         LOGW("[Engine Log] this uri not support in route push.");
         ProcessRouterTask();
@@ -891,6 +911,10 @@ void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std:
 
 void FrontendDelegateDeclarative::Replace(const PageTarget& target, const std::string& params)
 {
+    if (IsNavigationStage(target)) {
+        StartReplace(target, params);
+        return;
+    }
     {
         std::lock_guard<std::mutex> lock(routerQueueMutex_);
         if (!routerQueue_.empty()) {
@@ -913,7 +937,7 @@ void FrontendDelegateDeclarative::StartReplace(const PageTarget& target, const s
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
     LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
-        LoadReplacePage(GenerateNextPageId(), PageTarget(pagePath, target.container, target.useSubStage), params);
+        LoadReplacePage(GenerateNextPageId(), PageTarget(target, pagePath), params);
     } else {
         LOGW("[Engine Log] this uri not support in route replace.");
         ProcessRouterTask();
@@ -977,6 +1001,11 @@ void FrontendDelegateDeclarative::BackCheckAlert(const PageTarget& target, const
 
 void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const std::string& params)
 {
+    LOGD("router.Back path = %{private}s", target.url.c_str());
+    if (IsNavigationStage(target)) {
+        BackCheckAlert(target, params);
+        return;
+    }
     {
         std::lock_guard<std::mutex> lock(routerQueueMutex_);
         if (!routerQueue_.empty()) {
@@ -985,7 +1014,6 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
         }
         AddRouterTask(RouterTask { RouterAction::BACK, target, params });
     }
-    LOGD("router.Back path = %{private}s", target.url.c_str());
     BackCheckAlert(target, params);
 }
 
@@ -1008,7 +1036,7 @@ void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std:
             }
         }
         if (!pagePath.empty()) {
-            LoadPage(pageId_, PageTarget(pagePath), false, params, true);
+            LoadPage(pageId_, PageTarget(target, pagePath), false, params, true);
             return;
         }
         LOGI("run in normal back");
@@ -1020,7 +1048,7 @@ void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std:
             bool isRestore = false;
             pageId_ = GetPageIdByUrl(pagePath, isRestore);
             if (isRestore) {
-                LoadPage(pageId_, PageTarget(pagePath), false, params, true);
+                LoadPage(pageId_, PageTarget(target, pagePath), false, params, true);
                 return;
             }
             if (!params.empty()) {
@@ -1383,18 +1411,17 @@ std::string FrontendDelegateDeclarative::GetAssetPath(const std::string& url)
 void FrontendDelegateDeclarative::LoadPage(
     int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params, bool isRestore)
 {
+    LOGI("FrontendDelegateDeclarative %{private}p LoadPage[%{public}d]: %{public}s.", this, pageId, target.url.c_str());
+    if (pageId == INVALID_PAGE_ID) {
+        LOGE("FrontendDelegateDeclarative, invalid page id");
+        EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, target.url);
+        ProcessRouterTask();
+        return;
+    }
     {
         std::lock_guard<std::mutex> lock(mutex_);
         pageId_ = pageId;
         pageParamMap_[pageId] = params;
-    }
-    auto url = target.url;
-    LOGI("FrontendDelegateDeclarative %{private}p LoadPage[%{public}d]: %{public}s.", this, pageId, url.c_str());
-    if (pageId == INVALID_PAGE_ID) {
-        LOGE("FrontendDelegateDeclarative, invalid page id");
-        EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, url);
-        ProcessRouterTask();
-        return;
     }
     if (isStagingPageExist_) {
         LOGE("FrontendDelegateDeclarative, load page failed, waiting for current page loading finish.");
@@ -1403,6 +1430,13 @@ void FrontendDelegateDeclarative::LoadPage(
         return;
     }
     isStagingPageExist_ = true;
+
+    singlePageId_ = INVALID_PAGE_ID;
+    if (target.routerMode == RouterMode::SINGLE) {
+        singlePageId_ = GetPageIdByUrl(target.url);
+        LOGI("single page id = %{public}d", singlePageId_);
+    }
+
     auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
     auto page = AceType::MakeRefPtr<JsAcePage>(pageId, document, target.url, target.container);
     page->SetPageParams(params);
@@ -1416,12 +1450,12 @@ void FrontendDelegateDeclarative::LoadPage(
         }
     });
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), page, url, isMainPage] {
+        [weak = AceType::WeakClaim(this), page, isMainPage] {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
-            delegate->loadJs_(url, page, isMainPage);
+            delegate->loadJs_(page->GetUrl(), page, isMainPage);
             page->FlushCommands();
             // just make sure the pipelineContext is created.
             auto pipeline = delegate->pipelineContextHolder_.Get();
@@ -1540,6 +1574,9 @@ void FrontendDelegateDeclarative::OnPageReady(
                             delegate->PushPageTransitionListener(event, page);
                         }
                     });
+                if (delegate->singlePageId_ != INVALID_PAGE_ID) {
+                    pipelineContext->SetSinglePageId(delegate->singlePageId_);
+                }
                 pipelineContext->PushPage(page->BuildPage(url), page->GetStageElement());
             } else {
                 // This page has been loaded but become useless now, the corresponding js instance
@@ -1573,12 +1610,30 @@ void FrontendDelegateDeclarative::OnPushPageSuccess(const RefPtr<JsAcePage>& pag
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
     pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), page->GetUrl() });
+    if (singlePageId_ != INVALID_PAGE_ID) {
+        RecycleSinglePage();
+    }
     if (pageRouteStack_.size() >= MAX_ROUTER_STACK) {
         isRouteStackFull_ = true;
         EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, page->GetUrl());
     }
     LOGI("OnPushPageSuccess size=%{private}zu,pageId=%{private}d,url=%{private}s", pageRouteStack_.size(),
         pageRouteStack_.back().pageId, pageRouteStack_.back().url.c_str());
+}
+
+void FrontendDelegateDeclarative::RecycleSinglePage()
+{
+    LOGI("single page recycle");
+    auto iter = find_if(pageRouteStack_.begin(), pageRouteStack_.end(), [&](const PageInfo& item) {
+        return item.pageId == singlePageId_;
+    });
+    if (iter != pageRouteStack_.end()) {
+        pageMap_.erase(singlePageId_);
+        pageParamMap_.erase(singlePageId_);
+        pageRouteStack_.erase(iter);
+        OnPageDestroy(singlePageId_);
+    }
+    singlePageId_ = INVALID_PAGE_ID;
 }
 
 void FrontendDelegateDeclarative::OnPrePageChange(const RefPtr<JsAcePage>& page)
@@ -1874,6 +1929,9 @@ void FrontendDelegateDeclarative::OnReplacePageSuccess(const RefPtr<JsAcePage>& 
         pageRouteStack_.pop_back();
     }
     pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
+    if (singlePageId_ != INVALID_PAGE_ID) {
+        RecycleSinglePage();
+    }
 }
 
 void FrontendDelegateDeclarative::ReplacePage(const RefPtr<JsAcePage>& page, const std::string& url)
@@ -1904,6 +1962,9 @@ void FrontendDelegateDeclarative::ReplacePage(const RefPtr<JsAcePage>& page, con
                 delegate->OnPageHide();
                 delegate->OnPageDestroy(delegate->GetRunningPageId());
                 delegate->OnPrePageChange(page);
+                if (delegate->singlePageId_ != INVALID_PAGE_ID) {
+                    pipelineContext->SetSinglePageId(delegate->singlePageId_);
+                }
                 pipelineContext->ReplacePage(page->BuildPage(url), page->GetStageElement(), [weak, page, url]() {
                     auto delegate = weak.Upgrade();
                     if (!delegate) {
@@ -1994,40 +2055,46 @@ void FrontendDelegateDeclarative::ReplacePageInSubStage(const RefPtr<JsAcePage>&
 
 void FrontendDelegateDeclarative::LoadReplacePage(int32_t pageId, const PageTarget& target, const std::string& params)
 {
+    LOGI("FrontendDelegateDeclarative LoadReplacePage[%{private}d]: %{private}s.", pageId, target.url.c_str());
+    if (pageId == INVALID_PAGE_ID) {
+        LOGW("FrontendDelegateDeclarative, invalid page id");
+        EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, target.url);
+        ProcessRouterTask();
+        return;
+    }
     {
         std::lock_guard<std::mutex> lock(mutex_);
         pageId_ = pageId;
         pageParamMap_[pageId] = params;
-    }
-    auto url = target.url;
-    LOGI("FrontendDelegateDeclarative LoadReplacePage[%{private}d]: %{private}s.", pageId, url.c_str());
-    if (pageId == INVALID_PAGE_ID) {
-        LOGW("FrontendDelegateDeclarative, invalid page id");
-        EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
-        ProcessRouterTask();
-        return;
     }
     auto document = AceType::MakeRefPtr<DOMDocument>(pageId);
     auto page = AceType::MakeRefPtr<JsAcePage>(pageId, document, target.url, target.container);
     page->SetSubStage(target.useSubStage);
     if (isStagingPageExist_ && !page->GetSubStageFlag()) {
         LOGW("FrontendDelegateDeclarative, replace page failed, waiting for current page loading finish.");
-        EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, url);
+        EventReport::SendPageRouterException(PageRouterExcepType::REPLACE_PAGE_ERR, target.url);
         ProcessRouterTask();
         return;
     }
+
+    singlePageId_ = INVALID_PAGE_ID;
+    if (target.routerMode == RouterMode::SINGLE) {
+        singlePageId_ = GetPageIdByUrl(target.url);
+        LOGI("single page id = %{public}d", singlePageId_);
+    }
+
     isStagingPageExist_ = true;
     page->SetPageParams(params);
     taskExecutor_->PostTask(
-        [page, url, weak = AceType::WeakClaim(this)] {
+        [page, weak = AceType::WeakClaim(this)] {
             auto delegate = weak.Upgrade();
             if (delegate) {
-                delegate->loadJs_(url, page, false);
+                delegate->loadJs_(page->GetUrl(), page, false);
                 if (page->GetSubStageFlag()) {
                     page->FireDeclarativeOnPageAppearCallback();
-                    delegate->ReplacePageInSubStage(page, url);
+                    delegate->ReplacePageInSubStage(page, page->GetUrl());
                 } else {
-                    delegate->ReplacePage(page, url);
+                    delegate->ReplacePage(page, page->GetUrl());
                 }
             }
         },

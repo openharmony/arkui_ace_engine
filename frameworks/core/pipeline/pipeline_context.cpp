@@ -3896,4 +3896,15 @@ std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
     return "";
 }
 
+void PipelineContext::SetSinglePageId(int32_t pageId)
+{
+    auto stageElement = GetStageElement();
+    if (!stageElement) {
+        LOGE("Get stage element failed!");
+        return;
+    }
+
+    stageElement->SetSinglePageId(pageId);
+}
+
 } // namespace OHOS::Ace
