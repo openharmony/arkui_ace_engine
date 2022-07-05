@@ -73,6 +73,7 @@ void JSSelect::Create(const JSCallbackInfo& info)
         }
     }
 
+    ViewStackProcessor::GetInstance()->ClaimElementId(selectComponent);
     ViewStackProcessor::GetInstance()->Push(selectComponent);
 }
 

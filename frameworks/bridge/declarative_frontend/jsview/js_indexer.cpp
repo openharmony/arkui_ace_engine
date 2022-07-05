@@ -61,6 +61,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
 
         auto indexerComponent =
             AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal);
+        ViewStackProcessor::GetInstance()->ClaimElementId(indexerComponent);
         ViewStackProcessor::GetInstance()->Push(indexerComponent);
         JSInteractableView::SetFocusable(true);
         JSInteractableView::SetFocusNode(true);

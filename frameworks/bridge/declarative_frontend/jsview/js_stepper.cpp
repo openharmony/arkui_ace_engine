@@ -60,6 +60,7 @@ void JSStepper::Create(const JSCallbackInfo& info)
         stepperComponent->SetMouseHoverColor(theme->GetMouseHoverColor());
         stepperComponent->SetDisabledAlpha(theme->GetDisabledAlpha());
     }
+    ViewStackProcessor::GetInstance()->ClaimElementId(stepperComponent);
     ViewStackProcessor::GetInstance()->Push(stepperComponent);
 }
 

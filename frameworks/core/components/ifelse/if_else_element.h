@@ -33,6 +33,12 @@ public:
     bool CanUpdate(const RefPtr<Component>& newComponent) override;
     void Update() override;
 
+    // added for partial update
+    int32_t BranchId()
+    {
+        return branchId_;
+    }
+
 private:
     int32_t branchId_ = -1;
 };

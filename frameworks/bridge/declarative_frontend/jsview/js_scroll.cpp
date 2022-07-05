@@ -28,6 +28,7 @@ void JSScroll::Create(const JSCallbackInfo& info)
 {
     RefPtr<Component> child;
     auto scrollComponent = AceType::MakeRefPtr<OHOS::Ace::ScrollComponent>(child);
+    ViewStackProcessor::GetInstance()->ClaimElementId(scrollComponent);
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSScroller* jsScroller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSScroller>();
         if (jsScroller) {

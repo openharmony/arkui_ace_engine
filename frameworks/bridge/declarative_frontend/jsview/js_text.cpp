@@ -480,7 +480,8 @@ void JSText::Create(const JSCallbackInfo& info)
         return;
     }
 
-    auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponentV2>(data);
+    auto textComponent = AceType::MakeRefPtr<TextComponentV2>(data);
+    ViewStackProcessor::GetInstance()->ClaimElementId(textComponent);
     ViewStackProcessor::GetInstance()->Push(textComponent);
     JSInteractableView::SetFocusable(false);
     JSInteractableView::SetFocusNode(false);

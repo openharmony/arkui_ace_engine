@@ -26,6 +26,7 @@ void JSQRCode::Create(const std::string& value)
     qrcodeComponent->SetValue(value);
     qrcodeComponent->SetQrcodeColor(Color::BLACK);
     qrcodeComponent->SetBackgroundColor(Color::WHITE);
+    ViewStackProcessor::GetInstance()->ClaimElementId(qrcodeComponent);
     ViewStackProcessor::GetInstance()->Push(qrcodeComponent);
 }
 

@@ -23,6 +23,7 @@ namespace OHOS::Ace::Framework {
 void JSRect::Create(const JSCallbackInfo& info)
 {
     RefPtr<ShapeComponent> rectComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::RECT);
+    ViewStackProcessor::GetInstance()->ClaimElementId(rectComponent);
     ViewStackProcessor::GetInstance()->Push(rectComponent);
     JSShapeAbstract::SetSize(info);
     if (info.Length() > 0 && info[0]->IsObject()) {

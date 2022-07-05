@@ -96,6 +96,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
         component = toggleComponent;
     }
 
+    ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetDeliverMinToChild(true);

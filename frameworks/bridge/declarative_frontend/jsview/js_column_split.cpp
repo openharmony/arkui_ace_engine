@@ -25,6 +25,7 @@ void JSColumnSplit::Create()
 {
     std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
     auto columnSplit = AceType::MakeRefPtr<ColumnSplitComponent>(componentChildren);
+    ViewStackProcessor::GetInstance()->ClaimElementId(columnSplit);
     ViewStackProcessor::GetInstance()->Push(columnSplit);
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetBoxClipFlag(true);

@@ -40,6 +40,7 @@ void JSLine::JSBind(BindingTarget globalObj)
 void JSLine::Create(const JSCallbackInfo& info)
 {
     RefPtr<ShapeComponent> lineComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::LINE);
+    ViewStackProcessor::GetInstance()->ClaimElementId(lineComponent);
     lineComponent->SetStroke(Color::BLACK);
     ViewStackProcessor::GetInstance()->Push(lineComponent);
     JSShapeAbstract::SetSize(info);

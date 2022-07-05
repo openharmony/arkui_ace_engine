@@ -25,6 +25,7 @@ namespace OHOS::Ace::Framework {
 void JSPolyline::Create(const JSCallbackInfo& info)
 {
     RefPtr<Component> polylineComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::POLYLINE);
+    ViewStackProcessor::GetInstance()->ClaimElementId(polylineComponent);
     ViewStackProcessor::GetInstance()->Push(polylineComponent);
     JSShapeAbstract::SetSize(info);
 }

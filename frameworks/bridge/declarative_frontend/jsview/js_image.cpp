@@ -296,6 +296,7 @@ void JSImage::Create(const JSCallbackInfo& info)
     }
 
     RefPtr<ImageComponent> imageComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
+    ViewStackProcessor::GetInstance()->ClaimElementId(imageComponent);
     imageComponent->SetUseSkiaSvg(false);
     ViewStackProcessor::GetInstance()->Push(imageComponent);
     JSInteractableView::SetFocusable(false);

@@ -118,6 +118,7 @@ void JSSlider::Create(const JSCallbackInfo& info)
     value = GetValue(value, max, min);
 
     auto sliderComponent = AceType::MakeRefPtr<OHOS::Ace::SliderComponent>(value, step, min, max);
+    ViewStackProcessor::GetInstance()->ClaimElementId(sliderComponent);
     auto sliderMode = SliderStyle::OUTSET;
     if (!getStyle->IsNull() && getStyle->IsNumber()) {
         sliderMode = static_cast<SliderStyle>(getStyle->ToNumber<int32_t>());

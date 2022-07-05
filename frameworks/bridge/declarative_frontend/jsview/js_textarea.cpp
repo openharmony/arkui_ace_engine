@@ -144,6 +144,7 @@ void JSTextArea::Create(const JSCallbackInfo& info)
     textAreaComponent->SetHoverAnimationType(HoverAnimationType::BOARD);
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
 
+    ViewStackProcessor::GetInstance()->ClaimElementId(textAreaComponent);
     ViewStackProcessor::GetInstance()->Push(textAreaComponent);
     InitDefaultStyle();
     Border boxBorder;

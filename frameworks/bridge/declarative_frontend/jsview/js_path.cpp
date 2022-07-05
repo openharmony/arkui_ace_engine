@@ -23,6 +23,7 @@ namespace OHOS::Ace::Framework {
 void JSPath::Create(const JSCallbackInfo& info)
 {
     RefPtr<Component> component = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::PATH);
+    ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
     JSShapeAbstract::SetSize(info);
     if (info.Length() > 0 && info[0]->IsObject()) {

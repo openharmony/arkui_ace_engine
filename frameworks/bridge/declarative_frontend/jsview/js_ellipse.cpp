@@ -24,6 +24,7 @@ namespace OHOS::Ace::Framework {
 void JSEllipse::Create(const JSCallbackInfo& info)
 {
     RefPtr<Component> ellipseComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::ELLIPSE);
+    ViewStackProcessor::GetInstance()->ClaimElementId(ellipseComponent);
     ViewStackProcessor::GetInstance()->Push(ellipseComponent);
     JSShapeAbstract::SetSize(info);
 }

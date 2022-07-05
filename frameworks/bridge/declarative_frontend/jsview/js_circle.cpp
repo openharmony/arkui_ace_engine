@@ -24,6 +24,7 @@ namespace OHOS::Ace::Framework {
 void JSCircle::Create(const JSCallbackInfo& info)
 {
     RefPtr<Component> circleComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::CIRCLE);
+    ViewStackProcessor::GetInstance()->ClaimElementId(circleComponent);
     ViewStackProcessor::GetInstance()->Push(circleComponent);
     JSShapeAbstract::SetSize(info);
 }

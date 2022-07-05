@@ -206,6 +206,7 @@ void JSStack::Create(const JSCallbackInfo& info)
     std::list<RefPtr<Component>> children;
     RefPtr<OHOS::Ace::StackComponent> component =
         AceType::MakeRefPtr<StackComponent>(alignment, StackFit::KEEP, Overflow::OBSERVABLE, children);
+    ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
     JSInteractableView::SetFocusNode(true);
 }

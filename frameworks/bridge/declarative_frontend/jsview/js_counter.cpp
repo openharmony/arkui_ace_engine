@@ -176,6 +176,7 @@ void JSCounter::Create()
 {
     std::list<RefPtr<Component>> children;
     RefPtr<OHOS::Ace::CounterComponent> component = AceType::MakeRefPtr<CounterComponent>(children);
+    ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
 
     component->SetHeight(COUNTER_DEFAULT_HEIGHT);

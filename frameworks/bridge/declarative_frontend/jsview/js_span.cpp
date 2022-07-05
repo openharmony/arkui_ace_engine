@@ -301,6 +301,7 @@ void JSSpan::Create(const JSCallbackInfo& info)
     }
 
     auto spanComponent = AceType::MakeRefPtr<OHOS::Ace::TextSpanComponent>(label);
+    ViewStackProcessor::GetInstance()->ClaimElementId(spanComponent);
     ViewStackProcessor::GetInstance()->Push(spanComponent);
 
     // Init text style, allowScale is not supported in declarative.

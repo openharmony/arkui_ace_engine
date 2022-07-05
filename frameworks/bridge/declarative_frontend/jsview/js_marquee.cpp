@@ -62,6 +62,7 @@ void JSMarquee::Create(const JSCallbackInfo& info)
     } else {
         marqueeComponent->SetDirection(MarqueeDirection::RIGHT);
     }
+    ViewStackProcessor::GetInstance()->ClaimElementId(marqueeComponent);
     ViewStackProcessor::GetInstance()->Push(marqueeComponent);
 }
 

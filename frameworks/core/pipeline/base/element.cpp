@@ -204,18 +204,28 @@ inline RefPtr<Element> Element::DoUpdateChildWithNewComponent(
 RefPtr<Element> Element::UpdateChildWithSlot(
     const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot)
 {
-    LOGD("%{public}p->%{public}s::UpdateChildWithSlot(%{public}s, %{public}s, %{public}d, %{public}d)",
-        this, AceType::TypeName(this), AceType::TypeName(child), AceType::TypeName(newComponent), slot, renderSlot);
-
+    LOGD("%{public}p->%{public}s(elmtId: %{public}d)::UpdateChildWithSlot(child: %{public}s(elmtId: %{public}d), "
+    "component: %{public}s(elmtId: %{public}d), slot: %{public}d, renderSlot: %{public}d)",
+        this, AceType::TypeName(this), GetElementId(), (child ? AceType::TypeName(child) : "no child Element (yet)"),
+        (child ? child->GetElementId() : -1), newComponent ? AceType::TypeName(newComponent) : "no Component",
+        newComponent ? newComponent->GetElementId() : -1, slot, renderSlot);
     // Considering 4 cases:
     // 1. child == null && newComponent == null  -->  do nothing
+    if (!child && !newComponent) {
+        LOGW("no child and no newComponent, likely an internal error!");
+        return nullptr;
+    }
+
     // 2. child == null && newComponent != null  -->  create new child configured with newComponent
     if (!child) {
-        return !newComponent ? nullptr : InflateComponent(newComponent, slot, renderSlot);
+        auto newChild = InflateComponent(newComponent, slot, renderSlot);
+        ElementRegister::GetInstance()->AddElement(newChild);
+        return newChild;
     }
 
     // 3. child != null && newComponent == null  -->  remove old child
     if (!newComponent) {
+        ElementRegister::GetInstance()->RemoveElementSilently(child->GetElementId());
         DeactivateChild(child);
         return nullptr;
     }
@@ -229,8 +239,11 @@ RefPtr<Element> Element::UpdateChildWithSlot(
         if (context && needRebuildFocusElement) {
             context->AddNeedRebuildFocusElement(needRebuildFocusElement);
         }
+        ElementRegister::GetInstance()->RemoveElementSilently(child->GetElementId());
         DeactivateChild(child);
-        return InflateComponent(newComponent, slot, renderSlot);
+        auto newChild = InflateComponent(newComponent, slot, renderSlot);
+        ElementRegister::GetInstance()->AddElement(newChild);
+        return newChild;
     }
 
     if (!context || !context->GetIsDeclarative()) {
@@ -251,7 +264,14 @@ RefPtr<Element> Element::UpdateChildWithSlot(
     if (newComponent->HasElementFunction()) {
         newComponent->CallElementFunction(child);
     }
-    return DoUpdateChildWithNewComponent(child, newComponent, slot, renderSlot);
+
+    ElementRegister::GetInstance()->RemoveElementSilently(child->GetElementId());
+    auto newChild = DoUpdateChildWithNewComponent(child, newComponent, slot, renderSlot);
+    if (newChild != nullptr) {
+        newChild->SetElementId(newComponent->GetElementId());
+        ElementRegister::GetInstance()->AddElement(newChild);
+    }
+    return newChild;
 }
 
 void Element::Mount(const RefPtr<Element>& parent, int32_t slot, int32_t renderSlot)
@@ -482,4 +502,60 @@ void Element::MarkActive(bool active)
     }
 }
 
+void Element::SetElementId(int32_t elmtId)
+{
+    LOGD("Setting elmtId %{public}d for %{public}s", elmtId, AceType::TypeName(this));
+    elmtId_ = elmtId;
+}
+
+/*
+ *   Memebers for partial update
+ */
+void Element::LocalizedUpdateWithComponent(
+    const RefPtr<Component>& newComponent, const RefPtr<Component>& outmostWrappingComponent)
+{
+    LOGD("%{public}s elmtId %{public}d  updating with %{public}s elmtId %{public}d, canUpdate(): %{public}s",
+        AceType::TypeName(this), GetElementId(), AceType::TypeName(newComponent), newComponent->GetElementId(),
+        CanUpdate(newComponent) ? "yes" : "no");
+
+    ACE_DCHECK(CanUpdate(newComponent));
+    ACE_DCHECK(
+        (GetElementId() == ElementRegister::UndefinedElementId) || (GetElementId() == newComponent->GetElementId()));
+
+    // update wrapping component first
+    // do not traverse further to parent if outmostWrappingComponent == newComponent, i.e. scope of local update
+    // has been reached
+    const auto newParentComponent = newComponent->GetParent().Upgrade();
+    const auto parentElement = GetElementParent().Upgrade();
+    if ((newParentComponent != nullptr) && (newParentComponent != outmostWrappingComponent) &&
+        (parentElement != nullptr)) {
+        parentElement->LocalizedUpdateWithComponent(newParentComponent, outmostWrappingComponent);
+    }
+
+    // update Element with Component
+    SetNewComponent(newComponent); // virtual
+    LocalizedUpdate();             // virtual
+    SetNewComponent(nullptr);
+}
+
+void Element::LocalizedUpdate()
+{
+    LOGD("%{public}s elmtId %{public}d calling Update function", AceType::TypeName(this), GetElementId());
+    Update();
+}
+
+void Element::UnregisterForPartialUpdates()
+{
+    if (elmtId_ != ElementRegister::UndefinedElementId) {
+        ElementRegister::GetInstance()->RemoveElement(elmtId_);
+    }
+    UnregisterChildrenForPartialUpdates();
+}
+
+void Element::UnregisterChildrenForPartialUpdates()
+{
+    for (auto& child : GetChildren()) {
+        child->UnregisterForPartialUpdates();
+    }
+}
 } // namespace OHOS::Ace

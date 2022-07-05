@@ -31,6 +31,7 @@ void JSRow::Create(const JSCallbackInfo& info)
     std::list<RefPtr<Component>> children;
     RefPtr<RowComponent> rowComponent =
         AceType::MakeRefPtr<OHOS::Ace::RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, children);
+    ViewStackProcessor::GetInstance()->ClaimElementId(rowComponent);
     rowComponent->SetMainAxisSize(MainAxisSize::MIN);
     rowComponent->SetCrossAxisSize(CrossAxisSize::MIN);
 

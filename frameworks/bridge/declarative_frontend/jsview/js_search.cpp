@@ -262,6 +262,7 @@ void JSSearch::Create(const JSCallbackInfo& info)
     }
 
     auto searchComponent = AceType::MakeRefPtr<OHOS::Ace::SearchComponent>();
+    ViewStackProcessor::GetInstance()->ClaimElementId(searchComponent);
     ViewStackProcessor::GetInstance()->Push(searchComponent);
 
     auto textFieldComponent = AceType::MakeRefPtr<OHOS::Ace::TextFieldComponent>();

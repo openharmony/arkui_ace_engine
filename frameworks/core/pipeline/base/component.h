@@ -28,6 +28,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_v2/extensions/events/event_extensions.h"
 #include "core/event/ace_event_handler.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace {
 
@@ -243,6 +244,18 @@ public:
         restoreId_ = restoreId;
     }
 
+    /*
+     * Assign unique elmtId to Component
+     * will move to the Element when updating the Element
+     * typical usage is from the JSXYZ::Create() function
+     */
+    void AssignUniqueElementId(ElementIdType elmtId);
+
+    ElementIdType GetElementId() const
+    {
+        return elmtId_;
+    }
+
 protected:
     TextDirection direction_ = TextDirection::LTR;
 
@@ -266,6 +279,8 @@ private:
     bool isTailComponent_ = false;
     std::string inspectorTag_;
     int32_t restoreId_ = -1;
+
+    ElementIdType elmtId_ = ElementRegister::UndefinedElementId;
 };
 
 } // namespace OHOS::Ace

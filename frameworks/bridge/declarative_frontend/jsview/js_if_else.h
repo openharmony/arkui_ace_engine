@@ -27,6 +27,9 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void Pop();
     static void SetBranchId(int32_t value);
+
+    static void ComponentToElementLocalizedUpdate(
+        const RefPtr<Component>& component, RefPtr<Element>& element);
 };
 
 } // namespace OHOS::Ace::Framework
