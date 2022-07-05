@@ -116,6 +116,11 @@ JS_ERROR:
   PACKAGE_NAME: { type: STRING, desc: package name }
   REASON: { type: STRING, desc: js runtime error reason }
   SUMMARY: { type: STRING, desc: js runtime error summary }
+  FINGERPRINT: {type: STRING, desc: unique id for grouping same fault}
+  PANME: {type: STRING, desc: process name}
+  FIRST_FRAME: {type: STRING, desc: first stack info}
+  SECOND_FRAME: {type: STRING, desc: second stack info}
+  LAST_FRAME: {type: STRING, desc: last stack info}
 
 UI_BLOCK_3S:
   __BASE: {type: FAULT, level: CRITICAL, desc: The thread is blocked for 3s }
