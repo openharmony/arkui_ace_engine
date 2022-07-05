@@ -59,6 +59,7 @@ public:
     void InsertChild(int32_t position, const RefPtr<Component>& child) override;
     void AppendChild(const RefPtr<Component>& child) override;
     void RemoveChild(const RefPtr<Component>& child) override;
+    std::list<RefPtr<StepperItemComponent>> CollectItems(const RefPtr<Component>& child);
 
     RefPtr<StepperController> GetStepperController() const
     {

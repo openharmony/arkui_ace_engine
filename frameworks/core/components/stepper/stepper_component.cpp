@@ -15,6 +15,7 @@
 
 #include "core/components/stepper/stepper_component.h"
 
+#include "core/components/ifelse/if_else_component.h"
 #include "core/components/stepper/render_stepper.h"
 #include "core/components/stepper/stepper_element.h"
 
@@ -87,6 +88,18 @@ void StepperComponent::InsertChild(int32_t position, const RefPtr<Component>& ch
 
 void StepperComponent::AppendChild(const RefPtr<Component>& child)
 {
+    auto stepperItemList = CollectItems(child);
+    if (!stepperItemList.empty()) {
+        for (const auto& item : stepperItemList) {
+            item->SetIndex(GetChildren().size());
+            ComponentGroup::AppendChild(item);
+            AppendLabel(item->GetLabel());
+            AppendTextStyle(item->GetTextStyle());
+        }
+        SetUpdateType(UpdateType::REBUILD);
+        return;
+    }
+
     auto item = StepperItemComponent::GetStepperItem(child);
     if (!item) {
         LOGE("AppendChild: no stepper item in child");
@@ -111,6 +124,24 @@ void StepperComponent::RemoveChild(const RefPtr<Component>& child)
     labelsTextStyles_.clear();
     item->SetIndex(DEFAULT_NODE_INDEX);
     ComponentGroup::RemoveChild(child);
+}
+
+std::list<RefPtr<StepperItemComponent>> StepperComponent::CollectItems(const RefPtr<Component>& child)
+{
+    std::list<RefPtr<StepperItemComponent>> stepperItemList;
+    auto ifElseComponent = AceType::DynamicCast<IfElseComponent>(child);
+    if (!ifElseComponent) {
+        return stepperItemList;
+    }
+
+    auto children = ifElseComponent->GetChildren();
+    for (auto& childComponent : children) {
+        auto itemComponent = StepperItemComponent::GetStepperItem(childComponent);
+        if (itemComponent) {
+            stepperItemList.emplace_back(itemComponent);
+        }
+    }
+    return stepperItemList;
 }
 
 } // namespace OHOS::Ace
