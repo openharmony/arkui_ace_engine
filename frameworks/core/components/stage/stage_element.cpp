@@ -236,6 +236,11 @@ bool StageElement::ClearOffStage(const std::function<void()>& listener)
     return true;
 }
 
+void StageElement::SetSinglePageId(int32_t pageId)
+{
+    singlePageId_ = pageId;
+}
+
 void StageElement::PerformBuild()
 {
     LOGD("StageElement: PerformBuild, operation: %{public}d", operation_);
@@ -361,6 +366,9 @@ bool StageElement::PerformPushPageTransition(const RefPtr<Element>& elementIn, c
             auto context = stage->context_.Upgrade();
             if (context) {
                 context->OnPageShow();
+            }
+            if (stage->singlePageId_ != -1) {
+                stage->RecycleSinglePage();
             }
         }
     });
@@ -555,6 +563,9 @@ void StageElement::PerformReplace()
         context->OnPageShow();
     }
     RefreshFocus();
+    if (singlePageId_ != -1) {
+        RecycleSinglePage();
+    }
 }
 
 void StageElement::PerformPopToPage()
@@ -805,6 +816,19 @@ void StageElement::MakeTopPageTouchable()
         // only top page can touch
         child->SetDisableTouchEvent(!(iter == children.rbegin()));
     }
+}
+
+void StageElement::RecycleSinglePage()
+{
+    LOGI("single page recycle");
+    auto iter = find_if(children_.begin(), children_.end(), [&](const RefPtr<Element>& item) {
+        RefPtr<PageElement> page = AceType::DynamicCast<PageElement>(item);
+        return page && singlePageId_ == page->GetPageId();
+    });
+    if (iter != children_.end()) {
+        children_.erase(iter);
+    }
+    singlePageId_ = -1;
 }
 
 void SectionStageElement::PushPage(const RefPtr<Component>& newComponent)

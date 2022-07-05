@@ -25,6 +25,10 @@
 
 namespace OHOS::Ace::Napi {
 
+static constexpr size_t ARGC_WITH_MODE = 2;
+static constexpr uint32_t STANDARD = 0;
+static constexpr uint32_t SINGLE = 1;
+
 static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
 {
     if (uriNApi != nullptr) {
@@ -66,11 +70,11 @@ static napi_value JSRouterPush(napi_env env, napi_callback_info info)
 {
     LOGI("NAPI router push called");
     size_t requireArgc = 1;
-    size_t argc = 1;
-    napi_value argv = nullptr;
+    size_t argc = ARGC_WITH_MODE;
+    napi_value argv[ARGC_WITH_MODE] = { 0 };
     napi_value thisVar = nullptr;
     void* data = nullptr;
-    napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
     if (argc < requireArgc) {
         LOGE("params number err");
         return nullptr;
@@ -78,15 +82,15 @@ static napi_value JSRouterPush(napi_env env, napi_callback_info info)
     napi_value uriNApi = nullptr;
     napi_value params = nullptr;
     napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv, &valueType);
+    napi_typeof(env, argv[0], &valueType);
     if (valueType == napi_object) {
-        napi_get_named_property(env, argv, "url", &uriNApi);
+        napi_get_named_property(env, argv[0], "url", &uriNApi);
         napi_typeof(env, uriNApi, &valueType);
         if (valueType != napi_string) {
             LOGE("url is invalid");
             return nullptr;
         }
-        napi_get_named_property(env, argv, "params", &params);
+        napi_get_named_property(env, argv[0], "params", &params);
     }
     std::string paramsString;
     ParseParams(env, params, paramsString);
@@ -100,6 +104,15 @@ static napi_value JSRouterPush(napi_env env, napi_callback_info info)
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         LOGE("can not get delegate.");
+        return nullptr;
+    }
+
+    napi_typeof(env, argv[1], &valueType);
+    if (argc == ARGC_WITH_MODE && valueType == napi_number) {
+        uint32_t mode = STANDARD;
+        napi_get_value_uint32(env, argv[1], &mode);
+        LOGI("router mode with single");
+        delegate->PushWithMode(uriString, paramsString, mode);
         return nullptr;
     }
     delegate->Push(uriString, paramsString);
@@ -109,11 +122,11 @@ static napi_value JSRouterPush(napi_env env, napi_callback_info info)
 static napi_value JSRouterReplace(napi_env env, napi_callback_info info)
 {
     size_t requireArgc = 1;
-    size_t argc = 1;
-    napi_value argv = nullptr;
+    size_t argc = ARGC_WITH_MODE;
+    napi_value argv[ARGC_WITH_MODE] = { 0 };
     napi_value thisVar = nullptr;
     void* data = nullptr;
-    napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
+    napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
     if (argc < requireArgc) {
         LOGE("params number err");
         return nullptr;
@@ -121,15 +134,15 @@ static napi_value JSRouterReplace(napi_env env, napi_callback_info info)
     napi_value uriNApi = nullptr;
     napi_value params = nullptr;
     napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv, &valueType);
+    napi_typeof(env, argv[0], &valueType);
     if (valueType == napi_object) {
-        napi_get_named_property(env, argv, "url", &uriNApi);
+        napi_get_named_property(env, argv[0], "url", &uriNApi);
         napi_typeof(env, uriNApi, &valueType);
         if (valueType != napi_string) {
             LOGE("url is invalid");
             return nullptr;
         }
-        napi_get_named_property(env, argv, "params", &params);
+        napi_get_named_property(env, argv[0], "params", &params);
     }
     std::string paramsString;
     ParseParams(env, params, paramsString);
@@ -146,6 +159,16 @@ static napi_value JSRouterReplace(napi_env env, napi_callback_info info)
         LOGE("can not get delegate.");
         return nullptr;
     }
+
+    napi_typeof(env, argv[1], &valueType);
+    if (argc == ARGC_WITH_MODE && valueType == napi_number) {
+        uint32_t mode = STANDARD;
+        napi_get_value_uint32(env, argv[1], &mode);
+        LOGI("router mode with single");
+        delegate->ReplaceWithMode(uriString, paramsString, mode);
+        return nullptr;
+    }
+
     delegate->Replace(uriString, paramsString);
     return nullptr;
 }
@@ -394,6 +417,14 @@ static napi_value JSRouterGetParams(napi_env env, napi_callback_info info)
 
 static napi_value RouterExport(napi_env env, napi_value exports)
 {
+    napi_value routerMode = nullptr;
+    napi_create_object(env, &routerMode);
+    napi_value prop = nullptr;
+    napi_create_uint32(env, STANDARD, &prop);
+    napi_set_named_property(env, routerMode, "Standard", prop);
+    napi_create_uint32(env, SINGLE, &prop);
+    napi_set_named_property(env, routerMode, "Single", prop);
+
     static napi_property_descriptor routerDesc[] = {
         DECLARE_NAPI_FUNCTION("push", JSRouterPush),
         DECLARE_NAPI_FUNCTION("replace", JSRouterReplace),
@@ -404,8 +435,10 @@ static napi_value RouterExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("enableAlertBeforeBackPage", JSRouterEnableAlertBeforeBackPage),
         DECLARE_NAPI_FUNCTION("disableAlertBeforeBackPage", JSRouterDisableAlertBeforeBackPage),
         DECLARE_NAPI_FUNCTION("getParams", JSRouterGetParams),
+        DECLARE_NAPI_PROPERTY("RouterMode", routerMode),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(routerDesc) / sizeof(routerDesc[0]), routerDesc));
+
     return exports;
 }
 

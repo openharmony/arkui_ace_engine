@@ -169,6 +169,8 @@ public:
 
     bool CallRouterBackToPopPage();
 
+    void SetSinglePageId(int32_t pageId);
+
     bool PopPageStackOverlay();
 
     void NotifyAppStorage(const std::string& key, const std::string& value);

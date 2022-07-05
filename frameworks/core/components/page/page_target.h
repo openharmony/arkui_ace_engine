@@ -20,16 +20,25 @@
 
 namespace OHOS::Ace {
 
+enum class RouterMode {
+    STANDARD = 0,
+    SINGLE,
+};
+
 struct PageTarget {
     PageTarget() = delete;
     PageTarget(const std::string& url, const WeakPtr<StageElement>& container) : url(url), container(container) {}
     PageTarget(const std::string& url, const WeakPtr<StageElement>& container, bool useSubStage)
         : url(url), container(container), useSubStage(useSubStage)
     {}
+    PageTarget(const std::string& url, RouterMode routerMode) : url(url), routerMode(routerMode) {}
+    PageTarget(const PageTarget& pageTarget, const std::string& url) : url(url), routerMode(pageTarget.routerMode),
+        container(pageTarget.container) {}
     explicit PageTarget(const std::string& url) : url(url) {}
     ~PageTarget() = default;
 
     std::string url;
+    RouterMode routerMode = RouterMode::STANDARD;
     WeakPtr<StageElement> container;
     bool useSubStage = false;
 };
