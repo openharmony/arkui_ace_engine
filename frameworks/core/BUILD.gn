@@ -323,6 +323,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/common:ace_core_components_common_v2_$platform",
       "$ace_root/frameworks/core/components_v2/foreach:ace_core_components_foreach_v2_$platform",
       "$ace_root/frameworks/core/components_v2/grid:ace_core_components_grid_v2_$platform",
+      "$ace_root/frameworks/core/components_v2/grid_layout:ace_core_components_grid_layout_v2_$platform",
       "$ace_root/frameworks/core/components_v2/indexer:ace_core_components_indexer_v2_$platform",
       "$ace_root/frameworks/core/components_v2/inspector:ace_core_components_inspector_v2_$platform",
       "$ace_root/frameworks/core/components_v2/list:ace_core_components_list_v2_$platform",

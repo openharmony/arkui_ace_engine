@@ -34,6 +34,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_grid_col.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_grid_row.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
 #endif
@@ -42,14 +44,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
@@ -63,6 +59,12 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 #endif
@@ -138,11 +140,11 @@
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_plugin.h"
 #endif
+#include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #ifdef XCOMPONENT_SUPPORTED
@@ -195,12 +197,11 @@ static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc,
     page->SetDeclarativeOnPageAppearCallback([view]() { view->FireOnShow(); });
     page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
     page->SetDeclarativeOnPageRefreshCallback([view]() { view->MarkNeedUpdate(); });
-    page->SetDeclarativeOnUpdateWithValueParamsCallback(
-        [view](const std::string& params) {
-            if (view && !params.empty()) {
-                view->ExecuteUpdateWithValueParams(params);
-            }
-        });
+    page->SetDeclarativeOnUpdateWithValueParamsCallback([view](const std::string& params) {
+        if (view && !params.empty()) {
+            view->ExecuteUpdateWithValueParams(params);
+        }
+    });
 
     return JS_UNDEFINED;
 }
@@ -874,8 +875,10 @@ void JsRegisterViews(BindingTarget globalObj)
     JSFlexImpl::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
-    JSScrollBar::JSBind(globalObj),
+    JSScrollBar::JSBind(globalObj);
     JSToggle::JSBind(globalObj);
+    JSGridRow::JSBind(globalObj);
+    JSGridCol::JSBind(globalObj);
     JSSideBar::JSBind(globalObj);
     JSSlider::JSBind(globalObj);
     JSTextPicker::JSBind(globalObj);

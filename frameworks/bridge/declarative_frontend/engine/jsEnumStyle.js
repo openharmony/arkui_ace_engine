@@ -801,3 +801,15 @@ var BlurStyle;
   BlurStyle[BlurStyle["Regular"] = 2] = "Regular";
   BlurStyle[BlurStyle["Thick"] = 3] = "Thick";
 })(BlurStyle || (BlurStyle = {}));
+
+var BreakpointsReference;
+(function (BreakpointsReference) {
+  BreakpointsReference[BreakpointsReference["ComponentSize"] = 0] = "ComponentSize";
+  BreakpointsReference[BreakpointsReference["WindowSize"] = 1] = "WindowSize";
+})(BreakpointsReference || (BreakpointsReference = {}));
+
+var GridRowDirection;
+(function (GridRowDirection) {
+  GridRowDirection[GridRowDirection["Row"] = 0] = "Row";
+  GridRowDirection[GridRowDirection["RowReverse"] = 1] = "RowReverse";
+})(GridRowDirection || (GridRowDirection = {}));
