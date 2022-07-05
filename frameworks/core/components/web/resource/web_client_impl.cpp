@@ -332,15 +332,14 @@ bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthRe
         return false;
     }
     task->PostSyncTask([webClient = this, &param, &jsResult] {
-        if (!webClient) {
-            return;
-        }
-        auto delegate = webClient->webDelegate_.Upgrade();
-        if (delegate) {
-            jsResult = delegate->OnHttpAuthRequest(param.get());
-        }
-        },
-        OHOS::Ace::TaskExecutor::TaskType::JS);
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnHttpAuthRequest(param.get());
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS);
 
     LOGI("OnHttpAuthRequestByJS result:%{public}d", jsResult);
     return jsResult;

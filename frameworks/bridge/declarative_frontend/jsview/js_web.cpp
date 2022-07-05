@@ -105,7 +105,7 @@ public:
 
     void Confirm(const JSCallbackInfo& args)
     {
-        if (!args[0]->IsString() || !args[1]->IsString()) {
+        if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsString()) {
             LOGW("web http auth confirm list is not string");
             auto code = JSVal(ToJSValue(false));
             auto descriptionRef = JSRef<JSVal>::Make(code);
@@ -790,11 +790,13 @@ JSRef<JSVal> LoadWebRequestFocusEventToJSValue(const LoadWebRequestFocusEvent& e
 JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
-
     JSRef<JSObject> resultObj = JSClass<JSWebHttpAuth>::NewInstance();
     auto jsWebHttpAuth = Referenced::Claim(resultObj->Unwrap<JSWebHttpAuth>());
+    if (!jsWebHttpAuth) {
+        LOGE("jsWebHttpAuth is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
     jsWebHttpAuth->SetResult(eventInfo.GetResult());
-
     obj->SetPropertyObject("result", resultObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -1050,7 +1052,7 @@ void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
 
 void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
 {
-    if (!args[0]->IsFunction()) {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
         LOGE("param is invalid.");
         return;
     }
@@ -1064,6 +1066,10 @@ void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
                 return false;
             }
             auto eventInfo = TypeInfoHelper::DynamicCast<WebHttpAuthEvent>(info);
+            if (eventInfo == nullptr) {
+                LOGW("eventInfo is null");
+                return false;
+            }
             JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
             if (result->IsBoolean()) {
                 return result->ToBoolean();
