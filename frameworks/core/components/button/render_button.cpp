@@ -318,6 +318,10 @@ void RenderButton::OnMouseHoverEnterTest()
     if (!buttonComponent_) {
         return;
     }
+    if (hoverAnimationType_ == HoverAnimationType::NONE) {
+        LOGW("HoverAnimationType: %{public}d is not supported in this component.", hoverAnimationType_);
+        return;
+    }
     ButtonType type = buttonComponent_->GetType();
     if ((isPhone_ || isTablet_) && ((type == ButtonType::TEXT) || (type == ButtonType::NORMAL))) {
         needHoverColor_ = true;
@@ -342,6 +346,10 @@ void RenderButton::AnimateMouseHoverExit()
 }
 void RenderButton::OnMouseHoverExitTest()
 {
+    if (hoverAnimationType_ == HoverAnimationType::NONE) {
+        LOGW("HoverAnimationType: %{public}d is not supported in this component.", hoverAnimationType_);
+        return;
+    }
     if (needHoverColor_) {
         needHoverColor_ = false;
         MarkNeedRender();

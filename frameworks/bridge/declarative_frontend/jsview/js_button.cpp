@@ -195,6 +195,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSButton>::StaticMethod("size", &JSButton::JsSize);
     JSClass<JSButton>::StaticMethod("padding", &JSButton::JsPadding);
+    JSClass<JSButton>::StaticMethod("hoverEffect", &JSButton::JsHoverEffect);
 
     JSClass<JSButton>::StaticMethod("createWithLabel", &JSButton::CreateWithLabel, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("createWithChild", &JSButton::CreateWithChild, MethodOptions::NONE);
@@ -588,6 +589,18 @@ Dimension JSButton::GetSizeValue(const JSCallbackInfo& info)
         return Dimension(-1.0);
     }
     return value;
+}
+
+void JSButton::JsHoverEffect(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsNumber()) {
+        LOGE("The arg is not a number");
+        return;
+    }
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (buttonComponent) {
+        buttonComponent->SetMouseAnimationType(static_cast<HoverAnimationType>(info[0]->ToNumber<int32_t>()));
+    }
 }
 
 } // namespace OHOS::Ace::Framework
