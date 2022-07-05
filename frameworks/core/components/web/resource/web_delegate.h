@@ -68,6 +68,20 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebJSDialogResult> result_;
 };
 
+class AuthResultOhos : public AuthResult {
+    DECLARE_ACE_TYPE(AuthResultOhos, AuthResult)
+
+public:
+    AuthResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSHttpAuthResult> result) : result_(result) {}
+
+    bool Confirm(std::string &userName, std::string &pwd) override;
+    bool IsHttpAuthInfoSaved() override;
+    void Cancel() override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebJSHttpAuthResult> result_;
+};
+
 class FileSelectorParamOhos : public WebFileSelectorParam {
     DECLARE_ACE_TYPE(FileSelectorParamOhos, WebFileSelectorParam)
 
@@ -189,6 +203,7 @@ public:
         OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
     void OnRequestFocus();
     bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType);
+    bool OnHttpAuthRequest(const BaseEventInfo* info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);

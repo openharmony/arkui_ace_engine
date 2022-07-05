@@ -87,6 +87,78 @@ private:
     RefPtr<Result> result_;
 };
 
+class JSWebHttpAuth : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebHttpAuth>::Declare("WebHttpAuthResult");
+        JSClass<JSWebHttpAuth>::CustomMethod("confirm", &JSWebHttpAuth::Confirm);
+        JSClass<JSWebHttpAuth>::CustomMethod("cancel", &JSWebHttpAuth::Cancel);
+        JSClass<JSWebHttpAuth>::CustomMethod("isHttpAuthInfoSaved", &JSWebHttpAuth::IsHttpAuthInfoSaved);
+        JSClass<JSWebHttpAuth>::Bind(globalObj, &JSWebHttpAuth::Constructor, &JSWebHttpAuth::Destructor);
+    }
+
+    void SetResult(const RefPtr<AuthResult>& result)
+    {
+        result_ = result;
+    }
+
+    void Confirm(const JSCallbackInfo& args)
+    {
+        if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsString()) {
+            LOGW("web http auth confirm list is not string");
+            auto code = JSVal(ToJSValue(false));
+            auto descriptionRef = JSRef<JSVal>::Make(code);
+            args.SetReturnValue(descriptionRef);
+            return;
+        }
+        std::string userName = args[0]->ToString();
+        std::string password = args[1]->ToString();
+        bool ret = false;
+        if (result_) {
+            result_->Confirm(userName, password);
+            ret = true;
+        }
+        auto code = JSVal(ToJSValue(ret));
+        auto descriptionRef = JSRef<JSVal>::Make(code);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void Cancel(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Cancel();
+        }
+    }
+
+    void IsHttpAuthInfoSaved(const JSCallbackInfo& args)
+    {
+        bool ret = false;
+        if (result_) {
+            ret = result_->IsHttpAuthInfoSaved();
+        }
+        auto code = JSVal(ToJSValue(ret));
+        auto descriptionRef = JSRef<JSVal>::Make(code);
+        args.SetReturnValue(descriptionRef);
+    }
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebHttpAuth = Referenced::MakeRefPtr<JSWebHttpAuth>();
+        jsWebHttpAuth->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebHttpAuth));
+    }
+
+    static void Destructor(JSWebHttpAuth* jsWebHttpAuth)
+    {
+        if (jsWebHttpAuth != nullptr) {
+            jsWebHttpAuth->DecRefCount();
+        }
+    }
+
+    RefPtr<AuthResult> result_;
+};
+
 class JSWebConsoleLog : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -603,6 +675,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("password", &JSWeb::Password);
     JSClass<JSWeb>::StaticMethod("tableData", &JSWeb::TableData);
     JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::OnFileSelectorShowAbandoned);
+    JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::OnHttpAuthRequest);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -613,6 +686,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebConsoleLog::JSBind(globalObj);
     JSFileSelectorParam::JSBind(globalObj);
     JSFileSelectorResult::JSBind(globalObj);
+    JSWebHttpAuth::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
@@ -711,6 +785,20 @@ JSRef<JSVal> DownloadStartEventToJSValue(const DownloadStartEvent& eventInfo)
 JSRef<JSVal> LoadWebRequestFocusEventToJSValue(const LoadWebRequestFocusEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetRequestFocus()));
+}
+
+JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> resultObj = JSClass<JSWebHttpAuth>::NewInstance();
+    auto jsWebHttpAuth = Referenced::Claim(resultObj->Unwrap<JSWebHttpAuth>());
+    if (!jsWebHttpAuth) {
+        LOGE("jsWebHttpAuth is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
+    jsWebHttpAuth->SetResult(eventInfo.GetResult());
+    obj->SetPropertyObject("result", resultObj);
+    return JSRef<JSVal>::Cast(obj);
 }
 
 void JSWeb::Create(const JSCallbackInfo& info)
@@ -960,6 +1048,36 @@ void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetDownloadStartEventId(eventMarker);
+}
+
+void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("param is invalid.");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebHttpAuthEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), WebHttpAuthEventToJSValue);
+    auto jsCallback = [func = std::move(jsFunc)]
+        (const BaseEventInfo* info) -> bool {
+            ACE_SCORING_EVENT("onHttpAuthRequest CallBack");
+            if (func == nullptr) {
+                LOGW("function is null");
+                return false;
+            }
+            auto eventInfo = TypeInfoHelper::DynamicCast<WebHttpAuthEvent>(info);
+            if (eventInfo == nullptr) {
+                LOGW("eventInfo is null");
+                return false;
+            }
+            JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
+            if (result->IsBoolean()) {
+                return result->ToBoolean();
+            }
+            return false;
+        };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnHttpAuthRequestImpl(std::move(jsCallback));
 }
 
 JSRef<JSVal> ReceivedErrorEventToJSValue(const ReceivedErrorEvent& eventInfo)

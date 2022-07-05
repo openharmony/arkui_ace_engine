@@ -318,4 +318,30 @@ void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)
     }
     delegate->OnScaleChange(oldScaleFactor, newScaleFactor);
 }
+
+bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthResult> result)
+{
+    LOGI("OnHttpAuthRequestByJS");
+    ContainerScope scope(instanceId_);
+
+    bool jsResult = false;
+    auto param = std::make_shared<WebHttpAuthEvent>(AceType::MakeRefPtr<AuthResultOhos>(result));
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+    task->PostSyncTask([webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnHttpAuthRequest(param.get());
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+
+    LOGI("OnHttpAuthRequestByJS result:%{public}d", jsResult);
+    return jsResult;
+}
 } // namespace OHOS::Ace

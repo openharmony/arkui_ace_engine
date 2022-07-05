@@ -72,6 +72,7 @@ public:
     static void Password(bool password);
     static void TableData(bool tableData);
     static void OnFileSelectorShowAbandoned(const JSCallbackInfo& args);
+    static void OnHttpAuthRequest(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

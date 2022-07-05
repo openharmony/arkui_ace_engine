@@ -1087,6 +1087,22 @@ public:
         }
     }
 
+    using OnHttpAuthRequestImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnHttpAuthRequest(const BaseEventInfo* info) const
+    {
+        if (onHttpAuthRequestImpl_) {
+            return onHttpAuthRequestImpl_(info);
+        }
+        return false;
+    }
+    void SetOnHttpAuthRequestImpl(OnHttpAuthRequestImpl && onHttpAuthRequestImpl)
+    {
+        if (onHttpAuthRequestImpl == nullptr) {
+            return;
+        }
+        onHttpAuthRequestImpl_ = std::move(onHttpAuthRequestImpl);
+    }
+
     void RequestFocus();
 
     using OnConsoleImpl = std::function<bool(const BaseEventInfo* info)>;
@@ -1166,6 +1182,7 @@ private:
     OnConsoleImpl consoleImpl_;
     OnFileSelectorShowImpl onFileSelectorShowImpl_;
     OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
+    OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
 
     std::string type_;
     bool isJsEnabled_ = true;

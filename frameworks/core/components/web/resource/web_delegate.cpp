@@ -118,6 +118,29 @@ void ResultOhos::Cancel()
     }
 }
 
+bool AuthResultOhos::Confirm(std::string &userName, std::string &pwd)
+{
+    if (result_) {
+        return result_->Confirm(userName, pwd);
+    }
+    return false;
+}
+
+bool AuthResultOhos::IsHttpAuthInfoSaved()
+{
+    if (result_) {
+        return result_->IsHttpAuthInfoSaved();
+    }
+    return false;
+}
+
+void AuthResultOhos::Cancel()
+{
+    if (result_) {
+        result_->Cancel();
+    }
+}
+
 std::string FileSelectorParamOhos::GetTitle()
 {
     if (param_) {
@@ -2023,6 +2046,11 @@ bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> messa
 bool WebDelegate::OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType)
 {
     return webComponent_->OnCommonDialog(info, dialogEventType);
+}
+
+bool WebDelegate::OnHttpAuthRequest(const BaseEventInfo* info)
+{
+    return webComponent_->OnHttpAuthRequest(info);
 }
 
 void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,
