@@ -49,6 +49,7 @@ private:
     std::string componentName_ {};
     std::function<void()> wsOnMessage_ {};
     std::unique_ptr<websocket::stream<localSocket::socket>> webSocket_ { nullptr };
+    std::unique_ptr<boost::asio::io_context> ioContext_ { nullptr };
 };
 
 } // namespace OHOS::Ace::Framework

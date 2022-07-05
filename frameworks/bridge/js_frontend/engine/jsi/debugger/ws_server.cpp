@@ -20,19 +20,14 @@
 #include <sys/types.h>
 
 #include "base/log/log.h"
-thread_local boost::asio::io_context g_ioContext;
 
 namespace OHOS::Ace::Framework {
-
-void DispatchMsgToSocket(int sign)
-{
-    g_ioContext.stop();
-}
 
 void WsServer::RunServer()
 {
     terminateExecution_ = false;
     try {
+        ioContext_ = std::make_unique<boost::asio::io_context>();
         int appPid = getpid();
         tid_ = pthread_self();
         std::string pidStr = std::to_string(appPid);
@@ -49,18 +44,14 @@ void WsServer::RunServer()
         std::string sockName = '\0' + pidStr + instanceIdStr + componentName_;
         LOGI("WsServer RunServer: %{public}d%{public}d%{public}s", appPid, instanceId_, componentName_.c_str());
         localSocket::endpoint endPoint(sockName);
-        localSocket::socket socket(g_ioContext);
-        localSocket::acceptor acceptor(g_ioContext, endPoint);
+        localSocket::socket socket(*ioContext_);
+        localSocket::acceptor acceptor(*ioContext_, endPoint);
         acceptor.async_accept(socket, [&connectFlag](const boost::system::error_code& error) {
             if (!error) {
                 connectFlag = true;
             }
         });
-        if (signal(SIGURG, &DispatchMsgToSocket) == SIG_ERR) {
-            LOGE("WsServer RunServer: Error exception");
-            return;
-        }
-        g_ioContext.run();
+        ioContext_->run();
         if (terminateExecution_ || !connectState_) {
             return;
         }
@@ -69,7 +60,12 @@ void WsServer::RunServer()
         webSocket_->accept();
         while (!terminateExecution_) {
             beast::flat_buffer buffer;
-            webSocket_->read(buffer);
+            boost::system::error_code error;
+            webSocket_->read(buffer, error);
+            if (error) {
+                webSocket_.reset();
+                return;
+            }
             std::string message = boost::beast::buffers_to_string(buffer.data());
             LOGI("WsServer OnMessage: %{public}s", message.c_str());
             ideMsgQueue.push(std::move(message));
@@ -77,6 +73,7 @@ void WsServer::RunServer()
         }
     } catch (const beast::system_error& se) {
         if (se.code() != websocket::error::closed) {
+            webSocket_.reset();
             LOGE("Error system_error");
         }
     } catch (const std::exception& e) {
@@ -89,8 +86,12 @@ void WsServer::StopServer()
     LOGI("WsServer StopServer");
     terminateExecution_ = true;
     if (!connectState_) {
-        pthread_kill(tid_, SIGURG);
+        ioContext_->stop();
+    } else {
+        boost::system::error_code error;
+        webSocket_->close(websocket::close_code::normal, error);
     }
+    pthread_join(tid_, NULL);
 }
 
 void WsServer::SendReply(const std::string& message) const
