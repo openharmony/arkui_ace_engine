@@ -24,6 +24,7 @@
 #include "core/components/declaration/web/web_client.h"
 #include "core/components/declaration/web/web_declaration.h"
 #include "core/components/web/resource/web_javascript_value.h"
+#include "core/components/web/web_event.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/element.h"
@@ -44,13 +45,6 @@ enum WebCacheMode {
     USE_CACHE_ELSE_NETWORK,
     USE_NO_CACHE,
     USE_CACHE_ONLY
-};
-
-enum DialogEventType {
-    DIALOG_EVENT_ALERT = 0,
-    DIALOG_EVENT_BEFORE_UNLOAD = 1,
-    DIALOG_EVENT_CONFIRM = 2,
-    DIALOG_EVENT_PROMPT = 3
 };
 
 constexpr int default_text_zoom_atio = 100;
@@ -1158,6 +1152,31 @@ public:
         onUrlLoadInterceptImpl_ = onUrlLoadInterceptImpl;
     }
 
+    using OnInterceptRequestImpl = std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>;
+    RefPtr<WebResponse> OnInterceptRequest(const BaseEventInfo* info) const
+    {
+        if (onInterceptRequestImpl_) {
+            return onInterceptRequestImpl_(info);
+        }
+        return nullptr;
+    }
+
+    bool IsEmptyOnInterceptRequest() const
+    {
+        if (onInterceptRequestImpl_ == nullptr) {
+            return true;
+        }
+        return false;
+    }
+
+    void SetOnInterceptRequest(OnInterceptRequestImpl&& onInterceptRequestImpl)
+    {
+        if (onInterceptRequestImpl == nullptr) {
+            return;
+        }
+        onInterceptRequestImpl_ = std::move(onInterceptRequestImpl);
+    }
+
     void SetOnMouseEventCallback(const OnMouseCallback& onMouseId)
     {
         onMouseEvent_ = onMouseId;
@@ -1183,6 +1202,7 @@ private:
     OnFileSelectorShowImpl onFileSelectorShowImpl_;
     OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
+    OnInterceptRequestImpl onInterceptRequestImpl_ = nullptr;
 
     std::string type_;
     bool isJsEnabled_ = true;

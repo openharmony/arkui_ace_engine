@@ -333,8 +333,22 @@ public:
         JSClass<JSWebResourceResponse>::CustomMethod("getReasonMessage", &JSWebResourceResponse::GetReasonMessage);
         JSClass<JSWebResourceResponse>::CustomMethod("getResponseCode", &JSWebResourceResponse::GetResponseCode);
         JSClass<JSWebResourceResponse>::CustomMethod("getResponseHeader", &JSWebResourceResponse::GetResponseHeader);
+        JSClass<JSWebResourceResponse>::CustomMethod("setResponseData", &JSWebResourceResponse::SetResponseData);
+        JSClass<JSWebResourceResponse>::CustomMethod(
+            "setResponseEncoding", &JSWebResourceResponse::SetResponseEncoding);
+        JSClass<JSWebResourceResponse>::CustomMethod(
+            "setResponseMimeType", &JSWebResourceResponse::SetResponseMimeType);
+        JSClass<JSWebResourceResponse>::CustomMethod("setReasonMessage", &JSWebResourceResponse::SetReasonMessage);
+        JSClass<JSWebResourceResponse>::CustomMethod("setResponseCode", &JSWebResourceResponse::SetResponseCode);
+        JSClass<JSWebResourceResponse>::CustomMethod("setResponseHeader", &JSWebResourceResponse::SetResponseHeader);
         JSClass<JSWebResourceResponse>::Bind(
             globalObj, &JSWebResourceResponse::Constructor, &JSWebResourceResponse::Destructor);
+
+    }
+
+    JSWebResourceResponse()
+    {
+        response_ = AceType::MakeRefPtr<WebResponse>();
     }
 
     void SetEvent(const ReceivedHttpErrorEvent& eventInfo)
@@ -392,6 +406,76 @@ public:
         args.SetReturnValue(headers);
     }
 
+    RefPtr<WebResponse> GetResponseObj()
+    {
+        return response_;
+    }
+
+    void SetResponseData(const JSCallbackInfo& args)
+    {
+        if (!(args[0]->IsString())) {
+            return;
+        }
+        auto data = args[0]->ToString();
+        response_->SetData(data);
+    }
+
+    void SetResponseEncoding(const JSCallbackInfo& args)
+    {
+        if (!(args[0]->IsString())) {
+            return;
+        }
+        auto encode = args[0]->ToString();
+        response_->SetEncoding(encode);
+    }
+
+    void SetResponseMimeType(const JSCallbackInfo& args)
+    {
+        if (!(args[0]->IsString())) {
+            return;
+        }
+        auto mineType = args[0]->ToString();
+        response_->SetMimeType(mineType);
+    }
+
+    void SetReasonMessage(const JSCallbackInfo& args)
+    {
+        if (!(args[0]->IsString())) {
+            return;
+        }
+        auto reason = args[0]->ToString();
+        response_->SetReason(reason);
+    }
+
+    void SetResponseCode(const JSCallbackInfo& args)
+    {
+        if (!(args[0]->IsNumber())) {
+            return;
+        }
+        auto statusCode = args[0]->ToNumber<int32_t>();
+        response_->SetStatusCode(statusCode);
+    }
+
+    void SetResponseHeader(const JSCallbackInfo& args)
+    {
+        if (!(args[0]->IsArray())) {
+            return;
+        }
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
+        for (size_t i = 0; i < array->Length(); i++) {
+            auto obj = JSRef<JSObject>::Cast(array->GetValueAt(i));
+            auto headerKey = obj->GetProperty("headerKey");
+            auto headerValue = obj->GetProperty("headerValue");
+            if (!headerKey->IsString() || !headerValue->IsString()) {
+                LOGE("headerKey or headerValue is undefined");
+                return;
+            }
+            auto keystr = headerKey->ToString();
+            auto valstr = headerValue->ToString();
+            LOGI("Set Response Header %{public}s:%{public}s", keystr.c_str(), valstr.c_str());
+            response_->SetHeadersVal(keystr, valstr);
+        }
+    }
 private:
     static void Constructor(const JSCallbackInfo& args)
     {
@@ -430,6 +514,11 @@ public:
     }
 
     void SetHttpErrorEvent(const ReceivedHttpErrorEvent& eventInfo)
+    {
+        request_ = eventInfo.GetRequest();
+    }
+
+    void SetOnInterceptRequestEvent(const OnInterceptRequestEvent& eventInfo)
     {
         request_ = eventInfo.GetRequest();
     }
@@ -648,6 +737,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDownloadStart", &JSWeb::OnDownloadStart);
     JSClass<JSWeb>::StaticMethod("onErrorReceive", &JSWeb::OnErrorReceive);
     JSClass<JSWeb>::StaticMethod("onHttpErrorReceive", &JSWeb::OnHttpErrorReceive);
+    JSClass<JSWeb>::StaticMethod("onInterceptRequest", &JSWeb::OnInterceptRequest);
     JSClass<JSWeb>::StaticMethod("onUrlLoadIntercept", &JSWeb::OnUrlLoadIntercept);
     JSClass<JSWeb>::StaticMethod("onlineImageAccess", &JSWeb::OnLineImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("domStorageAccess", &JSWeb::DomStorageAccessEnabled);
@@ -1152,6 +1242,46 @@ void JSWeb::OnHttpErrorReceive(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetHttpErrorEventId(eventMarker);
+}
+
+JSRef<JSVal> OnInterceptRequestEventToJSValue(const OnInterceptRequestEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    requestEvent->SetOnInterceptRequestEvent(eventInfo);
+    obj->SetPropertyObject("request", requestObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnInterceptRequest");
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<OnInterceptRequestEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), OnInterceptRequestEventToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
+        (const BaseEventInfo* info) -> RefPtr<WebResponse> {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+            auto eventInfo = TypeInfoHelper::DynamicCast<OnInterceptRequestEvent>(info);
+            if (eventInfo == nullptr) {
+                return nullptr;
+            }
+            JSRef<JSVal> obj = func->ExecuteWithValue(*eventInfo);
+            if (!obj->IsObject()) {
+                LOGI("hap return value is null");
+                return nullptr;
+            }
+            auto jsResponse = JSRef<JSObject>::Cast(obj)->Unwrap<JSWebResourceResponse>();
+            if (jsResponse) {
+                return jsResponse->GetResponseObj();
+            }
+            return nullptr;
+        };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnInterceptRequest(std::move(jsCallback));
 }
 
 void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)

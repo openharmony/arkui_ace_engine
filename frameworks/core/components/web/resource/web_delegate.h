@@ -194,6 +194,8 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
     void OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
+    RefPtr<WebResponse> OnInterceptRequest(const BaseEventInfo* info);
+    bool IsEmptyOnInterceptRequest();
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
     void OnProgressChanged(int param);

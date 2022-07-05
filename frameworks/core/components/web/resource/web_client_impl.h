@@ -86,6 +86,8 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason) override;
     void OnRefreshAccessedHistory(const std::string& url, bool isReload) override;
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> OnHandleInterceptRequest(
+        std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     bool OnHandleInterceptUrlLoading(const std::string& url) override;
     void OnResource(const std::string& url) override;
     void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;

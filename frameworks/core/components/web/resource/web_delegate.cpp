@@ -2108,6 +2108,22 @@ void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResource
     }
 }
 
+bool WebDelegate::IsEmptyOnInterceptRequest()
+{
+    if (webComponent_ == nullptr) {
+        return true;
+    }
+    return webComponent_->IsEmptyOnInterceptRequest();
+}
+
+RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const BaseEventInfo* info)
+{
+    if (webComponent_ == nullptr) {
+        return nullptr;
+    }
+    return webComponent_->OnInterceptRequest(info);
+}
+
 void WebDelegate::OnRequestFocus()
 {
     if (onRequestFocusV2_) {
