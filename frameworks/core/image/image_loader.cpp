@@ -16,6 +16,7 @@
 #include "core/image/image_loader.h"
 
 #include <regex>
+#include <string_view>
 
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/utils/SkBase64.h"
@@ -312,16 +313,18 @@ sk_sp<SkData> Base64ImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
 {
     SkBase64 base64Decoder;
-    size_t imageSize = 0;
-    std::string base64Code = GetBase64ImageCode(imageSourceInfo.GetSrc(), imageSize);
-    SkBase64::Error error = base64Decoder.decode(base64Code.c_str(), base64Code.size());
+    std::string_view base64Code = GetBase64ImageCode(imageSourceInfo.GetSrc());
+    if (base64Code.size() == 0) {
+        return nullptr;
+    }
+    SkBase64::Error error = base64Decoder.decode(base64Code.data(), base64Code.size());
     if (error != SkBase64::kNoError) {
         LOGE("error base64 image code!");
         return nullptr;
     }
     auto base64Data = base64Decoder.getData();
     const uint8_t* imageData = reinterpret_cast<uint8_t*>(base64Data);
-    auto resData = SkData::MakeWithCopy(imageData, imageSize);
+    auto resData = SkData::MakeWithCopy(imageData, base64Decoder.getDataSize());
     // in SkBase64, the fData is not deleted after decoded.
     if (base64Data != nullptr) {
         delete[] base64Data;
@@ -330,34 +333,16 @@ sk_sp<SkData> Base64ImageLoader::LoadImageData(
     return resData;
 }
 
-std::string Base64ImageLoader::GetBase64ImageCode(const std::string& uri, size_t& imageSize)
+std::string_view Base64ImageLoader::GetBase64ImageCode(const std::string& uri)
 {
     auto iter = uri.find_first_of(',');
     if (iter == std::string::npos || iter == uri.size() - 1) {
         LOGE("wrong code format!");
-        imageSize = 0;
-        return std::string();
+        return std::string_view();
     }
     // iter + 1 to skip the ","
-    std::string code = uri.substr(iter + 1);
-    imageSize = GetBase64ImageSize(code);
+    std::string_view code(uri.c_str() + (iter + 1));
     return code;
-}
-
-size_t Base64ImageLoader::GetBase64ImageSize(const std::string& code)
-{
-    // use base64 code size to calculate image byte size.
-    auto iter = code.rbegin();
-    int32_t count = 0;
-    // skip all '=' in the end.
-    while (*iter == '=') {
-        count++;
-        iter++;
-    }
-    // get the valid code length.
-    size_t codeSize = code.size() - count;
-    // compute the image byte size.
-    return codeSize - (codeSize / 8) * 2;
 }
 
 bool ResourceImageLoader::GetResourceId(const std::string& uri, const RefPtr<ThemeConstants>& themeContants,
