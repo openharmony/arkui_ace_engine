@@ -58,12 +58,12 @@ template("js_pa_engine_ark") {
       "$ability_runtime_services_path/abilitymgr/include",
       "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/dataability/include",
       "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/rdb/include",
-      "$ability_runtime_path/frameworks/js/napi/aafwk/context",
-      "$ability_runtime_path/frameworks/js/napi/aafwk/inner/napi_common",
+      "$ability_runtime_napi_path/context",
+      "$ability_runtime_napi_path/inner/napi_common",
       "//foundation/arkui/ace_engine/adapter/ohos/entrance/pa_engine/engine/common",
     ]
     deps = [
-      "$ability_runtime_path/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
+      "$ability_runtime_napi_path/inner/napi_common:napi_common",
       "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
       "$ability_runtime_path/frameworks/native/appkit:appkit_native",
       "//ark/js_runtime:libark_jsruntime",
