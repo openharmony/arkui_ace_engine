@@ -299,6 +299,11 @@ void RenderWeb::OnTouchTestHit(const Offset& coordinateOffset, const TouchRestri
         LOGE("TouchTestHit touchRecognizer_ is nullprt");
         return;
     }
+
+    if (touchRestrict.sourceType != SourceType::TOUCH) {
+        LOGI("TouchTestHit got invalid source type: %{public}d", touchRestrict.sourceType);
+        return;
+    }
     touchRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(touchRecognizer_);
 }
