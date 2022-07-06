@@ -144,14 +144,13 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     int rightBottomX = leftTopX + static_cast<int>(node->GetWidth());
     int rightBottomY = leftTopY + static_cast<int>(node->GetHeight());
     if (manager->isOhosHostCard()) {
-        int id = static_cast<int>(
-            ConvertToCardAccessibilityId(node->GetNodeId(), manager->GetCardId(), manager->GetRootNodeId()));
+        int32_t id = ConvertToCardAccessibilityId(node->GetNodeId(), manager->GetCardId(), manager->GetRootNodeId());
         nodeInfo.SetAccessibilityId(id);
         if (node->GetParentId() == -1) {
             nodeInfo.SetParent(-1);
         } else {
-            nodeInfo.SetParent(static_cast<int>(
-                ConvertToCardAccessibilityId(node->GetParentId(), manager->GetCardId(), manager->GetRootNodeId())));
+            nodeInfo.SetParent(
+                ConvertToCardAccessibilityId(node->GetParentId(), manager->GetCardId(), manager->GetRootNodeId()));
         }
         leftTopX = static_cast<int>(node->GetLeft() + manager->GetCardOffset().GetX());
         leftTopY = static_cast<int>(node->GetTop() + manager->GetCardOffset().GetY());
@@ -197,8 +196,8 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     nodeInfo.SetPluraLineSupported(node->GetIsMultiLine());
     nodeInfo.SetPassword(node->GetIsPassword());
     nodeInfo.SetTextLengthLimit(node->GetMaxTextLength());
-    nodeInfo.SetSelectedBegin(static_cast<int>(node->GetTextSelectionStart()));
-    nodeInfo.SetSelectedEnd(static_cast<int>(node->GetTextSelectionEnd()));
+    nodeInfo.SetSelectedBegin(node->GetTextSelectionStart());
+    nodeInfo.SetSelectedEnd(node->GetTextSelectionEnd());
     nodeInfo.SetVisible(node->GetShown() && node->GetVisible() && (node->GetWidth() != 0 && node->GetHeight() != 0));
     nodeInfo.SetHint(node->GetHintText());
     std::string accessibilityLabel = node->GetAccessibilityLabel();
@@ -210,12 +209,14 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     nodeInfo.SetRange(rangeInfo);
     nodeInfo.SetInputType(static_cast<int>(node->GetTextInputType()));
     nodeInfo.SetComponentType(node->GetTag());
-    GridInfo gridInfo(static_cast<int>(node->GetCollectionInfo().rows),
-        static_cast<int>(node->GetCollectionInfo().columns), (nodeInfo.IsPluraLineSupported() ? 0 : 1));
+    GridInfo gridInfo(
+        node->GetCollectionInfo().rows, node->GetCollectionInfo().columns, (nodeInfo.IsPluraLineSupported() ? 0 : 1));
     nodeInfo.SetGrid(gridInfo);
+    nodeInfo.SetAccessibilityFocus(node->GetAccessibilityFocusedState());
+    nodeInfo.SetPageId(node->GetPageId());
 
-    int row = static_cast<int>(node->GetCollectionItemInfo().row);
-    int column = static_cast<int>(node->GetCollectionItemInfo().column);
+    int32_t row = node->GetCollectionItemInfo().row;
+    int32_t column = node->GetCollectionItemInfo().column;
     GridItemInfo gridItemInfo(row, row, column, column, false, nodeInfo.IsSelected());
     nodeInfo.SetGridItem(gridItemInfo);
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
