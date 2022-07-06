@@ -28,6 +28,7 @@ void FocusableElement::Update()
         LOGE("Can not dynamicCast to focusableComponent!");
         return;
     }
+    SetElementId(focusableComponent->GetElementId());
 
     // Save isNode
     isNode_ = focusableComponent->IsFocusNode();

@@ -69,6 +69,7 @@ void PageTransitionElement::PerformBuild()
         LOGE("PageTransitionElement::PerformBuild: get PageTransitionComponent failed!");
         return;
     }
+    SetElementId(pageTransitionComponent->GetElementId());
 
     if (!controller_) {
         LOGD("create animator.");

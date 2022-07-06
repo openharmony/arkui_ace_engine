@@ -28,6 +28,7 @@ class SearchElement : public RenderElement, public FocusGroup {
 
 public:
     void PerformBuild() override;
+    void LocalizedUpdate() override;
 
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent) override;

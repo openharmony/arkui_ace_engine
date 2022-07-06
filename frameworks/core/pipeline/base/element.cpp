@@ -172,6 +172,7 @@ void Element::DumpTree(int32_t depth)
 {
     if (DumpLog::GetInstance().GetDumpFile()) {
         Dump();
+        DumpLog::GetInstance().AddDesc(std::string("elmtId: ").append(std::to_string(GetElementId())));
         DumpLog::GetInstance().AddDesc(std::string("retakeID: ").append(std::to_string(GetRetakeId())));
         DumpLog::GetInstance().AddDesc(std::string("Active: ").append(IsActive() ? "Y" : "N"));
         DumpLog::GetInstance().Print(depth, AceType::TypeName(this), children_.size());

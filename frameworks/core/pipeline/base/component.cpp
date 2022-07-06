@@ -20,12 +20,13 @@
 #include "core/common/ace_application_info.h"
 #include "core/pipeline/base/render_component.h"
 #include "core/pipeline/base/single_child.h"
+#include "frameworks/core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace {
 
 std::atomic<int32_t> Component::key_ = 1;
 
-Component::Component()
+Component::Component() : elmtId_(ElementRegister::UndefinedElementId)
 {
     SetRetakeId(key_++);
     direction_ = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;

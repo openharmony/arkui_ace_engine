@@ -32,7 +32,7 @@ public:
 
     void PerformBuild() override;
 
-private:
+protected:
     void UpdateChildren(const std::list<RefPtr<Component>>& newComponents);
     void UpdateChildrenForDeclarative(const std::list<RefPtr<Component>>& newComponents);
 };

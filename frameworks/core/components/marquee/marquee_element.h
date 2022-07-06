@@ -21,12 +21,18 @@
 #include "core/pipeline/base/sole_child_element.h"
 
 namespace OHOS::Ace {
-class MarqueeElement : public SoleChildElement {
+class ACE_EXPORT MarqueeElement : public SoleChildElement {
     DECLARE_ACE_TYPE(MarqueeElement, SoleChildElement);
 
 public:
     MarqueeElement() = default;
     ~MarqueeElement() override = default;
+
+    void LocalizedUpdate() override
+    {
+        Update();
+        PerformBuild();
+    }
 };
 } // namespace OHOS::Ace
 

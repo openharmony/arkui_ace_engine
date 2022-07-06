@@ -66,6 +66,13 @@ void ButtonElement::Update()
     };
 }
 
+void ButtonElement::LocalizedUpdate()
+{
+    Update();
+    auto buttonComponent = AceType::DynamicCast<ButtonComponent>(component_);
+    ComponentGroupElement::UpdateChildrenForDeclarative(buttonComponent->GetChildren());
+}
+
 void ButtonElement::Apply(const RefPtr<Element>& child)
 {
     RenderElement::Apply(child);

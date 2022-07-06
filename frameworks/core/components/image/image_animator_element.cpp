@@ -35,6 +35,8 @@ void Ace::ImageAnimatorElement::Update()
         LOGE("ImageAnimator element update failed. imageAnimatorComponent is null.");
         return;
     }
+    SetElementId(imageAnimatorComponent->GetElementId());
+
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>();
     }
