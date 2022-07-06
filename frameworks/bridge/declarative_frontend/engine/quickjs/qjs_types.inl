@@ -57,6 +57,12 @@ void QJSCallbackInfo::SetReturnValue(QJSRef<T> val) const
     retVal_ = JS_DupValue(nullptr, val.Get().GetHandle());
 }
 
+template<typename S>
+void QJSCallbackInfo::SetReturnValue(S any) const
+{
+    retVal_ = __detail__::toJSValue<S>(any);
+}
+
 template<typename T>
 void QJSGCMarkCallbackInfo::Mark(const QJSRef<T>& val) const
 {

@@ -113,10 +113,10 @@ V8Type<T>::operator v8::Local<T>() const
 }
 
 template<typename T>
-V8Type<T> V8Type<T>::New()
+template<typename... Args>
+V8Type<T> V8Type<T>::New(Args&&... args)
 {
-    auto current = v8::Isolate::GetCurrent();
-    return V8Type<T>(T::New(current));
+    return V8Type<T>(T::New(v8::Isolate::GetCurrent()));
 }
 
 template<typename T>
@@ -166,6 +166,12 @@ void V8CallbackInfo::SetReturnValue(V8Ref<T> val) const
     info_.GetReturnValue().Set(val.Get().GetHandle());
 }
 
+template<typename S>
+void V8CallbackInfo::SetReturnValue(S any) const
+{
+    info_.GetReturnValue().Set(any);
+}
+
 template<typename... Args>
 void V8Exception::Throw(const char* format, Args... args)
 {
@@ -187,7 +193,8 @@ void V8Exception::ThrowReferenceError(const char* format, Args... args)
 {
     const std::string str = StringUtils::FormatString(format, args...);
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    isolate->ThrowException(v8::Exception::ReferenceError(v8::String::NewFromUtf8(isolate, str.c_str()).ToLocalChecked()));
+    isolate->ThrowException(
+        v8::Exception::ReferenceError(v8::String::NewFromUtf8(isolate, str.c_str()).ToLocalChecked()));
 }
 
 template<typename... Args>

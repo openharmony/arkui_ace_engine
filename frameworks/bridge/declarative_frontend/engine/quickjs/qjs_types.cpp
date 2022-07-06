@@ -263,6 +263,13 @@ size_t QJSArray::Length() const
     return QJSUtils::JsGetArrayLength(QJSContext::Current(), GetHandle());
 }
 
+QJSString::QJSString(const char* str) : QJSValue(JS_NewStringLen(QJSContext::Current(), str, strlen(str))) {}
+QJSString::QJSString(JSValue str) : QJSValue(str) {}
+
+QJSString QJSString::New(const char* str)
+{
+    return QJSString(str);
+}
 QJSCallbackInfo::QJSCallbackInfo(JSContext* ctx, JSValueConst thisObj, int argc, JSValueConst* argv)
     : ctx_(ctx), thisObj_(thisObj), argc_(argc), argv_(argv)
 {}

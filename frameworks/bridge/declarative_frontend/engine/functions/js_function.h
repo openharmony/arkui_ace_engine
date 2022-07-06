@@ -34,6 +34,7 @@ public:
     JsFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction);
     ~JsFunction() override;
     void Execute();
+    void Execute(const JSRef<JSObject>& jsParamsObject);
     void Execute(const std::vector<std::string>& keys, const std::string& param);
     void ExecuteNew(const std::vector<std::string>& keys, const std::string& param);
     JSRef<JSVal> ExecuteJS(int argc = 0, JSRef<JSVal>* argv = nullptr);

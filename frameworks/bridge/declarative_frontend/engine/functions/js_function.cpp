@@ -43,6 +43,12 @@ void JsFunction::Execute()
     JsFunction::ExecuteJS();
 }
 
+void JsFunction::Execute(const JSRef<JSObject>& jsParamsObject)
+{
+    JSRef<JSVal> paramObj = JSRef<JSVal>::Cast(jsParamsObject);
+    ExecuteJS(1, &paramObj);
+}
+
 void JsFunction::Execute(const std::vector<std::string>& keys, const std::string& param)
 {
     LOGI("param : %{private}s", param.c_str());

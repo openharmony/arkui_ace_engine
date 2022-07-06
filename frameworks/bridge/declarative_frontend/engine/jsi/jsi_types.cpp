@@ -301,4 +301,16 @@ void JsiCallbackInfo::ReturnSelf() const
     retVal_ = thisObj;
 }
 
+// -----------------------
+// Implementation of JsiString
+// -----------------------
+JsiString::JsiString(const char* str) : JsiValue(StringRef::NewFromUtf8(GetEcmaVM(), str)) {}
+JsiString::JsiString(JsiValue str) : JsiValue(str) {}
+
+JsiString JsiString::New(const char* str)
+{
+    return JsiString(str);
+}
+
+
 } // namespace OHOS::Ace::Framework

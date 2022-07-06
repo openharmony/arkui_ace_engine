@@ -97,6 +97,18 @@ public:
 };
 
 /**
+ * @brief A wrapper around a panda::StringRef
+ *
+ */
+class JsiString : public JsiValue {
+public:
+    explicit JsiString(const char* str);
+    explicit JsiString(JsiValue str);
+    static JsiString New(const char* str);
+    FAKE_PTR_FOR_FUNCTION_ACCESS(JsiString)
+};
+
+/**
  * @brief A wrapper around a panda::ArrayRef
  *
  */
