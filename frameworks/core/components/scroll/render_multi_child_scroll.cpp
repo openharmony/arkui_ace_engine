@@ -134,7 +134,8 @@ bool RenderMultiChildScroll::CalculateMainScrollExtent()
         }
     } else {
         if (scrollable_ && scrollable_->Available()) {
-            if (scrollable_->Idle() && GetMainOffset(currentOffset_) > mainScrollExtent_ - GetMainSize(viewPort_)) {
+            if (scrollable_->Idle() &&
+                GreatNotEqual(GetMainOffset(currentOffset_), mainScrollExtent_ - GetMainSize(viewPort_))) {
                 // scroll to bottom
                 scrollEffect_->ProcessScrollOver(0.0);
             }
