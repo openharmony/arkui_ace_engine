@@ -17,4 +17,4 @@ use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
 # source code for mac.
 
 use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
-          "${current_os}_${host_cpu}" == "mac_m1"
+          "${current_os}_${host_cpu}" == "mac_arm64"
