@@ -206,6 +206,7 @@ void JSGridRow::JSBind(BindingTarget globalObj)
     JSClass<JSGridRow>::StaticMethod("gutter", &JSGridRow::Gutter, MethodOptions::NONE);
     JSClass<JSGridRow>::StaticMethod("breakpoints", &JSGridRow::Breakpoints, MethodOptions::NONE);
     JSClass<JSGridRow>::StaticMethod("direction", &JSGridRow::Direction, MethodOptions::NONE);
+    JSClass<JSGridRow>::StaticMethod("onBreakpointChange", &JSGridRow::JsBreakpointEvent, MethodOptions::NONE);
     JSClass<JSGridRow>::Inherit<JSContainerBase>();
     JSClass<JSGridRow>::Bind<>(globalObj);
 }
@@ -275,6 +276,11 @@ void JSGridRow::Direction(const JSCallbackInfo& info)
     if (grid) {
         ParserDirection(info[0], grid);
     }
+}
+
+void JSGridRow::JsBreakpointEvent(const JSCallbackInfo& info)
+{
+    JSViewBindEvent(&V2::GridRowComponent::SetbreakPointChange, info);
 }
 
 } // namespace OHOS::Ace::Framework

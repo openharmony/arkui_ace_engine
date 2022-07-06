@@ -22,7 +22,9 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "base/utils/string_utils.h"
 #include "core/common/window.h"
+#include "core/components_v2/common/common_def.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
 #include "core/components_v2/grid_layout/grid_row_element.h"
 #include "core/components_v2/grid_layout/render_grid_row.h"
@@ -78,6 +80,15 @@ public:
     GridRowDirection GetDirection() const
     {
         return direction_;
+    }
+
+    ACE_DEFINE_COMPONENT_EVENT(breakPointChange, void(std::string));
+
+    void FirebreakPointEvent(const std::string& sizeType)
+    {
+        if (eventbreakPointChange_) {
+            (*eventbreakPointChange_)(sizeType);
+        }
     }
 
 private:

@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "core/components/common/layout/grid_container_info.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -59,6 +60,7 @@ enum class GridSizeType {
     LG = 3,
     XL = 4,
     XXL = 5,
+    UNDEFINED = 6,
 };
 
 struct GridSizeInfo : public AceType {

@@ -38,6 +38,26 @@ inline std::list<RefPtr<RenderNode>> SortChildrenByOrder(const std::list<RefPtr<
     return sortChildren;
 }
 
+std::string ConvertSizeTypeToString(GridSizeType sizeType)
+{
+    switch (sizeType) {
+        case GridSizeType::XS:
+            return "xs";
+        case GridSizeType::SM:
+            return "sm";
+        case GridSizeType::LG:
+            return "lg";
+        case GridSizeType::MD:
+            return "md";
+        case GridSizeType::XL:
+            return "xl";
+        case GridSizeType::XXL:
+            return "xxl";
+        case GridSizeType::UNDEFINED:
+            return "undefined";
+    }
+}
+
 } // namespace
 
 RefPtr<RenderNode> RenderGridRow::Create()
@@ -70,6 +90,10 @@ void RenderGridRow::PerformLayout()
         return;
     }
     auto sizeType = GridContainerUtils::ProcessGridSizeType(component->GetBreakPoints(), maxSize, context);
+    if (originSizeType_ != sizeType) {
+        auto sizeTypeString = ConvertSizeTypeToString(sizeType);
+        component->FirebreakPointEvent(sizeTypeString);
+    }
     auto getter = GridContainerUtils::ProcessGetter(sizeType, component->GetGetter());
     auto getterInDouble = std::make_pair<double, double>(NormalizeToPx(getter.first), NormalizeToPx(getter.second));
     int32_t columnNum = GridContainerUtils::ProcessColumn(sizeType, component->GetTotalCol());
