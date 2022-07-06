@@ -337,12 +337,12 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         SkAutoCanvasRestore acr(canvas, true);
         auto rsnode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
         auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-        recordingCanvas->ClipOutsetRect(rsnode->GetStagingProperties().GetBoundsWidth(),
-            rsnode->GetStagingProperties().GetBoundsHeight());
+        auto bounds = rsnode->GetStagingProperties().GetBounds();
+        auto frame = rsnode->GetStagingProperties().GetFrame();
+        recordingCanvas->ClipOutsetRect(bounds.z_, bounds.w_);
         auto size = GetLayoutSize() + Size(EXTRA_WIDTH, EXTRA_WIDTH);
-        if (rsnode->GetStagingProperties().GetFrameWidth() <= 0 ||
-            rsnode->GetStagingProperties().GetFrameHeight() <= 0) {
-            rsnode->SetFrameSize(GetLayoutSize().Width(), GetLayoutSize().Height());
+        if (frame.z_ <= 0 || frame.w_ <= 0) {
+            rsnode->SetFrame(bounds.x_, bounds.y_, GetLayoutSize().Width(), GetLayoutSize().Height());
         }
         DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, size);
         DebugBoundaryPainter::PaintDebugCorner(canvas, offset, size);
