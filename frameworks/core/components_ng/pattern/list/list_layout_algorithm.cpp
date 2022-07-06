@@ -157,7 +157,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (layoutWrapper->GetChildren().empty()) {
             startIndex_ = 0;
         } else {
-            startIndex_ = endIndex_.value() - layoutWrapper->GetChildren().size() + 1;
+            startIndex_ = endIndex_.value() - static_cast<int32_t>(layoutWrapper->GetChildren().size()) + 1;
         }
         LOGD("new start index is %{public}d, new end index is %{public}d", startIndex_.value(), endIndex_.value());
         return;
@@ -178,7 +178,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (layoutWrapper->GetChildren().empty()) {
         endIndex_ = 0;
     } else {
-        endIndex_ = startIndex_.value() + layoutWrapper->GetChildren().size() - 1;
+        endIndex_ = startIndex_.value() + static_cast<int32_t>(layoutWrapper->GetChildren().size()) - 1;
     }
     LOGD("new start index is %{public}d, new end index is %{public}d", startIndex_.value(), endIndex_.value());
 }
@@ -246,7 +246,7 @@ std::pair<int32_t, float> ListLayoutAlgorithm::RequestNewItemsForward(LayoutWrap
     auto nextIndex = startIndex;
     auto currentStartPos = startPos;
     auto currentEndPos = startPos;
-    while (currentEndPos < endMainPos_) {
+    while (LessNotEqual(currentEndPos, endMainPos_)) {
         // build more item and layout.
         RefPtr<FrameNode> newChild;
         {
@@ -287,7 +287,7 @@ std::pair<int32_t, float> ListLayoutAlgorithm::RequestNewItemsBackward(LayoutWra
     auto nextIndex = startIndex;
     auto currentStartPos = startPos;
     auto currentEndPos = startPos;
-    while (currentStartPos > startMainPos_) {
+    while (GreatNotEqual(currentStartPos, startMainPos_)) {
         // build more item and layout.
         RefPtr<FrameNode> newChild;
         {
