@@ -49,6 +49,7 @@ private:
     void InitBorderImageWidth(Border& border, RefPtr<BorderImage>& borderImage);
     void InitBorderImageSlice(RefPtr<BorderImage>& borderImage);
     void InitBorderImageOutset(Border& border, RefPtr<BorderImage>& borderImage);
+    void ParseNegativeNumberToZero(double& value);
 
     Size paintSize_;
     RefPtr<Decoration> decoration_;
