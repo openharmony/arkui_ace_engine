@@ -306,6 +306,8 @@ void JSCustomDialogController::CloseDialog()
         LOGW("JSCustomDialogController(CloseDialog) fail to post task, reset pending status");
         pending_ = false;
     }
+
+    dialogComponent_ = nullptr;
 }
 
 void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
