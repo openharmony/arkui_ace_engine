@@ -60,6 +60,8 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
+    void SetDebuggerPostTask();
+
     RefPtr<FrontendDelegate> GetDelegate() const
     {
         return frontendDelegate_;

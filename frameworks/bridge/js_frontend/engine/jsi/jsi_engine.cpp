@@ -2951,6 +2951,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     std::string library_path = "";
     if (debugger_mode) {
         library_path = ARK_DEBUGGER_LIB_PATH;
+        SetDebuggerPostTask();
     }
     if (!runtime_->Initialize(library_path, isDebugMode_, GetInstanceId())) {
         LOGE("Js Engine initialize runtime failed");
@@ -3095,6 +3096,20 @@ bool JsiEngineInstance::CallCurlFunction(const OHOS::Ace::RequestData& requestDa
 }
 #endif
 
+void JsiEngineInstance::SetDebuggerPostTask()
+{
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(frontendDelegate_));
+    auto&& postTask = [weakDelegate](std::function<void()>&& task) {
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate == nullptr) {
+            LOGE("delegate is nullptr");
+            return;
+        }
+        delegate->PostJsTask(std::move(task));
+    };
+    std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
+}
+
 // -----------------------
 // Start JsiEngine
 // -----------------------
@@ -3194,7 +3209,10 @@ void JsiEngine::RegisterInitWorkerFunc()
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         ConnectServerManager::Get().AddInstance(gettid());
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
-        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid());
+        auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
+            nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
+        };
+        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid(), workerPostTask);
 #endif
         instance->RegisterConsoleModule(arkNativeEngine);
         // load jsfwk

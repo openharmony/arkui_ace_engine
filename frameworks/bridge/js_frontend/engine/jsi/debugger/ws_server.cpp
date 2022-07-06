@@ -68,8 +68,7 @@ void WsServer::RunServer()
             }
             std::string message = boost::beast::buffers_to_string(buffer.data());
             LOGI("WsServer OnMessage: %{public}s", message.c_str());
-            ideMsgQueue.push(std::move(message));
-            wsOnMessage_();
+            wsOnMessage_(std::move(message));
         }
     } catch (const beast::system_error& se) {
         if (se.code() != websocket::error::closed) {
