@@ -114,6 +114,8 @@ public:
 
     bool CheckIfNeedLayoutAgain() override;
 
+    void OnVisibleChanged() override;
+
 protected:
     void ClearRenderObject() override;
     bool MaybeRelease() override;

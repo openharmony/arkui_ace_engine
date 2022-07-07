@@ -1242,4 +1242,12 @@ bool RenderFlex::CheckIfNeedLayoutAgain()
     return layoutMode_ != FlexLayoutMode::FLEX_WEIGHT_MODE;
 }
 
+void RenderFlex::OnVisibleChanged()
+{
+    auto accessibilityNode = GetAccessibilityNode().Upgrade();
+    if (accessibilityNode) {
+        accessibilityNode->SetVisible(GetVisible());
+    }
+}
+
 } // namespace OHOS::Ace

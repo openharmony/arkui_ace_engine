@@ -158,6 +158,12 @@ private:
         const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex);
     RefPtr<AccessibilityNode> CreateDeclarativeAccessibilityNode(
         const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex);
+    RefPtr<AccessibilityNode> GetRootAccessibilityNode();
+    // decor nodes are created before load page(SetRootNodeId)
+    bool IsDecor()
+    {
+        return rootNodeId_ == -1;
+    }
 };
 
 } // namespace OHOS::Ace::Framework

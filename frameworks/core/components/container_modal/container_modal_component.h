@@ -31,6 +31,10 @@ public:
     explicit ContainerModalComponent(const WeakPtr<PipelineContext>& context)
     {
         context_ = context;
+        auto pipelineContext = context_.Upgrade();
+        if (pipelineContext) {
+            isDeclarative_ = pipelineContext->GetIsDeclarative();
+        }
     }
 
     ~ContainerModalComponent() override = default;
@@ -66,14 +70,16 @@ private:
     RefPtr<Component> BuildTitle();
     RefPtr<Component> BuildFloatingTitle();
     RefPtr<Component> BuildContent();
-    RefPtr<ButtonComponent> BuildControlButton(
-        InternalResource::ResourceId icon, std::function<void()>&& clickCallback, bool isFocus);
+    RefPtr<Component> BuildControlButton(
+        InternalResource::ResourceId icon, std::function<void()>&& clickCallback, bool isFocus, bool isFloating);
+    void CreateAccessibilityNode(const std::string& tag, int32_t nodeId, int32_t parentNodeId);
     static RefPtr<Component> SetPadding(
         const RefPtr<Component>& component, const Dimension& leftPadding, const Dimension& rightPadding);
 
     WeakPtr<PipelineContext> context_;
     RefPtr<ImageComponent> titleIcon_;
     RefPtr<TextComponent> titleLabel_;
+    bool isDeclarative_ = true;
     bool hideSplit_ = false;
     bool hideMaximize_ = false;
     bool hideMinimize_ = false;

@@ -25,8 +25,17 @@
 #include "core/components/padding/padding_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components/tween/tween_component.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int32_t ROOT_DECOR_BASE = 3100000;
+constexpr int32_t TITLE_ROW = ROOT_DECOR_BASE;
+constexpr int32_t FLOATING_TITLE_ROW = ROOT_DECOR_BASE + 1;
+constexpr int32_t TITLE_LABEL = ROOT_DECOR_BASE + 2;
+constexpr int32_t FLOATING_TITLE_LABEL = ROOT_DECOR_BASE + 3;
+}
 
 RefPtr<Component> ContainerModalComponent::Create(
     const WeakPtr<PipelineContext>& context, const RefPtr<Component>& child)
@@ -52,6 +61,10 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     // build title box
     auto titleBox = AceType::MakeRefPtr<BoxComponent>();
     titleBox->SetHeight(CONTAINER_TITLE_HEIGHT);
+
+    // BuildTitleChildren need this
+    CreateAccessibilityNode(DOM_FLEX_ROW, TITLE_ROW, -1);
+
     auto titleChildrenRow =
         AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(false));
 
@@ -71,8 +84,14 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
         }
     });
     titleBox->SetChild(titleChildrenRow);
-    auto display = AceType::MakeRefPtr<DisplayComponent>(titleBox);
-    return display;
+
+    if (isDeclarative_) {
+        return AceType::MakeRefPtr<DisplayComponent>(AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+            std::to_string(TITLE_ROW), V2::ROW_COMPONENT_TAG, titleBox));
+    } else {
+        return AceType::MakeRefPtr<DisplayComponent>(
+            AceType::MakeRefPtr<ComposedComponent>(std::to_string(TITLE_ROW), DOM_FLEX_ROW, titleBox));
+    }
 }
 
 RefPtr<Component> ContainerModalComponent::BuildFloatingTitle()
@@ -85,11 +104,19 @@ RefPtr<Component> ContainerModalComponent::BuildFloatingTitle()
     titleBox->SetHeight(CONTAINER_TITLE_HEIGHT);
     titleBox->SetBackDecoration(titleDecoration);
 
+    CreateAccessibilityNode(DOM_FLEX_ROW, FLOATING_TITLE_ROW, -1);
+
     auto floatingTitleChildrenRow =
         AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(true));
     titleBox->SetChild(floatingTitleChildrenRow);
-    auto tween = AceType::MakeRefPtr<TweenComponent>("ContainerModal", titleBox);
-    return tween;
+    if (isDeclarative_) {
+        return AceType::MakeRefPtr<TweenComponent>(
+            "ContainerModal", AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+                                  std::to_string(FLOATING_TITLE_ROW), V2::ROW_COMPONENT_TAG, titleBox));
+    } else {
+        return AceType::MakeRefPtr<TweenComponent>("ContainerModal",
+            AceType::MakeRefPtr<ComposedComponent>(std::to_string(FLOATING_TITLE_ROW), DOM_FLEX_ROW, titleBox));
+    }
 }
 
 RefPtr<Component> ContainerModalComponent::BuildContent()
@@ -109,9 +136,10 @@ RefPtr<Component> ContainerModalComponent::BuildContent()
     return clip;
 }
 
-RefPtr<ButtonComponent> ContainerModalComponent::BuildControlButton(
-    InternalResource::ResourceId icon, std::function<void()>&& clickCallback, bool isFocus)
+RefPtr<Component> ContainerModalComponent::BuildControlButton(
+    InternalResource::ResourceId icon, std::function<void()>&& clickCallback, bool isFocus, bool isFloating)
 {
+    static int32_t controlButtonId = 0;
     auto image = AceType::MakeRefPtr<ImageComponent>(icon);
     image->SetWidth(TITLE_ICON_SIZE);
     image->SetHeight(TITLE_ICON_SIZE);
@@ -126,7 +154,16 @@ RefPtr<ButtonComponent> ContainerModalComponent::BuildControlButton(
     button->SetClickedColor(TITLE_BUTTON_CLICKED_COLOR);
     button->SetClickFunction(std::move(clickCallback));
     button->SetFocusable(false);
-    return button;
+    
+    ++controlButtonId;
+    int32_t buttonId = FLOATING_TITLE_LABEL + controlButtonId;
+    if (!isDeclarative_) {
+        CreateAccessibilityNode(DOM_NODE_TAG_BUTTON, buttonId, isFloating ? FLOATING_TITLE_ROW : TITLE_ROW);
+        return AceType::MakeRefPtr<ComposedComponent>(std::to_string(buttonId), DOM_NODE_TAG_BUTTON, button);
+    } else {
+        return AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+            std::to_string(buttonId), V2::BUTTON_COMPONENT_TAG, button);
+    }
 }
 
 RefPtr<Component> ContainerModalComponent::SetPadding(
@@ -195,6 +232,9 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     titleLabel_->SetTextStyle(style);
     titleLabel_->SetFlexWeight(1.0);
 
+    CreateAccessibilityNode(DOM_NODE_TAG_TEXT, isFloating ? FLOATING_TITLE_LABEL : TITLE_LABEL,
+        isFloating ? FLOATING_TITLE_ROW : TITLE_ROW);
+
     // title control button
     auto contextWptr = context_;
     auto leftSplitButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT
@@ -205,7 +245,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
             if (context) {
                 context->FireWindowSplitCallBack();
             }
-        }, isFocus);
+        }, isFocus, isFloating);
     auto maxRecoverButton = isFloating ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER
                                        : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
     if (!isFocus) {
@@ -224,7 +264,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
                     context->FireWindowMaximizeCallBack();
                 }
             }
-        }, isFocus);
+        }, isFocus, isFloating);
     auto minimizeButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE
                                   : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE;
     auto titleMinimizeButton = BuildControlButton(minimizeButton, [contextWptr]() {
@@ -233,7 +273,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
                 LOGI("minimize button clicked");
                 context->FireWindowMinimizeCallBack();
             }
-        }, isFocus);
+        }, isFocus, isFloating);
     auto closeButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE
                                : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE;
     auto titleCloseButton = BuildControlButton(closeButton, [contextWptr]() {
@@ -242,10 +282,18 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
                 LOGI("close button clicked");
                 context->FireWindowCloseCallBack();
             }
-        }, isFocus);
+        }, isFocus, isFloating);
     std::list<RefPtr<Component>> titleChildren;
     titleChildren.emplace_back(SetPadding(titleIcon_, TITLE_PADDING_START, TITLE_ELEMENT_MARGIN_HORIZONTAL));
-    titleChildren.emplace_back(titleLabel_);
+    if (isDeclarative_) {
+        titleChildren.emplace_back(AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+            isFloating ? std::to_string(FLOATING_TITLE_LABEL) : std::to_string(TITLE_LABEL), V2::TEXT_COMPONENT_TAG,
+            titleLabel_));
+    } else {
+        titleChildren.emplace_back(AceType::MakeRefPtr<ComposedComponent>(
+            isFloating ? std::to_string(FLOATING_TITLE_LABEL) : std::to_string(TITLE_LABEL), DOM_NODE_TAG_TEXT,
+            titleLabel_));
+    }
     if (!hideSplit_) {
         titleChildren.emplace_back(SetPadding(titleLeftSplitButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     }
@@ -258,6 +306,17 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     }
     titleChildren.emplace_back(SetPadding(titleCloseButton, ZERO_PADDING, TITLE_PADDING_END));
     return titleChildren;
+}
+
+void ContainerModalComponent::CreateAccessibilityNode(const std::string& tag, int32_t nodeId, int32_t parentNodeId)
+{
+    auto context = context_.Upgrade();
+    if (context != nullptr && !isDeclarative_) {
+        auto accessibilityManager = context->GetAccessibilityManager();
+        if (accessibilityManager) {
+            accessibilityManager->CreateAccessibilityNode(tag, nodeId, parentNodeId, -1);
+        }
+    }
 }
 
 } // namespace OHOS::Ace
