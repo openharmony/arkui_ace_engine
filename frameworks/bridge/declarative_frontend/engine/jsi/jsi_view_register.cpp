@@ -201,7 +201,7 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
 {
     LOGI("Load Document start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -297,7 +297,7 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
 {
     LOGD("JsGetI18nResource");
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -364,7 +364,7 @@ panda::Local<panda::JSValueRef> JsGetMediaResource(panda::JsiRuntimeCallInfo* ru
 {
     LOGD("JsGetMediaResource");
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -416,7 +416,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodes(panda::JsiRuntimeCallInfo* r
 panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -465,7 +465,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
 panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -494,7 +494,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* r
 panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -601,7 +601,7 @@ static V2::JsKeyEvent GetKeyEventFromJS(const JsiObject& value)
 panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -653,7 +653,7 @@ static MouseEvent GetMouseEventFromJS(const JsiObject& value)
 panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
@@ -684,7 +684,7 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runt
 panda::Local<panda::JSValueRef> Vp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -704,7 +704,7 @@ panda::Local<panda::JSValueRef> Vp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo
 panda::Local<panda::JSValueRef> Px2Vp(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -729,7 +729,7 @@ panda::Local<panda::JSValueRef> Px2Vp(panda::JsiRuntimeCallInfo* runtimeCallInfo
 panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -760,7 +760,7 @@ panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo
 panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -795,7 +795,7 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo* runtimeCallInfo
 panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -822,7 +822,7 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
 panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Undefined(vm);
@@ -850,7 +850,7 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
 panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
         return panda::JSValueRef::Exception(vm);
