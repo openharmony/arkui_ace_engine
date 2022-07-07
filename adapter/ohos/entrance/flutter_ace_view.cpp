@@ -80,10 +80,10 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
     touchPoint.id = pointerItem.GetPointerId();
     touchPoint.force = pointerItem.GetPressure();
     touchPoint.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
-    touchPoint.x = pointerItem.GetLocalX();
-    touchPoint.y = pointerItem.GetLocalY();
-    touchPoint.screenX = pointerItem.GetGlobalX();
-    touchPoint.screenY = pointerItem.GetGlobalY();
+    touchPoint.x = pointerItem.GetWindowX();
+    touchPoint.y = pointerItem.GetWindowY();
+    touchPoint.screenX = pointerItem.GetDisplayX();
+    touchPoint.screenY = pointerItem.GetDisplayY();
     touchPoint.isPressed = pointerItem.IsPressed();
     return touchPoint;
 }
@@ -193,10 +193,10 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
         return;
     }
 
-    events.x = item.GetLocalX();
-    events.y = item.GetLocalY();
-    events.screenX = item.GetGlobalX();
-    events.screenY = item.GetGlobalY();
+    events.x = item.GetWindowX();
+    events.y = item.GetWindowY();
+    events.screenX = item.GetDisplayX();
+    events.screenY = item.GetDisplayY();
     int32_t orgAction = pointerEvent->GetPointerAction();
     GetMouseEventAction(orgAction, events);
     int32_t orgButton = pointerEvent->GetButtonId();
@@ -254,8 +254,8 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
         return;
     }
 
-    event.x = item.GetLocalX();
-    event.y = item.GetLocalY();
+    event.x = item.GetWindowX();
+    event.y = item.GetWindowY();
     event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
     event.pinchAxisScale = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
@@ -305,14 +305,14 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(actionId, item)) {
         LOGI("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d", actionId,
-            item.GetLocalX(), item.GetLocalY(), pointerEvent->GetPointerAction());
+            item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction());
     }
     auto ids = pointerEvent->GetPointersIdList();
     for (auto&& id : ids) {
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(id, item)) {
             LOGI("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d", actionId,
-                item.GetLocalX(), item.GetLocalY(), item.IsPressed());
+                item.GetWindowX(), item.GetWindowY(), item.IsPressed());
         }
     }
 }
