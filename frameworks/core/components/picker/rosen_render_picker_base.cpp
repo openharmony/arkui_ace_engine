@@ -22,6 +22,9 @@ namespace OHOS::Ace {
 namespace {
 
 const uint32_t SEARCH_MAX_DEPTH = 16;
+constexpr Dimension FOCUS_RADIUS = 8.0_vp;
+constexpr Dimension FOCUS_BORDER_THICKNESS = 2.0_vp;
+constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
 
 } // namespace
 
@@ -79,6 +82,8 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
         // No divider and no gradient, directly return.
         return;
     }
+
+    InitializeSelectedOption(anchorColumn);
     // Draw two dividers on both sides of selected option.
     SkPaint paint;
     paint.setColor(theme->GetDividerColor().GetValue());
@@ -89,12 +94,19 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     }
     double upperLine = rect.Top() + rect.Height() / 2.0 - dividerSpacing / 2.0;
     double downLine = rect.Top() + rect.Height() / 2.0 + dividerSpacing / 2.0;
+    double leftLine = rect.Left();
+    double rightLine = rect.Right();
+
     if (!NearZero(dividerThickness) && !data_->GetSubsidiary()) {
-        canvas->drawRect({ rect.Left(), upperLine, rect.Right(), upperLine + dividerThickness }, paint);
-        canvas->drawRect({ rect.Left(), downLine, rect.Right(), downLine + dividerThickness }, paint);
+        canvas->drawRect({ leftLine, upperLine - dividerThickness, rightLine, upperLine }, paint);
+        canvas->drawRect({ leftLine, downLine, rightLine, downLine + dividerThickness }, paint);
     }
     // Paint gradient at top and bottom.
     PaintGradient(canvas, offset, rect, theme);
+
+    if (anchorColumn->IsFocused()) {
+        PaintFocusOptionBorder(canvas, anchorColumn);
+    }
 }
 
 void RosenRenderPickerBase::PaintGradient(
@@ -127,6 +139,25 @@ void RosenRenderPickerBase::PaintGradient(
         SkGradientShader::MakeLinear(points, colors, stopPositions, std::size(colors), SkTileMode::kClamp));
 #endif
     canvas->drawRect({rect.Left(), rect.Top(), rect.Right(), rect.Bottom()}, paint);
+}
+
+void RosenRenderPickerBase::PaintFocusOptionBorder(SkCanvas* canvas, const RefPtr<RenderPickerColumn>& pickerColumn)
+{
+    double focusBorderThickness = NormalizeToPx(FOCUS_BORDER_THICKNESS);
+    double focusOffsetX = focusBoxOffset_.GetX() - focusBorderThickness / 2.0;
+    double focusOffsetY = focusBoxOffset_.GetY() - focusBorderThickness / 2.0;
+    double focusBorderWidth = focusBoxSize_.Width() + focusBorderThickness;
+    double focusBorderHeight = focusBoxSize_.Height() + focusBorderThickness;
+    double focusRadius = NormalizeToPx(FOCUS_RADIUS);
+    SkPaint paint;
+    paint.setColor(FOCUS_BORDER_COLOR);
+    paint.setStyle(SkPaint::Style::kStroke_Style);
+    paint.setStrokeWidth(focusBorderThickness);
+    paint.setAntiAlias(true);
+    SkRRect rRect;
+    rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+    rRect.offset(focusOffsetX, focusOffsetY);
+    canvas->drawRRect(rRect, paint);
 }
 
 } // namespace OHOS::Ace

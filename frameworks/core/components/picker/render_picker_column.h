@@ -103,6 +103,16 @@ public:
         return column_->GetGlobalOffset();
     }
 
+    bool IsFocused() const
+    {
+        return focused_;
+    }
+
+    const std::vector<RefPtr<RenderPickerOption>>& GetOptions() const
+    {
+        return options_;
+    }
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;

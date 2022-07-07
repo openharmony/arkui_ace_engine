@@ -34,7 +34,8 @@ const Color HOVER_COLOR(0x0C000000);
 
 RenderPickerOption::RenderPickerOption()
 {
-    if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
+    if (SystemProperties::GetDeviceType() == DeviceType::WATCH ||
+        SystemProperties::GetDeviceType() == DeviceType::UNKNOWN) {
         return;
     }
 
@@ -67,7 +68,7 @@ void RenderPickerOption::Update(const RefPtr<Component>& component)
         pressDecoration_->SetBackgroundColor(theme->GetPressColor());
     }
     if (hoverDecoration_) {
-        hoverDecoration_->SetBackgroundColor(theme->GetHoverColor());
+        hoverDecoration_->SetBackgroundColor(HOVER_COLOR);
     }
     optionSize_ = theme->GetOptionSize(option->GetSelected());
     if (!NearZero(NormalizeToPx(option->GetFixHeight()))) {
@@ -78,7 +79,7 @@ void RenderPickerOption::Update(const RefPtr<Component>& component)
     textComponent_ = option->GetTextComponent();
     boxComponent_ = option->GetBoxComponent();
     selectedStyle_ = theme->GetOptionStyle(true, false);
-    focusStyle_ = theme->GetOptionStyle(true, true);
+    focusStyle_ = theme->GetOptionStyle(true, false);
     focusColor_ = theme->GetFocusColor();
     rrectRadius_ = theme->GetFocusRadius();
     selectedDecoration_ = theme->GetOptionDecoration(false);
@@ -195,7 +196,6 @@ bool RenderPickerOption::ResetHoverAnimation(bool isEnter)
         ResetMouseController();
     }
 
-    auto hoverColor = theme->GetHoverColor();
     Color bgColor = GetEventEffectColor();
     if (selectedDecoration_) {
         bgColor = selectedDecoration_->GetBackgroundColor();
@@ -203,12 +203,12 @@ bool RenderPickerOption::ResetHoverAnimation(bool isEnter)
     RefPtr<KeyframeAnimation<Color>> animation = AceType::MakeRefPtr<KeyframeAnimation<Color>>();
     if (isEnter) {
         // hover enter
-        CreateMouseAnimation(animation, bgColor, bgColor.BlendColor(hoverColor));
+        CreateMouseAnimation(animation, bgColor, bgColor.BlendColor(HOVER_COLOR));
         animation->SetCurve(Curves::FRICTION);
     } else {
         // from hover to normal
         CreateMouseAnimation(animation, GetEventEffectColor(), bgColor);
-        if (GetEventEffectColor() == bgColor.BlendColor(hoverColor)) {
+        if (GetEventEffectColor() == bgColor.BlendColor(HOVER_COLOR)) {
             animation->SetCurve(Curves::FRICTION);
         } else {
             animation->SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -231,7 +231,6 @@ bool RenderPickerOption::ResetPressAnimation(bool isDown)
         ResetMouseController();
     }
 
-    auto hoverColor = theme->GetHoverColor();
     auto pressColor = theme->GetPressColor();
     Color bgColor = GetEventEffectColor();
     if (selectedDecoration_) {
@@ -250,7 +249,7 @@ bool RenderPickerOption::ResetPressAnimation(bool isDown)
     } else {
         if (mouseState_ == MouseState::HOVER) {
             // from press to hover
-            CreateMouseAnimation(animation, GetEventEffectColor(), bgColor.BlendColor(hoverColor));
+            CreateMouseAnimation(animation, GetEventEffectColor(), bgColor.BlendColor(HOVER_COLOR));
         } else {
             // from press to normal
             CreateMouseAnimation(animation, GetEventEffectColor(), bgColor);
@@ -402,7 +401,8 @@ void RenderPickerOption::UpdateScrollDelta(double delta)
 double RenderPickerOption::LayoutBox()
 {
     LayoutParam boxLayout;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE && selected_ && !autoLayout_) {
+    if (SystemProperties::GetDeviceType() != DeviceType::WATCH &&
+        SystemProperties::GetDeviceType() != DeviceType::UNKNOWN && selected_ && !autoLayout_) {
         auto pressInterval = NormalizeToPx(PRESS_INTERVAL);
         auto boxSize = realSize_;
         boxSize.SetHeight(boxSize.Height() - 2.0 * pressInterval);
@@ -518,6 +518,15 @@ void RenderPickerOption::ClearRenders()
 {
     renderText_ = nullptr;
     renderBox_ = nullptr;
+}
+
+void RenderPickerOption::HandleMouseHoverEvent(MouseState mouseState)
+{
+    if (mouseState == MouseState::HOVER) {
+        OnMouseHoverEnterTest();
+    } else {
+        OnMouseHoverExitTest();
+    }
 }
 
 } // namespace OHOS::Ace
