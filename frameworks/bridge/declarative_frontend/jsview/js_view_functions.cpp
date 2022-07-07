@@ -23,9 +23,25 @@
 
 namespace OHOS::Ace::Framework {
 
-ViewFunctions::ViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction)
+void ViewFunctions::InitViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction, bool partialUpdate)
 {
     jsObject_ = jsObject;
+
+    if (partialUpdate) {
+        JSRef<JSVal> jsRenderFunc = jsObject->GetProperty("initialRenderView");
+        if (jsRenderFunc->IsFunction()) {
+            jsRenderFunc_ = JSRef<JSFunc>::Cast(jsRenderFunc);
+        } else {
+            LOGE("View lacks mandatory 'initialRenderView()' function, fatal internal error.");
+        }
+
+        JSRef<JSVal> jsRerenderFunc = jsObject->GetProperty("rerender");
+        if (jsRerenderFunc->IsFunction()) {
+            jsRerenderFunc_ = JSRef<JSFunc>::Cast(jsRerenderFunc);
+        } else {
+            LOGE("View lacks mandatory 'rerender()' function, fatal internal error.");
+        }
+    }
 
     JSRef<JSVal> jsAppearFunc = jsObject->GetProperty("aboutToAppear");
     if (jsAppearFunc->IsFunction()) {
@@ -102,15 +118,22 @@ ViewFunctions::ViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFun
         LOGD("onBackPress is not a function");
     }
 
-    JSRef<JSVal> jsUpdateWithValueParamsFunc = jsObject->GetProperty("updateWithValueParams");
-    if (jsUpdateWithValueParamsFunc->IsFunction()) {
-        LOGD("updateWithValueParams is a function");
-        jsUpdateWithValueParamsFunc_ = JSRef<JSFunc>::Cast(jsUpdateWithValueParamsFunc);
-    } else {
-        LOGD("updateWithValueParams is not a function");
+    if (!partialUpdate) {
+        JSRef<JSVal> jsUpdateWithValueParamsFunc = jsObject->GetProperty("updateWithValueParams");
+        if (jsUpdateWithValueParamsFunc->IsFunction()) {
+            LOGD("updateWithValueParams is a function");
+            jsUpdateWithValueParamsFunc_ = JSRef<JSFunc>::Cast(jsUpdateWithValueParamsFunc);
+        } else {
+            LOGD("updateWithValueParams is not a function");
+        }
+        jsRenderFunc_ = jsRenderFunction;
     }
+}
 
-    jsRenderFunc_ = jsRenderFunction;
+ViewFunctions::ViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction)
+{
+    ACE_DCHECK(jsObject);
+    InitViewFunctions(jsObject, jsRenderFunction, false);
 }
 
 void ViewFunctions::ExecuteRender()
@@ -176,6 +199,7 @@ void ViewFunctions::ExecuteHide()
     ExecuteFunction(jsOnHideFunc_, "onPageHide");
 }
 
+// Method not needed for Partial Update code path
 void ViewFunctions::ExecuteUpdateWithValueParams(const std::string& jsonData)
 {
     ExecuteFunctionWithParams(jsUpdateWithValueParamsFunc_, "updateWithValueParams", jsonData);
@@ -236,6 +260,7 @@ void ViewFunctions::ExecuteFunctionWithParams(JSWeak<JSFunc>& func, const char* 
     }
 }
 
+// Baseline version of Destroy
 void ViewFunctions::Destroy(JSView* parentCustomView)
 {
     LOGD("Destroy");
@@ -261,6 +286,57 @@ void ViewFunctions::Destroy(JSView* parentCustomView)
     }
     jsRenderResult_.Reset();
     LOGD("ViewFunctions::Destroy() end");
+}
+
+// PartialUpdate version of Destroy
+void ViewFunctions::Destroy()
+{
+    LOGD("Destroy");
+
+    // Might be called from parent view, before any result has been produced??
+    if (jsRenderResult_.IsEmpty()) {
+        LOGD("ViewFunctions::Destroy() -> no previous render result to delete");
+        return;
+    }
+
+    auto renderRes = jsRenderResult_.Lock();
+    if (renderRes.IsEmpty() || !renderRes->IsObject()) {
+        LOGD("ViewFunctions::Destroy() -> result not an object");
+        return;
+    }
+
+    // merging: when would a render function return a JSView ?
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(renderRes);
+    if (!obj.IsEmpty()) {
+        // jsRenderResult_ maybe an js exception, not a JSView
+        JSView* view = obj->Unwrap<JSView>();
+        if (view != nullptr) {
+            LOGE("NOTE NOTE NOTE render returned a JSView object that's dangling!");
+        }
+    }
+    jsObject_.Reset();
+    jsRenderResult_.Reset();
+
+    LOGD("ViewFunctions::Destroy() end");
+}
+
+// Partial update method
+void ViewFunctions::ExecuteRerender()
+{
+    if (jsRerenderFunc_.IsEmpty()) {
+        LOGE("no rerender function in View!");
+        return;
+    }
+
+    auto func = jsRerenderFunc_.Lock();
+    JSRef<JSVal> jsThis = jsObject_.Lock();
+    jsRenderResult_ = func->Call(jsThis);
+}
+
+// Partial update method
+ViewFunctions::ViewFunctions(JSRef<JSObject> jsObject)
+{
+    InitViewFunctions(jsObject, JSRef<JSFunc>(), true);
 }
 
 } // namespace OHOS::Ace::Framework
