@@ -47,7 +47,9 @@ RefPtr<RenderNode> WebComponent::CreateRenderNode()
         delegate_->AddCreatedCallback(createdCallback_);
     }
     auto renderWeb = AceType::DynamicCast<RenderWeb>(renderNode);
-    delegate_->AddCreatedCallback([renderWeb, this]() {
+    delegate_->AddCreatedCallback([weakRenderWeb = AceType::WeakClaim(AceType::RawPtr(renderWeb)),
+        weakCom = AceType::WeakClaim(this)]() {
+        auto renderWeb = weakRenderWeb.Upgrade();
         if (!renderWeb) {
             LOGE("renderWeb is null");
             return;
@@ -59,8 +61,7 @@ RefPtr<RenderNode> WebComponent::CreateRenderNode()
         }
         auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(),
                                                        TaskExecutor::TaskType::UI);
-        auto weakRender = AceType::WeakClaim(AceType::RawPtr(renderWeb));
-        uiTaskExecutor.PostTask([weakRender, weakWeb = AceType::WeakClaim(this)] {
+        uiTaskExecutor.PostTask([weakRender = weakRenderWeb, weakWeb = weakCom] {
             auto renderWeb = weakRender.Upgrade();
             if (renderWeb) {
                 renderWeb->Update(weakWeb.Upgrade());
