@@ -406,14 +406,14 @@ public:
         args.SetReturnValue(headers);
     }
 
-    RefPtr<WebResponse> GetResponseObj()
+    RefPtr<WebResponse> GetResponseObj() const
     {
         return response_;
     }
 
     void SetResponseData(const JSCallbackInfo& args)
     {
-        if (!(args[0]->IsString())) {
+        if ((args.Length() <= 0) || !(args[0]->IsString())) {
             return;
         }
         auto data = args[0]->ToString();
@@ -422,7 +422,7 @@ public:
 
     void SetResponseEncoding(const JSCallbackInfo& args)
     {
-        if (!(args[0]->IsString())) {
+        if ((args.Length() <= 0) || !(args[0]->IsString())) {
             return;
         }
         auto encode = args[0]->ToString();
@@ -431,7 +431,7 @@ public:
 
     void SetResponseMimeType(const JSCallbackInfo& args)
     {
-        if (!(args[0]->IsString())) {
+        if ((args.Length() <= 0) || !(args[0]->IsString())) {
             return;
         }
         auto mineType = args[0]->ToString();
@@ -440,7 +440,7 @@ public:
 
     void SetReasonMessage(const JSCallbackInfo& args)
     {
-        if (!(args[0]->IsString())) {
+        if ((args.Length() <= 0) || !(args[0]->IsString())) {
             return;
         }
         auto reason = args[0]->ToString();
@@ -449,7 +449,7 @@ public:
 
     void SetResponseCode(const JSCallbackInfo& args)
     {
-        if (!(args[0]->IsNumber())) {
+        if ((args.Length() <= 0) || !(args[0]->IsNumber())) {
             return;
         }
         auto statusCode = args[0]->ToNumber<int32_t>();
@@ -458,7 +458,7 @@ public:
 
     void SetResponseHeader(const JSCallbackInfo& args)
     {
-        if (!(args[0]->IsArray())) {
+        if ((args.Length() <= 0) || !(args[0]->IsArray())) {
             return;
         }
         JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
@@ -1257,7 +1257,7 @@ JSRef<JSVal> OnInterceptRequestEventToJSValue(const OnInterceptRequestEvent& eve
 void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
 {
     LOGI("JSWeb OnInterceptRequest");
-    if (!args[0]->IsFunction()) {
+    if ((args.Length() <= 0) || !args[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<OnInterceptRequestEvent, 1>>(

@@ -225,7 +225,7 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
 {
     ContainerScope scope(instanceId_);
 
-    LOGI("OnHandleInterceptRequest url %{public}s", request->Url().c_str());
+    LOGI("OnHandleInterceptRequest url %{private}s", request->Url().c_str());
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return nullptr;
@@ -246,14 +246,8 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
         LOGE("can't get task executor");
         return nullptr;
     }
-    task->PostSyncTask([webClient = this, &webResponse, &param] {
-            if (!webClient) {
-                return ;
-            }
-            auto delegate = webClient->webDelegate_.Upgrade();
-            if (delegate) {
-                webResponse = delegate->OnInterceptRequest(param.get());
-            }
+    task->PostSyncTask([&delegate, &webResponse, &param] {
+            webResponse = delegate->OnInterceptRequest(param.get());
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
 
     if (webResponse == nullptr) {
