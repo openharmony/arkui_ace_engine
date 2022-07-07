@@ -155,6 +155,9 @@ void FlutterRenderCustomPaint::Paint(RenderContext& context, const Offset& offse
     if (!pipeline) {
         return;
     }
+
+    TriggerOnReadyEvent();
+
     // use physical pixel to store bitmap
     double viewScale = pipeline->GetViewScale();
     if (tasks_.empty()) {
