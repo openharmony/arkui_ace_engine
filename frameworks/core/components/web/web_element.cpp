@@ -34,15 +34,15 @@ void WebElement::SetNewComponent(const RefPtr<Component>& newComponent)
         }
         webSrc_ = webComponent->GetSrc();
         Element::SetNewComponent(webComponent);
-        webComp_ = std::move(webComponent);
     }
 }
 
 void WebElement::Update()
 {
     RenderElement::Update();
-    if (webComp_) {
-        webComp_->SetFocusElement(AceType::WeakClaim(this));
+    auto webComponent = AceType::DynamicCast<WebComponent>(component_);
+    if (webComponent) {
+        webComponent->SetFocusElement(AceType::WeakClaim(this));
     }
 }
 

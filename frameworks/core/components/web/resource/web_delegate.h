@@ -257,7 +257,7 @@ private:
 #endif
 #endif
 
-    RefPtr<WebComponent> webComponent_;
+    WeakPtr<WebComponent> webComponent_;
     std::list<CreatedCallback> createdCallbacks_;
     std::list<ReleasedCallback> releasedCallbacks_;
     EventCallback onPageStarted_;
