@@ -63,6 +63,16 @@ public:
         tasks_.clear();
     }
 
+    void SetOnReadyEvent(const std::function<void()>& onReadyEvent)
+    {
+        onReadyEvent_ = onReadyEvent;
+    }
+
+    const std::function<void()>& GetOnReadyEvent() const
+    {
+        return onReadyEvent_;
+    }
+
     void SetRenderNode(const WeakPtr<RenderCustomPaint>& paint);
     std::string ToDataURL(const std::string& args);
     void SetWebGLInstance(CanvasRenderContextBase* context);
@@ -139,6 +149,7 @@ private:
     PushTaskFunc pushToRenderNodeFunc_;
     std::list<TaskFunc> tasks_;
     WeakPtr<RenderCustomPaint> renderNode_;
+    std::function<void()> onReadyEvent_;
 };
 
 class ACE_EXPORT CustomPaintComponent : public RenderComponent {
@@ -178,9 +189,9 @@ public:
 
     void SetOnReadyEvent(const EventMarker& value, RefPtr<PipelineContext> context)
     {
-        std::function<void()> onReady_ = AceAsyncEvent<void()>::Create(value, context);
-        if (onReady_) {
-            onReady_();
+        if (pool_) {
+            std::function<void()> onReadyEvent = AceAsyncEvent<void()>::Create(value, context);
+            pool_->SetOnReadyEvent(onReadyEvent);
         }
     }
 
