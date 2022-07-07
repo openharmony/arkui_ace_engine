@@ -58,12 +58,14 @@ void RenderStepper::Update(const RefPtr<Component>& component)
     totalItemCount_ = static_cast<int32_t>(stepperComponent_->GetChildren().size());
 
     // currentIndex_ should be updated only for the first time
-    if (currentIndex_ == -1) {
-        int32_t index = stepperComponent_->GetIndex();
+    int32_t index = stepperComponent_->GetIndex();
+    if (currentIndex_ != index) {
         if (index >= 0 && index < totalItemCount_) {
             currentIndex_ = index;
-        } else {
+        } else if (index < 0) {
             currentIndex_ = 0;
+        } else {
+            currentIndex_ = totalItemCount_ - 1;
         }
     }
 
