@@ -152,6 +152,7 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
     if (!pipeline) {
         return;
     }
+    TriggerOnReadyEvent();
     // use physical pixel to store bitmap
     double viewScale = pipeline->GetViewScale();
     if (tasks_.empty()) {

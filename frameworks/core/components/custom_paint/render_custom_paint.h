@@ -59,6 +59,7 @@ public:
     }
 
     void FlushPipelineImmediately();
+    void TriggerOnReadyEvent();
 
     virtual void TransferFromImageBitmap(const RefPtr<OffscreenCanvas>& offscreenCanvas) = 0;
     virtual void DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offscreenCanvas,
@@ -311,6 +312,14 @@ protected:
     ContextType type_ = ContextType::RENDER_2D;
     CanvasRenderContextBase* webGLContext_ = nullptr;
 
+    Offset position_;
+    Size drawSize_;
+    Offset prePosition_;
+    Size preDrawSize_;
+    bool isCanvasInit_ = false;
+    bool positionChange_ = false;
+    bool sizeChange_ = false;
+    std::function<void()> canvasOnReadyEvent_;
 private:
     Dimension width_;
     Dimension height_;
