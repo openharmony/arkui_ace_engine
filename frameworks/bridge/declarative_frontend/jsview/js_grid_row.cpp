@@ -25,6 +25,9 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
+
+constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
+
 void ParserGutter(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>& gridRow)
 {
     Dimension result;
@@ -162,21 +165,33 @@ void ParserBreakpoints(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>
     if (!gridRow) {
         return;
     }
+    if (reference->IsNumber()) {
+        breakpoint->reference = static_cast<V2::BreakPointsReference>(reference->ToNumber<int32_t>());
+    }
     if (value->IsArray()) {
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(value);
         breakpoint->breakpoints.clear();
+        if (array->Length() > MAX_NUMBER_BREAKPOINT) {
+            LOGI("The maximum number of breakpoints is %{public}zu", MAX_NUMBER_BREAKPOINT);
+            breakpoint->breakpoints = { "320vp", "600vp", "840vp" };
+            gridRow->SetBreakPoints(breakpoint);
+            return;
+        }
+        double width = -1.0;
         for (size_t i = 0; i < array->Length(); i++) {
             JSRef<JSVal> thredhold = array->GetValueAt(i);
-            if (thredhold->IsString()) {
+            if (thredhold->IsString() || thredhold->IsNumber()) {
+                Dimension valueDimension;
+                JSContainerBase::ParseJsDimensionVp(thredhold, valueDimension);
+                if (GreatNotEqual(width, valueDimension.Value())) {
+                    LOGI("Array data must be sorted in ascending order");
+                    breakpoint->breakpoints = { "320vp", "600vp", "840vp" };
+                    gridRow->SetBreakPoints(breakpoint);
+                    return;
+                }
+                width = valueDimension.Value();
                 breakpoint->breakpoints.push_back(thredhold->ToString());
             }
-        }
-    }
-    if (reference->IsNumber()) {
-        if (reference->ToNumber<int32_t>() == 0) {
-            breakpoint->reference = V2::BreakPointsReference::WindowSize;
-        } else if (reference->ToNumber<int32_t>() == 1) {
-            breakpoint->reference = V2::BreakPointsReference::ComponentSize;
         }
     }
     gridRow->SetBreakPoints(breakpoint);
