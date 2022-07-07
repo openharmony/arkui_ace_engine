@@ -75,6 +75,7 @@ private:
     void Initialize();
     void HandleClickEvent(const ClickInfo& info);
     void HandleClickEvent();
+    void SetAccessibilityClickImpl();
 
     RefPtr<ClickRecognizer> clickRecognizer_;
 

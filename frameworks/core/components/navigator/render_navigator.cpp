@@ -100,6 +100,7 @@ void RenderNavigator::Update(const RefPtr<Component>& component)
     if (active_ == true) {
         NavigatePage();
     }
+    SetAccessibilityClickImpl();
     MarkNeedLayout();
 }
 
@@ -134,6 +135,22 @@ void RenderNavigator::OnTouchTestHit(
     }
     clickRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(clickRecognizer_);
+}
+
+void RenderNavigator::SetAccessibilityClickImpl()
+{
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        auto weakPtr = AceType::WeakClaim(AceType::RawPtr(clickRecognizer_));
+        accessibilityNode->AddSupportAction(AceAction::ACTION_CLICK);
+        accessibilityNode->SetClickableState(true);
+        accessibilityNode->SetActionClickImpl([weakPtr]() {
+            auto click = weakPtr.Upgrade();
+            if (click) {
+                click->OnAccepted();
+            }
+        });
+    }
 }
 
 } // namespace OHOS::Ace
