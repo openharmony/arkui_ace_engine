@@ -473,6 +473,8 @@ var FormDimension;
   FormDimension["Dimension_2_2"] = 2;
   FormDimension["Dimension_2_4"] = 3;
   FormDimension["Dimension_4_4"] = 4;
+  FormDimension["Dimension_1_1"] = 5;
+  FormDimension["Dimension_2_1"] = 6;
 })(FormDimension || (FormDimension = {}));
 
 var TransitionType;
