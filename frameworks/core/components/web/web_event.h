@@ -16,9 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H
 
-#include "web_component.h"
-
 namespace OHOS::Ace {
+
+enum DialogEventType {
+    DIALOG_EVENT_ALERT = 0,
+    DIALOG_EVENT_BEFORE_UNLOAD = 1,
+    DIALOG_EVENT_CONFIRM = 2,
+    DIALOG_EVENT_PROMPT = 3
+};
 
 class WebConsoleLog : public AceType {
     DECLARE_ACE_TYPE(WebConsoleLog, AceType)
@@ -76,6 +81,7 @@ public:
         : headers_(headers), data_(data), encoding_(encoding), mimeType_(mimeType), reason_(reason),
           statusCode_(statusCode)
     {}
+    WebResponse() {};
     ~WebResponse() = default;
 
     const std::map<std::string, std::string>& GetHeaders() const
@@ -106,6 +112,36 @@ public:
     int32_t GetStatusCode() const
     {
         return statusCode_;
+    }
+
+    void SetHeadersVal(std::string& key, std::string& val)
+    {
+        headers_[key] = val;
+    }
+
+    void SetData(std::string& data)
+    {
+        data_ = data;
+    }
+
+    void SetEncoding(std::string& encoding)
+    {
+        encoding_ = encoding;
+    }
+
+    void SetMimeType(std::string& mimeType)
+    {
+        mimeType_ = mimeType;
+    }
+
+    void SetReason(std::string& reason)
+    {
+        reason_ = reason;
+    }
+
+    void SetStatusCode(int32_t statusCode)
+    {
+        statusCode_ = statusCode;
     }
 
 private:
@@ -487,6 +523,26 @@ public:
 private:
     RefPtr<WebRequest> request_;
     RefPtr<WebResponse> response_;
+};
+
+class ACE_EXPORT OnInterceptRequestEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(OnInterceptRequestEvent, BaseEventInfo);
+
+public:
+    OnInterceptRequestEvent(const RefPtr<WebRequest>& request)
+        : BaseEventInfo("OnInterceptRequestEvent"), request_(request)
+    {
+        LOGI("OnInterceptRequestEvent constructor");
+    }
+    ~OnInterceptRequestEvent() = default;
+
+    const RefPtr<WebRequest>& GetRequest() const
+    {
+        return request_;
+    }
+
+private:
+    RefPtr<WebRequest> request_;
 };
 
 class ACE_EXPORT LoadWebRequestFocusEvent : public BaseEventInfo {

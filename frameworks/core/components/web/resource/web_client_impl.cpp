@@ -220,6 +220,51 @@ bool WebClientImpl::OnHandleInterceptUrlLoading(const std::string& url)
     return delegate->OnHandleInterceptUrlLoading(url);
 }
 
+std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInterceptRequest(
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
+{
+    ContainerScope scope(instanceId_);
+
+    LOGI("OnHandleInterceptRequest url %{private}s", request->Url().c_str());
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return nullptr;
+    }
+    if (delegate->IsEmptyOnInterceptRequest() == true) {
+        LOGI("OnHandleInterceptRequest is empty");
+        return nullptr;
+    }
+
+    auto webRequest = AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(),
+        request->Method(), request->Url(), request->FromGesture(),
+        request->IsAboutMainFrame(), request->IsRequestRedirect());
+    auto param = std::make_shared<OnInterceptRequestEvent>(webRequest);
+
+    RefPtr<WebResponse> webResponse = nullptr;
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGE("can't get task executor");
+        return nullptr;
+    }
+    task->PostSyncTask([&delegate, &webResponse, &param] {
+            webResponse = delegate->OnInterceptRequest(param.get());
+        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+
+    if (webResponse == nullptr) {
+        LOGI("webResponse is null");
+        return nullptr;
+    }
+    std::string data = webResponse->GetData();
+    LOGI("intercept Encoding %{public}s",  webResponse->GetEncoding().c_str());
+    LOGI("intercept GetMimeType %{public}s",  webResponse->GetMimeType().c_str());
+    LOGI("intercept GetStatusCode %{public}d",  webResponse->GetStatusCode());
+    LOGI("intercept GetReason %{public}s",  webResponse->GetReason().c_str());
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse =
+        std::make_shared<OHOS::NWeb::NWebUrlResourceResponse>(webResponse->GetMimeType(), webResponse->GetEncoding(),
+        webResponse->GetStatusCode(), webResponse->GetReason(), webResponse->GetHeaders(), data);
+    return nwebResponse;
+}
+
 bool WebClientImpl::OnAlertDialogByJS(
     const std::string &url, const std::string &message, std::shared_ptr<NWeb::NWebJSDialogResult> result)
 {
