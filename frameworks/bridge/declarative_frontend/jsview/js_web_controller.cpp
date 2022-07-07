@@ -530,6 +530,9 @@ void JSWebController::GetCookieManager(const JSCallbackInfo& args)
     LOGI("JSWebController Start GetCookieManager");
     ContainerScope scope(instanceId_);
     if (webController_) {
+        if (!webController_->GetCookieManager()) {
+            return;
+        }
         if (!jsWebCookieInit_) {
             jsWebCookie_ = JSClass<JSWebCookie>::NewInstance();
             auto jsWebCookieVal = Referenced::Claim(jsWebCookie_->Unwrap<JSWebCookie>());
