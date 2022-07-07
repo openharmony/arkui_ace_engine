@@ -30,14 +30,17 @@ public:
 
     void Update() override
     {
+        const auto context = renderNode_->GetContext().Upgrade();
         std::list<TaskFunc> tasks;
         auto paint = AceType::DynamicCast<RenderCustomPaint>(renderNode_);
-        if (paint && paint->HasTask()) {
-            tasks = paint->GetTasks();
+        if (context && !context->GetIsDeclarative()) {
+            if (paint && paint->HasTask()) {
+                tasks = paint->GetTasks();
+            }
         }
         customComponent_ = component_;
         RenderElement::Update();
-        if (paint) {
+        if (context && !context->GetIsDeclarative() && paint) {
             paint->SetTasks(tasks);
         }
     }

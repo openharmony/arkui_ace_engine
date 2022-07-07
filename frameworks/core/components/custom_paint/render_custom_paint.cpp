@@ -49,7 +49,7 @@ void RenderCustomPaint::Update(const RefPtr<Component>& component)
     if (taskPool) {
         taskPool->SetRenderNode(AceType::WeakClaim(this));
         pool_ = taskPool;
-        tasks_ = std::list<TaskFunc>(taskPool->GetTasks().begin(), taskPool->GetTasks().end());
+        std::copy(taskPool->GetTasks().begin(), taskPool->GetTasks().end(), std::back_inserter(tasks_));
         taskPool->ClearTasks();
         pool_->SetPushToRenderNodeFunc([weak = AceType::WeakClaim(this)](const TaskFunc& taskFunc) {
             auto client = weak.Upgrade();
