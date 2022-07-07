@@ -33,6 +33,7 @@ public:
 private:
     void PaintGradient(SkCanvas* canvas, const Offset& offset, const Rect& rect, const RefPtr<PickerTheme>& theme);
     Rect GetOptionsRect(const Offset& offset, const RefPtr<RenderPickerColumn>& pickerColumn);
+    void PaintFocusOptionBorder(SkCanvas* canvas, const RefPtr<RenderPickerColumn>& pickerColumn);
 };
 
 } // namespace OHOS::Ace
