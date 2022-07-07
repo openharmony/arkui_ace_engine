@@ -41,6 +41,7 @@ public:
 private:
     RefPtr<Component> gridRowComponent_;
     std::list<RefPtr<RenderNode>> gridColChildren_;
+    GridSizeType originSizeType_ = GridSizeType::UNDEFINED;
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_RENDER_GRID_ROW_H

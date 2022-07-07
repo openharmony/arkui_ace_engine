@@ -28,6 +28,8 @@ public:
     static void Gutter(const JSCallbackInfo& info);
     static void Breakpoints(const JSCallbackInfo& info);
     static void Direction(const JSCallbackInfo& info);
+    static void JsBreakpointEvent(const JSCallbackInfo& info);
+
 };
 
 } // namespace OHOS::Ace::Framework
