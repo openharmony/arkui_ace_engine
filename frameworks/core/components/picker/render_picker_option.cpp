@@ -79,7 +79,7 @@ void RenderPickerOption::Update(const RefPtr<Component>& component)
     textComponent_ = option->GetTextComponent();
     boxComponent_ = option->GetBoxComponent();
     selectedStyle_ = theme->GetOptionStyle(true, false);
-    focusStyle_ = theme->GetOptionStyle(true, true);
+    focusStyle_ = theme->GetOptionStyle(true, false);
     focusColor_ = theme->GetFocusColor();
     rrectRadius_ = theme->GetFocusRadius();
     selectedDecoration_ = theme->GetOptionDecoration(false);
@@ -401,7 +401,8 @@ void RenderPickerOption::UpdateScrollDelta(double delta)
 double RenderPickerOption::LayoutBox()
 {
     LayoutParam boxLayout;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE && selected_ && !autoLayout_) {
+    if (SystemProperties::GetDeviceType() != DeviceType::WATCH &&
+        SystemProperties::GetDeviceType() != DeviceType::UNKNOWN && selected_ && !autoLayout_) {
         auto pressInterval = NormalizeToPx(PRESS_INTERVAL);
         auto boxSize = realSize_;
         boxSize.SetHeight(boxSize.Height() - 2.0 * pressInterval);

@@ -24,7 +24,7 @@ namespace {
 const uint32_t SEARCH_MAX_DEPTH = 16;
 constexpr Dimension FOCUS_RADIUS = 8.0_vp;
 constexpr Dimension FOCUS_BORDER_THICKNESS = 2.0_vp;
-constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF254FF7;
+constexpr uint32_t FOCUS_BORDER_COLOR = 0xFF0A59F7;
 
 } // namespace
 
