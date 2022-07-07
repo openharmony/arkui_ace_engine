@@ -67,6 +67,7 @@ public:
     using PositionUpdatedEvent = std::function<void(uint32_t)>;
     using EndOfStreamEvent = std::function<void()>;
     using StateChangedEvent = std::function<void(PlaybackStatus)>;
+    using ErrorEvent = std::function<void()>;
 
     MediaPlayerCallback() = default;
     explicit MediaPlayerCallback(int32_t instanceId)
@@ -79,6 +80,10 @@ public:
     void OnError(Media::PlayerErrorType errorType, int32_t errorCode) override
     {
         LOGE("OnError callback, errorType: %{public}d, errorCode: %{public}d", errorType, errorCode);
+        ContainerScope scope(instanceId_);
+        if (errorEvent_) {
+            errorEvent_();
+        }
     }
 
     void OnInfo(Media::PlayerOnInfoType type, int32_t extra, const Media::Format &InfoBody = {}) override
@@ -154,10 +159,16 @@ public:
         stateChangedEvent_ = std::move(stateChangedEvent);
     }
 
+    void SetErrorEvent(ErrorEvent&& errorEvent)
+    {
+        errorEvent_ = std::move(errorEvent);
+    }
+
 private:
     PositionUpdatedEvent positionUpdatedEvent_;
     EndOfStreamEvent endOfStreamEvent_;
     StateChangedEvent stateChangedEvent_;
+    ErrorEvent errorEvent_;
     int32_t instanceId_ = -1;
 };
 
