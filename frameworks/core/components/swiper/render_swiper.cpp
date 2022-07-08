@@ -633,7 +633,7 @@ void RenderSwiper::HandleTouchDown(const TouchEventInfo& info)
         touchContentType_ = TouchContentType::TOUCH_INDICATOR;
     } else {
         touchContentType_ = TouchContentType::TOUCH_CONTENT;
-        if (hasDragAction_ && swiper_->GetSlideContinue()) {
+        if (controller_ && hasDragAction_ && swiper_->GetSlideContinue()) {
             controller_->Finish();
             return;
         }
@@ -950,7 +950,7 @@ void RenderSwiper::HandleDragEnd(const DragEndInfo& info)
         RestoreAutoPlay();
         return;
     }
-    if (isPaintedFade_) {
+    if (isPaintedFade_ && fadeController_) {
         auto translate = AceType::MakeRefPtr<CurveAnimation<double>>(dragDelta_, 0, Curves::LINEAR);
         auto weak = AceType::WeakClaim(this);
         translate->AddListener(Animation<double>::ValueCallback([weak](double value) {
@@ -989,13 +989,17 @@ void RenderSwiper::HandleDragEnd(const DragEndInfo& info)
 void RenderSwiper::StartSpringMotion(double mainPosition, double mainVelocity,
     const ExtentPair& extent, const ExtentPair& initExtent)
 {
+    if (!springController_) {
+        return;
+    }
+
     constexpr double SPRING_SCROLL_MASS = 0.5;
     constexpr double SPRING_SCROLL_STIFFNESS = 100.0;
     constexpr double SPRING_SCROLL_DAMPING = 15.55635;
     const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
 
-    if (isAnimationAlreadyAdded_) {
+    if (isAnimationAlreadyAdded_ && controller_) {
         controller_->RemoveInterpolator(translate_);
         isAnimationAlreadyAdded_ = false;
     }
@@ -1029,7 +1033,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
         return;
     }
 
-    if (isAnimationAlreadyAdded_) {
+    if (isAnimationAlreadyAdded_ && controller_) {
         controller_->RemoveInterpolator(translate_);
         isAnimationAlreadyAdded_ = false;
     }
@@ -1104,32 +1108,34 @@ void RenderSwiper::MoveItems(double dragVelocity)
         }
     }));
 
-    controller_->ClearStopListeners();
-    // trigger the event after the animation ends.
-    controller_->AddStopListener([weak, fromIndex, toIndex, needRestore]() {
-        LOGI("slide animation stop");
-        // moving animation end, one drag and item move is complete
-        auto swiper = weak.Upgrade();
-        if (swiper) {
-            swiper->isIndicatorAnimationStart_ = false;
-            if (!needRestore) {
-                swiper->LoadLazyItems((fromIndex + 1) % swiper->itemCount_ == toIndex);
-                swiper->outItemIndex_ = fromIndex;
-                swiper->currentIndex_ = toIndex;
+    if (controller_) {
+        controller_->ClearStopListeners();
+        // trigger the event after the animation ends.
+        controller_->AddStopListener([weak, fromIndex, toIndex, needRestore]() {
+            LOGI("slide animation stop");
+            // moving animation end, one drag and item move is complete
+            auto swiper = weak.Upgrade();
+            if (swiper) {
+                swiper->isIndicatorAnimationStart_ = false;
+                if (!needRestore) {
+                    swiper->LoadLazyItems((fromIndex + 1) % swiper->itemCount_ == toIndex);
+                    swiper->outItemIndex_ = fromIndex;
+                    swiper->currentIndex_ = toIndex;
+                }
+                swiper->RestoreAutoPlay();
+                swiper->FireItemChangedEvent(!needRestore);
+                swiper->ResetCachedChildren();
+                swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
+                swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
+                swiper->ExecuteMoveCallback(swiper->currentIndex_);
+                swiper->MarkNeedLayout(true);
             }
-            swiper->RestoreAutoPlay();
-            swiper->FireItemChangedEvent(!needRestore);
-            swiper->ResetCachedChildren();
-            swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
-            swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
-            swiper->ExecuteMoveCallback(swiper->currentIndex_);
-            swiper->MarkNeedLayout(true);
-        }
-    });
+        });
 
-    controller_->SetDuration(duration_);
-    controller_->AddInterpolator(translate_);
-    controller_->Play();
+        controller_->SetDuration(duration_);
+        controller_->AddInterpolator(translate_);
+        controller_->Play();
+    }
     isAnimationAlreadyAdded_ = true;
     MarkNeedRender();
 }
@@ -2324,6 +2330,9 @@ void RenderSwiper::MarkIndicatorPosition(bool isZoomMax)
 void RenderSwiper::StartIndicatorSpringAnimation(double start, double end)
 {
     LOGD("StartIndicatorSpringAnimation(%{public}lf, %{public}lf)", start, end);
+    if (!springController_) {
+        return;
+    }
     UpdateIndicatorSpringStatus(SpringStatus::SPRING_START);
     double dampInc = std::fabs(currentIndex_ - targetIndex_) * SPRING_DAMP_INC;
     auto springDescription = AceType::MakeRefPtr<SpringProperty>(SPRING_MASS, SPRING_STIFF, SPRING_DAMP + dampInc);
@@ -2673,6 +2682,9 @@ void RenderSwiper::StopZoomDotAnimation()
 
 void RenderSwiper::StartDragRetractionAnimation()
 {
+    if (!dragRetractionController_) {
+        return;
+    }
     StopDragRetractionAnimation();
     dragRetractionAnimation_ = AceType::MakeRefPtr<CurveAnimation<double>>(
         stretchRate_, TARGET_START_TRANSLATE_TIME, INDICATOR_ZONE_STRETCH);
@@ -2691,7 +2703,7 @@ void RenderSwiper::StartDragRetractionAnimation()
 
 void RenderSwiper::StopDragRetractionAnimation()
 {
-    if (!dragRetractionController_->IsStopped()) {
+    if (dragRetractionController_ && !dragRetractionController_->IsStopped()) {
         dragRetractionController_->ClearStopListeners();
         dragRetractionController_->Stop();
     }
@@ -2895,23 +2907,25 @@ void RenderSwiper::StartIndicatorAnimation(int32_t fromIndex, int32_t toIndex, b
         }
     });
 
-    indicatorController_->ClearInterpolators();
-    indicatorController_->AddInterpolator(indicatorAnimation_);
-    indicatorController_->SetDuration(duration_);
-    indicatorController_->ClearStopListeners();
-    indicatorController_->AddStopListener([weak = AceType::WeakClaim(this), fromIndex, toIndex]() {
-        auto swiper = weak.Upgrade();
-        if (swiper) {
-            swiper->LoadLazyItems((fromIndex + 1) % swiper->itemCount_ == toIndex);
-            swiper->isIndicatorAnimationStart_ = false;
-            swiper->outItemIndex_ = fromIndex;
-            swiper->currentIndex_ = toIndex;
-            swiper->FireItemChangedEvent(true);
-            swiper->UpdateIndicatorSpringStatus(SpringStatus::FOCUS_SWITCH);
-            swiper->MarkNeedLayout(true);
-        }
-    });
-    indicatorController_->Play();
+    if (indicatorController_) {
+        indicatorController_->ClearInterpolators();
+        indicatorController_->AddInterpolator(indicatorAnimation_);
+        indicatorController_->SetDuration(duration_);
+        indicatorController_->ClearStopListeners();
+        indicatorController_->AddStopListener([weak = AceType::WeakClaim(this), fromIndex, toIndex]() {
+            auto swiper = weak.Upgrade();
+            if (swiper) {
+                swiper->LoadLazyItems((fromIndex + 1) % swiper->itemCount_ == toIndex);
+                swiper->isIndicatorAnimationStart_ = false;
+                swiper->outItemIndex_ = fromIndex;
+                swiper->currentIndex_ = toIndex;
+                swiper->FireItemChangedEvent(true);
+                swiper->UpdateIndicatorSpringStatus(SpringStatus::FOCUS_SWITCH);
+                swiper->MarkNeedLayout(true);
+            }
+        });
+        indicatorController_->Play();
+    }
 }
 
 void RenderSwiper::StopIndicatorAnimation()
