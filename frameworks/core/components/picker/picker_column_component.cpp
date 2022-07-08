@@ -65,8 +65,9 @@ void PickerColumnComponent::Initialize()
         option->SetSelected((index == selectedIndex));
         // Has selected item and normal item and disappear item which means at lease 5 items
         // The first and last item is disappear item.
-        option->SetDisappear((SystemProperties::GetDeviceType() == DeviceType::PHONE
-            && showCount >= 5 && (index == 0 || index == showCount - 1)));
+        option->SetDisappear((SystemProperties::GetDeviceType() != DeviceType::WATCH &&
+                              SystemProperties::GetDeviceType() != DeviceType::UNKNOWN && showCount >= 5 &&
+                              (index == 0 || index == showCount - 1)));
         option->SetAlignTop(false);
         option->SetAlignBottom(false);
         option->SetTheme(theme_->clone());

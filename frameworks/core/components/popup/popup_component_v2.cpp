@@ -188,7 +188,11 @@ const RefPtr<BoxComponent> PopupComponentV2::CreateBox(const RefPtr<PopupTheme>&
     }
 
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::BUBBLE_TYPE);
-    double maxWidth = columnInfo->GetWidth(GridSystemManager::GetInstance().GetCurrentGridInfo().maxColumns);
+    if (columnInfo->GetParent()) {
+        columnInfo->GetParent()->BuildColumnWidth();
+    }
+    auto gridSizeType = GridSystemManager::GetInstance().GetCurrentSize();
+    double maxWidth = columnInfo->GetWidth(columnInfo->GetColumns(gridSizeType));
     box->SetMaxWidth(Dimension(maxWidth, DimensionUnit::PX));
 
     return box;
