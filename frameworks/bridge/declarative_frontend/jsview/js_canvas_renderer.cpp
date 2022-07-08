@@ -1731,8 +1731,8 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
         }
 
         auto retObj = JSRef<JSObject>::New();
-        retObj->SetProperty("width", width);
-        retObj->SetProperty("height", height);
+        retObj->SetProperty("width", SystemProperties::Px2Vp(width));
+        retObj->SetProperty("height", SystemProperties::Px2Vp(height));
         info.SetReturnValue(retObj);
     }
 }
