@@ -3041,7 +3041,7 @@ void RenderSwiper::BuildLazyItems()
             cacheStart_ = (itemCount_ + currentIndex_ - halfLazy) % itemCount_;
             cacheEnd_ = (cacheStart_ + lazyLoadCacheSize_ - 1) % itemCount_;
         } else {
-            if (currentIndex_ <= halfLazy) {
+            if (currentIndex_ < halfLazy) {
                 cacheStart_ = 0;
                 cacheEnd_ = swiper_->GetCachedSize() + swiper_->GetDisplayCount() - 1;
             } else if (currentIndex_ >= itemCount_ - halfLazy - 1) {
