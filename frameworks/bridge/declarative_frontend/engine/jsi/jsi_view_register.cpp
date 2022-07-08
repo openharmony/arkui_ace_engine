@@ -546,7 +546,7 @@ static TouchEvent GetTouchPointFromJS(const JsiObject& value)
 panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    size_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         LOGE("The EcmaVM is null");
         return panda::JSValueRef::Undefined(vm);
