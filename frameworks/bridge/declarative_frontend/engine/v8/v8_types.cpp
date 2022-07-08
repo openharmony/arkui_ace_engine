@@ -96,6 +96,27 @@ V8Ref<V8Value> V8Object::GetProperty(const char* prop) const
     return result;
 }
 
+V8Ref<V8Value> V8Object::GetValueAt(size_t index) const
+{
+    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scp(isolate);
+    auto context = isolate->GetCurrentContext();
+    v8::MaybeLocal<v8::Value> val = GetHandle()->Get(context, index);
+    if (val.IsEmpty()) {
+        return V8Ref<V8Value>();
+    }
+
+    return V8Ref<V8Value>::Make(val.ToLocalChecked());
+}
+
+void V8Object::SetValueAt(size_t index, V8Ref<V8Value> value) const
+{
+    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scp(isolate);
+    auto context = isolate->GetCurrentContext();
+    GetHandle()->Set(context, index, value->GetHandle()).ToChecked();
+}
+
 void V8Object::SetPropertyJsonObject(const char* prop, const char* value) const
 {
     v8::Isolate* isolate = v8::Isolate::GetCurrent();
@@ -190,6 +211,14 @@ void V8Array::SetValueAt(size_t index, V8Ref<V8Value> value) const
 size_t V8Array::Length() const
 {
     return GetHandle()->Length();
+}
+
+V8String::V8String(const char* str) : V8Type(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), str).ToLocalChecked())
+{
+}
+V8String V8String::New(const char* str)
+{
+    return V8String(str);
 }
 
 V8CallbackInfo::V8CallbackInfo(const v8::FunctionCallbackInfo<v8::Value>& info) : info_(info)

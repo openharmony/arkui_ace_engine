@@ -94,16 +94,10 @@ public:
         return V8Ref<T>::Make(T::Cast(that.Get()));
     }
 
-    static V8Ref<T> New()
+    template<typename... Args>
+    static V8Ref<T> New(Args&&... args)
     {
-        return V8Ref<T>::Make(T::New());
-    }
-
-    template<typename S>
-    static V8Ref<T> New(S param)
-    {
-        return V8Ref<T>::Make(T::New(param));
-    }
+        return V8Ref<T>::Make(T::New(std::forward<Args>(args)...));
 
     V8Ref(const V8Ref<T>& rhs) : object_(rhs.object_) {}
 

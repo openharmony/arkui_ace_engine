@@ -141,6 +141,17 @@ public:
     FAKE_PTR_FOR_FUNCTION_ACCESS(QJSObjTemplate)
 };
 
+class QJSString : public QJSValue {
+public:
+    explicit QJSString(const char* str);
+    explicit QJSString(JSValue str);
+
+    FAKE_PTR_FOR_FUNCTION_ACCESS(QJSString)
+    ENABLE_CAST_FROM_THIS(QJSString)
+
+    static QJSString New(const char* str);
+};
+
 class QJSFunction : public QJSValue {
 public:
     QJSFunction();
@@ -176,6 +187,9 @@ public:
 
     template<typename T>
     void SetReturnValue(QJSRef<T> existing) const;
+
+    template<typename S>
+    void SetReturnValue(S any) const;
 
     void ReturnSelf() const;
 

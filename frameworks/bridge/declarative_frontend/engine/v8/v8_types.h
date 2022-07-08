@@ -70,7 +70,8 @@ public:
     void Reset();
     operator v8::Local<T>() const;
 
-    static V8Type<T> New();
+    template<typename... Args>
+    static V8Type<T> New(Args&&...);
 
 private:
     CopyablePersistent<T> handle_;
@@ -143,6 +144,8 @@ public:
     void SetProperty(const char* prop, const T value) const;
     void SetPropertyJsonObject(const char* prop, const char* value) const;
     void SetPropertyObject(const char* prop, V8Ref<V8Value> value) const;
+    V8Ref<V8Value> GetValueAt(size_t index) const;
+    void SetValueAt(size_t index, V8Ref<V8Value> value) const;
 
     explicit V8Object(v8::Local<v8::Object> obj);
 };
@@ -179,6 +182,15 @@ public:
     FAKE_PTR_FOR_FUNCTION_ACCESS(V8ObjTemplate)
 };
 
+class V8String : public V8Type<v8::String> {
+public:
+    explicit V8String(const char* str);
+
+    FAKE_PTR_FOR_FUNCTION_ACCESS(V8String)
+
+    static V8String New(const char* str);
+};
+
 struct V8ExecutionContext {
     v8::Isolate* isolate;
     CopyablePersistent<v8::Context> context;
@@ -204,6 +216,9 @@ public:
 
     template<typename T>
     void SetReturnValue(V8Ref<T> val) const;
+
+    template<typename S>
+    void SetReturnValue(S any) const;
 
     void ReturnSelf() const;
 

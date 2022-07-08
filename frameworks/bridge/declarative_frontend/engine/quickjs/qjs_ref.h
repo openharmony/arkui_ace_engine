@@ -57,15 +57,10 @@ public:
         return newVal;
     }
 
-    static QJSRef<T> New()
+    template<typename... Args>
+    static QJSRef<T> New(Args&&... args)
     {
-        return QJSRef<T>::Make(T::New());
-    }
-
-    template<typename S>
-    static QJSRef<T> New(S param)
-    {
-        return QJSRef<T>::Make(T::New(param));
+        return QJSRef<T>::Make(T::New(std::forward<Args>(args)...));
     }
 
     template<typename S>
