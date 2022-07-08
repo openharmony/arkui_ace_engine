@@ -975,6 +975,7 @@ bool JsAccessibilityManager::AccessibilityActionEvent(const ActionType& action,
     if (!node || !context) {
         return false;
     }
+    ContainerScope scope(context->GetInstanceId());
     switch (action) {
         case ActionType::ACCESSIBILITY_ACTION_CLICK: {
             node->SetClicked(true);
