@@ -110,6 +110,25 @@ void JSTabs::Pop()
     JSContainerBase::Pop();
 }
 
+void JSTabs::SetBarPosition(const JSCallbackInfo& info)
+{
+    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        return;
+    }
+    BarPosition barVal = BarPosition::START;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        auto barPositionVal = info[0]->ToNumber<int32_t>();
+        if (barPositionVal >= 0 && barPositionVal < static_cast<int32_t>(BAR_POSITIONS.size())) {
+            barVal = BAR_POSITIONS[barPositionVal];
+        }
+    }
+    auto tabBar = component->GetTabBarChild();
+    if (tabBar) {
+        tabBar->SetBarPosition(barVal);
+    }
+}
+
 void JSTabs::SetVertical(const std::string& value)
 {
     auto tabsComponent = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -246,6 +265,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("create", &JSTabs::Create);
     JSClass<JSTabs>::StaticMethod("pop", &JSTabs::Pop);
     JSClass<JSTabs>::StaticMethod("vertical", &JSTabs::SetVertical);
+    JSClass<JSTabs>::StaticMethod("barPosition", &JSTabs::SetBarPosition);
     JSClass<JSTabs>::StaticMethod("scrollable", &JSTabs::SetScrollable);
     JSClass<JSTabs>::StaticMethod("barMode", &JSTabs::SetBarMode);
     JSClass<JSTabs>::StaticMethod("barWidth", &JSTabs::SetBarWidth);
