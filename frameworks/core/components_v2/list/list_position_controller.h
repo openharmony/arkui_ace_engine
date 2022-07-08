@@ -31,6 +31,8 @@ public:
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve) override;
     Axis GetScrollDirection() const override;
     Offset GetCurrentOffset() const override;
+    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) override;
+    void ScrollPage(bool reverse, bool smooth) override;
 };
 
 } // namespace OHOS::Ace::V2

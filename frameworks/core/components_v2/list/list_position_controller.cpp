@@ -56,4 +56,22 @@ Offset ListPositionController::GetCurrentOffset() const
     return list->CurrentOffset();
 }
 
+void ListPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
+{
+    auto list = AceType::DynamicCast<V2::RenderList>(scroll_.Upgrade());
+    if (!list) {
+        return;
+    }
+    return list->ScrollToEdge(scrollEdgeType, smooth);
+}
+
+void ListPositionController::ScrollPage(bool reverse, bool smooth)
+{
+    auto list = AceType::DynamicCast<V2::RenderList>(scroll_.Upgrade());
+    if (!list) {
+        return;
+    }
+    return list->ScrollPage(reverse, smooth);
+}
+
 } // namespace OHOS::Ace::V2

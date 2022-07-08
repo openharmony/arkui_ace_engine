@@ -480,7 +480,7 @@ void RenderList::RequestNewItemsAtEnd(double& curMainPos, double mainSize, const
 {
     for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
         if (cachedCount_ != 0) {
-            if (endCachedCount_ >= cachedCount_) {
+            if (endCachedCount_ >= cachedCount_ && GreatOrEqual(curMainPos, mainSize)) {
                 break;
             }
         } else {
@@ -548,7 +548,7 @@ void RenderList::RequestNewItemsAtStart(const LayoutParam& innerLayout)
 {
     for (; startIndex_ > 0; --startIndex_) {
         if (cachedCount_ != 0) {
-            if (startCachedCount_ >= cachedCount_) {
+            if (startCachedCount_ >= cachedCount_ && LessOrEqual(currentOffset_, 0.0)) {
                 break;
             }
         } else {
@@ -626,6 +626,11 @@ void RenderList::PerformLayout()
     if (noEdgeEffect && reachStart_) {
         curMainPos -= currentOffset_;
         currentOffset_ = 0;
+        if (isLaneList_) {
+            RequestNewItemsAtEndForLaneList(curMainPos, mainSize, innerLayout);
+        } else {
+            RequestNewItemsAtEnd(curMainPos, mainSize, innerLayout);
+        }
     }
 
     if (IsReachStart()) {
@@ -1554,23 +1559,16 @@ void RenderList::AnimateTo(const Dimension& position, float duration, const RefP
     }
     animator_->ClearInterpolators();
     auto pos = NormalizePercentToPx(position, GetDirection());
-    auto animation =
-        AceType::MakeRefPtr<CurveAnimation<double>>(GetCurrentPosition(), GetCurrentPosition() + pos, curve);
+    double currentOffset = startIndexOffset_ - currentOffset_;
+    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(currentOffset, pos, curve);
     animation->AddListener([weak = AceType::WeakClaim(this)](double pos) {
         auto renderList = weak.Upgrade();
         if (!renderList) {
             return;
         }
         if (renderList->scrollable_ && !renderList->scrollable_->IsSpringMotionRunning()) {
-            Offset delta;
-            if (renderList->vertical_) {
-                delta.SetX(0.0);
-                delta.SetY(pos - renderList->currentOffset_);
-            } else {
-                delta.SetX(pos - renderList->currentOffset_);
-                delta.SetY(0.0);
-            }
-            renderList->UpdateScrollPosition(renderList->GetMainAxis(delta), SCROLL_FROM_JUMP);
+            double delta = (renderList->startIndexOffset_ - renderList->currentOffset_) - pos;
+            renderList->UpdateScrollPosition(delta, SCROLL_FROM_JUMP);
         }
     });
     animator_->AddInterpolator(animation);
@@ -1588,6 +1586,45 @@ Offset RenderList::CurrentOffset()
     }
     auto mainOffset = ctx->ConvertPxToVp(Dimension(currentOffset, DimensionUnit::PX));
     return vertical_ ? Offset(0.0, mainOffset) : Offset(mainOffset, 0.0);
+}
+
+void RenderList::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
+{
+    if (scrollable_ && !scrollable_->IsAnimationNotRunning()) {
+        scrollable_->StopScrollable();
+    }
+    if (vertical_) {
+        if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
+            JumpToIndex(0, SCROLL_FROM_JUMP);
+        } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
+            JumpToIndex(TotalCount(), SCROLL_FROM_JUMP);
+        }
+    } else {
+        if (scrollEdgeType == ScrollEdgeType::SCROLL_LEFT) {
+            JumpToIndex(0, SCROLL_FROM_JUMP);
+        } else if (scrollEdgeType == ScrollEdgeType::SCROLL_RIGHT) {
+            JumpToIndex(TotalCount(), SCROLL_FROM_JUMP);
+        }
+    }
+}
+
+void RenderList::ScrollPage(bool reverse, bool smooth)
+{
+    if (scrollable_ && !scrollable_->IsAnimationNotRunning()) {
+        scrollable_->StopScrollable();
+    }
+    double pageSize = GetMainSize(GetLayoutSize());
+    if (reverse) {
+        if (!reachStart_) {
+            currentOffset_ += pageSize;
+            MarkNeedLayout();
+        }
+    } else {
+        if (!reachEnd_) {
+            currentOffset_ -= pageSize;
+            MarkNeedLayout();
+        }
+    }
 }
 
 void RenderList::AdjustOffset(Offset& delta, int32_t source)
