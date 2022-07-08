@@ -112,6 +112,9 @@ public:
     using GetViewScaleCallback = std::function<bool(float&, float&)>;
     using SurfaceChangedCallbackMap =
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
+#ifdef ENABLE_ROSEN_BACKEND
+    using PostRSTaskCallback = std::function<void(std::function<void()>&&)>;
+#endif
 
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -1279,6 +1282,21 @@ public:
     {
         isFocusingByTab_ = isFocusingByTab;
     }
+
+#ifdef ENABLE_ROSEN_BACKEND
+    void SetPostRSTaskCallBack(PostRSTaskCallback&& callback)
+    {
+        postRSTaskCallback_ = std::move(callback);
+    }
+
+    void PostTaskToRS(std::function<void()>&& task)
+    {
+        if (postRSTaskCallback_) {
+            postRSTaskCallback_(std::move(task));
+        }
+    }
+#endif
+
 protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     virtual void SetRootRect(double width, double height, double offset = 0.0);
@@ -1541,6 +1559,10 @@ private:
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
     bool isSubPipeline_ = false;
+
+#ifdef ENABLE_ROSEN_BACKEND
+    PostRSTaskCallback postRSTaskCallback_;
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

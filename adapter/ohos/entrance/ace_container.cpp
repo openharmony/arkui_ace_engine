@@ -16,6 +16,9 @@
 #include "adapter/ohos/entrance/ace_container.h"
 
 #include "ability_info.h"
+#if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
+#include "adapter/ohos/entrance/ace_rosen_sync_task.h"
+#endif
 #include "flutter/lib/ui/ui_dart_state.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
@@ -1080,6 +1083,13 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     };
     auto dataProviderManager = MakeRefPtr<DataProviderManagerStandard>(dataAbilityHelperImpl);
     pipelineContext_->SetDataProviderManager(dataProviderManager);
+
+#if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
+    pipelineContext_->SetPostRSTaskCallBack([](std::function<void()>&& task) {
+        auto syncTask = std::make_shared<AceRosenSyncTask>(std::move(task));
+        Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
+    });
+#endif
 }
 
 void AceContainer::SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow)
