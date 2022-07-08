@@ -35,14 +35,17 @@ class ViewFunctions : public AceType {
 
 public:
     ViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction);
+    ViewFunctions(JSRef<JSObject> jsObject);
     ~ViewFunctions()
     {
         LOGD("Destroy: ViewFunctions");
     }
 
+    void Destroy();
     void Destroy(JSView* parentCustomView);
 
     void ExecuteRender();
+    void ExecuteRerender();
     void ExecuteAppear();
     void ExecuteDisappear();
     void ExecuteAboutToBeDeleted();
@@ -65,6 +68,9 @@ public:
         context_ = context;
     }
 
+protected:
+    void InitViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction, bool partialUpdate);
+
 private:
     JSWeak<JSObject> jsObject_;
     JSWeak<JSFunc> jsAppearFunc_;
@@ -75,6 +81,7 @@ private:
     JSWeak<JSFunc> jsAboutToBuildFunc_;
     JSWeak<JSFunc> jsBuildDoneFunc_;
     JSWeak<JSFunc> jsRenderFunc_;
+    JSWeak<JSFunc> jsRerenderFunc_;
     JSWeak<JSFunc> jsTransitionFunc_;
     JSWeak<JSVal> jsRenderResult_;
 
