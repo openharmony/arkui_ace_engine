@@ -112,7 +112,7 @@ void RenderGridRow::PerformLayout()
         Offset position;
         position.SetX(
             (offset + GetRelativeOffset(child, sizeType)) * childWidthLimit +
-            ((offset + GetRelativeOffset(child, sizeType)) == 0 ? 0 : offset + GetRelativeOffset(child, sizeType) - 1) *
+            ((offset + GetRelativeOffset(child, sizeType)) == 0 ? 0 : offset + GetRelativeOffset(child, sizeType)) *
                 getterInDouble.first);
         position.SetY(rowPosition.GetY());
         child->SetPosition(position);
