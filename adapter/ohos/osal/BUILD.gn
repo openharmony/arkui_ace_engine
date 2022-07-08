@@ -25,15 +25,15 @@ template("ace_osal_ohos_source_set") {
       external_deps = [
         "hitrace_native:hitrace_meter",
         "hiviewdfx_hilog_native:libhilog",
-        "startup_l2:syspara",
-        "startup_l2:syspara_watchagent",
+        "init:libbeget_proxy",
+        "init:libbegetutil",
       ]
       configs = [ "$ace_root:ace_config" ]
     } else {
       external_deps = [
         "hilog:libhilog",
         "hitrace_native:hitrace_meter",
-        "startup:syspara",
+        "init_lite:libbegetutil",
       ]
 
       configs = [ "$ace_root:ace_config" ]
