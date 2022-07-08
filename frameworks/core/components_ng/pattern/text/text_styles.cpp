@@ -31,6 +31,8 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         DEFINE_STYLE_UPDATE(fontStyle, FontSize, SetFontSize);
         DEFINE_STYLE_UPDATE(fontStyle, TextColor, SetTextColor);
         DEFINE_STYLE_UPDATE(fontStyle, ItalicFontStyle, SetFontStyle);
+        DEFINE_STYLE_UPDATE(fontStyle, FontWeight, SetFontWeight);
+        DEFINE_STYLE_UPDATE(fontStyle, FontFamily, SetFontFamilies);
     }
     if (textLineStyle) {
         DEFINE_STYLE_UPDATE(textLineStyle, LineHeight, SetLineHeight);

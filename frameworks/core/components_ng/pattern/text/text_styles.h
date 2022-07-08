@@ -27,6 +27,8 @@ struct FontStyle {
     ACE_DEFINE_STRUCT_PROPERTY(FontSize, Dimension);
     ACE_DEFINE_STRUCT_PROPERTY(TextColor, Color);
     ACE_DEFINE_STRUCT_PROPERTY(ItalicFontStyle, ItalicFontStyle);
+    ACE_DEFINE_STRUCT_PROPERTY(FontWeight, FontWeight);
+    ACE_DEFINE_STRUCT_PROPERTY(FontFamily, std::vector<std::string>);
 };
 
 struct TextLineStyle {

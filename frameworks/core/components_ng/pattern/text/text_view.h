@@ -30,6 +30,8 @@ public:
     static void FontSize(const Dimension& value);
     static void TextColor(const Color& value);
     static void ItalicFontStyle(const ItalicFontStyle& value);
+    static void FontWeight(const FontWeight& value);
+    static void FontFamily(const std::vector<std::string>& value);
 };
 } // namespace OHOS::Ace::NG
 
