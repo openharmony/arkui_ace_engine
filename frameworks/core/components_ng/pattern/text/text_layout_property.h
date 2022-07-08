@@ -47,6 +47,7 @@ public:
     ACE_DEFINE_CLASS_PROPERTY(TextParagraph, Content, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_CLASS_PROPERTY(TextParagraph, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_CLASS_PROPERTY(TextParagraph, TextColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_CLASS_PROPERTY(TextParagraph, ItalicFontStyle, ItalicFontStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_CLASS_PROPERTY(TextParagraph, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_CLASS_PROPERTY(TextParagraph, TextBaseline, TextBaseline, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_CLASS_PROPERTY(TextParagraph, BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE);

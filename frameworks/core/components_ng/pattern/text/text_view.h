@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextView {
@@ -28,6 +29,7 @@ public:
     static void Create(const std::string& content);
     static void FontSize(const Dimension& value);
     static void TextColor(const Color& value);
+    static void ItalicFontStyle(const ItalicFontStyle& value);
 };
 } // namespace OHOS::Ace::NG
 

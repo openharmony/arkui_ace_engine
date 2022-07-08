@@ -174,19 +174,25 @@ void JSText::SetMaxLines(int32_t value)
 
 void JSText::SetFontStyle(int32_t value)
 {
+    if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
+        LOGE("Text fontStyle(%{public}d) illegal value", value);
+        return ;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::ItalicFontStyle(FONT_STYLES[value]);
+        return;
+    }
+
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
         return;
     }
 
-    if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
-        auto textStyle = component->GetTextStyle();
-        textStyle.SetFontStyle(FONT_STYLES[value]);
-        component->SetTextStyle(std::move(textStyle));
-    } else {
-        LOGE("Text fontStyle(%d) illegal value", value);
-    }
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetFontStyle(FONT_STYLES[value]);
+    component->SetTextStyle(std::move(textStyle));
 }
 
 void JSText::SetTextAlign(int32_t value)

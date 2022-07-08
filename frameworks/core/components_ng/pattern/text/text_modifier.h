@@ -23,6 +23,15 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
+class ItalicFontStyleModifier : public PropertyModifier<ItalicFontStyle, LayoutProperty> {
+public:
+    ItalicFontStyleModifier(const ItalicFontStyle& value) : PropertyModifier<ItalicFontStyle, LayoutProperty>(value)
+    {
+        ACE_DEFINE_MODIFIER_TASK(TextLayoutProperty, LayoutProperty, ItalicFontStyle);
+    }
+    ~ItalicFontStyleModifier() override = default;
+};
+
 class FontSizeModifier : public PropertyModifier<Dimension, LayoutProperty> {
 public:
     FontSizeModifier(const Dimension& value) : PropertyModifier<Dimension, LayoutProperty>(value)

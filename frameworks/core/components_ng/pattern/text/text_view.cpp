@@ -41,4 +41,9 @@ void TextView::TextColor(const Color& value)
 {
     ViewStackProcessor::GetInstance()->PushLayoutTask(FontColorModifier(value));
 }
+
+void TextView::ItalicFontStyle(const NG::ItalicFontStyle& value)
+{
+    ViewStackProcessor::GetInstance()->PushLayoutTask(ItalicFontStyleModifier(value));
+}
 } // namespace OHOS::Ace::NG
