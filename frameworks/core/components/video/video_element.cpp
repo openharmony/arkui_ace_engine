@@ -238,9 +238,20 @@ void VideoElement::RegisterMediaPlayerEvent()
         });
     };
 
+    auto&& errorEvent = [videoElement, uiTaskExecutor]() {
+        uiTaskExecutor.PostTask([&videoElement] {
+            auto video = videoElement.Upgrade();
+            if (video) {
+                LOGD("OnError");
+                video->OnError("", "");
+            }
+        });
+    };
+
     mediaPlayerCallback_ = std::make_shared<MediaPlayerCallback>(ContainerScope::CurrentId());
     mediaPlayerCallback_->SetPositionUpdatedEvent(positionUpdatedEvent);
     mediaPlayerCallback_->SetStateChangedEvent(stateChangedEvent);
+    mediaPlayerCallback_->SetErrorEvent(errorEvent);
     mediaPlayer_->SetPlayerCallback(mediaPlayerCallback_);
 }
 
