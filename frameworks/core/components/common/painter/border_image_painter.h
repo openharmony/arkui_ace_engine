@@ -49,12 +49,19 @@ private:
     void InitBorderImageWidth(Border& border, RefPtr<BorderImage>& borderImage);
     void InitBorderImageSlice(RefPtr<BorderImage>& borderImage);
     void InitBorderImageOutset(Border& border, RefPtr<BorderImage>& borderImage);
+    void ParseNegativeNumberToZeroOrCeil(double& value);
 
     Size paintSize_;
     RefPtr<Decoration> decoration_;
     sk_sp<SkImage> image_;
+    
     double imageWidth_ = 0.0;
     double imageHeight_ = 0.0;
+    double imageCenterWidth_ = 0.0;
+    double imageCenterHeight_ = 0.0;
+    double borderCenterWidth_ = 0.0;
+    double borderCenterHeight_ = 0.0;
+
     double dipscale_ = 0.0;
     double leftWidth_ = 0.0;
     double topWidth_ = 0.0;
