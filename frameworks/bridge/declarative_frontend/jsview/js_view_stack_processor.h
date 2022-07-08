@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_STACK_PROCESSOR_H
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -28,10 +29,33 @@ public:
     static void JSBind(BindingTarget globalObj);
     static VisualState StringToVisualState(const std::string& stateString);
 
+    static ElementIdType JsAllocateNewElmetIdForNextComponent()
+    {
+        return ElementRegister::GetInstance()->MakeUniqueId();
+    }
+
+    static void JsStartGetAccessRecordingFor(ElementIdType elmtId)
+    {
+        return ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(elmtId);
+    }
+
+    static int32_t JsGetElmtIdToAccountFor()
+    {
+        return ViewStackProcessor::GetInstance()->GetElmtIdToAccountFor();
+    }
+    static void JsSetElmtIdToAccountFor(ElementIdType elmtId)
+    {
+        ViewStackProcessor::GetInstance()->SetElmtIdToAccountFor(elmtId);
+    }
+
+    static void JsStopGetAccessRecording()
+    {
+        return ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+
+    static void JsImplicitPopBeforeContinue();
+
 private:
-    /**
-     * Binds the native methods to the the js object
-     */
     static void JSVisualState(const JSCallbackInfo& info);
 };
 

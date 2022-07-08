@@ -17,7 +17,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -45,6 +44,19 @@ void JSViewStackProcessor::JSBind(BindingTarget globalObj)
     LOGD("JSViewStackProcessor::Bind");
     JSClass<JSViewStackProcessor>::Declare("ViewStackProcessor");
     MethodOptions opt = MethodOptions::NONE;
+
+    JSClass<JSViewStackProcessor>::StaticMethod(
+        "AllocateNewElmetIdForNextComponent", &JSViewStackProcessor::JsAllocateNewElmetIdForNextComponent, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod(
+        "StartGetAccessRecordingFor", &JSViewStackProcessor::JsStartGetAccessRecordingFor, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod(
+        "SetElmtIdToAccountFor", &JSViewStackProcessor::JsSetElmtIdToAccountFor, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod(
+        "GetElmtIdToAccountFor", &JSViewStackProcessor::JsGetElmtIdToAccountFor, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod(
+        "StopGetAccessRecording", &JSViewStackProcessor::JsStopGetAccessRecording, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod(
+        "ImplicitPopBeforeContinue", &JSViewStackProcessor::JsImplicitPopBeforeContinue, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("visualState", JSVisualState, opt);
     JSClass<JSViewStackProcessor>::Bind<>(globalObj);
 }
@@ -68,6 +80,19 @@ VisualState JSViewStackProcessor::StringToVisualState(const std::string& stateSt
     }
     LOGE("Unknown visual state \"%s\", resetting to UNDEFINED", stateString.c_str());
     return VisualState::NOTSET;
+}
+
+void JSViewStackProcessor::JsImplicitPopBeforeContinue()
+{
+    if ((ViewStackProcessor::GetInstance()->Size() > 1) && ViewStackProcessor::GetInstance()->ShouldPopImmediately()) {
+        LOGD("Implicit Pop before continue.");
+        ViewStackProcessor::GetInstance()->Pop();
+        LOGD("Implicit Pop done, top component is %{public}s",
+            AceType::TypeName(ViewStackProcessor::GetInstance()->GetMainComponent()));
+    } else {
+        LOGD("NO Implicit Pop before continue. top component is %{public}s",
+            AceType::TypeName(ViewStackProcessor::GetInstance()->GetMainComponent()));
+    }
 }
 
 } // namespace OHOS::Ace::Framework
