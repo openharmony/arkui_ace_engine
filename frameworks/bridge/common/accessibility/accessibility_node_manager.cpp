@@ -75,7 +75,9 @@ namespace {
 
 const char PAGE_CHANGE_EVENT[] = "pagechange";
 const char ROOT_STACK_TAG[] = "rootstacktag";
+const char ROOT_DECOR_TAG[] = "rootdecortag";
 constexpr int32_t ROOT_STACK_BASE = 1100000;
+constexpr int32_t ROOT_DECOR_BASE = 3100000;
 constexpr int32_t CARD_NODE_ID_RATION = 10000;
 constexpr int32_t CARD_ROOT_NODE_ID = 21000;
 constexpr int32_t CARD_BASE = 100000;
@@ -405,19 +407,7 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateDeclarativeAccessibili
     if (parentNodeId != -1) {
         parentNode = GetAccessibilityNodeById(parentNodeId);
     } else {
-        // create accessibility root stack node
-        auto rootStackId = rootNodeId_ + ROOT_STACK_BASE;
-        parentNode = GetAccessibilityNodeById(rootStackId);
-        if (!parentNode) {
-            parentNode = AceType::MakeRefPtr<AccessibilityNode>(rootStackId, ROOT_STACK_TAG);
-            std::lock_guard<std::mutex> lock(mutex_);
-            auto result = accessibilityNodes_.try_emplace(rootStackId, parentNode);
-
-            if (!result.second) {
-                LOGW("the accessibility node has already in the map");
-                return nullptr;
-            }
-        }
+        parentNode = GetRootAccessibilityNode();
     }
     auto accessibilityNode = GetAccessibilityNodeById(nodeId);
     if (!accessibilityNode) {
@@ -456,19 +446,7 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateCommonAccessibilityNod
             return nullptr;
         }
     } else {
-        // create accessibility root stack node
-        auto rootStackId = rootNodeId_ + ROOT_STACK_BASE;
-        parentNode = GetAccessibilityNodeById(rootStackId);
-        if (!parentNode) {
-            parentNode = AceType::MakeRefPtr<AccessibilityNode>(rootStackId, ROOT_STACK_TAG);
-            std::lock_guard<std::mutex> lock(mutex_);
-            auto result = accessibilityNodes_.try_emplace(rootStackId, parentNode);
-
-            if (!result.second) {
-                LOGW("the accessibility node has already in the map");
-                return nullptr;
-            }
-        }
+        parentNode = GetRootAccessibilityNode();
     }
 
     auto accessibilityNode = AceType::MakeRefPtr<AccessibilityNode>(nodeId, tag);
@@ -486,6 +464,26 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateCommonAccessibilityNod
         }
     }
     return accessibilityNode;
+}
+
+RefPtr<AccessibilityNode> AccessibilityNodeManager::GetRootAccessibilityNode()
+{
+    // create accessibility root stack node
+    auto rootStackId = rootNodeId_ + (!IsDecor() ? ROOT_STACK_BASE : ROOT_DECOR_BASE);
+    RefPtr<AccessibilityNode> parentNode = GetAccessibilityNodeById(rootStackId);
+    if (!parentNode) {
+        parentNode = AceType::MakeRefPtr<AccessibilityNode>(rootStackId, !IsDecor() ? ROOT_STACK_TAG : ROOT_DECOR_TAG);
+        std::lock_guard<std::mutex> lock(mutex_);
+        accessibilityNodes_.try_emplace(rootStackId, parentNode);
+    }
+    if (!IsDecor()) {
+        auto decor = GetAccessibilityNodeById(ROOT_DECOR_BASE - 1);
+        if (decor) {
+            decor->SetParentNode(parentNode);
+            decor->Mount(-1);
+        }
+    }
+    return parentNode;
 }
 
 RefPtr<AccessibilityNode> AccessibilityNodeManager::GetAccessibilityNodeById(NodeId nodeId) const

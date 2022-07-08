@@ -1269,7 +1269,7 @@ void RenderNode::UpdateAccessibilityPosition()
     }
 
     Size size = GetLayoutSize();
-    Offset globalOffset = GetGlobalOffset();
+    Offset globalOffset = GetGlobalOffsetExternal();
     PositionInfo positionInfo = { (size.Width()) * viewScale, (size.Height()) * viewScale,
         (globalOffset.GetX()) * viewScale, (globalOffset.GetY()) * viewScale };
     accessibilityNode->SetPositionInfo(positionInfo);
@@ -2162,6 +2162,27 @@ void RenderNode::SendAccessibilityEvent(const std::string& eventType)
         event.nodeId = accessibilityNode->GetNodeId();
         event.eventType = eventType;
         context->SendEventToAccessibility(event);
+    }
+}
+
+void RenderNode::SetAccessibilityClick(RefPtr<ClickRecognizer> clickRecognizer)
+{
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (!accessibilityNode) {
+        return;
+    }
+    if (clickRecognizer) {
+        accessibilityNode->SetClickableState(true);
+        auto weakPtr = AceType::WeakClaim(AceType::RawPtr(clickRecognizer));
+        accessibilityNode->SetActionClickImpl([weakPtr]() {
+            auto click = weakPtr.Upgrade();
+            if (click) {
+                click->OnAccepted();
+            }
+        });
+    } else {
+        accessibilityNode->SetClickableState(false);
+        accessibilityNode->SetActionClickImpl(nullptr);
     }
 }
 

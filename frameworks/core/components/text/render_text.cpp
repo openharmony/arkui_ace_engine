@@ -164,7 +164,7 @@ void RenderText::UpdateAccessibilityText()
         return; // Rect already clamp by viewport, no need to set again.
     }
     Size size = GetLayoutSize();
-    Offset globalOffset = GetGlobalOffset();
+    Offset globalOffset = GetGlobalOffsetExternal();
     PositionInfo positionInfo = { (size.Width()) * viewScale, (size.Height()) * viewScale,
         (globalOffset.GetX()) * viewScale, (globalOffset.GetY()) * viewScale };
     accessibilityNode->SetPositionInfo(positionInfo);

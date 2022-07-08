@@ -50,6 +50,7 @@ const char IMPORTANT_NO[] = "no";
 const char IMPORTANT_NO_HIDE_DES[] = "no-hide-descendants";
 constexpr int32_t DEFAULT_PARENT_ID = 2100000;
 constexpr int32_t ROOT_STACK_BASE = 1100000;
+constexpr int32_t ROOT_DECOR_BASE = 3100000;
 constexpr int32_t CARD_NODE_ID_RATION = 10000;
 constexpr int32_t CARD_ROOT_NODE_ID_RATION = 1000;
 constexpr int32_t CARD_BASE = 100000;
@@ -483,7 +484,7 @@ void JsAccessibilityManager::UpdateNodeChildIds(const RefPtr<AccessibilityNode>&
     if (!node) {
         return;
     }
-    LOGI("JsAccessibilityManager::UpdateNodeChildIds");
+
     node->ActionUpdateIds();
     const auto& children = node->GetChildList();
     std::vector<int32_t> childrenVec;
@@ -497,6 +498,12 @@ void JsAccessibilityManager::UpdateNodeChildIds(const RefPtr<AccessibilityNode>&
             childrenVec.emplace_back(ConvertToCardAccessibilityId(lastChildNodeId, cardId, rootNodeId));
         } else {
             childrenVec.emplace_back(lastChildNodeId);
+            for (const auto& child : children) {
+                if (child->GetNodeId() == ROOT_DECOR_BASE - 1) {
+                    childrenVec.emplace_back(child->GetNodeId());
+                    break;
+                }
+            }
         }
     } else {
         childrenVec.resize(children.size());

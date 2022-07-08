@@ -38,6 +38,7 @@
 #include "core/components_v2/inspector/inspector_node.h"
 #include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
+#include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline/base/render_layer.h"
@@ -1143,6 +1144,7 @@ protected:
     virtual void OnMouseHoverEnterTest() {}
     virtual void OnMouseHoverExitTest() {}
     void SendAccessibilityEvent(const std::string& eventType);
+    void SetAccessibilityClick(RefPtr<ClickRecognizer> clickRecognizer);
 
     void PrepareLayout();
 
