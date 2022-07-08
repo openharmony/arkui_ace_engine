@@ -2109,7 +2109,6 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
             textFieldManager_->MovePage(GetLastPage()->GetPageId(), { newRootWidth, newRootHeight }, offsetHeight);
         }
     }
-    GridSystemManager::GetInstance().OnSurfaceChanged(width);
     auto frontend = weakFrontend_.Upgrade();
     if (frontend) {
         frontend->OnSurfaceChanged(width, height);
@@ -2239,6 +2238,7 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height, 
     rootWidth_ = width / viewScale_;
     SetRootRect(rootWidth_, rootHeight_, offset);
     GridSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
+    GridSystemManager::GetInstance().OnSurfaceChanged(width);
 }
 
 void PipelineContext::SetRootSize(double density, int32_t width, int32_t height)
