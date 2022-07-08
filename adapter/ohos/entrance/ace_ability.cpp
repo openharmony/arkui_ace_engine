@@ -246,6 +246,13 @@ void AceAbility::OnStart(const Want& want)
             LOGW("localeInfo is null.");
             AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
         }
+        if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
+            SystemProperties::SetColorMode(ColorMode::DARK);
+            LOGI("UIContent set dark mode");
+        } else {
+            SystemProperties::SetColorMode(ColorMode::LIGHT);
+            LOGI("UIContent set light mode");
+        }
     } else {
         LOGW("resourceManager is null.");
         AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
@@ -306,6 +313,7 @@ void AceAbility::OnStart(const Want& want)
     aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
+    aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetBundlePath(abilityContext->GetBundleCodeDir());
