@@ -960,12 +960,12 @@ void RosenRenderBox::SetWindowBlurProgress(double progress)
 
 double RosenRenderBox::GetBoundsWidth()
 {
-    return ConvertHorizontalDimensionToPx(GetWidthDimension(), false) - GetMargin().LeftPx() - GetMargin().RightPx();
+    return ConvertHorizontalDimensionToPx(GetWidthDimension(), false);
 }
 
 double RosenRenderBox::GetBoundsHeight()
 {
-    return ConvertVerticalDimensionToPx(GetHeightDimension(), false) - GetMargin().TopPx() - GetMargin().BottomPx();
+    return ConvertVerticalDimensionToPx(GetHeightDimension(), false);
 }
 
 void RosenRenderBox::SyncDecorationToRSNode()
