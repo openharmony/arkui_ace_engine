@@ -3064,6 +3064,9 @@ void RenderSwiper::LoadItems()
         for (auto iter = children.begin(); iter != children.end(); ++iter, ++index) {
             items_.emplace(std::make_pair(index, *iter));
         }
+        if (context_.Upgrade()->UsePartialUpdate()) {
+            itemCount_ = children.size();
+        }
     } else {
         BuildLazyItems(); // depend on currentIndex_ value which init when swiper first update
     }
@@ -3272,6 +3275,44 @@ void RenderSwiper::OnPaintFinish()
             item->NotifyPaintFinish();
         }
     }
+}
+
+// In case of partial update we get extra RenderNode children
+// without invoking RenderSwiper::Update, so we have to reset items_
+// SwiperComponent swiper_ not updated in that case and
+// it will still keep initial list of children.
+void RenderSwiper::OnChildAdded(const RefPtr<RenderNode>& child)
+{
+    if (!context_.Upgrade()->UsePartialUpdate()) {
+        return;
+    }
+
+    if (!swiper_) {
+        return; // Not done with Update call yet.
+    }
+    if (swiper_->GetLazyForEachComponent()) {
+        return; // No partial update support for LazyForEach yet
+    }
+
+    // Later LoadItems will recreate items_ and update itemCount_
+    ClearItems(nullptr, 0);
+    ResetCachedChildren();
+}
+
+void RenderSwiper::OnChildRemoved(const RefPtr<RenderNode>& child)
+{
+    if (!context_.Upgrade()->UsePartialUpdate()) {
+        return;
+    }
+
+    if (!swiper_) {
+        return; // Not done with Update call yet.
+    }
+    if (swiper_->GetLazyForEachComponent()) {
+        return; // No partial update support for LazyForEach yet
+    }
+    ClearItems(nullptr, 0);
+    ResetCachedChildren();
 }
 
 } // namespace OHOS::Ace

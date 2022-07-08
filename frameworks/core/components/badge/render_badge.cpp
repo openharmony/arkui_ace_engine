@@ -110,7 +110,13 @@ void RenderBadge::PerformLayout()
 
     if (!GetChildren().front()) {
         SetLayoutSize(Size());
-        showMessage_ = false;
+        // For partial update code path we can get children added
+        // without executing of RenderBadge::Update
+        // In that case showMessage_ remains false and
+        // Badge never shown.
+        if (!context_.Upgrade()->UsePartialUpdate()) {
+            showMessage_ = false;
+        }
         return;
     }
 
