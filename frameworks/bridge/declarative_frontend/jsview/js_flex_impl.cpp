@@ -45,16 +45,16 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
     std::list<RefPtr<Component>> children;
     if (info.Length() < 1) {
         LOGI("No input args, use default row setting");
-        RefPtr<RowComponent> row =
-            AceType::MakeRefPtr<OHOS::Ace::RowComponent>(FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(FlexDirection::ROW,
+            FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         row->SetInspectorTag("FlexComponentV2");
         ViewStackProcessor::GetInstance()->Push(row);
         return;
     }
     if (!info[0]->IsObject()) {
         LOGW("arg is not a object, use default row setting");
-        RefPtr<RowComponent> row =
-            AceType::MakeRefPtr<OHOS::Ace::RowComponent>(FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(FlexDirection::ROW,
+            FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         row->SetInspectorTag("FlexComponentV2");
         ViewStackProcessor::GetInstance()->Push(row);
         return;
@@ -79,13 +79,13 @@ RefPtr<FlexComponent> JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info
 {
     std::list<RefPtr<Component>> children;
     if (info.Length() < 1) {
-        RefPtr<RowComponent> row =
-            AceType::MakeRefPtr<OHOS::Ace::RowComponent>(FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(FlexDirection::ROW,
+            FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         return row;
     }
     if (!info[0]->IsObject()) {
-        RefPtr<RowComponent> row =
-            AceType::MakeRefPtr<OHOS::Ace::RowComponent>(FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
+        RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(FlexDirection::ROW,
+            FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         return row;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
