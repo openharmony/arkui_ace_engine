@@ -24,7 +24,7 @@ ohos_unittest("PluginManagerTest") {
   module_out_path = module_output_path
 
   include_dirs = [
-    "//foundation/windowmanager/interfaces/innerkits",
+    "//foundation/window/window_manager/interfaces/innerkits",
     "//third_party/flutter/engine/",
   ]
 
