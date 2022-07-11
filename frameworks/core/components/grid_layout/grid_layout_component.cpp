@@ -26,21 +26,22 @@ namespace OHOS::Ace {
 RefPtr<Element> GridLayoutComponent::CreateElement()
 {
     // judge to create GridLayoutElement for dynamic grid
-    if (((rowsArgs_.empty() && (!columnsArgs_.empty())) || ((!rowsArgs_.empty()) && columnsArgs_.empty())) &&
-        (maxCount_ >= minCount_) && (minCount_ >= 1) && (cellLength_ > 0) && editMode_) {
+    if (UseNonProxiedCodePath()) {
+        LOGD("Use non-proxied code path, creaitng GridLayoutElement");
         return AceType::MakeRefPtr<GridLayoutElement>();
     }
     if (isDeclarative_ && useScroll_ && (rowsArgs_.empty() || columnsArgs_.empty())) {
+        LOGD("Use proxied code path, creaitng V2::GridElement");
         return AceType::MakeRefPtr<V2::GridElement>();
     }
+    LOGD("Use non-proxied code path, creaitng GridLayoutElement");
     return AceType::MakeRefPtr<GridLayoutElement>();
 }
 
 RefPtr<RenderNode> GridLayoutComponent::CreateRenderNode()
 {
     // judge to create RenderGridLayout for dynamic grid
-    if (((rowsArgs_.empty() && (!columnsArgs_.empty())) || ((!rowsArgs_.empty()) && columnsArgs_.empty())) &&
-        (maxCount_ >= minCount_) && (minCount_ >= 1) && (cellLength_ > 0) && editMode_) {
+    if (UseNonProxiedCodePath()) {
         return RenderGridLayout::Create();
     }
     if (isDeclarative_ && useScroll_ && (rowsArgs_.empty() || columnsArgs_.empty())) {

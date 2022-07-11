@@ -13,15 +13,69 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_mouse_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_item.h"
+
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_mouse_function.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::Framework {
 
-void JSGridItem::Create()
+void JSGridItem::Create(const JSCallbackInfo& args)
 {
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("fail to get container");
+        return;
+    }
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        LOGE("fail to get context");
+        return;
+    }
+
     auto itemComponent = AceType::MakeRefPtr<GridLayoutItemComponent>();
+    ViewStackProcessor::GetInstance()->ClaimElementId(itemComponent);
     ViewStackProcessor::GetInstance()->Push(itemComponent);
+
+    if (!context->UsePartialUpdate()) {
+        return;
+    }
+
+    // Partial update code path
+    if (args.Length() < 2 || !args[0]->IsFunction()) {
+        LOGE("Expected deep render function parameter");
+        return;
+    }
+    RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
+
+    if (!args[1]->IsBoolean()) {
+        LOGE("Expected isLazy parameter");
+        return;
+    }
+    const bool isLazy = args[1]->ToBoolean();
+
+    DeepRenderFunc gridItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
+                                                jsDeepRenderFunc = std::move(jsDeepRender),
+                                                elmtId = itemComponent->GetElementId()]() -> RefPtr<Component> {
+        ACE_SCOPED_TRACE("JSGridItem::ExecuteDeepRender");
+
+        LOGD("GridItem elmtId %{public}d DeepRender JS function execution start ....", elmtId);
+        ACE_DCHECK(componentsStack_.empty());
+
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+        JSRef<JSVal> jsParams[2];
+        jsParams[0] = JSRef<JSVal>::Make(ToJSValue(elmtId));
+        jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
+        jsDeepRenderFunc->ExecuteJS(2, jsParams);
+        RefPtr<Component> component = ViewStackProcessor::GetInstance()->Finish();
+        ACE_DCHECK(AceType::DynamicCast<V2::ListItemComponent>(component) != nullptr);
+        LOGD("GridItem elmtId %{public}d DeepRender JS function execution - done ", elmtId);
+        return component;
+    }; // gridItemDeepRenderFunc lambda
+
+    itemComponent->SetDeepRenderFunc(gridItemDeepRenderFunc);
+    itemComponent->SetIsLazyCreating(isLazy);
 }
 
 void JSGridItem::SetColumnStart(int32_t columnStart)

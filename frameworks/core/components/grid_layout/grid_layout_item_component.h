@@ -22,6 +22,7 @@
 namespace OHOS::Ace {
 
 using OnSelectFunc = std::function<void(bool)>;
+using DeepRenderFunc = std::function<RefPtr<Component>()>;
 
 class ACE_EXPORT GridLayoutItemComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(GridLayoutItemComponent, SoleChildComponent);
@@ -120,6 +121,32 @@ public:
         return itemHeight_;
     }
 
+    // transfer ownershop of deepRenderFunc_ to provided GridLayoutItemComponent
+    void MoveDeepRenderFunc(RefPtr<GridLayoutItemComponent>& component)
+    {
+        component->deepRenderFunc_ = std::move(deepRenderFunc_);
+    }
+
+    void SetDeepRenderFunc(const DeepRenderFunc& deepRenderFunc)
+    {
+        deepRenderFunc_ = deepRenderFunc;
+    }
+
+    RefPtr<Component> ExecDeepRender() const
+    {
+        return (deepRenderFunc_) ? deepRenderFunc_() : nullptr;
+    }
+
+    void SetIsLazyCreating(const bool isLazy)
+    {
+        isLazyCreating_ = isLazy;
+    }
+
+    bool GetIsLazyCreating() const
+    {
+        return isLazyCreating_;
+    }
+
 private:
     EventMarker clickEventId_;
     int32_t columnIndex_ = -1;
@@ -131,6 +158,8 @@ private:
     bool selectable_ = true;
     Dimension itemWidth_ {-1};
     Dimension itemHeight_ {-1};
+    DeepRenderFunc deepRenderFunc_ = nullptr;
+    bool isLazyCreating_ = false;
 };
 
 } // namespace OHOS::Ace

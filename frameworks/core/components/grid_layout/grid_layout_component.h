@@ -42,6 +42,12 @@ public:
 
     RefPtr<Element> CreateElement() override;
 
+    bool UseNonProxiedCodePath() const
+    {
+        return (((rowsArgs_.empty() && (!columnsArgs_.empty())) || ((!rowsArgs_.empty()) && columnsArgs_.empty())) &&
+                (maxCount_ >= minCount_) && (minCount_ >= 1) && (cellLength_ > 0) && editMode_);
+    }
+
     RefPtr<RenderNode> CreateRenderNode() override;
 
     void SetDirection(FlexDirection direction);
