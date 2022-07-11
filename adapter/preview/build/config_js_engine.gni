@@ -13,9 +13,5 @@
 
 declare_args() {
   # Enable Ark as Previewer JS engine, set it 'false' to use QuickJS instead
-  if ("${current_os}_${host_cpu}" == "mac_arm64") {
-    enable_ark_preview = false
-  } else {
-    enable_ark_preview = true
-  }
+  enable_ark_preview = true
 }
