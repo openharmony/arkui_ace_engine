@@ -826,7 +826,7 @@ void StageElement::RecycleSinglePage()
         return page && singlePageId_ == page->GetPageId();
     });
     if (iter != children_.end()) {
-        children_.erase(iter);
+        UpdateChild(*iter, nullptr);
     }
     singlePageId_ = -1;
 }
