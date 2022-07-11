@@ -109,6 +109,8 @@ if (is_standard_system) {
         get_label_info("//foundation/arkui/napi:ace_napi", "root_out_dir")
     shared_library_path_uv =
         get_label_info("//third_party/libuv:uv", "root_out_dir")
+    icu_shared_library =
+        get_label_info("//third_party/icu/icu4c:shared_icuuc", "root_out_dir")
 
     # ark js engine relvant dynamic library
     if (enable_ark_preview) {
@@ -118,8 +120,6 @@ if (is_standard_system) {
       ark_js_shared_library =
           get_label_info("//ark/js_runtime:libark_jsruntime", "root_out_dir") +
           "/ark/ark_js_runtime"
-      icu_shared_library =
-          get_label_info("//third_party/icu/icu4c:shared_icuuc", "root_out_dir")
       deps = [
         "$ace_napi:ace_napi",
         "$ace_napi:ace_napi_ark",
@@ -162,10 +162,14 @@ if (is_standard_system) {
       deps = [
         "//foundation/arkui/napi:ace_napi",
         "//foundation/arkui/napi:ace_napi_quickjs",
+        "//third_party/icu/icu4c:shared_icui18n",
+        "//third_party/icu/icu4c:shared_icuuc",
         "//third_party/libuv:uv",
       ]
       if (use_mac) {
         sources = [
+          "$icu_shared_library/thirdparty/icu/libhmicui18n.dylib",
+          "$icu_shared_library/thirdparty/icu/libhmicuuc.dylib",
           "$shared_library_path_napi/arkui/napi/libace_napi.dylib",
           "$shared_library_path_napi/arkui/napi/libace_napi_quickjs.dylib",
           "$shared_library_path_uv/thirdparty/libuv/libuv.dylib",
@@ -177,6 +181,8 @@ if (is_standard_system) {
           "//ark/js_runtime/ecmascript/js_vm:ark_js_vm",
         ]
         sources = [
+          "$icu_shared_library/thirdparty/icu/libhmicui18n.dll",
+          "$icu_shared_library/thirdparty/icu/libhmicuuc.dll",
           "$shared_library_path_napi/arkui/napi/libace_napi.dll",
           "$shared_library_path_napi/arkui/napi/libace_napi_quickjs.dll",
           "$shared_library_path_uv/thirdparty/libuv/libuv.dll",
