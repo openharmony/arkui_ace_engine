@@ -533,16 +533,20 @@ bool RenderTransform::HasDisappearingTransition(int32_t nodeId)
 void RenderTransform::OnTransition(TransitionType type, int32_t id)
 {
     LOGD("OnTransition. type: %{public}d, id: %{public}d", type, id);
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("OnTransition failed, context_ is null.");
+        return;
+    }
+    const auto& option = context->GetExplicitAnimationOption();
+    if (!option.IsValid()) {
+        LOGE("transition option is not valid.");
+        return;
+    }
     if (type == TransitionType::APPEARING) {
         pendingAppearing_ = true;
         needUpdateTransform_ = true;
     } else if (type == TransitionType::DISAPPEARING && hasDisappearTransition_) {
-        auto context = context_.Upgrade();
-        if (!context) {
-            LOGE("OnTransition failed, context_ is null");
-            return;
-        }
-        const auto& option = context->GetExplicitAnimationOption();
         transformAnimation_.SetAnimationStopCallback([weak = AceType::WeakClaim(this)]() {
             auto renderNode = weak.Upgrade();
             if (renderNode) {
