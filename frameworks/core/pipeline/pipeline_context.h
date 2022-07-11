@@ -1414,8 +1414,8 @@ private:
     RefPtr<DataProviderManagerInterface> dataProviderManager_;
     RefPtr<PlatformResRegister> platformResRegister_;
     RefPtr<RootElement> rootElement_;
-    RefPtr<FocusNode> dirtyFocusNode_;
-    RefPtr<FocusNode> dirtyFocusScope_;
+    WeakPtr<FocusNode> dirtyFocusNode_;
+    WeakPtr<FocusNode> dirtyFocusScope_;
     WeakPtr<Frontend> weakFrontend_;
     RefPtr<ImageCache> imageCache_;
     RefPtr<FontManager> fontManager_;
