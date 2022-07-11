@@ -81,7 +81,7 @@ public:
         : headers_(headers), data_(data), encoding_(encoding), mimeType_(mimeType), reason_(reason),
           statusCode_(statusCode)
     {}
-    WebResponse() {};
+    WebResponse() = default;
     ~WebResponse() = default;
 
     const std::map<std::string, std::string>& GetHeaders() const
