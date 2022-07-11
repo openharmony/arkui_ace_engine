@@ -95,6 +95,7 @@ public:
     void ArcTo(const ArcToParam& param);
     void Ellipse(const EllipseParam& param);
     void Fill();
+    void Fill(const RefPtr<CanvasPath2D>& path);
     void Stroke();
     void Stroke(const RefPtr<CanvasPath2D>& path);
     void Clip();
@@ -115,6 +116,8 @@ public:
     double GetWidth() const;
     double GetHeight() const;
 
+    void UpdateFillRuleForPath(const CanvasFillRule rule);
+    void UpdateFillRuleForPath2D(const CanvasFillRule rule);
     void UpdateFillColor(const Color& color);
     void UpdateStrokeColor(const Color& color);
     void UpdateFillGradient(const Gradient& gradient);
