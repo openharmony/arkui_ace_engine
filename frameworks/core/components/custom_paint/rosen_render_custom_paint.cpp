@@ -190,6 +190,9 @@ bool RosenRenderCustomPaint::CreateSurface(double viewScale)
 {
 #ifndef UPLOAD_GPU_DISABLED
     InitializeEglContext();
+    if (!environment_) {
+        return false;
+    }
     auto grContext = environment_->GetGrContext();
     if (!grContext) {
         LOGE("grContext_ is nullptr.");
