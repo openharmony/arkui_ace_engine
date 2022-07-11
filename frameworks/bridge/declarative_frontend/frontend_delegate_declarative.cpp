@@ -168,6 +168,7 @@ void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::str
     } else {
         mainPagePath_ = manifestParser_->GetRouter()->GetEntry();
     }
+    AddRouterTask(RouterTask { RouterAction::PUSH, PageTarget(mainPagePath_), params });
     LoadPage(GenerateNextPageId(), PageTarget(mainPagePath_), true, params);
 }
 
