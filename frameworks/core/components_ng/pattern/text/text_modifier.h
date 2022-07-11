@@ -23,6 +23,25 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
+class FontFamilyModifier : public PropertyModifier<std::vector<std::string>, LayoutProperty> {
+public:
+    FontFamilyModifier(const std::vector<std::string>& value)
+        : PropertyModifier<std::vector<std::string>, LayoutProperty>(value)
+    {
+        ACE_DEFINE_MODIFIER_TASK(TextLayoutProperty, LayoutProperty, FontFamily);
+    }
+    ~FontFamilyModifier() override = default;
+};
+    
+class FontWeightModifier : public PropertyModifier<FontWeight, LayoutProperty> {
+public:
+    FontWeightModifier(const FontWeight& value) : PropertyModifier<FontWeight, LayoutProperty>(value)
+    {
+        ACE_DEFINE_MODIFIER_TASK(TextLayoutProperty, LayoutProperty, FontWeight);
+    }
+    ~FontWeightModifier() override = default;
+};
+
 class ItalicFontStyleModifier : public PropertyModifier<ItalicFontStyle, LayoutProperty> {
 public:
     ItalicFontStyleModifier(const ItalicFontStyle& value) : PropertyModifier<ItalicFontStyle, LayoutProperty>(value)

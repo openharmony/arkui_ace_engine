@@ -46,4 +46,14 @@ void TextView::ItalicFontStyle(const NG::ItalicFontStyle& value)
 {
     ViewStackProcessor::GetInstance()->PushLayoutTask(ItalicFontStyleModifier(value));
 }
+
+void TextView::FontWeight(const Ace::FontWeight& value)
+{
+    ViewStackProcessor::GetInstance()->PushLayoutTask(FontWeightModifier(value));
+}
+
+void TextView::FontFamily(const std::vector<std::string>& value)
+{
+    ViewStackProcessor::GetInstance()->PushLayoutTask(FontFamilyModifier(value));
+}
 } // namespace OHOS::Ace::NG

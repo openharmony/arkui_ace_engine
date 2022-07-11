@@ -111,6 +111,8 @@ public:
     ACE_DEFINE_PARAGRAPH_PROPERTY(FontStyle, FontSize, Dimension);
     ACE_DEFINE_PARAGRAPH_PROPERTY(FontStyle, TextColor, Color);
     ACE_DEFINE_PARAGRAPH_PROPERTY(FontStyle, ItalicFontStyle, ItalicFontStyle);
+    ACE_DEFINE_PARAGRAPH_PROPERTY(FontStyle, FontWeight, FontWeight);
+    ACE_DEFINE_PARAGRAPH_PROPERTY(FontStyle, FontFamily, std::vector<std::string>);
     ACE_DEFINE_PARAGRAPH_PROPERTY(TextLineStyle, LineHeight, Dimension);
     ACE_DEFINE_PARAGRAPH_PROPERTY(TextLineStyle, TextBaseline, TextBaseline);
     ACE_DEFINE_PARAGRAPH_PROPERTY(TextLineStyle, BaselineOffset, Dimension);

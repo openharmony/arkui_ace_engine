@@ -102,6 +102,11 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
 
 void JSText::SetFontWeight(const std::string& value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::FontWeight(ConvertStrToFontWeight(value));
+        return;
+    }
+
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
@@ -242,6 +247,10 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
         LOGE("Parse FontFamilies failed");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::FontFamily(fontFamilies);
         return;
     }
     auto component = GetComponent();
