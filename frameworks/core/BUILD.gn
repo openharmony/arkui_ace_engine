@@ -333,6 +333,8 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/water_flow:ace_core_components_water_flow_v2_$platform",
     ]
 
+    deps += [ "$ace_root/frameworks/core/components_part_upd/foreach:ace_core_components_foreach_part_upd_$platform" ]
+
     deps += [
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
       "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_$platform",
