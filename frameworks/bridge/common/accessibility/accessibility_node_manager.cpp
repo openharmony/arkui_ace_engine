@@ -473,6 +473,9 @@ RefPtr<AccessibilityNode> AccessibilityNodeManager::GetRootAccessibilityNode()
     RefPtr<AccessibilityNode> parentNode = GetAccessibilityNodeById(rootStackId);
     if (!parentNode) {
         parentNode = AceType::MakeRefPtr<AccessibilityNode>(rootStackId, !IsDecor() ? ROOT_STACK_TAG : ROOT_DECOR_TAG);
+        if (parentNode && !IsDecor()) {
+            parentNode->SetPageId(rootNodeId_ - DOM_ROOT_NODE_ID_BASE);
+        }
         std::lock_guard<std::mutex> lock(mutex_);
         accessibilityNodes_.try_emplace(rootStackId, parentNode);
     }
