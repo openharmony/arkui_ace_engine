@@ -13,7 +13,6 @@
 
 import("//build/ohos/ace/ace_args.gni")
 import("//foundation/graphic/graphic_2d/graphic_config.gni")
-import("product_config.gni")
 
 defines = [
   "OHOS_PLATFORM",
@@ -42,16 +41,17 @@ if (ace_enable_gpu) {
   disable_gpu = true
 }
 
-foreach(product, enable_accessibility_product_list) {
-  if ("${product_name}" == product) {
-    accessibility_support = true
-  }
+declare_args() {
+  ace_engine_feature_enable_accessibility = false
+  ace_engine_feature_enable_web = false
 }
 
-foreach(product, enable_web_product_list) {
-  if ("${product_name}" == product) {
-    web_components_support = true
-  }
+if (ace_engine_feature_enable_accessibility) {
+  accessibility_support = true
+}
+
+if (ace_engine_feature_enable_web) {
+  web_components_support = true
 }
 
 use_external_icu = "shared"
