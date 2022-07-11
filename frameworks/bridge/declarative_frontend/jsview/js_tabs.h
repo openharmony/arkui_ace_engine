@@ -29,6 +29,7 @@ public:
 protected:
     static void SetIndex(int32_t number);
     static void SetVertical(const std::string& value);
+    static void SetBarPosition(const JSCallbackInfo& info);
     static void SetScrollable(const std::string& value);
     static void SetBarMode(const std::string& value);
     static void SetBarWidth(const JSCallbackInfo& info);
