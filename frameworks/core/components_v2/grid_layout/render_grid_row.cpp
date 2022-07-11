@@ -102,6 +102,7 @@ void RenderGridRow::PerformLayout()
     int offset = 0;
     Offset rowPosition;
     double rowHeight = 0.0;
+    double lastLength = maxSize.Width();
     for (auto child : gridColChildren_) {
         if (NeedNewLine(child, offset, columnNum, sizeType)) {
             rowPosition.SetY(rowPosition.GetY() + rowHeight + getterInDouble.second);
@@ -110,10 +111,17 @@ void RenderGridRow::PerformLayout()
         }
         rowHeight = std::max(rowHeight, child->GetLayoutSize().Height());
         Offset position;
-        position.SetX(
-            (offset + GetRelativeOffset(child, sizeType)) * childWidthLimit +
-            ((offset + GetRelativeOffset(child, sizeType)) == 0 ? 0 : offset + GetRelativeOffset(child, sizeType)) *
-                getterInDouble.first);
+        if (component->GetDirection() == V2::GridRowDirection::RowReverse) {
+            position.SetX(lastLength -
+                ((offset + GetRelativeOffset(child, sizeType) + GetGridColSpan(child, sizeType)) * childWidthLimit +
+                ((offset + GetRelativeOffset(child, sizeType)) == 0 ? 0 : offset + GetRelativeOffset(child, sizeType)) *
+                    getterInDouble.first));
+        } else if (component->GetDirection() == V2::GridRowDirection::Row) {
+            position.SetX(
+                (offset + GetRelativeOffset(child, sizeType)) * childWidthLimit +
+                ((offset + GetRelativeOffset(child, sizeType)) == 0 ? 0 : offset + GetRelativeOffset(child, sizeType)) *
+                    getterInDouble.first);
+        }
         position.SetY(rowPosition.GetY());
         child->SetPosition(position);
         offset += GetRelativeOffset(child, sizeType) + GetGridColSpan(child, sizeType);
