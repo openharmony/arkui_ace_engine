@@ -34,5 +34,7 @@ void RosenRenderRemoteWindow::Update(const RefPtr<Component>& component)
         // create corresponding RSRenderNode in Render Thread
         surfaceNode->CreateNodeInRenderThread(true);
     }
+
+    MarkNeedSyncGeometryProperties();
 }
 } // namespace OHOS::Ace
