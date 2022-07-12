@@ -107,7 +107,7 @@ template("build_component_ng") {
         ]
         include_dirs = [
           "//utils/native/base/include",
-          "//foundation/windowmanager/interfaces/innerkits",
+          "//foundation/window/window_manager/interfaces/innerkits",
         ]
       }
 

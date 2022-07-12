@@ -45,7 +45,7 @@ build_component("plugin") {
       "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
-      "//foundation/windowmanager/wm:libwm",
+      "//foundation/window/window_manager/wm:libwm",
     ]
 
     external_deps = [
