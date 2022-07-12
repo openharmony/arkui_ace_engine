@@ -614,6 +614,7 @@ void RenderRefresh::PerformLayout()
     display_->SetPosition(GetShowTimeOffset());
 
     loadingBox_->SetHidden(scrollableOffset_.GetY() < triggerLoadingDistance_);
+    loadingBox_->SetVisible(scrollableOffset_.GetY() > triggerLoadingDistance_);
 
     columnChild_ = children.back();
     columnChild_->Layout(innerLayout);
