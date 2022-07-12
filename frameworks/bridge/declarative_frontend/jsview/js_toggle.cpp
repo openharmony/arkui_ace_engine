@@ -63,13 +63,12 @@ void JSToggle::Create(const JSCallbackInfo& info)
     }
 
     auto tempIsOn = paramObject->GetProperty("isOn");
-    bool isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
     auto toggleType = static_cast<ToggleType>(type->ToNumber<int32_t>());
     RefPtr<Component> component;
     if (toggleType == ToggleType::CHECKBOX) {
         RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
         RefPtr<CheckboxComponent> checkboxComponent = AceType::MakeRefPtr<OHOS::Ace::CheckboxComponent>(checkBoxTheme);
-        checkboxComponent->SetValue(isOn);
+        checkboxComponent->SetValue(tempIsOn->ToBoolean());
         checkboxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
         auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
         auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
@@ -79,7 +78,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
     } else if (toggleType == ToggleType::SWITCH) {
         RefPtr<SwitchTheme> switchTheme = GetTheme<SwitchTheme>();
         RefPtr<SwitchComponent> switchComponent = AceType::MakeRefPtr<OHOS::Ace::SwitchComponent>(switchTheme);
-        switchComponent->SetValue(isOn);
+        switchComponent->SetValue(tempIsOn->ToBoolean());
         switchComponent->SetMouseAnimationType(HoverAnimationType::NONE);
         auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding();
         auto verticalPadding = switchTheme->GetHotZoneVerticalPadding();
@@ -92,7 +91,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
         toggleComponent->SetBackgroundColor(toggleTheme->GetBackgroundColor());
         toggleComponent->SetCheckedColor(toggleTheme->GetCheckedColor());
         toggleComponent->SetPressedBlendColor(toggleTheme->GetPressedBlendColor());
-        toggleComponent->SetCheckedState(isOn);
+        toggleComponent->SetCheckedState(tempIsOn->ToBoolean());
         component = toggleComponent;
     }
 
