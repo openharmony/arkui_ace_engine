@@ -286,7 +286,7 @@ bool Animator::GetAllowRunningAsynchronously()
 bool Animator::GetInitAnimationDirection()
 {
     if (repeatTimes_ == ANIMATION_REPEAT_INFINITE) {
-        return false;
+        return isReverse_;
     }
     if (direction_ == AnimationDirection::ALTERNATE_REVERSE || direction_ == AnimationDirection::REVERSE) {
         isReverse_ = true;

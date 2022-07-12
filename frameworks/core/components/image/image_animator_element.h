@@ -79,6 +79,8 @@ public:
         return images_;
     }
 
+    bool CanUpdate(const RefPtr<Component>& newComponent) override;
+
 protected:
     RefPtr<Component> BuildChild() override;
 
