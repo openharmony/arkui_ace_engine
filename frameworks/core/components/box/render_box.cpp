@@ -1604,6 +1604,14 @@ void RenderBox::OnTouchTestHit(
         result.emplace_back(onClick_);
         MarkIsNotSiblingAddRecognizerToResult(true);
     }
+    if (onLongPress_ && dragDropGesture_) {
+        std::vector<RefPtr<GestureRecognizer>> recognizers { onLongPress_, dragDropGesture_ };
+        auto parallelRecognizer = AceType::MakeRefPtr<OHOS::Ace::ParallelRecognizer>(recognizers);
+        parallelRecognizer->SetCoordinateOffset(coordinateOffset);
+        result.emplace_back(parallelRecognizer);
+        MarkIsNotSiblingAddRecognizerToResult(true);
+        return;
+    }
     if (onLongPress_) {
         onLongPress_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(onLongPress_);
