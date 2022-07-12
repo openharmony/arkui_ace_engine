@@ -364,7 +364,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         auto packagePathStr = context->GetBundleCodeDir();
         auto moduleInfo = context->GetHapModuleInfo();
         if (moduleInfo != nullptr) {
-            packagePathStr += "/" + moduleInfo->name + "/";
+            packagePathStr += "/" + moduleInfo->package + "/";
         }
         std::string srcPath = "";
         if (info != nullptr && !info->srcPath.empty()) {
