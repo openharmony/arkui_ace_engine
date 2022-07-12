@@ -289,16 +289,16 @@ void StackElement::PerformPopDialog(int32_t id)
     }
 
     bool hasDialog = std::any_of(children_.begin(), children_.end(), [](const RefPtr<Element>& child) {
-        return AceType::InstanceOf<DialogElement>(child) || AceType::InstanceOf<PickerBaseElement>(child) ||
-               AceType::InstanceOf<DropFilterElement>(child);
+        return AceType::InstanceOf<V2::InspectorComposedElement>(child) || AceType::InstanceOf<DialogElement>(child) ||
+               AceType::InstanceOf<PickerBaseElement>(child) || AceType::InstanceOf<DropFilterElement>(child);
     });
     if (!hasDialog) {
         EnableTouchEventAndRequestFocus();
         return;
     }
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
-        if (AceType::InstanceOf<DialogElement>(*iter) || AceType::InstanceOf<PickerBaseElement>(*iter) ||
-            AceType::InstanceOf<DropFilterElement>(*iter)) {
+        if (AceType::InstanceOf<V2::InspectorComposedElement>(*iter) || AceType::InstanceOf<DialogElement>(*iter) ||
+            AceType::InstanceOf<PickerBaseElement>(*iter) || AceType::InstanceOf<DropFilterElement>(*iter)) {
             UpdateChild(*iter, nullptr);
             break;
         }
