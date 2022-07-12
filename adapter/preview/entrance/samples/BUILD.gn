@@ -109,12 +109,12 @@ if (enable_ark_preview) {
     sources = []
     deps = []
     ark_core_shared_library =
-        get_label_info("//ark/runtime_core/libpandabase:libarkbase",
+        get_label_info("//arkcompiler/runtime_core/libpandabase:libarkbase",
                        "root_out_dir") + "/ark/ark"
     deps += [
-      "//ark/runtime_core/libpandabase:libarkbase(${current_toolchain})",
-      "//ark/runtime_core/libpandafile:libarkfile(${current_toolchain})",
-      "//ark/runtime_core/libziparchive:libarkziparchive(${current_toolchain})",
+      "//arkcompiler/runtime_core/libpandabase:libarkbase(${current_toolchain})",
+      "//arkcompiler/runtime_core/libpandafile:libarkfile(${current_toolchain})",
+      "//arkcompiler/runtime_core/libziparchive:libarkziparchive(${current_toolchain})",
     ]
     if (use_mac) {
       sources += [
@@ -135,9 +135,9 @@ if (enable_ark_preview) {
     }
 
     ark_js_shared_library =
-        get_label_info("//ark/js_runtime:libark_jsruntime", "root_out_dir") +
-        "/ark/ark_js_runtime"
-    deps += [ "//ark/js_runtime:libark_jsruntime" ]
+        get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
+                       "root_out_dir") + "/ark/ark_js_runtime"
+    deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
     if (use_mac) {
       sources += [ "$ark_js_shared_library/libark_jsruntime.dylib" ]
     } else {

@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//ark/ts2abc/ts2panda/ts2abc_config.gni")
+import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
@@ -48,7 +48,7 @@ template("js_pa_engine_ark") {
     configs = [
       "$ace_root:ace_config",
       "$ark_runtime_path/libpandabase:arkbase_public_config",
-      "//ark/js_runtime:ark_jsruntime_public_config",
+      "//arkcompiler/ets_runtime:ark_jsruntime_public_config",
     ]
 
     include_dirs = [
@@ -66,7 +66,7 @@ template("js_pa_engine_ark") {
       "$ability_runtime_napi_path/inner/napi_common:napi_common",
       "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
       "$ability_runtime_path/frameworks/native/appkit:appkit_native",
-      "//ark/js_runtime:libark_jsruntime",
+      "//arkcompiler/ets_runtime:libark_jsruntime",
       "//foundation/arkui/napi:ace_napi",
       "//foundation/arkui/napi:ace_napi_ark",
       "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",

@@ -115,18 +115,18 @@ if (is_standard_system) {
     # ark js engine relvant dynamic library
     if (enable_ark_preview) {
       ark_core_shared_library =
-          get_label_info("//ark/runtime_core/libpandabase:libarkbase",
+          get_label_info("//arkcompiler/runtime_core/libpandabase:libarkbase",
                          "root_out_dir") + "/ark/ark"
       ark_js_shared_library =
-          get_label_info("//ark/js_runtime:libark_jsruntime", "root_out_dir") +
-          "/ark/ark_js_runtime"
+          get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
+                         "root_out_dir") + "/ark/ark_js_runtime"
       deps = [
         "$ace_napi:ace_napi",
         "$ace_napi:ace_napi_ark",
-        "//ark/js_runtime:libark_jsruntime",
-        "//ark/runtime_core/libpandabase:libarkbase",
-        "//ark/runtime_core/libpandafile:libarkfile",
-        "//ark/runtime_core/libziparchive:libarkziparchive",
+        "//arkcompiler/ets_runtime:libark_jsruntime",
+        "//arkcompiler/runtime_core/libpandabase:libarkbase",
+        "//arkcompiler/runtime_core/libpandafile:libarkfile",
+        "//arkcompiler/runtime_core/libziparchive:libarkziparchive",
         "//third_party/icu/icu4c:shared_icui18n",
         "//third_party/icu/icu4c:shared_icuuc",
         "//third_party/libuv:uv",
@@ -178,7 +178,7 @@ if (is_standard_system) {
         # ark windows compiling check
         deps += [
           "$ace_napi:ace_napi_ark",
-          "//ark/js_runtime/ecmascript/js_vm:ark_js_vm",
+          "//arkcompiler/ets_runtime/ecmascript/js_vm:ark_js_vm",
         ]
         sources = [
           "$icu_shared_library/thirdparty/icu/libhmicui18n.dll",
