@@ -28,7 +28,7 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "core/components/video/media_player_callback.h"
-#include "foundation/multimedia/media_standard/interfaces/inner_api/native/player.h"
+#include "foundation/multimedia/player_framework/interfaces/inner_api/native/player.h"
 #endif
 
 namespace OHOS::Ace {

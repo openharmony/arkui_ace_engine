@@ -26,7 +26,7 @@ build_component("remote_window") {
   if (is_standard_system && !use_mingw_win && !use_mac) {
     include_dirs = [
       "//drivers/peripheral/display/interfaces/include",
-      "//foundation/multimedia/media_standard/interfaces/inner_api/native",
+      "//foundation/multimedia/player_framework/interfaces/inner_api/native",
     ]
 
     deps = [ "//foundation/graphic/graphic_2d:libsurface" ]
