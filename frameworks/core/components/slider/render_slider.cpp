@@ -283,7 +283,15 @@ void RenderSlider::Initialize()
             if (slider->blockTouchRegion_.ContainsInRegion(localPosition.GetX(), localPosition.GetY())) {
                 slider->isPress_ = true;
                 slider->MarkNeedLayout();
+                return;
             }
+            if (slider->NeedSmoothMoving()) {
+                slider->UpdateBlockPosition(localPosition, true);
+            } else {
+                slider->RenderBlockPosition(localPosition);
+                slider->UpdateTouchRegion();
+            }
+            slider->FireMovingEvent(SliderEvent::MOVE_START);
         }
     });
 
