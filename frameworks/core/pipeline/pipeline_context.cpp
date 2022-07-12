@@ -286,20 +286,29 @@ void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
-    if (isTabKeyPressed_) {
-        if (dirtyFocusNode_) {
-            dirtyFocusNode_->RequestFocusImmediately();
+    auto focusNode = dirtyFocusNode_.Upgrade();
+    if (!focusNode) {
+        dirtyFocusNode_.Reset();
+    } else {
+        if (isTabKeyPressed_) {
+            focusNode->RequestFocusImmediately();
             dirtyFocusNode_.Reset();
             dirtyFocusScope_.Reset();
             return;
         }
-
-        if (dirtyFocusScope_) {
-            dirtyFocusScope_->RequestFocusImmediately();
+    }
+    auto focusScope = dirtyFocusScope_.Upgrade();
+    if (!focusScope) {
+        dirtyFocusScope_.Reset();
+    } else {
+        if (isTabKeyPressed_) {
+            focusScope->RequestFocusImmediately();
+            dirtyFocusNode_.Reset();
             dirtyFocusScope_.Reset();
             return;
         }
-
+    }
+    if (isTabKeyPressed_) {
         if (rootElement_ && !rootElement_->IsCurrentFocus()) {
             rootElement_->RequestFocusImmediately();
         }
@@ -2409,9 +2418,9 @@ void PipelineContext::AddDirtyFocus(const RefPtr<FocusNode>& node)
         return;
     }
     if (node->IsChild()) {
-        dirtyFocusNode_ = node;
+        dirtyFocusNode_ = WeakClaim(RawPtr(node));
     } else {
-        dirtyFocusScope_ = node;
+        dirtyFocusScope_ = WeakClaim(RawPtr(node));
     }
     window_->RequestFrame();
 }
