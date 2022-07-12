@@ -358,6 +358,18 @@ ACE_EXPORT extern const char CHECKBOXGROUP_ETS_TAG[];
 ACE_EXPORT extern const char TIME_PICKER_DIALOG_COMPONENT_TAG[];
 ACE_EXPORT extern const char TIME_PICKER_DIALOG_ETS_TAG[];
 
+// web
+ACE_EXPORT extern const char WEB_COMPONENT_TAG[];
+ACE_EXPORT extern const char WEB_ETS_TAG[];
+
+// richText
+ACE_EXPORT extern const char RICH_TEXT_COMPONENT_TAG[];
+ACE_EXPORT extern const char RICH_TEXT_ETS_TAG[];
+
+// xcomponent
+ACE_EXPORT extern const char XCOMPONENT_TAG[];
+ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[];
+
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H
