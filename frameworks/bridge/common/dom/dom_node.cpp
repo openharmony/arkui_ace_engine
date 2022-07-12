@@ -18,7 +18,9 @@
 #include <sstream>
 #include <unordered_set>
 
+#include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
+#include "base/utils/string_utils.h"
 #include "core/animation/animatable_data.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/frontend.h"
@@ -1027,17 +1029,23 @@ void DOMNode::SetTransform(const std::string& value, DOMNode& node)
 // Convert transform style to json format, such as rotate(50deg) to {"rotate":"50deg"}
 std::string DOMNode::GetTransformJsonValue(const std::string& value)
 {
-    auto rightIndex = value.find('(');
-    auto leftIndex = value.find(')');
-    std::string jsonValue = value;
+    auto jsonValue = JsonUtil::Create(true);
+    std::vector<std::string> subValues;
+    StringUtils::StringSplitter(value, ' ', subValues);
+    for (const auto& subValue : subValues) {
+        auto rightIndex = subValue.find('(');
+        auto leftIndex = subValue.find(')');
 
-    if (rightIndex != std::string::npos && leftIndex != std::string::npos && (leftIndex - 1 - rightIndex > 0)) {
-        std::string transformType = value.substr(0, rightIndex);
-        std::string transformValue = value.substr(rightIndex + 1, leftIndex - 1 - rightIndex);
-        jsonValue = "{\"" + transformType + "\":\"" + transformValue + "\"}";
+        if (rightIndex != std::string::npos && leftIndex != std::string::npos && (leftIndex - 1 - rightIndex > 0)) {
+            std::string transformType = subValue.substr(0, rightIndex);
+            std::string transformValue = subValue.substr(rightIndex + 1, leftIndex - 1 - rightIndex);
+            jsonValue->Put(transformType.c_str(), transformValue.c_str());
+        } else {
+            return value;
+        }
     }
 
-    return jsonValue;
+    return jsonValue->ToString();
 }
 
 void DOMNode::AddKeyframe(double time, double typeValue, RefPtr<KeyframeAnimation<float>>& transformKeyframes)
