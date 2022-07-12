@@ -23,6 +23,7 @@
 
 #include "core/accessibility/accessibility_node.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/grid_layout/grid_layout_component.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/core/components/box/box_component.h"
 #include "frameworks/core/components/checkable/radio_group_component.h"
@@ -94,6 +95,31 @@ public:
     // use flag: isCustomView to avoid creating redundant Components.
     void Push(const RefPtr<Component>& component, bool isCustomView = false);
 
+    // special versions of Push and Pop for JSGrid
+    // maintains a stack of GridLayoutComponent
+    // to be accessed when creating JSGridItems
+    void PushGrid(const RefPtr<GridLayoutComponent>& gridComponent)
+    {
+        gridStack_.push(gridComponent);
+        Push(gridComponent);
+    }
+
+    void PopGrid()
+    {
+        if (!gridStack_.empty()) {
+            gridStack_.pop();
+        }
+        Pop();
+    }
+
+    RefPtr<GridLayoutComponent> GetTopGrid() const
+    {
+        if (gridStack_.empty()) {
+            return nullptr;
+        }
+        return gridStack_.top();
+    }
+
     // Push special tabs component for tabs, tabContent.
     void PushTabs(const RefPtr<Component>& component)
     {
@@ -155,6 +181,7 @@ public:
     const AnimationOption& GetImplicitAnimationOption() const;
 
     void SetZIndex(RefPtr<Component>& component);
+    bool ShouldPopImmediately();
 
     void SetIsPercentSize(RefPtr<Component>& component);
     std::shared_ptr<JsPageRadioGroups> GetRadioGroupComponent();
@@ -242,8 +269,6 @@ public:
 private:
     ViewStackProcessor();
 
-    bool ShouldPopImmediately();
-
 #ifdef ACE_DEBUG_LOG
     // Dump view stack comtent
     void DumpStack();
@@ -270,6 +295,9 @@ private:
     std::shared_ptr<JsPageCheckboxGroups> checkboxGroups_;
     // stack for tabs component.
     std::stack<RefPtr<Component>> tabsStack_;
+
+    // stack for Grid component.
+    std::stack<RefPtr<GridLayoutComponent>> gridStack_;
 
     RefPtr<PageTransitionComponent> pageTransitionComponent_;
 

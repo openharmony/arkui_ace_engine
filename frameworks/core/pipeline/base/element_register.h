@@ -29,7 +29,7 @@ namespace OHOS::Ace {
 using ElementIdType = int32_t;
 class Element;
 
-class ElementRegister {
+class ACE_EXPORT ElementRegister {
 public:
     static constexpr ElementIdType UndefinedElementId = static_cast<ElementIdType>(-1);
 
