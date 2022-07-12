@@ -119,6 +119,8 @@ public:
     {
         return currentIndex_;
     }
+    void OnChildAdded(const RefPtr<RenderNode>& child) override;
+    void OnChildRemoved(const RefPtr<RenderNode>& child) override;
     void OnFocus();
     void OnBlur();
     void RegisterChangeEndListener(int32_t listenerId, const SwiperChangeEndListener& listener);
