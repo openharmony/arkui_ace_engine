@@ -320,7 +320,7 @@ public:
     bool IsFullScreenModal() const
     {
         return windowModal_ == WindowModal::NORMAL || windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN ||
-               isFullWindow_;
+               windowModal_ == WindowModal::CONTAINER_MODAL || isFullWindow_;
     }
 
     using FinishEventHandler = std::function<void()>;
