@@ -199,7 +199,6 @@ void ImageAnimatorElement::UpdatePreLoadImages(const RefPtr<BoxComponent>& box)
         if (!childImage.src.empty()) {
             imageComponent->SetSrc(childImage.src);
         }
-        UpdateChild(GetFirstChild(), box);
     }
 }
 
@@ -376,6 +375,11 @@ Animator::Status ImageAnimatorElement::GetAnimatorStatus() const
         return animator_->GetStatus();
     }
     return Animator::Status::IDLE;
+}
+
+bool ImageAnimatorElement::CanUpdate(const RefPtr<Component>& newComponent)
+{
+    return Element::CanUpdate(newComponent);
 }
 
 } // namespace OHOS::Ace
