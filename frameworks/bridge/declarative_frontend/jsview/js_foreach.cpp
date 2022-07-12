@@ -21,11 +21,19 @@
 #include "bridge/declarative_frontend/engine/functions/js_foreach_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/foreach/for_each_component.h"
+#include "core/components_part_upd/foreach/foreach_component.h"
+#include "core/components_part_upd/foreach/foreach_element.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSForEach::Create(const JSCallbackInfo& info)
 {
+    auto const context = JSViewAbstract::GetPipelineContext();
+    if (context && context->UsePartialUpdate()) {
+        CreateForPartialUpdate();
+        return;
+    }
+
     if (info.Length() < 4 || !info[2]->IsObject() || !info[3]->IsFunction() ||
         (!info[0]->IsNumber() && !info[0]->IsString()) || info[1]->IsUndefined() || !info[1]->IsObject()) {
         LOGE("invalid arguments for ForEach");
@@ -62,9 +70,127 @@ void JSForEach::Create(const JSCallbackInfo& info)
     }
 }
 
+void JSForEach::CreateForPartialUpdate()
+{
+    // create ForEachComponent and push to stack
+    const auto elmtId = ViewStackProcessor::GetInstance()->ClaimElementId();
+    const auto elmtIdS = std::to_string(elmtId);
+    auto forEachComponent = AceType::MakeRefPtr<OHOS::Ace::PartUpd::ForEachComponent>(elmtIdS, "ForEach");
+    forEachComponent->SetElementId(elmtId);
+    ViewStackProcessor::GetInstance()->Push(forEachComponent);
+}
+
 void JSForEach::Pop()
 {
     ViewStackProcessor::GetInstance()->PopContainer();
+}
+
+// signature
+// elmtId : number
+// idList : string[]
+// returns bool, true on success
+void JSForEach::GetIdArray(const JSCallbackInfo& info)
+{
+    ACE_SCOPED_TRACE("JSForEach::GetIdArray");
+    if ((info.Length() != 2) || !info[1]->IsArray() || info[0]->IsString()) {
+        LOGE("Invalid arguments for ForEach.GetIdArray");
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+
+    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[1]);
+    if (jsArr->Length() > 0) {
+        LOGE("JS Array must be empty!");
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+
+    const int32_t elmtId = info[0]->ToNumber<int32_t>();
+    std::list<std::string> cppList = PartUpd::ForEachElementLookup::GetIdArray(elmtId);
+
+    size_t index = 0;
+    for (const auto& id : cppList) {
+        LOGD("  array id %{public}s", id.c_str());
+        jsArr->SetValueAt(index++, JSRef<JSString>::New(id.c_str()));
+    }
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(index > 0)));
+}
+
+// signature
+// elmtId : number
+// idList : string[]
+// no return value
+void JSForEach::SetIdArray(const JSCallbackInfo& info)
+{
+    ACE_SCOPED_TRACE("JSForEach::SetIdArray");
+
+    if ((info.Length() != 2) || !info[1]->IsArray() || info[0]->IsString()) {
+        LOGE("Invalid arguments for ForEach.SetIdArray");
+        return;
+    }
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<PartUpd::ForEachComponent>(stack->GetMainComponent());
+
+    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[1]);
+    std::list<std::string> newIdArr;
+
+    for (size_t i = 0; i < jsArr->Length(); i++) {
+        JSRef<JSVal> strId = jsArr->GetValueAt(i);
+        std::string value = strId->ToString();
+        newIdArr.insert(newIdArr.end(), value);
+    }
+
+    component->SetIdArray(newIdArr);
+
+    // re-render case
+    // children of IfElement will be replaced
+    // mark them as removed in ElementRegistry
+    RefPtr<OHOS::Ace::PartUpd::ForEachElement> forEachElement =
+        ElementRegister::GetInstance()->GetSpecificElementById<OHOS::Ace::PartUpd::ForEachElement>(
+            component->GetElementId());
+    if (!forEachElement) {
+        // first render case
+        return;
+    }
+
+    forEachElement->RemoveUnusedChildElementsFromRegistery(newIdArr);
+}
+
+// signature is
+// id: string | number
+// parentView : JSView
+void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
+{
+    if ((info.Length() != 2) || !info[1]->IsObject() || (!info[0]->IsNumber() && !info[0]->IsString())) {
+        LOGE("Invalid arguments for ForEach.CreateNewChildStart");
+        return;
+    }
+
+    const auto id = info[0]->ToString();
+
+    LOGD("Start create child with array id %{public}s.", id.c_str());
+    auto stack = ViewStackProcessor::GetInstance();
+    stack->PushKey(id);
+    const auto stacksKey = stack->GetKey();
+    stack->Push(AceType::MakeRefPtr<MultiComposedComponent>(stacksKey, "ForEachItem"));
+}
+
+// signature is
+// id: string | number
+// parentView : JSView
+void JSForEach::CreateNewChildFinish(const JSCallbackInfo& info)
+{
+    if ((info.Length() != 2) || !info[1]->IsObject() || (!info[0]->IsNumber() && !info[0]->IsString())) {
+        LOGE("Invalid arguments for ForEach.CreateNewChildFinish");
+        return;
+    }
+
+    const auto id = info[0]->ToString();
+    LOGD("Finish create child with array id %{public}s.", id.c_str());
+    auto stack = ViewStackProcessor::GetInstance();
+    stack->PopKey();
+    stack->PopContainer();
 }
 
 void JSForEach::JSBind(BindingTarget globalObj)
@@ -72,6 +198,10 @@ void JSForEach::JSBind(BindingTarget globalObj)
     JSClass<JSForEach>::Declare("ForEach");
     JSClass<JSForEach>::StaticMethod("create", &JSForEach::Create);
     JSClass<JSForEach>::StaticMethod("pop", &JSForEach::Pop);
+    JSClass<JSForEach>::StaticMethod("getIdArray", &JSForEach::GetIdArray);
+    JSClass<JSForEach>::StaticMethod("setIdArray", &JSForEach::SetIdArray);
+    JSClass<JSForEach>::StaticMethod("createNewChildStart", &JSForEach::CreateNewChildStart);
+    JSClass<JSForEach>::StaticMethod("createNewChildFinish", &JSForEach::CreateNewChildFinish);
     JSClass<JSForEach>::Bind<>(globalObj);
 }
 

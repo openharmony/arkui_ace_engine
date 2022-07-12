@@ -25,7 +25,22 @@ class JSForEach {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void CreateForPartialUpdate();
     static void Pop();
+    static void GetIdArray(const JSCallbackInfo& info);
+    static void SetIdArray(const JSCallbackInfo& info);
+
+    // function to call before exec item generator function
+    // signature is
+    // id: string | number
+    // parentView : JSView
+    static void CreateNewChildStart(const JSCallbackInfo& info);
+
+    // function to call after exec item generator function
+    // signature is
+    // id: string | number
+    // parentView : JSView
+    static void CreateNewChildFinish(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
