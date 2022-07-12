@@ -1726,7 +1726,7 @@ class View extends NativeView {
     get localStorage_() {
         if (!this.localStoragebackStore_) {
             aceConsole.warn(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
-            this.localStoragebackStore_ = new LocalStorage({ /* emty */});
+            this.localStoragebackStore_ = new LocalStorage({ /* emty */ });
         }
         return this.localStoragebackStore_;
     }
@@ -2254,6 +2254,7 @@ class Environment {
     }
 }
 Environment.Instance_ = undefined;
+Environment.ConfigureBackend(new EnvironmentSetting());
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
