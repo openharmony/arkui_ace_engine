@@ -479,7 +479,10 @@ void RenderButton::Update(const RefPtr<Component>& component)
     auto catchModeButton = buttonComponent_->GetCatchMode();
     clickRecognizer_->SetUseCatchMode(catchMode && catchModeButton);
     SetAccessibilityText(button->GetAccessibilityText());
-    SetAccessibilityClick(clickRecognizer_);
+    // for control button in container modal
+    if (buttonComponent_->GetClickedEventId().HasPreFunction()) {
+        SetAccessibilityClick(clickRecognizer_);
+    }
     UpdateDownloadStyles(button);
 
     OnStatusStyleChanged(disabled_ ? VisualState::DISABLED : VisualState::NORMAL);
