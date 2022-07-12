@@ -3234,6 +3234,7 @@ void PipelineContext::OpenImplicitAnimation(
                                 option.GetAnimationDirection() == AnimationDirection::ALTERNATE);
     timingProtocol.SetAutoReverse(option.GetAnimationDirection() == AnimationDirection::ALTERNATE ||
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
+    timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
     RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), wrapFinishCallback);
 #endif
 }
