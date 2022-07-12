@@ -306,8 +306,11 @@ bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &wa
         auto child = params->GetChild();
         while (child->IsValid()) {
             auto key = child->GetKey();
-            auto value = child->GetString();
-            want.SetParam(key, value);
+            if (!child->GetString().empty()) {
+                want.SetParam(key, child->GetString());
+            } else {
+                want.SetParam(key, child->GetInt());
+            }
             child = child->GetNext();
         }
     }
