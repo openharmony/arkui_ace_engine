@@ -164,6 +164,10 @@ public:
 
     void AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve);
 
+    void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth);
+
+    void ScrollPage(bool reverse, bool smooth);
+
     RefPtr<Component> GetComponent() override
     {
         return component_;
