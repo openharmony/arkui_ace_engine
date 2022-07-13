@@ -249,7 +249,7 @@ void RenderCollapsingNavigationBar::ScrollBy(double dy, double maxPosition)
             subtitleOpacity_.expand + positionY_.value * subtitleOpacity_.expandDis / scrollableHeight_;
         subtitleChangedCallback_(subtitleOpacity_.value);
     }
-    MarkNeedLayout();
+    MarkNeedLayout(false, true);
 }
 
 void RenderCollapsingNavigationBar::HandleDragStart(const DragStartInfo& info) {}
