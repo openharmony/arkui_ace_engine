@@ -3082,7 +3082,7 @@ void RenderSwiper::LoadItems()
             items_.emplace(std::make_pair(index, *iter));
         }
         if (context_.Upgrade()->UsePartialUpdate()) {
-            itemCount_ = children.size();
+            itemCount_ = static_cast<int32_t>(children.size());
         }
     } else {
         BuildLazyItems(); // depend on currentIndex_ value which init when swiper first update
