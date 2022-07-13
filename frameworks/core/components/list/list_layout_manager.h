@@ -85,6 +85,7 @@ private:
     bool CheckNeedAnimation();
     void InitChainAnimation(int32_t nodeCount);
     double GetChainDelta(int32_t index) const;
+    void UpdateItemPosition(void);
 
     int32_t cachedCount_ = 1;
     int32_t maxCount_ = 0;
