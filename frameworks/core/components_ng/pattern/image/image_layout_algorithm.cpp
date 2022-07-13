@@ -25,6 +25,7 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     if (imageObject_) {
+        LOGD("already has image object");
         return ProcessContentSize(contentConstraint, imageObject_);
     }
     auto frameNode = layoutWrapper->GetHostNode();
@@ -33,6 +34,7 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(imageLayoutProperty, contentConstraint.selfIdealSize);
     auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
     if (!imageInfo) {
+        LOGE("fail to get image info");
         return contentConstraint.selfIdealSize;
     }
     auto pipeline = frameNode->GetContext();

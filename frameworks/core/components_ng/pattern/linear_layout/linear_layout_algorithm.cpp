@@ -38,7 +38,8 @@ void LinearLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto parentOffset =
         layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
 
-    for (auto&& child : layoutWrapper->GetChildren()) {
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    for (auto&& child : children) {
         child->Layout(parentOffset);
     }
 }

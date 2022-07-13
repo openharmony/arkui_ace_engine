@@ -17,20 +17,18 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_FOR_EACH_H
 
 #include "base/utils/macros.h"
-#include "core/components_ng/base/custom_node.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/syntax/foreach/for_each_builder.h"
+#include "core/components_ng/syntax/lazy_for_each_builder.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ForEach {
+class ACE_EXPORT LazyForEach {
 public:
-    static void Create(const RefPtr<ForEachBuilder>& forEachBuilder)
+    static void Create(const RefPtr<LazyForEachBuilder>& forEachBuilder)
     {
-        auto listPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<NG::ListPattern>();
-        CHECK_NULL_VOID(listPattern);
-        listPattern->AddForEachBuilder(forEachBuilder);
+        // TODO: Add unique id.
+        auto lazyForEach = LazyForEachNode::CreateLazyForEachNode(0, forEachBuilder);
+        ViewStackProcessor::GetInstance()->Push(lazyForEach);
     }
 };
 } // namespace OHOS::Ace::NG

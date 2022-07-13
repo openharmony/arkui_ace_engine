@@ -22,10 +22,10 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/base/custom_node.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/modifier/modify_task.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/render_context.h"
 
@@ -69,11 +69,11 @@ public:
     RefPtr<FrameNode> GetMainFrameNode() const;
 
     // Get main component include composed component created by js view.
-    RefPtr<FrameNode> GetMainElementNode() const;
+    RefPtr<UINode> GetMainElementNode() const;
 
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
-    void Push(const RefPtr<FrameNode>& element, bool isCustomView = false);
+    void Push(const RefPtr<UINode>& element, bool isCustomView = false);
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrapped component has child of the new stack top's main component.
@@ -83,7 +83,7 @@ public:
     void PopContainer();
 
     // End of Render function, create component tree and flush modify task.
-    RefPtr<FrameNode> Finish();
+    RefPtr<UINode> Finish();
 
     void PushLayoutTask(Modifier<LayoutProperty>&& task);
 
@@ -125,7 +125,7 @@ public:
 
     void ClearStack()
     {
-        auto emptyStack = std::stack<RefPtr<FrameNode>>();
+        auto emptyStack = std::stack<RefPtr<UINode>>();
         elementsStack_.swap(emptyStack);
     }
 
@@ -147,15 +147,11 @@ private:
 
     bool ShouldPopImmediately();
 
-    // Go through the wrappingComponentsMap and wrap the components
-    // should be done before pushing to the stack.
-    RefPtr<FrameNode> WrapElements();
-
     // Singleton instance
     static thread_local std::unique_ptr<ViewStackProcessor> instance;
 
     // render component stack
-    std::stack<RefPtr<FrameNode>> elementsStack_;
+    std::stack<RefPtr<UINode>> elementsStack_;
 
     // modifier task
     std::stack<RefPtr<StateModifyTask>> modifyTaskStack_;

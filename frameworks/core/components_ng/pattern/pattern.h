@@ -144,6 +144,11 @@ public:
         return content->GetRect().GetSize();
     }
 
+    RefPtr<FrameNode> GetHost() const
+    {
+        return frameNode_.Upgrade();
+    }
+
     virtual void OnInActive() {}
     virtual void OnActive() {}
 

@@ -24,12 +24,13 @@
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
-#include "core/components_ng/base/custom_node.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/modifier/modify_task.h"
 #include "core/components_ng/modifier/render/bg_color_modifier.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -48,6 +49,13 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
 {}
+
+RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
+{
+    auto currentContainer = Container::Current();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
+}
 
 void PipelineContext::AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElement)
 {
@@ -91,7 +99,7 @@ void PipelineContext::SetupRootElement()
     CHECK_RUN_ON(UI);
     // TODO: Add unique id.
     rootNode_ =
-        FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, V2::ROOT_ETS_TAG, MakeRefPtr<StagePattern>(), Claim(this));
+        FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, MakeRefPtr<StagePattern>(), Claim(this));
     rootNode_->SetHostRootId(GetInstanceId());
     StateModifyTask modifyTask;
     modifyTask.GetRenderContextTask().emplace_back(BgColorModifier(Color::WHITE));
@@ -103,6 +111,7 @@ void PipelineContext::SetupRootElement()
     rootNode_->UpdateLayoutConstraint(layoutConstraint);
     window_->SetRootFrameNode(rootNode_);
     stageManager_ = MakeRefPtr<StageManager>(rootNode_);
+    rootNode_->AttachToMainTree();
     LOGI("SetupRootElement success!");
 }
 
@@ -114,7 +123,7 @@ RefPtr<StageManager> PipelineContext::GetStageManager()
 void PipelineContext::SetRootRect(double width, double height, double offset)
 {
     CHECK_RUN_ON(UI);
-    UpdateRootSizeAndSacle(width, height);
+    UpdateRootSizeAndScale(width, height);
     if (!rootNode_) {
         LOGE("rootNode_ is nullptr");
         return;

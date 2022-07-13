@@ -115,4 +115,12 @@ void ImagePattern::PaintImage(RenderContext* renderContext, const OffsetF& offse
     ImagePainter.DrawImage(renderContext->GetCanvas(), offset);
 }
 
+bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+{
+    if (skipMeasure) {
+        return false;
+    }
+    return image_;
+}
+
 } // namespace OHOS::Ace::NG

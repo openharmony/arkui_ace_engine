@@ -16,10 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_LAYOUT_WRAPPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_LAYOUT_WRAPPER_H
 
-#include <list>
-#include <memory>
+#include <map>
 #include <string>
-#include <utility>
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
@@ -30,17 +28,17 @@
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/magic_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/position_property.h"
-#include "core/pipeline_ng/ui_node_id.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
 
-class LayoutWrapper : public virtual AceType {
+class LayoutWrapper : public AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
 public:
     LayoutWrapper(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
@@ -49,7 +47,24 @@ public:
     {}
     ~LayoutWrapper() override = default;
 
-    void Reset();
+    void AppendChild(const RefPtr<LayoutWrapper>& child, int32_t slot = -1)
+    {
+        CHECK_NULL_VOID(child);
+        auto result = children_.try_emplace(currentChildCount_, child);
+        if (!result.second) {
+            LOGE("fail to append child");
+            return;
+        }
+        ++currentChildCount_;
+    }
+
+    void SetLayoutWrapperBuilder(const RefPtr<LayoutWrapperBuilder>& builder)
+    {
+        CHECK_NULL_VOID(builder);
+        builder->SetStartIndex(currentChildCount_);
+        currentChildCount_ += builder->GetTotalCount();
+        layoutWrapperBuilder_ = builder;
+    }
 
     void SetLayoutAlgorithm(const RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithm)
     {
@@ -82,62 +97,72 @@ public:
         return layoutProperty_;
     }
 
-    void ReplaceChildren(std::list<RefPtr<LayoutWrapper>>&& children)
+    // Calling these two method will mark the node as in use by default, nodes marked as use state will be added to the
+    // render area, and nodes in the render area will be mounted on the render tree after the layout is complete. You
+    // can call the RemoveChildInRenderTree method to explicitly remove the node from the area to be rendered.
+    RefPtr<LayoutWrapper> GetOrCreateChildByIndex(int32_t index, bool addToRenderTree = true);
+    std::list<RefPtr<LayoutWrapper>> GetAllChildrenWithBuild(bool addToRenderTree = true);
+    int32_t GetTotalChildCount() const
     {
-        children_ = std::move(children);
+        return currentChildCount_;
     }
 
-    void AddChild(const RefPtr<LayoutWrapper>& child, int32_t slot = -1);
+    std::list<RefPtr<FrameNode>> GetChildrenInRenderArea() const;
 
-    void RemoveChild(const RefPtr<LayoutWrapper>& child);
-
-    void ClearChildren();
-
-    const std::list<RefPtr<LayoutWrapper>>& GetChildren() const
-    {
-        return children_;
-    }
-
-    std::list<RefPtr<LayoutWrapper>>& ModifyChildren()
-    {
-        return children_;
-    }
+    void RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper);
+    void RemoveChildInRenderTree(int32_t index);
 
     void ResetHostNode();
 
     RefPtr<FrameNode> GetHostNode() const;
-
-    std::optional<uint32_t> GetHostNodeSlotId() const;
-
     std::string GetHostTag() const;
 
-    bool CheckShouldRunOnMain() const
+    bool IsActive() const
+    {
+        return isActive_;
+    }
+
+    bool CheckShouldRunOnMain()
     {
         return (CanRunOnWhichThread() & MAIN_TASK) == MAIN_TASK;
     }
 
-    TaskThread CanRunOnWhichThread() const
+    TaskThread CanRunOnWhichThread()
     {
+        if (layoutWrapperBuilder_) {
+            return MAIN_TASK;
+        }
         TaskThread taskThread = UNDEFINED_TASK;
         if (layoutAlgorithm_) {
             taskThread = taskThread | layoutAlgorithm_->CanRunOnWhichThread();
         }
-        for (const auto& child : children_) {
+        if ((taskThread & MAIN_TASK) == MAIN_TASK) {
+            return MAIN_TASK;
+        }
+        for (const auto& [index, child] : children_) {
             taskThread = taskThread | child->CanRunOnWhichThread();
         }
         return taskThread;
     }
 
     // dirty layoutBox mount to host and switch layoutBox.
+    // Notice: only the cached layoutWrapper (after call GetChildLayoutWrapper) will update the host.
     void MountToHostOnMainThread();
     void SwapDirtyLayoutWrapperOnMainThread();
 
 private:
-    std::list<RefPtr<LayoutWrapper>> children_;
+    // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
+    // The Wrapper Created by LazyForEach stores in the LayoutWrapperBuilder object.
+    std::map<int32_t, RefPtr<LayoutWrapper>> children_;
+    std::map<int32_t, RefPtr<LayoutWrapper>> pendingRender_;
     WeakPtr<FrameNode> hostNode_;
     RefPtr<GeometryNode> geometryNode_;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithm_;
+    RefPtr<LayoutWrapperBuilder> layoutWrapperBuilder_;
+
+    int32_t currentChildCount_ = 0;
+    bool isActive_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -122,15 +122,16 @@ void RosenRenderContext::Restore()
     }
 }
 
-void RosenRenderContext::RebuildFrame(FrameNode* self)
+void RosenRenderContext::RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children)
 {
-    ReCreateRsNodeTree(self);
+    ReCreateRsNodeTree(children);
 }
 
-void RosenRenderContext::ReCreateRsNodeTree(FrameNode* node)
+void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
 {
     rsNode_->ClearChildren();
-    for (const auto& child : node->GetChildren()) {
+    for (const auto& child : children) {
+        ACE_DCHECK(child);
         auto rosenRenderContext = DynamicCast<RosenRenderContext>(child->renderContext_);
         if (!rosenRenderContext) {
             continue;

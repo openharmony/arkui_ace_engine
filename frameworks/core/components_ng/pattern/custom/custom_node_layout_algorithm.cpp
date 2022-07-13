@@ -26,14 +26,18 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         ACE_SCOPED_TRACE("CustomNode:BuildItem");
         // first create child node and wrapper.
         auto child = renderFunction_();
-        child->MountToParent(host);
-        auto childWrapper = child->CreateLayoutWrapperOnCreate();
-        layoutWrapper->AddChild(childWrapper);
+        if (!child) {
+            LOGE("fail to build child");
+            return;
+        }
+        buildItem_ = child;
+        child->AdjustLayoutWrapperTree(Claim(layoutWrapper), false, false);
     }
     // then use normal measure step.
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
 
-    for (auto&& child : layoutWrapper->GetChildren()) {
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    for (auto&& child : children) {
         child->Measure(layoutConstraint);
     }
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);

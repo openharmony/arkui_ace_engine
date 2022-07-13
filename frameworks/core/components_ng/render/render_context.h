@@ -41,7 +41,7 @@ public:
         requestFrame_ = requestFrame;
     }
 
-    virtual void RebuildFrame(FrameNode* self) {};
+    virtual void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
 
     virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}
 

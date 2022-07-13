@@ -25,10 +25,9 @@ namespace OHOS::Ace::NG {
 
 void ListView::Create()
 {
-    auto* stack = ViewStackProcessor::GetInstance();
     // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, V2::LIST_ETS_TAG, AceType::MakeRefPtr<ListPattern>());
-    stack->Push(frameNode);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+    ViewStackProcessor::GetInstance()->Push(frameNode);
 }
 
 void ListView::SetListDirection(Axis axis)

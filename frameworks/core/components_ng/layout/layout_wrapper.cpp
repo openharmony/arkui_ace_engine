@@ -16,57 +16,81 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-void LayoutWrapper::Reset()
+RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool addToRenderTree)
 {
-    children_.clear();
-    geometryNode_.Reset();
-    layoutProperty_.Reset();
-    layoutAlgorithm_.Reset();
-}
-
-void LayoutWrapper::AddChild(const RefPtr<LayoutWrapper>& child, int32_t slot)
-{
-    if (!child) {
-        LOGW("Child MUST NOT be nullptr");
-        return;
+    if ((index >= currentChildCount_) || (index < 0)) {
+        LOGE("fail to get layout wrapper due to index is illegal, total count: %{public}d, target index: %{public}d",
+            currentChildCount_, index);
+        return nullptr;
     }
-
-    auto it = std::find(children_.begin(), children_.end(), child);
-    if (it != children_.end()) {
-        LOGW("frame node exist AddChild failed");
-        return;
-    }
-
-    auto pos = children_.begin();
-    std::advance(pos, slot);
-    children_.insert(pos, child);
-}
-
-void LayoutWrapper::RemoveChild(const RefPtr<LayoutWrapper>& child)
-{
-    if (!child) {
-        LOGW("Child MUST NOT be nullptr");
-        return;
-    }
-
-    // ClearChildren() before RemoveChild() also need to NotifyTransition().
-    if (!children_.empty()) {
-        auto it = std::find(children_.begin(), children_.end(), child);
-        if (it == children_.end()) {
-            LOGW("Child is not in  render node");
-            return;
+    auto iter = children_.find(index);
+    if (iter != children_.end()) {
+        if (addToRenderTree) {
+            iter->second->isActive_ = true;
+            pendingRender_.emplace(index, iter->second);
         }
-        children_.erase(it);
+        return iter->second;
     }
+    CHECK_NULL_RETURN(layoutWrapperBuilder_, nullptr);
+    auto wrapper = layoutWrapperBuilder_->GetOrCreateWrapperByIndex(index);
+    CHECK_NULL_RETURN(wrapper, nullptr);
+    if (addToRenderTree) {
+        wrapper->isActive_ = true;
+        pendingRender_.emplace(index, wrapper);
+    }
+    return wrapper;
 }
 
-void LayoutWrapper::ClearChildren()
+std::list<RefPtr<LayoutWrapper>> LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)
 {
-    children_.clear();
+    std::list<RefPtr<LayoutWrapper>> childLayoutWrappers;
+    for (const auto& [index, wrapper] : children_) {
+        wrapper->isActive_ = true;
+        childLayoutWrappers.emplace_back(wrapper);
+    }
+    if (layoutWrapperBuilder_) {
+        auto buildItems = layoutWrapperBuilder_->ExpandAllChildWrappers();
+        auto index = layoutWrapperBuilder_->GetStartIndex();
+        auto insertIter = childLayoutWrappers.begin();
+        std::advance(insertIter, index);
+        childLayoutWrappers.splice(insertIter, buildItems);
+    }
+    if (addToRenderTree) {
+        int32_t index = 0;
+        for (const auto& child : childLayoutWrappers) {
+            child->isActive_ = true;
+            pendingRender_.emplace(index++, child);
+        }
+    }
+    return childLayoutWrappers;
+}
+
+void LayoutWrapper::RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper)
+{
+    auto iter = std::find_if(
+        pendingRender_.begin(), pendingRender_.end(), [wrapper](const auto& value) { return value.second == wrapper; });
+    if (iter == pendingRender_.end()) {
+        LOGW("can not find current wrapper in pending render map");
+        return;
+    }
+    iter->second->isActive_ = false;
+    pendingRender_.erase(iter);
+}
+
+void LayoutWrapper::RemoveChildInRenderTree(int32_t index)
+{
+    auto iter = pendingRender_.find(index);
+    if (iter == pendingRender_.end()) {
+        LOGW("can not find current wrapper in pending render map");
+        return;
+    }
+    iter->second->isActive_ = false;
+    pendingRender_.erase(iter);
 }
 
 void LayoutWrapper::ResetHostNode()
@@ -77,15 +101,6 @@ void LayoutWrapper::ResetHostNode()
 RefPtr<FrameNode> LayoutWrapper::GetHostNode() const
 {
     return hostNode_.Upgrade();
-}
-
-std::optional<uint32_t> LayoutWrapper::GetHostNodeSlotId() const
-{
-    auto host = hostNode_.Upgrade();
-    if (host) {
-        return host->GetSlotId();
-    }
-    return std::nullopt;
 }
 
 std::string LayoutWrapper::GetHostTag() const
@@ -141,6 +156,21 @@ void LayoutWrapper::Layout(const std::optional<OffsetF>& parentGlobalOffset)
         geometryNode_->GetFrameOffset().ToString().c_str());
 }
 
+std::list<RefPtr<FrameNode>> LayoutWrapper::GetChildrenInRenderArea() const
+{
+    std::list<RefPtr<FrameNode>> frameNodes;
+    for (const auto& [index, wrapper] : pendingRender_) {
+        if (!wrapper) {
+            continue;
+        }
+        auto host = wrapper->GetHostNode();
+        if (host) {
+            frameNodes.emplace_back(host);
+        }
+    }
+    return frameNodes;
+}
+
 void LayoutWrapper::MountToHostOnMainThread()
 {
     SwapDirtyLayoutWrapperOnMainThread();
@@ -149,15 +179,21 @@ void LayoutWrapper::MountToHostOnMainThread()
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
+    for (const auto& [index, wrapper] : children_) {
+        if (wrapper) {
+            wrapper->SwapDirtyLayoutWrapperOnMainThread();
+        }
+    }
+    if (layoutWrapperBuilder_) {
+        layoutWrapperBuilder_->SwapDirtyChildrenOnMainThread();
+        layoutWrapperBuilder_->UpdateBuildCacheOnMainThread();
+    }
+
     auto host = hostNode_.Upgrade();
     if (!host) {
         LOGE("the host is nullptr");
         return;
     }
     host->SwapDirtyLayoutWrapperOnMainThread(Claim(this));
-
-    for (const auto& child : children_) {
-        child->SwapDirtyLayoutWrapperOnMainThread();
-    }
 }
 } // namespace OHOS::Ace::NG

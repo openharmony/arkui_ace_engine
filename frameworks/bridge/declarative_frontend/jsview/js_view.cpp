@@ -17,9 +17,9 @@
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/base/custom_node.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/composed_element.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
@@ -112,39 +112,26 @@ RefPtr<NG::FrameNode> JSView::CreateNode()
     ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
     // create component, return new something, need to set proper ID
     std::string key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
-    auto composedNode = NG::CustomNode::CreateCustomNode(key);
+    // TODO: add unique id.
+    auto composedNode = NG::CustomNode::CreateCustomNode(0, key);
+    node_ = composedNode;
+
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].Appear");
+        if (jsViewFunction_) {
+            jsViewFunction_->ExecuteAppear();
+        }
+    }
 
     // add callback for element creation to component, and get pointer reference
     // to the element on creation. When state of this view changes, mark the
     // element to dirty.
-    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<NG::FrameNode> {
+    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<NG::UINode> {
         auto jsView = weak.Upgrade();
         return jsView ? jsView->InternalRender() : nullptr;
     };
 
-    auto appearFunction = [weak = AceType::WeakClaim(this)]() {
-        auto jsView = weak.Upgrade();
-        if (!jsView) {
-            LOGE("the js view is nullptr in appear function");
-            return;
-        }
-        ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Appear");
-        if (jsView->jsViewFunction_) {
-            jsView->jsViewFunction_->ExecuteAppear();
-        }
-    };
-
-    auto updateJsView = [weak = AceType::WeakClaim(this)](WeakPtr<NG::CustomNode> newNode) {
-        auto jsView = weak.Upgrade();
-        if (!jsView) {
-            LOGE("the js view is nullptr in appear function");
-            return;
-        }
-        jsView->node_ = std::move(newNode);
-    };
     composedNode->SetRenderFunction(std::move(renderFunction));
-    composedNode->SetAppearFunction(std::move(appearFunction));
-    composedNode->SetUpdateJsViewFunction(std::move(updateJsView));
     return composedNode;
 }
 
@@ -174,7 +161,7 @@ RefPtr<OHOS::Ace::Component> JSView::InternalRender(const RefPtr<Component>& par
     return buildComponent;
 }
 
-RefPtr<NG::FrameNode> JSView::InternalRender()
+RefPtr<NG::UINode> JSView::InternalRender()
 {
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     needsUpdate_ = false;

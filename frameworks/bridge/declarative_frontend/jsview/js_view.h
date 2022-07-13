@@ -18,7 +18,7 @@
 
 #include <list>
 
-#include "core/components_ng/base/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/pipeline/base/composed_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -44,7 +44,7 @@ public:
     RefPtr<Component> CreateComponent();
     RefPtr<PageTransitionComponent> BuildPageTransitionComponent();
 
-    RefPtr<NG::FrameNode> InternalRender();
+    RefPtr<NG::UINode> InternalRender();
     RefPtr<NG::FrameNode> CreateNode();
 
     void MarkNeedUpdate();
