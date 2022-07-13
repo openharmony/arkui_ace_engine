@@ -69,17 +69,19 @@ public:
             if (!themeStyle) {
                 return theme;
             }
-            theme->titleColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_APPBAR_TITLE, Color::WHITE);
-            theme->titleFontSize_  = themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_HEADLINE7, 0.0_vp);
-            theme->titleFontSizeBig_  = themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_HEADLINE6, 0.0_vp);
-            theme->subTitleColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_APPBAR_SUBTITLE, Color::WHITE);
-            theme->subTitleFontSize_  = themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_OVERLINE, 0.0_vp);
-            theme->menuIconColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_APPBAR_ICON, Color::WHITE);
-            theme->buttonPressedColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_CLICK_EFFECT, Color::WHITE);
-            theme->buttonFocusColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_FOCUSED, Color::WHITE);
-            theme->buttonHoverColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_HOVER, Color::WHITE);
-            theme->buttonCornerRadius_  = themeStyle->GetAttr<Dimension>(THEME_ATTR_CLICK_CORNER_RADIUS, 0.0_vp);
-
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("navigation_pattern", nullptr);
+            if (pattern) {
+                theme->titleColor_ = pattern->GetAttr<Color>("title_color", Color::WHITE);
+                theme->titleFontSize_  = pattern->GetAttr<Dimension>("title_text_font_size", 0.0_vp);
+                theme->titleFontSizeBig_  = pattern->GetAttr<Dimension>("title_text_font_size_big", 0.0_vp);
+                theme->subTitleColor_ = pattern->GetAttr<Color>("sub_title_text_color", Color::WHITE);
+                theme->subTitleFontSize_  = pattern->GetAttr<Dimension>("sub_title_text_font_size", 0.0_vp);
+                theme->menuIconColor_ = pattern->GetAttr<Color>("menu_icon_color", Color::WHITE);
+                theme->buttonPressedColor_ = pattern->GetAttr<Color>("button_bg_color_pressed", Color::WHITE);
+                theme->buttonFocusColor_ = pattern->GetAttr<Color>("button_bg_color_focused", Color::WHITE);
+                theme->buttonHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color::WHITE);
+                theme->buttonCornerRadius_  = pattern->GetAttr<Dimension>("button_corner_radius", 0.0_vp);
+            }
             return theme;
         }
     };

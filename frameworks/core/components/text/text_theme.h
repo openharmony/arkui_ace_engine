@@ -57,7 +57,12 @@ public:
             if (!themeStyle) {
                 return;
             }
-            theme->textStyle_.SetTextColor(themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY, Color::BLACK));
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_TEXT, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of text fail");
+                return;
+            }
+            theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK));
         }
     };
 

@@ -52,7 +52,7 @@ public:
             if (!semiModalPattern) {
                 return;
             }
-            theme->bgColor_ = semiModalPattern->GetAttr<Color>(SEMI_MODAL_BACKGROUND_COLOR, Color());
+            theme->bgColor_ = semiModalPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
         }
     };
     ~SemiModalTheme() override = default;

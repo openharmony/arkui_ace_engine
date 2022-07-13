@@ -71,11 +71,16 @@ public:
             if (!themeStyle || !theme) {
                 return;
             }
-            theme->placeholderColor_ = themeStyle->GetAttr<Color>(SEARCH_PLACEHOLDER_COLOR, Color());
-            theme->focusPlaceholderColor_ = themeStyle->GetAttr<Color>(SEARCH_PLACEHOLDER_COLOR, Color());
-            theme->textColor_ = themeStyle->GetAttr<Color>(SEARCH_TEXT_COLOR, Color());
-            theme->focusTextColor_ = themeStyle->GetAttr<Color>(SEARCH_TEXT_COLOR, Color());
-            theme->fontSize_ = themeStyle->GetAttr<Dimension>(SEARCH_TEXT_FONT_SIZE, 0.0_fp);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SEARCH, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of search fail");
+                return;
+            }
+            theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color());
+            theme->focusPlaceholderColor_ = pattern->GetAttr<Color>("tips_text_color_focused", Color());
+            theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
+            theme->focusTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_FOCUSED, Color());
+            theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp);
         }
     };
 

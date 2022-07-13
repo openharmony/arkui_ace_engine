@@ -56,7 +56,12 @@ public:
                 LOGI("image theme style is null");
                 return;
             }
-            theme->fillColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_FOREGROUND, Color());
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_IMAGE, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of image fail");
+                return;
+            }
+            theme->fillColor_ = pattern->GetAttr<Color>("fill_color", Color());
         }
     };
 

@@ -88,17 +88,22 @@ public:
             if (!themeStyle || !theme) {
                 return;
             }
-            theme->iconColor_ = themeStyle->GetAttr<Color>(TEXT_OVERLAY_TOOL_BAR_ICON_COLOR, Color());
-            theme->menuIconColor_ = themeStyle->GetAttr<Color>(TEXT_OVERLAY_MENU_ICON_COLOR, Color());
-            theme->handleColor_ = themeStyle->GetAttr<Color>(TEXT_OVERLAY_HANDLE_COLOR, Color());
-            theme->handleColorInner_ = themeStyle->GetAttr<Color>(TEXT_OVERLAY_HANDLE_COLOR_INNER, Color());
-            theme->menuBackgroundColor_ = themeStyle->GetAttr<Color>(TEXT_OVERLAY_TOOL_BAR_BACKGROUND_COLOR, Color());
-            theme->buttonHoverColor_ = themeStyle->GetAttr<Color>(TEXT_OVERLAY_TOOL_BAR_BUTTON_HOVER_COLOR, Color());
-            theme->buttonClickedColor_ = themeStyle->GetAttr<Color>(TEXT_OVERLAY_TOOL_BAR_BUTTON_PRESS_COLOR, Color());
-            theme->menuButtonTextStyle_.SetTextColor(
-                themeStyle->GetAttr<Color>(TEXT_OVERLAY_TOOL_BAR_TEXT_COLOR, Color()));
-            theme->menuButtonTextStyle_.SetFontSize(
-                themeStyle->GetAttr<Dimension>(TEXT_OVERLAY_TOOL_BAR_FONT_SIZE, 0.0_fp));
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("text_overlay_pattern", nullptr);
+            if (pattern) {
+                theme->iconColor_ = pattern->GetAttr<Color>("icon_color", Color());
+                theme->menuIconColor_ = pattern->GetAttr<Color>("memu_icon_color", Color());
+                theme->handleColor_ = pattern->GetAttr<Color>("handle_outer_color", Color());
+                theme->handleColorInner_ = pattern->GetAttr<Color>("handle_inner_color", Color());
+                theme->menuBackgroundColor_ = pattern->GetAttr<Color>("menu_bg_color", Color());
+                theme->buttonHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color());
+                theme->buttonClickedColor_ = pattern->GetAttr<Color>("button_bg_color_clicked", Color());
+                theme->menuButtonTextStyle_.SetTextColor(
+                    pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
+                theme->menuButtonTextStyle_.SetFontSize(
+                    pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp));
+            } else {
+                LOGW("find pattern of textoverlay fail");
+            }
         }
     };
 

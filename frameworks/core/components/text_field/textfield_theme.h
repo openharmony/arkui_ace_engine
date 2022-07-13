@@ -119,35 +119,42 @@ public:
             if (!themeStyle || !theme) {
                 return;
             }
-            theme->fontSize_ = themeStyle->GetAttr<Dimension>(TEXTFIELD_FONT_SIZE, 0.0_fp);
-            theme->textColor_ = themeStyle->GetAttr<Color>(TEXTFIELD_TEXT_COLOR, Color());
-            theme->focusTextColor_ = themeStyle->GetAttr<Color>(TEXTFIELD_TEXT_COLOR, Color());
-            theme->placeholderColor_ = themeStyle->GetAttr<Color>(TEXTFIELD_HINT_TEXT_COLOR, Color());
-            theme->focusPlaceholderColor_ = themeStyle->GetAttr<Color>(TEXTFIELD_HINT_TEXT_COLOR, Color());
-            theme->bgColor_ = themeStyle->GetAttr<Color>(TEXTFIELD_BACKGROUND_COLOR, Color());
-            theme->focusBgColor_ = themeStyle->GetAttr<Color>(TEXTFIELD_BACKGROUND_COLOR, Color());
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("textfield_pattern", nullptr);
+            if (!pattern) {
+                LOGW("find pattern of textfield fail");
+                return;
+            }
+            const double defaultErrorAlpha = 0.6;
+            theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp);
+            theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
+            theme->focusTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_FOCUSED, Color());
+            theme->placeholderColor_ = pattern->GetAttr<Color>("tips_text_color", Color());
+            theme->focusPlaceholderColor_ = pattern->GetAttr<Color>("tips_text_color_focused", Color());
+            theme->bgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
+            theme->focusBgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
             // color of error border blend 60% opacity
-            theme->errorBorderColor_ = themeStyle->GetAttr<Color>(TEXTFIELD_ERROR_COLOR, Color()).BlendOpacity(0.6);
-            theme->errorTextStyle_.SetTextColor(themeStyle->GetAttr<Color>(TEXTFIELD_ERROR_COLOR, Color()));
-            theme->errorTextStyle_.SetFontSize(themeStyle->GetAttr<Dimension>(TEXTFIELD_ERROR_TEXT_FONT_SIZE, 0.0_fp));
+            theme->errorBorderColor_ = pattern->GetAttr<Color>("error_text_border_color", Color())
+                .BlendOpacity(pattern->GetAttr<double>("error_text_border_color_alpha", defaultErrorAlpha));
+            theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>("error_text_color", Color()));
+            theme->errorTextStyle_.SetFontSize(pattern->GetAttr<Dimension>("error_text_font_size", 0.0_fp));
 
-            theme->countTextStyle_.SetTextColor(themeStyle->GetAttr<Color>(TEXTFIELD_COUNT_TEXT_COLOR, Color()));
-            theme->countTextStyle_.SetFontSize(themeStyle->GetAttr<Dimension>(TEXTFIELD_COUNT_TEXT_FONT_SIZE, 0.0_fp));
-            theme->overCountStyle_.SetTextColor(themeStyle->GetAttr<Color>(TEXTFIELD_ERROR_COLOR, Color()));
-            theme->overCountStyle_.SetFontSize(themeStyle->GetAttr<Dimension>(TEXTFIELD_COUNT_TEXT_FONT_SIZE, 0.0_fp));
+            theme->countTextStyle_.SetTextColor(pattern->GetAttr<Color>("count_text_color", Color()));
+            theme->countTextStyle_.SetFontSize(pattern->GetAttr<Dimension>("count_text_font_size", 0.0_fp));
+            theme->overCountStyle_.SetTextColor(pattern->GetAttr<Color>("over_text_color", Color()));
+            theme->overCountStyle_.SetFontSize(pattern->GetAttr<Dimension>("over_text_font_size", 0.0_fp));
 
-            theme->countTextStyleOuter_.SetTextColor(themeStyle->GetAttr<Color>(TEXTFIELD_COUNT_TEXT_COLOR, Color()));
+            theme->countTextStyleOuter_.SetTextColor(pattern->GetAttr<Color>("count_outer_text_color", Color()));
             theme->countTextStyleOuter_.SetFontSize(
-                themeStyle->GetAttr<Dimension>(TEXTFIELD_COUNT_TEXT_FONT_SIZE_OUTER, 0.0_fp));
-            theme->overCountStyleOuter_.SetTextColor(themeStyle->GetAttr<Color>(TEXTFIELD_ERROR_COLOR, Color()));
+                pattern->GetAttr<Dimension>("count_outer_text_font_size", 0.0_fp));
+            theme->overCountStyleOuter_.SetTextColor(pattern->GetAttr<Color>("over_outer_text_color", Color()));
             theme->overCountStyleOuter_.SetFontSize(
-                themeStyle->GetAttr<Dimension>(TEXTFIELD_COUNT_TEXT_FONT_SIZE_OUTER, 0.0_fp));
+                pattern->GetAttr<Dimension>("over_outer_text_font_size", 0.0_fp));
+            theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color());
+            theme->disableTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_DISABLED, Color());
+            theme->cursorColor_ = pattern->GetAttr<Color>("cursor_color", Color());
+            theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
+            theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
 
-            theme->selectedColor_ = themeStyle->GetAttr<Color>(TEXTFIELD_SELECTED_COLOR, Color());
-            theme->disableTextColor_ = themeStyle->GetAttr<Color>(TEXTFIELD_TEXT_COLOR_DISABLE, Color());
-            theme->cursorColor_ = themeStyle->GetAttr<Color>(TEXTFIELD_CURSOR_COLOR, Color());
-            theme->hoverColor_ = themeStyle->GetAttr<Color>(TEXTFIELD_HOVER_COLOR, Color());
-            theme->pressColor_ = themeStyle->GetAttr<Color>(TEXTFIELD_PRESS_COLOR, Color());
         }
     };
 

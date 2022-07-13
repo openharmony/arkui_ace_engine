@@ -76,7 +76,12 @@ public:
             if (!themeStyle || !theme) {
                 return;
             }
-            theme->backgroundColor_ = themeStyle->GetAttr<Color>(POPUP_BACKGROUND_COLOR, Color());
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_POPUP, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of popup fail");
+                return;
+            }
+            theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
         }
     };
 

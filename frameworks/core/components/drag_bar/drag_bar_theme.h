@@ -48,11 +48,12 @@ public:
             if (!themeStyle) {
                 return;
             }
-            auto dragBarPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DRAG_BAR, nullptr);
-            if (!dragBarPattern) {
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DRAG_BAR, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of drag bar fail");
                 return;
             }
-            theme->barColor_ = dragBarPattern->GetAttr<Color>(DRAG_BAR_COLOR, Color());
+            theme->barColor_ = pattern->GetAttr<Color>(DRAG_BAR_COLOR, Color());
         }
     };
     ~DragBarTheme() override = default;

@@ -44,9 +44,15 @@ public:
             }
             theme->color_ = themeConstants->GetColor(THEME_FOCUSANIMATION_COLOR);
             auto themeStyle = themeConstants->GetThemeStyle();
-            if (themeStyle) {
-                theme->color_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_FOCUSED, Color::BLUE);
+            if (!themeStyle) {
+                return theme;
             }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_FOCUS_ANIMATION, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of focus_animation fail");
+                return theme;
+            }
+            theme->color_ = pattern->GetAttr<Color>("focus_animation_color", Color::BLUE);
             return theme;
         }
     };
