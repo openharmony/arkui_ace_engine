@@ -2085,7 +2085,9 @@ void RenderNode::SetRSNode(const std::shared_ptr<RSNode>& rsNode)
     }
 
     // copy render properties from previous RSNode
-    rsNode->CopyPropertiesFrom(*prevNode);
+    if (prevNode != nullptr) {
+        rsNode->CopyPropertiesFrom(*prevNode);
+    }
     // rebuild RSNode hierarchy
     MarkParentNeedRender();
 #endif
