@@ -283,16 +283,28 @@ class ACE_EXPORT WebHttpAuthEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(WebHttpAuthEvent, BaseEventInfo);
 
 public:
-    WebHttpAuthEvent(const RefPtr<AuthResult>& result)
-        : BaseEventInfo("WebHttpAuthEvent"), result_(result) {}
+    WebHttpAuthEvent(const RefPtr<AuthResult>& result, const std::string &host, const std::string &realm)
+        : BaseEventInfo("WebHttpAuthEvent"), result_(result), host_(host), realm_(realm) {}
     ~WebHttpAuthEvent() = default;
 
     const RefPtr<AuthResult>& GetResult() const
     {
         return result_;
     }
+
+    const std::string& GetHost() const
+    {
+        return host_;
+    }
+
+    const std::string& GetRealm() const
+    {
+        return realm_;
+    }
 private:
     RefPtr<AuthResult> result_;
+    std::string host_;
+    std::string realm_;
 };
 
 class ACE_EXPORT WebGeolocation : public AceType {
