@@ -21,17 +21,44 @@
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/common/container.h"
+#include "core/components/box/box_element.h"
+#include "core/components/grid_layout/grid_layout_item_component.h"
+#include "core/components/grid_layout/grid_layout_item_element.h"
 #include "core/components/ifelse/if_else_component.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#include "core/components_v2/list/list_item_component.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/composed_component.h"
+#include "frameworks/core//components_part_upd/foreach/foreach_component.h"
+#include "frameworks/core//components_part_upd/foreach/foreach_element.h"
+#include "frameworks/core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
 
 const std::string PREFIX_STEP = "  ";
+
+class ElementProxyHelper {
+public:
+    static bool UsePartialUpdate()
+    {
+        const auto container = Container::Current();
+        if (!container) {
+            LOGW("container is null");
+            return false;
+        }
+        const auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("pipelineContext is null!");
+            return false;
+        }
+        return pipelineContext->UsePartialUpdate();
+    }
+};
 
 class RenderElementProxy : public ElementProxy {
 public:
@@ -40,11 +67,16 @@ public:
     {}
     ~RenderElementProxy() override
     {
+        RemoveSelfFromElementRegistry();
         ReleaseElementByIndex(startIndex_);
     }
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
+        if (ElementProxyHelper::UsePartialUpdate()) {
+            UpdateForPartialUpdate(component, startIndex);
+            return;
+        }
         auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
         auto inspectorComposedComponent = AceType::DynamicCast<InspectorComposedComponent>(component);
         SetComposedId(composedComponent ? composedComponent->GetId() : "");
@@ -72,6 +104,101 @@ public:
         }
     }
 
+    void UpdateForPartialUpdate(const RefPtr<Component>& component, size_t startIndex)
+    {
+        LOGD("RenderElementProxy::Update with Component elmtId %{public}d ....", component->GetElementId());
+
+        auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
+        auto inspectorComposedComponent = AceType::DynamicCast<InspectorComposedComponent>(component);
+        SetComposedId(composedComponent ? composedComponent->GetId() : "");
+
+        component_ = component;
+        while (composedComponent && !composedComponent->HasElementFunction() && !inspectorComposedComponent) {
+            component_ = composedComponent->GetChild();
+            composedComponent = AceType::DynamicCast<ComposedComponent>(component_);
+        }
+
+        auto host = host_.Upgrade();
+        if (!host) {
+            return;
+        }
+
+        if (!component_ && forceRender_) {
+            component_ = host->OnMakeEmptyComponent();
+        }
+
+        startIndex_ = startIndex;
+        count_ = component_ ? 1 : 0;
+
+        if (GetElementId() == ElementRegister::UndefinedElementId) {
+            // first render case, add the ElementRegistry
+            ACE_DCHECK(element_ == nullptr);
+
+            SetElementId(component_->GetElementId());
+            AddSelfToElementRegistry();
+            realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
+            LOGD("   ... initial render case, setting elmtId %{public}d, realelmtId will be %{public}d",
+                component_->GetElementId(), realElmtId_);
+        }
+
+        if (element_) {
+            LOGD("   ... _element exists, update it with new component");
+            element_ = CreateElement();
+        }
+    }
+
+    void LocalizedUpdate(
+        const RefPtr<Component>& inwardWrappingComponent, const RefPtr<Component>& newListItemComponent) override
+    {
+        LOGD("RenderElementProxy (own elmtId %{public}d)::LocalizedUpdate with %{public}s, wrapComponent is %{public}s",
+            GetElementId(), AceType::TypeName(newListItemComponent), AceType::TypeName(inwardWrappingComponent));
+        ACE_DCHECK(
+            (component_ != nullptr) && (GetElementId() != ElementRegister::UndefinedElementId) && "Is re-render");
+
+        if (element_) {
+            // the Component (correctly) has elmtId of this ProxyElement
+            // We are updating the 'real' Lst/GridElement, need to adjust the elmtId
+            // in the Component.
+            newListItemComponent->SetElementId(realElmtId_);
+
+            // List/Grid Item do not use normal wrapping
+            auto updateElement = element_;
+            auto updateComponent = newListItemComponent;
+
+            LOGD("   ... localizedUpdate on main Component and 'wrapping' children ...");
+            for (;;) {
+                LOGD("   ... localizedUpdate %{public}s <- %{public}s", AceType::TypeName(updateElement),
+                    AceType::TypeName(updateComponent));
+                updateElement->SetNewComponent(updateComponent);
+                updateElement->LocalizedUpdate(); // virtual
+                updateElement->SetNewComponent(nullptr);
+
+                updateElement = updateElement->GetFirstChild();
+                auto singleChild = AceType::DynamicCast<SingleChild>(updateComponent);
+                if ((updateElement == nullptr) || (singleChild == nullptr) ||
+                    (singleChild->GetChild() == nullptr)) {
+                    break;
+                }
+                updateComponent = singleChild->GetChild();
+            }
+        }
+    }
+
+    RefPtr<Element> CreateElement()
+    {
+        auto host = host_.Upgrade();
+        if (!host) {
+            return nullptr;
+        }
+
+        // avoid creating the ListItemElemnt width the ProxyElement's elmtId
+        component_->SetElementId(realElmtId_);
+        LOGD("   ...creating/updating Element with elmtId %{public}d", realElmtId_);
+        auto element = host->OnUpdateElement(element_, component_);
+        component_->SetElementId(GetElementId());
+        return element;
+    }
+
     void UpdateIndex(size_t startIndex) override
     {
         startIndex_ = startIndex;
@@ -95,6 +222,10 @@ public:
         auto host = host_.Upgrade();
         if (!host) {
             return nullptr;
+        }
+        if (ElementProxyHelper::UsePartialUpdate()) {
+            element_ = CreateElement();
+            return element_;
         }
         element_ = host->OnUpdateElement(element_, component_);
         return element_;
@@ -143,7 +274,11 @@ public:
         }
     }
 
-private:
+protected:
+    // the proxy has elmtId, the real Element element_
+    // needs to be always given a different but always same elmtId
+    int32_t realElmtId_ = ElementRegister::UndefinedElementId;
+
     void SetComposedId(const ComposeId& composedId)
     {
         auto host = host_.Upgrade();
@@ -160,6 +295,238 @@ private:
     bool forceRender_ = false;
     RefPtr<Component> component_;
     RefPtr<Element> element_;
+};
+
+class ItemElementProxy : public RenderElementProxy {
+public:
+    explicit ItemElementProxy(const WeakPtr<ElementProxyHost>& host)
+        : RenderElementProxy(host), deepRenderignState_(DeepRenderingState::shallowTree)
+    {}
+    ~ItemElementProxy() override = default;
+
+    RefPtr<Element> GetElementByIndex(size_t index) override
+    {
+        LOGD("ListItemElementProxy (own elmtId %{public}d)::GetElementByIndex ....", GetElementId());
+        if (element_) {
+            return element_;
+        }
+        if (!component_) {
+            return nullptr;
+        }
+
+        if (deepRenderignState_ == DeepRenderingState::shallowTree) {
+            // repalce ListItemcomponent with new one from deep render
+            GetDeepRenderComponent();
+        }
+        element_ = CreateElement();
+        return element_;
+    }
+
+    virtual void GetDeepRenderComponent() = 0;
+
+protected:
+    enum DeepRenderingState { shallowTree, deepTree };
+
+    DeepRenderingState deepRenderignState_ = DeepRenderingState::shallowTree;
+};
+
+class ListItemElementProxy : public ItemElementProxy {
+public:
+    explicit ListItemElementProxy(const WeakPtr<ElementProxyHost>& host) : ItemElementProxy(host) {}
+    ~ListItemElementProxy() override = default;
+
+    void Update(const RefPtr<Component>& component, size_t startIndex) override
+    {
+        LOGD("ListItemElementProxy (own elmtId %{public}d)::Update ....", component->GetElementId());
+
+        auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
+        auto inspectorComposedComponent = AceType::DynamicCast<InspectorComposedComponent>(component);
+        SetComposedId(composedComponent ? composedComponent->GetId() : "");
+
+        component_ = component;
+        while (composedComponent && !composedComponent->HasElementFunction() && !inspectorComposedComponent) {
+            component_ = composedComponent->GetChild();
+            composedComponent = AceType::DynamicCast<ComposedComponent>(component_);
+        }
+
+        auto host = host_.Upgrade();
+        if (!host) {
+            LOGE("no host");
+            return;
+        }
+        startIndex_ = startIndex;
+        count_ = component_ ? 1 : 0;
+
+        if (GetElementId() == ElementRegister::UndefinedElementId) {
+            // first render case, add the ElementRegistry
+            ACE_DCHECK(element_ == nullptr);
+
+            SetElementId(component_->GetElementId());
+            AddSelfToElementRegistry();
+            realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
+            LOGD("   ... initial render case, setting elmtId %{public}d, realelmtId will be %{public}d",
+                component_->GetElementId(), realElmtId_);
+
+            auto listItemComponent = AceType::DynamicCast<V2::ListItemComponent>(component_);
+            if (listItemComponent->GetIsLazyCreating()) {
+                LOGD("   ... the component is from shallow render");
+                deepRenderignState_ = DeepRenderingState::shallowTree;
+                // continue later when GetElementByIndex is called
+                return;
+            } else {
+                LOGD("   ... the initial component is from deep render");
+                deepRenderignState_ = DeepRenderingState::deepTree;
+                element_ = CreateElement();
+                return;
+            }
+        }
+
+        LOGD("   ... not initial call to Update");
+        if (element_) {
+            LOGD("   ... ListElement exists and needs updating with new ListComponent - start");
+            element_ = CreateElement();
+            LOGD("   ... ListElement exists and needs updating with new ListComponent - done");
+        }
+    }
+
+    void GetDeepRenderComponent() override
+    {
+        auto listItemComponent = AceType::DynamicCast<V2::ListItemComponent>(component_);
+        auto newComponent = listItemComponent->ExecDeepRender();
+
+        ACE_DCHECK(newComponent != nullptr);
+        ACE_DCHECK(newComponent->GetElementId() == component_->GetElementId());
+        deepRenderignState_ = DeepRenderingState::deepTree;
+        component_ = newComponent;
+
+        auto composedComponent = AceType::DynamicCast<ComposedComponent>(newComponent);
+        while (composedComponent && !composedComponent->HasElementFunction()) {
+            LOGW("ComposedComponent case, using child as component_");
+            component_ = composedComponent->GetChild();
+            composedComponent = AceType::DynamicCast<ComposedComponent>(component_);
+        }
+
+        ACE_DCHECK(GetElementId() == component_->GetElementId());
+    }
+
+    void ReleaseElementByIndex(size_t index) override
+    {
+        LOGD("ListItemElementProxy (own elmtId %{public}d)::ReleaseElementByIndex, release deepRender component....",
+            GetElementId());
+        deepRenderignState_ = DeepRenderingState::shallowTree;
+
+        RenderElementProxy::ReleaseElementByIndex(index);
+
+        // release deeprender Component tree,
+        // repalce component_ with a dummy
+        auto li = AceType::DynamicCast<V2::ListItemComponent>(component_);
+        auto placeholder = AceType::MakeRefPtr<V2::ListItemComponent>();
+        li->MoveDeepRenderFunc(placeholder);
+        placeholder->SetElementId(li->GetElementId());
+        component_ = std::move(placeholder);
+    }
+};
+
+class GridItemElementProxy : public ItemElementProxy {
+public:
+    explicit GridItemElementProxy(const WeakPtr<ElementProxyHost>& host) : ItemElementProxy(host) {}
+    ~GridItemElementProxy() override {}
+
+    void Update(const RefPtr<Component>& component, size_t startIndex) override
+    {
+        LOGD("GridItemElementProxy (own elmtId %{public}d)::Update ....", component->GetElementId());
+
+        auto composedComponent = AceType::DynamicCast<ComposedComponent>(component);
+        auto inspectorComposedComponent = AceType::DynamicCast<InspectorComposedComponent>(component);
+        SetComposedId(composedComponent ? composedComponent->GetId() : "");
+
+        component_ = component;
+        while (composedComponent && !composedComponent->HasElementFunction() && !inspectorComposedComponent) {
+            component_ = composedComponent->GetChild();
+            composedComponent = AceType::DynamicCast<ComposedComponent>(component_);
+        }
+
+        auto host = host_.Upgrade();
+        if (!host) {
+            LOGE("no host");
+            return;
+        }
+        startIndex_ = startIndex;
+        count_ = component_ ? 1 : 0;
+
+        if (GetElementId() == ElementRegister::UndefinedElementId) {
+            // first render case, add the ElementRegistry
+            ACE_DCHECK(element_ == nullptr);
+
+            SetElementId(component_->GetElementId());
+            AddSelfToElementRegistry();
+            realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
+            LOGD("   ... initial render case, setting elmtId %{public}d, realelmtId will be %{public}d",
+                component_->GetElementId(), realElmtId_);
+
+            auto gridItemComponent = AceType::DynamicCast<GridLayoutItemComponent>(component_);
+            if (gridItemComponent->GetIsLazyCreating()) {
+                LOGD("   ... the component is from shallow render");
+                deepRenderignState_ = DeepRenderingState::shallowTree;
+                // continue later when GetElementByIndex is called
+                return;
+            } else {
+                LOGD("   ... the initial component is from deep render");
+                deepRenderignState_ = DeepRenderingState::deepTree;
+                element_ = CreateElement();
+                return;
+            }
+        }
+
+        LOGD("   ... not initial call to Update");
+        if (element_) {
+            LOGD("   ... ListElement exists and needs updating with new ListComponent - start");
+            element_ = CreateElement();
+            LOGD("   ... ListElement exists and needs updating with new ListComponent - done");
+        }
+    }
+
+    void GetDeepRenderComponent() override
+    {
+        auto gridItemComponent = AceType::DynamicCast<GridLayoutItemComponent>(component_);
+        auto newComponent = gridItemComponent->ExecDeepRender();
+
+        ACE_DCHECK(newComponent != nullptr);
+        ACE_DCHECK(newComponent->GetElementId() == component_->GetElementId());
+
+        deepRenderignState_ = DeepRenderingState::deepTree;
+        component_ = newComponent;
+
+        auto composedComponent = AceType::DynamicCast<ComposedComponent>(newComponent);
+        while (composedComponent && !composedComponent->HasElementFunction()) {
+            LOGW("ComposedComponent case, using child as component_");
+            component_ = composedComponent->GetChild();
+            composedComponent = AceType::DynamicCast<ComposedComponent>(component_);
+        }
+
+        LOGD("GridIemElementProxy::GetDeepRenderComponent, own elmtId %{public}d, "
+            "deep render result Component %{public}s elmtId %{public}d",
+            GetElementId(), AceType::TypeName(component_), component_->GetElementId());
+
+        ACE_DCHECK(GetElementId() == component_->GetElementId());
+    }
+
+    void ReleaseElementByIndex(size_t index) override
+    {
+        LOGD("GridItemElementProxy (own elmtId %{public}d)::ReleaseElementByIndex, release deepRender component....",
+            GetElementId());
+        deepRenderignState_ = DeepRenderingState::shallowTree;
+
+        RenderElementProxy::ReleaseElementByIndex(index);
+
+        // release deeprender Component tree,
+        // replace component_ with a dummy
+        auto gridItem = AceType::DynamicCast<GridLayoutItemComponent>(component_);
+        auto placeholder = AceType::MakeRefPtr<GridLayoutItemComponent>();
+        gridItem->MoveDeepRenderFunc(placeholder);
+        placeholder->SetElementId(gridItem->GetElementId());
+        component_ = std::move(placeholder);
+    }
 };
 
 class LazyForEachElementProxy : public ElementProxy, public DataChangeListener {
@@ -200,6 +567,13 @@ public:
             auto childComponent = lazyForEachComponent_->GetChildByIndex(item.first);
             item.second->Update(childComponent, startIndex_ + item.first);
         }
+    }
+
+    void LocalizedUpdate(
+        const RefPtr<Component>& newComponent, const RefPtr<Component>& outmostWrappingComponent) override
+    {
+        LOGD("LazyForEachElementProxy::LocalizedUpdate uses Update ....");
+        Update(newComponent, startIndex_);
     }
 
     void UpdateIndex(size_t startIndex) override
@@ -576,6 +950,8 @@ private:
 };
 
 class LinearElementProxy : public ElementProxy {
+    DECLARE_ACE_TYPE(LinearElementProxy, ElementProxy);
+
 public:
     explicit LinearElementProxy(const WeakPtr<ElementProxyHost>& host) : ElementProxy(host) {}
     ~LinearElementProxy() override = default;
@@ -658,12 +1034,19 @@ protected:
 };
 
 class ForEachElementProxy : public LinearElementProxy {
+    DECLARE_ACE_TYPE(ForEachElementProxy, LinearElementProxy);
+
 public:
     explicit ForEachElementProxy(const WeakPtr<ElementProxyHost>& host) : LinearElementProxy(host) {}
     ~ForEachElementProxy() override = default;
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
+        if (ElementProxyHelper::UsePartialUpdate()) {
+            UpdateForPartialUpdate(component, startIndex);
+            return;
+        }
+
         auto forEachComponent = AceType::DynamicCast<ForEachComponent>(component);
         ACE_DCHECK(forEachComponent);
 
@@ -747,6 +1130,242 @@ public:
             count_ += child->RenderCount();
         }
     }
+
+    // In baseline Update is used on first render and also on rerender
+    // in partial update only used fro first render
+    // Update simplify to only support the first render case.
+    void UpdateForPartialUpdate(const RefPtr<Component>& component, size_t startIndex)
+    {
+        if (GetElementId() != ElementRegister::UndefinedElementId) {
+            // run this function only on first render
+            return;
+        }
+
+        auto forEachComponent = AceType::DynamicCast<OHOS::Ace::PartUpd::ForEachComponent>(component);
+        ACE_DCHECK(forEachComponent);
+
+        LOGD(
+            "ForEachElementProxy::Update: first render: Creating ForEachElementProxy "
+            "with %{public}s elmtId %{public}d, startIndex_ %{public}d",
+            AceType::TypeName(forEachComponent), forEachComponent->GetElementId(), (int)startIndex);
+
+        SetElementId(forEachComponent->GetElementId());
+        AddSelfToElementRegistry();
+
+        const auto& components = forEachComponent->GetChildren();
+
+        count_ = 0;
+        startIndex_ = startIndex;
+        composedId_ = forEachComponent->GetId();
+
+        // Child of ForEachElement MUST be ComposedComponent or MultiComposedComponent
+        auto itChildStart = children_.begin();
+        auto itChildEnd = children_.end();
+        auto itComponentStart = components.begin();
+        auto itComponentEnd = components.end();
+
+        // 1. Try to update children at start with new components by order
+        while (itChildStart != itChildEnd && itComponentStart != itComponentEnd) {
+            const auto& child = *itChildStart;
+            const auto& childComponent = *itComponentStart;
+            auto composedComponent = AceType::DynamicCast<BaseComposedComponent>(childComponent);
+            ACE_DCHECK(composedComponent);
+            if (child->GetId() != composedComponent->GetId()) {
+                break;
+            }
+
+            child->Update(childComponent, startIndex_ + count_);
+            count_ += child->RenderCount();
+            ++itChildStart;
+            ++itComponentStart;
+        }
+
+        // 2. Try to find children at end with new components by order
+        while (itChildStart != itChildEnd && itComponentStart != itComponentEnd) {
+            const auto& child = *(--itChildEnd);
+            const auto& childComponent = *(--itComponentEnd);
+            auto composedComponent = AceType::DynamicCast<BaseComposedComponent>(childComponent);
+            ACE_DCHECK(composedComponent);
+            if (child->GetId() != composedComponent->GetId()) {
+                ++itChildEnd;
+                ++itComponentEnd;
+                break;
+            }
+        }
+
+        // 3. Collect children at middle
+        std::unordered_map<ComposeId, RefPtr<ElementProxy>> proxies;
+        while (itChildStart != itChildEnd) {
+            const auto& child = *itChildStart;
+            proxies.emplace(child->GetId(), child);
+            itChildStart = children_.erase(itChildStart);
+        }
+
+        // 4. Try to update children at middle with new components by order
+        while (itComponentStart != itComponentEnd) {
+            const auto& childComponent = *(itComponentStart++);
+            auto composedComponent = AceType::DynamicCast<BaseComposedComponent>(childComponent);
+            ACE_DCHECK(composedComponent);
+
+            RefPtr<ElementProxy> child;
+            auto it = proxies.find(composedComponent->GetId());
+            if (it == proxies.end()) {
+                child = ElementProxy::Create(host_, childComponent);
+            } else {
+                child = it->second;
+                proxies.erase(it);
+            }
+
+            children_.insert(itChildEnd, child);
+            child->Update(childComponent, startIndex_ + count_);
+            count_ += child->RenderCount();
+        }
+
+        // 5. Remove these useless children
+        proxies.clear();
+
+        // 6. Try to update children at end with new components by order
+        while (itChildEnd != children_.end() && itComponentEnd != components.end()) {
+            const auto& child = *(itChildEnd++);
+            const auto& childComponent = *(itComponentEnd++);
+            child->Update(childComponent, startIndex_ + count_);
+            count_ += child->RenderCount();
+        }
+
+        SetIdArray(forEachComponent->GetIdArray());
+#ifdef ACE_DEBUG
+        const auto& newIds = forEachComponent->GetIdArray();
+
+        std::string idS = "[";
+        for (const auto& newId : newIds) {
+            idS += newId + ", ";
+        }
+        idS += "]";
+
+        LOGD("ForEachElementProxy::Update done, result:");
+        LOGD("  ... new Ids %{public}s .", idS.c_str());
+        LOGD("  ... children_ size: %{public}llu .", children_.size());
+#endif
+    }
+
+    void SetIdArray(const std::list<std::string>& newIdArray)
+    {
+        idArray_ = newIdArray;
+    }
+
+    const std::list<std::string>& GetIdArray() const
+    {
+        return idArray_;
+    }
+
+    template<typename T>
+    int indexOf(std::list<T> list, T value)
+    {
+        int index = 0;
+        for (auto it = list.begin(); it != list.end(); ++it, ++index)
+            if ((*it) == value) {
+                return index;
+            }
+        return -1;
+    }
+
+    void Append(const RefPtr<ElementProxy> existingProxyChild)
+    {
+        LOGD("ForEachElementProxy::LocalizedUpdate: Append existng %{public}s , count_ %{public}zu",
+            AceType::TypeName(existingProxyChild), count_);
+        children_.emplace_back(existingProxyChild);
+        existingProxyChild->UpdateIndex(startIndex_ + count_);
+        count_ += existingProxyChild->RenderCount();
+    }
+
+    void AppendNewComponent(const RefPtr<Component>& newComponent)
+    {
+        LOGD("ForEachElementProxy::LocalizedUpdate: Append new %{public}s , count_ %{public}zu",
+            AceType::TypeName(newComponent), count_);
+        auto proxyChild = ElementProxy::Create(host_, newComponent);
+        children_.emplace_back(proxyChild);
+        proxyChild->Update(newComponent, startIndex_ + count_);
+        proxyChild->UpdateIndex(startIndex_ + count_);
+        count_ += proxyChild->RenderCount();
+    }
+
+    void LocalizedUpdate(
+        const RefPtr<Component>& newComponent, const RefPtr<Component>& outmostWrappingComponent) override
+    {
+        LOGD("ForEachElementProxy::LocalizedUpdate with %{public}s elmtId %{public}d",
+            AceType::TypeName(newComponent), newComponent->GetElementId());
+
+        auto forEachComponent = AceType::DynamicCast<OHOS::Ace::PartUpd::ForEachComponent>(newComponent);
+        ACE_DCHECK(forEachComponent);
+
+        // old / previous render and new render array id's
+        const auto& newIds = forEachComponent->GetIdArray();
+        const auto& oldIds = GetIdArray();
+
+        ACE_DCHECK((oldIds.size() == children_.size()) &&
+                   "ForEachElementProxy::LocalizedUpdat:Number of IDs generated during previous render and number of "
+                   "ForEach child ElementProxy objects must match");
+
+        // will build children_ array from scratch
+        std::list<RefPtr<ElementProxy>> oldChildren(children_); // make a copy of the list
+        children_.clear();
+
+        // the ForEach Component only includes the newly added children!
+        const auto& newChildComponents = forEachComponent->GetChildren();
+
+#ifdef ACE_DEBUG
+        std::string idS = "[";
+        for (const auto& oldId : oldIds) {
+            idS += oldId + ", ";
+        }
+        idS += "]";
+        LOGD("  ... old Ids %{public}s .", idS.c_str());
+
+        idS = "[";
+        for (const auto& newId : newIds) {
+            idS += newId + ", ";
+        }
+        idS += "]";
+        LOGD("  ... new Ids %{public}s .", idS.c_str());
+
+        LOGD("  ... previous render child element: %{public}llu .", children_.size());
+        LOGD("  ... newly added child Components: %{public}llu .", newChildComponents.size());
+#endif
+
+        size_t newChildIndex = 0;
+        int32_t oldIndex = -1;
+        count_ = 0;
+        for (const auto& newId : newIds) {
+            if ((oldIndex = indexOf(oldIds, newId)) == -1) {
+                // found a newly added ID
+                // insert component into 'slot'
+                auto newCompsIter = newChildComponents.begin();
+                std::advance(newCompsIter, newChildIndex);
+                AppendNewComponent(*newCompsIter);
+                newChildIndex++;
+            } else {
+                // the ID was used before, only need to update the child Element's slot
+                auto oldElementIter = oldChildren.begin();
+                std::advance(oldElementIter, oldIndex);
+                Append(*oldElementIter);
+            }
+        }
+
+        SetIdArray(forEachComponent->GetIdArray());
+
+        // host is the parent List, Swiper or Gridelement
+        auto host = host_.Upgrade();
+        if (host) {
+            host->UpdateIndex();
+            LOGD("ForEachElementProxy::LocalizedUpdat: Updated startIndex_ %{public}zu, count_: %{public}zu",
+                startIndex_, count_);
+            host->OnDataSourceUpdated(startIndex_);
+            LOGD("ForEachElementProxy::LocalizedUpdat: All done!");
+        }
+    }
+
+private:
+    std::list<std::string> idArray_;
 };
 
 class MultiComposedElementProxy : public LinearElementProxy {
@@ -781,6 +1400,13 @@ public:
             }
         }
     }
+
+    void LocalizedUpdate(
+        const RefPtr<Component>& newComponent, const RefPtr<Component>& outmostWrappingComponent) override
+    {
+        LOGD("MultiComposedElementProxy::LocalizedUpdate uses Update ....");
+        Update(newComponent, startIndex_);
+    }
 };
 
 class IfElseElementProxy : public MultiComposedElementProxy {
@@ -790,6 +1416,11 @@ public:
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
+        if (ElementProxyHelper::UsePartialUpdate()) {
+            UpdateForPartialUpdate(component, startIndex);
+            return;
+        }
+
         auto ifElseComponent = AceType::DynamicCast<IfElseComponent>(component);
         ACE_DCHECK(ifElseComponent);
 
@@ -800,6 +1431,68 @@ public:
 
         branchId_ = ifElseComponent->BranchId();
         MultiComposedElementProxy::Update(component, startIndex);
+    }
+
+    void UpdateInternal(const RefPtr<IfElseComponent>& ifElseComponent, size_t startIndex)
+    {
+        branchId_ = ifElseComponent->BranchId();
+        MultiComposedElementProxy::Update(ifElseComponent, startIndex);
+    }
+
+    // this function is wrongly named Update, we do not change its name to remain compatible with baseline
+    // the function is only called on first render
+    // on re-render Localupdate is called
+    void UpdateForPartialUpdate(const RefPtr<Component>& component, size_t startIndex)
+    {
+        ACE_DCHECK(
+            (GetElementId() == ElementRegister::UndefinedElementId) && "Update must only be called on first render");
+
+        auto ifElseComponent = AceType::DynamicCast<IfElseComponent>(component);
+        ACE_DCHECK(ifElseComponent);
+
+        LOGD("IfElseElementProxy::Update: First render: Creating IfElseElementProxy "
+            "with %{public}s elmtId %{public}d, startIndex_  %{public}d",
+            AceType::TypeName(ifElseComponent), ifElseComponent->GetElementId(), (int)startIndex);
+
+        SetElementId(ifElseComponent->GetElementId());
+        AddSelfToElementRegistry();
+
+        UpdateInternal(ifElseComponent, startIndex);
+    }
+
+    void LocalizedUpdate(
+        const RefPtr<Component>& newComponent, const RefPtr<Component>& outmostWrappingComponent) override
+    {
+        ACE_DCHECK((GetElementId() != ElementRegister::UndefinedElementId) &&
+                   "IfElseElementProxy::LocalizedUpdate must only be called on re-render");
+
+        auto ifElseComponent = AceType::DynamicCast<IfElseComponent>(newComponent);
+
+        ACE_DCHECK(ifElseComponent && "Must supply IfElseComponent");
+        ACE_DCHECK(branchId_ >= 0 && "branchId_ must initial during frst render");
+
+        LOGD("IfElseElementProxy::LocalizedUpdate with %{public}s elmtId %{public}d, branchId %{public}d->%{public}d",
+            AceType::TypeName(ifElseComponent), ifElseComponent->GetElementId(), branchId_,
+            ifElseComponent->BranchId());
+
+        if (ifElseComponent->BranchId() == branchId_) {
+            LOGD("IfElseElementProxy::LocalizedUpdat: branchId unchanged, nothing to do.");
+            return;
+        }
+
+        // Clear old children while branch id mismatched
+        LOGD("Clearing children...");
+        children_.clear();
+
+        UpdateInternal(ifElseComponent, 0);
+
+        // host is the parent List, Swiper or Gridelement
+        auto host = host_.Upgrade();
+        if (host) {
+            host->UpdateIndex();
+            LOGD("Updated startIndex_ %{public}d", (int)startIndex_);
+            host->OnDataSourceUpdated(startIndex_);
+        }
     }
 
 private:
@@ -817,11 +1510,27 @@ void ElementProxy::Dump(const std::string& prefix) const
 
 RefPtr<ElementProxy> ElementProxy::Create(const WeakPtr<ElementProxyHost>& host, const RefPtr<Component>& component)
 {
+
     if (AceType::InstanceOf<LazyForEachComponent>(component)) {
         return AceType::MakeRefPtr<LazyForEachElementProxy>(host);
     }
-    if (AceType::InstanceOf<ForEachComponent>(component)) {
-        return AceType::MakeRefPtr<ForEachElementProxy>(host);
+    if (!ElementProxyHelper::UsePartialUpdate()) {
+        if (AceType::InstanceOf<ForEachComponent>(component)) {
+            return AceType::MakeRefPtr<ForEachElementProxy>(host);
+        }
+    } else {
+        if (AceType::InstanceOf<OHOS::Ace::PartUpd::ForEachComponent>(component)) {
+            LOGD("creating ForEachElementProxy for %{public}s .", AceType::TypeName(component));
+            return AceType::MakeRefPtr<ForEachElementProxy>(host);
+        }
+        if (AceType::InstanceOf<ListItemComponent>(component)) {
+            LOGD("creating ListItemElementProxy for %{public}s .", AceType::TypeName(component));
+            return AceType::MakeRefPtr<ListItemElementProxy>(host);
+        }
+        if (AceType::InstanceOf<GridLayoutItemComponent>(component)) {
+            LOGD("creating GridItemElementProxy for %{public}s .", AceType::TypeName(component));
+            return AceType::MakeRefPtr<GridItemElementProxy>(host);
+        }
     }
     if (AceType::InstanceOf<IfElseComponent>(component)) {
         return AceType::MakeRefPtr<IfElseElementProxy>(host);
@@ -841,8 +1550,10 @@ void ElementProxyHost::UpdateChildren(const std::list<RefPtr<Component>>& compon
 {
     auto component = AceType::MakeRefPtr<MultiComposedComponent>("", "", components);
     if (!proxy_) {
+        LOGD("%{public}s/ElementProxyHost::UpdateChildren: not proxy, components", AceType::TypeName(this));
         proxy_ = ElementProxy::Create(AceType::WeakClaim(this), component);
     }
+    LOGD("%{public}s/ElementProxyHost::UpdateChildren: update component", AceType::TypeName(this));
     proxy_->Update(component, 0);
 }
 
@@ -919,6 +1630,37 @@ void ElementProxyHost::ReleaseRedundantComposeIds()
     }
     composeIds_ = activeComposeIds_;
     activeComposeIds_.clear();
+}
+
+void ElementProxy::AddSelfToElementRegistry()
+{
+    LOGD(" ElementProxy::AddSelfToElementRegistry() elmtId %{public}d", GetElementId());
+    ElementRegister::GetInstance()->AddElementProxy(AceType::WeakClaim(this));
+}
+
+void ElementProxy::RemoveSelfFromElementRegistry()
+{
+    LOGD(" ElementProxy::RemoveSelfFromElementRegistry() elmtId %{public}d", GetElementId());
+    ElementRegister::GetInstance()->RemoveElement(GetElementId());
+}
+
+std::list<std::string> ForEachElementLookup::GetIdArray(int32_t elmtId)
+{
+    auto elmt = ElementRegister::GetInstance()->GetElementById(elmtId);
+    auto feElmt = elmt != nullptr ? AceType::DynamicCast<OHOS::Ace::PartUpd::ForEachElement>(elmt) : nullptr;
+    if (feElmt != nullptr) {
+        return feElmt->GetIdArray();
+    }
+
+    auto elmtProxy = ElementRegister::GetInstance()->GetElementProxyById(elmtId);
+    auto feElmtProxy =
+        elmtProxy != nullptr ? AceType::DynamicCast<OHOS::Ace::V2::ForEachElementProxy>(elmtProxy) : nullptr;
+    if (feElmtProxy != nullptr) {
+        return feElmtProxy->GetIdArray();
+    }
+
+    LOGW("Can not find ForEachElement or ForEachElementProxy with elmtId %{public}d. (ok on first render)", elmtId);
+    return std::list<std::string>();
 }
 
 } // namespace OHOS::Ace::V2
