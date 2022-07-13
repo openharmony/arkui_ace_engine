@@ -1115,21 +1115,24 @@ void RenderSwiper::MoveItems(double dragVelocity)
             LOGI("slide animation stop");
             // moving animation end, one drag and item move is complete
             auto swiper = weak.Upgrade();
-            if (swiper) {
-                swiper->isIndicatorAnimationStart_ = false;
-                if (!needRestore) {
+            if (!swiper) {
+                return;
+            }
+            swiper->isIndicatorAnimationStart_ = false;
+            if (!needRestore) {
+                if (toIndex != swiper->currentIndex_) {
                     swiper->LoadLazyItems((fromIndex + 1) % swiper->itemCount_ == toIndex);
-                    swiper->outItemIndex_ = fromIndex;
                     swiper->currentIndex_ = toIndex;
                 }
-                swiper->RestoreAutoPlay();
-                swiper->FireItemChangedEvent(!needRestore);
-                swiper->ResetCachedChildren();
-                swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
-                swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
-                swiper->ExecuteMoveCallback(swiper->currentIndex_);
-                swiper->MarkNeedLayout(true);
+                swiper->outItemIndex_ = fromIndex;
             }
+            swiper->RestoreAutoPlay();
+            swiper->FireItemChangedEvent(!needRestore);
+            swiper->ResetCachedChildren();
+            swiper->UpdateOneItemOpacity(MAX_OPACITY, fromIndex);
+            swiper->UpdateOneItemOpacity(MAX_OPACITY, toIndex);
+            swiper->ExecuteMoveCallback(swiper->currentIndex_);
+            swiper->MarkNeedLayout(true);
         });
 
         controller_->SetDuration(duration_);
@@ -3037,7 +3040,7 @@ void RenderSwiper::BuildLazyItems()
             cacheStart_ = (itemCount_ + currentIndex_ - halfLazy) % itemCount_;
             cacheEnd_ = (cacheStart_ + lazyLoadCacheSize_ - 1) % itemCount_;
         } else {
-            if (currentIndex_ <= halfLazy) {
+            if (currentIndex_ < halfLazy) {
                 cacheStart_ = 0;
                 cacheEnd_ = swiper_->GetCachedSize() + swiper_->GetDisplayCount() - 1;
             } else if (currentIndex_ >= itemCount_ - halfLazy - 1) {
