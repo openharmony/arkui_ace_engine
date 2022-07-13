@@ -300,45 +300,45 @@ extern uint8_t* _binary_fa_black_clock_widget_second_png_end;
 // The following parameters represent the beginning and end of the file.
 extern uint8_t _binary_ic_public_drawer_svg_start[];
 extern uint8_t* _binary_ic_public_drawer_svg_end;
-// binary/container_modal_window_close.svg
-extern uint8_t _binary_container_modal_window_close_svg_start[];
-extern uint8_t* _binary_container_modal_window_close_svg_end;
+// binary/container_modal_window_close.png
+extern uint8_t _binary_container_modal_window_close_png_start[];
+extern uint8_t* _binary_container_modal_window_close_png_end;
 
-// binary/container_modal_window_maximize.svg
-extern uint8_t _binary_container_modal_window_maximize_svg_start[];
-extern uint8_t* _binary_container_modal_window_maximize_svg_end;
+// binary/container_modal_window_maximize.png
+extern uint8_t _binary_container_modal_window_maximize_png_start[];
+extern uint8_t* _binary_container_modal_window_maximize_png_end;
 
-// binary/container_modal_window_minimize.svg
-extern uint8_t _binary_container_modal_window_minimize_svg_start[];
-extern uint8_t* _binary_container_modal_window_minimize_svg_end;
+// binary/container_modal_window_minimize.png
+extern uint8_t _binary_container_modal_window_minimize_png_start[];
+extern uint8_t* _binary_container_modal_window_minimize_png_end;
 
-// binary/container_modal_window_recover.svg
-extern uint8_t _binary_container_modal_window_recover_svg_start[];
-extern uint8_t* _binary_container_modal_window_recover_svg_end;
+// binary/container_modal_window_recover.png
+extern uint8_t _binary_container_modal_window_recover_png_start[];
+extern uint8_t* _binary_container_modal_window_recover_png_end;
 
-// binary/container_modal_window_split_left.svg
-extern uint8_t _binary_container_modal_window_split_left_svg_start[];
-extern uint8_t* _binary_container_modal_window_split_left_svg_end;
+// binary/container_modal_window_split_left.png
+extern uint8_t _binary_container_modal_window_split_left_png_start[];
+extern uint8_t* _binary_container_modal_window_split_left_png_end;
 
-// binary/container_modal_window_defocus_close.svg
-extern uint8_t _binary_container_modal_window_defocus_close_svg_start[];
-extern uint8_t _binary_container_modal_window_defocus_close_svg_end[];
+// binary/container_modal_window_defocus_close.png
+extern uint8_t _binary_container_modal_window_defocus_close_png_start[];
+extern uint8_t _binary_container_modal_window_defocus_close_png_end[];
 
-// binary/container_modal_window_defocus_maximize.svg
-extern uint8_t _binary_container_modal_window_defocus_maximize_svg_start[];
-extern uint8_t _binary_container_modal_window_defocus_maximize_svg_end[];
+// binary/container_modal_window_defocus_maximize.png
+extern uint8_t _binary_container_modal_window_defocus_maximize_png_start[];
+extern uint8_t _binary_container_modal_window_defocus_maximize_png_end[];
 
-// binary/container_modal_window_defocus_minimize.svg
-extern uint8_t _binary_container_modal_window_defocus_minimize_svg_start[];
-extern uint8_t _binary_container_modal_window_defocus_minimize_svg_end[];
+// binary/container_modal_window_defocus_minimize.png
+extern uint8_t _binary_container_modal_window_defocus_minimize_png_start[];
+extern uint8_t _binary_container_modal_window_defocus_minimize_png_end[];
 
-// binary/container_modal_window_defocus_recover.svg
-extern uint8_t _binary_container_modal_window_defocus_recover_svg_start[];
-extern uint8_t _binary_container_modal_window_defocus_recover_svg_end[];
+// binary/container_modal_window_defocus_recover.png
+extern uint8_t _binary_container_modal_window_defocus_recover_png_start[];
+extern uint8_t _binary_container_modal_window_defocus_recover_png_end[];
 
-// binary/container_modal_window_defocus_split_left.svg
-extern uint8_t _binary_container_modal_window_defocus_split_left_svg_start[];
-extern uint8_t _binary_container_modal_window_defocus_split_left_svg_end[];
+// binary/container_modal_window_defocus_split_left.png
+extern uint8_t _binary_container_modal_window_defocus_split_left_png_start[];
+extern uint8_t _binary_container_modal_window_defocus_split_left_png_end[];
 
 namespace OHOS::Ace {
 namespace {
@@ -513,45 +513,45 @@ const uint8_t* InternalResource::GetResource(const ResourceId id, size_t& size) 
             ResourceData(_binary_ic_public_drawer_svg_start,
                 static_cast<size_t>(_binary_ic_public_drawer_svg_end - _binary_ic_public_drawer_svg_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE,
-            ResourceData(_binary_container_modal_window_close_svg_start,
-                static_cast<size_t>(_binary_container_modal_window_close_svg_end -
-                _binary_container_modal_window_close_svg_start)) },
+            ResourceData(_binary_container_modal_window_close_png_start,
+                static_cast<size_t>(_binary_container_modal_window_close_png_end -
+                _binary_container_modal_window_close_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
-            ResourceData(_binary_container_modal_window_maximize_svg_start,
-                static_cast<size_t>(_binary_container_modal_window_maximize_svg_end -
-                _binary_container_modal_window_maximize_svg_start)) },
+            ResourceData(_binary_container_modal_window_maximize_png_start,
+                static_cast<size_t>(_binary_container_modal_window_maximize_png_end -
+                _binary_container_modal_window_maximize_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
-            ResourceData(_binary_container_modal_window_minimize_svg_start,
-                static_cast<size_t>(_binary_container_modal_window_minimize_svg_end -
-                _binary_container_modal_window_minimize_svg_start)) },
+            ResourceData(_binary_container_modal_window_minimize_png_start,
+                static_cast<size_t>(_binary_container_modal_window_minimize_png_end -
+                _binary_container_modal_window_minimize_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER,
-            ResourceData(_binary_container_modal_window_recover_svg_start,
-                static_cast<size_t>(_binary_container_modal_window_recover_svg_end -
-                _binary_container_modal_window_recover_svg_start)) },
+            ResourceData(_binary_container_modal_window_recover_png_start,
+                static_cast<size_t>(_binary_container_modal_window_recover_png_end -
+                _binary_container_modal_window_recover_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
-            ResourceData(_binary_container_modal_window_split_left_svg_start,
-                static_cast<size_t>(_binary_container_modal_window_split_left_svg_end -
-                _binary_container_modal_window_split_left_svg_start)) },
+            ResourceData(_binary_container_modal_window_split_left_png_start,
+                static_cast<size_t>(_binary_container_modal_window_split_left_png_end -
+                _binary_container_modal_window_split_left_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE,
-            ResourceData(_binary_container_modal_window_defocus_close_svg_start,
-                static_cast<size_t>(_binary_container_modal_window_defocus_close_svg_end -
-                                    _binary_container_modal_window_defocus_close_svg_start)) },
+            ResourceData(_binary_container_modal_window_defocus_close_png_start,
+                static_cast<size_t>(_binary_container_modal_window_defocus_close_png_end -
+                                    _binary_container_modal_window_defocus_close_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MAXIMIZE,
-            ResourceData(_binary_container_modal_window_defocus_maximize_svg_start,
-                static_cast<size_t>(_binary_container_modal_window_defocus_maximize_svg_end -
-                                    _binary_container_modal_window_defocus_maximize_svg_start)) },
+            ResourceData(_binary_container_modal_window_defocus_maximize_png_start,
+                static_cast<size_t>(_binary_container_modal_window_defocus_maximize_png_end -
+                                    _binary_container_modal_window_defocus_maximize_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_MINIMIZE,
-            ResourceData(_binary_container_modal_window_defocus_minimize_svg_start,
-                static_cast<size_t>(_binary_container_modal_window_defocus_minimize_svg_end -
-                                    _binary_container_modal_window_defocus_minimize_svg_start)) },
+            ResourceData(_binary_container_modal_window_defocus_minimize_png_start,
+                static_cast<size_t>(_binary_container_modal_window_defocus_minimize_png_end -
+                                    _binary_container_modal_window_defocus_minimize_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_RECOVER,
-            ResourceData(_binary_container_modal_window_defocus_recover_svg_start,
-                static_cast<size_t>(_binary_container_modal_window_defocus_recover_svg_end -
-                                    _binary_container_modal_window_defocus_recover_svg_start)) },
+            ResourceData(_binary_container_modal_window_defocus_recover_png_start,
+                static_cast<size_t>(_binary_container_modal_window_defocus_recover_png_end -
+                                    _binary_container_modal_window_defocus_recover_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT,
-            ResourceData(_binary_container_modal_window_defocus_split_left_svg_start,
-                static_cast<size_t>(_binary_container_modal_window_defocus_split_left_svg_end -
-                                    _binary_container_modal_window_defocus_split_left_svg_start)) },
+            ResourceData(_binary_container_modal_window_defocus_split_left_png_start,
+                static_cast<size_t>(_binary_container_modal_window_defocus_split_left_png_end -
+                                    _binary_container_modal_window_defocus_split_left_png_start)) },
     };
     auto iter = RESOURCE_MAP.find(id);
     if (iter != RESOURCE_MAP.end()) {
