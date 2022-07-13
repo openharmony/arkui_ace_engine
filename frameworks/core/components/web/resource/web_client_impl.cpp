@@ -364,13 +364,14 @@ void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)
     delegate->OnScaleChange(oldScaleFactor, newScaleFactor);
 }
 
-bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthResult> result)
+bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthResult> result, const std::string &host,
+    const std::string &realm)
 {
     LOGI("OnHttpAuthRequestByJS");
     ContainerScope scope(instanceId_);
 
     bool jsResult = false;
-    auto param = std::make_shared<WebHttpAuthEvent>(AceType::MakeRefPtr<AuthResultOhos>(result));
+    auto param = std::make_shared<WebHttpAuthEvent>(AceType::MakeRefPtr<AuthResultOhos>(result), host, realm);
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
         LOGW("can't get task executor");
