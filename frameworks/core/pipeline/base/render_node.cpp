@@ -466,7 +466,7 @@ void RenderNode::MarkNeedLayout(bool selfOnly, bool forceParent)
         // Force mark self and all ancestors need layout.
         SetNeedLayout(true);
         auto parent = parent_.Upgrade();
-        if (parent && parent->CheckIfNeedLayoutAgain()) {
+        if (parent && (parent->CheckIfNeedLayoutAgain() || forceParent)) {
             parent->MarkNeedLayout(false, forceParent);
         } else {
             addSelf = true;
