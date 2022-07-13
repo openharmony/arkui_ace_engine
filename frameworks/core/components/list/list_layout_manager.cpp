@@ -418,6 +418,7 @@ void ListLayoutManager::PerformLayout()
         RefreshLayout();
     }
 
+    UpdateItemPosition();
     int32_t itemIndex = GetIndexByPosition(head_ - chainOffset_);
     int32_t firstIndex = itemIndex;
     renderList_.RecycleHead(itemIndex - 1); // Recycle head items.
@@ -792,6 +793,25 @@ void ListLayoutManager::InitChainAnimation(int32_t nodeCount)
 double ListLayoutManager::GetItemAnimationValue(int32_t index) const
 {
     return enableChain_ ? GetChainDelta(index) : 0.0;
+}
+
+void ListLayoutManager::UpdateItemPosition(void)
+{
+    double position = 0;
+    bool positionVaild = false;
+    for (auto it = itemPosition_.begin(); it != itemPosition_.end(); it++) {
+        if (positionVaild) {
+            it->second = position;
+        }
+        auto itemChild = renderList_.FindChildByIndex(it->first);
+        if (!itemChild) {
+            positionVaild = false;
+            continue;
+        }
+        double childSize = renderList_.GetMainSize(itemChild->GetLayoutSize());
+        position = it->second + childSize;
+        positionVaild = true;
+    }
 }
 
 } // namespace OHOS::Ace
