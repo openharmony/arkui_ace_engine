@@ -27,9 +27,11 @@ void RosenRenderRemoteWindow::Update(const RefPtr<Component>& component)
         return;
     }
 
+    // update RSNode if surface node changed
     auto surfaceNode = remoteWindowComponent->GetRSSurfaceNode();
-    // update RSNode if needed
-    if (surfaceNode != nullptr && surfaceNode != GetRSNode()) {
+    auto prevRSNode = GetRSNode();
+    if (prevRSNode == nullptr ||
+        (surfaceNode != nullptr && surfaceNode != prevRSNode && surfaceNode->GetId() != prevRSNode->GetId())) {
         SetRSNode(surfaceNode);
         // create corresponding RSRenderNode in Render Thread
         surfaceNode->CreateNodeInRenderThread(true);
