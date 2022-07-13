@@ -887,7 +887,9 @@ JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
         return JSRef<JSVal>::Cast(obj);
     }
     jsWebHttpAuth->SetResult(eventInfo.GetResult());
-    obj->SetPropertyObject("result", resultObj);
+    obj->SetPropertyObject("handler", resultObj);
+    obj->SetProperty("host", eventInfo.GetHost());
+    obj->SetProperty("realm", eventInfo.GetRealm());
     return JSRef<JSVal>::Cast(obj);
 }
 
