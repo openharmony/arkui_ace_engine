@@ -16,8 +16,9 @@
 #include "ui_mgr_service.h"
 
 #include <atomic>
-#include <i_input_event_consumer.h>
+#include <axis_event.h>
 #include <key_event.h>
+#include <pointer_event.h>
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
@@ -84,7 +85,7 @@ private:
     WeakPtr<Platform::AceContainer> container_;
 };
 
-class UIMgrServiceInputEventConsumer : public MMI::IInputEventConsumer {
+class UIMgrServiceInputEventConsumer : public Rosen::IInputEventConsumer {
 public:
     explicit UIMgrServiceInputEventConsumer(Ace::Platform::FlutterAceView* flutterAceView)
     {
@@ -92,14 +93,26 @@ public:
     }
     ~UIMgrServiceInputEventConsumer() override = default;
 
-    void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override
+    bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override
     {
         if (flutterAceView_ != nullptr) {
             flutterAceView_->DispatchTouchEvent(flutterAceView_, pointerEvent);
+            return true;
         }
+        return false;
     }
-    void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override {}
-    void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override {}
+
+    bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const override
+    {
+        // do nothing
+        return false;
+    }
+
+    bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const override
+    {
+        // do nothing
+        return false;
+    }
 
 private:
     Ace::Platform::FlutterAceView* flutterAceView_ = nullptr;
@@ -271,9 +284,9 @@ int UIMgrService::ShowDialog(const std::string& name,
             new UIMgrServiceWindowChangeListener(AceType::WeakClaim(AceType::RawPtr(container)));
         dialogWindow->RegisterWindowChangeListener(listener);
 
-        std::shared_ptr<MMI::IInputEventConsumer> inputEventListener =
+        std::shared_ptr<Rosen::IInputEventConsumer> inputEventListener =
             std::make_shared<UIMgrServiceInputEventConsumer>(flutterAceView);
-        dialogWindow->AddInputEventListener(inputEventListener);
+        dialogWindow->SetInputEventConsumer(inputEventListener);
 
         Ace::Platform::FlutterAceView::SurfaceCreated(flutterAceView, dialogWindow);
 
