@@ -82,6 +82,7 @@ protected:
     Rect closeIconRect_;
     Rect closeIconHotZoneRect_;
     Rect searchTextRect_;
+    Rect searchReactRect_;
     Offset searchBoxOffset_;
     SearchNodeType focusRender_ = SearchNodeType::NONE;
     SearchNodeType hoverOrPressRender_ = SearchNodeType::NONE;
