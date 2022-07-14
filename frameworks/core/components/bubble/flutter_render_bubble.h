@@ -39,7 +39,6 @@ private:
     SkRRect rrect_;
 
     SkRRect MakeRRect();
-    void UpdateBorderRadius() override;
     void PaintMask(RenderContext& context);
     void PaintBubble(RenderContext& context);
     void PaintTopBubble(SkCanvas* skCanvas, const SkPaint& paint);

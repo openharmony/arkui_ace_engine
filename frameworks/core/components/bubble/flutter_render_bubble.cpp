@@ -39,19 +39,6 @@ SkCanvas* FlutterRenderBubble::GetSkCanvas(RenderContext& context)
     return canvas->canvas();
 }
 
-void FlutterRenderBubble::UpdateBorderRadius()
-{
-    auto rrect = MakeRRect();
-    border_.SetTopLeftRadius(
-        Radius(rrect.radii(SkRRect::kUpperLeft_Corner).fX, rrect.radii(SkRRect::kUpperLeft_Corner).fY));
-    border_.SetTopRightRadius(
-        Radius(rrect.radii(SkRRect::kUpperRight_Corner).fX, rrect.radii(SkRRect::kUpperRight_Corner).fY));
-    border_.SetBottomRightRadius(
-        Radius(rrect.radii(SkRRect::kLowerRight_Corner).fX, rrect.radii(SkRRect::kLowerRight_Corner).fY));
-    border_.SetBottomLeftRadius(
-        Radius(rrect.radii(SkRRect::kLowerLeft_Corner).fX, rrect.radii(SkRRect::kLowerLeft_Corner).fY));
-}
-
 SkRRect FlutterRenderBubble::MakeRRect()
 {
     SkRect rect = SkRect::MakeXYWH(childOffset_.GetX(), childOffset_.GetY(), childSize_.Width(), childSize_.Height());
