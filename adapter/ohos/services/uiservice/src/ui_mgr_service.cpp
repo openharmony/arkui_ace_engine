@@ -73,7 +73,23 @@ public:
         auto container = container_.Upgrade();
         if (container) {
             container->SetWindowPos(rect.posX_, rect.posY_);
-        }
+            auto taskExecutor = container->GetTaskExecutor();
+            if (!taskExecutor) {
+                LOGE("OnSizeChange: taskExecutor is null.");
+                return;
+            }
+            taskExecutor->PostTask(
+                [rect, reason, container]() {
+                    auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
+                    if (!flutterAceView) {
+                        LOGE("OnSizeChange: flutterAceView is null.");
+                        return;
+                    }
+                    Platform::FlutterAceView::SurfaceChanged(flutterAceView, rect.width_, rect.height_,
+                        rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason));
+                },
+                TaskExecutor::TaskType::PLATFORM);
+                }
     }
     void OnModeChange(OHOS::Rosen::WindowMode mode) override
     {
