@@ -29,7 +29,7 @@ namespace OHOS::Ace::Framework {
 class JSGridItem : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
-    static void Create();
+    static void Create(const JSCallbackInfo& args);
 
 protected:
     #define ACE_DEFINE_SET_GRID_ITEM_SIZE(name)                                                                       \

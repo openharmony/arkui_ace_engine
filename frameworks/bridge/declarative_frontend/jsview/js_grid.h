@@ -26,6 +26,8 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
+    static void PopGrid(const JSCallbackInfo& info);
+    static void UseProxy(const JSCallbackInfo& args);
     static void SetColumnsTemplate(const std::string& value);
     static void SetRowsTemplate(const std::string& value);
     static void SetColumnsGap(const JSCallbackInfo& info);

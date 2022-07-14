@@ -39,6 +39,7 @@ void JSGrid::Create(const JSCallbackInfo& info)
     std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
 
     RefPtr<OHOS::Ace::GridLayoutComponent> gridComponent = AceType::MakeRefPtr<GridLayoutComponent>(componentChildren);
+    ViewStackProcessor::GetInstance()->ClaimElementId(gridComponent);
     gridComponent->SetDeclarative();
     gridComponent->SetNeedShrink(true);
     if (info.Length() > 0 && info[0]->IsObject()) {
@@ -57,7 +58,43 @@ void JSGrid::Create(const JSCallbackInfo& info)
             gridComponent->SetScrollBarProxy(proxy);
         }
     }
-    ViewStackProcessor::GetInstance()->Push(gridComponent);
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("fail to get container");
+        return;
+    }
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        LOGE("fail to get context");
+        return;
+    }
+
+    if (context->UsePartialUpdate()) {
+        ViewStackProcessor::GetInstance()->PushGrid(gridComponent);
+    } else {
+        ViewStackProcessor::GetInstance()->Push(gridComponent);
+    }
+}
+
+void JSGrid::PopGrid(const JSCallbackInfo& info)
+{
+    ViewStackProcessor::GetInstance()->PopGrid();
+}
+
+void JSGrid::UseProxy(const JSCallbackInfo& args)
+{
+    auto parentGrid = ViewStackProcessor::GetInstance()->GetTopGrid();
+    if (parentGrid == nullptr) {
+        LOGE("no parent Grid");
+    }
+
+    // return true if code path for GridElement and its children will rely on
+    // ElementProxy. Only in this case shallow render functionality can be used
+    // see also GridLayoutComponent::CreateElement() and GridItemElementProxy class
+    LOGD("parent Grid uses proxied code path %{public}s.",
+        (parentGrid ? !parentGrid->UseNonProxiedCodePath() ? "yes" : "false" : "no parent grid (error)"));
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(parentGrid ? !parentGrid->UseNonProxiedCodePath() : false)));
 }
 
 void JSGrid::SetColumnsTemplate(const std::string& value)
@@ -159,6 +196,8 @@ void JSGrid::JSBind(BindingTarget globalObj)
 
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSGrid>::StaticMethod("create", &JSGrid::Create, opt);
+    JSClass<JSGrid>::StaticMethod("pop", &JSGrid::PopGrid, opt);
+    JSClass<JSGrid>::StaticMethod("willUseProxy", &JSGrid::UseProxy, opt);
     JSClass<JSGrid>::StaticMethod("columnsTemplate", &JSGrid::SetColumnsTemplate, opt);
     JSClass<JSGrid>::StaticMethod("rowsTemplate", &JSGrid::SetRowsTemplate, opt);
     JSClass<JSGrid>::StaticMethod("columnsGap", &JSGrid::SetColumnsGap, opt);
