@@ -63,18 +63,18 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
 
 void JSCheckboxGroup::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("checkboxgroup create error, info is not-valid");
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto groupName = paramObject->GetProperty("group");
     RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
     auto checkboxComponent = AceType::MakeRefPtr<OHOS::Ace::CheckboxComponent>(checkBoxTheme);
-    auto checkboxGroupName = groupName->ToString();
-    checkboxComponent->SetGroupName(checkboxGroupName);
-    auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupCompnent();
-    checkboxGroupmap->emplace(checkboxGroupName, checkboxComponent);
+    if ((info.Length() >= 1) && info[0]->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+        auto groupName = paramObject->GetProperty("group");
+        if (groupName->IsString()) {
+            auto checkboxGroupName = groupName->ToString();
+            checkboxComponent->SetGroupName(checkboxGroupName);
+            auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupCompnent();
+            checkboxGroupmap->emplace(checkboxGroupName, checkboxComponent);
+        }
+    }
     checkboxComponent->SetInspectorTag("CheckboxGroupComponent");
     ViewStackProcessor::GetInstance()->Push(checkboxComponent);
     
