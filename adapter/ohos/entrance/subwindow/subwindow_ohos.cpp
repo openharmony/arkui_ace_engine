@@ -73,9 +73,6 @@ void SubwindowOhos::InitContainer()
             LOGI("create window error return");
             return;
         }
-
-        // This is for window dump tree, set the default background color #00000000.
-        window_->SetBackgroundColor("#00000000");
     }
     std::string url = "";
     window_->SetUIContent(url, nullptr, nullptr, false);
