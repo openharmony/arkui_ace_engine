@@ -26,15 +26,15 @@ void SelectPopupElement::PerformBuild()
     auto context = context_.Upgrade();
     if (!context || !context->GetAccessibilityManager() || !component) {
         LOGE("select: select popup component is null or initialize failed.");
-    } else {
-        component->Initialize(context->GetAccessibilityManager());
-        component->SetRefreshAnimationCallback([weak = WeakClaim(this)](const TweenOption& option, bool isIn) {
-            auto element = weak.Upgrade();
-            if (element) {
-                element->OnRefreshAnimation(option, isIn);
-            }
-        });
+        return;
     }
+    component->Initialize(context->GetAccessibilityManager());
+    component->SetRefreshAnimationCallback([weak = WeakClaim(this)](const TweenOption& option, bool isIn) {
+        auto element = weak.Upgrade();
+        if (element) {
+            element->OnRefreshAnimation(option, isIn);
+        }
+    });
     SoleChildElement::PerformBuild();
     auto tween = GetTween(AceType::Claim(this));
     if (tween && tween->GetController() && component) {
