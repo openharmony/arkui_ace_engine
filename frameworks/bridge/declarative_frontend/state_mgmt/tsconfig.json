@@ -1,5 +1,6 @@
 {
   "files": [
+    "src/lib/environment_setting.d.ts",
     "src/lib/i_property_subscriber.ts",
     "src/lib/i_property_subscriber_lookup.ts",
     "src/lib/subscriber_lookup.ts",
@@ -34,6 +35,7 @@
     "outFile": "./dist/stateMgmt.js",
     "rootDir": "./src/",
     "declaration": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "lib" : ["ES6"],
   }
 }
