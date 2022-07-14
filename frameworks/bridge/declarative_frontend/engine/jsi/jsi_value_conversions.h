@@ -66,7 +66,9 @@ T fromJsiValue(const EcmaVM* vm, Local<panda::JSValueRef> val)
 template<typename T>
 panda::Local<panda::JSValueRef> toJsiValueWithVM(const EcmaVM* vm, T val)
 {
-    if constexpr (std::is_integral<T>::value && std::is_signed<T>::value && !std::is_same<T, bool>::value) {
+    if constexpr (std::is_same_v<T, bool>) {
+        return panda::BooleanRef::New(vm, val);
+    } else if constexpr (std::is_integral<T>::value && std::is_signed<T>::value) {
         return panda::IntegerRef::New(vm, val);
     } else if constexpr (std::is_unsigned_v<T>) {
         return panda::IntegerRef::NewFromUnsigned(vm, val);
@@ -76,8 +78,6 @@ panda::Local<panda::JSValueRef> toJsiValueWithVM(const EcmaVM* vm, T val)
         return panda::StringRef::NewFromUtf8(vm, val.c_str());
     } else if constexpr (std::is_same_v<T, const char*>) {
         return panda::StringRef::NewFromUtf8(vm, val);
-    } else if constexpr (std::is_same_v<T, bool>) {
-        return panda::BooleanRef::New(vm, val);
     }
 
     return panda::JSValueRef::Exception(vm);
