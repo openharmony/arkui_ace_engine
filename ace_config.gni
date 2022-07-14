@@ -100,7 +100,7 @@ if (is_standard_system) {
 if (is_standard_system) {
   ace_engine_part = "ace_engine"
   hilog_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-  ark_runtime_path = "//ark/runtime_core"
+  ark_runtime_path = "//arkcompiler/runtime_core"
 } else {
   if (is_cross_platform_build) {
     ace_engine_part = "ace_engine_cross"

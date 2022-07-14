@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//ark/ts2abc/ts2panda/ts2abc_config.gni")
+import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
@@ -97,7 +97,7 @@ template("declarative_js_engine_ark") {
       "$ark_runtime_path/libpandabase:arkbase_public_config",
     ]
 
-    public_configs = [ "//ark/js_runtime:ark_jsruntime_public_config" ]
+    public_configs = [ "//arkcompiler/ets_runtime:ark_jsruntime_public_config" ]
 
     sources = [
       "js_converter.cpp",
@@ -116,7 +116,7 @@ template("declarative_js_engine_ark") {
       "modules/jsi_timer_module.cpp",
     ]
 
-    deps = [ "//ark/js_runtime:libark_jsruntime" ]
+    deps = [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
 
     if (!defined(config.build_for_preview) || !config.build_for_preview) {
       sources += [
