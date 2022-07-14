@@ -78,7 +78,7 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want)
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
     if (moduleInfo != nullptr) {
-        packagePathStr += "/" + moduleInfo->name + "/";
+        packagePathStr += "/" + moduleInfo->package + "/";
     }
 
     // init data ability
