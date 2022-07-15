@@ -56,9 +56,9 @@ constexpr double DRAG_OFFSET_MAX = 1.0;
 constexpr double DRAG_OFFSET_MAX_NEGATIVE = -1.0;
 constexpr double DRAG_OFFSET_SWITCH_DP = 14.0;
 
-const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 540, 200, TouchType::DOWN };
-const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 540, 200, TouchType::MOVE };
-const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 540, 200, TouchType::UP };
+const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 540, 200, 540, 200, TouchType::DOWN };
+const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 540, 200, 540, 200, TouchType::MOVE };
+const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 540, 200, 540, 200, TouchType::UP };
 enum class DragDirection {
     LEFT,
     RIGHT,

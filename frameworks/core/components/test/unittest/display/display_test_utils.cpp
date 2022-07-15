@@ -15,7 +15,6 @@
 
 #include "core/components/test/unittest/display/display_test_utils.h"
 
-#include "adapter/aosp/entrance/java/jni/ace_application_info.h"
 #include "core/components/box/box_component.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/test/json/json_frontend.h"

@@ -47,7 +47,5 @@ group("unittest") {
   testonly = true
   deps = []
 
-  deps += [
-    # ":StageElementTest"
-  ]
+  deps += [ ":StageElementTest" ]
 }

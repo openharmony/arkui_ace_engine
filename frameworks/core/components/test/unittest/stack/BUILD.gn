@@ -82,6 +82,6 @@ group("unittest") {
 
   deps += [
     ":RenderStackTest",
-    #":StackCreatorTest",
+    ":StackCreatorTest",
   ]
 }
