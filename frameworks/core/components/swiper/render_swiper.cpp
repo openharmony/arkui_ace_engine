@@ -265,7 +265,6 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     if (itemCount_ < LEAST_SLIDE_ITEM_COUNT) {
         LOGD("swiper item is less than least slide count");
         swiper_ = swiper;
-        index_ = 0;
         return;
     }
     UpdateIndex(swiper->GetIndex());
@@ -580,9 +579,8 @@ void RenderSwiper::UpdateIndex(int32_t index)
             index = itemCount_ - 1;
         }
         if (swiper_) {
-            if (index_ != index) {
+            if (currentIndex_ != index) {
                 swipeToIndex_ = index; // swipe to animation need to start after perform layout
-                index_ = index;
             }
         } else {
             // render node first update index
@@ -3035,6 +3033,10 @@ void RenderSwiper::UpdateItemCount(int32_t itemCount)
 
 void RenderSwiper::BuildLazyItems()
 {
+    LOGI("itemCount: %{public}d, lazyLoadCacheSize: %{public}d, cachedSize: %{public}d, displayCount: %{public}d",
+        itemCount_, lazyLoadCacheSize_, swiper_->GetCachedSize(), swiper_->GetDisplayCount());
+    auto lastCacheStart = cacheStart_;
+    auto lastCacheEnd = cacheEnd_;
     if (itemCount_ <= lazyLoadCacheSize_) {
         cacheStart_ = 0;
         cacheEnd_ = itemCount_;
@@ -3056,6 +3058,12 @@ void RenderSwiper::BuildLazyItems()
             }
         }
     }
+
+    if ((lastCacheStart == cacheStart_) && (lastCacheEnd == cacheEnd_) && !items_.empty()) {
+        LOGI("cache is not changed");
+        return;
+    }
+
     LOGI("currentIndex_ = %{public}d, init cached: %{public}d - %{public}d", currentIndex_, cacheStart_, cacheEnd_);
     int32_t index = cacheStart_;
     while ((index >= cacheStart_ && cacheStart_ > cacheEnd_) || index <= cacheEnd_) {
@@ -3072,9 +3080,6 @@ void RenderSwiper::BuildLazyItems()
 
 void RenderSwiper::LoadItems()
 {
-    if (!items_.empty()) {
-        return;
-    }
     if ((swiper_ && !swiper_->GetLazyForEachComponent()) || !swiper_) {
         auto children = GetChildren();
         int32_t index = 0;

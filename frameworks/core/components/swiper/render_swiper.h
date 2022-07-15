@@ -543,7 +543,6 @@ private:
     bool disableRotation_ = false;
     bool catchMode_ = true;
     Dimension itemSpace_;
-    int32_t index_ = 0;
     int32_t swipeToIndex_ = -1;
     MainSwiperSize mainSwiperSize_ = MainSwiperSize::MAX;
     double prevMargin_ = 0.0;
