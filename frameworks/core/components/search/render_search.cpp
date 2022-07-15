@@ -161,12 +161,18 @@ void RenderSearch::InitRect(const RefPtr<RenderTextField>& renderTextField)
         double searchBoxWidth = renderSearchBox_->GetLayoutSize().Width();
         Offset searchTextOffset = Offset(
             GetLayoutSize().Width() - rightBorderWidth - searchBoxWidth - searchBoxSpacing, searchBoxVerticalOffset);
+        Offset searchReactOffset = Offset(
+            GetLayoutSize().Width() - rightBorderWidth - searchBoxWidth - searchBoxSpacing, topBorderWidth);
         if (needReverse_) {
             searchTextOffset = Offset(leftBorderWidth, searchBoxVerticalOffset);
+            searchReactOffset = Offset(leftBorderWidth, topBorderWidth);
         }
+        Size searchBoxSize(renderSearchBox_->GetLayoutSize().Width() + searchBoxSpacing, GetLayoutSize().Height());
+        searchReactRect_ = Rect(searchReactOffset, searchBoxSize);
         searchTextRect_ = Rect(searchTextOffset, renderSearchBox_->GetLayoutSize() + Size(searchBoxSpacing, 0.0));
     } else {
         searchTextRect_ = Rect();
+        searchReactRect_ = Rect();
     }
 
     auto context = context_.Upgrade();
@@ -384,28 +390,29 @@ bool RenderSearch::TouchTest(const Point& globalPoint, const Point& parentLocalP
         GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
     LOGD("OnTouchTest: the local point refer to parent is %{public}lf, %{public}lf, ", parentLocalPoint.GetX(),
         parentLocalPoint.GetY());
+    auto pointWithoutMargin = parentLocalPoint - GetPosition();
     if (GetDisableTouchEvent() || disabled_) {
         return false;
     }
-    if (showCloseIcon_ && closeIconHotZoneRect_.IsInRegion(parentLocalPoint)) {
+    if (showCloseIcon_ && closeIconHotZoneRect_.IsInRegion(pointWithoutMargin)) {
         hoverOrPressRender_ = SearchNodeType::IMAGE;
-    } else if (searchTextRect_.IsInRegion(parentLocalPoint)) {
+    } else if (searchReactRect_.IsInRegion(pointWithoutMargin)) {
         hoverOrPressRender_ = SearchNodeType::BUTTON;
     } else {
         hoverOrPressRender_ = SearchNodeType::NONE;
     }
     // Since the paintRect is relative to parent, use parent local point to perform touch test.
-    if (closeIconHotZoneRect_.IsInRegion(parentLocalPoint) || searchTextRect_.IsInRegion(parentLocalPoint)) {
+    if (closeIconHotZoneRect_.IsInRegion(pointWithoutMargin) || searchReactRect_.IsInRegion(pointWithoutMargin)) {
         // Calculates the coordinate offset in this node.
-        const auto localPoint = parentLocalPoint - GetPaintRect().GetOffset();
+        const auto localPoint = pointWithoutMargin - GetPaintRect().GetOffset();
         const auto coordinateOffset = globalPoint - localPoint;
         globalPoint_ = globalPoint;
         OnTouchTestHit(coordinateOffset, touchRestrict, result);
         return true;
     }
-    if (GetPaintRect().IsInRegion(parentLocalPoint)) {
+    if (GetPaintRect().IsInRegion(pointWithoutMargin)) {
         // Calculates the local point location in this node.
-        const auto localPoint = parentLocalPoint - GetPaintRect().GetOffset();
+        const auto localPoint = pointWithoutMargin - GetPaintRect().GetOffset();
         bool dispatchSuccess = false;
         for (auto iter = GetChildren().rbegin(); iter != GetChildren().rend(); ++iter) {
             auto& child = *iter;
