@@ -73,9 +73,15 @@ void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
         paint.setColor(divider->color.GetValue());
         paint.setStyle(SkPaint::Style::kStroke_Style);
         paint.setStrokeWidth(strokeWidth);
+        bool isFirstIndex = (startIndex_ == 0);
 
         for (const auto& child : items_) {
             if (child == selectedItem_) {
+                continue;
+            }
+
+            if (isFirstIndex) {
+                isFirstIndex = false;
                 continue;
             }
 
