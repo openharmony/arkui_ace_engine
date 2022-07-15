@@ -271,6 +271,43 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
 #endif
 }
 
+void UpdateCacheInfo(std::list<AccessibilityElementInfo>& infos, uint32_t mode, const RefPtr<AccessibilityNode>& node,
+    const RefPtr<JsAccessibilityManager>& jsAccessibilityManager, int windowId)
+{
+    // parent
+    uint32_t umode = mode;
+    if (umode & static_cast<uint32_t>(PREFETCH_PREDECESSORS)) {
+        if (node->GetParentId() != -1 && node->GetParentId() != DEFAULT_PARENT_ID) {
+            AccessibilityElementInfo parentNodeInfo;
+            UpdateAccessibilityNodeInfo(node->GetParentNode(), parentNodeInfo, jsAccessibilityManager, windowId,
+                jsAccessibilityManager->GetRootNodeId());
+            infos.emplace_back(parentNodeInfo);
+        }
+    }
+    // sister/brothers
+    if (umode & static_cast<uint32_t>(PREFETCH_SIBLINGS)) {
+        if (node->GetParentId() != -1 && node->GetParentId() != DEFAULT_PARENT_ID) {
+            for (const auto& item : node->GetParentNode()->GetChildList()) {
+                if (node->GetNodeId() != item->GetNodeId()) {
+                    AccessibilityElementInfo siblingNodeInfo;
+                    UpdateAccessibilityNodeInfo(item, siblingNodeInfo, jsAccessibilityManager, windowId,
+                        jsAccessibilityManager->GetRootNodeId());
+                    infos.emplace_back(siblingNodeInfo);
+                }
+            }
+        }
+    }
+    // children
+    if (umode & static_cast<uint32_t>(PREFETCH_CHILDREN)) {
+        for (const auto& item : node->GetChildList()) {
+            AccessibilityElementInfo childNodeInfo;
+            UpdateAccessibilityNodeInfo(
+                item, childNodeInfo, jsAccessibilityManager, windowId, jsAccessibilityManager->GetRootNodeId());
+            infos.emplace_back(childNodeInfo);
+        }
+    }
+}
+
 inline std::string BoolToString(bool tag)
 {
     return tag ? "true" : "false";
@@ -769,37 +806,8 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
     UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
         jsAccessibilityManager->GetRootNodeId());
     infos.push_back(nodeInfo);
-
-    // parent and me.
-    RefPtr<AccessibilityNode> parentNode;
-    uint32_t umode = mode;
-    if (umode & static_cast<uint32_t>(PREFETCH_PREDECESSORS)) {
-        if (node->GetParentId() != -1 && node->GetParentId() != DEFAULT_PARENT_ID) {
-            auto parentNode = node->GetParentNode();
-            UpdateAccessibilityNodeInfo(parentNode, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
-                jsAccessibilityManager->GetRootNodeId());
-            infos.push_back(nodeInfo);
-
-            // sister/brothers.
-            if (umode & static_cast<uint32_t>(PREFETCH_SIBLINGS)) {
-                auto childs = parentNode->GetChildList();
-                for (const auto& item : node->GetChildList()) {
-                    UpdateAccessibilityNodeInfo(item, nodeInfo, jsAccessibilityManager,
-                        jsAccessibilityManager->windowId_, jsAccessibilityManager->GetRootNodeId());
-                    infos.push_back(nodeInfo);
-                }
-            }
-        }
-    }
-    // childs.
-    if (umode & static_cast<uint32_t>(PREFETCH_CHILDREN)) {
-        auto childs = node->GetChildList();
-        for (const auto& item : node->GetChildList()) {
-            UpdateAccessibilityNodeInfo(item, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
-                jsAccessibilityManager->GetRootNodeId());
-            infos.push_back(nodeInfo);
-        }
-    }
+    // cache parent/siblings/children infos
+    UpdateCacheInfo(infos, mode, node, jsAccessibilityManager, jsAccessibilityManager->windowId_);
 
     callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
 }
