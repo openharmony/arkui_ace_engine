@@ -16,14 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_RESOURCE_SHARED_IMAGE_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_RESOURCE_SHARED_IMAGE_MANAGER_H
 
+#include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <mutex>
+#include <new>
 #include <set>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
 

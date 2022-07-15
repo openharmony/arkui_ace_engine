@@ -15,8 +15,10 @@
 
 #include "frameworks/bridge/common/utils/source_map.h"
 
-#include <iostream>
-#include <vector>
+#include <cstdint>
+#include <fstream>
+
+#include "base/log/log.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -106,7 +108,7 @@ void RevSourceMap::Init(const std::string& sourceMap)
     // second: add the detail into the keyinfo
     for (auto keyInfo : sourceKeyInfo) {
         if (keyInfo == SOURCES || keyInfo == NAMES || keyInfo == MAPPINGS || keyInfo == FILE ||
-            keyInfo == SOURCE_CONTENT ||  keyInfo == SOURCE_ROOT) {
+            keyInfo == SOURCE_CONTENT || keyInfo == SOURCE_ROOT) {
             // record the temp key info
             mark = keyInfo;
         } else if (mark == SOURCES) {
@@ -133,8 +135,7 @@ void RevSourceMap::Init(const std::string& sourceMap)
     for (const auto& mapping : mappings_) {
         if (mapping == ";") {
             // plus a line for each semicolon
-            nowPos_.afterRow++,
-            nowPos_.afterColumn = 0;
+            nowPos_.afterRow++, nowPos_.afterColumn = 0;
             continue;
         }
         // decode each mapping ";QAABC"
@@ -155,14 +156,8 @@ void RevSourceMap::Init(const std::string& sourceMap)
         if (ans.size() == 5) {
             nowPos_.namesVal += ans[4];
         }
-        afterPos_.push_back({
-            nowPos_.beforeRow,
-            nowPos_.beforeColumn,
-            nowPos_.afterRow,
-            nowPos_.afterColumn,
-            nowPos_.sourcesVal,
-            nowPos_.namesVal
-        });
+        afterPos_.push_back({ nowPos_.beforeRow, nowPos_.beforeColumn, nowPos_.afterRow, nowPos_.afterColumn,
+            nowPos_.sourcesVal, nowPos_.namesVal });
     }
     mappings_.clear();
     mappings_.shrink_to_fit();

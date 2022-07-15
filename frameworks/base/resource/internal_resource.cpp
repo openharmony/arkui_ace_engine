@@ -15,9 +15,9 @@
 
 #include "base/resource/internal_resource.h"
 
+#include <functional>
 #include <map>
-
-#include "base/log/log.h"
+#include <utility>
 
 // binary/play.svg
 // Use objcopy transform to compiled object file.
@@ -470,11 +470,11 @@ const uint8_t* InternalResource::GetResource(const ResourceId id, size_t& size) 
             ResourceData(_binary_piece_delete_svg_start,
                 static_cast<size_t>(_binary_piece_delete_svg_end - _binary_piece_delete_svg_start)) },
         { InternalResource::ResourceId::IC_BACK,
-            ResourceData(_binary_ic_back_svg_start,
-                static_cast<size_t>(_binary_ic_back_svg_end - _binary_ic_back_svg_start)) },
+            ResourceData(
+                _binary_ic_back_svg_start, static_cast<size_t>(_binary_ic_back_svg_end - _binary_ic_back_svg_start)) },
         { InternalResource::ResourceId::IC_MORE,
-            ResourceData(_binary_ic_more_svg_start,
-                static_cast<size_t>(_binary_ic_more_svg_end - _binary_ic_more_svg_start)) },
+            ResourceData(
+                _binary_ic_more_svg_start, static_cast<size_t>(_binary_ic_more_svg_end - _binary_ic_more_svg_start)) },
         { InternalResource::ResourceId::IC_MORE_DARK,
             ResourceData(_binary_ic_more_dark_svg_start,
                 static_cast<size_t>(_binary_ic_more_dark_svg_end - _binary_ic_more_dark_svg_start)) },
@@ -515,24 +515,24 @@ const uint8_t* InternalResource::GetResource(const ResourceId id, size_t& size) 
                 static_cast<size_t>(_binary_ic_public_drawer_svg_end - _binary_ic_public_drawer_svg_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE,
             ResourceData(_binary_container_modal_window_close_png_start,
-                static_cast<size_t>(_binary_container_modal_window_close_png_end -
-                _binary_container_modal_window_close_png_start)) },
+                static_cast<size_t>(
+                    _binary_container_modal_window_close_png_end - _binary_container_modal_window_close_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
             ResourceData(_binary_container_modal_window_maximize_png_start,
                 static_cast<size_t>(_binary_container_modal_window_maximize_png_end -
-                _binary_container_modal_window_maximize_png_start)) },
+                                    _binary_container_modal_window_maximize_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
             ResourceData(_binary_container_modal_window_minimize_png_start,
                 static_cast<size_t>(_binary_container_modal_window_minimize_png_end -
-                _binary_container_modal_window_minimize_png_start)) },
+                                    _binary_container_modal_window_minimize_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER,
             ResourceData(_binary_container_modal_window_recover_png_start,
                 static_cast<size_t>(_binary_container_modal_window_recover_png_end -
-                _binary_container_modal_window_recover_png_start)) },
+                                    _binary_container_modal_window_recover_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,
             ResourceData(_binary_container_modal_window_split_left_png_start,
                 static_cast<size_t>(_binary_container_modal_window_split_left_png_end -
-                _binary_container_modal_window_split_left_png_start)) },
+                                    _binary_container_modal_window_split_left_png_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE,
             ResourceData(_binary_container_modal_window_defocus_close_png_start,
                 static_cast<size_t>(_binary_container_modal_window_defocus_close_png_end -

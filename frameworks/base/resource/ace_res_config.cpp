@@ -12,15 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "base/resource/ace_res_config.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <cstring>
+#include <memory>
 #include <unordered_map>
+#include <utility>
 
 #include "base/i18n/localization.h"
-#include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/resource/ace_res_data_struct.h"
 #include "base/resource/ace_res_key_parser.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"

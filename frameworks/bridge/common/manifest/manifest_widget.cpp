@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/common/manifest/manifest_widget.h"
 
+#include "base/log/log.h"
+
 namespace OHOS::Ace::Framework {
 
 const std::string& ManifestWidget::GetWidgetName() const

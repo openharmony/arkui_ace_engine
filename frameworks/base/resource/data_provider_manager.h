@@ -18,11 +18,14 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
+#include <string>
+#include <type_traits>
 #include <vector>
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/resource/data_ability_helper.h"
-
 namespace OHOS::Ace {
 
 class DataProviderRes {
@@ -73,8 +76,9 @@ class DataProviderManagerStandard : public DataProviderManagerInterface {
     DECLARE_ACE_TYPE(DataProviderManagerStandard, DataProviderManagerInterface)
 
 public:
-    explicit DataProviderManagerStandard(const DataAbilityHelperImpl& dataAbilityHelperImpl) :
-        dataAbilityHelperImpl_(dataAbilityHelperImpl) {}
+    explicit DataProviderManagerStandard(const DataAbilityHelperImpl& dataAbilityHelperImpl)
+        : dataAbilityHelperImpl_(dataAbilityHelperImpl)
+    {}
     ~DataProviderManagerStandard() override = default;
 
     std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) override;

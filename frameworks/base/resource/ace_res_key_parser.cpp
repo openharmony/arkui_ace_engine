@@ -20,8 +20,14 @@
 #else
 #include "securec.h"
 #endif
+#include <algorithm>
+#include <functional>
 #include <regex>
+#include <string>
+#include <type_traits>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "base/log/log.h"
 #include "base/utils/string_utils.h"
@@ -43,8 +49,7 @@ const std::unordered_map<std::string, ResolutionType> RES_RESOLUTION = {
 };
 
 const std::unordered_map<std::string, DeviceOrientation> RES_ORIENTATION = {
-    { "horizontal", DeviceOrientation::LANDSCAPE },
-    { "vertical", DeviceOrientation::PORTRAIT }
+    { "horizontal", DeviceOrientation::LANDSCAPE }, { "vertical", DeviceOrientation::PORTRAIT }
 };
 
 const std::unordered_map<std::string, ColorMode> RES_COLOR_MODE = {
@@ -73,12 +78,12 @@ const std::unordered_map<std::string, LongScreenType> RES_LONG_SCREEN = {
     { "notlong", LongScreenType::NOT_LONG },
 };
 
-}
+} // namespace
 
 AceResKeyParser::AceResKeyParser() = default;
 AceResKeyParser::~AceResKeyParser() = default;
 
-bool AceResKeyParser::Parse(const std::string& deviceResConfigTag, std::vector<KeyParam> &keyParams, bool styleRes)
+bool AceResKeyParser::Parse(const std::string& deviceResConfigTag, std::vector<KeyParam>& keyParams, bool styleRes)
 {
     std::vector<std::string> keyParts;
     StringUtils::StringSplitter(deviceResConfigTag, '-', keyParts);
@@ -129,7 +134,7 @@ bool AceResKeyParser::DeclarativeParse(const std::string& deviceResConfigTag, st
     return false;
 }
 
-bool AceResKeyParser::ParseMatch(const std::vector<std::string>& keys, std::vector<KeyParam> &keyParams,
+bool AceResKeyParser::ParseMatch(const std::vector<std::string>& keys, std::vector<KeyParam>& keyParams,
     parse_key_function functions[], int32_t funcLen, bool styleRes) const
 {
     for (auto iter = keys.begin(); iter != keys.end(); iter++) {
@@ -284,7 +289,7 @@ bool AceResKeyParser::ParseDefaults(const std::string& key, std::vector<KeyParam
 
 std::string AceResKeyParser::GetMccByValue(uint32_t value) const
 {
-    char mccStr[MAX_MCC_MNC_LEN] = {0};
+    char mccStr[MAX_MCC_MNC_LEN] = { 0 };
     if (sprintf_s(mccStr, MAX_MCC_MNC_LEN, "mcc%03u", value) < 0) {
         LOGE("output mcc exception");
         return "";
@@ -294,7 +299,7 @@ std::string AceResKeyParser::GetMccByValue(uint32_t value) const
 
 std::string AceResKeyParser::GetMncShortLenByValue(uint32_t value) const
 {
-    char mncStr[MAX_MCC_MNC_LEN] = {0};
+    char mncStr[MAX_MCC_MNC_LEN] = { 0 };
     if (sprintf_s(mncStr, MAX_MCC_MNC_LEN, "mnc%02u", value) < 0) {
         LOGE("output mnc short len exception");
         return "";
@@ -304,7 +309,7 @@ std::string AceResKeyParser::GetMncShortLenByValue(uint32_t value) const
 
 std::string AceResKeyParser::GetMncByValue(uint32_t value) const
 {
-    char mncStr[MAX_MCC_MNC_LEN] = {0};
+    char mncStr[MAX_MCC_MNC_LEN] = { 0 };
     if (sprintf_s(mncStr, MAX_MCC_MNC_LEN, "mnc%03u", value) < 0) {
         LOGE("output mnc len exception");
         return "";
@@ -314,8 +319,8 @@ std::string AceResKeyParser::GetMncByValue(uint32_t value) const
 
 std::string AceResKeyParser::GetOrientationByType(DeviceOrientation type) const
 {
-    auto item = find_if(RES_ORIENTATION.begin(), RES_ORIENTATION.end(),
-                        [type](auto iter) { return iter.second == type; });
+    auto item =
+        find_if(RES_ORIENTATION.begin(), RES_ORIENTATION.end(), [type](auto iter) { return iter.second == type; });
     if (item != RES_ORIENTATION.end()) {
         return item->first;
     }
@@ -324,8 +329,8 @@ std::string AceResKeyParser::GetOrientationByType(DeviceOrientation type) const
 
 std::string AceResKeyParser::GetColorModeByType(ColorMode type) const
 {
-    auto item = find_if(RES_COLOR_MODE.begin(), RES_COLOR_MODE.end(),
-                        [type](auto iter) { return iter.second == type; });
+    auto item =
+        find_if(RES_COLOR_MODE.begin(), RES_COLOR_MODE.end(), [type](auto iter) { return iter.second == type; });
     if (item != RES_COLOR_MODE.end()) {
         return item->first;
     }
@@ -335,7 +340,7 @@ std::string AceResKeyParser::GetColorModeByType(ColorMode type) const
 std::string AceResKeyParser::GetDeclarativeColorModeByType(ColorMode type) const
 {
     auto item = find_if(DECLARATIVE_RES_COLOR_MODE.begin(), DECLARATIVE_RES_COLOR_MODE.end(),
-                        [type](auto iter) { return iter.second == type; });
+        [type](auto iter) { return iter.second == type; });
     if (item != DECLARATIVE_RES_COLOR_MODE.end()) {
         return item->first;
     }
@@ -344,8 +349,8 @@ std::string AceResKeyParser::GetDeclarativeColorModeByType(ColorMode type) const
 
 std::string AceResKeyParser::GetDeviceByType(DeviceType type) const
 {
-    auto deviceTypeItem = find_if(RES_DEVICE_TYPE.begin(), RES_DEVICE_TYPE.end(),
-                                  [type](auto iter) { return iter.second == type; });
+    auto deviceTypeItem =
+        find_if(RES_DEVICE_TYPE.begin(), RES_DEVICE_TYPE.end(), [type](auto iter) { return iter.second == type; });
     if (deviceTypeItem != RES_DEVICE_TYPE.end()) {
         return deviceTypeItem->first;
     }
@@ -354,8 +359,8 @@ std::string AceResKeyParser::GetDeviceByType(DeviceType type) const
 
 std::string AceResKeyParser::GetResolutionByType(ResolutionType type) const
 {
-    auto resolutionItem = find_if(RES_RESOLUTION.begin(), RES_RESOLUTION.end(),
-                                  [type](auto iter) { return iter.second == type; });
+    auto resolutionItem =
+        find_if(RES_RESOLUTION.begin(), RES_RESOLUTION.end(), [type](auto iter) { return iter.second == type; });
     if (resolutionItem != RES_RESOLUTION.end()) {
         return resolutionItem->first;
     }
@@ -363,8 +368,8 @@ std::string AceResKeyParser::GetResolutionByType(ResolutionType type) const
 }
 std::string AceResKeyParser::GetScreenShapeByType(ScreenShape type) const
 {
-    auto shapeItem = find_if(RES_SCREEN_SHAPE.begin(), RES_SCREEN_SHAPE.end(),
-        [type](auto iter) { return iter.second == type; });
+    auto shapeItem =
+        find_if(RES_SCREEN_SHAPE.begin(), RES_SCREEN_SHAPE.end(), [type](auto iter) { return iter.second == type; });
     if (shapeItem != RES_SCREEN_SHAPE.end()) {
         return shapeItem->first;
     }
@@ -373,8 +378,8 @@ std::string AceResKeyParser::GetScreenShapeByType(ScreenShape type) const
 
 std::string AceResKeyParser::GetScreenLongByType(LongScreenType type) const
 {
-    auto longItem = find_if(RES_LONG_SCREEN.begin(), RES_LONG_SCREEN.end(),
-        [type](auto iter) { return iter.second == type; });
+    auto longItem =
+        find_if(RES_LONG_SCREEN.begin(), RES_LONG_SCREEN.end(), [type](auto iter) { return iter.second == type; });
     if (longItem != RES_LONG_SCREEN.end()) {
         return longItem->first;
     }

@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "frameworks/bridge/codec/standard_function_codec.h"
 
 #include "base/log/log.h"

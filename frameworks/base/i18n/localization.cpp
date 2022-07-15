@@ -15,23 +15,35 @@
 
 #include "base/i18n/localization.h"
 
+#include <cstddef>
+#include <cstring>
 #include <map>
+#include <type_traits>
 #include <unordered_map>
+#include <utility>
 
 #include "chnsecal.h"
 #include "unicode/calendar.h"
 #include "unicode/datefmt.h"
 #include "unicode/dtfmtsym.h"
 #include "unicode/dtptngen.h"
+#include "unicode/fieldpos.h"
+#include "unicode/fmtable.h"
 #include "unicode/locid.h"
 #include "unicode/measfmt.h"
+#include "unicode/measunit.h"
 #include "unicode/measure.h"
 #include "unicode/numberformatter.h"
 #include "unicode/plurrule.h"
 #include "unicode/reldatefmt.h"
 #include "unicode/smpdtfmt.h"
-#include "unicode/uclean.h"
-#include "unicode/udata.h"
+#include "unicode/stringpiece.h"
+#include "unicode/ucal.h"
+#include "unicode/unistr.h"
+#include "unicode/upluralrules.h"
+#include "unicode/ureldatefmt.h"
+#include "unicode/utypes.h"
+#include "unicode/uversion.h"
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
@@ -57,15 +69,15 @@ namespace {
 
 #define CHECK_RETURN(status, ret)                                      \
     do {                                                               \
-        if ((status) > U_ZERO_ERROR) {                                   \
+        if ((status) > U_ZERO_ERROR) {                                 \
             LOGE("status = %{public}d", static_cast<int32_t>(status)); \
-            return (ret);                                                \
+            return (ret);                                              \
         }                                                              \
     } while (0)
 
 #define CHECK_NO_RETURN(status)                                        \
     do {                                                               \
-        if ((status) > U_ZERO_ERROR) {                                   \
+        if ((status) > U_ZERO_ERROR) {                                 \
             LOGE("status = %{public}d", static_cast<int32_t>(status)); \
         }                                                              \
     } while (0)
@@ -80,9 +92,8 @@ const char CHINESE_LEAP[] = u8"\u95f0";
 const char CHINESE_FIRST[] = u8"\u521d";
 const char CHINESE_TEN[] = u8"\u5341";
 const char CHINESE_TWENTY[] = u8"\u5eff";
-const char* g_chineseOneToNine[] = {
-    u8"\u4e00", u8"\u4e8c", u8"\u4e09", u8"\u56db", u8"\u4e94", u8"\u516d", u8"\u4e03", u8"\u516b", u8"\u4e5d"
-};
+const char* g_chineseOneToNine[] = { u8"\u4e00", u8"\u4e8c", u8"\u4e09", u8"\u56db", u8"\u4e94", u8"\u516d", u8"\u4e03",
+    u8"\u516b", u8"\u4e5d" };
 const std::unordered_map<std::string, std::string> LANGUAGE_CODE_MAP {
     { "he", "iw" },
     { "fil", "tl" },
