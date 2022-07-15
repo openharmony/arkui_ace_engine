@@ -47,8 +47,14 @@ public:
             theme->textColor_ = themeConstants->GetColor(THEME_MARQUEE_TEXT_COLOR);
             theme->fontSize_ = themeConstants->GetDimension(THEME_MARQUEE_FONT_SIZE);
             auto themeStyle = themeConstants->GetThemeStyle();
-            if (themeStyle) {
-                theme->textColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY, Color::BLACK);
+            if (!themeStyle) {
+                return theme;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_MARQUEE, nullptr);
+            if (pattern) {
+                theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK);
+            } else {
+                LOGW("find pattern of marquee fail");
             }
             return theme;
         }

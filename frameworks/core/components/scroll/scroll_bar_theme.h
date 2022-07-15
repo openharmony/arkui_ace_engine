@@ -64,7 +64,12 @@ public:
                 LOGI("scroll bar theme style is null");
                 return;
             }
-            theme->foregroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_FOREGROUND,
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SCROLL_BAR, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of scroll_bar fail");
+                return;
+            }
+            theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
                 Color::TRANSPARENT).BlendOpacity(0.4);
         }
     };

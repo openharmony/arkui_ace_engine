@@ -70,11 +70,11 @@ public:
             if (!togglePattern) {
                 return;
             }
-            theme->backgroundColor_ = themeStyle->GetAttr<Color>(TOGGLE_BACKGROUND_COLOR, Color());
-            theme->checkedColor_ = togglePattern->GetAttr<Color>(TOGGLE_CHECKED_COLOR, Color())
-                .BlendOpacity(themeStyle->GetAttr<double>(THEME_ATTR_HIGHLIGHT_BACKGROUND_ALPHA, 0.0));
-            theme->textStyle_.SetTextColor(togglePattern->GetAttr<Color>(TOGGLE_TEXT_COLOR, Color()));
-            theme->pressedBlendColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_CLICK_EFFECT, Color());
+            theme->backgroundColor_ = togglePattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
+            theme->checkedColor_ = togglePattern->GetAttr<Color>("bg_color_checked", Color())
+                .BlendOpacity(togglePattern->GetAttr<double>("bg_color_checked_alpha", 0.0));
+            theme->textStyle_.SetTextColor(togglePattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
+            theme->pressedBlendColor_ = togglePattern->GetAttr<Color>("bg_color_pressed_blend", Color());
         }
     };
 

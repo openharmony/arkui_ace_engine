@@ -106,25 +106,27 @@ public:
             if (!style || !theme || !theme->popupDecoration_) {
                 return;
             }
-            theme->hoverColor_ = style->GetAttr<Color>(THEME_ATTR_COLOR_HOVER, theme->hoverColor_);
-            theme->pressColor_ = style->GetAttr<Color>(THEME_ATTR_COLOR_CLICK_EFFECT, theme->pressColor_);
+            auto pattern = style->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
+            if (!pattern) {
+                LOGE("Pattern of picker is null, please check!");
+                return;
+            }
+            theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, theme->hoverColor_);
+            theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, theme->pressColor_);
             if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
                 return; // light, dart color only for phone
             }
             theme->popupDecoration_->SetBackgroundColor(
-                style->GetAttr<Color>(THEME_ATTR_COLOR_DIALOG_BG, theme->popupDecoration_->GetBackgroundColor()));
-            theme->focusColor_ = style->GetAttr<Color>(THEME_ATTR_COLOR_FOCUSED, theme->focusColor_);
-            auto id = (style->GetName() == "117440517" ? // the style name of semitransparent
-                           THEME_ATTR_TEXT_COLOR_PRIMARY
-                                                       : THEME_ATTR_COLOR_TEXT_PRIMARY_ACTIVATED);
+                pattern->GetAttr<Color>("popup_bg_color", theme->popupDecoration_->GetBackgroundColor()));
+            theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, theme->focusColor_);
             theme->selectedOptionStyle_.SetTextColor(
-                style->GetAttr<Color>(id, theme->selectedOptionStyle_.GetTextColor()));
+                pattern->GetAttr<Color>("selected_text_color", theme->selectedOptionStyle_.GetTextColor()));
             theme->focusOptionStyle_.SetTextColor(theme->selectedOptionStyle_.GetTextColor());
             theme->normalOptionStyle_.SetTextColor(
-                style->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY, theme->normalOptionStyle_.GetTextColor()));
+                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->normalOptionStyle_.GetTextColor()));
             theme->disappearOptionStyle_.SetTextColor(theme->normalOptionStyle_.GetTextColor());
             theme->titleStyle_.SetTextColor(theme->normalOptionStyle_.GetTextColor());
-            theme->dividerColor_ = style->GetAttr<Color>(THEME_ATTR_COLOR_LIST_DIVIDER, theme->dividerColor_);
+            theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", theme->dividerColor_);
         }
 
     private:

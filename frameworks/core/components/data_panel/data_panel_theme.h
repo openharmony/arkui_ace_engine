@@ -78,9 +78,10 @@ public:
             }
             auto dataPanelPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DATA_PANEL, nullptr);
             if (!dataPanelPattern) {
+                LOGW("find pattern of datapanel fail");
                 return;
             }
-            theme->backgroundColor_ = dataPanelPattern->GetAttr<Color>(DATA_PANEL_TRACK_COLOR, Color::BLACK);
+            theme->backgroundColor_ = dataPanelPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::BLACK);
             theme->loadingColors_.first = dataPanelPattern->GetAttr<Color>(DATA_PANEL_LOADING_COLOR_END, Color::BLACK);
             theme->loadingColors_.second =
                 dataPanelPattern->GetAttr<Color>(DATA_PANEL_LOADING_COLOR_START, Color::BLACK);

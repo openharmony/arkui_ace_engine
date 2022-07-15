@@ -40,8 +40,14 @@ public:
             }
             theme->color_ = themeConstants->GetColor(THEME_DIVIDER_COLOR);
             auto themeStyle = themeConstants->GetThemeStyle();
-            if (themeStyle) {
-                theme->color_ = themeStyle->GetAttr<Color>(THEME_ATTR_SUBHEADER_DIVIDER, Color::BLACK);
+            if (!themeStyle) {
+                return theme;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DIVIDER, nullptr);
+            if (pattern) {
+                theme->color_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
+            } else {
+                LOGW("find pattern of divider fail");
             }
             return theme;
         }

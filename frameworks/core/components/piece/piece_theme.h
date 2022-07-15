@@ -66,11 +66,16 @@ public:
             if (!themeStyle || !theme) {
                 return;
             }
-            theme->textStyle_.SetTextColor(themeStyle->GetAttr<Color>(PIECE_TEXT_COLOR, Color()));
-            theme->textStyle_.SetFontSize(themeStyle->GetAttr<Dimension>(PIECE_TEXT_FONT_SIZE, 0.0_fp));
-            theme->backgroundColor_ = themeStyle->GetAttr<Color>(PIECE_BACKGROUND_COLOR, Color())
-                                          .BlendOpacity(themeStyle->GetAttr<double>(PIECE_BACKGROUND_COLOR_ALPHA, 0.0));
-            theme->hoverColor_ = themeStyle->GetAttr<Color>(PIECE_HOVER_COLOR, Color());
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_PIECE, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of piece fail");
+                return;
+            }
+            theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
+            theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp));
+            theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color())
+                .BlendOpacity(pattern->GetAttr<double>(PATTERN_BG_COLOR_ALPHA, 0.0));
+            theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
         }
     };
 

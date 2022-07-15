@@ -70,12 +70,19 @@ public:
                 LOGI("progress theme style is null");
                 return;
             }
-            theme->trackBgColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_COMPONENT_NORMAL, Color::RED);
-            theme->trackSelectedColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_EMPHASIZE, Color::RED);
-            theme->markerColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_FOREGROUND, Color::RED).BlendOpacity(0.1);
-            theme->tipTextColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY_INVERSE, Color::RED);
-            theme->tipColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_TIPS_BG, Color::RED);
-            theme->blockHoverColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_HOVER, Color::RED);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SLIDER, nullptr);
+            if (pattern) {
+                const double defaultMarkColorAplpa = 0.1;
+                theme->trackBgColor_ = pattern->GetAttr<Color>("track_bg_color", Color::RED);
+                theme->trackSelectedColor_ = pattern->GetAttr<Color>("track_color_selected", Color::RED);
+                theme->markerColor_ = pattern->GetAttr<Color>("marker_color", Color::RED)
+                    .BlendOpacity(pattern->GetAttr<double>("marker_color_alpha", defaultMarkColorAplpa));
+                theme->tipTextColor_ = pattern->GetAttr<Color>("tip_text_color", Color::RED);
+                theme->tipColor_ = pattern->GetAttr<Color>("tip_color", Color::RED);
+                theme->blockHoverColor_ = pattern->GetAttr<Color>("block_color_hovered", Color::RED);
+            } else {
+                LOGW("find pattern of slider fail");
+            }
         }
     };
 

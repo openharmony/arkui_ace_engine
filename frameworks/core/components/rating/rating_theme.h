@@ -65,10 +65,16 @@ public:
             theme->starColorActive_ = themeConstants->GetColor(THEME_RATING_STAR_COLOR_ACTIVE);
             theme->starColorInactive_ = themeConstants->GetColor(THEME_RATING_STAR_COLOR_INACTIVE);
             auto themeStyle = themeConstants->GetThemeStyle();
-            if (themeStyle) {
-                theme->hoverColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_HOVER, Color::RED);
-                theme->starColorActive_ = themeStyle->GetAttr<Color>(THEME_ATTRPALETTE_COLOR11, Color::RED);
-                theme->starColorInactive_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_COMPONENT_NORMAL, Color::RED);
+            if (!themeStyle) {
+                return theme;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_RATING, nullptr);
+            if (pattern) {
+                theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color::RED);
+                theme->starColorActive_ = pattern->GetAttr<Color>("icon_color_active", Color::RED);
+                theme->starColorInactive_ = pattern->GetAttr<Color>("icon_color_inactive", Color::RED);
+            } else {
+                LOGW("find pattern of rating fail");
             }
             return theme;
         }
