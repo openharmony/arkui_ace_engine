@@ -20,7 +20,7 @@
 
 #include "core/common/container_scope.h"
 #include "core/components/video/video_utils.h"
-#include "foundation/multimedia/media_standard/interfaces/inner_api/native/player.h"
+#include "foundation/multimedia/player_framework/interfaces/inner_api/native/player.h"
 
 namespace OHOS::Ace {
 namespace {
