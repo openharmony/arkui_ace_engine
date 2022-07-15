@@ -14,7 +14,6 @@
  */
 #include "gtest/gtest.h"
 
-#include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/json/json_util.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/render_button.h"
@@ -27,21 +26,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
-
-Platform::JniEnvironment::JniEnvironment() {}
-
-Platform::JniEnvironment::~JniEnvironment() = default;
-
-std::shared_ptr<JNIEnv> Platform::JniEnvironment::GetJniEnv(JNIEnv* jniEnv) const
-{
-    return nullptr;
-}
-
-Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
-{
-    static Platform::JniEnvironment jniEnvironment;
-    return jniEnvironment;
-}
 
 const Offset RESULT_ORIGIN_CENTER = Offset(75, 50);
 const Offset RESULT_ORIGIN_MIX = Offset(50, 40);

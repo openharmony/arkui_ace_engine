@@ -47,18 +47,15 @@ group("unittest") {
 
     #"refresh:unittest",
     "rotation:unittest",
-
-    #"scroll:unittest",
+    "scroll:unittest",
     "semimodal:unittest",
-
-    #"shadow:unittest",
+    "shadow:unittest",
     "slider:unittest",
     "stack:unittest",
     "stage:unittest",
     "svg:unittest",
     "swiper:unittest",
-
-    #"text:unittest",
+    "text:unittest",
     "theme:unittest",
     "transform:unittest",
     "transition:unittest",

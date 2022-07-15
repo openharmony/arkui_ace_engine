@@ -67,7 +67,7 @@ ohos_unittest("RenderPaddingTest") {
 group("unittest") {
   testonly = true
   deps = [
-    # ":PaddingCreatorTest",
-    # ":RenderPaddingTest",
+    ":PaddingCreatorTest",
+    ":RenderPaddingTest",
   ]
 }
