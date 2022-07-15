@@ -39,8 +39,8 @@ void SoleChildElement::PerformBuild()
     UpdateChild(child, component->GetChild());
 }
 
-// specialhandling for noGridItem, ListItem
-// whose 'wrapping' copmponent are descendants, not ancestors
+// special handling for noGridItem, ListItem
+// whose 'wrapping' component are descendants, not ancestors
 void SoleChildElement::LocalizedUpdateWithItemComponent(
     const RefPtr<Component>& innerMostWrappingComponent, const RefPtr<Component>& mainComponent)
 {

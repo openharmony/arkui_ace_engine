@@ -1077,8 +1077,9 @@ public:
     }
 
     // mark JSview boundary, create/destroy RSNode if need
-    void SyncRSNodeBoundary(bool isHead, bool isTail);
-    void SyncRSNode(std::shared_ptr<RSNode> rsNode);
+    void SyncRSNodeBoundary(bool isHead, bool isTail, const RefPtr<Component>& component = nullptr);
+    void ProcessExternalRSNode(const RefPtr<Component>& component);
+    void SyncRSNode(const std::shared_ptr<RSNode>& rsNode);
     const std::shared_ptr<RSNode>& GetRSNode() const
     {
         return rsNode_;
@@ -1204,7 +1205,6 @@ protected:
     }
 
     virtual std::shared_ptr<RSNode> CreateRSNode() const;
-    void SetRSNode(const std::shared_ptr<RSNode>& rsNode);
     virtual void OnRSTransition(TransitionType type) {}
     // JSview boundary, all nodes in [head, tail] share the same RSNode
     bool IsHeadRenderNode() const
@@ -1288,6 +1288,7 @@ private:
     // Sync view hierarchy to RSNode
     void RSNodeAddChild(const RefPtr<RenderNode>& child);
     void MarkParentNeedRender() const;
+    static std::shared_ptr<RSNode> ExtractExternalRSNode(const RefPtr<Component>& component);
 
     std::list<RefPtr<RenderNode>> hoverChildren_;
     std::list<RefPtr<RenderNode>> children_;
