@@ -343,6 +343,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             SystemProperties::SetColorMode(ColorMode::LIGHT);
             LOGI("UIContent set light mode");
         }
+        SystemProperties::SetInputDevice(
+            resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
     }
 
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
@@ -509,6 +511,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+    aceResCfg.SetInputDevice(SystemProperties::GetInputDevice());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetAssetManager(flutterAssetManager);
@@ -716,24 +719,11 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         LOGE("UIContent null config");
         return;
     }
-    auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    if (colorMode.empty()) {
-        LOGW("UIContent null config");
-        return;
-    }
-    if (colorMode != OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT &&
-        colorMode != OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) {
-        LOGE("UIContent invalid color mode: %{public}s", colorMode.c_str());
-        return;
-    }
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (!container) {
         LOGE("UIContent container is null");
         return;
     }
-
-    LOGI("UIContent UpdateConfiguration %{public}s, color mode:%{public}s",
-        config->GetName().c_str(), colorMode.c_str());
     auto pipeline = container->GetPipelineContext();
     if (!pipeline) {
         LOGE("UIContent pipeline is null");
@@ -745,14 +735,26 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         return;
     }
     auto resConfig = container->GetResourceConfiguration();
-    if (colorMode == OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT) {
-        SystemProperties::SetColorMode(ColorMode::LIGHT);
-        container->SetColorScheme(ColorScheme::SCHEME_LIGHT);
-        resConfig.SetColorMode(ColorMode::LIGHT);
-    } else {
-        SystemProperties::SetColorMode(ColorMode::DARK);
-        container->SetColorScheme(ColorScheme::SCHEME_DARK);
-        resConfig.SetColorMode(ColorMode::DARK);
+    auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (!colorMode.empty()) {
+        if (colorMode == OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) {
+            SystemProperties::SetColorMode(ColorMode::DARK);
+            container->SetColorScheme(ColorScheme::SCHEME_DARK);
+            resConfig.SetColorMode(ColorMode::DARK);
+        } else {
+            SystemProperties::SetColorMode(ColorMode::LIGHT);
+            container->SetColorScheme(ColorScheme::SCHEME_LIGHT);
+            resConfig.SetColorMode(ColorMode::LIGHT);
+        }
+        LOGI("UIContent UpdateConfiguration %{public}s, color mode:%{public}s",
+            config->GetName().c_str(), colorMode.c_str());
+    }
+    auto inputDevice = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+    if (!inputDevice.empty()) {
+        SystemProperties::SetInputDevice(inputDevice == "true");
+        resConfig.SetInputDevice(inputDevice == "true");
+        LOGI("UIContent UpdateConfiguration %{public}s, input device:%{public}s",
+            config->GetName().c_str(), inputDevice.c_str());
     }
     if (instanceId_ == -1) {
         LOGE("Get Instance failed");
