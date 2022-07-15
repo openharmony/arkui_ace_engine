@@ -63,9 +63,9 @@ RefPtr<RenderNode> TabBarItemComponent::CreateRenderNode()
 
 void FindChildren(const RefPtr<Component>& component, std::stack<RefPtr<Component>>& allChildren)
 {
-    auto sigleChildGroup = AceType::DynamicCast<SingleChild>(component);
-    if (sigleChildGroup) {
-        allChildren.push(sigleChildGroup->GetChild());
+    auto singleChildGroup = AceType::DynamicCast<SingleChild>(component);
+    if (singleChildGroup) {
+        allChildren.push(singleChildGroup->GetChild());
     }
 
     auto multiChildGroup = AceType::DynamicCast<ComponentGroup>(component);

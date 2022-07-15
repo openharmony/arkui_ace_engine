@@ -22,21 +22,21 @@ void RosenRenderRemoteWindow::Update(const RefPtr<Component>& component)
 {
     RenderRemoteWindow::Update(component);
     
+    MarkNeedSyncGeometryProperties();
+}
+
+std::shared_ptr<Rosen::RSNode> RosenRenderRemoteWindow::ExtractRSNode(const RefPtr<Component>& component)
+{
     RefPtr<RemoteWindowComponent> remoteWindowComponent = AceType::DynamicCast<RemoteWindowComponent>(component);
     if (!remoteWindowComponent) {
-        return;
+        return nullptr;
     }
 
     // update RSNode if surface node changed
     auto surfaceNode = remoteWindowComponent->GetRSSurfaceNode();
-    auto prevRSNode = GetRSNode();
-    if (prevRSNode == nullptr ||
-        (surfaceNode != nullptr && surfaceNode != prevRSNode && surfaceNode->GetId() != prevRSNode->GetId())) {
-        SetRSNode(surfaceNode);
-        // create corresponding RSRenderNode in Render Thread
+    if (surfaceNode) {
         surfaceNode->CreateNodeInRenderThread(true);
     }
-
-    MarkNeedSyncGeometryProperties();
+    return std::static_pointer_cast<Rosen::RSNode>(surfaceNode);
 }
 } // namespace OHOS::Ace

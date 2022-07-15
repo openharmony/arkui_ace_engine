@@ -629,6 +629,11 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
         components.emplace_back(mainComponent);
+    } else if (AceType::InstanceOf<RemoteWindowComponent>(mainComponent)) {
+        // mark head component, it should use external RSNode stored in tail component.
+        components.emplace_back(mainComponent);
+        Component::MergeRSNode(components);
+        components.front()->MarkUseExternalRSNode();
     } else {
         // by default, mainComponent is placed after other components, they should share the same RSNode.
         //  (head)      (tail)
