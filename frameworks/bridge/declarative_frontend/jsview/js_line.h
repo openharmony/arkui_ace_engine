@@ -22,6 +22,7 @@
 namespace OHOS::Ace::Framework {
 
 class JSLine : public JSShapeAbstract {
+    DECLARE_ACE_TYPE(JSLine, JSShapeAbstract);
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
