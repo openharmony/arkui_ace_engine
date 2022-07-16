@@ -373,6 +373,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     std::string libraryPath = "";
     if (debuggerMode) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
+        SetDebuggerPostTask();
     }
     if (!usingSharedRuntime_ && !runtime_->Initialize(libraryPath, isDebugMode_, instanceId_)) {
         LOGE("Js Engine initialize runtime failed");
@@ -898,6 +899,20 @@ void JsiDeclarativeEngineInstance::FlushCommandBuffer(void* context, const std::
     return;
 }
 
+void JsiDeclarativeEngineInstance::SetDebuggerPostTask()
+{
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(frontendDelegate_));
+    auto&& postTask = [weakDelegate](std::function<void()>&& task) {
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate == nullptr) {
+            LOGE("delegate is nullptr");
+            return;
+        }
+        delegate->PostJsTask(std::move(task));
+    };
+    std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
+}
+
 // -----------------------
 // Start JsiDeclarativeEngine
 // -----------------------
@@ -1042,7 +1057,10 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         }
         ConnectServerManager::Get().AddInstance(gettid());
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
-        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid());
+        auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
+            nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
+        };
+        panda::JSNApi::StartDebugger(libraryPath.c_str(), vm, debugMode, gettid(), workerPostTask);
         instance->InitConsoleModule(arkNativeEngine);
 
         std::vector<uint8_t> buffer((uint8_t*)_binary_jsEnumStyle_abc_start, (uint8_t*)_binary_jsEnumStyle_abc_end);

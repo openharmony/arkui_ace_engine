@@ -90,7 +90,8 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string &fileName)
 {
     JSExecutionScope executionScope(vm_);
     if (!libPath_.empty()) {
-        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_);
+        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_,
+            debuggerPostTask_);
     }
     LocalScope scope(vm_);
     bool ret = JSNApi::Execute(vm_, fileName, PANDA_MAIN_FUNCTION);

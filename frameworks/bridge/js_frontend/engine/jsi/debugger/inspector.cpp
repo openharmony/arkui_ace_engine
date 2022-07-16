@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,41 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/debugger/inspector.h"
 
 #include <dlfcn.h>
+#include <shared_mutex>
+#include <unordered_map>
 
 #include "base/log/log.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/debugger/ws_server.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
-thread_local Inspector* g_inspector = nullptr;
+enum DispatchStatus : int32_t {
+    UNKNOWN = 0,
+    DISPATCHING,
+    DISPATCHED
+};
+
+using InitializeDebugger = void(*)(void*, const std::function<void(const void*, const std::string&)>&);
+using UninitializeDebugger = void(*)(void*);
+using WaitForDebugger = void(*)(void*);
+using DispatchMessage = void(*)(void*, std::string&&);
+using ProcessMessage = void(*)(void*);
+using GetDispatchStatus = int32_t(*)(void*);
+
+DispatchMessage g_dispatchMessage = nullptr;
+InitializeDebugger g_initializeDebugger = nullptr;
+UninitializeDebugger g_uninitializeDebugger = nullptr;
+WaitForDebugger g_waitForDebugger = nullptr;
+ProcessMessage g_processMessage = nullptr;
+GetDispatchStatus g_getDispatchStatus = nullptr;
+
+std::atomic<bool> g_hasArkFuncsInited = false;
+std::unordered_map<const void*, Inspector*> g_inspectors;
+std::shared_mutex g_mutex;
+
 thread_local void* g_handle = nullptr;
+thread_local void* g_vm = nullptr;
+
 constexpr char ARK_DEBUGGER_SHARED_LIB[] = "libark_ecma_debugger.so";
 
 void* HandleClient(void* const server)
@@ -37,16 +64,22 @@ void* HandleClient(void* const server)
     return nullptr;
 }
 
+bool LoadArkDebuggerLibrary()
+{
+    if (g_handle != nullptr) {
+        LOGE("Already opened");
+        return false;
+    }
+    g_handle = dlopen(ARK_DEBUGGER_SHARED_LIB, RTLD_LAZY);
+    if (g_handle == nullptr) {
+        LOGE("Failed to open %{public}s, reason: %{public}sn", ARK_DEBUGGER_SHARED_LIB, dlerror());
+        return false;
+    }
+    return true;
+}
+
 void* GetArkDynFunction(const char* symbol)
 {
-    if (g_handle == nullptr) {
-        g_handle = dlopen(ARK_DEBUGGER_SHARED_LIB, RTLD_LAZY);
-        if (g_handle == nullptr) {
-            LOGE("Failed to open shared library %{public}s, reason: %{public}sn", ARK_DEBUGGER_SHARED_LIB, dlerror());
-            return nullptr;
-        }
-    }
-
     auto function = dlsym(g_handle, symbol);
     if (function == nullptr) {
         LOGE("Failed to get symbol %{public}s in %{public}s", symbol, ARK_DEBUGGER_SHARED_LIB);
@@ -54,43 +87,25 @@ void* GetArkDynFunction(const char* symbol)
     return function;
 }
 
-void DispatchMsgToArk(int sign)
+void SendReply(const void* vm, const std::string& message)
 {
-    if (g_inspector == nullptr || g_inspector->websocketServer_ == nullptr || g_inspector->isDispatchingMsg_) {
-        return;
-    }
-    auto processMsg = reinterpret_cast<void (*)(void *, const std::string &)>(
-        GetArkDynFunction("DispatchProtocolMessage"));
-    if (processMsg == nullptr) {
-        LOGE("processMessage is empty");
-        return;
-    }
-    g_inspector->isDispatchingMsg_ = true;
-    while (!g_inspector->websocketServer_->ideMsgQueue.empty()) {
-        const std::string message = g_inspector->websocketServer_->ideMsgQueue.front();
-        g_inspector->websocketServer_->ideMsgQueue.pop();
-        processMsg(g_inspector->vm_, message);
-        std::string startDebugging("Runtime.runIfWaitingForDebugger");
-        if (message.find(startDebugging, 0) != std::string::npos) {
-            g_inspector->waitingForDebugger_ = false;
-        }
-    }
-    g_inspector->isDispatchingMsg_ = false;
-}
-
-void SendReply(const std::string& message)
-{
-    if (g_inspector != nullptr && g_inspector->websocketServer_ != nullptr) {
-        g_inspector->websocketServer_->SendReply(message);
+    std::shared_lock<std::shared_mutex> lock(g_mutex);
+    auto iter = g_inspectors.find(vm);
+    if (iter != g_inspectors.end() && iter->second != nullptr &&
+        iter->second->websocketServer_ != nullptr) {
+        iter->second->websocketServer_->SendReply(message);
     }
 }
 
-void ResetService()
+void ResetServiceLocked()
 {
-    if (g_inspector != nullptr && g_inspector->websocketServer_ != nullptr) {
-        g_inspector->websocketServer_->StopServer();
-        delete g_inspector;
-        g_inspector = nullptr;
+    auto iter = g_inspectors.find(g_vm);
+    if (iter != g_inspectors.end() && iter->second != nullptr &&
+        iter->second->websocketServer_ != nullptr) {
+        iter->second->websocketServer_->StopServer();
+        delete iter->second;
+        iter->second = nullptr;
+        g_inspectors.erase(iter);
     }
     if (g_handle != nullptr) {
         dlclose(g_handle);
@@ -98,50 +113,140 @@ void ResetService()
     }
 }
 
-} // namespace
-
-void Inspector::OnMessage()
+bool InitializeInspector(void* vm, const std::string& componentName, int32_t instanceId,
+    const DebuggerPostTask& debuggerPostTask)
 {
-    pthread_kill(tid_, SIGALRM);
-    return;
-}
-
-void Inspector::InitializeInspector(const std::string& componentName, int32_t instanceId)
-{
-    websocketServer_ = std::make_unique<WsServer>(componentName, std::bind(&Inspector::OnMessage, this), instanceId);
-}
-
-bool StartDebug(const std::string& componentName, void *vm, bool isDebugMode, int32_t instanceId)
-{
-    LOGI("StartDebug: %{private}s", componentName.c_str());
-    g_inspector = new Inspector();
-    g_inspector->InitializeInspector(componentName, instanceId);
-    g_inspector->tid_ = pthread_self();
-    g_inspector->waitingForDebugger_ = isDebugMode;
-    g_inspector->vm_ = vm;
-
-    g_handle = dlopen(ARK_DEBUGGER_SHARED_LIB, RTLD_LAZY);
-    if (g_handle == nullptr) {
-        LOGE("handle is empty");
+    std::unique_lock<std::shared_mutex> lock(g_mutex);
+    auto iter = g_inspectors.find(vm);
+    if (iter != g_inspectors.end()) {
+        LOGE("Already have the same vm in the map");
         return false;
     }
-    auto initialize = reinterpret_cast<void (*)(const std::function<void(std::string)> &, void *)>(
-        GetArkDynFunction("InitializeDebugger"));
-    if (initialize == nullptr) {
-        ResetService();
+
+    Inspector *newInspector = new Inspector();
+    if (!g_inspectors.emplace(vm, newInspector).second) {
+        delete newInspector;
         return false;
     }
-    initialize(std::bind(&SendReply, std::placeholders::_1), vm);
+
+    newInspector->tid_ = pthread_self();
+    newInspector->vm_ = vm;
+    newInspector->debuggerPostTask_ = debuggerPostTask;
+    newInspector->websocketServer_ = std::make_unique<WsServer>(componentName,
+        std::bind(&Inspector::OnMessage, newInspector, std::placeholders::_1), instanceId);
 
     pthread_t tid;
-    if (pthread_create(&tid, nullptr, &HandleClient, static_cast<void*>(g_inspector->websocketServer_.get())) != 0) {
-        LOGE("pthread_create fail!");
-        ResetService();
+    if (pthread_create(&tid, nullptr, &HandleClient, static_cast<void *>(
+        newInspector->websocketServer_.get())) != 0) {
+        LOGE("Create inspector thread failed");
         return false;
     }
-    signal(SIGALRM, &DispatchMsgToArk);
-    while (g_inspector->waitingForDebugger_) {
-        usleep(g_inspector->DEBUGGER_WAIT_SLEEP_TIME);
+
+    return true;
+}
+
+bool InitializeArkFunctions()
+{
+    // no need to initialize again in case of multi-instance
+    if (g_hasArkFuncsInited) {
+        return true;
+    }
+
+    std::unique_lock<std::shared_mutex> lock(g_mutex);
+    if (g_hasArkFuncsInited) {
+        return true;
+    }
+    g_initializeDebugger = reinterpret_cast<InitializeDebugger>(
+        GetArkDynFunction("InitializeDebugger"));
+    if (g_initializeDebugger == nullptr) {
+        ResetServiceLocked();
+        return false;
+    }
+    g_uninitializeDebugger = reinterpret_cast<UninitializeDebugger>(
+        GetArkDynFunction("UninitializeDebugger"));
+    if (g_uninitializeDebugger == nullptr) {
+        ResetServiceLocked();
+        return false;
+    }
+    g_waitForDebugger = reinterpret_cast<WaitForDebugger>(
+        GetArkDynFunction("WaitForDebugger"));
+    if (g_waitForDebugger == nullptr) {
+        ResetServiceLocked();
+        return false;
+    }
+    g_dispatchMessage = reinterpret_cast<DispatchMessage>(
+        GetArkDynFunction("DispatchMessage"));
+    if (g_dispatchMessage == nullptr) {
+        ResetServiceLocked();
+        return false;
+    }
+    g_getDispatchStatus = reinterpret_cast<GetDispatchStatus>(
+        GetArkDynFunction("GetDispatchStatus"));
+    if (g_getDispatchStatus == nullptr) {
+        ResetServiceLocked();
+        return false;
+    }
+    g_processMessage = reinterpret_cast<ProcessMessage>(
+        GetArkDynFunction("ProcessMessage"));
+    if (g_processMessage == nullptr) {
+        ResetServiceLocked();
+        return false;
+    }
+
+    g_hasArkFuncsInited = true;
+    return true;
+}
+} // namespace
+
+void Inspector::OnMessage(std::string&& msg)
+{
+    g_dispatchMessage(vm_, std::move(msg));
+
+    // message will be processed soon if the debugger thread is in running or waiting status
+    if (g_getDispatchStatus(vm_) != DispatchStatus::UNKNOWN) {
+        return;
+    }
+    usleep(DELAY_CHECK_DISPATCH_STATUS);
+    if (g_getDispatchStatus(vm_) != DispatchStatus::UNKNOWN) {
+        return;
+    }
+
+    // the debugger thread maybe in idle status, so try to post a task to wake it up
+    if (debuggerPostTask_ != nullptr) {
+        debuggerPostTask_([tid = tid_, vm = vm_] {
+            if (tid != pthread_self()) {
+                LOGE("Task not in debugger thread");
+                return;
+            }
+            g_processMessage(vm);
+        });
+    } else {
+        LOGW("No debuggerPostTask provided");
+    }
+}
+
+bool StartDebug(const std::string& componentName, void* vm, bool isDebugMode, int32_t instanceId,
+    const DebuggerPostTask& debuggerPostTask)
+{
+    LOGI("StartDebug: %{private}s", componentName.c_str());
+    g_vm = vm;
+    if (!LoadArkDebuggerLibrary()) {
+        return false;
+    }
+    if (!InitializeArkFunctions()) {
+        LOGE("Initialize ark functions failed");
+        return false;
+    }
+
+    g_initializeDebugger(vm, std::bind(&SendReply, vm, std::placeholders::_2));
+
+    if (!InitializeInspector(vm, componentName, instanceId, debuggerPostTask)) {
+        LOGE("Initialize inspector failed");
+        return false;
+    }
+
+    if (isDebugMode) {
+        g_waitForDebugger(vm);
     }
     LOGI("StartDebug Continue");
     return true;
@@ -150,16 +255,14 @@ bool StartDebug(const std::string& componentName, void *vm, bool isDebugMode, in
 void StopDebug(const std::string& componentName)
 {
     LOGI("StopDebug: %{private}s", componentName.c_str());
-    if (g_inspector == nullptr) {
+    std::unique_lock<std::shared_mutex> lock(g_mutex);
+    auto iter = g_inspectors.find(g_vm);
+    if (iter == g_inspectors.end() || iter->second == nullptr) {
         return;
     }
-    auto uninitialize = reinterpret_cast<void (*)(void *)>(GetArkDynFunction("UninitializeDebugger"));
-    if (uninitialize == nullptr) {
-        return;
-    }
-    uninitialize(g_inspector->vm_);
-    ResetService();
+
+    g_uninitializeDebugger(g_vm);
+    ResetServiceLocked();
     LOGI("StopDebug end");
 }
-
 } // namespace OHOS::Ace::Framework

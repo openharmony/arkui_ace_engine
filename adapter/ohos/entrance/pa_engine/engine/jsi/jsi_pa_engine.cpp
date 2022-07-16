@@ -496,6 +496,7 @@ bool JsiPaEngineInstance::InitJsEnv(bool debuggerMode, const std::unordered_map<
     std::string libraryPath = "";
     if (debuggerMode) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
+        SetDebuggerPostTask();
     }
     if (!runtime_->Initialize(libraryPath, isDebugMode_, instanceId_)) {
         LOGE("JsiPaEngineInstance initialize runtime failed");
@@ -610,6 +611,20 @@ void JsiPaEngineInstance::SetArkNativeEngine(ArkNativeEngine* nativeEngine)
 ArkNativeEngine* JsiPaEngineInstance::GetArkNativeEngine() const
 {
     return nativeEngine_;
+}
+
+void JsiPaEngineInstance::SetDebuggerPostTask()
+{
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(backendDelegate_));
+    auto&& postTask = [weakDelegate](std::function<void()>&& task) {
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate == nullptr) {
+            LOGE("delegate is nullptr");
+            return;
+        }
+        delegate->PostJsTask(std::move(task));
+    };
+    std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
 }
 
 // -----------------------
