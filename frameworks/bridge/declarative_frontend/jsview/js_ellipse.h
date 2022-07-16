@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSEllipse : public JSShapeAbstract, public JSInteractableView {
+class JSEllipse : public JSShapeAbstract {
     DECLARE_ACE_TYPE(JSEllipse, JSShapeAbstract);
 public:
     static void JSBind(BindingTarget globalObj);

@@ -981,7 +981,7 @@ void RenderBox::MouseHoverEnterTest()
         CreateFloatAnimation(scaleAnimationEnter_, 1.0, 1.05);
         controllerEnter_->ClearInterpolators();
         controllerEnter_->AddInterpolator(scaleAnimationEnter_);
-        isHoveredScale = true;
+        isHoveredScale_ = true;
     } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
@@ -992,7 +992,7 @@ void RenderBox::MouseHoverEnterTest()
         CreateColorAnimation(colorAnimationEnter_, hoverColorBegin_, Color::FromRGBO(0, 0, 0, 0.05));
         controllerEnter_->ClearInterpolators();
         controllerEnter_->AddInterpolator(colorAnimationEnter_);
-        isHoveredBoard = true;
+        isHoveredBoard_ = true;
     } else {
         return;
     }
@@ -1029,7 +1029,7 @@ void RenderBox::MouseHoverExitTest()
         CreateFloatAnimation(scaleAnimationExit_, begin, 1.0);
         controllerExit_->ClearInterpolators();
         controllerExit_->AddInterpolator(scaleAnimationExit_);
-        isHoveredScale = false;
+        isHoveredScale_ = false;
     } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         if (!backDecoration_) {
             backDecoration_ = AceType::MakeRefPtr<Decoration>();
@@ -1042,7 +1042,7 @@ void RenderBox::MouseHoverExitTest()
         CreateColorAnimation(colorAnimationExit_, hoverColor_, hoverColorBegin_);
         controllerExit_->ClearInterpolators();
         controllerExit_->AddInterpolator(colorAnimationExit_);
-        isHoveredBoard = false;
+        isHoveredBoard_ = false;
     } else {
         return;
     }
