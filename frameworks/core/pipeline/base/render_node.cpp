@@ -806,7 +806,7 @@ bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalP
 {
     LOGD("MouseDetect: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
         GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
-    if (disabled_) {
+    if (disableTouchEvent_ || disabled_) {
         return false;
     }
 
@@ -819,7 +819,7 @@ bool RenderNode::MouseDetect(const Point& globalPoint, const Point& parentLocalP
     const auto& sortedChildren = SortChildrenByZIndex(GetChildren());
     for (auto iter = sortedChildren.rbegin(); iter != sortedChildren.rend(); ++iter) {
         auto& child = *iter;
-        if (!child->GetVisible() || child->disabled_) {
+        if (!child->GetVisible() || child->disabled_ || child->disableTouchEvent_) {
             continue;
         }
         child->MouseDetect(globalPoint, localPoint, hoverList, hoverNode);
