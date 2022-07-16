@@ -64,16 +64,22 @@ void* HandleClient(void* const server)
     return nullptr;
 }
 
+bool LoadArkDebuggerLibrary()
+{
+    if (g_handle != nullptr) {
+        LOGE("Already opened");
+        return false;
+    }
+    g_handle = dlopen(ARK_DEBUGGER_SHARED_LIB, RTLD_LAZY);
+    if (g_handle == nullptr) {
+        LOGE("Failed to open %{public}s, reason: %{public}sn", ARK_DEBUGGER_SHARED_LIB, dlerror());
+        return false;
+    }
+    return true;
+}
+
 void* GetArkDynFunction(const char* symbol)
 {
-    if (g_handle == nullptr) {
-        g_handle = dlopen(ARK_DEBUGGER_SHARED_LIB, RTLD_LAZY);
-        if (g_handle == nullptr) {
-            LOGE("Failed to open shared library %{public}s, reason: %{public}sn", ARK_DEBUGGER_SHARED_LIB, dlerror());
-            return nullptr;
-        }
-    }
-
     auto function = dlsym(g_handle, symbol);
     if (function == nullptr) {
         LOGE("Failed to get symbol %{public}s in %{public}s", symbol, ARK_DEBUGGER_SHARED_LIB);
@@ -224,6 +230,9 @@ bool StartDebug(const std::string& componentName, void* vm, bool isDebugMode, in
 {
     LOGI("StartDebug: %{private}s", componentName.c_str());
     g_vm = vm;
+    if (!LoadArkDebuggerLibrary()) {
+        return false;
+    }
     if (!InitializeArkFunctions()) {
         LOGE("Initialize ark functions failed");
         return false;
