@@ -3002,6 +3002,12 @@ void PipelineContext::RootLostFocus() const
 
 void PipelineContext::WindowFocus(bool isFocus)
 {
+    for (const auto& [id, callback] : windowFocusChangedCallbackMap_) {
+        if (callback) {
+            callback(isFocus);
+        }
+    }
+
     if (!isFocus) {
         OnVirtualKeyboardAreaChange(Rect());
     }
