@@ -73,6 +73,8 @@ DOMButton::DOMButton(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeI
     buttonChild_->AppendChild(paddingChild_);
     isWatch_ = (SystemProperties::GetDeviceType() == DeviceType::WATCH);
     isTv_ = (SystemProperties::GetDeviceType() == DeviceType::TV);
+    Component::MergeRSNode(textChild_);
+    Component::MergeRSNode(imageChild_);
 }
 
 void DOMButton::ResetInitializedStyle()
