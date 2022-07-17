@@ -24,9 +24,22 @@
 namespace OHOS::Ace {
 namespace {
 
+// If flexShrink is not defined, use 1.0 as default in Flex
+void ChangeShrinkValueInFlexComponent(const RefPtr<Component>& component)
+{
+    auto flexItem = AceType::DynamicCast<FlexItemComponent>(component);
+    if (!flexItem) {
+        return;
+    }
+    if (flexItem->GetFlexShrink() < 0) {
+        flexItem->SetFlexShrink(1.0);
+    }
+}
+
 RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component)
 {
     if (AceType::InstanceOf<FlexItemComponent>(component)) {
+        ChangeShrinkValueInFlexComponent(component);
         return component;
     }
     if (!component) {
@@ -37,6 +50,7 @@ RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component)
     if (composedComponent) {
         auto composedChild = composedComponent->GetChild();
         if (AceType::InstanceOf<FlexItemComponent>(composedChild)) {
+            ChangeShrinkValueInFlexComponent(composedChild);
             return component;
         }
 

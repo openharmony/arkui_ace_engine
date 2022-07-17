@@ -15,6 +15,7 @@
 
 #include "core/components/flex/render_flex_item.h"
 
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components/flex/flex_item_component.h"
 
@@ -241,6 +242,16 @@ void RenderFlexItem::SetAlignValue(AlignDirection& alignDirection, double value)
         return;
     }
     LOGE("Unknown Align Direction");
+}
+
+void RenderFlexItem::Dump()
+{
+    DumpLog::GetInstance().AddDesc(std::string("FlexGrow: ")
+                                       .append(std::to_string(flexGrow_))
+                                       .append(", FlexShrink: ")
+                                       .append(std::to_string(flexShrink_))
+                                       .append(", FlexBasis: ")
+                                       .append(std::to_string(flexBasis_.Value())));
 }
 
 } // namespace OHOS::Ace
