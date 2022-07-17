@@ -121,7 +121,7 @@ public:
 
     void Destroy() override {}
 
-    void AttachPipelineContext(const RefPtr<PipelineContext>& context) override {}
+    void AttachPipelineContext(const RefPtr<PipelineBase>& context) override {}
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override {}
 
     RefPtr<AcePage> GetPage(int32_t pageId) const override

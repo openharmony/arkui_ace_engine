@@ -284,7 +284,7 @@ void PluginFrontendDelegate::TransferComponentResponseData(int32_t callbackId, i
     std::vector<uint8_t>&& data)
 {
     auto pipelineContext = pipelineContextHolder_.Get();
-    WeakPtr<PipelineContext> contextWeak(pipelineContext);
+    WeakPtr<PipelineBase> contextWeak(pipelineContext);
     taskExecutor_->PostTask(
         [callbackId, data = std::move(data), contextWeak]() mutable {
             auto context = contextWeak.Upgrade();
@@ -823,7 +823,8 @@ void PluginFrontendDelegate::GetState(int32_t& index, std::string& name, std::st
 
 size_t PluginFrontendDelegate::GetComponentsCount()
 {
-    auto pipelineContext = pipelineContextHolder_.Get();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_RETURN(pipelineContext, 0);
     const auto& pageElement = pipelineContext->GetLastPage();
     if (pageElement) {
         return pageElement->GetComponentsCount();
@@ -854,7 +855,8 @@ void PluginFrontendDelegate::TriggerPageUpdate(int32_t pageId, bool directExecut
     auto jsCommands = std::make_shared<std::vector<RefPtr<JsCommand>>>();
     jsPage->PopAllCommands(*jsCommands);
 
-    auto pipelineContext = pipelineContextHolder_.Get();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_VOID(pipelineContext);
     WeakPtr<Framework::JsAcePage> jsPageWeak(jsPage);
     WeakPtr<PipelineContext> contextWeak(pipelineContext);
     auto updateTask = [jsPageWeak, contextWeak, jsCommands] {
@@ -929,7 +931,7 @@ int32_t PluginFrontendDelegate::GetVersionCode() const
 void PluginFrontendDelegate::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
-    auto pipelineContext = pipelineContextHolder_.Get();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     taskExecutor_->PostTask(
         [durationTime, message, bottom, isRightToLeft, context = pipelineContext] {
@@ -978,9 +980,11 @@ void PluginFrontendDelegate::ShowDialog(const std::string& title, const std::str
         .buttons = buttons,
         .callbacks = std::move(callbackMarkers),
     };
-    pipelineContextHolder_.Get()->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
+    auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    if (context) {
+        context->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
+    }
 }
-
 
 Rect PluginFrontendDelegate::GetBoundingRectData(NodeId nodeId)
 {
@@ -1126,7 +1130,10 @@ void PluginFrontendDelegate::LoadJS(
                 [weak, page] {
                     auto delegate = weak.Upgrade();
                     if (delegate && delegate->pipelineContextHolder_.Get()) {
-                        delegate->pipelineContextHolder_.Get()->FlushFocus();
+                        auto context = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+                        if (context) {
+                            context->FlushFocus();
+                        }
                     }
                     if (page->GetDomDocument()) {
                         page->GetDomDocument()->HandlePageLoadFinish();
@@ -1187,7 +1194,8 @@ void PluginFrontendDelegate::OnPageReady(
             if (!delegate) {
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);
@@ -1306,7 +1314,8 @@ void PluginFrontendDelegate::PopToPage(const std::string& url)
             if (pageId == INVALID_PAGE_ID) {
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             if (!pipelineContext->CanPopPage()) {
                 delegate->ResetStagingPage();
                 return;
@@ -1360,7 +1369,8 @@ void PluginFrontendDelegate::PopPage()
             if (!delegate) {
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             if (delegate->GetStackSize() == 1) {
                 if (delegate->disallowPopLastPage_) {
                     LOGW("Not allow back because this is the last page!");
@@ -1430,7 +1440,8 @@ void PluginFrontendDelegate::ClearInvisiblePages()
             if (!delegate) {
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             if (pipelineContext->ClearInvisiblePages()) {
                 auto pageId = delegate->OnClearInvisiblePagesSuccess();
                 delegate->SetCurrentPage(pageId);
@@ -1470,7 +1481,8 @@ void PluginFrontendDelegate::ReplacePage(
             if (!delegate) {
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);
@@ -1711,8 +1723,11 @@ SingleTaskExecutor PluginFrontendDelegate::GetUiTask()
     return SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::UI);
 }
 
-void PluginFrontendDelegate::AttachPipelineContext(const RefPtr<PipelineContext>& context)
+void PluginFrontendDelegate::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
+    if (!context) {
+        return;
+    }
     context->SetOnPageShow([weak = AceType::WeakClaim(this)] {
         auto delegate = weak.Upgrade();
         if (delegate) {
@@ -1730,7 +1745,7 @@ void PluginFrontendDelegate::AttachPipelineContext(const RefPtr<PipelineContext>
     jsAccessibilityManager_->InitializeCallback();
 }
 
-RefPtr<PipelineContext> PluginFrontendDelegate::GetPipelineContext()
+RefPtr<PipelineBase> PluginFrontendDelegate::GetPipelineContext()
 {
     return pipelineContextHolder_.Get();
 }

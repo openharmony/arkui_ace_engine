@@ -36,7 +36,7 @@ class RosenRenderOffscreenCanvas : public RenderOffscreenCanvas {
     DECLARE_ACE_TYPE(RosenRenderOffscreenCanvas, RenderOffscreenCanvas);
 
 public:
-    RosenRenderOffscreenCanvas(const WeakPtr<PipelineContext>& context, int32_t width, int32_t height);
+    RosenRenderOffscreenCanvas(const WeakPtr<PipelineBase>& context, int32_t width, int32_t height);
     ~RosenRenderOffscreenCanvas() override = default;
     void SetAntiAlias(bool isEnabled) override;
     void FillRect(Rect rect) override;
@@ -82,7 +82,7 @@ private:
     void InitCachePaint();
     bool antiAlias_ = true;
     SkPaint GetStrokePaint();
-    WeakPtr<PipelineContext> pipelineContext_;
+    WeakPtr<PipelineBase> pipelineContext_;
     SkBitmap skBitmap_;
     SkPath skPath_;
     SkPath strokePath_;

@@ -27,7 +27,7 @@
 #include "base/resource/shared_image_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/image/image_source_info.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -36,7 +36,7 @@ class ImageLoader : public virtual AceType {
 
 public:
     virtual sk_sp<SkData> LoadImageData(
-        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context = nullptr) = 0;
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context = nullptr) = 0;
 
     static std::string RemovePathHead(const std::string& uri);
     static RefPtr<ImageLoader> CreateImageLoader(const ImageSourceInfo& imageSourceInfo);
@@ -49,7 +49,7 @@ public:
     FileImageLoader() = default;
     ~FileImageLoader() override = default;
     sk_sp<SkData> LoadImageData(
-        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context = nullptr) override;
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context = nullptr) override;
 };
 
 // data provider image loader.
@@ -58,7 +58,7 @@ public:
     DataProviderImageLoader() = default;
     ~DataProviderImageLoader() override = default;
     sk_sp<SkData> LoadImageData(
-        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context = nullptr) override;
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context = nullptr) override;
 };
 
 class AssetImageLoader final : public ImageLoader {
@@ -66,8 +66,8 @@ public:
     AssetImageLoader() = default;
     ~AssetImageLoader() override = default;
     sk_sp<SkData> LoadImageData(
-        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context = nullptr) override;
-    std::string LoadJsonData(const std::string& src, const WeakPtr<PipelineContext> context = nullptr);
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context = nullptr) override;
+    std::string LoadJsonData(const std::string& src, const WeakPtr<PipelineBase> context = nullptr);
 };
 
 // Network image provider: read image from network.
@@ -76,7 +76,7 @@ public:
     NetworkImageLoader() = default;
     ~NetworkImageLoader() override = default;
     sk_sp<SkData> LoadImageData(
-        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context = nullptr) override;
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context = nullptr) override;
 };
 
 class InternalImageLoader final : public ImageLoader {
@@ -84,7 +84,7 @@ public:
     InternalImageLoader() = default;
     ~InternalImageLoader() override = default;
     sk_sp<SkData> LoadImageData(
-        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context = nullptr) override;
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context = nullptr) override;
 };
 
 class Base64ImageLoader final : public ImageLoader {
@@ -93,7 +93,7 @@ public:
     ~Base64ImageLoader() override = default;
     static std::string_view GetBase64ImageCode(const std::string& uri);
     sk_sp<SkData> LoadImageData(
-        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context = nullptr) override;
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context = nullptr) override;
 };
 
 class ResourceImageLoader final : public ImageLoader {
@@ -101,7 +101,7 @@ public:
     ResourceImageLoader() = default;
     ~ResourceImageLoader() override = default;
     sk_sp<SkData> LoadImageData(
-        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context = nullptr) override;
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context = nullptr) override;
 
 private:
     bool GetResourceId(const std::string& uri, const RefPtr<ThemeConstants>& themeConstants, uint32_t& resId) const;

@@ -1706,7 +1706,7 @@ void JsCardParser::CreateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     } else {
         command = Referenced::MakeRefPtr<Framework::JsCommandAddDomElement>(type, nodeId, parentId);
     }
-    command->SetPipelineContext(context_);
+    command->SetPipelineContext(AceType::DynamicCast<PipelineContext>(context_));
     auto ptr = Referenced::RawPtr(command);
     if (shouldShow && hasShownAttr) {
         attrs.emplace_back(std::make_pair("show", TRUE));

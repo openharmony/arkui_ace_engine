@@ -42,7 +42,7 @@ constexpr double SCALE_CALCULATOR_FACTOR = 0.7;
 
 } // namespace
 
-ScrollFadeController::ScrollFadeController(const WeakPtr<PipelineContext>& context) : context_(context)
+ScrollFadeController::ScrollFadeController(const WeakPtr<PipelineBase>& context) : context_(context)
 {
     Initialize();
 }

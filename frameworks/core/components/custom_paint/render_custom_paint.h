@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 class RenderOffscreenCanvas : public OffscreenCanvas {
     DECLARE_ACE_TYPE(RenderOffscreenCanvas, OffscreenCanvas);
 public:
-    static RefPtr<OffscreenCanvas> Create(const WeakPtr<PipelineContext>& context, int32_t width, int32_t height);
+    static RefPtr<OffscreenCanvas> Create(const WeakPtr<PipelineBase>& context, int32_t width, int32_t height);
 };
 
 class RenderCustomPaint : public RenderNode {

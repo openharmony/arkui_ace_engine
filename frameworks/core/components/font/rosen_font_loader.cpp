@@ -26,7 +26,7 @@ namespace OHOS::Ace {
 RosenFontLoader::RosenFontLoader(const std::string& familyName, const std::string& familySrc)
     : FontLoader(familyName, familySrc) {}
 
-void RosenFontLoader::AddFont(const RefPtr<PipelineContext>& context)
+void RosenFontLoader::AddFont(const RefPtr<PipelineBase>& context)
 {
     if (familySrc_.empty()) {
         return;
@@ -41,7 +41,7 @@ void RosenFontLoader::AddFont(const RefPtr<PipelineContext>& context)
     }
 }
 
-void RosenFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
+void RosenFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase>& context)
 {
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));
     context->GetTaskExecutor()->PostTask(
@@ -82,7 +82,7 @@ void RosenFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::Pipelin
         TaskExecutor::TaskType::BACKGROUND);
 }
 
-void RosenFontLoader::LoadFromAsset(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
+void RosenFontLoader::LoadFromAsset(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase>& context)
 {
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));
     context->GetTaskExecutor()->PostTask(

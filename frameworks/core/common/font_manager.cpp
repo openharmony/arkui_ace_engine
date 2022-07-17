@@ -24,7 +24,7 @@ namespace OHOS::Ace {
 float FontManager::fontWeightScale_ = 1.0f;
 
 void FontManager::RegisterFont(
-    const std::string& familyName, const std::string& familySrc, const RefPtr<PipelineContext>& context)
+    const std::string& familyName, const std::string& familySrc, const RefPtr<PipelineBase>& context)
 {
     if (std::find(std::begin(fontNames_), std::end(fontNames_), familyName) == std::end(fontNames_)) {
         fontNames_.emplace_back(familyName);

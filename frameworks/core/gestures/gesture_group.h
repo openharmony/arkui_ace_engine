@@ -41,7 +41,7 @@ public:
     }
 
 protected:
-    RefPtr<GestureRecognizer> CreateRecognizer(WeakPtr<PipelineContext> context) override;
+    RefPtr<GestureRecognizer> CreateRecognizer(WeakPtr<PipelineBase> context) override;
 
 private:
     GestureMode mode_;

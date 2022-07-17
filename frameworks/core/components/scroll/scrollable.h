@@ -75,7 +75,7 @@ public:
     static void SetVelocityScale(double sVelocityScale);
     static void SetFriction(double sFriction);
 
-    void Initialize(const WeakPtr<PipelineContext>& context);
+    void Initialize(const WeakPtr<PipelineBase>& context);
 
     bool IsMotionStop() const
     {
@@ -240,7 +240,7 @@ public:
         available_ = available;
     }
 
-    WeakPtr<PipelineContext> GetContext() const
+    WeakPtr<PipelineBase> GetContext() const
     {
         return context_;
     }
@@ -304,7 +304,7 @@ private:
     RefPtr<FrictionMotion> motion_;
     RefPtr<ScrollMotion> scrollMotion_;
     RefPtr<SpringProperty> spring_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     WeakPtr<RenderNode> scrollableNode_;
     double currentPos_ = 0.0;
     double currentVelocity_ = 0.0;

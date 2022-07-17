@@ -145,7 +145,7 @@ void AceContainer::Destroy()
     ContainerScope scope(instanceId_);
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
-        RefPtr<PipelineContext> context;
+        RefPtr<PipelineBase> context;
         context.Swap(pipelineContext_);
         if (GetSettings().usePlatformAsUIThread) {
             context->Destroy();
@@ -264,7 +264,7 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
         return true;
     }
     ContainerScope scope(instanceId);
-    auto context = container->GetPipelineContext();
+    auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!context) {
         return false;
     }
@@ -345,7 +345,7 @@ void AceContainer::OnActive(int32_t instanceId)
 
     taskExecutor->PostTask(
         [container]() {
-            auto pipelineContext = container->GetPipelineContext();
+            auto pipelineContext = DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (!pipelineContext) {
                 LOGE("pipeline context is null, OnActive failed.");
                 return;
@@ -378,7 +378,7 @@ void AceContainer::OnInactive(int32_t instanceId)
 
     taskExecutor->PostTask(
         [container]() {
-            auto pipelineContext = container->GetPipelineContext();
+            auto pipelineContext = DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (!pipelineContext) {
                 LOGE("pipeline context is null, OnInactive failed.");
                 return;
@@ -981,12 +981,16 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     pipelineContext_->SetRootSize(density, width, height);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
-    pipelineContext_->SetWindowModal(windowModal_);
-    pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     pipelineContext_->SetWindowId(windowId);
-    if (isSubContainer_) {
-        pipelineContext_->SetIsSubPipeline(true);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_);
+    if (pipelineContext) {
+        pipelineContext->SetWindowModal(windowModal_);
+        pipelineContext->SetDrawDelegate(aceView_->GetDrawDelegate());
+        if (isSubContainer_) {
+            pipelineContext->SetIsSubPipeline(true);
+        }
     }
+
     InitializeCallback();
 
     auto&& finishEventHandler = [weak = WeakClaim(this), instanceId] {
@@ -1088,7 +1092,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     taskExecutor_->PostTask(
         [context = pipelineContext_, callback, isSubContainer = isSubContainer_]() {
             if (callback != nullptr) {
-                callback(context);
+                callback(AceType::DynamicCast<PipelineContext>(context));
             }
             if (!isSubContainer) {
                 context->SetupRootElement();
@@ -1104,7 +1108,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     } else {
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
         if (declarativeFrontend) {
-            declarativeFrontend->AttachSubPipelineContext(pipelineContext_);
+            declarativeFrontend->AttachSubPipelineContext(AceType::DynamicCast<PipelineContext>(pipelineContext_));
         }
         return;
     }
@@ -1117,7 +1121,9 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     pipelineContext_->SetDataProviderManager(dataProviderManager);
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
-    pipelineContext_->SetPostRTTaskCallBack([](std::function<void()>&& task) {
+    auto context = AceType::DynamicCast<PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(context);
+    context->SetPostRTTaskCallBack([](std::function<void()>&& task) {
         auto syncTask = std::make_shared<AceRosenSyncTask>(std::move(task));
         Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
     });
@@ -1234,7 +1240,8 @@ void AceContainer::InitWindowCallback()
         LOGW("AceContainer::InitWindowCallback failed, aceAbility is null.");
         return;
     }
-    if (pipelineContext_ == nullptr) {
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_);
+    if (pipelineContext == nullptr) {
         LOGE("AceContainer::InitWindowCallback failed, pipelineContext_ is null.");
         return;
     }
@@ -1245,28 +1252,28 @@ void AceContainer::InitWindowCallback()
     }
     std::shared_ptr<AppExecFwk::AbilityInfo> info = aceAbility->GetAbilityInfo();
     if (info != nullptr) {
-        pipelineContext_->SetAppLabelId(info->labelId);
-        pipelineContext_->SetAppIconId(info->iconId);
+        pipelineContext->SetAppLabelId(info->labelId);
+        pipelineContext->SetAppIconId(info->iconId);
     }
-    pipelineContext_->SetWindowMinimizeCallBack(
+    pipelineContext->SetWindowMinimizeCallBack(
         [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Minimize()); });
-    pipelineContext_->SetWindowMaximizeCallBack(
+    pipelineContext->SetWindowMaximizeCallBack(
         [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Maximize()); });
 
-    pipelineContext_->SetWindowRecoverCallBack(
+    pipelineContext->SetWindowRecoverCallBack(
         [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Recover()); });
 
-    pipelineContext_->SetWindowCloseCallBack(
+    pipelineContext->SetWindowCloseCallBack(
         [window]() -> bool { return (OHOS::Rosen::WMError::WM_OK == window->Close()); });
 
-    pipelineContext_->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
+    pipelineContext->SetWindowStartMoveCallBack([window]() { window->StartMove(); });
 
-    pipelineContext_->SetWindowSplitCallBack([window]() -> bool {
+    pipelineContext->SetWindowSplitCallBack([window]() -> bool {
         return (
             OHOS::Rosen::WMError::WM_OK == window->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY));
     });
 
-    pipelineContext_->SetWindowGetModeCallBack([window]() -> WindowMode { return (WindowMode)window->GetMode(); });
+    pipelineContext->SetWindowGetModeCallBack([window]() -> WindowMode { return (WindowMode)window->GetMode(); });
 }
 
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(const std::string& bundle,

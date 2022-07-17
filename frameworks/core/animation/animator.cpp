@@ -21,7 +21,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -60,7 +60,7 @@ Animator::Animator(const char* name)
     }
 }
 
-Animator::Animator(const WeakPtr<PipelineContext>& context, const char* name)
+Animator::Animator(const WeakPtr<PipelineBase>& context, const char* name)
 {
     controllerId_ = AllocControllerId();
     AttachScheduler(context);
@@ -81,7 +81,7 @@ Animator::~Animator()
     }
 }
 
-void Animator::AttachScheduler(const WeakPtr<PipelineContext>& context)
+void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context)
 {
     auto&& callback = [weak = AceType::WeakClaim(this)](uint64_t duration) {
         auto controller = weak.Upgrade();

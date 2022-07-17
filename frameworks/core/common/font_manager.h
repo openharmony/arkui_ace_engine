@@ -22,7 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/common/font_loader.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -40,7 +40,7 @@ public:
     static RefPtr<FontManager> Create();
 
     void RegisterFont(
-        const std::string& familyName, const std::string& familySrc, const RefPtr<PipelineContext>& context);
+        const std::string& familyName, const std::string& familySrc, const RefPtr<PipelineBase>& context);
     void RegisterCallback(
         const WeakPtr<RenderNode>& node, const std::string& familyName, const std::function<void()>& callback);
     void UnRegisterCallback(const WeakPtr<RenderNode>& node);

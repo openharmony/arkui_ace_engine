@@ -22,7 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/event/ace_event_helper.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/media_query/media_query_info.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
@@ -43,7 +43,7 @@ public:
     FrontendDelegate() = default;
     ~FrontendDelegate() override = default;
 
-    virtual void AttachPipelineContext(const RefPtr<PipelineContext>& context) = 0;
+    virtual void AttachPipelineContext(const RefPtr<PipelineBase>& context) = 0;
     ACE_EXPORT void SetAssetManager(const RefPtr<AssetManager>& assetManager)
     {
         assetManager_ = assetManager;
@@ -172,7 +172,7 @@ public:
 
     virtual SingleTaskExecutor GetUiTask() = 0;
 
-    virtual RefPtr<PipelineContext> GetPipelineContext() = 0;
+    virtual RefPtr<PipelineBase> GetPipelineContext() = 0;
 
     virtual const RefPtr<GroupJsBridge>& GetGroupJsBridge() = 0;
 

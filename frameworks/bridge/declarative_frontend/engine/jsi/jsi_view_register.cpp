@@ -456,7 +456,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorTree(panda::JsiRuntimeCallInfo* ru
         LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
         LOGE("pipeline is null");
         return panda::JSValueRef::Undefined(vm);
@@ -483,7 +483,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* r
         LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
         LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
@@ -512,7 +512,7 @@ panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo* runt
         LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
         LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
@@ -620,7 +620,7 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
         LOGW("container is null");
         return panda::JSValueRef::Undefined(vm);
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (pipelineContext == nullptr) {
         LOGE("pipelineContext==nullptr");
         return panda::JSValueRef::Undefined(vm);
@@ -809,13 +809,9 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
         return panda::JSValueRef::Undefined(vm);
     }
     auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return panda::JSValueRef::Undefined(vm);
-    }
-
-    auto pipelineContext = container->GetPipelineContext();
-    auto frontend = pipelineContext->GetFrontend();
+    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
     auto windowConfig = frontend->GetWindowConfig();
     double lpxValue = firstArg->ToNumber(vm)->Value();
     double pxValue = lpxValue * windowConfig.designWidthScale;
@@ -836,13 +832,9 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
         return panda::JSValueRef::Undefined(vm);
     }
     auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return panda::JSValueRef::Undefined(vm);
-    }
-
-    auto pipelineContext = container->GetPipelineContext();
-    auto frontend = pipelineContext->GetFrontend();
+    CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
     auto windowConfig = frontend->GetWindowConfig();
     double pxValue = firstArg->ToNumber(vm)->Value();
     double lpxValue = pxValue / windowConfig.designWidthScale;

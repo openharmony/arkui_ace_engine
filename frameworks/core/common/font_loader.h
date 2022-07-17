@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FONT_LOADER_H
 
 #include "base/memory/ace_type.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -28,7 +28,7 @@ public:
     FontLoader(const std::string& familyName, const std::string& familySrc);
     ~FontLoader() override = default;
 
-    virtual void AddFont(const RefPtr<PipelineContext>& context) = 0;
+    virtual void AddFont(const RefPtr<PipelineBase>& context) = 0;
 
     static RefPtr<FontLoader> Create(const std::string& familyName, const std::string& familySrc);
 

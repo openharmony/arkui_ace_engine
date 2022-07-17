@@ -22,7 +22,7 @@
 #include "third_party/skia/include/core/SkColor.h"
 
 #include "core/components/common/properties/text_style.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace txt {
 enum class FontWeight;
@@ -58,7 +58,7 @@ SkColor ConvertSkColor(Color color);
 
 txt::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration);
 
-void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineContext>& context, txt::TextStyle& txtStyle);
+void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, txt::TextStyle& txtStyle);
 
 Rect ConvertSkRect(SkRect skRect);
 

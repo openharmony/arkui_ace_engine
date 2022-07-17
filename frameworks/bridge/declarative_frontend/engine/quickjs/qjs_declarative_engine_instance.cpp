@@ -176,7 +176,7 @@ void QJSDeclarativeEngineInstance::TriggerPageUpdate(JSContext* ctx)
     LOGE("QJS context has no ref to instance. Failed!");
 }
 
-RefPtr<PipelineContext> QJSDeclarativeEngineInstance::GetPipelineContext(JSContext* ctx)
+RefPtr<PipelineBase> QJSDeclarativeEngineInstance::GetPipelineContext(JSContext* ctx)
 {
     auto* instance = QJSDeclarativeEngineInstance::UnWrapEngineInstance(ctx);
     if (instance != nullptr) {

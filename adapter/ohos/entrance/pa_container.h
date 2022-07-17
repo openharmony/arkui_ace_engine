@@ -68,7 +68,7 @@ public:
         return nullptr;
     }
 
-    RefPtr<PipelineContext> GetPipelineContext() const override
+    RefPtr<PipelineBase> GetPipelineContext() const override
     {
         return nullptr;
     }

@@ -226,8 +226,8 @@ bool PipelineContext::GetIsDeclarative() const
 
 void PipelineContext::AddGeometryChangedNode(const RefPtr<RenderNode>& renderNode) {}
 
-void PipelineContext::PostAsyncEvent(const std::function<void()>& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(const std::function<void()>& task, TaskExecutor::TaskType type) {}
 
-void PipelineContext::PostAsyncEvent(std::function<void()>&& task, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(std::function<void()>&& task, TaskExecutor::TaskType type) {}
 
 } // namespace OHOS::Ace

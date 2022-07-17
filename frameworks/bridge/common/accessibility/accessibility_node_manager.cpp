@@ -195,7 +195,7 @@ AccessibilityNodeManager::~AccessibilityNodeManager()
 
 void AccessibilityNodeManager::InitializeCallback() {}
 
-void AccessibilityNodeManager::SetPipelineContext(const RefPtr<PipelineContext>& context)
+void AccessibilityNodeManager::SetPipelineContext(const RefPtr<PipelineBase>& context)
 {
     context_ = context;
 }

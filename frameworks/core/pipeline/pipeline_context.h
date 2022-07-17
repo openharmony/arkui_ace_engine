@@ -35,16 +35,13 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
-#include "core/accessibility/accessibility_manager.h"
 #include "core/animation/flush_event.h"
 #include "core/animation/page_transition_listener.h"
 #include "core/animation/schedule_task.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/focus_animation_manager.h"
-#include "core/common/platform_bridge.h"
 #include "core/common/platform_res_register.h"
-#include "core/common/window_animation_config.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -56,6 +53,7 @@
 #include "core/image/image_cache.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/factories/render_factory.h"
+#include "core/pipeline/pipeline_base.h"
 #ifndef WEARABLE_PRODUCT
 #include "core/event/multimodal/multimodal_manager.h"
 #include "core/event/multimodal/multimodal_subscriber.h"
@@ -68,11 +66,9 @@ class RSUIDirector;
 
 namespace OHOS::Ace {
 
-class OffscreenCanvas;
 class CardTransitionController;
 class ComposedElement;
 class FontManager;
-class Frontend;
 enum class FrontendType;
 class OverlayElement;
 class RenderNode;
@@ -107,15 +103,12 @@ struct VisibleCallbackInfo {
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 using SubscribeCtrlACallback = std::function<void()>;
 
-class ACE_EXPORT PipelineContext : public AceType {
-    DECLARE_ACE_TYPE(PipelineContext, AceType);
+class ACE_EXPORT PipelineContext : public PipelineBase {
+    DECLARE_ACE_TYPE(PipelineContext, PipelineBase);
 
 public:
     static constexpr int32_t DEFAULT_HOVER_ENTER_ANIMATION_ID = -1;
     using TimeProvider = std::function<int64_t(void)>;
-    using OnPageShowCallBack = std::function<void()>;
-    using AnimationCallback = std::function<void()>;
-    using GetViewScaleCallback = std::function<bool(float&, float&)>;
     using SurfaceChangedCallbackMap =
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
     using PostRTTaskCallback = std::function<void(std::function<void()>&&)>;
@@ -129,24 +122,22 @@ public:
 
     ~PipelineContext() override;
 
-    virtual void SetupRootElement();
+    void SetupRootElement() override;
 
     // This is used for subwindow, when the subwindow is created,a new subrootElement will be built
     RefPtr<Element> SetupSubRootElement();
     RefPtr<DialogComponent> ShowDialog(
         const DialogProperties& dialogProperties, bool isRightToLeft, const std::string& inspectorTag = "");
     void CloseContextMenu();
-    void GetBoundingRectData(int32_t nodeId, Rect& rect);
-
-    RefPtr<OffscreenCanvas> CreateOffscreenCanvas(int32_t width, int32_t height);
+    void GetBoundingRectData(int32_t nodeId, Rect& rect) override;
 
     void PushVisibleCallback(int32_t nodeId, double ratio, std::function<void(bool, double)>&& callback);
     void RemoveVisibleChangeNode(int32_t nodeId);
 
     void PushPage(const RefPtr<PageComponent>& pageComponent, const RefPtr<StageElement>& stage);
     void PushPage(const RefPtr<PageComponent>& pageComponent);
-    void PostponePageTransition();
-    void LaunchPageTransition();
+    void PostponePageTransition() override;
+    void LaunchPageTransition() override;
 
     bool CanPushPage();
 
@@ -168,7 +159,7 @@ public:
 
     bool ClearInvisiblePages(const std::function<void()>& listener = nullptr);
 
-    bool CallRouterBackToPopPage();
+    bool CallRouterBackToPopPage() override;
 
     void SetSinglePageId(int32_t pageId);
 
@@ -176,7 +167,7 @@ public:
 
     void NotifyAppStorage(const std::string& key, const std::string& value);
 
-    bool Dump(const std::vector<std::string>& params) const;
+    bool Dump(const std::vector<std::string>& params) const override;
 
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 
@@ -185,10 +176,6 @@ public:
     RefPtr<PageElement> GetLastPage() const;
 
     RefPtr<RenderNode> GetLastPageRender() const;
-
-    void AddRouterChangeCallback(const OnRouterChangeCallback& onRouterChangeCallback);
-
-    void onRouterChange(const std::string url);
 
     void ScheduleUpdate(const RefPtr<ComposedComponent>& composed);
 
@@ -223,35 +210,33 @@ public:
     void RemoveRequestedRotationNode(const WeakPtr<RenderNode>& renderNode);
 
     // add schedule task and return the unique mark id.
-    uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task);
+    uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) override;
 
     // remove schedule task by id.
-    void RemoveScheduleTask(uint32_t id);
+    void RemoveScheduleTask(uint32_t id) override;
 
     // Called by view when touch event received.
-    virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false);
+    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
-    bool OnKeyEvent(const KeyEvent& event);
+    bool OnKeyEvent(const KeyEvent& event) override;
 
     // Called by view when mouse event received.
-    void OnMouseEvent(const MouseEvent& event);
+    void OnMouseEvent(const MouseEvent& event) override;
 
     // Called by view when axis event received.
-    void OnAxisEvent(const AxisEvent& event);
+    void OnAxisEvent(const AxisEvent& event) override;
 
     // Called by container when rotation event received.
     // if return false, then this event needs platform to handle it.
-    bool OnRotationEvent(const RotationEvent& event) const;
+    bool OnRotationEvent(const RotationEvent& event) const override;
 
     // Called by window when received vsync signal.
-    void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
+    void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) override;
 
     // Called by view when idle event.
-    void OnIdle(int64_t deadline);
-
-    void OnActionEvent(const std::string& action);
+    void OnIdle(int64_t deadline) override;
 
     void OnVirtualKeyboardAreaChange(Rect keyboardArea);
 
@@ -279,46 +264,25 @@ public:
         eventTrigger_.TriggerSyncEvent(marker, std::forward<Args>(args)...);
     }
 
-    void PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
-
-    void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
-
     void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED);
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
 
     void WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
 
-    void OnSurfaceDensityChanged(double density);
+    void OnSurfaceDensityChanged(double density) override;
 
-    void OnSystemBarHeightChanged(double statusBar, double navigationBar);
+    void OnSystemBarHeightChanged(double statusBar, double navigationBar) override;
 
-    void OnSurfaceDestroyed();
-
-    RefPtr<Frontend> GetFrontend() const;
+    void OnSurfaceDestroyed() override;
 
     FrontendType GetFrontendType() const
     {
         return frontendType_;
     }
 
-    RefPtr<TaskExecutor> GetTaskExecutor() const
-    {
-        return taskExecutor_;
-    }
-
-    RefPtr<AssetManager> GetAssetManager() const
-    {
-        return assetManager_;
-    }
-
     RefPtr<PlatformResRegister> GetPlatformResRegister() const
     {
         return platformResRegister_;
-    }
-
-    Window* GetWindow()
-    {
-        return window_.get();
     }
 
     WindowModal GetWindowModal() const
@@ -332,78 +296,10 @@ public:
                windowModal_ == WindowModal::CONTAINER_MODAL || isFullWindow_;
     }
 
-    using FinishEventHandler = std::function<void()>;
-    void SetFinishEventHandler(FinishEventHandler&& listener)
-    {
-        finishEventHandler_ = std::move(listener);
-    }
-
-    using StartAbilityHandler = std::function<void(const std::string& address)>;
-    void SetStartAbilityHandler(StartAbilityHandler&& listener)
-    {
-        startAbilityHandler_ = std::move(listener);
-    }
-    void HyperlinkStartAbility(const std::string& address) const;
-
-    using ActionEventHandler = std::function<void(const std::string& action)>;
-    void SetActionEventHandler(ActionEventHandler&& listener)
-    {
-        actionEventHandler_ = std::move(listener);
-    }
-
     // SemiModal and DialogModal have their own enter/exit animation and will exit after animation done.
-    void Finish(bool autoFinish = true) const;
+    void Finish(bool autoFinish = true) const override;
 
-    void RequestFullWindow(int32_t duration);
-
-    using StatusBarEventHandler = std::function<void(const Color& color)>;
-    void SetStatusBarEventHandler(StatusBarEventHandler&& listener)
-    {
-        statusBarBgColorEventHandler_ = std::move(listener);
-    }
-    void NotifyStatusBarBgColor(const Color& color) const;
-    using PopupEventHandler = std::function<void()>;
-
-    void SetPopupEventHandler(PopupEventHandler&& listener)
-    {
-        popupEventHandler_ = std::move(listener);
-    }
-    void NotifyPopupDismiss() const;
-
-    using RouterBackEventHandler = std::function<void()>;
-    void SetRouterBackEventHandler(RouterBackEventHandler&& listener)
-    {
-        routerBackEventHandler_ = std::move(listener);
-    }
-    void NotifyRouterBackDismiss() const;
-
-    using PopPageSuccessEventHandler = std::function<void(const std::string& pageUrl, const int32_t pageId)>;
-    void SetPopPageSuccessEventHandler(PopPageSuccessEventHandler&& listener)
-    {
-        popPageSuccessEventHandler_.push_back(std::move(listener));
-    }
-    void NotifyPopPageSuccessDismiss(const std::string& pageUrl, const int32_t pageId) const;
-
-    using IsPagePathInvalidEventHandler = std::function<void(bool& isPageInvalid)>;
-    void SetIsPagePathInvalidEventHandler(IsPagePathInvalidEventHandler&& listener)
-    {
-        isPagePathInvalidEventHandler_.push_back(std::move(listener));
-    }
-    void NotifyIsPagePathInvalidDismiss(bool isPageInvalid) const;
-
-    using DestroyEventHandler = std::function<void()>;
-    void SetDestroyHandler(DestroyEventHandler&& listener)
-    {
-        destroyEventHandler_.push_back(std::move(listener));
-    }
-    void NotifyDestroyEventDismiss() const;
-
-    using DispatchTouchEventHandler = std::function<void(const TouchEvent& event)>;
-    void SetDispatchTouchEventHandler(DispatchTouchEventHandler&& listener)
-    {
-        dispatchTouchEventHandler_.push_back(std::move(listener));
-    }
-    void NotifyDispatchTouchEventDismiss(const TouchEvent& event) const;
+    void RequestFullWindow(int32_t duration) override;
 
     using WebPaintCallback = std::function<void()>;
     void SetWebPaintCallback(WebPaintCallback&& listener)
@@ -417,35 +313,14 @@ public:
         return viewScale_;
     }
 
-    // Get the dp scale which used to covert dp to logic px.
-    double GetDipScale() const
-    {
-        return dipScale_;
-    }
-
-    // Get the widnow design scale used to covert lpx to logic px.
-    double GetLogicScale() const
-    {
-        return designWidthScale_;
-    }
-
     // Get the font scale used to covert fp to logic px.
     double GetFontUnitScale() const
     {
         return dipScale_ * fontScale_;
     }
 
-    double GetRootHeight() const
-    {
-        return rootHeight_;
-    }
     RefPtr<RenderNode> DragTestAll(const TouchEvent& point);
     RefPtr<RenderNode> DragTest(const TouchEvent& point, const RefPtr<RenderNode>& renderNode, int32_t deep);
-
-    double GetRootWidth() const
-    {
-        return rootWidth_;
-    }
 
     void SetRootHeight(double rootHeight)
     {
@@ -462,14 +337,6 @@ public:
     {
         return isSurfaceReady_;
     }
-
-    void ClearImageCache();
-
-    RefPtr<ImageCache> GetImageCache() const;
-
-    double NormalizeToPx(const Dimension& dimension) const;
-
-    double ConvertPxToVp(const Dimension& dimension) const;
 
     void ShowFocusAnimation(
         const RRect& rrect, const Color& color, const Offset& offset, bool isIndented = false) const;
@@ -522,9 +389,9 @@ public:
 
     bool RequestFocus(const RefPtr<Element>& targetElement);
 
-    RefPtr<AccessibilityManager> GetAccessibilityManager() const;
+    RefPtr<AccessibilityManager> GetAccessibilityManager() const override;
 
-    void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent);
+    void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) override;
 
     BaseId::IdType AddPageTransitionListener(const PageTransitionListenable::CallbackFuncType& funcObject);
 
@@ -534,22 +401,9 @@ public:
 
     void ClearPageTransitionListeners();
 
-    void Destroy();
+    void Destroy() override;
 
-    const RefPtr<FontManager>& GetFontManager() const
-    {
-        return fontManager_;
-    }
-
-    void RegisterFont(const std::string& familyName, const std::string& familySrc);
-
-    void TryLoadImageInfo(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& loadCallback);
-
-    void SetAnimationCallback(AnimationCallback&& callback);
-
-    bool IsLastPage();
-
-    void SetRootSize(double density, int32_t width, int32_t height);
+    bool IsLastPage() override;
 
     RefPtr<Element> GetDeactivateElement(int32_t componentId) const;
 
@@ -575,9 +429,9 @@ public:
 
     void SetWindowOnHide();
 
-    void OnShow();
+    void OnShow() override;
 
-    void OnHide();
+    void OnHide() override;
 
     void MarkForcedRefresh()
     {
@@ -586,24 +440,13 @@ public:
 
     void SetTimeProvider(TimeProvider&& timeProvider);
 
-    uint64_t GetTimeFromExternalTimer();
-
-    void SetFontScale(float fontScale);
+    uint64_t GetTimeFromExternalTimer() override;
 
     void AddFontNode(const WeakPtr<RenderNode>& node);
 
     void RemoveFontNode(const WeakPtr<RenderNode>& node);
 
-    float GetFontScale() const
-    {
-        return fontScale_;
-    }
-
-    void UpdateFontWeightScale();
-
     void LoadSystemFont(const std::function<void()>& onFondsLoaded);
-
-    void NotifyFontNodes();
 
     const RefPtr<SharedTransitionController>& GetSharedTransitionController() const
     {
@@ -617,36 +460,13 @@ public:
 
     void SetClickPosition(const Offset& position) const;
 
-    void SetTextFieldManager(const RefPtr<ManagerInterface>& manager);
-
     void RootLostFocus() const;
 
     void FlushFocus();
 
     void WindowFocus(bool isFocus);
 
-    void SetIsRightToLeft(bool isRightToLeft)
-    {
-        isRightToLeft_ = isRightToLeft;
-    }
-
-    bool IsRightToLeft() const
-    {
-        return isRightToLeft_;
-    }
-
-    const RefPtr<PlatformBridge>& GetMessageBridge() const
-    {
-        return messageBridge_;
-    }
-    void SetMessageBridge(const RefPtr<PlatformBridge>& messageBridge)
-    {
-        messageBridge_ = messageBridge;
-    }
-
-    void SetOnPageShow(OnPageShowCallBack&& onPageShowCallBack);
-
-    void OnPageShow();
+    void OnPageShow() override;
 
     double GetStatusBarHeight() const
     {
@@ -690,19 +510,9 @@ public:
         drawDelegate_ = std::move(delegate);
     }
 
-    void SetBuildAfterCallback(const std::function<void()>& callback)
+    void SetBuildAfterCallback(const std::function<void()>& callback) override
     {
         buildAfterCallback_.emplace_back(callback);
-    }
-
-    RefPtr<ThemeManager> GetThemeManager() const
-    {
-        return themeManager_;
-    }
-
-    void SetThemeManager(RefPtr<ThemeManager> theme)
-    {
-        themeManager_ = theme;
     }
 
     void SetIsKeyEvent(bool isKeyEvent);
@@ -710,16 +520,6 @@ public:
     bool IsKeyEvent() const
     {
         return isKeyEvent_;
-    }
-
-    void SetIsJsCard(bool isJsCard)
-    {
-        isJsCard_ = isJsCard;
-    }
-
-    bool IsJsCard() const
-    {
-        return isJsCard_;
     }
 
     void SetIsJsPlugin(bool isJsPlugin)
@@ -732,7 +532,7 @@ public:
         return isJsPlugin_;
     }
 
-    void RefreshRootBgColor() const;
+    void RefreshRootBgColor() const override;
     void AddToHoverList(const RefPtr<RenderNode>& node);
 
     using UpdateWindowBlurRegionHandler = std::function<void(const std::vector<std::vector<float>>&)>;
@@ -788,35 +588,31 @@ public:
     void ForceLayoutForImplicitAnimation();
 
     bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr);
+        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr) override;
 
-    void PrepareOpenImplicitAnimation();
+    void PrepareOpenImplicitAnimation() override;
 
     void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallBack = nullptr);
+        const std::function<void()>& finishCallBack = nullptr) override;
 
-    void PrepareCloseImplicitAnimation();
+    void PrepareCloseImplicitAnimation() override;
 
-    bool CloseImplicitAnimation();
+    bool CloseImplicitAnimation() override;
 
-    void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback);
+    void AddKeyFrame(
+        float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback) override;
 
-    void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback);
+    void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback) override;
 
-    void SaveExplicitAnimationOption(const AnimationOption& option);
+    void SaveExplicitAnimationOption(const AnimationOption& option) override;
 
-    void CreateExplicitAnimator(const std::function<void()>& onFinishEvent);
+    void CreateExplicitAnimator(const std::function<void()>& onFinishEvent) override;
 
-    void ClearExplicitAnimationOption();
+    void ClearExplicitAnimationOption() override;
 
-    const AnimationOption GetExplicitAnimationOption() const;
+    const AnimationOption GetExplicitAnimationOption() const override;
 
     void FlushBuild();
-
-    int32_t GetInstanceId() const
-    {
-        return instanceId_;
-    }
 
     void SetUseLiteStyle(bool useLiteStyle)
     {
@@ -833,7 +629,7 @@ public:
         return dirtyRect_;
     }
 
-    bool GetIsDeclarative() const;
+    bool GetIsDeclarative() const override;
 
     bool IsForbidPlatformQuit() const
     {
@@ -842,7 +638,7 @@ public:
 
     void SetForbidPlatformQuit(bool forbidPlatformQuit);
 
-    void SetAppBgColor(const Color& color);
+    void SetAppBgColor(const Color& color) override;
 
     const Color& GetAppBgColor() const
     {
@@ -859,28 +655,6 @@ public:
         return photoCachePath_;
     }
 
-    int32_t GetMinPlatformVersion() const
-    {
-        return minPlatformVersion_;
-    }
-    void SetMinPlatformVersion(int32_t minPlatformVersion)
-    {
-        minPlatformVersion_ = minPlatformVersion;
-    }
-
-    void SetGetViewScaleCallback(GetViewScaleCallback&& callback)
-    {
-        getViewScaleCallback_ = callback;
-    }
-
-    bool GetViewScale(float& scaleX, float& scaleY)
-    {
-        if (getViewScaleCallback_) {
-            return getViewScaleCallback_(scaleX, scaleY);
-        }
-        return false;
-    }
-
     void SetScreenOnCallback(std::function<void(std::function<void()>&& func)>&& screenOnCallback)
     {
         screenOnCallback_ = std::move(screenOnCallback);
@@ -889,11 +663,6 @@ public:
     void SetScreenOffCallback(std::function<void(std::function<void()>&& func)>&& screenOffCallback)
     {
         screenOffCallback_ = std::move(screenOffCallback);
-    }
-
-    const RefPtr<ManagerInterface>& GetTextFieldManager()
-    {
-        return textFieldManager_;
     }
 
     void AddScreenOnEvent(std::function<void()>&& func);
@@ -911,7 +680,7 @@ public:
     }
     // This interface posts an async task to do async query and returns the result from previous query.
     bool IsWindowInScreen();
-    void NotifyOnPreDraw();
+    void NotifyOnPreDraw() override;
     void AddNodesToNotifyOnPreDraw(const RefPtr<RenderNode>& renderNode);
 
     void UpdateNodesNeedDrawOnPixelMap();
@@ -921,37 +690,6 @@ public:
     const RefPtr<RootElement>& GetRootElement() const
     {
         return rootElement_;
-    }
-
-    const RefPtr<DataProviderManagerInterface>& GetDataProviderManager() const
-    {
-        return dataProviderManager_;
-    }
-    void SetDataProviderManager(const RefPtr<DataProviderManagerInterface>& dataProviderManager)
-    {
-        dataProviderManager_ = dataProviderManager;
-    }
-
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    void SetCurrentUrl(const std::string& url)
-    {
-        currentUrl_ = url;
-    }
-
-    const std::string& GetCurrentUrl()
-    {
-        return currentUrl_;
-    }
-#endif
-
-    int32_t GetWindowId() const
-    {
-        return windowId_;
-    }
-
-    void SetWindowId(int32_t windowId)
-    {
-        windowId_ = windowId;
     }
 
     void SetAccessibilityEnabled(bool isEnabled)
@@ -980,7 +718,7 @@ public:
     }
     void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
-    void OnDragEvent(int32_t x, int32_t y, DragEventAction action);
+    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
     void SetPreTargetRenderNode(const RefPtr<DragDropEvent>& preDragDropNode);
     const RefPtr<DragDropEvent>& GetPreTargetRenderNode() const;
     void SetInitRenderNode(const RefPtr<RenderNode>& initRenderNode);
@@ -995,8 +733,6 @@ public:
     {
         return density_;
     }
-
-    void RequestFrame();
 
     void SetClipHole(double left, double top, double width, double height);
 
@@ -1053,24 +789,9 @@ public:
     void SetTouchPipeline(WeakPtr<PipelineContext> context);
     void RemoveTouchPipeline(WeakPtr<PipelineContext> context);
 
-    bool IsRebuildFinished() const
-    {
-        return isRebuildFinished_;
-    }
-
     void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
 
     std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRSUIDirector();
-
-    void SetOnVsyncProfiler(const std::function<void(const std::string&)> callback)
-    {
-        onVsyncProfiler_ = callback;
-    }
-
-    void ResetOnVsyncProfiler()
-    {
-        onVsyncProfiler_ = nullptr;
-    }
 
     bool IsShiftDown() const
     {
@@ -1320,11 +1041,6 @@ public:
         return onShow_;
     }
 
-    bool UsePartialUpdate()
-    {
-        return usePartialupdate_;
-    }
-
     void SetNextFrameLayoutCallback(std::function<void()>&& callback)
     {
         nextFrameLayoutCallback_ = std::move(callback);
@@ -1357,18 +1073,16 @@ public:
     }
     
 protected:
-    virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
-    virtual void SetRootRect(double width, double height, double offset = 0.0);
-    virtual void FlushPipelineWithoutAnimation();
-    virtual void FlushMessages();
-    void FlushAnimation(uint64_t nanoTimestamp);
+    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
+    void SetRootRect(double width, double height, double offset = 0.0) override
+    {
+        SetRootSizeWithWidthHeight(width, height, offset);
+    }
+    void FlushPipelineWithoutAnimation() override;
+    void FlushMessages() override;
+    void FlushAnimation(uint64_t nanoTimestamp) override;
 
-    RefPtr<EventManager> eventManager_;
-    std::unique_ptr<Window> window_;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
-    RefPtr<ThemeManager> themeManager_;
-    double rootHeight_ = 0.0;
-    double rootWidth_ = 0.0;
     bool hasIdleTasks_ = false;
 
 private:
@@ -1441,16 +1155,10 @@ private:
     std::list<RefPtr<FlushEvent>> postAnimationFlushListeners_;
     std::list<RefPtr<FlushEvent>> preFlushListeners_;
     RefPtr<FocusAnimationManager> focusAnimationManager_;
-    RefPtr<TaskExecutor> taskExecutor_;
-    RefPtr<AssetManager> assetManager_;
-    RefPtr<DataProviderManagerInterface> dataProviderManager_;
     RefPtr<PlatformResRegister> platformResRegister_;
     RefPtr<RootElement> rootElement_;
     WeakPtr<FocusNode> dirtyFocusNode_;
     WeakPtr<FocusNode> dirtyFocusScope_;
-    WeakPtr<Frontend> weakFrontend_;
-    RefPtr<ImageCache> imageCache_;
-    RefPtr<FontManager> fontManager_;
     RefPtr<SharedImageManager> sharedImageManager_;
     std::list<std::function<void()>> buildAfterCallback_;
     RefPtr<RenderFactory> renderFactory_;
@@ -1458,7 +1166,6 @@ private:
     UpdateWindowBlurDrawOpHandler updateWindowBlurDrawOpHandler_;
     DragEventHandler dragEventHandler_;
     InitDragEventListener initDragEventListener_;
-    GetViewScaleCallback getViewScaleCallback_;
     std::stack<bool> pendingImplicitLayout_;
     std::vector<KeyCode> pressedKeyCodes;
     TouchEvent zoomEventA_;
@@ -1481,20 +1188,8 @@ private:
     RefPtr<CardTransitionController> cardTransitionController_;
     RefPtr<TextOverlayManager> textOverlayManager_;
     EventTrigger eventTrigger_;
-    FinishEventHandler finishEventHandler_;
-    StartAbilityHandler startAbilityHandler_;
-    ActionEventHandler actionEventHandler_;
-    StatusBarEventHandler statusBarBgColorEventHandler_;
-    PopupEventHandler popupEventHandler_;
-    RouterBackEventHandler routerBackEventHandler_;
-    std::list<PopPageSuccessEventHandler> popPageSuccessEventHandler_;
-    std::list<IsPagePathInvalidEventHandler> isPagePathInvalidEventHandler_;
-    std::list<DestroyEventHandler> destroyEventHandler_;
-    std::list<DispatchTouchEventHandler> dispatchTouchEventHandler_;
-    std::list<WebPaintCallback> webPaintCallback_;
 
-    RefPtr<ManagerInterface> textFieldManager_;
-    RefPtr<PlatformBridge> messageBridge_;
+    std::list<WebPaintCallback> webPaintCallback_;
     WeakPtr<RenderNode> requestedRenderNode_;
     // Make page update tasks pending here to avoid block receiving vsync.
     std::queue<std::function<void()>> pageUpdateTasks_;
@@ -1502,8 +1197,6 @@ private:
     std::map<int32_t, RefPtr<Element>> deactivateElements_;
 
     RefPtr<Component> contextMenu_;
-    // animation frame callback
-    AnimationCallback animationCallback_;
 
     // window blur region
     std::unordered_map<int32_t, WindowBlurInfo> windowBlurRegions_;
@@ -1516,13 +1209,7 @@ private:
 
     RefPtr<DragDropEvent> preTargetRenderNode_;
 
-    bool isRightToLeft_ = false;
     bool isSurfaceReady_ = false;
-    float viewScale_ = 1.0f;
-    float fontScale_ = 1.0f;
-    double density_ = 1.0;
-    double dipScale_ = 1.0;
-    float designWidthScale_ = 1.0;
 
     int32_t cardAppearingDuration_ = 0;
     double statusBarHeight_ = 0.0;     // dp
@@ -1533,7 +1220,6 @@ private:
     std::atomic<bool> onShow_ = true;
     bool isKeyEvent_ = false;
     bool needWindowBlurRegionRefresh_ = false;
-    bool isJsCard_ = false;
     bool isJsPlugin_ = false;
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
@@ -1542,7 +1228,6 @@ private:
     bool isDensityUpdate_ = false;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
-    OnPageShowCallBack onPageShowCallBack_;
     WindowModal windowModal_ = WindowModal::NORMAL;
     int32_t modalHeight_ = 0;
     int32_t hoverNodeId_ = DEFAULT_HOVER_ENTER_ANIMATION_ID;
@@ -1563,17 +1248,10 @@ private:
     bool buildingFirstPage_ = false;
     bool forbidPlatformQuit_ = false;
     FrontendType frontendType_;
-    int32_t instanceId_ = 0;
-    int32_t minPlatformVersion_ = 0;
     std::string photoCachePath_;
     AnimationOption explicitAnimationOption_;
     std::map<int32_t, RefPtr<Animator>> explicitAnimators_;
-    OnRouterChangeCallback OnRouterChangeCallback_ = nullptr;
     bool isAccessibilityEnabled_ = false;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    std::string currentUrl_;
-#endif
-    int32_t windowId_ = 0;
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
@@ -1582,10 +1260,6 @@ private:
     std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;
     Offset pluginOffset_ { 0, 0 };
     Offset pluginEventOffset_ { 0, 0 };
-
-    bool isRebuildFinished_ = false;
-
-    std::function<void(const std::string&)> onVsyncProfiler_;
 
     bool isShiftDown_ = false;
     bool isCtrlDown_ = false;
@@ -1626,8 +1300,6 @@ private:
 
     PostRTTaskCallback postRTTaskCallback_;
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
-
-    bool usePartialupdate_ = false;
 
     std::vector<RectCallback> rectCallbackList_;
 

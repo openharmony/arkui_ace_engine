@@ -53,14 +53,14 @@ public:
         : CalcDimension(dimension), animationOption_(option)
     {}
 
-    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+    void SetContextAndCallback(const WeakPtr<PipelineBase>& context, const RenderNodeAnimationCallback& callback)
     {
         context_ = context;
         animationCallback_ = callback;
     }
 
     void SetContextAndCallbackAfterFirstAssign(
-        const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+        const WeakPtr<PipelineBase>& context, const RenderNodeAnimationCallback& callback)
     {
         context_ = context;
         animationCallback_ = callback;
@@ -113,7 +113,7 @@ private:
     bool isFirstAssign_ = true;
     AnimationOption animationOption_;
     RefPtr<Animator> animationController_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     RenderNodeAnimationCallback animationCallback_;
     RenderNodeAnimationCallback stopCallback_;
     RefPtr<Evaluator<double>> evaluator_;

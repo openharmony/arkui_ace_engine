@@ -41,12 +41,12 @@ namespace OHOS::Ace::NG {
 PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
-    : V1::PipelineContext(std::move(window), std::move(taskExecutor), std::move(assetManager),
-          std::move(platformResRegister), frontend, instanceId)
+    : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
 {}
-PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
-    RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend)
-    : V1::PipelineContext(std::move(window), taskExecutor, std::move(assetManager), frontend)
+
+PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+    RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
+    : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
 {}
 
 void PipelineContext::AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElement)
@@ -114,6 +114,7 @@ RefPtr<StageManager> PipelineContext::GetStageManager()
 void PipelineContext::SetRootRect(double width, double height, double offset)
 {
     CHECK_RUN_ON(UI);
+    UpdateRootSizeAndSacle(width, height);
     if (!rootNode_) {
         LOGE("rootNode_ is nullptr");
         return;
@@ -137,6 +138,18 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     touchEvents_.emplace_back(point);
     hasIdleTasks_ = true;
     window_->RequestFrame();
+}
+
+void PipelineContext::OnSurfaceDensityChanged(double density)
+{
+    CHECK_RUN_ON(UI);
+    LOGI("OnSurfaceDensityChanged density_(%{public}lf)", density_);
+    LOGI("OnSurfaceDensityChanged dipScale_(%{public}lf)", dipScale_);
+    density_ = density;
+    if (!NearZero(viewScale_)) {
+        LOGI("OnSurfaceDensityChanged viewScale_(%{public}lf)", viewScale_);
+        dipScale_ = density_ / viewScale_;
+    }
 }
 
 void PipelineContext::FlushTouchEvents()

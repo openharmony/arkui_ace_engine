@@ -186,13 +186,16 @@ bool PluginFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& t
     return true;
 }
 
-void PluginFrontend::AttachPipelineContext(const RefPtr<PipelineContext>& context)
+void PluginFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     if (!delegate_) {
         return;
     }
     handler_ = AceType::MakeRefPtr<PluginEventHandler>(delegate_);
-    context->RegisterEventHandler(handler_);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(context);
+    if (pipelineContext) {
+        pipelineContext->RegisterEventHandler(handler_);
+    }
     delegate_->AttachPipelineContext(context);
 }
 

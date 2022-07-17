@@ -30,7 +30,7 @@ namespace OHOS {
     bool FileImageLoaderTest(const uint8_t* data, size_t size)
     {
         auto info = CreatImageSourceInfo(data, size);
-        Ace::WeakPtr<Ace::PipelineContext> context = nullptr;
+        Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
         Ace::DataProviderImageLoader dataProviderImageLoader;
         return dataProviderImageLoader.LoadImageData(info, context) != nullptr;
     }
@@ -38,7 +38,7 @@ namespace OHOS {
     bool AssetImageLoader(const uint8_t* data, size_t size)
     {
         auto info = CreatImageSourceInfo(data, size);
-        Ace::WeakPtr<Ace::PipelineContext> context = nullptr;
+        Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
         Ace::AssetImageLoader assetImageLoader;
         return assetImageLoader.LoadImageData(info, context) != nullptr;
     }
@@ -46,7 +46,7 @@ namespace OHOS {
     bool NetworkImageLoader(const uint8_t* data, size_t size)
     {
         auto info = CreatImageSourceInfo(data, size);
-        Ace::WeakPtr<Ace::PipelineContext> context = nullptr;
+        Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
         Ace::NetworkImageLoader networkImageLoader;
         return networkImageLoader.LoadImageData(info, context) != nullptr;
     }
@@ -54,7 +54,7 @@ namespace OHOS {
     bool InternalImageLoader(const uint8_t* data, size_t size)
     {
         auto info = CreatImageSourceInfo(data, size);
-        Ace::WeakPtr<Ace::PipelineContext> context = nullptr;
+        Ace::WeakPtr<Ace::PipelineBase> context = nullptr;
         Ace::InternalImageLoader internalImageLoader;
         return internalImageLoader.LoadImageData(info, context) != nullptr;
     }

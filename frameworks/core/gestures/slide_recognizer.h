@@ -30,7 +30,7 @@ class SlideRecognizer : public MultiFingersRecognizer {
 
 public:
     SlideRecognizer(
-        const WeakPtr<PipelineContext>& context, int32_t fingers, const SwipeDirection& direction, double speed)
+        const WeakPtr<PipelineBase>& context, int32_t fingers, const SwipeDirection& direction, double speed)
         : direction_(direction), speed_(speed), context_(context)
     {
         fingers_ = fingers;
@@ -75,7 +75,7 @@ private:
 
     SwipeDirection direction_;
     double speed_ = 0.0;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     std::map<int32_t, TouchEvent> touchPoints_;
     std::map<int32_t, Offset> fingersDistance_;
     AxisEvent axisEventStart_;

@@ -27,7 +27,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/image/image_source_info.h"
 #include "core/image/image_loader.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 class SkSVGDOM;
 namespace OHOS::Ace {
@@ -75,14 +75,14 @@ struct LoadCallback {
 class FlutterRenderImage;
 class ImageProvider {
 public:
-    static void TryLoadImageInfo(const RefPtr<PipelineContext>& context, const std::string& src,
+    static void TryLoadImageInfo(const RefPtr<PipelineBase>& context, const std::string& src,
         std::function<void(bool, int32_t, int32_t)>&& loadCallback);
 
     static void GetSVGImageDOMAsyncFromSrc(
         const std::string& src,
         std::function<void(const sk_sp<SkSVGDOM>&)> callback,
         std::function<void()> failedCallback,
-        const WeakPtr<PipelineContext> context,
+        const WeakPtr<PipelineBase> context,
         uint64_t svgThemeColor = 0,
         OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
 
@@ -90,7 +90,7 @@ public:
         const sk_sp<SkData>& skData,
         std::function<void(const sk_sp<SkSVGDOM>&)> callback,
         std::function<void()> failedCallback,
-        const WeakPtr<PipelineContext> context,
+        const WeakPtr<PipelineBase> context,
         uint64_t svgThemeColor = 0,
         OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
 
@@ -106,7 +106,7 @@ public:
         const ImageObjSuccessCallback& successCallback,
         const UploadSuccessCallback& uploadSuccessCallback,
         const FailedCallback& failedCallback,
-        const WeakPtr<PipelineContext>& context,
+        const WeakPtr<PipelineBase>& context,
         bool syncMode,
         bool useSkiaSvg,
         bool needAutoResize,
@@ -132,21 +132,21 @@ public:
     // This is a synchronization interface for getting out source image.
     static sk_sp<SkImage> GetSkImage(
         const std::string& src,
-        const WeakPtr<PipelineContext> context,
+        const WeakPtr<PipelineBase> context,
         Size targetSize = Size());
 
     static RefPtr<ImageObject> GeneratorAceImageObject(
         const ImageSourceInfo& imageInfo,
-        const RefPtr<PipelineContext> context,
+        const RefPtr<PipelineBase> context,
         bool useSkiaSvg);
 
     static sk_sp<SkData> LoadImageRawData(
         const ImageSourceInfo& imageInfo,
-        const RefPtr<PipelineContext> context,
+        const RefPtr<PipelineBase> context,
         const Size& targetSize = Size());
 
     static RefPtr<ImageObject> QueryImageObjectFromCache(
-        const ImageSourceInfo& imageInfo, const RefPtr<PipelineContext>& pipelineContext);
+        const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase>& pipelineContext);
     static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
     static SkAlphaType AlphaTypeToSkAlphaType(const RefPtr<PixelMap>& pixmap);
     static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
@@ -163,7 +163,7 @@ public:
         const ImageSourceInfo& imageInfo,
         bool canStartUploadImageObj,
         const RefPtr<ImageObject>& imageObj,
-        const RefPtr<PipelineContext>& context,
+        const RefPtr<PipelineBase>& context,
         const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder);
 
     static bool TryUploadingImage(

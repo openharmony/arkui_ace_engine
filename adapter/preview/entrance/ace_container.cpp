@@ -277,7 +277,7 @@ void AceContainer::InitializeCallback()
 
     auto&& cardViewPositionCallback = [weak, instanceId = instanceId_](int id, float offsetX, float offsetY) {
         ContainerScope scope(instanceId);
-        auto context = weak.Upgrade();
+        auto context = AceType::DynamicCast<PipelineContext>(weak.Upgrade());
         if (context == nullptr) {
             LOGE("context is nullptr");
             return;
@@ -290,7 +290,7 @@ void AceContainer::InitializeCallback()
 
     auto&& cardViewParamsCallback = [weak, id = instanceId_](const std::string& key, bool focus) {
         ContainerScope scope(id);
-        auto context = weak.Upgrade();
+        auto context = AceType::DynamicCast<PipelineContext>(weak.Upgrade());
         if (context == nullptr) {
             LOGE("context is nullptr");
             return;
@@ -451,7 +451,7 @@ void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
     themeManager->UpdateConfig(resConfig);
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_, config = resConfig,
-            weakContext = WeakPtr<PipelineContext>(pipelineContext_)]() {
+            weakContext = WeakPtr<PipelineBase>(pipelineContext_)]() {
             auto themeManager = weakThemeManager.Upgrade();
             auto context = weakContext.Upgrade();
             if (!themeManager || !context) {
@@ -669,7 +669,7 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
     themeManager->UpdateConfig(resConfig);
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_,
-            weakContext = WeakPtr<PipelineContext>(pipelineContext_)]() {
+            weakContext = WeakPtr<PipelineBase>(pipelineContext_)]() {
             auto themeManager = weakThemeManager.Upgrade();
             auto context = weakContext.Upgrade();
             if (!themeManager || !context) {
@@ -728,15 +728,16 @@ void AceContainer::AttachView(
         }
     }
     resRegister_ = aceView_->GetPlatformResRegister();
-    pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
         std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
-    pipelineContext_->SetRootSize(density, width, height);
-    pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
-    pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
-    pipelineContext_->SetMessageBridge(messageBridge_);
-    pipelineContext_->SetWindowModal(windowModal_);
-    pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
-    pipelineContext_->SetIsJsCard(type_ == FrontendType::JS_CARD);
+    pipelineContext->SetRootSize(density, width, height);
+    pipelineContext->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
+    pipelineContext->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
+    pipelineContext->SetMessageBridge(messageBridge_);
+    pipelineContext->SetWindowModal(windowModal_);
+    pipelineContext->SetDrawDelegate(aceView_->GetDrawDelegate());
+    pipelineContext->SetIsJsCard(type_ == FrontendType::JS_CARD);
+    pipelineContext_ = pipelineContext;
     InitializeCallback();
 
     ThemeConstants::InitDeviceType();

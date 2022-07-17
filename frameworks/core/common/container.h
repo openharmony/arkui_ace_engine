@@ -26,7 +26,7 @@
 #include "core/common/platform_res_register.h"
 #include "core/common/settings.h"
 #include "core/common/window.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -75,7 +75,7 @@ public:
     virtual RefPtr<PlatformResRegister> GetPlatformResRegister() const = 0;
 
     // Get the pipelineContext of container.
-    virtual RefPtr<PipelineContext> GetPipelineContext() const = 0;
+    virtual RefPtr<PipelineBase> GetPipelineContext() const = 0;
 
     // Dump container.
     virtual bool Dump(const std::vector<std::string>& params) = 0;

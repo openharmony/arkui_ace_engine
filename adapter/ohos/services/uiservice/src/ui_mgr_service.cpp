@@ -408,7 +408,9 @@ int UIMgrService::CancelDialog(int id)
         auto taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor();
         taskExecutor->PostTask(
             [id]() {
-                if (auto context = Ace::Platform::AceContainer::GetContainer(id)->GetPipelineContext()) {
+
+                if (auto context = AceType::DynamicCast<PipelineContext>(
+                        Ace::Platform::AceContainer::GetContainer(id)->GetPipelineContext())) {
                     context->SetRSUIDirector(nullptr);
                 }
             },

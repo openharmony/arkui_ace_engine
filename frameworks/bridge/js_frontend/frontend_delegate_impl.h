@@ -25,7 +25,7 @@
 #include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/components/dialog/dialog_component.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
@@ -84,7 +84,7 @@ public:
         }
     }
 
-    void Attach(const RefPtr<PipelineContext>& context)
+    void Attach(const RefPtr<PipelineBase>& context)
     {
         if (attached_ || !context) {
             return;
@@ -94,7 +94,7 @@ public:
         promise_.set_value(context);
     }
 
-    const RefPtr<PipelineContext>& Get()
+    const RefPtr<PipelineBase>& Get()
     {
         if (!pipelineContext_) {
             pipelineContext_ = future_.get();
@@ -105,9 +105,9 @@ public:
 
 private:
     bool attached_ = false;
-    std::promise<RefPtr<PipelineContext>> promise_;
-    std::future<RefPtr<PipelineContext>> future_ = promise_.get_future();
-    RefPtr<PipelineContext> pipelineContext_;
+    std::promise<RefPtr<PipelineBase>> promise_;
+    std::future<RefPtr<PipelineBase>> future_ = promise_.get_future();
+    RefPtr<PipelineBase> pipelineContext_;
 };
 
 struct FrontendDelegateImplBuilder {
@@ -207,7 +207,7 @@ public:
     explicit FrontendDelegateImpl(const FrontendDelegateImplBuilder& builder);
     ~FrontendDelegateImpl() override;
 
-    void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
+    void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
 
     // JsFrontend delegate functions.
     void RunPage(const std::string& url, const std::string& params);
@@ -351,7 +351,7 @@ public:
         return groupJsBridge_;
     }
 
-    RefPtr<PipelineContext> GetPipelineContext() override;
+    RefPtr<PipelineBase> GetPipelineContext() override;
 
     void SetGroupJsBridge(const RefPtr<GroupJsBridge>& groupJsBridge)
     {

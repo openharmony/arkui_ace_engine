@@ -31,7 +31,7 @@ void JSContextMenu::Close(const JSCallbackInfo& args)
     // Close context menu.
     auto container = Container::Current();
     if (container) {
-        auto context = container->GetPipelineContext();
+        auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
         auto executor = Container::CurrentTaskExecutor();
         if (executor) {
             executor->PostTask(

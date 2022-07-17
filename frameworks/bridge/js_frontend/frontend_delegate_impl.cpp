@@ -252,8 +252,7 @@ void FrontendDelegateImpl::SetJsMessageDispatcher(const RefPtr<JsMessageDispatch
 void FrontendDelegateImpl::TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data)
 {
     LOGD("JsFrontend TransferComponentResponseData");
-    auto pipelineContext = pipelineContextHolder_.Get();
-    WeakPtr<PipelineContext> contextWeak(pipelineContext);
+    WeakPtr<PipelineBase> contextWeak(pipelineContextHolder_.Get());
     taskExecutor_->PostTask(
         [callbackId, data = std::move(data), contextWeak]() mutable {
             auto context = contextWeak.Upgrade();
@@ -454,11 +453,12 @@ void FrontendDelegateImpl::CallPopPage()
     if (!pageRouteStack_.empty() && currentPage.isAlertBeforeBackPage) {
         backUri_ = "";
         taskExecutor_->PostTask(
-            [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
+            [context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get()),
+                dialogProperties = pageRouteStack_.back().dialogProperties,
                 isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
-              if (context) {
-                  context->ShowDialog(dialogProperties, isRightToLeft);
-              }
+                if (context) {
+                    context->ShowDialog(dialogProperties, isRightToLeft);
+                }
             },
             TaskExecutor::TaskType::UI);
     } else {
@@ -625,7 +625,8 @@ void FrontendDelegateImpl::Back(const std::string& uri, const std::string& param
             backUri_ = uri;
             backParam_ = params;
             taskExecutor_->PostTask(
-                [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
+                [context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get()),
+                    dialogProperties = pageRouteStack_.back().dialogProperties,
                     isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
                     if (context) {
                         context->ShowDialog(dialogProperties, isRightToLeft);
@@ -681,9 +682,9 @@ void FrontendDelegateImpl::LaunchPageTransition()
     std::lock_guard<std::mutex> lock(mutex_);
     taskExecutor_->PostTask(
         [context = pipelineContextHolder_.Get()]() {
-          if (context) {
-              context->LaunchPageTransition();
-          }
+            if (context) {
+                context->LaunchPageTransition();
+            }
         },
         TaskExecutor::TaskType::UI);
 }
@@ -761,7 +762,7 @@ void FrontendDelegateImpl::TriggerPageUpdate(int32_t pageId, bool directExecute)
     auto jsCommands = std::make_shared<std::vector<RefPtr<JsCommand>>>();
     jsPage->PopAllCommands(*jsCommands);
 
-    auto pipelineContext = pipelineContextHolder_.Get();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     WeakPtr<Framework::JsAcePage> jsPageWeak(jsPage);
     WeakPtr<PipelineContext> contextWeak(pipelineContext);
     auto updateTask = [weak = AceType::WeakClaim(this), jsPageWeak, contextWeak, jsCommands] {
@@ -816,7 +817,11 @@ void FrontendDelegateImpl::PostJsTask(std::function<void()>&& task)
 
 void FrontendDelegateImpl::RemoveVisibleChangeNode(NodeId id)
 {
-    auto task = [nodeId = id, pipeline = pipelineContextHolder_.Get()]() { pipeline->RemoveVisibleChangeNode(nodeId); };
+    auto task = [nodeId = id, pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get())]() {
+        if (pipeline) {
+            pipeline->RemoveVisibleChangeNode(nodeId);
+        }
+    };
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
@@ -868,7 +873,7 @@ void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duratio
 {
     LOGD("FrontendDelegateImpl ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
-    auto pipelineContext = pipelineContextHolder_.Get();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext));
     taskExecutor_->PostTask([durationTime, message, bottom, isRightToLeft, weak] {
@@ -944,14 +949,15 @@ void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::strin
         .buttons = buttons,
         .callbacks = std::move(callbackMarkers),
     };
-    auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContextHolder_.Get()));
-    taskExecutor_->PostTask([weak, dialogProperties,
-        isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
-        auto context = weak.Upgrade();
-        if (context) {
-            context->ShowDialog(dialogProperties, isRightToLeft);
-        }
-    }, TaskExecutor::TaskType::UI);
+    WeakPtr<PipelineContext> weak = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    taskExecutor_->PostTask(
+        [weak, dialogProperties, isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
+            auto context = weak.Upgrade();
+            if (context) {
+                context->ShowDialog(dialogProperties, isRightToLeft);
+            }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
@@ -999,14 +1005,15 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
         .textColor = "#000000"
     };
     dialogProperties.buttons.emplace_back(buttonInfo);
-    auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContextHolder_.Get()));
-    taskExecutor_->PostTask([weak, dialogProperties,
-        isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
-        auto context = weak.Upgrade();
-        if (context) {
-            context->ShowDialog(dialogProperties, isRightToLeft);
-        }
-    }, TaskExecutor::TaskType::UI);
+    WeakPtr<PipelineContext> weak = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    taskExecutor_->PostTask(
+        [weak, dialogProperties, isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
+            auto context = weak.Upgrade();
+            if (context) {
+                context->ShowDialog(dialogProperties, isRightToLeft);
+            }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void FrontendDelegateImpl::EnableAlertBeforeBackPage(
@@ -1188,7 +1195,10 @@ void FrontendDelegateImpl::LoadPage(int32_t pageId, const std::string& url, bool
                 [weak, page] {
                     auto delegate = weak.Upgrade();
                     if (delegate && delegate->pipelineContextHolder_.Get()) {
-                        delegate->pipelineContextHolder_.Get()->FlushFocus();
+                        auto context = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+                        if (context) {
+                            context->FlushFocus();
+                        }
                     }
                     if (page->GetDomDocument()) {
                         page->GetDomDocument()->HandlePageLoadFinish();
@@ -1250,7 +1260,8 @@ void FrontendDelegateImpl::OnPageReady(const RefPtr<JsAcePage>& page, const std:
                 return;
             }
             delegate->SetCurrentReadyPage(page);
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             bool useLiteStyle = delegate->GetMinPlatformVersion() < COMPATIBLE_VERSION && delegate->IsUseLiteStyle();
             pipelineContext->SetUseLiteStyle(useLiteStyle);
             page->SetUseLiteStyle(useLiteStyle);
@@ -1375,7 +1386,8 @@ void FrontendDelegateImpl::PopToPage(const std::string& url)
             if (pageId == INVALID_PAGE_ID) {
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             if (!pipelineContext->CanPopPage()) {
                 delegate->ResetStagingPage();
                 return;
@@ -1435,7 +1447,8 @@ void FrontendDelegateImpl::PopPage()
             if (!delegate) {
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             if (delegate->GetStackSize() == 1) {
                 if (delegate->disallowPopLastPage_) {
                     LOGW("Not allow back because this is the last page!");
@@ -1504,7 +1517,8 @@ void FrontendDelegateImpl::ClearInvisiblePages()
             if (!delegate) {
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             if (pipelineContext->ClearInvisiblePages()) {
                 auto pageId = delegate->OnClearInvisiblePagesSuccess();
                 delegate->SetCurrentPage(pageId);
@@ -1549,7 +1563,8 @@ void FrontendDelegateImpl::ReplacePage(const RefPtr<JsAcePage>& page, const std:
                 return;
             }
             delegate->SetCurrentReadyPage(page);
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             bool useLiteStyle = delegate->GetMinPlatformVersion() < COMPATIBLE_VERSION && delegate->IsUseLiteStyle();
             pipelineContext->SetUseLiteStyle(useLiteStyle);
             page->SetUseLiteStyle(useLiteStyle);
@@ -1801,7 +1816,7 @@ SingleTaskExecutor FrontendDelegateImpl::GetUiTask()
     return SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::UI);
 }
 
-void FrontendDelegateImpl::AttachPipelineContext(const RefPtr<PipelineContext>& context)
+void FrontendDelegateImpl::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     context->SetOnPageShow([weak = AceType::WeakClaim(this)] {
         auto delegate = weak.Upgrade();
@@ -1820,7 +1835,7 @@ void FrontendDelegateImpl::AttachPipelineContext(const RefPtr<PipelineContext>& 
     jsAccessibilityManager_->InitializeCallback();
 }
 
-RefPtr<PipelineContext> FrontendDelegateImpl::GetPipelineContext()
+RefPtr<PipelineBase> FrontendDelegateImpl::GetPipelineContext()
 {
     return pipelineContextHolder_.Get();
 }
@@ -1898,7 +1913,8 @@ void FrontendDelegateImpl::PushJsCallbackToRenderNode(NodeId id, double ratio,
             }
         }, TaskExecutor::TaskType::JS);
     };
-    auto uiPushTask = [id, ratio, visibleCallback, pipeline = pipelineContextHolder_.Get()]() {
+    auto uiPushTask = [id, ratio, visibleCallback,
+                          pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get())]() {
         if (pipeline) {
             pipeline->PushVisibleCallback(id, ratio, visibleCallback);
         }

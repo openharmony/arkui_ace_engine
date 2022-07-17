@@ -302,7 +302,7 @@ void JSInteractableView::UpdateEventTarget(NodeId id, BaseEventInfo& info)
         LOGE("fail to get container");
         return;
     }
-    auto context = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!context) {
         LOGE("fail to get context");
         return;

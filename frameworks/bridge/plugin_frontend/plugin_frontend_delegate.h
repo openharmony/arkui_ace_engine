@@ -58,7 +58,7 @@ public:
         const OnRestoreDataCallBack& onRestoreDataCallBack);
     ~PluginFrontendDelegate() override;
 
-    void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
+    void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
 
     // JSFrontend delegate functions.
     void RunPage(const std::string& url, const std::string& params);
@@ -210,7 +210,7 @@ public:
         return groupJsBridge_;
     }
 
-    RefPtr<PipelineContext> GetPipelineContext() override;
+    RefPtr<PipelineBase> GetPipelineContext() override;
 
     void SetGroupJsBridge(const RefPtr<GroupJsBridge>& groupJsBridge)
     {

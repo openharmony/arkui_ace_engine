@@ -218,7 +218,7 @@ static JSValue JsGetInspectorTree(JSContext* ctx, JSValueConst new_target, int a
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
 
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
         return JS_ThrowSyntaxError(ctx, "pipeline is null");
     }
@@ -243,7 +243,7 @@ static JSValue JsGetInspectorByKey(JSContext* ctx, JSValueConst new_target, int 
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
 
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
         return JS_ThrowSyntaxError(ctx, "pipeline is null");
     }
@@ -272,7 +272,7 @@ static JSValue JsSendEventByKey(JSContext* ctx, JSValueConst new_target, int arg
     if (!container) {
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
         return JS_ThrowSyntaxError(ctx, "pipeline is null");
     }
@@ -384,7 +384,7 @@ static JSValue JsSendKeyEvent(JSContext* ctx, JSValueConst new_target, int argc,
     if (!container) {
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
         return JS_ThrowSyntaxError(ctx, "pipeline is null");
     }
@@ -693,8 +693,7 @@ JSValue Lpx2Px(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* 
     if (!container) {
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
-    auto pipelineContext = container->GetPipelineContext();
-    auto frontend = pipelineContext->GetFrontend();
+    auto frontend = container->GetFrontend();
     auto& windowConfig = frontend->GetWindowConfig();
     double pxValue = lpxValue * windowConfig.designWidthScale;
 
@@ -721,8 +720,7 @@ JSValue Px2Lpx(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* 
     if (!container) {
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
-    auto pipelineContext = container->GetPipelineContext();
-    auto frontend = pipelineContext->GetFrontend();
+    auto frontend = container->GetFrontend();
     auto& windowConfig = frontend->GetWindowConfig();
     double lpxValue = pxValue / windowConfig.designWidthScale;
 

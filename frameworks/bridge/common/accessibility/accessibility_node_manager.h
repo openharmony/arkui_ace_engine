@@ -22,7 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -45,7 +45,7 @@ public:
 
     // AccessibilityNodeManager functions.
     virtual void InitializeCallback();
-    void SetPipelineContext(const RefPtr<PipelineContext>& context);
+    void SetPipelineContext(const RefPtr<PipelineBase>& context);
     void SetRunningPage(const RefPtr<JsAcePage>& page);
     std::string GetNodeChildIds(const RefPtr<AccessibilityNode>& node);
     void AddNodeWithId(const std::string& key, const RefPtr<AccessibilityNode>& node);
@@ -86,7 +86,7 @@ public:
         return isOhosHostCard_;
     }
 
-    WeakPtr<PipelineContext> GetPipelineContext()
+    WeakPtr<PipelineBase> GetPipelineContext()
     {
         return context_;
     }
@@ -144,7 +144,7 @@ protected:
     std::unordered_map<std::string, WeakPtr<AccessibilityNode>> nodeWithTargetMap_;
     std::unordered_map<std::string, WeakPtr<ComposedElement>> composedElementIdMap_;
     std::unordered_map<NodeId, std::list<VisibleCallbackInfo>> visibleChangeNodes_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     WeakPtr<JsAcePage> indexPage_;
     int32_t rootNodeId_ = -1;
     Offset cardOffset_;

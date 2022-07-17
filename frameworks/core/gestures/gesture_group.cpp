@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-RefPtr<GestureRecognizer> GestureGroup::CreateRecognizer(WeakPtr<PipelineContext> context)
+RefPtr<GestureRecognizer> GestureGroup::CreateRecognizer(WeakPtr<PipelineBase> context)
 {
     LOGD("create gesture group, sub size %{public}zu, mode %{public}d", gestures_.size(), mode_);
     std::vector<RefPtr<GestureRecognizer>> recognizers;

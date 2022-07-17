@@ -194,21 +194,24 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
     return true;
 }
 
-void DeclarativeFrontend::AttachPipelineContext(const RefPtr<PipelineContext>& context)
+void DeclarativeFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     LOGI("DeclarativeFrontend AttachPipelineContext.");
     if (!delegate_) {
         return;
     }
     handler_ = AceType::MakeRefPtr<DeclarativeEventHandler>(delegate_);
-    context->RegisterEventHandler(handler_);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(context);
+    if (pipelineContext) {
+        pipelineContext->RegisterEventHandler(handler_);
+    }
     delegate_->AttachPipelineContext(context);
 }
 
 void DeclarativeFrontend::AttachSubPipelineContext(const RefPtr<PipelineContext>& context)
 {
     LOGI("DeclarativeFrontend AttachSubPipelineContext.");
-    if (!delegate_) {
+    if (!context) {
         return;
     }
     context->RegisterEventHandler(handler_);

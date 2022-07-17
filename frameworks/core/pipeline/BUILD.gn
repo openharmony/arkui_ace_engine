@@ -24,6 +24,7 @@ template("ace_core_pipeline_source_set") {
     # add common source file needed by all product platform here
     sources = [
       # context
+      "pipeline_base.cpp",
       "pipeline_context.cpp",
 
       # base component

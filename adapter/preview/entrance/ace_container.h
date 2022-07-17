@@ -105,7 +105,7 @@ public:
         return resRegister_;
     }
 
-    RefPtr<PipelineContext> GetPipelineContext() const override
+    RefPtr<PipelineBase> GetPipelineContext() const override
     {
         return pipelineContext_;
     }
@@ -198,7 +198,7 @@ private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
     RefPtr<PlatformResRegister> resRegister_;
-    RefPtr<PipelineContext> pipelineContext_;
+    RefPtr<PipelineBase> pipelineContext_;
     RefPtr<Frontend> frontend_;
     RefPtr<PlatformBridge> messageBridge_;
     FrontendType type_ { FrontendType::JSON };

@@ -30,7 +30,7 @@ class PanRecognizer : public MultiFingersRecognizer {
 
 public:
     PanRecognizer(
-        const WeakPtr<PipelineContext>& context, int32_t fingers, const PanDirection& direction, double distance)
+        const WeakPtr<PipelineBase>& context, int32_t fingers, const PanDirection& direction, double distance)
         : direction_(direction), distance_(distance), context_(context)
     {
         fingers_ = fingers;
@@ -43,7 +43,7 @@ public:
             velocityTracker_ = VelocityTracker(Axis::VERTICAL);
         }
     }
-    PanRecognizer(const WeakPtr<PipelineContext>& context, RefPtr<PanGestureOption> panGestureOption)
+    PanRecognizer(const WeakPtr<PipelineBase>& context, RefPtr<PanGestureOption> panGestureOption)
         : panGestureOption_(panGestureOption)
     {
         auto newContext = context.Upgrade();
@@ -140,7 +140,7 @@ private:
 
     PanDirection direction_;
     double distance_ = 0.0;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     std::map<int32_t, TouchEvent> touchPoints_;
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;

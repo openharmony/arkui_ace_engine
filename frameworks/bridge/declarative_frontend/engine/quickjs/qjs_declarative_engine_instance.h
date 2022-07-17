@@ -83,7 +83,7 @@ public:
 
     static void PostJsTask(JSContext* ctx, std::function<void()>&& task);
     static void TriggerPageUpdate(JSContext* ctx);
-    static RefPtr<PipelineContext> GetPipelineContext(JSContext* ctx);
+    static RefPtr<PipelineBase> GetPipelineContext(JSContext* ctx);
 
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)
     {

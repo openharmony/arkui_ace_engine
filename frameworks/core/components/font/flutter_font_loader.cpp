@@ -26,7 +26,7 @@ namespace OHOS::Ace {
 FlutterFontLoader::FlutterFontLoader(const std::string& familyName, const std::string& familySrc)
     : FontLoader(familyName, familySrc) {}
 
-void FlutterFontLoader::AddFont(const RefPtr<PipelineContext>& context)
+void FlutterFontLoader::AddFont(const RefPtr<PipelineBase>& context)
 {
     if (familySrc_.empty()) {
         return;
@@ -41,7 +41,7 @@ void FlutterFontLoader::AddFont(const RefPtr<PipelineContext>& context)
     }
 }
 
-void FlutterFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
+void FlutterFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase>& context)
 {
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));
     context->GetTaskExecutor()->PostTask([weak = AceType::WeakClaim(this), weakContext] {
@@ -78,7 +78,7 @@ void FlutterFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::Pipel
     }, TaskExecutor::TaskType::BACKGROUND);
 }
 
-void FlutterFontLoader::LoadFromAsset(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
+void FlutterFontLoader::LoadFromAsset(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase>& context)
 {
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));
     context->GetTaskExecutor()->PostTask([weak = AceType::WeakClaim(this), weakContext] {

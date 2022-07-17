@@ -22,7 +22,7 @@ TimeoutGesture::TimeoutGesture(const std::chrono::duration<float>& timeout)
 {
 }
 
-RefPtr<GestureRecognizer> TimeoutGesture::CreateRecognizer(WeakPtr<PipelineContext> context)
+RefPtr<GestureRecognizer> TimeoutGesture::CreateRecognizer(WeakPtr<PipelineBase> context)
 {
     auto timeout = AceType::MakeRefPtr<OHOS::Ace::TimeoutRecognizer>(
             context,

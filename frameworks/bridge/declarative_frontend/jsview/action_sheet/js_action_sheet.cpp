@@ -69,7 +69,7 @@ ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
                 if (!container) {
                     return;
                 }
-                auto context = container->GetPipelineContext();
+                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (!context) {
                     return;
                 }
@@ -196,7 +196,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     // Show ActionSheet.
     auto container = Container::Current();
     if (container) {
-        auto context = container->GetPipelineContext();
+        auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
         auto executor = container->GetTaskExecutor();
         if (executor) {
             executor->PostTask(

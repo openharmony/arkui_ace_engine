@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 
-RefPtr<GestureRecognizer> Ace::SwipeGesture::CreateRecognizer(WeakPtr<PipelineContext> context)
+RefPtr<GestureRecognizer> Ace::SwipeGesture::CreateRecognizer(WeakPtr<PipelineBase> context)
 {
     auto newContext = context.Upgrade();
     if (!newContext) {

@@ -37,7 +37,7 @@ public:
     ~SwipeGesture() override = default;
 
 protected:
-    RefPtr<GestureRecognizer> CreateRecognizer(WeakPtr<PipelineContext> context) override;
+    RefPtr<GestureRecognizer> CreateRecognizer(WeakPtr<PipelineBase> context) override;
 
 private:
     SwipeDirection direction_;

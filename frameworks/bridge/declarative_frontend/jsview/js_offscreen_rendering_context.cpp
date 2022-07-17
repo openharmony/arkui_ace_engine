@@ -129,11 +129,13 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
             height = SystemProperties::Vp2Px(height);
             auto container = Container::Current();
             if (container) {
-                auto context = container->GetPipelineContext();
-                auto offscreenCanvas = context->CreateOffscreenCanvas(width, height);
-                jsRenderContext->SetOffscreenCanvas(offscreenCanvas);
-                std::lock_guard<std::mutex> lock(mutex_);
-                offscreenCanvasMap_[offscreenCanvasCount_++] = offscreenCanvas;
+                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+                if (context) {
+                    auto offscreenCanvas = context->CreateOffscreenCanvas(width, height);
+                    jsRenderContext->SetOffscreenCanvas(offscreenCanvas);
+                    std::lock_guard<std::mutex> lock(mutex_);
+                    offscreenCanvasMap_[offscreenCanvasCount_++] = offscreenCanvas;
+                }
             }
         }
         if (args[2]->IsObject()) {

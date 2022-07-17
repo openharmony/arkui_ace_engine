@@ -36,7 +36,7 @@ public:
     ~TapGesture() override = default;
 
 protected:
-    RefPtr<GestureRecognizer> CreateRecognizer(WeakPtr<PipelineContext> context) override;
+    RefPtr<GestureRecognizer> CreateRecognizer(WeakPtr<PipelineBase> context) override;
 
 private:
     int32_t count_ = 1;

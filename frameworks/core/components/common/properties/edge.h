@@ -180,7 +180,7 @@ public:
         return (edge.left_ == left_) && (edge.top_ == top_) && (edge.right_ == right_) && (edge.bottom_ == bottom_);
     }
 
-    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+    void SetContextAndCallback(const WeakPtr<PipelineBase>& context, const RenderNodeAnimationCallback& callback)
     {
         left_.SetContextAndCallback(context, callback);
         top_.SetContextAndCallback(context, callback);

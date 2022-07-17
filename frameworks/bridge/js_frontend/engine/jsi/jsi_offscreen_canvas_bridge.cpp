@@ -205,7 +205,7 @@ std::unordered_map<int32_t, Gradient> JsiOffscreenCanvasBridge::gradientColors_;
 std::unordered_map<int32_t, RefPtr<CanvasPath2D>> JsiOffscreenCanvasBridge::path2Ds_;
 
 JsiOffscreenCanvasBridge::JsiOffscreenCanvasBridge(
-    const RefPtr<PipelineContext>& pipelineContext, int32_t width, int32_t height)
+    const RefPtr<PipelineBase>& pipelineContext, int32_t width, int32_t height)
 {
     width_ = width;
     height_ = height;

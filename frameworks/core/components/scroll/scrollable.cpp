@@ -83,7 +83,7 @@ Scrollable::~Scrollable()
     springController_->Stop();
 }
 
-void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
+void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
 {
     context_ = context;
     PanDirection panDirection;
