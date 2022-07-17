@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_ROSEN_RENDER_TEXTURE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_ROSEN_RENDER_TEXTURE_H
 
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/decoration.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "surface.h"
 #endif
@@ -44,6 +46,7 @@ public:
 
 #ifdef OHOS_STANDARD_SYSTEM
     OHOS::sptr<OHOS::Surface> GetSurface();
+    void SyncProperties(const Size& videoSize, ImageFit imagefit, ImageObjectPosition imagePosition);
 #endif
 
 private:

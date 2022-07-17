@@ -91,6 +91,20 @@ void RenderTexture::PerformLayout()
     if (!NeedLayout()) {
         return;
     }
+    Measure();
+    SetNeedLayout(false);
+    if (textureSizeChangeEvent_) {
+        textureSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
+    }
+    if (textureOffsetChangeEvent_) {
+        textureOffsetChangeEvent_(textureId_,
+            (int32_t)(alignmentX_ + GetGlobalOffset().GetX()), (int32_t)(alignmentY_ + GetGlobalOffset().GetY()));
+    }
+    MarkNeedRender();
+}
+
+void RenderTexture::Measure()
+{
     double width = GetLayoutParam().GetMinSize().Width();
     double height = GetLayoutParam().GetMinSize().Height();
     for (const auto& item : GetChildren()) {
@@ -127,16 +141,6 @@ void RenderTexture::PerformLayout()
     }
 
     ApplyObjectPosition();
-
-    SetNeedLayout(false);
-    if (textureSizeChangeEvent_) {
-        textureSizeChangeEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
-    }
-    if (textureOffsetChangeEvent_) {
-        textureOffsetChangeEvent_(textureId_,
-            (int32_t)(alignmentX_ + GetGlobalOffset().GetX()), (int32_t)(alignmentY_ + GetGlobalOffset().GetY()));
-    }
-    MarkNeedRender();
 }
 
 void RenderTexture::ApplyObjectPosition()

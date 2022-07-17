@@ -17,6 +17,7 @@
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
+#include "core/components/common/layout/constants.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_surface_node.h"
 #endif
@@ -69,9 +70,11 @@ void RosenRenderTexture::SyncGeometryProperties()
     if (!rsNode) {
         return;
     }
-    Offset paintOffset = GetPaintOffset();
-    rsNode->SetBounds(paintOffset.GetX() + alignmentX_, paintOffset.GetY() + alignmentY_,
-        drawSize_.Width(), drawSize_.Height() - controlsHeight_);
+
+    auto offset = GetPaintOffset() + Offset(alignmentX_, alignmentY_);
+    auto size = drawSize_ - Size(0.0, controlsHeight_);
+    rsNode->SetBounds(offset.GetX(), offset.GetY(), size.Width(), size.Height());
+    LOGI("SetBounds position: %{public}s, size: %{public}s", offset.ToString().c_str(), size.ToString().c_str());
 }
 
 void RosenRenderTexture::InitGaussianFuzzyParas()
@@ -174,6 +177,15 @@ OHOS::sptr<OHOS::Surface> RosenRenderTexture::GetSurface()
         return surface;
     }
     return nullptr;
+}
+
+void RosenRenderTexture::SyncProperties(const Size& videoSize, ImageFit imageFit, ImageObjectPosition imagePosition)
+{
+    sourceSize_ = videoSize;
+    imageFit_ = imageFit;
+    imagePosition_ = imagePosition;
+    RenderTexture::Measure();
+    SyncGeometryProperties();
 }
 
 } // namespace OHOS::Ace
