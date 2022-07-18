@@ -189,6 +189,8 @@ public:
 
     void SetAlignValue(AlignDirection& alignDirection, double value);
 
+    void Dump() override;
+
 protected:
     void ClearRenderObject() override;
     bool MaybeRelease() override;
