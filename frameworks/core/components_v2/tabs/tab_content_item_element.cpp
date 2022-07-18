@@ -15,8 +15,9 @@
 
 #include "core/components_v2/tabs/tab_content_item_element.h"
 
-#include "core/components/flex/flex_element.h"
+#include "core/components/tab_bar/tab_bar_item_element.h"
 #include "core/components_v2/tabs/tab_content_item_component.h"
+#include "core/components_v2/tabs/tabs_helper.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -29,6 +30,10 @@ void TabContentItemElement::Update()
     }
     barIcon_ = component->GetBarIcon();
     barText_ = component->GetBarText();
+    if (component->GetBarElementId() != ElementRegister::UndefinedElementId) {
+        tabBarItemElementId_ = component->GetBarElementId();
+    }
+
     FlexElement::Update();
 }
 

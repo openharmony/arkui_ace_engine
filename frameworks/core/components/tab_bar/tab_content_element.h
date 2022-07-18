@@ -44,6 +44,11 @@ public:
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
     bool IsFocusable() const override;
 
+    RefPtr<TabController> GetTabController() const
+    {
+        return controller_;
+    }
+
 protected:
     RefPtr<RenderNode> CreateRenderNode() override;
     void UpdateLastFocusNode();

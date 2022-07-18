@@ -173,6 +173,7 @@ public:
     void InitBottomTabStyle(const RefPtr<TabTheme>& theme);
     // Called by element on perform build process.
     void BuildItems(std::list<RefPtr<TabBarItemComponent>>& items);
+    void UpdateItemStyle(const RefPtr<TabBarItemComponent>& item);
 
     void ResetIndicator()
     {

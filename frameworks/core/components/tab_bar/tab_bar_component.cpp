@@ -162,4 +162,24 @@ void TabBarComponent::BuildItems(std::list<RefPtr<TabBarItemComponent>>& items)
     }
 }
 
+void TabBarComponent::UpdateItemStyle(const RefPtr<TabBarItemComponent>& item)
+{
+    RefPtr<TabBarItemComponent> box = item;
+    if (usingDefaultStyle_) {
+        box->UpdateStyle(inactiveTextStyle_, inactiveColor_);
+    }
+    box->SetPadding(labelPadding_);
+    if (mode_ == TabBarMode::FIXED) {
+        box->SetFlex(BoxFlex::FLEX_XY);
+    } else {
+        if (vertical_) {
+            box->SetFlex(BoxFlex::FLEX_X);
+        } else {
+            box->SetFlex(BoxFlex::FLEX_Y);
+        }
+    }
+    box->SetDeliverMinToChild(false);
+    box->SetAlignment(itemAlignment_);
+}
+
 } // namespace OHOS::Ace

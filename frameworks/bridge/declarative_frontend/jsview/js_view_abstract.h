@@ -302,12 +302,7 @@ protected:
     template<typename T>
     static RefPtr<T> GetTheme()
     {
-        auto container = Container::Current();
-        if (!container) {
-            LOGW("container is null");
-            return nullptr;
-        }
-        auto pipelineContext = container->GetPipelineContext();
+        auto pipelineContext = GetPipelineContext();
         if (!pipelineContext) {
             LOGE("pipelineContext is null!");
             return nullptr;

@@ -38,6 +38,12 @@ public:
 
     void ChangeByBar(int32_t index, bool isFromController = false) override;
     void PrepareContent(int32_t index) override;
+    void UpdateIndex() override;
+
+    RefPtr<Element> GetElementByIndex(size_t index)
+    {
+        return ElementProxyHost::GetElementByIndex(index);
+    }
 
 private:
     RefPtr<Element> OnUpdateElement(const RefPtr<Element>& element, const RefPtr<Component>& component) override;

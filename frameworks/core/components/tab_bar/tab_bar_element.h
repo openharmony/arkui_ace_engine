@@ -33,6 +33,15 @@ public:
     void PerformBuild() override;
     void Update() override;
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
+    RefPtr<TabBarComponent> GetTabBarComponent() const
+    {
+        return tabBar_;
+    }
+
+    RefPtr<TabController> GetTabController() const
+    {
+        return controller_;
+    }
 
 protected:
     void OnFocus() override;
@@ -47,6 +56,7 @@ private:
     RefPtr<TabController> controller_;
     RefPtr<BoxComponent> indicatorStyle_;
     RefPtr<BoxComponent> focusIndicatorStyle_;
+    RefPtr<TabBarComponent> tabBar_ = nullptr;
 };
 
 } // namespace OHOS::Ace

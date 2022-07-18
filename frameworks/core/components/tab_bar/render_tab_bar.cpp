@@ -19,6 +19,7 @@
 
 #include "base/log/event_report.h"
 #include "base/utils/system_properties.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace {
@@ -90,7 +91,14 @@ void RenderTabBar::FlushIndex(const RefPtr<TabController>& controller)
             index = pendingIndex < 0 ? 0 : pendingIndex;
         }
     }
-    index_ = index < tabsSize_ ? index : tabsSize_ - 1;
+    if (!Container::IsCurrentUsePartialUpdate()) {
+        index_ = index < tabsSize_ ? index : tabsSize_ - 1;
+    } else {
+        // In partial update we have zero tabs yet here, so just keep the index
+        index_ = (index < tabsSize_ || tabsSize_ == 0) ? index : tabsSize_ - 1;
+    }
+    LOGD("focus index_ %{public}d tabsSize_ %{public}d, index %{public}d, initial %{public}d, pending %{public}d",
+        index_, tabsSize_, index, controller->GetInitialIndex(), controller->GetIndex());
     controller->SetIndexWithoutChangeContent(index_);
 }
 
@@ -261,6 +269,10 @@ void RenderTabBar::UpdatePosition()
 
 void RenderTabBar::SetIndex(int32_t index, bool force)
 {
+    if (Container::IsCurrentUsePartialUpdate()) {
+        tabsSize_ = indicator_? GetChildren().size() - 1 : GetChildren().size();
+    }
+
     if (index < 0 || index >= tabsSize_) {
         LOGW("illegal index = %{public}d", index);
         return;

@@ -38,9 +38,20 @@ public:
 
     void PerformBuild() override;
 
+    ElementIdType GetBarElementId() const
+    {
+        return tabBarItemElementId_;
+    }
+
+    void SetBarElementId(ElementIdType id)
+    {
+        tabBarItemElementId_ = id;
+    }
+
 private:
     std::string barIcon_;
     std::string barText_;
+    ElementIdType tabBarItemElementId_ = ElementRegister::UndefinedElementId;
 };
 
 } // namespace OHOS::Ace::V2

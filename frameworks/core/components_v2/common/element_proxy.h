@@ -105,7 +105,7 @@ public:
     size_t TotalCount() const;
 
     void UpdateChildren(const std::list<RefPtr<Component>>& components);
-    void UpdateIndex();
+    virtual void UpdateIndex();
 
     RefPtr<Component> GetComponentByIndex(size_t index);
     RefPtr<Element> GetElementByIndex(size_t index);

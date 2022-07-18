@@ -27,7 +27,7 @@ namespace OHOS::Ace::Framework {
 class JSTabContent : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
-    static void Create();
+    static void Create(const JSCallbackInfo& info);
 
 protected:
     static void SetTabBar(const JSCallbackInfo& info);
