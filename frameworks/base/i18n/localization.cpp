@@ -259,11 +259,11 @@ const std::string Localization::FormatDuration(uint32_t duration, bool needShowH
 {
     WaitingForInit();
     UErrorCode status = U_ZERO_ERROR;
-    // duration greater than 1 hour, use hh:mm:ss;
+    // duration greater than 1 hour, use HH:mm:ss;
     if (!needShowHour && duration > SECONDS_IN_HOUR) {
         needShowHour = true;
     }
-    const char* engTimeFormat = needShowHour ? "hh:mm:ss" : "mm:ss";
+    const char* engTimeFormat = needShowHour ? "HH:mm:ss" : "mm:ss";
     auto simpleDateFormat = std::make_unique<SimpleDateFormat>(UnicodeString(engTimeFormat), locale_->instance, status);
     CHECK_RETURN(status, "");
 
