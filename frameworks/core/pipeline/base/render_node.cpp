@@ -24,6 +24,7 @@
 #include "render_service_client/core/ui/rs_canvas_node.h"
 
 #include "core/animation/native_curve_helper.h"
+#include "core/components/remote_window/rosen_render_remote_window.h"
 #endif
 
 #include "base/log/dump_log.h"
@@ -1977,11 +1978,18 @@ void RenderNode::SetDepth(int32_t depth)
     }
 }
 
-void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
+void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail, const RefPtr<Component>& component)
 {
     isHeadRenderNode_ = isHead;
 #ifdef ENABLE_ROSEN_BACKEND
     isTailRenderNode_ = isTail;
+
+    // if "UseExternalRSNode" is true, we should find tail component and extract RSNode from it.
+    ProcessExternalRSNode(component);
+    if (rsNode_) {
+        return;
+    }
+
     if (isHead && !rsNode_) {
         // create RSNode in first node of JSview
         rsNode_ = CreateRSNode();
@@ -1992,15 +2000,46 @@ void RenderNode::SyncRSNodeBoundary(bool isHead, bool isTail)
 #endif
 }
 
-void RenderNode::SyncRSNode(std::shared_ptr<RSNode> rsNode)
+void RenderNode::ProcessExternalRSNode(const RefPtr<Component>& component)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    rsNode_ = rsNode;
-    if (!isTailRenderNode_) {
-        const auto& children = GetChildren();
-        for (const auto& item : children) {
-            item->SyncRSNode(rsNode);
+    if (!isHeadRenderNode_ || component == nullptr || !component->UseExternalRSNode()) {
+        return;
+    }
+
+    auto tailComponent = component;
+    while (tailComponent != nullptr) {
+        // recursive find tail component.
+        if (!tailComponent->IsTailComponent()) {
+            auto singleChild = AceType::DynamicCast<SingleChild>(tailComponent);
+            if (!singleChild) {
+                return;
+            }
+            tailComponent = singleChild->GetChild();
+            continue;
         }
+        // extract RSNode from tail component.
+        auto rsNode = RosenRenderRemoteWindow::ExtractRSNode(tailComponent);
+        if (rsNode != nullptr) {
+            SyncRSNode(rsNode);
+        }
+        return;
+    }
+#endif
+}
+
+void RenderNode::SyncRSNode(const std::shared_ptr<RSNode>& rsNode)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsNode_ == rsNode) {
+        return;
+    }
+    rsNode_ = rsNode;
+    if (isTailRenderNode_) {
+        return;
+    }
+    for (const auto& child : GetChildren()) {
+        child->SyncRSNode(rsNode);
     }
 #endif
 }

@@ -619,7 +619,6 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
     } else if (!components.empty() && (
         AceType::InstanceOf<BoxComponent>(mainComponent) ||
         AceType::InstanceOf<FormComponent>(mainComponent) ||
-        AceType::InstanceOf<RemoteWindowComponent>(mainComponent) ||
         AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
         AceType::InstanceOf<TextureComponent>(mainComponent) ||
         AceType::InstanceOf<WebComponent>(mainComponent) ||
@@ -630,6 +629,11 @@ RefPtr<Component> ViewStackProcessor::WrapComponents()
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
         components.emplace_back(mainComponent);
+    } else if (AceType::InstanceOf<RemoteWindowComponent>(mainComponent)) {
+        // mark head component, it should use external RSNode stored in tail component.
+        components.emplace_back(mainComponent);
+        Component::MergeRSNode(components);
+        components.front()->MarkUseExternalRSNode();
     } else {
         // by default, mainComponent is placed after other components, they should share the same RSNode.
         //  (head)      (tail)
