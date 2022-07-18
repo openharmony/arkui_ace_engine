@@ -236,6 +236,16 @@ public:
         return colorMode_;
     }
 
+    static void SetInputDevice(bool hasInputDevice)
+    {
+        hasInputDevice_ = hasInputDevice;
+    }
+
+    static bool GetInputDevice()
+    {
+        return hasInputDevice_;
+    }
+
     static void InitMccMnc(int32_t mcc, int32_t mnc);
 
     static ScreenShape GetScreenShape()
@@ -278,6 +288,7 @@ private:
     static bool svgTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
+    static bool hasInputDevice_;
     static int32_t deviceWidth_;
     static int32_t deviceHeight_;
     static double resolution_;

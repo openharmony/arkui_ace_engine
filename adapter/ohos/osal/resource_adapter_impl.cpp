@@ -95,8 +95,9 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     auto resRet = newResMgr->AddResource(resIndexPath.c_str());
     auto configRet = newResMgr->UpdateResConfig(*resConfig);
     LOGI("AddRes result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}d, "
-         "device=%{public}d",
-        resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType());
+         "device=%{public}d, colorMode=%{publid}d, inputDevice=%{public}d",
+        resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
+        resConfig->GetColorMode(), resConfig->GetInputDevice());
     sysResourceManager_ = newResMgr;
     resourceManager_ = sysResourceManager_;
     packagePathStr_ = resPath;
@@ -105,8 +106,10 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
 {
     auto resConfig = ConvertConfigToGlobal(config);
-    LOGI("UpdateConfig ori=%{public}d, dpi=%{public}d, device=%{public}d",
-        resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType());
+    LOGI("UpdateConfig ori=%{public}d, dpi=%{public}d, device=%{public}d, "
+        "colorMode=%{publid}d, inputDevice=%{public}d",
+        resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
+        resConfig->GetColorMode(), resConfig->GetInputDevice());
     resourceManager_->UpdateResConfig(*resConfig);
 }
 
