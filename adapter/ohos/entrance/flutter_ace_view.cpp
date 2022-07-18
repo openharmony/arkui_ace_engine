@@ -90,7 +90,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
 
 void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, TouchEvent& touchEvent)
 {
-    auto ids = pointerEvent->GetPointersIdList();
+    auto ids = pointerEvent->GetPointerIds();
     for (auto&& id : ids) {
         MMI::PointerEvent::PointerItem item;
         bool ret = pointerEvent->GetPointerItem(id, item);
@@ -307,7 +307,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
         LOGI("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d", actionId,
             item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction());
     }
-    auto ids = pointerEvent->GetPointersIdList();
+    auto ids = pointerEvent->GetPointerIds();
     for (auto&& id : ids) {
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(id, item)) {
