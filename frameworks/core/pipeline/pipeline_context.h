@@ -119,6 +119,7 @@ public:
     using SurfaceChangedCallbackMap =
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
     using PostRTTaskCallback = std::function<void(std::function<void()>&&)>;
+    using WindowFocusChangedCallbackMap = std::unordered_map<int32_t, std::function<void(bool)>>;
 
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -1323,6 +1324,20 @@ public:
     {
         return usePartialupdate_;
     }
+
+    int32_t RegisterWindowFocusChangedCallback(std::function<void(bool)>&& callback)
+    {
+        if (callback) {
+            windowFocusChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterWindowFocusChangedCallback(int32_t callbackId)
+    {
+        windowFocusChangedCallbackMap_.erase(callbackId);
+    }
     
 protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
@@ -1545,6 +1560,7 @@ private:
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
+    WindowFocusChangedCallbackMap windowFocusChangedCallbackMap_;
 
     std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;
     Offset pluginOffset_ { 0, 0 };
