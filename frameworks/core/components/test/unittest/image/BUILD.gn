@@ -216,7 +216,7 @@ config("config_render_test") {
 group("unittest") {
   testonly = true
   deps = [
-    ":ImageCreatorTest",
+    #":ImageCreatorTest",
     # ":RenderImageTest",
   ]
 }

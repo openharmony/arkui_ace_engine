@@ -278,6 +278,6 @@ group("unittest") {
   testonly = true
   deps = [
     #":CheckableComponentTest",
-    #":CheckableCreatorTest",
+    ":CheckableCreatorTest",
   ]
 }

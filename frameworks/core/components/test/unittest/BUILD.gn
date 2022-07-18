@@ -17,19 +17,17 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 group("unittest") {
   testonly = true
   deps = [
-    #"align:unittest",
-    #"border:unittest",
+    "align:unittest",
+    "border:unittest",
     "box:unittest",
 
     #"button:unittest",
     "checkable:unittest",
     "click_effect:unittest",
-
-    #"decoration:unittest",
+    "decoration:unittest",
     "dialog:unittest",
     "display:unittest",
-
-    #"divider:unittest",
+    "divider:unittest",
     "drag_bar:unittest",
     "flex:unittest",
 
@@ -38,7 +36,7 @@ group("unittest") {
     "grid_layout:unittest",
 
     #"image:unittest",
-    "image_animator:unittest",
+    #"image_animator:unittest",
     "indexer:unittest",
     "list:unittest",
     "padding:unittest",

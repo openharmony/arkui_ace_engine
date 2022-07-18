@@ -63,7 +63,7 @@ ohos_unittest("RenderGridTest") {
 group("unittest") {
   testonly = true
   deps = [
-    #":GridCreatorTest",
+    ":GridCreatorTest",
     ":RenderGridTest",
   ]
 }
