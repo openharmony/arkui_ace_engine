@@ -1418,6 +1418,11 @@ bool PipelineContext::PopPageStackOverlay()
         return false;
     }
     LOGI("Pop page overlays");
+    // If last child is popup, use PopPopup to trigger state change event.
+    if (pageStack->PopPopupIfExist()) {
+        return true;
+    }
+
     pageStack->PopComponent();
     return true;
 }

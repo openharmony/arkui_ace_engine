@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/bubble/bubble_element.h"
+#include "core/components/bubble/render_bubble.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/dialog/dialog_element.h"
@@ -507,6 +508,34 @@ void StackElement::CreateInspectorComponent(PopupComponentInfo& componentInfo) c
         composedComponent->SetChild(componentInfo.component);
         componentInfo.component = composedComponent;
     }
+}
+
+bool StackElement::PopPopupIfExist() const
+{
+    auto bubbleElement = GetBubble(GetLastChild());
+    if (!bubbleElement) {
+        return false;
+    }
+    auto renderBubble = DynamicCast<RenderBubble>(bubbleElement->GetRenderNode());
+    if (!renderBubble) {
+        return false;
+    }
+    renderBubble->PopBubble();
+    return true;
+}
+
+RefPtr<BubbleElement> StackElement::GetBubble(const RefPtr<Element>& element) const
+{
+    if (!element) {
+        return nullptr;
+    }
+
+    auto bubble = DynamicCast<BubbleElement>(element);
+    if (bubble) {
+        return bubble;
+    }
+
+    return GetBubble(element->GetFirstChild());
 }
 
 } // namespace OHOS::Ace
