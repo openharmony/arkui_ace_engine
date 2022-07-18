@@ -633,7 +633,17 @@ std::string InspectorComposedElement::GetRect()
     if (GetClipFlag()) {
         accessibilityNode_->SetClipFlagToChild(true);
     }
+    auto parent = GetElementParent().Upgrade();
+    while (parent && rect.IsValid()) {
+        rect = rect.IntersectRect(parent->GetRenderRect());
+        parent = parent->GetElementParent().Upgrade();
+    }
+
     isRectValid_ = rect.IsValid();
+    if (!isRectValid_) {
+        rect.SetRect(0, 0, 0, 0);
+    }
+
     strRec = std::to_string(rect.Left())
                  .append(",")
                  .append(std::to_string(rect.Top()))
