@@ -576,6 +576,18 @@ void UIContentImpl::Foreground()
 {
     LOGI("UIContentImpl: window foreground");
     Platform::AceContainer::OnShow(instanceId_);
+    // set the flag isForegroundCalled to be true
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("get container(id=%{public}d) failed", instanceId_);
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("get pipeline context failed");
+        return;
+    }
+    pipelineContext->SetForegroundCalled(true);
 }
 
 void UIContentImpl::Background()
@@ -939,6 +951,25 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window)
     AceEngine::Get().AddContainer(instanceId_, container);
     touchOutsideListener_ = new TouchOutsideListener(instanceId_);
     window_->RegisterTouchOutsideListener(touchOutsideListener_);
+}
+
+void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
+{
+    if (!callback) {
+        LOGI("set callback to nullptr");
+        return;
+    }
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        LOGE("get container(id=%{public}d) failed", instanceId_);
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("get pipeline context failed");
+        return;
+    }
+    pipelineContext->SetNextFrameLayoutCallback(std::move(callback));
 }
 
 } // namespace OHOS::Ace

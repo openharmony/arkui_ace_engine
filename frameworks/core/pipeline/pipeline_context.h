@@ -1323,6 +1323,16 @@ public:
     {
         return usePartialupdate_;
     }
+
+    void SetNextFrameLayoutCallback(std::function<void()>&& callback)
+    {
+        nextFrameLayoutCallback_ = std::move(callback);
+    }
+
+    void SetForegroundCalled(bool isForegroundCalled)
+    {
+        this->isForegroundCalled_ = isForegroundCalled;
+    }
     
 protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
@@ -1573,6 +1583,7 @@ private:
     std::function<Rect()> windowRectImpl_ = nullptr;
 
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
+    std::function<void()> nextFrameLayoutCallback_ = nullptr;
     Size selectedItemSize_ { 0.0, 0.0 };
     size_t selectedIndex_ = -1;
     size_t insertIndex_ = -1;
@@ -1588,6 +1599,7 @@ private:
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
     bool isSubPipeline_ = false;
+    bool isForegroundCalled_ = false;
 
     PostRTTaskCallback postRTTaskCallback_;
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
