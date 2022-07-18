@@ -1127,6 +1127,7 @@ shared_ptr<JsValue> JsiCanvasBridge::JsDrawImage(const shared_ptr<JsRuntime>& ru
         pixelMap = CreatePixelMapFromNapiValue(runtime, argv[0]);
         if (!pixelMap) {
             LOGE("pixelMap is null");
+            return runtime->NewUndefined();
         }
         isPixelMap = true;
 #else
