@@ -110,6 +110,7 @@ public:
 
 protected:
     RenderTexture();
+    void Measure();
 
     int64_t textureId_ = INVALID_TEXTURE;
     Size drawSize_;   // size of draw area

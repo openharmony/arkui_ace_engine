@@ -65,9 +65,8 @@ struct MediaPlayerCallback : public Media::PlayerCallback {
 
 public:
     using PositionUpdatedEvent = std::function<void(uint32_t)>;
-    using EndOfStreamEvent = std::function<void()>;
     using StateChangedEvent = std::function<void(PlaybackStatus)>;
-    using ErrorEvent = std::function<void()>;
+    using CommonEvent = std::function<void()>;
 
     MediaPlayerCallback() = default;
     explicit MediaPlayerCallback(int32_t instanceId)
@@ -93,26 +92,31 @@ public:
         switch (type) {
             case OHOS::Media::INFO_TYPE_SEEKDONE:
                 LOGI("OnSeekDone callback");
-                if (positionUpdatedEvent_ != nullptr) {
+                if (positionUpdatedEvent_) {
                     positionUpdatedEvent_(extra / MILLISECONDS_TO_SECONDS);
                 }
                 break;
             case OHOS::Media::INFO_TYPE_EOS:
                 LOGI("OnEndOfStream callback");
-                if (endOfStreamEvent_ != nullptr) {
+                if (endOfStreamEvent_) {
                     endOfStreamEvent_();
                 }
                 break;
             case OHOS::Media::INFO_TYPE_STATE_CHANGE:
                 LOGI("OnStateChanged callback");
                 PrintState(static_cast<OHOS::Media::PlayerStates>(extra));
-                if (stateChangedEvent_ != nullptr) {
+                if (stateChangedEvent_) {
                     stateChangedEvent_(ConvertToPlaybackStatus(extra));
                 }
                 break;
             case OHOS::Media::INFO_TYPE_POSITION_UPDATE:
-                if (positionUpdatedEvent_ != nullptr) {
+                if (positionUpdatedEvent_) {
                     positionUpdatedEvent_(extra / MILLISECONDS_TO_SECONDS);
+                }
+                break;
+            case OHOS::Media::INFO_TYPE_RESOLUTION_CHANGE:
+                if (resolutionChangeEvent_) {
+                    resolutionChangeEvent_();
                 }
                 break;
             case OHOS::Media::INFO_TYPE_MESSAGE:
@@ -149,7 +153,7 @@ public:
         positionUpdatedEvent_ = std::move(positionUpdatedEvent);
     }
 
-    void SetEndOfStreamEvent(EndOfStreamEvent&& endOfStreamEvent)
+    void SetEndOfStreamEvent(CommonEvent&& endOfStreamEvent)
     {
         endOfStreamEvent_ = std::move(endOfStreamEvent);
     }
@@ -159,16 +163,22 @@ public:
         stateChangedEvent_ = std::move(stateChangedEvent);
     }
 
-    void SetErrorEvent(ErrorEvent&& errorEvent)
+    void SetErrorEvent(CommonEvent&& errorEvent)
     {
         errorEvent_ = std::move(errorEvent);
     }
 
+    void SetResolutionChangeEvent(CommonEvent&& resolutionChangeEvent)
+    {
+        resolutionChangeEvent_ = std::move(resolutionChangeEvent);
+    }
+
 private:
     PositionUpdatedEvent positionUpdatedEvent_;
-    EndOfStreamEvent endOfStreamEvent_;
+    CommonEvent endOfStreamEvent_;
     StateChangedEvent stateChangedEvent_;
-    ErrorEvent errorEvent_;
+    CommonEvent errorEvent_;
+    CommonEvent resolutionChangeEvent_;
     int32_t instanceId_ = -1;
 };
 
