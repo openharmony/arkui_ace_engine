@@ -22,31 +22,21 @@ void RosenRenderRemoteWindow::Update(const RefPtr<Component>& component)
 {
     RenderRemoteWindow::Update(component);
     
-    RefPtr<RemoteWindowComponent> remoteWindowComponent = AceType::DynamicCast<RemoteWindowComponent>(component);
-    if (!remoteWindowComponent) {
-        return;
-    }
-
-    auto surfaceNode = remoteWindowComponent->GetRSSurfaceNode();
-    // update RSNode if needed
-    if (surfaceNode != nullptr && surfaceNode != GetRSNode()) {
-        SetRSNode(surfaceNode);
-        // create corresponding RSRenderNode in Render Thread
-        surfaceNode->CreateNodeInRenderThread(true);
-        // after updating RSNode, we need to explicitly sync geometry
-        MarkNeedSyncGeometryProperties();
-    }
+    MarkNeedSyncGeometryProperties();
 }
 
-void RosenRenderRemoteWindow::SyncGeometryProperties()
+std::shared_ptr<Rosen::RSNode> RosenRenderRemoteWindow::ExtractRSNode(const RefPtr<Component>& component)
 {
-    auto rsNode = GetRSNode();
-    if (!rsNode) {
-        return;
+    RefPtr<RemoteWindowComponent> remoteWindowComponent = AceType::DynamicCast<RemoteWindowComponent>(component);
+    if (!remoteWindowComponent) {
+        return nullptr;
     }
-    Offset paintOffset = GetPaintOffset();
-    // for surface nodes, only bounds is used
-    rsNode->SetBounds(paintOffset.GetX(), paintOffset.GetY(), drawSize_.Width(), drawSize_.Height());
-    rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), drawSize_.Width(), drawSize_.Height());
+
+    // update RSNode if surface node changed
+    auto surfaceNode = remoteWindowComponent->GetRSSurfaceNode();
+    if (surfaceNode) {
+        surfaceNode->CreateNodeInRenderThread(true);
+    }
+    return std::static_pointer_cast<Rosen::RSNode>(surfaceNode);
 }
 } // namespace OHOS::Ace

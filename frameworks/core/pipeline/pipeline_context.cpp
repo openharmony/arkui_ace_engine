@@ -2054,7 +2054,6 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
                 FlushLayout();
             });
             break;
-            [[fallthrough]];
         }
         case WindowSizeChangeReason::DRAG_START: {
             isDragStart_ = true;
