@@ -83,7 +83,6 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
         return;
     }
 
-    InitializeSelectedOption(anchorColumn);
     // Draw two dividers on both sides of selected option.
     SkPaint paint;
     paint.setColor(theme->GetDividerColor().GetValue());
@@ -104,8 +103,12 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     // Paint gradient at top and bottom.
     PaintGradient(canvas, offset, rect, theme);
 
-    if (anchorColumn->IsFocused()) {
-        PaintFocusOptionBorder(canvas, anchorColumn);
+    for (const auto& column : columns_) {
+        if (column->IsFocused()) {
+            InitializeSelectedOption(column);
+            PaintFocusOptionBorder(canvas, column);
+            break;
+        }
     }
 }
 
