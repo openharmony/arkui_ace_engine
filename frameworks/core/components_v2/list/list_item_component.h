@@ -41,6 +41,7 @@ struct EditMode {
 };
 
 using OnSelectFunc = std::function<void(bool)>;
+using DeepRenderFunc = std::function<RefPtr<Component>()>;
 
 class ACE_EXPORT ListItemComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(V2::ListItemComponent, SoleChildComponent);
@@ -81,8 +82,37 @@ public:
         onSelectId_ = onSelectId;
     }
 
+    // transfer ownershop of deepRenderFunc_ to provided ListItemComponent
+    void MoveDeepRenderFunc(RefPtr<ListItemComponent>& component)
+    {
+        component->deepRenderFunc_ = std::move(deepRenderFunc_);
+        ACE_DCHECK(deepRenderFunc_ == nullptr);
+    }
+
+    void SetDeepRenderFunc(const DeepRenderFunc& deepRenderFunc)
+    {
+        deepRenderFunc_ = deepRenderFunc;
+    }
+
+    RefPtr<Component> ExecDeepRender() const
+    {
+        return (deepRenderFunc_) ? deepRenderFunc_() : nullptr;
+    }
+
+    void SetIsLazyCreating(const bool isLazy)
+    {
+        isLazyCreating_ = isLazy;
+    }
+
+    bool GetIsLazyCreating() const
+    {
+        return isLazyCreating_;
+    }
+
 private:
     OnSelectFunc onSelectId_;
+    DeepRenderFunc deepRenderFunc_ = nullptr;
+    bool isLazyCreating_ = false;
     bool selectable_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemComponent);
 };
