@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSCircle : public JSShapeAbstract, public JSInteractableView {
+class JSCircle : public JSShapeAbstract {
     DECLARE_ACE_TYPE(JSCircle, JSShapeAbstract);
 public:
     static void JSBind(BindingTarget globalObj);

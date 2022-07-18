@@ -1154,7 +1154,6 @@ void RosenRenderBox::AnimateMouseHoverEnter()
 {
     LOGD("RosenRenderBox::AnimateMouseHoverEnter in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
     if (hoverAnimationType_ == HoverAnimationType::SCALE) {
-        isHoveredScale = true;
         auto rsNode = GetRSNode();
         if (!rsNode) {
             return;
@@ -1173,6 +1172,7 @@ void RosenRenderBox::AnimateMouseHoverEnter()
                 }
             },
             []() {});
+        isHoveredScale_ = true;
     } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         ResetController(controllerExit_);
         if (!controllerEnter_) {
@@ -1190,7 +1190,7 @@ void RosenRenderBox::AnimateMouseHoverEnter()
         controllerEnter_->SetDuration(HOVER_ANIMATION_DURATION);
         controllerEnter_->SetFillMode(FillMode::FORWARDS);
         controllerEnter_->Play();
-        isHoveredBoard = true;
+        isHoveredBoard_ = true;
     } else {
         return;
     }
@@ -1199,8 +1199,7 @@ void RosenRenderBox::AnimateMouseHoverEnter()
 void RosenRenderBox::AnimateMouseHoverExit()
 {
     LOGI("RosenRenderBox::AnimateMouseHoverExit in. hoverAnimationType_ = %{public}d", hoverAnimationType_);
-    if (hoverAnimationType_ == HoverAnimationType::SCALE) {
-        isHoveredScale = true;
+    if (hoverAnimationType_ == HoverAnimationType::SCALE || isHoveredScale_) {
         auto rsNode = GetRSNode();
         float scaleBegin = SCALE_CHANGED;
         float scaleEnd = SCALE_DEFAULT;
@@ -1216,7 +1215,9 @@ void RosenRenderBox::AnimateMouseHoverExit()
                 }
             },
             []() {});
-    } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
+        isHoveredScale_ = false;
+    }
+    if (hoverAnimationType_ == HoverAnimationType::BOARD || isHoveredBoard_) {
         ResetController(controllerEnter_);
         if (!controllerExit_) {
             controllerExit_ = AceType::MakeRefPtr<Animator>(context_);
@@ -1235,7 +1236,7 @@ void RosenRenderBox::AnimateMouseHoverExit()
         controllerExit_->SetDuration(HOVER_ANIMATION_DURATION);
         controllerExit_->Play();
         controllerExit_->SetFillMode(FillMode::FORWARDS);
-        isHoveredBoard = false;
+        isHoveredBoard_ = false;
     }
 }
 

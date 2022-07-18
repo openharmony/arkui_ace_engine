@@ -242,8 +242,8 @@ protected:
     Color hoverColor_ = Color::TRANSPARENT;
     float scale_ = 1.0f;
     bool isZoom = false;
-    bool isHoveredBoard = false;
-    bool isHoveredScale = false;
+    bool isHoveredBoard_ = false;
+    bool isHoveredScale_ = false;
     bool isAccessibilityFocus_ = false;
     bool needFocusBorder_ = false;
     bool needPaintDebugBoundary_ = false;
