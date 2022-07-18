@@ -815,7 +815,7 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
     auto frontend = pipelineContext->GetFrontend();
     auto windowConfig = frontend->GetWindowConfig();
     double lpxValue = firstArg->ToNumber(vm)->Value();
-    double pxValue = lpxValue * windowConfig.designWidthScale;
+    double pxValue = lpxValue * windowConfig.GetDesignWidthScale(container->GetViewWidth());
     return panda::NumberRef::New(vm, pxValue);
 }
 
@@ -842,7 +842,7 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
     auto frontend = pipelineContext->GetFrontend();
     auto windowConfig = frontend->GetWindowConfig();
     double pxValue = firstArg->ToNumber(vm)->Value();
-    double lpxValue = pxValue / windowConfig.designWidthScale;
+    double lpxValue = pxValue / windowConfig.GetDesignWidthScale(container->GetViewWidth());
 
     return panda::NumberRef::New(vm, lpxValue);
 }
