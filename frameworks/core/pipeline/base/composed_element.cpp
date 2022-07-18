@@ -68,6 +68,13 @@ void ComposedElement::PerformBuild()
     }
 
     auto component = HasRenderFunction() ? CallRenderFunction(component_) : BuildChild();
+
+    if (!component && context->UsePartialUpdate()) {
+        // partial update re-render code path calls JSView::MakeElementUpdatesToCompleteRerender
+        // this function returns no component, ComposedElement does not require updqates
+        return;
+    }
+
     auto child = children_.empty() ? nullptr : children_.front();
     auto composedComponent = AceType::DynamicCast<ComposedComponent>(component_);
     if (composedComponent) {
