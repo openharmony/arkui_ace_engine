@@ -33,6 +33,7 @@
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
 #include "core/gestures/exclusive_recognizer.h"
+#include "core/gestures/gesture_info.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
 #include "core/gestures/parallel_recognizer.h"
@@ -284,7 +285,9 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
         return;
     }
 
-    auto dragItemInfo = GenerateDragItemInfo(pipelineContext, info);
+    GestureEvent newInfo = info;
+    newInfo.SetGlobalPoint(startPoint_);
+    auto dragItemInfo = GenerateDragItemInfo(pipelineContext, newInfo);
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (dragItemInfo.pixelMap) {
         auto initRenderNode = AceType::Claim(this);
