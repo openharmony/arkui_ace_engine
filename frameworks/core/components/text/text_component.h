@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/text_style.h"
@@ -47,6 +48,9 @@ public:
 
     const TextStyle& GetTextStyle() const;
     void SetTextStyle(const TextStyle& textStyle);
+
+    const std::optional<TextAlign>& GetAlignment() const;
+    void SetAlignment(const TextAlign& alignment);
 
     const Color& GetFocusColor() const;
     void SetFocusColor(const Color& focusColor);
@@ -122,6 +126,7 @@ public:
     }
 
 private:
+    std::optional<TextAlign> alignment_;
     RefPtr<TextDeclaration> declaration_;
     OnDragFunc onDragStartId_;
     OnDropFunc onDragEnterId_;
