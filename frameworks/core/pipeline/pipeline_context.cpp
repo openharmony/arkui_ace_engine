@@ -900,13 +900,10 @@ void PipelineContext::SetupRootElement()
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_ && renderRoot) {
         LOGI("rosen ui director call set root.");
         rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
-        auto surfaceNode = rsUIDirector_->GetMutableRSSurfaceNode();
-        if (surfaceNode) {
-            if (windowModal_ == WindowModal::CONTAINER_MODAL) {
-                surfaceNode->SetSurfaceBgColor(appBgColor_.GetValue());
-            } else {
-                surfaceNode->SetSurfaceBgColor(renderRoot->GetBgColor().GetValue());
-            }
+        if (windowModal_ == WindowModal::CONTAINER_MODAL) {
+            rsUIDirector_->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+        } else {
+            rsUIDirector_->SetAbilityBGAlpha(renderRoot->GetBgColor().GetAlpha());
         }
     }
 #endif
@@ -957,10 +954,9 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
         rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
-        auto surfaceNode = rsUIDirector_->GetMutableRSSurfaceNode();
         auto renderRoot = AceType::DynamicCast<RenderRoot>(rootRenderNode);
-        if (surfaceNode && renderRoot) {
-            surfaceNode->SetSurfaceBgColor(renderRoot->GetBgColor().GetValue());
+        if (renderRoot) {
+            rsUIDirector_->SetAbilityBGAlpha(renderRoot->GetBgColor().GetAlpha());
         }
     }
 #endif
@@ -2325,10 +2321,7 @@ void PipelineContext::SetAppBgColor(const Color& color)
     LOGI("Set bgColor %{public}u", color.GetValue());
     appBgColor_ = color;
 #ifdef ENABLE_ROSEN_BACKEND
-    auto surfaceNode = rsUIDirector_->GetMutableRSSurfaceNode();
-    if (surfaceNode) {
-        surfaceNode->SetSurfaceBgColor(color.GetValue());
-    }
+    rsUIDirector_->SetAbilityBGAlpha(color.GetAlpha());
 #endif
     if (!themeManager_) {
         LOGW("themeManager_ is nullptr!");
