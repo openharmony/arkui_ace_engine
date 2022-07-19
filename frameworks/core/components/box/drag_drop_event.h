@@ -99,6 +99,7 @@ public:
     }
 
     void CreateDragDropRecognizer(const WeakPtr<PipelineContext>& pipelineContext);
+    void LongPressOnAction(const GestureEvent& info);
     virtual void PanOnActionStart(const GestureEvent& info) = 0;
     virtual void PanOnActionUpdate(const GestureEvent& info) = 0;
     virtual void PanOnActionEnd(const GestureEvent& info) = 0;
@@ -122,6 +123,7 @@ protected:
     RefPtr<DragDropEvent> initialDragDropNode_;
     Size selectedItemSize_;
     Point localPoint_;
+    Point startPoint_;
     UpdateBuilderFunc updateBuilder_;
 };
 

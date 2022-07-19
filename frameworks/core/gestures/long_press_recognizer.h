@@ -90,6 +90,7 @@ private:
     bool useCatchMode_ = true;
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;
+    Point globalPoint_;
 };
 
 } // namespace OHOS::Ace
