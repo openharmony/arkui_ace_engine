@@ -169,7 +169,9 @@ public:
     void HandleTouchUp(const int32_t& id, const double& x, const double& y);
     void HandleTouchMove(const int32_t& id, const double& x, const double& y);
     void HandleTouchCancel();
+    void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
+    void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action);
     void OnFocus();
     void OnBlur();
 #endif
@@ -255,7 +257,7 @@ private:
 #endif
 #endif
 
-    RefPtr<WebComponent> webComponent_;
+    WeakPtr<WebComponent> webComponent_;
     std::list<CreatedCallback> createdCallbacks_;
     std::list<ReleasedCallback> releasedCallbacks_;
     EventCallback onPageStarted_;

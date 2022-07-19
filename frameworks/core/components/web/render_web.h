@@ -46,6 +46,7 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void OnAttachContext() override;
+    void OnMouseEvent(const MouseEvent& event);
     bool HandleMouseEvent(const MouseEvent& event) override;
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -75,6 +76,10 @@ public:
     {
         return delegate_;
     }
+
+    void HandleAxisEvent(const AxisEvent& event) override;
+    bool IsAxisScrollable(AxisDirection direction) override;
+    WeakPtr<RenderNode> CheckAxisNode() override;
 
 protected:
     RefPtr<WebDelegate> delegate_;
