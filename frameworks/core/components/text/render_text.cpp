@@ -105,6 +105,7 @@ void RenderText::Update(const RefPtr<Component>& component)
     textAffinity_ = TextAffinity::UPSTREAM;
     textValue_.text = text_->GetData();
     cursorWidth_ = NormalizeToPx(CURSOR_WIDTH);
+    alignment_ = text_->GetAlignment();
 
     onDragStart_ = text_->GetOnDragStartId();
     onDragEnter_ = text_->GetOnDragEnterId();

@@ -36,6 +36,7 @@ public:
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetMaxLines(int32_t value);
     static void SetFontStyle(int32_t value);
+    static void SetAlign(int32_t value);
     static void SetTextAlign(int32_t value);
     static void SetLineHeight(const JSCallbackInfo& info);
     static void SetFontFamily(const JSCallbackInfo& info);
