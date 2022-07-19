@@ -1279,4 +1279,57 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
     }
     return context->CreateModuleContext(bundle, module);
 }
+
+void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::string& inputDevice)
+{
+    if (colorMode.empty() && inputDevice.empty()) {
+        LOGW("AceContainer::OnConfigurationUpdated param is empty");
+        return;
+    }
+    if (pipelineContext_ == nullptr) {
+        LOGE("AceContainer::UpdateConfiguration pipeline is null");
+        return;
+    }
+    auto themeManager = pipelineContext_->GetThemeManager();
+    if (themeManager == nullptr) {
+        LOGE("AceContainer::UpdateConfiguration themeManager is null");
+        return;
+    }
+    auto resConfig = GetResourceConfiguration();
+    if (!colorMode.empty()) {
+        if (colorMode == "dark") {
+            SystemProperties::SetColorMode(ColorMode::DARK);
+            SetColorScheme(ColorScheme::SCHEME_DARK);
+            resConfig.SetColorMode(ColorMode::DARK);
+        } else {
+            SystemProperties::SetColorMode(ColorMode::LIGHT);
+            SetColorScheme(ColorScheme::SCHEME_LIGHT);
+            resConfig.SetColorMode(ColorMode::LIGHT);
+        }
+    }
+    if (!inputDevice.empty()) {
+        SystemProperties::SetInputDevice(inputDevice == "true");
+        resConfig.SetInputDevice(inputDevice == "true");
+    }
+    SetResourceConfiguration(resConfig);
+    themeManager->UpdateConfig(resConfig);
+    themeManager->LoadResourceThemes();
+    auto taskExecutor = GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("AceContainer::UpdateConfiguration taskExecutor is null.");
+        return;
+    }
+    taskExecutor->PostTask([instanceId = instanceId_, weak = WeakClaim(this)]() {
+        ContainerScope scope(instanceId);
+        auto container = weak.Upgrade();
+        if (!container) {
+            return;
+        }
+        auto frontend = container->GetFrontend();
+        if (frontend) {
+            LOGE("AceContainer::UpdateConfiguration frontend MarkNeedUpdate.");
+            frontend->MarkNeedUpdate();
+        }
+        }, TaskExecutor::TaskType::JS);
+}
 } // namespace OHOS::Ace::Platform

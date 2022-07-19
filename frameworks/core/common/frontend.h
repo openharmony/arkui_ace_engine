@@ -210,6 +210,11 @@ public:
         dialogCallback_ = callback;
     }
 
+    virtual void MarkNeedUpdate()
+    {
+        return;
+    }
+
 protected:
     bool disallowPopLastPage_ = false;
     FrontendDialogCallback dialogCallback_ = nullptr;

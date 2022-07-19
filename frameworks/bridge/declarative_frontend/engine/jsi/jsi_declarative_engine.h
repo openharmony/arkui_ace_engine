@@ -56,6 +56,7 @@ public:
     static void RootViewHandle(panda::Local<panda::ObjectRef> value);
     void DestroyRootViewHandle(int32_t pageId);
     void DestroyAllRootViewHandle();
+    void MarkAllRootViewNeedUpdate();
 
     static std::unique_ptr<JsonValue> GetI18nStringResource(
         const std::string& targetStringKey, const std::string& targetStringValue);
@@ -277,6 +278,13 @@ public:
     RefPtr<JsiDeclarativeEngineInstance> GetEngineInstance()
     {
         return engineInstance_;
+    }
+
+    virtual void MarkNeedUpdate() override
+    {
+        if (engineInstance_) {
+            engineInstance_->MarkAllRootViewNeedUpdate();
+        }
     }
 
     void RunNativeEngineLoop() override

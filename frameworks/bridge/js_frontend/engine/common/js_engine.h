@@ -253,6 +253,11 @@ public:
     }
 #endif
 
+    virtual void MarkNeedUpdate()
+    {
+        return;
+    }
+
 protected:
     NativeEngine* nativeEngine_ = nullptr;
     std::function<void(JsEngine*)> mediaUpdateCallback_;

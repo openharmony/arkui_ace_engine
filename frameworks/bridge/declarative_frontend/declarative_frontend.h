@@ -196,6 +196,13 @@ public:
 
     void AttachSubPipelineContext(const RefPtr<PipelineContext>& context);
 
+    void MarkNeedUpdate() override
+    {
+        if (jsEngine_) {
+            jsEngine_->MarkNeedUpdate();
+        }
+    }
+
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 

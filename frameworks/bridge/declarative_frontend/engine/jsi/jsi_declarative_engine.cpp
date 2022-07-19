@@ -510,6 +510,29 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
     rootViewMap_.clear();
 }
 
+void JsiDeclarativeEngineInstance::MarkAllRootViewNeedUpdate()
+{
+    CHECK_RUN_ON(JS);
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
+    if (rootViewMap_.empty()) {
+        LOGW("MarkAllRootViewNeedUpdate release left %{private}zu views ", rootViewMap_.size());
+        return;
+    }
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+    if (!arkRuntime) {
+        LOGE("ark runtime is null");
+        return;
+    }
+    for (const auto& pair : rootViewMap_) {
+        auto globalRootView = pair.second;
+        panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
+        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
+        if (jsView != nullptr) {
+            jsView->MarkNeedUpdate();
+        }
+    }
+}
+
 std::unique_ptr<JsonValue> JsiDeclarativeEngineInstance::GetI18nStringResource(
     const std::string& targetStringKey, const std::string& targetStringValue)
 {

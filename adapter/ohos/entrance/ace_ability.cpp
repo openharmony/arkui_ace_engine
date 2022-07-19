@@ -513,7 +513,16 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
     LOGI("AceAbility::OnConfigurationUpdated called ");
     Ability::OnConfigurationUpdated(configuration);
     Platform::AceContainer::OnConfigurationUpdated(abilityId_, configuration.GetName());
-    LOGI("AceAbility::OnConfigurationUpdated called End");
+
+    auto container = Platform::AceContainer::GetContainer(abilityId_);
+    if (!container) {
+        LOGE("AceAbility container is null");
+        return;
+    }
+    auto colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    auto inputDevice = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+    container->UpdateConfiguration(colorMode, inputDevice);
+    LOGI("AceAbility::OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());
 }
 
 void AceAbility::OnAbilityResult(int requestCode, int resultCode, const OHOS::AAFwk::Want& resultData)
