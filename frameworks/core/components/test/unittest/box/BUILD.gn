@@ -129,7 +129,7 @@ group("unittest") {
 
   #deps += [ ":MouseHoverAnimationTest" ]
 
-  #deps += [ ":BoxCreatorTest" ]
+  deps += [ ":BoxCreatorTest" ]
 }
 
 config("config_json_creator_test") {

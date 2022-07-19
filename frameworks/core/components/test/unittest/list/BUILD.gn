@@ -94,7 +94,8 @@ config("config_tabbar_element_test") {
 group("unittest") {
   testonly = true
   deps = [
-    #":ListCreatorTest",
+    ":ListCreatorTest",
+
     #":ListElementTest",
     ":RenderListTest",
   ]

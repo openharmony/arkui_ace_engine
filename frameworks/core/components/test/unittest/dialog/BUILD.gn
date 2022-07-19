@@ -113,7 +113,8 @@ group("unittest") {
 
   deps += [
     ":DialogComponentTest",
-    # ":DialogCreatorTest",
+    ":DialogCreatorTest",
+
     # ":RenderDialogTest",
   ]
 }

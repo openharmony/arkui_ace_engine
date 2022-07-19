@@ -78,7 +78,7 @@ group("unittest") {
   deps = []
 
   deps += [
-    #":FlexCreatorTest",
-    ":RenderFlexTest",
+    ":FlexCreatorTest",
+    #":RenderFlexTest",
   ]
 }
