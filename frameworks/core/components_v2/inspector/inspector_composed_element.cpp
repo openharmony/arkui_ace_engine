@@ -1725,11 +1725,11 @@ void InspectorComposedElement::ProcessAllVisibleCallback(
 
         if (NearEqual(currentVisibleRatio, nodeCallbackInfo.visibleRatio)) {
             if (NearEqual(nodeCallbackInfo.visibleRatio, VISIBLE_RATIO_MIN) && nodeCallbackInfo.isCurrentVisible) {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo, false, currentVisibleRatio);
+                OnVisibleAreaChangeCallback(nodeCallbackInfo, false, VISIBLE_RATIO_MIN);
             }
 
             if (NearEqual(nodeCallbackInfo.visibleRatio, VISIBLE_RATIO_MAX) && !nodeCallbackInfo.isCurrentVisible) {
-                OnVisibleAreaChangeCallback(nodeCallbackInfo, true, currentVisibleRatio);
+                OnVisibleAreaChangeCallback(nodeCallbackInfo, true, VISIBLE_RATIO_MAX);
             }
         }
     }

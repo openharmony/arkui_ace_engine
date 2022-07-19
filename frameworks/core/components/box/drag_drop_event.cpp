@@ -27,7 +27,7 @@ namespace {
 
 constexpr int32_t DEFAULT_FINGERS = 1;
 constexpr int32_t DEFAULT_DURATION = 150;
-constexpr int32_t DEFAULT_DISTANCE = 0;
+constexpr int32_t DEFAULT_DISTANCE = 5;
 
 }; // namespace
 
