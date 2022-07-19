@@ -27,8 +27,6 @@
 
 namespace OHOS::Ace {
 struct KeyParam;
-}
-namespace OHOS::Ace {
 
 class AceResConfig {
 public:

@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "base/log/log.h"
+
 namespace OHOS::Ace {
 
 std::unique_ptr<DataProviderRes> DataProviderManager::GetDataProviderResFromUri(const std::string& uriStr)

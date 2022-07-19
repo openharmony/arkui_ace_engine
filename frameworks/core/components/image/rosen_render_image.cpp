@@ -307,6 +307,7 @@ void RosenRenderImage::Update(const RefPtr<Component>& component)
             return;
         }
     }
+
     FetchImageObject();
 }
 

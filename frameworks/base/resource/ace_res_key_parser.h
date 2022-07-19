@@ -27,6 +27,7 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/singleton.h"
 #include "base/utils/system_properties.h"
+
 namespace OHOS::Ace {
 using parse_key_function = std::function<bool(const std::string&, std::vector<KeyParam>&)>;
 

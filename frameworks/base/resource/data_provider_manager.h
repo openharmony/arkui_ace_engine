@@ -24,8 +24,8 @@
 #include <vector>
 
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/resource/data_ability_helper.h"
+
 namespace OHOS::Ace {
 
 class DataProviderRes {

@@ -27,7 +27,6 @@
 #include <vector>
 
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"

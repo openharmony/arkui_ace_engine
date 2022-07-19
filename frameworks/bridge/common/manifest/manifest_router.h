@@ -27,6 +27,7 @@
 namespace OHOS::Ace {
 class JsonValue;
 }
+
 namespace OHOS::Ace::Framework {
 
 class ManifestRouter : public Referenced {
