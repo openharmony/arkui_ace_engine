@@ -104,6 +104,9 @@ void RenderGridRow::PerformLayout()
     double rowHeight = 0.0;
     double lastLength = maxSize.Width();
     for (auto child : gridColChildren_) {
+        if (GetGridColSpan(child, sizeType) == 0) {
+            continue;
+        }
         if (NeedNewLine(child, offset, columnNum, sizeType)) {
             rowPosition.SetY(rowPosition.GetY() + rowHeight + getterInDouble.second);
             rowHeight = 0.0;
@@ -114,8 +117,8 @@ void RenderGridRow::PerformLayout()
         if (component->GetDirection() == V2::GridRowDirection::RowReverse) {
             position.SetX(lastLength -
                 ((offset + GetRelativeOffset(child, sizeType) + GetGridColSpan(child, sizeType)) * childWidthLimit +
-                ((offset + GetRelativeOffset(child, sizeType)) == 0 ? 0 : offset + GetRelativeOffset(child, sizeType)) *
-                    getterInDouble.first));
+                ((offset + GetRelativeOffset(child, sizeType) + GetGridColSpan(child, sizeType)) - 1)
+                 * getterInDouble.first));
         } else if (component->GetDirection() == V2::GridRowDirection::Row) {
             position.SetX(
                 (offset + GetRelativeOffset(child, sizeType)) * childWidthLimit +
