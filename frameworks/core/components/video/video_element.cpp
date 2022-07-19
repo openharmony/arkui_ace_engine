@@ -310,10 +310,8 @@ void VideoElement::PreparePlayer()
         return;
     }
 
-    if (mediaPlayer_->Reset() != 0) {
-        LOGE("Player Reset failed");
-        return;
-    }
+    (void)mediaPlayer_->Reset();
+
     std::string filePath = src_;
     LOGI("filePath : %{private}s", filePath.c_str());
 
