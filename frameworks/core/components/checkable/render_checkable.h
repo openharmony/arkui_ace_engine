@@ -71,7 +71,7 @@ public:
         onChange_ = value;
     }
 
-    bool Isdisable()
+    bool IsDisable()
     {
         return disabled_;
     }

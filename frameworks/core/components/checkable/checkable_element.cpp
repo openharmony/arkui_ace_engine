@@ -47,7 +47,7 @@ void CheckableElement::Update()
 void CheckableElement::OnClick()
 {
     auto renderCheckable = AceType::DynamicCast<RenderCheckable>(renderNode_);
-    if (!renderCheckable || renderCheckable->Isdisable()) {
+    if (!renderCheckable || renderCheckable->IsDisable()) {
         return;
     }
     renderCheckable->HandleClick();
@@ -64,6 +64,29 @@ void CheckableElement::OnBlur()
 {
     if (renderNode_ != nullptr) {
         renderNode_->ChangeStatus(RenderStatus::BLUR);
+    }
+}
+
+bool CheckableElement::OnKeyEvent(const KeyEvent& keyEvent)
+{
+    auto renderCheckable = AceType::DynamicCast<RenderCheckable>(renderNode_);
+    if (!renderCheckable || renderCheckable->IsDisable()) {
+        return false;
+    }
+
+    if (keyEvent.action != KeyAction::DOWN) {
+        return false;
+    }
+
+    switch (keyEvent.code) {
+        case KeyCode::KEY_ENTER:
+        case KeyCode::KEY_NUMPAD_ENTER:
+        case KeyCode::KEY_DPAD_CENTER:
+        case KeyCode::KEY_SPACE:
+            renderCheckable->HandleClick();
+            return true;
+        default:
+            return false;
     }
 }
 
