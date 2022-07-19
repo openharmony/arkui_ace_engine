@@ -470,13 +470,17 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
 template<typename C>
 panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
+    if (binding == nullptr) {
+        LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
+        return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
+    }
     LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
     auto fnPtr = static_cast<StaticFunctionBinding<void, const JSCallbackInfo&>*>(binding)->Get();
     JsiCallbackInfo info(runtimeCallInfo);
     fnPtr(info);
-    EcmaVM* vm = runtimeCallInfo->GetVM();
     std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal = info.GetReturnValue();
     auto jsVal = std::get_if<panda::CopyableGlobal<panda::JSValueRef>>(&retVal);
     if (jsVal) {
