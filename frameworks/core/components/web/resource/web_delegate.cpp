@@ -191,15 +191,15 @@ void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result)
 WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
+    if (nweb_) {
+        nweb_->OnDestroy();
+    }
 }
 
 void WebDelegate::ReleasePlatformResource()
 {
-    auto delegate = WeakClaim(this).Upgrade();
-    if (delegate) {
-        delegate->Stop();
-        delegate->Release();
-    }
+    Stop();
+    Release();
 }
 
 void WebGeolocationOhos::Invoke(const std::string &origin, const bool& allow, const bool& retain)
@@ -488,13 +488,14 @@ bool WebDelegate::LoadDataWithRichText()
         return false;
     }
 
-    if (webComponent_ == nullptr) {
+    auto webCom = webComponent_.Upgrade();
+    if (webCom == nullptr) {
         return false;
     }
-    if (webComponent_->GetData().empty()) {
+    if (webCom->GetData().empty()) {
         return false;
     }
-    const std::string& data = webComponent_->GetData();
+    const std::string& data = webCom->GetData();
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), data]() {
             auto delegate = weak.Upgrade();
@@ -621,8 +622,9 @@ void WebDelegate::RequestFocus()
             if (!delegate) {
                 return;
             }
-            if (delegate->webComponent_) {
-                delegate->webComponent_->RequestFocus();
+            auto webCom = delegate->webComponent_.Upgrade();
+            if (webCom) {
+                webCom->RequestFocus();
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -759,7 +761,7 @@ void WebDelegate::CreatePluginResource(
 {
     state_ = State::CREATING;
 
-    auto webCom = webComponent_;
+    auto webCom = webComponent_.Upgrade();
     if (!webCom) {
         LOGI("webCom is null");
         state_ = State::CREATEFAILED;
@@ -785,7 +787,7 @@ void WebDelegate::CreatePluginResource(
             LOGI("webDelegate is null!");
             return;
         }
-        auto webCom = webDelegate->webComponent_;
+        auto webCom = webDelegate->webComponent_.Upgrade();
         if (!webCom) {
             LOGI("webCom is null!");
             webDelegate->OnError(NTC_ERROR, "fail to call WebDelegate::SetSrc PostTask");
@@ -836,7 +838,7 @@ void WebDelegate::CreatePluginResource(
 
 void WebDelegate::InitWebEvent()
 {
-    auto webCom = webComponent_;
+    auto webCom = webComponent_.Upgrade();
     if (!webCom) {
         state_ = State::CREATEFAILED;
         OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
@@ -904,7 +906,7 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
         return;
     }
 
-    auto webCom = webComponent_;
+    auto webCom = webComponent_.Upgrade();
     if (!webCom) {
         state_ = State::CREATEFAILED;
         OnError(NTC_ERROR, "fail to call WebDelegate::Create due to webComponent is null");
@@ -933,33 +935,33 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
         RegisterOHOSWebEventAndMethord();
     } else {
         onPageFinishedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetPageFinishedEventId(), pipelineContext);
+            webCom->GetPageFinishedEventId(), pipelineContext);
         onPageStartedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetPageStartedEventId(), pipelineContext);
+            webCom->GetPageStartedEventId(), pipelineContext);
         onProgressChangeV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetProgressChangeEventId(), pipelineContext);
+            webCom->GetProgressChangeEventId(), pipelineContext);
         onTitleReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetTitleReceiveEventId(), pipelineContext);
+            webCom->GetTitleReceiveEventId(), pipelineContext);
         onGeolocationHideV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetGeolocationHideEventId(), pipelineContext);
+            webCom->GetGeolocationHideEventId(), pipelineContext);
         onGeolocationShowV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetGeolocationShowEventId(), pipelineContext);
+            webCom->GetGeolocationShowEventId(), pipelineContext);
         onRequestFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetRequestFocusEventId(), pipelineContext);
+            webCom->GetRequestFocusEventId(), pipelineContext);
         onErrorReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetPageErrorEventId(), pipelineContext);
+            webCom->GetPageErrorEventId(), pipelineContext);
         onHttpErrorReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetHttpErrorEventId(), pipelineContext);
+            webCom->GetHttpErrorEventId(), pipelineContext);
         onDownloadStartV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetDownloadStartEventId(), pipelineContext);
+            webCom->GetDownloadStartEventId(), pipelineContext);
         onRenderExitedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetRenderExitedId(), pipelineContext);
+            webCom->GetRenderExitedId(), pipelineContext);
         onRefreshAccessedHistoryV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetRefreshAccessedHistoryId(), pipelineContext);
+            webCom->GetRefreshAccessedHistoryId(), pipelineContext);
         onResourceLoadV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetResourceLoadId(), pipelineContext);
+            webCom->GetResourceLoadId(), pipelineContext);
         onScaleChangeV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webComponent_->GetScaleChangeId(), pipelineContext);
+            webCom->GetScaleChangeId(), pipelineContext);
     }
 }
 
@@ -975,7 +977,10 @@ void WebDelegate::RegisterOHOSWebEventAndMethord()
     };
     WebClient::GetInstance().RegisterReloadCallback(reloadCallback);
 
-    auto webCom = webComponent_;
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return;
+    }
     if (!webCom->GetPageStartedEventId().IsEmpty()) {
         onPageStarted_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageStartedEventId(), context_);
     }
@@ -989,7 +994,11 @@ void WebDelegate::RegisterOHOSWebEventAndMethord()
 
 void WebDelegate::SetWebCallBack()
 {
-    auto webController = webComponent_->GetController();
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return;
+    }
+    auto webController = webCom->GetController();
     if (webController) {
         auto context = context_.Upgrade();
         if (!context) {
@@ -1296,7 +1305,7 @@ void WebDelegate::InitWebViewWithWindow()
                 LOGE("fail to get webview instance");
                 return;
             }
-            auto component = delegate->webComponent_;
+            auto component = delegate->webComponent_.Upgrade();
             if (!component) {
                 return;
             }
@@ -1363,7 +1372,7 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
                 LOGE("fail to get webview instance");
                 return;
             }
-            auto component = delegate->webComponent_;
+            auto component = delegate->webComponent_.Upgrade();
             if (component == nullptr) {
                 return;
             }
@@ -1712,7 +1721,10 @@ void WebDelegate::LoadUrl()
         [weak = WeakClaim(this)] () {
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
-                delegate->nweb_->Load(delegate->webComponent_->GetSrc());
+                auto webCom = delegate->webComponent_.Upgrade();
+                if (webCom) {
+                    delegate->nweb_->Load(webCom->GetSrc());
+                }
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -2039,18 +2051,30 @@ void WebDelegate::OnGeolocationPermissionsShowPrompt(const std::string& origin,
 
 bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message)
 {
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return false;
+    }
     auto param = std::make_shared<LoadWebConsoleLogEvent>(AceType::MakeRefPtr<ConsoleLogOhos>(message));
-    return webComponent_->OnConsole(param.get());
+    return webCom->OnConsole(param.get());
 }
 
 bool WebDelegate::OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType)
 {
-    return webComponent_->OnCommonDialog(info, dialogEventType);
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return false;
+    }
+    return webCom->OnCommonDialog(info, dialogEventType);
 }
 
 bool WebDelegate::OnHttpAuthRequest(const BaseEventInfo* info)
 {
-    return webComponent_->OnHttpAuthRequest(info);
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return false;
+    }
+    return webCom->OnHttpAuthRequest(info);
 }
 
 void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,
@@ -2110,18 +2134,20 @@ void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResource
 
 bool WebDelegate::IsEmptyOnInterceptRequest()
 {
-    if (webComponent_ == nullptr) {
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
         return true;
     }
-    return webComponent_->IsEmptyOnInterceptRequest();
+    return webCom->IsEmptyOnInterceptRequest();
 }
 
 RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const BaseEventInfo* info)
 {
-    if (webComponent_ == nullptr) {
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
         return nullptr;
     }
-    return webComponent_->OnInterceptRequest(info);
+    return webCom->OnInterceptRequest(info);
 }
 
 void WebDelegate::OnRequestFocus()
@@ -2191,13 +2217,21 @@ void WebDelegate::OnRouterPush(const std::string& param)
 
 bool WebDelegate::OnFileSelectorShow(const BaseEventInfo* info)
 {
-    return webComponent_->OnFileSelectorShow(info);
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return false;
+    }
+    return webCom->OnFileSelectorShow(info);
 }
 
 bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
 {
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return false;
+    }
     auto param = std::make_shared<UrlLoadInterceptEvent>(data);
-    return webComponent_->OnUrlLoadIntercept(param.get());
+    return webCom->OnUrlLoadIntercept(param.get());
 }
 
 void WebDelegate::OnResourceLoad(const std::string& url)
