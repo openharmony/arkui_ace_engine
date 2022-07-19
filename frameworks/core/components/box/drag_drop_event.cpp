@@ -44,6 +44,7 @@ void DragDropEvent::CreateDragDropRecognizer(const WeakPtr<PipelineContext>& pip
 
     auto longPressRecognizer = AceType::MakeRefPtr<OHOS::Ace::LongPressRecognizer>(
         context, DEFAULT_DURATION, DEFAULT_FINGERS, false, true, false);
+    longPressRecognizer->SetOnAction(std::bind(&DragDropEvent::LongPressOnAction, this, std::placeholders::_1));
     PanDirection panDirection;
     auto panRecognizer =
         AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(context, DEFAULT_FINGERS, panDirection, DEFAULT_DISTANCE);
@@ -55,6 +56,11 @@ void DragDropEvent::CreateDragDropRecognizer(const WeakPtr<PipelineContext>& pip
     std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer, panRecognizer };
     dragDropGesture_ = AceType::MakeRefPtr<OHOS::Ace::SequencedRecognizer>(pipelineContext, recognizers);
     dragDropGesture_->SetIsExternalGesture(true);
+}
+
+void DragDropEvent::LongPressOnAction(const GestureEvent& info)
+{
+    startPoint_ = info.GetGlobalPoint();
 }
 
 RefPtr<DragDropEvent> DragDropEvent::FindDragDropNode(const RefPtr<PipelineContext>& context, const GestureEvent& info)
