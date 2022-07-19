@@ -111,14 +111,20 @@ public:
             if (!style || !theme) {
                 return;
             }
-            theme->fontColor_ = style->GetAttr<Color>(THEME_ATTR_COLOR_SPINNER_ICON, theme->fontColor_);
-            theme->clickedColor_ = style->GetAttr<Color>(THEME_ATTR_COLOR_CLICK_EFFECT, theme->clickedColor_);
-            theme->selectedColor_ = style->GetAttr<Color>(THEME_ATTR_COLOR_CONTROL_ACTIVE, theme->selectedColor_);
-            theme->selectedColorText_ = style->GetAttr<Color>(
-                THEME_ATTR_COLOR_TEXT_PRIMARY_ACTIVATED, theme->selectedColorText_);
-            theme->hoverColor_ = style->GetAttr<Color>(THEME_ATTR_COLOR_HOVER, theme->hoverColor_);
-            theme->backgroundColor_ = style->GetAttr<Color>(THEME_ATTR_COLOR_DIALOG_BG, theme->backgroundColor_);
-            theme->lineColor_ = style->GetAttr<Color>(THEME_ATTR_COLOR_LIST_DIVIDER, theme->lineColor_);
+            auto pattern = style->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SELECT, nullptr);
+            if (!pattern) {
+                LOGE("Pattern of select is null, please check!");
+                return;
+            }
+
+            theme->fontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_);
+            theme->clickedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_CLICKED, theme->clickedColor_);
+            theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, theme->selectedColor_);
+            theme->selectedColorText_ = pattern->GetAttr<Color>(
+                PATTERN_TEXT_COLOR_SELECTED, theme->selectedColorText_);
+            theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, theme->hoverColor_);
+            theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
+            theme->lineColor_ = pattern->GetAttr<Color>("line_color", theme->lineColor_);
         }
     };
 

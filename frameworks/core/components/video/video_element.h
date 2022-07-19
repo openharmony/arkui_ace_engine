@@ -28,7 +28,7 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "core/components/video/media_player_callback.h"
-#include "foundation/multimedia/media_standard/interfaces/inner_api/native/player.h"
+#include "foundation/multimedia/player_framework/interfaces/inner_api/native/player.h"
 #endif
 
 namespace OHOS::Ace {
@@ -80,6 +80,7 @@ protected:
 
 private:
     void OnError(const std::string& errorId, const std::string& param);
+    void OnResolutionChange() const;
     void OnPrepared(
         uint32_t width, uint32_t height, bool isPlaying, uint32_t duration, uint32_t currentPos, bool needFireEvent);
     void OnPlayerStatus(PlaybackStatus status);
@@ -152,6 +153,7 @@ private:
     std::string currentPosText_;
     TextDirection textDirection_ = TextDirection::LTR;
     float speed_ = -1.0f;
+    int32_t focusChangeCallbackId_ = 0;
 
     EventMarker shieldId_; // Shield the event on the control bar.
     EventMarker startBtnClickId_;

@@ -82,19 +82,25 @@ public:
                 LOGI("progress theme style is null");
                 return;
             }
-            theme->trackBgColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_COMPONENT_NORMAL, Color::RED);
-            theme->trackSelectedColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_EMPHASIZE, Color::RED);
-            theme->trackCachedColor_ =
-                themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_EMPHASIZE, Color::RED).BlendOpacity(0.4);
-            theme->loadingColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_PROGRESS, Color::RED).BlendOpacity(0.6);
-            theme->progressColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_PROGRESS, Color::RED);
-            theme->moonFrontColor_ =
-                themeStyle->GetAttr<Color>(TEXT_OVERLAY_HANDLE_COLOR, Color::RED)
-                    .BlendOpacity(themeStyle->GetAttr<double>(THEME_ATTR_HIGHLIGHT_BACKGROUND_ALPHA, 1.0));
-            theme->moonTrackBackgroundColor_ =
-                themeStyle->GetAttr<Color>(TEXT_OVERLAY_HANDLE_COLOR, Color::RED)
-                    .BlendOpacity(themeStyle->GetAttr<double>(THEME_ATTR_HIGHLIGHT_BACKGROUND_ALPHA, 1.0))
-                    .BlendOpacity(themeStyle->GetAttr<double>(THEME_ATTR_DISABLED_ALPHA, 1.0));
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("progress_pattern", nullptr);
+            if (!pattern) {
+                LOGE("Pattern of progress is null, please check!");
+                return;
+            }
+            const double defaultCachedAlpha = 0.4;
+            const double defaultLoadBGAlpha = 0.6;
+            theme->trackBgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::RED);
+            theme->trackSelectedColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR, Color::RED);
+            theme->trackCachedColor_ = theme->trackSelectedColor_
+                .BlendOpacity(pattern->GetAttr<double>("fg_color_cached_alpha", defaultCachedAlpha));
+            theme->progressColor_ = pattern->GetAttr<Color>("fg_progress_color", Color::RED);
+            theme->loadingColor_ = theme->progressColor_
+                .BlendOpacity(pattern->GetAttr<double>("loading_progress_bg_color_alpha", defaultLoadBGAlpha));
+            theme->moonFrontColor_ = pattern->GetAttr<Color>("moon_progress_fg_color", Color::RED)
+                .BlendOpacity(pattern->GetAttr<double>("moon_progress_fg_color_alpha", 1.0));
+            theme->moonTrackBackgroundColor_ = pattern->GetAttr<Color>("moon_progress_bg_color", Color::RED)
+                .BlendOpacity(pattern->GetAttr<double>("moon_progress_bg_color_alpha", 1.0))
+                .BlendOpacity(pattern->GetAttr<double>("moon_progress_bg_color_alpha_ex", 1.0));
         }
     };
 

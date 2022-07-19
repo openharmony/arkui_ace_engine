@@ -74,6 +74,9 @@ public:
 
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
+    // Set UIContent callback for custom window animation
+    void SetNextFrameLayoutCallback(std::function<void()>&& callback) override;
+
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info);

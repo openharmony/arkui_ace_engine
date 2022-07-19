@@ -63,19 +63,17 @@ public:
             if (!themeStyle) {
                 return theme;
             }
-            theme->digitalIndicatorTextStyle_.SetFontSize(
-                themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_BODY2, 0.0_vp));
             auto swiperPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_SWIPER, nullptr);
             if (!swiperPattern) {
-                LOGE("Pattern of swiper is null, please check!");
+                LOGW("find pattern of swiper fail");
                 return theme;
             }
-            theme->color_ = swiperPattern->GetAttr<Color>(INDICATOR_COLOR_UNSELECTED, Color::RED);
-            theme->hotZoneColor_ = swiperPattern->GetAttr<Color>(INDICATOR_MASK_COLOR, Color::RED);
-            theme->indicatorTextFocusColor_ = swiperPattern->GetAttr<Color>(INDICATOR_TEXT_COLOR_FOCUS, Color::RED);
+            theme->color_ = swiperPattern->GetAttr<Color>("indicator_color", Color::RED);
+            theme->hotZoneColor_ = swiperPattern->GetAttr<Color>("indicator_hotzone_color", Color::RED);
+            theme->indicatorTextFocusColor_ = swiperPattern->GetAttr<Color>("indicator_text_color_focused", Color::RED);
             theme->digitalIndicatorTextStyle_.SetTextColor(
-                swiperPattern->GetAttr<Color>(INDICATOR_TEXT_COLOR, Color::RED));
-            theme->selectedColor_ = swiperPattern->GetAttr<Color>(INDICATOR_COLOR_SELECTED, Color::RED);
+                swiperPattern->GetAttr<Color>("indicator_text_color", Color::RED));
+            theme->selectedColor_ = swiperPattern->GetAttr<Color>("indicator_color_selected", Color::RED);
             return theme;
         }
     };

@@ -246,6 +246,21 @@ public:
      */
     static void JSBind();
 
+    static const RefPtr<PipelineContext> GetPipelineContext()
+    {
+        auto container = Container::Current();
+        if (!container) {
+            LOGW("container is null");
+            return nullptr;
+        }
+        auto pipelineContext = container->GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("pipelineContext is null!");
+            return nullptr;
+        }
+        return pipelineContext;
+    }
+
 protected:
     /**
      * box properties setter

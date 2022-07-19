@@ -24,6 +24,15 @@
 
 namespace OHOS::Ace::PartUpd {
 
+class ForEachElementLookup {
+public:
+    static std::list<std::string> GetIdArray(int32_t elmtId)
+    {
+        // Full implemenation to follow in next updates
+        return std::list<std::string>();
+    }
+};
+
 // ComposedElement just maintain a child element may have render node.
 class ACE_EXPORT ForEachElement : public MultiComposedElement {
     DECLARE_ACE_TYPE(PartUpd::ForEachElement, MultiComposedElement);

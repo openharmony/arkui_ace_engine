@@ -79,9 +79,9 @@ public:
             if (!toastPattern) {
                 return;
             }
-            theme->textStyle_.SetFontSize(toastPattern->GetAttr<Dimension>(TOAST_FONT_SIZE, 0.0_vp));
-            theme->textStyle_.SetTextColor(toastPattern->GetAttr<Color>(TOAST_TEXT_COLOR, Color()));
-            theme->backgroundColor_ = toastPattern->GetAttr<Color>(TOAST_BACKGROUND_COLOR, Color());
+            theme->textStyle_.SetFontSize(toastPattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_vp));
+            theme->textStyle_.SetTextColor(toastPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
+            theme->backgroundColor_ = toastPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
         }
     };
 

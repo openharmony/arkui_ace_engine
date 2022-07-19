@@ -75,16 +75,19 @@ public:
             theme->disabledAlpha_ = themeConstants->GetDouble(THEME_STEPPER_DISABLED_ALPHA);
             auto themeStyle = themeConstants->GetThemeStyle();
             if (themeStyle) {
-                theme->textStyle_.SetTextColor(themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY, Color::RED));
-                theme->radius_ = themeStyle->GetAttr<Dimension>(THEME_ATTR_CLICK_CORNER_RADIUS, 0.0_vp);
-                theme->buttonPressedColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_CLICK_EFFECT, Color::RED);
-                theme->mouseHoverColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_HOVER, Color::RED);
-                theme->defaultPaddingStart_ = themeStyle->GetAttr<Dimension>(THEME_ATTR_DEFAULT_PADDING_START, 0.0_vp);
-                theme->defaultPaddingEnd_ = themeStyle->GetAttr<Dimension>(THEME_ATTR_DEFAULT_PADDING_END, 0.0_vp);
-                theme->arrowColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_PRIMARY, Color::RED);
-                theme->progressColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_PROGRESS, Color::RED);
-                theme->disabledColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY, Color::RED);
-                theme->disabledAlpha_ = themeStyle->GetAttr<double>(THEME_ATTR_DISABLED_ALPHA, 0.0);
+                auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("stepper_pattern", nullptr);
+                if (pattern) {
+                    theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::RED));
+                    theme->radius_ = pattern->GetAttr<Dimension>("border_radius", 0.0_vp);
+                    theme->buttonPressedColor_ = pattern->GetAttr<Color>("button_bg_color_pressed", Color::RED);
+                    theme->mouseHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color::RED);
+                    theme->defaultPaddingStart_ = pattern->GetAttr<Dimension>("padding_left", 0.0_vp);
+                    theme->defaultPaddingEnd_ = pattern->GetAttr<Dimension>("padding_right", 0.0_vp);
+                    theme->arrowColor_ = pattern->GetAttr<Color>("arrorw_color", Color::RED);
+                    theme->progressColor_ = pattern->GetAttr<Color>("progress_color", Color::RED);
+                    theme->disabledColor_ = pattern->GetAttr<Color>("button_bg_color_disabled", Color::RED);
+                    theme->disabledAlpha_ = pattern->GetAttr<double>("button_bg_color_disabled_alpha", 0.0);
+                }
             }
             return theme;
         }

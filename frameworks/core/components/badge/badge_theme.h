@@ -55,9 +55,14 @@ public:
             if (!themeStyle) {
                 return;
             }
-            theme->badgeColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_BADGE_RED, Color::BLACK);
-            theme->badgeFontSize_ = themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_CAPTION, 0.0_vp);
-            theme->badgeTextColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY_INVERSE, Color::BLACK);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_BADGE, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of badge fail");
+                return;
+            }
+            theme->badgeColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::BLACK);
+            theme->badgeFontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_vp);
+            theme->badgeTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK);
         }
     };
 

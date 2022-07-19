@@ -34,10 +34,10 @@ constexpr double MAX_FRICTION = 0.766;
 const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
 #ifndef WEARABLE_PRODUCT
-constexpr double FRICTION = 1.0;
+constexpr double FRICTION = 0.6;
 constexpr double VELOCITY_SCALE = 1.0;
-constexpr double MAX_VELOCITY = 8000.0;
-constexpr double MIN_VELOCITY = -8000.0;
+constexpr double MAX_VELOCITY = 800000.0;
+constexpr double MIN_VELOCITY = -800000.0;
 constexpr double ADJUSTABLE_VELOCITY = 3000.0;
 #else
 constexpr double DISTANCE_EPSILON = 1.0;

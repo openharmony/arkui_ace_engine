@@ -236,37 +236,46 @@ public:
                 themeConstants->GetDimension(THEME_CALENDAR_SCHEDULE_MARKER_RADIUS);
             theme->cardCalendarTheme_.boundaryColOffset =
                 themeConstants->GetDimension(THEME_CARD_CALENDAR_BOUNDARY_COL_OFFSET);
-
-            auto themeStyle = themeConstants->GetThemeStyle();
-            if (themeStyle) {
-                theme->cardCalendarTheme_.focusedAreaBackgroundColor =
-                    themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_ACCENT, Color::BLUE);
-                theme->cardCalendarTheme_.dayColor =
-                    themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY, Color::BLACK);
-                theme->cardCalendarTheme_.weekColor =
-                    themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY, Color::BLACK);
-                theme->cardCalendarTheme_.nonCurrentMonthDayColor =
-                    themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_TERTIARY, Color::BLACK);
-                theme->cardCalendarTheme_.weekendDayColor =
-                    themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_SECONDARY, Color::BLACK);
-                theme->cardCalendarTheme_.weekendLunarColor =
-                    themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_SECONDARY, Color::BLACK);
-                theme->cardCalendarTheme_.nonCurrentMonthLunarColor =
-                    themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_FOURTH, Color::BLACK);
-                theme->cardCalendarTheme_.todayColor =
-                    themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY_INVERSE, Color::WHITE);
-                theme->cardCalendarTheme_.todayLunarColor =
-                    themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY_INVERSE, Color::WHITE);
-                theme->cardCalendarTheme_.lunarColor =
-                    themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_SECONDARY, Color::BLACK);
-                theme->cardCalendarTheme_.markLunarColor =
-                    themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_TEXT_PRIMARY_ACTIVATED, Color::BLUE);
-                theme->cardCalendarTheme_.titleTextColor =
-                    themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_PRIMARY, Color::BLACK);
-                theme->cardCalendarTheme_.clickEffectColor =
-                    themeStyle->GetAttr<Color>(TEXTFIELD_PRESS_COLOR, Color::TRANSPARENT);
-            }
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
+        }
+    private:
+        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<CalendarTheme>& theme) const
+        {
+            if (!themeStyle) {
+                return;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_CALENDAR, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of calendar fail");
+                return;
+            }
+            theme->cardCalendarTheme_.focusedAreaBackgroundColor =
+                pattern->GetAttr<Color>("card_area_bg_color_focused", Color::BLUE);
+            theme->cardCalendarTheme_.dayColor =
+                pattern->GetAttr<Color>("card_day_color", Color::BLACK);
+            theme->cardCalendarTheme_.weekColor =
+                pattern->GetAttr<Color>("card_week_color", Color::BLACK);
+            theme->cardCalendarTheme_.nonCurrentMonthDayColor =
+                pattern->GetAttr<Color>("card_uncurrent_month_day_color", Color::BLACK);
+            theme->cardCalendarTheme_.weekendDayColor =
+                pattern->GetAttr<Color>("card_weekend_color", Color::BLACK);
+            theme->cardCalendarTheme_.weekendLunarColor =
+                pattern->GetAttr<Color>("card_weekend_lunar_color", Color::BLACK);
+            theme->cardCalendarTheme_.nonCurrentMonthLunarColor =
+                pattern->GetAttr<Color>("card_uncurrent_month_lunar_color", Color::BLACK);
+            theme->cardCalendarTheme_.todayColor =
+                pattern->GetAttr<Color>("card_today_color", Color::WHITE);
+            theme->cardCalendarTheme_.todayLunarColor =
+                pattern->GetAttr<Color>("card_today_lunar_color", Color::WHITE);
+            theme->cardCalendarTheme_.lunarColor =
+                pattern->GetAttr<Color>("card_lunar_color", Color::BLACK);
+            theme->cardCalendarTheme_.markLunarColor =
+                pattern->GetAttr<Color>("card_mark_lunar_color", Color::BLUE);
+            theme->cardCalendarTheme_.titleTextColor =
+                pattern->GetAttr<Color>("card_title_text_color", Color::BLACK);
+            theme->cardCalendarTheme_.clickEffectColor =
+                pattern->GetAttr<Color>("card_switch_button_bg_color_clicked", Color::TRANSPARENT);
         }
     };
 

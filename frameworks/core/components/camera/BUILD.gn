@@ -56,7 +56,7 @@ build_component("camera") {
 
     external_deps = [
       "ipc:ipc_core",
-      "multimedia_media_standard:media_client",
+      "multimedia_player_framework:media_client",
     ]
   } else {
     sources += [ "large_system/camera.cpp" ]

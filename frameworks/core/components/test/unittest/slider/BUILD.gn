@@ -63,7 +63,7 @@ group("unittest") {
   testonly = true
 
   deps = [
-    # ":RenderSliderTest",
-    # ":SliderCreatorTest",
+    ":RenderSliderTest",
+    ":SliderCreatorTest",
   ]
 }

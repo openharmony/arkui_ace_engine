@@ -1146,8 +1146,10 @@ void JsiDeclarativeEngine::FireExternalEvent(
         }
         auto bridge = weak.Upgrade();
         if (bridge) {
+#ifdef XCOMPONENT_SUPPORTED
             pool->NativeXComponentInit(
                 bridge->nativeXComponent_, AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
+#endif
         }
     };
 

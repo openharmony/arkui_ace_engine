@@ -196,22 +196,24 @@ public:
                 LOGE("Pattern of checkbox is null, please check!");
                 return;
             }
-            theme->pointColor_ = checkboxPattern->GetAttr<Color>(FG_COLOR_CHECKED, Color::RED);
-            theme->activeColor_ = checkboxPattern->GetAttr<Color>(BG_COLOR_CHECKED, Color::RED);
-            theme->inactiveColor_ = checkboxPattern->GetAttr<Color>(BG_COLOR_UNCHECKED, Color::RED);
-            theme->focusColor_ = checkboxPattern->GetAttr<Color>(BG_COLOR_UNCHECKED, Color::RED);
-            theme->borderRadius_ = checkboxPattern->GetAttr<Dimension>(BORDER_RADIUS, 0.0_vp);
-            theme->hoverColor_ = checkboxPattern->GetAttr<Color>(HOVER_EFFECT_COLOR, Color::RED);
-            theme->inactivePointColor_ = checkboxPattern->GetAttr<Color>(FG_COLOR_UNCHECKED, Color::RED);
-            theme->hoverRadius_ = checkboxPattern->GetAttr<Dimension>(HOVER_EFFECT_RADIUS, 0.0_vp);
+            theme->pointColor_ = checkboxPattern->GetAttr<Color>("fg_color_checked", Color::RED);
+            theme->activeColor_ = checkboxPattern->GetAttr<Color>("bg_color_checked", Color::RED);
+            theme->inactiveColor_ = checkboxPattern->GetAttr<Color>("bg_border_color_unchecked", Color::RED);
+            theme->focusColor_ = checkboxPattern->GetAttr<Color>("focus_border_color", Color::RED);
+            theme->borderRadius_ = checkboxPattern->GetAttr<Dimension>("bg_border_radius", 0.0_vp);
+            theme->hoverColor_ = checkboxPattern->GetAttr<Color>("hover_border_color", Color::RED);
+            theme->inactivePointColor_ = checkboxPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
+            theme->hoverRadius_ = checkboxPattern->GetAttr<Dimension>("hover_border_radius", 0.0_vp);
+
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
-            theme->width_ = checkboxPattern->GetAttr<Dimension>(CHECKBOX_WIDTH, 26.0_vp);
+            // width/height/borderRadius not exist in theme
+            theme->width_ = checkboxPattern->GetAttr<Dimension>("width", 26.0_vp);
             theme->height_ = theme->width_;
-            theme->borderRadius_ = checkboxPattern->GetAttr<Dimension>(CHECKBOX_BORDER_RADIUS, 4.0_vp);
+            theme->borderRadius_ = checkboxPattern->GetAttr<Dimension>("hover_border_radius", 4.0_vp);
             theme->hotZoneHorizontalPadding_ =
-                checkboxPattern->GetAttr<Dimension>(CHECKBOX_PADDING, 11.0_vp);
+                checkboxPattern->GetAttr<Dimension>("hotzone_padding_horizontal", 11.0_vp);
             theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
         }
     };
@@ -281,13 +283,14 @@ public:
                 LOGE("Pattern of switch is null, please check!");
                 return;
             }
-            theme->pointColor_ = switchPattern->GetAttr<Color>(FG_COLOR_CHECKED, Color::RED);
-            theme->activeColor_ = switchPattern->GetAttr<Color>(BG_COLOR_CHECKED, Color::RED);
-            theme->inactiveColor_ = switchPattern->GetAttr<Color>(BG_COLOR_UNCHECKED, Color::RED);
-            theme->focusColor_ = switchPattern->GetAttr<Color>(BG_COLOR_UNCHECKED, Color::RED);
-            theme->hoverColor_ = switchPattern->GetAttr<Color>(HOVER_EFFECT_COLOR, Color::RED);
-            theme->hoverRadius_ = switchPattern->GetAttr<Dimension>(HOVER_EFFECT_RADIUS, 0.0_vp);
-            theme->inactivePointColor_ = switchPattern->GetAttr<Color>(FG_COLOR_UNCHECKED, Color::RED);
+            theme->pointColor_ = switchPattern->GetAttr<Color>("fg_color_checked", Color::RED);
+            theme->activeColor_ = switchPattern->GetAttr<Color>("bg_color_checked", Color::RED);
+            theme->inactiveColor_ = switchPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
+            theme->focusColor_ = switchPattern->GetAttr<Color>("focus_border_color", Color::RED);
+            theme->hoverColor_ = switchPattern->GetAttr<Color>("hover_border_color", Color::RED);
+            theme->hoverRadius_ = switchPattern->GetAttr<Dimension>("hover_border_radius", 0.0_vp);
+            theme->inactivePointColor_ = switchPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
+
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
@@ -345,15 +348,15 @@ public:
             }
             auto radioPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_RADIO, nullptr);
             if (!radioPattern) {
-                LOGE("Pattern of radio is null, please check!");
+                LOGW("find pattern of radio fail");
                 return;
             }
-            theme->pointColor_ = radioPattern->GetAttr<Color>(FG_COLOR_CHECKED, Color::RED);
-            theme->activeColor_ = radioPattern->GetAttr<Color>(BG_COLOR_CHECKED, Color::RED);
-            theme->inactiveColor_ = radioPattern->GetAttr<Color>(BG_COLOR_UNCHECKED, Color::RED);
-            theme->inactivePointColor_ = radioPattern->GetAttr<Color>(FG_COLOR_UNCHECKED, Color::RED);
-            theme->focusColor_ = radioPattern->GetAttr<Color>(BG_COLOR_UNCHECKED, Color::RED);
-            theme->hoverColor_ = radioPattern->GetAttr<Color>(HOVER_EFFECT_COLOR, Color::RED);
+            theme->pointColor_ = radioPattern->GetAttr<Color>("fg_color_checked", Color::RED);
+            theme->activeColor_ = radioPattern->GetAttr<Color>("bg_color_checked", Color::RED);
+            theme->inactiveColor_ = radioPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
+            theme->inactivePointColor_ = radioPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
+            theme->focusColor_ = radioPattern->GetAttr<Color>("focus_border_color", Color::RED);
+            theme->hoverColor_ = radioPattern->GetAttr<Color>("hover_border_color", Color::RED);
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }

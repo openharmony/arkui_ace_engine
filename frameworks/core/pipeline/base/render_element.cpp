@@ -42,7 +42,7 @@ void RenderElement::Prepare(const WeakPtr<Element>& parent)
         renderNode_ = CreateRenderNode();
     }
     if (renderNode_) {
-        renderNode_->SyncRSNodeBoundary(component_->IsHeadComponent(), component_->IsTailComponent());
+        renderNode_->SyncRSNodeBoundary(component_->IsHeadComponent(), component_->IsTailComponent(), component_);
         SetAccessibilityNode(parent);
         renderNode_->Attach(context_);
     }
@@ -209,6 +209,7 @@ void RenderElement::Update()
 {
     if (renderNode_ != nullptr) {
         UpdateAccessibilityNode();
+        renderNode_->ProcessExternalRSNode(component_);
         renderNode_->UpdateAll(component_);
         if (component_ && nodeMounted_) {
             SetElementId(component_->GetElementId());

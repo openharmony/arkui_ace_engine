@@ -97,28 +97,29 @@ public:
             }
             auto buttonPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_BUTTON, nullptr);
             if (!buttonPattern) {
+                LOGW("find pattern of button fail");
                 return;
             }
             theme->bgColor_ = buttonPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
-            theme->clickedColor_ = buttonPattern->GetAttr<Color>(BUTTON_CLICK_BLEND_COLOR, Color());
-            theme->disabledColor_ = buttonPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color())
-                .BlendOpacity(themeStyle->GetAttr<double>(THEME_ATTR_DISABLED_ALPHA, 0.0));
-            theme->hoverColor_ = themeStyle->GetAttr<Color>(BUTTON_HOVER_COLOR, Color());
-            theme->borderColor_ = buttonPattern->GetAttr<Color>(BUTTON_BORDER_COLOR, Color());
-            theme->borderWidth_ = buttonPattern->GetAttr<Dimension>(BUTTON_BORDER_WIDTH, 0.0_vp);
-            theme->textStyle_.SetTextColor(buttonPattern->GetAttr<Color>(BUTTON_TEXT_COLOR, Color()));
-            theme->textDisabledColor_ = buttonPattern->GetAttr<Color>(BUTTON_TEXT_COLOR, Color())
-                .BlendOpacity(themeStyle->GetAttr<double>(THEME_ATTR_DISABLED_ALPHA, 0.0));
-            theme->textWaitingColor_ = buttonPattern->GetAttr<Color>(BUTTON_TEXT_COLOR, Color());
-            theme->normalTextColor_ = buttonPattern->GetAttr<Color>(BUTTON_NORMAL_TEXT_COLOR, Color());
-            theme->downloadBackgroundColor_ = themeStyle->GetAttr<Color>(BUTTON_DOWNLOAD_BG_COLOR, Color())
-                .BlendOpacity(themeStyle->GetAttr<double>(THEME_ATTR_FOURTH_CONTENT_ALPHA, 0.0));
-            theme->downloadBorderColor_ = buttonPattern->GetAttr<Color>(BUTTON_DOWNLOAD_BORDER_COLOR, Color())
-                .BlendOpacity(themeStyle->GetAttr<double>(THEME_ATTR_HIGHLIGHT_BACKGROUND_ALPHA, 0.0));
-            theme->downloadProgressColor_ = buttonPattern->GetAttr<Color>(BUTTON_DOWNLOAD_BORDER_COLOR, Color())
-                .BlendOpacity(themeStyle->GetAttr<double>(THEME_ATTR_HIGHLIGHT_BACKGROUND_ALPHA, 0.0));
-            theme->downloadTextColor_ = buttonPattern->GetAttr<Color>(BUTTON_DOWNLOAD_TEXT_COLOR, Color());
-            theme->progressColor_ = buttonPattern->GetAttr<Color>(BUTTON_TEXT_COLOR, Color());
+            theme->clickedColor_ = buttonPattern->GetAttr<Color>("bg_color_clicked_blend", Color());
+            theme->disabledColor_ = theme->bgColor_
+                .BlendOpacity(buttonPattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, 0.0));
+            theme->hoverColor_ = buttonPattern->GetAttr<Color>("bg_color_hovered_blend", Color());
+            theme->borderColor_ = buttonPattern->GetAttr<Color>("border_color", Color());
+            theme->borderWidth_ = buttonPattern->GetAttr<Dimension>("border_width", 0.0_vp);
+            theme->textStyle_.SetTextColor(buttonPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
+            theme->textDisabledColor_ = buttonPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color())
+                .BlendOpacity(buttonPattern->GetAttr<double>("text_color_disabled_alpha", 0.0));
+            theme->textWaitingColor_ = buttonPattern->GetAttr<Color>("waiting_button_text_color", Color());
+            theme->normalTextColor_ = buttonPattern->GetAttr<Color>("normal_text_color", Color());
+            theme->downloadBackgroundColor_ = buttonPattern->GetAttr<Color>("download_button_bg_color", Color())
+                .BlendOpacity(buttonPattern->GetAttr<double>("download_button_bg_color_alpha", 0.0));
+            theme->downloadBorderColor_ = buttonPattern->GetAttr<Color>("download_button_border_color", Color())
+                .BlendOpacity(buttonPattern->GetAttr<double>("download_button_border_color_alpha", 0.0));
+            theme->downloadProgressColor_ = buttonPattern->GetAttr<Color>("download_button_process_color", Color())
+                .BlendOpacity(buttonPattern->GetAttr<double>("download_button_process_color_alpha", 0.0));
+            theme->downloadTextColor_ = buttonPattern->GetAttr<Color>("download_button_text_color", Color());
+            theme->progressColor_ = buttonPattern->GetAttr<Color>("process_button_text_color", Color());
         }
     };
 

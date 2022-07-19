@@ -60,10 +60,15 @@ public:
             if (!themeStyle) {
                 return;
             }
-            theme->textStyle_.SetFontSize(themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_BODY2, 0.0_vp));
-            theme->textStyle_.SetTextColor(themeStyle->GetAttr<Color>(THEME_ATTR_TEXT_COLOR_SECONDARY, Color::BLACK));
-            theme->progressColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_PROGRESS, Color::BLACK);
-            theme->backgroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_BG_COLOR, Color::WHITE);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_REFRESH, nullptr);
+            if (!pattern) {
+                LOGW("find pattern of search fail");
+                return;
+            }
+            theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_vp));
+            theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK));
+            theme->progressColor_ = pattern->GetAttr<Color>("progress_color", Color::BLACK);
+            theme->backgroundColor_ = pattern->GetAttr<Color>("progress_bg_color", Color::WHITE);
         }
     };
 

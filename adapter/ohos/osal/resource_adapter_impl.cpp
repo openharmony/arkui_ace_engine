@@ -33,6 +33,52 @@ void CheckThemeId(int32_t& themeId)
     themeId = OHOS_THEME_ID;
 }
 
+const char* PATTERN_MAP[] = {
+    THEME_PATTERN_BUTTON,
+    THEME_PATTERN_CHECKBOX,
+    THEME_PATTERN_DATA_PANEL,
+    THEME_PATTERN_RADIO,
+    THEME_PATTERN_SWIPER,
+    THEME_PATTERN_SWITCH,
+    THEME_PATTERN_TOOLBAR,
+    THEME_PATTERN_TOGGLE,
+    THEME_PATTERN_TOAST,
+    THEME_PATTERN_DIALOG,
+    THEME_PATTERN_DRAG_BAR,
+    THEME_PATTERN_SEMI_MODAL,
+    // append
+    THEME_PATTERN_BADGE,
+    THEME_PATTERN_CALENDAR,
+    THEME_PATTERN_CAMERA,
+    THEME_PATTERN_CLOCK,
+    THEME_PATTERN_COUNTER,
+    THEME_PATTERN_DIVIDER,
+    THEME_PATTERN_FOCUS_ANIMATION,
+    THEME_PATTERN_GRID,
+    THEME_PATTERN_IMAGE,
+    THEME_PATTERN_LIST,
+    THEME_PATTERN_LIST_ITEM,
+    THEME_PATTERN_MARQUEE,
+    THEME_PATTERN_NAVIGATION_BAR,
+    THEME_PATTERN_PICKER,
+    THEME_PATTERN_PIECE,
+    THEME_PATTERN_POPUP,
+    THEME_PATTERN_PROGRESS,
+    THEME_PATTERN_QRCODE,
+    THEME_PATTERN_RATING,
+    THEME_PATTERN_REFRESH,
+    THEME_PATTERN_SCROLL_BAR,
+    THEME_PATTERN_SEARCH,
+    THEME_PATTERN_SELECT,
+    THEME_PATTERN_SLIDER,
+    THEME_PATTERN_STEPPER,
+    THEME_PATTERN_TAB,
+    THEME_PATTERN_TEXT,
+    THEME_PATTERN_TEXTFIELD,
+    THEME_PATTERN_TEXT_OVERLAY,
+    THEME_PATTERN_VIDEO
+};
+
 } // namespace
 
 RefPtr<ResourceAdapter> ResourceAdapter::Create()
@@ -49,8 +95,9 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     auto resRet = newResMgr->AddResource(resIndexPath.c_str());
     auto configRet = newResMgr->UpdateResConfig(*resConfig);
     LOGI("AddRes result=%{public}d, UpdateResConfig result=%{public}d, ori=%{public}d, dpi=%{public}d, "
-         "device=%{public}d",
-        resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType());
+         "device=%{public}d, colorMode=%{publid}d, inputDevice=%{public}d",
+        resRet, configRet, resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
+        resConfig->GetColorMode(), resConfig->GetInputDevice());
     sysResourceManager_ = newResMgr;
     resourceManager_ = sysResourceManager_;
     packagePathStr_ = resPath;
@@ -59,40 +106,30 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
 {
     auto resConfig = ConvertConfigToGlobal(config);
-    LOGI("UpdateConfig ori=%{public}d, dpi=%{public}d, device=%{public}d",
-        resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType());
+    LOGI("UpdateConfig ori=%{public}d, dpi=%{public}d, device=%{public}d, "
+        "colorMode=%{publid}d, inputDevice=%{public}d",
+        resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
+        resConfig->GetColorMode(), resConfig->GetInputDevice());
     resourceManager_->UpdateResConfig(*resConfig);
 }
 
 RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
 {
-    static const std::map<std::string, std::string> patterns = {
-        { THEME_PATTERN_BUTTON, "ohos_button_pattern" },
-        { THEME_PATTERN_CHECKBOX, "ohos_checkbox_pattern" },
-        { THEME_PATTERN_DATA_PANEL, "ohos_data_panel_pattern" },
-        { THEME_PATTERN_RADIO, "ohos_radio_pattern" },
-        { THEME_PATTERN_SWIPER, "ohos_swiper_pattern" },
-        { THEME_PATTERN_SWITCH, "ohos_switch_pattern" },
-        { THEME_PATTERN_TOOLBAR, "ohos_toolbar_pattern" },
-        { THEME_PATTERN_TOGGLE, "ohos_toggle_pattern" },
-        { THEME_PATTERN_TOAST, "ohos_toast_pattern" },
-        { THEME_DIALOG_TOGGLE, "ohos_dialog_pattern" },
-        { THEME_PATTERN_DRAG_BAR, "ohos_drag_bar_pattern" },
-        { THEME_PATTERN_SEMI_MODAL, "ohos_semi_modal_pattern" }
-    };
-
     CheckThemeId(themeId);
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
     auto ret = resourceManager_->GetThemeById(themeId, theme->rawAttrs_);
-    for (auto& [key, value]: patterns) {
+    std::string OHFlag = "ohos_"; // fit with resource/base/theme.json and pattern.json
+    for (int i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
         ResourceThemeStyle::RawAttrMap attrMap;
-        ret = resourceManager_->GetPatternByName(value.c_str(), attrMap);
+        std::string patternTag = PATTERN_MAP[i];
+        std::string patternName = OHFlag + PATTERN_MAP[i];
+        ret = resourceManager_->GetPatternByName(patternName.c_str(), attrMap);
         LOGD("theme pattern[%{public}s, %{public}s], attr size=%{public}zu",
-            key.c_str(), value.c_str(), attrMap.size());
+            patternTag.c_str(), patternName.c_str(), attrMap.size());
         if (attrMap.empty()) {
             continue;
         }
-        theme->patternAttrs_[key] = attrMap;
+        theme->patternAttrs_[patternTag] = attrMap;
     }
     LOGI("theme themeId=%{public}d, ret=%{public}d, attr size=%{public}zu, pattern size=%{public}zu",
         themeId, ret, theme->rawAttrs_.size(), theme->patternAttrs_.size());

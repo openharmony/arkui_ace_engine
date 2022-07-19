@@ -196,6 +196,8 @@ public:
     static void MergeRSNode(const RefPtr<Component>& head, const RefPtr<Component>& tail);
     static void MergeRSNode(const RefPtr<Component>& standaloneNode);
     static void ExtendRSNode(const RefPtr<Component>& newHead, const RefPtr<Component>& prevHead);
+    void MarkUseExternalRSNode() { useExternalRSNode_ = true; }
+    bool UseExternalRSNode() const { return useExternalRSNode_; }
 
     virtual uint32_t Compare(const RefPtr<Component>& component) const
     {
@@ -282,6 +284,7 @@ private:
     RefPtr<V2::EventExtensions> eventExtensions_;
     bool isHeadComponent_ = false;
     bool isTailComponent_ = false;
+    bool useExternalRSNode_ = false;
     std::string inspectorTag_;
     int32_t restoreId_ = -1;
 

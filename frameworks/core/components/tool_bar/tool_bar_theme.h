@@ -78,17 +78,16 @@ public:
             if (!themeStyle) {
                 return;
             }
-            theme->textStyle_.SetTextColor(themeStyle->GetAttr<Color>(THEME_ATTR_TOOLBAR_TEXT_COLOR, Color::BLACK));
-            theme->iconColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_TOOLBAR_ICON_COLOR, Color());
-            theme->toolBarBgColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_TOOLBAR_BG_COLOR, Color());
-            theme->toolBarItemBgColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_TOOLBAR_SUB_BG_COLOR, Color());
-
             auto toolbarPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_TOOLBAR, nullptr);
             if (!toolbarPattern) {
                 LOGI("ToolbarPattern is null");
                 return;
             }
-            theme->iconMoreColor_ = toolbarPattern->GetAttr<Color>(TOOLBAR_ICON_MORE_COLOR, Color());
+            theme->iconMoreColor_ = toolbarPattern->GetAttr<Color>("more_icon_color", Color());
+            theme->textStyle_.SetTextColor(toolbarPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK));
+            theme->iconColor_ = toolbarPattern->GetAttr<Color>("icon_color", Color());
+            theme->toolBarBgColor_ = toolbarPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
+            theme->toolBarItemBgColor_ = toolbarPattern->GetAttr<Color>("item_bg_color", Color());
         }
     };
 

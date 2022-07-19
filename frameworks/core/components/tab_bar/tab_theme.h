@@ -63,10 +63,15 @@ public:
             if (!themeStyle) {
                 return theme;
             }
-            theme->backgroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_TAB_BACKGROUND, Color::WHITE);
-            theme->activeIndicatorColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_SUBTAB_LINE_ON, Color::WHITE);
-            theme->focusIndicatorColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_SUBTAB_LINE_ON, Color::WHITE);
-            theme->focusIndicatorRadius_  = themeStyle->GetAttr<Dimension>(THEME_ATTR_CLICK_CORNER_RADIUS, 0.0_vp);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_TAB, nullptr);
+            if (pattern) {
+                theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::WHITE);
+                theme->activeIndicatorColor_ = pattern->GetAttr<Color>("active_indicator_color", Color::WHITE);
+                theme->focusIndicatorColor_ = pattern->GetAttr<Color>("focus_indicator_color", Color::WHITE);
+                theme->focusIndicatorRadius_  = pattern->GetAttr<Dimension>("focus_indicator_radius", 0.0_vp);
+            } else {
+                LOGW("find pattern of tab fail");
+            }
             return theme;
         }
     };

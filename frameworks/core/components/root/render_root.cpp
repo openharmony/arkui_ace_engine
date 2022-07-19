@@ -126,4 +126,8 @@ void RenderRoot::SetBgColor(const Color& color)
     MarkNeedRender();
 }
 
+Color RenderRoot::GetBgColor() const
+{
+    return isContextMenu_ ? Color::TRANSPARENT : bgColor_;
+}
 } // namespace OHOS::Ace

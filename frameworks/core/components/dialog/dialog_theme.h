@@ -131,12 +131,15 @@ public:
                 LOGI("progress theme style is null");
                 return;
             }
-            theme->backgroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_DIALOG_BG, Color::BLACK);
-            theme->titleTextStyle_.SetTextColor(themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_PRIMARY, Color::BLACK));
-            theme->contentTextStyle_.SetTextColor(themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_PRIMARY, Color::BLACK));
-            theme->buttonBackgroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_DIALOG_BG, Color::BLACK);
-            auto dialogPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_DIALOG_TOGGLE, nullptr);
-            if (SystemProperties::GetDeviceType() != DeviceType::CAR || !dialogPattern) {
+            auto dialogPattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DIALOG, nullptr);
+            if (!dialogPattern) {
+                return;
+            }
+            theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::BLACK);
+            theme->titleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK));
+            theme->contentTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("content_text_color", Color::BLACK));
+            theme->buttonBackgroundColor_ = dialogPattern->GetAttr<Color>("button_bg_color", Color::BLACK);
+            if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
             auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 0.0_vp);
@@ -152,24 +155,25 @@ public:
             theme->actionsPadding_ = Edge(defaultPadding, actionsTopPadding, defaultPadding, actionsTopPadding);
             theme->buttonHeight_ = dialogPattern->GetAttr<Dimension>(DIALOG_BUTTON_HEIGHT, 0.0_vp);
             theme->titleMaxLines_ = static_cast<uint32_t>(dialogPattern->GetAttr<int32_t>(DIALOG_TITLE_MAX_LINES, 2));
-            theme->titleTextStyle_.SetFontSize(
-                themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_HEAD_LINE8, 20.0_vp));
-            theme->titleMinFontSize_ = themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_HEAD_LINE8, 20.0_vp);
-            theme->contentTextStyle_.SetFontSize(themeStyle->GetAttr<Dimension>(TEXTFIELD_FONT_SIZE, 16.0_vp));
-            theme->contentMinFontSize_ = themeStyle->GetAttr<Dimension>(TEXTFIELD_FONT_SIZE, 16.0_vp);
             theme->buttonSpacingHorizontal_ = actionsTopPadding;
-            theme->commonButtonBgColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_BUTTON_NORMAL_COLOR, Color::GRAY);
-            theme->emphasizeButtonBgColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_WARNING, Color::BLACK);
             theme->commonButtonTextColor_ =
                 dialogPattern->GetAttr<Color>(DIALOG_COMMON_BUTTON_TEXT_COLOR, Color::WHITE);
-            theme->buttonTextSize_ = themeStyle->GetAttr<Dimension>(THEME_ATTR_TEXT_SIZE_BUTTON1, 16.0_vp);
             theme->buttonMinTextSize_ = dialogPattern->GetAttr<Dimension>(DIALOG_MIN_BUTTON_TEXT_SIZE, 10.0_vp);
             theme->minButtonWidth_ = dialogPattern->GetAttr<Dimension>(DIALOG_MIN_BUTTON_WIDTH, 104.0_vp);
             theme->maxButtonWidth_ = dialogPattern->GetAttr<Dimension>(DIALOG_MAX_BUTTON_WIDTH, 260.0_vp);
-            theme->buttonClickedColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_CLICK_EFFECT, Color::BLACK);
-            theme->emphasizeButtonTextColor_ =
-                themeStyle->GetAttr<Color>(THEME_ATTR_COLOR_FOREGROUND_CONTRARY, Color::WHITE);
             theme->maskColorEnd_ = dialogPattern->GetAttr<Color>(DIALOG_MASK_COLOR_END, Color::WHITE);
+            // pattern config
+            theme->titleTextStyle_.SetFontSize(
+                dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_vp));
+            theme->titleMinFontSize_ = dialogPattern->GetAttr<Dimension>("title_text_font_size_min", 20.0_vp);
+            theme->commonButtonBgColor_ = dialogPattern->GetAttr<Color>("common_button_bg_color", Color::GRAY);
+            theme->emphasizeButtonBgColor_ = dialogPattern->GetAttr<Color>("first_button_bg_color", Color::BLACK);
+            theme->emphasizeButtonTextColor_ =
+                dialogPattern->GetAttr<Color>("first_button_text_color", Color::WHITE);
+            theme->buttonTextSize_ = dialogPattern->GetAttr<Dimension>("button_text_font_size", 16.0_vp);
+            theme->buttonClickedColor_ = dialogPattern->GetAttr<Color>("button_bg_color_clicked", Color::BLACK);
+            theme->contentTextStyle_.SetFontSize(themeStyle->GetAttr<Dimension>("content_text_font_size", 16.0_vp));
+            theme->contentMinFontSize_ = themeStyle->GetAttr<Dimension>("content_text_font_size_min", 16.0_vp);
         }
     };
 

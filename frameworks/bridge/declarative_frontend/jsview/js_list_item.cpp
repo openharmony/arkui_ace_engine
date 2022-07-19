@@ -19,6 +19,14 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_item_view.h"
 #include "core/components_v2/list/list_item_component.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container.h"
+#include "core/components_v2/common/element_proxy.h"
+#include "core/components_v2/list/list_item_component.h"
+#include "core/pipeline/base/element_register.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -29,6 +37,12 @@ const V2::StickyMode STICKY_MODE_TABLE[] = { V2::StickyMode::NONE, V2::StickyMod
 
 void JSListItem::Create(const JSCallbackInfo& args)
 {
+    const auto context = JSViewAbstract::GetPipelineContext();
+    if (context && context->UsePartialUpdate()) {
+        CreateForPartialUpdate(args);
+        return;
+    }
+
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ListItemView::Create();
         return;
@@ -38,6 +52,50 @@ void JSListItem::Create(const JSCallbackInfo& args)
     if (args.Length() >= 1 && args[0]->IsString()) {
         listItemComponent->SetType(args[0]->ToString());
     }
+    ViewStackProcessor::GetInstance()->Push(listItemComponent);
+    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusNode(true);
+    args.ReturnSelf();
+}
+
+void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
+{
+    auto listItemComponent = AceType::MakeRefPtr<V2::ListItemComponent>();
+    ViewStackProcessor::GetInstance()->ClaimElementId(listItemComponent);
+
+    if (args.Length() < 2 || !args[0]->IsFunction()) {
+        LOGE("Expected deep render function parameter");
+        return;
+    }
+    RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
+
+    if (!args[1]->IsBoolean()) {
+        LOGE("Expected isLazy parameter");
+        return;
+    }
+    const bool isLazy = args[1]->ToBoolean();
+
+    V2::DeepRenderFunc listItemDeepRenderFunc =
+        [execCtx = args.GetExecutionContext(), jsDeepRenderFunc = std::move(jsDeepRender),
+        elmtId = listItemComponent->GetElementId()]() -> RefPtr<Component> {
+        ACE_SCOPED_TRACE("JSListItem::ExecuteDeepRender");
+
+        LOGD("ListItem elmtId %{public}d DeepRender JS function execution start ....", elmtId);
+        ACE_DCHECK(componentsStack_.empty());
+
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+        JSRef<JSVal> jsParams[2];
+        jsParams[0] = JSRef<JSVal>::Make(ToJSValue(elmtId));
+        jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
+        jsDeepRenderFunc->ExecuteJS(2, jsParams);
+        RefPtr<Component> component = ViewStackProcessor::GetInstance()->Finish();
+        ACE_DCHECK(AceType::DynamicCast<V2::ListItemComponent>(component) != nullptr);
+        LOGD("ListItem elmtId %{public}d DeepRender JS function execution - done ", elmtId);
+        return component;
+    }; // listItemDeepRenderFunc lambda
+
+    listItemComponent->SetDeepRenderFunc(listItemDeepRenderFunc);
+    listItemComponent->SetIsLazyCreating(isLazy);
     ViewStackProcessor::GetInstance()->Push(listItemComponent);
     JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);

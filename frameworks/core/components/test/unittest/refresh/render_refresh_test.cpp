@@ -45,9 +45,9 @@ static int64_t GetTickCount()
     return (ts.tv_sec * SEC_TO_NANOSEC + ts.tv_nsec);
 }
 
-const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::DOWN };
-const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::MOVE };
-const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::UP };
+const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 540.0f, 500.0f, 540.0f, 500.0f, TouchType::DOWN };
+const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 540.0f, 500.0f, 540.0f, 500.0f, TouchType::MOVE };
+const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 540.0f, 500.0f, 540.0f, 500.0f, TouchType::UP };
 
 enum class DragDirection {
     UP,

@@ -253,6 +253,8 @@ void AceAbility::OnStart(const Want& want)
             SystemProperties::SetColorMode(ColorMode::LIGHT);
             LOGI("UIContent set light mode");
         }
+        SystemProperties::SetInputDevice(
+            resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
     } else {
         LOGW("resourceManager is null.");
         AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
@@ -314,6 +316,7 @@ void AceAbility::OnStart(const Want& want)
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+    aceResCfg.SetInputDevice(SystemProperties::GetInputDevice());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetBundlePath(abilityContext->GetBundleCodeDir());

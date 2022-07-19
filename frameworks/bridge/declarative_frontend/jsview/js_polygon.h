@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSPolygon : public JSShapeAbstract, public JSInteractableView {
+class JSPolygon : public JSShapeAbstract {
     DECLARE_ACE_TYPE(JSPolygon, JSShapeAbstract);
 public:
     static void JSBind(BindingTarget globalObj);

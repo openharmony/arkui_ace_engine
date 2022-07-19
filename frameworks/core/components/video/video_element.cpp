@@ -149,6 +149,14 @@ VideoElement::~VideoElement()
         }
     }
     ReleasePlatformResource();
+
+    if (focusChangeCallbackId_ > 0) {
+        auto context = context_.Upgrade();
+        if (context) {
+            context->UnregisterWindowFocusChangedCallback(focusChangeCallbackId_);
+        }
+    }
+
 #ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_ != nullptr) {
         mediaPlayer_->Release();
@@ -205,6 +213,18 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
             InitListener();
         }
     }
+
+    auto context = context_.Upgrade();
+    if (!context || focusChangeCallbackId_ > 0) {
+        return;
+    }
+    auto focusChangedCallback = [weak = WeakClaim(this)](bool isFocus) {
+        auto video = weak.Upgrade();
+        if (video) {
+            video->HiddenChange(!isFocus);
+        }
+    };
+    focusChangeCallbackId_ = context->RegisterWindowFocusChangedCallback(focusChangedCallback);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -248,10 +268,20 @@ void VideoElement::RegisterMediaPlayerEvent()
         });
     };
 
+    auto&& resolutionChangeEvent = [videoElement, uiTaskExecutor]() {
+        uiTaskExecutor.PostSyncTask([&videoElement] {
+            auto video = videoElement.Upgrade();
+            if (video) {
+                video->OnResolutionChange();
+            }
+        });
+    };
+
     mediaPlayerCallback_ = std::make_shared<MediaPlayerCallback>(ContainerScope::CurrentId());
     mediaPlayerCallback_->SetPositionUpdatedEvent(positionUpdatedEvent);
     mediaPlayerCallback_->SetStateChangedEvent(stateChangedEvent);
     mediaPlayerCallback_->SetErrorEvent(errorEvent);
+    mediaPlayerCallback_->SetResolutionChangeEvent(resolutionChangeEvent);
     mediaPlayer_->SetPlayerCallback(mediaPlayerCallback_);
 }
 
@@ -1001,6 +1031,26 @@ void VideoElement::OnError(const std::string& errorId, const std::string& param)
         }
         onError_(param);
     }
+}
+
+void VideoElement::OnResolutionChange() const
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!mediaPlayer_ || !renderNode_) {
+        LOGE("player or render is null");
+        return;
+    }
+
+    auto rosenTexture = DynamicCast<RosenRenderTexture>(renderNode_);
+    if (!rosenTexture) {
+        LOGE("backend is not rosen.");
+        return;
+    }
+
+    Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
+    LOGI("OnResolutionChange video size: %{public}s", videoSize.ToString().c_str());
+    rosenTexture->SyncProperties(videoSize, imageFit_, imagePosition_);
+#endif
 }
 
 void VideoElement::OnPrepared(

@@ -27,6 +27,7 @@
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "core/animation/native_curve_helper.h"
@@ -572,6 +573,11 @@ void PipelineContext::FlushLayout()
     CreateGeometryTransition();
     FlushGeometryProperties();
 
+    if (isForegroundCalled_ && nextFrameLayoutCallback_) {
+        isForegroundCalled_ = false;
+        nextFrameLayoutCallback_();
+        nextFrameLayoutCallback_ = nullptr;
+    }
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushLayout();
     }
@@ -890,9 +896,17 @@ void PipelineContext::SetupRootElement()
         renderRoot->SetDefaultBgColor(windowModal_ == WindowModal::CONTAINER_MODAL);
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_ && renderRoot) {
         LOGI("rosen ui director call set root.");
         rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
+        auto surfaceNode = rsUIDirector_->GetMutableRSSurfaceNode();
+        if (surfaceNode) {
+            if (windowModal_ == WindowModal::CONTAINER_MODAL) {
+                surfaceNode->SetSurfaceBgColor(appBgColor_.GetValue());
+            } else {
+                surfaceNode->SetSurfaceBgColor(renderRoot->GetBgColor().GetValue());
+            }
+        }
     }
 #endif
     sharedTransitionController_->RegisterTransitionListener();
@@ -942,6 +956,11 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
         rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
+        auto surfaceNode = rsUIDirector_->GetMutableRSSurfaceNode();
+        auto renderRoot = AceType::DynamicCast<RenderRoot>(rootRenderNode);
+        if (surfaceNode && renderRoot) {
+            surfaceNode->SetSurfaceBgColor(renderRoot->GetBgColor().GetValue());
+        }
     }
 #endif
     sharedTransitionController_->RegisterTransitionListener();
@@ -1404,6 +1423,11 @@ bool PipelineContext::PopPageStackOverlay()
         return false;
     }
     LOGI("Pop page overlays");
+    // If last child is popup, use PopPopup to trigger state change event.
+    if (pageStack->PopPopupIfExist()) {
+        return true;
+    }
+
     pageStack->PopComponent();
     return true;
 }
@@ -2040,7 +2064,6 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
                 FlushLayout();
             });
             break;
-            [[fallthrough]];
         }
         case WindowSizeChangeReason::DRAG_START: {
             isDragStart_ = true;
@@ -2294,6 +2317,12 @@ void PipelineContext::SetAppBgColor(const Color& color)
 {
     LOGI("Set bgColor %{public}u", color.GetValue());
     appBgColor_ = color;
+#ifdef ENABLE_ROSEN_BACKEND
+    auto surfaceNode = rsUIDirector_->GetMutableRSSurfaceNode();
+    if (surfaceNode) {
+        surfaceNode->SetSurfaceBgColor(color.GetValue());
+    }
+#endif
     if (!themeManager_) {
         LOGW("themeManager_ is nullptr!");
         return;
@@ -2575,6 +2604,7 @@ void PipelineContext::Destroy()
     window_->Destroy();
     touchPluginPipelineContext_.clear();
     webPaintCallback_.clear();
+    windowFocusChangedCallbackMap_.clear();
     LOGI("PipelineContext::Destroy end.");
 }
 
@@ -3002,6 +3032,12 @@ void PipelineContext::RootLostFocus() const
 
 void PipelineContext::WindowFocus(bool isFocus)
 {
+    for (const auto& [id, callback] : windowFocusChangedCallbackMap_) {
+        if (callback) {
+            callback(isFocus);
+        }
+    }
+
     if (!isFocus) {
         OnVirtualKeyboardAreaChange(Rect());
     }

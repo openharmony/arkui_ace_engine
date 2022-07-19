@@ -146,8 +146,8 @@ RefPtr<FlexItemComponent> ViewStackProcessor::GetFlexItemComponent()
     if (wrappingComponentsMap.find("flexItem") != wrappingComponentsMap.end()) {
         return AceType::DynamicCast<FlexItemComponent>(wrappingComponentsMap["flexItem"]);
     }
-
-    RefPtr<FlexItemComponent> flexItem = AceType::MakeRefPtr<OHOS::Ace::FlexItemComponent>(0.0, 0.0, 0.0);
+    // flex values are all changed to 0.0 in Render.
+    RefPtr<FlexItemComponent> flexItem = AceType::MakeRefPtr<OHOS::Ace::FlexItemComponent>(0.0, -1.0, 0.0);
     wrappingComponentsMap.emplace("flexItem", flexItem);
     return flexItem;
 }
@@ -622,7 +622,6 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     } else if (!components.empty() && (
         AceType::InstanceOf<BoxComponent>(mainComponent) ||
         AceType::InstanceOf<FormComponent>(mainComponent) ||
-        AceType::InstanceOf<RemoteWindowComponent>(mainComponent) ||
         AceType::InstanceOf<TextFieldComponent>(mainComponent) ||
         AceType::InstanceOf<TextureComponent>(mainComponent) ||
         AceType::InstanceOf<WebComponent>(mainComponent) ||
@@ -633,6 +632,11 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
         Component::MergeRSNode(components);
         Component::MergeRSNode(mainComponent);
         components.emplace_back(mainComponent);
+    } else if (AceType::InstanceOf<RemoteWindowComponent>(mainComponent)) {
+        // mark head component, it should use external RSNode stored in tail component.
+        components.emplace_back(mainComponent);
+        Component::MergeRSNode(components);
+        components.front()->MarkUseExternalRSNode();
     } else {
         // by default, mainComponent is placed after other components, they should share the same RSNode.
         //  (head)      (tail)

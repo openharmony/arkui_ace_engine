@@ -111,8 +111,8 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtim
         LOGE("pixelMapNapiEntry is null");
         return nullptr;
     }
-    void* pixmapPtrAddr = pixelMapNapiEntry(
-        reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
+    void* pixmapPtrAddr =
+        pixelMapNapiEntry(reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(nativeValue));
     if (pixmapPtrAddr == nullptr) {
         LOGE(" Failed to get pixmap pointer");
         return nullptr;
@@ -514,7 +514,7 @@ void SetDomStyle(
     }
 
     if (isIine) {
-        std::vector < std::pair < std::string, std::string >> stylesFinally;
+        std::vector<std::pair<std::string, std::string>> stylesFinally;
         for (int32_t i = 0; i < static_cast<int32_t>(styles.size()); i++) {
             std::string key = styles[i].first;
             std::string value = styles[i].second;
@@ -2204,6 +2204,7 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
         JsiComponentApiBridge::JsScrollTo(runtime, arguments, nodeId);
         return runtime->NewUndefined();
     } else if (std::strcmp(methodName.c_str(), "getXComponentContext") == 0) {
+#ifdef XCOMPONENT_SUPPORTED
         auto bridge = AceType::DynamicCast<JsiXComponentBridge>(page->GetXComponentBridgeById(nodeId));
         if (bridge) {
             bridge->HandleContext(runtime, nodeId, arguments);
@@ -2215,6 +2216,7 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
     } else if (std::strcmp(methodName.c_str(), "setXComponentSurfaceSize") == 0) {
         JsiXComponentBridge::JsSetXComponentSurfaceSize(runtime, arguments, nodeId);
         return runtime->NewUndefined();
+#endif
     }
 
     shared_ptr<JsValue> resultValue = runtime->NewUndefined();
@@ -2228,7 +2230,7 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
         return JsiListBridge::JsGetCurrentOffset(runtime, nodeId);
     } else if (std::strcmp(methodName.c_str(), "getState") == 0) {
         return JsiImageAnimatorBridge::JsGetState(runtime, nodeId);
-    }  else if (std::strcmp(methodName.c_str(), "addChild") == 0) {
+    } else if (std::strcmp(methodName.c_str(), "addChild") == 0) {
         auto sPage = GetStagingPage(runtime);
         if (sPage == nullptr) {
             return runtime->NewUndefined();
@@ -2343,10 +2345,7 @@ shared_ptr<JsValue> AppSetData(const shared_ptr<JsRuntime>& runtime, const share
     while (iter != JsiEngineInstance::dataMap_.end()) {
         std::string key = iter->first;
         std::string val = iter->second;
-        strResult.append("\"")
-                .append(key)
-                .append("\":")
-                .append(val);
+        strResult.append("\"").append(key).append("\":").append(val);
         ++iter;
         if (iter != JsiEngineInstance::dataMap_.end()) {
             strResult.append(",");
@@ -2518,7 +2517,7 @@ int32_t CreateDomElement(const shared_ptr<JsRuntime>& runtime, const shared_ptr<
     if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
         page->FlushCommands();
     }
-    return  globalNodeId;
+    return globalNodeId;
 }
 
 shared_ptr<JsValue> JsFocus(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -2684,7 +2683,6 @@ JsiEngineInstance::~JsiEngineInstance()
     }
     runtime_.reset();
     runtime_ = nullptr;
-
 }
 
 void JsiEngineInstance::FlushCommandBuffer(void* context, const std::string& command)
@@ -3538,12 +3536,14 @@ void JsiEngine::FireExternalEvent(const std::string& componentId, const uint32_t
         LOGE("FireExternalEvent GetRunningPage is nullptr");
         return;
     }
+#ifdef XCOMPONENT_SUPPORTED
     std::string arguments;
     auto bridge = AceType::DynamicCast<JsiXComponentBridge>(page->GetXComponentBridgeById(nodeId));
     if (bridge) {
         bridge->HandleContext(runtime, nodeId, arguments);
         return;
     }
+#endif
 }
 
 // Destroy page instance on Js

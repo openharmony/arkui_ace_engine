@@ -37,8 +37,8 @@ void RosenRenderContext::StartRecording(float x, float y, float width, float hei
     auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>();
     if (rsCanvasNode) {
         rosenCanvas_ =
-            Canvas::Create(rsCanvasNode->BeginRecording(ceil(rsNode_->GetStagingProperties().GetFrameWidth()),
-                ceil(rsNode_->GetStagingProperties().GetFrameHeight())));
+            Canvas::Create(rsCanvasNode->BeginRecording(ceil(rsCanvasNode->GetPaintWidth()),
+                ceil(rsCanvasNode->GetPaintHeight())));
     }
 }
 

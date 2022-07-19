@@ -65,7 +65,7 @@ ohos_unittest("RenderScrollTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":RenderScrollTest",
-    #":ScrollCreatorTest",
+    #":RenderScrollTest",
+    ":ScrollCreatorTest",
   ]
 }
