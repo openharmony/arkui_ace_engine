@@ -47,7 +47,7 @@ void RosenRenderContext::Repaint(const RefPtr<RenderNode>& node)
     auto rsNode = node->GetRSNode();
     auto offset =
         node->GetTransitionPaintRect().GetOffset() -
-        Offset(rsNode->GetStagingProperties().GetFramePositionX(), rsNode->GetStagingProperties().GetFramePositionY());
+        Offset(rsNode->GetStagingProperties().GetFrame().x_, rsNode->GetStagingProperties().GetFrame().y_);
 
     std::string name = AceType::TypeName(node);
     if (name != "RosenRenderForm" && name != "RosenRenderPlugin") {
@@ -176,11 +176,7 @@ void RosenRenderContext::InitContext(
     }
     rsNode_->ClearChildren();
     if (auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>()) {
-        rosenCanvas_ = rsCanvasNode->BeginRecording(
-            rsNode_->GetStagingProperties().GetFrameWidth() <= 0 ?
-            rsNode_->GetStagingProperties().GetBoundsWidth() : rsNode_->GetStagingProperties().GetFrameWidth(),
-            rsNode_->GetStagingProperties().GetFrameHeight()<= 0 ?
-            rsNode_->GetStagingProperties().GetBoundsHeight() : rsNode_->GetStagingProperties().GetFrameHeight());
+        rosenCanvas_ = rsCanvasNode->BeginRecording(rsCanvasNode->GetPaintWidth(), rsCanvasNode->GetPaintHeight());
     }
 }
 
