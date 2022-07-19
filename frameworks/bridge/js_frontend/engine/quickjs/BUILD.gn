@@ -64,9 +64,6 @@ template("js_engine_qjs") {
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine) {
       defines += [ "BUILT_IN_JS_ENGINE" ]
-      deps += [ "intl:intl_qjs_static" ]
-    } else {
-      deps += [ "intl:intl_qjs" ]
     }
 
     if (platform == "windows" || platform == "mac") {
