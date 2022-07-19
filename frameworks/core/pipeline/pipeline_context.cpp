@@ -573,6 +573,11 @@ void PipelineContext::FlushLayout()
     CreateGeometryTransition();
     FlushGeometryProperties();
 
+    if (isForegroundCalled_ && nextFrameLayoutCallback_) {
+        isForegroundCalled_ = false;
+        nextFrameLayoutCallback_();
+        nextFrameLayoutCallback_ = nullptr;
+    }
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushLayout();
     }

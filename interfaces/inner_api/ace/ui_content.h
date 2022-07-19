@@ -95,6 +95,9 @@ public:
     virtual void SetBackgroundColor(uint32_t color) = 0;
 
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+
+    // Set UIContent callback for custom window animation
+    virtual void SetNextFrameLayoutCallback(std::function<void()>&& callback) = 0;
 };
 
 } // namespace OHOS::Ace
