@@ -222,8 +222,8 @@ void ContainerModalElement::PerformBuild()
         }
 
         auto titleDisplay = AceType::DynamicCast<DisplayElement>(column->GetFirstChild());
-        if (titleDisplay) {
-            titleBox_ = AceType::DynamicCast<BoxElement>(titleDisplay->GetFirstChild());
+        if (titleDisplay && titleDisplay->GetFirstChild()) {
+            titleBox_ = AceType::DynamicCast<BoxElement>(titleDisplay->GetFirstChild()->GetFirstChild());
         }
 
         auto tween = AceType::DynamicCast<TweenElement>(stackElement->GetLastChild());
@@ -231,7 +231,10 @@ void ContainerModalElement::PerformBuild()
             LOGE("ContainerModalElement PerformBuild failed, tween element is null.");
             return;
         }
-        floatingTitleBox_ = AceType::DynamicCast<BoxElement>(tween->GetContentElement());
+        if (tween->GetContentElement()) {
+            floatingTitleBox_ = AceType::DynamicCast<BoxElement>(tween->GetContentElement()->GetFirstChild());
+        }
+
         auto display = AceType::DynamicCast<DisplayElement>(tween->GetFirstChild());
         if (display && !floatingTitleDisplay_) {
             floatingTitleDisplay_ = AceType::DynamicCast<RenderDisplay>(display->GetRenderNode());
