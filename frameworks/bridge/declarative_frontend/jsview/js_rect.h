@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSRect : public JSShapeAbstract, public JSInteractableView {
+class JSRect : public JSShapeAbstract {
     DECLARE_ACE_TYPE(JSRect, JSShapeAbstract);
 public:
     static void Create(const JSCallbackInfo& info);
