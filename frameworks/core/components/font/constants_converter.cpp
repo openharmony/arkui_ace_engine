@@ -183,7 +183,7 @@ txt::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration)
     return convertValue;
 }
 
-void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineContext>& context, txt::TextStyle& txtStyle)
+void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, txt::TextStyle& txtStyle)
 {
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
     txtStyle.font_weight = ConvertTxtFontWeight(textStyle.GetFontWeight());

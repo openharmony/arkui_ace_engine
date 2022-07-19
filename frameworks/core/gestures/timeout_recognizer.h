@@ -27,8 +27,8 @@ class SingleChildGestureRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(SingleChildGestureRecognizer, GestureRecognizer);
 
 public:
-    explicit SingleChildGestureRecognizer(WeakPtr<PipelineContext> context);
-    SingleChildGestureRecognizer(WeakPtr<PipelineContext> context, RefPtr<GestureRecognizer> child);
+    explicit SingleChildGestureRecognizer(WeakPtr<PipelineBase> context);
+    SingleChildGestureRecognizer(WeakPtr<PipelineBase> context, RefPtr<GestureRecognizer> child);
     ~SingleChildGestureRecognizer();
 
     void SetChild(RefPtr<GestureRecognizer> recognizer);
@@ -42,14 +42,14 @@ protected:
 
 private:
     RefPtr<GestureRecognizer> child_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
 };
 
 class TimeoutRecognizer : public SingleChildGestureRecognizer {
     DECLARE_ACE_TYPE(TimeoutRecognizer, SingleChildGestureRecognizer);
 public:
-    explicit TimeoutRecognizer(WeakPtr<PipelineContext> context, std::chrono::duration<float> timeout);
-    TimeoutRecognizer(WeakPtr<PipelineContext> context, RefPtr<GestureRecognizer> child,
+    explicit TimeoutRecognizer(WeakPtr<PipelineBase> context, std::chrono::duration<float> timeout);
+    TimeoutRecognizer(WeakPtr<PipelineBase> context, RefPtr<GestureRecognizer> child,
         std::chrono::duration<float> timeout);
 
     void OnAccepted(size_t touchId) override;
@@ -77,7 +77,7 @@ private:
     bool CheckTimeout(TimeStamp time);
 
 private:
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     std::chrono::duration<float> timeout_;
     std::set<size_t> touchIds_;
     std::optional<TimeStamp> start_;

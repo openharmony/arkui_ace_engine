@@ -347,7 +347,7 @@ void PickerBaseComponent::OpenDialog(DialogProperties& properties)
     if (!container) {
         return;
     }
-    auto context = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!context) {
         return;
     }
@@ -377,7 +377,7 @@ void PickerBaseComponent::CloseDialog()
     if (!container) {
         return;
     }
-    auto context = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!context) {
         return;
     }

@@ -67,7 +67,7 @@ void ImageProvider::ProccessLoadingResult(
     const ImageSourceInfo& imageInfo,
     bool canStartUploadImageObj,
     const RefPtr<ImageObject>& imageObj,
-    const RefPtr<PipelineContext>& context,
+    const RefPtr<PipelineBase>& context,
     const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder)
 {
     std::lock_guard lock(loadingImageMutex_);
@@ -149,7 +149,7 @@ void ImageProvider::FetchImageObject(
     const ImageObjSuccessCallback& successCallback,
     const UploadSuccessCallback& uploadSuccessCallback,
     const FailedCallback& failedCallback,
-    const WeakPtr<PipelineContext>& context,
+    const WeakPtr<PipelineBase>& context,
     bool syncMode,
     bool useSkiaSvg,
     bool needAutoResize,
@@ -209,7 +209,7 @@ void ImageProvider::FetchImageObject(
 }
 
 RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(
-    const ImageSourceInfo& imageInfo, const RefPtr<PipelineContext>& pipelineContext)
+    const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase>& pipelineContext)
 {
     auto imageCache = pipelineContext->GetImageCache();
     if (!imageCache) {
@@ -219,9 +219,7 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(
 }
 
 RefPtr<ImageObject> ImageProvider::GeneratorAceImageObject(
-    const ImageSourceInfo& imageInfo,
-    const RefPtr<PipelineContext> context,
-    bool useSkiaSvg)
+    const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase> context, bool useSkiaSvg)
 {
     auto imageData = LoadImageRawData(imageInfo, context);
 
@@ -234,9 +232,7 @@ RefPtr<ImageObject> ImageProvider::GeneratorAceImageObject(
 }
 
 sk_sp<SkData> ImageProvider::LoadImageRawData(
-    const ImageSourceInfo& imageInfo,
-    const RefPtr<PipelineContext> context,
-    const Size& targetSize)
+    const ImageSourceInfo& imageInfo, const RefPtr<PipelineBase> context, const Size& targetSize)
 {
     auto imageCache = context->GetImageCache();
     if (imageCache) {
@@ -275,13 +271,9 @@ sk_sp<SkData> ImageProvider::LoadImageRawData(
     return data;
 }
 
-void ImageProvider::GetSVGImageDOMAsyncFromSrc(
-    const std::string& src,
-    std::function<void(const sk_sp<SkSVGDOM>&)> successCallback,
-    std::function<void()> failedCallback,
-    const WeakPtr<PipelineContext> context,
-    uint64_t svgThemeColor,
-    OnPostBackgroundTask onBackgroundTaskPostCallback)
+void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
+    std::function<void(const sk_sp<SkSVGDOM>&)> successCallback, std::function<void()> failedCallback,
+    const WeakPtr<PipelineBase> context, uint64_t svgThemeColor, OnPostBackgroundTask onBackgroundTaskPostCallback)
 {
     auto task = [src, successCallback, failedCallback, context, svgThemeColor, id = Container::CurrentId()] {
         ContainerScope scope(id);
@@ -322,13 +314,9 @@ void ImageProvider::GetSVGImageDOMAsyncFromSrc(
     BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
 }
 
-void ImageProvider::GetSVGImageDOMAsyncFromData(
-    const sk_sp<SkData>& skData,
-    std::function<void(const sk_sp<SkSVGDOM>&)> successCallback,
-    std::function<void()> failedCallback,
-    const WeakPtr<PipelineContext> context,
-    uint64_t svgThemeColor,
-    OnPostBackgroundTask onBackgroundTaskPostCallback)
+void ImageProvider::GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
+    std::function<void(const sk_sp<SkSVGDOM>&)> successCallback, std::function<void()> failedCallback,
+    const WeakPtr<PipelineBase> context, uint64_t svgThemeColor, OnPostBackgroundTask onBackgroundTaskPostCallback)
 {
     auto task = [skData, successCallback, failedCallback, context, svgThemeColor, id = Container::CurrentId()] {
         ContainerScope scope(id);
@@ -500,10 +488,7 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
     return rawImage;
 }
 
-sk_sp<SkImage> ImageProvider::GetSkImage(
-    const std::string& src,
-    const WeakPtr<PipelineContext> context,
-    Size targetSize)
+sk_sp<SkImage> ImageProvider::GetSkImage(const std::string& src, const WeakPtr<PipelineBase> context, Size targetSize)
 {
     ImageSourceInfo info(src);
     auto imageLoader = ImageLoader::CreateImageLoader(info);
@@ -525,7 +510,7 @@ sk_sp<SkImage> ImageProvider::GetSkImage(
     return image;
 }
 
-void ImageProvider::TryLoadImageInfo(const RefPtr<PipelineContext>& context, const std::string& src,
+void ImageProvider::TryLoadImageInfo(const RefPtr<PipelineBase>& context, const std::string& src,
     std::function<void(bool, int32_t, int32_t)>&& loadCallback)
 {
     BackgroundTaskExecutor::GetInstance().PostTask(

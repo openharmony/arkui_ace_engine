@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace {
 
-RefPtr<GestureRecognizer> RotationGesture::CreateRecognizer(WeakPtr<PipelineContext> context)
+RefPtr<GestureRecognizer> RotationGesture::CreateRecognizer(WeakPtr<PipelineBase> context)
 {
     auto rotationRecognizer = AceType::MakeRefPtr<OHOS::Ace::RotationRecognizer>(fingers_, angle_);
     if (onActionStartId_) {

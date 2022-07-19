@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace {
 
-RefPtr<GestureRecognizer> LongPressGesture::CreateRecognizer(WeakPtr<PipelineContext> context)
+RefPtr<GestureRecognizer> LongPressGesture::CreateRecognizer(WeakPtr<PipelineBase> context)
 {
     LOGD("create long press gesture, fingers %{public}d, duration %{public}d, isRepeat %{public}d", fingers_, duration_,
         repeat_);

@@ -50,13 +50,13 @@ public:
     // But only one type will be played at a time. When playing one, the other's setting will be cleared.
     // 1. Interpolator: Play/Reverse/Stop/Finish will work
     // 2. Motion: PlayMotion will work
-    Animator(const WeakPtr<PipelineContext>& context, const char* name = nullptr);
+    Animator(const WeakPtr<PipelineBase>& context, const char* name = nullptr);
 
     Animator(const char* name = nullptr);
 
     ~Animator() override;
 
-    void AttachScheduler(const WeakPtr<PipelineContext>& context);
+    void AttachScheduler(const WeakPtr<PipelineBase>& context);
     bool HasScheduler() const;
 
     // Every interpolate animation needs to add itself into animator and use the controller to drive.

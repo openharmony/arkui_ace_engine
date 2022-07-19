@@ -44,7 +44,7 @@ constexpr double DEFAULT_SLIDE_SPEED = 300.0;
 } // namespace
 
 class GestureRecognizer;
-class PipelineContext;
+class PipelineBase;
 
 enum class GesturePriority {
     Begin = -1,
@@ -588,7 +588,7 @@ public:
         return gestureMask_;
     }
 
-    virtual RefPtr<GestureRecognizer> CreateRecognizer(WeakPtr<PipelineContext> context) = 0;
+    virtual RefPtr<GestureRecognizer> CreateRecognizer(WeakPtr<PipelineBase> context) = 0;
 
 protected:
     int32_t fingers_ = 1;

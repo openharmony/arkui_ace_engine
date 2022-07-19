@@ -17,8 +17,8 @@
 #include "rosen_render_offscreen_canvas.h"
 
 namespace OHOS::Ace {
-RefPtr<OffscreenCanvas> RenderOffscreenCanvas::Create(const WeakPtr<PipelineContext>& context,
-    int32_t width, int32_t height)
+RefPtr<OffscreenCanvas> RenderOffscreenCanvas::Create(
+    const WeakPtr<PipelineBase>& context, int32_t width, int32_t height)
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
 #ifdef ENABLE_ROSEN_BACKEND

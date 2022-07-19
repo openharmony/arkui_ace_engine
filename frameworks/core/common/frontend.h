@@ -22,7 +22,7 @@
 #include "core/common/ace_page.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/event/ace_event_handler.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 #include "frameworks/base/utils/resource_configuration.h"
 
 using FrontendDialogCallback = std::function<void(const std::string& event, const std::string& param)>;
@@ -46,6 +46,7 @@ struct WindowConfig {
 };
 
 enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN };
+struct PageTarget;
 
 class ACE_EXPORT Frontend : public AceType {
     DECLARE_ACE_TYPE(Frontend, AceType);
@@ -63,7 +64,7 @@ public:
 
     virtual void Destroy() = 0;
 
-    virtual void AttachPipelineContext(const RefPtr<PipelineContext>& context) = 0;
+    virtual void AttachPipelineContext(const RefPtr<PipelineBase>& context) = 0;
 
     virtual void SetAssetManager(const RefPtr<AssetManager>& assetManager) = 0;
 

@@ -41,7 +41,7 @@ public:
 
     void Destroy() override;
 
-    void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
+    void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
     void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
@@ -173,7 +173,7 @@ public:
 private:
     void UpdatePageData(const std::string& dataList);
     void LoadPage(const std::string& urlPath, const std::string& params);
-    void ParsePage(const RefPtr<PipelineContext>& context, const std::string& pageContent, const std::string& params,
+    void ParsePage(const RefPtr<PipelineBase>& context, const std::string& pageContent, const std::string& params,
         const RefPtr<Framework::JsAcePage>& page);
     void OnPageLoaded(const RefPtr<Framework::JsAcePage>& page);
     void ParseManifest() const;

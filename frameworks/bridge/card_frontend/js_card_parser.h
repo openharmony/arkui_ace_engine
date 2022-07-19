@@ -30,7 +30,7 @@ enum class ParsingStatus { CREATE, UPDATE };
 
 class ACE_EXPORT JsCardParser : public Referenced {
 public:
-    JsCardParser(const WeakPtr<PipelineContext>& context, const WeakPtr<AssetManager>& assertManager,
+    JsCardParser(const WeakPtr<PipelineBase>& context, const WeakPtr<AssetManager>& assertManager,
         std::unique_ptr<JsonValue>&& rootBody)
         : Referenced(false), context_(context), assetManager_(assertManager), rootBody_(std::move(rootBody))
     {}
@@ -90,7 +90,7 @@ public:
     bool Initialize();
     void SetColorMode(ColorMode colorMode);
 
-    const WeakPtr<PipelineContext>& GetPipelineContext() const
+    const WeakPtr<PipelineBase>& GetPipelineContext() const
     {
         return context_;
     }
@@ -204,7 +204,7 @@ private:
     ColorMode colorMode_ = ColorMode::LIGHT;
     ParsingStatus parsingStatus_ = ParsingStatus::CREATE;
     std::vector<int32_t> idArray_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     WeakPtr<AssetManager> assetManager_;
     std::unique_ptr<JsonValue> rootBody_;
     std::unique_ptr<JsonValue> styleJson_;

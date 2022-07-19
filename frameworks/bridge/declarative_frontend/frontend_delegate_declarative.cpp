@@ -318,7 +318,7 @@ void FrontendDelegateDeclarative::TransferComponentResponseData(int32_t callback
 {
     LOGD("FrontendDelegateDeclarative TransferComponentResponseData");
     auto pipelineContext = pipelineContextHolder_.Get();
-    WeakPtr<PipelineContext> contextWeak(pipelineContext);
+    WeakPtr<PipelineBase> contextWeak(pipelineContext);
     taskExecutor_->PostTask(
         [callbackId, data = std::move(data), contextWeak]() mutable {
             auto context = contextWeak.Upgrade();
@@ -986,8 +986,9 @@ void FrontendDelegateDeclarative::BackCheckAlert(const PageTarget& target, const
         if (currentPage.isAlertBeforeBackPage) {
             backUri_ = target;
             backParam_ = params;
+            auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
             taskExecutor_->PostTask(
-                [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
+                [context, dialogProperties = pageRouteStack_.back().dialogProperties,
                     isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft()]() {
                     if (context) {
                         context->ShowDialog(dialogProperties, isRightToLeft);
@@ -1066,7 +1067,8 @@ void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std:
 
 size_t FrontendDelegateDeclarative::GetComponentsCount()
 {
-    auto pipelineContext = pipelineContextHolder_.Get();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_RETURN(pipelineContext, 0);
     const auto& pageElement = pipelineContext->GetLastPage();
     if (pageElement) {
         return pageElement->GetComponentsCount();
@@ -1088,7 +1090,7 @@ void FrontendDelegateDeclarative::TriggerPageUpdate(int32_t pageId, bool directE
     auto jsCommands = std::make_shared<std::vector<RefPtr<JsCommand>>>();
     jsPage->PopAllCommands(*jsCommands);
 
-    auto pipelineContext = pipelineContextHolder_.Get();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     WeakPtr<Framework::JsAcePage> jsPageWeak(jsPage);
     WeakPtr<PipelineContext> contextWeak(pipelineContext);
     auto updateTask = [jsPageWeak, contextWeak, jsCommands] {
@@ -1125,7 +1127,9 @@ void FrontendDelegateDeclarative::TriggerPageUpdate(int32_t pageId, bool directE
 
     taskExecutor_->PostTask(
         [updateTask, pipelineContext, directExecute]() {
-            pipelineContext->AddPageUpdateTask(std::move(updateTask), directExecute);
+            if (pipelineContext) {
+                pipelineContext->AddPageUpdateTask(std::move(updateTask), directExecute);
+            }
         },
         TaskExecutor::TaskType::UI);
 }
@@ -1164,7 +1168,7 @@ void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t 
 {
     LOGD("FrontendDelegateDeclarative ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
-    auto pipelineContext = pipelineContextHolder_.Get();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     taskExecutor_->PostTask(
         [durationTime, message, bottom, isRightToLeft, context = pipelineContext] {
@@ -1215,7 +1219,9 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         .buttons = buttons,
         .callbacks = std::move(callbackMarkers),
     };
-    pipelineContextHolder_.Get()->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
+    auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_VOID(context);
+    context->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
 }
 
 void FrontendDelegateDeclarative::ShowActionMenu(
@@ -1255,7 +1261,9 @@ void FrontendDelegateDeclarative::ShowActionMenu(
     };
     ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
-    pipelineContextHolder_.Get()->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
+    auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_VOID(context);
+    context->ShowDialog(dialogProperties, AceApplicationInfo::GetInstance().IsRightToLeft());
 }
 
 void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
@@ -1466,8 +1474,11 @@ void FrontendDelegateDeclarative::LoadPage(
             delegate->taskExecutor_->PostTask(
                 [weak, page] {
                     auto delegate = weak.Upgrade();
-                    if (delegate && delegate->pipelineContextHolder_.Get()) {
-                        delegate->pipelineContextHolder_.Get()->FlushFocus();
+                    if (delegate) {
+                        auto context = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+                        if (context) {
+                            context->FlushFocus();
+                        }
                     }
                     if (page->GetDomDocument()) {
                         page->GetDomDocument()->HandlePageLoadFinish();
@@ -1544,7 +1555,8 @@ void FrontendDelegateDeclarative::OnPageReady(
             if (!delegate) {
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);
@@ -1696,7 +1708,8 @@ void FrontendDelegateDeclarative::PopToPage(const std::string& url)
                 delegate->ProcessRouterTask();
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             if (!pipelineContext->CanPopPage()) {
                 LOGW("router pop to page run in unexpected process");
                 delegate->ResetStagingPage();
@@ -1772,7 +1785,8 @@ void FrontendDelegateDeclarative::PopPage()
             if (!delegate) {
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             if (delegate->GetStackSize() == 1) {
                 if (delegate->disallowPopLastPage_) {
                     LOGW("Not allow back because this is the last page!");
@@ -1827,7 +1841,8 @@ void FrontendDelegateDeclarative::RestorePopPage(const RefPtr<JsAcePage>& page, 
                 return;
             }
             LOGI("RestorePopPage begin");
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             if (delegate->GetStackSize() == 1) {
                 if (delegate->disallowPopLastPage_) {
                     LOGW("Not allow back because this is the last page!");
@@ -1901,7 +1916,8 @@ void FrontendDelegateDeclarative::ClearInvisiblePages()
             if (!delegate) {
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             if (pipelineContext->ClearInvisiblePages([weak]() {
                     auto delegate = weak.Upgrade();
                     if (!delegate) {
@@ -1951,7 +1967,8 @@ void FrontendDelegateDeclarative::ReplacePage(const RefPtr<JsAcePage>& page, con
             if (!delegate) {
                 return;
             }
-            auto pipelineContext = delegate->pipelineContextHolder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);
@@ -2002,7 +2019,7 @@ void FrontendDelegateDeclarative::ReplacePageInSubStage(const RefPtr<JsAcePage>&
             if (!delegate) {
                 return;
             }
-            auto pipelineContext = page->GetPipelineContext().Upgrade();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(page->GetPipelineContext().Upgrade());
             if (!pipelineContext) {
                 LOGE("pipelineContext is null");
                 return;
@@ -2274,8 +2291,11 @@ SingleTaskExecutor FrontendDelegateDeclarative::GetUiTask()
     return SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::UI);
 }
 
-void FrontendDelegateDeclarative::AttachPipelineContext(const RefPtr<PipelineContext>& context)
+void FrontendDelegateDeclarative::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
+    if (!context) {
+        return;
+    }
     context->SetOnPageShow([weak = AceType::WeakClaim(this)] {
         auto delegate = weak.Upgrade();
         if (delegate) {
@@ -2293,7 +2313,7 @@ void FrontendDelegateDeclarative::AttachPipelineContext(const RefPtr<PipelineCon
     jsAccessibilityManager_->InitializeCallback();
 }
 
-RefPtr<PipelineContext> FrontendDelegateDeclarative::GetPipelineContext()
+RefPtr<PipelineBase> FrontendDelegateDeclarative::GetPipelineContext()
 {
     return pipelineContextHolder_.Get();
 }
@@ -2308,7 +2328,8 @@ std::string FrontendDelegateDeclarative::RestoreRouterStack(const std::string& c
     }
     // restore node info
     auto jsonNodeInfo = jsonContentInfo->GetValue("nodeInfo");
-    auto pipelineContext = pipelineContextHolder_.Get();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_RETURN(pipelineContext, "");
     pipelineContext->RestoreNodeInfo(std::move(jsonNodeInfo));
     // restore stack info
     std::lock_guard<std::mutex> lock(mutex_);
@@ -2345,7 +2366,8 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
         jsonContentInfo->Put("stackInfo", jsonRouterStack);
     }
 
-    auto pipelineContext = pipelineContextHolder_.Get();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
     jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
 
     return jsonContentInfo->ToString();

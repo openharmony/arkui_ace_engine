@@ -159,25 +159,17 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         return;
     }
 
-#ifdef USE_V8_ENGINE
-    auto pipelineContext = V8DeclarativeEngineInstance::GetPipelineContext();
-#elif USE_QUICKJS_ENGINE
-    auto pipelineContext = QJSDeclarativeEngineInstance::GetPipelineContext(info[1]->GetJsContext());
-#elif USE_ARK_ENGINE
-    auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
-    auto pipelineContext = JsiDeclarativeEngineInstance::GetPipelineContext(runtime);
-#endif
-    if (!pipelineContext) {
-        LOGE("pipelineContext is null!");
-        return;
-    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
 
     AnimationOption option = CreateAnimation(animationArgs);
     if (SystemProperties::GetRosenBackendEnabled()) {
         LOGD("RSAnimationInfo: Begin JSAnimateTo");
         auto triggerId = Container::CurrentId();
         AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
-            auto context = container->GetPipelineContext();
+            auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (!context) {
                 // pa container do not have pipeline context.
                 return;
@@ -199,7 +191,7 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
         jsAnimateToFunc->Call(info[1]);
         AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
-            auto context = container->GetPipelineContext();
+            auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (!context) {
                 // pa container do not have pipeline context.
                 return;

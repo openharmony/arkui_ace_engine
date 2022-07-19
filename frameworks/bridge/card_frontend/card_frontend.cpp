@@ -54,13 +54,14 @@ void CardFrontend::Destroy()
     LOGI("CardFrontend Destroy end.");
 }
 
-void CardFrontend::AttachPipelineContext(const RefPtr<PipelineContext>& context)
+void CardFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
-    if (!delegate_) {
+    auto pipelineContext = DynamicCast<PipelineContext>(context);
+    if (!delegate_ || !pipelineContext) {
         return;
     }
     eventHandler_ = AceType::MakeRefPtr<CardEventHandler>(delegate_);
-    context->RegisterEventHandler(eventHandler_);
+    pipelineContext->RegisterEventHandler(eventHandler_);
     holder_.Attach(context);
     delegate_->GetJsAccessibilityManager()->SetPipelineContext(context);
     delegate_->GetJsAccessibilityManager()->InitializeCallback();
@@ -171,7 +172,7 @@ void CardFrontend::LoadPage(const std::string& urlPath, const std::string& param
     ParsePage(holder_.Get(), content, params, page);
 }
 
-void CardFrontend::ParsePage(const RefPtr<PipelineContext>& context, const std::string& pageContent,
+void CardFrontend::ParsePage(const RefPtr<PipelineBase>& context, const std::string& pageContent,
     const std::string& params, const RefPtr<Framework::JsAcePage>& page)
 {
     CHECK_RUN_ON(JS);
@@ -217,7 +218,8 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
                 command->Execute(page);
             }
 
-            auto pipelineContext = frontend->holder_.Get();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(frontend->holder_.Get());
+            CHECK_NULL_VOID(pipelineContext);
             auto minSdk = frontend->manifestParser_->GetMinPlatformVersion();
             pipelineContext->SetMinPlatformVersion(minSdk);
 

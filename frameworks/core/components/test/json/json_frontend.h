@@ -38,7 +38,7 @@ public:
 
     void Destroy() override {}
 
-    void AttachPipelineContext(const RefPtr<PipelineContext>& context) override;
+    void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
@@ -169,7 +169,7 @@ private:
     FrontendType type_ { FrontendType::JSON };
     static constexpr int32_t JSON_DESIGN_WIDTH = 1080;
     std::unordered_map<int, RefPtr<AcePage>> pageMap_;
-    RefPtr<PipelineContext> pipelineContext_;
+    RefPtr<PipelineBase> pipelineContext_;
     RefPtr<AceEventHandler> handler_;
     WindowConfig windowConfig_ { .designWidth = JSON_DESIGN_WIDTH, .autoDesignWidth = false };
 };

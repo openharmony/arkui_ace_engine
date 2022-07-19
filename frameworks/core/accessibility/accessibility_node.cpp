@@ -442,7 +442,7 @@ void AccessibilityNode::SetFocusChangeEventMarker(const EventMarker& eventId)
         LOGE("Container is null.");
         return;
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
         LOGE("PipelineContext is null.");
         return;

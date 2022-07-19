@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class PipelineContext;
+class PipelineBase;
 
 class ACE_EXPORT Scheduler : public ScheduleTask {
     DECLARE_ACE_TYPE(Scheduler, ScheduleTask);
@@ -31,7 +31,7 @@ class ACE_EXPORT Scheduler : public ScheduleTask {
 public:
     using OnFrameCallback = std::function<void(uint64_t)>;
 
-    Scheduler(OnFrameCallback&& callback, const WeakPtr<PipelineContext>& context)
+    Scheduler(OnFrameCallback&& callback, const WeakPtr<PipelineBase>& context)
         : callback_(std::move(callback)), context_(context)
     {}
 
@@ -55,7 +55,7 @@ public:
         return isRunning_;
     }
 
-    WeakPtr<PipelineContext> GetContext()
+    WeakPtr<PipelineBase> GetContext()
     {
         return context_;
     }
@@ -78,12 +78,12 @@ private:
     bool isRunning_ = false;
     uint64_t startupTimestamp_ = 0;
     OnFrameCallback callback_ = nullptr;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
 };
 
 class SchedulerBuilder {
 public:
-    static RefPtr<Scheduler> Build(Scheduler::OnFrameCallback&& callback, const WeakPtr<PipelineContext>& context)
+    static RefPtr<Scheduler> Build(Scheduler::OnFrameCallback&& callback, const WeakPtr<PipelineBase>& context)
     {
         return AceType::MakeRefPtr<Scheduler>(std::move(callback), context);
     }

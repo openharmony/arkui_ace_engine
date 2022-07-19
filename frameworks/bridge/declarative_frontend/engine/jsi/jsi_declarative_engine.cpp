@@ -620,7 +620,7 @@ void JsiDeclarativeEngineInstance::TriggerPageUpdate(const shared_ptr<JsRuntime>
     engineInstance->GetDelegate()->TriggerPageUpdate(engineInstance->GetRunningPage()->GetPageId());
 }
 
-RefPtr<PipelineContext> JsiDeclarativeEngineInstance::GetPipelineContext(const shared_ptr<JsRuntime>& runtime)
+RefPtr<PipelineBase> JsiDeclarativeEngineInstance::GetPipelineContext(const shared_ptr<JsRuntime>& runtime)
 {
     LOGD("GetPipelineContext");
     if (runtime == nullptr) {

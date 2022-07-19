@@ -103,7 +103,7 @@ const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] =
 constexpr size_t BLEND_MODE_SIZE = ArraySize(SK_BLEND_MODE_TABLE);
 } // namespace
 
-FlutterRenderOffscreenCanvas::FlutterRenderOffscreenCanvas(const WeakPtr<PipelineContext>& context,
+FlutterRenderOffscreenCanvas::FlutterRenderOffscreenCanvas(const WeakPtr<PipelineBase>& context,
     int32_t width, int32_t height)
 {
     pipelineContext_ = context;

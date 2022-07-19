@@ -161,7 +161,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         // Show dialog.
         auto container = Container::Current();
         if (container) {
-            auto context = container->GetPipelineContext();
+            auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
             auto executor = container->GetTaskExecutor();
             if (executor) {
                 executor->PostTask(

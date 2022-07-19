@@ -77,7 +77,7 @@ JSValue AppTerminate(JSContext* ctx, JSValue value, int32_t argc, JSValueConst* 
         return JS_NULL;
     }
     auto uiTaskExecutor = delegate->GetUiTask();
-    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
+    WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
     uiTaskExecutor.PostTask([pipelineContextWeak]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
@@ -142,7 +142,7 @@ JSValue AppRequestFullWindow(JSContext* ctx, JSValue value, int32_t argc, JSValu
         js_free(ctx, pTab);
     }
     auto instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
-    WeakPtr<PipelineContext> pipelineContextWeak = instance->GetDelegate()->GetPipelineContext();
+    WeakPtr<PipelineBase> pipelineContextWeak = instance->GetDelegate()->GetPipelineContext();
     auto uiTaskExecutor = instance->GetDelegate()->GetUiTask();
     uiTaskExecutor.PostTask([pipelineContextWeak, duration]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
@@ -171,7 +171,7 @@ JSValue AppSetImageCacheCount(JSContext* ctx, JSValue value, int32_t argc, JSVal
         return JS_NULL;
     }
     auto uiTaskExecutor = delegate->GetUiTask();
-    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
+    WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
     int32_t size;
     JS_ToInt32(ctx, &size, argv[0]);
     size = size > 0 ? size : 0;
@@ -207,7 +207,7 @@ JSValue AppSetImageRawDataCacheSize(JSContext* ctx, JSValue value, int32_t argc,
         return JS_NULL;
     }
     auto uiTaskExecutor = delegate->GetUiTask();
-    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
+    WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
     int32_t size;
     JS_ToInt32(ctx, &size, argv[0]);
     size = size > 0 ? size : 0;
@@ -243,7 +243,7 @@ JSValue AppSetImageFileCacheSize(JSContext* ctx, JSValue value, int32_t argc, JS
         return JS_NULL;
     }
     auto uiTaskExecutor = delegate->GetUiTask();
-    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
+    WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
     int32_t size;
     JS_ToInt32(ctx, &size, argv[0]);
     size = size > 0 ? size : 0;

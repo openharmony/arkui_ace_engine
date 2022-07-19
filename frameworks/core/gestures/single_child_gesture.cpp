@@ -27,7 +27,7 @@ const RefPtr<Gesture>& SingleChildGesture::GetChild() const
     return child_;
 }
 
-RefPtr<GestureRecognizer> SingleChildGesture::CreateChildRecognizer(WeakPtr<PipelineContext> context)
+RefPtr<GestureRecognizer> SingleChildGesture::CreateChildRecognizer(WeakPtr<PipelineBase> context)
 {
     return child_->CreateRecognizer(context);
 }

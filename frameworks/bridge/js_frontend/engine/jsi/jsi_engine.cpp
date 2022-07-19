@@ -529,7 +529,7 @@ void SetDomStyle(
     } else {
         command.SetStyles(std::move(styles));
     }
-    auto pipelineContext = GetFrontendDelegate(runtime)->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(GetFrontendDelegate(runtime)->GetPipelineContext());
     command.SetPipelineContext(pipelineContext);
 }
 
@@ -587,7 +587,7 @@ shared_ptr<JsValue> GetAppInfo(const shared_ptr<JsRuntime>& runtime)
 void Terminate(const shared_ptr<JsRuntime>& runtime)
 {
     auto delegate = GetFrontendDelegate(runtime);
-    WeakPtr<PipelineContext> pipelineContextWeak = delegate->GetPipelineContext();
+    WeakPtr<PipelineBase> pipelineContextWeak = delegate->GetPipelineContext();
     auto uiTaskExecutor = delegate->GetUiTask();
     uiTaskExecutor.PostTask([pipelineContextWeak]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
@@ -676,7 +676,7 @@ void RequestFullWindow(const shared_ptr<JsRuntime>& runtime, const shared_ptr<Js
         }
     }
     auto delegate = GetFrontendDelegate(runtime);
-    WeakPtr<PipelineContext> pipelineContextWeak = delegate->GetPipelineContext();
+    WeakPtr<PipelineBase> pipelineContextWeak = delegate->GetPipelineContext();
     auto uiTaskExecutor = delegate->GetUiTask();
     uiTaskExecutor.PostTask([pipelineContextWeak, duration]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();

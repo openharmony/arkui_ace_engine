@@ -135,7 +135,7 @@ public:
 
             ContainerScope scope(instanceId_);
             taskExecutor->PostTask([container, keyboardRect] {
-                auto context = container->GetPipelineContext();
+                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (context != nullptr) {
                     context->OnVirtualKeyboardAreaChange(keyboardRect);
                 }
@@ -229,7 +229,7 @@ void UIContentImpl::DestroyUIDirector()
     if (!container) {
         return;
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
         return;
     }
@@ -539,7 +539,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                         ContainerScope scope(id);
                         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
                     });
-                auto context = container->GetPipelineContext();
+                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
                 }
@@ -582,7 +582,7 @@ void UIContentImpl::Foreground()
         LOGE("get container(id=%{public}d) failed", instanceId_);
         return;
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
         LOGE("get pipeline context failed");
         return;
@@ -641,7 +641,7 @@ uint32_t UIContentImpl::GetBackgroundColor()
                 LOGE("Post sync task GetBackgroundColor failed: container is null. return 0x000000");
                 return;
             }
-            auto pipelineContext = container->GetPipelineContext();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (!pipelineContext) {
                 LOGE("Post sync task GetBackgroundColor failed: pipeline is null. return 0x000000");
                 return;
@@ -817,7 +817,7 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode)
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([container, mode]() {
-        auto pipelineContext = container->GetPipelineContext();
+        auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
         if (!pipelineContext) {
             LOGE("UpdateWindowMode failed, pipeline context is null.");
             return;
@@ -843,7 +843,7 @@ void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, boo
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [container, hideSplit, hideMaximize, hideMinimize]() {
-            auto pipelineContext = container->GetPipelineContext();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (!pipelineContext) {
                 LOGE("pipeline context is null.");
                 return;
@@ -859,7 +859,7 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
         LOGE("get container(id=%{public}d) failed", instanceId_);
         return;
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
         LOGE("get pipeline context failed");
         return;
@@ -875,7 +875,7 @@ void UIContentImpl::InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::A
         LOGE("InitWindowCallback failed, container(id=%{public}d) is null.", instanceId_);
         return;
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
         LOGE("InitWindowCallback failed, pipelineContext is null.");
         return;
@@ -964,7 +964,7 @@ void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
         LOGE("get container(id=%{public}d) failed", instanceId_);
         return;
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
         LOGE("get pipeline context failed");
         return;

@@ -136,7 +136,7 @@ sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
 }
 
 sk_sp<SkData> FileImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
     auto src = imageSourceInfo.GetSrc();
     std::string filePath = RemovePathHead(src);
@@ -176,7 +176,7 @@ sk_sp<SkData> FileImageLoader::LoadImageData(
 }
 
 sk_sp<SkData> DataProviderImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
     auto src = imageSourceInfo.GetSrc();
     auto skData = ImageLoader::LoadDataFromCachedFile(src);
@@ -207,7 +207,7 @@ sk_sp<SkData> DataProviderImageLoader::LoadImageData(
 }
 
 sk_sp<SkData> AssetImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
     auto src = imageSourceInfo.GetSrc();
     if (src.empty()) {
@@ -241,7 +241,7 @@ sk_sp<SkData> AssetImageLoader::LoadImageData(
     return SkData::MakeWithCopy(data, dataSize);
 }
 
-std::string AssetImageLoader::LoadJsonData(const std::string& src, const WeakPtr<PipelineContext> context)
+std::string AssetImageLoader::LoadJsonData(const std::string& src, const WeakPtr<PipelineBase> context)
 {
     if (src.empty()) {
         LOGE("image src is empty");
@@ -273,7 +273,7 @@ std::string AssetImageLoader::LoadJsonData(const std::string& src, const WeakPtr
 }
 
 sk_sp<SkData> NetworkImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
     auto uri = imageSourceInfo.GetSrc();
     // 1. find in cache file path.
@@ -297,7 +297,7 @@ sk_sp<SkData> NetworkImageLoader::LoadImageData(
 }
 
 sk_sp<SkData> InternalImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
     size_t imageSize = 0;
     const uint8_t* internalData =
@@ -310,7 +310,7 @@ sk_sp<SkData> InternalImageLoader::LoadImageData(
 }
 
 sk_sp<SkData> Base64ImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
     SkBase64 base64Decoder;
     std::string_view base64Code = GetBase64ImageCode(imageSourceInfo.GetSrc());
@@ -376,7 +376,7 @@ bool ResourceImageLoader::GetResourceId(const std::string& uri, const RefPtr<The
 }
 
 sk_sp<SkData> ResourceImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
     auto uri = imageSourceInfo.GetSrc();
     auto pipelineContext = context.Upgrade();

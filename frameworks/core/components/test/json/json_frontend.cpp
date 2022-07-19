@@ -32,7 +32,7 @@ bool JsonFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>&)
     return true;
 }
 
-void JsonFrontend::AttachPipelineContext(const RefPtr<PipelineContext>& context)
+void JsonFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     pipelineContext_ = context;
 }
@@ -83,7 +83,7 @@ void JsonFrontend::RunPage(int32_t pageId, const std::string& content, const std
         return;
     }
     taskRunner->PostTask(
-        [page, content, context = pipelineContext_] {
+        [page, content, context = AceType::DynamicCast<PipelineContext>(pipelineContext_)] {
             auto pageComponent = page->BuildPage(content);
             context->PushPage(pageComponent);
         },
@@ -111,7 +111,7 @@ void JsonFrontend::UpdatePage(int32_t pageId, const std::string& content)
         return;
     }
     taskRunner->PostTask(
-        [jsonPage, content, context = pipelineContext_] {
+        [jsonPage, content, context = AceType::DynamicCast<PipelineContext>(pipelineContext_)] {
             auto patchComponent = jsonPage->BuildPagePatch(content);
             context->ScheduleUpdate(patchComponent);
         },

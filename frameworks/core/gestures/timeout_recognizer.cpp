@@ -18,12 +18,12 @@
 #include <unordered_set>
 
 namespace OHOS::Ace {
-SingleChildGestureRecognizer::SingleChildGestureRecognizer(WeakPtr<PipelineContext> context)
+SingleChildGestureRecognizer::SingleChildGestureRecognizer(WeakPtr<PipelineBase> context)
     : context_(std::move(context))
 {
 }
 
-SingleChildGestureRecognizer::SingleChildGestureRecognizer(WeakPtr<PipelineContext> context,
+SingleChildGestureRecognizer::SingleChildGestureRecognizer(WeakPtr<PipelineBase> context,
     RefPtr<GestureRecognizer> child)
     : child_(std::move(child)),
     context_(std::move(context))
@@ -76,7 +76,7 @@ RefPtr<GestureRecognizer> SingleChildGestureRecognizer::GetChild() const
     return child_;
 }
 
-TimeoutRecognizer::TimeoutRecognizer(WeakPtr<PipelineContext> context,
+TimeoutRecognizer::TimeoutRecognizer(WeakPtr<PipelineBase> context,
     std::chrono::duration<float> timeout)
     : SingleChildGestureRecognizer(context),
     context_(context),
@@ -84,7 +84,7 @@ TimeoutRecognizer::TimeoutRecognizer(WeakPtr<PipelineContext> context,
 {
 }
 
-TimeoutRecognizer::TimeoutRecognizer(WeakPtr<PipelineContext> context,
+TimeoutRecognizer::TimeoutRecognizer(WeakPtr<PipelineBase> context,
     RefPtr<GestureRecognizer> child, std::chrono::duration<float> timeout)
     : SingleChildGestureRecognizer(context, std::move(child)),
     context_(context),

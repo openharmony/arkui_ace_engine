@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 
-RefPtr<GestureRecognizer> Ace::PanGesture::CreateRecognizer(WeakPtr<PipelineContext> context)
+RefPtr<GestureRecognizer> Ace::PanGesture::CreateRecognizer(WeakPtr<PipelineBase> context)
 {
     auto newContext = context.Upgrade();
     if (!newContext) {

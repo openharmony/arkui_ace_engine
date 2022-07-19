@@ -29,11 +29,11 @@ public:
     FlutterFontLoader(const std::string& familyName, const std::string& familySrc);
     ~FlutterFontLoader() override = default;
 
-    void AddFont(const RefPtr<PipelineContext>& context) override;
+    void AddFont(const RefPtr<PipelineBase>& context) override;
 
 private:
-    void LoadFromNetwork(const RefPtr<PipelineContext>& context);
-    void LoadFromAsset(const RefPtr<PipelineContext>& context);
+    void LoadFromNetwork(const RefPtr<PipelineBase>& context);
+    void LoadFromAsset(const RefPtr<PipelineBase>& context);
 };
 
 } // namespace OHOS::Ace

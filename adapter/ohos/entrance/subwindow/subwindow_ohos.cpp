@@ -122,7 +122,7 @@ void SubwindowOhos::InitContainer()
             rsUiDirector->SetUITaskRunner(
                 [taskExecutor = container->GetTaskExecutor()](
                     const std::function<void()>& task) { taskExecutor->PostTask(task, TaskExecutor::TaskType::UI); });
-            auto context = container->GetPipelineContext();
+            auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (context != nullptr) {
                 LOGI("Init RSUIDirector");
                 context->SetRSUIDirector(rsUiDirector);
@@ -132,7 +132,8 @@ void SubwindowOhos::InitContainer()
         }
     }
 #endif
-    auto subPipelineContext = Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext();
+    auto subPipelineContext =
+        DynamicCast<PipelineContext>(Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
     if (!subPipelineContext) {
         LOGE("Get SubPipelineContext failed, pipelineContext is null");
     }
@@ -234,7 +235,7 @@ RefPtr<StackElement> SubwindowOhos::GetStack()
         return nullptr;
     }
 
-    auto context = aceContainer->GetPipelineContext();
+    auto context = DynamicCast<PipelineContext>(aceContainer->GetPipelineContext());
     if (!context) {
         LOGE("Get context failed, it is null");
         return nullptr;

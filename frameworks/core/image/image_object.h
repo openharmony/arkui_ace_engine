@@ -31,7 +31,7 @@ class ImageObject : public virtual AceType {
 public:
     static RefPtr<ImageObject> BuildImageObject(
         ImageSourceInfo source,
-        const RefPtr<PipelineContext> context,
+        const RefPtr<PipelineBase> context,
         const sk_sp<SkData>& skData,
         bool useSkiaSvg);
 
@@ -73,7 +73,7 @@ public:
     }
 
     virtual void UploadToGpuForRender(
-        const WeakPtr<PipelineContext>& context,
+        const WeakPtr<PipelineBase>& context,
         const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         const UploadSuccessCallback& successCallback,
         const FailedCallback& failedCallback,
@@ -184,7 +184,7 @@ public:
     ~StaticImageObject() override = default;
 
     void UploadToGpuForRender(
-        const WeakPtr<PipelineContext>& context,
+        const WeakPtr<PipelineBase>& context,
         const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         const UploadSuccessCallback& successCallback,
         const FailedCallback& failedCallback,
@@ -223,7 +223,7 @@ public:
     ~AnimatedImageObject() override = default;
 
     void UploadToGpuForRender(
-        const WeakPtr<PipelineContext>& context,
+        const WeakPtr<PipelineBase>& context,
         const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         const UploadSuccessCallback& successCallback,
         const FailedCallback& failedCallback,

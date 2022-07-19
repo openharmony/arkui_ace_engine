@@ -27,7 +27,7 @@
 #include "core/animation/picture_animation.h"
 #include "core/image/image_source_info.h"
 #include "core/image/image_provider.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -38,7 +38,7 @@ public:
     AnimatedImagePlayer(
         ImageSourceInfo source,
         UploadSuccessCallback successCallback,
-        const WeakPtr<PipelineContext>& weakContext,
+        const WeakPtr<PipelineBase>& weakContext,
         const fml::WeakPtr<flutter::IOManager>& ioManager,
         const fml::RefPtr<flutter::SkiaUnrefQueue>& gpuQueue,
         std::unique_ptr<SkCodec> codec,
@@ -116,7 +116,7 @@ private:
 
     ImageSourceInfo imageSource_;
     UploadSuccessCallback successCallback_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
 
     // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
     fml::WeakPtr<flutter::IOManager> ioManager_;

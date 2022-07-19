@@ -246,7 +246,7 @@ public:
      */
     static void JSBind();
 
-    static const RefPtr<PipelineContext> GetPipelineContext()
+    static const RefPtr<PipelineBase> GetPipelineContext()
     {
         auto container = Container::Current();
         if (!container) {

@@ -31,7 +31,7 @@ class JsiOffscreenCanvasBridge : public BaseCanvasBridge {
 
 public:
     JsiOffscreenCanvasBridge() = default;
-    JsiOffscreenCanvasBridge(const RefPtr<PipelineContext>& pipeContext, int32_t width, int32_t height);
+    JsiOffscreenCanvasBridge(const RefPtr<PipelineBase>& pipeContext, int32_t width, int32_t height);
     ~JsiOffscreenCanvasBridge() override = default;
 
     shared_ptr<JsValue> GetBridge(const shared_ptr<JsRuntime>& runtime);

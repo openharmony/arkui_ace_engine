@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace {
 
-RefPtr<GestureRecognizer> TapGesture::CreateRecognizer(WeakPtr<PipelineContext> context)
+RefPtr<GestureRecognizer> TapGesture::CreateRecognizer(WeakPtr<PipelineBase> context)
 {
     auto clickRecognizer = AceType::MakeRefPtr<OHOS::Ace::ClickRecognizer>(context, fingers_, count_);
     if (onActionId_) {

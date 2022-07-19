@@ -35,7 +35,7 @@ class FlutterRenderOffscreenCanvas : public RenderOffscreenCanvas {
     DECLARE_ACE_TYPE(FlutterRenderOffscreenCanvas, RenderOffscreenCanvas);
 
 public:
-    FlutterRenderOffscreenCanvas(const WeakPtr<PipelineContext>& context, int32_t width, int32_t height);
+    FlutterRenderOffscreenCanvas(const WeakPtr<PipelineBase>& context, int32_t width, int32_t height);
     ~FlutterRenderOffscreenCanvas() override = default;
     void SetAntiAlias(bool isEnabled) override;
     void FillRect(Rect rect) override;
@@ -81,7 +81,7 @@ private:
     void InitCachePaint();
     bool antiAlias_ = true;
     SkPaint GetStrokePaint();
-    WeakPtr<PipelineContext> pipelineContext_;
+    WeakPtr<PipelineBase> pipelineContext_;
     SkBitmap skBitmap_;
     SkPath skPath_;
     SkPath strokePath_;

@@ -38,8 +38,8 @@ class LongPressRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(LongPressRecognizer, MultiFingersRecognizer);
 
 public:
-    explicit LongPressRecognizer(const WeakPtr<PipelineContext>& context) : context_(context) {}
-    LongPressRecognizer(const WeakPtr<PipelineContext>& context, int32_t duration, int32_t fingers, bool repeat,
+    explicit LongPressRecognizer(const WeakPtr<PipelineBase>& context) : context_(context) {}
+    LongPressRecognizer(const WeakPtr<PipelineBase>& context, int32_t duration, int32_t fingers, bool repeat,
         bool isForDrag = false, bool isDisableMouseLeft = false)
         : context_(context), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
           isDisableMouseLeft_(isDisableMouseLeft)
@@ -75,7 +75,7 @@ private:
     void Reset();
     double ConvertPxToVp(double offset) const;
 
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     OnLongPress onLongPress_;
     CancelableCallback<void()> deadlineTimer_;
     CancelableCallback<void()> timer_;

@@ -30,7 +30,7 @@ class ACE_EXPORT SequencedRecognizer : public MultiFingersRecognizer {
 
 public:
     SequencedRecognizer(
-        const WeakPtr<PipelineContext>& context, const std::vector<RefPtr<GestureRecognizer>>& recognizers)
+        const WeakPtr<PipelineBase>& context, const std::vector<RefPtr<GestureRecognizer>>& recognizers)
     {
         for (auto& recognizer : recognizers) {
             recognizer->SetGestureGroup(AceType::WeakClaim(this));
@@ -61,7 +61,7 @@ private:
     std::map<int32_t, TouchEvent> curPoints_;
     size_t activeIndex = 0;
     CancelableCallback<void()> deadlineTimer_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
 };
 
 } // namespace OHOS::Ace

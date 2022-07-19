@@ -272,13 +272,16 @@ bool JsFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskE
     return true;
 }
 
-void JsFrontend::AttachPipelineContext(const RefPtr<PipelineContext>& context)
+void JsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     if (!delegate_) {
         return;
     }
     handler_ = AceType::MakeRefPtr<JsEventHandler>(delegate_);
-    context->RegisterEventHandler(handler_);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(context);
+    if (pipelineContext) {
+        pipelineContext->RegisterEventHandler(handler_);
+    }
     delegate_->AttachPipelineContext(context);
 }
 

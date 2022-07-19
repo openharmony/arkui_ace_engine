@@ -4920,7 +4920,7 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
         LOGE("JsOnVisibleAreaChange: Fail to get container");
         return;
     }
-    auto context = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!context) {
         LOGE("JsOnVisibleAreaChange: Fail to get context");
         return;

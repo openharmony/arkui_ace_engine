@@ -177,7 +177,7 @@ void JSCustomDialogController::ShowDialog()
         LOGE("Container is null.");
         return;
     }
-    auto context = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!context) {
         LOGE("JSCustomDialogController No Context");
         return;
@@ -255,7 +255,7 @@ void JSCustomDialogController::CloseDialog()
         LOGE("Container is null.");
         return;
     }
-    auto context = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!context) {
         LOGE("JSCustomDialogController No Context");
         return;

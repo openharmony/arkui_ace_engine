@@ -66,8 +66,11 @@ void RenderAbilityComponent::Paint(RenderContext& context, const Offset& offset)
 
     auto container = Container::Current();
     auto parentWindowRect = Rect();
-    if (container && container->GetPipelineContext()) {
-        parentWindowRect = container->GetPipelineContext()->GetCurrentWindowRect();
+    if (container) {
+        auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
+        if (context) {
+            parentWindowRect = context->GetCurrentWindowRect();
+        }
     }
     currentRect_.SetOffset(globalOffset + parentWindowRect.GetOffset());
     if (hasConnectionToAbility_) {

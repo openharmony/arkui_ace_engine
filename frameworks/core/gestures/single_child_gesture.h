@@ -27,7 +27,7 @@ public:
 
     void SetChild(RefPtr<Gesture> child);
     const RefPtr<Gesture>& GetChild() const;
-    RefPtr<GestureRecognizer> CreateChildRecognizer(WeakPtr<PipelineContext> context);
+    RefPtr<GestureRecognizer> CreateChildRecognizer(WeakPtr<PipelineBase> context);
 
 private:
     RefPtr<Gesture> child_;

@@ -66,7 +66,7 @@ shared_ptr<JsValue> AppTerminate(const shared_ptr<JsRuntime>& runtime, const sha
         return runtime->NewNull();
     }
     auto uiTaskExecutor = delegate->GetUiTask();
-    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
+    WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
     uiTaskExecutor.PostTask([pipelineContextWeak]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
@@ -103,7 +103,7 @@ shared_ptr<JsValue> AppSetImageCacheCount(const shared_ptr<JsRuntime>& runtime, 
         LOGE("size: %{public}d less than zero is invalid for cache image", size);
         return runtime->NewNull();
     }
-    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
+    WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
     auto uiTaskExecutor = delegate->GetUiTask();
     uiTaskExecutor.PostTask([ pipelineContextWeak, size ]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
@@ -148,7 +148,7 @@ shared_ptr<JsValue> AppSetImageRawDataCacheSize(
         LOGE("size: %{public}d less than zero is invalid for cache image raw data", size);
         return runtime->NewNull();
     }
-    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
+    WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
     auto uiTaskExecutor = delegate->GetUiTask();
     uiTaskExecutor.PostTask([ pipelineContextWeak, size ]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
@@ -191,7 +191,7 @@ shared_ptr<JsValue> AppSetImageFileCacheSize(const shared_ptr<JsRuntime>& runtim
         LOGE("size: %{public}d less than zero is invalid for cache image files", size);
         return runtime->NewNull();
     }
-    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
+    WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
     auto uiTaskExecutor = delegate->GetUiTask();
     uiTaskExecutor.PostTask([ pipelineContextWeak, size ]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();

@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-RefPtr<GestureRecognizer> PinchGesture::CreateRecognizer(WeakPtr<PipelineContext> context)
+RefPtr<GestureRecognizer> PinchGesture::CreateRecognizer(WeakPtr<PipelineBase> context)
 {
     auto newContext = context.Upgrade();
     if (!newContext) {

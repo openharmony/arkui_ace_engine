@@ -20,7 +20,7 @@
 
 #include "base/thread/cancelable_callback.h"
 #include "core/gestures/multi_fingers_recognizer.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -39,12 +39,12 @@ class ClickRecognizer : public MultiFingersRecognizer {
 
 public:
     ClickRecognizer() = default;
-    ClickRecognizer(const WeakPtr<PipelineContext>& context, int32_t fingers, int32_t count)
+    ClickRecognizer(const WeakPtr<PipelineBase>& context, int32_t fingers, int32_t count)
         : count_(count), context_(context)
     {
         fingers_ = fingers;
     }
-    explicit ClickRecognizer(const WeakPtr<PipelineContext>& context) : context_(context) {}
+    explicit ClickRecognizer(const WeakPtr<PipelineBase>& context) : context_(context) {}
     ~ClickRecognizer() override = default;
 
     void OnAccepted() override;
@@ -91,7 +91,7 @@ private:
     ClickCallback onClick_;
     ClickCallback remoteMessage_;
     bool useCatchMode_ = true;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     CancelableCallback<void()> fingerDeadlineTimer_;
     CancelableCallback<void()> tapDeadlineTimer_;
     std::map<int32_t, TouchEvent> touchPoints_;

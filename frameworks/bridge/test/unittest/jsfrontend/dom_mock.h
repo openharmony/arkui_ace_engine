@@ -96,7 +96,7 @@ public:
         return false;
     }
 
-    void AttachPipelineContext(const RefPtr<PipelineContext>& context) override {}
+    void AttachPipelineContext(const RefPtr<PipelineBase>& context) override {}
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override {}
     void DumpFrontend() const override {}
     void AddPage(const RefPtr<AcePage>& page) override {}

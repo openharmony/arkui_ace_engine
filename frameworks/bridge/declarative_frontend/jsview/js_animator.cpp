@@ -69,7 +69,7 @@ RefPtr<PipelineContext> GetCurrentContext()
         LOGW("container is null");
         return nullptr;
     }
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
         LOGE("pipelineContext is null!");
         return nullptr;

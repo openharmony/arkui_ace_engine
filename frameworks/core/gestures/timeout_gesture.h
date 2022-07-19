@@ -29,7 +29,7 @@ public:
     explicit TimeoutGesture(const std::chrono::duration<float>& timeout);
 
 protected:
-    RefPtr<GestureRecognizer> CreateRecognizer(WeakPtr<PipelineContext> context) override;
+    RefPtr<GestureRecognizer> CreateRecognizer(WeakPtr<PipelineBase> context) override;
 
 private:
     std::chrono::duration<float> timeout_;

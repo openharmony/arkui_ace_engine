@@ -216,12 +216,12 @@ public:
         return jsCommands_.size();
     }
 
-    void SetPipelineContext(const WeakPtr<PipelineContext>& pipelineContext)
+    void SetPipelineContext(const WeakPtr<PipelineBase>& pipelineContext)
     {
         pipelineContext_ = pipelineContext;
     }
 
-    WeakPtr<PipelineContext> GetPipelineContext() const
+    WeakPtr<PipelineBase> GetPipelineContext() const
     {
         return pipelineContext_;
     }
@@ -374,7 +374,7 @@ private:
     bool showCommandConsumed_ = false;
     int32_t fragmentCount_ = 0;
 
-    WeakPtr<PipelineContext> pipelineContext_;
+    WeakPtr<PipelineBase> pipelineContext_;
     RefPtr<PageTransitionComponent> pageTransition_;
     RefPtr<Component> component_;
     RefPtr<NG::FrameNode> pageRootNode_;

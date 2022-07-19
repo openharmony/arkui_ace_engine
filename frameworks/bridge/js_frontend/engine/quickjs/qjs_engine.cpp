@@ -480,7 +480,7 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
     }
 
     if (isIine) {
-        std::vector < std::pair < std::string, std::string >> stylesFinally;
+        std::vector<std::pair<std::string, std::string>> stylesFinally;
         for (int32_t i = 0; i < static_cast<int32_t>(styles.size()); i++) {
             std::string key = styles[i].first;
             std::string value = styles[i].second;
@@ -497,7 +497,7 @@ void SetDomStyle(JSContext* ctx, JSValueConst fromMap, JsCommandDomElementOperat
     }
 
     QjsEngineInstance* instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
-    auto pipelineContext = instance->GetDelegate()->GetPipelineContext();
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(instance->GetDelegate()->GetPipelineContext());
     command.SetPipelineContext(pipelineContext);
     js_free(ctx, pTab);
 }
@@ -667,7 +667,7 @@ int32_t CreateDomElement(JSContext* ctx, JSValueConst value, int32_t argc, JSVal
     if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
         page->FlushCommands();
     }
-    return  globalNodeId;
+    return globalNodeId;
 }
 
 JSValue JsDomAddElement(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
@@ -1642,7 +1642,7 @@ JSValue GetAppInfo(JSContext* ctx)
 JSValue Terminate(JSContext* ctx)
 {
     QjsEngineInstance* instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
-    WeakPtr<PipelineContext> pipelineContextWeak = instance->GetDelegate()->GetPipelineContext();
+    WeakPtr<PipelineBase> pipelineContextWeak = instance->GetDelegate()->GetPipelineContext();
     auto uiTaskExecutor = instance->GetDelegate()->GetUiTask();
     uiTaskExecutor.PostTask([pipelineContextWeak]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
@@ -1709,7 +1709,7 @@ JSValue RequestFullWindow(JSContext* ctx, JSValueConst argv)
         js_free(ctx, pTab);
     }
     QjsEngineInstance* instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
-    WeakPtr<PipelineContext> pipelineContextWeak = instance->GetDelegate()->GetPipelineContext();
+    WeakPtr<PipelineBase> pipelineContextWeak = instance->GetDelegate()->GetPipelineContext();
     auto uiTaskExecutor = instance->GetDelegate()->GetUiTask();
     uiTaskExecutor.PostTask([pipelineContextWeak, duration]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
@@ -1850,7 +1850,8 @@ JSValue SetSwipeToDismiss(JSContext* ctx, JSValueConst argv)
     }
 
     QjsEngineInstance* instance = static_cast<QjsEngineInstance*>(JS_GetContextOpaque(ctx));
-    WeakPtr<PipelineContext> pipelineContextWeak = instance->GetDelegate()->GetPipelineContext();
+    WeakPtr<PipelineContext> pipelineContextWeak =
+        AceType::DynamicCast<PipelineContext>(instance->GetDelegate()->GetPipelineContext());
     auto uiTaskExecutor = instance->GetDelegate()->GetUiTask();
     uiTaskExecutor.PostTask([pipelineContextWeak, forbidQuit]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
@@ -2553,7 +2554,7 @@ JSValue AppSetData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCons
         return JS_EXCEPTION;
     }
     std::string key = ScopedString::Stringify(ctx, argv[0]);
-    std::string mapValue =  ScopedString::Stringify(ctx, argv[1]);
+    std::string mapValue = ScopedString::Stringify(ctx, argv[1]);
     dataMap_[key] = mapValue;
     return JS_TRUE;
 }

@@ -31,7 +31,7 @@ public:
         : path_(path), animationOption_(option) {}
     ~AnimatablePath() = default;
 
-    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+    void SetContextAndCallback(const WeakPtr<PipelineBase>& context, const RenderNodeAnimationCallback& callback)
     {
         context_ = context;
         animationCallback_ = callback;
@@ -70,7 +70,7 @@ private:
     std::string pathTo_;
     AnimationOption animationOption_;
     RefPtr<Animator> animationController_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     RenderNodeAnimationCallback animationCallback_ = nullptr;
 };
 

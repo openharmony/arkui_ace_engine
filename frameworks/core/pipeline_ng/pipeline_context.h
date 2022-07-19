@@ -22,38 +22,149 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/event/touch_event.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
-namespace V1 = ::OHOS::Ace;
-
-class ACE_EXPORT PipelineContext final : public V1::PipelineContext {
-    DECLARE_ACE_TYPE(NG::PipelineContext, PipelineContext);
+class ACE_EXPORT PipelineContext final : public PipelineBase {
+    DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
-        RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend);
+    PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+        RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);
 
     ~PipelineContext() override = default;
 
-    void AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElement);
-
     void SetupRootElement() override;
+
+    uint64_t GetTimeFromExternalTimer() override
+    {
+        return 0;
+    }
+
+    bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr) override
+    {
+        return false;
+    }
+
+    void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback) override
+    {}
+
+    void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback) override {}
+
+    void PrepareOpenImplicitAnimation() override {}
+
+    void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& finishCallBack = nullptr) override
+    {}
+
+    void PrepareCloseImplicitAnimation() override {}
+
+    bool CloseImplicitAnimation() override
+    {
+        return false;
+    }
+
+    // add schedule task and return the unique mark id.
+    uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) override
+    {
+        return 0;
+    }
+
+    // remove schedule task by id.
+    void RemoveScheduleTask(uint32_t id) override {}
+
+    // Called by view when touch event received.
+    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
+
+    // Called by container when key event received.
+    // if return false, then this event needs platform to handle it.
+    bool OnKeyEvent(const KeyEvent& event) override
+    {
+        return false;
+    }
+
+    // Called by view when mouse event received.
+    void OnMouseEvent(const MouseEvent& event) override {}
+
+    // Called by view when axis event received.
+    void OnAxisEvent(const AxisEvent& event) override {}
+
+    // Called by container when rotation event received.
+    // if return false, then this event needs platform to handle it.
+    bool OnRotationEvent(const RotationEvent& event) const override
+    {
+        return false;
+    }
+
+    // Called by window when received vsync signal.
+    void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) override
+    {
+        FlushVsync(nanoTimestamp, frameCount);
+    }
+
+    void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override {}
+
+    // Called by view when idle event.
+    void OnIdle(int64_t deadline) override {}
+
+    void OnActionEvent(const std::string& action) override {}
+
+    void SetBuildAfterCallback(const std::function<void()>& callback) override {}
+
+    void SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) override {}
+
+    void SaveExplicitAnimationOption(const AnimationOption& option) override {}
+
+    void CreateExplicitAnimator(const std::function<void()>& onFinishEvent) override {}
+
+    void ClearExplicitAnimationOption() override {}
+
+    const AnimationOption GetExplicitAnimationOption() const override
+    {
+        return AnimationOption();
+    }
+
+    void Destroy() override {}
+
+    void OnShow() override {}
+
+    void OnHide() override {}
+
+    void OnSurfaceChanged(
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override
+    {
+        SetRootSize(density_, width, height);
+    }
+
+    void OnSurfaceDensityChanged(double density) override;
+
+    void OnSystemBarHeightChanged(double statusBar, double navigationBar) override {}
+
+    void OnSurfaceDestroyed() override {}
+
+    void NotifyOnPreDraw() override {}
+
+    bool CallRouterBackToPopPage() override
+    {
+        return false;
+    }
+
+    void AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElement);
 
     void SetRootRect(double width, double height, double offset) override;
 
     RefPtr<StageManager> GetStageManager();
 
-    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
-
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
+    void FlushAnimation(uint64_t nanoTimestamp) override {}
 
 private:
     void FlushTouchEvents();
@@ -91,6 +202,7 @@ private:
 
     RefPtr<FrameNode> rootNode_ = nullptr;
     RefPtr<StageManager> stageManager_ = nullptr;
+    bool hasIdleTasks_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

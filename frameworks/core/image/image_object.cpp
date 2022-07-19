@@ -31,7 +31,7 @@ std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, Size t
 
 RefPtr<ImageObject> ImageObject::BuildImageObject(
     ImageSourceInfo source,
-    const RefPtr<PipelineContext> context,
+    const RefPtr<PipelineBase> context,
     const sk_sp<SkData>& skData,
     bool useSkiaSvg)
 {
@@ -43,7 +43,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
         }
         auto color = source.GetFillColor();
         if (!useSkiaSvg) {
-            auto svgDom = SvgDom::CreateSvgDom(*svgStream, context, color);
+            auto svgDom = SvgDom::CreateSvgDom(*svgStream, DynamicCast<PipelineContext>(context), color);
             return svgDom ? MakeRefPtr<SvgImageObject>(source, Size(), 1, svgDom) : nullptr;
         } else {
             uint64_t colorValue = 0;
@@ -103,7 +103,7 @@ Size SvgSkiaImageObject::MeasureForImage(RefPtr<RenderImage> image)
 }
 
 void StaticImageObject::UploadToGpuForRender(
-    const WeakPtr<PipelineContext>& context,
+    const WeakPtr<PipelineBase>& context,
     const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     const UploadSuccessCallback& successCallback,
     const FailedCallback& failedCallback,
@@ -188,7 +188,7 @@ bool StaticImageObject::CancelBackgroundTasks()
 }
 
 void AnimatedImageObject::UploadToGpuForRender(
-    const WeakPtr<PipelineContext>& context,
+    const WeakPtr<PipelineBase>& context,
     const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     const UploadSuccessCallback& successCallback,
     const FailedCallback& failedCallback,

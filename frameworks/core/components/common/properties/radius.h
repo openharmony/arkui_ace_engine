@@ -33,7 +33,7 @@ public:
     Radius(const AnimatableDimension& x, const AnimatableDimension& y) : x_(x), y_(y) {}
     ~Radius() = default;
 
-    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+    void SetContextAndCallback(const WeakPtr<PipelineBase>& context, const RenderNodeAnimationCallback& callback)
     {
         x_.SetContextAndCallback(context, callback);
         y_.SetContextAndCallback(context, callback);

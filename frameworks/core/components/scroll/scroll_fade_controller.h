@@ -39,7 +39,7 @@ class ScrollFadeController : public AceType {
     DECLARE_ACE_TYPE(ScrollFadeController, AceType);
 
 public:
-    explicit ScrollFadeController(const WeakPtr<PipelineContext>& context);
+    explicit ScrollFadeController(const WeakPtr<PipelineBase>& context);
     ~ScrollFadeController();
     void ProcessAbsorb(double velocity);
     void ProcessPull(double overDistance, double mainAxisExtent, double crossAxisExtent);
@@ -67,7 +67,7 @@ private:
     double pullDistance_ = 0.0;
     OverScrollState state_ = OverScrollState::IDLE;
     RefPtr<Animator> controller_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     RefPtr<Animation<double>> decele_;
     ScrollOverFunc callback_;
     CancelableCallback<void()> pullTask_;

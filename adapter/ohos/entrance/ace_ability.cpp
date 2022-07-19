@@ -647,7 +647,7 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode)
     ContainerScope scope(abilityId_);
     taskExecutor->PostTask(
         [container, mode]() {
-            auto pipelineContext = container->GetPipelineContext();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (!pipelineContext) {
                 LOGE("OnModeChange failed, pipeline context is null.");
                 return;
@@ -684,7 +684,7 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
         ContainerScope scope(abilityId_);
         taskExecutor->PostTask(
             [container, keyboardRect] {
-                auto context = container->GetPipelineContext();
+                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
                 if (context != nullptr) {
                     context->OnVirtualKeyboardAreaChange(keyboardRect);
                 }
@@ -708,7 +708,7 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
     ContainerScope scope(abilityId_);
     taskExecutor->PostSyncTask(
         [container, params, &info] {
-            auto context = container->GetPipelineContext();
+            auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (context != nullptr) {
                 context->DumpInfo(params, info);
             }
@@ -845,7 +845,7 @@ uint32_t AceAbility::GetBackgroundColor()
                 LOGE("Post sync task GetBackgroundColor failed: container is null. return 0x000000");
                 return;
             }
-            auto pipelineContext = container->GetPipelineContext();
+            auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
             if (!pipelineContext) {
                 LOGE("Post sync task GetBackgroundColor failed: pipeline is null. return 0x000000");
                 return;
