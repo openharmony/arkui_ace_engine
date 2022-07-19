@@ -29,6 +29,7 @@
 #include "core/components_v2/list/render_list_item.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
+#include "core/components/refresh/render_refresh.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -359,6 +360,7 @@ protected:
     bool chainAnimation_ = false;
     bool chainOverScroll_ = false;
     double currentDelta_ = 0.0;
+    bool inLinkRefresh_ = false;
 
     SpringChainProperty chainProperty_;
     RefPtr<SpringProperty> overSpringProperty_;
@@ -406,6 +408,7 @@ protected:
     double prevOffset_ = 0.0;
     double prevMainPos_ = 0.0;
     double estimatedHeight_ = 0.0;
+    WeakPtr<RenderRefresh> refreshParent_;
 
 private:
     int32_t lanes_ = -1;
@@ -464,6 +467,7 @@ private:
     void MultiSelectAllWhenCtrlA();
 
     void ApplyRestoreInfo();
+    bool HandleRefreshEffect(double& delta, int32_t source);
 
     bool hasDragItem_ = false;
     std::map<ListEvents, bool> listEventFlags_;
