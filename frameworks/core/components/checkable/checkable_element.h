@@ -31,6 +31,7 @@ public:
     void OnClick() override;
     void OnFocus() override;
     void OnBlur() override;
+    bool OnKeyEvent(const KeyEvent& keyEvent) override;
 
     bool CanUpdate(const RefPtr<Component>& newComponent) override
     {
