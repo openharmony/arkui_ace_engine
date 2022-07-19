@@ -264,13 +264,7 @@ void ImageProvider::UploadImageToGPUForRender(
     // If want to dump draw command or gpu disabled, should use CPU image.
     callback({ image, renderTaskHolder->unrefQueue });
 #else
-    auto rasterizedImage = image->makeRasterImage();
-    if (!rasterizedImage) {
-        LOGW("Rasterize image failed. callback.");
-        callback({ image, renderTaskHolder->unrefQueue });
-        return;
-    }
-    auto task = [rasterizedImage, callback, renderTaskHolder] () {
+    auto task = [image, callback, renderTaskHolder] () {
         if (!renderTaskHolder) {
             LOGW("renderTaskHolder has been released.");
             return;
@@ -278,13 +272,19 @@ void ImageProvider::UploadImageToGPUForRender(
         // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
         if (!renderTaskHolder->ioManager) {
             // Shell is closing.
-            callback({ rasterizedImage, renderTaskHolder->unrefQueue });
+            callback({ image, renderTaskHolder->unrefQueue });
             return;
         }
-        ACE_DCHECK(!rasterizedImage->isTextureBacked());
+        ACE_DCHECK(!image->isTextureBacked());
         auto resContext = renderTaskHolder->ioManager->GetResourceContext();
         if (!resContext) {
-            callback({ rasterizedImage, renderTaskHolder->unrefQueue });
+            callback({ image, renderTaskHolder->unrefQueue });
+            return;
+        }
+        auto rasterizedImage = image->makeRasterImage();
+        if (!rasterizedImage) {
+            LOGW("Rasterize image failed. callback.");
+            callback({ image, renderTaskHolder->unrefQueue });
             return;
         }
         SkPixmap pixmap;
