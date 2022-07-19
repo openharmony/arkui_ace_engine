@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/log/dump_log.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/scroll/render_single_child_scroll.h"
@@ -581,6 +582,10 @@ void RenderFlex::ResizeItems(const FlexItemProperties& flexItemProps, BaselinePr
         } else {
             remainSpace -= infiniteLayoutSize;
         }
+    }
+    // reduce layout times in special cases
+    if (relativeNodes_.size() <= 1 && crossAxisAlign_ != FlexAlign::STRETCH && NearZero(remainSpace)) {
+        return;
     }
     double spacePerFlex = 0.0;
     double allocatedFlexSpace = 0.0;
