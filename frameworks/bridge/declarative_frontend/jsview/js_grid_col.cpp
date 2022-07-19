@@ -36,27 +36,27 @@ RefPtr<V2::GridContainerSize> ParserGridContianerSize(const JSRef<JSVal>& jsValu
         auto gridParam = JSRef<JSObject>::Cast(jsValue);
         if (jsValue->IsObject()) {
             auto xs = gridParam->GetProperty("xs");
-            if (xs->IsNumber() && xs->ToNumber<int32_t>() > 0) {
+            if (xs->IsNumber() && xs->ToNumber<int32_t>() >= 0) {
                 gridContainerSize->xs = xs->ToNumber<int32_t>();
             }
             auto sm = gridParam->GetProperty("sm");
-            if (sm->IsNumber() && sm->ToNumber<int32_t>() > 0) {
+            if (sm->IsNumber() && sm->ToNumber<int32_t>() >= 0) {
                 gridContainerSize->sm = sm->ToNumber<int32_t>();
             }
             auto md = gridParam->GetProperty("md");
-            if (md->IsNumber() && md->ToNumber<int32_t>() > 0) {
+            if (md->IsNumber() && md->ToNumber<int32_t>() >= 0) {
                 gridContainerSize->md = md->ToNumber<int32_t>();
             }
             auto lg = gridParam->GetProperty("lg");
-            if (lg->IsNumber() && lg->ToNumber<int32_t>() > 0) {
+            if (lg->IsNumber() && lg->ToNumber<int32_t>() >= 0) {
                 gridContainerSize->lg = lg->ToNumber<int32_t>();
             }
             auto xl = gridParam->GetProperty("xl");
-            if (xl->IsNumber() && xl->ToNumber<int32_t>() > 0) {
+            if (xl->IsNumber() && xl->ToNumber<int32_t>() >= 0) {
                 gridContainerSize->xl = xl->ToNumber<int32_t>();
             }
             auto xxl = gridParam->GetProperty("xxl");
-            if (xxl->IsNumber() && xxl->ToNumber<int32_t>() > 0) {
+            if (xxl->IsNumber() && xxl->ToNumber<int32_t>() >= 0) {
                 gridContainerSize->xxl = xxl->ToNumber<int32_t>();
             }
         }
