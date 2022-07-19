@@ -1348,6 +1348,13 @@ public:
     {
         windowFocusChangedCallbackMap_.erase(callbackId);
     }
+
+    void AddRectCallback(OutOfRectGetRectCallback& getRectCallback, OutOfRectTouchCallback& touchCallback,
+        OutOfRectMouseCallback& mouseCallback)
+    {
+        rectCallbackList_.emplace_back(
+            RectCallback(getRectCallback, touchCallback, mouseCallback));
+    }
     
 protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
@@ -1621,6 +1628,8 @@ private:
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     bool usePartialupdate_ = false;
+
+    std::vector<RectCallback> rectCallbackList_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

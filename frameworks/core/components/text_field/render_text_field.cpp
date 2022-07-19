@@ -396,6 +396,7 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
     if (event.button == MouseButton::LEFT_BUTTON) {
         if (event.action == MouseAction::PRESS) {
             UpdateStartSelection(DEFAULT_SELECT_INDEX, event.GetOffset(), true, false);
+            AddOutOfRectCallbackToContext();
         } else if (event.action == MouseAction::MOVE) {
             int32_t start = GetEditingValue().selection.baseOffset;
             int32_t end = GetCursorPositionForClick(event.GetOffset());
@@ -409,6 +410,7 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         Offset rightClickOffset = event.GetOffset();
         ShowTextOverlay(rightClickOffset, false, true);
+        AddOutOfRectCallbackToContext();
     }
 
     return false;
@@ -596,6 +598,62 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     if (context) {
         context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
     }
+    AddOutOfRectCallbackToContext();
+}
+
+void RenderTextField::OnEditChange(bool isInEditStatus)
+{
+    CHECK_NULL_VOID(onEditChanged_);
+    if (isInEditStatus && !isInEditStatus_) {
+        isInEditStatus_ = true;
+        onEditChanged_(true);
+    } else if (!isInEditStatus && isInEditStatus_) {
+        isInEditStatus_ = false;
+        onEditChanged_(false);
+    }
+}
+
+void RenderTextField::AddOutOfRectCallbackToContext()
+{
+    auto context = GetContext().Upgrade();
+    CHECK_NULL_VOID(context);
+    OutOfRectTouchCallback outRectCallback = [weak = WeakClaim(this)]() {
+        auto render = weak.Upgrade();
+        if (render) {
+            if (render->isOverlayShowed_) {
+                render->PopTextOverlay();
+            }
+            render->StopTwinkling();
+            render->CloseKeyboard();
+            render->OnEditChange(false);
+        }
+    };
+    OutOfRectGetRectCallback getRectCallback = [weak = WeakClaim(this)](std::vector<Rect>& resRectList) {
+        auto render = weak.Upgrade();
+        if (render) {
+            render->GetFieldAndOverlayTouchRect(resRectList);
+        }
+    };
+    context->AddRectCallback(getRectCallback, outRectCallback, outRectCallback);
+}
+
+void RenderTextField::GetFieldAndOverlayTouchRect(std::vector<Rect>& resRectList)
+{
+    auto context = GetContext().Upgrade();
+    CHECK_NULL_VOID(context);
+    resRectList.clear();
+    auto fieldTouchRectList = GetTouchRectList();
+    for (auto& rect : fieldTouchRectList) {
+        rect.SetOffset(GetGlobalOffset());
+    }
+    resRectList.insert(
+        resRectList.end(), fieldTouchRectList.begin(), fieldTouchRectList.end());
+    auto textOverlayManager = context->GetTextOverlayManager();
+    if (textOverlayManager) {
+        auto overlayTouchRectList = textOverlayManager->GetTextOverlayRect();
+        resRectList.insert(
+            resRectList.end(), overlayTouchRectList.begin(), overlayTouchRectList.end());
+    }
 }
 
 bool RenderTextField::SearchAction(const Offset& globalPosition, const Offset& globalOffset)
@@ -633,6 +691,7 @@ void RenderTextField::OnDoubleClick(const ClickInfo& clickInfo)
     LOGI("text field accept double click, position: %{public}d, selection: %{public}s", clickPosition,
         selection.ToString().c_str());
     MarkNeedRender();
+    AddOutOfRectCallbackToContext();
 }
 
 void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
@@ -660,6 +719,7 @@ void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
     bool isPassword = (keyboard_ == TextInputType::VISIBLE_PASSWORD);
     UpdateStartSelection(DEFAULT_SELECT_INDEX, longPressPosition, singleHandle || isPassword, true);
     ShowTextOverlay(longPressPosition, false);
+    AddOutOfRectCallbackToContext();
 }
 
 void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHandle, bool isUsingMouse)
@@ -922,9 +982,6 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
     if (needStartTwinkling) {
         StartTwinkling();
     }
-    if (onEditChanged_) {
-        onEditChanged_(softKeyboardEnabled_);
-    }
     return true;
 }
 
@@ -954,9 +1011,6 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
         if (keyboard_ != TextInputType::MULTILINE) {
             resetToStart_ = true;
             MarkNeedLayout();
-        }
-        if (onEditChanged_) {
-            onEditChanged_(forceClose);
         }
         return true;
     }
