@@ -51,7 +51,6 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/clock_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/component_api_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/image_animator_bridge.h"
-#include "frameworks/bridge/js_frontend/engine/quickjs/intl/intl_support.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/list_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/offscreen_canvas_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_group_js_bridge.h"
@@ -2653,50 +2652,6 @@ JSValue JsPluralRulesFormat(JSContext* ctx, JSValueConst value, int32_t argc, JS
     }
 }
 
-JSValue JsLoadIntl(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
-{
-    ACE_SCOPED_TRACE("QjsEngine::LoadIntl");
-    LOGI("JsLoadIntl");
-
-    JSValue ret = CallReadObject(ctx, js_intl_support, js_intl_support_size, true);
-    if (JS_IsException(ret)) {
-        LOGE("JsLoadIntl failed!");
-    }
-
-    return ret;
-}
-
-JSValue JsLoadLocaleData(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
-{
-    ACE_SCOPED_TRACE("QjsEngine::LoadLocaleData");
-    LOGI("Add LocaleData");
-
-    ScopedString lib(ctx, argv[0]);    // select which lib(intl or intl-relative-time-format) to use
-    ScopedString locale(ctx, argv[1]); // select locale
-
-    std::string key;
-    if (strcmp(lib.get(), "intl") == 0) {
-        key.append("intl_");
-    } else {
-        key.append("intl_relative_");
-    }
-    key.append(locale.get());
-    std::replace(key.begin(), key.end(), '-', '_');
-
-    std::unordered_map<std::string, std::vector<const void*>> data = GetLocaleDatasMap();
-    if (data.find(key) != data.end()) {
-        std::vector<const void*> val = data[key];
-        const uint32_t* len = static_cast<const uint32_t*>(val[0]);
-        const uint8_t* rawData = static_cast<const uint8_t*>(val[1]);
-        JSValue ret = CallReadObject(ctx, rawData, *len, true);
-        LOGI("load data: %s", key.c_str());
-        return ret;
-    } else {
-        LOGE("load data: %s not found!", key.c_str());
-        return JS_NULL;
-    }
-}
-
 // Follow definition in quickjs.
 #define JS_CFUNC_DEF_CPP(name, length, func)                            \
     {                                                                   \
@@ -2721,8 +2676,6 @@ const JSCFunctionListEntry JS_ACE_FUNCS[] = {
     JS_CFUNC_DEF_CPP("removeElement", 2, JsRemoveElement),
     JS_CFUNC_DEF_CPP("callNative", 1, JsCallNative),
     JS_CFUNC_DEF_CPP("callComponent", 3, JsCallComponent),
-    JS_CFUNC_DEF_CPP("loadIntl", 0, JsLoadIntl),
-    JS_CFUNC_DEF_CPP("loadLocaleData", 0, JsLoadLocaleData),
 #if defined(ENABLE_JS_DEBUG) || defined(ENABLE_JS_DEBUG_PREVIEW)
     JS_CFUNC_DEF_CPP("compileAndRunBundle", 4, JsCompileAndRunBundle),
 #endif
@@ -2930,31 +2883,6 @@ bool QjsEngineInstance::InitJsEnv(
     bool result = JS_IsException(retVal) ? false : true;
     if (context) {
         JS_FreeValue(context, retVal);
-    }
-
-    std::string intlHook("                                       \
-        globalThis.Intl = {                                      \
-            NumberFormat: function() {                           \
-                delete globalThis.Intl;                          \
-                ace.loadIntl();                                  \
-                return Intl.NumberFormat(...arguments);          \
-            },                                                   \
-            DateTimeFormat: function() {                         \
-               delete globalThis.Intl;                           \
-               ace.loadIntl();                                   \
-               return Intl.DateTimeFormat(...arguments);         \
-            },                                                   \
-            RelativeTimeFormat: function() {                     \
-                delete globalThis.Intl;                          \
-                ace.loadIntl();                                  \
-                return new Intl.RelativeTimeFormat(...arguments);\
-            }                                                    \
-        }                                                        \
-    ");
-
-    if (JS_CALL_FAIL ==
-        CallEvalBuf(context, intlHook.c_str(), intlHook.size(), "<input>", JS_EVAL_TYPE_GLOBAL, instanceId_)) {
-        LOGE("Intl init failed!");
     }
 
     return result;
