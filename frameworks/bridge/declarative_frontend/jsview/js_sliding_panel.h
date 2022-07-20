@@ -42,6 +42,7 @@ public:
     static void JsPanelBorderStyle(int32_t style);
     static void JsPanelBorderWidth(const JSCallbackInfo& info);
     static void JsPanelBorderRadius(const JSCallbackInfo& info);
+    static void ParsePanelRadius(const JSRef<JSVal>& args);
 
 protected:
     static RefPtr<BoxComponent> GetPanelBox();
