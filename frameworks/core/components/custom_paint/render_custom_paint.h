@@ -312,13 +312,8 @@ protected:
     ContextType type_ = ContextType::RENDER_2D;
     CanvasRenderContextBase* webGLContext_ = nullptr;
 
-    Offset position_;
     Size drawSize_;
-    Offset prePosition_;
-    Size preDrawSize_;
     bool isCanvasInit_ = false;
-    bool positionChange_ = false;
-    bool sizeChange_ = false;
     std::function<void()> canvasOnReadyEvent_;
 private:
     Dimension width_;
