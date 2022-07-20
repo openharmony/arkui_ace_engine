@@ -30,6 +30,10 @@ BorderImagePainter::BorderImagePainter(const Size& paintSize, const RefPtr<Decor
     : paintSize_(paintSize), decoration_(decoration), image_(image), dipscale_(dipscale)
 {}
 
+namespace {
+    constexpr double EXTRA_OFFSET = 1.0;
+}
+
 void BorderImagePainter::InitPainter()
 {
     imageWidth_ = std::ceil(image_->width());
@@ -224,10 +228,11 @@ void BorderImagePainter::PaintBorderImage(const Offset& offset, SkCanvas* canvas
 
 void BorderImagePainter::FillBorderImageCenter(const Offset& offset, SkCanvas* canvas, SkPaint& paint)
 {
-    double destLeftOffset = offset.GetX() - leftOutset_ + leftWidth_;
-    double destTopOffset = offset.GetY() - topOutset_ + topWidth_;
+    double destLeftOffset = offset.GetX() - leftOutset_ + leftWidth_ - EXTRA_OFFSET;
+    double destTopOffset = offset.GetY() - topOutset_ + topWidth_ - EXTRA_OFFSET;
     SkRect srcRectCenter = SkRect::MakeXYWH(leftSlice_, topSlice_, imageCenterWidth_, imageCenterHeight_);
-    SkRect desRectCenter = SkRect::MakeXYWH(destLeftOffset, destTopOffset, borderCenterWidth_, borderCenterHeight_);
+    SkRect desRectCenter = SkRect::MakeXYWH(destLeftOffset, destTopOffset,
+        borderCenterWidth_ + EXTRA_OFFSET * 2, borderCenterHeight_ + EXTRA_OFFSET * 2);
     canvas->drawImageRect(image_, srcRectCenter, desRectCenter, &paint);
 }
 
@@ -250,22 +255,25 @@ void BorderImagePainter::PaintBorderImageCorners(const Offset& offset, SkCanvas*
 
     // Draw the four corners of the picture to the four corners of the border
     // left top
-    SkRect desRectLeftTop = SkRect::MakeXYWH(offsetLeftX, offsetTopY, leftWidth_, topWidth_);
+    SkRect desRectLeftTop = SkRect::MakeXYWH(offsetLeftX, offsetTopY,
+        leftWidth_ + EXTRA_OFFSET, topWidth_ + EXTRA_OFFSET);
     canvas->drawImageRect(image_, srcRectLeftTop, desRectLeftTop, &paint);
 
     // right top
-    SkRect desRectRightTop = SkRect::MakeXYWH(offsetRightX - rightWidth_, offsetTopY, rightWidth_, topWidth_);
+    SkRect desRectRightTop = SkRect::MakeXYWH(offsetRightX - rightWidth_ - EXTRA_OFFSET, offsetTopY,
+        rightWidth_ + EXTRA_OFFSET, topWidth_ + EXTRA_OFFSET);
     canvas->drawImageRect(image_, srcRectRightTop, desRectRightTop, &paint);
 
     // left bottom
     SkRect desRectLeftBottom =
-        SkRect::MakeXYWH(offsetLeftX, offsetBottomY - bottomWidth_, leftWidth_, bottomWidth_);
+        SkRect::MakeXYWH(offsetLeftX, offsetBottomY - bottomWidth_ - EXTRA_OFFSET,
+            leftWidth_ + EXTRA_OFFSET, bottomWidth_ + EXTRA_OFFSET);
     canvas->drawImageRect(image_, srcRectLeftBottom, desRectLeftBottom, &paint);
 
     // right bottom
     SkRect desRectRightBottom =
-        SkRect::MakeXYWH(offsetRightX - rightWidth_, offsetBottomY - bottomWidth_,
-            rightWidth_, bottomWidth_);
+        SkRect::MakeXYWH(offsetRightX - rightWidth_ - EXTRA_OFFSET, offsetBottomY - bottomWidth_ - EXTRA_OFFSET,
+            rightWidth_ + EXTRA_OFFSET, bottomWidth_ + EXTRA_OFFSET);
     canvas->drawImageRect(image_, srcRectRightBottom, desRectRightBottom, &paint);
 }
 
