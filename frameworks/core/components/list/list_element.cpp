@@ -712,11 +712,12 @@ void ListElement::UpdateListElement()
         LOGD("rebuild elements");
         ResetStickyItem();
         RebuildElements(tailIndex);
+        PatchElements(true);
         renderList_->MarkNeedRefresh();
         needRefresh_ = true;
     } else {
         LOGD("patch elements");
-        PatchElements();
+        PatchElements(false);
     }
 }
 
@@ -844,25 +845,33 @@ void ListElement::RebuildElements(int32_t tailIndex)
     }
 }
 
-void ListElement::PatchElements()
+void ListElement::PatchElements(bool rebuild)
 {
     if (needRefreshItems_.empty()) {
         LOGE("need refresh is empty");
         return;
     }
 
-    RefPtr<ComponentGroup> group = AceType::DynamicCast<ComponentGroup>(component_);
-    if (!group || group->GetChildren().empty()) {
-        return;
+    RefPtr<ListItemComponent> startItem;
+    if (rebuild) {
+        startItem = ListItemComponent::GetListItem(needRefreshItems_.back());
+    } else {
+        startItem = ListItemComponent::GetListItem(needRefreshItems_.front());
     }
-
-    auto startItem = ListItemComponent::GetListItem(needRefreshItems_.front());
     if (!startItem) {
         LOGE("start item is not list item");
         return;
     }
 
     int32_t start = startItem->GetIndex();
+    if (rebuild) {
+        start += 1;
+    }
+
+    RefPtr<ComponentGroup> group = AceType::DynamicCast<ComponentGroup>(component_);
+    if (!group || group->GetChildren().empty()) {
+        return;
+    }
 
     auto children = group->GetChildren();
     auto iter = children.begin();
@@ -871,7 +880,7 @@ void ListElement::PatchElements()
         auto listItemComponent = ListItemComponent::GetListItem(*iter);
         if (listItemComponent) {
             if (listItemComponent->GetOperation() == LIST_ITEM_OP_REMOVE) {
-                group->RemoveChild(*iter);
+                group->ComponentGroup::RemoveChild(*iter);
             } else {
                 listItemComponent->SetOperation(LIST_ITEM_OP_NONE);
                 listItemComponent->RemoveFlag(LIST_ITEM_FLAG_IN_RANGE);
