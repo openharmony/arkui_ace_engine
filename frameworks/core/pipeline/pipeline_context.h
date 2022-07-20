@@ -1297,6 +1297,13 @@ public:
     }
 #endif
 
+    void AddRectCallback(OutOfRectGetRectCallback& getRectCallback, OutOfRectTouchCallback& touchCallback,
+        OutOfRectMouseCallback& mouseCallback)
+    {
+        rectCallbackList_.emplace_back(
+            RectCallback(getRectCallback, touchCallback, mouseCallback));
+    }
+
 protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount);
     virtual void SetRootRect(double width, double height, double offset = 0.0);
@@ -1563,6 +1570,8 @@ private:
 #ifdef ENABLE_ROSEN_BACKEND
     PostRSTaskCallback postRSTaskCallback_;
 #endif
+
+    std::vector<RectCallback> rectCallbackList_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
