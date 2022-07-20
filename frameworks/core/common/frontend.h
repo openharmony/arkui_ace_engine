@@ -43,6 +43,18 @@ struct WindowConfig {
     bool autoDesignWidth = false;
     bool boxWrap = false;
     double designWidthScale = 0.0;
+
+    double GetDesignWidthScale(const double viewWidth)
+    {
+        if (NearEqual(designWidthScale, 0.0)) {
+            if (designWidth <= 0) {
+                LOGI("designWidth <= 0");
+                designWidth = DEFAULT_DESIGN_WIDTH;
+            }
+            return viewWidth / designWidth;
+        }
+        return designWidthScale;
+    }
 };
 
 enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN };
