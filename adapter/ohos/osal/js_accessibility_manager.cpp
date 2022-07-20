@@ -254,9 +254,8 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
         nodeInfo.SetVisible(false);
     }
 
-    std::vector<int32_t> childIds = node->GetChildIds();
-    for (size_t i = 0; i < childIds.size(); ++i) {
-        nodeInfo.AddChild(childIds[i]);
+    for (const auto& child : node->GetChildList()) {
+        nodeInfo.AddChild(child->GetNodeId());
     }
 
 #ifdef ACE_DEBUG
