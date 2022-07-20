@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_INPUT_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_INPUT_H
 
+#include "core/components/button/button_component.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/input_option.h"
 #include "core/components/checkable/checkable_component.h"
@@ -74,6 +75,16 @@ protected:
         if (theme && checkableComponent) {
             checkableComponent->ApplyTheme(theme);
             SetWidth(theme->GetWidth());
+            SetHeight(theme->GetHeight());
+        }
+    }
+
+    void InitButton()
+    {
+        const auto& theme = GetTheme<ButtonTheme>();
+        const auto& buttonComponent = AceType::DynamicCast<ButtonComponent>(inputChild_);
+        if (theme && buttonComponent) {
+            buttonComponent->ApplyTheme(theme);
             SetHeight(theme->GetHeight());
         }
     }
