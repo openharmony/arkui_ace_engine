@@ -32,22 +32,21 @@ using localSocket = boost::asio::local::stream_protocol;
 
 class WsServer {
 public:
-    WsServer(const std::string& component, const std::function<void()>& onMessage, int32_t instanceId)
+    WsServer(const std::string& component, const std::function<void(std::string&&)>& onMessage, int32_t instanceId)
         : instanceId_(instanceId), componentName_(component), wsOnMessage_(onMessage)
     {}
     ~WsServer() = default;
     void RunServer();
     void StopServer();
     void SendReply(const std::string& message) const;
-    std::queue<const std::string> ideMsgQueue;
 
 private:
-    volatile bool connectState_ {false};
-    volatile bool terminateExecution_ { false };
+    std::atomic<bool> connectState_ {false};
+    std::atomic<bool> terminateExecution_ { false };
     int32_t instanceId_ {0};
     pthread_t tid_ {0};
     std::string componentName_ {};
-    std::function<void()> wsOnMessage_ {};
+    std::function<void(std::string&&)> wsOnMessage_ {};
     std::unique_ptr<websocket::stream<localSocket::socket>> webSocket_ { nullptr };
 };
 

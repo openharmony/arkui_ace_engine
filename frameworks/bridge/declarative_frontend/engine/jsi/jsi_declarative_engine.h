@@ -122,6 +122,8 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
+    void SetDebuggerPostTask();
+
     void SetInstanceId(int32_t instanceId)
     {
         instanceId_ = instanceId;

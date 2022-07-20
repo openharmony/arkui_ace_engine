@@ -47,6 +47,8 @@ using panda::StringRef;
 using panda::ecmascript::EcmaVM;
 class PandaFunctionData;
 
+using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
+
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this<ArkJSRuntime> {
 public:
@@ -79,6 +81,11 @@ public:
         return vm_;
     }
 
+    void SetDebuggerPostTask(DebuggerPostTask&& task)
+    {
+        debuggerPostTask_ = std::move(task);
+    }
+
 private:
     EcmaVM *vm_ = nullptr;
     int32_t instanceId_ = 0;
@@ -87,6 +94,7 @@ private:
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };
     std::string libPath_ {};
     bool isDebugMode_ {true};
+    DebuggerPostTask debuggerPostTask_;
 };
 
 class PandaFunctionData {

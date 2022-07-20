@@ -33,7 +33,6 @@ void WsServer::RunServer()
 {
     terminateExecution_ = false;
     try {
-        boost::asio::io_context ioContext;
         int appPid = getpid();
         tid_ = pthread_self();
         std::string pidStr = std::to_string(appPid);
@@ -73,8 +72,7 @@ void WsServer::RunServer()
             webSocket_->read(buffer);
             std::string message = boost::beast::buffers_to_string(buffer.data());
             LOGI("WsServer OnMessage: %{public}s", message.c_str());
-            ideMsgQueue.push(std::move(message));
-            wsOnMessage_();
+            wsOnMessage_(std::move(message));
         }
     } catch (const beast::system_error& se) {
         if (se.code() != websocket::error::closed) {
