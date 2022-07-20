@@ -36,6 +36,9 @@ void RosenRenderSingleChildScroll::Paint(RenderContext& context, const Offset& o
     rsNode->SetPaintOrder(true);
     // Todo: viewPort_ is not adapt for RS.
     rsNode->SetClipToBounds(true);
+    if (!viewPort_.IsInfinite()) {
+        rsNode->SetFrameSize(viewPort_.Width(), viewPort_.Height());
+    }
 
     // paint custom effect
     if (scrollEffect_) {
