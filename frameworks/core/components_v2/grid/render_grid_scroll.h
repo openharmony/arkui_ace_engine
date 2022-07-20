@@ -115,6 +115,9 @@ public:
     // Used in GridPositionController
     void ScrollToIndex(int32_t index, int32_t source);
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve);
+    void BuildItemsBackwardByRange(int32_t startItemIdx, int32_t endItemIdx);
+    void BuildItemsForwardByRange(int32_t startItemIdx, int32_t endItemIdx);
+    double CalculateScrollLength(int32_t index);
     Offset CurrentOffset();
     void ScrollToEdge(ScrollEdgeType edgeType, bool smooth);
     void ScrollPage(bool reverse, bool smooth);
