@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_H
 
+#include <functional>
+
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
@@ -31,10 +33,10 @@
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
-using TouchEventCallback = std::function<void(const TouchEvent&)>;
+using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&)>;
 using KeyEventCallback = std::function<bool(const KeyEvent&)>;
-using MouseEventCallback = std::function<void(const MouseEvent&)>;
-using AxisEventCallback = std::function<void(const AxisEvent&)>;
+using MouseEventCallback = std::function<void(const MouseEvent&, const std::function<void()>&)>;
+using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
 using DragEventCallBack = std::function<void(int32_t x, int32_t y, const DragEventAction& action)>;

@@ -15,6 +15,8 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 
+#include <functional>
+
 #include "ability_info.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -544,16 +546,48 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
 
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
-    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event) {
+    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](
+                                    const TouchEvent& event, const std::function<void()>& markProcess) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event]() {
+            [context, event, markProcess]() {
                 context->OnTouchEvent(event);
                 context->NotifyDispatchTouchEventDismiss(event);
+                if (markProcess) {
+                    markProcess();
+                }
             },
             TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterTouchEventCallback(touchEventCallback);
+
+    auto&& mouseEventCallback = [context = pipelineContext_, id = instanceId_](
+                                    const MouseEvent& event, const std::function<void()>& markProcess) {
+        ContainerScope scope(id);
+        context->GetTaskExecutor()->PostTask(
+            [context, event, markProcess]() {
+                context->OnMouseEvent(event);
+                if (markProcess) {
+                    markProcess();
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    };
+    aceView_->RegisterMouseEventCallback(mouseEventCallback);
+
+    auto&& axisEventCallback = [context = pipelineContext_, id = instanceId_](
+                                   const AxisEvent& event, const std::function<void()>& markProcess) {
+        ContainerScope scope(id);
+        context->GetTaskExecutor()->PostTask(
+            [context, event, markProcess]() {
+                context->OnAxisEvent(event);
+                if (markProcess) {
+                    markProcess();
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    };
+    aceView_->RegisterAxisEventCallback(axisEventCallback);
 
     auto&& keyEventCallback = [context = pipelineContext_, id = instanceId_](const KeyEvent& event) {
         ContainerScope scope(id);
@@ -563,20 +597,6 @@ void AceContainer::InitializeCallback()
         return result;
     };
     aceView_->RegisterKeyEventCallback(keyEventCallback);
-
-    auto&& mouseEventCallback = [context = pipelineContext_, id = instanceId_](const MouseEvent& event) {
-        ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, event]() { context->OnMouseEvent(event); }, TaskExecutor::TaskType::UI);
-    };
-    aceView_->RegisterMouseEventCallback(mouseEventCallback);
-
-    auto&& axisEventCallback = [context = pipelineContext_, id = instanceId_](const AxisEvent& event) {
-        ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, event]() { context->OnAxisEvent(event); }, TaskExecutor::TaskType::UI);
-    };
-    aceView_->RegisterAxisEventCallback(axisEventCallback);
 
     auto&& rotationEventCallback = [context = pipelineContext_, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
