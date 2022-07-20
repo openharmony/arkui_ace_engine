@@ -731,49 +731,16 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         LOGE("UIContent null config");
         return;
     }
+    Platform::AceContainer::OnConfigurationUpdated(instanceId_, (*config).GetName());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (!container) {
         LOGE("UIContent container is null");
         return;
     }
-    auto pipeline = container->GetPipelineContext();
-    if (!pipeline) {
-        LOGE("UIContent pipeline is null");
-        return;
-    }
-    auto themeManager = pipeline->GetThemeManager();
-    if (!themeManager) {
-        LOGE("UIContent themeManager is null");
-        return;
-    }
-    auto resConfig = container->GetResourceConfiguration();
     auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    if (!colorMode.empty()) {
-        if (colorMode == OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) {
-            SystemProperties::SetColorMode(ColorMode::DARK);
-            container->SetColorScheme(ColorScheme::SCHEME_DARK);
-            resConfig.SetColorMode(ColorMode::DARK);
-        } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
-            container->SetColorScheme(ColorScheme::SCHEME_LIGHT);
-            resConfig.SetColorMode(ColorMode::LIGHT);
-        }
-        LOGI("UIContent UpdateConfiguration %{public}s, color mode:%{public}s",
-            config->GetName().c_str(), colorMode.c_str());
-    }
     auto inputDevice = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-    if (!inputDevice.empty()) {
-        SystemProperties::SetInputDevice(inputDevice == "true");
-        resConfig.SetInputDevice(inputDevice == "true");
-        LOGI("UIContent UpdateConfiguration %{public}s, input device:%{public}s",
-            config->GetName().c_str(), inputDevice.c_str());
-    }
-    if (instanceId_ == -1) {
-        LOGE("Get Instance failed");
-    }
-    container->SetResourceConfiguration(resConfig);
-    Platform::AceContainer::OnConfigurationUpdated(instanceId_, (*config).GetName());
-    themeManager->UpdateConfig(resConfig);
+    container->UpdateConfiguration(colorMode, inputDevice);
+    LOGI("UIContentImpl::UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason)

@@ -276,6 +276,8 @@ public:
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(const std::string& bundle,
         const std::string& module);
+
+    void UpdateConfiguration(const std::string& colorMode, const std::string& inputDevice);
 private:
     void InitializeFrontend();
     void InitializeCallback();
