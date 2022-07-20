@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_UTILS_SOURCE_MAP_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_UTILS_SOURCE_MAP_H
 
-#include <fstream>
+#include <cstdint>
+#include <string>
 #include <vector>
 
-#include "base/log/log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 

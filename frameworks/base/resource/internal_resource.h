@@ -16,7 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_RESOURCE_INTERNAL_RESOURCE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_RESOURCE_INTERNAL_RESOURCE_H
 
-#include <functional>
+#include <cstddef>
+#include <cstdint>
 
 #include "base/utils/singleton.h"
 

@@ -16,7 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CODEC_STANDARD_FUNCTION_CODEC_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CODEC_STANDARD_FUNCTION_CODEC_H
 
+#include <cstdint>
+#include <vector>
+
 #include "base/utils/macros.h"
+#include "base/utils/noncopyable.h"
+#include "bridge/codec/codec_data.h"
+#include "bridge/codec/function_call.h"
 #include "frameworks/bridge/codec/function_codec.h"
 
 namespace OHOS::Ace::Framework {

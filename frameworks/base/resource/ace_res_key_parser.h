@@ -16,15 +16,20 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_RESOURCE_ACE_RES_KEY_PARSER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_RESOURCE_ACE_RES_KEY_PARSER_H
 
+#include <cstdint>
 #include <functional>
 #include <string>
 #include <vector>
 
 #include "base/resource/ace_res_data_struct.h"
+#include "base/utils/device_config.h"
+#include "base/utils/device_type.h"
+#include "base/utils/noncopyable.h"
 #include "base/utils/singleton.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
-using parse_key_function = std::function<bool(const std::string& , std::vector<KeyParam>&)>;
+using parse_key_function = std::function<bool(const std::string&, std::vector<KeyParam>&)>;
 
 class AceResKeyParser final : public Singleton<AceResKeyParser> {
     DECLARE_SINGLETON(AceResKeyParser);

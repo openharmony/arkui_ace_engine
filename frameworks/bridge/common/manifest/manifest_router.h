@@ -17,11 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_MANIFEST_MANIFEST_ROUTER_H
 
 #include <list>
+#include <memory>
 #include <string>
 
 #include "base/json/json_util.h"
-#include "base/log/log.h"
 #include "base/memory/referenced.h"
+#include "base/utils/noncopyable.h"
+
+namespace OHOS::Ace {
+class JsonValue;
+}
 
 namespace OHOS::Ace::Framework {
 

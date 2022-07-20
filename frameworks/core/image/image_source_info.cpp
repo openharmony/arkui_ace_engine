@@ -19,6 +19,7 @@
 
 #include "base/log/log.h"
 #include "core/common/container.h"
+
 namespace OHOS::Ace {
 
 bool ImageSourceInfo::IsSVGSource(const std::string& src, InternalResource::ResourceId resourceId)

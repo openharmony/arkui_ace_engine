@@ -16,14 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_RESOURCE_ACE_RES_CONFIG_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_RESOURCE_ACE_RES_CONFIG_H
 
-#include <algorithm>
+#include <cstdint>
 #include <set>
 #include <string>
 #include <vector>
 
-#include "base/resource/ace_res_data_struct.h"
+#include "base/utils/device_config.h"
+#include "base/utils/device_type.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
+struct KeyParam;
 
 class AceResConfig {
 public:

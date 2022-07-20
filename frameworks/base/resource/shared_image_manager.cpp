@@ -15,7 +15,12 @@
 
 #include "base/resource/shared_image_manager.h"
 
+#include <cstdint>
+#include <type_traits>
+#include <utility>
+
 #include "base/log/log.h"
+#include "base/thread/cancelable_callback.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -98,8 +103,7 @@ void SharedImageManager::AddPictureNamesToReloadMap(std::string&& name)
     providerMapToReload_.try_emplace(name, std::set<WeakPtr<ImageProviderLoader>>());
 }
 
-bool SharedImageManager::AddProviderToReloadMap(
-    const std::string& name, const WeakPtr<ImageProviderLoader>& loaderWp)
+bool SharedImageManager::AddProviderToReloadMap(const std::string& name, const WeakPtr<ImageProviderLoader>& loaderWp)
 {
     std::lock_guard<std::mutex> lock(providerMapMutex_);
     auto providerMapIter = providerMapToReload_.find(name);

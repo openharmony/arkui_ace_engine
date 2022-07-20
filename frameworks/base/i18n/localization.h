@@ -16,7 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_I18N_LOCALIZATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_I18N_LOCALIZATION_H
 
+#include <cstdint>
+#include <functional>
 #include <future>
+#include <memory>
+#include <mutex>
+#include <new>
 #include <string>
 #include <vector>
 
@@ -60,11 +65,11 @@ public:
 
     static std::string ComputeScript(const std::string& language, const std::string& region);
 
-    static void ParseLocaleTag(
-        const std::string& languageTag, std::string& language, std::string& script, std::string& region,
-        bool needAddSubtags);
+    static void ParseLocaleTag(const std::string& languageTag, std::string& language, std::string& script,
+        std::string& region, bool needAddSubtags);
 
-    void SetOnChange(const std::function<void()>& value) {
+    void SetOnChange(const std::function<void()>& value)
+    {
         onChange_ = value;
     }
 

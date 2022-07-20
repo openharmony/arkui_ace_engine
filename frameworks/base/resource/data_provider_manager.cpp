@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+#include "base/resource/data_provider_manager.h"
+
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "base/resource/data_provider_manager.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
 
@@ -28,7 +30,7 @@ std::unique_ptr<DataProviderRes> DataProviderManager::GetDataProviderResFromUri(
     }
     return nullptr;
 }
- 
+
 void* DataProviderManagerStandard::GetDataProviderThumbnailResFromUri(const std::string& uriStr)
 {
     InitHelper();
@@ -52,7 +54,7 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
         LOGE("file descriptor is not valid");
         return nullptr;
     }
-    
+
     // get size of file.
     struct stat statBuf;
     auto statRes = fstat(fd, &statBuf);

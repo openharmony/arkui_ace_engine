@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CODEC_STANDARD_CODEC_BUFFER_OPERATOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CODEC_STANDARD_CODEC_BUFFER_OPERATOR_H
 
+#include <cstdint>
 #include <vector>
 
+#include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "frameworks/bridge/codec/byte_buffer_operator.h"
 #include "frameworks/bridge/codec/codec_data.h"

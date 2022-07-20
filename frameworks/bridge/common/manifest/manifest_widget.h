@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_MANIFEST_MANIFEST_WIDGET_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_MANIFEST_MANIFEST_WIDGET_H
 
+#include <cstdint>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
 #include "base/json/json_util.h"
-#include "base/log/log.h"
 #include "base/memory/referenced.h"
+#include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace::Framework {
 

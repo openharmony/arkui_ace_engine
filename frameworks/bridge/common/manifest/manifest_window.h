@@ -16,10 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_MANIFEST_MANIFEST_WINDOW_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_MANIFEST_MANIFEST_WINDOW_H
 
+#include <memory>
+
 #include "base/json/json_util.h"
 #include "base/memory/referenced.h"
+#include "base/utils/noncopyable.h"
 #include "core/common/frontend.h"
-
 namespace OHOS::Ace::Framework {
 
 class ManifestWindow : public Referenced {
