@@ -883,6 +883,7 @@ protected:
     std::string parentTag_;
     std::list<RefPtr<DOMNode>> children_;
     // for pseudo class
+    std::vector<std::pair<std::string, std::string>> attributesCache_;
     std::unordered_map<int32_t, std::unordered_map<std::string, std::string>> pseudoClassStyleMap_;
     RefPtr<ComposedComponent> rootComponent_;
     RefPtr<BoxComponent> boxComponent_;
@@ -934,6 +935,7 @@ private:
     void UpdatePseudoStyleByStatus(int32_t status, bool isBackendChange);
     void ResetDefaultStyles();
     uint32_t CalculatePseudoStatus() const;
+    void SetAttrInternal(const std::vector<std::pair<std::string, std::string>>& attrs);
 
     // for state update callbacks
     void OnFocus(bool isFocus);
