@@ -2321,7 +2321,9 @@ void PipelineContext::SetAppBgColor(const Color& color)
     LOGI("Set bgColor %{public}u", color.GetValue());
     appBgColor_ = color;
 #ifdef ENABLE_ROSEN_BACKEND
-    rsUIDirector_->SetAbilityBGAlpha(color.GetAlpha());
+    if (rsUIDirector_) {
+        rsUIDirector_->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+    }
 #endif
     if (!themeManager_) {
         LOGW("themeManager_ is nullptr!");
