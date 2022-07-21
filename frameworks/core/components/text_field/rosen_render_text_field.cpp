@@ -805,7 +805,7 @@ std::unique_ptr<txt::ParagraphStyle> RosenRenderTextField::CreateParagraphStyle(
     // If single-line, it shouldn't do soft-wrap for us.
     if (maxLines_ == 1 && resetToStart_) {
         style->max_lines = 1;
-        if (showEllipsis_) {
+        if (showEllipsis_ && keyboard_ != TextInputType::VISIBLE_PASSWORD) {
             style->ellipsis = StringUtils::Str8ToStr16(ELLIPSIS);
         }
     }
