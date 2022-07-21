@@ -43,6 +43,8 @@ public:
         renderFunction_ = renderFunction;
     }
 
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+
 private:
     RenderFunction renderFunction_;
     bool isBuildDone_ = false;

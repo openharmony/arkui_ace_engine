@@ -55,6 +55,8 @@ bool CheckPositionFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckRequestNewChildNodeFlag(PropertyChangeFlag propertyChangeFlag);
 
+bool CheckUpdateByChildRequest(PropertyChangeFlag propertyChangeFlag);
+
 bool CheckNoChanged(PropertyChangeFlag propertyChangeFlag);
 
 #define ACE_DEFINE_CLASS_PROPERTY_GROUP(group, type)        \
@@ -200,8 +202,6 @@ public:
         propertyChangeFlag_ = propertyChangeFlag_ | propertyChangeFlag;
         OnPropertyChange(propertyName);
     }
-
-    virtual void AdjustPropertyChangeFlagByChild(PropertyChangeFlag propertyChangeFlag) {}
 
 protected:
     virtual void OnPropertyChange(const char* propertyName) {}

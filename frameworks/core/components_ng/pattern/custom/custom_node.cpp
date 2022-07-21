@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 
 #include "base/log/dump_log.h"
 #include "core/components_ng/base/frame_node.h"
@@ -23,32 +23,25 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<CustomNode> CustomNode::CreateCustomNode(const std::string& id)
+RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::string& viewKey)
 {
-    auto node = MakeRefPtr<CustomNode>(id);
+    auto node = MakeRefPtr<CustomNode>(nodeId, viewKey);
+    node->SetContext(PipelineContext::GetCurrentContext());
     node->InitializePatternAndContext();
     return node;
 }
 
-CustomNode::CustomNode(const std::string& id) : FrameNode(V2::JS_VIEW_ETS_TAG, id, MakeRefPtr<CustomNodePattern>()) {}
+CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
+    : FrameNode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
+{}
 
 CustomNode::~CustomNode() = default;
-
-void CustomNode::OnContextAttached()
-{
-    if (UpdateJsViewFunction_) {
-        UpdateJsViewFunction_(WeakClaim(this));
-    }
-    if (appearFunction_) {
-        appearFunction_();
-    }
-}
 
 void CustomNode::Rebuild() {}
 
 void CustomNode::MarkNeedRebuild()
 {
-    auto context = context_.Upgrade();
+    auto context = GetContext();
     if (!context) {
         LOGE("context is nullptr, fail to push async task");
         return;

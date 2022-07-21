@@ -181,9 +181,9 @@ int32_t ResourceAdapterMock::GetInt(uint32_t resId)
     return findIter->second.GetValue<int32_t>(ERROR_VALUE_INT).second;
 }
 
-const AnimationOption PipelineContext::GetExplicitAnimationOption() const
+AnimationOption PipelineContext::GetExplicitAnimationOption() const
 {
-    return AnimationOption();
+    return {};
 }
 
 uint64_t PipelineContext::GetTimeFromExternalTimer()

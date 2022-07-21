@@ -29,8 +29,9 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "core/components_ng/syntax/foreach/for_each.h"
-#include "core/components_ng/syntax/foreach/lazy_for_each_builder.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/syntax/lazy_for_each.h"
+#include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/composed_component.h"
@@ -471,9 +472,9 @@ public:
         return GetTotalIndexCount();
     }
 
-    std::pair<std::string, RefPtr<NG::FrameNode>> OnGetChildByIndex(int32_t index) override
+    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(int32_t index) override
     {
-        std::pair<std::string, RefPtr<NG::FrameNode>> info;
+        std::pair<std::string, RefPtr<NG::UINode>> info;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, info);
         if (getDataFunc_.IsEmpty()) {
             return info;
@@ -557,7 +558,7 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
         builder->SetParentViewObj(parentViewObj);
         builder->SetDataSourceObj(dataSourceObj);
         builder->SetItemGenerator(itemGenerator, std::move(keyGenFunc));
-        NG::ForEach::Create(builder);
+        NG::LazyForEach::Create(builder);
         return;
     }
 

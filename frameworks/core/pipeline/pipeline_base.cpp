@@ -227,7 +227,7 @@ void PipelineBase::OnActionEvent(const std::string& action)
     }
 }
 
-void PipelineBase::onRouterChange(const std::string url)
+void PipelineBase::onRouterChange(const std::string& url)
 {
     if (onRouterChangeCallback_ != nullptr) {
         onRouterChangeCallback_(url);
@@ -262,7 +262,7 @@ void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::
     }
 }
 
-void PipelineBase::UpdateRootSizeAndSacle(int32_t width, int32_t height)
+void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
 {
     auto frontend = weakFrontend_.Upgrade();
     CHECK_NULL_VOID(frontend);

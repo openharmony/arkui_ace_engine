@@ -32,20 +32,10 @@ public:
     using AppearFunction = std::function<void()>;
     using UpdateJsViewFunction = std::function<void(WeakPtr<CustomNode>)>;
 
-    static RefPtr<CustomNode> CreateCustomNode(const std::string& id);
+    static RefPtr<CustomNode> CreateCustomNode(int32_t nodeId, const std::string& viewKey);
 
-    CustomNode(const std::string& id);
+    CustomNode(int32_t nodeId, const std::string& viewKey);
     ~CustomNode() override;
-
-    void SetAppearFunction(AppearFunction&& func)
-    {
-        appearFunction_ = std::move(func);
-    }
-
-    void SetUpdateJsViewFunction(UpdateJsViewFunction&& func)
-    {
-        UpdateJsViewFunction_ = std::move(func);
-    }
 
     void SetRenderFunction(const RenderFunction& renderFunction)
     {
@@ -61,15 +51,10 @@ public:
     // called by pipeline in js thread of update.
     void Rebuild();
 
-protected:
-    void OnContextAttached() override;
-
 private:
     void BuildChildren(const RefPtr<FrameNode>& child);
 
-    AppearFunction appearFunction_;
-    UpdateJsViewFunction UpdateJsViewFunction_;
-
+    std::string viewKey_;
     bool needRebuild_ = false;
 };
 } // namespace OHOS::Ace::NG

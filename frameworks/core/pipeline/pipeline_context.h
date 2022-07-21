@@ -62,7 +62,7 @@
 
 namespace OHOS::Rosen {
 class RSUIDirector;
-}
+} // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
 
@@ -124,7 +124,7 @@ public:
 
     void SetupRootElement() override;
 
-    // This is used for subwindow, when the subwindow is created,a new subrootElement will be built
+    // This is used for subwindow, when the subwindow is created,a new subRootElement will be built
     RefPtr<Element> SetupSubRootElement();
     RefPtr<DialogComponent> ShowDialog(
         const DialogProperties& dialogProperties, bool isRightToLeft, const std::string& inspectorTag = "");
@@ -240,7 +240,7 @@ public:
 
     void OnVirtualKeyboardAreaChange(Rect keyboardArea);
 
-    // Set card position for barrierfree
+    // Set card position for barrierFree
     void SetCardViewPosition(int id, float offsetX, float offsetY);
 
     void SetCardViewAccessibilityParams(const std::string& key, bool focus);
@@ -409,7 +409,7 @@ public:
 
     void ClearDeactivateElements();
 
-    void AddDeactivateElement(const int32_t id, const RefPtr<Element>& element);
+    void AddDeactivateElement(int32_t id, const RefPtr<Element>& element);
 
     const RefPtr<RenderFactory>& GetRenderFactory() const
     {
@@ -610,7 +610,7 @@ public:
 
     void ClearExplicitAnimationOption() override;
 
-    const AnimationOption GetExplicitAnimationOption() const override;
+    AnimationOption GetExplicitAnimationOption() const override;
 
     void FlushBuild();
 
@@ -619,7 +619,7 @@ public:
         useLiteStyle_ = useLiteStyle;
     }
 
-    bool UseLiteStyle()
+    bool UseLiteStyle() const
     {
         return useLiteStyle_;
     }
@@ -825,7 +825,7 @@ public:
 
     void SetShortcutKey(const KeyEvent& event);
 
-    void SetEventManager(const RefPtr<EventManager> eventManager)
+    void SetEventManager(const RefPtr<EventManager>& eventManager)
     {
         eventManager_ = eventManager;
     }
@@ -847,7 +847,7 @@ public:
 
     void SubscribeCtrlA(SubscribeCtrlACallback callback)
     {
-        subscribeCtrlA_ = callback;
+        subscribeCtrlA_ = std::move(callback);
     }
 
     void SetWindowMinimizeCallBack(std::function<bool(void)>&& callback)
@@ -1050,7 +1050,7 @@ public:
     {
         this->isForegroundCalled_ = isForegroundCalled;
     }
-    
+
     int32_t RegisterWindowFocusChangedCallback(std::function<void(bool)>&& callback)
     {
         if (callback) {
@@ -1068,10 +1068,9 @@ public:
     void AddRectCallback(OutOfRectGetRectCallback& getRectCallback, OutOfRectTouchCallback& touchCallback,
         OutOfRectMouseCallback& mouseCallback)
     {
-        rectCallbackList_.emplace_back(
-            RectCallback(getRectCallback, touchCallback, mouseCallback));
+        rectCallbackList_.emplace_back(RectCallback(getRectCallback, touchCallback, mouseCallback));
     }
-    
+
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void SetRootRect(double width, double height, double offset = 0.0) override

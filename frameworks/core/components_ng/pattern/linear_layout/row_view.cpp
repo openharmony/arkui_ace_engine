@@ -26,7 +26,7 @@ void RowView::Create()
 {
     auto pattern = AceType::MakeRefPtr<LinearLayoutPattern>(false);
     // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, V2::ROW_ETS_TAG, pattern);
+    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, pattern);
     ViewStackProcessor::GetInstance()->Push(frameNode);
 }
 

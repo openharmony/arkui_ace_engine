@@ -27,7 +27,7 @@ void ImageView::Create(const std::string& src)
     auto* stack = ViewStackProcessor::GetInstance();
     // TODO: Add unique id.
     auto frameNode =
-        FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, V2::IMAGE_ETS_TAG, AceType::MakeRefPtr<ImagePattern>());
+        FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 0, AceType::MakeRefPtr<ImagePattern>());
     stack->Push(frameNode);
     ImageSourceInfo imageSourceInfo(src);
     stack->PushLayoutTask(ImageSourceInfoModifier(imageSourceInfo));

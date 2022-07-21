@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    for (auto&& child : layoutWrapper->GetChildren()) {
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutConstraint);
     }
     PerformMeasureSelf(layoutWrapper);
@@ -34,7 +34,7 @@ void BoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     PerformLayout(layoutWrapper);
     auto parentOffset =
         layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    for (auto&& child : layoutWrapper->GetChildren()) {
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Layout(parentOffset);
     }
 }
@@ -75,7 +75,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         } else {
             // use the max child size.
             auto childFrame = SizeF(-1, -1);
-            for (const auto& child : layoutWrapper->GetChildren()) {
+            for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
                 auto childSize = child->GetGeometryNode()->GetFrameSize();
                 childFrame = childFrame > childSize ? childFrame : childSize;
             }
@@ -104,7 +104,7 @@ void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     // Update child position.
-    for (const auto& child : layoutWrapper->GetChildren()) {
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto translate =
             Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetFrameSize(), align) + paddingOffset;
         child->GetGeometryNode()->SetFrameOffset(translate);

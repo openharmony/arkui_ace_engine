@@ -27,7 +27,7 @@ void TextView::Create(const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, V2::TEXT_ETS_TAG, AceType::MakeRefPtr<TextPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     stack->Push(frameNode);
     stack->PushLayoutTask(ContentModifier(content));
 }

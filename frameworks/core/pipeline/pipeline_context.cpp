@@ -406,7 +406,7 @@ RefPtr<StageElement> PipelineContext::GetStageElement() const
     if (!rootElement_) {
         LOGE("Root element is null!");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-        return RefPtr<StageElement>();
+        return {};
     }
 
     if (windowModal_ == WindowModal::SEMI_MODAL || windowModal_ == WindowModal::SEMI_MODAL_FULL_SCREEN) {
@@ -432,7 +432,7 @@ RefPtr<StageElement> PipelineContext::GetStageElement() const
     }
     LOGE("Get stage element failed.");
     EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-    return RefPtr<StageElement>();
+    return {};
 }
 
 Rect PipelineContext::GetRootRect() const
@@ -2156,7 +2156,7 @@ void PipelineContext::OnSurfaceDestroyed()
 void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height, int32_t offset)
 {
     CHECK_RUN_ON(UI);
-    UpdateRootSizeAndSacle(width, height);
+    UpdateRootSizeAndScale(width, height);
     CHECK_NULL_VOID(rootElement_);
     const Rect paintRect(0.0, offset, rootWidth_, rootHeight_);
     auto rootNode = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
@@ -3378,7 +3378,7 @@ void PipelineContext::ClearExplicitAnimationOption()
     explicitAnimationOption_ = AnimationOption();
 }
 
-const AnimationOption PipelineContext::GetExplicitAnimationOption() const
+AnimationOption PipelineContext::GetExplicitAnimationOption() const
 {
     return explicitAnimationOption_;
 }

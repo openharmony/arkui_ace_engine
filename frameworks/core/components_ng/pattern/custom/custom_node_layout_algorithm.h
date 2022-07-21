@@ -18,12 +18,13 @@
 
 #include <string>
 
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
 
-using RenderFunction = std::function<RefPtr<FrameNode>()>;
+using RenderFunction = std::function<RefPtr<UINode>()>;
 
 // CustomNodeLayoutAlgorithm acts as the underlying @component view.
 class ACE_EXPORT CustomNodeLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -41,8 +42,14 @@ public:
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
+    RefPtr<UINode> MoveBuildItem()
+    {
+        return std::move(buildItem_);
+    }
+
 private:
     RenderFunction renderFunction_;
+    RefPtr<UINode> buildItem_;
 };
 } // namespace OHOS::Ace::NG
 

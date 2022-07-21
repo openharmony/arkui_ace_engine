@@ -18,7 +18,7 @@
 
 #include <utility>
 
-#include "core/components_ng/base/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/event/touch_event.h"
@@ -37,6 +37,8 @@ public:
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);
 
     ~PipelineContext() override = default;
+
+    static RefPtr<PipelineContext> GetCurrentContext();
 
     void SetupRootElement() override;
 
@@ -124,7 +126,7 @@ public:
 
     void ClearExplicitAnimationOption() override {}
 
-    const AnimationOption GetExplicitAnimationOption() const override
+    AnimationOption GetExplicitAnimationOption() const override
     {
         return AnimationOption();
     }

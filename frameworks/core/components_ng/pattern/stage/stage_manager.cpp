@@ -34,7 +34,7 @@ void StageManager::PushPage(const RefPtr<FrameNode>& node)
         return;
     }
     // Add unique id.
-    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, V2::PAGE_ETS_TAG, MakeRefPtr<PagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 0, MakeRefPtr<PagePattern>());
     node->MountToParent(pageNode);
     pageNode->MountToParent(rootNode_);
     // TODO: change page index

@@ -34,7 +34,7 @@ public:
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
-    void RebuildFrame(FrameNode* self) override;
+    void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
     void UpdateBgColor(const Color& value) override;
 
@@ -70,7 +70,7 @@ public:
     }
 
 private:
-    void ReCreateRsNodeTree(FrameNode* node);
+    void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     std::shared_ptr<Rosen::RSNode> rsNode_ = nullptr;
     SkPictureRecorder* recorder_ = nullptr;

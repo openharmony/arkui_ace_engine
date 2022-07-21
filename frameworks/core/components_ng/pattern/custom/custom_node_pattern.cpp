@@ -13,20 +13,24 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/syntax/foreach/for_each_builder.h"
+#include "core/components_ng/pattern/custom/custom_node_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-RefPtr<FrameNode> ForEachBuilder::GetChildByIndex(int32_t index)
+bool CustomNodePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
 {
-    auto iter = cachedItems_.find(index);
-    if (iter != cachedItems_.end()) {
-        return iter->second.second;
+    CHECK_NULL_RETURN(dirty, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto customNodeLayoutAlgorithm =
+        DynamicCast<CustomNodeLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm());
+    if (customNodeLayoutAlgorithm) {
+        auto uiNode = customNodeLayoutAlgorithm->MoveBuildItem();
+        if (uiNode) {
+            uiNode->MountToParent(host);
+        }
     }
-    auto itemInfo = OnGetChildByIndex(index);
-    CHECK_NULL_RETURN(itemInfo.second, nullptr);
-    cachedItems_.emplace(index, itemInfo);
-    return itemInfo.second;
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

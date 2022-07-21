@@ -57,6 +57,11 @@ bool CheckRequestNewChildNodeFlag(PropertyChangeFlag propertyChangeFlag)
     return ((propertyChangeFlag & PROPERTY_REQUEST_NEW_CHILD_NODE) == PROPERTY_REQUEST_NEW_CHILD_NODE);
 }
 
+bool CheckUpdateByChildRequest(PropertyChangeFlag propertyChangeFlag)
+{
+    return ((propertyChangeFlag & PROPERTY_UPDATE_BY_CHILD_REQUEST) == PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
 bool CheckNoChanged(PropertyChangeFlag propertyChangeFlag)
 {
     return (propertyChangeFlag == PROPERTY_UPDATE_NORMAL);

@@ -27,7 +27,7 @@ void StackView::Create()
 {
     // TODO: Add unique id.
     auto frameNode =
-        FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, V2::STACK_ETS_TAG, AceType::MakeRefPtr<StackPattern>());
+        FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, 0, AceType::MakeRefPtr<StackPattern>());
     ViewStackProcessor::GetInstance()->Push(frameNode);
 }
 
@@ -35,7 +35,7 @@ void StackView::Create(Alignment alignment)
 {
     // TODO: Add unique id.
     auto frameNode =
-        FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, V2::STACK_ETS_TAG, AceType::MakeRefPtr<StackPattern>());
+        FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, 0, AceType::MakeRefPtr<StackPattern>());
     frameNode->GetLayoutProperty()->UpdateAlignment(alignment);
     ViewStackProcessor::GetInstance()->Push(frameNode);
 }

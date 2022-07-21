@@ -61,6 +61,9 @@ public:
         return layoutAlgorithm;
     }
 
+        // Called on main thread to check if need rerender of the content.
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+
 private:
     void OnActive() override
     {
