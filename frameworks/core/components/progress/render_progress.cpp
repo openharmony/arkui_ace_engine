@@ -86,7 +86,7 @@ Size RenderProgress::Measure()
             layoutSize.SetHeight(item->GetLayoutSize().Height());
         }
     }
-    return layoutSize;
+    return GetLayoutParam().Constrain(layoutSize);
 }
 
 } // namespace OHOS::Ace
