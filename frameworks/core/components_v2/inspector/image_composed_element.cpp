@@ -75,9 +75,9 @@ std::string ImageComposedElement::GetSrc() const
         return "";
     }
     auto imageSrc = renderImage->GetImageSrc();
-    while (imageSrc.find("\\") != std::string::npos) {
-        auto num = imageSrc.find("\\");
-        imageSrc.replace(num, 1, "/");
+    if (imageSrc.find("resources") != std::string::npos) {
+        auto num = imageSrc.find("resources");
+        imageSrc = imageSrc.substr(num);
     }
     return imageSrc;
 }
