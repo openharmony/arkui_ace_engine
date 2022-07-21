@@ -358,10 +358,6 @@ bool StageElement::PerformPushPageTransition(const RefPtr<Element>& elementIn, c
         if (stage) {
             stage->NotifyPageTransitionListeners(TransitionEvent::PUSH_END, pageInWeak, pageOutWeak);
             ACE_SCOPED_TRACE("PUSH_END");
-            auto context = stage->context_.Upgrade();
-            if (context) {
-                context->OnPageShow();
-            }
         }
     });
     // make stage untouchable when push page.
@@ -550,10 +546,6 @@ void StageElement::PerformReplace()
 #endif
     UpdateChild(oldElement, nullptr);
     UpdateChild(nullptr, newComponent_);
-    auto context = context_.Upgrade();
-    if (context) {
-        context->OnPageShow();
-    }
     RefreshFocus();
 }
 
