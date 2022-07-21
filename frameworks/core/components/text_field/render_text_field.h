@@ -203,6 +203,16 @@ public:
         return hasTextOverlayPushed_;
     }
 
+    bool GetIsInEditStatus() const
+    {
+        return isInEditStatus_;
+    }
+
+    void SetIsInEditStatus(bool isInEditStatus)
+    {
+        isInEditStatus_ = isInEditStatus;
+    }
+
     const std::string GetPlaceholder() const
     {
         return placeholder_;
@@ -313,6 +323,14 @@ public:
     bool hasFocus_ = false;
     void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
 
+    const std::function<void(bool)>& GetOnEditChanged() const
+    {
+        return onEditChanged_;
+    }
+
+    void OnEditChange(bool isInEditStatus);
+    void GetFieldAndOverlayTouchRect(std::vector<Rect>& resRectList);
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -382,6 +400,8 @@ protected:
         return (SystemProperties::GetDeviceType() != DeviceType::TV &&
             SystemProperties::GetDeviceType() != DeviceType::WATCH);
     }
+
+    void AddOutOfRectCallbackToContext();
 
     // Used for compare to the current value and decide whether to UpdateRemoteEditing().
     std::shared_ptr<TextEditingValue> lastKnownRemoteEditingValue_;
@@ -565,6 +585,7 @@ private:
     bool isSingleHandle_ = false;
     bool hasTextOverlayPushed_ = false;
     bool softKeyboardEnabled_ = true;
+    bool isInEditStatus_ = false;
     Color pressColor_;
     Color hoverColor_;
     TextSelection selection_; // Selection from custom.
