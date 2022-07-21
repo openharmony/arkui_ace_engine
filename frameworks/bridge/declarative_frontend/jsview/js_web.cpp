@@ -753,7 +753,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("overviewModeAccess", &JSWeb::OverviewModeAccess);
     JSClass<JSWeb>::StaticMethod("fileFromUrlAccess", &JSWeb::FileFromUrlAccess);
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
-    JSClass<JSWeb>::StaticMethod("textZoomRatio", &JSWeb::TextZoomRatio);
+    JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::TextZoomAtio);
     JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccessEnabled);
     JSClass<JSWeb>::StaticMethod("initialScale", &JSWeb::InitialScale);
     JSClass<JSWeb>::StaticMethod("backgroundColor", &JSWeb::BackgroundColor);
@@ -1605,7 +1605,7 @@ void JSWeb::DatabaseAccess(bool isDatabaseAccessEnabled)
     webComponent->SetDatabaseAccessEnabled(isDatabaseAccessEnabled);
 }
 
-void JSWeb::TextZoomRatio(int32_t textZoomRatioNum)
+void JSWeb::TextZoomAtio(int32_t textZoomAtioNum)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
@@ -1613,7 +1613,7 @@ void JSWeb::TextZoomRatio(int32_t textZoomRatioNum)
         LOGE("JSWeb: MainComponent is null.");
         return;
     }
-    webComponent->SetTextZoomRatio(textZoomRatioNum);
+    webComponent->SetTextZoomAtio(textZoomAtioNum);
 }
 
 void JSWeb::WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
