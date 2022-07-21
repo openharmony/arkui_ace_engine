@@ -87,7 +87,6 @@ void FlutterRenderPickerBase::Paint(RenderContext& context, const Offset& offset
         // No divider and no gradient, directly return.
         return;
     }
-    InitializeSelectedOption(anchorColumn);
     // Draw two dividers on both sides of selected option.
     flutter::Paint paint;
     flutter::PaintData paintData;
@@ -108,8 +107,12 @@ void FlutterRenderPickerBase::Paint(RenderContext& context, const Offset& offset
     // Paint gradient at top and bottom.
     PaintGradient(canvas, offset, rect, theme);
 
-    if (anchorColumn->IsFocused()) {
-        PaintFocusOptionBorder(canvas, anchorColumn);
+    for (const auto& column : columns_) {
+        if (column->IsFocused()) {
+            InitializeSelectedOption(column);
+            PaintFocusOptionBorder(canvas, column);
+            break;
+        }
     }
 }
 
