@@ -316,7 +316,9 @@ void JsInspectorManager::GetAttrsAndStyles(std::unique_ptr<JsonValue>& jsonNode,
 
     auto styleJsonNode = JsonUtil::Create(true);
     for (auto style : node->GetStyles()) {
-        styleJsonNode->Put(ConvertStrToPropertyType(style.first).c_str(), style.second.c_str());
+        if (!style.second.empty()) {
+            styleJsonNode->Put(ConvertStrToPropertyType(style.first).c_str(), style.second.c_str());
+        }
     }
     jsonNode->Put(INSPECTOR_STYLES, styleJsonNode);
 }
