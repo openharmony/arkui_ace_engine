@@ -254,8 +254,9 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
         nodeInfo.SetVisible(false);
     }
 
-    for (const auto& child : node->GetChildList()) {
-        nodeInfo.AddChild(child->GetNodeId());
+    manager->UpdateNodeChildIds(node);
+    for (const auto& child : node->GetChildIds()) {
+        nodeInfo.AddChild(child);
     }
 
 #ifdef ACE_DEBUG
@@ -801,7 +802,6 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(
     }
 
     AccessibilityElementInfo nodeInfo;
-    jsAccessibilityManager->UpdateNodeChildIds(node);
     UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
         jsAccessibilityManager->GetRootNodeId());
     infos.push_back(nodeInfo);
@@ -1228,7 +1228,6 @@ void JsAccessibilityManager::FocusMoveSearch(const int32_t elementId, const int3
 
     if (resultNode) {
         LOGI("FocusMoveSearch end nodeId:%{public}d", resultNode->GetNodeId());
-        jsAccessibilityManager->UpdateNodeChildIds(resultNode);
         UpdateAccessibilityNodeInfo(resultNode, nodeInfo, jsAccessibilityManager, windowId_, rootNode->GetNodeId());
     }
     LOGI("SetFocusMoveSearchResult");
