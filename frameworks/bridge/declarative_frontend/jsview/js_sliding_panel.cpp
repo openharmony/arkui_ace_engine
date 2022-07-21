@@ -76,6 +76,62 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
     JSClass<JSSlidingPanel>::Bind<>(globalObj);
 }
 
+void JSSlidingPanel::ParsePanelRadius(const JSRef<JSVal>& args)
+{
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
+        return;
+    }
+    RefPtr<Decoration> tarDecoration = GetPanelDecoration();
+    Dimension radiusTopLeft;
+    Dimension radiusTopRight;
+    Dimension radiusBottomLeft;
+    Dimension radiusBottomRight;
+    Dimension borderRadius;
+    if (ParseJsDimensionVp(args, borderRadius)) {
+        radiusTopLeft = borderRadius;
+        radiusTopRight = borderRadius;
+        radiusBottomLeft = borderRadius;
+        radiusBottomRight = borderRadius;
+    } else if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        auto valueTopLeft = object->GetProperty("topLeft");
+        if (!valueTopLeft->IsUndefined()) {
+            ParseJsDimensionVp(valueTopLeft, radiusTopLeft);
+        }
+        auto valueTopRight = object->GetProperty("topRight");
+        if (!valueTopRight->IsUndefined()) {
+            ParseJsDimensionVp(valueTopRight, radiusTopRight);
+        }
+        auto valueBottomLeft = object->GetProperty("bottomLeft");
+        if (!valueBottomLeft->IsUndefined()) {
+            ParseJsDimensionVp(valueBottomLeft, radiusBottomLeft);
+        }
+        auto valueBottomRight = object->GetProperty("bottomRight");
+        if (!valueBottomRight->IsUndefined()) {
+            ParseJsDimensionVp(valueBottomRight, radiusBottomRight);
+        }
+    } else {
+        LOGE("args format error. %{public}s", args->ToString().c_str());
+        return;
+    }
+    auto border = tarDecoration->GetBorder();
+    border.SetTopLeftRadius(Radius(radiusTopLeft));
+    border.SetTopRightRadius(Radius(radiusTopRight));
+    border.SetBottomLeftRadius(Radius(radiusBottomLeft));
+    border.SetBottomRightRadius(Radius(radiusBottomRight));
+    tarDecoration->SetBorder(border);
+}
+
+void JSSlidingPanel::JsPanelBorderRadius(const JSCallbackInfo& info)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
+    ParsePanelRadius(info[0]);
+    panel->SetHasBorderStyle(true);
+    panel->SetHasDecorationStyle(true);
+}
+
 void JSSlidingPanel::JsBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -152,29 +208,6 @@ void JSSlidingPanel::JsPanelBorderColor(const JSCallbackInfo& info)
     panel->SetHasDecorationStyle(true);
 }
 
-void JSSlidingPanel::JsPanelBorderRadius(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-    Dimension radiusVal;
-    if (!ParseJsDimensionVp(info[0], radiusVal)) {
-        return;
-    }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
-    auto decoration = JSSlidingPanel::GetPanelDecoration();
-    if (!panel || !decoration) {
-        return;
-    }
-    auto border = decoration->GetBorder();
-    border.SetBorderRadius(Radius(radiusVal));
-    decoration->SetBorder(border);
-    panel->SetHasBorderStyle(true);
-    panel->SetHasDecorationStyle(true);
-}
-
 void JSSlidingPanel::JsPanelBorderWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -227,33 +260,33 @@ void JSSlidingPanel::JsPanelBorder(const JSCallbackInfo& info)
         LOGE("arg is not a object.");
         return;
     }
-
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
-        info.ReturnSelf();
-        return;
-    }
-    Dimension width = Dimension(0.0, DimensionUnit::VP);
-    Dimension radius = Dimension(0.0, DimensionUnit::VP);
-    ParseJsonDimensionVp(argsPtrItem->GetValue("width"), width);
-    ParseJsonDimensionVp(argsPtrItem->GetValue("radius"), radius);
-    auto borderStyle = argsPtrItem->GetInt("style", static_cast<int32_t>(BorderStyle::SOLID));
-    auto style = (borderStyle > 0 && borderStyle < 4) ? (BorderStyle)borderStyle : BorderStyle::SOLID;
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto panel = AceType::DynamicCast<SlidingPanelComponentV2>(component);
-    auto decoration = JSSlidingPanel::GetPanelDecoration();
-    if (!panel || !decoration) {
+    if (!panel) {
+        LOGE("Panel is Null");
         return;
     }
+    auto decoration = JSSlidingPanel::GetPanelDecoration();
+    auto argsPtrItem = JSRef<JSObject>::Cast(info[0]);
+
+    Dimension width = Dimension(0.0, DimensionUnit::VP);
+    ParseJsDimensionVp(argsPtrItem->GetProperty("width"), width);
+    ParsePanelRadius(argsPtrItem->GetProperty("radius"));
+    auto styleJsValue = argsPtrItem->GetProperty("style");
+    auto borderStyle = BorderStyle::SOLID;
+    if (!styleJsValue->IsUndefined() && styleJsValue->IsNumber()) {
+        auto styleValue = styleJsValue->ToNumber<uint32_t>();
+        if (styleValue > 0 && styleValue < 4) {
+            borderStyle = static_cast<BorderStyle>(styleValue);
+        }
+    }
     auto border = decoration->GetBorder();
-    border.SetStyle(style);
+    border.SetStyle(borderStyle);
     border.SetWidth(width);
     Color color;
-    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
+    if (ParseJsColor(argsPtrItem->GetProperty("color"), color)) {
         border.SetColor(color);
     }
-    border.SetBorderRadius(Radius(radius));
     decoration->SetBorder(border);
     panel->SetHasBorderStyle(true);
     panel->SetHasDecorationStyle(true);
