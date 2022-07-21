@@ -101,6 +101,16 @@ void TextComponent::SetTextStyle(const TextStyle& textStyle)
     declaration_->SetTextStyle(textStyle);
 }
 
+const std::optional<TextAlign>& TextComponent::GetAlignment() const
+{
+    return alignment_;
+}
+
+void TextComponent::SetAlignment(const TextAlign& alignment)
+{
+    alignment_ = alignment;
+}
+
 const Color& TextComponent::GetFocusColor() const
 {
     return declaration_->GetFocusColor();

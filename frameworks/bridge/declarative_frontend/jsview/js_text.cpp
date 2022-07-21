@@ -206,6 +206,25 @@ void JSText::SetTextAlign(int32_t value)
     }
 }
 
+void JSText::SetAlign(int32_t value)
+{
+    auto component = GetComponent();
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+    Alignment alignment = ParseAlignment(value);
+    if (NearEqual(alignment.GetHorizontal(), -1.0)) {
+        component->SetAlignment(TextAlign::LEFT);
+    } else if (NearEqual(alignment.GetHorizontal(), 0.0)) {
+        component->SetAlignment(TextAlign::CENTER);
+    } else if (NearEqual(alignment.GetHorizontal(), 1.0)) {
+        component->SetAlignment(TextAlign::RIGHT);
+    }
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetAlignment(alignment);
+}
+
 void JSText::SetLineHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -439,6 +458,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
     JSClass<JSText>::StaticMethod("textOverflow", &JSText::SetTextOverflow, opt);
     JSClass<JSText>::StaticMethod("fontStyle", &JSText::SetFontStyle, opt);
+    JSClass<JSText>::StaticMethod("align", &JSText::SetAlign, opt);
     JSClass<JSText>::StaticMethod("textAlign", &JSText::SetTextAlign, opt);
     JSClass<JSText>::StaticMethod("lineHeight", &JSText::SetLineHeight, opt);
     JSClass<JSText>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);
