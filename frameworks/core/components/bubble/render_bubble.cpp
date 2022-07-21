@@ -172,7 +172,6 @@ void RenderBubble::PerformLayout()
         const auto& child = GetChildren().front();
         child->Layout(innerLayout);
         childSize_ = child->GetLayoutSize();
-        UpdateBorderRadius();
         childOffset_ = GetChildPosition(childSize_);
         if (useCustom_) {
             UpdateCustomChildPosition();
