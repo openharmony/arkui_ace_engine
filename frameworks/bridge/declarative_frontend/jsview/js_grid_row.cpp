@@ -75,7 +75,7 @@ void ParserGutter(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>& gri
                 gutter->xXXl = xxxlDimension;
             }
         } else if (xObject->IsNumber()) {
-            gutter->SetYGutter(Dimension(xObject->ToNumber<double>()));
+            gutter->SetXGutter(Dimension(xObject->ToNumber<double>()));
         }
         if (yObject->IsObject()) {
             auto yParamGutter = JSRef<JSObject>::Cast(yObject);
