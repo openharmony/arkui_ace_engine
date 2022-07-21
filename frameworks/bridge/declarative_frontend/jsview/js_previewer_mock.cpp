@@ -257,7 +257,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("overviewModeAccess", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("fileFromUrlAccess", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::Mock);
-    JSClass<JSWeb>::StaticMethod("textZoomRatio", &JSWeb::Mock);
+    JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("initialScale", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("backgroundColor", &JSWeb::Mock);

@@ -63,7 +63,7 @@ public:
     static void OverviewModeAccess(bool isOverviewModeAccessEnabled);
     static void FileFromUrlAccess(bool isFileFromUrlAccessEnabled);
     static void DatabaseAccess(bool isDatabaseAccessEnabled);
-    static void TextZoomRatio(int32_t textZoomRatioNum);
+    static void TextZoomAtio(int32_t textZoomAtioNum);
     static void WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled);
     static void OnMouse(const JSCallbackInfo& args);
     static void OnResourceLoad(const JSCallbackInfo& args);
