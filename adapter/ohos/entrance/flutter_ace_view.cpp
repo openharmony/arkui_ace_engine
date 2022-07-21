@@ -419,7 +419,6 @@ void FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const std::shared_
         LOGD("ProcessTouchEvent");
         view->ProcessTouchEvent(pointerEvent);
     }
-    pointerEvent->MarkProcessed();
 }
 
 bool FlutterAceView::DispatchKeyEvent(FlutterAceView* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -494,9 +493,14 @@ void FlutterAceView::SetShellHolder(std::unique_ptr<flutter::OhosShellHolder> ho
 void FlutterAceView::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
+    auto markProcess = [pointerEvent]() {
+        if (pointerEvent) {
+            pointerEvent->MarkProcessed();
+        }
+    };
     if (touchPoint.type != TouchType::UNKNOWN) {
         if (touchEventCallback_) {
-            touchEventCallback_(touchPoint);
+            touchEventCallback_(touchPoint, markProcess);
         }
     } else {
         LOGW("Unknown event.");
@@ -516,9 +520,14 @@ void FlutterAceView::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
 {
     MouseEvent event;
     ConvertMouseEvent(pointerEvent, event);
+    auto markProcess = [pointerEvent]() {
+        if (pointerEvent) {
+            pointerEvent->MarkProcessed();
+        }
+    };
 
     if (mouseEventCallback_) {
-        mouseEventCallback_(event);
+        mouseEventCallback_(event, markProcess);
     }
 }
 
@@ -526,9 +535,14 @@ void FlutterAceView::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& 
 {
     AxisEvent event;
     ConvertAxisEvent(pointerEvent, event);
+    auto markProcess = [pointerEvent]() {
+        if (pointerEvent) {
+            pointerEvent->MarkProcessed();
+        }
+    };
 
     if (axisEventCallback_) {
-        axisEventCallback_(event);
+        axisEventCallback_(event, markProcess);
     }
 }
 

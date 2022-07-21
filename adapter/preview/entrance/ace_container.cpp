@@ -15,6 +15,8 @@
 
 #include "adapter/preview/entrance/ace_container.h"
 
+#include <functional>
+
 #include "flutter/lib/ui/ui_dart_state.h"
 
 #include "adapter/preview/entrance/ace_application_info.h"
@@ -211,7 +213,8 @@ void AceContainer::InitializeCallback()
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
 
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
-    auto&& touchEventCallback = [weak, id = instanceId_](const TouchEvent& event) {
+    auto&& touchEventCallback = [weak, id = instanceId_](
+                                    const TouchEvent& event, const std::function<void()>& ignoreMark) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
@@ -237,7 +240,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterKeyEventCallback(keyEventCallback);
 
-    auto&& mouseEventCallback = [weak, id = instanceId_](const MouseEvent& event) {
+    auto&& mouseEventCallback = [weak, id = instanceId_](
+                                    const MouseEvent& event, const std::function<void()>& ignoreMark) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
@@ -249,7 +253,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterMouseEventCallback(mouseEventCallback);
 
-    auto&& axisEventCallback = [weak, id = instanceId_](const AxisEvent& event) {
+    auto&& axisEventCallback = [weak, id = instanceId_](
+                                   const AxisEvent& event, const std::function<void()>& ignoreMark) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
