@@ -32,7 +32,7 @@ template("ace_capability_ohos_source_set") {
     include_dirs = [ "//foundation/distributeddatamgr/appdatamgr/preferences/interfaces/inner_api/include/" ]
     external_deps = [
       "ability_base:want",
-      "distributeddataobject:distributeddataobject_impl",
+      "data_object:distributeddataobject_impl",
       "ipc:ipc_core",
       "preferences:native_preferences",
     ]
