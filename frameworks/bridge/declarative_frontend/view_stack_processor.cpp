@@ -881,7 +881,6 @@ void ViewStackProcessor::SetIsPercentSize(RefPtr<Component>& component)
 void ViewStackProcessor::ClaimElementId(RefPtr<Component> component)
 {
     ACE_DCHECK((reservedElementId_ != ElementRegister::UndefinedElementId) && "No reserved elmtId, internal error!");
-    ACE_DCHECK(mainComponent != nullptr);
     LOGD("Assigning elmtId %{public}u to new %{public}s .", reservedElementId_, AceType::TypeName(component));
     component->AssignUniqueElementId(reservedElementId_);
     reservedElementId_ = ElementRegister::UndefinedElementId;
