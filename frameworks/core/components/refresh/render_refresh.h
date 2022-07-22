@@ -77,6 +77,7 @@ public:
         // Percent
         return frictionRatio_ * 100.0;
     }
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -190,6 +191,7 @@ private:
 
     std::string timeText_;
     std::string lastTimeText_;
+    std::function<void(const std::string&)> changeEvent_;
 };
 
 } // namespace OHOS::Ace
