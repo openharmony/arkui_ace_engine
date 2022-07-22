@@ -143,6 +143,10 @@ void RevSourceMap::Init(const std::string& sourceMap)
             LOGE("decode code fail");
             return;
         }
+        if (ans.size() == 0) {
+            LOGE("decode sourcemap fail, mapping: %{public}s", mapping.c_str());
+            break;
+        }
         if (ans.size() == 1) {
             nowPos_.afterColumn += ans[0];
             continue;
@@ -217,6 +221,10 @@ uint32_t RevSourceMap::Base64CharToInt(char charCode)
 
 bool RevSourceMap::VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans)
 {
+    if (vStr.size() == 0) {
+        LOGE("VlqRevCode fail with empty string.");
+        return false;
+    }
     const int32_t VLQ_BASE_SHIFT = 5;
     // binary: 100000
     uint32_t VLQ_BASE = 1 << VLQ_BASE_SHIFT;
