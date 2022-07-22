@@ -100,6 +100,7 @@ public:
     }
 
     void CreateDragDropRecognizer(const WeakPtr<PipelineContext>& pipelineContext);
+    void LongPressOnAction(const GestureEvent& info);
     virtual void PanOnActionStart(const GestureEvent& info) = 0;
     virtual void PanOnActionUpdate(const GestureEvent& info) = 0;
     virtual void PanOnActionEnd(const GestureEvent& info) = 0;
@@ -125,6 +126,7 @@ protected:
     RefPtr<DragDropEvent> initialDragDropNode_;
     Size selectedItemSize_;
     Point localPoint_;
+    Point startPoint_;
     UpdateBuilderFunc updateBuilder_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     std::function<void(const std::string&)> deleteDataCallback_ = nullptr;
