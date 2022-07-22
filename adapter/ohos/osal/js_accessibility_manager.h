@@ -86,10 +86,9 @@ public:
         const std::map<std::string, std::string> actionArguments, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback);
     bool ClearCurrentFocus();
-
-private:
     void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node);
 
+private:
     class JsInteractionOperation : public Accessibility::AccessibilityElementOperator {
     public:
         virtual ~JsInteractionOperation() = default;
