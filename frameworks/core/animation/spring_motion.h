@@ -59,7 +59,7 @@ protected:
 
 private:
     // the threshold close to zero
-    static constexpr double NEAR_ZERO = 0.001;
+    static constexpr double NEAR_ZERO = 0.1;
 };
 
 class ScrollSpringMotion : public SpringMotion {
