@@ -537,7 +537,7 @@ void AccessibilityNodeManager::ClearPageAccessibilityNodes(int32_t pageId)
     auto rootNodeId = pageId + ROOT_STACK_BASE;
     auto accessibilityNode = GetAccessibilityNodeById(rootNodeId);
     if (!accessibilityNode) {
-        LOGW("the accessibility node %{public}d is not in the map", rootNodeId);
+        LOGD("the accessibility node %{public}d is not in the map", rootNodeId);
         return;
     }
     RemoveAccessibilityNodes(accessibilityNode);
