@@ -436,7 +436,9 @@ bool FlutterRenderText::UpdateParagraph()
     using namespace Constants;
 
     txt::ParagraphStyle style;
-
+    if (alignment_.has_value()) {
+        textStyle_.SetTextAlign(alignment_.value());
+    }
     const auto& textAlign = textStyle_.GetTextAlign();
     if (textAlign == TextAlign::START || textAlign == TextAlign::END) {
         std::string data = text_->GetData();

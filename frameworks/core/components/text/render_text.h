@@ -169,6 +169,7 @@ protected:
     std::map<int32_t, std::map<GestureType, EventMarker>> touchRegions_; // key of map is end position of span.
     double paragraphWidth_ = 0.0;
     double paragraphHeight_ = 0.0;
+    std::optional<TextAlign> alignment_;
 
 private:
     void HandleTouchEvent(GestureType type, const Offset& touchPosition);
