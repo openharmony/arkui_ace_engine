@@ -151,7 +151,7 @@ size_t SystemProperties::GetLongPauseTime()
 
 bool SystemProperties::GetAsmInterpreterEnabled()
 {
-    return system::GetParameter("persist.ark.asminterpreter", "false") == "true";
+    return system::GetParameter("persist.ark.asminterpreter", "true") == "true";
 }
 
 std::string SystemProperties::GetAsmOpcodeDisableRange()
