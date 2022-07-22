@@ -20,6 +20,30 @@
 
 namespace OHOS::Ace::Framework {
 
+void ParseRefreshingObject(
+    const JSCallbackInfo& info, const JSRef<JSObject>& refreshing, const RefPtr<RefreshComponent>& refreshComponent)
+{
+    JSRef<JSVal> changeEventVal = refreshing->GetProperty("changeEvent");
+    if (changeEventVal->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+        auto eventMarker =
+            EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+
+                if (param != "true" && param != "false") {
+                    LOGE("param is not equal true or false, invalid.");
+                    return;
+                }
+
+                bool newValue = StringToBool(param);
+                JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
+                func->ExecuteJS(1, &newJSVal);
+            });
+        refreshComponent->SetChangeEvent(eventMarker);
+    }
+}
+
 void JSRefresh::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRefresh>::Declare("Refresh");
@@ -58,11 +82,13 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto refreshing = paramObject->GetProperty("refreshing");
-    if (!refreshing->IsBoolean()) {
-        LOGE("refresh create error, info is non-valid");
-        return;
+    if (refreshing->IsBoolean()) {
+        refreshComponent->SetRefreshing(refreshing->ToBoolean());
+    } else {
+        JSRef<JSObject> refreshingObj = JSRef<JSObject>::Cast(refreshing);
+        ParseRefreshingObject(info, refreshingObj, refreshComponent);
+        refreshComponent->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
     }
-    refreshComponent->SetRefreshing(refreshing->ToBoolean());
 
     auto jsOffset = paramObject->GetProperty("offset");
     Dimension offset;

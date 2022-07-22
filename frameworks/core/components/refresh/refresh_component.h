@@ -252,6 +252,16 @@ public:
         textStyle_ = textStyle;
     }
 
+    const EventMarker& GetChangeEvent() const
+    {
+        return changeEvent_;
+    }
+
+    void SetChangeEvent(const EventMarker& changeEvent)
+    {
+        changeEvent_ = changeEvent;
+    }
+
 private:
     Dimension indicatorOffset_ = Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP);
     Dimension loadingDistance_;
@@ -280,6 +290,7 @@ private:
 #endif
     EventMarker refreshEventId_;
     EventMarker pullDownEventId_;
+    EventMarker changeEvent_;
 };
 
 } // namespace OHOS::Ace
