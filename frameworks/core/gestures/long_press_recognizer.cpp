@@ -78,6 +78,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         LOGI("the long press is forbidden");
         return;
     }
+    globalPoint_ = Point(event.x, event.y);
     if (state_ == DetectState::READY) {
         touchMap_[event.id] = event;
         pointsCount_++;
@@ -247,6 +248,7 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
         }
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
+        info.SetGlobalPoint(globalPoint_);
         info.SetScreenLocation(trackPoint.GetScreenOffset());
         info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
         (*callback)(info);
