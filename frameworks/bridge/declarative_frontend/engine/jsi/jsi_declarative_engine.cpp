@@ -930,10 +930,9 @@ void JsiDeclarativeEngine::Destroy()
     XComponentClient::GetInstance().SetJSValCallToNull();
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
-
+    engineInstance_->DestroyAllRootViewHandle();
     if (!runtime_ && nativeEngine_ != nullptr) {
         nativeEngine_->CancelCheckUVLoop();
-        engineInstance_->DestroyAllRootViewHandle();
         delete nativeEngine_;
         nativeEngine_ = nullptr;
     }
