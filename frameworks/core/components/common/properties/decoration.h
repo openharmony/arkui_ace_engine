@@ -240,8 +240,8 @@ public:
     bool IsValid() const
     {
         if (GetType() == GradientType::SWEEP) {
-            return LessOrEqual(fmod(sweepGradient_.startAngle.value().Value(), 360.0f),
-                fmod(sweepGradient_.endAngle.value().Value(), 360.0f)) && colors_.size() > 1;
+            return LessOrEqual(weepGradient_.startAngle.value().Value(),
+                sweepGradient_.endAngle.value().Value()) && colors_.size() > 1;
         }
         return colors_.size() > 1;
     }
