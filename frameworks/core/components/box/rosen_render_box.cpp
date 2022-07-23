@@ -370,10 +370,10 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         rsNode->SetMask(mask->GetRSMask(GetPaintRect(), skPath));
     }
 #endif
-
     if ((!backDecoration_) || backDecoration_->GetImage() ||
         (backDecoration_->GetBackgroundColor() != Color::TRANSPARENT) || !(backDecoration_->GetGradient().IsValid())) {
         // no need to paint gradient
+        rsNode->SetBackgroundShader(nullptr);
         return;
     }
 
