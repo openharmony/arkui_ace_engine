@@ -232,6 +232,10 @@ bool RenderSideBarContainer::TouchTest(const Point& globalPoint, const Point& pa
         return false;
     }
 
+    if (status_ != SideStatus::SHOW) {
+        return RenderNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+    }
+
     auto sidebarWidthVp = ConvertWidthToVp(sidebarWidth_);
     auto paintRect = GetPaintRect();
     auto exceptRegion = Rect(paintRect.GetOffset() + exceptRegion_.GetOffset(), exceptRegion_.GetSize());
