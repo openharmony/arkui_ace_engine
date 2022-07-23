@@ -107,13 +107,8 @@ void FlutterRenderPickerBase::Paint(RenderContext& context, const Offset& offset
     // Paint gradient at top and bottom.
     PaintGradient(canvas, offset, rect, theme);
 
-    for (const auto& column : columns_) {
-        if (column->IsFocused()) {
-            InitializeSelectedOption(column);
-            PaintFocusOptionBorder(canvas, column);
-            break;
-        }
-    }
+    // Need to use PipelineContext::ShowFocusAnimation
+    PaintFocusOptionBorder(canvas);
 }
 
 void FlutterRenderPickerBase::PaintGradient(
@@ -162,27 +157,39 @@ void FlutterRenderPickerBase::PaintGradient(
     layer_->SetColors(colors);
 }
 
-void FlutterRenderPickerBase::PaintFocusOptionBorder(
-    const ScopedCanvas& canvas, const RefPtr<RenderPickerColumn>& pickerColumn)
+void FlutterRenderPickerBase::PaintFocusOptionBorder(const ScopedCanvas& canvas)
 {
-    double focusBorderThickness = NormalizeToPx(FOCUS_BORDER_THICKNESS);
-    double focusOffsetX = focusBoxOffset_.GetX() - focusBorderThickness / 2.0;
-    double focusOffsetY = focusBoxOffset_.GetY() - focusBorderThickness / 2.0;
-    double focusBorderWidth = focusBoxSize_.Width() + focusBorderThickness;
-    double focusBorderHeight = focusBoxSize_.Height() + focusBorderThickness;
-    double focusRadius = NormalizeToPx(FOCUS_RADIUS);
-    flutter::Paint paint;
-    flutter::PaintData paintData;
-    paint.paint()->setColor(FOCUS_BORDER_COLOR);
-    paint.paint()->setStyle(SkPaint::Style::kStroke_Style);
-    paint.paint()->setStrokeWidth(focusBorderThickness);
-    paint.paint()->setAntiAlias(true);
-    flutter::RRect rRect;
-    SkRRect rect;
-    rect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
-    rect.offset(focusOffsetX, focusOffsetY);
-    rRect.sk_rrect = rect;
-    canvas->drawRRect(rRect, paint, paintData);
+    auto pipeline = context_.Upgrade();
+    if (!pipeline || !pipeline->IsKeyEvent()) {
+        return;
+    }
+
+    for (const auto& column : columns_) {
+        if (!column->IsFocused()) {
+            continue;
+        }
+
+        InitializeSelectedOption(column);
+        double focusBorderThickness = NormalizeToPx(FOCUS_BORDER_THICKNESS);
+        double focusOffsetX = focusBoxOffset_.GetX() - focusBorderThickness / 2.0;
+        double focusOffsetY = focusBoxOffset_.GetY() - focusBorderThickness / 2.0;
+        double focusBorderWidth = focusBoxSize_.Width() + focusBorderThickness;
+        double focusBorderHeight = focusBoxSize_.Height() + focusBorderThickness;
+        double focusRadius = NormalizeToPx(FOCUS_RADIUS);
+        flutter::Paint paint;
+        flutter::PaintData paintData;
+        paint.paint()->setColor(FOCUS_BORDER_COLOR);
+        paint.paint()->setStyle(SkPaint::Style::kStroke_Style);
+        paint.paint()->setStrokeWidth(focusBorderThickness);
+        paint.paint()->setAntiAlias(true);
+        flutter::RRect rRect;
+        SkRRect rect;
+        rect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+        rect.offset(focusOffsetX, focusOffsetY);
+        rRect.sk_rrect = rect;
+        canvas->drawRRect(rRect, paint, paintData);
+        break;
+    }
 }
 
 } // namespace OHOS::Ace
