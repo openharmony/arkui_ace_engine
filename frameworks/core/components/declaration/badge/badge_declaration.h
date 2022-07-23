@@ -26,7 +26,7 @@ struct BadgeAttribute : Attribute {
     BadgePosition badgePosition { BadgePosition::RIGHT_TOP };
     int64_t messageCount = 0;
     int64_t maxCount = 99;
-    std::string badgeLabel;
+    std::optional<std::string> badgeLabel;
 };
 
 struct BadgeStyle : Style {
@@ -57,7 +57,7 @@ public:
         return attribute.badgePosition;
     }
 
-    const std::string& GetBadgeLabel() const
+    const std::optional<std::string>& GetBadgeLabel() const
     {
         auto& attribute = static_cast<BadgeAttribute&>(GetAttribute(AttributeTag::SPECIALIZED_ATTR));
         return attribute.badgeLabel;

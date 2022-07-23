@@ -287,7 +287,9 @@ bool RenderScroll::IsCrashTop()
 {
     double current = GetMainOffset(currentOffset_);
     double last = GetMainOffset(lastOffset_);
-    return current <= 0.0 && last > 0.0;
+    bool scrollUpToReachTop = GreatNotEqual(last, 0.0) && LessOrEqual(current, 0.0);
+    bool scrollDownToReachTop = LessNotEqual(last, 0.0) && GreatOrEqual(current, 0.0);
+    return scrollUpToReachTop || scrollDownToReachTop;
 }
 
 bool RenderScroll::IsCrashBottom()
@@ -295,7 +297,9 @@ bool RenderScroll::IsCrashBottom()
     double maxExtent = mainScrollExtent_ - GetMainSize(viewPort_);
     double current = GetMainOffset(currentOffset_);
     double last = GetMainOffset(lastOffset_);
-    return current >= maxExtent && last < maxExtent && ReachMaxCount();
+    bool scrollDownToReachEnd = LessNotEqual(last, maxExtent) && GreatOrEqual(current, maxExtent);
+    bool scrollUpToReachEnd = GreatNotEqual(last, maxExtent) && LessOrEqual(current, maxExtent);
+    return (scrollUpToReachEnd || scrollDownToReachEnd) && ReachMaxCount();
 }
 
 bool RenderScroll::CanScrollVertically(const Offset& delta)
@@ -596,12 +600,10 @@ void RenderScroll::InitScrollBar(const RefPtr<ScrollBar>& scrollBar)
         if (!scrollBar_) {
             scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF);
         }
-        if (axis_ != Axis::VERTICAL) {
-            scrollBar_->SetUndisplay();
-        } else {
-            scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
+        if (axis_ == Axis::HORIZONTAL) {
+            scrollBar_->SetPositionMode(PositionMode::BOTTOM);
         }
-
+        scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
         SetBarCallBack(axis_ == Axis::VERTICAL);
     }
 }

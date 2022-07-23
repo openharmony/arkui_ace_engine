@@ -23,9 +23,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
-#include "core/components_ng/property/render_property.h"
+#include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/render_context.h"
-#include "core/components_ng/render/render_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -37,9 +36,9 @@ public:
     using ContentPaintImpl = std::function<void(RenderContext*, OffsetF)>;
 
     RenderWrapper(
-        WeakPtr<RenderContext> renderContext, RefPtr<GeometryNode> geometryNode, RefPtr<RenderProperty> layoutProperty)
+        WeakPtr<RenderContext> renderContext, RefPtr<GeometryNode> geometryNode, RefPtr<PaintProperty> layoutProperty)
         : renderContext_(std::move(renderContext)), geometryNode_(std::move(geometryNode)),
-          renderProperty_(std::move(layoutProperty))
+          paintProperty_(std::move(layoutProperty))
     {}
     ~RenderWrapper() override = default;
 
@@ -68,7 +67,7 @@ public:
 private:
     WeakPtr<RenderContext> renderContext_;
     RefPtr<GeometryNode> geometryNode_;
-    RefPtr<RenderProperty> renderProperty_;
+    RefPtr<PaintProperty> paintProperty_;
     ContentPaintImpl contentPaintImpl_;
     TaskThread taskThread_ = MAIN_TASK;
 };

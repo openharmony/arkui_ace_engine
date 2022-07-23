@@ -196,7 +196,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    if (!isModulePreloaded_ || IsPlugin()) {
+    if (!isModulePreloaded_  || !usingSharedRuntime_ || IsPlugin()) {
         InitGlobalObjectTemplate();
     }
 
@@ -206,7 +206,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         LOGI("InitJsEnv SharedRuntime has initialized, skip...");
     } else {
         InitGroupJsBridge();
-        if (!isModulePreloaded_ || IsPlugin()) {
+        if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin()) {
             InitConsoleModule();
             InitAceModule();
             InitJsExportsUtilObject();
@@ -352,7 +352,7 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
         global->SetProperty(runtime_, "console", consoleObj);
     }
 
-    if (isModulePreloaded_ && !IsPlugin()) {
+    if (isModulePreloaded_ && usingSharedRuntime_ && !IsPlugin()) {
         LOGD("console module has already preloaded");
         return;
     }

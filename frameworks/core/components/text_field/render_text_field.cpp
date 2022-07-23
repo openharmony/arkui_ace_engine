@@ -1008,7 +1008,7 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
             MarkNeedLayout();
         }
 
-        if (keyboard_ != TextInputType::MULTILINE) {
+        if (keyboard_ != TextInputType::MULTILINE && keyboard_ != TextInputType::VISIBLE_PASSWORD) {
             resetToStart_ = true;
             MarkNeedLayout();
         }
@@ -1239,8 +1239,8 @@ void RenderTextField::EditingValueFilter(TextEditingValue& result)
             wstrInSelection = WstringSearch(wstrInSelection, filterRegex);
         }
         std::wstring wstrAfterSelection;
-        size_t lenLeft = wideText.length() - static_cast<size_t>(end);
-        if (lenLeft > 0) {
+        if (end >= start && end <= static_cast<int32_t>(wideText.length())) {
+            size_t lenLeft = wideText.length() - static_cast<size_t>(end);
             wstrAfterSelection = wideText.substr(end, lenLeft);
             wstrAfterSelection = WstringSearch(wstrAfterSelection, filterRegex);
         }
@@ -2154,6 +2154,8 @@ void RenderTextField::InitAccessibilityEventListener()
             textField->OnLongPress(LongPressInfo(0));
         }
     });
+
+    accessibilityNode->AddSupportAction(AceAction::ACTION_SET_TEXT);
 }
 
 void RenderTextField::UpdateDirectionStatus()

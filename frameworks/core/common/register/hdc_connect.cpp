@@ -96,10 +96,11 @@ void FreeInstance()
     if (clsHdcJdwpSimulator == nullptr) {
         return; // if clsHdcJdwpSimulator is nullptr, should return immediately.
     }
-    delete clsHdcJdwpSimulator;
-    clsHdcJdwpSimulator = nullptr;
+    clsHdcJdwpSimulator->FreeContext();
     uv_stop(&loopMain);
     TryCloseLoop(&loopMain, "Hdcjdwp exit");
+    delete clsHdcJdwpSimulator;
+    clsHdcJdwpSimulator = nullptr;
     LOGI("jdwp_process exit.");
 }
 

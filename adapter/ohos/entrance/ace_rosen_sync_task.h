@@ -23,7 +23,7 @@ namespace OHOS::Ace::Platform {
 
 class AceRosenSyncTask : public Rosen::RSSyncTask {
 public:
-    explicit AceRosenSyncTask(std::function<void()>&& task, unsigned long long timeoutNS = 50e6)
+    explicit AceRosenSyncTask(std::function<void()>&& task, unsigned long long timeoutNS = 30e9)
         : Rosen::RSSyncTask(timeoutNS), task_(std::move(task))
     {}
     virtual ~AceRosenSyncTask() = default;

@@ -286,7 +286,7 @@ void RosenRenderImage::Update(const RefPtr<Component>& component)
     // curImageSrc represents the picture currently shown and imageSrc represents next picture to be shown
     imageLoadingStatus_ = (sourceInfo_ != curSourceInfo_) ? ImageLoadingStatus::UPDATING : imageLoadingStatus_;
     UpdateRenderAltImage(component);
-    if (proceedPreviousLoading_ && (sourceInfo_.IsSvg() || sourceInfo_.GetSrcType() != SrcType::MEMORY)) {
+    if (proceedPreviousLoading_) {
         LOGI("Proceed previous loading, imageSrc is %{public}s, image loading status: %{public}d",
             sourceInfo_.ToString().c_str(), imageLoadingStatus_);
         return;
@@ -415,22 +415,22 @@ void RosenRenderImage::FetchImageObject()
 void RosenRenderImage::UpdateSharedMemoryImage(const RefPtr<PipelineContext>& context)
 {
     auto sharedImageManager = context->GetSharedImageManager();
-    if (sharedImageManager) {
-        if (sharedImageManager->IsResourceToReload(ImageLoader::RemovePathHead(sourceInfo_.GetSrc()))) {
-            // This case means that the imageSrc to load is a memory image and its data is not ready.
-            // If run [GetImageSize] here, there will be an unexpected [OnLoadFail] callback from [ImageProvider].
-            // When the data is ready, [SharedImageManager] done [AddImageData], [GetImageSize] will be run.
-            return;
-        }
-        auto nameOfSharedImage = ImageLoader::RemovePathHead(sourceInfo_.GetSrc());
-        if (sharedImageManager->AddProviderToReloadMap(nameOfSharedImage, AceType::WeakClaim(this))) {
-            return;
-        }
-        // this is when current picName is not found in [ProviderMapToReload], indicating that image data of this
-        // image may have been written to [SharedImageMap], so return the [MemoryImageProvider] and start loading
-        if (sharedImageManager->FindImageInSharedImageMap(nameOfSharedImage, AceType::WeakClaim(this))) {
-            return;
-        }
+    if (!sharedImageManager) {
+        LOGE("sharedImageManager is null when image try loading memory image, sourceInfo_: %{private}s",
+            sourceInfo_.ToString().c_str());
+        return;
+    }
+    auto nameOfSharedImage = ImageLoader::RemovePathHead(sourceInfo_.GetSrc());
+    if (sharedImageManager->IsResourceToReload(nameOfSharedImage, AceType::WeakClaim(this))) {
+        // This case means that the image to load is a memory image and its data is not ready.
+        // Add [this] to [providerMapToReload_] so that it will be notified to start loading image.
+        // When the data is ready, [SharedImageManager] will call [UpdateData] in [AddImageData].
+        return;
+    }
+    // this is when current picName is not found in [ProviderMapToReload], indicating that image data of this
+    // image may have been written to [SharedImageMap], so start loading
+    if (sharedImageManager->FindImageInSharedImageMap(nameOfSharedImage, AceType::WeakClaim(this))) {
+        return;
     }
 }
 
@@ -684,7 +684,7 @@ void RosenRenderImage::ApplyBorderRadius(
 
 #ifdef OHOS_PLATFORM
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-    recordingCanvas->ClipAdaptiveRRect(radii_[0].x());
+    recordingCanvas->ClipAdaptiveRRect(radii_);
 #else
     // There are three situations in which we apply border radius to the whole image component:
     // 1. when the image source is a SVG;
@@ -758,18 +758,17 @@ void RosenRenderImage::CanvasDrawImageRect(
     }
     if (!image_ || !image_->image()) {
         imageDataNotReady_ = true;
-        LOGI("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
+        LOGD("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
             rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
         return;
     }
 #ifdef OHOS_PLATFORM
-    float radius = radii_[0].x();
     int fitNum = static_cast<int>(imageFit_);
     int repeatNum = static_cast<int>(imageRepeat_);
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
-        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radius, scale_);
+        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_);
         recordingCanvas->DrawImageWithParm(image_->image(), rsImageInfo, paint);
         return;
     }
@@ -1034,7 +1033,7 @@ void RosenRenderImage::OnHiddenChanged(bool hidden)
         if (imageObj_ && imageObj_->GetFrameCount() > 1) {
             LOGI("Animated image Pause");
             imageObj_->Pause();
-        } else {
+        } else if (sourceInfo_.GetSrcType() != SrcType::MEMORY) {
             CancelBackgroundTasks();
         }
     } else {
@@ -1043,6 +1042,11 @@ void RosenRenderImage::OnHiddenChanged(bool hidden)
             imageObj_->Resume();
         } else if (backgroundTaskCancled_) {
             backgroundTaskCancled_ = false;
+            if (sourceInfo_.GetSrcType() == SrcType::MEMORY) {
+                LOGE("memory image: %{public}s should not be notified to resume loading.",
+                    sourceInfo_.ToString().c_str());
+            }
+            imageLoadingStatus_ = ImageLoadingStatus::UNLOADED;
             FetchImageObject();
         }
     }

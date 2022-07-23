@@ -27,6 +27,7 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
@@ -641,13 +642,6 @@ void AceContainer::InitializeCallback()
             [context]() { context->OnSurfaceDestroyed(); }, TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
-
-    auto&& idleCallback = [context = pipelineContext_, id = instanceId_](int64_t deadline) {
-        ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
-    };
-    aceView_->RegisterIdleCallback(idleCallback);
 
     auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
                                    int32_t x, int32_t y, const DragEventAction& action) {
@@ -1307,9 +1301,10 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
     return context->CreateModuleContext(bundle, module);
 }
 
-void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::string& inputDevice)
+void AceContainer::UpdateConfiguration(
+    const std::string& colorMode, const std::string& inputDevice, const std::string& languageTag)
 {
-    if (colorMode.empty() && inputDevice.empty()) {
+    if (colorMode.empty() && inputDevice.empty() && languageTag.empty()) {
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
         return;
     }
@@ -1338,9 +1333,23 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
         SystemProperties::SetInputDevice(inputDevice == "true");
         resConfig.SetInputDevice(inputDevice == "true");
     }
+    if (!languageTag.empty()) {
+        std::string language;
+        std::string script;
+        std::string region;
+        Localization::ParseLocaleTag(languageTag, language, script, region, false);
+        if (!language.empty() || !script.empty() || !region.empty()) {
+            AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
+        }
+    }
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     themeManager->LoadResourceThemes();
+    UpdateFrondend();
+}
+
+void AceContainer::UpdateFrondend()
+{
     auto taskExecutor = GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("AceContainer::UpdateConfiguration taskExecutor is null.");
@@ -1354,7 +1363,7 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
         }
         auto frontend = container->GetFrontend();
         if (frontend) {
-            LOGE("AceContainer::UpdateConfiguration frontend MarkNeedUpdate.");
+            LOGI("AceContainer::UpdateConfiguration frontend MarkNeedUpdate.");
             frontend->MarkNeedUpdate();
         }
         }, TaskExecutor::TaskType::JS);

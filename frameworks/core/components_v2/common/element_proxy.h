@@ -83,6 +83,9 @@ public:
     {}
 
 protected:
+    void AddSelfToElementRegistry();
+    void RemoveSelfFromElementRegistry();
+
     WeakPtr<ElementProxyHost> host_;
 
     ComposeId composedId_;
@@ -95,7 +98,9 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ElementProxy);
 };
 
-class ElementProxyHost : virtual public Referenced {
+class ElementProxyHost : virtual public AceType {
+    DECLARE_ACE_TYPE(ElementProxyHost, AceType);
+
 public:
     size_t TotalCount() const;
 
@@ -122,6 +127,12 @@ private:
     std::set<ComposeId> activeComposeIds_;
 };
 
+class ACE_EXPORT ForEachElementLookup {
+public:
+    static std::list<std::string> GetIdArray(int32_t elmtId);
+};
+
 } // namespace OHOS::Ace::V2
+
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_COMMON_ELEMENT_PROXY_H

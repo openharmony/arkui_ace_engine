@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_RENDER_PROPERTIES_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_RENDER_PROPERTIES_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_FONT_COLLECTION_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_FONT_COLLECTION_H
 
-#include <memory>
-#include <optional>
-
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/property/property.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
-struct BackgroundProperty {
-    ACE_DEFINE_STRUCT_PROPERTY(BgColor, Color);
-};
-} // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_RENDER_PROPERTIES_H
+class ACE_EXPORT FontCollection : public virtual AceType {
+public:
+    static RefPtr<FontCollection> Current();
+};
+
+} // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_FONT_COLLECTION_H

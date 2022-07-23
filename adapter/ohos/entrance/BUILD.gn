@@ -63,12 +63,9 @@ template("ace_ohos_standard_source_set") {
       "$ability_runtime_napi_path/featureAbility",
       "//foundation/arkui/napi/interfaces/kits",
       "//foundation/arkui/napi/native_engine",
-      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/dataability/include",
-      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/rdb/include",
       "//foundation/window/window_manager/interfaces/innerkits",
       "//third_party/node/src",
       "//utils/native/base/include",
-      "//foundation/distributeddatamgr/appdatamgr/preferences/interfaces/inner_api/include/",
     ]
 
     deps = [

@@ -28,8 +28,6 @@ template("js_pa_engine_qjs") {
       "$ability_runtime_path/interfaces/kits/native/ability/native",
       "$ability_runtime_services_path/common/include",
       "$ability_runtime_services_path/abilitymgr/include",
-      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/dataability/include",
-      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/rdb/include",
       "$ability_runtime_napi_path/context",
       "$ability_runtime_napi_path/inner/napi_common",
       "//foundation/arkui/ace_engine/adapter/ohos/entrance/pa_engine/engine/common",

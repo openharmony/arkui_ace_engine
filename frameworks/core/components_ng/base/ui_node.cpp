@@ -142,6 +142,13 @@ void UINode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
     }
 }
 
+void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+{
+    for (const auto& child : children_) {
+        child->MarkDirtyNode(extraFlag);
+    }
+}
+
 void UINode::MarkNeedSyncRenderTree()
 {
     auto parent = parent_.Upgrade();

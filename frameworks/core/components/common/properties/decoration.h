@@ -239,6 +239,10 @@ public:
 
     bool IsValid() const
     {
+        if (GetType() == GradientType::SWEEP) {
+            return LessOrEqual(sweepGradient_.startAngle.value().Value(),
+                sweepGradient_.endAngle.value().Value()) && colors_.size() > 1;
+        }
         return colors_.size() > 1;
     }
 

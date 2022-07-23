@@ -52,7 +52,7 @@ public:
             theme->backgroundColor_ = themeConstants->GetColor(THEME_SCROLL_BAR_BACKGROUND_COLOR);
             theme->foregroundColor_ = themeConstants->GetColor(THEME_SCROLL_BAR_FOREGROUND_COLOR);
             Dimension paddingRight = themeConstants->GetDimension(THEME_SCROLL_BAR_PADDING_RIGHT);
-            theme->padding_ = Edge(0.0, 0.0, paddingRight.Value(), 0.0, paddingRight.Unit());
+            theme->padding_ = Edge(0.0, 0.0, paddingRight.Value(), paddingRight.Value(), paddingRight.Unit());
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }

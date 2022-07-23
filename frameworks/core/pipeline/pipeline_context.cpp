@@ -833,6 +833,7 @@ void PipelineContext::SetupRootElement()
         Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, std::list<RefPtr<Component>>());
     auto overlay = AceType::MakeRefPtr<OverlayComponent>(std::list<RefPtr<Component>>());
     overlay->SetTouchable(false);
+    Component::MergeRSNode(overlay);
     stack->AppendChild(rootStage);
     stack->AppendChild(overlay);
     RefPtr<RootComponent> rootComponent;
@@ -1729,6 +1730,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
         OnTouchEvent(touchPoint);
     }
 
+    CHECK_NULL_VOID(rootElement_);
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     LOGD(
         "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
@@ -2158,10 +2160,17 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height, 
     CHECK_RUN_ON(UI);
     UpdateRootSizeAndScale(width, height);
     CHECK_NULL_VOID(rootElement_);
-    const Rect paintRect(0.0, offset, rootWidth_, rootHeight_);
+    const Rect paintRect(0.0, 0.0, rootWidth_, rootHeight_);
     auto rootNode = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
     if (!rootNode) {
         return;
+    }
+    auto stack = GetStageElement()->GetElementParent().Upgrade();
+    if (stack) {
+        auto renderStack = AceType::DynamicCast<RenderStack>(stack->GetRenderNode());
+        if (renderStack) {
+            renderStack->SetTop(Dimension(offset));
+        }
     }
     if (!NearEqual(viewScale_, rootNode->GetScale()) || paintRect != rootNode->GetPaintRect() || isDensityUpdate_) {
         if (!NearEqual(viewScale_, rootNode->GetScale())) {

@@ -526,7 +526,7 @@ void AccessibilityNodeManager::RemoveAccessibilityNodeById(NodeId nodeId)
 {
     auto accessibilityNode = GetAccessibilityNodeById(nodeId);
     if (!accessibilityNode) {
-        LOGW("the accessibility node %{public}d is not in the map", nodeId);
+        LOGD("the accessibility node %{public}d is not in the map", nodeId);
         return;
     }
     RemoveAccessibilityNodes(accessibilityNode);
@@ -752,6 +752,7 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
     }
 
     DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetNodeId()));
+    DumpLog::GetInstance().AddDesc("compid: " + node->GetJsComponentId());
     DumpLog::GetInstance().AddDesc("text: " + node->GetText());
     DumpLog::GetInstance().AddDesc("top: " + std::to_string(node->GetTop() + windowTop_));
     DumpLog::GetInstance().AddDesc("left: " + std::to_string(node->GetLeft() + windowLeft_));

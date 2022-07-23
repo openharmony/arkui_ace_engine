@@ -36,8 +36,6 @@ class GestureScope {
 public:
     explicit GestureScope(size_t touchId) : touchId_(touchId) {}
     ~GestureScope() = default;
-    GestureScope(GestureScope&&) = default;
-    GestureScope& operator=(GestureScope&&) = default;
 
     void AddMember(const RefPtr<GestureRecognizer>& recognizer);
     void DelMember(const RefPtr<GestureRecognizer>& recognizer);
@@ -72,8 +70,11 @@ private:
     std::list<WeakPtr<GestureRecognizer>> parallelRecognizers_;
 };
 
-class GestureReferee : public Singleton<GestureReferee> {
+class GestureReferee {
 public:
+    static GestureReferee* GetInstance();
+    ~GestureReferee() = default;
+
     // Each gesture recognizer should add itself to the gesture scope at the beginning of the gesture sequence
     // (touch down event) for gesture adjudicating.
     void AddGestureRecognizer(size_t touchId, const RefPtr<GestureRecognizer>& recognizer);
@@ -90,6 +91,10 @@ public:
     void Adjudicate(size_t touchId, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
 
 private:
+    GestureReferee() = default;
+    // Singleton instance
+    static thread_local std::unique_ptr<GestureReferee> instance_;
+
     // Stores gesture recognizer collection according to Id.
     std::unordered_map<size_t, GestureScope> gestureScopes_;
 };

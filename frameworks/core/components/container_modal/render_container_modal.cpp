@@ -126,20 +126,4 @@ void RenderContainerModal::ContainerBoxLayout()
     containerBox->SetPosition(Offset(0.0, 0.0));
 }
 
-Offset RenderContainerModal::GetGlobalOffset() const
-{
-    auto context = GetContext().Upgrade();
-    if (!context) {
-        LOGE("get pipeline context failed");
-        return RenderNode::GetGlobalOffset();
-    }
-
-    auto windowMode = context->FireWindowGetModeCallBack();
-    if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
-        return Offset(-(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
-            -CONTAINER_TITLE_HEIGHT.ConvertToPx());
-    }
-    return RenderNode::GetGlobalOffset();
-}
-
 } // namespace OHOS::Ace

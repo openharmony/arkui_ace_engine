@@ -113,6 +113,7 @@ public:
             parent->MarkNeedLayout();
             parent->RemoveChild(AceType::Claim(this));
         }
+        parent_ = nullptr;
     }
 
     // Update node with attr, style, event, method and so on.

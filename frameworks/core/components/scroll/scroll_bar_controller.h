@@ -41,7 +41,7 @@ public:
     ScrollBarController() = default;
     ~ScrollBarController() override = default;
 
-    void Initialize(const WeakPtr<PipelineContext>& context);
+    void Initialize(const WeakPtr<PipelineContext>& context, bool isVertical);
     void HandleScrollBarEnd();
     void HandleTouchDown();
     void HandleTouchUp();
@@ -171,6 +171,7 @@ protected:
     RefPtr<Vibrator> vibrator_;
     WeakPtr<PipelineContext> context_;
 
+    bool isVertical_ = true;
     bool isActive_ = false;
     // Whether scroll bar is pressed, use different style when pressed.
     bool isPressed_ = false;

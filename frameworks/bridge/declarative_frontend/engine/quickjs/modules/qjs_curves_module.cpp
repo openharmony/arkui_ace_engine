@@ -22,6 +22,8 @@
 
 namespace OHOS::Ace::Framework {
 
+namespace {
+constexpr size_t RESPONSIVE_SPRING_MOTION_PARAMS_SIZE = 3;
 std::string GetJsStringVal(JSContext* ctx, JSValueConst value)
 {
     std::string val;
@@ -183,6 +185,54 @@ bool CreateStepsCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
     return true;
 }
 
+bool CreateSpringMotionCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
+    JSValueConst* argv, RefPtr<Curve>& curve)
+{
+    if (!argv || argc > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) {
+        LOGW("SpringMotionCurve: the number of parameters is illegal");
+        return false;
+    }
+    double response = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE;
+    double dampingRatio = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_DAMPING_RATIO;
+    double blendDuration = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_BLEND_DURATION;
+    if (argc > 0) {
+        JS_ToFloat64(ctx, &response, argv[0]);
+    }
+    if (argc > 1) {
+        JS_ToFloat64(ctx, &dampingRatio, argv[1]);
+    }
+    if (argc > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE - 1) {
+        JS_ToFloat64(ctx, &blendDuration, argv[RESPONSIVE_SPRING_MOTION_PARAMS_SIZE - 1]);
+    }
+    curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(static_cast<float>(response), static_cast<float>(dampingRatio),
+        static_cast<float>(blendDuration));
+    return true;
+}
+
+bool CreateResponsiveSpringMotionCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
+    JSValueConst* argv, RefPtr<Curve>& curve)
+{
+    if (!argv || argc > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) {
+        LOGW("ResponsiveSpringMotionCurve: the number of parameters is illegal");
+        return false;
+    }
+    double response = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
+    double dampingRatio = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
+    double blendDuration = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+    if (argc > 0) {
+        JS_ToFloat64(ctx, &response, argv[0]);
+    }
+    if (argc > 1) {
+        JS_ToFloat64(ctx, &dampingRatio, argv[1]);
+    }
+    if (argc > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE - 1) {
+        JS_ToFloat64(ctx, &blendDuration, argv[RESPONSIVE_SPRING_MOTION_PARAMS_SIZE - 1]);
+    }
+    curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(static_cast<float>(response), static_cast<float>(dampingRatio),
+        static_cast<float>(blendDuration));
+    return true;
+}
+
 JSValue ParseCurves(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv, std::string& curveString)
 {
     JS_SetPropertyStr(ctx, value, CURVE_INTERPOLATE, JS_NewCFunction(ctx, CurvesInterpolate, CURVE_INTERPOLATE, 1));
@@ -194,6 +244,10 @@ JSValue ParseCurves(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCon
         curveCreated = CreateCubicCurve(ctx, value, argc, argv, curve);
     } else if (curveString == CURVES_STEPS || curveString == STEPS_CURVE) {
         curveCreated = CreateStepsCurve(ctx, value, argc, argv, curve);
+    } else if (curveString == SPRING_MOTION) {
+        curveCreated = CreateSpringMotionCurve(ctx, value, argc, argv, curve);
+    } else if (curveString == RESPONSIVE_SPRING_MOTION) {
+        curveCreated = CreateResponsiveSpringMotionCurve(ctx, value, argc, argv, curve);
     } else {
         return JS_NULL;
     }
@@ -255,6 +309,19 @@ JSValue StepsCurve(JSContext* ctx, JSValueConst value, int32_t argc, JSValueCons
     return ParseCurves(ctx, value, argc, argv, curveString);
 }
 
+JSValue SpringMotionCurve(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    std::string curveString(SPRING_MOTION);
+    return ParseCurves(ctx, value, argc, argv, curveString);
+}
+
+JSValue ResponsiveSpringMotionCurve(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
+{
+    std::string curveString(RESPONSIVE_SPRING_MOTION);
+    return ParseCurves(ctx, value, argc, argv, curveString);
+}
+} // namespace
+
 void InitCurvesModule(JSContext* ctx, JSValue& moduleObj)
 {
     JS_SetPropertyStr(ctx, moduleObj, CURVES_INIT, JS_NewCFunction(ctx, CurvesInit, CURVES_INIT, 1));
@@ -265,5 +332,9 @@ void InitCurvesModule(JSContext* ctx, JSValue& moduleObj)
     JS_SetPropertyStr(ctx, moduleObj, SPRING_CURVE, JS_NewCFunction(ctx, SpringCurve, SPRING_CURVE, 4));
     JS_SetPropertyStr(ctx, moduleObj, CURVES_STEPS, JS_NewCFunction(ctx, CurvesSteps, CURVES_STEPS, 2));
     JS_SetPropertyStr(ctx, moduleObj, STEPS_CURVE, JS_NewCFunction(ctx, StepsCurve, STEPS_CURVE, 2));
+    JS_SetPropertyStr(ctx, moduleObj, SPRING_MOTION, JS_NewCFunction(ctx, SpringMotionCurve,
+        SPRING_MOTION, RESPONSIVE_SPRING_MOTION_PARAMS_SIZE));
+    JS_SetPropertyStr(ctx, moduleObj, RESPONSIVE_SPRING_MOTION, JS_NewCFunction(ctx, ResponsiveSpringMotionCurve,
+        RESPONSIVE_SPRING_MOTION, RESPONSIVE_SPRING_MOTION_PARAMS_SIZE));
 }
 } // namespace OHOS::Ace::Framework

@@ -48,7 +48,7 @@ public:
         return MakeRefPtr<ImageLayoutProperty>();
     }
 
-    RefPtr<RenderProperty> CreateRenderProperty() override
+    RefPtr<PaintProperty> CreateRenderProperty() override
     {
         return MakeRefPtr<ImageRenderProperty>();
     }
