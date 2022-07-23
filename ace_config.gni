@@ -34,6 +34,9 @@ declare_args() {
 
   # Enable when build for cross platform
   is_cross_platform_build = false
+
+  # Enable build for new ng pipeline, also will use new flutter
+  enable_ng_build = false
 }
 
 use_external_v8_snapshot = false
@@ -61,6 +64,8 @@ ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi"
 ability_runtime_services_path = "${ability_runtime_path}/services"
 flutter_root = "//third_party/flutter"
 ace_flutter_engine_root = "$flutter_root/build"
+flutter_root_new = "//third_party/flutter_ace_shell"
+ace_flutter_engine_root_new = "$flutter_root_new/build"
 expat_root = "//third_party/expat"
 cjson_root = "//third_party/cJSON"
 jsoncpp_root = "//third_party/jsoncpp"
@@ -140,6 +145,10 @@ if (enable_ace_instance_log) {
 
 if (enable_dump_drawcmd) {
   ace_common_defines += [ "DUMP_DRAW_CMD" ]
+}
+
+if (enable_ng_build) {
+  ace_common_defines += [ "NG_BUILD" ]
 }
 
 if (!defined(global_parts_info) ||

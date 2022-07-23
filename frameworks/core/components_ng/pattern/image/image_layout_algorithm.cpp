@@ -15,6 +15,10 @@
 
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 
+#ifdef NG_BUILD
+#include "ace_shell/shell/common/window_manager.h"
+#endif
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -40,10 +44,14 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, contentConstraint.selfIdealSize);
     // TODO: add adapter for flutter.
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_RETURN(currentDartState, contentConstraint.selfIdealSize);
-    auto renderTaskHolder = MakeRefPtr<FlutterRenderTaskHolder>(currentDartState->GetSkiaUnrefQueue(),
-        currentDartState->GetIOManager(), currentDartState->GetTaskRunners().GetIOTaskRunner());
+#ifdef NG_BUILD
+    auto currentState = flutter::ace::WindowManager::GetWindow(pipeline->GetInstanceId());
+#else
+    auto* currentState = flutter::UIDartState::Current();
+#endif
+    CHECK_NULL_RETURN(currentState, contentConstraint.selfIdealSize);
+    auto renderTaskHolder = MakeRefPtr<FlutterRenderTaskHolder>(currentState->GetSkiaUnrefQueue(),
+        currentState->GetIOManager(), currentState->GetTaskRunners().GetIOTaskRunner());
     ImageProvider::FetchImageObject(imageInfo.value(), successCallback_, uploadSuccessCallback_, failedCallback_,
         pipeline, false, false, false, renderTaskHolder, onBackgroundTaskPostCallback_);
     return contentConstraint.selfIdealSize;

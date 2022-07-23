@@ -102,6 +102,11 @@ public:
         return NonNegative(x_) && NonNegative(y_);
     }
 
+    bool NonOffset() const
+    {
+        return NearZero(x_) && NearZero(y_);
+    }
+
     std::string ToString() const
     {
         static const int32_t precision = 2;

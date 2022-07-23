@@ -19,7 +19,11 @@
 #include <unordered_map>
 
 #include "flutter/fml/memory/ref_counted.h"
+#ifdef NG_BUILD
+#include "flutter/lib/ui/io_manager.h"
+#else
 #include "flutter/lib/ui/painting/image.h"
+#endif
 #include "third_party/skia/include/codec/SkCodec.h"
 
 #include "base/memory/ace_type.h"

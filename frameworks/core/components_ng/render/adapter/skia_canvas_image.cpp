@@ -21,10 +21,14 @@ namespace OHOS::Ace::NG {
 
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
 {
+#ifdef NG_BUILD
+    return AceType::MakeRefPtr<SkiaCanvasImage>();
+#else
     auto* imageRef = reinterpret_cast<fml::RefPtr<flutter::CanvasImage>*>(rawImage);
     CHECK_NULL_RETURN(imageRef, nullptr);
 
     return AceType::MakeRefPtr<SkiaCanvasImage>(*imageRef);
+#endif
 }
 
 } // namespace OHOS::Ace::NG

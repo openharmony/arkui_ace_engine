@@ -178,7 +178,12 @@ void SkiaCanvas::DrawImage(
     CHECK_NULL_VOID(skiaImage);
     auto imageObj = skiaImage->GetCanvasImage();
     CHECK_NULL_VOID(imageObj);
+#ifdef NG_BUILD
+    rawCanvas_->drawImageRect(imageObj, ToSkRect(srcRect), ToSkRect(dstRect), skiaPaint->GetSamplingOptions(),
+        &skiaPaint->GetRawPaint(), SkCanvas::kFast_SrcRectConstraint);
+#else
     rawCanvas_->drawImageRect(imageObj, ToSkRect(srcRect), ToSkRect(dstRect), &skiaPaint->GetRawPaint());
+#endif
 }
 
 } // namespace OHOS::Ace::NG

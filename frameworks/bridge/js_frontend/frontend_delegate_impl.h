@@ -28,6 +28,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
+#include "frameworks/bridge/common/utils/pipeline_context_holder.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
@@ -68,46 +69,6 @@ struct PageInfo {
     bool isRestore = false;
     bool isAlertBeforeBackPage = false;
     DialogProperties dialogProperties;
-};
-
-class PipelineContextHolder {
-public:
-    ~PipelineContextHolder()
-    {
-        if (pipelineContext_) {
-            auto taskExecutor = pipelineContext_->GetTaskExecutor();
-            // To guarantee the pipelineContext_ destruct in platform thread
-            auto context = AceType::RawPtr(pipelineContext_);
-            context->IncRefCount();
-            pipelineContext_.Reset();
-            taskExecutor->PostTask([context] { context->DecRefCount(); }, TaskExecutor::TaskType::PLATFORM);
-        }
-    }
-
-    void Attach(const RefPtr<PipelineBase>& context)
-    {
-        if (attached_ || !context) {
-            return;
-        }
-
-        attached_ = true;
-        promise_.set_value(context);
-    }
-
-    const RefPtr<PipelineBase>& Get()
-    {
-        if (!pipelineContext_) {
-            pipelineContext_ = future_.get();
-            ACE_DCHECK(pipelineContext_);
-        }
-        return pipelineContext_;
-    }
-
-private:
-    bool attached_ = false;
-    std::promise<RefPtr<PipelineBase>> promise_;
-    std::future<RefPtr<PipelineBase>> future_ = promise_.get_future();
-    RefPtr<PipelineBase> pipelineContext_;
 };
 
 struct FrontendDelegateImplBuilder {

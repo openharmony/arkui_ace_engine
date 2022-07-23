@@ -223,7 +223,11 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     txtShadow.color = spanShadow.GetColor().GetValue();
     txtShadow.offset.fX = static_cast<SkScalar>(spanShadow.GetOffset().GetX());
     txtShadow.offset.fY = static_cast<SkScalar>(spanShadow.GetOffset().GetY());
+#ifdef NG_BUILD
+    txtShadow.blur_sigma = spanShadow.GetBlurRadius();
+#else
     txtShadow.blur_radius = spanShadow.GetBlurRadius();
+#endif
     txtStyle.text_shadows.emplace_back(txtShadow);
 
     if (textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT) {

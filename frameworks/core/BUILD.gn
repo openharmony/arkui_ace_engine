@@ -24,7 +24,7 @@ template("ace_core_source_set") {
 
     # add common source file needed by all product platform here
     sources = [
-      #accessibility
+      # accessibility
       "accessibility/accessibility_node.cpp",
       "accessibility/accessibility_utils.cpp",
 
@@ -413,8 +413,228 @@ template("ace_core_source_set") {
   }
 }
 
+# build ng core sources
+template("ace_core_ng_source_set") {
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    part_name = ace_engine_part
+    defines += invoker.defines
+
+    # add common source file needed by all product platform here
+    sources = [
+      # accessibility
+      "accessibility/accessibility_node.cpp",
+      "accessibility/accessibility_utils.cpp",
+
+      # animation
+      "animation/animatable_data.cpp",
+      "animation/animatable_properties.cpp",
+      "animation/animation_util.cpp",
+      "animation/animator.cpp",
+      "animation/animator_group.cpp",
+      "animation/anticipate_curve.cpp",
+      "animation/bilateral_spring_adapter.cpp",
+      "animation/bilateral_spring_node.cpp",
+      "animation/card_transition_controller.cpp",
+      "animation/cubic_curve.cpp",
+      "animation/curves.cpp",
+      "animation/friction_motion.cpp",
+      "animation/property_animation.cpp",
+      "animation/scheduler.cpp",
+      "animation/scroll_motion.cpp",
+      "animation/simple_spring_adapter.cpp",
+      "animation/simple_spring_chain.cpp",
+      "animation/simple_spring_node.cpp",
+      "animation/spring_animation.cpp",
+      "animation/spring_curve.cpp",
+      "animation/spring_model.cpp",
+      "animation/spring_motion.cpp",
+      "animation/svg_animate.cpp",
+
+      # common
+      "common/ace_application_info.cpp",
+      "common/ace_engine.cpp",
+      "common/clipboard/clipboard_proxy.cpp",
+      "common/container.cpp",
+      "common/container_scope.cpp",
+      "common/environment/environment_proxy.cpp",
+      "common/event_manager.cpp",
+      "common/focus_animation_manager.cpp",
+      "common/font_loader.cpp",
+      "common/font_manager.cpp",
+      "common/platform_bridge.cpp",
+      "common/sharedata/share_data.cpp",
+      "common/storage/storage_proxy.cpp",
+      "common/text_field_manager.cpp",
+      "common/thread_checker.cpp",
+      "common/vibrator/vibrator_proxy.cpp",
+      "common/watch_dog.cpp",
+      "common/window.cpp",
+
+      # event
+      "event/back_end_event_manager.cpp",
+      "event/event_convertor.cpp",
+      "event/key_event.cpp",
+      "event/key_event_recognizer.cpp",
+      "event/mouse_raw_recognizer.cpp",
+
+      # gestures
+      "gestures/click_recognizer.cpp",
+      "gestures/drag_recognizer.cpp",
+      "gestures/exclusive_recognizer.cpp",
+      "gestures/gesture_recognizer.cpp",
+      "gestures/gesture_referee.cpp",
+      "gestures/long_press_recognizer.cpp",
+      "gestures/multi_fingers_recognizer.cpp",
+      "gestures/pan_recognizer.cpp",
+      "gestures/parallel_recognizer.cpp",
+      "gestures/pinch_recognizer.cpp",
+      "gestures/press_recognizer.cpp",
+      "gestures/raw_recognizer.cpp",
+      "gestures/rotation_recognizer.cpp",
+      "gestures/sequenced_recognizer.cpp",
+      "gestures/single_child_gesture.cpp",
+      "gestures/slide_recognizer.cpp",
+      "gestures/swipe_recognizer.cpp",
+      "gestures/timeout_recognizer.cpp",
+      "gestures/velocity_tracker.cpp",
+
+      # declarative gestures
+      "gestures/gesture_group.cpp",
+      "gestures/long_press_gesture.cpp",
+      "gestures/pan_gesture.cpp",
+      "gestures/pinch_gesture.cpp",
+      "gestures/rotation_gesture.cpp",
+      "gestures/slide_gesture.cpp",
+      "gestures/tap_gesture.cpp",
+      "gestures/timeout_gesture.cpp",
+
+      # pipeline
+      "pipeline/base/related_node.cpp",
+      "pipeline/pipeline_base.cpp",
+
+      # image
+      "image/animated_image_player.cpp",
+
+      #"image/flutter_image_cache.cpp",
+      "image/image_cache.cpp",
+      "image/image_loader.cpp",
+      "image/image_object.cpp",
+      "image/image_provider.cpp",
+      "image/image_source_info.cpp",
+
+      # textfield
+      "common/ime/text_editing_value.cpp",
+      "common/ime/text_input_action.cpp",
+      "common/ime/text_input_configuration.cpp",
+      "common/ime/text_input_connection.cpp",
+      "common/ime/text_input_formatter.cpp",
+      "common/ime/text_input_proxy.cpp",
+      "common/ime/text_input_type.cpp",
+
+      # properties
+      "components/common/properties/alignment.cpp",
+      "components/common/properties/animatable_path.cpp",
+      "components/common/properties/border.cpp",
+      "components/common/properties/border_edge.cpp",
+      "components/common/properties/border_image.cpp",
+      "components/common/properties/border_image_edge.cpp",
+      "components/common/properties/clip_path.cpp",
+      "components/common/properties/color.cpp",
+      "components/common/properties/color_factory.cpp",
+      "components/common/properties/decoration.cpp",
+      "components/common/properties/edge.cpp",
+
+      # "components/common/properties/motion_path_evaluator.cpp",
+      "components/common/properties/page_transition_option.cpp",
+      "components/common/properties/scroll_bar.cpp",
+      "components/common/properties/shadow.cpp",
+      "components/common/properties/shadow_config.cpp",
+      "components/common/properties/text_style.cpp",
+      "components/common/properties/text_style_parser.cpp",
+
+      # layout
+      "components/common/layout/grid_column_info.cpp",
+      "components/common/layout/grid_container_info.cpp",
+      "components/common/layout/grid_system_manager.cpp",
+
+      # v1 deps
+      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
+      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
+      "components/custom_paint/render_offscreen_canvas_creator.cpp",
+      "components/font/constants_converter.cpp",
+      "components/font/font_loader_creator.cpp",
+      "components/font/font_manager_creator.cpp",
+      "components/scroll/scrollable.cpp",
+      "components/theme/app_theme.cpp",
+      "components/theme/theme_attributes.cpp",
+      "components/theme/theme_constants.cpp",
+      "components/theme/theme_manager.cpp",
+      "components/theme/theme_utils.cpp",
+
+      # v2 inspector
+      "components_v2/inspector/inspector_constants.cpp",
+
+      # flutter impl
+      "common/flutter/flutter_asset_manager.cpp",
+      "common/flutter/flutter_task_executor.cpp",
+    ]
+
+    configs = [ "$ace_root:ace_config" ]
+
+    deps = [
+      "$ace_root/frameworks/core/components/theme:build_theme_code",
+      "pipeline_ng:ace_core_pipeline_ng_$platform",
+    ]
+
+    if (enable_ng_build) {
+      deps += [
+        "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_$platform",
+        "$ace_flutter_engine_root_new/skia:ace_skia_dev_$platform",
+      ]
+    }
+
+    deps += [
+      "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
+    ]
+
+    cflags_cc = []
+    cflags_cc += invoker.cflags_cc
+  }
+}
+
 foreach(item, ace_platforms) {
   ace_core_source_set("ace_core_" + item.name) {
+    platform = item.name
+
+    if (defined(item.config)) {
+      config = item.config
+    } else {
+      config = {
+      }
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    } else {
+      defines = []
+    }
+
+    if (defined(config.cflags_cc)) {
+      cflags_cc = config.cflags_cc
+    } else {
+      cflags_cc = []
+    }
+  }
+
+  ace_core_ng_source_set("ace_core_ng_" + item.name) {
     platform = item.name
 
     if (defined(item.config)) {

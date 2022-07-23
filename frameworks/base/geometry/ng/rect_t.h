@@ -179,6 +179,11 @@ public:
         return NonNegative(width_) && NonNegative(height_);
     }
 
+    bool IsEmpty() const
+    {
+        return NonPositive(width_) || NonPositive(height_);
+    }
+
     RectT Constrain(const RectT& other)
     {
         T right = Right();

@@ -18,14 +18,17 @@
 #include "base/utils/utils.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
+#include "core/components_ng/render/adapter/txt_font_collection.h"
 
 namespace OHOS::Ace::NG {
 
-RefPtr<Paragraph> Paragraph::Create(
-    const WeakPtr<PipelineContext>& context, const ParagraphStyle& paraStyle, void* fontCollection)
+RefPtr<Paragraph> Paragraph::Create(const WeakPtr<PipelineContext>& context, const ParagraphStyle& paraStyle,
+    const RefPtr<FontCollection>& fontCollection)
 {
-    auto sharedfontColletcion = reinterpret_cast<std::shared_ptr<txt::FontCollection>*>(fontCollection);
-    return AceType::MakeRefPtr<TxtParagraph>(context, paraStyle, *sharedfontColletcion);
+    auto txtFontCollection = DynamicCast<TxtFontCollection>(fontCollection);
+    CHECK_NULL_RETURN(txtFontCollection, nullptr);
+    auto sharedfontColletcion = txtFontCollection->GetRawFontCollection();
+    return AceType::MakeRefPtr<TxtParagraph>(context, paraStyle, sharedfontColletcion);
 }
 
 bool TxtParagraph::IsValid()
@@ -40,8 +43,10 @@ void TxtParagraph::CreateBuilder()
     style.text_align = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.max_lines = paraStyle_.maxLines;
     style.locale = paraStyle_.fontLocale;
+#ifndef NG_BUILD
     // keep WordBreak define same with WordBreakType in minikin
     style.word_break_type = static_cast<minikin::WordBreakType>(paraStyle_.wordBreak);
+#endif
     builder_ = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection_);
 }
 
