@@ -202,6 +202,12 @@ void CanvasTaskPool::Fill()
     PushTask(task);
 }
 
+void CanvasTaskPool::Fill(const RefPtr<CanvasPath2D>& path)
+{
+    auto task = [path](RenderCustomPaint& interface, const Offset& offset) { interface.Fill(offset, path); };
+    PushTask(task);
+}
+
 void CanvasTaskPool::Stroke()
 {
     auto task = [](RenderCustomPaint& interface, const Offset& offset) { interface.Stroke(offset); };
@@ -340,6 +346,22 @@ double CanvasTaskPool::GetHeight() const
     }
 
     return paint->GetLayoutSize().Height();
+}
+
+void CanvasTaskPool::UpdateFillRuleForPath(const CanvasFillRule rule)
+{
+    auto task = [rule](RenderCustomPaint& interface, const Offset& offset) {
+        interface.SetFillRuleForPath(rule);
+    };
+    PushTask(task);
+}
+
+void CanvasTaskPool::UpdateFillRuleForPath2D(const CanvasFillRule rule)
+{
+    auto task = [rule](RenderCustomPaint& interface, const Offset& offset) {
+        interface.SetFillRuleForPath2D(rule);
+    };
+    PushTask(task);
 }
 
 void CanvasTaskPool::UpdateFillColor(const Color& color)
