@@ -46,9 +46,14 @@ template("js_engine_ark") {
       "jsi_offscreen_canvas_bridge.cpp",
       "jsi_stepper_bridge.cpp",
       "jsi_utils.cpp",
-      "jsi_xcomponent_bridge.cpp",
     ]
 
+    # xcomponent components supports phone, TV and wearable except PC Preview
+    if (defined(config.xcomponent_components_support) &&
+        config.xcomponent_components_support) {
+      sources += [ "jsi_xcomponent_bridge.cpp" ]
+    }
+    
     deps = [ "//third_party/jsframework:ark_build" ]
     if (target_cpu == "arm64") {
       defines += [ "APP_USE_ARM64" ]

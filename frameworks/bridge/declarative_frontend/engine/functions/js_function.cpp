@@ -75,6 +75,7 @@ void JsFunction::Execute(const std::vector<std::string>& keys, const std::string
     JsFunction::ExecuteJS(1, &paramObj);
 }
 
+#if defined(XCOMPONENT_SUPPORTED)
 void JsFunction::ExecuteNew(const std::vector<std::string>& keys, const std::string& param,
     RefPtr<JSXComponentController>& jsXComponentController)
 {
@@ -85,6 +86,7 @@ void JsFunction::ExecuteNew(const std::vector<std::string>& keys, const std::str
     }
     JsFunction::ExecuteJS(1, &jsVal);
 }
+#endif
 
 JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
 {

@@ -2115,12 +2115,14 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
         JsiComponentApiBridge::JsScrollTo(runtime, arguments, nodeId);
         return runtime->NewUndefined();
     } else if (std::strcmp(methodName.c_str(), "getXComponentContext") == 0) {
+#ifdef XCOMPONENT_SUPPORTED
         auto bridge = AceType::DynamicCast<JsiXComponentBridge>(page->GetXComponentBridgeById(nodeId));
         if (bridge) {
             bridge->HandleContext(runtime, nodeId, arguments);
             return bridge->GetRenderContext();
         }
         return runtime->NewUndefined();
+#endif
 #ifdef OHOS_STANDARD_SYSTEM
     } else if (std::strcmp(methodName.c_str(), "getXComponentSurfaceId") == 0) {
         return JsiXComponentBridge::JsGetXComponentSurfaceId(runtime, nodeId);
@@ -2138,7 +2140,7 @@ shared_ptr<JsValue> JsCallComponent(const shared_ptr<JsRuntime>& runtime, const 
         return JsiListBridge::JsGetCurrentOffset(runtime, nodeId);
     } else if (std::strcmp(methodName.c_str(), "getState") == 0) {
         return JsiImageAnimatorBridge::JsGetState(runtime, nodeId);
-    }  else if (std::strcmp(methodName.c_str(), "addChild") == 0) {
+    } else if (std::strcmp(methodName.c_str(), "addChild") == 0) {
         auto sPage = GetStagingPage(runtime);
         if (sPage == nullptr) {
             return runtime->NewUndefined();
@@ -2488,7 +2490,7 @@ int32_t CreateDomElement(const shared_ptr<JsRuntime>& runtime, const shared_ptr<
     if (!page->CheckPageCreated() && page->GetCommandSize() > FRAGMENT_SIZE) {
         page->FlushCommands();
     }
-    return  globalNodeId;
+    return globalNodeId;
 }
 
 shared_ptr<JsValue> JsFocus(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -2654,7 +2656,6 @@ JsiEngineInstance::~JsiEngineInstance()
     }
     runtime_.reset();
     runtime_ = nullptr;
-
 }
 
 void JsiEngineInstance::FlushCommandBuffer(void* context, const std::string& command)
@@ -3488,12 +3489,14 @@ void JsiEngine::FireExternalEvent(const std::string& componentId, const uint32_t
         LOGE("FireExternalEvent GetRunningPage is nullptr");
         return;
     }
+#ifdef XCOMPONENT_SUPPORTED
     std::string arguments;
     auto bridge = AceType::DynamicCast<JsiXComponentBridge>(page->GetXComponentBridgeById(nodeId));
     if (bridge) {
         bridge->HandleContext(runtime, nodeId, arguments);
         return;
     }
+#endif
 }
 
 // Destroy page instance on Js
