@@ -685,6 +685,10 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
         component->SetTouchable(mainComponent->IsTouchable());
     }
 
+    for (auto&& component : components) {
+        component->SetDisabledStatus(mainComponent->IsDisabledStatus());
+    }
+
 #ifdef ACE_DEBUG_LOG
     LOGD("Unwrap result: components size %{public}d (outmost child first, inner most Component last)",
         static_cast<int32_t>(components.size()));
@@ -716,11 +720,6 @@ void ViewStackProcessor::UpdateTopComponentProps(const RefPtr<Component>& compon
                 renderComponent->SetPositionType(positionedComponent->GetPositionType());
             }
         }
-    }
-
-    if (wrappingComponentsMap.find("root") != wrappingComponentsMap.end()) {
-        auto rootComponent = GetRootComponent();
-        component->SetDisabledStatus(rootComponent->IsDisabledStatus());
     }
 }
 
