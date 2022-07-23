@@ -29,11 +29,14 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/lazy_for_each.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
+#include "core/components_v2/grid_layout/grid_col_component.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_v2/list/list_component.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/multi_composed_component.h"
@@ -393,6 +396,22 @@ public:
         return static_cast<size_t>(GetTotalIndexCount());
     }
 
+    void ExpandChildrenOnInitial()
+    {
+        auto totalIndex = GetTotalIndexCount();
+        auto* stack = ViewStackProcessor::GetInstance();
+        for (auto index = 0; index < totalIndex; index++) {
+            JSRef<JSVal> result = CallJSFunction(getDataFunc_, dataSourceObj_, index);
+            std::string key = keyGenFunc_(result, index);
+            auto multiComposed = AceType::MakeRefPtr<MultiComposedComponent>(key, "LazyForEach");
+            stack->Push(multiComposed);
+            stack->PushKey(key);
+            itemGenFunc_->Call(JSRef<JSObject>(), 1, &result);
+            stack->PopContainer();
+            stack->PopKey();
+        }
+    }
+
     RefPtr<Component> OnGetChildByIndex(size_t index) override
     {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, nullptr);
@@ -567,6 +586,14 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
     component->SetParentViewObj(parentViewObj);
     component->SetDataSourceObj(dataSourceObj);
     component->SetItemGenerator(itemGenerator, std::move(keyGenFunc));
+
+    auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto listComponent = AceType::DynamicCast<V2::ListComponent>(mainComponent);
+    auto gridComponent = AceType::DynamicCast<V2::GridColComponent>(mainComponent);
+    auto swiperComponent = AceType::DynamicCast<SwiperComponent>(mainComponent);
+    if (!listComponent && !gridComponent && !swiperComponent) {
+        component->ExpandChildrenOnInitial();
+    }
 
     ViewStackProcessor::GetInstance()->Push(component);
 }
