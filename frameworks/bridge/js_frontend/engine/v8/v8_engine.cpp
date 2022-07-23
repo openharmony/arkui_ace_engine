@@ -3684,16 +3684,20 @@ void V8Engine::SetPostTask()
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    std::weak_ptr<V8NativeEngine> weakNativeEngine(nativeEngine_);
-    auto&& postTask = [weakDelegate, weakNativeEngine, id = instanceId_](bool needSync) {
+    auto&& postTask = [weakDelegate, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([weakNativeEngine, needSync, id]() {
+        delegate->PostJsTask([weakEngine, needSync, id]() {
+            auto jsEngine = weakEngine.Upgrade();
+            if (jsEngine == nullptr) {
+                LOGW("jsEngine is nullptr");
+                return;
+            }
+            auto nativeEngine = jsEngine->GetNativeEngine();
             ContainerScope scope(id);
-            auto nativeEngine = weakNativeEngine.lock();
             if (!nativeEngine) {
                 LOGE("native v8 engine weak pointer invalid");
                 return;
