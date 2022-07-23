@@ -292,6 +292,7 @@ void VideoElement::CreateMediaPlayer()
 
 void VideoElement::PreparePlayer()
 {
+    SetVolume(isMute_ ? 0.0f : 1.0f);
     if (!hasSrcChanged_) {
         return;
     }
@@ -630,11 +631,6 @@ void VideoElement::SetNewComponent(const RefPtr<Component>& newComponent)
             // When the video is in the initial state and the attribute is auto play, start playing.
             if (isInitialState_ && isAutoPlay_) {
                 Start();
-            }
-            if (isMute_) {
-                SetVolume(0.0f);
-            } else {
-                SetVolume(1.0f);
             }
         } else {
             hasSrcChanged_ = true;
@@ -1590,6 +1586,7 @@ void VideoElement::Stop()
     ReleasePlatformResource();
 #else
     if (mediaPlayer_ != nullptr) {
+        LOGI("Video Stop");
         mediaPlayer_->Stop();
     }
 #endif
@@ -1598,6 +1595,7 @@ void VideoElement::Stop()
 
 void VideoElement::SetCurrentTime(float currentPos, SeekMode seekMode)
 {
+    LOGI("pos: %{public}lf, mode: %{public}d", currentPos, seekMode);
 #ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_ != nullptr && GreatOrEqual(currentPos, 0.0) && LessOrEqual(currentPos, duration_)) {
         LOGI("Video Seek");
@@ -1713,6 +1711,7 @@ void VideoElement::ExitFullScreen()
 
 void VideoElement::SetVolume(float volume)
 {
+    LOGI("volume: %{public}lf", volume);
 #ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_ != nullptr) {
         mediaPlayer_->SetVolume(volume, volume);
@@ -1726,6 +1725,7 @@ void VideoElement::SetVolume(float volume)
 
 void VideoElement::EnableLooping(bool loop)
 {
+    LOGI("loop: %{public}d", loop);
 #ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_) {
         mediaPlayer_->SetLooping(loop);
@@ -1739,6 +1739,7 @@ void VideoElement::EnableLooping(bool loop)
 
 void VideoElement::SetSpeed(float speed)
 {
+    LOGI("speed: %{public}lf", speed);
     if (speed <= ILLEGAL_SPEED) {
         LOGE("speed is not valid: %{public}lf", speed);
         return;
