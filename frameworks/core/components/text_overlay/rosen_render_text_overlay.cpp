@@ -50,10 +50,6 @@ void RosenRenderTextOverlay::Paint(RenderContext& context, const Offset& offset)
 
     AdjustForAnimation();
 
-    if (showMagnifier_) {
-        PaintMagnifier(context);
-    }
-
     if ((!isSingleHandle_ || showOption_.showMenu) && !showMagnifier_) {
         RenderNode::Paint(context, offset);
     }
