@@ -56,6 +56,7 @@ const char UNICODE_SETTING_TAG[] = "unicodeSetting";
 const char LOCALE_DIR_LTR[] = "ltr";
 const char LOCALE_DIR_RTL[] = "rtl";
 const char LOCALE_KEY[] = "locale";
+const char COMPONENT_PREVIEW[] = "_preview_";
 } // namespace
 
 std::once_flag AceContainer::onceFlag_;
@@ -835,10 +836,11 @@ void AceContainer::LoadDocument(const std::string& url, const std::string& compo
         LOGE("jsEngine is null, AceContainer::LoadDocument failed");
         return;
     }
+    std::string dstUrl = url + COMPONENT_PREVIEW + componentName;
     taskExecutor_->PostTask(
-        [front = frontend, componentName, url, jsEngine]() {
-            front->SetPagePath(url);
-            jsEngine->ReplaceJSContent(url, componentName);
+        [front = frontend, componentName, dstUrl, jsEngine]() {
+            front->SetPagePath(dstUrl);
+            jsEngine->ReplaceJSContent(dstUrl, componentName);
         },
         TaskExecutor::TaskType::JS);
 }
