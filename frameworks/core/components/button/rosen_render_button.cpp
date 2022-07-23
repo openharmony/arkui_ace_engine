@@ -111,7 +111,9 @@ void RosenRenderButton::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     DrawButton(canvas, offset);
-    if (isFocus_ && (isTablet_ || isPhone_)) {
+    auto pipeline = context_.Upgrade();
+    if (isFocus_ && (isTablet_ || isPhone_) && pipeline && pipeline->IsKeyEvent()) {
+        // Need to use PipelineContext::ShowFocusAnimation
         PaintFocus(context, offset);
     }
     RenderNode::Paint(context, offset);
