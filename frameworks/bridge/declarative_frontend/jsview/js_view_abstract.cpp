@@ -1261,8 +1261,10 @@ void JSViewAbstract::JsEnabled(const JSCallbackInfo& info)
     }
 
     bool enabled = info[0]->ToBoolean();
-    auto rootComponent = ViewStackProcessor::GetInstance()->GetRootComponent();
-    rootComponent->SetDisabledStatus(!enabled);
+    auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
+    if (mainComponent) {
+        mainComponent->SetDisabledStatus(!enabled);
+    }
 
     auto focusComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(!enabled);
     if (focusComponent) {
