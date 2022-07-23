@@ -35,7 +35,7 @@ public:
 private:
     void PaintGradient(ScopedCanvas& canvas, const Offset& offset, const Rect& rect, const RefPtr<PickerTheme>& theme);
     Rect GetOptionsRect(const Offset& offset, const RefPtr<RenderPickerColumn>& pickerColumn);
-    void PaintFocusOptionBorder(const ScopedCanvas& canvas, const RefPtr<RenderPickerColumn>& pickerColumn);
+    void PaintFocusOptionBorder(const ScopedCanvas& canvas);
 
     RefPtr<Flutter::GradientLayer> layer_;
 };

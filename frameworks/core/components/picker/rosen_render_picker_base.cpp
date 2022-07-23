@@ -103,13 +103,8 @@ void RosenRenderPickerBase::Paint(RenderContext& context, const Offset& offset)
     // Paint gradient at top and bottom.
     PaintGradient(canvas, offset, rect, theme);
 
-    for (const auto& column : columns_) {
-        if (column->IsFocused()) {
-            InitializeSelectedOption(column);
-            PaintFocusOptionBorder(canvas, column);
-            break;
-        }
-    }
+    // Need to use PipelineContext::ShowFocusAnimation
+    PaintFocusOptionBorder(canvas);
 }
 
 void RosenRenderPickerBase::PaintGradient(
@@ -144,23 +139,36 @@ void RosenRenderPickerBase::PaintGradient(
     canvas->drawRect({rect.Left(), rect.Top(), rect.Right(), rect.Bottom()}, paint);
 }
 
-void RosenRenderPickerBase::PaintFocusOptionBorder(SkCanvas* canvas, const RefPtr<RenderPickerColumn>& pickerColumn)
+void RosenRenderPickerBase::PaintFocusOptionBorder(SkCanvas* canvas)
 {
-    double focusBorderThickness = NormalizeToPx(FOCUS_BORDER_THICKNESS);
-    double focusOffsetX = focusBoxOffset_.GetX() - focusBorderThickness / 2.0;
-    double focusOffsetY = focusBoxOffset_.GetY() - focusBorderThickness / 2.0;
-    double focusBorderWidth = focusBoxSize_.Width() + focusBorderThickness;
-    double focusBorderHeight = focusBoxSize_.Height() + focusBorderThickness;
-    double focusRadius = NormalizeToPx(FOCUS_RADIUS);
-    SkPaint paint;
-    paint.setColor(FOCUS_BORDER_COLOR);
-    paint.setStyle(SkPaint::Style::kStroke_Style);
-    paint.setStrokeWidth(focusBorderThickness);
-    paint.setAntiAlias(true);
-    SkRRect rRect;
-    rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
-    rRect.offset(focusOffsetX, focusOffsetY);
-    canvas->drawRRect(rRect, paint);
+    auto pipeline = context_.Upgrade();
+    if (!pipeline || !pipeline->IsKeyEvent()) {
+        return;
+    }
+
+    for (const auto& column : columns_) {
+        if (!column->IsFocused()) {
+            continue;
+        }
+
+        InitializeSelectedOption(column);
+        double focusBorderThickness = NormalizeToPx(FOCUS_BORDER_THICKNESS);
+        double focusOffsetX = focusBoxOffset_.GetX() - focusBorderThickness / 2.0;
+        double focusOffsetY = focusBoxOffset_.GetY() - focusBorderThickness / 2.0;
+        double focusBorderWidth = focusBoxSize_.Width() + focusBorderThickness;
+        double focusBorderHeight = focusBoxSize_.Height() + focusBorderThickness;
+        double focusRadius = NormalizeToPx(FOCUS_RADIUS);
+        SkPaint paint;
+        paint.setColor(FOCUS_BORDER_COLOR);
+        paint.setStyle(SkPaint::Style::kStroke_Style);
+        paint.setStrokeWidth(focusBorderThickness);
+        paint.setAntiAlias(true);
+        SkRRect rRect;
+        rRect.setRectXY(SkRect::MakeIWH(focusBorderWidth, focusBorderHeight), focusRadius, focusRadius);
+        rRect.offset(focusOffsetX, focusOffsetY);
+        canvas->drawRRect(rRect, paint);
+        break;
+    }
 }
 
 } // namespace OHOS::Ace
