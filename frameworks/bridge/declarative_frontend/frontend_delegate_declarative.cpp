@@ -1601,6 +1601,7 @@ void FrontendDelegateDeclarative::PushPageTransitionListener(
     if (event == TransitionEvent::PUSH_END) {
         OnPushPageSuccess(page, page->GetUrl());
         SetCurrentPage(page->GetPageId());
+        OnPageShow();
         OnMediaQueryUpdate();
         ProcessRouterTask();
     }
@@ -1973,6 +1974,7 @@ void FrontendDelegateDeclarative::ReplacePage(const RefPtr<JsAcePage>& page, con
                     }
                     delegate->OnReplacePageSuccess(page, url);
                     delegate->SetCurrentPage(page->GetPageId());
+                    delegate->OnPageShow();
                     delegate->OnMediaQueryUpdate();
                     delegate->ProcessRouterTask();
                 });
