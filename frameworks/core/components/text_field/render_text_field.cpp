@@ -1005,7 +1005,7 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
             MarkNeedLayout();
         }
 
-        if (keyboard_ != TextInputType::MULTILINE  && keyboard_ != TextInputType::VISIBLE_PASSWORD) {
+        if (keyboard_ != TextInputType::MULTILINE && keyboard_ != TextInputType::VISIBLE_PASSWORD) {
             resetToStart_ = true;
             MarkNeedLayout();
         }
