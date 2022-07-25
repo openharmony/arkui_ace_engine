@@ -63,6 +63,7 @@ void DialogTweenElement::PerformBuild()
 
     transitionElement->SetController(animator);
     transitionElement->SwitchTransitionOption(TransitionOptionType::TRANSITION_IN, true);
+    RequestFocusImmediately();
 }
 
 bool DialogTweenElement::OnKeyEvent(const KeyEvent& keyEvent)
