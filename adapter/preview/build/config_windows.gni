@@ -33,7 +33,7 @@ use_curl_download = true
 accessibility_support = true
 rich_components_support = true
 advance_components_support = false
-form_components_support = true
+form_components_support = false
 plugin_components_support = false
 xcomponent_components_support = false
 js_pa_support = false
@@ -41,9 +41,14 @@ connect_server_support = false
 enable_rosen_backend = false
 enable_standard_input = false
 ohos_standard_fontmgr = true
+no_support_component_mock = true
 
 if (form_components_support) {
   defines += [ "FORM_SUPPORTED" ]
+}
+
+if (defined(no_support_component_mock) && no_support_component_mock) {
+  defines += [ "PREVIEW_COMPONENT_MOCK" ]
 }
 
 cflags_cc = [

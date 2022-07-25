@@ -338,4 +338,16 @@ const char CHECKBOXGROUP_ETS_TAG[] = "CheckboxGroup";
 ACE_EXPORT extern const char TIME_PICKER_DIALOG_COMPONENT_TAG[] = "TimePickerDialog";
 ACE_EXPORT extern const char TIME_PICKER_DIALOG_ETS_TAG[] = "TimePickerDialog";
 
+// web
+ACE_EXPORT extern const char WEB_COMPONENT_TAG[] = "WebComponent";
+ACE_EXPORT extern const char WEB_ETS_TAG[] = "Web";
+
+// richText
+ACE_EXPORT extern const char RICH_TEXT_COMPONENT_TAG[] = "RichTextComponent";
+ACE_EXPORT extern const char RICH_TEXT_ETS_TAG[] = "RichText";
+
+// xcomponent
+ACE_EXPORT extern const char XCOMPONENT_TAG[] = "XComponentComponent";
+ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[] = "XComponent";
+
 } // namespace OHOS::Ace::V2

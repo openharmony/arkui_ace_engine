@@ -242,7 +242,13 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { CHECKBOXGROUP_COMPONENT_TAG,
         [](const std::string& id) {return AceType::MakeRefPtr<V2::CheckboxGroupComposedElement>(id); } },
 	{ TIME_PICKER_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) {return AceType::MakeRefPtr<V2::TimePickerDialogComposedElement>(id); } }
+        [](const std::string& id) {return AceType::MakeRefPtr<V2::TimePickerDialogComposedElement>(id); } },
+    { WEB_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { RICH_TEXT_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { XCOMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
 };
 
 } // namespace
@@ -321,7 +327,10 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { SIDE_BAR_COMPONENT_TAG, SIDE_BAR_ETS_TAG },
     { LOADING_PROGRESS_COMPONENT_TAG, LOADING_PROGRESS_ETS_TAG },
     { CHECKBOXGROUP_COMPONENT_TAG, CHECKBOXGROUP_ETS_TAG },
-	{ TIME_PICKER_DIALOG_COMPONENT_TAG, TIME_PICKER_DIALOG_ETS_TAG}
+	{ TIME_PICKER_DIALOG_COMPONENT_TAG, TIME_PICKER_DIALOG_ETS_TAG},
+    { WEB_COMPONENT_TAG, WEB_ETS_TAG },
+    { RICH_TEXT_COMPONENT_TAG, RICH_TEXT_ETS_TAG },
+    { XCOMPONENT_TAG, XCOMPONENT_ETS_TAG },
 };
 
 RefPtr<Element> InspectorComposedComponent::CreateElement()

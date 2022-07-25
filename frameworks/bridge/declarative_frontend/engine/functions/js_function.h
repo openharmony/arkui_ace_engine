@@ -22,7 +22,9 @@
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
+#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -35,8 +37,10 @@ public:
     ~JsFunction() override;
     void Execute();
     void Execute(const std::vector<std::string>& keys, const std::string& param);
+#if defined(XCOMPONENT_SUPPORTED)
     void ExecuteNew(const std::vector<std::string>& keys, const std::string& param,
         RefPtr<JSXComponentController>& jsXComponentController);
+#endif
     JSRef<JSVal> ExecuteJS(int argc = 0, JSRef<JSVal>* argv = nullptr);
 
 protected:
