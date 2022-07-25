@@ -160,7 +160,7 @@ void FlutterRenderPickerBase::PaintGradient(
 void FlutterRenderPickerBase::PaintFocusOptionBorder(const ScopedCanvas& canvas)
 {
     auto pipeline = context_.Upgrade();
-    if (!pipeline || !pipeline->IsKeyEvent()) {
+    if (!pipeline || !pipeline->GetIsTabKeyPressed()) {
         return;
     }
 
