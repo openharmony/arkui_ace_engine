@@ -16,14 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEST_UNITTEST_RELATIVE_CONTAINER_RELATIVE_CONTAINER_TEST_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEST_UNITTEST_RELATIVE_CONTAINER_RELATIVE_CONTAINER_TEST_UTILS_H
 
-#include "core/components/root/render_root.h"
+#include "core/components/box/render_box.h"
+#include "core/components/common/layout/position_param.h"
+#include "core/components/flex/render_flex_item.h"
 #include "core/components/relative_container/render_relative_container.h"
+#include "core/components/root/render_root.h"
 #include "core/components/text/render_text.h"
 
-
 namespace OHOS::Ace {
-    constexpr double LENGTH = 356.0;
-
 class MockRenderRoot final : public RenderRoot {
     DECLARE_ACE_TYPE(MockRenderRoot, RenderRoot);
 };
@@ -32,50 +32,20 @@ class MockRenderRelativeContainer final : public RenderRelativeContainer {
     DECLARE_ACE_TYPE(MockRenderRelativeContainer, RenderRelativeContainer);
 };
 
-class MockRenderText final : public RenderText {
-    DECLARE_ACE_TYPE(MockRenderText, RenderText);
-
-public:
-    uint32_t GetTextLines() override
-    {
-        return 0;
-    }
-
-    Size Measure() override
-    {
-        return GetLayoutSize();
-    }
-
-    double GetTextWidth() override
-    {
-        return 0;
-    }
-
-    int32_t GetTouchPosition(const Offset& offset) override
-    {
-        return 0;
-    }
-
-    void ShowTextOverlay(const Offset& showOffset) override
-    {
-        return;
-    }
-
-    void RegisterCallbacksToOverlay() override
-    {
-        return;
-    }
-
-    Offset GetHandleOffset(int32_t extend) override
-    {
-        return Offset();
-    }
+class MockRenderBox final : public RenderBox {
+    DECLARE_ACE_TYPE(MockRenderBox, RenderBox);
 };
 
 class RelativeContainerTestUtils {
 public:
     static RefPtr<RenderRoot> CreateRenderRoot();
-    static RefPtr<RenderText> CreateRenderText(const RefPtr<PipelineContext>& context);
+    static RefPtr<RenderRelativeContainer> CreateRenderRelativeContainer(const RefPtr<PipelineContext>& context);
+    static RefPtr<RenderBox> CreateRenderBox(
+        const double width, const double height, const RefPtr<PipelineContext>& context);
+    static void AddAlignRule(const std::string id, const AlignDirection& direction,
+        const HorizontalAlign& horizontalRule, std::map<AlignDirection, AlignRule>& alignRules);
+    static void AddAlignRule(const std::string id, const AlignDirection& direction, const VerticalAlign& verticalRule,
+        std::map<AlignDirection, AlignRule>& alignRules);
 };
 } // namespace OHOS::Ace
 
