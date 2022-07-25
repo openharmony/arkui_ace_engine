@@ -65,7 +65,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
-#ifndef WEARABLE_PRODUCT
+#ifdef FORM_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
@@ -156,6 +156,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
+#if defined(PREVIEW_COMPONENT_MOCK)
+#include "frameworks/bridge/declarative_frontend/jsview/js_previewer_mock.h"
+#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -991,7 +994,14 @@ void JsRegisterViews(BindingTarget globalObj)
     JsDragFunction::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);
-
+#ifdef PREVIEW_COMPONENT_MOCK
+    JSForm::JSBind(globalObj);
+    JSXComponent::JSBind(globalObj);
+    JSXComponentController::JSBind(globalObj);
+    JSRichText::JSBind(globalObj);
+    JSWeb::JSBind(globalObj);
+    JSWebController::JSBind(globalObj);
+#endif
     JSObjectTemplate mainAxisAlign;
     mainAxisAlign.Constant("Start", 1);
     mainAxisAlign.Constant("Center", 2);

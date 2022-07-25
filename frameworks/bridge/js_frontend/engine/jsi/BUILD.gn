@@ -70,8 +70,13 @@ template("js_engine_ark") {
       "jsi_list_bridge.cpp",
       "jsi_offscreen_canvas_bridge.cpp",
       "jsi_stepper_bridge.cpp",
-      "jsi_xcomponent_bridge.cpp",
     ]
+
+    # xcomponent components supports phone, TV and wearable except PC Preview
+    if (defined(config.xcomponent_components_support) &&
+        config.xcomponent_components_support) {
+      sources += [ "jsi_xcomponent_bridge.cpp" ]
+    }
 
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine) {

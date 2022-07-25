@@ -57,7 +57,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
-#ifndef WEARABLE_PRODUCT
+#ifdef FORM_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 #endif
 #ifdef WEB_SUPPORTED
@@ -156,6 +156,9 @@
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/core/common/container.h"
 #include "frameworks/core/components_v2/inspector/inspector.h"
+#if defined(PREVIEW_COMPONENT_MOCK)
+#include "frameworks/bridge/declarative_frontend/jsview/js_previewer_mock.h"
+#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -1020,6 +1023,14 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "FlowItem", JSWaterFlowItem::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
+#ifdef PREVIEW_COMPONENT_MOCK
+    { "FormComponent", JSForm::JSBind },
+    { "XComponent", JSXComponent::JSBind },
+    { "XComponentController", JSXComponentController::JSBind },
+    { "RichText", JSRichText::JSBind },
+    { "Web", JSWeb::JSBind },
+    { "WebController", JSWebController::JSBind },
+#endif
 };
 
 void RegisterAllModule(BindingTarget globalObj)

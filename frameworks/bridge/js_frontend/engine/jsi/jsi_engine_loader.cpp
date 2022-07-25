@@ -37,7 +37,11 @@ RefPtr<BaseCanvasBridge> JsiEngineLoader::CreateCanvasBridge() const
 
 RefPtr<BaseXComponentBridge> JsiEngineLoader::CreateXComponentBridge() const
 {
+#ifdef XCOMPONENT_SUPPORTED
     return AceType::MakeRefPtr<JsiXComponentBridge>();
+#else
+    return nullptr;
+#endif
 }
 
 #if defined(BUILT_IN_JS_ENGINE)
