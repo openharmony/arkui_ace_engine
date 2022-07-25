@@ -751,6 +751,63 @@ void WebDelegate::RequestFocus()
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::SearchAllAsync(const std::string& searchStr)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), searchStr]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->FindAllAsync(searchStr);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::ClearMatches()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->ClearMatches();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::SearchNext(bool forward)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), forward]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->FindNext(forward);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 int WebDelegate::ConverToWebHitTestType(int hitType)
 {
     WebHitTestType webHitType;
@@ -1085,6 +1142,8 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
             webCom->GetScaleChangeId(), pipelineContext);
         onPermissionRequestV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webCom->GetPermissionRequestEventId(), pipelineContext);
+        onSearchResultReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webCom->GetSearchResultReceiveEventId(), pipelineContext);
     }
 }
 
@@ -1389,6 +1448,31 @@ void WebDelegate::SetWebCallBack()
                     }
                 });
             });
+
+        webController->SetSearchAllAsyncImpl([weak = WeakClaim(this), uiTaskExecutor](const std::string& searchStr) {
+            uiTaskExecutor.PostTask([weak, searchStr]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->SearchAllAsync(searchStr);
+                }
+            });
+        });
+        webController->SetClearMatchesImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ClearMatches();
+                }
+            });
+        });
+        webController->SetSearchNextImpl([weak = WeakClaim(this), uiTaskExecutor](bool forward) {
+            uiTaskExecutor.PostTask([weak, forward]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->SearchNext(forward);
+                }
+            });
+        });
     }
 }
 
@@ -1444,6 +1528,10 @@ void WebDelegate::InitWebViewWithWindow()
             auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>(Container::CurrentId());
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
+
+            auto findListenerImpl = std::make_shared<FindListenerImpl>(Container::CurrentId());
+            findListenerImpl->SetWebDelegate(weak);
+            delegate->nweb_->PutFindCallback(findListenerImpl);
 
             std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
             setting->PutDomStorageEnabled(true);
@@ -1505,6 +1593,10 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->SetNWebHandler(nweb_handler);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
+
+            auto findListenerImpl = std::make_shared<FindListenerImpl>(Container::CurrentId());
+            findListenerImpl->SetWebDelegate(weak);
+            delegate->nweb_->PutFindCallback(findListenerImpl);
 
             std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
             setting->PutDomStorageEnabled(component->GetDomStorageAccessEnabled());
@@ -2386,6 +2478,14 @@ void WebDelegate::OnScaleChange(float oldScaleFactor, float newScaleFactor)
 {
     if (onScaleChangeV2_) {
         onScaleChangeV2_(std::make_shared<ScaleChangeEvent>(oldScaleFactor, newScaleFactor));
+    }
+}
+
+void WebDelegate::OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting)
+{
+    if (onSearchResultReceiveV2_) {
+        onSearchResultReceiveV2_(
+            std::make_shared<SearchResultReceiveEvent>(activeMatchOrdinal, numberOfMatches, isDoneCounting));
     }
 }
 

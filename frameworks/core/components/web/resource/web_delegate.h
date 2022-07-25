@@ -269,6 +269,8 @@ public:
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);
     bool LoadDataWithRichText();
+    void OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -323,6 +325,11 @@ private:
     void BackOrForward(int32_t step);
     bool AccessBackward();
     bool AccessForward();
+
+    void SearchAllAsync(const std::string& searchStr);
+    void ClearMatches();
+    void SearchNext(bool forward);
+
 #if defined(ENABLE_ROSEN_BACKEND)
     void InitWebViewWithSurface(sptr<Surface> surface);
 #endif
@@ -362,6 +369,7 @@ private:
     EventCallbackV2 onResourceLoadV2_;
     EventCallbackV2 onScaleChangeV2_;
     EventCallbackV2 onPermissionRequestV2_;
+    EventCallbackV2 onSearchResultReceiveV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;

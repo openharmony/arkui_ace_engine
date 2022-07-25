@@ -1018,6 +1018,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::OnHttpAuthRequest);
     JSClass<JSWeb>::StaticMethod("onPermissionRequest", &JSWeb::OnPermissionRequest);
     JSClass<JSWeb>::StaticMethod("onContextMenuShow", &JSWeb::OnContextMenuShow);
+    JSClass<JSWeb>::StaticMethod("onSearchResultReceive", &JSWeb::OnSearchResultReceive);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1145,6 +1146,15 @@ JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("host", eventInfo.GetHost());
     obj->SetProperty("realm", eventInfo.GetRealm());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> SearchResultReceiveEventToJSValue(const SearchResultReceiveEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("activeMatchOrdinal", eventInfo.GetActiveMatchOrdinal());
+    obj->SetProperty("numberOfMatches", eventInfo.GetNumberOfMatches());
+    obj->SetProperty("isDoneCounting", eventInfo.GetIsDoneCounting());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -2074,5 +2084,23 @@ void JSWeb::TableData(bool tableData)
 void JSWeb::OnFileSelectorShowAbandoned(const JSCallbackInfo& args)
 {
     LOGI("JSWeb: OnFileSelectorShow Abandoned");
+}
+
+void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<SearchResultReceiveEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), SearchResultReceiveEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<SearchResultReceiveEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetSearchResultReceiveEventId(eventMarker);
 }
 } // namespace OHOS::Ace::Framework

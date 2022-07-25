@@ -593,6 +593,44 @@ public:
         requestFocusImpl_ = std::move(requestFocusImpl);
     }
 
+    using SearchAllAsyncImpl = std::function<void(const std::string&)>;
+    void SearchAllAsync(const std::string& searchStr)
+    {
+        if (searchAllAsyncImpl_) {
+            searchAllAsyncImpl_(searchStr);
+        }
+    }
+
+    void SetSearchAllAsyncImpl(SearchAllAsyncImpl&& searchAllAsyncImpl)
+    {
+        searchAllAsyncImpl_ = std::move(searchAllAsyncImpl);
+    }
+
+    using ClearMatchesImpl = std::function<void()>;
+    void ClearMatches()
+    {
+        if (clearMatchesImpl_) {
+            clearMatchesImpl_();
+        }
+    }
+    void SetClearMatchesImpl(ClearMatchesImpl&& clearMatchesImpl)
+    {
+        clearMatchesImpl_ = std::move(clearMatchesImpl);
+    }
+
+    using SearchNextImpl = std::function<void(bool)>;
+    void SearchNext(bool forward)
+    {
+        if (searchNextImpl_) {
+            searchNextImpl_(forward);
+        }
+    }
+
+    void SetSearchNextImpl(SearchNextImpl&& searchNextImpl)
+    {
+        searchNextImpl_ = std::move(searchNextImpl);
+    }
+
     void Reload() const
     {
         declaration_->webMethod.Reload();
@@ -636,6 +674,9 @@ private:
     RemoveJavascriptInterfaceImpl removeJavascriptInterfaceImpl_;
     WebViewJavaScriptResultCallBackImpl webViewJavaScriptResultCallBackImpl_;
     RequestFocusImpl requestFocusImpl_;
+    SearchAllAsyncImpl searchAllAsyncImpl_;
+    ClearMatchesImpl clearMatchesImpl_;
+    SearchNextImpl searchNextImpl_;
 };
 
 // A component can show HTML5 webpages.
@@ -1211,6 +1252,16 @@ public:
     OnMouseCallback GetOnMouseEventCallback() const
     {
         return onMouseEvent_;
+    }
+
+    void SetSearchResultReceiveEventId(const EventMarker& searchResultReceiveEventId)
+    {
+        declaration_->SetSearchResultReceiveEventId(searchResultReceiveEventId);
+    }
+
+    const EventMarker& GetSearchResultReceiveEventId() const
+    {
+        return declaration_->GetSearchResultReceiveEventId();
     }
 
 private:

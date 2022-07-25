@@ -62,6 +62,17 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
     delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
 }
 
+void FindListenerImpl::OnFindResultReceived(
+    const int activeMatchOrdinal, const int numberOfMatches, const bool isDoneCounting)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnSearchResultReceive(activeMatchOrdinal, numberOfMatches, isDoneCounting);
+}
+
 void WebClientImpl::OnPageLoadEnd(int httpStatusCode, const std::string& url)
 {
     ContainerScope scope(instanceId_);
