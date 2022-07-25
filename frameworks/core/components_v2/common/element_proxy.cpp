@@ -419,10 +419,10 @@ public:
 
         // release deeprender Component tree,
         // repalce component_ with a dummy
-        auto li = AceType::DynamicCast<V2::ListItemComponent>(component_);
+        auto listItem = AceType::DynamicCast<V2::ListItemComponent>(component_);
         auto placeholder = AceType::MakeRefPtr<V2::ListItemComponent>();
-        li->MoveDeepRenderFunc(placeholder);
-        placeholder->SetElementId(li->GetElementId());
+        listItem->MoveDeepRenderFunc(placeholder);
+        placeholder->SetElementId(listItem->GetElementId());
         component_ = std::move(placeholder);
     }
 };
@@ -1307,8 +1307,9 @@ public:
                    "ForEach child ElementProxy objects must match");
 
         // will build children_ array from scratch
-        std::list<RefPtr<ElementProxy>> oldChildren(children_); // make a copy of the list
-        children_.clear();
+        // make a copy of the list
+        std::list<RefPtr<ElementProxy>> oldChildren; 
+        std::swap(oldChildren, children_);
 
         // the ForEach Component only includes the newly added children!
         const auto& newChildComponents = forEachComponent->GetChildren();
