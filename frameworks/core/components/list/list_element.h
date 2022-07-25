@@ -75,7 +75,7 @@ private:
     void UpdateListElement();
     void GetRefreshItems(bool& rebuild, int32_t& index);
     void RebuildElements(int32_t tailIndex);
-    void PatchElements();
+    void PatchElements(bool rebuild);
     void OnRefreshed();
 
     void UpdateCachedComponent();
