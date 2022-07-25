@@ -142,7 +142,7 @@ void RosenRenderPickerBase::PaintGradient(
 void RosenRenderPickerBase::PaintFocusOptionBorder(SkCanvas* canvas)
 {
     auto pipeline = context_.Upgrade();
-    if (!pipeline || !pipeline->IsKeyEvent()) {
+    if (!pipeline || !pipeline->GetIsTabKeyPressed()) {
         return;
     }
 
