@@ -110,6 +110,12 @@ enum class ContextType {
     RENDER_3D,
 };
 
+// following the definition of FillType in skPath
+enum class CanvasFillRule {
+    NONZERO = 0,
+    EVENODD,
+};
+
 // following the definition in skPaint
 enum class LineCapStyle {
     BUTT = 0,
