@@ -46,13 +46,15 @@ Rosen::RSAnimationTimingCurve NativeCurveHelper::ToNativeCurve(const RefPtr<Curv
     }
 }
 
-Rosen::RSMotionPathOption NativeCurveHelper::ToNativeMotionPathOption(const MotionPathOption& option)
+Rosen::RSMotionPathOption NativeCurveHelper::ToNativeMotionPathOption(const MotionPathOption& option,
+    bool pathNeedOrigin)
 {
     auto motionOption = Rosen::RSMotionPathOption(option.GetPath());
     motionOption.SetBeginFraction(option.GetBegin());
     motionOption.SetEndFraction(option.GetEnd());
     motionOption.SetRotationMode(
         option.GetRotate() ? Rosen::RotationMode::ROTATE_AUTO : Rosen::RotationMode::ROTATE_NONE);
+    motionOption.SetPathNeedAddOrigin(pathNeedOrigin);
     return motionOption;
 }
 

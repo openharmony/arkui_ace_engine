@@ -1285,19 +1285,20 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     touchable_ = component->IsTouchable();
     disabled_ = component->IsDisabledStatus();
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
+    positionParam_ = renderComponent->GetPositionParam();
     if (renderComponent) {
         motionPathOption_ = renderComponent->GetMotionPathOption();
 #ifdef ENABLE_ROSEN_BACKEND
         if (SystemProperties::GetRosenBackendEnabled() && motionPathOption_.IsValid()) {
             if (auto rsNode = GetRSNode()) {
                 auto nativeMotionOption = std::make_shared<Rosen::RSMotionPathOption>(
-                    NativeCurveHelper::ToNativeMotionPathOption(motionPathOption_));
+                    NativeCurveHelper::ToNativeMotionPathOption(motionPathOption_,
+                        positionParam_.type == PositionType::OFFSET));
                 rsNode->SetMotionPathOption(nativeMotionOption);
             }
         }
 #endif
 
-        positionParam_ = renderComponent->GetPositionParam();
         if (!NearEqual(flexWeight_, renderComponent->GetFlexWeight())) {
             auto parentFlex = GetParent().Upgrade();
             if (parentFlex) {
