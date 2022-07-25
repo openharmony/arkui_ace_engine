@@ -325,7 +325,7 @@ public:
     virtual void GetDeepRenderComponent() = 0;
 
 protected:
-    enum DeepRenderingState { shallowTree, deepTree };
+    enum class DeepRenderingState { shallowTree, deepTree };
 
     DeepRenderingState deepRenderignState_ = DeepRenderingState::shallowTree;
 };
