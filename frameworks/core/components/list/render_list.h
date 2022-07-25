@@ -270,6 +270,7 @@ public:
 
     RefPtr<RenderNode> GetChildByPosition(double position) const;
     RefPtr<RenderNode> GetNearChildByPosition(double position) const;
+    RefPtr<RenderNode> FindChildByIndex(int32_t index);
     RefPtr<RenderNode> GetChildByIndex(int32_t index);
     int32_t GetIndexByPosition(double position) const;
     bool RecycleByRange(int32_t from, int32_t to);

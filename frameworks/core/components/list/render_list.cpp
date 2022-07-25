@@ -375,6 +375,16 @@ RefPtr<RenderNode> RenderList::GetNearChildByPosition(double position) const
     return node;
 }
 
+RefPtr<RenderNode> RenderList::FindChildByIndex(int32_t index)
+{
+    auto item = items_.find(index);
+    if (item != items_.end()) {
+        return item->second;
+    } else {
+        return nullptr;
+    }
+}
+
 RefPtr<RenderNode> RenderList::GetChildByIndex(int32_t index)
 {
     if (index < 0) {
