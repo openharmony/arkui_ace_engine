@@ -521,7 +521,8 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
     }
     auto colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     auto inputDevice = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-    container->UpdateConfiguration(colorMode, inputDevice);
+    auto languageTag = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    container->UpdateConfiguration(colorMode, inputDevice, languageTag);
     LOGI("AceAbility::OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());
 }
 
