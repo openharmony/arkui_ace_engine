@@ -526,7 +526,7 @@ void AccessibilityNodeManager::RemoveAccessibilityNodeById(NodeId nodeId)
 {
     auto accessibilityNode = GetAccessibilityNodeById(nodeId);
     if (!accessibilityNode) {
-        LOGW("the accessibility node %{public}d is not in the map", nodeId);
+        LOGD("the accessibility node %{public}d is not in the map", nodeId);
         return;
     }
     RemoveAccessibilityNodes(accessibilityNode);
