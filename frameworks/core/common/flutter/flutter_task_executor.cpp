@@ -57,10 +57,12 @@ TaskExecutor::Task WrapTaskWithContainer(TaskExecutor::Task&& task, int32_t id)
     auto wrappedTask = [originTask = std::move(task), id, traceId = TraceId::CreateTraceId()]() {
         ContainerScope scope(id);
         std::unique_ptr<TraceId> traceIdPtr(traceId);
-        if (originTask) {
+        if (originTask && traceIdPtr) {
             traceIdPtr->SetTraceId();
             originTask();
             traceIdPtr->ClearTraceId();
+        } else {
+            LOGW("WrapTaskWithContainer: originTask or traceIdPtr is null.");
         }
     };
     return wrappedTask;
