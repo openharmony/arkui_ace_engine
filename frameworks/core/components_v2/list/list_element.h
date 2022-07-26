@@ -56,8 +56,12 @@ private:
     RefPtr<RenderNode> CreateRenderNode() override;
     void Apply(const RefPtr<Element>& element) override;
 
+    bool IsAncestor(const RefPtr<Element>& parent, const RefPtr<Element>& node);
+    int32_t GetRealElementIndex(const RefPtr<FocusNode>& node);
+
     RefPtr<RenderList> renderList_;
     size_t stickyRange_ = 0;
+    std::list<RefPtr<FocusNode>> sortedFocusNodesList_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListElement);
 };
