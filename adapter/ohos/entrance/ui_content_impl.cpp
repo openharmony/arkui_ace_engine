@@ -739,7 +739,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     }
     auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     auto inputDevice = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-    container->UpdateConfiguration(colorMode, inputDevice);
+    auto languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    container->UpdateConfiguration(colorMode, inputDevice, languageTag);
     LOGI("UIContentImpl::UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
 }
 
