@@ -495,6 +495,7 @@ void FlutterAceView::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>&
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
     auto markProcess = [pointerEvent]() {
         if (pointerEvent) {
+            LOGI("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
             pointerEvent->MarkProcessed();
         }
     };
@@ -522,6 +523,7 @@ void FlutterAceView::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
     ConvertMouseEvent(pointerEvent, event);
     auto markProcess = [pointerEvent]() {
         if (pointerEvent) {
+            LOGI("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
             pointerEvent->MarkProcessed();
         }
     };
@@ -537,6 +539,7 @@ void FlutterAceView::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& 
     ConvertAxisEvent(pointerEvent, event);
     auto markProcess = [pointerEvent]() {
         if (pointerEvent) {
+            LOGI("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
             pointerEvent->MarkProcessed();
         }
     };
