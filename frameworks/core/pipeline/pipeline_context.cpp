@@ -1768,6 +1768,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
         OnTouchEvent(touchPoint);
     }
 
+    CHECK_NULL_VOID(rootElement_);
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     LOGD(
         "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
