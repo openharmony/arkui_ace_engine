@@ -73,7 +73,7 @@ const Dimension& BadgeComponent::GetBadgeCircleSize() const
     return declaration_->GetBadgeCircleSize();
 }
 
-const std::string& BadgeComponent::GetBadgeLabel() const
+const std::optional<std::string>& BadgeComponent::GetBadgeLabel() const
 {
     return declaration_->GetBadgeLabel();
 }
