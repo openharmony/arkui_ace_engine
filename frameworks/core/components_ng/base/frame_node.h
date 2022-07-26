@@ -31,7 +31,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_context.h"
-#include "core/components_ng/render/render_property.h"
+#include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/render_wrapper.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
@@ -67,7 +67,9 @@ public:
 
     void InitializePatternAndContext();
 
-    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+    void MarkModifyDone();
+
+    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
     // When a component is first created, the node properties are refreshed based on the StateModifyTask.
     void FlushStateModifyTaskOnCreate(StateModifyTask& stateModifyTask);
@@ -107,9 +109,9 @@ public:
     }
 
     template<typename T>
-    RefPtr<T> GetRenderProperty() const
+    RefPtr<T> GetPaintProperty() const
     {
-        return DynamicCast<T>(renderProperty_);
+        return DynamicCast<T>(paintProperty_);
     }
 
     template<typename T>
@@ -174,11 +176,10 @@ private:
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     RefPtr<LayoutProperty> layoutProperty_;
-    RefPtr<RenderProperty> renderProperty_;
-    RefPtr<Pattern> pattern_;
-    RefPtr<EventHub> eventHub_;
-
+    RefPtr<PaintProperty> paintProperty_;
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
+    RefPtr<EventHub> eventHub_;
+    RefPtr<Pattern> pattern_;
 
     bool needSyncRenderTree_ = false;
 

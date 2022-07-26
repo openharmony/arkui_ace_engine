@@ -44,9 +44,9 @@ public:
         ResetLinearLayoutAttribute();
     }
 
-    ACE_DEFINE_CLASS_PROPERTY_GROUP(LinearLayoutAttribute, LinearLayoutAttribute)
+    ACE_DEFINE_PROPERTY_GROUP(LinearLayoutAttribute, LinearLayoutAttribute)
 
-    ACE_DEFINE_CLASS_PROPERTY(LinearLayoutAttribute, CrossAxisAlign, FlexAlign, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LinearLayoutAttribute, CrossAxisAlign, FlexAlign, PROPERTY_UPDATE_LAYOUT);
 
     FlexAlign GetCrossAxisAlign() const
     {

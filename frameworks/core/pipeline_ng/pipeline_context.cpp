@@ -28,8 +28,6 @@
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/modifier/modify_task.h"
-#include "core/components_ng/modifier/render/bg_color_modifier.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -98,12 +96,10 @@ void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
     // TODO: Add unique id.
-    rootNode_ =
-        FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, MakeRefPtr<StagePattern>(), Claim(this));
+    rootNode_ = FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, MakeRefPtr<StagePattern>(), Claim(this));
     rootNode_->SetHostRootId(GetInstanceId());
-    StateModifyTask modifyTask;
-    modifyTask.GetRenderContextTask().emplace_back(BgColorModifier(Color::WHITE));
-    rootNode_->FlushStateModifyTaskOnCreate(modifyTask);
+    rootNode_->SetHostPageId(-1);
+    rootNode_->GetRenderContext()->UpdateBgColor(Color::WHITE);
     CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;

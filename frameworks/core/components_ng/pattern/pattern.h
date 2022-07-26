@@ -24,7 +24,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/render_property.h"
+#include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
 // Pattern is the base class for different measure, layout and paint behavior.
@@ -57,9 +57,9 @@ public:
         OnAttachToFrameNode();
     }
 
-    virtual RefPtr<RenderProperty> CreateRenderProperty()
+    virtual RefPtr<PaintProperty> CreateRenderProperty()
     {
-        return MakeRefPtr<RenderProperty>();
+        return MakeRefPtr<PaintProperty>();
     }
 
     virtual RefPtr<LayoutProperty> CreateLayoutProperty()

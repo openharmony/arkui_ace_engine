@@ -138,6 +138,8 @@ public:
 
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 
+    virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+
 protected:
     virtual void OnChildAdded(const RefPtr<UINode>& child) {}
 

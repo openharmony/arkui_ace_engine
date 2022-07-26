@@ -17,7 +17,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_modifier.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -30,7 +29,8 @@ void ImageView::Create(const std::string& src)
         FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 0, AceType::MakeRefPtr<ImagePattern>());
     stack->Push(frameNode);
     ImageSourceInfo imageSourceInfo(src);
-    stack->PushLayoutTask(ImageSourceInfoModifier(imageSourceInfo));
+
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
 }
 
 } // namespace OHOS::Ace::NG

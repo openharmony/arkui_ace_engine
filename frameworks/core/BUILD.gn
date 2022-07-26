@@ -339,7 +339,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
       "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_$platform",
       "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
-      "$ace_root/frameworks/core/components_ng/modifier:ace_core_components_modifier_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_$platform",
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
