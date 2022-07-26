@@ -1545,7 +1545,6 @@ bool JsAccessibilityManager::RequestAccessibilityFocus(const RefPtr<Accessibilit
 
     ClearCurrentFocus();
     currentFocusNodeId_ = requestNodeId;
-    node->SetFocusedState(true);
     node->SetAccessibilityFocusedState(true);
     LOGI("RequestAccessibilityFocus SetFocusedState true nodeId:%{public}d", node->GetNodeId());
     return node->ActionAccessibilityFocus(true);
@@ -1561,7 +1560,6 @@ bool JsAccessibilityManager::ClearAccessibilityFocus(const RefPtr<AccessibilityN
     }
 
     currentFocusNodeId_ = -1;
-    node->SetFocusedState(false);
     node->SetAccessibilityFocusedState(false);
     return node->ActionAccessibilityFocus(false);
 }
