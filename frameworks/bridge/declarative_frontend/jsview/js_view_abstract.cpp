@@ -2633,24 +2633,10 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
 
     if (jsValue->IsNumber()) {
         result = Dimension(jsValue->ToNumber<double>(), defaultUnit);
-        LOGI("is number");
-        LOGI("before dimension");
-        LOGI(jsValue->ToNumber<double>());
-        LOGI(defaultUnit);
-        LOGI("after dimension");
-        LOGI(result.Value());
-        LOGI(result.Unit());
         return true;
     }
     if (jsValue->IsString()) {
         result = StringUtils::StringToDimensionWithUnit(jsValue->ToString(), defaultUnit);
-        LOGI("is string");
-        LOGI("before dimension");
-        LOGI(jsValue->ToString());
-        LOGI(defaultUnit);
-        LOGI("after dimension");
-        LOGI(result.Value());
-        LOGI(result.Unit());
         return true;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
