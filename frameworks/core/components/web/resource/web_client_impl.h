@@ -94,6 +94,8 @@ public:
     bool OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthResult> result, const std::string &host,
         const std::string &realm) override;
     void OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request) override;
+    bool RunContextMenu(std::shared_ptr<NWeb::NWebContextMenuParams> params,
+        std::shared_ptr<NWeb::NWebContextMenuCallback> callback) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

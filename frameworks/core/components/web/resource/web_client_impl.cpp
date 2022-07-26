@@ -399,4 +399,31 @@ void WebClientImpl::OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest>
     CHECK_NULL_VOID(delegate);
     delegate->OnPermissionRequestPrompt(request);
 }
+
+bool WebClientImpl::RunContextMenu(
+    std::shared_ptr<NWeb::NWebContextMenuParams> params,
+    std::shared_ptr<NWeb::NWebContextMenuCallback> callback)
+{
+    ContainerScope scope(instanceId_);
+    bool jsResult = false;
+    auto param = std::make_shared<ContextMenuEvent>(AceType::MakeRefPtr<ContextMenuParamOhos>(params),
+        AceType::MakeRefPtr<ContextMenuResultOhos>(callback));
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+    task->PostSyncTask([webClient = this, &param, &jsResult] {
+        if (webClient == nullptr) {
+            return;
+        }
+        auto delegate = webClient->GetWebDelegate();
+        if (delegate) {
+            jsResult = delegate->OnContextMenuShow(param.get());
+        }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS);
+    LOGI("OnContextMenuEventShow result:%{public}d", jsResult);
+    return jsResult;
+}
 } // namespace OHOS::Ace

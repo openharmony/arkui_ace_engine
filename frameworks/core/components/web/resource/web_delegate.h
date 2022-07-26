@@ -110,6 +110,36 @@ private:
     std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback_;
 };
 
+class ContextMenuParamOhos : public WebContextMenuParam {
+    DECLARE_ACE_TYPE(ContextMenuParamOhos, WebContextMenuParam)
+
+public:
+    ContextMenuParamOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param)
+        : param_(param) {}
+
+    int32_t GetXCoord() const override;
+    int32_t GetYCoord() const override;
+    std::string GetLinkUrl() const override;
+    std::string GetUnfilteredLinkUrl() const override;
+    std::string GetSourceUrl() const override;
+    bool HasImageContents() const override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
+};
+
+class ContextMenuResultOhos : public ContextMenuResult {
+    DECLARE_ACE_TYPE(ContextMenuResultOhos, ContextMenuResult)
+
+public:
+    ContextMenuResultOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback)
+        : callback_(callback) {}
+
+    void Cancel() const override;
+    void CopyImage() const override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;
+};
+
 class WebGeolocationOhos : public WebGeolocation {
     DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
 
@@ -234,6 +264,7 @@ public:
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason);
     void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed);
     bool OnFileSelectorShow(const BaseEventInfo* info);
+    bool OnContextMenuShow(const BaseEventInfo* info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);

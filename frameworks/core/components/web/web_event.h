@@ -744,6 +744,59 @@ private:
     float oldScale_ = 0.0f;
     float newScale_ = 0.0f;
 };
+
+class WebContextMenuParam : public AceType {
+    DECLARE_ACE_TYPE(WebContextMenuParam, AceType)
+
+public:
+    WebContextMenuParam() = default;
+    ~WebContextMenuParam() = default;
+
+    virtual int32_t GetXCoord() const = 0;
+    virtual int32_t GetYCoord() const = 0;
+    virtual std::string GetLinkUrl() const = 0;
+    virtual std::string GetUnfilteredLinkUrl() const = 0;
+    virtual std::string GetSourceUrl() const = 0;
+    virtual bool HasImageContents() const = 0;
+};
+
+class ACE_EXPORT ContextMenuResult : public AceType {
+    DECLARE_ACE_TYPE(ContextMenuResult, AceType)
+
+public:
+    ContextMenuResult() = default;
+    ~ContextMenuResult() = default;
+
+    virtual void Cancel() const = 0;
+    virtual void CopyImage() const = 0;
+};
+
+class ACE_EXPORT ContextMenuEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ContextMenuEvent, BaseEventInfo);
+
+public:
+    ContextMenuEvent(const RefPtr<WebContextMenuParam>& param,
+                      const RefPtr<ContextMenuResult>& result)
+        : BaseEventInfo("ContextShowEvent"), param_(param), result_(result)
+    {
+        LOGI("ContextShowEvent constructor");
+    }
+    ~ContextMenuEvent() = default;
+
+    const RefPtr<WebContextMenuParam>& GetParam() const
+    {
+        return param_;
+    }
+
+    const RefPtr<ContextMenuResult>& GetContextMenuResult() const
+    {
+        return result_;
+    }
+
+private:
+    RefPtr<WebContextMenuParam> param_;
+    RefPtr<ContextMenuResult> result_;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H

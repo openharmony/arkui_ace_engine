@@ -207,6 +207,30 @@ std::string WebPermissionRequestOhos::GetOrigin() const
     return "";
 }
 
+int32_t ContextMenuParamOhos::GetXCoord() const
+{
+    if (param_) {
+        return param_->GetXCoord();
+    }
+    return 0;
+}
+
+int32_t ContextMenuParamOhos::GetYCoord() const
+{
+    if (param_) {
+        return param_->GetYCoord();
+    }
+    return 0;
+}
+
+std::string ContextMenuParamOhos::GetLinkUrl() const
+{
+    if (param_) {
+        return param_->GetLinkUrl();
+    }
+    return "";
+}
+
 std::vector<std::string> WebPermissionRequestOhos::GetResources() const
 {
     std::vector<std::string> resources;
@@ -245,6 +269,42 @@ void WebPermissionRequestOhos::Grant(std::vector<std::string>& resources) const
         }
         request_->Agree(resourcesId);
     }
+}
+
+std::string ContextMenuParamOhos::GetUnfilteredLinkUrl() const
+{
+    if (param_) {
+        return param_->GetUnfilteredLinkUrl();
+    }
+    return "";
+}
+
+std::string ContextMenuParamOhos::GetSourceUrl() const
+{
+    if (param_) {
+        return param_->GetSourceUrl();
+    }
+    return "";
+}
+
+bool ContextMenuParamOhos::HasImageContents() const
+{
+    if (param_) {
+        return param_->HasImageContents();
+    }
+    return false;
+}
+
+void ContextMenuResultOhos::Cancel() const
+{
+    if (callback_) {
+        callback_->Cancel();
+    }
+}
+
+void ContextMenuResultOhos::CopyImage() const
+{
+
 }
 
 WebDelegate::~WebDelegate()
@@ -2292,6 +2352,15 @@ bool WebDelegate::OnFileSelectorShow(const BaseEventInfo* info)
         return false;
     }
     return webCom->OnFileSelectorShow(info);
+}
+
+bool WebDelegate::OnContextMenuShow(const BaseEventInfo* info)
+{
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return false;
+    }
+    return webCom->OnContextMenuShow(info);
 }
 
 bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
