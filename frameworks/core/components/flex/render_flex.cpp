@@ -1018,7 +1018,10 @@ double RenderFlex::GetAvailableMainSize()
 
 double RenderFlex::GetMainSize(const RefPtr<RenderNode>& item) const
 {
-    double size;
+    double size = 0.0;
+    if (!item) {
+        return size;
+    }
     if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
         size = item->GetLayoutSize().Width();
         if (item->GetPositionType() == PositionType::SEMI_RELATIVE) {
@@ -1033,7 +1036,10 @@ double RenderFlex::GetMainSize(const RefPtr<RenderNode>& item) const
 
 double RenderFlex::GetCrossSize(const RefPtr<RenderNode>& item) const
 {
-    double size;
+    double size = 0.0;
+    if (!item) {
+        return size;
+    }
     if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
         size = item->GetLayoutSize().Height();
     } else {
