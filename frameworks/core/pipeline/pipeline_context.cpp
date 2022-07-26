@@ -853,6 +853,7 @@ void PipelineContext::SetupRootElement()
         Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, std::list<RefPtr<Component>>());
     auto overlay = AceType::MakeRefPtr<OverlayComponent>(std::list<RefPtr<Component>>());
     overlay->SetTouchable(false);
+    Component::MergeRSNode(overlay);
     stack->AppendChild(rootStage);
     stack->AppendChild(overlay);
     RefPtr<RootComponent> rootComponent;
