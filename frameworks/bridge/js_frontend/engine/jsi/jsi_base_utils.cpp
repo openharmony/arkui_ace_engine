@@ -18,6 +18,8 @@
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 const int32_t OFFSET_PREVIEW = 9;
@@ -63,18 +65,67 @@ std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, st
     summaryBody.append(messageStr).append("\n");
 
     shared_ptr<JsValue> stack = error->GetProperty(runtime, "stack");
-    std::string stackStr = "Stacktrace:\n";
-    stackStr.append(stack->ToString(runtime));
+    std::string rawStack = stack->ToString(runtime);
+    if (rawStack.empty()) {
+        summaryBody.append("Stacktrace is empty!\n");
+        return summaryBody;
+    }
 
+    shared_ptr<JsValue> errorFunc = error->GetProperty(runtime, "errorfunc");
+    auto errorPos = GetErrorPos(rawStack);
+    std::string sourceCodeInfo = GetSourceCodeInfo(runtime, errorFunc, errorPos);
+
+    std::string stackHead = "Stacktrace:\n";
     if (pageMap || appMap) {
-        std::string tempStack = JsiDumpSourceFile(stackStr, pageUrl, pageMap, appMap, data);
-        summaryBody.append(tempStack);
+        std::string showStack = TranslateStack(rawStack, pageUrl, pageMap, appMap, data);
+        summaryBody.append(sourceCodeInfo).append(stackHead).append(showStack);
     } else {
         summaryBody.append("Cannot get SourceMap info, dump raw stack:\n");
-        summaryBody.append(stackStr);
+        summaryBody.append(stackHead).append(rawStack);
     }
 
     return summaryBody;
+}
+
+ErrorPos JsiBaseUtils::GetErrorPos(const std::string& rawStack)
+{
+    uint32_t lineEnd = rawStack.find("\n") - 1;
+    if (rawStack[lineEnd - 1] == '?') {
+        return std::make_pair(0, 0);
+    }
+
+    uint32_t secondPos = rawStack.rfind(':', lineEnd);
+    uint32_t fristPos = rawStack.rfind(':', secondPos - 1);
+
+    std::string lineStr = rawStack.substr(fristPos + 1, secondPos - 1 - fristPos);
+    std::string columnStr = rawStack.substr(secondPos + 1, lineEnd - 1 - secondPos);
+
+    return std::make_pair(StringToInt(lineStr), StringToInt(columnStr));
+}
+
+std::string JsiBaseUtils::GetSourceCodeInfo(std::shared_ptr<JsRuntime> runtime,
+    const shared_ptr<JsValue>& errorFunc, ErrorPos pos)
+{
+    if (pos.first == 0) {
+        return "";
+    }
+    shared_ptr<ArkJSRuntime> arkJsRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    LocalScope scope(arkJsRuntime->GetEcmaVm());
+    uint32_t line = pos.first;
+    uint32_t column = pos.second;
+    Local<panda::FunctionRef> function(std::static_pointer_cast<ArkJSValue>(errorFunc)->GetValue(arkJsRuntime));
+    Local<panda::StringRef> sourceCode = function->GetSourceCode(arkJsRuntime->GetEcmaVm(), line);
+    std::string sourceCodeStr = sourceCode->ToString();
+    if (sourceCodeStr.empty()) {
+        return "";
+    }
+    std::string sourceCodeInfo = "SourceCode:\n";
+    sourceCodeInfo.append(sourceCodeStr).append("\n");
+    for (uint32_t k = 0; k < column - 1; k++) {
+        sourceCodeInfo.push_back(' ');
+    }
+    sourceCodeInfo.append("^\n");
+    return sourceCodeInfo;
 }
 
 std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const std::string& rawStack)
@@ -82,8 +133,6 @@ std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const 
     if (!runningPage) {
         return rawStack;
     }
-    std::string stacktrace = "Stacktrace:\n";
-    stacktrace.append(rawStack).append("\n");
     std::string summaryBody;
     RefPtr<RevSourceMap> pageMap;
     RefPtr<RevSourceMap> appMap;
@@ -95,18 +144,19 @@ std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const 
         appMap = runningPage->GetAppMap();
     }
 
+    std::string stackHead = "Stacktrace:\n";
     if (pageMap || appMap) {
-        std::string tempStack = JsiBaseUtils::JsiDumpSourceFile(stacktrace, pageUrl, pageMap, appMap);
-        summaryBody.append(tempStack);
+        std::string tempStack = JsiBaseUtils::TranslateStack(rawStack, pageUrl, pageMap, appMap);
+        summaryBody.append(stackHead).append(tempStack);
     } else {
         summaryBody.append("Cannot get SourceMap info, dump raw stack:\n");
-        summaryBody.append(stacktrace);
+        summaryBody.append(stackHead).append(rawStack);
     }
 
     return summaryBody;
 }
 
-std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const std::string& pageUrl,
+std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std::string& pageUrl,
     const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, const AceType *data)
 {
     const std::string closeBrace = ")";
@@ -117,34 +167,20 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const s
     int32_t appFlag = static_cast<int32_t>(tempStack.find(runningPageTag));
     bool isAppPage = appFlag > 0 && appMap;
     if (!isAppPage) {
-        std::string ans = std::as_const(pageUrl);
-        char* ch = strrchr((char*)ans.c_str(), '.');
-        int index = ch - ans.c_str();
-        ans.insert(index, "_");
-        runningPageTag = ans;
+        std::string tag = std::as_const(pageUrl);
+        char* ch = strrchr((char*)tag.c_str(), '.');
+        int index = ch - tag.c_str();
+        tag.insert(index, "_");
+        runningPageTag = tag;
     }
     // find per line of stack
     std::vector<std::string> res;
     ExtractEachInfo(tempStack, res);
 
     // collect error info first
-    bool needGetErrorPos = false;
-    int32_t errorPos = 0;
-    uint32_t i = 1;
-    std::string codeStart = "SourceCode (";
-    std::string sourceCode = "";
-    if (res.size() > 1) {
-        std::string fristLine = res[1];
-        uint32_t codeStartLen = codeStart.length();
-        if (fristLine.substr(0, codeStartLen).compare(codeStart) == 0) {
-            sourceCode = fristLine.substr(codeStartLen, fristLine.length() - codeStartLen - 1);
-            i = 2;  // 2 means Convert from the second line
-            needGetErrorPos = true;
-        }
-    }
-    for (; i < res.size(); i++) {
+    for (uint32_t i = 0; i < res.size(); i++) {
         std::string temp = res[i];
-        if (temp.find(runningPageTag) == std::string::npos) {
+        if (temp.rfind(runningPageTag) == std::string::npos) {
             continue;
         }
         int32_t closeBracePos = static_cast<int32_t>(temp.find(closeBrace));
@@ -153,10 +189,6 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const s
         std::string line = "";
         std::string column = "";
         GetPosInfo(temp, closeBracePos, line, column);
-        if (needGetErrorPos) {
-            errorPos = StringToInt(column);
-            needGetErrorPos = false;
-        }
         if (line.empty() || column.empty()) {
             LOGI("the stack without line info");
             break;
@@ -171,17 +203,6 @@ std::string JsiBaseUtils::JsiDumpSourceFile(const std::string& stackStr, const s
     }
     if (ans.empty()) {
         return tempStack;
-    }
-    if (sourceCode.empty()) {
-        ans = res[0] + "\n" + ans;
-    } else {
-        sourceCode.push_back('\n');
-        for (int32_t k = 0; k < errorPos - 1; k++) {
-            sourceCode.push_back(' ');
-        }
-        sourceCode.push_back('^');
-        std::string codeBegin = "SourceCode: ";
-        ans = codeBegin + "\n" + sourceCode + "\n" + res[0] + "\n" + ans;
     }
     return ans;
 }
