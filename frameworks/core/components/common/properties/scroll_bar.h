@@ -75,6 +75,10 @@ enum class PositionMode {
      * display scrollbar on left.
      */
     LEFT,
+    /*
+     * display scrollbar on bottom.
+     */
+    BOTTOM,
 };
 
 class ScrollBar final : public AceType {
@@ -314,7 +318,8 @@ public:
 
 private:
     void SetBarRegion(const Offset& offset, const Size& size);
-    void SetTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
+    void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
+    void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
     double NormalizeToPx(const Dimension& dimension) const;
 
     DisplayMode displayMode_ = DisplayMode::OFF;
