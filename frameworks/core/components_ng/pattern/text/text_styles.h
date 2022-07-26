@@ -24,20 +24,20 @@ namespace OHOS::Ace::NG {
 using ItalicFontStyle = Ace::FontStyle;
 
 struct FontStyle {
-    ACE_DEFINE_STRUCT_PROPERTY(FontSize, Dimension);
-    ACE_DEFINE_STRUCT_PROPERTY(TextColor, Color);
-    ACE_DEFINE_STRUCT_PROPERTY(ItalicFontStyle, ItalicFontStyle);
-    ACE_DEFINE_STRUCT_PROPERTY(FontWeight, FontWeight);
-    ACE_DEFINE_STRUCT_PROPERTY(FontFamily, std::vector<std::string>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, ItalicFontStyle);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
 };
 
 struct TextLineStyle {
-    ACE_DEFINE_STRUCT_PROPERTY(LineHeight, Dimension);
-    ACE_DEFINE_STRUCT_PROPERTY(TextBaseline, TextBaseline);
-    ACE_DEFINE_STRUCT_PROPERTY(BaselineOffset, Dimension);
-    ACE_DEFINE_STRUCT_PROPERTY(TextOverflow, TextOverflow);
-    ACE_DEFINE_STRUCT_PROPERTY(TextAlign, TextAlign);
-    ACE_DEFINE_STRUCT_PROPERTY(MaxLines, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LineHeight, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextBaseline, TextBaseline);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BaselineOffset, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextOverflow, TextOverflow);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAlign, TextAlign);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLines, uint32_t);
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,

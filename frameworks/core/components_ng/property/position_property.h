@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 struct PositionProperty {
-    ACE_DEFINE_STRUCT_PROPERTY(Alignment, Alignment);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Alignment, Alignment);
 };
 } // namespace OHOS::Ace::NG
 

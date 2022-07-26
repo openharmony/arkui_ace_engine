@@ -128,7 +128,7 @@ public:
 
     AnimationOption GetExplicitAnimationOption() const override
     {
-        return AnimationOption();
+        return {};
     }
 
     void Destroy() override {}

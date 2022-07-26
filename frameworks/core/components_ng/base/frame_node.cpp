@@ -23,7 +23,6 @@
 #include "base/thread/task_executor.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/modifier/modify_task.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
@@ -37,7 +36,7 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
     renderContext_->InitContext(IsRootNode());
-    renderProperty_ = pattern->CreateRenderProperty();
+    paintProperty_ = pattern->CreateRenderProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
 }
@@ -104,52 +103,6 @@ void FrameNode::RequestNextFrame()
     }
 }
 
-void FrameNode::FlushStateModifyTaskOnCreate(StateModifyTask& stateModifyTask)
-{
-    if (!stateModifyTask.GetLayoutTask().empty()) {
-        for (auto&& task : stateModifyTask.GetLayoutTask()) {
-            task.FlushModify(RawPtr(layoutProperty_));
-        }
-    }
-    if (!stateModifyTask.GetRenderTask().empty()) {
-        for (auto&& task : stateModifyTask.GetRenderTask()) {
-            task.FlushModify(RawPtr(renderProperty_));
-        }
-    }
-    if (!stateModifyTask.GetRenderContextTask().empty()) {
-        for (auto&& task : stateModifyTask.GetRenderContextTask()) {
-            task.FlushModify(RawPtr(renderContext_));
-        }
-    }
-    pattern_->OnModifyDone();
-}
-
-void FrameNode::FlushStateModifyTaskOnRerender(StateModifyTask& stateModifyTask)
-{
-    if (!stateModifyTask.GetLayoutTask().empty()) {
-        for (auto&& task : stateModifyTask.GetLayoutTask()) {
-            task.FlushModify(RawPtr(layoutProperty_));
-        }
-    }
-    if (!stateModifyTask.GetRenderTask().empty()) {
-        for (auto&& task : stateModifyTask.GetRenderTask()) {
-            task.FlushModify(RawPtr(renderProperty_));
-        }
-    }
-    MarkDirtyNode();
-    auto task = [contextTask = stateModifyTask.MoveRenderContextTask(),
-                    renderContext = WeakPtr<RenderContext>(renderContext_)]() {
-        auto context = renderContext.Upgrade();
-        if (context) {
-            for (auto&& task : contextTask) {
-                task.FlushModify(RawPtr(context));
-            }
-        }
-    };
-    PostTask(std::move(task));
-    pattern_->OnModifyDone();
-}
-
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
 {
     LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
@@ -163,7 +116,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(
         dirty, layoutAlgorithmWrapper->SkipMeasure(), layoutAlgorithmWrapper->SkipLayout());
-    if (needRerender || CheckNeedRender(renderProperty_->GetPropertyChangeFlag())) {
+    if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     if (needSyncRenderTree_) {
@@ -342,9 +295,9 @@ void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, boo
 RefPtr<RenderWrapper> FrameNode::CreateRenderWrapper()
 {
     isRenderDirtyMarked_ = false;
-    auto renderWrapper = MakeRefPtr<RenderWrapper>(renderContext_, geometryNode_->Clone(), renderProperty_->Clone());
+    auto renderWrapper = MakeRefPtr<RenderWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
     renderWrapper->SetContentPaintImpl(pattern_->CreateContentPaintImpl());
-    renderProperty_->CleanDirty();
+    paintProperty_->CleanDirty();
     return renderWrapper;
 }
 
@@ -364,6 +317,11 @@ void FrameNode::RebuildRenderContextTree(const std::list<RefPtr<FrameNode>>& chi
 {
     LOGD("%{public}s rebuild render context tree", GetTag().c_str());
     renderContext_->RebuildFrame(this, children);
+}
+
+void FrameNode::MarkModifyDone()
+{
+    pattern_->OnModifyDone();
 }
 
 void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
@@ -386,8 +344,8 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame() const
 void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag)
 {
     layoutProperty_->UpdatePropertyChangeFlag(extraFlag);
-    renderProperty_->UpdatePropertyChangeFlag(extraFlag);
-    auto flag = layoutProperty_->GetPropertyChangeFlag() | renderProperty_->GetPropertyChangeFlag();
+    paintProperty_->UpdatePropertyChangeFlag(extraFlag);
+    auto flag = layoutProperty_->GetPropertyChangeFlag() | paintProperty_->GetPropertyChangeFlag();
     if (CheckNoChanged(flag)) {
         return;
     }

@@ -17,7 +17,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/list/list_modifier.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -32,7 +31,7 @@ void ListView::Create()
 
 void ListView::SetListDirection(Axis axis)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(ListDirectionModifier(axis));
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListDirection, axis);
 }
 
 void ListView::SetEdgeEffect(EdgeEffect edgeEffect)
