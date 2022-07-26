@@ -426,6 +426,9 @@ bool FocusGroup::IsFocusableByTab() const
     if (!FocusNode::IsFocusableByTab()) {
         return false;
     }
+    if (focusNodes_.empty()) {
+        return true;
+    }
     return std::any_of(focusNodes_.begin(), focusNodes_.end(),
         [](const RefPtr<FocusNode>& focusNode) { return focusNode->IsFocusableByTab(); });
 }
