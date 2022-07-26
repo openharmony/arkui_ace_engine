@@ -1549,9 +1549,6 @@ void FrontendDelegateDeclarative::OnPageReady(
                 delegate->ProcessRouterTask();
             }
             delegate->isStagingPageExist_ = false;
-            if (isMainPage) {
-                delegate->OnPageShow();
-            }
         },
         TaskExecutor::TaskType::UI);
 }
