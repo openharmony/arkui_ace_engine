@@ -65,6 +65,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
 
     web_ = web;
     if (delegate_) {
+        delegate_->SetComponent(web);
         delegate_->UpdateJavaScriptEnabled(web->GetJsEnabled());
         delegate_->UpdateBlockNetworkImage(web->GetOnLineImageAccessEnabled());
         delegate_->UpdateAllowFileAccess(web->GetFileAccessEnabled());
