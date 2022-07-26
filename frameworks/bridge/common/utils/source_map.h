@@ -43,6 +43,7 @@ struct MappingInfo {
 class ACE_EXPORT RevSourceMap final : public Referenced {
 public:
     MappingInfo Find(int32_t row, int32_t col);
+    std::string GetOriginalNames(const std::string& sourceCode, uint32_t& errorPos) const;
     void ExtractKeyInfo(const std::string& sourceMap, std::vector<std::string>& sourceKeyInfo);
     void Init(const std::string& sourceMap);
 
