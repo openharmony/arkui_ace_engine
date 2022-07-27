@@ -1300,7 +1300,7 @@ RefPtr<AccessibilityNode> JsAccessibilityManager::FindNodeInAbsoluteDirection(
             tempBest.SetTop(node->GetTop() + node->GetHeight() + 1);
             break;
         case FOCUS_DIRECTION_DOWN:
-            tempBest.SetTop(node->GetTop() + node->GetHeight() - 1);
+            tempBest.SetTop(node->GetTop() - node->GetHeight() - 1);
             break;
         default:
             break;
@@ -1393,13 +1393,13 @@ bool JsAccessibilityManager::IsCandidateRect(Rect nodeRect, Rect itemRect, const
 {
     switch (direction) {
         case FOCUS_DIRECTION_LEFT:
-            return nodeRect.Left() < itemRect.Left() && nodeRect.Right() < itemRect.Right();
-        case FOCUS_DIRECTION_RIGHT:
             return nodeRect.Left() > itemRect.Left() && nodeRect.Right() > itemRect.Right();
+        case FOCUS_DIRECTION_RIGHT:
+            return nodeRect.Left() < itemRect.Left() && nodeRect.Right() < itemRect.Right();
         case FOCUS_DIRECTION_UP:
-            return nodeRect.Top() < itemRect.Top() && nodeRect.Bottom() < itemRect.Bottom();
-        case FOCUS_DIRECTION_DOWN:
             return nodeRect.Top() > itemRect.Top() && nodeRect.Bottom() > itemRect.Bottom();
+        case FOCUS_DIRECTION_DOWN:
+            return nodeRect.Top() < itemRect.Top() && nodeRect.Bottom() < itemRect.Bottom();
         default:
             break;
     }
