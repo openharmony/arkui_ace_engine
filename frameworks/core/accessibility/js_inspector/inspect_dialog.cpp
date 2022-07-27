@@ -25,6 +25,7 @@ void InspectDialog::PackAttrAndStyle()
 {
     // add for the attrs
     attrs_.insert(std::make_pair("disabled", "false"));
+    attrs_.insert(std::make_pair("dragable", "false"));
 
     // add for the styles
     // clear the common styles for dialog
