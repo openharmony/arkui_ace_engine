@@ -87,16 +87,21 @@ public:
         return sidebar_;
     }
 
+    void SetSideBarPositon(const SideBarPosition& sidebarposition)
+    {
+        sidebarpositon_ = sidebarposition;
+    }
+
     void StopAnimation();
 
     void PlaySideBarContainerToAnimation(SideStatus status);
 
 private:
     void CreateAnimation();
-    void PlayHideAnimation();
-    void StopHideAnimation();
-    void PlayShowAnimation();
-    void StopShowAnimation();
+    void PlayRightToLeftAnimation();
+    void StopRightToLeftAnimation();
+    void PlayLeftToRightAnimation();
+    void StopLeftToRightAnimation();
 
     RefPtr<SideBarAnimation> leftToRightAnimation_;
     RefPtr<SideBarAnimation> rightToLeftAnimation_;
@@ -105,6 +110,7 @@ private:
     StopAnimationCallback stopCallback_;
     bool isAnimationCreated_ = false;
     WeakPtr<RenderNode> sidebar_;
+    SideBarPosition sidebarpositon_ = SideBarPosition::START;
 };
 
 }

@@ -119,6 +119,29 @@ void JSSideBar::SetShowControlButton(bool isShow)
     component->SetShowControlButton(isShow);
 }
 
+void JSSideBar::JsSideBarPosition(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    SideBarPosition sideBarPosition = SideBarPosition::START;
+    if (info[0]->IsNumber()) {
+        sideBarPosition = static_cast<SideBarPosition>(info[0]->ToNumber<int>());
+    } else {
+        LOGE("The arg is wrong");
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<SideBarContainerComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("side bar is null");
+        return;
+    }
+    
+    component->SetSideBarPosition(sideBarPosition);
+}
+
 void JSSideBar::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSideBar>::Declare("SideBarContainer");
@@ -132,6 +155,7 @@ void JSSideBar::JSBind(BindingTarget globalObj)
     JSClass<JSSideBar>::StaticMethod("minSideBarWidth", &JSSideBar::JsMinSideBarWidth);
     JSClass<JSSideBar>::StaticMethod("maxSideBarWidth", &JSSideBar::JsMaxSideBarWidth);
     JSClass<JSSideBar>::StaticMethod("autoHide", &JSSideBar::JsAutoHide);
+    JSClass<JSSideBar>::StaticMethod("sideBarPosition", &JSSideBar::JsSideBarPosition);
     JSClass<JSSideBar>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSideBar>::StaticMethod("width", SetWidth);
     JSClass<JSSideBar>::StaticMethod("height", SetHeight);

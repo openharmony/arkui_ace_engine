@@ -131,6 +131,7 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
     iconSwitch_ = sideBar_->GetSwitchIcon();
     showControlButton_ = sideBar_->GetShowControlButton();
     autoHide_ = sideBar_->GetAutoHide();
+    sideBarPosition_ = sideBar_->GetSideBarPositon();
 
     exceptRegion_.SetRect(SystemProperties::Vp2Px(sideBar_->GetButtonLeft()),
         SystemProperties::Vp2Px(sideBar_->GetButtonTop()), SystemProperties::Vp2Px(sideBar_->GetButtonWidth()),
@@ -198,6 +199,7 @@ void RenderSideBarContainer::InitializeDragAndAnimation()
     dragRecognizer_->SetIsExternalGesture(true);
     animationController_ = AceType::MakeRefPtr<SideBarAnimationController>(GetContext());
     animationController_->SetRenderSideBarContainer(weak);
+    animationController_->SetSideBarPositon(sideBarPosition_);
 }
 
 void RenderSideBarContainer::OnStatusChanged(RenderStatus renderStatus)
@@ -239,7 +241,11 @@ bool RenderSideBarContainer::TouchTest(const Point& globalPoint, const Point& pa
     auto sidebarWidthVp = ConvertWidthToVp(sidebarWidth_);
     auto paintRect = GetPaintRect();
     auto exceptRegion = Rect(paintRect.GetOffset() + exceptRegion_.GetOffset(), exceptRegion_.GetSize());
-    auto dragRect = Rect(paintRect.GetOffset() + Offset((sidebarWidthVp - DEFAULT_DRAG_REGION).ConvertToPx(), 0),
+    auto layoutSize = GetLayoutSize();
+    auto layoutSizeWithVP =  Dimension(Dimension(layoutSize.Width()).ConvertToVp(), DimensionUnit::VP);
+    bool isSideBarStart = sideBarPosition_ == SideBarPosition::START;
+    auto sidbarDrag = (isSideBarStart ? sidebarWidthVp : (layoutSizeWithVP - sidebarWidthVp)) - DEFAULT_DRAG_REGION;
+    auto dragRect = Rect(paintRect.GetOffset() + Offset(NormalizeToPx(sidbarDrag), 0),
         Size(2 * DEFAULT_DRAG_REGION.ConvertToPx(), paintRect.Height()));
     auto touchRect = GetTransformRect(dragRect);
     auto point = GetTransformPoint(parentLocalPoint);
@@ -390,13 +396,17 @@ void RenderSideBarContainer::PlaceChildren()
 
 void RenderSideBarContainer::SetChildrenStatus()
 {
-    auto children = GetChildren();
-    auto begin = children.begin();
-    RefPtr<RenderNode>& content = *begin;
-    RefPtr<RenderNode>& sideBar = *(++begin);
+    auto layoutSize = GetLayoutSize();
+    if (!layoutSize.IsValid()) {
+        LOGW("SetChildrenStatus: Layout size is invalid.");
+        return;
+    }
+
+    auto sideBarWidthVP = ConvertWidthToVp(sidebarWidth_);
+    bool isSideBarStart = sideBarPosition_ == SideBarPosition::START;
 
     if (status_ == SideStatus::SHOW) {
-        curPosition_ = 0.0_vp;
+        curPosition_ = isSideBarStart ? 0.0_vp : -sideBarWidthVP;
 
         if (ConvertWidthToVp(sidebarWidth_) < ConvertWidthToVp(minSidebarWidth_) && autoHide_) {
             DoSideBarAnimation();
@@ -404,32 +414,55 @@ void RenderSideBarContainer::SetChildrenStatus()
     }
 
     static Dimension miniWidthToHide = 520.0_vp;
-    auto layoutSize = GetLayoutSize();
-    auto sideBarWidthVP = ConvertWidthToVp(sidebarWidth_);
     auto autoHide = layoutSize.Width() <= miniWidthToHide.ConvertToPx();
-    if (status_ == SideStatus::HIDDEN) {
-        curPosition_ = -sideBarWidthVP;
-    }
+
     if (status_ == SideStatus::AUTO) {
         if (autoHide) {
-            curPosition_ = -sideBarWidthVP;
             status_ = SideStatus::HIDDEN;
         } else {
-            curPosition_ = 0.0_vp;
+            curPosition_ = isSideBarStart ? 0.0_vp : -sideBarWidthVP;
             status_ = SideStatus::SHOW;
         }
     }
+    if (status_ == SideStatus::HIDDEN) {
+        curPosition_ = isSideBarStart ? -sideBarWidthVP : 0.0_vp;
+    }
 
+    LayoutChildren();
+}
+
+void RenderSideBarContainer::LayoutChildren()
+{
+    auto children = GetChildren();
+    auto begin = children.begin();
+    RefPtr<RenderNode>& content = *begin;
+    RefPtr<RenderNode>& sideBar = *(++begin);
+
+    auto sideBarWidthVP = ConvertWidthToVp(sidebarWidth_);
+    auto layoutSize = GetLayoutSize();
+    auto layoutSizeWithVP =  Dimension(Dimension(layoutSize.Width()).ConvertToVp(), DimensionUnit::VP);
+    bool isSideBarStart = sideBarPosition_ == SideBarPosition::START;
     auto curPositionVP = ConvertWidthToVp(curPosition_);
+
     if (sideBar_->GetSideBarContainerType() == SideBarContainerType::EMBED) {
-        content->SetLeft(sideBarWidthVP + curPositionVP);
-        auto fixedSize = layoutSize.MinusWidth((sideBarWidthVP + curPositionVP).ConvertToPx());
-        content->Layout(LayoutParam(fixedSize, Size()));
+        if (isSideBarStart) {
+            content->SetLeft(sideBarWidthVP + curPositionVP);
+            auto fixedSize = layoutSize.MinusWidth((sideBarWidthVP + curPositionVP).ConvertToPx());
+            content->Layout(LayoutParam(fixedSize, Size()));
+        } else {
+            content->SetLeft(Dimension(0));
+            auto fixedSize = layoutSize.MinusWidth((-curPositionVP).ConvertToPx());
+            content->Layout(LayoutParam(fixedSize, Size()));
+        }
     } else {
         content->SetLeft(Dimension(0));
         content->Layout(LayoutParam(layoutSize, Size()));
     }
-    sideBar->SetLeft(curPositionVP);
+    if (isSideBarStart) {
+        sideBar->SetLeft(curPositionVP);
+    } else {
+        sideBar->SetLeft(layoutSizeWithVP + curPositionVP);
+    }
     auto fixedSize = Size(sideBarWidthVP.ConvertToPx(), layoutSize.Height());
     sideBar->Layout(LayoutParam(fixedSize, fixedSize));
     MarkNeedRender();
@@ -478,7 +511,8 @@ void RenderSideBarContainer::HandleDragUpdate(double xOffset)
         return;
     }
     bool isSideBarWidthUnitPercent = sidebarWidth_.Unit() == DimensionUnit::PERCENT;
-    auto sideBarLine = ConvertWidthToVp(preSidebarWidth_).ConvertToPx() + xOffset;
+    bool isSideBarStart = sideBarPosition_ == SideBarPosition::START;
+    auto sideBarLine = ConvertWidthToVp(preSidebarWidth_).ConvertToPx() + (isSideBarStart ? xOffset : -xOffset);
     auto minValue = ConvertWidthToVp(minSidebarWidth_).ConvertToPx();
     auto maxValue = ConvertWidthToVp(maxSidebarWidth_).ConvertToPx();
     if (sideBarLine > minValue && sideBarLine < maxValue) {
