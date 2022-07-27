@@ -910,6 +910,77 @@ int32_t JsiPaEngine::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     return arkJSValue->ToInt32(runtime);
 }
 
+std::string JsiPaEngine::ExcludeTag(const std::string& jsonString, const std::string& tagString)
+{
+    size_t pos = jsonString.find(tagString);
+    if (pos == std::string::npos) {
+        return jsonString;
+    }
+    std::string valueString = jsonString.substr(pos);
+    pos = valueString.find(":");
+    if (pos == std::string::npos) {
+        return "";
+    }
+    size_t valuePos = pos + 1;
+    while (valuePos < valueString.size()) {
+        if (valueString.at(valuePos) != ' ' && valueString.at(valuePos) != '\t') {
+            break;
+        }
+        valuePos++;
+    }
+    if (valuePos >= valueString.size()) {
+        return "";
+    }
+    valueString = valueString.substr(valuePos);
+    return valueString.substr(0, valueString.size() - 1);
+}
+
+std::string JsiPaEngine::IncludeTag(const std::string& jsonString, const std::string& tagString)
+{
+    std::string result = "{\"" + tagString + "\":";
+    result += jsonString;
+    result += "}";
+    return result;
+}
+
+std::shared_ptr<AppExecFwk::PacMap> JsiPaEngine::Call(const std::string& method,
+    const std::string& arg, const AppExecFwk::PacMap& pacMap)
+{
+    LOGD("JsiPaEngine Call");
+    ACE_DCHECK(engineInstance_);
+
+    std::string pacString = const_cast<AppExecFwk::PacMap&>(pacMap).ToString();
+    std::string params = ExcludeTag(pacString, "pacmap");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(method));
+    argv.push_back(runtime->NewString(arg));
+    argv.push_back(runtime->NewString(params));
+    auto func = GetPaFunc("call");
+    if (func == nullptr) {
+        return nullptr;
+    }
+    shared_ptr<JsValue> retVal = CallFunc(func, argv);
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
+    if (arkJSValue->IsException(runtime)) {
+        LOGE("JsiPaEngine Query FAILED!");
+        return nullptr;
+    }
+    if (arkJSValue->IsUndefined(runtime)) {
+        LOGE("JsiPaEngine Query return value is undefined!");
+        return nullptr;
+    }
+    std::string retStr = IncludeTag(arkJSValue->ToString(runtime), "pacmap");
+    auto result = std::make_shared<AppExecFwk::PacMap>();
+    if (result == nullptr) {
+        LOGE("fail to create PacMap");
+        return nullptr;
+    }
+    result->FromString(retStr);
+    LOGD("JsiPaEngine Call End: %{public}s", result->ToString().c_str());
+    return result;
+}
+
 int32_t JsiPaEngine::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values)
 {
     LOGI("JsiPaEngine BatchInsert");
