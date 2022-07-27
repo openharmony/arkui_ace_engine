@@ -20,7 +20,6 @@ group("ace_packages") {
 
   # core library for Ability Cross-platform Environment(ACE) JS
   deps += [
-    "$ace_root/adapter/ohos/services:services_target",
     "$ace_root/build:libace",
     "$ace_root/interfaces/inner_api:innerkits_target",
     "$ace_root/interfaces/inner_api/ace:ace_uicontent",
