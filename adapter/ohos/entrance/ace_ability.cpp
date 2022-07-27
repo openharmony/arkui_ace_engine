@@ -228,7 +228,7 @@ void AceAbility::OnStart(const Want& want)
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
     if (moduleInfo != nullptr) {
-        packagePathStr += "/" + moduleInfo->name + "/";
+        packagePathStr += "/" + moduleInfo->package + "/";
     }
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     std::string srcPath = "";
