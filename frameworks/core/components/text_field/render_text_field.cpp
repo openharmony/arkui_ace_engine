@@ -2156,7 +2156,6 @@ void RenderTextField::InitAccessibilityEventListener()
     });
 
     accessibilityNode->AddSupportAction(AceAction::ACTION_SET_TEXT);
-
 }
 
 void RenderTextField::UpdateDirectionStatus()

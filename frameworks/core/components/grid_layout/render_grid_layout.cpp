@@ -475,9 +475,9 @@ void RenderGridLayout::InitialGridProp()
     colGap_ = NormalizePercentToPx(userColGap_, false);
 
     rowSize_ = ((gridHeight_ > 0.0) && (gridHeight_ < GetLayoutParam().GetMaxSize().Height())) ? gridHeight_
-                   : GetLayoutParam().GetMaxSize().Height();
+        : GetLayoutParam().GetMaxSize().Height();
     colSize_ = ((gridWidth_ > 0.0) && (gridWidth_ < GetLayoutParam().GetMaxSize().Width())) ? gridWidth_
-                   : GetLayoutParam().GetMaxSize().Width();
+        : GetLayoutParam().GetMaxSize().Width();
     if (NearEqual(rowSize_, Size::INFINITE_SIZE) &&
         (rowsArgs_.find(UNIT_PERCENT) != std::string::npos || rowsArgs_.find(UNIT_RATIO) != std::string::npos)) {
         rowSize_ = viewPort_.Height();
@@ -875,8 +875,8 @@ void RenderGridLayout::PerformLayout()
         PerformLayoutForStaticGrid();
     }
     if (CheckNeedShrink()) {
-        SetLayoutSize(
-            GetLayoutParam().Constrain(Size(colSize_, allocatedRowSizes_.back() + (rowCount_ - 1) * rowGap_)));
+        SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_,
+            allocatedRowSizes_.back() + (rowCount_ - 1) * rowGap_)));
     } else {
         SetLayoutSize(GetLayoutParam().Constrain(Size(colSize_, rowSize_)));
     }
@@ -1211,7 +1211,7 @@ void RenderGridLayout::OnDragEnter(const ItemDragInfo& info)
 {
     LOGD("%{public}s begin. itemDragStarted_ %{public}d, itemDragEntered_ %{public}d, itemLongPressed_ %{public}d, "
          "isInMainGrid_ %{public}d, isMainGrid_ %{public}d",
-        __PRETTY_FUNCTION__, itemDragStarted_, itemDragEntered_, itemLongPressed_, isInMainGrid_, isMainGrid_);
+         __PRETTY_FUNCTION__, itemDragStarted_, itemDragEntered_, itemLongPressed_, isInMainGrid_, isMainGrid_);
     if (!editMode_) {
         LOGW("%{public}s no editMode no dragevent.", __PRETTY_FUNCTION__);
         return;
@@ -1233,7 +1233,7 @@ void RenderGridLayout::OnDragLeave(const ItemDragInfo& info)
 {
     LOGD("%{public}s begin. itemDragStarted_ %{public}d, itemDragEntered_ %{public}d, itemLongPressed_ %{public}d, "
          "isInMainGrid_ %{public}d, isMainGrid_ %{public}d",
-        __PRETTY_FUNCTION__, itemDragStarted_, itemDragEntered_, itemLongPressed_, isInMainGrid_, isMainGrid_);
+         __PRETTY_FUNCTION__, itemDragStarted_, itemDragEntered_, itemLongPressed_, isInMainGrid_, isMainGrid_);
     if (!editMode_) {
         LOGW("%{public}s no editMode no dragevent.", __PRETTY_FUNCTION__);
         return;
@@ -1254,7 +1254,7 @@ void RenderGridLayout::OnDragMove(const ItemDragInfo& info)
 {
     LOGD("%{public}s begin. itemDragStarted_ %{public}d, itemDragEntered_ %{public}d, itemLongPressed_ %{public}d, "
          "isInMainGrid_ %{public}d, isMainGrid_ %{public}d",
-        __PRETTY_FUNCTION__, itemDragStarted_, itemDragEntered_, itemLongPressed_, isInMainGrid_, isMainGrid_);
+         __PRETTY_FUNCTION__, itemDragStarted_, itemDragEntered_, itemLongPressed_, isInMainGrid_, isMainGrid_);
     if (!editMode_) {
         LOGW("%{public}s no editMode no dragevent.", __PRETTY_FUNCTION__);
         return;
@@ -1461,7 +1461,7 @@ bool RenderGridLayout::OnDrop(const ItemDragInfo& info)
 {
     LOGD("%{public}s begin. itemDragStarted_ %{public}d, itemDragEntered_ %{public}d, itemLongPressed_ %{public}d, "
          "isInMainGrid_ %{public}d, isMainGrid_ %{public}d",
-        __PRETTY_FUNCTION__, itemDragStarted_, itemDragEntered_, itemLongPressed_, isInMainGrid_, isMainGrid_);
+         __PRETTY_FUNCTION__, itemDragStarted_, itemDragEntered_, itemLongPressed_, isInMainGrid_, isMainGrid_);
     if (!editMode_) {
         LOGW("%{public}s no editMode no dragevent.", __PRETTY_FUNCTION__);
         return false;
@@ -2266,14 +2266,15 @@ bool RenderGridLayout::AddNodeAnimationToController(
     Point startPoint(item->GetPosition().GetX(), item->GetPosition().GetY());
     Point endPoint = CalcChildPosition(item, row, col, rowSpan, colSpan);
     auto animationRef = AceType::MakeRefPtr<CurveAnimation<Point>>(startPoint, endPoint, Curves::FRICTION);
-    animationRef->AddListener([item, weak = WeakClaim(this)](const Point newPoint) {
-        if (item) {
-            item->SetPosition(Offset(newPoint.GetX(), newPoint.GetY()));
-        }
-        auto renderGrid = weak.Upgrade();
-        if (renderGrid) {
-            renderGrid->MarkNeedLayout();
-        }
+    animationRef->AddListener(
+        [item, weak = WeakClaim(this)](const Point& newPoint) {
+            if (item) {
+                item->SetPosition(Offset(newPoint.GetX(), newPoint.GetY()));
+            }
+            auto renderGrid = weak.Upgrade();
+            if (renderGrid) {
+                renderGrid->MarkNeedLayout();
+            }
     });
 
     auto gridLayoutItem = AceType::DynamicCast<RenderGridLayoutItem>(item);
@@ -2486,7 +2487,7 @@ void RenderGridLayout::RegisterDropJSFunc(const OnCallJSDropFunc& func)
 void RenderGridLayout::CallDropJSFunc()
 {
     std::lock_guard<std::mutex> lock(dropJSFuncListLock_);
-    for (auto& func : dropJSFuncList_) {
+    for (auto& func: dropJSFuncList_) {
         func();
     }
     dropJSFuncList_.clear();
@@ -2580,12 +2581,13 @@ void RenderGridLayout::StartFlexController(const Point& endPoint, bool includeSu
     }
     runFlexAnimation_.store(true);
     auto animationRef = AceType::MakeRefPtr<CurveAnimation<Point>>(lastGlobalPoint_, endPoint, Curves::FRICTION);
-    animationRef->AddListener([weak = WeakClaim(this)](const Point newPoint) {
-        auto renderGrid = weak.Upgrade();
-        if (renderGrid) {
-            renderGrid->UpdateFlexComponentPosition(newPoint);
-        }
-    });
+    animationRef->AddListener(
+        [weak = WeakClaim(this)](const Point& newPoint) {
+            auto renderGrid = weak.Upgrade();
+            if (renderGrid) {
+                renderGrid->UpdateFlexComponentPosition(newPoint);
+            }
+        });
 
     flexController_->AddInterpolator(animationRef);
     if (isExistComponent_) {
@@ -2880,8 +2882,8 @@ void RenderGridLayout::FinishedSpringAnimation()
 
 void RenderGridLayout::UpdateSprintAnimationPosition(double position)
 {
-    LOGD("UpdateSprintAnimationPosition: distance(%{public}f,%{public}f), offset=%{public}f", slideDistance_.GetX(),
-        slideDistance_.GetY(), position);
+    LOGD("UpdateSprintAnimationPosition: distance(%{public}f,%{public}f), offset=%{public}f",
+        slideDistance_.GetX(), slideDistance_.GetY(), position);
     size_t index = 0;
     for (auto& item : itemsInGrid_) {
         auto& itemPos = springStartPosition_[index];
@@ -3107,8 +3109,8 @@ void RenderGridLayout::HandleMouseEventWhenShiftDown(const MouseEvent& event)
     }
 }
 
-void RenderGridLayout::MultiSelectAllInRange(
-    const RefPtr<RenderGridLayoutItem>& firstItem, const RefPtr<RenderGridLayoutItem>& secondItem)
+void RenderGridLayout::MultiSelectAllInRange(const RefPtr<RenderGridLayoutItem>& firstItem,
+    const RefPtr<RenderGridLayoutItem>& secondItem)
 {
     ClearMultiSelect();
     if (!firstItem) {
@@ -3125,7 +3127,7 @@ void RenderGridLayout::MultiSelectAllInRange(
 
     auto fromItemIndex = std::min(firstItem->GetIndex(), secondItem->GetIndex());
     auto toItemIndex = std::max(firstItem->GetIndex(), secondItem->GetIndex());
-
+    
     for (const auto& item : GetChildren()) {
         auto gridLayoutItem = FindChildOfClass<RenderGridLayoutItem>(item);
         if (!gridLayoutItem) {
@@ -3180,7 +3182,7 @@ void RenderGridLayout::MultiSelectWhenCtrlDown(const Rect& selectedZone)
         if (!selectedZone.IsIntersectWith(item->GetPaintRect())) {
             if (selectedItemsWithCtrl_.find(gridLayoutItem) != selectedItemsWithCtrl_.end()) {
                 gridLayoutItem->MarkIsSelected(true);
-            } else {
+            }  else {
                 gridLayoutItem->MarkIsSelected(false);
             }
             if (gridLayoutItem->GetOnSelectId()) {
