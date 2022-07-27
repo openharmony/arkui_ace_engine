@@ -833,6 +833,7 @@ void PipelineContext::SetupRootElement()
         Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, std::list<RefPtr<Component>>());
     auto overlay = AceType::MakeRefPtr<OverlayComponent>(std::list<RefPtr<Component>>());
     overlay->SetTouchable(false);
+    Component::MergeRSNode(overlay);
     stack->AppendChild(rootStage);
     stack->AppendChild(overlay);
     RefPtr<RootComponent> rootComponent;
@@ -1729,6 +1730,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
         OnTouchEvent(touchPoint);
     }
 
+    CHECK_NULL_VOID(rootElement_);
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     LOGD(
         "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",

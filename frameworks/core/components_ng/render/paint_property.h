@@ -19,33 +19,27 @@
 #include <memory>
 
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/property/render_property.h"
-#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
-// RenderProperty are used to set render properties.
-class RenderProperty : public Property {
-    DECLARE_ACE_TYPE(RenderProperty, Property)
+// PaintProperty are used to set render properties.
+class PaintProperty : public Property {
+    DECLARE_ACE_TYPE(PaintProperty, Property)
 
 public:
-    RenderProperty() = default;
-    ~RenderProperty() override = default;
+    PaintProperty() = default;
+    ~PaintProperty() override = default;
 
-    virtual RefPtr<RenderProperty> Clone() const
+    virtual RefPtr<PaintProperty> Clone() const
     {
-        auto renderProperty = MakeRefPtr<RenderProperty>();
-        renderProperty->UpdateRenderProperty(this);
+        auto renderProperty = MakeRefPtr<PaintProperty>();
+        renderProperty->UpdatePaintProperty(this);
         return renderProperty;
     }
 
     virtual void Reset() {}
 
 protected:
-    void UpdateRenderProperty(const RenderProperty* renderProperty) {}
-
-private:
-    friend class RenderContext;
-    friend class RosenRenderContext;
+    void UpdatePaintProperty(const PaintProperty* renderProperty) {}
 };
 } // namespace OHOS::Ace::NG
 

@@ -28,10 +28,6 @@ class ACE_EXPORT CustomNode : public FrameNode {
     DECLARE_ACE_TYPE(CustomNode, FrameNode);
 
 public:
-    using ApplyFunction = std::function<void(const RefPtr<FrameNode>&)>;
-    using AppearFunction = std::function<void()>;
-    using UpdateJsViewFunction = std::function<void(WeakPtr<CustomNode>)>;
-
     static RefPtr<CustomNode> CreateCustomNode(int32_t nodeId, const std::string& viewKey);
 
     CustomNode(int32_t nodeId, const std::string& viewKey);

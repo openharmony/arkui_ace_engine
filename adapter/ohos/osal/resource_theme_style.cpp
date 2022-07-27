@@ -38,10 +38,17 @@ double ParseDoubleUnit(const std::string& value, std::string& unit)
 
 DimensionUnit ParseDimensionUnit(const std::string& unit)
 {
-    if (unit == "fp" || unit == "sp") {
+    if (unit == "px") {
+        return DimensionUnit::PX;
+    } else if (unit == "fp") {
         return DimensionUnit::FP;
+    } else if (unit == "lpx") {
+        return DimensionUnit::LPX;
+    } else if (unit == "%") {
+        return DimensionUnit::PERCENT;
+    } else {
+        return DimensionUnit::VP;
     }
-    return DimensionUnit::VP;
 }
 }
 

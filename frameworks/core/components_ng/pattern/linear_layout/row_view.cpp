@@ -17,7 +17,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_modifier.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -32,6 +31,6 @@ void RowView::Create()
 
 void RowView::AlignItems(FlexAlign flexAlign)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(CrossAxisAlignModifier(flexAlign));
+    ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign);
 }
 } // namespace OHOS::Ace::NG

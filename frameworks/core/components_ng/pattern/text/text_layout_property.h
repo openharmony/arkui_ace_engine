@@ -43,18 +43,18 @@ public:
         ResetTextParagraph();
     }
 
-    ACE_DEFINE_CLASS_PROPERTY_GROUP(TextParagraph, TextParagraph);
-    ACE_DEFINE_CLASS_PROPERTY(TextParagraph, Content, std::string, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_CLASS_PROPERTY(TextParagraph, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_CLASS_PROPERTY(TextParagraph, TextColor, Color, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_CLASS_PROPERTY(TextParagraph, ItalicFontStyle, ItalicFontStyle, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_CLASS_PROPERTY(TextParagraph, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_CLASS_PROPERTY(TextParagraph, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_CLASS_PROPERTY(TextParagraph, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_CLASS_PROPERTY(TextParagraph, TextBaseline, TextBaseline, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_CLASS_PROPERTY(TextParagraph, BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_CLASS_PROPERTY(TextParagraph, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_CLASS_PROPERTY(TextParagraph, MaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_GROUP(TextParagraph, TextParagraph);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextParagraph, Content, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextParagraph, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextParagraph, TextColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextParagraph, ItalicFontStyle, ItalicFontStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextParagraph, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextParagraph, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextParagraph, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextParagraph, TextBaseline, TextBaseline, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextParagraph, BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextParagraph, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextParagraph, MaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutProperty);
