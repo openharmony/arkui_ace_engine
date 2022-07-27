@@ -180,7 +180,6 @@ public:
     ColorPropertyAnimatable::SetterMap GetColorPropertySetterMap() override;
     ColorPropertyAnimatable::GetterMap GetColorPropertyGetterMap() override;
     Offset GetGlobalOffsetExternal() const override;
-    Offset GetGlobalOffset() const override;
     void MouseHoverEnterTest() override;
     void MouseHoverExitTest() override;
     void AnimateMouseHoverEnter() override;
