@@ -17,7 +17,6 @@
 
 #include <set>
 
-#include "core/components/button/button_component.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/text_field/text_field_component.h"
 #include "frameworks/bridge/common/dom/dom_form.h"
@@ -111,6 +110,9 @@ void DOMInput::ResetInitializedStyle()
         InitCheckable<CheckboxComponent, CheckboxTheme>();
     } else if (type_.first == INPUT_TYPE_RADIO) {
         InitCheckable<RadioComponent<std::string>, RadioTheme>();
+    } else if ((type_.first == INPUT_TYPE_BUTTON) || (type_.first == INPUT_TYPE_SUBMIT) ||
+               (type_.first == INPUT_TYPE_RESET)) {
+        InitButton();
     } else {
         const auto& theme = GetTheme<TextFieldTheme>();
         DOMTextFieldUtil::InitDefaultValue(

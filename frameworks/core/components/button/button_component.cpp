@@ -16,13 +16,15 @@
 #include "core/components/button/button_component.h"
 
 #include "core/components/button/button_element.h"
-#include "core/components/button/button_theme.h"
 #include "core/components/button/render_button.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components/theme/theme_manager.h"
 
 namespace OHOS::Ace {
+
+constexpr uint32_t WATCH_BACKGROUND_COLOR = 0xff007dff;
+constexpr uint32_t WATCH_TEXT_COLOR = 0xffffffff;
 
 ButtonComponent::ButtonComponent(const std::list<RefPtr<Component>>& children) : ComponentGroup(children)
 {
@@ -189,6 +191,36 @@ const EventMarker& ButtonComponent::GetRemoteMessageEventId() const
 RefPtr<ButtonProgressController> ButtonComponent::GetButtonController() const
 {
     return declaration_->GetButtonController();
+}
+
+void ButtonComponent::ApplyTheme(const RefPtr<ButtonTheme>& theme)
+{
+        height_ = theme->GetHeight();
+        SetLayoutFlag(LAYOUT_FLAG_EXTEND_TO_PARENT);
+        SetBackgroundColor(theme->GetBgColor());
+        SetFocusColor(theme->GetBgColor());
+        SetFocusAnimationColor(theme->GetBgFocusColor());
+        SetHoverColor(theme->GetHoverColor());
+        auto padding = AceType::DynamicCast<PaddingComponent>(GetChildren().front());
+        if (!padding) {
+            return;
+        }
+        padding->SetPadding(theme->GetPadding());
+        auto text = AceType::DynamicCast<TextComponent>(padding->GetChild());
+        if (!text) {
+            return;
+        }
+        auto textStyle = theme->GetTextStyle();
+        textStyle.SetAdaptTextSize(textStyle.GetFontSize(), theme->GetMinFontSize());
+        textStyle.SetTextAlign(TextAlign::CENTER);
+        textStyle.SetMaxLines(theme->GetTextMaxLines());
+        textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+        if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
+        SetBackgroundColor(Color(WATCH_BACKGROUND_COLOR));
+        textStyle.SetTextColor(Color(WATCH_TEXT_COLOR));
+        text->SetFocusColor(Color(WATCH_TEXT_COLOR));
+        }
+        text->SetTextStyle(textStyle);
 }
 
 void ButtonComponent::SetDisabledState(bool state)
