@@ -32,32 +32,59 @@ class ComposedElement;
 
 namespace OHOS::Ace::Framework {
 
-class JSView;
-
 class JSView : public JSViewAbstract, public Referenced {
 public:
-    JSView(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction);
-    ~JSView() override;
-
-    RefPtr<OHOS::Ace::Component> InternalRender(const RefPtr<Component>& parent);
-    void Destroy(JSView* parentCustomView);
-    RefPtr<Component> CreateComponent();
+    JSView()
+    {
+        instanceId_ = Container::CurrentId();
+    }
+    ~JSView() override = default;
+    virtual void Destroy(JSView* parentCustomView) = 0;
+    virtual RefPtr<Component> CreateComponent() = 0;
     RefPtr<PageTransitionComponent> BuildPageTransitionComponent();
-
-    RefPtr<NG::UINode> InternalRender();
-    RefPtr<NG::FrameNode> CreateNode();
-
-    void MarkNeedUpdate();
-
+    virtual RefPtr<NG::FrameNode> CreateNode()
+    {
+        LOGE("Internal error. Not implemented");
+        return nullptr;
+    };
     void SyncInstanceId();
-
     void RestoreInstanceId();
+
+    void FireOnShow()
+    {
+        if (jsViewFunction_) {
+            ACE_SCORING_EVENT("OnShow");
+            jsViewFunction_->ExecuteShow();
+        }
+    }
+
+    void FireOnHide()
+    {
+        if (jsViewFunction_) {
+            ACE_SCORING_EVENT("OnHide");
+            jsViewFunction_->ExecuteHide();
+        }
+    }
+
+    bool FireOnBackPress()
+    {
+        if (jsViewFunction_) {
+            ACE_SCORING_EVENT("OnBackPress");
+            return jsViewFunction_->ExecuteOnBackPress();
+        }
+        return false;
+    }
+
+    void RenderJSExecution();
+
+    virtual void MarkNeedUpdate();
 
     bool NeedsUpdate()
     {
         return needsUpdate_;
     }
 
+    static void JSBind(BindingTarget globalObj);
     /**
      * Views which do not have a state can mark static.
      * The element will be reused and re-render will be skipped.
@@ -71,6 +98,61 @@ public:
     {
         return isStatic_;
     }
+
+    void SetContext(const JSExecutionContext& context)
+    {
+        jsViewFunction_->SetContext(context);
+    }
+
+    // Used by full update variant only from js_lazy_foreach.cpp
+    virtual void RemoveChildGroupById(const std::string& viewId)
+    {
+        LOGE("Internal error. Not implemented");
+    };
+    virtual void MarkLazyForEachProcess(const std::string& groudId)
+    {
+        LOGE("Internal error. Not implemented");
+    };
+    virtual void ResetLazyForEachProcess()
+    {
+        LOGE("Internal error. Not implemented");
+    };
+    virtual void ExecuteUpdateWithValueParams(const std::string& jsonData)
+    {
+        LOGE("Internal error. Not implemented");
+    };
+
+protected:
+    RefPtr<ViewFunctions> jsViewFunction_;
+    bool needsUpdate_ = false;
+
+    WeakPtr<ComposedElement> GetElement()
+    {
+        return element_;
+    }
+
+    WeakPtr<ComposedElement> element_ = nullptr;
+
+private:
+    int32_t instanceId_ = -1;
+    int32_t restoreInstanceId_ = -1;
+    bool isStatic_ = false;
+};
+
+
+class JSViewFullUpdate : public JSView {
+public:
+    JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction);
+    ~JSViewFullUpdate() override;
+
+    RefPtr<Component> InternalRender(const RefPtr<Component>& parent);
+    void Destroy(JSView* parentCustomView) override;
+    RefPtr<Component> CreateComponent() override;
+
+    RefPtr<NG::UINode> InternalRender();
+    RefPtr<NG::FrameNode> CreateNode() override;
+
+    void MarkNeedUpdate() override;
 
     /**
      * During render function execution, the child customview with same id will
@@ -88,48 +170,18 @@ public:
 
     void FindChildById(const JSCallbackInfo& info);
 
-    void FireOnShow()
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("Component[" + viewId_ + "].OnShow");
-            jsViewFunction_->ExecuteShow();
-        }
-    }
-
-    void FireOnHide()
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("Component[" + viewId_ + "].OnHide");
-            jsViewFunction_->ExecuteHide();
-        }
-    }
-
-    bool FireOnBackPress()
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("Component[" + viewId_ + "].OnBackPress");
-            return jsViewFunction_->ExecuteOnBackPress();
-        }
-        return false;
-    }
-
-    void SetContext(const JSExecutionContext& context)
-    {
-        jsViewFunction_->SetContext(context);
-    }
-
-    void ExecuteUpdateWithValueParams(const std::string& jsonData)
+    void ExecuteUpdateWithValueParams(const std::string& jsonData) override
     {
         jsViewFunction_->ExecuteUpdateWithValueParams(jsonData);
     }
 
-    void MarkLazyForEachProcess(const std::string& groudId)
+    void MarkLazyForEachProcess(const std::string& groudId) override
     {
         isLazyForEachProcessed_ = true;
         lazyItemGroupId_ = groudId;
     }
 
-    void ResetLazyForEachProcess()
+    void ResetLazyForEachProcess() override
     {
         isLazyForEachProcessed_ = false;
         lazyItemGroupId_ = "";
@@ -142,20 +194,15 @@ public:
      */
     std::string AddChildById(const std::string& viewId, const JSRef<JSObject>& obj);
 
-    void RemoveChildGroupById(const std::string& viewId);
+    void RemoveChildGroupById(const std::string& viewId) override;
 
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
     static void ConstructorCallback(const JSCallbackInfo& args);
-    static void DestructorCallback(JSView* instance);
+    static void DestructorCallback(JSViewFullUpdate* instance);
 
 private:
-    WeakPtr<OHOS::Ace::ComposedElement> GetElement()
-    {
-        return element_;
-    }
-
     void DestroyChild(JSView* parentCustomView);
 
     /**
@@ -171,17 +218,9 @@ private:
     // view id for custom view itself
     std::string viewId_;
 
-    int32_t instanceId_ = -1;
-    int32_t restoreInstanceId_ = -1;
-
-    WeakPtr<OHOS::Ace::ComposedElement> element_ = nullptr;
     WeakPtr<NG::CustomNode> node_ = nullptr;
-    bool needsUpdate_ = false;
-    bool isStatic_ = false;
     bool isLazyForEachProcessed_ = false;
     std::string lazyItemGroupId_;
-
-    RefPtr<ViewFunctions> jsViewFunction_;
 
     // unique view id for custom view to recycle.
     std::string id_;
@@ -201,6 +240,102 @@ private:
     // its cleared after cleaning up the abandoned child.
     std::unordered_set<std::string> lastAccessedViewIds_;
 };
+
+
+class JSViewPartialUpdate : public JSView {
+using UpdateFuncResult = std::tuple<int32_t, RefPtr<Component>, RefPtr<Component>>;
+public:
+    explicit JSViewPartialUpdate(JSRef<JSObject> jsObject);
+    ~JSViewPartialUpdate() override;
+
+    RefPtr<Component> InitialRender();
+    void Destroy(JSView* parentCustomView) override;
+    RefPtr<Component> CreateComponent() override;
+
+    static void Create(const JSCallbackInfo& info);
+    static void JSBind(BindingTarget globalObj);
+
+    static void ConstructorCallback(const JSCallbackInfo& args);
+    static void DestructorCallback(JSViewPartialUpdate* instance);
+
+    // public functions added by partial update added below ==================
+    
+    /**
+     * Last step of executing an partial update function
+     * get the result component from ViewStackProcessor
+     * add it to the queue to [elmtId, Component] to
+     * execute an local update on in the UI thread
+     * parameters
+     * elmtId of the Component/Element that's updated
+     * removedElementId : Array<number>  ids of Elements that were removed while updating
+     *     caused by if condition toggle or ForEach array deleted / replaced items
+     * return boolean - true means success
+     */
+    void JsFinishUpdateFunc(int32_t elmtId);
+
+    // The process of Component to Element sync leads to Elements being
+    // deleted. ElementRegister keeps track of hese deletions
+    // before the framework can forget about these elmtIds
+    // these need to be removed from its own book keeping
+    // state variables keep track of dependent elmtIds and
+    // View objects keep a map elmtId -> update function,
+    // both on TS side.
+    // View.purgeDeletedElmtIds cleans both state variables
+    // and update function map from deleted ElmtIds
+    // afterwards it informs the ElementRegister that elmtIds
+    // it was able to purge.
+    // only then ElementRegister can forget about these elmtIds
+    void JsGetDeletedElemtIds(const JSCallbackInfo& info);
+
+    // JS signature: View.eletedElmtIdsHaveBeenPurged(elmtIds : number[])
+    // inform ElementRegister that given deleted eltIds
+    // have been deleted from partial updates book keeping
+    // at this point ElementRegister can forget about the,
+    void JsDeletedElmtIdsHaveBeenPurged(const JSCallbackInfo& info);
+
+    /**
+     * flush pendingElementUpdates
+     * and call ComponentToElementLocalizedUpdate for each entry
+     * returns always mull
+     */
+    void MakeElementUpdatesToCompleteRerender();
+
+    /**
+     * take given Component and update the referenced main Element and its wrapping Elements with it.
+     * to be executed on UI thread
+     */
+    void ComponentToElementLocalizedUpdate(const UpdateFuncResult& updateFuncResult);
+
+    /**
+    JS exposed function to check from ElementRegister if given elmtId is (still) in use
+    */
+    bool JsElementIdExists(int32_t elmtId);
+
+    void JSGetProxiedItemRenderState(const JSCallbackInfo& info);
+
+private:
+    // view id for custom view itself
+    std::string viewId_;
+
+    // indicates if the JSView has ever completed initial render
+    // used for code branching in lambda given to ComposedComponent
+    // render callback
+    bool isFirstRender_ = true;
+
+    /* list of updte function result is a tripple (tuple with three entries)
+    <0> elmtId
+    <1> outmost wrapping Component
+    <2> main Component
+    */
+    std::list<UpdateFuncResult> pendingElementUpdates_;
+
+    // The C++ JSView object owns a reference to the JS Object
+    // AssignNewView assigns the JS View
+    // Destroy deleted the ref, and thereby triggers the deletio
+    // GC -> JS View Object -> JSView C++ Object
+    JSRef<JSObject> jsViewObject_;
+};
+
 
 } // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_H

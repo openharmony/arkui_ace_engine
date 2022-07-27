@@ -23,6 +23,7 @@
 #include "core/components/foreach/for_each_component.h"
 #include "core/components_part_upd/foreach/foreach_component.h"
 #include "core/components_part_upd/foreach/foreach_element.h"
+#include "core/components_v2/common/element_proxy.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -106,7 +107,7 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
     }
 
     const int32_t elmtId = info[0]->ToNumber<int32_t>();
-    std::list<std::string> cppList = PartUpd::ForEachElementLookup::GetIdArray(elmtId);
+    std::list<std::string> cppList = OHOS::Ace::V2::ForEachElementLookup::GetIdArray(elmtId);
 
     size_t index = 0;
     for (const auto& id : cppList) {
