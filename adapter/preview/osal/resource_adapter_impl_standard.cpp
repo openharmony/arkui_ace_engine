@@ -32,6 +32,21 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
     return AceType::MakeRefPtr<ResourceAdapterImpl>();
 }
 
+DimensionUnit ParseDimensionUnit(const std::string& unit)
+{
+    if (unit == "px") {
+        return DimensionUnit::PX;
+    } else if (unit == "fp") {
+        return DimensionUnit::FP;
+    } else if (unit == "lpx") {
+        return DimensionUnit::LPX;
+    } else if (unit == "%") {
+        return DimensionUnit::PERCENT;
+    } else {
+        return DimensionUnit::VP;
+    }
+}
+
 void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
 {
     std::string appResPath = resourceInfo.GetPackagePath();
@@ -77,13 +92,14 @@ Color ResourceAdapterImpl::GetColor(uint32_t resId)
 Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
 {
     float dimensionFloat = 0.0f;
+    std::string unit = "";
     if (resourceManager_) {
-        auto state = resourceManager_->GetFloatById(resId, dimensionFloat);
+        auto state = resourceManager_->GetFloatById(resId, dimensionFloat, unit);
         if (state != Global::Resource::SUCCESS) {
             LOGE("GetDimension error, id=%{public}u", resId);
         }
     }
-    return Dimension(static_cast<double>(dimensionFloat));
+    return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
 }
 
 std::string ResourceAdapterImpl::GetString(uint32_t resId)
