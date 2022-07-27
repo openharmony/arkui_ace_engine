@@ -45,6 +45,10 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
     component_ = checkbox;
 
     if (isDeclarative_) {
+        if (!component_->GetCheckboxList().empty()) {
+            component_->SetMember(component_->GetValue());
+            component_->SetGroupValue(component_->GetValue() ? CheckableStatus::ALL : CheckableStatus::NONE);
+        }
         UpdateGroupStatus();
         component_->SetGroupValue(CHECKABLE_STATUS[static_cast<int32_t>(status_)]);
 
