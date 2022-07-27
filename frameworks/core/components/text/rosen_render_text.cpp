@@ -23,6 +23,7 @@
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -596,7 +597,7 @@ Offset RosenRenderText::GetHandleOffset(int32_t extend)
     GetCaretRect(extend, result);
     selectHeight_ = result.Bottom() - result.Top();
     Offset handleLocalOffset = Offset((result.Left() + result.Right()) / 2.0, result.Bottom());
-    Offset handleOffset = handleLocalOffset + GetPaintRect().GetOffset() + GetOffsetToPage() + textOffsetForShowCaret_;
+    Offset handleOffset = handleLocalOffset + GetOffsetToPage();
     return handleOffset;
 }
 

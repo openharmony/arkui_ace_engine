@@ -523,7 +523,8 @@ void RenderText::ShowTextOverlay(const Offset& showOffset, bool isUsingMouse)
         AceType::MakeRefPtr<TextOverlayComponent>(GetThemeManager(), context_.Upgrade()->GetAccessibilityManager());
     textOverlay_->SetWeakText(WeakClaim(this));
     textOverlay_->SetLineHeight(selectHeight_);
-    textOverlay_->SetClipRect(GetPaintRect() + Size(HANDLE_HOT_ZONE, HANDLE_HOT_ZONE) + GetOffsetToPage() -
+    Rect paintRect = { Offset::Zero(), GetLayoutParam().GetMaxSize() };
+    textOverlay_->SetClipRect(paintRect + Size(HANDLE_HOT_ZONE, HANDLE_HOT_ZONE) + GetOffsetToPage() -
                               Offset(HANDLE_HOT_ZONE / 2.0, 0.0));
     textOverlay_->SetTextDirection(defaultTextDirection_);
     textOverlay_->SetStartHandleOffset(startHandleOffset);
@@ -621,7 +622,8 @@ void RenderText::UpdateOverlay()
             .endHandleOffset = GetPositionForExtend(selEnd) };
         updateHandlePosition_(option);
         if (onClipRectChanged_) {
-            onClipRectChanged_(GetPaintRect() + Size(HANDLE_HOT_ZONE, HANDLE_HOT_ZONE) + GetOffsetToPage() -
+            Rect paintRect = { Offset::Zero(), GetLayoutParam().GetMaxSize() };
+            onClipRectChanged_(paintRect + Size(HANDLE_HOT_ZONE, HANDLE_HOT_ZONE) + GetOffsetToPage() -
                                Offset(HANDLE_HOT_ZONE / 2.0, 0.0));
         }
     }

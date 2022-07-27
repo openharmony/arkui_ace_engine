@@ -276,7 +276,7 @@ int32_t TextOverlayBase::GetCursorPositionForClick(const Offset& offset, const O
         return 0;
     }
     cursorPositionType_ = CursorPositionType::NORMAL;
-    clickOffset_ = offset - globalOffset - textOverlayPaintRect_.GetOffset() - textOffsetForShowCaret_;
+    clickOffset_ = offset - globalOffset - textOffsetForShowCaret_;
     // Solve can't select right boundary of RTL language.
     double rightBoundary = GetBoundaryOfParagraph(false);
     if (GreatOrEqual(clickOffset_.GetX(), rightBoundary)) {
@@ -375,7 +375,7 @@ void TextOverlayBase::PaintSelection(SkCanvas* canvas, const Offset& globalOffse
     canvas->save();
     SkPaint paint;
     paint.setColor(selectedColor_.GetValue());
-    Offset effectiveOffset = textOverlayPaintRect_.GetOffset() + textOffsetForShowCaret_;
+    Offset effectiveOffset = textOffsetForShowCaret_;
     for (const auto& box : boxes) {
         auto selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
         selectedRect_.emplace_back(selectionRect + globalOffset);
