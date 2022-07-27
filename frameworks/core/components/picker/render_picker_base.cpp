@@ -77,6 +77,7 @@ void RenderPickerBase::Update(const RefPtr<Component>& component)
     if (datePicker) {
         startDateSolar_ = datePicker->GetStartDate();
         endDateSolar_ = datePicker->GetEndDate();
+        selectedDate_ = datePicker->GetSelectedDate();
     }
 
     columnHeight_ = picker->GetColumnHeight();

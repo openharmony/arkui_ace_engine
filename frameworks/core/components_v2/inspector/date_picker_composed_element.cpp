@@ -28,9 +28,11 @@ namespace OHOS::Ace::V2 {
 namespace {
 const std::unordered_map<std::string, std::function<std::string(const DatePickerComposedElement&)>> CREATE_JSON_MAP {
     { "lunar", [](const DatePickerComposedElement& inspector) { return inspector.GetLunar(); } },
-    { "start", [](const DatePickerComposedElement& inspector) { return inspector.GetStart(); } },
-    { "end", [](const DatePickerComposedElement& inspector) { return inspector.GetEnd(); } },
-    { "selected", [](const DatePickerComposedElement& inspector) { return inspector.GetSelected(); } }
+};
+
+const std::unordered_map<std::string,
+    std::function<std::unique_ptr<JsonValue>(const DatePickerComposedElement&)>> CREATE_JSON_VALUE_MAP {
+    { "constructor", [](const DatePickerComposedElement& inspector) { return inspector.GetConstructor(); } }
 };
 }
 
@@ -49,6 +51,9 @@ std::unique_ptr<JsonValue> DatePickerComposedElement::ToJsonObject() const
     for (const auto& value : CREATE_JSON_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
     }
+    for (const auto& value : CREATE_JSON_VALUE_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
+    }
     return resultJson;
 }
 
@@ -57,6 +62,15 @@ std::string DatePickerComposedElement::GetLunar() const
     auto render = GetRenderPickerBase();
     auto showLunar = render ? render->GetPickerBaseComponent()->IsShowLunar() : false;
     return ConvertBoolToString(showLunar);
+}
+
+std::unique_ptr<JsonValue> DatePickerComposedElement::GetConstructor() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("start", GetStart().c_str());
+    jsonValue->Put("end", GetEnd().c_str());
+    jsonValue->Put("selected", GetSelected().c_str());
+    return jsonValue;
 }
 
 std::string DatePickerComposedElement::GetStart() const

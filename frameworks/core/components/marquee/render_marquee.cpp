@@ -189,6 +189,7 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
     GetMarqueeCallback(component);
     value_ = marquee->GetValue();
     start_ = marquee->GetPlayerStatus();
+    textStyle_ = marquee->GetTextStyle();
     auto context = GetContext().Upgrade();
     if (context && context->UseLiteStyle()) {
         // lite loop time is 1000ms, while default marquee loop is 85ms.
