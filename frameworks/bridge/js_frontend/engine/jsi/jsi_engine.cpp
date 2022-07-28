@@ -3055,7 +3055,6 @@ bool JsiEngineInstance::IsDragEvent(const std::string& param)
 
 void JsiEngineInstance::CallJs(const std::string& callbackId, const std::string& args, bool keepAlive, bool isGlobal)
 {
-    LOGI("JsiEngineInstance CallJs");
     std::string keepAliveStr = keepAlive ? "true" : "false";
     std::string callBuff = std::string("[{\"args\": [\"")
                                .append(callbackId)
