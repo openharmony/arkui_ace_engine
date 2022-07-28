@@ -188,7 +188,6 @@ void TextFieldElement::OnFocus()
     auto textField = DynamicCast<RenderTextField>(renderNode_);
     if (textField) {
         textField->StartTwinkling();
-        textField->OnEditChange(true);
     }
     FocusNode::OnFocus();
     auto context = context_.Upgrade();
@@ -206,7 +205,6 @@ void TextFieldElement::OnBlur()
     if (textField) {
         textField->StopTwinkling();
         textField->PopTextOverlay();
-        textField->OnEditChange(false);
     }
     CloseKeyboard();
     FocusNode::OnBlur();
@@ -247,7 +245,6 @@ bool TextFieldElement::RequestKeyboard(bool needStartTwinkling)
             if (textField->RequestKeyboard(!editingMode_, needStartTwinkling)) {
                 editingMode_ = true;
             }
-            textField->OnEditChange(true);
         }
         return true;
     } else {
