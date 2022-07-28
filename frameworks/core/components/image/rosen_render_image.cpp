@@ -1023,7 +1023,6 @@ Size RosenRenderImage::Measure()
     if (imageObj_) {
         return imageObj_->MeasureForImage(AceType::Claim(this));
     }
-    LOGI("empty image object, measure failed, return empty size.");
     return Size();
 }
 
