@@ -20,7 +20,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
-#include "core/components_ng/pattern/list/list_modifier.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_view.h"
 
@@ -44,14 +43,18 @@ public:
 HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. call SetSpaceWidth function to set space width
-     * @tc.steps: step2. call GetSpaceWidth function to get space width
+     * @tc.steps: step1. call CreateFrameNode function to create frameNode
+     * @tc.steps: step2. call GetLayoutProperty function to get layoutProperty and set space
+     * @tc.steps: step3. call GetSpace function to get space and compare
      * @tc.expected: if Dimension is PX, value should not be changed
      */
     for (size_t i = 0; i < TEST_SPACE_PX_COUNT; i++) {
         auto frameNode = NG::FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<NG::ListPattern>());
         NG::ViewStackProcessor::GetInstance()->Push(frameNode);
-        NG::ViewStackProcessor::GetInstance()->PushLayoutTask(NG::SpaceModifier(LIST_LAYOUT_ALGORITHM_SPACE_PXS[i]));
+        auto castListLayoutProperty = frameNode->GetLayoutProperty<NG::ListLayoutProperty>();
+        if (castListLayoutProperty) {
+            castListLayoutProperty->UpdateSpace(LIST_LAYOUT_ALGORITHM_SPACE_PXS[i]);
+        }
         auto layoutProperty = frameNode->GetLayoutProperty();
         auto listLayoutProperty = AceType::DynamicCast<OHOS::Ace::NG::ListLayoutProperty>(layoutProperty);
         auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
@@ -61,25 +64,28 @@ HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest001, TestSize.Level1)
 
 /**
  * @tc.name: ListLayoutAlgorithmTest002
- * @tc.desc: set space width into listLayoutAlgorithm and get it
+ * @tc.desc: set space width into frameNode and test layout
  * @tc.type: FUNC
  */
 HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. call SetSpaceWidth function to set space width
-     * @tc.steps: step2. call GetSpaceWidth function to get space width
-     * @tc.expected: if Dimension is PX, value should not be changed
+     * @tc.steps: step1. call CreateFrameNode function to create frameNode
+     * @tc.steps: step2. call GeometryNode function to create geometryNode and set frameSize
+     * @tc.steps: step3. call LayoutWrapper function to create layoutWrapper
+     * @tc.steps: step4. call ListLayoutAlgorithm function to create listLayoutAlgorithm and set space
+     * @tc.steps: step5. call Measure function to measure and compare result
+     * @tc.expected: layout should be correct
      */
     for (size_t i = 0; i < TEST_SPACE_PX_COUNT; i++) {
         auto frameNode = NG::FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<NG::ListPattern>());
         
-        RefPtr<NG::GeometryNode> geometryNode = AceType::MakeRefPtr<NG::GeometryNode>();
+        RefPtr<NG::GeometryNode> geometryNode;
         geometryNode->SetFrameSize(OHOS::Ace::NG::SizeF(GEOMETRYNODE_FRAMESIZE, GEOMETRYNODE_FRAMESIZE));
 
         NG::LayoutWrapper layoutWrapper = NG::LayoutWrapper(frameNode, geometryNodePtr, frameNode->GetLayoutProperty());
 
-        auto listLayoutAlgorithm = NG::ListLayoutAlgorithm(START_INDEX, END_INDEX);
+        auto listLayoutAlgorithm = OHOS::Ace::NG::ListLayoutAlgorithm(START_INDEX, END_INDEX);
         float space = LIST_LAYOUT_ALGORITHM_SPACE_PXS[i].Value();
         listLayoutAlgorithm.SetSpaceWidth(space);
 
