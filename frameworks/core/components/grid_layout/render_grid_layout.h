@@ -195,6 +195,36 @@ public:
         updatePosition_ = updatePosition;
     }
 
+    bool GetEditMode() const
+    {
+        return editMode_;
+    }
+
+    int32_t GetMaxCount() const
+    {
+        return mainCountMax_;
+    }
+
+    int32_t GetMinCount() const
+    {
+        return mainCountMin_;
+    }
+
+    int32_t GetCellLength() const
+    {
+        return cellLength_;
+    }
+
+    bool GetSupportAnimation() const
+    {
+        return supportAnimation_;
+    }
+
+    bool GetMultiSelectable() const
+    {
+        return isMultiSelectable_;
+    }
+
 protected:
     virtual LayoutParam MakeInnerLayoutParam(int32_t row, int32_t col, int32_t rowSpan, int32_t colSpan) const;
 

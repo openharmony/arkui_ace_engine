@@ -60,6 +60,10 @@ public:
             return false;
         }
     }
+    const TextStyle& GetTextStyle()
+    {
+        return textStyle_;
+    }
 
 protected:
     virtual TextDirection GetTextDirection(const std::string& text) const = 0;
@@ -108,6 +112,7 @@ private:
     std::function<void()> onFinishEvent_;
     std::function<void()> onStartEvent_;
     Size lastLayoutSize_;
+    TextStyle textStyle_;
 };
 
 } // namespace OHOS::Ace

@@ -36,6 +36,8 @@ const std::unordered_map<std::string, std::function<std::string(const GridCompos
     { "maxCount", [](const GridComposedElement& inspector) { return inspector.GetGridMaxCount(); } },
     { "minCount", [](const GridComposedElement& inspector) { return inspector.GetGridMinCount(); } },
     { "cellLength", [](const GridComposedElement& inspector) { return inspector.GetGridCellLength(); } },
+    { "multiSelectable", [](const GridComposedElement& inspector) { return inspector.GetMultiSelectable(); } },
+    { "supportAnimation", [](const GridComposedElement& inspector) { return inspector.GetSupportAnimation(); } },
 };
 
 }
@@ -163,11 +165,7 @@ std::string GridComposedElement::GetScrollBar() const
 
 std::string GridComposedElement::GetGridEditMode() const
 {
-    auto node = GetInspectorNode(GridLayoutElement::TypeId());
-    if (!node) {
-        return "false";
-    }
-    auto renderGrip = AceType::DynamicCast<GridLayoutComponent>(node);
+    auto renderGrip = GetContentRender<RenderGridLayout>(GridLayoutElement::TypeId());
     if (renderGrip) {
         return ConvertBoolToString(renderGrip->GetEditMode());
     }
@@ -176,11 +174,7 @@ std::string GridComposedElement::GetGridEditMode() const
 
 std::string GridComposedElement::GetGridMaxCount() const
 {
-    auto node = GetInspectorNode(GridLayoutElement::TypeId());
-    if (!node) {
-        return "1";
-    }
-    auto renderGrip = AceType::DynamicCast<GridLayoutComponent>(node);
+    auto renderGrip = GetContentRender<RenderGridLayout>(GridLayoutElement::TypeId());
     if (renderGrip) {
         return std::to_string(renderGrip->GetMaxCount());
     }
@@ -189,11 +183,7 @@ std::string GridComposedElement::GetGridMaxCount() const
 
 std::string GridComposedElement::GetGridMinCount() const
 {
-    auto node = GetInspectorNode(GridLayoutElement::TypeId());
-    if (!node) {
-        return "1";
-    }
-    auto renderGrip = AceType::DynamicCast<GridLayoutComponent>(node);
+    auto renderGrip = GetContentRender<RenderGridLayout>(GridLayoutElement::TypeId());
     if (renderGrip) {
         return std::to_string(renderGrip->GetMinCount());
     }
@@ -202,15 +192,29 @@ std::string GridComposedElement::GetGridMinCount() const
 
 std::string GridComposedElement::GetGridCellLength() const
 {
-    auto node = GetInspectorNode(GridLayoutElement::TypeId());
-    if (!node) {
-        return "0";
-    }
-    auto renderGrip = AceType::DynamicCast<GridLayoutComponent>(node);
+    auto renderGrip = GetContentRender<RenderGridLayout>(GridLayoutElement::TypeId());
     if (renderGrip) {
         return std::to_string(renderGrip->GetCellLength());
     }
     return "0";
+}
+
+std::string GridComposedElement::GetSupportAnimation() const
+{
+    auto renderGrip = GetContentRender<RenderGridLayout>(GridLayoutElement::TypeId());
+    if (renderGrip) {
+        return ConvertBoolToString(renderGrip->GetSupportAnimation());
+    }
+    return "false";
+}
+
+std::string GridComposedElement::GetMultiSelectable() const
+{
+    auto renderGrip = GetContentRender<RenderGridLayout>(GridLayoutElement::TypeId());
+    if (renderGrip) {
+        return ConvertBoolToString(renderGrip->GetMultiSelectable());
+    }
+    return "false";
 }
 
 std::string GridComposedElement::DisplayModeToString(DisplayMode displayMode) const

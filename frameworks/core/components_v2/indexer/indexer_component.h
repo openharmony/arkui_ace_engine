@@ -276,6 +276,11 @@ public:
         return valueArray_;
     }
 
+    std::vector<std::u16string> GetLabel() const
+    {
+        return indexerLabel_;
+    }
+
 protected:
     // init data
     void FormatLabelAlphabet();

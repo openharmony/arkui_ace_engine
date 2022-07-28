@@ -16,6 +16,7 @@
 #include "core/components_v2/inspector/indexer_composed_element.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/string_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text/text_element.h"
 #include "core/components_v2/indexer/indexer_element.h"
@@ -35,8 +36,11 @@ const std::unordered_map<std::string, std::function<std::string(const IndexerCom
     { "selectedFont", [](const IndexerComposedElement& inspector) { return inspector.GetSelectedFont(); } },
     { "popupFont", [](const IndexerComposedElement& inspector) { return inspector.GetPopupFont(); } },
     { "font", [](const IndexerComposedElement& inspector) { return inspector.GetFont(); } },
-    { "selected", [](const IndexerComposedElement& inspector) { return inspector.GetSelected(); } },
-    { "arrayValue", [](const IndexerComposedElement& inspector) { return inspector.GetArrayValue(); } }
+};
+
+const std::unordered_map<std::string,
+    std::function<std::unique_ptr<JsonValue>(const IndexerComposedElement&)>> CREATE_JSON_VALUE_MAP {
+    { "constructor", [](const IndexerComposedElement& inspector) { return inspector.GetConstructor(); } }
 };
 
 const std::unordered_map<std::string, std::function<bool(const IndexerComposedElement&)>> CREATE_JSON_BOOL_MAP {
@@ -59,6 +63,9 @@ std::unique_ptr<JsonValue> IndexerComposedElement::ToJsonObject() const
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
     }
     for (const auto& value : CREATE_JSON_BOOL_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
+    }
+    for (const auto& value : CREATE_JSON_VALUE_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
@@ -190,7 +197,15 @@ std::string IndexerComposedElement::GetFont() const
     return fontJson->ToString();
 }
 
-std::string IndexerComposedElement::GetSelected() const
+std::unique_ptr<JsonValue> IndexerComposedElement::GetConstructor() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("arrayValue", GetArrayValue().c_str());
+    jsonValue->Put("selected", GetIndexSelected().c_str());
+    return jsonValue;
+}
+
+std::string IndexerComposedElement::GetIndexSelected() const
 {
     auto node = GetInspectorNode(IndexerElement::TypeId());
     if (!node) {
@@ -216,7 +231,7 @@ std::string IndexerComposedElement::GetArrayValue() const
     }
     for (uint32_t i = 0; i < length; i++) {
         auto index = std::to_string(i);
-        jsonValueArray->Put(index.c_str(), value[i].c_str());
+        jsonValueArray->Put(index.c_str(), StringUtils::Str16ToStr8(value[i]).c_str());
     }
     return jsonValueArray->ToString();
 }

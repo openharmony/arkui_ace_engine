@@ -37,6 +37,7 @@ public:
     std::string GetLoop() const;
     std::string GetStart() const;
     std::string GetFromStart() const;
+    std::string GetFontSize() const;
 
     void Dump() override;
     std::unique_ptr<JsonValue> ToJsonObject() const override;
