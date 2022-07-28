@@ -36,41 +36,6 @@ config("ace_pc_preview_config") {
   ]
 }
 
-template("ace_test") {
-  forward_variables_from(invoker, "*")
-  ohos_executable(target_name) {
-    defines += invoker.defines
-    defines += [ "USE_GLFW_WINDOW" ]
-    configs = [ ":ace_pc_preview_config" ]
-
-    sources = [
-      "ace_${device}_test.cpp",
-      "key_input_handler.cpp",
-      "touch_event_handler.cpp",
-    ]
-    deps = [
-      ":copy_curl_shared_library(${current_toolchain})",
-      ":copy_napi_modules_shared_library(${current_toolchain})",
-      ":copy_resource_dynamic_library(${current_toolchain})",
-      "$ace_napi:ace_napi(${current_toolchain})",
-      "$ace_root/adapter/preview/build:libace_engine_$platform(${current_toolchain})",
-    ]
-    if (enable_ark_preview) {
-      deps += [
-        ":copy_ark_shared_library(${current_toolchain})",
-        ":copy_icu_data_resource(${current_toolchain})",
-        ":copy_icu_shared_library(${current_toolchain})",
-        ":copy_napi_shared_library(${current_toolchain})",
-      ]
-    } else {
-      deps += [ ":copy_napi_shared_library(${current_toolchain})" ]
-    }
-    if (platform == "windows") {
-      libs = [ "pthread" ]
-    }
-  }
-}
-
 ace_devices = [
   "phone",
   "tv",
@@ -79,223 +44,197 @@ ace_devices = [
   "card",
   "car",
 ]
-
-foreach(item, ace_platforms) {
-  platform = item.name
-  platform_defines = []
-  config = {
-  }
-
-  if (defined(item.config)) {
-    config = item.config
-  }
-  if (defined(config.defines)) {
-    platform_defines = config.defines
-  }
-
-  if (platform == "windows" || platform == "mac") {
-    foreach(device, ace_devices) {
-      ace_test("ace_test_${platform}_$device") {
-        defines = platform_defines
-        platform = platform
-        device = device
-      }
+foreach(device, ace_devices) {
+  ohos_executable("ace_${device}_test") {
+    defines = [ "USE_GLFW_WINDOW" ]
+    configs = [ ":ace_pc_preview_config" ]
+    ohos_test = true
+    test_output_dir = "$root_out_dir/common/samples"
+    sources = [
+      "ace_${device}_test.cpp",
+      "key_input_handler.cpp",
+      "touch_event_handler.cpp",
+    ]
+    deps = [
+      ":copy_napi_modules_shared_library",
+      ":copy_preview_shared_library",
+      "$ace_napi:ace_napi",
+    ]
+    if (use_mac) {
+      defines += [ "MAC_PLATFORM" ]
+      deps += [ "$ace_root/adapter/preview/build:libace_engine_mac" ]
+    } else {
+      defines += [ "WINDOWS_PLATFORM" ]
+      deps += [ "$ace_root/adapter/preview/build:libace_engine_windows" ]
+      libs = [ "pthread" ]
     }
   }
 }
 
-if (enable_ark_preview) {
-  ohos_copy("copy_ark_shared_library") {
-    sources = []
+# Avoid conditional judgment branches caused by dynamic library suffixes.
+if (use_mac) {
+  dylib_suffix = ".dylib"
+} else {
+  dylib_suffix = ".dll"
+}
+
+if (is_standard_system) {
+  # All dynamic libraries to be copied to the path "/previewer/common/bin/module/",
+  # which are called by the napi framework, can be added to this script.
+  ohos_copy("copy_napi_modules_shared_library") {
     deps = []
-    ark_core_shared_library =
-        get_label_info("//arkcompiler/runtime_core/libpandabase:libarkbase",
-                       "root_out_dir") + "/ark/ark"
-    deps += [
-      "//arkcompiler/runtime_core/libpandabase:libarkbase(${current_toolchain})",
-      "//arkcompiler/runtime_core/libpandafile:libarkfile(${current_toolchain})",
-      "//arkcompiler/runtime_core/libziparchive:libarkziparchive(${current_toolchain})",
-    ]
-    if (use_mac) {
-      sources += [
-        "$ark_core_shared_library/libarkbase.dylib",
-        "$ark_core_shared_library/libarkfile.dylib",
-        "$ark_core_shared_library/libarkziparchive.dylib",
-      ]
-      outputs =
-          [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
-    } else {
-      sources += [
-        "$ark_core_shared_library/libarkbase.dll",
-        "$ark_core_shared_library/libarkfile.dll",
-        "$ark_core_shared_library/libarkziparchive.dll",
-      ]
-      outputs = [ root_build_dir +
-                  "/mingw_x86_64/common/common/{{source_file_part}}" ]
+    sources = []
+    foreach(module, common_napi_libs) {
+      out_path = get_label_info("$ace_root/interfaces/napi/kits:${module}",
+                                "root_out_dir")
+      deps += [ "$ace_root/interfaces/napi/kits:${module}" ]
+      sources += [ "${out_path}/arkui/ace_engine/lib${module}${dylib_suffix}" ]
     }
 
-    ark_js_shared_library =
-        get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
-                       "root_out_dir") + "/ark/ark_js_runtime"
-    deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
-    if (use_mac) {
-      sources += [ "$ark_js_shared_library/libark_jsruntime.dylib" ]
-    } else {
-      sources += [ "$ark_js_shared_library/libark_jsruntime.dll" ]
-    }
+    # Set the output directory for all dynamic libraries.
+    outputs = [ root_out_dir + "/common/samples/module/{{source_file_part}}" ]
   }
-  ohos_copy("copy_napi_shared_library") {
-    shared_library_path =
-        get_label_info("$ace_napi:ace_napi(${current_toolchain})",
-                       "root_out_dir")
-    deps = [
-      "$ace_napi:ace_napi(${current_toolchain})",
-      "$ace_napi:ace_napi_ark(${current_toolchain})",
+
+  # All dynamic libraries to be copied to the path "/previewer/common/bin/",
+  # which are related to the previewer, can be added to this script.
+  ohos_copy("copy_preview_shared_library") {
+    deps = []
+    sources = []
+
+    # Add some resources
+    # Add ohos fonts
+    sources += [
+      "//foundation/arkui/ace_engine/adapter/preview/sdk/fontconfig.json",
+      "//utils/system_resources/fonts",
     ]
-    if (use_mac) {
-      sources = [
-        "$shared_library_path/arkui/napi/libace_napi.dylib",
-        "$shared_library_path/arkui/napi/libace_napi_ark.dylib",
-      ]
-      outputs =
-          [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
-    } else {
-      sources = [
-        "$shared_library_path/arkui/napi/libace_napi.dll",
-        "$shared_library_path/arkui/napi/libace_napi_ark.dll",
-      ]
-      outputs = [ root_build_dir +
-                  "/mingw_x86_64/common/common/{{source_file_part}}" ]
-    }
-  }
-  ohos_copy("copy_icu_shared_library") {
-    shared_library_path =
+
+    # Add the dynamic library with the same name on the mac and windows system here.
+    # Add dynamic library "libcurl_shared"
+    curl_path = get_label_info("//third_party/curl:curl_shared", "root_out_dir")
+    deps += [ "//third_party/curl:curl_shared" ]
+    sources += [ curl_path + "/thirdparty/curl/libcurl_shared${dylib_suffix}" ]
+
+    # Add dynamic library "libsec_shared"
+    sec_path =
+        get_label_info("//third_party/bounds_checking_function:libsec_shared",
+                       "root_out_dir")
+    deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
+    sources +=
+        [ sec_path + "/thirdparty/bounds_checking_function/libsec_shared" +
+          dylib_suffix ]
+
+    # Add napi framework-related dynamic libraries
+    ace_napi_path =
+        get_label_info("//foundation/arkui/napi:ace_napi", "root_out_dir")
+    uv_path = get_label_info("//third_party/libuv:uv", "root_out_dir")
+    icu_path =
         get_label_info("//third_party/icu/icu4c:shared_icuuc", "root_out_dir")
-    deps = [
+    deps += [
+      "$ace_napi:ace_napi",
       "//third_party/icu/icu4c:shared_icui18n",
       "//third_party/icu/icu4c:shared_icuuc",
+      "//third_party/libuv:uv",
     ]
-    if (use_mac) {
-      sources = [
-        "$shared_library_path/thirdparty/icu/libhmicui18n.dylib",
-        "$shared_library_path/thirdparty/icu/libhmicuuc.dylib",
+    sources += [
+      "$ace_napi_path/arkui/napi/libace_napi${dylib_suffix}",
+      "$icu_path/thirdparty/icu/libhmicui18n${dylib_suffix}",
+      "$icu_path/thirdparty/icu/libhmicuuc${dylib_suffix}",
+      "$uv_path/thirdparty/libuv/libuv${dylib_suffix}",
+    ]
+
+    # Add qjs or ark engine-related dynamic libraries
+    if (enable_ark_preview) {
+      ark_core_path =
+          get_label_info("//arkcompiler/runtime_core/libpandabase:libarkbase",
+                         "root_out_dir")
+      ark_js_path = get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
+                                   "root_out_dir")
+      deps += [
+        "$ace_napi:ace_napi_ark",
+        "//arkcompiler/ets_runtime:libark_jsruntime",
+        "//arkcompiler/runtime_core/libpandabase:libarkbase",
+        "//arkcompiler/runtime_core/libpandafile:libarkfile",
+        "//arkcompiler/runtime_core/libziparchive:libarkziparchive",
       ]
-      outputs =
-          [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
-    } else {
-      sources = [
-        "$shared_library_path/thirdparty/icu/libhmicui18n.dll",
-        "$shared_library_path/thirdparty/icu/libhmicuuc.dll",
+      sources += [
+        "$ace_napi_path/arkui/napi/libace_napi_ark${dylib_suffix}",
+        "$ark_core_path/ark/ark/libarkbase${dylib_suffix}",
+        "$ark_core_path/ark/ark/libarkfile${dylib_suffix}",
+        "$ark_core_path/ark/ark/libarkziparchive${dylib_suffix}",
+        "$ark_js_path/ark/ark_js_runtime/libark_jsruntime${dylib_suffix}",
+        "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
       ]
-      outputs = [ root_build_dir +
-                  "/mingw_x86_64/common/common/{{source_file_part}}" ]
-    }
-  }
-  ohos_copy("copy_icu_data_resource") {
-    sources = [ "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat" ]
-    if (use_mac) {
-      outputs = [ root_build_dir + "/clang_x64/common/common/icudt67l.dat" ]
     } else {
-      outputs = [ root_build_dir + "/mingw_x86_64/common/common/icudt67l.dat" ]
+      deps += [ "$ace_napi:ace_napi_quickjs" ]
+      sources +=
+          [ "$ace_napi_path/arkui/napi/libace_napi_quickjs${dylib_suffix}" ]
     }
+
+    # Add dynamic libraries with different names on mac and windows systems here.
+    if (use_mac) {
+      ace_engine_path =
+          get_label_info("$ace_root/adapter/preview/build::libace_engine_mac",
+                         "root_out_dir") + "/common/common/libace_engine_mac" +
+          dylib_suffix
+      resource_manager_path = get_label_info(
+                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
+                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_mac${dylib_suffix}"
+      deps += [
+        "$ace_root/adapter/preview/build:libace_engine_mac",
+        "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
+      ]
+    } else {
+      ace_engine_path =
+          get_label_info(
+              "$ace_root/adapter/preview/build::libace_engine_windows",
+              "root_out_dir") + "/common/common/libace_engine_windows" +
+          dylib_suffix
+      resource_manager_path = get_label_info(
+                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
+                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_win${dylib_suffix}"
+      deps += [
+        "$ace_root/adapter/preview/build:libace_engine_windows",
+        "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
+      ]
+    }
+    sources += [
+      ace_engine_path,
+      resource_manager_path,
+    ]
+
+    # Set the output directory for all dynamic libraries.
+    outputs = [ root_out_dir + "/common/samples/{{source_file_part}}" ]
   }
 } else {
-  ohos_copy("copy_napi_shared_library") {
-    shared_library_path =
-        get_label_info("$ace_napi:ace_napi(${current_toolchain})",
-                       "root_out_dir")
+  ohos_copy("copy_resource_dynamic_library") {
+    if (use_mac) {
+      sources = [
+        "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libhmicuuc" +
+            dylib_suffix,
+        "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libresourcemanager_mac${dylib_suffix}",
+      ]
+    } else {
+      sources = [
+        "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libhmicuuc" +
+            dylib_suffix,
+        "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libresourcemanager_win${dylib_suffix}",
+      ]
+    }
+    outputs = [ root_out_dir + "/common/samples/{{source_file_part}}" ]
+  }
+}
+
+# Install packages
+group("previewer_demo") {
+  if (is_wearable_product) {
+    deps = [ ":ace_wearable_test" ]
+  } else {
     deps = [
-      "$ace_napi:ace_napi(${current_toolchain})",
-      "$ace_napi:ace_napi_quickjs(${current_toolchain})",
+      ":ace_car_test",
+      ":ace_card_test",
+      ":ace_phone_test",
+      ":ace_tablet_test",
+      ":ace_tv_test",
     ]
-    if (use_mac) {
-      sources = [
-        "$shared_library_path/arkui/napi/libace_napi.dylib",
-        "$shared_library_path/arkui/napi/libace_napi_quickjs.dylib",
-        "$shared_library_path/thirdparty/libuv/libuv.dylib",
-      ]
-      outputs =
-          [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
-    } else {
-      sources = [
-        "$shared_library_path/arkui/napi/libace_napi.dll",
-        "$shared_library_path/arkui/napi/libace_napi_quickjs.dll",
-        "$shared_library_path/thirdparty/libuv/libuv.dll",
-      ]
-      outputs = [ root_build_dir +
-                  "/mingw_x86_64/common/common/{{source_file_part}}" ]
-    }
-  }
-}
-
-ohos_copy("copy_napi_modules_shared_library") {
-  deps = []
-  sources = []
-  foreach(module, common_napi_libs) {
-    out_path = get_label_info("$ace_root/interfaces/napi/kits:${module}",
-                              "root_out_dir")
-    deps += [ "$ace_root/interfaces/napi/kits:${module}" ]
-    if (use_mac) {
-      sources += [ "${out_path}/arkui/ace_engine/lib${module}.dylib" ]
-    } else {
-      sources += [ "${out_path}/arkui/ace_engine/lib${module}.dll" ]
-    }
-  }
-
-  if (use_mac) {
-    outputs = [ root_build_dir +
-                "/clang_x64/common/common/module/{{source_file_part}}" ]
-  } else {
-    outputs = [ root_build_dir +
-                "/mingw_x86_64/common/common/module/{{source_file_part}}" ]
-  }
-}
-
-ohos_copy("copy_curl_shared_library") {
-  shared_library_path =
-      get_label_info("//third_party/curl:curl_shared", "root_out_dir")
-  deps = [ "//third_party/curl:curl_shared" ]
-  if (use_mac) {
-    sources = [ shared_library_path + "/thirdparty/curl/libcurl_shared.dylib" ]
-    outputs =
-        [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
-  } else {
-    sources = [ shared_library_path + "/thirdparty/curl/libcurl_shared.dll" ]
-    outputs =
-        [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
-  }
-}
-
-ohos_copy("copy_resource_dynamic_library") {
-  if (use_mac) {
-    if (is_standard_system) {
-      resource_manager_library = get_label_info(
-                                     "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
-                                     "root_out_dir") + "/global/resource_management/libglobal_resmgr_mac.dylib"
-      deps = [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
-      sources = [ resource_manager_library ]
-    } else {
-      sources = [
-        "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libhmicuuc.dylib",
-        "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libresourcemanager_mac.dylib",
-      ]
-    }
-    outputs =
-        [ root_build_dir + "/clang_x64/common/common/{{source_file_part}}" ]
-  } else {
-    if (is_standard_system) {
-      resource_manager_library = get_label_info(
-                                     "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
-                                     "root_out_dir") + "/global/resource_management/libglobal_resmgr_win.dll"
-      deps = [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
-      sources = [ resource_manager_library ]
-    } else {
-      sources = [
-        "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libhmicuuc.dll",
-        "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libresourcemanager_win.dll",
-      ]
-    }
-    outputs =
-        [ root_build_dir + "/mingw_x86_64/common/common/{{source_file_part}}" ]
   }
 }

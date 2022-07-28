@@ -32,31 +32,20 @@ config("bridge_config") {
   ]
 }
 
-template("test_bridge") {
-  forward_variables_from(invoker, "*")
+ohos_shared_library("test_bridge") {
+  configs = [ ":bridge_config" ]
 
-  ohos_shared_library(target_name) {
-    configs = [ ":bridge_config" ]
+  sources = [
+    "run_args_parser.cpp",
+    "test_bridge.cpp",
+  ]
 
-    sources = [
-      "run_args_parser.cpp",
-      "test_bridge.cpp",
-    ]
+  deps = [ "$ace_napi:ace_napi" ]
 
-    deps = [
-      "$ace_napi:ace_napi(${current_toolchain})",
-      "$ace_root/adapter/preview/build:libace_engine_$platform(${current_toolchain})",
-    ]
-    if (platform == "windows") {
-      libs = [ "pthread" ]
-    }
+  if (use_mingw_win) {
+    deps += [ "$ace_root/adapter/preview/build:libace_engine_windows" ]
+    libs = [ "pthread" ]
+  } else {
+    deps += [ "$ace_root/adapter/preview/build:libace_engine_mac" ]
   }
-}
-
-test_bridge("test_bridge_windows") {
-  platform = "windows"
-}
-
-test_bridge("test_bridge_mac") {
-  platform = "mac"
 }
