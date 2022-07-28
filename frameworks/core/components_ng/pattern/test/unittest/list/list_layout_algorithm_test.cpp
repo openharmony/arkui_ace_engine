@@ -83,7 +83,7 @@ HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest002, TestSize.Level1)
         RefPtr<NG::GeometryNode> geometryNode;
         geometryNode->SetFrameSize(OHOS::Ace::NG::SizeF(GEOMETRYNODE_FRAMESIZE, GEOMETRYNODE_FRAMESIZE));
 
-        NG::LayoutWrapper layoutWrapper = NG::LayoutWrapper(frameNode, geometryNodePtr, frameNode->GetLayoutProperty());
+        NG::LayoutWrapper layoutWrapper = NG::LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
         auto listLayoutAlgorithm = OHOS::Ace::NG::ListLayoutAlgorithm(START_INDEX, END_INDEX);
         float space = LIST_LAYOUT_ALGORITHM_SPACE_PXS[i].Value();
