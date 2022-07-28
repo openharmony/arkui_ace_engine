@@ -73,14 +73,12 @@ group("unittest") {
 
       #"picker:unittest",
       "piece:unittest",
-      "rating:unittest",
-
-      #"select:unittest",
       "plugin:unittest",
+      "rating:unittest",
+      "select:unittest",
       "tabbar:unittest",
       "text_field:unittest",
-
-      #"text_select:unittest",
+      "text_select:unittest",
     ]
   }
 }
