@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/label_target.h"
 #include "base/utils/macros.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/border_edge.h"
 #include "core/components/common/properties/color.h"
@@ -100,6 +101,7 @@ public:
     void SetRemoteMessageEventId(const EventMarker& eventId);
     void SetClickFunction(std::function<void()>&& clickCallback);
     void SetDeclaration(const RefPtr<ButtonDeclaration>& declaration);
+    void ApplyTheme(const RefPtr<ButtonTheme>& theme);
 
     bool GetFocusable() const
     {
@@ -196,6 +198,7 @@ private:
     bool isInputButton_ = false;
     bool isCatchMode_ = true;
     uint32_t layoutFlag_ = 0;
+    Dimension height_;
     // for custom button type
     std::array<Radius, 4> radii_ = { Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp) };
     RefPtr<StateAttributes<ButtonStateAttribute>> stateAttributeList_;

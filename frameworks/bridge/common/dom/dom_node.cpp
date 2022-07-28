@@ -183,6 +183,12 @@ void DOMNode::AddEvent(int32_t pageId, const std::vector<std::string>& events)
 
 void DOMNode::SetAttr(const std::vector<std::pair<std::string, std::string>>& attrs)
 {
+    attributesCache_ = attrs;
+    SetAttrInternal(attrs);
+}
+
+void DOMNode::SetAttrInternal(const std::vector<std::pair<std::string, std::string>>& attrs)
+{
     std::vector<std::pair<std::string, std::string>> tempAttrs;
     for (const auto& attr : attrs) {
         if (SetSpecializedAttr(attr)) {
@@ -617,6 +623,7 @@ void DOMNode::UpdateStyleWithChildren()
 {
     auto status = CalculatePseudoStatus();
     UpdatePseudoStyleByStatus(status, true);
+    SetAttrInternal(attributesCache_);
 
     for (const auto& child : children_) {
         if (child) {
