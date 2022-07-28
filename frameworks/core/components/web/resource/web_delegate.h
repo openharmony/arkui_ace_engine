@@ -177,7 +177,7 @@ public:
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
-    void UpdateTextZoomRatio(const int32_t& textZoomRatioNum);
+    void UpdateTextZoomAtio(const int32_t& textZoomAtioNum);
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
     void LoadUrl();
     void HandleTouchDown(const int32_t& id, const double& x, const double& y);
