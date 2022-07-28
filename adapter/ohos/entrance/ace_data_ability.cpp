@@ -222,5 +222,12 @@ Uri AceDataAbility::DenormalizeUri(const Uri& uri)
     return ret;
 }
 
+std::shared_ptr<AppExecFwk::PacMap> AceDataAbility::Call(const Uri& uri,
+    const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
+{
+    LOGD("AceDataAbility::Call called");
+    std::shared_ptr<AppExecFwk::PacMap> ret = Platform::PaContainer::Call(abilityId_, uri, method, arg, pacMap);
+    return ret;
+}
 } // namespace Ace
 } // namespace OHOS

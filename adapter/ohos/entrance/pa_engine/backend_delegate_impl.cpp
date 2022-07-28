@@ -38,8 +38,8 @@ const char PA_MANIFEST_JSON[] = "manifest.json";
 BackendDelegateImpl::BackendDelegateImpl(const BackendDelegateImplBuilder& builder)
     : loadJs_(builder.loadCallback), dispatcherCallback_(builder.transferCallback),
       asyncEvent_(builder.asyncEventCallback), syncEvent_(builder.syncEventCallback), insert_(builder.insertCallback),
-      query_(builder.queryCallback), update_(builder.updateCallback), delete_(builder.deleteCallback),
-      batchInsert_(builder.batchInsertCallback), getType_(builder.getTypeCallback),
+      call_(builder.callCallback), query_(builder.queryCallback), update_(builder.updateCallback),
+      delete_(builder.deleteCallback), batchInsert_(builder.batchInsertCallback), getType_(builder.getTypeCallback),
       getFileTypes_(builder.getFileTypesCallback), openFile_(builder.openFileCallback),
       openRawFile_(builder.openRawFileCallback), normalizeUri_(builder.normalizeUriCallback),
       denormalizeUri_(builder.denormalizeUriCallback), destroyApplication_(builder.destroyApplicationCallback),
@@ -319,6 +319,16 @@ int32_t BackendDelegateImpl::Insert(const Uri& uri, const OHOS::NativeRdb::Value
     int32_t ret = 0;
     taskExecutor_->PostSyncTask(
         [insert = insert_, &ret, uri, value] { ret = insert(uri, value); }, TaskExecutor::TaskType::JS);
+    return ret;
+}
+
+std::shared_ptr<AppExecFwk::PacMap> BackendDelegateImpl::Call(const Uri& uri,
+    const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
+{
+    std::shared_ptr<AppExecFwk::PacMap> ret = nullptr;
+    taskExecutor_->PostSyncTask(
+        [call = call_, &ret, method, arg, pacMap] { ret = call(method, arg, pacMap); },
+        TaskExecutor::TaskType::JS);
     return ret;
 }
 

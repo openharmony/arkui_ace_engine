@@ -53,6 +53,8 @@ public:
     int32_t OpenRawFile(const Uri& uri, const std::string& mode) override;
     Uri NormalizeUri(const Uri& uri) override;
     Uri DenormalizeUri(const Uri& uri) override;
+    std::shared_ptr<AppExecFwk::PacMap> Call(
+        const Uri& uri, const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap) override;
 
 private:
     int32_t abilityId_ = 200000;

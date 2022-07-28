@@ -149,6 +149,8 @@ public:
     void FireSyncEvent(const std::string& eventId, const std::string& param) override;
 
     int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value) override;
+    std::shared_ptr<AppExecFwk::PacMap> Call(const std::string& method,
+        const std::string& arg, const AppExecFwk::PacMap& pacMap) override;
     std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(const Uri& uri, const std::vector<std::string>& columns,
         const OHOS::NativeRdb::DataAbilityPredicates& predicates) override;
     int32_t Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,

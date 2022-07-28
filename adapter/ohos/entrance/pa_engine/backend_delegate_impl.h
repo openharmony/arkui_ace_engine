@@ -24,6 +24,7 @@
 #include "data_ability_predicates.h"
 #include "form_provider_info.h"
 #include "iremote_object.h"
+#include "pac_map.h"
 #include "values_bucket.h"
 #include "want.h"
 
@@ -42,6 +43,8 @@ using JsMessageDispatcherSetterCallback = std::function<void(const RefPtr<JsMess
 using PaEventCallback = std::function<void(const std::string&, const std::string&)>;
 using DestroyApplicationCallback = std::function<void(const std::string& packageName)>;
 using InsertCallback = std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value)>;
+using CallCallback = std::function<std::shared_ptr<AppExecFwk::PacMap>(const std::string& method,
+    const std::string& arg, const AppExecFwk::PacMap& pacMap)>;
 using QueryCallback = std::function<std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet>(
     const Uri& uri, const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates)>;
 using UpdateCallback = std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
@@ -76,6 +79,7 @@ struct BackendDelegateImplBuilder {
     JsMessageDispatcherSetterCallback transferCallback;
     DestroyApplicationCallback destroyApplicationCallback;
     InsertCallback insertCallback;
+    CallCallback callCallback;
     QueryCallback queryCallback;
     UpdateCallback updateCallback;
     DeleteCallback deleteCallback;
@@ -167,6 +171,8 @@ public:
     void MethodChannel(const std::string& methodName, std::string& jsonStr);
 
     int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value);
+    std::shared_ptr<AppExecFwk::PacMap> Call(const Uri& uri,
+        const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap);
     std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(const Uri& uri, const std::vector<std::string>& columns,
         const OHOS::NativeRdb::DataAbilityPredicates& predicates);
     int32_t Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
@@ -206,6 +212,7 @@ private:
     PaEventCallback syncEvent_;
 
     InsertCallback insert_;
+    CallCallback call_;
     QueryCallback query_;
     UpdateCallback update_;
     DeleteCallback delete_;
