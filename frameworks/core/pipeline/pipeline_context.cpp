@@ -2284,7 +2284,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     if (!rootNode) {
         return;
     }
-    if (GetStackElement()) {
+    if (GetStageElement()) {
         auto renderStage = AceType::DynamicCast<RenderStack>(GetStageElement()->GetRenderNode());
         if (renderStage) {
             renderStage->SetTop(Dimension(offset));
