@@ -30,6 +30,7 @@
 #include "frameworks/bridge/common/dom/dom_type.h"
 
 using namespace OHOS::Accessibility;
+using namespace OHOS::AccessibilityConfig;
 using namespace std;
 
 namespace OHOS::Ace::Framework {
@@ -381,8 +382,50 @@ JsAccessibilityManager::~JsAccessibilityManager()
     auto eventType = AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED;
 
     UnsubscribeStateObserver(eventType);
+    UnsubscribeToastObserver();
 
     DeregisterInteractionOperation();
+}
+void JsAccessibilityManager::ToastAccessibilityConfigObserver::OnConfigChanged(
+    const AccessibilityConfig::CONFIG_ID id, const AccessibilityConfig::ConfigValue& value)
+{
+    LOGI("JsAccessibilityManager::OnConfigChanged changed:%{public}u", value.contentTimeout);
+    AceApplicationInfo::GetInstance().SetBarrierfreeDuration((int32_t)value.contentTimeout);
+}
+
+bool JsAccessibilityManager::SubscribeToastObserver()
+{
+    LOGI("JsAccessibilityManager::SubscribeToastObserver");
+    if (!toastObserver_) {
+        toastObserver_ = std::make_shared<ToastAccessibilityConfigObserver>();
+    }
+    if (!toastObserver_) {
+        return false;
+    }
+    auto& config = OHOS::Singleton<OHOS::AccessibilityConfig::AccessibilityConfig>::GetInstance();
+    bool isSuccess = config.InitializeContext();
+    if (!isSuccess) {
+        LOGE("AccessibilityConfig InitializeContext failed");
+        return false;
+    }
+    config.SubscribeConfigObserver(CONFIG_CONTENT_TIMEOUT, toastObserver_);
+    return true;
+}
+
+bool JsAccessibilityManager::UnsubscribeToastObserver()
+{
+    LOGI("JsAccessibilityManager::UnsubscribeToastObserver");
+    if (!toastObserver_) {
+        return false;
+    }
+    auto& config = OHOS::Singleton<OHOS::AccessibilityConfig::AccessibilityConfig>::GetInstance();
+    bool isSuccess = config.InitializeContext();
+    if (!isSuccess) {
+        LOGE("AccessibilityConfig InitializeContext failed");
+        return false;
+    }
+    config.UnsubscribeConfigObserver(CONFIG_CONTENT_TIMEOUT, toastObserver_);
+    return true;
 }
 
 bool JsAccessibilityManager::SubscribeStateObserver(const int eventType)
@@ -440,6 +483,7 @@ void JsAccessibilityManager::InitializeCallback()
     }
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(client->IsEnabled());
 
+    SubscribeToastObserver();
     SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
     if (client->IsEnabled()) {
         RegisterInteractionOperation(windowId_);

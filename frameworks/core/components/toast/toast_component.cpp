@@ -19,6 +19,7 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/align/align_component.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -174,6 +175,10 @@ void ToastComponent::Show(const RefPtr<PipelineContext>& context, const std::str
 
     int32_t toastId = GenerateNextToastId();
     auto deviceType = SystemProperties::GetDeviceType();
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        int32_t barrierfreeDuration = AceApplicationInfo::GetInstance().GetBarrierfreeDuration();
+        duration = duration > barrierfreeDuration ? duration : barrierfreeDuration;
+    }
     // get toast animation playing time
     toastDurationTime_ = duration;
     Dimension bottomPosition = StringUtils::StringToDimension(bottom);
