@@ -386,8 +386,8 @@ void FocusGroup::RemoveChild(const RefPtr<FocusNode>& focusNode)
     if (itLastFocusNode_ == it) {
         itLastFocusNode_ = focusNodes_.end();
     }
-    focusNodes_.erase(it);
     focusNode->SetParent(nullptr);
+    focusNodes_.erase(it);
 }
 
 void FocusGroup::SwitchFocus(const RefPtr<FocusNode>& focusNode)
