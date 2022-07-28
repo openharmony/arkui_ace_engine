@@ -2284,10 +2284,11 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     if (!rootNode) {
         return;
     }
-    if (GetStageElement()) {
-        auto renderStage = AceType::DynamicCast<RenderStack>(GetStageElement()->GetRenderNode());
-        if (renderStage) {
-            renderStage->SetTop(Dimension(offset));
+    auto stack = GetStageElement()->GetElementParent().Upgrade();
+    if (stack) {
+        auto renderStack = AceType::DynamicCast<RenderStack>(stack->GetRenderNode());
+        if (renderStack) {
+            renderStack->SetTop(Dimension(offset));
         }
     }
     if (!NearEqual(viewScale_, rootNode->GetScale()) || paintRect != rootNode->GetPaintRect() || isDensityUpdate_) {
