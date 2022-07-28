@@ -125,6 +125,37 @@ public:
         return hasDragBar_;
     }
 
+    const Color& GetBackgroundMask() const
+    {
+        return backgroundMask_;
+    }
+
+    void SetBackgroundMask(const Color& backgroundMask)
+    {
+        backgroundMask_ = backgroundMask;
+    }
+
+    const EventMarker& GetOnHeightChanged() const
+    {
+        return onHeightChanged_;
+    }
+
+    void SetOnHeightChanged(const EventMarker& value)
+    {
+        onHeightChanged_ = value;
+    }
+
+    bool Visible() const
+    {
+        return visible_;
+    }
+
+    void SetVisible(bool visible)
+    {
+        visible_ = visible;
+    }
+
+
 protected:
     void BuildInnerChild(const RefPtr<BoxComponent>& boxStyle, const RefPtr<PanelComponent>& panel);
 
@@ -134,6 +165,9 @@ protected:
     // used for inspector node in PC preview
     int32_t panelId_ = -1;
     EventMarker onSizeChanged_;
+    EventMarker onHeightChanged_;
+    Color backgroundMask_;
+    bool visible_ = false;
     bool hasDragBar_ = false;
     std::pair<Dimension, bool> miniHeight_ = { 0.0_vp, false };
     std::pair<Dimension, bool> halfHeight_ = { 0.0_vp, false };

@@ -35,6 +35,7 @@ void JSSlidingPanel::Create(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(slidingPanel);
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         auto isShow = info[0]->ToBoolean();
+        slidingPanel->SetVisible(isShow);
         auto component = ViewStackProcessor::GetInstance()->GetDisplayComponent();
         auto display = AceType::DynamicCast<DisplayComponent>(component);
         if (!display) {
@@ -54,6 +55,7 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
     JSClass<JSSlidingPanel>::StaticMethod("show", &JSSlidingPanel::SetShow, opt);
     JSClass<JSSlidingPanel>::StaticMethod("mode", &JSSlidingPanel::SetPanelMode, opt);
     JSClass<JSSlidingPanel>::StaticMethod("type", &JSSlidingPanel::SetPanelType, opt);
+    JSClass<JSSlidingPanel>::StaticMethod("backgroundMask", &JSSlidingPanel::SetBackgroundMask, opt);
     JSClass<JSSlidingPanel>::StaticMethod("fullHeight", &JSSlidingPanel::SetFullHeight, opt);
     JSClass<JSSlidingPanel>::StaticMethod("halfHeight", &JSSlidingPanel::SetHalfHeight, opt);
     JSClass<JSSlidingPanel>::StaticMethod("miniHeight", &JSSlidingPanel::SetMiniHeight, opt);
@@ -70,10 +72,58 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
     JSClass<JSSlidingPanel>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSlidingPanel>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSlidingPanel>::StaticMethod("onChange", &JSSlidingPanel::SetOnSizeChange);
+    JSClass<JSSlidingPanel>::StaticMethod("onHeightChange", &JSSlidingPanel::SetOnHeightChange);
 
     JSClass<JSSlidingPanel>::Inherit<JSContainerBase>();
     JSClass<JSSlidingPanel>::Inherit<JSViewAbstract>();
     JSClass<JSSlidingPanel>::Bind<>(globalObj);
+}
+
+void JSSlidingPanel::SetBackgroundMask(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
+    if (!panel) {
+        LOGE("Panel is null");
+        return;
+    }
+    
+    Color color;
+    LOGE("xxy color is %{public}s", info[0]->ToString().c_str());
+    if (ParseJsColor(info[0], color)) {
+        panel->SetBackgroundMask(color);
+    }
+}
+
+void JSSlidingPanel::SetOnHeightChange(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (args[0]->IsFunction()) {
+        auto onHeightChange = EventMarker(
+            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelHeightChangeEvent>(info);
+                if (!eventInfo) {
+                    return;
+                }
+                auto params = ConvertToJSValues(eventInfo->GetHeight());
+                ACE_SCORING_EVENT("SlidingPanel.OnHeightChange");
+                func->Call(JSRef<JSObject>(), params.size(), params.data());
+            });
+        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+        auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
+        if (panel) {
+            panel->SetOnHeightChanged(onHeightChange);
+        }
+    }
+    args.ReturnSelf();
 }
 
 void JSSlidingPanel::ParsePanelRadius(const JSRef<JSVal>& args)

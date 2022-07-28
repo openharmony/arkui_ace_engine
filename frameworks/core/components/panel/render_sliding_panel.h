@@ -60,6 +60,27 @@ private:
     double height_ = 0.0;
 };
 
+class ACE_EXPORT SlidingPanelHeightChangeEvent : public BaseEventInfo, public EventToJSONStringAdapter {
+    DECLARE_RELATIONSHIP_OF_CLASSES(SlidingPanelHeightChangeEvent, BaseEventInfo, EventToJSONStringAdapter);
+
+public:
+    explicit SlidingPanelHeightChangeEvent(double height)
+        : BaseEventInfo("SlidingPanelHeightChangeEvent"), height_(height)
+    {}
+
+    ~SlidingPanelHeightChangeEvent() override = default;
+
+    double GetHeight() const
+    {
+        return height_;
+    }
+
+    std::string ToJSONString() const override;
+
+private:
+    double height_ = 0.0;
+};
+
 class RenderSlidingPanel : public RenderNode {
     DECLARE_ACE_TYPE(RenderSlidingPanel, RenderNode);
 
@@ -142,13 +163,16 @@ protected:
     PanelMode previousMode_ = PanelMode::HALF;
     PanelType type_ = PanelType::FOLDABLE_BAR;
     bool hasBoxStyle_ = false;
+    Color backgroundMask_;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> onSizeChange_;
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> onHeightChange_;
 
 private:
     void InitializeRecognizer();
     bool InitializeLayoutProps();
     void SetDragBarCallBack();
     void FireSizeChangeEvent();
+    void FireHeightChangeEvent();
     void HandleDragStart(const Offset& startPoint);
     void HandleDragUpdate(const Offset& currentPoint);
     void HandleDragEnd(const Offset& endPoint, double velocity);
@@ -173,6 +197,7 @@ private:
     double fullHalfBoundary_ = 0.0;
     double halfMiniBoundary_ = 0.0;
     double fullMiniBoundary_ = 0.0;
+    bool visible = false;
     // used for inspector node in PC preview
     int32_t panelId_ = -1;
     std::pair<Dimension, bool> miniHeight_ = { 0.0_vp, false };
