@@ -169,10 +169,10 @@ void RenderBadge::InitialBadgeText()
     badgeRenderText_->SetLayoutParam(innerLayout);
 }
 
-bool RenderBadge::ParseBadgeStatus(const std::string& label, int64_t messageCount, int64_t countLimit)
+bool RenderBadge::ParseBadgeStatus(const std::optional<std::string>& label, int64_t messageCount, int64_t countLimit)
 {
-    if (!label.empty()) {
-        textData_ = label;
+    if (label.has_value()) {
+        textData_ = label.value();
         return true;
     }
     if (messageCount < 0) {
