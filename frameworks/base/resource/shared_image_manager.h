@@ -47,7 +47,6 @@ public:
     ~SharedImageManager() override = default;
     void AddSharedImage(const std::string& name, SharedImage&& sharedImage);
     void AddPictureNamesToReloadMap(std::string&& name);
-    bool AddProviderToReloadMap(const std::string& name, const WeakPtr<ImageProviderLoader>& providerWp);
     bool FindImageInSharedImageMap(const std::string& name, const WeakPtr<ImageProviderLoader>& providerWp);
 
     const SharedImageMap& GetSharedImageMap() const
@@ -61,10 +60,17 @@ public:
         return (res != 0);
     }
 
-    bool IsResourceToReload(const std::string& name)
+    bool IsResourceToReload(const std::string& name, const WeakPtr<ImageProviderLoader>& providerWp)
     {
         std::lock_guard<std::mutex> lockProviderMap(providerMapMutex_);
-        return providerMapToReload_.find(name) != providerMapToReload_.end();
+        auto providerMapIter = providerMapToReload_.find(name);
+        bool resourceInReloadMap = (providerMapIter != providerMapToReload_.end());
+        // if image data if [name] is waiting to be written, add [providerWp] to [providerMapToReload_]
+        // so that it will be notified to start loading image when data is ready
+        if (resourceInReloadMap) {
+            providerMapIter->second.emplace(providerWp);
+        }
+        return resourceInReloadMap;
     }
 
 private:
