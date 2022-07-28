@@ -35,6 +35,7 @@ public:
     std::string GetStart() const;
     std::string GetEnd() const;
     std::string GetSelected() const;
+    std::unique_ptr<JsonValue> GetConstructor() const;
 
 private:
     RefPtr<RenderPickerBase> GetRenderPickerBase() const;

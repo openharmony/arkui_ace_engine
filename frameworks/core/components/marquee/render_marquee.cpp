@@ -193,6 +193,7 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
     GetMarqueeCallback(component);
     value_ = marquee->GetValue();
     start_ = marquee->GetPlayerStatus();
+    textStyle_ = marquee->GetTextStyle();
     auto context = GetContext().Upgrade();
     if (!context) {
         LOGE("context is null");
