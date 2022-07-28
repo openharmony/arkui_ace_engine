@@ -363,6 +363,10 @@ bool StageElement::PerformPushPageTransition(const RefPtr<Element>& elementIn, c
         if (stage) {
             stage->NotifyPageTransitionListeners(TransitionEvent::PUSH_END, pageInWeak, pageOutWeak);
             ACE_SCOPED_TRACE("PUSH_END");
+            auto context = stage->context_.Upgrade();
+            if (context) {
+                context->OnPageShow();
+            }
             if (stage->singlePageId_ != -1) {
                 stage->RecycleSinglePage();
             }
@@ -554,6 +558,10 @@ void StageElement::PerformReplace()
 #endif
     UpdateChild(oldElement, nullptr);
     UpdateChild(nullptr, newComponent_);
+    auto context = context_.Upgrade();
+    if (context) {
+        context->OnPageShow();
+    }
     RefreshFocus();
     if (singlePageId_ != -1) {
         RecycleSinglePage();
