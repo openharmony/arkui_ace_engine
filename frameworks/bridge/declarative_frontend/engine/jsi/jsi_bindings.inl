@@ -348,8 +348,13 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(pand
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     T* instance = static_cast<T*>(ptr);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
+    if (binding == nullptr) {
+        LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
+        return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
+    }
     LOGD("InternalMemberFunctionCallback: Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
     auto fnPtr = static_cast<FunctionBinding<T, panda::Local<panda::JSValueRef>, Args...>*>(binding)->Get();
     (instance->*fnPtr)(runtimeCallInfo);
@@ -363,8 +368,13 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     T* instance = static_cast<T*>(ptr);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
+    if (binding == nullptr) {
+        LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
+        return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
+    }
     LOGD("InternalmemberFunctionCallback: Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
 
     auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
@@ -372,7 +382,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
     (instance->*fnPtr)(info);
 
     std::variant<void*, panda::CopyableGlobal<panda::JSValueRef>> retVal = info.GetReturnValue();
-    EcmaVM* vm = runtimeCallInfo->GetVM();
     auto jsVal = std::get_if<panda::CopyableGlobal<panda::JSValueRef>>(&retVal);
     if (jsVal) {
         return jsVal->ToLocal();
@@ -387,8 +396,13 @@ panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCal
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     Class* instance = static_cast<Class*>(ptr);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
+    if (binding == nullptr) {
+        LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
+        return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
+    }
     LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
 
     auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
@@ -397,7 +411,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCal
     constexpr bool isVoid = std::is_void_v<R>;
     constexpr bool hasArguments = sizeof...(Args) != 0;
 
-    EcmaVM* vm = runtimeCallInfo->GetVM();
     if constexpr (isVoid && hasArguments) {
         // C::MemberFunction(Args...)
         FunctionUtils::CallMemberFunction(instance, fnPtr, tuple);
@@ -424,8 +437,13 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSMethodCallback(panda::JsiRuntimeC
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     C* ptr = static_cast<C*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
     Class* instance = static_cast<Class*>(ptr);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
+    if (binding == nullptr) {
+        LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
+        return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
+    }
     LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
     JsiCallbackInfo info(runtimeCallInfo);
     auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
@@ -436,8 +454,13 @@ template<typename C>
 template<typename R, typename... Args>
 panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRuntimeCallInfo *runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     int index = *(static_cast<int*>(runtimeCallInfo->GetData()));
     auto binding = ThisJSClass::GetFunctionBinding(index);
+    if (binding == nullptr) {
+        LOGE("Calling %{public}s::%{public}d", ThisJSClass::JSName(), index);
+        return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
+    }
     LOGD("Calling %{public}s::%{public}s", ThisJSClass::JSName(), binding->Name());
 
     auto fnPtr = static_cast<StaticFunctionBinding<R, Args...>*>(binding)->Get();
@@ -447,7 +470,6 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
     constexpr bool hasArguments = sizeof...(Args) != 0;
 
     panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
-    EcmaVM* vm = runtimeCallInfo->GetVM();
     if constexpr (isVoid && hasArguments) {
         // void C::MemberFunction(Args...)
         FunctionUtils::CallStaticMemberFunction(fnPtr, tuple);
