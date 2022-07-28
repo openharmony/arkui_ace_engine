@@ -91,43 +91,6 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
     inSelectedRect_ = false;
 }
 
-void EventManager::HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList)
-{
-    for (auto iter = rectCallbackList.begin(); iter != rectCallbackList.end();) {
-        auto rectCallback = *iter;
-        auto rectGetCallback = rectCallback.rectGetCallback;
-        if (!rectGetCallback) {
-            ++iter;
-            continue;
-        }
-        std::vector<Rect> rectList;
-        rectGetCallback(rectList);
-        if (std::any_of(rectList.begin(), rectList.end(),
-            [point](const Rect& rect) { return rect.IsInRegion(point); })) {
-            ++iter;
-            continue;
-        }
-        for (const auto& rect : rectList) {
-            LOGI("Point(%{public}f, %{public}f) out of Rect-[%{public}f, %{public}f, %{public}f, %{public}f]",
-                point.GetX(), point.GetY(), rect.Left(), rect.Right(), rect.Top(), rect.Bottom());
-        }
-        if (point.GetSourceType() == SourceType::TOUCH) {
-            if (!rectCallback.touchCallback) {
-                ++iter;
-                continue;
-            }
-            rectCallback.touchCallback();
-        } else if (point.GetSourceType() == SourceType::MOUSE) {
-            if (!rectCallback.mouseCallback) {
-                ++iter;
-                continue;
-            }
-            rectCallback.mouseCallback();
-        }
-        iter = rectCallbackList.erase(iter);
-    }
-}
-
 void EventManager::TouchTest(
     const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict)
 {

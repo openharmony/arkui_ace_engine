@@ -113,13 +113,6 @@ RenderTextOverlay::~RenderTextOverlay()
     if (spOverlayComponent) {
         RemoveBackendEvent(spOverlayComponent);
     }
-    auto context = GetContext().Upgrade();
-    if (context) {
-        auto textOverlayManager = context->GetTextOverlayManager();
-        if (textOverlayManager) {
-            textOverlayManager->ClearTextOverlayRect();
-        }
-    }
 }
 
 void RenderTextOverlay::Update(const RefPtr<Component>& component)
@@ -547,11 +540,6 @@ void RenderTextOverlay::PerformLayout()
             textOverlayManager->AddTextOverlayRect(textOverlayRect);
             textOverlayManager->AddTextOverlayRect(startHandleRect);
             textOverlayManager->AddTextOverlayRect(endHandleRect);
-        }
-    } else {
-        auto textOverlayManager = context->GetTextOverlayManager();
-        if (textOverlayManager) {
-            textOverlayManager->ClearTextOverlayRect();
         }
     }
 }

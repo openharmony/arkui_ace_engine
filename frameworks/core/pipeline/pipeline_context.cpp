@@ -22,7 +22,6 @@
 #include "base/utils/utils.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
-#include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1565,8 +1564,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
     if (scalePoint.type == TouchType::DOWN) {
-        eventManager_->HandleOutOfRectCallback(
-            { scalePoint.x, scalePoint.y, scalePoint.sourceType }, rectCallbackList_);
         LOGD("receive touch down event, first use touch test to collect touch event target");
         eventManager_->HandleGlobalEvent(scalePoint, textOverlayManager_);
         TouchRestrict touchRestrict { TouchRestrict::NONE };
@@ -1709,10 +1706,6 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     LOGD(
         "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
         scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.button, scaleEvent.pressedButtons);
-    if (event.action == MouseAction::PRESS && event.button != MouseButton::LEFT_BUTTON) {
-        eventManager_->HandleOutOfRectCallback(
-            { scaleEvent.x, scaleEvent.y, scaleEvent.sourceType }, rectCallbackList_);
-    }
     eventManager_->MouseTest(scaleEvent, rootElement_->GetRenderNode());
     eventManager_->DispatchMouseEvent(scaleEvent);
     eventManager_->DispatchMouseHoverEvent(scaleEvent);
@@ -2507,7 +2500,6 @@ void PipelineContext::Destroy()
     sharedImageManager_.Reset();
     window_->Destroy();
     touchPluginPipelineContext_.clear();
-    rectCallbackList_.clear();
     LOGI("PipelineContext::Destroy end.");
 }
 

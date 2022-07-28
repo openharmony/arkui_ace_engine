@@ -33,21 +33,6 @@ class RenderNode;
 class Element;
 class TextOverlayManager;
 using MouseHoverTestList = std::list<WeakPtr<RenderNode>>;
-using OutOfRectGetRectCallback = std::function<void(std::vector<Rect>&)>;
-using OutOfRectTouchCallback = std::function<void(void)>;
-using OutOfRectMouseCallback = std::function<void(void)>;
-
-struct RectCallback final {
-    RectCallback(OutOfRectGetRectCallback rectGetCallback, OutOfRectTouchCallback touchCallback,
-        OutOfRectMouseCallback mouseCallback)
-        : rectGetCallback(std::move(rectGetCallback)), touchCallback(std::move(touchCallback)),
-          mouseCallback(std::move(mouseCallback))
-    {}
-    ~RectCallback() = default;
-    OutOfRectGetRectCallback rectGetCallback;
-    OutOfRectTouchCallback touchCallback;
-    OutOfRectMouseCallback mouseCallback;
-};
 
 class EventManager : public virtual AceType {
 public:
@@ -106,8 +91,6 @@ public:
     }
 
     void CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode);
-
-    void HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList);
 
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
