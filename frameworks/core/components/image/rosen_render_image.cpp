@@ -758,7 +758,7 @@ void RosenRenderImage::CanvasDrawImageRect(
     }
     if (!image_ || !image_->image()) {
         imageDataNotReady_ = true;
-        LOGI("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
+        LOGD("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
             rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
         return;
     }
