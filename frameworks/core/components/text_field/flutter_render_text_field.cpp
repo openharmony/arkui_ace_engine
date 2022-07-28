@@ -860,6 +860,9 @@ std::unique_ptr<txt::ParagraphStyle> FlutterRenderTextField::CreateParagraphStyl
         realTextDirection_ = textDirection_;
     }
     UpdateDirectionStatus();
+    if (keyboard_ != TextInputType::MULTILINE) {
+        style->word_break_type = minikin::WordBreakType::kWordBreakType_BreakAll;
+    }
     return style;
 }
 
