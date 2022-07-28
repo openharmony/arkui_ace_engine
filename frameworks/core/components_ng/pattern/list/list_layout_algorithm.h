@@ -58,6 +58,21 @@ public:
     {
         return endIndex_.value_or(0);
     }
+    
+    PositionMap GetPositionMap()
+    {
+        return itemPosition_;
+    }
+
+    void SetSpaceWidth(float spaceWidth)
+    {
+        spaceWidth_ = spaceWidth;
+    }
+    
+    float GetSpaceWidth()
+    {
+        return spaceWidth_;
+    }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
@@ -86,6 +101,8 @@ private:
     int32_t preEndIndex_ = 0;
     std::optional<int32_t> startIndex_;
     std::optional<int32_t> endIndex_;
+
+    float spaceWidth_ = 0.0;
 };
 } // namespace OHOS::Ace::NG
 

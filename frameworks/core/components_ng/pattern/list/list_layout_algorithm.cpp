@@ -112,6 +112,11 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(listLayoutProperty);
+
+    // get space
+    auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
+
+    // calculate idealSize and set FrameSize
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto idealSize =
         CreateIdealSize(listLayoutProperty->GetLayoutConstraint().value(), axis, listLayoutProperty->GetMeasureType());
@@ -121,12 +126,15 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     MinusPaddingToSize(listLayoutProperty->CreatePaddingPropertyF(), idealSize);
+
     // calculate main size.
     auto mainSize = GetMainAxisSize(idealSize, axis);
     startMainPos_ = currentOffset_;
     endMainPos_ = currentOffset_ + mainSize;
     LOGD("pre start index: %{public}d, pre end index: %{public}d, offset is %{public}f", preStartIndex_, preEndIndex_,
         currentOffset_);
+    
+    spaceWidth_ = ConvertToPx(space, listLayoutProperty->GetLayoutConstraint()->scaleProperty, mainSize);
 
     // calculate child layout constraint.
     auto contentLayoutConstraint = listLayoutProperty->CreateChildConstraint();
@@ -183,6 +191,7 @@ void ListLayoutAlgorithm::LayoutForward(
             }
         }
         itemPosition_[currentIndex] = { currentStartPos, currentEndPos };
+        currentEndPos = currentEndPos + spaceWidth_;
     } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize));
 
     startIndex_ = newStartIndex.value_or(preStartIndex_);
@@ -261,6 +270,7 @@ void ListLayoutAlgorithm::LayoutBackward(
             }
         }
         itemPosition_[currentIndex] = { currentStartPos, currentEndPos };
+        currentStartPos = currentStartPos - spaceWidth_;
     } while (GreatNotEqual(currentStartPos, startMainPos_ - cacheSize));
 
     endIndex_ = newEndIndex.value_or(preEndIndex_);
