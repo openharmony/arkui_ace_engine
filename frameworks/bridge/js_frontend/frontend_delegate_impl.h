@@ -395,6 +395,8 @@ private:
     int32_t OnPopPageSuccess();
     void PopPage();
 
+    void PushPageTransitionListener(const TransitionEvent& event, const RefPtr<JsAcePage>& page);
+
     void PopPageTransitionListener(const TransitionEvent& event, int32_t destroyPageId);
 
     void PopToPageTransitionListener(const TransitionEvent& event, const std::string& url, int32_t pageId);
