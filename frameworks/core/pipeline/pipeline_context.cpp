@@ -2160,10 +2160,17 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height, 
     CHECK_RUN_ON(UI);
     UpdateRootSizeAndScale(width, height);
     CHECK_NULL_VOID(rootElement_);
-    const Rect paintRect(0.0, offset, rootWidth_, rootHeight_);
+    const Rect paintRect(0.0, 0.0, rootWidth_, rootHeight_);
     auto rootNode = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
     if (!rootNode) {
         return;
+    }
+    auto stack = GetStageElement()->GetElementParent().Upgrade();
+    if (stack) {
+        auto renderStack = AceType::DynamicCast<RenderStack>(stack->GetRenderNode());
+        if (renderStack) {
+            renderStack->SetTop(Dimension(offset));
+        }
     }
     if (!NearEqual(viewScale_, rootNode->GetScale()) || paintRect != rootNode->GetPaintRect() || isDensityUpdate_) {
         if (!NearEqual(viewScale_, rootNode->GetScale())) {
