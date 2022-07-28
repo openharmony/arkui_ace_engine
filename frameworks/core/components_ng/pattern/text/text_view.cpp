@@ -56,4 +56,44 @@ void TextView::FontFamily(const std::vector<std::string>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value);
 }
+
+void TextView::TextAlign(const Ace::TextAlign& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value);
+}
+
+void TextView::TextOverflow(const Ace::TextOverflow& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value);
+}
+
+void TextView::MaxLines(const uint32_t& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value);
+}
+
+void TextView::LineHeight(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value);
+}
+
+void TextView::TextDecoration(const Ace::TextDecoration& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, value);
+}
+
+void TextView::TextDecorationColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationColor, value);
+}
+
+void TextView::BaselineOffset(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, value);
+}
+
+void TextView::TextCase(const Ace::TextCase& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value);
+}
 } // namespace OHOS::Ace::NG

@@ -41,6 +41,9 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         DEFINE_STYLE_UPDATE(textLineStyle, TextOverflow, SetTextOverflow);
         DEFINE_STYLE_UPDATE(textLineStyle, TextAlign, SetTextAlign);
         DEFINE_STYLE_UPDATE(textLineStyle, MaxLines, SetMaxLines);
+        DEFINE_STYLE_UPDATE(textLineStyle, TextDecoration, SetTextDecoration);
+        DEFINE_STYLE_UPDATE(textLineStyle, TextDecorationColor, SetTextDecorationColor);
+        DEFINE_STYLE_UPDATE(textLineStyle, TextCase, SetTextCase);
     }
     return textStyle;
 }
