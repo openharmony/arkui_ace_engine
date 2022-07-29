@@ -50,6 +50,8 @@ public:
 
     void Reset(double start, double end, double velocity, const RefPtr<SpringProperty>& spring);
 
+    std::string GetMotionType() const override;
+
 protected:
     double endPosition_ = 0.0;
     double currentPosition_ = 0.0;
