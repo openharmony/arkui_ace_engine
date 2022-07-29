@@ -302,6 +302,8 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { XCOMPONENT_TAG, XCOMPONENT_ETS_TAG },
 };
 
+thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;
+
 RefPtr<Element> InspectorComposedComponent::CreateElement()
 {
     auto generateFunc = CREATE_ELEMENT_MAP.find(GetName());
@@ -364,6 +366,11 @@ std::string InspectorComposedComponent::GetEtsTag(const std::string& tag)
         return tag;
     }
     return iter->second;
+}
+
+std::string InspectorComposedComponent::GenerateId()
+{
+    return std::to_string(composedElementId_++);
 }
 
 } // namespace OHOS::Ace::V2
