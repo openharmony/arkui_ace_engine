@@ -207,30 +207,6 @@ std::string WebPermissionRequestOhos::GetOrigin() const
     return "";
 }
 
-int32_t ContextMenuParamOhos::GetXCoord() const
-{
-    if (param_) {
-        return param_->GetXCoord();
-    }
-    return 0;
-}
-
-int32_t ContextMenuParamOhos::GetYCoord() const
-{
-    if (param_) {
-        return param_->GetYCoord();
-    }
-    return 0;
-}
-
-std::string ContextMenuParamOhos::GetLinkUrl() const
-{
-    if (param_) {
-        return param_->GetLinkUrl();
-    }
-    return "";
-}
-
 std::vector<std::string> WebPermissionRequestOhos::GetResources() const
 {
     std::vector<std::string> resources;
@@ -269,6 +245,30 @@ void WebPermissionRequestOhos::Grant(std::vector<std::string>& resources) const
         }
         request_->Agree(resourcesId);
     }
+}
+
+int32_t ContextMenuParamOhos::GetXCoord() const
+{
+    if (param_) {
+        return param_->GetXCoord();
+    }
+    return 0;
+}
+
+int32_t ContextMenuParamOhos::GetYCoord() const
+{
+    if (param_) {
+        return param_->GetYCoord();
+    }
+    return 0;
+}
+
+std::string ContextMenuParamOhos::GetLinkUrl() const
+{
+    if (param_) {
+        return param_->GetLinkUrl();
+    }
+    return "";
 }
 
 std::string ContextMenuParamOhos::GetUnfilteredLinkUrl() const
