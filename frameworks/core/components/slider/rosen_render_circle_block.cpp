@@ -108,7 +108,7 @@ void RosenRenderCircleBlock::PaintShadow(RenderContext& context, const Offset& o
     double diameter = radius * 2.0;
     SkRect rect = SkRect::MakeXYWH(offset.GetX() - radius, offset.GetY() - radius, diameter, diameter);
     RosenDecorationPainter::PaintShadow(SkPath().addRRect(SkRRect::MakeRectXY(rect, radius, radius)),
-        ShadowConfig::DefaultShadowXS, static_cast<RosenRenderContext*>(&context)->GetRSNode());
+        ShadowConfig::DefaultShadowXS, static_cast<RosenRenderContext*>(&context)->GetCanvas());
 }
 
 } // namespace OHOS::Ace
