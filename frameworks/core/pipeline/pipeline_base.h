@@ -458,6 +458,11 @@ public:
 
     void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
+    virtual void FlushReloadTransition()
+    {
+        return;
+    }
+
 protected:
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;

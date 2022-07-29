@@ -80,9 +80,9 @@ Global::Resource::ColorMode ConvertColorModeToGlobal(ColorMode colorMode)
     }
 }
 
-Global::Resource::InputDevice ConvertHasInputDevice(bool hasInputDevice)
+Global::Resource::InputDevice ConvertInputDevice(bool deviceAccess)
 {
-    return hasInputDevice ? Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE :
+    return deviceAccess ? Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE :
         Global::Resource::InputDevice::INPUTDEVICE_NOT_SET;
 }
 
@@ -96,7 +96,7 @@ std::shared_ptr<Global::Resource::ResConfig> ConvertConfigToGlobal(const Resourc
     newResCfg->SetDirection(ConvertDirectionToGlobal(config.GetOrientation()));
     newResCfg->SetScreenDensity(ConvertDensityToGlobal(config.GetDensity()));
     newResCfg->SetColorMode(ConvertColorModeToGlobal(config.GetColorMode()));
-    newResCfg->SetInputDevice(ConvertHasInputDevice(config.GetInputDevice()));
+    newResCfg->SetInputDevice(ConvertInputDevice(config.GetDeviceAccess()));
     return newResCfg;
 }
 

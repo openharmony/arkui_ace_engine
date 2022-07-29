@@ -56,7 +56,7 @@ public:
     static void RootViewHandle(panda::Local<panda::ObjectRef> value);
     void DestroyRootViewHandle(int32_t pageId);
     void DestroyAllRootViewHandle();
-    void MarkAllRootViewNeedUpdate();
+    void FlushReload();
 
     static std::unique_ptr<JsonValue> GetI18nStringResource(
         const std::string& targetStringKey, const std::string& targetStringValue);
@@ -280,10 +280,10 @@ public:
         return engineInstance_;
     }
 
-    virtual void MarkNeedUpdate() override
+    virtual void FlushReload() override
     {
         if (engineInstance_) {
-            engineInstance_->MarkAllRootViewNeedUpdate();
+            engineInstance_->FlushReload();
         }
     }
 

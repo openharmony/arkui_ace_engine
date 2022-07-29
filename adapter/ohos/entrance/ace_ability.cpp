@@ -253,7 +253,7 @@ void AceAbility::OnStart(const Want& want)
             SystemProperties::SetColorMode(ColorMode::LIGHT);
             LOGI("UIContent set light mode");
         }
-        SystemProperties::SetInputDevice(
+        SystemProperties::SetDeviceAccess(
             resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
     } else {
         LOGW("resourceManager is null.");
@@ -316,7 +316,7 @@ void AceAbility::OnStart(const Want& want)
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
-    aceResCfg.SetInputDevice(SystemProperties::GetInputDevice());
+    aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetBundlePath(abilityContext->GetBundleCodeDir());
@@ -520,9 +520,9 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
         return;
     }
     auto colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    auto inputDevice = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+    auto deviceAccess = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     auto languageTag = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    container->UpdateConfiguration(colorMode, inputDevice, languageTag);
+    container->UpdateConfiguration(colorMode, deviceAccess, languageTag);
     LOGI("AceAbility::OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());
 }
 

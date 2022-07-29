@@ -85,14 +85,14 @@ public:
         return colorMode_;
     }
 
-    void SetInputDevice(bool hasInputDevice)
+    void SetDeviceAccess(bool isDeviceAccess)
     {
-        hasInputDevice_ = hasInputDevice;
+        isDeviceAccess_ = isDeviceAccess;
     }
 
-    bool GetInputDevice() const
+    bool GetDeviceAccess() const
     {
-        return hasInputDevice_;
+        return isDeviceAccess_;
     }
 
     bool UpdateFromJsonString(const std::string jsonStr, uint32_t& updateFlags);
@@ -106,7 +106,7 @@ private:
     DeviceOrientation orientation_ = DeviceOrientation::PORTRAIT;
     double density_ = 1.0;
     double fontRatio_ = 1.0;
-    bool hasInputDevice_ = false;
+    bool isDeviceAccess_ = false;
     ColorMode colorMode_ = ColorMode::LIGHT;
 };
 

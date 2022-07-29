@@ -510,12 +510,12 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
     rootViewMap_.clear();
 }
 
-void JsiDeclarativeEngineInstance::MarkAllRootViewNeedUpdate()
+void JsiDeclarativeEngineInstance::FlushReload()
 {
     CHECK_RUN_ON(JS);
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     if (rootViewMap_.empty()) {
-        LOGW("MarkAllRootViewNeedUpdate release left %{private}zu views ", rootViewMap_.size());
+        LOGW("FlushReload release left %{private}zu views ", rootViewMap_.size());
         return;
     }
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
