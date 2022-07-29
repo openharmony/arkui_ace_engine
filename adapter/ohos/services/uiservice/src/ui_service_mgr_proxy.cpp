@@ -21,8 +21,7 @@
 #include "ui_service_proxy.h"
 #include "ui_service_stub.h"
 
-namespace OHOS {
-namespace Ace {
+namespace OHOS::Ace {
 bool UIServiceMgrProxy::WriteInterfaceToken(MessageParcel& data)
 {
     if (!data.WriteInterfaceToken(UIServiceMgrProxy::GetDescriptor())) {
@@ -176,7 +175,7 @@ int UIServiceMgrProxy::ReturnRequest(const AAFwk::Want& want, const std::string&
 
 int UIServiceMgrProxy::ShowDialog(const std::string& name,
                                   const std::string& params,
-                                  OHOS::Rosen::WindowType windowType,
+                                  uint32_t windowType,
                                   int x,
                                   int y,
                                   int width,
@@ -202,7 +201,7 @@ int UIServiceMgrProxy::ShowDialog(const std::string& name,
         return INVALID_DATA;
     }
 
-    if (!dataParcel.WriteUint32(static_cast<uint32_t>(windowType))) {
+    if (!dataParcel.WriteUint32(windowType)) {
         HILOG_ERROR("fail to WriteUInt32 windowType");
         return INVALID_DATA;
     }
@@ -273,7 +272,7 @@ int UIServiceMgrProxy::UpdateDialog(int id, const std::string& data)
 {
     MessageParcel dataParcel;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
 
     if (!WriteInterfaceToken(dataParcel)) {
         return UI_SERVICE_PROXY_INNER_ERR;
@@ -296,5 +295,59 @@ int UIServiceMgrProxy::UpdateDialog(int id, const std::string& data)
     }
     return reply.ReadInt32();
 }
-}  // namespace Ace
-}  // namespace OHOS
+
+int32_t UIServiceMgrProxy::AttachToUiService(const sptr<IRemoteObject>& dialog, int32_t pid)
+{
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    MessageOption option { MessageOption::TF_ASYNC };
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return UI_SERVICE_PROXY_INNER_ERR;
+    }
+
+    if (!dataParcel.WriteRemoteObject(dialog)) {
+        HILOG_ERROR("Failed to write remote object");
+        return UI_SERVICE_PROXY_INNER_ERR;
+    }
+    if (!dataParcel.WriteInt32(pid)) {
+        HILOG_ERROR("fail to WriteString pid");
+        return INVALID_DATA;
+    }
+    int32_t result = Remote()->SendRequest(IUIServiceMgr::ATTACH_DIALOG, dataParcel, reply, option);
+    if (result != NO_ERROR) {
+        HILOG_ERROR("Request fail, error: %{public}d", result);
+        return result;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t UIServiceMgrProxy::RemoteDialogCallback(int32_t id, const std::string& event, const std::string& params)
+{
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    MessageOption option { MessageOption::TF_ASYNC };
+
+    if (!WriteInterfaceToken(dataParcel)) {
+        return UI_SERVICE_PROXY_INNER_ERR;
+    }
+    if (!dataParcel.WriteInt32(id)) {
+        HILOG_ERROR("fail to WriteString pid");
+        return INVALID_DATA;
+    }
+    if (!dataParcel.WriteString(event)) {
+        HILOG_ERROR("fail to WriteString data");
+        return INVALID_DATA;
+    }
+    if (!dataParcel.WriteString(params)) {
+        HILOG_ERROR("fail to WriteString data");
+        return INVALID_DATA;
+    }
+    int32_t result = Remote()->SendRequest(IUIServiceMgr::REMOTE_DIALOG_CALLBACK, dataParcel, reply, option);
+    if (result != NO_ERROR) {
+        HILOG_ERROR("Request fail, error: %{public}d", result);
+        return result;
+    }
+    return reply.ReadInt32();
+}
+}

@@ -679,7 +679,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
     jsFront->SetInstanceName(instanceName);
 }
 
-void AceContainer::DestroyContainer(int32_t instanceId)
+void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
@@ -698,11 +698,14 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
     if (taskExecutor) {
         taskExecutor->PostTask(
-            [instanceId] {
+            [instanceId, destroyCallback] {
                 LOGI("Remove on Platform thread...");
                 EngineHelper::RemoveEngine(instanceId);
                 AceEngine::Get().RemoveContainer(instanceId);
                 ConnectServerManager::Get().RemoveInstance(instanceId);
+                if (destroyCallback) {
+                    destroyCallback();
+                }
             },
             TaskExecutor::TaskType::PLATFORM);
     }
