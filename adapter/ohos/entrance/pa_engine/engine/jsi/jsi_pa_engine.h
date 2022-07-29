@@ -137,6 +137,9 @@ public:
 
     // data
     int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value) override;
+    std::shared_ptr<AppExecFwk::PacMap> Call(const std::string& method,
+        const std::string& arg, const AppExecFwk::PacMap& pacMap) override;
+	
     int32_t BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values) override;
     std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(const Uri& uri, const std::vector<std::string>& columns,
         const OHOS::NativeRdb::DataAbilityPredicates& predicates) override;
@@ -183,6 +186,14 @@ private:
     void RegisterWorker();
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
+
+    std::string ExcludeTag(const std::string& jsonString, const std::string& tagString);
+    std::string IncludeTag(const std::string& jsonString, const std::string& tagString);
+    std::shared_ptr<AppExecFwk::PacMap> BuildPacMap(const napi_env& env, const napi_value& arg);
+    void SetPacMapObject(std::shared_ptr<AppExecFwk::PacMap> pacMap,
+        const napi_env& env, std::string keyStr, napi_value value);
+    std::string UnwrapStringFromJS(napi_env env, napi_value param, const std::string& defaultValue = "");
+    std::vector<std::string> ConvertStringVector(napi_env env, napi_value jsValue);
 
     int32_t instanceId_ = 0;
     ArkNativeEngine* nativeEngine_ = nullptr;
