@@ -2053,6 +2053,7 @@ void FrontendDelegateDeclarative::ReplacePageInSubStage(const RefPtr<JsAcePage>&
                     }
                     delegate->OnReplacePageSuccess(page, url);
                     delegate->SetCurrentPage(page->GetPageId());
+                    delegate->OnPageShow();
                     delegate->OnMediaQueryUpdate();
                     delegate->ProcessRouterTask();
                 });
