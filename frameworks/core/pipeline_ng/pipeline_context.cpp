@@ -15,6 +15,7 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include <cstdint>
 #include <memory>
 
 #include "base/log/ace_trace.h"
@@ -67,6 +68,14 @@ void PipelineContext::AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElemen
     window_->RequestFrame();
 }
 
+uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
+{
+    CHECK_RUN_ON(UI);
+    scheduleTasks_.try_emplace(++nextScheduleTaskId_, task);
+    window_->RequestFrame();
+    return nextScheduleTaskId_;
+}
+
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
@@ -77,6 +86,28 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
     FlushPipelineWithoutAnimation();
+}
+
+void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushAnimation();
+    }
+
+    decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
+    for (const auto& [id, weakTask] : temp) {
+        auto task = weakTask.Upgrade();
+        if (task) {
+            task->OnFrame(nanoTimestamp);
+        }
+    }
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushAnimation();
+    }
 }
 
 void PipelineContext::FlushMessages()
