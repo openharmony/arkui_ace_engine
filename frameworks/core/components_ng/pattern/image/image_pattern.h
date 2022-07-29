@@ -88,7 +88,11 @@ private:
 
     void OnImageObjectReady(const RefPtr<ImageObject>& imageObj);
     // TODO: add adapter for image.
+#ifdef NG_BUILD
+    void OnImageDataUploaded(RefPtr<CanvasImage> image);
+#else
     void OnImageDataUploaded(fml::RefPtr<flutter::CanvasImage> image);
+#endif
     void CacheImageObject();
 
     ImageObjSuccessCallback CreateSuccessCallback();

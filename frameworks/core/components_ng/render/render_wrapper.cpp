@@ -20,13 +20,12 @@
 namespace OHOS::Ace::NG {
 void RenderWrapper::FlushRender()
 {
-    const auto& rect = geometryNode_->GetFrame().GetRect();
     auto renderContext = renderContext_.Upgrade();
     if (!renderContext) {
         LOGE("render context is nullptr");
         return;
     }
-    renderContext->StartRecording(rect.GetX(), rect.GetY(), rect.GetSize().Width(), rect.GetSize().Height());
+    renderContext->StartRecording();
 
     // first paint background.
 

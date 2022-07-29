@@ -112,7 +112,11 @@ FlutterTaskExecutor::FlutterTaskExecutor(const flutter::TaskRunners& taskRunners
     platformRunner_ = taskRunners.GetPlatformTaskRunner();
     uiRunner_ = taskRunners.GetUITaskRunner();
     ioRunner_ = taskRunners.GetIOTaskRunner();
+#ifdef NG_BUILD
+    gpuRunner_ = taskRunners.GetRasterTaskRunner();
+#else
     gpuRunner_ = taskRunners.GetGPUTaskRunner();
+#endif
 }
 
 FlutterTaskExecutor::~FlutterTaskExecutor()
@@ -152,7 +156,11 @@ void FlutterTaskExecutor::InitOtherThreads(const flutter::TaskRunners& taskRunne
 {
     uiRunner_ = taskRunners.GetUITaskRunner();
     ioRunner_ = taskRunners.GetIOTaskRunner();
+#ifdef NG_BUILD
+    gpuRunner_ = taskRunners.GetRasterTaskRunner();
+#else
     gpuRunner_ = taskRunners.GetGPUTaskRunner();
+#endif
 
     PostTaskToTaskRunner(
         uiRunner_, [] { SetThreadPriority(UI_THREAD_PRIORITY); }, 0);

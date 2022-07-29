@@ -19,7 +19,11 @@
 #include <string>
 
 #include "flutter/fml/memory/ref_counted.h"
+#ifdef NG_BUILD
+#include "flutter/lib/ui/io_manager.h"
+#else
 #include "flutter/lib/ui/painting/image.h"
+#endif
 #include "third_party/skia/include/codec/SkCodec.h"
 
 #include "base/memory/ace_type.h"
@@ -28,6 +32,10 @@
 #include "core/image/image_source_info.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline/pipeline_base.h"
+
+#ifdef NG_BUILD
+#include "core/components_ng/render/canvas_image.h"
+#endif
 
 class SkSVGDOM;
 namespace OHOS::Ace {
@@ -53,7 +61,11 @@ public:
 
 class SvgDom;
 using ImageObjSuccessCallback = std::function<void(ImageSourceInfo, const RefPtr<ImageObject>)>;
+#ifdef NG_BUILD
+using UploadSuccessCallback = std::function<void(ImageSourceInfo, const RefPtr<NG::CanvasImage>&)>;
+#else
 using UploadSuccessCallback = std::function<void(ImageSourceInfo, const fml::RefPtr<flutter::CanvasImage>&)>;
+#endif
 using SvgDomSuccessCallback =  std::function<void(ImageSourceInfo, const RefPtr<SvgDom>&)>;
 using FailedCallback = std::function<void(ImageSourceInfo)>;
 using CancelableTask = CancelableCallback<void()>;
@@ -78,6 +90,7 @@ public:
     static void TryLoadImageInfo(const RefPtr<PipelineBase>& context, const std::string& src,
         std::function<void(bool, int32_t, int32_t)>&& loadCallback);
 
+#ifndef NG_BUILD
     static void GetSVGImageDOMAsyncFromSrc(
         const std::string& src,
         std::function<void(const sk_sp<SkSVGDOM>&)> callback,
@@ -93,6 +106,7 @@ public:
         const WeakPtr<PipelineBase> context,
         uint64_t svgThemeColor = 0,
         OnPostBackgroundTask onBackgroundTaskPostCallback = nullptr);
+#endif
 
     // upload image data to gpu context for painting asynchronously.
     static void UploadImageToGPUForRender(
@@ -175,7 +189,11 @@ public:
         const RefPtr<TaskExecutor>& taskExecutor,
         const ImageSourceInfo& imageInfo,
         const Size& imageSize,
+#ifdef NG_BUILD
+        const RefPtr<NG::CanvasImage>& canvasImage);
+#else
         const fml::RefPtr<flutter::CanvasImage>& canvasImage);
+#endif
 
 private:
     static std::mutex loadingImageMutex_;

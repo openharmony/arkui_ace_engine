@@ -81,6 +81,7 @@ void FontManager::RemoveFontNode(const WeakPtr<RenderNode>& node)
 
 void FontManager::RebuildFontNode()
 {
+#ifndef NG_BUILD
     for (auto iter = fontNodes_.begin(); iter != fontNodes_.end();) {
         auto fontNode = iter->Upgrade();
         if (fontNode) {
@@ -90,6 +91,7 @@ void FontManager::RebuildFontNode()
             iter = fontNodes_.erase(iter);
         }
     }
+#endif
 }
 
 void FontManager::UnRegisterCallback(const WeakPtr<RenderNode>& node)
@@ -122,6 +124,7 @@ void FontManager::RemoveVariationNode(const WeakPtr<RenderNode>& node)
 
 void FontManager::NotifyVariationNodes()
 {
+#ifndef NG_BUILD
     for (const auto& node : variationNodes_) {
         auto refNode = node.Upgrade();
         if (refNode) {
@@ -132,6 +135,7 @@ void FontManager::NotifyVariationNodes()
             refNode->MarkNeedLayout();
         }
     }
+#endif
 }
 
 } // namespace OHOS::Ace

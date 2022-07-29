@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_SKIA_CANVAS_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_SKIA_CANVAS_IMAGE_H
 
+#ifdef NG_BUILD
+#include "third_party/skia/include/core/SkImage.h"
+#else
 #include "flutter/lib/ui/painting/image.h"
+#endif
 
 #include "core/components_ng/render/canvas_image.h"
 
@@ -25,21 +29,29 @@ namespace OHOS::Ace::NG {
 class SkiaCanvasImage : public CanvasImage {
     DECLARE_ACE_TYPE(SkiaCanvasImage, CanvasImage)
 public:
-    SkiaCanvasImage(const fml::RefPtr<flutter::CanvasImage>& image) : image_(image) {}
+#ifndef NG_BUILD
+    explicit SkiaCanvasImage(const fml::RefPtr<flutter::CanvasImage>& image) : image_(image) {}
+#else
+    SkiaCanvasImage() = default;
+#endif
 
     ~SkiaCanvasImage() override = default;
 
     sk_sp<SkImage> GetCanvasImage() const
     {
+#ifndef NG_BUILD
         if (image_) {
             return image_->image();
         }
+#endif
         return nullptr;
     }
 
 private:
     // TODO: add adapter for image.
+#ifndef NG_BUILD
     fml::RefPtr<flutter::CanvasImage> image_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

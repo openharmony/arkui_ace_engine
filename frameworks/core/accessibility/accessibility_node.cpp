@@ -442,6 +442,7 @@ void AccessibilityNode::SetFocusChangeEventMarker(const EventMarker& eventId)
         LOGE("Container is null.");
         return;
     }
+#ifndef NG_BUILD
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     if (!pipelineContext) {
         LOGE("PipelineContext is null.");
@@ -449,6 +450,7 @@ void AccessibilityNode::SetFocusChangeEventMarker(const EventMarker& eventId)
     }
     focusChangeEventId_ =
         AceAsyncEvent<void(const std::string&)>::Create(eventId, pipelineContext);
+#endif
 }
 
 void AccessibilityNode::OnFocusChange(bool isFocus)

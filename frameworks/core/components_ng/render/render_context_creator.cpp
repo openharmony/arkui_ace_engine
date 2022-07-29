@@ -16,6 +16,9 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
+#ifdef NG_BUILD
+#include "core/components_ng/render/adapter/flutter_render_context.h"
+#endif
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -26,6 +29,10 @@ RefPtr<RenderContext> RenderContext::Create()
         return MakeRefPtr<RosenRenderContext>();
 #endif
     }
+#ifdef NG_BUILD
+    return MakeRefPtr<FlutterRenderContext>();
+#else
     return nullptr;
+#endif
 }
 } // namespace OHOS::Ace::NG

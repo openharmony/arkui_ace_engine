@@ -28,7 +28,7 @@ RosenRenderContext::~RosenRenderContext()
     StopRecordingIfNeeded();
 }
 
-void RosenRenderContext::StartRecording(float x, float y, float width, float height)
+void RosenRenderContext::StartRecording()
 {
     if (rsNode_ == nullptr) {
         return;
