@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMMON_FLUTTER_FLUTTER_TASK_EXECUTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMMON_FLUTTER_FLUTTER_TASK_EXECUTOR_H
 
+#include <array>
+#include <atomic>
+#include <mutex>
 #include <thread>
 #include <unordered_map>
 
@@ -49,6 +52,11 @@ public:
         return taskTypeTable_[type].tid;
     }
 
+    uint32_t GetTotalTaskNum(TaskType type) final
+    {
+        return taskIdTable_[static_cast<uint32_t>(type)];
+    }
+
 private:
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const final;
     Task WrapTaskWithTraceId(Task&& task, int32_t id) const final;
@@ -72,6 +80,8 @@ private:
 
     mutable std::mutex tableMutex_;
     std::unordered_map<TaskType, ThreadInfo> taskTypeTable_;
+    mutable std::array<std::atomic<uint32_t>, TASK_TYPE_SIZE> taskIdTable_ { 0 };
+
     static thread_local TaskType localTaskType;
 
     std::unique_ptr<fml::Thread> jsThread_;

@@ -16,6 +16,7 @@
 #include "core/common/flutter/flutter_task_executor.h"
 
 #include <cerrno>
+#include <functional>
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
 #ifdef OHOS_STANDARD_SYSTEM
 #include <sys/prctl.h>
@@ -35,10 +36,10 @@
 #endif
 
 #include "base/log/log.h"
+#include "base/log/trace_id.h"
 #include "base/thread/background_task_executor.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "base/log/trace_id.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -52,9 +53,11 @@ inline std::string GenJsThreadName()
     return std::string("jsThread-") + std::to_string(instanceCount.fetch_add(1, std::memory_order_relaxed));
 }
 
-TaskExecutor::Task WrapTaskWithContainer(TaskExecutor::Task&& task, int32_t id)
+TaskExecutor::Task WrapTaskWithContainer(
+    TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc = nullptr)
 {
-    auto wrappedTask = [originTask = std::move(task), id, traceId = TraceId::CreateTraceId()]() {
+    auto wrappedTask = [originTask = std::move(task), id, traceId = TraceId::CreateTraceId(),
+                           traceIdFunc = std::move(traceIdFunc)]() {
         ContainerScope scope(id);
         std::unique_ptr<TraceId> traceIdPtr(traceId);
         if (originTask && traceIdPtr) {
@@ -63,6 +66,9 @@ TaskExecutor::Task WrapTaskWithContainer(TaskExecutor::Task&& task, int32_t id)
             traceIdPtr->ClearTraceId();
         } else {
             LOGW("WrapTaskWithContainer: originTask or traceIdPtr is null.");
+        }
+        if (traceIdFunc) {
+            traceIdFunc();
         }
     };
     return wrappedTask;
@@ -170,8 +176,11 @@ void FlutterTaskExecutor::InitOtherThreads(const flutter::TaskRunners& taskRunne
 bool FlutterTaskExecutor::OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const
 {
     int32_t currentId = Container::CurrentId();
+    auto traceIdFunc = [this, type]() {
+        this->taskIdTable_[static_cast<uint32_t>(type)]++;
+    };
     TaskExecutor::Task wrappedTask =
-        currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId) : std::move(task);
+        currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc)) : std::move(task);
 
     switch (type) {
         case TaskType::PLATFORM:

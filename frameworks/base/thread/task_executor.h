@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_THREAD_TASK_EXECUTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_THREAD_TASK_EXECUTOR_H
 
+#include <cstdint>
 #include <functional>
 
 #include "base/memory/ace_type.h"
@@ -32,6 +33,7 @@ public:
     using Task = std::function<void()>;
     using CancelableTask = CancelableCallback<void()>;
 
+    static constexpr int32_t TASK_TYPE_SIZE = 7;
     enum class TaskType : uint32_t {
         PLATFORM = 0,
         UI,
@@ -197,6 +199,11 @@ public:
     virtual bool WillRunOnCurrentThread(TaskType type) const = 0;
 
     virtual int32_t GetTid(TaskType type)
+    {
+        return 0;
+    }
+
+    virtual uint32_t GetTotalTaskNum(TaskType type)
     {
         return 0;
     }
