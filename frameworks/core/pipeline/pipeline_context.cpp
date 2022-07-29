@@ -891,9 +891,14 @@ void PipelineContext::SetupRootElement()
         renderRoot->SetDefaultBgColor(windowModal_ == WindowModal::CONTAINER_MODAL);
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_ && renderRoot) {
         LOGI("rosen ui director call set root.");
         rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
+        if (windowModal_ == WindowModal::CONTAINER_MODAL) {
+            rsUIDirector_->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+        } else {
+            rsUIDirector_->SetAbilityBGAlpha(renderRoot->GetBgColor().GetAlpha());
+        }
     }
 #endif
     sharedTransitionController_->RegisterTransitionListener();
@@ -943,6 +948,10 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
         rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
+        auto renderRoot = AceType::DynamicCast<RenderRoot>(rootRenderNode);
+        if (renderRoot) {
+            rsUIDirector_->SetAbilityBGAlpha(renderRoot->GetBgColor().GetAlpha());
+        }
     }
 #endif
     sharedTransitionController_->RegisterTransitionListener();
@@ -2300,6 +2309,11 @@ void PipelineContext::SetAppBgColor(const Color& color)
 {
     LOGI("Set bgColor %{public}u", color.GetValue());
     appBgColor_ = color;
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsUIDirector_) {
+        rsUIDirector_->SetAbilityBGAlpha(appBgColor_.GetAlpha());
+    }
+#endif
     if (!themeManager_) {
         LOGW("themeManager_ is nullptr!");
         return;
