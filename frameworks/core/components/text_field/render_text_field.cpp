@@ -428,7 +428,6 @@ void RenderTextField::OnTouchTestHit(
             }
         });
         clickRecognizer_->SetPriority(GesturePriority::Low);
-        clickRecognizer_->SetUseCatchMode(false);
     }
     clickRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(clickRecognizer_);
