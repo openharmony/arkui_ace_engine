@@ -386,6 +386,12 @@ void RenderSideBarContainer::PlaceChildren()
 
 void RenderSideBarContainer::SetChildrenStatus()
 {
+    auto layoutSize = GetLayoutSize();
+    if (!layoutSize.IsValid()) {
+        LOGW("SetChildrenStatus: Layout size is invalid.");
+        return;
+    }
+
     auto children = GetChildren();
     auto begin = children.begin();
     RefPtr<RenderNode>& content = *begin;
@@ -400,7 +406,6 @@ void RenderSideBarContainer::SetChildrenStatus()
     }
 
     static Dimension miniWidthToHide = 520.0_vp;
-    auto layoutSize = GetLayoutSize();
     auto sideBarWidthVP = ConvertWidthToVp(sidebarWidth_);
     auto autoHide = layoutSize.Width() <= miniWidthToHide.ConvertToPx();
     if (status_ == SideStatus::HIDDEN) {
