@@ -61,9 +61,7 @@ void RenderCustomPaint::Update(const RefPtr<Component>& component)
         canvasOnReadyEvent_ = taskPool->GetOnReadyEvent();
         // trigger onReady() every time build() is triggered, to support camera application.
         if (isCanvasInit_) {
-            if (canvasOnReadyEvent_ && (!drawSize_.IsHeightInfinite())) {
-                canvasOnReadyEvent_();
-            }
+            isCanvasInit_ = false;
         }
     }
     MarkNeedLayout();
@@ -73,6 +71,16 @@ void RenderCustomPaint::PerformLayout()
 {
     drawSize_ = GetLayoutParam().GetMaxSize();
     SetLayoutSize(drawSize_);
+}
+
+void RenderCustomPaint::OnPositionChanged()
+{
+    isCanvasInit_ = false;
+}
+
+void RenderCustomPaint::OnSizeChanged()
+{
+    isCanvasInit_ = false;
 }
 
 void RenderCustomPaint::TriggerOnReadyEvent()

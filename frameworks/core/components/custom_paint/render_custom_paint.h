@@ -40,6 +40,8 @@ public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
+    void OnPositionChanged() override;
+    void OnSizeChanged() override;
 
     void PushTask(const TaskFunc& func);
 
