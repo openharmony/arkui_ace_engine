@@ -67,6 +67,7 @@ public:
     void Ellipse(const Offset& offset, const EllipseParam& param) override;
     void AddRect(const Offset& offset, const Rect& rect) override;
     void Fill(const Offset& offset) override;
+    void Fill(const Offset& offset, const RefPtr<CanvasPath2D>& path) override;
     void Stroke(const Offset& offset) override;
     void Stroke(const Offset& offset, const RefPtr<CanvasPath2D>& path) override;
     void Clip() override;
@@ -87,6 +88,9 @@ public:
 
     void WebGLInit(CanvasRenderContextBase* context) override;
     void WebGLUpdate() override;
+
+    void SetFillRuleForPath(const CanvasFillRule& rule) override;
+    void SetFillRuleForPath2D(const CanvasFillRule& rule) override;
 
     bool IsRepaintBoundary() const override
     {
@@ -119,6 +123,8 @@ private:
     void Path2DRect(const Offset& offset, const PathArgs& args);
     void Path2DClosePath(const Offset& offset, const PathArgs& args);
     void Path2DStroke(const Offset& offset);
+    void Path2DFill(const Offset& offset);
+    void ParsePath2D(const Offset& offset, const RefPtr<CanvasPath2D>& path);
     void InitImageCallbacks();
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed();
@@ -130,7 +136,8 @@ private:
     bool antiAlias_ = false;
     std::unique_ptr<txt::Paragraph> paragraph_;
     SkPath skPath_;
-    SkPath strokePath_;
+    // Specifically refers to the class Path2D in canvas.d.ts
+    SkPath skPath2d_;
     SkPaint imagePaint_;
     SkBitmap canvasCache_;
     SkBitmap webglBitmap_;
