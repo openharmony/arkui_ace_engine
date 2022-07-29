@@ -60,7 +60,6 @@ public:
     static ViewStackProcessor* GetInstance();
     ~ViewStackProcessor() = default;
     // possible wrapping components
-    static std::string GenerateId();
     RefPtr<FlexItemComponent> GetFlexItemComponent();
     RefPtr<StepperItemComponent> GetStepperItemComponent();
     RefPtr<DisplayComponent> GetStepperDisplayComponent();
@@ -281,8 +280,6 @@ private:
 
     AnimationOption implicitAnimationOption_;
     VisualState visualState_ = VisualState::NOTSET;
-
-    static thread_local int32_t composedElementId_;
 
     bool isScoringEnable_ = false;
 
