@@ -1103,7 +1103,8 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
 {
     ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
-    ResSchedReport::GetInstance().ResSchedDataReport("push_page");
+    std::unordered_map<std::string, std::string> params {{"pageUrl", pageComponent->GetPageUrl()}};
+    ResSchedReport::GetInstance().ResSchedDataReport("push_page_start", params);
     auto stageElement = stage;
     if (!stageElement) {
         // if not target stage, use root stage
@@ -1123,6 +1124,7 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
         RefPtr<DisplayComponent> display = AceType::MakeRefPtr<DisplayComponent>(pageComponent);
         stageElement->PushPage(display);
     }
+    ResSchedReport::GetInstance().ResSchedDataReport("push_page_complete", params);
 
 #if defined(ENABLE_NATIVE_VIEW) || defined(ENABLE_ROSEN_BACKEND)
     if (GetIsDeclarative()) {

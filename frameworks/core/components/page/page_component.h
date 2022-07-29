@@ -36,6 +36,11 @@ public:
         return pageId_;
     }
 
+    const std::string& GetPageUrl()
+    {
+        return pageUrl_;
+    }
+
 private:
     int32_t pageId_ = -1;
     std::string pageUrl_;

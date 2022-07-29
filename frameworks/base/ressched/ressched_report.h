@@ -32,11 +32,14 @@ class ACE_EXPORT ResSchedReport final {
 public:
     static ResSchedReport& GetInstance();
     void ResSchedDataReport(const char* name);
+    void ResSchedDataReport(const char* name, std::unordered_map<std::string, std::string>& param);
 
 private:
     ResSchedReport() {}
     ~ResSchedReport() {}
     ReportDataFunc reportDataFunc_ = nullptr;
+
+    void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& payload);
 };
 } // namespace OHOS::Ace
 
