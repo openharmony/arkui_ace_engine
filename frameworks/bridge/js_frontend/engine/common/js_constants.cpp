@@ -120,6 +120,10 @@ const char SPRING_CURVE[] = "springCurve";
 const char CURVES_STEPS[] = "steps";
 const char STEPS_CURVE[] = "stepsCurve";
 const char CURVE_INTERPOLATE[] = "interpolate";
+const char SPRING_MOTION[] = "springMotion";
+const char RESPONSIVE_SPRING_MOTION[] = "responsiveSpringMotion";
+const char DOM_ANIMATION_TIMING_FUNCTION_SPRING_MOTION[] = "spring-motion";
+const char DOM_ANIMATION_TIMING_FUNCTION_RESPONSIVE_SPRING_MOTION[] = "responsive-spring-motion";
 
 // for grid
 const char GRID_GET_SYSTEM_LAYOUT_INFO[] = "getSystemLayoutInfo";
