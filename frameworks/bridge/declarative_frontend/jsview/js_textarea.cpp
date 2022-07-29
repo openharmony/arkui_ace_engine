@@ -124,11 +124,11 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onCopy", &JSTextField::SetOnCopy);
     JSClass<JSTextArea>::StaticMethod("onCut", &JSTextField::SetOnCut);
     JSClass<JSTextArea>::StaticMethod("onPaste", &JSTextField::SetOnPaste);
+    JSClass<JSTextArea>::StaticMethod("onClick", &JSTextField::SetOnClick);
     JSClass<JSTextArea>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextArea>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSTextArea>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSTextArea>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSTextArea>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextArea>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextArea>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextArea>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
