@@ -20,7 +20,13 @@
 namespace OHOS::Ace {
 namespace {
 constexpr char COLOR_VALUE_PREFIX[] = "$color:";
+constexpr char MEDIA_VALUE_PREFIX[] = "/";
 constexpr char REF_ATTR_VALUE_KEY_WORD[] = "?theme:";
+constexpr char RES_PATH_TAG[] = "file:///";
+// resource manager hap for system resource
+constexpr char RES_HAP_PREFIX[] = "ohos.global.systemres";
+// resource manager hap absolute path, as resource manager api don't return
+constexpr char RES_HAP_PATH[] = "/data/storage/el1/bundle/ohos.global.systemres/ohos.global.systemres/assets/";
 
 double ParseDoubleUnit(const std::string& value, std::string& unit)
 {
@@ -66,6 +72,13 @@ void ResourceThemeStyle::ParseContent()
         if (attrValue.front() == '#' || attrValue.find(COLOR_VALUE_PREFIX) != std::string::npos) {
             // color
             attributes_[attrName] = { .type = ThemeConstantsType::COLOR, .value = Color::FromString(attrValue) };
+        } else if (attrValue.find(MEDIA_VALUE_PREFIX) != std::string::npos) {
+            std::string mediaPath = RES_PATH_TAG;
+            if (attrValue.find(RES_HAP_PREFIX) == std::string::npos) {
+                mediaPath.append(RES_HAP_PATH);
+            }
+            mediaPath += attrValue;
+            attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = mediaPath };
         } else if (stringAttrs.find(attrName) != stringAttrs.end()) {
             // string
             attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = attrValue };

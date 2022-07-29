@@ -22,6 +22,7 @@
 #include "core/components/image/image_event.h"
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/stack/stack_element.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
@@ -81,6 +82,7 @@ void RenderImage::Update(const RefPtr<Component>& component)
         image->GetImageSourceSize().second,
         inComingSrc.empty() ? image->GetResourceId() : InternalResource::ResourceId::NO_ID,
         image->GetPixmap());
+    UpdateThemeIcon(inComingSource);
     auto fillColor = image->GetImageFill();
     if (fillColor.has_value()) {
         inComingSource.SetFillColor(fillColor.value());
@@ -103,6 +105,22 @@ void RenderImage::Update(const RefPtr<Component>& component)
     proceedPreviousLoading_ = sourceInfo_.IsValid() && sourceInfo_ == inComingSource;
     sourceInfo_ = inComingSource;
     MarkNeedLayout(sourceInfo_.IsSvg());
+}
+
+void RenderImage::UpdateThemeIcon(ImageSourceInfo& sourceInfo)
+{
+    if (sourceInfo.IsInternalResource()) {
+        auto iconTheme = GetTheme<IconTheme>();
+        if (!iconTheme) {
+            LOGW("icon theme is null.");
+            return;
+        }
+        auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
+        if (!iconPath.empty()) {
+            sourceInfo.SetSrc(iconPath);
+            sourceInfo.UpdateSrcType();
+        }
+    }
 }
 
 void RenderImage::PerformLayout()
