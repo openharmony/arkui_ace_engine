@@ -28,11 +28,15 @@ void ViewFunctions::InitViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> js
     jsObject_ = jsObject;
 
     if (partialUpdate) {
-        JSRef<JSVal> jsRenderFunc = jsObject->GetProperty("initialRenderView");
-        if (jsRenderFunc->IsFunction()) {
-            jsRenderFunc_ = JSRef<JSFunc>::Cast(jsRenderFunc);
+        if (jsObject->GetProperty("initialRender")->IsFunction()) {
+            JSRef<JSVal> jsRenderFunc = jsObject->GetProperty("initialRenderView");
+            if (jsRenderFunc->IsFunction()) {
+                jsRenderFunc_ = JSRef<JSFunc>::Cast(jsRenderFunc);
+            } else {
+                LOGE("View lacks mandatory 'initialRenderView()' function, fatal internal error.");
+            }
         } else {
-            LOGE("View lacks mandatory 'initialRenderView()' function, fatal internal error.");
+            LOGE("View lacks mandatory 'initialRender()' function, fatal internal error.");
         }
 
         JSRef<JSVal> jsRerenderFunc = jsObject->GetProperty("rerender");

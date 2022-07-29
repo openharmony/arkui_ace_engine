@@ -34,6 +34,10 @@ public:
 
     bool CanUpdate(const RefPtr<Component>& newComponent) override
     {
+        auto pipelineContext = context_.Upgrade();
+        if (pipelineContext && pipelineContext->GetIsDeclarative() && pipelineContext->UsePartialUpdate()) {
+            return Element::CanUpdate(newComponent);
+        }
         return (newComponent == customComponent_) && Element::CanUpdate(newComponent);
     }
 
