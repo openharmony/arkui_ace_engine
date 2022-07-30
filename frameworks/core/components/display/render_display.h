@@ -106,10 +106,24 @@ public:
         return stateAttributeList_;
     }
 
-
     bool HasStateAttributes()
     {
         return stateAttributeList_ != nullptr;
+    }
+
+    bool HasBackgroundMask()
+    {
+        return backgroundMask_.has_value();
+    }
+
+    const Color& GetBackgroundMask() const
+    {
+        return backgroundMask_.value();
+    }
+
+    void SetBackgroundMask(const Color& backgroundMask)
+    {
+        backgroundMask_ = backgroundMask;
     }
 
 protected:
@@ -135,6 +149,7 @@ protected:
     RefPtr<CurveAnimation<uint8_t>> appearingAnimation_;
     RefPtr<Animator> animator_;
     RefPtr<StateAttributes<DisplayStateAttribute>> stateAttributeList_;
+    std::optional<Color> backgroundMask_;
 
 private:
     void OnVisibleChange(VisibleType type);

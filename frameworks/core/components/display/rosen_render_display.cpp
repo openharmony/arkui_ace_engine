@@ -66,6 +66,9 @@ void RosenRenderDisplay::Paint(RenderContext& context, const Offset& offset)
     }
     if (auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode()) {
         rsNode->SetVisible(RenderDisplay::GetVisible());
+        if (HasBackgroundMask()) {
+            rsNode->SetBackgroundColor(GetBackgroundMask().GetValue());
+        }
     }
 }
 

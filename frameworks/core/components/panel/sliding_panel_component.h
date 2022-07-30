@@ -125,16 +125,6 @@ public:
         return hasDragBar_;
     }
 
-    const Color& GetBackgroundMask() const
-    {
-        return backgroundMask_;
-    }
-
-    void SetBackgroundMask(const Color& backgroundMask)
-    {
-        backgroundMask_ = backgroundMask;
-    }
-
     const EventMarker& GetOnHeightChanged() const
     {
         return onHeightChanged_;
@@ -166,7 +156,6 @@ protected:
     int32_t panelId_ = -1;
     EventMarker onSizeChanged_;
     EventMarker onHeightChanged_;
-    Color backgroundMask_;
     bool visible_ = false;
     bool hasDragBar_ = false;
     std::pair<Dimension, bool> miniHeight_ = { 0.0_vp, false };

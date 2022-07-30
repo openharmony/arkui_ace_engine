@@ -41,6 +41,19 @@ void FlutterRenderDisplay::Paint(RenderContext& context, const Offset& offset)
         if (!disableLayer_ && layer_) {
             layer_->SetOpacity(opacity_, 0.0, 0.0);
         }
+        flutter::Canvas* canvas = static_cast<FlutterRenderContext*>(&context)->GetCanvas();
+        if (canvas == nullptr) {
+            LOGE("Paint canvas is null.");
+            return;
+        }
+        if (HasBackgroundMask()) {
+            SkPaint paint;
+            paint.setColor(GetBackgroundMask().GetValue());
+            auto skCanvas = canvas->canvas();
+            skCanvas->drawRect(
+                SkRect::MakeXYWH(offset.GetX(), offset.GetY(), GetLayoutSize().Width(), GetLayoutSize().Height()),
+                paint);
+        }
         RenderNode::Paint(context, offset);
     }
 }

@@ -137,7 +137,6 @@ void RenderSlidingPanel::Update(const RefPtr<Component>& component)
         slidingPanel->GetOnSizeChanged(), context_);
     onHeightChange_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         slidingPanel->GetOnHeightChanged(), context_);
-    backgroundMask_ = slidingPanel->GetBackgroundMask();
     MarkNeedLayout();
 }
 

@@ -163,7 +163,6 @@ protected:
     PanelMode previousMode_ = PanelMode::HALF;
     PanelType type_ = PanelType::FOLDABLE_BAR;
     bool hasBoxStyle_ = false;
-    Color backgroundMask_;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> onSizeChange_;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> onHeightChange_;
 
