@@ -189,111 +189,6 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy
     JSViewAbstract::GetAngle("angle", argsPtrItem, angle);
 }
 
-void SetDefaultTransition(TransitionType transitionType)
-{
-    auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-    if (!display) {
-        LOGE("display component is null.");
-        return;
-    }
-    LOGI("JsTransition with default");
-    display->SetTransition(transitionType, 0.0);
-}
-
-bool ParseAndSetOpacityTransition(const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType)
-{
-    if (transitionArgs->Contains("opacity")) {
-        double opacity = 0.0;
-        JSViewAbstract::ParseJsonDouble(transitionArgs->GetValue("opacity"), opacity);
-        auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-        if (!display) {
-            LOGE("display component is null.");
-            return true;
-        }
-        LOGI("JsTransition with type: %{public}d, opacity: %{public}.2f", transitionType, opacity);
-        display->SetTransition(transitionType, opacity);
-        return true;
-    }
-    return false;
-}
-
-bool ParseAndSetRotateTransition(const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType)
-{
-    if (transitionArgs->Contains("rotate")) {
-        auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-        if (!transform) {
-            LOGE("transform component is null.");
-            return true;
-        }
-        auto rotateArgs = transitionArgs->GetObject("rotate");
-        // default: dx, dy, dz (0.0, 0.0, 0.0)
-        float dx = 0.0f;
-        float dy = 0.0f;
-        float dz = 0.0f;
-        // default centerX, centerY 50% 50%;
-        Dimension centerX = 0.5_pct;
-        Dimension centerY = 0.5_pct;
-        std::optional<float> angle;
-        ParseJsRotate(rotateArgs, dx, dy, dz, centerX, centerY, angle);
-        if (angle) {
-            transform->SetRotateTransition(transitionType, dx, dy, dz, angle.value());
-            transform->SetOriginDimension(DimensionOffset(centerX, centerY));
-            LOGI("JsTransition with type: %{public}d. rotate: [%.2f, %.2f, %.2f] [%.2f, %.2f] %.2f", transitionType, dx,
-                dy, dz, centerX.Value(), centerY.Value(), angle.value());
-        }
-        return true;
-    }
-    return false;
-}
-
-bool ParseAndSetScaleTransition(const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType)
-{
-    if (transitionArgs->Contains("scale")) {
-        auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-        if (!transform) {
-            LOGE("transform component is null.");
-            return true;
-        }
-        auto scaleArgs = transitionArgs->GetObject("scale");
-        // default: x, y, z (1.0, 1.0, 1.0)
-        auto scaleX = 1.0f;
-        auto scaleY = 1.0f;
-        auto scaleZ = 1.0f;
-        // default centerX, centerY 50% 50%;
-        Dimension centerX = 0.5_pct;
-        Dimension centerY = 0.5_pct;
-        ParseJsScale(scaleArgs, scaleX, scaleY, scaleZ, centerX, centerY);
-        transform->SetScaleTransition(transitionType, scaleX, scaleY, scaleZ);
-        transform->SetOriginDimension(DimensionOffset(centerX, centerY));
-        LOGI("JsTransition with type: %{public}d. scale: [%.2f, %.2f, %.2f] [%.2f, %.2f]", transitionType, scaleX,
-            scaleY, scaleZ, centerX.Value(), centerY.Value());
-        return true;
-    }
-    return false;
-}
-
-bool ParseAndSetTranslateTransition(const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType)
-{
-    if (transitionArgs->Contains("translate")) {
-        auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-        if (!transform) {
-            LOGE("transform component is null.");
-            return true;
-        }
-        auto translateArgs = transitionArgs->GetObject("translate");
-        // default: x, y, z (0.0, 0.0, 0.0)
-        auto translateX = Dimension(0.0);
-        auto translateY = Dimension(0.0);
-        auto translateZ = Dimension(0.0);
-        ParseJsTranslate(translateArgs, translateX, translateY, translateZ);
-        transform->SetTranslateTransition(transitionType, translateX, translateY, translateZ);
-        LOGI("JsTransition with type: %{public}d. translate: [%.2f, %.2f, %.2f]", transitionType, translateX.Value(),
-            translateY.Value(), translateZ.Value());
-        return true;
-    }
-    return false;
-}
-
 bool ParseMotionPath(const std::unique_ptr<JsonValue>& argsPtrItem, MotionPathOption& option)
 {
     if (argsPtrItem && !argsPtrItem->IsNull()) {
@@ -583,6 +478,115 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
         result = origin | COLOR_ALPHA_VALUE;
     }
     return result;
+}
+
+void JSViewAbstract::SetDefaultTransition(TransitionType transitionType)
+{
+    auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
+    if (!display) {
+        LOGE("display component is null.");
+        return;
+    }
+    LOGI("JsTransition with default");
+    display->SetTransition(transitionType, 0.0);
+}
+
+bool JSViewAbstract::ParseAndSetOpacityTransition(
+    const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType)
+{
+    if (transitionArgs->Contains("opacity")) {
+        double opacity = 0.0;
+        JSViewAbstract::ParseJsonDouble(transitionArgs->GetValue("opacity"), opacity);
+        auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
+        if (!display) {
+            LOGE("display component is null.");
+            return true;
+        }
+        LOGI("JsTransition with type: %{public}d, opacity: %{public}.2f", transitionType, opacity);
+        display->SetTransition(transitionType, opacity);
+        return true;
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseAndSetRotateTransition(
+    const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType)
+{
+    if (transitionArgs->Contains("rotate")) {
+        auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+        if (!transform) {
+            LOGE("transform component is null.");
+            return true;
+        }
+        auto rotateArgs = transitionArgs->GetObject("rotate");
+        // default: dx, dy, dz (0.0, 0.0, 0.0)
+        float dx = 0.0f;
+        float dy = 0.0f;
+        float dz = 0.0f;
+        // default centerX, centerY 50% 50%;
+        Dimension centerX = 0.5_pct;
+        Dimension centerY = 0.5_pct;
+        std::optional<float> angle;
+        ParseJsRotate(rotateArgs, dx, dy, dz, centerX, centerY, angle);
+        if (angle) {
+            transform->SetRotateTransition(transitionType, dx, dy, dz, angle.value());
+            transform->SetOriginDimension(DimensionOffset(centerX, centerY));
+            LOGI("JsTransition with type: %{public}d. rotate: [%.2f, %.2f, %.2f] [%.2f, %.2f] %.2f", transitionType, dx,
+                dy, dz, centerX.Value(), centerY.Value(), angle.value());
+        }
+        return true;
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseAndSetScaleTransition(
+    const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType)
+{
+    if (transitionArgs->Contains("scale")) {
+        auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+        if (!transform) {
+            LOGE("transform component is null.");
+            return true;
+        }
+        auto scaleArgs = transitionArgs->GetObject("scale");
+        // default: x, y, z (1.0, 1.0, 1.0)
+        auto scaleX = 1.0f;
+        auto scaleY = 1.0f;
+        auto scaleZ = 1.0f;
+        // default centerX, centerY 50% 50%;
+        Dimension centerX = 0.5_pct;
+        Dimension centerY = 0.5_pct;
+        ParseJsScale(scaleArgs, scaleX, scaleY, scaleZ, centerX, centerY);
+        transform->SetScaleTransition(transitionType, scaleX, scaleY, scaleZ);
+        transform->SetOriginDimension(DimensionOffset(centerX, centerY));
+        LOGI("JsTransition with type: %{public}d. scale: [%.2f, %.2f, %.2f] [%.2f, %.2f]", transitionType, scaleX,
+            scaleY, scaleZ, centerX.Value(), centerY.Value());
+        return true;
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseAndSetTranslateTransition(
+    const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType)
+{
+    if (transitionArgs->Contains("translate")) {
+        auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+        if (!transform) {
+            LOGE("transform component is null.");
+            return true;
+        }
+        auto translateArgs = transitionArgs->GetObject("translate");
+        // default: x, y, z (0.0, 0.0, 0.0)
+        auto translateX = Dimension(0.0);
+        auto translateY = Dimension(0.0);
+        auto translateZ = Dimension(0.0);
+        ParseJsTranslate(translateArgs, translateX, translateY, translateZ);
+        transform->SetTranslateTransition(transitionType, translateX, translateY, translateZ);
+        LOGI("JsTransition with type: %{public}d. translate: [%.2f, %.2f, %.2f]", transitionType, translateX.Value(),
+            translateY.Value(), translateZ.Value());
+        return true;
+    }
+    return false;
 }
 
 void JSViewAbstract::JsScale(const JSCallbackInfo& info)
@@ -2112,13 +2116,13 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
         borderImage->SetNeedFillCenter(needFill->ToBoolean());
     }
     boxDecoration->SetBorderImage(borderImage);
-    
+
     boxComponent->SetBackDecoration(boxDecoration);
     info.ReturnSelf();
 }
 
-void JSViewAbstract::ParseBorderImageDimension(const JSRef<JSVal>& args,
-    BorderImage::BorderImageOption& borderImageDimension)
+void JSViewAbstract::ParseBorderImageDimension(
+    const JSRef<JSVal>& args, BorderImage::BorderImageOption& borderImageDimension)
 {
     JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
     static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
@@ -2152,8 +2156,8 @@ void JSViewAbstract::ParseBorderImageDimension(const JSRef<JSVal>& args,
     }
 }
 
-void JSViewAbstract::ParseBorderImageSource(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage,
-    RefPtr<Decoration>& boxDecoration)
+void JSViewAbstract::ParseBorderImageSource(
+    const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage, RefPtr<Decoration>& boxDecoration)
 {
     if (!args->IsString() && !args->IsObject()) {
         LOGE("Border image source type not recognized");
@@ -2172,7 +2176,6 @@ void JSViewAbstract::ParseBorderImageSource(const JSRef<JSVal>& args, RefPtr<Bor
         } else {
             ParseBorderImageLinearGradient(args, boxDecoration);
         }
-        
     }
 }
 
@@ -2189,7 +2192,7 @@ void JSViewAbstract::ParseBorderImageLinearGradient(const JSRef<JSVal>& args, Re
     // angle
     std::optional<float> degree;
     GetAngle("angle", argsPtrItem, degree);
-    
+
     if (degree) {
         lineGradient.GetLinearGradient().angle = AnimatableDimension(degree.value(), DimensionUnit::PX, option);
         degree.reset();
