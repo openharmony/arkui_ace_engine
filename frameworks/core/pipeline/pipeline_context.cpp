@@ -1947,7 +1947,8 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
     switch (type) {
         case WindowSizeChangeReason::RECOVER:
         case WindowSizeChangeReason::MAXIMIZE: {
-            LOGD("PipelineContext::Root node animation, width = %{private}d, height = %{private}d", width, height);
+            LOGD("PipelineContext::Root node RECOVER/MAXIMIZE animation, width = %{private}d, height = %{private}d",
+                width, height);
             AnimationOption option;
             constexpr int32_t duration = 400;
             option.SetDuration(duration);
@@ -1979,7 +1980,20 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             NotifyWebPaint();
             break;
         }
-        case WindowSizeChangeReason::ROTATION:
+        case WindowSizeChangeReason::ROTATION: {
+            LOGD("PipelineContext::Root node ROTATION animation, width = %{private}d, height = %{private}d", width,
+                height);
+            AnimationOption option;
+            constexpr int32_t duration = 600;
+            option.SetDuration(duration);
+            auto curve = MakeRefPtr<CubicCurve>(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
+            option.SetCurve(curve);
+            Animate(option, curve, [width, height, this]() {
+                SetRootSizeWithWidthHeight(width, height);
+                FlushLayout();
+            });
+            break;
+        }
         case WindowSizeChangeReason::RESIZE:
         case WindowSizeChangeReason::UNDEFINED:
         default: {
