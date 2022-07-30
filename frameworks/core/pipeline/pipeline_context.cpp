@@ -2199,10 +2199,17 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         LOGW("the view scale is zero or root element is nullptr");
         return;
     }
-    const Rect paintRect(0.0, offset, width, height);
+    const Rect paintRect(0.0, 0.0, width, height);
     auto rootNode = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
     if (!rootNode) {
         return;
+    }
+    auto stack = GetStageElement()->GetElementParent().Upgrade();
+    if (stack) {
+        auto renderStack = AceType::DynamicCast<RenderStack>(stack->GetRenderNode());
+        if (renderStack) {
+            renderStack->SetTop(Dimension(offset));
+        }
     }
     if (!NearEqual(viewScale_, rootNode->GetScale()) || paintRect != rootNode->GetPaintRect() || isDensityUpdate_) {
         if (!NearEqual(viewScale_, rootNode->GetScale())) {
