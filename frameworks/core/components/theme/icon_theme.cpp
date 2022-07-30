@@ -95,6 +95,10 @@ void IconTheme::Builder::ParsePattern(const RefPtr<ThemeStyle>& themeStyle, cons
 
 std::string IconTheme::GetIconPath(const InternalResource::ResourceId& resourceId) const
 {
+    if (!pattern_) {
+        LOGW("pattern of icon is null");
+        return "";
+    }
     auto iter = RESOURCE_ICON_MAP.find(resourceId);
     if (iter == RESOURCE_ICON_MAP.end()) {
         LOGW("Find resourceId:%{public}d fail in resourceMap", resourceId);
