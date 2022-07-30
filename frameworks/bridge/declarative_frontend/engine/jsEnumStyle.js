@@ -735,6 +735,12 @@ var SideBarContainerType;
   SideBarContainerType[SideBarContainerType["Embed"] = 0] = "Embed";
 })(SideBarContainerType || (SideBarContainerType = {}));
 
+var SideBarPosition;
+(function (SideBarPosition){
+  SideBarPosition[SideBarPosition["Start"] = 0] = "Start";
+  SideBarPosition[SideBarPosition["End"] = 1] = "End";
+})(SideBarPosition || (SideBarPosition = {}));
+
 var PlaybackSpeed;
 (function (PlaybackSpeed) {
   PlaybackSpeed["Speed_Forward_0_75_X"] = "0.75";
