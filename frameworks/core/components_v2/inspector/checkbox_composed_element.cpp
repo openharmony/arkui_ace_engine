@@ -101,6 +101,30 @@ std::string CheckboxComposedElement::GetSelectedColor() const
     return "";
 }
 
+std::string CheckboxComposedElement::GetWidth() const
+{
+    auto renderCheckbox = GetRenderCheckbox();
+    if (renderCheckbox) {
+        auto component = renderCheckbox->GetCheckboxComponent();
+        if (component) {
+            return component->GetWidth().ToString();
+        }
+    }
+    return "";
+}
+
+std::string CheckboxComposedElement::GetHeight() const
+{
+    auto renderCheckbox = GetRenderCheckbox();
+    if (renderCheckbox) {
+        auto component = renderCheckbox->GetCheckboxComponent();
+        if (component) {
+            return component->GetHeight().ToString();
+        }
+    }
+    return "";
+}
+
 RefPtr<RenderCheckbox> CheckboxComposedElement::GetRenderCheckbox() const
 {
     auto node = GetInspectorNode(CheckableElement::TypeId());

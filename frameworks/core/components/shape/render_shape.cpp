@@ -27,6 +27,7 @@ void RenderShape::Update(const RefPtr<Component>& component)
         EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
         return;
     }
+    component_ = shapeComponent;
     shapeType_ = shapeComponent->GetShapeType();
     topLeftRadius_ = shapeComponent->GetTopLeftRadius();
     topRightRadius_ = shapeComponent->GetTopRightRadius();

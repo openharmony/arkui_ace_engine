@@ -100,6 +100,11 @@ public:
         }
     }
 
+    RefPtr<CheckboxComponent> GetCheckboxComponent() const
+    {
+        return component_;
+    }
+
 protected:
     void UpdateAnimation();
     void OnAnimationStop();

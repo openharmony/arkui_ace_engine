@@ -74,7 +74,10 @@ std::string ShapeComposedElement::GetWidth() const
 {
     auto renderShape = AceType::DynamicCast<RenderShape>(GetInspectorNode(ShapeElement::TypeId()));
     if (renderShape) {
-        return renderShape->GetWidthDimension().ToString();
+        auto component = renderShape->GetShapeComponent();
+        if (component) {
+            return component->GetWidth().ToString();
+        }
     }
     return InspectorComposedElement::GetWidth();
 }
@@ -83,7 +86,10 @@ std::string ShapeComposedElement::GetHeight() const
 {
     auto renderShape = AceType::DynamicCast<RenderShape>(GetInspectorNode(ShapeElement::TypeId()));
     if (renderShape) {
-        return renderShape->GetHeightDimension().ToString();
+        auto component = renderShape->GetShapeComponent();
+        if (component) {
+            return component->GetHeight().ToString();
+        }
     }
     return InspectorComposedElement::GetHeight();
 }

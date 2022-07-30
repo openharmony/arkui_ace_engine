@@ -81,6 +81,30 @@ std::string SwitchComposedElement::GetPointColor() const
     return "";
 }
 
+std::string SwitchComposedElement::GetWidth() const
+{
+    auto renderSwitch = GetRenderSwitch();
+    if (renderSwitch) {
+        auto component = renderSwitch->GetSwitchComponent();
+        if (component) {
+            return component->GetWidth().ToString();
+        }
+    }
+    return "";
+}
+
+std::string SwitchComposedElement::GetHeight() const
+{
+    auto renderSwitch = GetRenderSwitch();
+    if (renderSwitch) {
+        auto component = renderSwitch->GetSwitchComponent();
+        if (component) {
+            return component->GetHeight().ToString();
+        }
+    }
+    return "";
+}
+
 RefPtr<RenderSwitch> SwitchComposedElement::GetRenderSwitch() const
 {
     auto node = GetInspectorNode(CheckableElement::TypeId());

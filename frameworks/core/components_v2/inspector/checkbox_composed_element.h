@@ -38,6 +38,8 @@ public:
     std::string GetCheckBoxGroup() const;
     std::string GetSelectedColor() const;
     std::string GetSelect() const;
+    std::string GetWidth() const override;
+    std::string GetHeight() const override;
 
     AceType::IdType GetTargetTypeId() const override
     {
