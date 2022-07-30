@@ -15,6 +15,7 @@
 
 #include "core/components_v2/list/render_list.h"
 
+#include "base/geometry/axis.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/utils/string_utils.h"
@@ -104,12 +105,13 @@ void RenderList::Update(const RefPtr<Component>& component)
 {
     component_ = AceType::DynamicCast<ListComponent>(component);
     ACE_DCHECK(component_);
-    InitScrollBar();
 
     RemoveAllItems();
 
     auto axis = component_->GetDirection();
     vertical_ = axis == Axis::VERTICAL;
+
+    InitScrollBar();
 
     // Start index should be updated only for the first time
     if (startIndex_ == INITIAL_CHILD_INDEX) {
@@ -330,6 +332,9 @@ void RenderList::InitScrollBar()
     scrollBar_->SetNormalWidth(theme->GetNormalWidth());
     scrollBar_->SetActiveWidth(theme->GetActiveWidth());
     scrollBar_->SetTouchWidth(theme->GetTouchWidth());
+    if (!vertical_) {
+        scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    }
     scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
     SetScrollBarCallback();
 }

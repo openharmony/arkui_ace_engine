@@ -585,12 +585,10 @@ void RenderScroll::InitScrollBar(const RefPtr<ScrollBar>& scrollBar)
         if (!scrollBar_) {
             scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF);
         }
-        if (axis_ != Axis::VERTICAL) {
-            scrollBar_->SetUndisplay();
-        } else {
-            scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
+        if (axis_ == Axis::HORIZONTAL) {
+            scrollBar_->SetPositionMode(PositionMode::BOTTOM);
         }
-
+        scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
         SetBarCallBack(axis_ == Axis::VERTICAL);
     }
 }
