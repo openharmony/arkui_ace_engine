@@ -15,27 +15,34 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 
-#include "frameworks/bridge/declarative_frontend/engine/bindings.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/engine/bindings.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSViewStackProcessor::JSVisualState(const JSCallbackInfo& info)
 {
     LOGD("JSVisualState");
-    if (info.Length() < 1) {
-        ViewStackProcessor::GetInstance()->ClearVisualState();
+    if ((info.Length() < 1) || (!info[0]->IsString())) {
+        LOGE("JSVisualState: is not a string.");
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewStackProcessor::GetInstance()->ClearVisualState();
+        } else {
+            ViewStackProcessor::GetInstance()->ClearVisualState();
+        }
         return;
     }
 
-    if (!info[0]->IsString()) {
-        LOGE("JSVisualState: is not a string.");
-        ViewStackProcessor::GetInstance()->ClearVisualState();
-        return;
-    }
     std::string state = info[0]->ToString();
     VisualState visualState = JSViewStackProcessor::StringToVisualState(state);
-    ViewStackProcessor::GetInstance()->SetVisualState(visualState);
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewStackProcessor::GetInstance()->SetVisualState(visualState);
+    } else {
+        ViewStackProcessor::GetInstance()->SetVisualState(visualState);
+    }
 }
 
 // public static emthods exposed to JS
@@ -78,12 +85,48 @@ VisualState JSViewStackProcessor::StringToVisualState(const std::string& stateSt
     if (stateString == "hover") {
         return VisualState::HOVER;
     }
-    LOGE("Unknown visual state \"%s\", resetting to UNDEFINED", stateString.c_str());
+    LOGE("Unknown visual state \"%{public}s\", resetting to UNDEFINED", stateString.c_str());
     return VisualState::NOTSET;
+}
+
+void JSViewStackProcessor::JsStartGetAccessRecordingFor(ElementIdType elmtId)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        return NG::ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(elmtId);
+    }
+    return ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(elmtId);
+}
+
+int32_t JSViewStackProcessor::JsGetElmtIdToAccountFor()
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        return NG::ViewStackProcessor::GetInstance()->GetNodeIdToAccountFor();
+    }
+    return ViewStackProcessor::GetInstance()->GetElmtIdToAccountFor();
+}
+
+void JSViewStackProcessor::JsSetElmtIdToAccountFor(ElementIdType elmtId)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        return NG::ViewStackProcessor::GetInstance()->SetNodeIdToAccountFor(elmtId);
+    }
+    ViewStackProcessor::GetInstance()->SetElmtIdToAccountFor(elmtId);
+}
+
+void JSViewStackProcessor::JsStopGetAccessRecording()
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        return NG::ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+    return ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 }
 
 void JSViewStackProcessor::JsImplicitPopBeforeContinue()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewStackProcessor::GetInstance()->ImplicitPopBeforeContinue();
+        return;
+    }
     if ((ViewStackProcessor::GetInstance()->Size() > 1) && ViewStackProcessor::GetInstance()->ShouldPopImmediately()) {
         LOGD("Implicit Pop before continue.");
         ViewStackProcessor::GetInstance()->Pop();

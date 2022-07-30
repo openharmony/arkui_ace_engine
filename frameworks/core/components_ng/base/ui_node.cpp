@@ -19,12 +19,14 @@
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 UINode::~UINode()
 {
+    ElementRegister::GetInstance()->RemoveItem(nodeId_);
     if (!onMainTree_) {
         return;
     }

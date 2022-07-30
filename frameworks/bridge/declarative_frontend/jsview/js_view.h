@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_H
 
 #include <list>
+#include <string>
 
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/pipeline/base/composed_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -42,11 +44,13 @@ public:
     virtual void Destroy(JSView* parentCustomView) = 0;
     virtual RefPtr<Component> CreateComponent() = 0;
     RefPtr<PageTransitionComponent> BuildPageTransitionComponent();
-    virtual RefPtr<NG::FrameNode> CreateNode()
+
+    virtual RefPtr<NG::CustomNode> CreateUINode()
     {
         LOGE("Internal error. Not implemented");
         return nullptr;
-    };
+    }
+
     void SyncInstanceId();
     void RestoreInstanceId();
 
@@ -131,14 +135,14 @@ protected:
         return element_;
     }
 
-    WeakPtr<ComposedElement> element_ = nullptr;
+    WeakPtr<ComposedElement> element_;
+    WeakPtr<NG::CustomNode> node_;
 
 private:
     int32_t instanceId_ = -1;
     int32_t restoreInstanceId_ = -1;
     bool isStatic_ = false;
 };
-
 
 class JSViewFullUpdate : public JSView {
 public:
@@ -149,21 +153,22 @@ public:
     void Destroy(JSView* parentCustomView) override;
     RefPtr<Component> CreateComponent() override;
 
+    // TODO: delete this after the toolchain for partial update is ready.
     RefPtr<NG::UINode> InternalRender();
-    RefPtr<NG::FrameNode> CreateNode() override;
+    RefPtr<NG::CustomNode> CreateUINode() override;
 
     void MarkNeedUpdate() override;
 
     /**
-     * During render function execution, the child customview with same id will
+     * During render function execution, the child custom view with same id will
      * be recycled if they exist already in our child map. The ones which are not
      * recycled needs to be cleaned. So After render function execution, clean the
-     * abandoned child customview.
+     * abandoned child custom view.
      */
     void CleanUpAbandonedChild();
 
     /**
-     * Retries the customview child for recycling
+     * Retries the custom view child for recycling
      * always use FindChildById to be certain before calling this method
      */
     JSRef<JSObject> GetChildById(const std::string& viewId);
@@ -189,7 +194,7 @@ public:
 
     /**
      * New CustomView child will be added to the map.
-     * and it can be reterieved for recycling in next render function
+     * and it can be retrieved for recycling in next render function
      * In next render call if this child is not recycled, it will be destroyed.
      */
     std::string AddChildById(const std::string& viewId, const JSRef<JSObject>& obj);
@@ -210,7 +215,7 @@ private:
      */
     std::string ProcessViewId(const std::string& viewId);
     /**
-     * creates a set of valid viewids on a render function execution
+     * creates a set of valid view ids on a render function execution
      * its cleared after cleaning up the abandoned child.
      */
     void ChildAccessedById(const std::string& viewId);
@@ -218,7 +223,6 @@ private:
     // view id for custom view itself
     std::string viewId_;
 
-    WeakPtr<NG::CustomNode> node_ = nullptr;
     bool isLazyForEachProcessed_ = false;
     std::string lazyItemGroupId_;
 
@@ -236,14 +240,14 @@ private:
     // until they are abandoned used by lazyForEach
     std::unordered_map<std::string, std::list<std::string>> lazyItemGroups_;
 
-    // a set of valid viewids on a renderfuntion excution
+    // a set of valid view ids on a render function execution
     // its cleared after cleaning up the abandoned child.
     std::unordered_set<std::string> lastAccessedViewIds_;
 };
 
-
 class JSViewPartialUpdate : public JSView {
-using UpdateFuncResult = std::tuple<int32_t, RefPtr<Component>, RefPtr<Component>>;
+    using UpdateFuncResult = std::tuple<int32_t, RefPtr<Component>, RefPtr<Component>>;
+
 public:
     explicit JSViewPartialUpdate(JSRef<JSObject> jsObject);
     ~JSViewPartialUpdate() override;
@@ -252,6 +256,9 @@ public:
     void Destroy(JSView* parentCustomView) override;
     RefPtr<Component> CreateComponent() override;
 
+    RefPtr<NG::UINode> InitialUIRender();
+    RefPtr<NG::CustomNode> CreateUINode() override;
+
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
@@ -259,7 +266,7 @@ public:
     static void DestructorCallback(JSViewPartialUpdate* instance);
 
     // public functions added by partial update added below ==================
-    
+
     /**
      * Last step of executing an partial update function
      * get the result component from ViewStackProcessor
@@ -268,13 +275,13 @@ public:
      * parameters
      * elmtId of the Component/Element that's updated
      * removedElementId : Array<number>  ids of Elements that were removed while updating
-     *     caused by if condition toggle or ForEach array deleted / replaced items
+     * caused by if condition toggle or ForEach array deleted / replaced items
      * return boolean - true means success
      */
     void JsFinishUpdateFunc(int32_t elmtId);
 
     // The process of Component to Element sync leads to Elements being
-    // deleted. ElementRegister keeps track of hese deletions
+    // deleted. ElementRegister keeps track of these deletions
     // before the framework can forget about these elmtIds
     // these need to be removed from its own book keeping
     // state variables keep track of dependent elmtIds and
@@ -287,7 +294,7 @@ public:
     // only then ElementRegister can forget about these elmtIds
     void JsGetDeletedElemtIds(const JSCallbackInfo& info);
 
-    // JS signature: View.eletedElmtIdsHaveBeenPurged(elmtIds : number[])
+    // JS signature: View.deletedElmtIdsHaveBeenPurged(elmtIds : number[])
     // inform ElementRegister that given deleted eltIds
     // have been deleted from partial updates book keeping
     // at this point ElementRegister can forget about the,
@@ -314,6 +321,8 @@ public:
     void JSGetProxiedItemRenderState(const JSCallbackInfo& info);
 
 private:
+    void MarkNeedUpdate() override;
+
     // view id for custom view itself
     std::string viewId_;
 
@@ -322,7 +331,7 @@ private:
     // render callback
     bool isFirstRender_ = true;
 
-    /* list of updte function result is a tripple (tuple with three entries)
+    /* list of update function result is a triple (tuple with three entries)
     <0> elmtId
     <1> outmost wrapping Component
     <2> main Component
@@ -331,11 +340,10 @@ private:
 
     // The C++ JSView object owns a reference to the JS Object
     // AssignNewView assigns the JS View
-    // Destroy deleted the ref, and thereby triggers the deletio
+    // Destroy deleted the ref, and thereby triggers the deletion
     // GC -> JS View Object -> JSView C++ Object
     JSRef<JSObject> jsViewObject_;
 };
-
 
 } // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_H

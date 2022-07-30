@@ -149,7 +149,9 @@ public:
         return false;
     }
 
-    void AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElement);
+    void AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode);
+
+    void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
 
@@ -193,7 +195,7 @@ private:
     };
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
-    std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyComposedNodes_;
+    std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_ = nullptr;

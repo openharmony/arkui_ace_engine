@@ -56,16 +56,37 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
-void PipelineContext::AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElement)
+void PipelineContext::AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);
-    if (!dirtyElement) {
+    if (!dirtyNode) {
         LOGW("dirtyElement is null");
         return;
     }
-    dirtyComposedNodes_.emplace(dirtyElement);
+    dirtyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     window_->RequestFrame();
+}
+
+void PipelineContext::FlushDirtyNodeUpdate()
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushBuild();
+    }
+
+    decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
+    for (const auto& weakNode : dirtyNodes) {
+        auto node = weakNode.Upgrade();
+        if (node) {
+            node->Update();
+        }
+    }
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushBuild();
+    }
 }
 
 uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
@@ -118,6 +139,7 @@ void PipelineContext::FlushMessages()
 
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
+    FlushDirtyNodeUpdate();
     FlushTouchEvents();
     UITaskScheduler::GetInstance()->FlushTask();
     FlushMessages();
@@ -126,8 +148,8 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
-    // TODO: Add unique id.
-    rootNode_ = FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, MakeRefPtr<StagePattern>(), Claim(this));
+    rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>(), Claim(this));
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
     rootNode_->GetRenderContext()->UpdateBgColor(Color::WHITE);

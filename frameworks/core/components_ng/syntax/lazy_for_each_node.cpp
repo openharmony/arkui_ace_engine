@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -26,6 +27,7 @@ RefPtr<LazyForEachNode> LazyForEachNode::CreateLazyForEachNode(
 {
     auto node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     node->SetContext(PipelineContext::GetCurrentContext());
+    ElementRegister::GetInstance()->AddUINode(node);
     return node;
 }
 

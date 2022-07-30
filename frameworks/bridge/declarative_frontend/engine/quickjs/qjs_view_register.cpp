@@ -181,22 +181,6 @@ static JSValue JsDumpMemoryStats(JSContext* ctx, JSValueConst new_target, int ar
     QJSContext::Scope scope(ctx);
 
     QJSUtils::JsDumpMemoryStats(ctx);
-    if (argc > 0) {
-        LOGI("ACE Declarative JS Memory dump: %s ========================", ScopedString(argv[0]).get());
-    } else {
-        LOGI("ACE Declarative JS Memory dump: %s ========================", "unknown");
-    }
-    LOGI("View (cust. Component): %5d ", QJSKlass<JSView>::NumberOfInstances());
-    LOGI("ForEach:                %5d ", QJSKlass<JSForEach>::NumberOfInstances());
-    LOGI("Row:                    %5d ", QJSKlass<JSRow>::NumberOfInstances());
-    LOGI("Column:                 %5d ", QJSKlass<JSColumn>::NumberOfInstances());
-    LOGI("Text:                   %5d ", QJSKlass<JSText>::NumberOfInstances());
-    LOGI("Image:                  %5d ", QJSKlass<JSImage>::NumberOfInstances());
-    LOGI("Button:                 %5d ", QJSKlass<JSButton>::NumberOfInstances());
-    LOGI("Grid:                   %5d ", QJSKlass<JSGrid>::NumberOfInstances());
-    LOGI("GridItem:               %5d ", QJSKlass<JSGridItem>::NumberOfInstances());
-    LOGI("List:                   %5d ", QJSKlass<JSList>::NumberOfInstances());
-    LOGI("ListItem:               %5d ", QJSKlass<JSListItem>::NumberOfInstances());
 #endif
     return JS_UNDEFINED;
 }

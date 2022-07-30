@@ -352,4 +352,9 @@ float SystemProperties::GetAnimationScale()
     return animationScale_;
 }
 
+std::string SystemProperties::GetPartialUpdatePkg()
+{
+    return system::GetParameter("persist.ace.partial.pkgname", "");
+}
+
 } // namespace OHOS::Ace

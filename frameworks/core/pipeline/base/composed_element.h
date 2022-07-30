@@ -81,10 +81,7 @@ public:
 
     bool HasRenderFunction()
     {
-        if (renderFunction_) {
-            return true;
-        }
-        return false;
+        return static_cast<bool>(renderFunction_);
     }
 
     void CallRemoveFunction()
@@ -98,7 +95,7 @@ public:
     {
         removeFunction_ = std::move(func);
     }
-    
+
     bool HasRemoveFunction()
     {
         return removeFunction_ != nullptr;

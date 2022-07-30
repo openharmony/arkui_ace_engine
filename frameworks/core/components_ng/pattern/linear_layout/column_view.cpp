@@ -25,9 +25,9 @@ namespace OHOS::Ace::NG {
 void ColumnView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto pattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
-    // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, pattern);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     stack->Push(frameNode);
 }
 

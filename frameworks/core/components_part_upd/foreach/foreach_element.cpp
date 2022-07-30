@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_part_upd/foreach/foreach_element.h"
 
+#include <cstdint>
 #include <list>
 #include <set>
 
@@ -68,7 +69,7 @@ void ForEachElement::RemoveUnusedChildElementsFromRegistery(const std::list<std:
     // ID array before update
     std::list<std::string> oldIds = GetIdArray();
 
-    if (!oldIds.size()) {
+    if (oldIds.empty()) {
         return;
     }
 
@@ -157,10 +158,10 @@ void ForEachElement::LocalizedUpdate()
     LOGD("  ... old Ids %{public}s .", idS.c_str());
     LOGD("ForEachElement children before change:  ");
     for (const auto& childElmt : GetChildren()) {
-        LOGD("   ... child arr-id {public}s slot %{public}d / renderSlot %{public}d.",
-            (*idIter).c_str(), childElmt->GetSlot(), childElmt->GetRenderSlot());
+        LOGD("   ... child arr-id %{public}s / renderSlot %{public}d, %{public}d", (*idIter).c_str(),
+            childElmt->GetSlot(), childElmt->GetRenderSlot());
     }
-    LOGD("  ... total children Elements: %{public}llu .", GetChildren().size());
+    LOGD("  ... total children Elements: %{public}d .", static_cast<int32_t>(GetChildren().size()));
     idS = "[";
     for (const auto& newId : newIds) {
         idS += newId + ", ";
@@ -191,7 +192,7 @@ void ForEachElement::LocalizedUpdate()
             auto iter = oldElmtsByIdMap.find(newId);
             auto oldElmt = (*iter).second;
             LOGD("Elmt with arr-id %{public}s retained, update its slot %{public}d->%{public}d /"
-                " renderSlot %{public}d->%{public}d",
+                 " renderSlot %{public}d->%{public}d",
                 newId.c_str(), oldElmt->GetSlot(), slot, oldElmt->GetRenderSlot(), renderSlot);
             ChangeChildSlot(oldElmt, slot);
             ChangeChildRenderSlot(oldElmt, renderSlot, true);
@@ -207,8 +208,8 @@ void ForEachElement::LocalizedUpdate()
             // the ID is no longer used, delete the child Element
             auto iter = oldElmtsByIdMap.find(oldId);
             auto oldElmt = iter->second;
-            LOGD("Array Id %{public}s no more used, deleting %{public}s(%{public}d)",
-                oldId.c_str(), AceType::TypeName(oldElmt), oldElmt->GetElementId());
+            LOGD("Array Id %{public}s no more used, deleting %{public}s(%{public}d)", oldId.c_str(),
+                AceType::TypeName(oldElmt), oldElmt->GetElementId());
             // no new child component
             UpdateChild(oldElmt, nullptr);
             needRequestLayout = false;
@@ -228,7 +229,7 @@ void ForEachElement::LocalizedUpdate()
     for (const auto& childElmt : GetChildren()) {
         LOGD("   ... slot %{public}d / renderSlot %{public}d.", childElmt->GetSlot(), childElmt->GetRenderSlot());
     }
-    LOGD("  ... total children Elements: %{public}llu .", GetChildren().size());
+    LOGD("  ... total children Elements: %{public}d .", static_cast<int32_t>(GetChildren().size()));
 #endif
 }
 } // namespace OHOS::Ace::PartUpd

@@ -226,7 +226,7 @@ RefPtr<Element> Element::UpdateChildWithSlot(
 
     // 3. child != null && newComponent == null  -->  remove old child
     if (!newComponent) {
-        ElementRegister::GetInstance()->RemoveElementSilently(child->GetElementId());
+        ElementRegister::GetInstance()->RemoveItemSilently(child->GetElementId());
         DeactivateChild(child);
         return nullptr;
     }
@@ -240,7 +240,7 @@ RefPtr<Element> Element::UpdateChildWithSlot(
         if (context && needRebuildFocusElement) {
             context->AddNeedRebuildFocusElement(needRebuildFocusElement);
         }
-        ElementRegister::GetInstance()->RemoveElementSilently(child->GetElementId());
+        ElementRegister::GetInstance()->RemoveItemSilently(child->GetElementId());
         DeactivateChild(child);
         auto newChild = InflateComponent(newComponent, slot, renderSlot);
         ElementRegister::GetInstance()->AddElement(newChild);
@@ -266,7 +266,7 @@ RefPtr<Element> Element::UpdateChildWithSlot(
         newComponent->CallElementFunction(child);
     }
 
-    ElementRegister::GetInstance()->RemoveElementSilently(child->GetElementId());
+    ElementRegister::GetInstance()->RemoveItemSilently(child->GetElementId());
     auto newChild = DoUpdateChildWithNewComponent(child, newComponent, slot, renderSlot);
     if (newChild != nullptr) {
         newChild->SetElementId(newComponent->GetElementId());
@@ -548,14 +548,14 @@ void Element::LocalizedUpdate()
 void Element::UnregisterForPartialUpdates()
 {
     if (elmtId_ != ElementRegister::UndefinedElementId) {
-        ElementRegister::GetInstance()->RemoveElement(elmtId_);
+        ElementRegister::GetInstance()->RemoveItem(elmtId_);
     }
     UnregisterChildrenForPartialUpdates();
 }
 
 void Element::UnregisterChildrenForPartialUpdates()
 {
-    for (auto& child : GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->UnregisterForPartialUpdates();
     }
 }

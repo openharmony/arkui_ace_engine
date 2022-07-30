@@ -46,14 +46,6 @@ FrameNode::~FrameNode()
     pattern_->DetachFromFrameNode();
 }
 
-RefPtr<FrameNode> FrameNode::CreateFrameNodeAndMountToParent(const std::string& tag, int32_t nodeId,
-    const RefPtr<Pattern>& pattern, const RefPtr<FrameNode>& parent, int32_t slot)
-{
-    auto newChild = CreateFrameNode(tag, nodeId, pattern);
-    newChild->MountToParent(parent, slot);
-    return newChild;
-}
-
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, const RefPtr<PipelineContext>& context)
 {
@@ -62,12 +54,38 @@ RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     return newChild;
 }
 
+RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
+    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+{
+    auto frameNode = GetFrameNode(tag, nodeId);
+    if (frameNode) {
+        return frameNode;
+    }
+    auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
+    return CreateFrameNode(tag, nodeId, pattern);
+}
+
+RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId)
+{
+    auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
+    if (!frameNode) {
+        return nullptr;
+    }
+    if (frameNode->tag_ != tag) {
+        LOGE("the tag is changed");
+        ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
+        return nullptr;
+    }
+    return frameNode;
+}
+
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
     frameNode->SetContext(PipelineContext::GetCurrentContext());
     frameNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(frameNode);
     return frameNode;
 }
 
@@ -322,6 +340,12 @@ void FrameNode::RebuildRenderContextTree(const std::list<RefPtr<FrameNode>>& chi
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
+}
+
+void FrameNode::FlushUpdateAndMarkDirty()
+{
+    MarkDirtyNode();
+    RequestNextFrame();
 }
 
 void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)

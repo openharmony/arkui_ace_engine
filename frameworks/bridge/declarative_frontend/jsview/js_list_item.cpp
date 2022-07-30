@@ -37,8 +37,7 @@ const V2::StickyMode STICKY_MODE_TABLE[] = { V2::StickyMode::NONE, V2::StickyMod
 
 void JSListItem::Create(const JSCallbackInfo& args)
 {
-    const auto context = JSViewAbstract::GetPipelineContext();
-    if (context && context->UsePartialUpdate()) {
+    if (Container::IsCurrentUsePartialUpdate()) {
         CreateForPartialUpdate(args);
         return;
     }
