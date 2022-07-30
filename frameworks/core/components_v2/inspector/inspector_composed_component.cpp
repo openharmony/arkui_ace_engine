@@ -29,6 +29,7 @@
 #include "core/components_v2/inspector/checkboxGroup_composed_element.h"
 #include "core/components_v2/inspector/column_composed_element.h"
 #include "core/components_v2/inspector/column_split_composed_element.h"
+#include "core/components_v2/inspector/counter_composed_element.h"
 #include "core/components_v2/inspector/customdialog_composed_element.h"
 #include "core/components_v2/inspector/data_panel_composed_element.h"
 #include "core/components_v2/inspector/date_picker_composed_element.h"
@@ -102,7 +103,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { COLUMN_SPLIT_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ColumnSplitComposedElement>(id); } },
     { COUNTER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::CounterComposedElement>(id); } },
     { NAVIGATION_VIEW_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationComposedElement>(id); } },
     { ROW_SPLIT_COMPONENT_TAG,
