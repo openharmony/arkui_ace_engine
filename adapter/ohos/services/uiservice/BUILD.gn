@@ -70,8 +70,8 @@ template("uiservice_static") {
     deps = [
       "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/uiservice_plugins/uiservice_dialog:uiservicedialog",
       "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-      "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-      "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+      "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+      "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//utils/native/base:utils",
     ]
 

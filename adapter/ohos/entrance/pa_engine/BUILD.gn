@@ -38,8 +38,8 @@ template("pa_backend") {
       "$ability_runtime_path/frameworks/native/appkit:appkit_native",
       "//foundation/arkui/napi:ace_napi",
       "//foundation/arkui/napi:ace_napi_quickjs",
-      "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-      "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+      "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+      "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//utils/native/base:utils",
     ]
     external_deps = [
@@ -54,7 +54,7 @@ template("pa_backend") {
       "napi:ace_napi",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
-      "samgr_standard:samgr_proxy",
+      "samgr:samgr_proxy",
     ]
 
     sources = [

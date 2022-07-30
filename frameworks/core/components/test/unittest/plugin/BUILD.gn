@@ -53,8 +53,8 @@ ohos_unittest("PluginCallBackClientTest") {
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
 
   external_deps = [
@@ -80,8 +80,8 @@ ohos_unittest("PluginComponentTest") {
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
 
   external_deps = [
@@ -107,8 +107,8 @@ ohos_unittest("PluginElementTest") {
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
 
   external_deps = [
@@ -136,8 +136,8 @@ ohos_unittest("PluginManagerDelegateTest") {
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
 
   external_deps = [

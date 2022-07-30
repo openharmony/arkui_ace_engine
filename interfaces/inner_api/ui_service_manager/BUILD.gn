@@ -60,7 +60,7 @@ ohos_shared_library("ui_service_mgr") {
   ]
 
   deps = [
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//utils/native/base:utils",
   ]
 
