@@ -32,8 +32,10 @@
 #include "core/components_v2/list/render_list.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
+#include "core/gestures/click_recognizer.h"
 #include "core/gestures/exclusive_recognizer.h"
 #include "core/gestures/gesture_info.h"
+#include "core/gestures/gesture_recognizer.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
 #include "core/gestures/parallel_recognizer.h"
@@ -1551,6 +1553,11 @@ void RenderBox::OnTouchTestHierarchy(const Offset& coordinateOffset, const Touch
 
         for (auto& recognizer : recognizers) {
             recognizer->SetCoordinateOffset(coordinateOffset);
+            auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(recognizer);
+            if (clickRecognizer && clickRecognizer->GetRefereeState() == RefereeState::PENDING) {
+                clickRecognizer->MultiClickReset();
+                clickRecognizer->DecCount();
+            }
         }
 
         if (priority == GesturePriority::Parallel) {
