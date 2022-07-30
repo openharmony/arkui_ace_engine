@@ -43,7 +43,6 @@
 
 namespace OHOS::Ace::Framework {
 thread_local std::unique_ptr<ViewStackProcessor> ViewStackProcessor::instance = nullptr;
-thread_local int32_t ViewStackProcessor::composedElementId_ = 1;
 
 ViewStackProcessor* ViewStackProcessor::GetInstance()
 {
@@ -106,7 +105,8 @@ RefPtr<PopupComponentV2> ViewStackProcessor::GetPopupComponent(bool createNewCom
         return nullptr;
     }
 
-    RefPtr<PopupComponentV2> popupComponent = AceType::MakeRefPtr<OHOS::Ace::PopupComponentV2>(GenerateId(), "popup");
+    RefPtr<PopupComponentV2> popupComponent =
+        AceType::MakeRefPtr<OHOS::Ace::PopupComponentV2>(V2::InspectorComposedComponent::GenerateId(), "popup");
     wrappingComponentsMap.emplace("popup", popupComponent);
     return popupComponent;
 }
@@ -123,7 +123,8 @@ RefPtr<MenuComponent> ViewStackProcessor::GetMenuComponent(bool createNewCompone
         return nullptr;
     }
 
-    RefPtr<MenuComponent> menuComponent = AceType::MakeRefPtr<OHOS::Ace::MenuComponent>(GenerateId(), "menu");
+    RefPtr<MenuComponent> menuComponent =
+        AceType::MakeRefPtr<OHOS::Ace::MenuComponent>(V2::InspectorComposedComponent::GenerateId(), "menu");
     wrappingComponentsMap.emplace("menu", menuComponent);
     return menuComponent;
 }
@@ -805,11 +806,6 @@ void ViewStackProcessor::SetZIndex(RefPtr<Component>& component)
     }
 }
 
-std::string ViewStackProcessor::GenerateId()
-{
-    return std::to_string(composedElementId_++);
-}
-
 RefPtr<V2::InspectorComposedComponent> ViewStackProcessor::GetInspectorComposedComponent() const
 {
     if (componentsStack_.empty()) {
@@ -839,7 +835,8 @@ RefPtr<Component> ViewStackProcessor::GetScoringComponent() const
 void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& inspectorTag)
 {
     if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {
-        auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(GenerateId(), inspectorTag);
+        auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+            V2::InspectorComposedComponent::GenerateId(), inspectorTag);
         auto& wrappingComponentsMap = componentsStack_.top();
         wrappingComponentsMap.emplace("inspector", composedComponent);
     }

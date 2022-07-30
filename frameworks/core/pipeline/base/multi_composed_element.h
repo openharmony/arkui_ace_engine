@@ -34,8 +34,7 @@ public:
     void PerformBuild() override;
     bool CanUpdate(const RefPtr<Component>& newComponent) override;
 
-protected:
-    void UpdateChildren(const std::list<RefPtr<Component>>& newComponents);
+    virtual void UpdateChildren(const std::list<RefPtr<Component>>& newComponents);
     void UpdateChildrenForRebuild(const std::list<RefPtr<Component>>& newComponents);
 };
 

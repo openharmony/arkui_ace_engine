@@ -52,6 +52,7 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/card_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components/tool_bar/tool_bar_theme.h"
@@ -111,6 +112,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { CounterTheme::TypeId(), &ThemeBuildFunc<CounterTheme::Builder> },
     { DragBarTheme::TypeId(), &ThemeBuildFunc<DragBarTheme::Builder> },
     { SemiModalTheme::TypeId(), &ThemeBuildFunc<SemiModalTheme::Builder> },
+    { IconTheme::TypeId(), &ThemeBuildFunc<IconTheme::Builder> },
     { V2::PatternLockTheme::TypeId(), &ThemeBuildFunc<V2::PatternLockTheme::Builder> }
 };
 

@@ -39,6 +39,12 @@ template("declarative_js_engine_qjs") {
       "qjs_view_register.cpp",
     ]
 
+    if (enable_ng_build) {
+      sources += [ "qjs_view_register_impl_ng.cpp" ]
+    } else {
+      sources += [ "qjs_view_register_impl.cpp" ]
+    }
+
     deps = [
       "$ace_root/frameworks/core/components/theme:build_theme_code",
       "//third_party/quickjs:qjs",
@@ -47,6 +53,12 @@ template("declarative_js_engine_qjs") {
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine) {
       defines += [ "BUILT_IN_JS_ENGINE" ]
+      if (enable_ng_build) {
+        sources += [
+          "$ace_root/frameworks/bridge/js_frontend/engine/quickjs/qjs_group_js_bridge.cpp",
+          "$ace_root/frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.cpp",
+        ]
+      }
     } else {
       sources += [
         "$ace_root/frameworks/bridge/js_frontend/engine/quickjs/qjs_group_js_bridge.cpp",

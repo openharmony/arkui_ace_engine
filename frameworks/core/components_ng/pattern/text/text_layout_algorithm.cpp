@@ -20,10 +20,10 @@
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/components/font/constants_converter.h"
-#include "core/components/font/font_collection.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -77,13 +77,8 @@ bool TextLayoutAlgorithm::CreateParagraph(
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak() };
 
-    auto fontCollection = FontCollection::GetInstance()->GetFontCollection();
-    if (!fontCollection) {
-        LOGW("UpdateParagraph: fontCollection is null");
-        return false;
-    }
-
-    paragraph_ = Paragraph::Create(context, paraStyle, &fontCollection);
+    paragraph_ = Paragraph::Create(context, paraStyle, FontCollection::Current());
+    CHECK_NULL_RETURN(paragraph_, false);
     paragraph_->PushStyle(textStyle);
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
     paragraph_->AddText(StringUtils::Str8ToStr16(content));

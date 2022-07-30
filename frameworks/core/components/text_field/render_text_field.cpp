@@ -2154,6 +2154,8 @@ void RenderTextField::InitAccessibilityEventListener()
             textField->OnLongPress(LongPressInfo(0));
         }
     });
+
+    accessibilityNode->AddSupportAction(AceAction::ACTION_SET_TEXT);
 }
 
 void RenderTextField::UpdateDirectionStatus()

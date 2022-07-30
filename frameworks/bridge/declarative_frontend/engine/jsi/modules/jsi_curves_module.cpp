@@ -155,6 +155,40 @@ bool CreateStepsCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsV
     return true;
 }
 
+bool CreateSpringMotionCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
+{
+    if (argc > 3) {
+        LOGW("SpringMotionCurve: the number of parameters is illegal");
+        return false;
+    }
+    float response = argc > 0 ? static_cast<float>(argv[0]->ToDouble(runtime))
+                        : ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE;
+    float dampingRatio = argc > 1 ? static_cast<float>(argv[1]->ToDouble(runtime))
+                            : ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_DAMPING_RATIO;
+    float blendDuration = argc > 2 ? static_cast<float>(argv[2]->ToDouble(runtime))
+                            : ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_BLEND_DURATION;
+    curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
+    return true;
+}
+
+bool CreateResponsiveSpringMotionCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, RefPtr<Curve>& curve)
+{
+    if (argc > 3) {
+        LOGW("ResponsiveSpringMotionCurve: the number of parameters is illegal");
+        return false;
+    }
+    float response = argc > 0 ? static_cast<float>(argv[0]->ToDouble(runtime))
+                        : ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
+    float dampingRatio = argc > 1 ? static_cast<float>(argv[1]->ToDouble(runtime))
+                            : ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
+    float blendDuration = argc > 2 ? static_cast<float>(argv[2]->ToDouble(runtime))
+                            : ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+    curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
+    return true;
+}
+
 shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, std::string& curveString)
 {
@@ -168,6 +202,10 @@ shared_ptr<JsValue> ParseCurves(const shared_ptr<JsRuntime>& runtime, const shar
         curveCreated = CreateCubicCurve(runtime, thisObj, argv, argc, curve);
     } else if (curveString == CURVES_STEPS || curveString == STEPS_CURVE) {
         curveCreated = CreateStepsCurve(runtime, thisObj, argv, argc, curve);
+    } else if (curveString == SPRING_MOTION) {
+        curveCreated = CreateSpringMotionCurve(runtime, thisObj, argv, argc, curve);
+    } else if (curveString == RESPONSIVE_SPRING_MOTION) {
+        curveCreated = CreateResponsiveSpringMotionCurve(runtime, thisObj, argv, argc, curve);
     } else {
         LOGE("curve params: %{public}s is illegal", curveString.c_str());
         return runtime->NewNull();
@@ -230,6 +268,20 @@ shared_ptr<JsValue> StepsCurve(const shared_ptr<JsRuntime>& runtime, const share
     return ParseCurves(runtime, thisObj, argv, argc, curveString);
 }
 
+shared_ptr<JsValue> SpringMotionCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string curveString(SPRING_MOTION);
+    return ParseCurves(runtime, thisObj, argv, argc, curveString);
+}
+
+shared_ptr<JsValue> ResponsiveSpringMotionCurve(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string curveString(RESPONSIVE_SPRING_MOTION);
+    return ParseCurves(runtime, thisObj, argv, argc, curveString);
+}
+
 void InitCurvesModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& moduleObj)
 {
     moduleObj->SetProperty(runtime, CURVES_INIT, runtime->NewFunction(CurvesInit));
@@ -240,6 +292,8 @@ void InitCurvesModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>&
     moduleObj->SetProperty(runtime, SPRING_CURVE, runtime->NewFunction(SpringCurve));
     moduleObj->SetProperty(runtime, CURVES_STEPS, runtime->NewFunction(CurvesSteps));
     moduleObj->SetProperty(runtime, STEPS_CURVE, runtime->NewFunction(StepsCurve));
+    moduleObj->SetProperty(runtime, SPRING_MOTION, runtime->NewFunction(SpringMotionCurve));
+    moduleObj->SetProperty(runtime, RESPONSIVE_SPRING_MOTION, runtime->NewFunction(ResponsiveSpringMotionCurve));
 }
 
 } // namespace OHOS::Ace::Framework

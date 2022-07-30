@@ -134,6 +134,7 @@ public:
     static RefPtr<AccessibilityManager> GetAccessibilityManager();
     static RefPtr<AccessibilityNode> CreateAccessibilityNode(
         const std::string& tag, int32_t nodeId, int32_t parentNodeId, int32_t itemIndex);
+    static std::string GenerateId();
 
 private:
     bool accessibilitygroup_ = false;
@@ -142,6 +143,7 @@ private:
     std::string accessibilityimportance_ = "";
     EventMarker accessibilityEvent_;
     RefPtr<InspectorFunctionImpl> inspectorFunctionImpl_ = MakeRefPtr<InspectorFunctionImpl>();
+    static thread_local int32_t composedElementId_;
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     std::string debugLine_;

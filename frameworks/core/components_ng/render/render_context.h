@@ -47,7 +47,7 @@ public:
 
     virtual void InitContext(bool isRoot = false) {}
 
-    virtual void StartRecording(float x, float y, float width, float height) {}
+    virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
 
     virtual void SetDrawContentAtLast(bool usedrawContentLastOrder) {}

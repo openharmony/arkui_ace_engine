@@ -21,8 +21,7 @@
 #include "ui_service_proxy.h"
 #include "ui_service_stub.h"
 
-namespace OHOS {
-namespace Ace {
+namespace OHOS::Ace {
 UIServiceMgrStub::UIServiceMgrStub()
 {
     requestFuncMap_[REGISTER_CALLBACK] = &UIServiceMgrStub::RegisterCallBackInner;
@@ -33,6 +32,8 @@ UIServiceMgrStub::UIServiceMgrStub()
     requestFuncMap_[SHOW_DIALOG] = &UIServiceMgrStub::ShowDialogInner;
     requestFuncMap_[CANCEL_DIALOG] = &UIServiceMgrStub::CancelDialogInner;
     requestFuncMap_[UPDATE_DIALOG] = &UIServiceMgrStub::UpdateDialogInner;
+    requestFuncMap_[ATTACH_DIALOG] = &UIServiceMgrStub::AttachToUiServiceInner;
+    requestFuncMap_[REMOTE_DIALOG_CALLBACK] = &UIServiceMgrStub::RemoteDialogCallbackInner;
 }
 
 UIServiceMgrStub::~UIServiceMgrStub()
@@ -143,7 +144,7 @@ int UIServiceMgrStub::ShowDialogInner(MessageParcel &data, MessageParcel &reply)
 {
     const std::string& name = data.ReadString();
     const std::string& params = data.ReadString();
-    auto windowType = static_cast<OHOS::Rosen::WindowType>(data.ReadUint32());
+    auto windowType = data.ReadUint32();
     int x = data.ReadInt32();
     int y = data.ReadInt32();
     int width = data.ReadInt32();
@@ -177,5 +178,23 @@ int UIServiceMgrStub::UpdateDialogInner(MessageParcel &data, MessageParcel &repl
     reply.WriteInt32(result);
     return NO_ERROR;
 }
-}  // namespace Ace
-}  // namespace OHOS
+
+int32_t UIServiceMgrStub::AttachToUiServiceInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> client = data.ReadRemoteObject();
+    if (client == nullptr) {
+        HILOG_ERROR("AttachToUiServiceInner read remote object failed");
+        return -1;
+    }
+    int32_t pid = data.ReadInt32();
+    return AttachToUiService(client, pid);
+}
+
+int32_t UIServiceMgrStub::RemoteDialogCallbackInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t id = data.ReadInt32();
+    std::string event = data.ReadString();
+    std::string params = data.ReadString();
+    return RemoteDialogCallback(id, event, params);
+}
+}

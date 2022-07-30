@@ -1282,6 +1282,15 @@ void FrontendDelegateImpl::OnPageReady(const RefPtr<JsAcePage>& page, const std:
                 if (!isMainPage) {
                     delegate->OnPageHide();
                 }
+                pipelineContext->RemovePageTransitionListener(delegate->pageTransitionListenerId_);
+                delegate->pageTransitionListenerId_ = pipelineContext->AddPageTransitionListener(
+                    [weak, page](
+                        const TransitionEvent& event, const WeakPtr<PageElement>& in, const WeakPtr<PageElement>& out) {
+                        auto delegate = weak.Upgrade();
+                        if (delegate) {
+                            delegate->PushPageTransitionListener(event, page);
+                        }
+                    });
                 pipelineContext->PushPage(page->BuildPage(url));
                 delegate->OnPushPageSuccess(page, url);
                 delegate->SetCurrentPage(page->GetPageId());
@@ -1293,11 +1302,16 @@ void FrontendDelegateImpl::OnPageReady(const RefPtr<JsAcePage>& page, const std:
                 delegate->ResetStagingPage();
             }
             delegate->isStagingPageExist_ = false;
-            if (isMainPage) {
-                delegate->OnPageShow();
-            }
         },
         TaskExecutor::TaskType::UI);
+}
+
+void FrontendDelegateImpl::PushPageTransitionListener(
+    const TransitionEvent& event, const RefPtr<JsAcePage>& page)
+{
+    if (event == TransitionEvent::PUSH_END) {
+        OnPageShow();
+    }
 }
 
 void FrontendDelegateImpl::FlushPageCommand(const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage)
@@ -1585,6 +1599,7 @@ void FrontendDelegateImpl::ReplacePage(const RefPtr<JsAcePage>& page, const std:
                 pipelineContext->ReplacePage(page->BuildPage(url));
                 delegate->OnReplacePageSuccess(page, url);
                 delegate->SetCurrentPage(page->GetPageId());
+                delegate->OnPageShow();
                 delegate->OnMediaQueryUpdate();
             } else {
                 // This page has been loaded but become useless now, the corresponding js instance

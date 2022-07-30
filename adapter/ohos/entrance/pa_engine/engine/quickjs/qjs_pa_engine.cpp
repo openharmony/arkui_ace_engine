@@ -938,6 +938,14 @@ int32_t QjsPaEngine::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     return GetJsInt32Val(ctx, retVal);
 }
 
+std::shared_ptr<AppExecFwk::PacMap> QjsPaEngine::Call(const std::string& method,
+    const std::string& arg, const AppExecFwk::PacMap& pacMap)
+{
+    LOGD("QjsPaEngine Call");
+    std::shared_ptr<AppExecFwk::PacMap> resultSet = nullptr;
+    return resultSet;
+}
+
 std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> QjsPaEngine::Query(
     const Uri& uri, const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates)
 {

@@ -34,6 +34,10 @@ void StageManager::PushPage(const RefPtr<UINode>& node)
         LOGE("the root node is nullptr");
         return;
     }
+    if (!node) {
+        LOGE("page node is nullptr, maybe js file execute failed");
+        return;
+    }
     // Add unique id.
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 0, MakeRefPtr<PagePattern>());
     node->MountToParent(pageNode);

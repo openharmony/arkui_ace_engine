@@ -260,7 +260,7 @@ config("config_render_marquee_test") {
 group("unittest") {
   testonly = true
   deps = [
-    #":MarqueeCreatorTest",
+    ":MarqueeCreatorTest",
     #":RenderMarqueeTest",
   ]
 }

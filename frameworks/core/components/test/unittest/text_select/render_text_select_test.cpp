@@ -265,7 +265,7 @@ public:
 
     // Implement Clipboard
     void SetData(const std::string& data) override {};
-    void GetData(const std::function<void(const std::string&)>& callback) override
+    virtual void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false) override
     {
         if (taskExecutor_) {
             taskExecutor_->PostTask(

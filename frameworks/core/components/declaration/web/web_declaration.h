@@ -43,6 +43,7 @@ struct WebEvent : Event {
     EventMarker refreshAccessedHistoryId;
     EventMarker resourceLoadId;
     EventMarker scaleChangeId;
+    EventMarker permissionRequestId;
 };
 
 struct WebMethod : Method {
@@ -262,6 +263,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.scaleChangeId;
+    }
+
+    void SetPermissionRequestEventId(const EventMarker& permissionRequestId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.permissionRequestId = permissionRequestId;
+    }
+
+    const EventMarker& GetPermissionRequestEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.permissionRequestId;
     }
 
 protected:

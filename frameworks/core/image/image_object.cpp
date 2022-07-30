@@ -21,6 +21,10 @@
 #include "core/components/image/render_image.h"
 #include "core/image/flutter_image_cache.h"
 
+#ifdef NG_BUILD
+#include "core/components_ng/render/canvas_image.h"
+#endif
+
 namespace OHOS::Ace {
 
 std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, Size targetImageSize)
@@ -37,6 +41,9 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
 {
     // build svg image object.
     if (source.IsSvg()) {
+#ifdef NG_BUILD
+        return nullptr;
+#else
         const auto svgStream = std::make_unique<SkMemoryStream>(skData);
         if (!svgStream) {
             return nullptr;
@@ -55,6 +62,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
             auto skiaDom = SkSVGDOM::MakeFromStream(*svgStream, colorValue);
             return skiaDom ? MakeRefPtr<SvgSkiaImageObject>(source, Size(), 1, skiaDom) : nullptr;
         }
+#endif
     }
     // build normal pixel image object.
     auto codec = SkCodec::MakeFromData(skData);
@@ -95,12 +103,14 @@ Size SvgImageObject::MeasureForImage(RefPtr<RenderImage> image)
     return image->MeasureForSvgImage();
 }
 
+#ifndef NG_BUILD
 void SvgSkiaImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image) {}
 
 Size SvgSkiaImageObject::MeasureForImage(RefPtr<RenderImage> image)
 {
     return image->MeasureForSvgImage();
 }
+#endif
 
 void StaticImageObject::UploadToGpuForRender(
     const WeakPtr<PipelineBase>& context,
@@ -124,12 +134,17 @@ void StaticImageObject::UploadToGpuForRender(
             LOGE("task executor is null.");
             return;
         }
+
         auto key = GenerateCacheKey(imageSource, imageSize);
         if (!ImageProvider::TryUploadingImage(key, successCallback, failedCallback)) {
             LOGI("other thread is uploading same image to gpu : %{public}s", imageSource.ToString().c_str());
             return;
         }
+#ifdef NG_BUILD
+        RefPtr<NG::CanvasImage> cachedFlutterImage = NG::CanvasImage::Create(nullptr);
+#else
         fml::RefPtr<flutter::CanvasImage> cachedFlutterImage;
+#endif
         auto imageCache = pipelineContext->GetImageCache();
         if (imageCache) {
             auto cachedImage = imageCache->GetCacheImage(key);
@@ -164,8 +179,12 @@ void StaticImageObject::UploadToGpuForRender(
         auto callback = [successCallback, imageSource, taskExecutor, imageCache, imageSize, key,
                             id = Container::CurrentId()](flutter::SkiaGPUObject<SkImage> image) {
             ContainerScope scope(id);
+#ifdef NG_BUILD
+            auto canvasImage = NG::CanvasImage::Create(nullptr);
+#else
             auto canvasImage = flutter::CanvasImage::Create();
             canvasImage->set_image(std::move(image));
+#endif
             if (imageCache) {
                 LOGD("cache image key: %{public}s", key.c_str());
                 imageCache->CacheImage(key, std::make_shared<CachedImage>(canvasImage));

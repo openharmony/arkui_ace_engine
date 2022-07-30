@@ -64,9 +64,7 @@ void SharedImageManager::PostDelayedTaskToClearImageData(const std::string& name
 
 void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& sharedImage)
 {
-    size_t dataSize = 0;
-    {
-        std::set<RefPtr<ImageProviderLoader>> providerSet = std::set<RefPtr<ImageProviderLoader>>();
+        std::set<WeakPtr<ImageProviderLoader>> providerWpSet = std::set<WeakPtr<ImageProviderLoader>>();
         // step1: lock provider map to search for record of current picture name
         std::scoped_lock lock(providerMapMutex_, sharedImageMapMutex_);
         auto providersToNotify = providerMapToReload_.find(name);
@@ -77,23 +75,51 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
                     LOGE("provider of %{private}s is null, data size is %{public}zu", name.c_str(), sharedImage.size());
                     continue;
                 }
-                providerSet.emplace(provider);
+                providerWpSet.emplace(provider);
             }
             providerMapToReload_.erase(providersToNotify);
         }
         // step2: lock image map to add shared image and notify [LazyMemoryImageProvider]s to update data and reload
         // update image data when the name can be found in map
-        auto result = sharedImageMap_.try_emplace(name, std::move(sharedImage));
-        if (!result.second) {
-            result.first->second = std::move(sharedImage);
+        auto iter = sharedImageMap_.find(name);
+        if (iter != sharedImageMap_.end()) {
+            iter->second = std::move(sharedImage);
+        } else {
+            sharedImageMap_.emplace(name, std::move(sharedImage));
         }
-        for (const auto& provider : providerSet) {
-            provider->UpdateData(std::string(MEMORY_IMAGE_HEAD).append(name), result.first->second);
+        if (!taskExecutor_) {
+            LOGE("taskExecutor is null when try UpdateData");
+            return;
         }
-        dataSize = result.first->second.size();
-        LOGI("done add image data for %{private}s, length of data is %{public}zu", name.c_str(), dataSize);
-    }
-    PostDelayedTaskToClearImageData(name, dataSize);
+        taskExecutor_->PostTask([providerWpSet, name, wp = AceType::WeakClaim(this)] () {
+            auto sharedImageManager = wp.Upgrade();
+            if (!sharedImageManager) {
+                LOGE("sharedImageManager is null when try UpdateData");
+                return;
+            }
+            size_t dataSize = 0;
+            auto sharedImageMap = sharedImageManager->GetSharedImageMap();
+            {
+                std::lock_guard<std::mutex> lockImageMap(sharedImageManager->sharedImageMapMutex_);
+                auto imageDataIter = sharedImageMap.find(name);
+                if (imageDataIter == sharedImageMap.end()) {
+                    LOGE("fail to find data of %{public}s in sharedImageMap, stop UpdateData", name.c_str());
+                    return;
+                }
+                dataSize = imageDataIter->second.size();
+                for (const auto& providerWp : providerWpSet) {
+                    auto provider = providerWp.Upgrade();
+                    if (!provider) {
+                        LOGE("provider of %{public}s is null when UpdateData, dataSize is %{public}zu",
+                            name.c_str(), dataSize);
+                        continue;
+                    }
+                    provider->UpdateData(std::string(MEMORY_IMAGE_HEAD).append(name), imageDataIter->second);
+                }
+                LOGI("done add image data for %{private}s, length of data is %{public}zu", name.c_str(), dataSize);
+            }
+            sharedImageManager->PostDelayedTaskToClearImageData(name, dataSize);
+        }, TaskExecutor::TaskType::UI);
 }
 
 void SharedImageManager::AddPictureNamesToReloadMap(std::string&& name)
@@ -103,16 +129,6 @@ void SharedImageManager::AddPictureNamesToReloadMap(std::string&& name)
     providerMapToReload_.try_emplace(name, std::set<WeakPtr<ImageProviderLoader>>());
 }
 
-bool SharedImageManager::AddProviderToReloadMap(const std::string& name, const WeakPtr<ImageProviderLoader>& loaderWp)
-{
-    std::lock_guard<std::mutex> lock(providerMapMutex_);
-    auto providerMapIter = providerMapToReload_.find(name);
-    if (providerMapIter != providerMapToReload_.end()) {
-        providerMapIter->second.emplace(loaderWp);
-        return true;
-    }
-    return false;
-}
 
 bool SharedImageManager::FindImageInSharedImageMap(
     const std::string& name, const WeakPtr<ImageProviderLoader>& providerWp)

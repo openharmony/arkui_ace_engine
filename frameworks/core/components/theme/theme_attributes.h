@@ -44,6 +44,7 @@ extern const char THEME_PATTERN_COUNTER[];
 extern const char THEME_PATTERN_DIVIDER[];
 extern const char THEME_PATTERN_FOCUS_ANIMATION[];
 extern const char THEME_PATTERN_GRID[];
+extern const char THEME_PATTERN_ICON[];
 extern const char THEME_PATTERN_IMAGE[];
 extern const char THEME_PATTERN_LIST[];
 extern const char THEME_PATTERN_LIST_ITEM[];

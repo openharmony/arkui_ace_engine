@@ -643,13 +643,6 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
 
-    auto&& idleCallback = [context = pipelineContext_, id = instanceId_](int64_t deadline) {
-        ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
-    };
-    aceView_->RegisterIdleCallback(idleCallback);
-
     auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
                                    int32_t x, int32_t y, const DragEventAction& action) {
         ContainerScope scope(id);
@@ -686,7 +679,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
     jsFront->SetInstanceName(instanceName);
 }
 
-void AceContainer::DestroyContainer(int32_t instanceId)
+void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
@@ -705,11 +698,14 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
     if (taskExecutor) {
         taskExecutor->PostTask(
-            [instanceId] {
+            [instanceId, destroyCallback] {
                 LOGI("Remove on Platform thread...");
                 EngineHelper::RemoveEngine(instanceId);
                 AceEngine::Get().RemoveContainer(instanceId);
                 ConnectServerManager::Get().RemoveInstance(instanceId);
+                if (destroyCallback) {
+                    destroyCallback();
+                }
             },
             TaskExecutor::TaskType::PLATFORM);
     }

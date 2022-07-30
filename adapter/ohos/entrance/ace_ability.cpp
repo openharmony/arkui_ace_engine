@@ -718,7 +718,7 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
     ContainerScope scope(abilityId_);
     taskExecutor->PostSyncTask(
         [container, params, &info] {
-            auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+            auto context = container->GetPipelineContext();
             if (context != nullptr) {
                 context->DumpInfo(params, info);
             }

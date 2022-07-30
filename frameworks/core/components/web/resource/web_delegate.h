@@ -121,6 +121,24 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> geolocationCallback_;
 };
 
+class WebPermissionRequestOhos : public WebPermissionRequest {
+    DECLARE_ACE_TYPE(WebPermissionRequestOhos, WebPermissionRequest)
+
+public:
+    WebPermissionRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request)
+        : request_(request) {}
+
+    void Deny() const override;
+
+    std::string GetOrigin() const override;
+
+    std::vector<std::string> GetResources() const override;
+
+    void Grant(std::vector<std::string>& resources) const override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebAccessRequest> request_;
+};
+
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -189,6 +207,7 @@ public:
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action);
     void OnFocus();
     void OnBlur();
+    void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -311,6 +330,7 @@ private:
     EventCallbackV2 onRenderExitedV2_;
     EventCallbackV2 onResourceLoadV2_;
     EventCallbackV2 onScaleChangeV2_;
+    EventCallbackV2 onPermissionRequestV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;

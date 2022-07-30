@@ -18,6 +18,7 @@
 
 #include "core/components/box/box_element.h"
 #include "core/focus/focus_node.h"
+#include "core/components/tab_bar/render_tab_bar_item.h"
 
 namespace OHOS::Ace {
 

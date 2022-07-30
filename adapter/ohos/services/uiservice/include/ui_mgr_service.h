@@ -13,24 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_UI_SERVICE_MANAGER_SERVICE_H
-#define OHOS_AAFWK_UI_SERVICE_MANAGER_SERVICE_H
+#ifndef OHOS_ACE_UI_SERVICE_MANAGER_SERVICE_H
+#define OHOS_ACE_UI_SERVICE_MANAGER_SERVICE_H
 
 #include <memory>
 #include <singleton.h>
 #include <thread_ex.h>
+#include <unistd.h>
 #include <unordered_map>
 
-#include "ability.h"
+#include "client_socket.h"
 #include "element_name.h"
 #include "event_handler.h"
 #include "event_runner.h"
 #include "hilog_wrapper.h"
 #include "iremote_object.h"
-#include "resource_manager.h"
+
 #include "runtime.h"
 #include "system_ability.h"
 #include "ui_service_mgr_stub.h"
+#include "uiservice_dialog/uiservice_dialog_interface.h"
 #include "uri.h"
 
 namespace OHOS {
@@ -39,6 +41,12 @@ using EventRunner = OHOS::AppExecFwk::EventRunner;
 using EventHandler = OHOS::AppExecFwk::EventHandler;
 enum class UIServiceRunningState { STATE_NOT_START, STATE_RUNNING };
 
+using AppSpawnMsg = AppSpawn::ClientSocket::AppProperty;
+
+union AppSpawnPidMsg {
+    pid_t pid = 0;
+    char pidBuf[sizeof(pid_t)];
+};
 class UIMgrService : public SystemAbility,
                           public UIServiceMgrStub,
                           public std::enable_shared_from_this<UIMgrService> {
@@ -58,19 +66,24 @@ public:
     int ReturnRequest(const AAFwk::Want& want, const std::string& source, const std::string& data,
         const std::string& extraData) override;
 
-    int ShowDialog(const std::string& name,
-                           const std::string& params,
-                           OHOS::Rosen::WindowType windowType,
-                           int x,
-                           int y,
-                           int width,
-                           int height,
-                           const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
-                           int* id = nullptr) override;
+    int32_t AttachToUiService(const sptr<IRemoteObject>& dialog, int32_t pid) override;
+
+    int ShowDialog(
+        const std::string& name,
+        const std::string& params,
+        uint32_t windowType,
+        int x,
+        int y,
+        int width,
+        int height,
+        const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
+        int* id = nullptr) override;
 
     int CancelDialog(int id) override;
 
     int UpdateDialog(int id, const std::string& data) override;
+
+    int32_t RemoteDialogCallback(int32_t id, const std::string& event, const std::string& params) override;
 
     /**
      * GetEventHandler, get the ui_service manager service's handler.
@@ -80,24 +93,45 @@ public:
     std::shared_ptr<EventHandler> GetEventHandler();
 
 private:
+    struct DialogParam {
+        std::string name;
+        std::string params;
+        uint32_t windowType;
+        int32_t x;
+        int32_t y;
+        int32_t width;
+        int32_t height;
+        int32_t id;
+    };
+
     bool Init();
     bool CheckCallBackFromMap(const std::string& key);
     int HandleRegister(const AAFwk::Want& want,  const sptr<IUIService>& uiService);
     int HandleUnregister(const AAFwk::Want& want);
-    void InitResourceManager();
-    std::shared_ptr<OHOS::AppExecFwk::Ability> CreateAbility();
+    int32_t OpenAppSpawnConnection();
+    void CloseAppSpawnConnection();
+
+    AppSpawnMsg* MakeAppSpawnMsg(const std::string& name, int32_t id);
+
     std::string GetCallBackKeyStr(const AAFwk::Want& want);
     std::shared_ptr<EventRunner> eventLoop_;
     std::shared_ptr<EventHandler> handler_;
     UIServiceRunningState state_;
+
     std::map<std::string, sptr<IUIService>> callbackMap_;
     std::mutex uiMutex_;
-    std::unordered_map<int32_t, std::shared_ptr<OHOS::AppExecFwk::Ability>> abilityMaps_;
 
-    const std::string PUSH_STRING = "PUSH";
-    const std::string REQUEST_STRING = "REQUEST";
-    float density_ = 2.0f; // 2.0 for wgr, 3.0 for phone
-    std::shared_ptr<Global::Resource::ResourceManager> resourceManager_ = nullptr;
+    // app spawn client socket
+    std::shared_ptr<AppSpawn::ClientSocket> clientSocket_;
+
+    std::mutex dialogMapMutex_;
+    std::unordered_map<int32_t, sptr<OHOS::Ace::IUiServiceDialog>> dialogMap_; // dialog ID vs dialog client
+
+    std::unordered_map<int32_t, DialogParam> dialogRecords_; // pid vs dialog params
+
+    std::unordered_map<int32_t, int32_t> dialogIDMap_; // dialog ID vs dialog Pid
+
+    std::unordered_map<int32_t, sptr<OHOS::Ace::IDialogCallback>> dialogCallbackProxyMap_;
 };
 }  // namespace Ace
 }  // namespace OHOS

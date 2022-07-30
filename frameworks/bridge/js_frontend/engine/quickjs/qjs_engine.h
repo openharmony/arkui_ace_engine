@@ -38,6 +38,7 @@ namespace OHOS::Ace::Framework {
 
 // Each JsFrontend holds only one QjsEngineInstance.
 class QjsEngineInstance final : public AceType, public JsEngineInstance {
+    DECLARE_ACE_TYPE(QjsEngineInstance, AceType)
 public:
     explicit QjsEngineInstance(const RefPtr<FrontendDelegate>& delegate, int32_t instanceId)
         : frontendDelegate_(delegate), instanceId_(instanceId)
@@ -206,6 +207,7 @@ private:
 };
 
 class QjsEngine : public JsEngine {
+    DECLARE_ACE_TYPE(QjsEngine, JsEngine)
 public:
     explicit QjsEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~QjsEngine() override;
@@ -270,12 +272,6 @@ public:
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
 
-    void RunNativeEngineLoop() override
-    {
-        if (nativeEngine_ != nullptr) {
-            nativeEngine_->Loop(LOOP_NOWAIT, false);
-        }
-    }
     static std::map<const std::string, std::string> dataMap_;
 
 private:
@@ -286,7 +282,6 @@ private:
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
     void SetPostTask(NativeEngine* nativeEngine);
-    QuickJSNativeEngine* nativeEngine_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(QjsEngine);
 };
 

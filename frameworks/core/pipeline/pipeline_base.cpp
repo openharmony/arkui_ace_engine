@@ -15,6 +15,11 @@
 
 #include "core/pipeline/pipeline_base.h"
 
+#include <fstream>
+
+#include "base/log/dump_log.h"
+#include "base/log/event_report.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
 #include "core/common/manager_interface.h"
@@ -51,6 +56,14 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
 PipelineBase::~PipelineBase()
 {
     LOG_DESTROY();
+}
+
+uint64_t PipelineBase::GetTimeFromExternalTimer()
+{
+    static const int64_t secToNanosec = 1000000000;
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (ts.tv_sec * secToNanosec + ts.tv_nsec);
 }
 
 void PipelineBase::RequestFrame()
@@ -285,6 +298,58 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
     dipScale_ = density_ / viewScale_;
     rootHeight_ = height / viewScale_;
     rootWidth_ = width / viewScale_;
+}
+
+void PipelineBase::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const
+{
+    auto result = false;
+    if (!SystemProperties::GetDebugEnabled()) {
+        std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
+        DumpLog::GetInstance().SetDumpFile(std::move(ss));
+        result = Dump(params);
+        const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
+        auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
+        info.emplace_back(ostringstream->str().substr(0, DumpLog::MAX_DUMP_LENGTH));
+        DumpLog::GetInstance().Reset();
+    } else {
+        auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
+        std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(dumpFilePath);
+        DumpLog::GetInstance().SetDumpFile(std::move(ss));
+        result = Dump(params);
+        info.emplace_back("dumpFilePath: " + dumpFilePath);
+        DumpLog::GetInstance().Reset();
+    }
+    if (!result) {
+        DumpLog::ShowDumpHelp(info);
+    }
+}
+
+bool PipelineBase::Dump(const std::vector<std::string>& params) const
+{
+    if (params.empty()) {
+        LOGW("the params is empty");
+        return false;
+    }
+    // the first param is the key word of dump.
+#ifdef ACE_MEMORY_MONITOR
+    if (params[0] == "-memory") {
+        MemoryMonitor::GetInstance().Dump();
+        return true;
+    }
+#endif
+    if (params[0] == "-jscrash") {
+        EventReport::JsErrReport(
+            AceApplicationInfo::GetInstance().GetPackageName(), "js crash reason", "js crash summary");
+        return true;
+    }
+    // hiview report dump will provide three params .
+    if (params[0] == "-hiviewreport" && params.size() >= 3) {
+        DumpLog::GetInstance().Print("Report hiview event. EventType: " + params[1] + ", error type: " + params[2]);
+        EventInfo eventInfo = { .eventType = params[1], .errorType = StringUtils::StringToInt(params[2]) };
+        EventReport::SendEvent(eventInfo);
+        return true;
+    }
+    return OnDumpInfo(params);
 }
 
 } // namespace OHOS::Ace

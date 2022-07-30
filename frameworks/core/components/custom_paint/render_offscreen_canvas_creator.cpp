@@ -13,8 +13,15 @@
  * limitations under the License.
  */
 
+#include "core/components/custom_paint/render_custom_paint.h"
+#include "core/pipeline/pipeline_base.h"
+
+#ifndef NG_BUILD
 #include "flutter_render_offscreen_canvas.h"
+#endif
+#ifdef ENABLE_ROSEN_BACKEND
 #include "rosen_render_offscreen_canvas.h"
+#endif
 
 namespace OHOS::Ace {
 RefPtr<OffscreenCanvas> RenderOffscreenCanvas::Create(
@@ -27,7 +34,11 @@ RefPtr<OffscreenCanvas> RenderOffscreenCanvas::Create(
         return nullptr;
 #endif
     } else {
+#ifndef NG_BUILD
         return AceType::MakeRefPtr<FlutterRenderOffscreenCanvas>(context, width, height);
+#else
+        return nullptr;
+#endif
     }
 }
 } // namespace OHOS::Ace

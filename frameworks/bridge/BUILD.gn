@@ -40,6 +40,23 @@ template("framework_bridge") {
   }
 }
 
+# build ng framework bridge
+template("framework_bridge_ng") {
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    part_name = ace_engine_part
+    configs = [ "$ace_root:ace_config" ]
+
+    deps = [
+      "codec:data_codec",
+      "common:bridge_common_ng_$platform",
+      "common/accessibility:bridge_accessibility_$platform",
+      "declarative_frontend:declarative_frontend_$platform",
+    ]
+  }
+}
+
 foreach(item, ace_platforms) {
   framework_bridge("framework_bridge_" + item.name) {
     platform = item.name
@@ -49,5 +66,9 @@ foreach(item, ace_platforms) {
     if (defined(item.config)) {
       config = item.config
     }
+  }
+
+  framework_bridge_ng("framework_bridge_ng_" + item.name) {
+    platform = item.name
   }
 }

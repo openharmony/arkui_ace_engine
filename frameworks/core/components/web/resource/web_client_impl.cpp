@@ -390,4 +390,13 @@ bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthRe
     LOGI("OnHttpAuthRequestByJS result:%{public}d", jsResult);
     return jsResult;
 }
+
+void WebClientImpl::OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request)
+{
+    LOGI("OnPermissionRequest");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnPermissionRequestPrompt(request);
+}
 } // namespace OHOS::Ace

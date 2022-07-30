@@ -167,6 +167,11 @@ public:
 
     void SetFillColor(const Color& color);
 
+    void UpdateSrcType()
+    {
+        srcType_ = ResolveSrcType();
+    }
+
     std::optional<Color> GetFillColor() const
     {
         return fillColor_;

@@ -690,7 +690,6 @@ bool UIContentImpl::ProcessBackPressed()
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    LOGI("UIContent ProcessPointerEvent");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (container) {
         auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
@@ -827,7 +826,7 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
         LOGE("get container(id=%{public}d) failed", instanceId_);
         return;
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
         LOGE("get pipeline context failed");
         return;

@@ -836,6 +836,16 @@ public:
         return declaration_->GetScaleChangeId();
     }
 
+    void SetPermissionRequestEventId(const EventMarker& permissionRequestEventId)
+    {
+        declaration_->SetPermissionRequestEventId(permissionRequestEventId);
+    }
+
+    const EventMarker& GetPermissionRequestEventId() const
+    {
+        return declaration_->GetPermissionRequestEventId();
+    }
+
     void SetDeclaration(const RefPtr<WebDeclaration>& declaration)
     {
         if (declaration) {
