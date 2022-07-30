@@ -69,9 +69,6 @@ private:
     void ResetStickyItem();
     void InitStickyFunc();
 
-    RefPtr<Element> GetCachedElement(const std::string& type);
-    bool RemoveFromCache(const RefPtr<Element>& item);
-
     void UpdateListElement();
     void GetRefreshItems(bool& rebuild, int32_t& index);
     void RebuildElements(int32_t tailIndex);
@@ -110,10 +107,8 @@ private:
     bool needRefresh_ = false;
     bool isJsCard_ = false;
 
-    size_t bucketSize_ = 6; // default cache size
     bool building_ = false;
     std::map<int32_t, RefPtr<Element>> itemElements_;
-    std::map<std::string, std::list<RefPtr<Element>>> cacheBuckets_;
 
     bool needMoveFocusItem_ = false;
     RefPtr<Element> stickyElement_;
