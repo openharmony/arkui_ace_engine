@@ -46,9 +46,14 @@ void Animator::SetDurationScale(float scale)
     scale_ = scale;
 }
 
-float Animator::GetDurationScale()
+float Animator::GetAnimationScale()
 {
+#ifdef OHOS_STANDARD_SYSTEM
+    // if rosen is enabled, animationScale should be set on Rosen.
+    return allowRunningAsynchronously_ ? 1.0 : SystemProperties::GetAnimationScale();
+#else
     return scale_;
+#endif
 }
 
 // Public Functions.
@@ -312,7 +317,7 @@ void Animator::UpdatePlayedTime(int32_t playedTime, bool checkReverse)
         isReverse_ = false;
         isCurDirection_ = false;
     }
-    float scale = GetDurationScale();
+    float scale = GetAnimationScale();
     if (!NearZero(tempo_)) {
         int32_t scaledPlayedTime = playedTime * scale / tempo_;
         elapsedTime_ = scaledPlayedTime;
@@ -680,8 +685,8 @@ void Animator::StartInner(bool alwaysNotify)
 AnimationOption Animator::GetAnimationOption()
 {
     AnimationOption option;
-    option.SetDuration(duration_ * scale_);
-    option.SetDelay(startDelay_ * scale_);
+    option.SetDuration(duration_ * GetAnimationScale());
+    option.SetDelay(startDelay_ * GetAnimationScale());
     option.SetIteration(iteration_);
     option.SetTempo(tempo_);
     option.SetFillMode(fillMode_);
@@ -885,7 +890,7 @@ float Animator::GetNormalizedTime(float playedTime, bool needStop) const
 
 void Animator::UpdateScaledTime()
 {
-    float scale = GetDurationScale();
+    float scale = GetAnimationScale();
     if (!NearZero(tempo_)) {
         scaledDuration_ = duration_ * scale / tempo_;
         scaledStartDelay_ = startDelay_ * scale / tempo_;

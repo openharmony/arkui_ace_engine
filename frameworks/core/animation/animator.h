@@ -43,7 +43,6 @@ public:
 
     // Adjust global animation duration, default scale is 1.0f.
     static void SetDurationScale(float scale);
-    static float GetDurationScale();
 
     // Animator can play animations.
     // So far, animation has two types: Interpolator and Motion(physical-based animation).
@@ -140,6 +139,9 @@ public:
 
     // Get Controller Id.
     int32_t GetId() const;
+
+    // Get AnimationScale
+    float GetAnimationScale();
 
 private:
     // Screen refresh callback. duration is in millisecond.
