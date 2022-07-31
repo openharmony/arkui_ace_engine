@@ -20,6 +20,10 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
@@ -60,6 +64,10 @@ void JsBindViews(BindingTarget globalObj)
     JSColumn::JSBind(globalObj);
     JSRow::JSBind(globalObj);
     JSStack::JSBind(globalObj);
+    JSImage::JSBind(globalObj);
+    JSLazyForEach::JSBind(globalObj);
+    JSList::JSBind(globalObj);
+    JSListItem::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSEnvironment::JSBind(globalObj);
