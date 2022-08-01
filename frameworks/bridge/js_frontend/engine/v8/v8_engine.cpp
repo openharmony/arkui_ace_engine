@@ -3666,7 +3666,7 @@ bool V8Engine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
     engineInstance_->SetV8NativeEngine(nativeEngine_);
     SetPostTask();
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
     RegisterWorker();
@@ -3781,7 +3781,7 @@ V8Engine::~V8Engine()
         }
     }
 
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     if (nativeEngine_) {
         nativeEngine_->CancelCheckUVLoop();
     }
