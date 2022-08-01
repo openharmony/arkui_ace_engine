@@ -267,6 +267,7 @@ void FlutterRenderSlider::HandleFocus()
 void FlutterRenderSlider::OnPaintFinish()
 {
     HandleFocus();
+    RenderSlider::OnPaintFinish();
 }
 
 void FlutterRenderSlider::OnMouseHoverEnterTest()

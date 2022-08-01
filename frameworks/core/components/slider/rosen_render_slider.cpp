@@ -268,7 +268,7 @@ void RosenRenderSlider::HandleFocus()
 void RosenRenderSlider::OnPaintFinish()
 {
     HandleFocus();
-    UpdateAccessibilityAttr();
+    RenderSlider::OnPaintFinish();
 }
 
 void RosenRenderSlider::OnMouseHoverEnterTest()

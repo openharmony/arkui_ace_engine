@@ -88,6 +88,8 @@ public:
 
     void PerformLayout() override;
 
+    void OnPaintFinish() override;
+
     bool HandleFocusEvent(const KeyEvent& keyEvent);
 
     double GetValue() const

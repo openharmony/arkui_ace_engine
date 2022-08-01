@@ -124,6 +124,11 @@ void RenderSlider::PerformLayout()
     UpdateTouchRegion();
 }
 
+void RenderSlider::OnPaintFinish()
+{
+    UpdateAccessibilityAttr();
+}
+
 void RenderSlider::UpdateAccessibilityAttr()
 {
     // Update text with slider value
