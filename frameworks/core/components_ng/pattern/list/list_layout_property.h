@@ -45,7 +45,7 @@ public:
         ResetListDirection();
     }
 
-    ACE_DEFINE_CLASS_PROPERTY_WITHOUT_GROUP(ListDirection, Axis, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListDirection, Axis, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

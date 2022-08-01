@@ -47,6 +47,8 @@ public:
     std::string GetGridMaxCount() const;
     std::string GetGridMinCount() const;
     std::string GetGridCellLength() const;
+    std::string GetSupportAnimation() const;
+    std::string GetMultiSelectable() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

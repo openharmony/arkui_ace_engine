@@ -23,11 +23,41 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/modifier/modify_task.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/render_context.h"
+
+#define ACE_UPDATE_LAYOUT_PROPERTY(target, name, value)                         \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetLayoutProperty<target>();             \
+        if (cast##target) {                                                     \
+            cast##target->Update##name(value);                                  \
+        }                                                                       \
+    } while (false)
+
+#define ACE_UPDATE_PAINT_PROPERTY(target, name, value)                          \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetPaintProperty<target>();              \
+        if (cast##target) {                                                     \
+            cast##target->Update##name(value);                                  \
+        }                                                                       \
+    } while (false)
+
+#define ACE_UPDATE_RENDER_CONTEXT(name, value)                                 \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto target = frameNode->GetRenderContext();                            \
+        if (target) {                                                           \
+            target->Update##name(value);                                        \
+        }                                                                       \
+    } while (false)
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewStackProcessor final {
@@ -84,12 +114,6 @@ public:
 
     // End of Render function, create component tree and flush modify task.
     RefPtr<UINode> Finish();
-
-    void PushLayoutTask(Modifier<LayoutProperty>&& task);
-
-    void PushRenderTask(Modifier<RenderProperty>&& task);
-
-    void PushRenderContextTask(Modifier<RenderContext>&& task);
 
     // Set key to be used for next node on the stack
     void PushKey(const std::string& key);
@@ -152,9 +176,6 @@ private:
 
     // render component stack
     std::stack<RefPtr<UINode>> elementsStack_;
-
-    // modifier task
-    std::stack<RefPtr<StateModifyTask>> modifyTaskStack_;
 
     RefPtr<GestureProcessor> gestureStack_;
 

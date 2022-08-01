@@ -273,6 +273,104 @@ private:
     RefPtr<WebGeolocation> webGeolocation_;
 };
 
+class JSWebPermissionRequest : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebPermissionRequest>::Declare("WebPermissionRequest");
+        JSClass<JSWebPermissionRequest>::CustomMethod("deny", &JSWebPermissionRequest::Deny);
+        JSClass<JSWebPermissionRequest>::CustomMethod("getOrigin", &JSWebPermissionRequest::GetOrigin);
+        JSClass<JSWebPermissionRequest>::CustomMethod("getAccessibleResource", &JSWebPermissionRequest::GetResources);
+        JSClass<JSWebPermissionRequest>::CustomMethod("grant", &JSWebPermissionRequest::Grant);
+        JSClass<JSWebPermissionRequest>::Bind(globalObj, &JSWebPermissionRequest::Constructor,
+            &JSWebPermissionRequest::Destructor);
+    }
+
+    void SetEvent(const WebPermissionRequestEvent& eventInfo)
+    {
+        webPermissionRequest_ = eventInfo.GetWebPermissionRequest();
+    }
+
+    void Deny(const JSCallbackInfo& args)
+    {
+        if (webPermissionRequest_) {
+            webPermissionRequest_->Deny();
+        }
+    }
+
+    void GetOrigin(const JSCallbackInfo& args)
+    {
+        std::string origin;
+        if (webPermissionRequest_) {
+            origin = webPermissionRequest_->GetOrigin();
+        }
+        auto originJs = JSVal(ToJSValue(origin));
+        auto originJsRef = JSRef<JSVal>::Make(originJs);
+        args.SetReturnValue(originJsRef);
+    }
+
+    void GetResources(const JSCallbackInfo& args)
+    {
+        JSRef<JSArray> result = JSRef<JSArray>::New();
+        if (webPermissionRequest_) {
+            std::vector<std::string> resources = webPermissionRequest_->GetResources();
+            uint32_t index = 0;
+            for (auto iterator = resources.begin(); iterator != resources.end(); ++iterator) {
+                auto valueStr = JSVal(ToJSValue(*iterator));
+                auto value = JSRef<JSVal>::Make(valueStr);
+                result->SetValueAt(index++, value);
+            }
+        }
+        args.SetReturnValue(result);
+    }
+
+    void Grant(const JSCallbackInfo& args)
+    {
+        if (args.Length() < 1) {
+            if (webPermissionRequest_) {
+                webPermissionRequest_->Deny();
+            }
+        }
+        std::vector<std::string> resources;
+        if (args[0]->IsArray()) {
+            JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
+            for (size_t i = 0; i < array->Length(); i++) {
+                JSRef<JSVal> val = array->GetValueAt(i);
+                if (!val->IsString()) {
+                    LOGW("resources list is not string at index %{public}zu", i);
+                    continue;
+                }
+                std::string res;
+                if (!ConvertFromJSValue(val, res)) {
+                    LOGW("can't convert resource at index %{public}zu of JSWebPermissionRequest, so skip it.", i);
+                    continue;
+                }
+                resources.push_back(res);
+            }
+        }
+
+        if (webPermissionRequest_) {
+            webPermissionRequest_->Grant(resources);
+        }
+    }
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebPermissionRequest = Referenced::MakeRefPtr<JSWebPermissionRequest>();
+        jsWebPermissionRequest->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebPermissionRequest));
+    }
+
+    static void Destructor(JSWebPermissionRequest* jsWebPermissionRequest)
+    {
+        if (jsWebPermissionRequest != nullptr) {
+            jsWebPermissionRequest->DecRefCount();
+        }
+    }
+
+    RefPtr<WebPermissionRequest> webPermissionRequest_;
+};
+
 class JSWebResourceError : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -766,6 +864,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("tableData", &JSWeb::TableData);
     JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::OnFileSelectorShowAbandoned);
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::OnHttpAuthRequest);
+    JSClass<JSWeb>::StaticMethod("onPermissionRequest", &JSWeb::OnPermissionRequest);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -777,6 +876,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSFileSelectorParam::JSBind(globalObj);
     JSFileSelectorResult::JSBind(globalObj);
     JSWebHttpAuth::JSBind(globalObj);
+    JSWebPermissionRequest::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
@@ -1697,6 +1797,34 @@ void JSWeb::OnScaleChange(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetScaleChangeId(eventMarker);
+}
+
+JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
+    auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
+    permissionEvent->SetEvent(eventInfo);
+    obj->SetPropertyObject("request", permissionObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnPermissionRequest(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebPermissionRequestEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), PermissionRequestEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetPermissionRequestEventId(eventMarker);
 }
 
 void JSWeb::BackgroundColor(const JSCallbackInfo& info)

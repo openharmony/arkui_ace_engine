@@ -17,7 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_FLUTTER_IMAGE_CACHE_H
 
 #include "flutter/fml/memory/ref_counted.h"
+#ifdef NG_BUILD
+#include "core/components_ng/render/canvas_image.h"
+#else
 #include "flutter/lib/ui/painting/image.h"
+#endif
 
 #include "core/image/image_cache.h"
 #include "core/image/image_object.h"
@@ -25,8 +29,13 @@
 namespace OHOS::Ace {
 
 struct CachedImage {
+#ifdef NG_BUILD
+    explicit CachedImage(const RefPtr<NG::CanvasImage>& image) : imagePtr(image) {}
+    RefPtr<NG::CanvasImage> imagePtr;
+#else
     explicit CachedImage(const fml::RefPtr<flutter::CanvasImage>& image) : imagePtr(image) {}
     fml::RefPtr<flutter::CanvasImage> imagePtr;
+#endif
 };
 
 struct SkiaCachedImageData : public CachedImageData {

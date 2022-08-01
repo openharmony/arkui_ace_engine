@@ -17,6 +17,7 @@
 
 #include <cerrno>
 #include <csignal>
+#include <cstdint>
 #include <pthread.h>
 #include <shared_mutex>
 
@@ -25,6 +26,7 @@
 #include "base/log/event_report.h"
 #include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
+#include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_application_info.h"
@@ -164,6 +166,7 @@ private:
     int32_t lastLoopTime_ = 0;
     int32_t lastThreadTag_ = 0;
     int32_t freezeCount_ = 0;
+    int64_t lastTaskId_ = -1;
     State state_ = State::NORMAL;
     WeakPtr<TaskExecutor> taskExecutor_;
     std::queue<uint64_t> inputTaskIds_;
@@ -332,9 +335,18 @@ void ThreadWatcher::CheckAndResetIfNeeded()
 bool ThreadWatcher::IsThreadStuck()
 {
     bool res = false;
+    auto taskExecutor = taskExecutor_.Upgrade();
+    if (!taskExecutor) {
+        LOGW("taskExecutor is null");
+        return false;
+    }
+    uint32_t taskId = taskExecutor->GetTotalTaskNum(type_);
+    if (useUIAsJSThread_) {
+        taskId += taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::JS);
+    }
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
-        if ((loopTime_ - threadTag_) > (lastLoopTime_ - lastThreadTag_)) {
+        if (((loopTime_ - threadTag_) > (lastLoopTime_ - lastThreadTag_)) && (lastTaskId_ == taskId)) {
             std::string abilityName;
             if (AceEngine::Get().GetContainer(instanceId_) != nullptr) {
                 abilityName = AceEngine::Get().GetContainer(instanceId_)->GetHostClassName();
@@ -344,6 +356,7 @@ bool ThreadWatcher::IsThreadStuck()
                 abilityName.c_str(), instanceId_, threadName_.c_str(), loopTime_, threadTag_);
             res = true;
         }
+        lastTaskId_ = taskId;
         lastLoopTime_ = loopTime_;
         lastThreadTag_ = threadTag_;
     }

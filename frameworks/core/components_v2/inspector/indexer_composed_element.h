@@ -43,9 +43,10 @@ public:
     std::string GetFont() const;
     std::string ConvertAlignStyleToString(AlignStyle alignStyle) const;
     std::string GetPopupBackground() const;
-    std::string GetSelected() const;
+    std::string GetIndexSelected() const;
     std::string GetArrayValue() const;
     bool GetUsingPopup() const;
+    std::unique_ptr<JsonValue> GetConstructor() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

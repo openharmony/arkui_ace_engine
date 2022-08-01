@@ -317,6 +317,22 @@ public:
     virtual void Invoke(const std::string& origin, const bool& allow, const bool& retain) = 0;
 };
 
+class ACE_EXPORT WebPermissionRequest : public AceType {
+    DECLARE_ACE_TYPE(WebPermissionRequest, AceType)
+
+public:
+    WebPermissionRequest() = default;
+    ~WebPermissionRequest() = default;
+
+    virtual void Deny() const = 0;
+
+    virtual std::string GetOrigin() const = 0;
+
+    virtual std::vector<std::string> GetResources() const = 0;
+
+    virtual void Grant(std::vector<std::string>& resources) const = 0;
+};
+
 class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageStartEvent, BaseEventInfo);
 
@@ -440,6 +456,23 @@ public:
 private:
     std::string origin_;
     RefPtr<WebGeolocation> webGeolocation_;
+};
+
+class ACE_EXPORT WebPermissionRequestEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebPermissionRequestEvent, BaseEventInfo);
+
+public:
+    WebPermissionRequestEvent(const RefPtr<WebPermissionRequest>& webPermissionRequest)
+        : BaseEventInfo("WebPermissionRequestEvent"), webPermissionRequest_(webPermissionRequest) {}
+    ~WebPermissionRequestEvent() = default;
+
+    const RefPtr<WebPermissionRequest>& GetWebPermissionRequest() const
+    {
+        return webPermissionRequest_;
+    }
+
+private:
+    RefPtr<WebPermissionRequest> webPermissionRequest_;
 };
 
 class ACE_EXPORT DownloadStartEvent : public BaseEventInfo {

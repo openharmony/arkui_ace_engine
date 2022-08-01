@@ -41,13 +41,6 @@ namespace OHOS::Ace::V2 {
 
 namespace {
 
-std::atomic<int32_t> g_currentInspectorId(0);
-
-int32_t GetCurrentInspectorId()
-{
-    return g_currentInspectorId.fetch_add(1, std::memory_order_relaxed) + 1;
-}
-
 constexpr uint32_t WINDOW_BLUR_STYLE_ENUM_OFFSET = 100;
 
 const char* VISIBLE_TYPE[] = { "Visibility.Visible", "Visibility.Hidden", "Visibility.None" };
@@ -197,7 +190,7 @@ void InspectorComposedElement::OnInactive()
 
 void InspectorComposedElement::OnActive()
 {
-    inspectorId_ = GetCurrentInspectorId();
+    inspectorId_ = std::stoi(id_);
 }
 
 RefPtr<PopupElementV2> InspectorComposedElement::GetPopupElement() const

@@ -18,7 +18,6 @@
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/text/text_modifier.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -29,31 +28,32 @@ void TextView::Create(const std::string& content)
     // TODO: Add unique id.
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     stack->Push(frameNode);
-    stack->PushLayoutTask(ContentModifier(content));
+
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
 }
 
 void TextView::FontSize(const Dimension& value)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(FontSizeModifier(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
 }
 
 void TextView::TextColor(const Color& value)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(FontColorModifier(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
 }
 
 void TextView::ItalicFontStyle(const NG::ItalicFontStyle& value)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(ItalicFontStyleModifier(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, value);
 }
 
 void TextView::FontWeight(const Ace::FontWeight& value)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(FontWeightModifier(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
 }
 
 void TextView::FontFamily(const std::vector<std::string>& value)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(FontFamilyModifier(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value);
 }
 } // namespace OHOS::Ace::NG

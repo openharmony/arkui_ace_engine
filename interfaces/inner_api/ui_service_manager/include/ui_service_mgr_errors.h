@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_UI_SERVICE_MANAGER_ERRORS_H
-#define OHOS_AAFWK_UI_SERVICE_MANAGER_ERRORS_H
+#ifndef OHOS_ACE_UI_SERVICE_MANAGER_ERRORS_H
+#define OHOS_ACE_UI_SERVICE_MANAGER_ERRORS_H
 
 #include "errors.h"
 
@@ -30,7 +30,8 @@ enum {
 // offset of aafwk error, only be used in this file.
 constexpr ErrCode AAFWK_UI_SERVICE_ERR_OFFSET = ErrCodeOffset(SUBSYS_AAFWK, UI_MODULE_TYPE_SERVICE);
 
-enum {
+enum UiServiceErrorCode {
+    UI_SERVICE_NO_ERROR = NO_ERROR,
     UI_SERVICE_NOT_CONNECTED = AAFWK_UI_SERVICE_ERR_OFFSET,
     GET_UI_SERVICE_FAILED,
     UI_SERVICE_PROXY_INNER_ERR,
@@ -41,6 +42,7 @@ enum {
     UI_SERVICE_INVALID_PARAMETER,
     UI_SERVICE_GET_PROXY_FAILED,
     UI_SERVICE_CREATE_WINDOW_FAILED,
+    UI_SERVICE_SHAERD_LIB_ERROR,
 };
 }  // namespace Ace
 }  // namespace OHOS

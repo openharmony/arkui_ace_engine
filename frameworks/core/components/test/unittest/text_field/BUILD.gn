@@ -82,6 +82,6 @@ group("unittest") {
 
   deps += [
     #":RenderTextFieldTest",
-    #":TextFieldCreatorTest",
+    ":TextFieldCreatorTest",
   ]
 }

@@ -23,10 +23,13 @@ template("ace_base_i18n") {
   source_set(target_name) {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
-    deps = [
-      "$ace_flutter_engine_root/icu:ace_libicu_$platform",
-      "$ace_root/frameworks/base/resource:ace_resource",
-    ]
+    deps = [ "$ace_root/frameworks/base/resource:ace_resource" ]
+
+    if (enable_ng_build) {
+      deps += [ "$ace_flutter_engine_root_new/icu:ace_libicu_dev_$platform" ]
+    } else {
+      deps += [ "$ace_flutter_engine_root/icu:ace_libicu_$platform" ]
+    }
 
     configs += [
       ":ace_base_i18n_config",

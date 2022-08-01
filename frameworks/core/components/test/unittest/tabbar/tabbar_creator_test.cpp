@@ -88,7 +88,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator001, TestSize.Level1)
     EXPECT_TRUE(tabBar);
     EXPECT_EQ(tabBar->GetChildren().size(), std::size_t(1));
     EXPECT_EQ(tabBar->GetController()->GetId(), CONTROLLER_ID);
-    EXPECT_EQ(tabBar->GetIndex(), 0);
     EXPECT_EQ(tabBar->GetMode(), TabBarMode::FIXED);
     EXPECT_EQ(tabBar->GetIndicatorSize(), TabBarIndicatorType::LABEL);
     EXPECT_EQ(tabBar->GetLabelPadding(), Edge());
@@ -241,7 +240,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator006, TestSize.Level1)
      */
     RefPtr<TabBarComponent> tabBar = CreateTabBarComponent(dslJson);
     EXPECT_TRUE(tabBar != nullptr);
-    EXPECT_TRUE(tabBar->GetIndex() == 0);
 }
 
 /**
@@ -275,7 +273,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator007, TestSize.Level1)
      */
     RefPtr<TabBarComponent> tabBar = CreateTabBarComponent(dslJson);
     EXPECT_TRUE(tabBar != nullptr);
-    EXPECT_TRUE(tabBar->GetIndex() == 0);
 }
 
 /**
@@ -421,7 +418,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator010, TestSize.Level1)
     EXPECT_TRUE(tabBar);
     EXPECT_EQ(tabBar->GetChildren().size(), std::size_t(2));
     EXPECT_EQ(tabBar->GetController()->GetId(), CONTROLLER_ID);
-    EXPECT_EQ(tabBar->GetIndex(), 1);
     EXPECT_EQ(tabBar->GetMode(), TabBarMode::SCROLLABLE);
     EXPECT_EQ(tabBar->GetIndicatorSize(), TabBarIndicatorType::LABEL);
     EXPECT_EQ(tabBar->GetLabelPadding(), LABEL_PADDING);

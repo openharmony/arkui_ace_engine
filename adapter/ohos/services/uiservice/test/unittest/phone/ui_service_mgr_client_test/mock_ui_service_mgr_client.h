@@ -28,8 +28,7 @@
 #include "ui_mgr_service.h"
 #include "ui_service_mgr_client.h"
 
-namespace OHOS {
-namespace Ace {
+namespace OHOS::Ace {
 class MockUIServiceMgrClient : public UIServiceMgrClient {
 public:
     static std::shared_ptr<UIServiceMgrClient> GetInstance();
@@ -60,6 +59,5 @@ ErrCode MockUIServiceMgrClient::Connect()
     }
     return ERR_OK;
 }
-}  // namespace Ace
-}  // namespace OHOS
+} // namespace OHOS:Ace
 #endif  // MOCK_FOUNDATION_AAFWK_MOCK_DATAOBS_MGR_CLIENT_H

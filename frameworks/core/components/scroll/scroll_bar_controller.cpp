@@ -22,6 +22,7 @@
 #include "core/common/vibrator/vibrator_proxy.h"
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/gestures/drag_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -40,10 +41,15 @@ constexpr int32_t BAR_SHRINK_DURATION = 250; // 250ms, scroll bar width shrinks 
 
 } // namespace
 
-void ScrollBarController::Initialize(const WeakPtr<PipelineContext>& context)
+void ScrollBarController::Initialize(const WeakPtr<PipelineContext>& context, bool isVertical)
 {
     context_ = context;
-    dragRecognizer_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
+    isVertical_ = isVertical;
+    if (isVertical) {
+        dragRecognizer_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
+    } else {
+        dragRecognizer_ = AceType::MakeRefPtr<HorizontalDragRecognizer>();
+    }
     dragRecognizer_->SetOnDragUpdate([weakBar = AceType::WeakClaim(this)](const DragUpdateInfo& info) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {
@@ -244,11 +250,11 @@ bool ScrollBarController::UpdateScrollPosition(const double offset, int32_t sour
     if (callback_) {
         auto scroll = AceType::DynamicCast<RenderScroll>(scroll_.Upgrade());
         if (scroll && !NearZero(scroll->GetEstimatedHeight())) {
-            double height = scroll->GetLayoutSize().Height();
+            double mainSize = isVertical_ ? scroll->GetLayoutSize().Height(): scroll->GetLayoutSize().Width();
             double estimatedHeight = scroll->GetEstimatedHeight();
-            double activeHeight = height * height / estimatedHeight;
-            if (!NearEqual(height, activeHeight)) {
-                double value = offset * (estimatedHeight - height) / (height - activeHeight);
+            double activeHeight = mainSize * mainSize / estimatedHeight;
+            if (!NearEqual(mainSize, activeHeight)) {
+                double value = offset * (estimatedHeight - mainSize) / (mainSize - activeHeight);
                 ret = callback_(value, source);
             }
         }

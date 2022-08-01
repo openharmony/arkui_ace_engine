@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_AAFWK_UI_SERVICE_PROXY_H
-#define OHOS_AAFWK_UI_SERVICE_PROXY_H
+#ifndef OHOS_ACE_UI_SERVICE_PROXY_H
+#define OHOS_ACE_UI_SERVICE_PROXY_H
 
 #include <iremote_proxy.h>
 #include "ui_service_interface.h"

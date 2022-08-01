@@ -29,13 +29,14 @@ DialogCallbackStub::~DialogCallbackStub()
 
 void DialogCallbackStub::OnDialogCallback(int32_t id, const std::string& event, const std::string& params)
 {
+    HILOG_INFO("Ace DialogCallbackStub::OnDialogCallback id: %{public}d", id);
     callback_(id, event, params);
 }
 
 int DialogCallbackStub::OnRemoteRequest(
-    uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+    uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    HILOG_DEBUG("DialogCallbackStub::%{public}s, cmd = %{public}d, flags= %{public}d, code=%{public}d",
+    HILOG_INFO("Ace DialogCallbackStub::%{public}s, cmd = %{public}d, flags= %{public}d, code=%{public}d",
         __func__, code, option.GetFlags(), code);
     std::u16string descriptor = DialogCallbackStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
@@ -47,11 +48,11 @@ int DialogCallbackStub::OnRemoteRequest(
     if (code == IDialogCallback::UI_SERVICE_DIALOG_CALLBACK) {
         return OnDialogCallBackInner(data, reply);
     }
-    HILOG_WARN("%{public}s, default case, need check.", __func__);
+    HILOG_WARN("Ace %{public}s, default case, need check.", __func__);
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int DialogCallbackStub::OnDialogCallBackInner(MessageParcel &data, MessageParcel &reply)
+int DialogCallbackStub::OnDialogCallBackInner(MessageParcel& data, MessageParcel& reply)
 {
     int32_t id = data.ReadInt32();
     const std::string& event = data.ReadString();
@@ -60,7 +61,7 @@ int DialogCallbackStub::OnDialogCallBackInner(MessageParcel &data, MessageParcel
     return ERR_NONE;
 }
 
-void DialogCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
+void DialogCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOG_ERROR("recv DialogCallbackRecipient death notice");
 

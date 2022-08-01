@@ -337,11 +337,18 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
     settings.use_current_event_runner = useCurrentEventRunner;
     LOGI("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
     LOGI("use platform as ui thread: %{public}s", settings.platform_as_ui_thread ? "true" : "false");
-    settings.idle_notification_callback = [weak = WeakClaim(aceSurface)](int64_t deadline) {
-        auto aceSurface = weak.Upgrade();
-        if (aceSurface != nullptr) {
-            aceSurface->ProcessIdleEvent(deadline);
+    settings.idle_notification_callback = [instanceId](int64_t deadline) {
+        ContainerScope scope(instanceId);
+        auto container = Container::Current();
+        if (!container) {
+            return;
         }
+        auto context = container->GetPipelineContext();
+        if (!context) {
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
     };
     auto shell_holder = std::make_unique<flutter::OhosShellHolder>(settings, false);
     if (aceSurface != nullptr) {
@@ -495,6 +502,7 @@ void FlutterAceView::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>&
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
     auto markProcess = [pointerEvent]() {
         if (pointerEvent) {
+            LOGI("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
             pointerEvent->MarkProcessed();
         }
     };
@@ -522,6 +530,7 @@ void FlutterAceView::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
     ConvertMouseEvent(pointerEvent, event);
     auto markProcess = [pointerEvent]() {
         if (pointerEvent) {
+            LOGI("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
             pointerEvent->MarkProcessed();
         }
     };
@@ -537,6 +546,7 @@ void FlutterAceView::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& 
     ConvertAxisEvent(pointerEvent, event);
     auto markProcess = [pointerEvent]() {
         if (pointerEvent) {
+            LOGI("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
             pointerEvent->MarkProcessed();
         }
     };
@@ -554,13 +564,6 @@ bool FlutterAceView::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEv
     KeyEvent event;
     ConvertKeyEvent(keyEvent, event);
     return keyEventCallback_(event);
-}
-
-void FlutterAceView::ProcessIdleEvent(int64_t deadline)
-{
-    if (idleCallback_) {
-        idleCallback_(deadline);
-    }
 }
 
 const void* FlutterAceView::GetNativeWindowById(uint64_t textureId)

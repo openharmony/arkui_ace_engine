@@ -25,12 +25,11 @@ namespace OHOS::Ace::Framework {
 JsAcePage::~JsAcePage()
 {
     LOG_DESTROY();
+#ifndef NG_BUILD
     auto pipelineContext = pipelineContext_.Upgrade();
     if (!pipelineContext) {
         return;
     }
-
-    auto accessibilityManager = pipelineContext->GetAccessibilityManager();
 
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     if (!taskExecutor) {
@@ -38,17 +37,20 @@ JsAcePage::~JsAcePage()
         return;
     }
 
+    auto accessibilityManager = pipelineContext->GetAccessibilityManager();
     RefPtr<DOMDocument> domDoc;
     domDoc.Swap(domDoc_);
     auto weakDom = AceType::WeakClaim(AceType::RawPtr(domDoc));
     auto weakAcc = AceType::WeakClaim(AceType::RawPtr(accessibilityManager));
-    taskExecutor->PostTask([weakDom, weakAcc] {
-        auto domDoc = weakDom.Upgrade();
-        auto accessibilityManager = weakAcc.Upgrade();
-        if (domDoc && accessibilityManager) {
-            accessibilityManager->ClearPageAccessibilityNodes(domDoc->GetRootNodeId());
-        }
-    }, TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask(
+        [weakDom, weakAcc] {
+            auto domDoc = weakDom.Upgrade();
+            auto accessibilityManager = weakAcc.Upgrade();
+            if (domDoc && accessibilityManager) {
+                accessibilityManager->ClearPageAccessibilityNodes(domDoc->GetRootNodeId());
+            }
+        },
+        TaskExecutor::TaskType::UI);
 
     // Release Dom and Components in UI thread
     RefPtr<PageTransitionComponent> pageTransition;
@@ -58,17 +60,23 @@ JsAcePage::~JsAcePage()
     std::shared_ptr<JsPageRadioGroups> radioGroups;
     radioGroups.swap(radioGroups_);
 
-    taskExecutor->PostSyncTask([&domDoc, &pageTransition, &component, &radioGroups]() {
-        LOGI("release Dom and Components on UI thread");
-        domDoc.Reset();
-        pageTransition.Reset();
-        component.Reset();
-        radioGroups.reset();
-    }, TaskExecutor::TaskType::UI);
+    taskExecutor->PostSyncTask(
+        [&domDoc, &pageTransition, &component, &radioGroups]() {
+            LOGI("release Dom and Components on UI thread");
+            domDoc.Reset();
+            pageTransition.Reset();
+            component.Reset();
+            radioGroups.reset();
+        },
+        TaskExecutor::TaskType::UI);
+#endif
 }
 
 RefPtr<PageComponent> JsAcePage::BuildPage(const std::string& url)
 {
+#ifdef NG_BUILD
+    return nullptr;
+#else
     CHECK_RUN_ON(UI);
     auto pageId = GetPageId();
     auto rootStack = domDoc_->GetRootStackComponent();
@@ -112,6 +120,7 @@ RefPtr<PageComponent> JsAcePage::BuildPage(const std::string& url)
     }
     return AceType::MakeRefPtr<PageComponent>(
         pageId, url, isDeclarative ? std::move(pageTransition_) : pageTransition_);
+#endif
 }
 
 std::string JsAcePage::GetCardId() const
@@ -132,6 +141,7 @@ std::string JsAcePage::GetCardId() const
     return "";
 }
 
+#ifndef NG_BUILD
 RefPtr<ComposedComponent> JsAcePage::BuildPagePatch(int32_t nodeId)
 {
     CHECK_RUN_ON(UI);
@@ -180,6 +190,7 @@ void JsAcePage::SwapBackgroundDecoration(const RefPtr<PageTransitionComponent>& 
     transition->SetBackground(backgroundBox);
     box->SetBackDecoration(nullptr);
 }
+#endif
 
 RefPtr<BaseCanvasBridge> JsAcePage::GetBridgeById(NodeId nodeId)
 {

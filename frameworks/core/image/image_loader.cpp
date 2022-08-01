@@ -312,11 +312,29 @@ sk_sp<SkData> InternalImageLoader::LoadImageData(
 sk_sp<SkData> Base64ImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
-    SkBase64 base64Decoder;
     std::string_view base64Code = GetBase64ImageCode(imageSourceInfo.GetSrc());
     if (base64Code.size() == 0) {
         return nullptr;
     }
+
+#ifdef NG_BUILD
+    size_t outputLen;
+    SkBase64::Error error = SkBase64::Decode(base64Code.data(), base64Code.size(), nullptr, &outputLen);
+    if (error != SkBase64::Error::kNoError) {
+        LOGE("error base64 image code!");
+        return nullptr;
+    }
+
+    sk_sp<SkData> resData = SkData::MakeUninitialized(outputLen);
+    void* output = resData->writable_data();
+    error = SkBase64::Decode(base64Code.data(), base64Code.size(), output, &outputLen);
+    if (error != SkBase64::Error::kNoError) {
+        LOGE("error base64 image code!");
+        return nullptr;
+    }
+    return resData;
+#else
+    SkBase64 base64Decoder;
     SkBase64::Error error = base64Decoder.decode(base64Code.data(), base64Code.size());
     if (error != SkBase64::kNoError) {
         LOGE("error base64 image code!");
@@ -331,6 +349,7 @@ sk_sp<SkData> Base64ImageLoader::LoadImageData(
         base64Data = nullptr;
     }
     return resData;
+#endif
 }
 
 std::string_view Base64ImageLoader::GetBase64ImageCode(const std::string& uri)

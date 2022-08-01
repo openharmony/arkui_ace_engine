@@ -37,6 +37,7 @@
 #include "core/components/common/properties/motion_path_evaluator.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/rotation/rotation_node.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components/grid_layout/render_grid_layout.h"
 #include "core/components/root/render_root.h"
@@ -1194,8 +1195,24 @@ Offset RenderNode::GetOffsetFromOrigin(const Offset& offset) const
 
 Offset RenderNode::GetGlobalOffset() const
 {
+    Offset globalOffset = GetPosition();
     auto renderNode = parent_.Upgrade();
-    return renderNode ? GetPosition() + renderNode->GetGlobalOffset() : GetPosition();
+    while (renderNode) {
+        globalOffset += renderNode->GetPosition();
+        auto parentWeak = renderNode->GetParent();
+        renderNode = parentWeak.Upgrade();
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        return globalOffset;
+    }
+    auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+        context->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
+    if (isContainerModal) {
+        globalOffset = globalOffset + Offset(-(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
+            -CONTAINER_TITLE_HEIGHT.ConvertToPx());
+    }
+    return globalOffset;
 }
 
 Offset RenderNode::GetPaintOffset() const

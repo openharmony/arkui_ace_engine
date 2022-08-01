@@ -15,7 +15,6 @@
 
 #include "core/pipeline/pipeline_context.h"
 
-#include <fstream>
 #include <utility>
 
 #include "base/memory/ace_type.h"
@@ -833,6 +832,7 @@ void PipelineContext::SetupRootElement()
         Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, std::list<RefPtr<Component>>());
     auto overlay = AceType::MakeRefPtr<OverlayComponent>(std::list<RefPtr<Component>>());
     overlay->SetTouchable(false);
+    Component::MergeRSNode(overlay);
     stack->AppendChild(rootStage);
     stack->AppendChild(overlay);
     RefPtr<RootComponent> rootComponent;
@@ -940,12 +940,9 @@ RefPtr<Element> PipelineContext::SetupSubRootElement()
     return rootElement_;
 }
 
-bool PipelineContext::Dump(const std::vector<std::string>& params) const
+bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 {
-    if (params.empty()) {
-        LOGW("params is empty now, it's illegal!");
-        return false;
-    }
+    ACE_DCHECK(!params.empty());
 
     if (params[0] == "-element") {
         if (params.size() > 1 && params[1] == "-lastpage") {
@@ -970,10 +967,6 @@ bool PipelineContext::Dump(const std::vector<std::string>& params) const
     } else if (params[0] == "-multimodal") {
         multiModalManager_->DumpMultimodalScene();
 #endif
-#ifdef ACE_MEMORY_MONITOR
-    } else if (params[0] == "-memory") {
-        MemoryMonitor::GetInstance().Dump();
-#endif
     } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
         DumpAccessibility(params);
     } else if (params[0] == "-rotation" && params.size() >= 2) {
@@ -989,44 +982,13 @@ bool PipelineContext::Dump(const std::vector<std::string>& params) const
     } else if (params[0] == "-scrollfriction" && params.size() >= 2) {
         DumpLog::GetInstance().Print(std::string("Set Scroll Friction. friction: ") + params[1]);
         Scrollable::SetFriction(StringUtils::StringToDouble(params[1]));
-    } else if (params[0] == "-hiviewreport" && params.size() >= 3) {
-        DumpLog::GetInstance().Print("Report hiview event. EventType: " + params[1] + ", error type: " + params[2]);
-        EventInfo eventInfo = { .eventType = params[1], .errorType = StringUtils::StringToInt(params[2]) };
-        EventReport::SendEvent(eventInfo);
     } else if (params[0] == "-threadstuck" && params.size() >= 3) {
         MakeThreadStuck(params);
-    } else if (params[0] == "-jscrash") {
-        EventReport::JsErrReport(
-            AceApplicationInfo::GetInstance().GetPackageName(), "js crash reason", "js crash summary");
     } else {
         DumpLog::GetInstance().Print("Error: Unsupported dump params!");
         return false;
     }
     return true;
-}
-
-void PipelineContext::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
-{
-    bool result = false;
-    if (!SystemProperties::GetDebugEnabled()) {
-        std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
-        DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        result = Dump(params);
-        auto& result = DumpLog::GetInstance().GetDumpFile();
-        auto o = static_cast<std::ostringstream*>(result.get());
-        info.emplace_back(o->str().substr(0, DumpLog::MAX_DUMP_LENGTH));
-        DumpLog::GetInstance().Reset();
-    } else {
-        auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
-        std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(dumpFilePath);
-        DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        result = Dump(params);
-        info.emplace_back("dumpFilePath: " + dumpFilePath);
-        DumpLog::GetInstance().Reset();
-    }
-    if (!result) {
-        DumpLog::ShowDumpHelp(info);
-    }
 }
 
 RefPtr<StackElement> PipelineContext::GetLastStack() const
@@ -1729,6 +1691,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
         OnTouchEvent(touchPoint);
     }
 
+    CHECK_NULL_VOID(rootElement_);
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     LOGD(
         "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
@@ -2158,10 +2121,17 @@ void PipelineContext::SetRootSizeWithWidthHeight(int32_t width, int32_t height, 
     CHECK_RUN_ON(UI);
     UpdateRootSizeAndScale(width, height);
     CHECK_NULL_VOID(rootElement_);
-    const Rect paintRect(0.0, offset, rootWidth_, rootHeight_);
+    const Rect paintRect(0.0, 0.0, rootWidth_, rootHeight_);
     auto rootNode = AceType::DynamicCast<RenderRoot>(rootElement_->GetRenderNode());
     if (!rootNode) {
         return;
+    }
+    auto stack = GetStageElement()->GetElementParent().Upgrade();
+    if (stack) {
+        auto renderStack = AceType::DynamicCast<RenderStack>(stack->GetRenderNode());
+        if (renderStack) {
+            renderStack->SetTop(Dimension(offset));
+        }
     }
     if (!NearEqual(viewScale_, rootNode->GetScale()) || paintRect != rootNode->GetPaintRect() || isDensityUpdate_) {
         if (!NearEqual(viewScale_, rootNode->GetScale())) {
@@ -3048,7 +3018,6 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
     } else {
         ProcessDragEventEnd(renderNode, event, globalPoint);
     }
-
 }
 
 void PipelineContext::FlushWindowBlur()

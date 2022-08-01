@@ -59,7 +59,7 @@ public:
 
     virtual void SetupRootElement() = 0;
 
-    virtual uint64_t GetTimeFromExternalTimer() = 0;
+    virtual uint64_t GetTimeFromExternalTimer();
 
     virtual bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
         const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr) = 0;
@@ -151,10 +151,11 @@ public:
 
     virtual void RequestFullWindow(int32_t duration) {}
 
-    virtual bool Dump(const std::vector<std::string>& params) const
-    {
-        return false;
-    }
+    // Called by AceAbility and UiContent.
+    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const;
+
+    // Called by AceEngine.
+    bool Dump(const std::vector<std::string>& params) const;
 
     virtual bool IsLastPage()
     {
@@ -459,6 +460,10 @@ public:
     void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
 protected:
+    virtual bool OnDumpInfo(const std::vector<std::string>& params) const
+    {
+        return false;
+    }
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;

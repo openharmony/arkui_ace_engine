@@ -24,9 +24,9 @@
 
 namespace OHOS::Ace::NG {
 struct MagicItemProperty {
-    ACE_DEFINE_STRUCT_PROPERTY(LayoutWeight, float);
-    ACE_DEFINE_STRUCT_PROPERTY(AspectRatio, float);
-    ACE_DEFINE_STRUCT_PROPERTY(DisplayPriority, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LayoutWeight, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AspectRatio, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DisplayPriority, int32_t);
 };
 } // namespace OHOS::Ace::NG
 

@@ -230,13 +230,6 @@ public:
         return AceType::RawPtr(engineInstance_->GetDelegate());
     }
 
-    void RunNativeEngineLoop() override
-    {
-        if (nativeEngine_ != nullptr) {
-            nativeEngine_->Loop(LOOP_NOWAIT, false);
-        }
-    }
-
     static std::unique_ptr<v8::Platform>& GetPlatform();
 
 private:

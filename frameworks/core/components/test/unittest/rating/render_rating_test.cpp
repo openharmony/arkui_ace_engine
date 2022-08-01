@@ -26,6 +26,7 @@
 #define protected public
 #include "frameworks/core/components/rating/render_rating.h"
 #include "frameworks/core/components/test/unittest/mock/mock_render_depend.h"
+#include "frameworks/core/components/text_overlay/text_overlay_component.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,9 +59,9 @@ const KeyEvent KEY_EVENT_RIGHT(KeyCode::KEY_DPAD_RIGHT, KeyAction::CLICK);
 const KeyEvent KEY_EVENT_LEFT(KeyCode::KEY_DPAD_LEFT, KeyAction::CLICK);
 const KeyEvent KEY_EVENT_ENTER(KeyCode::KEY_ENTER, KeyAction::CLICK);
 
-const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 648, 20, TouchType::DOWN };
-const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 648, 20, TouchType::MOVE };
-const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 648, 20, TouchType::UP };
+const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 648, 20, 648, 20, TouchType::DOWN };
+const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 648, 20, 648, 20, TouchType::MOVE };
+const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 648, 20, 648, 20, TouchType::UP };
 enum class DragDirection {
     LEFT,
     RIGHT,
@@ -93,6 +94,10 @@ private:
 
 class MockImageCache : public ImageCache {
     void Clear() override {};
+    RefPtr<CachedImageData> GetDataFromCacheFile(const std::string& filePath) override
+    {
+        return nullptr;
+    }
 };
 
 RefPtr<ImageCache> ImageCache::Create()

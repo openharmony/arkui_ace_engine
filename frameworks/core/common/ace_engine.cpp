@@ -176,7 +176,9 @@ void AceEngine::TriggerGarbageCollection()
         container.second->TriggerGarbageCollection();
     }
 
+#ifndef NG_BUILD
     ImageCache::Purge();
+#endif
     BackgroundTaskExecutor::GetInstance().TriggerGarbageCollection();
     PurgeMallocCache();
 }

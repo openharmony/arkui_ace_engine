@@ -30,6 +30,7 @@ void JSCanvas::Create(const JSCallbackInfo& info)
             jsContext->SetAntiAlias();
         }
     }
+    ViewStackProcessor::GetInstance()->ClaimElementId(paintChild);
     ViewStackProcessor::GetInstance()->Push(paintChild);
 }
 
@@ -55,20 +56,41 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto readyEvent_ = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Canvas.onReady");
-        func->Execute();
-    });
     auto container = Container::Current();
-    if (container) {
-        auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-        auto component = AceType::DynamicCast<CustomPaintComponent>(
-            ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (component && context) {
-            component->SetOnReadyEvent(readyEvent_, context);
-        }
+    if (!container) {
+        LOGE("No container");
+        return;
     }
+    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    if (!context) {
+        LOGE("No PipelineContext");
+        return;
+    }
+    auto component = AceType::DynamicCast<CustomPaintComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        LOGE("No CustomPaintComponent");
+        return;
+    }
+
+    auto elmtId =  component->GetElementId();
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto readyEvent_ = context->UsePartialUpdate() ?
+        EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+            accountableCanvaselement = elmtId]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Canvas.onReady");
+            LOGD("Canvas elmtId %d executing JS onReady function - start", accountableCanvaselement);
+            ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(accountableCanvaselement);
+            func->Execute();
+            ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+            LOGD("Canvas elmtId %d executing JS onReady function - end", accountableCanvaselement);
+        })
+        :
+        EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Canvas.onReady");
+            func->Execute();
+        });
+    component->SetOnReadyEvent(readyEvent_, context);
 }
 } // namespace OHOS::Ace::Framework
