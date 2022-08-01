@@ -15,7 +15,6 @@
 
 
 const testLocalStorage = tsuite("LocalStorage Tests", () => {
-
   
     class TestSubscriber<C> implements ISinglePropertyChangeSubscriber<C>  {
 
@@ -44,42 +43,40 @@ const testLocalStorage = tsuite("LocalStorage Tests", () => {
         console.log(`TestSubscriber '${this.label_}' property changed value (shown stringified): '${ JSON.stringify(newValue) }' `);
       }
     }
-  
 
-  let storage: LocalStorage;
+  localStorageInstance = new LocalStorage({ say: "Hello", name: "Gudio" });
 
   tcase("size", () => {
-    storage = LocalStorageLookup.GetOrCreate("utest/local_storage_test.ts", { say: "Hello", name: "Gudio" });
-    test("LocalStorage has initial two ObservedProperties", storage.size() == 2);
+    test("LocalStorage has initial two ObservedProperties", NativeLocalStorage.GetShared().size() == 2);
   });
 
   tcase("LocalStorage has been init with value", () => {
-    test("added 'say'is in LocalStorage", storage.has("say"));
-    test("added 'name'is in LocalStorage", storage.has("name"));
+    test("added 'say'is in LocalStorage", NativeLocalStorage.GetShared().has("say"));
+    test("added 'name'is in LocalStorage", NativeLocalStorage.GetShared().has("name"));
 
-    test("added 'say' correct value", storage.get<string>("say") == "Hello");
-    test("added 'name' wrong value", storage.get<string>("name") == "Gudio");
+    test("added 'say' correct value", NativeLocalStorage.GetShared().get<string>("say") == "Hello");
+    test("added 'name' wrong value", NativeLocalStorage.GetShared().get<string>("name") == "Gudio");
   });
 
   tcase("LocalStorage remembers self set boolean value", () => {
-    storage.setOrCreate<boolean>("aBool", true);
-    test("added 'aBool' correct boolean value", storage.get<boolean>("aBool"));
+    NativeLocalStorage.GetShared().setOrCreate<boolean>("aBool", true);
+    test("added 'aBool' correct boolean value", NativeLocalStorage.GetShared().get<boolean>("aBool"));
   });
 
   tcase("LocalStorage remembers self set number value", () => {
-    storage.setOrCreate<number>("favorite", 47);
+    NativeLocalStorage.GetShared().setOrCreate<number>("favorite", 47);
 
-    test("added 'favorite', has correct number value", storage.get<number>("favorite") == 47);
-    test("added 'favorite' converted to string is '47'", storage.get<string>("favorite") == "47");
+    test("added 'favorite', has correct number value", NativeLocalStorage.GetShared().get<number>("favorite") == 47);
+    test("added 'favorite' converted to string is '47'", NativeLocalStorage.GetShared().get<string>("favorite") == "47");
   });
 
   let boolChangeListener = new TestSubscriber<boolean>("boolChangeListener");
-  storage.subscribeToChangesOf("aBool", boolChangeListener);
+  NativeLocalStorage.GetShared().subscribeToChangesOf("aBool", boolChangeListener);
   let childboolChangeListenerSpy = spyOn(boolChangeListener, "hasChanged");
   
   tcase("Notifies listener on property value change", () => {
-  storage.set<boolean>("aBool", false);
-    test("boolean value readback correct", storage.get<boolean>("aBool") == false);
+  NativeLocalStorage.GetShared().set<boolean>("aBool", false);
+    test("boolean value readback correct", NativeLocalStorage.GetShared().get<boolean>("aBool") == false);
     test("subscribing listener's 'hasChanged' called, param is newValue", childboolChangeListenerSpy.called && childboolChangeListenerSpy.args[0] == false);
   });
 
@@ -93,55 +90,55 @@ const testLocalStorage = tsuite("LocalStorage Tests", () => {
   let objAClass2: TestAClass = { a: 101, b: 201 };
 
   tcase("ObservedObject create, get, set", () => {
-    storage.setOrCreate<TestAClass>("objAClass", objAClass1);
-    test("ObservedObject create, value read back prop 'a'", (storage.get<TestAClass>("objAClass").a == 1 && storage.get<TestAClass>("objAClass").b == 2));
+    NativeLocalStorage.GetShared().setOrCreate<TestAClass>("objAClass", objAClass1);
+    test("ObservedObject create, value read back prop 'a'", (NativeLocalStorage.GetShared().get<TestAClass>("objAClass").a == 1 && NativeLocalStorage.GetShared().get<TestAClass>("objAClass").b == 2));
 
-    storage.get<TestAClass>("objAClass").a = 47;
-    test("ObservedObject property value change, value read back", storage.get<TestAClass>("objAClass").a == 47);
+    NativeLocalStorage.GetShared().get<TestAClass>("objAClass").a = 47;
+    test("ObservedObject property value change, value read back", NativeLocalStorage.GetShared().get<TestAClass>("objAClass").a == 47);
 
-    storage.set<TestAClass>("objAClass", objAClass2);
+    NativeLocalStorage.GetShared().set<TestAClass>("objAClass", objAClass2);
     test("ObservedProperty of type ObservedObject set new ObservedObject, value read back",
-      storage.get<TestAClass>("objAClass").a == 101 && storage.get<TestAClass>("objAClass").b == 201);
+      NativeLocalStorage.GetShared().get<TestAClass>("objAClass").a == 101 && NativeLocalStorage.GetShared().get<TestAClass>("objAClass").b == 201);
 
-    storage.get<TestAClass>("objAClass").a = 102;
+    NativeLocalStorage.GetShared().get<TestAClass>("objAClass").a = 102;
     test("Followed by prop value change, value read back",
-      storage.get<TestAClass>("objAClass").a == 102 && storage.get<TestAClass>("objAClass").b == 201);
+      NativeLocalStorage.GetShared().get<TestAClass>("objAClass").a == 102 && NativeLocalStorage.GetShared().get<TestAClass>("objAClass").b == 201);
   })
 
   let objAChangeListener = new TestSubscriber<TestAClass>("objAChangeListener");
-  storage.subscribeToChangesOf("objAClass", objAChangeListener);
+  NativeLocalStorage.GetShared().subscribeToChangesOf("objAClass", objAChangeListener);
   let objAChangeListenerSpy1 = spyOn(objAChangeListener, "hasChanged");
   let objAClass3: TestAClass = { a: 101, b: 102 };
 
 
   tcase("Notifies listener on 'objAClass' property value change", () => {
-    storage.set<TestAClass>("objAClass", objAClass3);
-    test("ObservedObject property value change, value read back", storage.get<TestAClass>("objAClass").a == 101);
+    NativeLocalStorage.GetShared().set<TestAClass>("objAClass", objAClass3);
+    test("ObservedObject property value change, value read back", NativeLocalStorage.GetShared().get<TestAClass>("objAClass").a == 101);
     test("subscribing listener's 'hasChanged' called with correct param", objAChangeListenerSpy1.called && objAChangeListenerSpy1.args[0].b == 102);
   });
 
   let objAChangeListenerSpy2 = spyOn(objAChangeListener, "hasChanged");
 
   tcase("Notifies listener on 'objAClass' property's property value change", () => {
-    storage.get<TestAClass>("objAClass").b = 103;
-    test("ObservedObject property value change, value read back", storage.get<TestAClass>("objAClass").b == 103);
+    NativeLocalStorage.GetShared().get<TestAClass>("objAClass").b = 103;
+    test("ObservedObject property value change, value read back", NativeLocalStorage.GetShared().get<TestAClass>("objAClass").b == 103);
     test("subscribing listener's 'hasChanged' called with correct param", objAChangeListenerSpy2.called && objAChangeListenerSpy2.args[0].b == 103);
   });
 
   tcase("cleanup ok", () => {
-    storage.unsubscribeFromChangesOf("aBool", boolChangeListener.id__());
+    NativeLocalStorage.GetShared().unsubscribeFromChangesOf("aBool", boolChangeListener.id__());
     boolChangeListener.aboutToBeDeleted();
 
-    storage.unsubscribeFromChangesOf("objAClass", objAChangeListener.id__());
+    NativeLocalStorage.GetShared().unsubscribeFromChangesOf("objAClass", objAChangeListener.id__());
     objAChangeListener.aboutToBeDeleted();
 
-    const deleteOk = storage.delete("name") && storage.delete("say") && storage.delete("aBool") && storage.delete("favorite") && storage.delete("objAClass");
+    const deleteOk = NativeLocalStorage.GetShared().delete("name") && NativeLocalStorage.GetShared().delete("say") && NativeLocalStorage.GetShared().delete("aBool") && NativeLocalStorage.GetShared().delete("favorite") && NativeLocalStorage.GetShared().delete("objAClass");
     test(`Deletion of props form AppStrorage without isuses`, deleteOk)
 
-    // test that manual cleanup has been complete, before calling storage.boutToBeDeleted();
-    test(`AppStrorage has ${storage.size()} ObservedProperties: >${Array.from(storage.keys())}<, should be none.`, storage.size() == 0);
+    // test that manual cleanup has been complete, before calling NativeLocalStorage.GetShared().boutToBeDeleted();
+    test(`AppStrorage has ${NativeLocalStorage.GetShared().size()} ObservedProperties: >${Array.from(NativeLocalStorage.GetShared().keys())}<, should be none.`, NativeLocalStorage.GetShared().size() == 0);
 
-    storage.aboutToBeDeleted();
+    NativeLocalStorage.GetShared().aboutToBeDeleted();
 
     test(`SubscriberManager num of subscribers is ${SubscriberManager.Get().numberOfSubscrbers()} should be 0 .`, SubscriberManager.Get().numberOfSubscrbers() == 0);
   });

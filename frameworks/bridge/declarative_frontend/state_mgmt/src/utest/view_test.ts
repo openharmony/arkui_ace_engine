@@ -54,8 +54,9 @@ const testViewState = tsuite("View State", () => {
         forProp_?: string,
         forReg_?: string;
       },
-      uri : string) {
-      super(compilerAssignedUniqueChildId, parent);
+      uri : string,
+      localStorage : LocalStorage) {
+      super(compilerAssignedUniqueChildId, parent, localStorage);
       // tsc will add initialization of forLink_ and forProp_ with defauilt values here
       this.updateWithValueParams(params);
     }
@@ -206,10 +207,10 @@ const testViewState = tsuite("View State", () => {
 
   console.debug("create LocalStorage ...")
   const uri = "stateMgmt/src/utest/view_test.ts";
-  LocalStorageLookup.GetOrCreate(uri, {});
+  let localStorageForView : LocalStorage = new LocalStorage({});
 
-  console.debug("create Parent ...")
-  let parentView: Parent = new Parent("0", undefined, {}, uri);
+  console.debug("create Parent ...");
+  let parentView: Parent = new Parent("0", undefined, {}, uri, localStorageForView);
 
 
   tcase("Parent.render #1 ...", () => {

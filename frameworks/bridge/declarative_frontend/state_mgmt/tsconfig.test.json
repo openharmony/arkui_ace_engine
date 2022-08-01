@@ -1,15 +1,20 @@
 {
   "files": [
+    // mock of what is implemented on native side
+    "src/utest/mock/mock_storage.ts",
+    "src/utest/mock/mock_environment_backend.ts",
+    "src/utest/mock/local_storage_native_mock.ts",
+    "src/utest/mock/view_native_mock.ts",
+    // implementation
+    "src/lib/i_environment_backend.ts",
     "src/lib/i_property_subscriber.ts",
     "src/lib/i_property_subscriber_lookup.ts",
     "src/lib/i_property_subscriber.ts",
     "src/lib/i_property_subscriber_lookup.ts",
     "src/lib/subscriber_lookup.ts",
     "src/lib/i_storage.ts",
-    "src/lib/i_environment_backend.ts",
     "src/lib/local_storage.ts",
     "src/lib/app_storage.ts",
-    "src/lib/local_storage_lookup",
     "src/lib/subscribable_abstract.ts",
     "src/lib/observed_object.ts",
     "src/lib/observed_property_abstract.ts",
@@ -21,14 +26,11 @@
     "src/lib/synced_property_object_nested.ts",
     "src/lib/synced_property_simple_one_way.ts",
     "src/lib/synced_property_simple_two_way.ts",
-    "src/utest/view_native_mock.ts",
+    "src/lib/synced_property_object_nested.ts",
     "src/lib/view.ts",
     "src/lib/persistent_storage.ts",
     "src/lib/environment.ts",
-    "src/index.ts",
-    // testing
-    "src/utest/mock_storage.ts",
-    "src/utest/mock_environment_backend.ts",
+    // unit testing
     "src/utest/helpers_for_test.ts",
     "src/utest/local_storage_test.ts",
     "src/utest/app_storage_test.ts",
@@ -47,6 +49,7 @@
     "outDir": "./distTest/",
     "outFile": "./distTest/stateMgmt_test.js",
     "rootDir": "./src/",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "lib" : ["ES6"],
   }
 }
