@@ -38,6 +38,7 @@ public:
     std::string GetHalfHeight() const;
     std::string GetMiniHeight() const;
     std::string GetShow() const;
+    std::string GetBackgroundMask() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

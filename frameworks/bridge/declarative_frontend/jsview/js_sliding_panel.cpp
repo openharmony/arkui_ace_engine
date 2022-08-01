@@ -385,6 +385,13 @@ void JSSlidingPanel::SetShow(bool isShow)
         return;
     }
     display->SetVisible(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
+    auto panelComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto panel = AceType::DynamicCast<SlidingPanelComponent>(panelComponent);
+    if (!panel) {
+        LOGE("Panel is null");
+        return;
+    }
+    panel->SetVisible(isShow);
 }
 
 void JSSlidingPanel::SetPanelMode(int32_t mode)
