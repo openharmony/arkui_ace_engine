@@ -1581,16 +1581,16 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             pipelineContext->OnTouchEvent(pluginPoint, true);
         }
     }
-    if (scalePoint.type == TouchType::MOVE) {
-        isMoving_ = true;
-    }
+    isMoving_ = scalePoint.type == TouchType::MOVE ? true : isMoving_;
     if (isKeyEvent_) {
         SetIsKeyEvent(false);
     }
     if (isSubPipe) {
         return;
     }
+    ResSchedReport::GetInstance().DispatchTouchEventStart(scalePoint.type);
     eventManager_->DispatchTouchEvent(scalePoint);
+    ResSchedReport::GetInstance().DispatchTouchEventEnd();
     if (scalePoint.type == TouchType::UP) {
         touchPluginPipelineContext_.clear();
         eventManager_->SetInstanceId(GetInstanceId());

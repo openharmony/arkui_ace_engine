@@ -21,6 +21,7 @@
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
 using ReportDataFunc = void (*)(uint32_t resType, int64_t value,
@@ -32,12 +33,16 @@ class ACE_EXPORT ResSchedReport final {
 public:
     static ResSchedReport& GetInstance();
     void ResSchedDataReport(const char* name);
-    void ResSchedDataReport(const char* name, std::unordered_map<std::string, std::string>& param);
+    void ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param);
+    void MarkNeedUpdate();
+    void DispatchTouchEventStart(const TouchType& touchType);
+    void DispatchTouchEventEnd();
 
 private:
     ResSchedReport() {}
     ~ResSchedReport() {}
     ReportDataFunc reportDataFunc_ = nullptr;
+    bool isInTouchDownUp_ = false;
 
     void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& payload);
 };

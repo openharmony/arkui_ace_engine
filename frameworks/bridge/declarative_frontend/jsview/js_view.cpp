@@ -17,6 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_report.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -54,6 +55,7 @@ void JSView::MarkNeedUpdate()
 {
     ACE_DCHECK((!GetElement().Invalid()));
     ACE_SCOPED_TRACE("JSView::MarkNeedUpdate");
+    ResSchedReport::GetInstance().MarkNeedUpdate();
 
     if (GetElement().Invalid()) {
         LOGE("Invalid Element weak ref, internal error");
