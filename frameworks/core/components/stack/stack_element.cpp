@@ -359,6 +359,12 @@ void StackElement::PerformPopPopup(const ComposeId& id)
                 return;
             }
 
+            auto context = context_.Upgrade();
+            if (context && !context->GetOnShow()) {
+                UpdateChild(child, nullptr);
+                break;
+            }
+
             auto theme = themeManager->GetTheme<PopupTheme>();
             auto hideAlphaAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0f, 0.0f, Curves::FAST_OUT_SLOW_IN);
             TweenOption hideOption;
