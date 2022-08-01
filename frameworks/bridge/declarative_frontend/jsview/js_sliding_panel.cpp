@@ -93,7 +93,6 @@ void JSSlidingPanel::SetBackgroundMask(const JSCallbackInfo& info)
     }
     
     Color color;
-    LOGE("xxy color is %{public}s", info[0]->ToString().c_str());
     auto displayComponent = ViewStackProcessor::GetInstance()->GetDisplayComponent();
     auto display = AceType::DynamicCast<DisplayComponent>(displayComponent);
     if (!display) {
