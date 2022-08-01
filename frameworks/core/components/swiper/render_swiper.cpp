@@ -3057,11 +3057,16 @@ void RenderSwiper::BuildLazyItems()
         }
     }
     LOGI("currentIndex_ = %{public}d, init cached: %{public}d - %{public}d", currentIndex_, cacheStart_, cacheEnd_);
-    int32_t index = cacheStart_;
-    while ((index >= cacheStart_ && cacheStart_ > cacheEnd_) || index <= cacheEnd_) {
-        buildChildByIndex_(index++);
-        if (loop_) {
-            index = index % itemCount_;
+    if (cacheStart_ > cacheEnd_) { // CacheStart may greater than cacheEnd when enable loop.
+        for (int32_t index = cacheStart_; index < itemCount_; ++index) {
+            buildChildByIndex_(index);
+        }
+        for (int32_t index = 0; index <= cacheEnd_; ++index) {
+            buildChildByIndex_(index);
+        }
+    } else {
+        for (int32_t index = cacheStart_; index <= cacheEnd_; ++index) {
+            buildChildByIndex_(index);
         }
     }
 
