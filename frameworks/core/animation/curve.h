@@ -236,9 +236,18 @@ public:
                             comma + std::to_string(blendDuration_) + std::string(")"));
         return curveString;
     }
-    float GetResponse() const { return response_; }
-    float GetDampingRatio() const { return dampingRatio_; }
-    float GetBlendDuration() const { return blendDuration_; }
+    float GetResponse() const
+    {
+        return response_;
+    }
+    float GetDampingRatio() const
+    {
+        return dampingRatio_;
+    }
+    float GetBlendDuration() const
+    {
+        return blendDuration_;
+    }
     static constexpr float DEFAULT_SPRING_MOTION_RESPONSE = 0.55f;
     static constexpr float DEFAULT_SPRING_MOTION_DAMPING_RATIO = 0.825f;
     static constexpr float DEFAULT_SPRING_MOTION_BLEND_DURATION = 0.0f;
