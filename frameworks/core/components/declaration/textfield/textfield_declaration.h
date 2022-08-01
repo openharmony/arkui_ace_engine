@@ -106,6 +106,7 @@ struct TextFieldStyle : Style {
     // Style about error text
     // Whether error text show inner or under.
     bool errorIsInner = false;
+    bool useInlineStyle = false;
     TextStyle errorTextStyle;
     // Spacing between error text and input text.
     Dimension errorSpacing;
@@ -209,6 +210,18 @@ public:
     {
         auto& style = MaybeResetStyle<TextFieldStyle>(StyleTag::SPECIALIZED_STYLE);
         style.editingStyle = textstyle;
+    }
+
+    const TextStyle& UsingInlineStyle() const
+    {
+        auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.useInlineStyle;
+    }
+
+    void SetInlineStyle(bool) const
+    {
+        auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.editingStyle;
     }
 
     const TextStyle& GetPlaceHoldStyle() const

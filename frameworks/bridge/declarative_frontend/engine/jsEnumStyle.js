@@ -94,6 +94,12 @@ var RepeatMode;
   RepeatMode["Space"] = "Space";
 })(RepeatMode || (RepeatMode = {}));
 
+var InputStyle;
+(function (InputStyle) {
+  InputStyle["DEFAULT"] = "DEFAULT";
+  InputStyle["INLINE"] = "INLINE";
+})(InputStyle || (InputStyle = {}));
+
 var BorderStyle;
 (function (BorderStyle) {
   BorderStyle[BorderStyle["Solid"] = 0] = "Solid";
