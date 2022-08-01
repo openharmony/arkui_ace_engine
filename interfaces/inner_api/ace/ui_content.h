@@ -98,6 +98,9 @@ public:
 
     // Set UIContent callback for custom window animation
     virtual void SetNextFrameLayoutCallback(std::function<void()>&& callback) = 0;
+
+    // Receive memory level notification
+    virtual void NotifyMemoryLevel(int32_t level) = 0;
 };
 
 } // namespace OHOS::Ace

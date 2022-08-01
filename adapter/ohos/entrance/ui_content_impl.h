@@ -77,6 +77,9 @@ public:
     // Set UIContent callback for custom window animation
     void SetNextFrameLayoutCallback(std::function<void()>&& callback) override;
 
+    // Receive memory level notification
+    void NotifyMemoryLevel(int32_t level) override;
+
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitWindowCallback(const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info);

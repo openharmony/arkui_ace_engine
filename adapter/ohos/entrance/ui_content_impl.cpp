@@ -939,4 +939,9 @@ void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
     pipelineContext->SetNextFrameLayoutCallback(std::move(callback));
 }
 
+void UIContentImpl::NotifyMemoryLevel(int32_t level)
+{
+    LOGI("Receive memory level notification, level: %{public}d", level);
+}
+
 } // namespace OHOS::Ace
