@@ -48,8 +48,6 @@ public:
             theme->progressColors_.second = themeConstants->GetColor(THEME_DATA_PANEL_PROGRESS_END_COLOR);
             theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_1_START),
                 themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_1_END));
-            theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_1_START),
-                themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_1_END));
             theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_2_START),
                 themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_2_END));
             theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_3_START),
