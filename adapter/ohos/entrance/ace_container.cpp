@@ -281,6 +281,7 @@ void AceContainer::OnShow(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
+        LOGE("container is null, OnShow failed.");
         return;
     }
 
@@ -292,17 +293,30 @@ void AceContainer::OnShow(int32_t instanceId)
         front->UpdateState(Frontend::State::ON_SHOW);
         front->OnShow();
     }
-    auto context = container->GetPipelineContext();
-    if (!context) {
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null, OnShow failed.");
         return;
     }
-    context->OnShow();
+
+    taskExecutor->PostTask(
+        [container]() {
+            auto pipelineContext = DynamicCast<PipelineContext>(container->GetPipelineContext());
+            if (!pipelineContext) {
+                LOGE("pipeline context is null, OnShow failed.");
+                return;
+            }
+            pipelineContext->OnShow();
+            pipelineContext->SetForegroundCalled(true);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::OnHide(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
+        LOGE("container is null, OnHide failed.");
         return;
     }
     ContainerScope scope(instanceId);
@@ -317,11 +331,21 @@ void AceContainer::OnHide(int32_t instanceId)
             taskExecutor->PostTask([front]() { front->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
         }
     }
-    auto context = container->GetPipelineContext();
-    if (!context) {
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null, OnHide failed.");
         return;
     }
-    context->OnHide();
+    taskExecutor->PostTask(
+        [container]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("pipeline context is null, OnHide failed.");
+                return;
+            }
+            pipelineContext->OnHide();
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::OnActive(int32_t instanceId)
@@ -711,24 +735,18 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
     }
 }
 
-void AceContainer::SetView(
-    AceView* view, double density, int32_t width, int32_t height, int32_t windowId, UIEnvCallback callback)
+void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height,
+    sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback)
 {
-    if (view == nullptr) {
-        return;
-    }
-
+    CHECK_NULL_VOID(view);
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
-    if (!container) {
-        return;
-    }
-    auto platformWindow = PlatformWindow::Create(view);
-    if (!platformWindow) {
-        LOGE("Create PlatformWindow failed!");
-        return;
-    }
-    std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
-    container->AttachView(std::move(window), view, density, width, height, windowId, callback);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    std::unique_ptr<Window> window =
+        std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), callback);
 }
 
 void AceContainer::SetViewNew(

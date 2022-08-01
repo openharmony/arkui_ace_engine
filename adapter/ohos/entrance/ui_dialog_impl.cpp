@@ -246,6 +246,7 @@ void UIDialogImpl::ShowDialog(const std::string& name, const std::string& params
         height);
     option->SetWindowRect({ x, y, width, height });
     option->SetWindowType(static_cast<OHOS::Rosen::WindowType>(windowType));
+    option->SetMainHandlerAvailable(false);
     std::string windowName = "system_dialog_window";
     windowName += std::to_string(dialogId);
     auto dialogWindow = OHOS::Rosen::Window::Create(windowName, option);
@@ -308,7 +309,7 @@ void UIDialogImpl::ShowDialog(const std::string& name, const std::string& params
 
     // set view
     Ace::Platform::AceContainer::SetView(
-        flutterAceView, density_, width, height, dialogWindow->GetWindowId(), callback);
+        flutterAceView, density_, width, height, dialogWindow, callback);
     Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
     Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
     container->SetWindowPos(x, y);

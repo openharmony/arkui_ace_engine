@@ -48,8 +48,8 @@ private:
     WeakPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::FrameNode> rootNode_;
     int32_t id_ = 0;
-    std::shared_ptr<OHOS::Rosen::VSyncReceiver> vsyncReceiver_;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
+    std::shared_ptr<OHOS::Rosen::VsyncCallback> vsyncCallback_;
 };
 
 } // namespace OHOS::Ace::NG
