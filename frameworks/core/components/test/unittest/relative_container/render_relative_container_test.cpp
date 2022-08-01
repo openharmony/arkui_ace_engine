@@ -1602,4 +1602,1478 @@ HWTEST_F(RenderRelativeContainerTest, TwoComponents008, TestSize.Level1)
     ASSERT_TRUE(secondRenderFlexItem->GetPosition() == OFFSET_CENTER_MIDDLE);
     ASSERT_TRUE(secondRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
 }
+
+/* *
+ * @tc.name: ConflictAnchorRules001
+ * @tc.desc: Verify the location of two components with conflict anchor rules
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderRelativeContainerTest, ConflictAnchorRules001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the render node tree, set id and anchor rules to the flex items,
+     *                   set width and height to the render boxs
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         right: { anchor: CONTAINER_ID, align: HorizontalAlign.Center },
+     *       }).id(COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> flexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> renderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    renderFlexItem->Attach(mockContext);
+    flexItemComponent->SetInspectorKey(COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> alignRules;
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::CENTER, alignRules);
+    flexItemComponent->SetAlignRules(alignRules);
+    renderFlexItem->Update(flexItemComponent);
+    auto renderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    renderFlexItem->AddChild(renderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: COMPONENT_ID, align: HorizontalAlign.Start },
+     *         middle: { anchor: COMPONENT_ID, align: HorizontalAlign.End },
+     *         right: { anchor: CONTAINER_ID, align: HorizontalAlign.End },
+     *       }).id(SECOND_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> secondFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> secondRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    secondRenderFlexItem->Attach(mockContext);
+    secondFlexItemComponent->SetInspectorKey(SECOND_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> secondAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::START, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::MIDDLE, HorizontalAlign::END, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, secondAlignRules);
+    secondFlexItemComponent->SetAlignRules(secondAlignRules);
+    secondRenderFlexItem->Update(secondFlexItemComponent);
+    auto secondRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    secondRenderFlexItem->AddChild(secondRenderBox);
+
+    RefPtr<RenderRoot> renderRoot = RelativeContainerTestUtils::CreateRenderRoot();
+    auto renderRelativeContainer = RelativeContainerTestUtils::CreateRenderRelativeContainer(mockContext);
+    renderRoot->AddChild(renderRelativeContainer);
+    renderRelativeContainer->AddChild(renderFlexItem);
+    renderRelativeContainer->AddChild(secondRenderFlexItem);
+    ASSERT_TRUE(renderRelativeContainer->GetChildren().size() == 2);
+
+    /**
+     * @tc.steps: step2. call PerformLayout interface
+     * @tc.expected: step2. the positions and layout sizes of render boxs and flex items are set correctly
+     */
+    renderRoot->PerformLayout();
+    renderRelativeContainer->PerformLayout();
+    ASSERT_TRUE(renderRelativeContainer->GetLayoutSize() == CONTAINER_SIZE);
+    ASSERT_TRUE(renderFlexItem->GetPosition() == OFFSET_TOP_MIDDLE - Offset(ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(renderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(secondRenderFlexItem->GetPosition() == OFFSET_TOP_MIDDLE - Offset(ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(secondRenderFlexItem->GetLayoutSize() == ITEM_SIZE + Size(ITEM_WIDTH, ZERO));
+}
+
+/* *
+ * @tc.name: ConflictAnchorRules002
+ * @tc.desc: Verify the location of two components with conflict anchor rules
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderRelativeContainerTest, ConflictAnchorRules002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the render node tree, set id and anchor rules to the flex items,
+     *                   set width and height to the render boxs
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         bottom: { anchor: CONTAINER_ID, align: VerticalAlign.Center },
+     *       }).id(COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> flexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> renderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    renderFlexItem->Attach(mockContext);
+    flexItemComponent->SetInspectorKey(COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> alignRules;
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::CENTER, alignRules);
+    flexItemComponent->SetAlignRules(alignRules);
+    renderFlexItem->Update(flexItemComponent);
+    auto renderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    renderFlexItem->AddChild(renderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         top: { anchor: CONTAINER_ID, align: VerticalAlign.Top },
+     *         center: { anchor: COMPONENT_ID, align: VerticalAlign.Top },
+     *         bottom: { anchor: COMPONENT_ID, align: VerticalAlign.Bottom },
+     *       }).id(SECOND_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> secondFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> secondRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    secondRenderFlexItem->Attach(mockContext);
+    secondFlexItemComponent->SetInspectorKey(SECOND_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> secondAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::CENTER, VerticalAlign::TOP, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, secondAlignRules);
+    secondFlexItemComponent->SetAlignRules(secondAlignRules);
+    secondRenderFlexItem->Update(secondFlexItemComponent);
+    auto secondRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    secondRenderFlexItem->AddChild(secondRenderBox);
+
+    RefPtr<RenderRoot> renderRoot = RelativeContainerTestUtils::CreateRenderRoot();
+    auto renderRelativeContainer = RelativeContainerTestUtils::CreateRenderRelativeContainer(mockContext);
+    renderRoot->AddChild(renderRelativeContainer);
+    renderRelativeContainer->AddChild(renderFlexItem);
+    renderRelativeContainer->AddChild(secondRenderFlexItem);
+    ASSERT_TRUE(renderRelativeContainer->GetChildren().size() == 2);
+
+    /**
+     * @tc.steps: step2. call PerformLayout interface
+     * @tc.expected: step2. the positions and layout sizes of render boxs and flex items are set correctly
+     */
+    renderRoot->PerformLayout();
+    renderRelativeContainer->PerformLayout();
+    ASSERT_TRUE(renderRelativeContainer->GetLayoutSize() == CONTAINER_SIZE);
+    ASSERT_TRUE(renderFlexItem->GetPosition() == OFFSET_CENTER_LEFT - Offset(ZERO, ITEM_HEIGHT));
+    ASSERT_TRUE(renderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(secondRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT);
+    ASSERT_TRUE(secondRenderFlexItem->GetLayoutSize() == Size(ITEM_WIDTH, CONTAINER_HEIGHT - 2 * ITEM_HEIGHT));
+}
+
+/* *
+ * @tc.name: DuplicateId001
+ * @tc.desc: Verify the location of two components with duplicate id
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderRelativeContainerTest, DuplicateId001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the render node tree, set id and anchor rules to the flex items,
+     *                   set width and height to the render boxs
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         right: { anchor: CONTAINER_ID, align: HorizontalAlign.End },
+     *         top: { anchor: CONTAINER_ID, align: VerticalAlign.Top },
+     *       }).id(COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> flexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> renderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    renderFlexItem->Attach(mockContext);
+    flexItemComponent->SetInspectorKey(COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> alignRules;
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, alignRules);
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, alignRules);
+    flexItemComponent->SetAlignRules(alignRules);
+    renderFlexItem->Update(flexItemComponent);
+    auto renderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    renderFlexItem->AddChild(renderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         right: { anchor: COMPONENT_ID, align: HorizontalAlign.End },
+     *         bottom: { anchor: COMPONENT_ID, align: VerticalAlign.Bottom },
+     *       }).id(SECOND_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> secondFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> secondRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    secondRenderFlexItem->Attach(mockContext);
+    secondFlexItemComponent->SetInspectorKey(SECOND_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> secondAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::RIGHT, HorizontalAlign::END, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, secondAlignRules);
+    secondFlexItemComponent->SetAlignRules(secondAlignRules);
+    secondRenderFlexItem->Update(secondFlexItemComponent);
+    auto secondRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    secondRenderFlexItem->AddChild(secondRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         right: { anchor: CONTAINER_ID, align: HorizontalAlign.End },
+     *         top: { anchor: CONTAINER_ID, align: VerticalAlign.Center },
+     *       }).id(SECOND_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> thirdFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> thirdRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    thirdRenderFlexItem->Attach(mockContext);
+    thirdFlexItemComponent->SetInspectorKey(SECOND_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> thirdAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, thirdAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::CENTER, thirdAlignRules);
+    thirdFlexItemComponent->SetAlignRules(thirdAlignRules);
+    thirdRenderFlexItem->Update(thirdFlexItemComponent);
+    auto thirdRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    thirdRenderFlexItem->AddChild(thirdRenderBox);
+
+    RefPtr<RenderRoot> renderRoot = RelativeContainerTestUtils::CreateRenderRoot();
+    auto renderRelativeContainer = RelativeContainerTestUtils::CreateRenderRelativeContainer(mockContext);
+    renderRoot->AddChild(renderRelativeContainer);
+    renderRelativeContainer->AddChild(renderFlexItem);
+    renderRelativeContainer->AddChild(secondRenderFlexItem);
+    renderRelativeContainer->AddChild(thirdRenderFlexItem);
+    ASSERT_TRUE(renderRelativeContainer->GetChildren().size() == 3);
+
+    /**
+     * @tc.steps: step2. call PerformLayout interface
+     * @tc.expected: step2. the positions and layout sizes of render boxs and flex items are set correctly
+     */
+    renderRoot->PerformLayout();
+    renderRelativeContainer->PerformLayout();
+    ASSERT_TRUE(renderRelativeContainer->GetLayoutSize() == CONTAINER_SIZE);
+    ASSERT_TRUE(renderFlexItem->GetPosition() == OFFSET_TOP_RIGHT - Offset(ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(renderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(secondRenderFlexItem->GetPosition() == OFFSET_TOP_RIGHT - Offset(ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(secondRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(thirdRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT);
+    ASSERT_TRUE(thirdRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+}
+
+/* *
+ * @tc.name: MultipleComponents001
+ * @tc.desc: Verify the location of three components with ids and anchor rules
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderRelativeContainerTest, MultipleComponents001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the render node tree, set id and anchor rules to the flex items,
+     *                   set width and height to the render boxs
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: THIRD_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: CONTAINER_ID, align: VerticalAlign.Center },
+     *       }).id(COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> flexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> renderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    renderFlexItem->Attach(mockContext);
+    flexItemComponent->SetInspectorKey(COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> alignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        THIRD_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, alignRules);
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::CENTER, alignRules);
+    flexItemComponent->SetAlignRules(alignRules);
+    renderFlexItem->Update(flexItemComponent);
+    auto renderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    renderFlexItem->AddChild(renderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: CONTAINER_ID, align: VerticalAlign.Center },
+     *       }).id(SECOND_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> secondFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> secondRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    secondRenderFlexItem->Attach(mockContext);
+    secondFlexItemComponent->SetInspectorKey(SECOND_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> secondAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        CONTAINER_ID, AlignDirection::TOP, VerticalAlign::CENTER, secondAlignRules);
+    secondFlexItemComponent->SetAlignRules(secondAlignRules);
+    secondRenderFlexItem->Update(secondFlexItemComponent);
+    auto secondRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    secondRenderFlexItem->AddChild(secondRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: SECOND_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: CONTAINER_ID, align: VerticalAlign.Center },
+     *       }).id(THIRD_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> thirdFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> thirdRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    thirdRenderFlexItem->Attach(mockContext);
+    thirdFlexItemComponent->SetInspectorKey(THIRD_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> thirdAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, thirdAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::CENTER, thirdAlignRules);
+    thirdFlexItemComponent->SetAlignRules(thirdAlignRules);
+    thirdRenderFlexItem->Update(thirdFlexItemComponent);
+    auto thirdRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    thirdRenderFlexItem->AddChild(thirdRenderBox);
+
+    RefPtr<RenderRoot> renderRoot = RelativeContainerTestUtils::CreateRenderRoot();
+    auto renderRelativeContainer = RelativeContainerTestUtils::CreateRenderRelativeContainer(mockContext);
+    renderRoot->AddChild(renderRelativeContainer);
+    renderRelativeContainer->AddChild(renderFlexItem);
+    renderRelativeContainer->AddChild(secondRenderFlexItem);
+    renderRelativeContainer->AddChild(thirdRenderFlexItem);
+    ASSERT_TRUE(renderRelativeContainer->GetChildren().size() == 3);
+
+    /**
+     * @tc.steps: step2. call PerformLayout interface
+     * @tc.expected: step2. the positions and layout sizes of render boxs and flex items are set correctly
+     */
+    renderRoot->PerformLayout();
+    renderRelativeContainer->PerformLayout();
+    ASSERT_TRUE(renderRelativeContainer->GetLayoutSize() == CONTAINER_SIZE);
+    ASSERT_TRUE(renderFlexItem->GetPosition() == OFFSET_TOP_LEFT);
+    ASSERT_TRUE(renderFlexItem->GetLayoutSize() == Size(ZERO, ZERO));
+    ASSERT_TRUE(secondRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT);
+    ASSERT_TRUE(secondRenderFlexItem->GetLayoutSize() == Size(ZERO, ZERO));
+    ASSERT_TRUE(thirdRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT);
+    ASSERT_TRUE(thirdRenderFlexItem->GetLayoutSize() == Size(ZERO, ZERO));
+}
+
+/* *
+ * @tc.name: MultipleComponents002
+ * @tc.desc: Verify the location of three components with ids and anchor rules
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderRelativeContainerTest, MultipleComponents002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the render node tree, set id and anchor rules to the flex items,
+     *                   set width and height to the render boxs
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: CONTAINER_ID, align: HorizontalAlign.Start },
+     *         top: { anchor: CONTAINER_ID, align: VerticalAlign.Center },
+     *       }).id(COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> flexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> renderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    renderFlexItem->Attach(mockContext);
+    flexItemComponent->SetInspectorKey(COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> alignRules;
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, alignRules);
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::CENTER, alignRules);
+    flexItemComponent->SetAlignRules(alignRules);
+    renderFlexItem->Update(flexItemComponent);
+    auto renderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    renderFlexItem->AddChild(renderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(SECOND_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> secondFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> secondRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    secondRenderFlexItem->Attach(mockContext);
+    secondFlexItemComponent->SetInspectorKey(SECOND_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> secondAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, secondAlignRules);
+    secondFlexItemComponent->SetAlignRules(secondAlignRules);
+    secondRenderFlexItem->Update(secondFlexItemComponent);
+    auto secondRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    secondRenderFlexItem->AddChild(secondRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: SECOND_COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: SECOND_COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(THIRD_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> thirdFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> thirdRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    thirdRenderFlexItem->Attach(mockContext);
+    thirdFlexItemComponent->SetInspectorKey(THIRD_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> thirdAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, thirdAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, thirdAlignRules);
+    thirdFlexItemComponent->SetAlignRules(thirdAlignRules);
+    thirdRenderFlexItem->Update(thirdFlexItemComponent);
+    auto thirdRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    thirdRenderFlexItem->AddChild(thirdRenderBox);
+
+    RefPtr<RenderRoot> renderRoot = RelativeContainerTestUtils::CreateRenderRoot();
+    auto renderRelativeContainer = RelativeContainerTestUtils::CreateRenderRelativeContainer(mockContext);
+    renderRoot->AddChild(renderRelativeContainer);
+    renderRelativeContainer->AddChild(renderFlexItem);
+    renderRelativeContainer->AddChild(secondRenderFlexItem);
+    renderRelativeContainer->AddChild(thirdRenderFlexItem);
+    ASSERT_TRUE(renderRelativeContainer->GetChildren().size() == 3);
+
+    /**
+     * @tc.steps: step2. call PerformLayout interface
+     * @tc.expected: step2. the positions and layout sizes of render boxs and flex items are set correctly
+     */
+    renderRoot->PerformLayout();
+    renderRelativeContainer->PerformLayout();
+    ASSERT_TRUE(renderRelativeContainer->GetLayoutSize() == CONTAINER_SIZE);
+    ASSERT_TRUE(renderFlexItem->GetPosition() == OFFSET_CENTER_LEFT);
+    ASSERT_TRUE(renderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(secondRenderFlexItem->GetPosition() == OFFSET_CENTER_LEFT + Offset(ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(secondRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(thirdRenderFlexItem->GetPosition() == OFFSET_CENTER_LEFT + Offset(2 * ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(thirdRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+}
+
+/* *
+ * @tc.name: MultipleComponents003
+ * @tc.desc: Verify the location of three components with ids and anchor rules
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderRelativeContainerTest, MultipleComponents003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the render node tree, set id and anchor rules to the flex items,
+     *                   set width and height to the render boxs
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         right: { anchor: CONTAINER_ID, align: HorizontalAlign.End },
+     *         top: { anchor: CONTAINER_ID, align: VerticalAlign.Top },
+     *       }).id(COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> flexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> renderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    renderFlexItem->Attach(mockContext);
+    flexItemComponent->SetInspectorKey(COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> alignRules;
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, alignRules);
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, alignRules);
+    flexItemComponent->SetAlignRules(alignRules);
+    renderFlexItem->Update(flexItemComponent);
+    auto renderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    renderFlexItem->AddChild(renderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         right: { anchor: COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: COMPONENT_ID, align: VerticalAlign.Bottom },
+     *       }).id(SECOND_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> secondFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> secondRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    secondRenderFlexItem->Attach(mockContext);
+    secondFlexItemComponent->SetInspectorKey(SECOND_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> secondAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::RIGHT, HorizontalAlign::END, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::TOP, VerticalAlign::BOTTOM, secondAlignRules);
+    secondFlexItemComponent->SetAlignRules(secondAlignRules);
+    secondRenderFlexItem->Update(secondFlexItemComponent);
+    auto secondRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    secondRenderFlexItem->AddChild(secondRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         right: { anchor: CONTAINER_ID, align: HorizontalAlign.End },
+     *         top: { anchor: SECOND_COMPONENT_ID, align: VerticalAlign.Bottom },
+     *       }).id(THIRD_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> thirdFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> thirdRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    thirdRenderFlexItem->Attach(mockContext);
+    thirdFlexItemComponent->SetInspectorKey(THIRD_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> thirdAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, thirdAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::BOTTOM, thirdAlignRules);
+    thirdFlexItemComponent->SetAlignRules(thirdAlignRules);
+    thirdRenderFlexItem->Update(thirdFlexItemComponent);
+    auto thirdRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    thirdRenderFlexItem->AddChild(thirdRenderBox);
+
+    RefPtr<RenderRoot> renderRoot = RelativeContainerTestUtils::CreateRenderRoot();
+    auto renderRelativeContainer = RelativeContainerTestUtils::CreateRenderRelativeContainer(mockContext);
+    renderRoot->AddChild(renderRelativeContainer);
+    renderRelativeContainer->AddChild(renderFlexItem);
+    renderRelativeContainer->AddChild(secondRenderFlexItem);
+    renderRelativeContainer->AddChild(thirdRenderFlexItem);
+    ASSERT_TRUE(renderRelativeContainer->GetChildren().size() == 3);
+
+    /**
+     * @tc.steps: step2. call PerformLayout interface
+     * @tc.expected: step2. the positions and layout sizes of render boxs and flex items are set correctly
+     */
+    renderRoot->PerformLayout();
+    renderRelativeContainer->PerformLayout();
+    ASSERT_TRUE(renderRelativeContainer->GetLayoutSize() == CONTAINER_SIZE);
+    ASSERT_TRUE(renderFlexItem->GetPosition() == OFFSET_TOP_RIGHT - Offset(ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(renderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(
+        secondRenderFlexItem->GetPosition() == OFFSET_TOP_RIGHT - Offset(ITEM_WIDTH, ZERO) + Offset(ZERO, ITEM_HEIGHT));
+    ASSERT_TRUE(secondRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(thirdRenderFlexItem->GetPosition() ==
+                OFFSET_TOP_RIGHT - Offset(ITEM_WIDTH, ZERO) + Offset(ZERO, 2 * ITEM_HEIGHT));
+    ASSERT_TRUE(thirdRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+}
+
+/* *
+ * @tc.name: MultipleComponents004
+ * @tc.desc: Verify the location of three components with ids and anchor rules
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderRelativeContainerTest, MultipleComponents004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the render node tree, set id and anchor rules to the flex items,
+     *                   set width and height to the render boxs
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         middle: { anchor: CONTAINER_ID, align: HorizontalAlign.Center },
+     *         center: { anchor: CONTAINER_ID, align: VerticalAlign.Center },
+     *       }).id(COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> flexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> renderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    renderFlexItem->Attach(mockContext);
+    flexItemComponent->SetInspectorKey(COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> alignRules;
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::MIDDLE, HorizontalAlign::CENTER, alignRules);
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::CENTER, VerticalAlign::CENTER, alignRules);
+    flexItemComponent->SetAlignRules(alignRules);
+    renderFlexItem->Update(flexItemComponent);
+    auto renderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    renderFlexItem->AddChild(renderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(SECOND_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> secondFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> secondRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    secondRenderFlexItem->Attach(mockContext);
+    secondFlexItemComponent->SetInspectorKey(SECOND_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> secondAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, secondAlignRules);
+    secondFlexItemComponent->SetAlignRules(secondAlignRules);
+    secondRenderFlexItem->Update(secondFlexItemComponent);
+    auto secondRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    secondRenderFlexItem->AddChild(secondRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: SECOND_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: SECOND_COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(THIRD_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> thirdFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> thirdRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    thirdRenderFlexItem->Attach(mockContext);
+    thirdFlexItemComponent->SetInspectorKey(THIRD_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> thirdAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, thirdAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, thirdAlignRules);
+    thirdFlexItemComponent->SetAlignRules(thirdAlignRules);
+    thirdRenderFlexItem->Update(thirdFlexItemComponent);
+    auto thirdRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    thirdRenderFlexItem->AddChild(thirdRenderBox);
+
+    RefPtr<RenderRoot> renderRoot = RelativeContainerTestUtils::CreateRenderRoot();
+    auto renderRelativeContainer = RelativeContainerTestUtils::CreateRenderRelativeContainer(mockContext);
+    renderRoot->AddChild(renderRelativeContainer);
+    renderRelativeContainer->AddChild(renderFlexItem);
+    renderRelativeContainer->AddChild(secondRenderFlexItem);
+    renderRelativeContainer->AddChild(thirdRenderFlexItem);
+    ASSERT_TRUE(renderRelativeContainer->GetChildren().size() == 3);
+
+    /**
+     * @tc.steps: step2. call PerformLayout interface
+     * @tc.expected: step2. the positions and layout sizes of render boxs and flex items are set correctly
+     */
+    renderRoot->PerformLayout();
+    renderRelativeContainer->PerformLayout();
+    ASSERT_TRUE(renderRelativeContainer->GetLayoutSize() == CONTAINER_SIZE);
+    ASSERT_TRUE(renderFlexItem->GetPosition() == OFFSET_CENTER_MIDDLE - Offset(ITEM_WIDTH / 2, ITEM_HEIGHT / 2));
+    ASSERT_TRUE(renderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(secondRenderFlexItem->GetPosition() == OFFSET_CENTER_MIDDLE);
+    ASSERT_TRUE(secondRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(thirdRenderFlexItem->GetPosition() == OFFSET_CENTER_MIDDLE + Offset(ITEM_WIDTH / 2, ITEM_HEIGHT / 2));
+    ASSERT_TRUE(thirdRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+}
+
+/* *
+ * @tc.name: MultipleComponents005
+ * @tc.desc: Verify the location of four components with ids and anchor rules
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderRelativeContainerTest, MultipleComponents005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the render node tree, set id and anchor rules to the flex items,
+     *                   set width and height to the render boxs
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: CONTAINER_ID, align: HorizontalAlign.Start },
+     *         top: { anchor: CONTAINER_ID, align: VerticalAlign.Top },
+     *       }).id(COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> flexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> renderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    renderFlexItem->Attach(mockContext);
+    flexItemComponent->SetInspectorKey(COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> alignRules;
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, alignRules);
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, alignRules);
+    flexItemComponent->SetAlignRules(alignRules);
+    renderFlexItem->Update(flexItemComponent);
+    auto renderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    renderFlexItem->AddChild(renderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(SECOND_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> secondFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> secondRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    secondRenderFlexItem->Attach(mockContext);
+    secondFlexItemComponent->SetInspectorKey(SECOND_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> secondAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, secondAlignRules);
+    secondFlexItemComponent->SetAlignRules(secondAlignRules);
+    secondRenderFlexItem->Update(secondFlexItemComponent);
+    auto secondRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    secondRenderFlexItem->AddChild(secondRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: SECOND_COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: SECOND_COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(THIRD_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> thirdFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> thirdRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    thirdRenderFlexItem->Attach(mockContext);
+    thirdFlexItemComponent->SetInspectorKey(THIRD_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> thirdAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, thirdAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, thirdAlignRules);
+    thirdFlexItemComponent->SetAlignRules(thirdAlignRules);
+    thirdRenderFlexItem->Update(thirdFlexItemComponent);
+    auto thirdRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    thirdRenderFlexItem->AddChild(thirdRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: THIRD_COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: THIRD_COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(FOUTRH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> fourthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> fourthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    fourthRenderFlexItem->Attach(mockContext);
+    fourthFlexItemComponent->SetInspectorKey(FOUTRH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> fourthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        THIRD_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, fourthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        THIRD_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, fourthAlignRules);
+    fourthFlexItemComponent->SetAlignRules(fourthAlignRules);
+    fourthRenderFlexItem->Update(fourthFlexItemComponent);
+    auto fourthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    fourthRenderFlexItem->AddChild(fourthRenderBox);
+
+    RefPtr<RenderRoot> renderRoot = RelativeContainerTestUtils::CreateRenderRoot();
+    auto renderRelativeContainer = RelativeContainerTestUtils::CreateRenderRelativeContainer(mockContext);
+    renderRoot->AddChild(renderRelativeContainer);
+    renderRelativeContainer->AddChild(renderFlexItem);
+    renderRelativeContainer->AddChild(secondRenderFlexItem);
+    renderRelativeContainer->AddChild(thirdRenderFlexItem);
+    renderRelativeContainer->AddChild(fourthRenderFlexItem);
+    ASSERT_TRUE(renderRelativeContainer->GetChildren().size() == 4);
+
+    /**
+     * @tc.steps: step2. call PerformLayout interface
+     * @tc.expected: step2. the positions and layout sizes of render boxs and flex items are set correctly
+     */
+    renderRoot->PerformLayout();
+    renderRelativeContainer->PerformLayout();
+    ASSERT_TRUE(renderRelativeContainer->GetLayoutSize() == CONTAINER_SIZE);
+    ASSERT_TRUE(renderFlexItem->GetPosition() == OFFSET_TOP_LEFT);
+    ASSERT_TRUE(renderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(secondRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(secondRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(thirdRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(2 * ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(thirdRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(fourthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(3 * ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(fourthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+}
+
+/* *
+ * @tc.name: MultipleComponents006
+ * @tc.desc: Verify the location of five components with ids and anchor rules
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderRelativeContainerTest, MultipleComponents006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the render node tree, set id and anchor rules to the flex items,
+     *                   set width and height to the render boxs
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: CONTAINER_ID, align: HorizontalAlign.Start },
+     *         top: { anchor: CONTAINER_ID, align: VerticalAlign.Top },
+     *       }).id(COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> flexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> renderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    renderFlexItem->Attach(mockContext);
+    flexItemComponent->SetInspectorKey(COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> alignRules;
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, alignRules);
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, alignRules);
+    flexItemComponent->SetAlignRules(alignRules);
+    renderFlexItem->Update(flexItemComponent);
+    auto renderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    renderFlexItem->AddChild(renderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(SECOND_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> secondFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> secondRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    secondRenderFlexItem->Attach(mockContext);
+    secondFlexItemComponent->SetInspectorKey(SECOND_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> secondAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, secondAlignRules);
+    secondFlexItemComponent->SetAlignRules(secondAlignRules);
+    secondRenderFlexItem->Update(secondFlexItemComponent);
+    auto secondRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    secondRenderFlexItem->AddChild(secondRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: SECOND_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: SECOND_COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(THIRD_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> thirdFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> thirdRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    thirdRenderFlexItem->Attach(mockContext);
+    thirdFlexItemComponent->SetInspectorKey(THIRD_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> thirdAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, thirdAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, thirdAlignRules);
+    thirdFlexItemComponent->SetAlignRules(thirdAlignRules);
+    thirdRenderFlexItem->Update(thirdFlexItemComponent);
+    auto thirdRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    thirdRenderFlexItem->AddChild(thirdRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: THIRD_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: THIRD_COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(FOUTRH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> fourthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> fourthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    fourthRenderFlexItem->Attach(mockContext);
+    fourthFlexItemComponent->SetInspectorKey(FOUTRH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> fourthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        THIRD_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, fourthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        THIRD_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, fourthAlignRules);
+    fourthFlexItemComponent->SetAlignRules(fourthAlignRules);
+    fourthRenderFlexItem->Update(fourthFlexItemComponent);
+    auto fourthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    fourthRenderFlexItem->AddChild(fourthRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: FOUTRH_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: FOUTRH_COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(FIFTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> fifthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> fifthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    fifthRenderFlexItem->Attach(mockContext);
+    fifthFlexItemComponent->SetInspectorKey(FIFTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> fifthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        FOUTRH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, fifthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        FOUTRH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, fifthAlignRules);
+    fifthFlexItemComponent->SetAlignRules(fifthAlignRules);
+    fifthRenderFlexItem->Update(fifthFlexItemComponent);
+    auto fifthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    fifthRenderFlexItem->AddChild(fifthRenderBox);
+
+    RefPtr<RenderRoot> renderRoot = RelativeContainerTestUtils::CreateRenderRoot();
+    auto renderRelativeContainer = RelativeContainerTestUtils::CreateRenderRelativeContainer(mockContext);
+    renderRoot->AddChild(renderRelativeContainer);
+    renderRelativeContainer->AddChild(renderFlexItem);
+    renderRelativeContainer->AddChild(secondRenderFlexItem);
+    renderRelativeContainer->AddChild(thirdRenderFlexItem);
+    renderRelativeContainer->AddChild(fourthRenderFlexItem);
+    renderRelativeContainer->AddChild(fifthRenderFlexItem);
+    ASSERT_TRUE(renderRelativeContainer->GetChildren().size() == 5);
+
+    /**
+     * @tc.steps: step2. call PerformLayout interface
+     * @tc.expected: step2. the positions and layout sizes of render boxs and flex items are set correctly
+     */
+    renderRoot->PerformLayout();
+    renderRelativeContainer->PerformLayout();
+    ASSERT_TRUE(renderRelativeContainer->GetLayoutSize() == CONTAINER_SIZE);
+    ASSERT_TRUE(renderFlexItem->GetPosition() == OFFSET_TOP_LEFT);
+    ASSERT_TRUE(renderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(secondRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT) / 2);
+    ASSERT_TRUE(secondRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(thirdRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT));
+    ASSERT_TRUE(thirdRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(fourthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT) * 3 / 2);
+    ASSERT_TRUE(fourthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(fifthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT) * 2);
+    ASSERT_TRUE(fifthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+}
+
+/* *
+ * @tc.name: MultipleComponents007
+ * @tc.desc: Verify the location of ten components with ids and anchor rules
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderRelativeContainerTest, MultipleComponents007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the render node tree, set id and anchor rules to the flex items,
+     *                   set width and height to the render boxs
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: CONTAINER_ID, align: HorizontalAlign.Start },
+     *         top: { anchor: CONTAINER_ID, align: VerticalAlign.Top },
+     *       }).id(COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> flexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> renderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    renderFlexItem->Attach(mockContext);
+    flexItemComponent->SetInspectorKey(COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> alignRules;
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, alignRules);
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, alignRules);
+    flexItemComponent->SetAlignRules(alignRules);
+    renderFlexItem->Update(flexItemComponent);
+    auto renderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    renderFlexItem->AddChild(renderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(SECOND_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> secondFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> secondRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    secondRenderFlexItem->Attach(mockContext);
+    secondFlexItemComponent->SetInspectorKey(SECOND_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> secondAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, secondAlignRules);
+    secondFlexItemComponent->SetAlignRules(secondAlignRules);
+    secondRenderFlexItem->Update(secondFlexItemComponent);
+    auto secondRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    secondRenderFlexItem->AddChild(secondRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: SECOND_COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: SECOND_COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(THIRD_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> thirdFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> thirdRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    thirdRenderFlexItem->Attach(mockContext);
+    thirdFlexItemComponent->SetInspectorKey(THIRD_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> thirdAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, thirdAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, thirdAlignRules);
+    thirdFlexItemComponent->SetAlignRules(thirdAlignRules);
+    thirdRenderFlexItem->Update(thirdFlexItemComponent);
+    auto thirdRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    thirdRenderFlexItem->AddChild(thirdRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: THIRD_COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: THIRD_COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(FOUTRH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> fourthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> fourthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    fourthRenderFlexItem->Attach(mockContext);
+    fourthFlexItemComponent->SetInspectorKey(FOUTRH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> fourthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        THIRD_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, fourthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        THIRD_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, fourthAlignRules);
+    fourthFlexItemComponent->SetAlignRules(fourthAlignRules);
+    fourthRenderFlexItem->Update(fourthFlexItemComponent);
+    auto fourthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    fourthRenderFlexItem->AddChild(fourthRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: FOUTRH_COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: FOUTRH_COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(FIFTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> fifthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> fifthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    fifthRenderFlexItem->Attach(mockContext);
+    fifthFlexItemComponent->SetInspectorKey(FIFTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> fifthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        FOUTRH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, fifthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        FOUTRH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, fifthAlignRules);
+    fifthFlexItemComponent->SetAlignRules(fifthAlignRules);
+    fifthRenderFlexItem->Update(fifthFlexItemComponent);
+    auto fifthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    fifthRenderFlexItem->AddChild(fifthRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: FIFTH_COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: FIFTH_COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(SIXTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> sixthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> sixthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    sixthRenderFlexItem->Attach(mockContext);
+    sixthFlexItemComponent->SetInspectorKey(SIXTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> sixthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        FIFTH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, sixthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        FIFTH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, sixthAlignRules);
+    sixthFlexItemComponent->SetAlignRules(sixthAlignRules);
+    sixthRenderFlexItem->Update(sixthFlexItemComponent);
+    auto sixthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    sixthRenderFlexItem->AddChild(sixthRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: SIXTH_COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: SIXTH_COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(SEVENTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> seventhFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> seventhRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    seventhRenderFlexItem->Attach(mockContext);
+    seventhFlexItemComponent->SetInspectorKey(SEVENTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> seventhAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        SIXTH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, seventhAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        SIXTH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, seventhAlignRules);
+    seventhFlexItemComponent->SetAlignRules(seventhAlignRules);
+    seventhRenderFlexItem->Update(seventhFlexItemComponent);
+    auto seventhRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    seventhRenderFlexItem->AddChild(seventhRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: SEVENTH_COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: SEVENTH_COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(EIGHTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> eighthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> eighthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    eighthRenderFlexItem->Attach(mockContext);
+    eighthFlexItemComponent->SetInspectorKey(EIGHTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> eighthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        SEVENTH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, eighthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        SEVENTH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, eighthAlignRules);
+    eighthFlexItemComponent->SetAlignRules(eighthAlignRules);
+    eighthRenderFlexItem->Update(eighthFlexItemComponent);
+    auto eighthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    eighthRenderFlexItem->AddChild(eighthRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: EIGHTH_COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: EIGHTH_COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(NINTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> ninthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> ninthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    ninthRenderFlexItem->Attach(mockContext);
+    ninthFlexItemComponent->SetInspectorKey(NINTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> ninthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        EIGHTH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, ninthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        EIGHTH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, ninthAlignRules);
+    ninthFlexItemComponent->SetAlignRules(ninthAlignRules);
+    ninthRenderFlexItem->Update(ninthFlexItemComponent);
+    auto ninthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    ninthRenderFlexItem->AddChild(ninthRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: NINTH_COMPONENT_ID, align: HorizontalAlign.End },
+     *         top: { anchor: NINTH_COMPONENT_ID, align: VerticalAlign.Top },
+     *       }).id(TENTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> tenthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> tenthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    tenthRenderFlexItem->Attach(mockContext);
+    tenthFlexItemComponent->SetInspectorKey(TENTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> tenthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        NINTH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::END, tenthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        NINTH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::TOP, tenthAlignRules);
+    tenthFlexItemComponent->SetAlignRules(tenthAlignRules);
+    tenthRenderFlexItem->Update(tenthFlexItemComponent);
+    auto tenthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    tenthRenderFlexItem->AddChild(tenthRenderBox);
+
+    RefPtr<RenderRoot> renderRoot = RelativeContainerTestUtils::CreateRenderRoot();
+    auto renderRelativeContainer = RelativeContainerTestUtils::CreateRenderRelativeContainer(mockContext);
+    renderRoot->AddChild(renderRelativeContainer);
+    renderRelativeContainer->AddChild(renderFlexItem);
+    renderRelativeContainer->AddChild(secondRenderFlexItem);
+    renderRelativeContainer->AddChild(thirdRenderFlexItem);
+    renderRelativeContainer->AddChild(fourthRenderFlexItem);
+    renderRelativeContainer->AddChild(fifthRenderFlexItem);
+    renderRelativeContainer->AddChild(sixthRenderFlexItem);
+    renderRelativeContainer->AddChild(seventhRenderFlexItem);
+    renderRelativeContainer->AddChild(eighthRenderFlexItem);
+    renderRelativeContainer->AddChild(ninthRenderFlexItem);
+    renderRelativeContainer->AddChild(tenthRenderFlexItem);
+    ASSERT_TRUE(renderRelativeContainer->GetChildren().size() == 10);
+
+    /**
+     * @tc.steps: step2. call PerformLayout interface
+     * @tc.expected: step2. the positions and layout sizes of render boxs and flex items are set correctly
+     */
+    renderRoot->PerformLayout();
+    renderRelativeContainer->PerformLayout();
+    ASSERT_TRUE(renderRelativeContainer->GetLayoutSize() == CONTAINER_SIZE);
+    ASSERT_TRUE(renderFlexItem->GetPosition() == OFFSET_TOP_LEFT);
+    ASSERT_TRUE(renderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(secondRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(secondRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(thirdRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(2 * ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(thirdRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(fourthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(3 * ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(fourthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(fifthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(4 * ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(fifthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(sixthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(5 * ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(sixthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(seventhRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(6 * ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(seventhRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(eighthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(7 * ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(eighthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(ninthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(8 * ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(ninthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(tenthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(9 * ITEM_WIDTH, ZERO));
+    ASSERT_TRUE(tenthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+}
+
+/* *
+ * @tc.name: MultipleComponents008
+ * @tc.desc: Verify the location of ten components with ids and anchor rules
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderRelativeContainerTest, MultipleComponents008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the render node tree, set id and anchor rules to the flex items,
+     *                   set width and height to the render boxs
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: CONTAINER_ID, align: HorizontalAlign.Start },
+     *         top: { anchor: CONTAINER_ID, align: VerticalAlign.Top },
+     *       }).id(COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> flexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> renderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    renderFlexItem->Attach(mockContext);
+    flexItemComponent->SetInspectorKey(COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> alignRules;
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, alignRules);
+    RelativeContainerTestUtils::AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, alignRules);
+    flexItemComponent->SetAlignRules(alignRules);
+    renderFlexItem->Update(flexItemComponent);
+    auto renderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    renderFlexItem->AddChild(renderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(SECOND_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> secondFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> secondRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    secondRenderFlexItem->Attach(mockContext);
+    secondFlexItemComponent->SetInspectorKey(SECOND_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> secondAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, secondAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, secondAlignRules);
+    secondFlexItemComponent->SetAlignRules(secondAlignRules);
+    secondRenderFlexItem->Update(secondFlexItemComponent);
+    auto secondRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    secondRenderFlexItem->AddChild(secondRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: SECOND_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: SECOND_COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(THIRD_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> thirdFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> thirdRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    thirdRenderFlexItem->Attach(mockContext);
+    thirdFlexItemComponent->SetInspectorKey(THIRD_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> thirdAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, thirdAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        SECOND_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, thirdAlignRules);
+    thirdFlexItemComponent->SetAlignRules(thirdAlignRules);
+    thirdRenderFlexItem->Update(thirdFlexItemComponent);
+    auto thirdRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    thirdRenderFlexItem->AddChild(thirdRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: THIRD_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: THIRD_COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(FOUTRH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> fourthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> fourthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    fourthRenderFlexItem->Attach(mockContext);
+    fourthFlexItemComponent->SetInspectorKey(FOUTRH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> fourthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        THIRD_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, fourthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        THIRD_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, fourthAlignRules);
+    fourthFlexItemComponent->SetAlignRules(fourthAlignRules);
+    fourthRenderFlexItem->Update(fourthFlexItemComponent);
+    auto fourthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    fourthRenderFlexItem->AddChild(fourthRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: FOUTRH_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: FOUTRH_COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(FIFTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> fifthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> fifthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    fifthRenderFlexItem->Attach(mockContext);
+    fifthFlexItemComponent->SetInspectorKey(FIFTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> fifthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        FOUTRH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, fifthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        FOUTRH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, fifthAlignRules);
+    fifthFlexItemComponent->SetAlignRules(fifthAlignRules);
+    fifthRenderFlexItem->Update(fifthFlexItemComponent);
+    auto fifthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    fifthRenderFlexItem->AddChild(fifthRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: FIFTH_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: FIFTH_COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(SIXTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> sixthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> sixthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    sixthRenderFlexItem->Attach(mockContext);
+    sixthFlexItemComponent->SetInspectorKey(SIXTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> sixthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        FIFTH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, sixthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        FIFTH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, sixthAlignRules);
+    sixthFlexItemComponent->SetAlignRules(sixthAlignRules);
+    sixthRenderFlexItem->Update(sixthFlexItemComponent);
+    auto sixthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    sixthRenderFlexItem->AddChild(sixthRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: SIXTH_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: SIXTH_COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(SEVENTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> seventhFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> seventhRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    seventhRenderFlexItem->Attach(mockContext);
+    seventhFlexItemComponent->SetInspectorKey(SEVENTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> seventhAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        SIXTH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, seventhAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        SIXTH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, seventhAlignRules);
+    seventhFlexItemComponent->SetAlignRules(seventhAlignRules);
+    seventhRenderFlexItem->Update(seventhFlexItemComponent);
+    auto seventhRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    seventhRenderFlexItem->AddChild(seventhRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: SEVENTH_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: SEVENTH_COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(EIGHTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> eighthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> eighthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    eighthRenderFlexItem->Attach(mockContext);
+    eighthFlexItemComponent->SetInspectorKey(EIGHTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> eighthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        SEVENTH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, eighthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        SEVENTH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, eighthAlignRules);
+    eighthFlexItemComponent->SetAlignRules(eighthAlignRules);
+    eighthRenderFlexItem->Update(eighthFlexItemComponent);
+    auto eighthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    eighthRenderFlexItem->AddChild(eighthRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: EIGHTH_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: EIGHTH_COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(NINTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> ninthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> ninthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    ninthRenderFlexItem->Attach(mockContext);
+    ninthFlexItemComponent->SetInspectorKey(NINTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> ninthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        EIGHTH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, ninthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        EIGHTH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, ninthAlignRules);
+    ninthFlexItemComponent->SetAlignRules(ninthAlignRules);
+    ninthRenderFlexItem->Update(ninthFlexItemComponent);
+    auto ninthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    ninthRenderFlexItem->AddChild(ninthRenderBox);
+
+    /**
+     * corresponding ets code:
+     *   Box().width(ITEM_WIDTH).height(ITEM_HEIGHT)
+     *       .alignRules({
+     *         left: { anchor: NINTH_COMPONENT_ID, align: HorizontalAlign.Center },
+     *         top: { anchor: NINTH_COMPONENT_ID, align: VerticalAlign.Center },
+     *       }).id(TENTH_COMPONENT_ID)
+     */
+    RefPtr<FlexItemComponent> tenthFlexItemComponent = AceType::MakeRefPtr<FlexItemComponent>();
+    RefPtr<RenderFlexItem> tenthRenderFlexItem = AceType::MakeRefPtr<RenderFlexItem>();
+    tenthRenderFlexItem->Attach(mockContext);
+    tenthFlexItemComponent->SetInspectorKey(TENTH_COMPONENT_ID);
+    std::map<AlignDirection, AlignRule> tenthAlignRules;
+    RelativeContainerTestUtils::AddAlignRule(
+        NINTH_COMPONENT_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, tenthAlignRules);
+    RelativeContainerTestUtils::AddAlignRule(
+        NINTH_COMPONENT_ID, AlignDirection::TOP, VerticalAlign::CENTER, tenthAlignRules);
+    tenthFlexItemComponent->SetAlignRules(tenthAlignRules);
+    tenthRenderFlexItem->Update(tenthFlexItemComponent);
+    auto tenthRenderBox = RelativeContainerTestUtils::CreateRenderBox(ITEM_WIDTH, ITEM_HEIGHT, mockContext);
+    tenthRenderFlexItem->AddChild(tenthRenderBox);
+
+    RefPtr<RenderRoot> renderRoot = RelativeContainerTestUtils::CreateRenderRoot();
+    auto renderRelativeContainer = RelativeContainerTestUtils::CreateRenderRelativeContainer(mockContext);
+    renderRoot->AddChild(renderRelativeContainer);
+    renderRelativeContainer->AddChild(renderFlexItem);
+    renderRelativeContainer->AddChild(secondRenderFlexItem);
+    renderRelativeContainer->AddChild(thirdRenderFlexItem);
+    renderRelativeContainer->AddChild(fourthRenderFlexItem);
+    renderRelativeContainer->AddChild(fifthRenderFlexItem);
+    renderRelativeContainer->AddChild(sixthRenderFlexItem);
+    renderRelativeContainer->AddChild(seventhRenderFlexItem);
+    renderRelativeContainer->AddChild(eighthRenderFlexItem);
+    renderRelativeContainer->AddChild(ninthRenderFlexItem);
+    renderRelativeContainer->AddChild(tenthRenderFlexItem);
+    ASSERT_TRUE(renderRelativeContainer->GetChildren().size() == 10);
+
+    /**
+     * @tc.steps: step2. call PerformLayout interface
+     * @tc.expected: step2. the positions and layout sizes of render boxs and flex items are set correctly
+     */
+    renderRoot->PerformLayout();
+    renderRelativeContainer->PerformLayout();
+    ASSERT_TRUE(renderRelativeContainer->GetLayoutSize() == CONTAINER_SIZE);
+    ASSERT_TRUE(renderFlexItem->GetPosition() == OFFSET_TOP_LEFT);
+    ASSERT_TRUE(renderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(secondRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT) / 2);
+    ASSERT_TRUE(secondRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(thirdRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT));
+    ASSERT_TRUE(thirdRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(fourthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT) * 3 / 2);
+    ASSERT_TRUE(fourthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(fifthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT) * 2);
+    ASSERT_TRUE(fifthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(sixthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT) * 5 / 2);
+    ASSERT_TRUE(sixthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(seventhRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT) * 3);
+    ASSERT_TRUE(seventhRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(eighthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT) * 7 / 2);
+    ASSERT_TRUE(eighthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(ninthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT) * 4);
+    ASSERT_TRUE(ninthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+    ASSERT_TRUE(tenthRenderFlexItem->GetPosition() == OFFSET_TOP_LEFT + Offset(ITEM_WIDTH, ITEM_HEIGHT) * 9 / 2);
+    ASSERT_TRUE(tenthRenderFlexItem->GetLayoutSize() == ITEM_SIZE);
+}
 } // namespace OHOS::Ace
