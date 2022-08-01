@@ -111,17 +111,14 @@ void JSSlidingPanel::SetOnHeightChange(const JSCallbackInfo& args)
         return;
     }
     if (args[0]->IsFunction()) {
-        auto onHeightChange = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelHeightChangeEvent>(info);
-                if (!eventInfo) {
-                    return;
-                }
-                auto params = ConvertToJSValues(eventInfo->GetHeight());
-                ACE_SCORING_EVENT("SlidingPanel.OnHeightChange");
-                func->Call(JSRef<JSObject>(), params.size(), params.data());
-            });
+        auto onHeightChangeCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onHeightChange = [execCtx = args.GetExecutionContext(),
+            func = std::move(onHeightChangeCallback)](double height) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("OnHeightChange");
+            JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(height));
+            func->ExecuteJS(1, &param);
+        };
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         auto panel = AceType::DynamicCast<SlidingPanelComponent>(component);
         if (panel) {

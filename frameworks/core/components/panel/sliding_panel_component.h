@@ -125,14 +125,14 @@ public:
         return hasDragBar_;
     }
 
-    const EventMarker& GetOnHeightChanged() const
+    const std::function<void(double)>& GetOnHeightChanged() const
     {
         return onHeightChanged_;
     }
 
-    void SetOnHeightChanged(const EventMarker& value)
+    void SetOnHeightChanged(const std::function<void(double)>& func)
     {
-        onHeightChanged_ = value;
+        onHeightChanged_ = func;
     }
 
     bool Visible() const
@@ -155,7 +155,7 @@ protected:
     // used for inspector node in PC preview
     int32_t panelId_ = -1;
     EventMarker onSizeChanged_;
-    EventMarker onHeightChanged_;
+    std::function<void(double)> onHeightChanged_;
     bool visible_ = false;
     bool hasDragBar_ = false;
     std::pair<Dimension, bool> miniHeight_ = { 0.0_vp, false };

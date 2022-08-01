@@ -60,27 +60,6 @@ private:
     double height_ = 0.0;
 };
 
-class ACE_EXPORT SlidingPanelHeightChangeEvent : public BaseEventInfo, public EventToJSONStringAdapter {
-    DECLARE_RELATIONSHIP_OF_CLASSES(SlidingPanelHeightChangeEvent, BaseEventInfo, EventToJSONStringAdapter);
-
-public:
-    explicit SlidingPanelHeightChangeEvent(double height)
-        : BaseEventInfo("SlidingPanelHeightChangeEvent"), height_(height)
-    {}
-
-    ~SlidingPanelHeightChangeEvent() override = default;
-
-    double GetHeight() const
-    {
-        return height_;
-    }
-
-    std::string ToJSONString() const override;
-
-private:
-    double height_ = 0.0;
-};
-
 class RenderSlidingPanel : public RenderNode {
     DECLARE_ACE_TYPE(RenderSlidingPanel, RenderNode);
 
@@ -164,7 +143,7 @@ protected:
     PanelType type_ = PanelType::FOLDABLE_BAR;
     bool hasBoxStyle_ = false;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> onSizeChange_;
-    std::function<void(const std::shared_ptr<BaseEventInfo>&)> onHeightChange_;
+    std::function<void(double)> onHeightChange_;
 
 private:
     void InitializeRecognizer();

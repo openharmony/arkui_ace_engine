@@ -111,7 +111,7 @@ public:
         return stateAttributeList_ != nullptr;
     }
 
-    bool HasBackgroundMask()
+    bool HasBackgroundMask() const
     {
         return backgroundMask_.has_value();
     }

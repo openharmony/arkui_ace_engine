@@ -91,14 +91,6 @@ std::string SlidingPanelSizeChangeEvent::ToJSONString() const
     return std::string(R"("sizechange",)").append(result->ToString());
 }
 
-std::string SlidingPanelHeightChangeEvent::ToJSONString() const
-{
-    auto result = JsonUtil::Create(true);
-    result->Put("height", height_);
-
-    return std::string(R"("heightchange",)").append(result->ToString());
-}
-
 RefPtr<RenderNode> RenderSlidingPanel::Create()
 {
     return AceType::MakeRefPtr<RenderSlidingPanel>();
@@ -135,8 +127,7 @@ void RenderSlidingPanel::Update(const RefPtr<Component>& component)
     visible = slidingPanel->Visible();
     onSizeChange_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         slidingPanel->GetOnSizeChanged(), context_);
-    onHeightChange_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-        slidingPanel->GetOnHeightChanged(), context_);
+    onHeightChange_ = slidingPanel->GetOnHeightChanged();
     MarkNeedLayout();
 }
 
@@ -281,7 +272,7 @@ void RenderSlidingPanel::FireHeightChangeEvent()
     if (!visible) {
         currentHeight = 0;
     }
-    onHeightChange_(std::make_shared<SlidingPanelHeightChangeEvent>(currentHeight));
+    onHeightChange_(currentHeight);
 }
 
 void RenderSlidingPanel::FireSizeChangeEvent()
