@@ -127,7 +127,14 @@ public:
     {
         return isCardType_;
     }
-
+    void SetBarrierfreeDuration(int32_t duration)
+    {
+        barrierfreeDuration_ = duration;
+    }
+    int32_t GetBarrierfreeDuration() const
+    {
+        return barrierfreeDuration_;
+    }
     void SetAccessibilityEnabled(bool isEnabled)
     {
         isAccessibilityEnabled_ = isEnabled;
@@ -148,6 +155,7 @@ protected:
     std::string processName_;
     std::string dataDirFilePath_;
     int32_t uid_;
+    int32_t barrierfreeDuration_ = 0;
 
     bool isRightToLeft_ = false;
     bool isDebugVersion_ = false;
