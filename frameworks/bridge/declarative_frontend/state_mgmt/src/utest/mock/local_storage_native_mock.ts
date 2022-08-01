@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,17 @@
  * limitations under the License.
  */
 
+// alloc in local_storage_test.ts
+let localStorageInstance : any;
 
-initTest();
-
-testLocalStorage();
-
-testAppStorage();
-
-testAppStorageArray();
-
-testEnvironment();
-
-testPersistentStorage();
-
-testViewState();
-
-nestedObsObjProps();
-
-array1ObsObjProps();
-
-reportTestResults();
+class NativeLocalStorage {
+    constructor() {
+        console.log("LocalStorageNative constructor (Mock) - unimplemented");
+    }
+    static GetShared() : LocalStorage {
+        console.log("LocalStorageNative (Mock).GetShared - returns debug sigleton");
+        // localStorageInstance is declared in index_test.ts
+        return localStorageInstance;
+    }
+  }
+  

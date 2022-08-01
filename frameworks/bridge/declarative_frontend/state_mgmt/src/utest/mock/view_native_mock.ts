@@ -34,4 +34,12 @@ abstract class NativeView {
     console.error("View.create - unimplemented");
   }
 
+
+  syncInstanceId(): void {
+    console.warn("NativeView(Mock).syncInstanceId() -  unimplemented!");
+  }
+  restoreInstanceId(): void {
+    console.warn("NativeView(Mock).restoreInstanceId() -  unimplemented!");
+  }
+
 }

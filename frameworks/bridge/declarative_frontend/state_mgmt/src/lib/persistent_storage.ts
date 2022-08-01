@@ -195,4 +195,3 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   }
 };
 
-PersistentStorage.ConfigureBackend(new Storage());

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+// Mock of the native provided IStorage used by PersistentStorage
+
 class MockStorage implements IStorage {
   private dbFileName_: string;
   private fs = require('fs');
