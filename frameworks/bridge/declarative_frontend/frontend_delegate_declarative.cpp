@@ -1933,7 +1933,6 @@ void FrontendDelegateDeclarative::ClearInvisiblePages()
 
 void FrontendDelegateDeclarative::OnReplacePageSuccess(const RefPtr<JsAcePage>& page, const std::string& url)
 {
-    OnPageDestroy(GetRunningPageId());
     if (!page) {
         return;
     }
@@ -1977,6 +1976,7 @@ void FrontendDelegateDeclarative::ReplacePage(const RefPtr<JsAcePage>& page, con
             pipelineContext->GetAccessibilityManager()->HandleComponentPostBinding();
             if (pipelineContext->CanReplacePage()) {
                 delegate->OnPageHide();
+                delegate->OnPageDestroy(delegate->GetRunningPageId());
                 delegate->OnPrePageChange(page);
                 if (delegate->singlePageId_ != INVALID_PAGE_ID) {
                     pipelineContext->SetSinglePageId(delegate->singlePageId_);
@@ -2045,6 +2045,7 @@ void FrontendDelegateDeclarative::ReplacePageInSubStage(const RefPtr<JsAcePage>&
 
             if (stageElement->CanReplacePage()) {
                 delegate->OnPageHide();
+                delegate->OnPageDestroy(delegate->GetRunningPageId());
                 delegate->OnPrePageChange(page);
                 stageElement->Replace(page->BuildPage(url), [weak, page, url]() {
                     auto delegate = weak.Upgrade();
