@@ -63,10 +63,10 @@ constexpr char NTC_PARAM_DESCRIPTION[] = "description";
 constexpr char WEB_ERROR_CODE_CREATEFAIL[] = "error-web-delegate-000001";
 constexpr char WEB_ERROR_MSG_CREATEFAIL[] = "create web_delegate failed.";
 
-const std::string RESOURCE_VIDEO_CAPTURE = "ACCESSIBLE_RESOURCE_VIDEO_CAPTURE";
-const std::string RESOURCE_AUDIO_CAPTURE = "ACCESSIBLE_RESOURCE_AUDIO_CAPTURE";
-const std::string RESOURCE_PROTECTED_MEDIA_ID = "ACCESSIBLE_RESOURCE_PROTECTED_MEDIA_ID";
-const std::string RESOURCE_MIDI_SYSEX = "ACCESSIBLE_RESOURCE_MIDI_SYSEX";
+const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
+const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
+const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
+const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 } // namespace
 
 int ConsoleLogOhos::GetLineNumber()

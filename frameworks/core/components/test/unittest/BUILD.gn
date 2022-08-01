@@ -44,6 +44,7 @@ group("unittest") {
     "progress:unittest",
 
     #"refresh:unittest",
+    "relative_container:unittest",
     "rotation:unittest",
     "scroll:unittest",
     "semimodal:unittest",
