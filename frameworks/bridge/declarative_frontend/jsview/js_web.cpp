@@ -823,7 +823,7 @@ public:
         JSClass<JSContextMenuParam>::CustomMethod("getUnfilterendLinkUrl",
             &JSContextMenuParam::GetUnfilteredLinkUrl);
         JSClass<JSContextMenuParam>::CustomMethod("getSourceUrl", &JSContextMenuParam::GetSourceUrl);
-        JSClass<JSContextMenuParam>::CustomMethod("existImage",
+        JSClass<JSContextMenuParam>::CustomMethod("existImageContents",
             &JSContextMenuParam::HasImageContents);
         JSClass<JSContextMenuParam>::Bind(
             globalObj, &JSContextMenuParam::Constructor, &JSContextMenuParam::Destructor);
@@ -940,7 +940,12 @@ public:
         }
     }
 
-    void CopyImage(const JSCallbackInfo& args) {}
+    void CopyImage(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Cancel();
+        }
+    }
 private:
     static void Constructor(const JSCallbackInfo& args)
     {
