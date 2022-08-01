@@ -223,7 +223,7 @@ public:
         dialogCallback_ = callback;
     }
 
-    virtual void MarkNeedUpdate()
+    virtual void FlushReload()
     {
         return;
     }

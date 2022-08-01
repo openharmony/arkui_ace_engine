@@ -100,6 +100,7 @@ constexpr char UI_THREAD_NAME[] = "UI";
 constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
 constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;       // TODO: Need confirm value
 constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0; // TODO: Need confirm value
+constexpr int32_t FLUSH_RELOAD_TRANSITION_DURATION_MS = 400;
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
@@ -721,6 +722,18 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushAnimation();
     }
+}
+
+void PipelineContext::FlushReloadTransition()
+{
+    AnimationOption option;
+    option.SetDuration(FLUSH_RELOAD_TRANSITION_DURATION_MS);
+    option.SetCurve(Curves::FRICTION);
+    Animate(option, Curves::FRICTION, [this]() {
+        FlushBuild();
+        FlushPostAnimation();
+        FlushLayout();
+    });
 }
 
 void PipelineContext::FlushPostAnimation()

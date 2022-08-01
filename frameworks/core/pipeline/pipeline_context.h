@@ -1077,6 +1077,7 @@ protected:
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
+    void FlushReloadTransition() override;
 
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     bool hasIdleTasks_ = false;

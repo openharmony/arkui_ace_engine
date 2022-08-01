@@ -253,7 +253,7 @@ public:
     }
 #endif
 
-    virtual void MarkNeedUpdate()
+    virtual void FlushReload()
     {
         return;
     }

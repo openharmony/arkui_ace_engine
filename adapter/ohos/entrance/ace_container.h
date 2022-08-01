@@ -286,7 +286,7 @@ private:
     void InitializeTask();
     void InitWindowCallback();
 
-    void UpdateFrondend();
+    void UpdateFrondend(bool needReloadTransition);
 
     void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         int32_t windowId, UIEnvCallback callback = nullptr);

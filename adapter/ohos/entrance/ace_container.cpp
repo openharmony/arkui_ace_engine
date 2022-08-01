@@ -1305,9 +1305,9 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
 }
 
 void AceContainer::UpdateConfiguration(
-    const std::string& colorMode, const std::string& inputDevice, const std::string& languageTag)
+    const std::string& colorMode, const std::string& deviceAccess, const std::string& languageTag)
 {
-    if (colorMode.empty() && inputDevice.empty() && languageTag.empty()) {
+    if (colorMode.empty() && deviceAccess.empty() && languageTag.empty()) {
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
         return;
     }
@@ -1332,9 +1332,10 @@ void AceContainer::UpdateConfiguration(
             resConfig.SetColorMode(ColorMode::LIGHT);
         }
     }
-    if (!inputDevice.empty()) {
-        SystemProperties::SetInputDevice(inputDevice == "true");
-        resConfig.SetInputDevice(inputDevice == "true");
+    if (!deviceAccess.empty()) {
+        // Event of accessing mouse or keyboard
+        SystemProperties::SetDeviceAccess(deviceAccess == "true");
+        resConfig.SetDeviceAccess(deviceAccess == "true");
     }
     if (!languageTag.empty()) {
         std::string language;
@@ -1348,17 +1349,17 @@ void AceContainer::UpdateConfiguration(
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     themeManager->LoadResourceThemes();
-    UpdateFrondend();
+    UpdateFrondend(!deviceAccess.empty());
 }
 
-void AceContainer::UpdateFrondend()
+void AceContainer::UpdateFrondend(bool needReloadTransition)
 {
     auto taskExecutor = GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("AceContainer::UpdateConfiguration taskExecutor is null.");
         return;
     }
-    taskExecutor->PostTask([instanceId = instanceId_, weak = WeakClaim(this)]() {
+    taskExecutor->PostTask([instanceId = instanceId_, weak = WeakClaim(this), needReloadTransition]() {
         ContainerScope scope(instanceId);
         auto container = weak.Upgrade();
         if (!container) {
@@ -1366,9 +1367,28 @@ void AceContainer::UpdateFrondend()
         }
         auto frontend = container->GetFrontend();
         if (frontend) {
-            LOGI("AceContainer::UpdateConfiguration frontend MarkNeedUpdate.");
-            frontend->MarkNeedUpdate();
+            LOGI("AceContainer::UpdateConfiguration frontend MarkNeedUpdate");
+            frontend->FlushReload();
         }
+        // reload transition animation
+        if (!needReloadTransition) {
+            return;
+        }
+        auto taskExecutor = container->GetTaskExecutor();
+        if (!taskExecutor) {
+            return;
+        }
+        taskExecutor->PostTask([instanceId, weak]() {
+            ContainerScope scope(instanceId);
+            auto container = weak.Upgrade();
+            if (!container) {
+                return;
+            }
+            auto pipline = container->GetPipelineContext();
+            if (pipline) {
+                pipline->FlushReloadTransition();
+            }
+            }, TaskExecutor::TaskType::UI);
         }, TaskExecutor::TaskType::JS);
 }
 } // namespace OHOS::Ace::Platform
