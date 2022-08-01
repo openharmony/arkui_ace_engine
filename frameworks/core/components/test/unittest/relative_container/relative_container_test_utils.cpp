@@ -17,17 +17,20 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/render_button.h"
+#include "core/components/relative_container/relative_container_component.h"
+#include "core/components/relative_container/render_relative_container.h"
 #include "core/components/root/render_root.h"
 #include "core/components/text/text_component.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 
 namespace OHOS::Ace {
 namespace {
-    constexpr double RECT_WIDTH = 1080.0;
-    constexpr double RECT_HEIGHT = 2244.0;
-}  // namespace
+constexpr double RECT_WIDTH = 2000.0;
+constexpr double RECT_HEIGHT = 1000.0;
+} // namespace
 
 RefPtr<RenderRoot> RelativeContainerTestUtils::CreateRenderRoot()
 {
@@ -37,10 +40,45 @@ RefPtr<RenderRoot> RelativeContainerTestUtils::CreateRenderRoot()
     return root;
 }
 
-RefPtr<RenderText> RelativeContainerTestUtils::CreateRenderText(const RefPtr<PipelineContext>& context)
+RefPtr<RenderRelativeContainer> RelativeContainerTestUtils::CreateRenderRelativeContainer(
+    const RefPtr<PipelineContext>& context)
 {
-    auto text = AceType::MakeRefPtr<MockRenderText>();
-    text->Attach(context);
-    return text;
+    RefPtr<RenderRelativeContainer> renderRelativeContainer = AceType::MakeRefPtr<MockRenderRelativeContainer>();
+    std::list<RefPtr<Component>> children;
+    RefPtr<OHOS::Ace::RelativeContainerComponent> relativeContainerComponent =
+        AceType::MakeRefPtr<RelativeContainerComponent>(children);
+    renderRelativeContainer->Update(relativeContainerComponent);
+    renderRelativeContainer->Attach(context);
+    return renderRelativeContainer;
+}
+
+RefPtr<RenderBox> RelativeContainerTestUtils::CreateRenderBox(
+    const double width, const double height, const RefPtr<PipelineContext>& context)
+{
+    RefPtr<RenderBox> renderBox = AceType::MakeRefPtr<MockRenderBox>();
+    RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<BoxComponent>();
+    boxComponent->SetWidth(width);
+    boxComponent->SetHeight(height);
+    renderBox->Update(boxComponent);
+    renderBox->Attach(context);
+    return renderBox;
+}
+
+void RelativeContainerTestUtils::AddAlignRule(const std::string id, const AlignDirection& direction,
+    const HorizontalAlign& horizontalRule, std::map<AlignDirection, AlignRule>& alignRules)
+{
+    AlignRule alignRule;
+    alignRule.anchor = id;
+    alignRule.horizontal = horizontalRule;
+    alignRules[direction] = alignRule;
+}
+
+void RelativeContainerTestUtils::AddAlignRule(const std::string id, const AlignDirection& direction,
+    const VerticalAlign& verticalRule, std::map<AlignDirection, AlignRule>& alignRules)
+{
+    AlignRule alignRule;
+    alignRule.anchor = id;
+    alignRule.vertical = verticalRule;
+    alignRules[direction] = alignRule;
 }
 } // namespace OHOS::Ace
