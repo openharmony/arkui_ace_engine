@@ -51,6 +51,8 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_stateMgmt_abc_end[];
+extern const char _binary_stateMgmtPU_abc_start[];
+extern const char _binary_stateMgmtPU_abc_end[];
 extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsEnumStyle_abc_end[];
 
@@ -236,8 +238,23 @@ bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
 
 void JsiDeclarativeEngineInstance::InitAceModule()
 {
-    bool stateMgmtResult = runtime_->EvaluateJsCode(
-        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+    bool partialUpdate = false;
+    auto container = Container::Current();
+    if (container) {
+        auto pipelineContext = container->GetPipelineContext();
+        partialUpdate = pipelineContext && pipelineContext->UsePartialUpdate();
+    }
+
+    uint8_t* codeStart;
+    int32_t codeLength;
+    if (partialUpdate) {
+        codeStart = (uint8_t*)_binary_stateMgmtPU_abc_start;
+        codeLength = _binary_stateMgmtPU_abc_end - _binary_stateMgmtPU_abc_start;
+    } else {
+        codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+        codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
+    }
+    bool stateMgmtResult = runtime_->EvaluateJsCode(codeStart, codeLength);
     if (!stateMgmtResult) {
         LOGE("EvaluateJsCode stateMgmt failed");
     }
@@ -324,8 +341,23 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
 
     // preload state management
-    bool evalResult = arkRuntime->EvaluateJsCode(
-        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+    bool partialUpdate = false;
+    auto container = Container::Current();
+    if (container) {
+        auto pipelineContext = container->GetPipelineContext();
+        partialUpdate = pipelineContext && pipelineContext->UsePartialUpdate();
+    }
+
+    uint8_t* codeStart;
+    int32_t codeLength;
+    if (partialUpdate) {
+        codeStart = (uint8_t*)_binary_stateMgmtPU_abc_start;
+        codeLength = _binary_stateMgmtPU_abc_end - _binary_stateMgmtPU_abc_start;
+    } else {
+        codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+        codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
+    }
+    bool evalResult = arkRuntime->EvaluateJsCode(codeStart, codeLength);
     if (!evalResult) {
         LOGE("PreloadAceModule EvaluateJsCode stateMgmt failed");
     }
