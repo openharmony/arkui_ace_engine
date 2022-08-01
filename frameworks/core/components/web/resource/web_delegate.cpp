@@ -252,7 +252,7 @@ int32_t ContextMenuParamOhos::GetXCoord() const
     if (param_) {
         return param_->GetXCoord();
     }
-    return 0;
+    return -1;
 }
 
 int32_t ContextMenuParamOhos::GetYCoord() const
@@ -260,7 +260,7 @@ int32_t ContextMenuParamOhos::GetYCoord() const
     if (param_) {
         return param_->GetYCoord();
     }
-    return 0;
+    return -1;
 }
 
 std::string ContextMenuParamOhos::GetLinkUrl() const
