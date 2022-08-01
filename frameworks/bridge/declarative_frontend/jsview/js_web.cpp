@@ -823,7 +823,7 @@ public:
         JSClass<JSContextMenuParam>::CustomMethod("getUnfilterendLinkUrl",
             &JSContextMenuParam::GetUnfilteredLinkUrl);
         JSClass<JSContextMenuParam>::CustomMethod("getSourceUrl", &JSContextMenuParam::GetSourceUrl);
-        JSClass<JSContextMenuParam>::CustomMethod("existImageContents",
+        JSClass<JSContextMenuParam>::CustomMethod("existsImageContents",
             &JSContextMenuParam::HasImageContents);
         JSClass<JSContextMenuParam>::Bind(
             globalObj, &JSContextMenuParam::Constructor, &JSContextMenuParam::Destructor);
