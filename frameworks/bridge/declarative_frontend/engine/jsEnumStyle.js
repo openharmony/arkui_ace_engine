@@ -381,6 +381,12 @@ var Visibility;
   Visibility[Visibility["None"] = 2] = "None";
 })(Visibility || (Visibility = {}));
 
+var RelateType;
+(function (RelateType) {
+  RelateType[RelateType["FILL"] = 0] = "FILL";
+  RelateType[RelateType["FIT"] = 1] = "FIT";
+})(RelateType || (RelateType = {}));
+
 var FlexDirection;
 (function (FlexDirection) {
   FlexDirection[FlexDirection["Row"] = 0] = "Row";
