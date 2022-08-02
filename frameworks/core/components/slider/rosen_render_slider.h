@@ -37,7 +37,6 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
     void OnMouseHoverEnterTest() override;
     void OnMouseHoverExitTest() override;
-    void OnPaintFinish() override;
     void PaintTrackFocus(RenderContext& context, const Offset& offset);
 
     RefPtr<RenderBlock> GetRenderBlock()
@@ -52,7 +51,6 @@ public:
 
 private:
     void AddTipChild();
-    void HandleFocus();
     void ProcessBlock(const Offset& currentPosition);
     void ProcessTrack(const Offset& currentPosition);
     void SetTipPosition(double blockOffset);
@@ -61,8 +59,6 @@ private:
     void CreateColorAnimation(
         RefPtr<KeyframeAnimation<Color>>& colorAnimation, const Color& beginValue, const Color& endValue, bool hover);
 
-    RefPtr<RenderNode> block_ = AceType::MakeRefPtr<RenderBlock>();
-    RefPtr<RenderNode> track_ = AceType::MakeRefPtr<RenderTrack>();
     RefPtr<Animator> controllerEnter_;
     RefPtr<Animator> controllerExit_;
     RefPtr<KeyframeAnimation<Color>> colorAnimationEnter_;
