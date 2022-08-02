@@ -345,37 +345,37 @@ JSValue ModuleManager::SetWaitTimer(JSContext* ctx, int32_t argc, JSValueConst* 
 {
     LOGD("SetWaitTimer argc is %d", argc);
 
-    if (argc < 1) {
-        LOGE("JsSetTimer: invalid callback value");
-        return JS_NULL;
-    }
-
-    JSValue jsFunc = JS_DupValue(ctx, argv[0]);
-    if (!JS_IsFunction(ctx, jsFunc)) {
-        LOGE("argv[0] is not function");
-        return JS_NULL;
-    }
-
-    int index = 1;
-    uint32_t delay = 0;
-    if (JS_IsNumber(argv[1])) {
-        JS_ToUint32(ctx, &delay, argv[1]);
-        index = 2;
-    }
-
-    std::vector<JSValue> callbackArray;
-    while (index < argc) {
-        callbackArray.emplace_back(JS_DupValue(ctx, argv[index]));
-        ++index;
-    }
-
-    uint32_t callbackId = ModuleManager::GetInstance()->AddCallback(jsFunc, callbackArray, isInterval);
-
     auto instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
     if (instance == nullptr) {
         LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return JS_NULL;
     }
+
+    if (argc < 1) {
+        LOGW("JsSetTimer: invalid callback value");
+        return JS_NULL;
+    }
+
+    JSValue jsFunc = JS_DupValue(ctx, argv[0]);
+    if (!JS_IsFunction(ctx, jsFunc)) {
+        LOGW("argv[0] is not function");
+        return JS_NULL;
+    }
+
+    uint32_t delay = 0;
+    std::vector<JSValue> callbackArray;
+    if (argc < 2 || !JS_IsNumber(argv[1])) {
+        uint32_t callbackId = ModuleManager::GetInstance()->AddCallback(jsFunc, callbackArray, isInterval);
+        instance->GetDelegate()->WaitTimer(std::to_string(callbackId), std::to_string(delay), isInterval, true);
+        return JS_NULL;
+    }
+
+    JS_ToUint32(ctx, &delay, argv[1]);
+    for (int index = 2; index < argc; ++index) {
+        callbackArray.emplace_back(JS_DupValue(ctx, argv[index]));
+    }
+
+    uint32_t callbackId = ModuleManager::GetInstance()->AddCallback(jsFunc, callbackArray, isInterval);
     instance->GetDelegate()->WaitTimer(std::to_string(callbackId), std::to_string(delay), isInterval, true);
 
     return JS_NewInt32(ctx, callbackId);

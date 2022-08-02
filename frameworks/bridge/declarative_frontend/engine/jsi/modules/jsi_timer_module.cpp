@@ -27,15 +27,6 @@ namespace {
 shared_ptr<JsValue> SetTimeoutOrInterval(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc, bool isInterval)
 {
-    if (argc < 2) {
-        LOGE("argc should be greater than or equal to 2");
-        return runtime->NewNull();
-    }
-    if (!argv[0]->IsFunction(runtime) || !argv[1]->IsNumber(runtime)) {
-        LOGW("argv[0] is not IsFunction or argv[1] is not number");
-        return runtime->NewNull();
-    }
-
     auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
     if (instance == nullptr) {
         LOGE("get jsi engine instance failed");
@@ -47,12 +38,27 @@ shared_ptr<JsValue> SetTimeoutOrInterval(const shared_ptr<JsRuntime>& runtime, c
         return runtime->NewNull();
     }
 
+    if (argc < 1) {
+        LOGE("argc should be greater than or equal to 1");
+        return runtime->NewNull();
+    }
+    if (!argv[0]->IsFunction(runtime)) {
+        LOGW("argv[0] is not function");
+        return runtime->NewNull();
+    }
+    uint32_t delay = 0;
     std::vector<shared_ptr<JsValue>> callBackParams;
+    if (argc < 2 || !argv[1]->IsNumber(runtime)) {
+        uint32_t callbackId = JsiTimerModule::GetInstance()->AddCallBack(argv[0], callBackParams);
+        delegate->WaitTimer(std::to_string(callbackId), std::to_string(delay), isInterval, true);
+        return runtime->NewInt32(callbackId);
+    }
+    delay = static_cast<uint32_t>(argv[1]->ToInt32(runtime));
+
     for (int i = 2; i < argc; ++i) {
         callBackParams.emplace_back(argv[i]);
     }
     uint32_t callbackId = JsiTimerModule::GetInstance()->AddCallBack(argv[0], callBackParams);
-    uint32_t delay = static_cast<uint32_t>(argv[1]->ToInt32(runtime));
     delegate->WaitTimer(std::to_string(callbackId), std::to_string(delay), isInterval, true);
     return runtime->NewInt32(callbackId);
 }
