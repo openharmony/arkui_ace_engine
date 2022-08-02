@@ -163,6 +163,16 @@ public:
         visibleChangeEvent_ = changeEvent;
     }
 
+    const std::optional<Color>& GetBackgroundMask() const
+    {
+        return backgroundMask_;
+    }
+
+    void SetBackgroundMask(const Color& backgroundMask)
+    {
+        backgroundMask_ = backgroundMask;
+    }
+
 private:
     VisibleType visible_ = VisibleType::VISIBLE;
     Shadow shadow_;
@@ -173,6 +183,7 @@ private:
     bool hasAppearTransition_ = false;
     bool disableLayer_ = false;
     int32_t duration_ = 0;
+    std::optional<Color> backgroundMask_;
     RefPtr<StateAttributes<DisplayStateAttribute>> stateAttributeList_ = nullptr;
     EventMarker visibleChangeEvent_;
 };

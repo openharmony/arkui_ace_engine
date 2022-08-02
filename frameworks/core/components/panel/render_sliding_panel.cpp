@@ -124,8 +124,10 @@ void RenderSlidingPanel::Update(const RefPtr<Component>& component)
     halfHeight_ = slidingPanel->GetHalfHeight();
     miniHeight_ = slidingPanel->GetMiniHeight();
     panelId_ = slidingPanel->GetPanelId();
+    visible = slidingPanel->Visible();
     onSizeChange_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         slidingPanel->GetOnSizeChanged(), context_);
+    onHeightChange_ = slidingPanel->GetOnHeightChanged();
     MarkNeedLayout();
 }
 
@@ -259,6 +261,18 @@ void RenderSlidingPanel::SetDragBarCallBack()
             panel->FireSizeChangeEvent();
         }
     });
+}
+
+void RenderSlidingPanel::FireHeightChangeEvent()
+{
+    if (!onHeightChange_) {
+        return;
+    }
+    auto currentHeight = GetLayoutParam().GetMaxSize().Height() - blankHeight_;
+    if (!visible) {
+        currentHeight = 0;
+    }
+    onHeightChange_(currentHeight);
 }
 
 void RenderSlidingPanel::FireSizeChangeEvent()
@@ -398,6 +412,7 @@ void RenderSlidingPanel::HandleDragUpdate(const Offset& currentPoint)
         targetBlankHeight = maxBlankHeight;
     }
     blankHeight_ = targetBlankHeight;
+    FireHeightChangeEvent();
     MarkNeedLayout();
 }
 
@@ -524,6 +539,7 @@ void RenderSlidingPanel::AppendBlankHeightAnimation(double blankHeight, PanelMod
             panel->dragBar_->ShowInPanelMode(mode);
         }
         panel->blankHeight_ = start + (end - start) * value;
+        panel->FireHeightChangeEvent();
         panel->MarkNeedLayout();
     });
     animator_->AddInterpolator(heightAnimation);

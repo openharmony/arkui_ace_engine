@@ -41,6 +41,7 @@ void RenderDisplay::Update(const RefPtr<Component>& component)
     appearingOpacity_ = display->GetAppearingOpacity();
     hasDisappearTransition_ = display->HasDisappearTransition();
     hasAppearTransition_ = display->HasAppearTransition();
+    backgroundMask_ = display->GetBackgroundMask();
     if (!hasDisappearTransition_) {
         pendingAppearing_ = false;
     }
