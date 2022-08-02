@@ -836,7 +836,7 @@ public:
 
     void GetXCoord(const JSCallbackInfo& args)
     {
-        int32_t ret = 0;
+        int32_t ret = -1;
         if (param_) {
             ret = param_->GetXCoord();
         }
@@ -847,7 +847,7 @@ public:
 
     void GetYCoord(const JSCallbackInfo& args)
     {
-        int32_t ret = 0;
+        int32_t ret = -1;
         if (param_) {
             ret = param_->GetYCoord();
         }
