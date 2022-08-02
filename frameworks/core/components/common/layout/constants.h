@@ -491,6 +491,12 @@ enum class SideBarPosition {
     END
 };
 
+enum class HitTestMode {
+    DEFAULT = 0,
+    BLOCK,
+    TRANSPARENT
+};
+
 inline constexpr uint32_t STATE_NORMAL = 0;
 inline constexpr uint32_t STATE_PRESSED = 1;
 inline constexpr uint32_t STATE_FOCUS = 1 << 1;

@@ -892,6 +892,11 @@ public:
         return touchable_;
     }
 
+    HitTestMode GetHitTestMode() const
+    {
+        return hitTestMode_;
+    }
+
     bool IsDisabled() const
     {
         return disabled_;
@@ -1345,6 +1350,7 @@ private:
 
     std::string restoreInfo_;
     bool isNotSiblingAddRecognizerToResult_ = true;
+    HitTestMode hitTestMode_ = HitTestMode::DEFAULT;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
 };

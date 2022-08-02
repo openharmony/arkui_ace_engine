@@ -18,9 +18,11 @@
 #include <algorithm>
 #include <set>
 #include <sstream>
+#include <string>
 #include <unistd.h>
 
 #include "base/memory/ace_type.h"
+#include "core/components/common/layout/constants.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_canvas_node.h"
@@ -369,6 +371,7 @@ void RenderNode::DumpTree(int32_t depth)
         DumpLog::GetInstance().AddDesc(std::string("TouchRectList: ").append(touchRectList));
         DumpLog::GetInstance().AddDesc(std::string("DirtyRect: ").append(dirtyRect.ToString()));
         DumpLog::GetInstance().AddDesc(std::string("LayoutParam: ").append(layoutParam_.ToString()));
+        DumpLog::GetInstance().AddDesc(std::string("HitTestMode: ").append(std::to_string(static_cast<int32_t>(hitTestMode_))));
 #ifdef ENABLE_ROSEN_BACKEND
         if (rsNode_) {
             DumpLog::GetInstance().AddDesc(rsNode_->DumpNode(depth));
@@ -704,19 +707,24 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
     bool dispatchSuccess = false;
     const auto& sortedChildren = SortChildrenByZIndex(GetChildren());
-    if (IsChildrenTouchEnable()) {
+    if (IsChildrenTouchEnable() && GetHitTestMode() != HitTestMode::BLOCK) {
         for (auto iter = sortedChildren.rbegin(); iter != sortedChildren.rend(); ++iter) {
-            auto& child = *iter;
+            const auto& child = *iter;
             if (!child->GetVisible() || child->disabled_ || child->disableTouchEvent_) {
                 continue;
             }
             if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
                 dispatchSuccess = true;
-                break;
+                if (child->GetHitTestMode() != HitTestMode::TRANSPARENT) {
+                    break;
+                }
             }
-            if (child->IsTouchable() && (child->InterceptTouchEvent() || IsExclusiveEventForChild())) {
+
+            auto interceptTouchEvent = child->GetHitTestMode() != HitTestMode::TRANSPARENT &&
+                (child->InterceptTouchEvent() || IsExclusiveEventForChild() || child->GetHitTestMode() == HitTestMode::BLOCK);
+            if (child->IsTouchable() && interceptTouchEvent) {
                 auto localTransformPoint = child->GetTransformPoint(localPoint);
-                for (auto& rect : child->GetTouchRectList()) {
+                for (const auto& rect : child->GetTouchRectList()) {
                     if (rect.IsInRegion(localTransformPoint)) {
                         dispatchSuccess = true;
                         break;
@@ -727,7 +735,7 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     }
 
     auto beforeSize = result.size();
-    for (auto& rect : GetTouchRectList()) {
+    for (const auto& rect : GetTouchRectList()) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             // Calculates the coordinate offset in this node.
             globalPoint_ = globalPoint;
@@ -1299,6 +1307,7 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
         LOGE("fail to update all due to component is null");
         return;
     }
+    hitTestMode_ = component->GetHitTestMode();
     touchable_ = component->IsTouchable();
     disabled_ = component->IsDisabledStatus();
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
