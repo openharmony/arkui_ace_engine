@@ -136,5 +136,3 @@ class Environment {
     });
   }
 }
-
-Environment.ConfigureBackend(new EnvironmentSetting());

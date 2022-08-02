@@ -13,8 +13,17 @@
  * limitations under the License.
  */
 
-console.debug("ACE State Mgmt for partial update init ...")
+// alloc in local_storage_test.ts
+let localStorageInstance : any;
 
-Environment.ConfigureBackend(new EnvironmentSetting());
-
-PersistentStorage.ConfigureBackend(new Storage());
+class NativeLocalStorage {
+    constructor() {
+        console.log("LocalStorageNative constructor (Mock) - unimplemented");
+    }
+    static GetShared() : LocalStorage {
+        console.log("LocalStorageNative (Mock).GetShared - returns debug sigleton");
+        // localStorageInstance is declared in index_test.ts
+        return localStorageInstance;
+    }
+  }
+  

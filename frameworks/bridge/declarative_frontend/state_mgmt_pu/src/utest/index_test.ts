@@ -13,8 +13,23 @@
  * limitations under the License.
  */
 
-console.debug("ACE State Mgmt for partial update init ...")
 
-Environment.ConfigureBackend(new EnvironmentSetting());
+initTest();
 
-PersistentStorage.ConfigureBackend(new Storage());
+testLocalStorage();
+
+testAppStorage();
+
+testAppStorageArray();
+
+testEnvironment();
+
+testPersistentStorage();
+
+testViewState();
+
+nestedObsObjProps();
+
+array1ObsObjProps();
+
+reportTestResults();

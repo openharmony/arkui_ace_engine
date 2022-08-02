@@ -16,5 +16,5 @@
     "test": "rm -rf ./distTest;\n mkdir -p ./distTest;\n tsc --build tsconfig.test.json;\n node distTest/stateMgmt_test.js"
   },
   "author": "Guido Grassel",
-  "license": "SEE LICENSE IN /LICENCE.txt"
+  "license": "See top of files"
 }
