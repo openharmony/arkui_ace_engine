@@ -19,6 +19,7 @@
 #include <regex>
 
 #include "base/log/log.h"
+#include "core/common/container.h"
 #include "frameworks/bridge/common/media_query/media_query_info.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -81,9 +82,21 @@ const std::string LESS_NOT_EQUAL = "<";
  */
 double TransferValue(double value, const std::string& unit)
 {
-    double transfer;
+    double transfer = 1.0;
     if (unit == "dpi") {
         transfer = 96.0; // 1px = 96 dpi
+    } else if (unit == "vp") {
+        auto container = Container::Current();
+        if (container) {
+            auto pipeline = container->GetPipelineContext();
+            if (pipeline && !NearZero(pipeline->GetDipScale())) {
+                transfer = 1.0 / pipeline->GetDipScale();
+            } else {
+                LOGW("No pipeline, use default scale.");
+            }
+        } else {
+            LOGW("No container, use default scale.");
+        }
     } else if (unit == "dpcm") {
         transfer = 36.0; // 1px = 36 dpcm
     } else {
@@ -115,7 +128,8 @@ const MediaQueryerRule CONDITION_WITH_AND(std::regex("(\\([\\.a-z0-9:>=<-]+\\))(
 
 // condition such as: (100 < width < 1000)
 const MediaQueryerRule CSS_LEVEL4_MULTI(
-    std::regex("\\(([\\d\\.]+)(dpi|dppx|dpcm|px)?(>|<|>=|<=)([a-z0-9:-]+)(>|<|>=|<=)([\\d\\.]+)(dpi|dppx|dpcm|px)?\\)"),
+    std::regex(
+        "\\(([\\d\\.]+)(dpi|dppx|dpcm|px|vp)?(>|<|>=|<=)([a-z0-9:-]+)(>|<|>=|<=)([\\d\\.]+)(dpi|dppx|dpcm|px|vp)?\\)"),
     [](const std::smatch& matchResults, const MediaFeature& mediaFeature, MediaError& failReason) {
         static constexpr int32_t LEFT_CONDITION_VALUE = 6;
         static constexpr int32_t LEFT_UNIT = 7;
@@ -136,7 +150,7 @@ const MediaQueryerRule CSS_LEVEL4_MULTI(
 
 // condition such as: width < 1000
 const MediaQueryerRule CSS_LEVEL4_LEFT(
-    std::regex("\\(([^m][a-z-]+)(>|<|>=|<=)([\\d\\.]+)(dpi|dppx|dpcm|px)?\\)"),
+    std::regex("\\(([^m][a-z-]+)(>|<|>=|<=)([\\d\\.]+)(dpi|dppx|dpcm|px|vp)?\\)"),
     [](const std::smatch& matchResults, const MediaFeature& mediaFeature, MediaError& failReason) {
         static constexpr int32_t CONDITION_VALUE = 3;
         static constexpr int32_t UNIT = 4;
@@ -151,7 +165,7 @@ const MediaQueryerRule CSS_LEVEL4_LEFT(
 
 // condition such as: 1000 < width
 const MediaQueryerRule CSS_LEVEL4_RIGHT(
-    std::regex("\\(([\\d\\.]+)(dpi|dppx|dpcm|px)?(>|<|>=|<=)([^m][a-z-]+)\\)"),
+    std::regex("\\(([\\d\\.]+)(dpi|dppx|dpcm|px|vp)?(>|<|>=|<=)([^m][a-z-]+)\\)"),
     [](const std::smatch& matchResults, const MediaFeature& mediaFeature, MediaError& failReason) {
         static constexpr int32_t CONDITION_VALUE = 1;
         static constexpr int32_t UNIT = 2;
@@ -165,7 +179,7 @@ const MediaQueryerRule CSS_LEVEL4_RIGHT(
 
 // condition such as: min-width: 1000
 const MediaQueryerRule CSS_LEVEL3_RULE(
-    std::regex("\\((min|max)-([a-z-]+):([\\d\\.]+)(dpi|dppx|dpcm)?\\)"),
+    std::regex("\\((min|max)-([a-z-]+):([\\d\\.]+)(dpi|dppx|dpcm|vp)?\\)"),
     [](const std::smatch& matchResults, const MediaFeature& mediaFeature, MediaError& failReason) {
         static constexpr int32_t RELATIONSHIP = 1;
         static constexpr int32_t MEDIA_FEATURE = 2;
