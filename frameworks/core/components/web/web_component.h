@@ -1145,6 +1145,22 @@ public:
         onFileSelectorShowImpl_ = onFileSelectorShowImpl;
     }
 
+    using OnContextMenuImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnContextMenuShow(const BaseEventInfo* info) const
+    {
+        if (onContextMenuImpl_) {
+            return onContextMenuImpl_(info);
+        }
+        return false;
+    }
+    void SetOnContextMenuShow(OnContextMenuImpl && onContextMenuImpl)
+    {
+        if (onContextMenuImpl == nullptr) {
+            return;
+        }
+        onContextMenuImpl_ = std::move(onContextMenuImpl);
+    }
+
     using OnUrlLoadInterceptImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnUrlLoadIntercept(const BaseEventInfo* info) const
     {
@@ -1212,6 +1228,7 @@ private:
     OnFileSelectorShowImpl onFileSelectorShowImpl_;
     OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
+    OnContextMenuImpl onContextMenuImpl_;
     OnInterceptRequestImpl onInterceptRequestImpl_ = nullptr;
 
     std::string type_;
