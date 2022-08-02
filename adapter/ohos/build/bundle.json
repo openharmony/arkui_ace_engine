@@ -56,11 +56,17 @@
             ]
         },
         "build": {
-            "sub_component": [
-                "//foundation/arkui/ace_engine/adapter/ohos/build:ace_packages",
-                "//foundation/arkui/ace_engine/adapter/ohos/sa_profile:ace_sa_profile",
-                "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:ui_service.cfg"
-            ],
+            "group_type": {
+                "base_group": [],
+                "fwk_group": [
+                    "//foundation/arkui/ace_engine/adapter/ohos/build:ace_packages"
+                ],
+                "service_group": [
+                    "//foundation/arkui/ace_engine/adapter/ohos/services:services_target",
+                    "//foundation/arkui/ace_engine/adapter/ohos/sa_profile:ace_sa_profile",
+                    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:ui_service.cfg"
+                ]
+            },
             "inner_kits": [
                 {
                     "header": {
