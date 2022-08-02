@@ -33,9 +33,9 @@ class FormPlatformEventCallback final : public Platform::PlatformEventCallback {
 public:
     explicit FormPlatformEventCallback(FormPlatformFinish onFinish) : onFinish_(onFinish) {}
 
-    ~FormPlatformEventCallback() = default;
+    ~FormPlatformEventCallback() override = default;
 
-    virtual void OnFinish() const
+    void OnFinish() const override
     {
         LOGI("FormPlatformEventCallback OnFinish");
         if (onFinish_) {
@@ -43,7 +43,7 @@ public:
         }
     }
 
-    virtual void OnStatusBarBgColorChanged(uint32_t color)
+    void OnStatusBarBgColorChanged(uint32_t color) override
     {
         LOGI("FormPlatformEventCallback OnStatusBarBgColorChanged");
     }

@@ -70,9 +70,9 @@ public:
     explicit ContentEventCallback(ContentFinishCallback onFinish) : onFinish_(onFinish) {}
     ContentEventCallback(ContentFinishCallback onFinish, ContentStartAbilityCallback onStartAbility)
         : onFinish_(onFinish), onStartAbility_(onStartAbility) {}
-    ~ContentEventCallback() = default;
+    ~ContentEventCallback() override = default;
 
-    virtual void OnFinish() const
+    void OnFinish() const override
     {
         LOGI("UIContent OnFinish");
         if (onFinish_) {
@@ -80,7 +80,7 @@ public:
         }
     }
 
-    virtual void OnStartAbility(const std::string& address)
+    void OnStartAbility(const std::string& address) override
     {
         LOGI("UIContent OnStartAbility");
         if (onStartAbility_) {
@@ -88,7 +88,7 @@ public:
         }
     }
 
-    virtual void OnStatusBarBgColorChanged(uint32_t color)
+    void OnStatusBarBgColorChanged(uint32_t color) override
     {
         LOGI("UIContent OnStatusBarBgColorChanged");
     }
