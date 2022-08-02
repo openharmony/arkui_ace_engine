@@ -37,9 +37,9 @@ class DataPlatformEventCallback final : public Platform::PlatformEventCallback {
 public:
     explicit DataPlatformEventCallback(DataPlatformFinish onFinish) : onFinish_(onFinish) {}
 
-    ~DataPlatformEventCallback() = default;
+    ~DataPlatformEventCallback() override = default;
 
-    virtual void OnFinish() const
+    void OnFinish() const override
     {
         LOGI("DataPlatformEventCallback OnFinish");
         if (onFinish_) {
@@ -47,7 +47,7 @@ public:
         }
     }
 
-    virtual void OnStatusBarBgColorChanged(uint32_t color)
+    void OnStatusBarBgColorChanged(uint32_t color) override
     {
         LOGI("DataPlatformEventCallback OnStatusBarBgColorChanged");
     }

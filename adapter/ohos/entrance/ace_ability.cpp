@@ -134,9 +134,9 @@ public:
         : onFinish_(onFinish), onStartAbility_(onStartAbility)
     {}
 
-    ~AcePlatformEventCallback() = default;
+    ~AcePlatformEventCallback() override = default;
 
-    virtual void OnFinish() const
+    void OnFinish() const override
     {
         LOGI("AcePlatformEventCallback OnFinish");
         if (onFinish_) {
@@ -144,7 +144,7 @@ public:
         }
     }
 
-    virtual void OnStartAbility(const std::string& address)
+    void OnStartAbility(const std::string& address) override
     {
         LOGI("AcePlatformEventCallback OnStartAbility");
         if (onStartAbility_) {
@@ -152,7 +152,7 @@ public:
         }
     }
 
-    virtual void OnStatusBarBgColorChanged(uint32_t color)
+    void OnStatusBarBgColorChanged(uint32_t color) override
     {
         LOGI("AcePlatformEventCallback OnStatusBarBgColorChanged");
     }

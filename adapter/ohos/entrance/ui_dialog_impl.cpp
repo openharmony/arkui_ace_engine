@@ -111,30 +111,6 @@ private:
     Ace::Platform::FlutterAceView* flutterAceView_ = nullptr;
 };
 
-using AcePlatformFinish = std::function<void()>;
-class AcePlatformEventCallback final : public Ace::Platform::PlatformEventCallback {
-public:
-    explicit AcePlatformEventCallback(AcePlatformFinish onFinish) : onFinish_(onFinish) {}
-
-    ~AcePlatformEventCallback() = default;
-
-    virtual void OnFinish() const
-    {
-        LOGI("AcePlatformEventCallback OnFinish");
-        if (onFinish_) {
-            onFinish_();
-        }
-    }
-
-    virtual void OnStatusBarBgColorChanged(uint32_t color)
-    {
-        LOGI("AcePlatformEventCallback OnStatusBarBgColorChanged");
-    }
-
-private:
-    AcePlatformFinish onFinish_;
-};
-
 static void SetDialogBackgroundColor(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
 {
     auto themeManager = context->GetThemeManager();
@@ -218,7 +194,7 @@ void UIDialogImpl::ShowDialog(const std::string& name, const std::string& params
     // create container
     auto ability = CreateAbility();
     Ace::Platform::AceContainer::CreateContainer(
-        dialogId, Ace::FrontendType::JS, false, "", ability, std::make_unique<AcePlatformEventCallback>([]() {}), true);
+        dialogId, Ace::FrontendType::JS, false, "", ability, nullptr, true);
     abilityMaps_[dialogId] = ability;
     auto container = Ace::Platform::AceContainer::GetContainer(dialogId);
     if (!container) {
