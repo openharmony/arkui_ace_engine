@@ -178,6 +178,8 @@ public:
 
     static std::string GetNewPipePkg();
 
+    static float GetAnimationScale();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;
