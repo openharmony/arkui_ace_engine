@@ -2959,10 +2959,15 @@ JSValue QjsEngineInstance::FireJsEvent(const std::string& param)
                         JS_SetPropertyStr(
                             ctx, arg1, "setDragImage", JS_NewCFunction(ctx, AppSetDataImage, "setDragImage", 3));
                         JS_SetPropertyStr(ctx, arg2, "dataTransfer", arg1);
+                        JS_FreeValue(ctx, arg1);
                     }
+                    JS_FreeValue(ctx, arg2);
                 }
+                JS_FreeValue(ctx, stdDrag);
             }
+            JS_FreeValue(ctx, args);
         }
+        JS_FreeValue(ctx, itemVal);
     }
     JSValueConst argv[] = {
         QJSUtils::NewString(ctx, std::to_string(runningPage_->GetPageId()).c_str()),

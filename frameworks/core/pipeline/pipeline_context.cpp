@@ -2339,6 +2339,7 @@ void PipelineContext::Destroy()
     CHECK_RUN_ON(UI);
     LOGI("PipelineContext::Destroy begin.");
     ClearImageCache();
+    platformResRegister_.Reset();
     rootElement_.Reset();
     composedElementMap_.clear();
     dirtyElements_.clear();
