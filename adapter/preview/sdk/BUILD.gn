@@ -129,23 +129,14 @@ if (is_standard_system) {
 
     # Add qjs or ark engine-related dynamic libraries
     if (enable_ark_preview) {
-      ark_core_path =
-          get_label_info("//arkcompiler/runtime_core/libpandabase:libarkbase",
-                         "root_out_dir")
       ark_js_path = get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
                                    "root_out_dir")
       deps += [
         "$ace_napi:ace_napi_ark",
         "//arkcompiler/ets_runtime:libark_jsruntime",
-        "//arkcompiler/runtime_core/libpandabase:libarkbase",
-        "//arkcompiler/runtime_core/libpandafile:libarkfile",
-        "//arkcompiler/runtime_core/libziparchive:libarkziparchive",
       ]
       sources += [
         "$ace_napi_path/arkui/napi/libace_napi_ark${dylib_suffix}",
-        "$ark_core_path/ark/ark/libarkbase${dylib_suffix}",
-        "$ark_core_path/ark/ark/libarkfile${dylib_suffix}",
-        "$ark_core_path/ark/ark/libarkziparchive${dylib_suffix}",
         "$ark_js_path/ark/ark_js_runtime/libark_jsruntime${dylib_suffix}",
         "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
       ]
