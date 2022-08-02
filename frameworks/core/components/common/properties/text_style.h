@@ -233,16 +233,6 @@ public:
         return hasHeightOverride_;
     }
 
-    const Shadow& GetShadow() const
-    {
-        return shadow_;
-    }
-
-    void SetShadow(const Shadow& shadow)
-    {
-        shadow_ = shadow;
-    }
-
     const Dimension& GetLetterSpacing() const
     {
         return letterSpacing_;
@@ -396,6 +386,21 @@ public:
         textCase_ = textCase;
     }
 
+    const std::vector<Shadow>& GetTextShadows() const
+    {
+        return textShadows_;
+    }
+
+    void SetTextShadows(std::vector<Shadow>&& textShadows)
+    {
+        textShadows_ = textShadows;
+    }
+
+    void SetShadow(Shadow &shadow)
+    {
+        textShadows_.emplace_back(shadow);
+    }
+
 private:
     std::vector<std::string> fontFamilies_;
     std::unordered_map<std::string, int32_t> fontFeatures_;
@@ -418,7 +423,7 @@ private:
     Color textColor_ { Color::BLACK };
     Color textDecorationColor_ { Color::TRANSPARENT };
     TextDecoration textDecoration_ { TextDecoration::NONE };
-    Shadow shadow_;
+    std::vector<Shadow> textShadows_;
     WhiteSpace whiteSpace_{ WhiteSpace::PRE };
     Dimension wordSpacing_;
     Dimension textIndent_ { 0.0f, DimensionUnit::PX };
