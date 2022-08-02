@@ -304,7 +304,9 @@ void ContextMenuResultOhos::Cancel() const
 
 void ContextMenuResultOhos::CopyImage() const
 {
-
+    if (callback_) {
+        callback_->Cancel();
+    }
 }
 
 WebDelegate::~WebDelegate()

@@ -943,7 +943,7 @@ public:
     void CopyImage(const JSCallbackInfo& args)
     {
         if (result_) {
-            result_->Cancel();
+            result_->CopyImage();
         }
     }
 private:
