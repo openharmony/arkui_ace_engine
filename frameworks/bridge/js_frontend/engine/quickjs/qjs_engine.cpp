@@ -3183,7 +3183,7 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     bool ret = engineInstance_->InitJsEnv(runtime, context, GetExtraNativeObject());
 
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
     RegisterWorker();
@@ -3284,7 +3284,7 @@ QjsEngine::~QjsEngine()
 {
     LOG_DESTROY();
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         nativeEngine_->DeleteEngine();
