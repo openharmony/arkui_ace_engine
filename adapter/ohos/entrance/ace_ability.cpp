@@ -533,14 +533,6 @@ void AceAbility::OnAbilityResult(int requestCode, int resultCode, const OHOS::AA
     LOGI("AceAbility::OnAbilityResult called End");
 }
 
-void AceAbility::OnRequestPermissionsFromUserResult(
-    int requestCode, const std::vector<std::string>& permissions, const std::vector<int>& grantResults)
-{
-    LOGI("AceAbility::OnRequestPermissionsFromUserResult called ");
-    AbilityProcess::GetInstance()->OnRequestPermissionsFromUserResult(this, requestCode, permissions, grantResults);
-    LOGI("AceAbility::OnRequestPermissionsFromUserResult called End");
-}
-
 bool AceAbility::OnStartContinuation()
 {
     LOGI("AceAbility::OnStartContinuation called.");

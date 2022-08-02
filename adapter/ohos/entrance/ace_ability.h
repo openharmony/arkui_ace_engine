@@ -54,8 +54,6 @@ public:
     void OnSaveAbilityState(OHOS::AppExecFwk::PacMap& outState) override;
     void OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& configuration) override;
     void OnAbilityResult(int requestCode, int resultCode, const OHOS::AAFwk::Want& resultData) override;
-    void OnRequestPermissionsFromUserResult(
-        int requestCode, const std::vector<std::string>& permissions, const std::vector<int>& grantResults) override;
 
     bool OnStartContinuation() override;
     bool OnSaveData(OHOS::AAFwk::WantParams& saveData) override;
