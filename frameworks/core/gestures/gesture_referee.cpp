@@ -78,11 +78,6 @@ void GestureScope::DelMember(const RefPtr<GestureRecognizer>& recognizer)
 
 void GestureScope::HandleGestureDisposal(const RefPtr<GestureRecognizer>& recognizer, const GestureDisposal disposal)
 {
-    if (!Existed(recognizer)) {
-        LOGE("can not find the parallel recognizer");
-        return;
-    }
-
     GesturePriority priority = recognizer->GetPriority();
     if (priority == GesturePriority::Parallel) {
         HandleParallelDisposal(recognizer, disposal);
@@ -120,26 +115,12 @@ void GestureScope::HandleParallelDisposal(const RefPtr<GestureRecognizer>& recog
 
 void GestureScope::HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer)
 {
-    if (!AceType::InstanceOf<ClickRecognizer>(recognizer)) {
-        if (CheckNeedBlocked(recognizer)) {
-            LOGI("gesture referee ready to notify block for %{public}s", AceType::TypeName(recognizer));
-            recognizer->SetRefereeState(RefereeState::BLOCKED);
-            return;
-        }
-    }
-
     LOGI("gesture referee accept %{public}s of id %{public}zu", AceType::TypeName(recognizer), touchId_);
     AcceptGesture(recognizer);
 }
 
 void GestureScope::HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer)
 {
-    if (CheckNeedBlocked(recognizer)) {
-        LOGI("gesture referee ready to notify block for %{public}s", AceType::TypeName(recognizer));
-        recognizer->SetRefereeState(RefereeState::BLOCKED);
-        return;
-    }
-
     LOGI("gesture referee ready to notify pending for %{public}s", AceType::TypeName(recognizer));
     recognizer->SetRefereeState(RefereeState::PENDING);
     recognizer->OnPending(touchId_);
