@@ -115,6 +115,10 @@ private:
     void PaintSelectCaret(SkCanvas* canvas);
     void PaintIcon(const Offset& offset, RenderContext& context);
     void PaintSelection(SkCanvas* canvas) const;
+    void DrawSelection(unsigned start, unsigned end, SkCanvas* canvas) const;
+#if defined(IOS_PLATFORM)
+    void PaintCompose(SkCanvas* canvas) const;
+#endif
     void PaintTextAndPlaceholder(SkCanvas* canvas) const;
     void PaintErrorText(SkCanvas* canvas) const;
     void PaintCountText(SkCanvas* canvas) const;

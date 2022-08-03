@@ -261,16 +261,23 @@ void FlutterRenderTextField::PaintSelection(SkCanvas* canvas) const
     if (!IsSelectiveDevice()) {
         return;
     }
-    using namespace Constants;
 
     if (!paragraph_ || (canvas == nullptr)) {
         return;
     }
+
     const auto& selection = GetEditingValue().selection;
     if (GetEditingValue().text.empty() || selection.GetStart() == selection.GetEnd()) {
         return;
     }
-    const auto& boxes = paragraph_->GetRectsForRange(selection.GetStart(), selection.GetEnd(),
+    
+    DrawSelection(selection.GetStart(), selection.GetEnd(), canvas);
+}
+
+void FlutterRenderTextField::DrawSelection(unsigned start, unsigned end, SkCanvas* canvas) const
+{
+    using namespace Constants;
+    const auto& boxes = paragraph_->GetRectsForRange(start, end,
         txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     if (boxes.empty()) {
         return;
@@ -292,6 +299,26 @@ void FlutterRenderTextField::PaintSelection(SkCanvas* canvas) const
     }
     canvas->restore();
 }
+
+#if defined(IOS_PLATFORM)
+void FlutterRenderTextField::PaintCompose(SkCanvas* canvas) const
+{
+    if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
+        return;
+    }
+
+    if (!paragraph_ || (canvas == nullptr)) {
+        return;
+    }
+
+    const auto& compose = GetEditingValue().compose;
+    if (GetEditingValue().text.empty() || compose.GetStart() == compose.GetEnd()) {
+        return;
+    }
+    
+    DrawSelection(compose.GetStart(), compose.GetEnd(), canvas);
+}
+#endif
 
 void FlutterRenderTextField::PaintTextAndPlaceholder(SkCanvas* canvas) const
 {
@@ -1384,6 +1411,9 @@ void FlutterRenderTextField::PaintTextField(
     canvas->clipRect(SkRect::MakeLTRB(innerRect_.Left(), innerRect_.Top(), innerRect_.Right(), innerRect_.Bottom()),
         SkClipOp::kIntersect);
     PaintSelection(canvas);
+#if defined(IOS_PLATFORM)
+    PaintCompose(canvas);
+#endif
     // Paint cursor.
     PaintCaret(*canvas, caretRect_);
     PaintTextAndPlaceholder(canvas);

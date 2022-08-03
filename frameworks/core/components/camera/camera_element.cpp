@@ -400,6 +400,11 @@ void CameraElement::UpdateCamera(const RefPtr<CameraComponent> &cameraComponent)
     if (texture_) {
         cameraComponent->SetTextureId(texture_->GetId());
         cameraComponent->SetFit(ImageFit::CONTAIN);
+   
+#if defined(IOS_PLATFORM)
+        cameraComponent->SetFit(ImageFit::COVER);
+#endif
+		 
         cameraComponent->SetSrcWidth(preViewWidth_);
         cameraComponent->SetSrcHeight(preViewHeight_);
     }
@@ -451,6 +456,11 @@ void CameraElement::OnPreViewSizeChange(int32_t preViewWidth, int32_t preViewHei
     auto camera = AceType::MakeRefPtr<CameraComponent>();
     camera->SetTextureId(texture_->GetId());
     camera->SetFit(ImageFit::CONTAIN);
+ 
+#if defined(IOS_PLATFORM)
+    camera->SetFit(ImageFit::COVER);
+#endif
+	
     camera->SetSrcWidth(preViewWidth);
     camera->SetSrcHeight(preViewHeight);
     preViewWidth_ = preViewWidth;
