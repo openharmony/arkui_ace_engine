@@ -682,39 +682,43 @@ void ModuleManager::SetWaitTimer(const v8::FunctionCallbackInfo<v8::Value>& args
         LOGE("set time out or interval, context is empty!");
         return;
     }
+    auto delegate =
+        static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
 
-    LOGI("Enter SetWaitTimer %{private}d %{private}d", isInterval, args.Length());
+    int argc = args.Length();
+    if (argc < 1) {
+        LOGW("JsSetTimer: invalid callback value");
+    }
+
+    LOGI("Enter SetWaitTimer %{private}d %{private}d", isInterval, argc);
 
     if (!args[0]->IsFunction()) {
-        LOGE("args[0] is not function");
+        LOGW("args[0] is not function");
         return;
     }
     v8::Local<v8::Function> jsFunc = v8::Local<v8::Function>::Cast(args[0]);
-
-    int index = 1;
-    uint32_t delay = 0;
-    if (args[1]->IsNumber()) {
-        LOGE("args[1] is number");
-        delay = args[1]->ToInt32(context).ToLocalChecked()->Value();
-        index = 2;
-    }
-
     CopyablePersistent<v8::Function> pFunction;
     pFunction.Reset(isolate, jsFunc);
 
+    uint32_t delay = 0;
     std::vector<v8::Persistent<v8::Value, v8::CopyablePersistentTraits<v8::Value>>> callbackArray;
-    while (index < args.Length()) {
+    if (argc < 2 || !args[1]->IsNumber()) {
+        uint32_t callbackId = ModuleManager::GetInstance()->AddCallback(pFunction, callbackArray, isolate, isInterval);
+        args.GetReturnValue().Set(v8::Integer::New(isolate, callbackId));
+        (*delegate)->WaitTimer(std::to_string(callbackId), std::to_string(delay), isInterval, true);
+        return;
+    }
+
+    delay = args[1]->ToInt32(context).ToLocalChecked()->Value();
+
+    for (int index  = 2; index < argc; ++index) {
         CopyablePersistent<v8::Value> pValue;
         pValue.Reset(isolate, args[index]);
         callbackArray.emplace_back(pValue);
-        ++index;
     }
 
     uint32_t callbackId = ModuleManager::GetInstance()->AddCallback(pFunction, callbackArray, isolate, isInterval);
-
     args.GetReturnValue().Set(v8::Integer::New(isolate, callbackId));
-    auto delegate =
-        static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
     (*delegate)->WaitTimer(std::to_string(callbackId), std::to_string(delay), isInterval, true);
 }
 
