@@ -879,7 +879,13 @@ void PipelineContext::SetupRootElement()
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
     auto renderRoot = AceType::DynamicCast<RenderRoot>(rootRenderNode);
-    if (renderRoot) {
+    if (!renderRoot) {
+        LOGE("render root is null.");
+        return;
+    }
+    if (appBgColor_ != Color::WHITE) {
+        SetAppBgColor(appBgColor_);
+    } else {
         renderRoot->SetDefaultBgColor(windowModal_ == WindowModal::CONTAINER_MODAL);
     }
 #ifdef ENABLE_ROSEN_BACKEND
