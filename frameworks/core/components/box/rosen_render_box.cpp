@@ -1057,10 +1057,10 @@ void RosenRenderBox::SyncDecorationToRSNode()
         }
         if (backDecoration_->GetBorder().HasRadius()) {
             cornerRadius.SetValues(
-                backDecoration_->GetBorder().TopLeftRadius().GetX().ConvertToPx(dipScale_),
-                backDecoration_->GetBorder().TopRightRadius().GetX().ConvertToPx(dipScale_),
-                backDecoration_->GetBorder().BottomRightRadius().GetX().ConvertToPx(dipScale_),
-                backDecoration_->GetBorder().BottomLeftRadius().GetX().ConvertToPx(dipScale_)
+                NormalizeToPx(backDecoration_->GetBorder().TopLeftRadius().GetX()),
+                NormalizeToPx(backDecoration_->GetBorder().TopRightRadius().GetX()),
+                NormalizeToPx(backDecoration_->GetBorder().BottomRightRadius().GetX()),
+                NormalizeToPx(backDecoration_->GetBorder().BottomLeftRadius().GetX())
             );
         }
         RosenDecorationPainter::PaintBoxShadows(backDecoration_->GetShadows(), rsNode);
@@ -1068,7 +1068,7 @@ void RosenRenderBox::SyncDecorationToRSNode()
             backFilter = Rosen::RSFilter::CreateMaterialFilter(
                 static_cast<int>(backDecoration_->GetBlurStyle()), dipScale_);
         } else if (backDecoration_->GetBlurRadius().IsValid()) {
-            float radius = backDecoration_->GetBlurRadius().ConvertToPx(dipScale_);
+            float radius = NormalizeToPx(backDecoration_->GetBlurRadius());
             float backblurRadius = RosenDecorationPainter::ConvertRadiusToSigma(radius);
             backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
         }
@@ -1079,14 +1079,14 @@ void RosenRenderBox::SyncDecorationToRSNode()
         }
         if (frontDecoration_->GetBorder().HasRadius()) {
             cornerRadius.SetValues(
-                frontDecoration_->GetBorder().TopLeftRadius().GetX().ConvertToPx(dipScale_),
-                frontDecoration_->GetBorder().TopRightRadius().GetX().ConvertToPx(dipScale_),
-                frontDecoration_->GetBorder().BottomRightRadius().GetX().ConvertToPx(dipScale_),
-                frontDecoration_->GetBorder().BottomLeftRadius().GetX().ConvertToPx(dipScale_)
+                NormalizeToPx(frontDecoration_->GetBorder().TopLeftRadius().GetX()),
+                NormalizeToPx(frontDecoration_->GetBorder().TopRightRadius().GetX()),
+                NormalizeToPx(frontDecoration_->GetBorder().BottomRightRadius().GetX()),
+                NormalizeToPx(frontDecoration_->GetBorder().BottomLeftRadius().GetX())
             );
         }
         if (frontDecoration_->GetBlurRadius().IsValid()) {
-            float radius = frontDecoration_->GetBlurRadius().ConvertToPx(dipScale_);
+            float radius = NormalizeToPx(frontDecoration_->GetBlurRadius());
             float frontblurRadius = RosenDecorationPainter::ConvertRadiusToSigma(radius);
             filter = Rosen::RSFilter::CreateBlurFilter(frontblurRadius, frontblurRadius);
         }
