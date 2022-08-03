@@ -1,6 +1,10 @@
 # Declarative State Management
 
 This sub-project provides most of the revised implementation of Declarative State management.
+The implementation is for baseline. A seprate implementation is for partial update in 
+`state_mgmt_pu/*` directory. 
+
+The framework loads one state mgmt library at startup, depending on the choosen configuration.
 
 ## Building just state mgmt
 
@@ -23,10 +27,15 @@ For every release build
 The output is one JS file:
 `./distRelease/stateMgmt.js`
 
-The difference between debug build and release buold is the removal 
-of all console.log/.debug/.info statements from the generated JS code.
+The difference between debug build and release build is the removal 
+of all `console.log`/`.debug`/`.info` statements from the generated JS code.
 
 ## Unit tests for state mgmt using node.js / npm
+
+Unit tests run with Node.js on Ubuntu shell independent of the native ArkUI framework.
+
+Before first run:
+`npm install`
 
 To compile the entire project and unit tests, and to run all tests
 `npm test`

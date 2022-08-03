@@ -22,7 +22,6 @@ declare class ForEach {
   static setIdArray(elmtId: number, newIdArray: string[]): void;
   static createNewChildStart(id: string, parentView: NativeView): void;
   static createNewChildFinish(id: string, parentView: NativeView): void;
-  static inflate(): void;  // FIXME: still needed, == createNewChildFinish?
 }
 
 
