@@ -113,7 +113,7 @@ void JSSlidingPanel::SetOnHeightChange(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onHeightChangeCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
         auto onHeightChange = [execCtx = args.GetExecutionContext(),
-            func = std::move(onHeightChangeCallback)](double height) {
+            func = std::move(onHeightChangeCallback)](int32_t height) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("OnHeightChange");
             JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(height));

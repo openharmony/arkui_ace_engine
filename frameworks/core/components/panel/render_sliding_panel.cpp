@@ -268,7 +268,7 @@ void RenderSlidingPanel::FireHeightChangeEvent()
     if (!onHeightChange_) {
         return;
     }
-    auto currentHeight = GetLayoutParam().GetMaxSize().Height() - blankHeight_;
+    int32_t currentHeight = static_cast<int32_t>(GetLayoutParam().GetMaxSize().Height() - blankHeight_);
     if (!visible) {
         currentHeight = 0;
     }
