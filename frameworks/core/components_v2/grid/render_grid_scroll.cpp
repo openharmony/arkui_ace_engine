@@ -52,7 +52,6 @@ RenderGridScroll::~RenderGridScroll()
 
 void RenderGridScroll::Update(const RefPtr<Component>& component)
 {
-    InitScrollBar(component);
     if (!NeedUpdate(component)) {
         return;
     }
@@ -68,6 +67,7 @@ void RenderGridScroll::Update(const RefPtr<Component>& component)
     startRankItemIndex_ = 0;
     currentItemIndex_ = 0;
     RenderGridLayout::Update(component);
+    InitScrollBar(component);
     TakeBoundary();
     const RefPtr<GridLayoutComponent> grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (!grid) {
@@ -1153,6 +1153,9 @@ void RenderGridScroll::InitScrollBar(const RefPtr<Component>& component)
         scrollBar_->SetNormalWidth(theme->GetNormalWidth());
         scrollBar_->SetActiveWidth(theme->GetActiveWidth());
         scrollBar_->SetTouchWidth(theme->GetTouchWidth());
+    }
+    if (!isVertical_) {
+        scrollBar_->SetPositionMode(PositionMode::BOTTOM);
     }
     scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
     SetScrollBarCallback();
