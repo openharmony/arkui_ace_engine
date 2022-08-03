@@ -512,7 +512,7 @@ void StackElement::CreateInspectorComponent(PopupComponentInfo& componentInfo) c
     auto inspectorTag = dialog->GetInspectorTag();
     if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {
         auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(
-            std::to_string(dialog->GetDialogId()) + inspectorTag, inspectorTag);
+            V2::InspectorComposedComponent::GenerateId(), inspectorTag);
         composedComponent->SetChild(componentInfo.component);
         componentInfo.component = composedComponent;
     }
