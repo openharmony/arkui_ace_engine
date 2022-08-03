@@ -521,7 +521,8 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
     }
     auto colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     auto inputDevice = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-    container->UpdateConfiguration(colorMode, inputDevice);
+    auto languageTag = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    container->UpdateConfiguration(colorMode, inputDevice, languageTag);
     LOGI("AceAbility::OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());
 }
 
@@ -717,7 +718,7 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
     ContainerScope scope(abilityId_);
     taskExecutor->PostSyncTask(
         [container, params, &info] {
-            auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+            auto context = container->GetPipelineContext();
             if (context != nullptr) {
                 context->DumpInfo(params, info);
             }

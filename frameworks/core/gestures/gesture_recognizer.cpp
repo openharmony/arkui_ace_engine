@@ -74,7 +74,7 @@ void GestureRecognizer::AddToReferee(size_t touchId, const RefPtr<GestureRecogni
         return;
     }
 
-    GestureReferee::GetInstance().AddGestureRecognizer(touchId, recognizer);
+    GestureReferee::GetInstance()->AddGestureRecognizer(touchId, recognizer);
 }
 
 void GestureRecognizer::DelFromReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer)
@@ -85,7 +85,7 @@ void GestureRecognizer::DelFromReferee(size_t touchId, const RefPtr<GestureRecog
         return;
     }
 
-    GestureReferee::GetInstance().DelGestureRecognizer(touchId, recognizer);
+    GestureReferee::GetInstance()->DelGestureRecognizer(touchId, recognizer);
 }
 
 void GestureRecognizer::BatchAdjudicate(
@@ -100,7 +100,7 @@ void GestureRecognizer::BatchAdjudicate(
     std::set<size_t> copyIds = touchIds;
     for (auto pointerId : copyIds) {
         LOGD("Adjudicate gesture recognizer, touch id %{public}zu, disposal %{public}d", pointerId, disposal);
-        GestureReferee::GetInstance().Adjudicate(pointerId, recognizer, disposal);
+        GestureReferee::GetInstance()->Adjudicate(pointerId, recognizer, disposal);
     }
 }
 } // namespace OHOS::Ace

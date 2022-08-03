@@ -18,6 +18,7 @@
 #include <unordered_set>
 
 #include "base/utils/string_utils.h"
+#include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -28,6 +29,7 @@ using CustomCurveCreator = RefPtr<Curve> (*)(const std::vector<std::string>&);
 const size_t STEPS_PARAMS_SIZE = 2;
 const size_t CUBIC_PARAMS_SIZE = 4;
 const size_t SPRING_PARAMS_SIZE = 4;
+constexpr size_t RESPONSIVE_SPRING_MOTION_PARAMS_SIZE = 3;
 
 static const std::unordered_set<std::string> HORIZON_SET = {
     DOM_BACKGROUND_IMAGE_POSITION_LEFT,
@@ -95,6 +97,38 @@ RefPtr<Curve> SpringCurveCreator(const std::vector<std::string>& params)
     double stiffness = StringToDouble(params.at(2));
     double damping = StringToDouble(params.at(3));
     return AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
+}
+
+RefPtr<Curve> SpringMotionCreator(const std::vector<std::string>& params)
+{
+    if (params.size() > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) {
+        LOGW("spring motion accept at most 3 params");
+        return nullptr;
+    }
+    size_t paramSize = params.size();
+    float response = paramSize > 0 ? StringUtils::StringToFloat(params[0])
+                        : ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE;
+    float dampingRatio = paramSize > 1 ? StringUtils::StringToFloat(params[1])
+                            : ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_DAMPING_RATIO;
+    float blendDuration = paramSize > 2 ? StringUtils::StringToFloat(params[2])
+                            : ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_BLEND_DURATION;
+    return AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
+}
+
+RefPtr<Curve> ResponsiveSpringMotionCreator(const std::vector<std::string>& params)
+{
+    if (params.size() > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) {
+        LOGW("responsive spring motion accept at most 3 params");
+        return nullptr;
+    }
+    size_t paramSize = params.size();
+    float response = paramSize > 0 ? StringUtils::StringToFloat(params[0])
+                        : ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
+    float dampingRatio = paramSize > 1 ? StringUtils::StringToFloat(params[1])
+                            : ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
+    float blendDuration = paramSize > 2 ? StringUtils::StringToFloat(params[2])
+                            : ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+    return AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingRatio, blendDuration);
 }
 
 void SetBgImgPositionX(
@@ -250,7 +284,9 @@ RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc)
     }
     static const LinearMapNode<CustomCurveCreator> customCurveMap[] = {
         { DOM_ANIMATION_TIMING_FUNCTION_CUBIC_BEZIER, CubicCurveCreator },
+        { DOM_ANIMATION_TIMING_FUNCTION_RESPONSIVE_SPRING_MOTION, ResponsiveSpringMotionCreator },
         { DOM_ANIMATION_TIMING_FUNCTION_SPRING, SpringCurveCreator },
+        { DOM_ANIMATION_TIMING_FUNCTION_SPRING_MOTION, SpringMotionCreator },
         { DOM_ANIMATION_TIMING_FUNCTION_STEPS, StepsCurveCreator },
     };
     int64_t index = BinarySearchFindIndex(customCurveMap, ArraySize(customCurveMap), aniTimFuncName.c_str());

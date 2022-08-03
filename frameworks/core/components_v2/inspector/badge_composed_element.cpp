@@ -89,7 +89,7 @@ std::string BadgeComposedElement::GetBadgePosition(void) const
 std::string BadgeComposedElement::GetLabel(void) const
 {
     auto renderBadge = GetRenderBadge();
-    std::string label =  renderBadge ? renderBadge->GetBadgeComponent()->GetBadgeLabel() : "";
+    std::string label =  renderBadge ? renderBadge->GetBadgeComponent()->GetBadgeLabel().value() : "";
     return label;
 }
 

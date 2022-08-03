@@ -15,6 +15,7 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include <cstdint>
 #include <memory>
 
 #include "base/log/ace_trace.h"
@@ -28,8 +29,6 @@
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/modifier/modify_task.h"
-#include "core/components_ng/modifier/render/bg_color_modifier.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -69,6 +68,14 @@ void PipelineContext::AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElemen
     window_->RequestFrame();
 }
 
+uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
+{
+    CHECK_RUN_ON(UI);
+    scheduleTasks_.try_emplace(++nextScheduleTaskId_, task);
+    window_->RequestFrame();
+    return nextScheduleTaskId_;
+}
+
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
@@ -79,6 +86,28 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
     FlushPipelineWithoutAnimation();
+}
+
+void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushAnimation();
+    }
+
+    decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
+    for (const auto& [id, weakTask] : temp) {
+        auto task = weakTask.Upgrade();
+        if (task) {
+            task->OnFrame(nanoTimestamp);
+        }
+    }
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushAnimation();
+    }
 }
 
 void PipelineContext::FlushMessages()
@@ -98,12 +127,10 @@ void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
     // TODO: Add unique id.
-    rootNode_ =
-        FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, MakeRefPtr<StagePattern>(), Claim(this));
+    rootNode_ = FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, MakeRefPtr<StagePattern>(), Claim(this));
     rootNode_->SetHostRootId(GetInstanceId());
-    StateModifyTask modifyTask;
-    modifyTask.GetRenderContextTask().emplace_back(BgColorModifier(Color::WHITE));
-    rootNode_->FlushStateModifyTaskOnCreate(modifyTask);
+    rootNode_->SetHostPageId(-1);
+    rootNode_->GetRenderContext()->UpdateBgColor(Color::WHITE);
     CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;

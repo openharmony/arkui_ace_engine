@@ -43,7 +43,7 @@ public:
 
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
-    void StartRecording(float x, float y, float width, float height) override;
+    void StartRecording() override;
 
     void StopRecordingIfNeeded() override;
 
@@ -72,10 +72,10 @@ public:
 private:
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
-    std::shared_ptr<Rosen::RSNode> rsNode_ = nullptr;
+    std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
-    RefPtr<Canvas> recordingCanvas_ = nullptr;
-    RefPtr<Canvas> rosenCanvas_ = nullptr;
+    RefPtr<Canvas> recordingCanvas_;
+    RefPtr<Canvas> rosenCanvas_;
 };
 } // namespace OHOS::Ace::NG
 

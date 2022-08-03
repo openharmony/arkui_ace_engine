@@ -51,7 +51,7 @@ protected:
     void HandleClickEvent();
     void InitialBadgeText();
     void UpdateBadgeText();
-    bool ParseBadgeStatus(const std::string& label, int64_t messageCount, int64_t countLimit);
+    bool ParseBadgeStatus(const std::optional<std::string>& label, int64_t messageCount, int64_t countLimit);
 
     double width_ = 0.0;
     double height_ = 0.0;

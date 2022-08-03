@@ -680,14 +680,6 @@ Offset RenderBox::GetGlobalOffsetExternal() const
     return offset;
 }
 
-Offset RenderBox::GetGlobalOffset() const
-{
-    auto renderNode = GetParent().Upgrade();
-    auto offset = renderNode ? GetPosition() + renderNode->GetGlobalOffset() : GetPosition();
-    offset += alignOffset_;
-    return offset;
-}
-
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 void RenderBox::CalculateScale(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size)
 {

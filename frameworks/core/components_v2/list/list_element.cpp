@@ -92,6 +92,34 @@ size_t ListElement::FindPreviousStickyListItem(size_t index)
     return INVALID_INDEX;
 }
 
+bool ListElement::IsAncestor(const RefPtr<Element>& parent, const RefPtr<Element>& node)
+{
+    CHECK_NULL_RETURN(parent, false);
+    CHECK_NULL_RETURN(node, false);
+    if (node == parent) {
+        return true;
+    }
+    auto nodeParent = (node->GetElementParent()).Upgrade();
+    if (!nodeParent) {
+        return false;
+    }
+    return IsAncestor(parent, nodeParent);
+}
+
+int32_t ListElement::GetRealElementIndex(const RefPtr<FocusNode>& node)
+{
+    auto nodeElement = AceType::DynamicCast<Element>(node);
+    CHECK_NULL_RETURN(nodeElement, -1);
+    for (int32_t i = 0; i < static_cast<int32_t>(children_.size()); i++) {
+        auto element = GetElementByIndex(i);
+        CHECK_NULL_RETURN(element, -1);
+        if (IsAncestor(element, nodeElement)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 bool ListElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
 {
     RefPtr<RenderList> list = AceType::DynamicCast<RenderList>(renderNode_);
@@ -108,12 +136,12 @@ bool ListElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect
     while (!ret) {
         int32_t focusIndex = list->RequestNextFocus(vertical, reverse);
         LOGI("Request next focus index = %{public}d", focusIndex);
-        int32_t size = static_cast<int32_t>(GetChildrenList().size());
+        auto size = static_cast<int32_t>(sortedFocusNodesList_.size());
         if (focusIndex < 0 || focusIndex >= size) {
             LOGW("Invalid next focus index");
             return false;
         }
-        auto iter = GetChildrenList().begin();
+        auto iter = sortedFocusNodesList_.begin();
         std::advance(iter, focusIndex);
         auto focusNode = *iter;
         if (!focusNode) {
@@ -133,8 +161,17 @@ bool ListElement::UpdateFocusIndex()
         LOGE("Render grid is null.");
         return false;
     }
+    sortedFocusNodesList_.clear();
+    sortedFocusNodesList_ = GetChildrenList();
+    sortedFocusNodesList_.sort([wp = WeakClaim(this)](RefPtr<FocusNode>& node1, RefPtr<FocusNode>& node2) {
+        auto list = wp.Upgrade();
+        if (list) {
+            return list->GetRealElementIndex(node1) < list->GetRealElementIndex(node2);
+        }
+        return true;
+    });
     int32_t index = 0;
-    for (const auto& iter : GetChildrenList()) {
+    for (const auto& iter : sortedFocusNodesList_) {
         if (iter->IsCurrentFocus()) {
             list->SetFocusIndex(index);
             return true;

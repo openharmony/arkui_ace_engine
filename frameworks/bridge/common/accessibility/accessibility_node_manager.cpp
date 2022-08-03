@@ -97,6 +97,7 @@ RefPtr<InspectNode> InspectNodeCreator(NodeId nodeId, const std::string& tag)
     return AceType::MakeRefPtr<T>(nodeId, tag);
 }
 
+#ifndef NG_BUILD
 const LinearMapNode<RefPtr<InspectNode> (*)(NodeId, const std::string&)> inspectNodeCreators[] = {
     { DOM_NODE_TAG_BADGE, &InspectNodeCreator<InspectBadge> },
     { DOM_NODE_TAG_BUTTON, &InspectNodeCreator<InspectButton> },
@@ -149,6 +150,7 @@ const LinearMapNode<RefPtr<InspectNode> (*)(NodeId, const std::string&)> inspect
     { DOM_NODE_TAG_TOOL_BAR_ITEM, &InspectNodeCreator<InspectToolbarItem> },
     { DOM_NODE_TAG_VIDEO, &InspectNodeCreator<InspectVideo> },
 };
+#endif
 
 std::string ConvertStrToPropertyType(const std::string& typeValue)
 {
@@ -161,10 +163,12 @@ std::string ConvertStrToPropertyType(const std::string& typeValue)
 
 inline int32_t GetRootNodeIdFromPage(const RefPtr<JsAcePage>& page)
 {
+#ifndef NG_BUILD
     auto domDocument = page ? page->GetDomDocument() : nullptr;
     if (domDocument) {
         return domDocument->GetRootNodeId();
     }
+#endif
     LOGW("Failed to get root dom node");
     return -1;
 }
@@ -207,6 +211,7 @@ void AccessibilityNodeManager::SetRunningPage(const RefPtr<JsAcePage>& page)
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.eventType = PAGE_CHANGE_EVENT;
     SendAccessibilityAsyncEvent(accessibilityEvent);
+#ifndef NG_BUILD
     if (GetVersion() == AccessibilityVersion::JS_DECLARATIVE_VERSION) {
         auto domDocument = page ? page->GetDomDocument() : nullptr;
         if (domDocument) {
@@ -215,6 +220,7 @@ void AccessibilityNodeManager::SetRunningPage(const RefPtr<JsAcePage>& page)
             LOGE("domDocument is null");
         }
     }
+#endif
 }
 
 std::string AccessibilityNodeManager::GetNodeChildIds(const RefPtr<AccessibilityNode>& node)
@@ -681,6 +687,7 @@ void AccessibilityNodeManager::SetCardViewPosition(int id, float offsetX, float 
 
 void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
 {
+#ifndef NG_BUILD
     auto composedElement = GetComposedElementFromPage(id);
     auto inspector = AceType::DynamicCast<V2::InspectorComposedElement>(composedElement.Upgrade());
     if (!inspector) {
@@ -701,6 +708,7 @@ void AccessibilityNodeManager::UpdateEventTarget(NodeId id, BaseEventInfo& info)
         DimensionOffset(Offset(globalOffset.GetX() - LocalOffset.GetX(), globalOffset.GetY() - LocalOffset.GetY()));
     target.area.SetWidth(Dimension(rectInLocal.Width() - marginLeft - marginRight));
     target.area.SetHeight(Dimension(rectInLocal.Height() - marginTop - marginBottom));
+#endif
 }
 
 void AccessibilityNodeManager::SetWindowPos(int32_t left, int32_t top)
@@ -722,6 +730,9 @@ bool AccessibilityNodeManager::IsDeclarative()
 bool AccessibilityNodeManager::GetDefaultAttrsByType(
     const std::string& type, std::unique_ptr<JsonValue>& jsonDefaultAttrs)
 {
+#ifdef NG_BUILD
+    return false;
+#else
     NodeId nodeId = -1;
     RefPtr<InspectNode> inspectNode;
     int64_t creatorIndex = BinarySearchFindIndex(inspectNodeCreators, ArraySize(inspectNodeCreators), type.c_str());
@@ -736,6 +747,7 @@ bool AccessibilityNodeManager::GetDefaultAttrsByType(
     inspectNode->SetAllAttr(jsonDefaultAttrs, INSPECTOR_ATTRS);
     inspectNode->SetAllStyle(jsonDefaultAttrs, INSPECTOR_STYLES);
     return true;
+#endif
 }
 
 void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
@@ -752,6 +764,7 @@ void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
     }
 
     DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetNodeId()));
+    DumpLog::GetInstance().AddDesc("compid: " + node->GetJsComponentId());
     DumpLog::GetInstance().AddDesc("text: " + node->GetText());
     DumpLog::GetInstance().AddDesc("top: " + std::to_string(node->GetTop() + windowTop_));
     DumpLog::GetInstance().AddDesc("left: " + std::to_string(node->GetLeft() + windowLeft_));

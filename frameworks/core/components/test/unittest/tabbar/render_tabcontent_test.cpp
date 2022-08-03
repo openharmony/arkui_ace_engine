@@ -21,6 +21,7 @@
 #include "core/components/tab_bar/render_tab_bar_item.h"
 #include "core/components/tab_bar/render_tab_content.h"
 #include "core/components/test/unittest/mock/mock_render_depend.h"
+#include "frameworks/core/components/text_overlay/text_overlay_component.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -46,9 +47,9 @@ static int64_t GetTickCount()
     return (ts.tv_sec * SEC_TO_NANOSEC + ts.tv_nsec);
 }
 
-const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::DOWN };
-const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::MOVE };
-const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::UP };
+const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 540.0f, 500.0f, 540.0f, 500.0f, TouchType::DOWN };
+const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 540.0f, 500.0f, 540.0f, 500.0f, TouchType::MOVE };
+const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 540.0f, 500.0f, 540.0f, 500.0f, TouchType::UP };
 
 std::function<void(const RefPtr<RenderTabContent>&)> hookContent;
 std::function<void(const RefPtr<RenderTabBar>&)> hookBar;

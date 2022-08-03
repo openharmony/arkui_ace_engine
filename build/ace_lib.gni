@@ -19,11 +19,19 @@ template("libace_static") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
-    deps = [
-      "$ace_root/frameworks/base:ace_base_$platform",
-      "$ace_root/frameworks/bridge:framework_bridge_$platform",
-      "$ace_root/frameworks/core:ace_core_$platform",
-    ]
+    deps = [ "$ace_root/frameworks/base:ace_base_$platform" ]
+
+    if (enable_ng_build) {
+      deps += [
+        "$ace_root/frameworks/bridge:framework_bridge_ng_$platform",
+        "$ace_root/frameworks/core:ace_core_ng_$platform",
+      ]
+    } else {
+      deps += [
+        "$ace_root/frameworks/bridge:framework_bridge_$platform",
+        "$ace_root/frameworks/core:ace_core_$platform",
+      ]
+    }
 
     if (defined(config.platform_deps)) {
       deps += config.platform_deps
@@ -32,18 +40,22 @@ template("libace_static") {
     # build-in qjs engine
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine && defined(config.qjs_engine)) {
-      if (defined(use_js_debug) && use_js_debug) {
-        deps += [ "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_qjs_debug_$platform" ]
-        if (defined(config.js_pa_support) && config.js_pa_support) {
-          deps += [ "$ace_root/${config.pa_engine_path}/engine:js_pa_engine_qjs_debug_$platform" ]
-        }
+      if (enable_ng_build) {
+        deps += [ "$ace_root/frameworks/bridge/declarative_frontend:declarative_js_engine_ng_qjs_$platform" ]
       } else {
-        deps += [
-          "$ace_root/frameworks/bridge/declarative_frontend:declarative_js_engine_qjs_$platform",
-          "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_qjs_$platform",
-        ]
-        if (defined(config.js_pa_support) && config.js_pa_support) {
-          deps += [ "$ace_root/${config.pa_engine_path}/engine:js_pa_engine_qjs_$platform" ]
+        if (defined(use_js_debug) && use_js_debug) {
+          deps += [ "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_qjs_debug_$platform" ]
+          if (defined(config.js_pa_support) && config.js_pa_support) {
+            deps += [ "$ace_root/${config.pa_engine_path}/engine:js_pa_engine_qjs_debug_$platform" ]
+          }
+        } else {
+          deps += [
+            "$ace_root/frameworks/bridge/declarative_frontend:declarative_js_engine_qjs_$platform",
+            "$ace_root/frameworks/bridge/js_frontend/engine:js_engine_qjs_$platform",
+          ]
+          if (defined(config.js_pa_support) && config.js_pa_support) {
+            deps += [ "$ace_root/${config.pa_engine_path}/engine:js_pa_engine_qjs_$platform" ]
+          }
         }
       }
     }

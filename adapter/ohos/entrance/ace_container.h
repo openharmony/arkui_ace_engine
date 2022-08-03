@@ -220,7 +220,7 @@ public:
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
 
-    static void DestroyContainer(int32_t instanceId);
+    static void DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback = nullptr);
     static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params);
     static bool PushPage(int32_t instanceId, const std::string& content, const std::string& params);
     static bool OnBackPressed(int32_t instanceId);
@@ -277,12 +277,16 @@ public:
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(const std::string& bundle,
         const std::string& module);
 
-    void UpdateConfiguration(const std::string& colorMode, const std::string& inputDevice);
+    void UpdateConfiguration(
+        const std::string& colorMode, const std::string& inputDevice, const std::string& languageTag);
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask();
     void InitWindowCallback();
+
+    void UpdateFrondend();
 
     void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         int32_t windowId, UIEnvCallback callback = nullptr);

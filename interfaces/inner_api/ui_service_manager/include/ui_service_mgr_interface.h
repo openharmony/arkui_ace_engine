@@ -24,7 +24,6 @@
 #include "dialog_callback_interface.h"
 #include "ui_service_interface.h"
 #include "uri.h"
-#include "wm/window.h"
 
 namespace OHOS {
 namespace Ace {
@@ -55,7 +54,7 @@ public:
 
     virtual int ShowDialog(const std::string& name,
                            const std::string& params,
-                           OHOS::Rosen::WindowType windowType,
+                           uint32_t windowType,
                            int x,
                            int y,
                            int width,
@@ -66,6 +65,10 @@ public:
     virtual int CancelDialog(int id) = 0;
 
     virtual int UpdateDialog(int id, const std::string& data) = 0;
+
+    virtual int32_t AttachToUiService(const sptr<IRemoteObject>& dialog, int32_t pid) = 0;
+
+    virtual int32_t RemoteDialogCallback(int32_t id, const std::string& event, const std::string& params) = 0;
 
     enum {
         // ipc id 1-1000 for kit
@@ -79,6 +82,8 @@ public:
         SHOW_DIALOG,
         CANCEL_DIALOG,
         UPDATE_DIALOG,
+        ATTACH_DIALOG,
+        REMOTE_DIALOG_CALLBACK,
     };
 };
 }  // namespace Ace

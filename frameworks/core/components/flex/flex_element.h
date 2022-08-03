@@ -38,6 +38,12 @@ public:
         if (!flexComponent) {
             return false;
         }
+
+        // partial update does not produce children
+        auto pipelineContext = context_.Upgrade();
+        if (pipelineContext && pipelineContext->UsePartialUpdate()) {
+            return true;
+        }
         return GetChildren().size() == flexComponent->GetSizeOfChildren();
     }
 

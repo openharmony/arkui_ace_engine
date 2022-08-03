@@ -31,11 +31,11 @@ public:
     explicit DialogCallbackStub(DialogCallback callback);
     virtual ~DialogCallbackStub();
 
-    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
     void OnDialogCallback(int32_t id, const std::string& event, const std::string& params) override;
 
 private:
-    int OnDialogCallBackInner(MessageParcel &data, MessageParcel &reply);
+    int OnDialogCallBackInner(MessageParcel& data, MessageParcel& reply);
 
     DialogCallback callback_;
 
@@ -48,10 +48,10 @@ private:
  */
 class DialogCallbackRecipient : public IRemoteObject::DeathRecipient {
 public:
-    using RemoteDiedHandler = std::function<void(const wptr<IRemoteObject> &)>;
+    using RemoteDiedHandler = std::function<void(const wptr<IRemoteObject>&)>;
     explicit DialogCallbackRecipient(RemoteDiedHandler handler);
     virtual ~DialogCallbackRecipient();
-    virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
+    virtual void OnRemoteDied(const wptr<IRemoteObject>& remote);
 
 private:
     RemoteDiedHandler handler_;

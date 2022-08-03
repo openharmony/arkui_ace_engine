@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -37,9 +38,8 @@ class Paragraph : public virtual AceType {
     DECLARE_ACE_TYPE(NG::Paragraph, AceType)
 
 public:
-    // TODO: don't depand on cotext and fontCollection need to be abstacted
-    static RefPtr<Paragraph> Create(
-        const WeakPtr<PipelineContext>& context, const ParagraphStyle& paraStyle, void* fontCollection);
+    static RefPtr<Paragraph> Create(const WeakPtr<PipelineContext>& context, const ParagraphStyle& paraStyle,
+        const RefPtr<FontCollection>& fontCollection);
 
     // whether the paragraph has been build
     virtual bool IsValid() = 0;

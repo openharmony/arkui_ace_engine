@@ -63,6 +63,10 @@ constexpr char NTC_PARAM_DESCRIPTION[] = "description";
 constexpr char WEB_ERROR_CODE_CREATEFAIL[] = "error-web-delegate-000001";
 constexpr char WEB_ERROR_MSG_CREATEFAIL[] = "create web_delegate failed.";
 
+const std::string RESOURCE_VIDEO_CAPTURE = "ACCESSIBLE_RESOURCE_VIDEO_CAPTURE";
+const std::string RESOURCE_AUDIO_CAPTURE = "ACCESSIBLE_RESOURCE_AUDIO_CAPTURE";
+const std::string RESOURCE_PROTECTED_MEDIA_ID = "ACCESSIBLE_RESOURCE_PROTECTED_MEDIA_ID";
+const std::string RESOURCE_MIDI_SYSEX = "ACCESSIBLE_RESOURCE_MIDI_SYSEX";
 } // namespace
 
 int ConsoleLogOhos::GetLineNumber()
@@ -185,6 +189,61 @@ void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result)
 {
     if (callback_) {
         callback_->OnReceiveValue(result);
+    }
+}
+
+void WebPermissionRequestOhos::Deny() const
+{
+    if (request_) {
+        request_->Refuse();
+    }
+}
+
+std::string WebPermissionRequestOhos::GetOrigin() const
+{
+    if (request_) {
+        return request_->Origin();
+    }
+    return "";
+}
+
+std::vector<std::string> WebPermissionRequestOhos::GetResources() const
+{
+    std::vector<std::string> resources;
+    if (request_) {
+        uint32_t resourcesId = static_cast<uint32_t>(request_->ResourceAcessId());
+        if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::VIDEO_CAPTURE) {
+            resources.push_back(RESOURCE_VIDEO_CAPTURE);
+        }
+        if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::AUDIO_CAPTURE) {
+            resources.push_back(RESOURCE_AUDIO_CAPTURE);
+        }
+        if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::PROTECTED_MEDIA_ID) {
+            resources.push_back(RESOURCE_PROTECTED_MEDIA_ID);
+        }
+        if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::MIDI_SYSEX) {
+            resources.push_back(RESOURCE_MIDI_SYSEX);
+        }
+    }
+    return resources;
+}
+
+void WebPermissionRequestOhos::Grant(std::vector<std::string>& resources) const
+{
+    if (request_) {
+        uint32_t resourcesId = 0;
+        for (auto res : resources) {
+            if (res == RESOURCE_VIDEO_CAPTURE) {
+                resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::VIDEO_CAPTURE;
+            } else if (res == RESOURCE_AUDIO_CAPTURE) {
+                resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::AUDIO_CAPTURE;
+            } else if (res == RESOURCE_PROTECTED_MEDIA_ID) {
+                resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::PROTECTED_MEDIA_ID;
+            } else if (res == RESOURCE_MIDI_SYSEX) {
+                resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::MIDI_SYSEX;
+            }
+        }
+        request_->Agree(resourcesId);
     }
 }
 
@@ -962,6 +1021,8 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
             webCom->GetResourceLoadId(), pipelineContext);
         onScaleChangeV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webCom->GetScaleChangeId(), pipelineContext);
+        onPermissionRequestV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webCom->GetPermissionRequestEventId(), pipelineContext);
     }
 }
 
@@ -2046,6 +2107,15 @@ void WebDelegate::OnGeolocationPermissionsShowPrompt(const std::string& origin,
     if (onGeolocationShowV2_) {
         auto geolocation = AceType::MakeRefPtr<WebGeolocationOhos>(callback);
         onGeolocationShowV2_(std::make_shared<LoadWebGeolocationShowEvent>(origin, geolocation));
+    }
+}
+
+void WebDelegate::OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request)
+{
+    // ace 2.0
+    if (onPermissionRequestV2_) {
+        onPermissionRequestV2_(std::make_shared<WebPermissionRequestEvent>(
+            AceType::MakeRefPtr<WebPermissionRequestOhos>(request)));
     }
 }
 

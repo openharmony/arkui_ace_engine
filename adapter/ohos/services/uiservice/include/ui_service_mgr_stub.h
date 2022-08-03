@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_UI_SERVICE_MANAGER_STUB_H
-#define OHOS_AAFWK_UI_SERVICE_MANAGER_STUB_H
+#ifndef OHOS_ACE_UI_SERVICE_MANAGER_STUB_H
+#define OHOS_ACE_UI_SERVICE_MANAGER_STUB_H
 
 #include "ui_service_mgr_interface.h"
 
@@ -42,10 +42,13 @@ private:
     int PushInner(MessageParcel& data, MessageParcel& reply);
     int RequestInner(MessageParcel& data, MessageParcel& reply);
     int ReturnRequestInner(MessageParcel& data, MessageParcel& reply);
-    using RequestFuncType = int (UIServiceMgrStub ::*)(MessageParcel& data, MessageParcel& reply);
     int ShowDialogInner(MessageParcel& data, MessageParcel& reply);
     int CancelDialogInner(MessageParcel& data, MessageParcel& reply);
     int UpdateDialogInner(MessageParcel &data, MessageParcel &reply);
+    int32_t AttachToUiServiceInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RemoteDialogCallbackInner(MessageParcel &data, MessageParcel &reply);
+
+    using RequestFuncType = int (UIServiceMgrStub ::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, RequestFuncType> requestFuncMap_;
 };
 }  // namespace Ace

@@ -16,21 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_RENDER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_RENDER_PROPERTY_H
 
-#include "core/components_ng/render/render_property.h"
+#include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
-// RenderProperty are used to set render properties.
-class ImageRenderProperty : public RenderProperty {
-    DECLARE_ACE_TYPE(ImageRenderProperty, RenderProperty)
+// PaintProperty are used to set render properties.
+class ImageRenderProperty : public PaintProperty {
+    DECLARE_ACE_TYPE(ImageRenderProperty, PaintProperty)
 
 public:
     ImageRenderProperty() = default;
     ~ImageRenderProperty() override = default;
 
-    RefPtr<RenderProperty> Clone() const override
+    RefPtr<PaintProperty> Clone() const override
     {
         auto renderProperty = MakeRefPtr<ImageRenderProperty>();
-        renderProperty->UpdateRenderProperty(this);
+        renderProperty->UpdatePaintProperty(this);
         renderProperty->propAutoResize_ = CloneAutoResize();
         return renderProperty;
     }
@@ -40,7 +40,7 @@ public:
         propAutoResize_.reset();
     }
 
-    ACE_DEFINE_CLASS_PROPERTY_WITHOUT_GROUP(AutoResize, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoResize, bool, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

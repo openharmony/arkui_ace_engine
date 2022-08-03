@@ -113,6 +113,16 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         return jsBackendEngine->Insert(uri, value);
     };
 
+    builder.callCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const std::string& method,
+                               const std::string& arg, const AppExecFwk::PacMap& pacMap)
+        -> std::shared_ptr<AppExecFwk::PacMap> {
+        auto jsBackendEngine = weakEngine.Upgrade();
+        if (!jsBackendEngine) {
+            return nullptr;
+        }
+        return jsBackendEngine->Call(method, arg, pacMap);
+    };
+
     builder.queryCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const Uri& uri,
                                 const std::vector<std::string>& columns,
                                 const OHOS::NativeRdb::DataAbilityPredicates& predicates)
@@ -414,6 +424,12 @@ void PaBackend::MethodChannel(const std::string& methodName, std::string& jsonSt
 int32_t PaBackend::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value)
 {
     return delegate_->Insert(uri, value);
+}
+
+std::shared_ptr<AppExecFwk::PacMap> PaBackend::Call(const Uri& uri,
+    const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
+{
+    return delegate_->Call(uri, method, arg, pacMap);
 }
 
 std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> PaBackend::Query(

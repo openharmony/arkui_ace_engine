@@ -124,7 +124,7 @@ public:
         return bubbleText_;
     }
 
-    std::vector<std::string> GetArrayValue() const
+    std::vector<std::u16string> GetArrayValue() const
     {
         return valueArray_;
     }
@@ -178,7 +178,7 @@ protected:
     RefPtr<Animator> bubbleController_;             // control bubble appear and disappear
     Offset touchPostion_;
     std::list<RefPtr<RenderNode>> items_;
-    std::vector<std::string> valueArray_;
+    std::vector<std::u16string> valueArray_;
 
     OnSelectedFunc selectedEventFun_;
     IndexerComponent::OnRequestPopupDataFunc requestPopupDataEventFun_;

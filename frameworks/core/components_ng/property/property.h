@@ -59,7 +59,7 @@ bool CheckUpdateByChildRequest(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNoChanged(PropertyChangeFlag propertyChangeFlag);
 
-#define ACE_DEFINE_CLASS_PROPERTY_GROUP(group, type)        \
+#define ACE_DEFINE_PROPERTY_GROUP(group, type)              \
 public:                                                     \
     const std::unique_ptr<type>& GetOrCreate##group()       \
     {                                                       \
@@ -87,55 +87,55 @@ public:                                                     \
 private:                                                    \
     std::unique_ptr<type> prop##group##_;
 
-#define ACE_DEFINE_CLASS_PROPERTY(group, name, type, changeFlag) \
-public:                                                          \
-    void Update##name(const type& value)                         \
-    {                                                            \
-        auto& groupProperty = GetOrCreate##group();              \
-        if (groupProperty->Check##name(value)) {                 \
-            LOGD("the %{public}s is same, just ignore", #name);  \
-            return;                                              \
-        }                                                        \
-        groupProperty->Update##name(value);                      \
-        UpdatePropertyChangeFlag(#name, changeFlag);             \
+#define ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(group, name, type, changeFlag) \
+public:                                                                    \
+    void Update##name(const type& value)                                   \
+    {                                                                      \
+        auto& groupProperty = GetOrCreate##group();                        \
+        if (groupProperty->Check##name(value)) {                           \
+            LOGD("the %{public}s is same, just ignore", #name);            \
+            return;                                                        \
+        }                                                                  \
+        groupProperty->Update##name(value);                                \
+        UpdatePropertyChangeFlag(#name, changeFlag);                       \
     }
 
-#define ACE_DEFINE_CLASS_PROPERTY_WITHOUT_GROUP(name, type, changeFlag) \
-public:                                                                 \
-    const std::optional<type>& Get##name()                              \
-    {                                                                   \
-        return prop##name##_;                                           \
-    }                                                                   \
-    bool Has##name() const                                              \
-    {                                                                   \
-        return prop##name##_.has_value();                               \
-    }                                                                   \
-    const type& Get##name##Value() const                                \
-    {                                                                   \
-        return prop##name##_.value();                                   \
-    }                                                                   \
-    std::optional<type> Clone##name() const                             \
-    {                                                                   \
-        return prop##name##_;                                           \
-    }                                                                   \
-    void Reset##name()                                                  \
-    {                                                                   \
-        return prop##name##_.reset();                                   \
-    }                                                                   \
-    void Update##name(const type& value)                                \
-    {                                                                   \
-        if (prop##name##_ == value) {                                   \
-            LOGD("the %{public}s is same, just ignore", #name);         \
-            return;                                                     \
-        }                                                               \
-        prop##name##_ = value;                                          \
-        UpdatePropertyChangeFlag(#name, changeFlag);                    \
-    }                                                                   \
-                                                                        \
-private:                                                                \
+#define ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(name, type, changeFlag) \
+public:                                                                \
+    const std::optional<type>& Get##name()                             \
+    {                                                                  \
+        return prop##name##_;                                          \
+    }                                                                  \
+    bool Has##name() const                                             \
+    {                                                                  \
+        return prop##name##_.has_value();                              \
+    }                                                                  \
+    const type& Get##name##Value() const                               \
+    {                                                                  \
+        return prop##name##_.value();                                  \
+    }                                                                  \
+    std::optional<type> Clone##name() const                            \
+    {                                                                  \
+        return prop##name##_;                                          \
+    }                                                                  \
+    void Reset##name()                                                 \
+    {                                                                  \
+        return prop##name##_.reset();                                  \
+    }                                                                  \
+    void Update##name(const type& value)                               \
+    {                                                                  \
+        if (prop##name##_ == value) {                                  \
+            LOGD("the %{public}s is same, just ignore", #name);        \
+            return;                                                    \
+        }                                                              \
+        prop##name##_ = value;                                         \
+        UpdatePropertyChangeFlag(#name, changeFlag);                   \
+    }                                                                  \
+                                                                       \
+private:                                                               \
     std::optional<type> prop##name##_;
 
-#define ACE_DEFINE_STRUCT_PROPERTY(name, type)                \
+#define ACE_DEFINE_PROPERTY_GROUP_ITEM(name, type)            \
     std::optional<type> prop##name;                           \
                                                               \
     const std::optional<type>& Get##name() const              \

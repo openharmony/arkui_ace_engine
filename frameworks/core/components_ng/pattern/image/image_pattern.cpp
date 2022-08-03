@@ -35,7 +35,11 @@ ImageObjSuccessCallback ImagePattern::CreateSuccessCallback()
 UploadSuccessCallback ImagePattern::CreateUploadSuccessCallback()
 {
     auto task = [weak = WeakClaim(this)](
+#ifdef NG_BUILD
+                    const ImageSourceInfo& imageSourceInfo, RefPtr<CanvasImage> image) {
+#else
                     const ImageSourceInfo& imageSourceInfo, fml::RefPtr<flutter::CanvasImage> image) {
+#endif
         auto pattern = weak.Upgrade();
         if (pattern && pattern->isActive_) {
             pattern->OnImageDataUploaded(image);
@@ -61,10 +65,18 @@ OnPostBackgroundTask ImagePattern::CreateOnBackgroundTaskPostCallback()
     return task;
 }
 
+#ifdef NG_BUILD
+void ImagePattern::OnImageDataUploaded(RefPtr<CanvasImage> image)
+#else
 void ImagePattern::OnImageDataUploaded(fml::RefPtr<flutter::CanvasImage> image)
+#endif
 {
     LOGD("on image data uploaded, %{public}s.", imageObject_->GetSourceInfo().GetSrc().c_str());
+#ifdef NG_BUILD
+    image_ = image;
+#else
     image_ = CanvasImage::Create(&image);
+#endif
     if (imageObject_ && (imageObject_->GetSourceInfo().GetSrcType() != SrcType::MEMORY) &&
         imageObject_->IsSingleFrame()) {
         imageObject_->ClearData();

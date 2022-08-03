@@ -394,8 +394,8 @@ void FocusGroup::RemoveChild(const RefPtr<FocusNode>& focusNode)
     if (itLastFocusNode_ == it) {
         itLastFocusNode_ = focusNodes_.end();
     }
-    focusNodes_.erase(it);
     focusNode->SetParent(nullptr);
+    focusNodes_.erase(it);
 }
 
 void FocusGroup::SwitchFocus(const RefPtr<FocusNode>& focusNode)
@@ -428,6 +428,9 @@ bool FocusGroup::IsFocusableByTab() const
 {
     if (!FocusNode::IsFocusableByTab()) {
         return false;
+    }
+    if (focusNodes_.empty()) {
+        return true;
     }
     return std::any_of(focusNodes_.begin(), focusNodes_.end(),
         [](const RefPtr<FocusNode>& focusNode) { return focusNode->IsFocusableByTab(); });

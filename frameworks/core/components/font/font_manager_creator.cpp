@@ -13,8 +13,14 @@
  * limitations under the License.
  */
 
+#include "core/common/font_manager.h"
+
+#ifndef NG_BUILD
 #include "core/components/font/flutter_font_manager.h"
+#endif
+#ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/font/rosen_font_manager.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -27,7 +33,12 @@ RefPtr<FontManager> FontManager::Create()
         return nullptr;
 #endif
     } else {
+#ifdef NG_BUILD
+        // TODO: adapt to flutter fontmanager for ng
+        return nullptr;
+#else
         return AceType::MakeRefPtr<FlutterFontManager>();
+#endif
     }
 }
 

@@ -33,10 +33,7 @@ void StackView::Create()
 
 void StackView::Create(Alignment alignment)
 {
-    // TODO: Add unique id.
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, 0, AceType::MakeRefPtr<StackPattern>());
-    frameNode->GetLayoutProperty()->UpdateAlignment(alignment);
-    ViewStackProcessor::GetInstance()->Push(frameNode);
+    Create();
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 } // namespace OHOS::Ace::NG

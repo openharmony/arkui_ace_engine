@@ -44,7 +44,7 @@ public:
         ResetImageSourceInfo();
     }
 
-    ACE_DEFINE_CLASS_PROPERTY_WITHOUT_GROUP(ImageSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutProperty);

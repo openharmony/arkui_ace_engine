@@ -21,7 +21,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/render/canvas.h"
-#include "core/components_ng/render/render_property.h"
 
 namespace OHOS::Ace::NG {
 RosenRenderContext::~RosenRenderContext()
@@ -29,16 +28,15 @@ RosenRenderContext::~RosenRenderContext()
     StopRecordingIfNeeded();
 }
 
-void RosenRenderContext::StartRecording(float x, float y, float width, float height)
+void RosenRenderContext::StartRecording()
 {
     if (rsNode_ == nullptr) {
         return;
     }
     auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>();
     if (rsCanvasNode) {
-        rosenCanvas_ =
-            Canvas::Create(rsCanvasNode->BeginRecording(ceil(rsCanvasNode->GetPaintWidth()),
-                ceil(rsCanvasNode->GetPaintHeight())));
+        rosenCanvas_ = Canvas::Create(
+            rsCanvasNode->BeginRecording(ceil(rsCanvasNode->GetPaintWidth()), ceil(rsCanvasNode->GetPaintHeight())));
     }
 }
 

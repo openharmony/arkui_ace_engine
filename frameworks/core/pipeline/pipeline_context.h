@@ -167,10 +167,6 @@ public:
 
     void NotifyAppStorage(const std::string& key, const std::string& value);
 
-    bool Dump(const std::vector<std::string>& params) const override;
-
-    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
-
     RefPtr<StackElement> GetLastStack() const;
 
     RefPtr<PageElement> GetLastPage() const;
@@ -1072,6 +1068,7 @@ public:
     }
 
 protected:
+    bool OnDumpInfo(const std::vector<std::string>& params) const override;
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void SetRootRect(double width, double height, double offset = 0.0) override
     {

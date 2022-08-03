@@ -646,6 +646,24 @@ void PaContainer::OnCommand(const OHOS::AAFwk::Want &want, int startId, int32_t 
     }
 }
 
+std::shared_ptr<AppExecFwk::PacMap> PaContainer::Call(int32_t instanceId, const Uri& uri,
+    const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
+{
+    LOGD("Call with id %{public}d", instanceId);
+    std::shared_ptr<AppExecFwk::PacMap> ret = nullptr;
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        LOGE("no AceContainer with id %{private}d", instanceId);
+        return ret;
+    }
+    auto aceContainer = AceType::DynamicCast<PaContainer>(container);
+    auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
+    if (back) {
+        ret = back->Call(uri, method, arg, pacMap);
+    }
+    return ret;
+}
+
 void PaContainer::DumpHeapSnapshot(bool isPrivate)
 {
     taskExecutor_->PostTask(

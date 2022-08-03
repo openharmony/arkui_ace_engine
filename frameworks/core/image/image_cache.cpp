@@ -38,11 +38,24 @@ int32_t ImageCache::cacheFileSize_ = 0;
 std::mutex ImageCache::cacheFileInfoMutex_;
 std::list<FileInfo> ImageCache::cacheFileInfo_;
 
+// TODO: Create a real ImageCache later
+#ifdef NG_BUILD
+class MockImageCache : public ImageCache {
+    void Clear() override {};
+    RefPtr<CachedImageData> GetDataFromCacheFile(const std::string& filePath) override
+    {
+        return nullptr;
+    }
+};
+
+RefPtr<ImageCache> ImageCache::Create()
+{
+    return AceType::MakeRefPtr<MockImageCache>();
+}
+#endif
+
 template<typename T>
-void ImageCache::CacheWithCountLimitLRU(
-    const std::string& key,
-    const T& cacheObj,
-    std::list<CacheNode<T>>& cacheList,
+void ImageCache::CacheWithCountLimitLRU(const std::string& key, const T& cacheObj, std::list<CacheNode<T>>& cacheList,
     std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache,
     const std::atomic<size_t>& capacity)
 {
@@ -62,9 +75,7 @@ void ImageCache::CacheWithCountLimitLRU(
 }
 
 template<typename T>
-T ImageCache::GetCacheObjWithCountLimitLRU(
-    const std::string& key,
-    std::list<CacheNode<T>>& cacheList,
+T ImageCache::GetCacheObjWithCountLimitLRU(const std::string& key, std::list<CacheNode<T>>& cacheList,
     std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache)
 {
     auto iter = cache.find(key);
@@ -133,8 +144,8 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImage
     std::scoped_lock lock(dataCacheListMutex_, imageDataCacheMutex_);
     auto dataSize = imageData->GetSize();
     if (dataSize > (dataSizeLimit_ >> 1)) { // if data is longer than half limit, do not cache it.
-        LOGW("data is %{public}d, bigger than half limit %{public}d, do not cache it",
-            static_cast<int32_t>(dataSize), static_cast<int32_t>(dataSizeLimit_ >> 1));
+        LOGW("data is %{public}d, bigger than half limit %{public}d, do not cache it", static_cast<int32_t>(dataSize),
+            static_cast<int32_t>(dataSizeLimit_ >> 1));
         return;
     }
     auto iter = imageDataCache_.find(key);
@@ -185,8 +196,7 @@ RefPtr<CachedImageData> ImageCache::GetCacheImageData(const std::string& key)
     }
 }
 
-
-void ImageCache::WriteCacheFile(const std::string& url, const void * const data, const size_t size)
+void ImageCache::WriteCacheFile(const std::string& url, const void* const data, const size_t size)
 {
     std::vector<std::string> removeVector;
     std::string cacheNetworkFilePath = GetImageCacheFilePath(url);

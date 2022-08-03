@@ -536,6 +536,8 @@ void RenderGridLayout::UpdateAccessibilityAttr()
     collectionInfo.rows = rowCount_;
     collectionInfo.columns = colCount_;
     refPtr->SetCollectionInfo(collectionInfo);
+    refPtr->AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+    refPtr->AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
 }
 
 // Support five ways below:
@@ -2265,7 +2267,7 @@ bool RenderGridLayout::AddNodeAnimationToController(
     Point endPoint = CalcChildPosition(item, row, col, rowSpan, colSpan);
     auto animationRef = AceType::MakeRefPtr<CurveAnimation<Point>>(startPoint, endPoint, Curves::FRICTION);
     animationRef->AddListener(
-        [item, weak = WeakClaim(this)](const Point newPoint) {
+        [item, weak = WeakClaim(this)](const Point& newPoint) {
             if (item) {
                 item->SetPosition(Offset(newPoint.GetX(), newPoint.GetY()));
             }
@@ -2580,7 +2582,7 @@ void RenderGridLayout::StartFlexController(const Point& endPoint, bool includeSu
     runFlexAnimation_.store(true);
     auto animationRef = AceType::MakeRefPtr<CurveAnimation<Point>>(lastGlobalPoint_, endPoint, Curves::FRICTION);
     animationRef->AddListener(
-        [weak = WeakClaim(this)](const Point newPoint) {
+        [weak = WeakClaim(this)](const Point& newPoint) {
             auto renderGrid = weak.Upgrade();
             if (renderGrid) {
                 renderGrid->UpdateFlexComponentPosition(newPoint);

@@ -198,6 +198,7 @@ public:
         directPaint_ = directPaint;
     }
 
+    void UpdateThemeIcon(ImageSourceInfo& sourceInfo);
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     virtual void FetchImageObject() {}

@@ -271,6 +271,28 @@ if (is_standard_system) {
     module_source_dir = target_out_dir + "/previewer/common/bin/"
     module_install_name = ""
   }
+
+  ohos_copy("copy_sec_shared_library") {
+    if (use_mac) {
+      mac_shared_library_path =
+          get_label_info("//third_party/bounds_checking_function:libsec_shared",
+                         "root_out_dir") +
+          "/thirdparty/bounds_checking_function/libsec_shared.dylib"
+      deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+      sources = [ mac_shared_library_path ]
+      outputs = [ target_out_dir + "/previewer/common/bin/libsec_shared.dylib" ]
+    } else {
+      windows_shared_library_path =
+          get_label_info("//third_party/bounds_checking_function:libsec_shared",
+                         "root_out_dir") +
+          "/thirdparty/bounds_checking_function/libsec_shared.dll"
+      deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+      sources = [ windows_shared_library_path ]
+      outputs = [ target_out_dir + "/previewer/common/bin/libsec_shared.dll" ]
+    }
+    module_source_dir = target_out_dir + "/previewer/common/bin/"
+    module_install_name = ""
+  }
 } else {
   ohos_copy("copy_system_resource") {
     if (use_mac) {

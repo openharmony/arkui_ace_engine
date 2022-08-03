@@ -24,10 +24,10 @@
 
 namespace OHOS::Ace::NG {
 struct FlexItemProperty {
-    ACE_DEFINE_STRUCT_PROPERTY(FlexGrow, int32_t);
-    ACE_DEFINE_STRUCT_PROPERTY(FlexShrink, int32_t);
-    ACE_DEFINE_STRUCT_PROPERTY(AlignSelf, FlexAlign);
-    ACE_DEFINE_STRUCT_PROPERTY(FlexBasis, CalcLength);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexGrow, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexShrink, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignSelf, FlexAlign);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexBasis, CalcLength);
 };
 } // namespace OHOS::Ace::NG
 

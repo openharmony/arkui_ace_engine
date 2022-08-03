@@ -133,6 +133,7 @@ JSContext* QJSDeclarativeEngineInstance::GetCurrentContext()
 
 void QJSDeclarativeEngineInstance::PushJSCommand(const RefPtr<JsCommand>& jsCommand, bool forcePush) const
 {
+#ifndef NG_BUILD
     auto page = GetRunningPage();
     if (page == nullptr) {
         LOGE("Internal error: running page is null.");
@@ -145,6 +146,7 @@ void QJSDeclarativeEngineInstance::PushJSCommand(const RefPtr<JsCommand>& jsComm
     if (!page->CheckPageCreated() && (forcePush || (page->GetCommandSize() > (FRAGMENT_SIZE + 4)))) {
         page->FlushCommands();
     }
+#endif
 }
 
 void QJSDeclarativeEngineInstance::PushJSCommand(JSContext* ctx, const RefPtr<JsCommand>& jsCommand, bool forceFlush)

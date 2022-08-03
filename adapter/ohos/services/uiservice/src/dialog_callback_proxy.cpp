@@ -29,7 +29,7 @@ void DialogCallbackProxy::OnDialogCallback(int32_t id, const std::string& event,
 {
     auto remote = Remote();
     if (remote == nullptr) {
-        HILOG_ERROR("%{public}s remote is nullptr", __func__);
+        HILOG_ERROR("Ace %{public}s remote is nullptr", __func__);
         return;
     }
 
@@ -38,27 +38,27 @@ void DialogCallbackProxy::OnDialogCallback(int32_t id, const std::string& event,
     OHOS::MessageOption option;
 
     if (!dataParcel.WriteInterfaceToken(DialogCallbackProxy::GetDescriptor())) {
-        HILOG_ERROR("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false", __func__);
+        HILOG_ERROR("Ace %{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false", __func__);
         return;
     }
     if (!dataParcel.WriteInt32(id)) {
-        HILOG_ERROR("fail to WriteInt32 id");
+        HILOG_ERROR("Ace fail to WriteInt32 id");
         return;
     }
     if (!dataParcel.WriteString(event)) {
-        HILOG_ERROR("fail to WriteString event");
+        HILOG_ERROR("Ace fail to WriteString event");
         return;
     }
     if (!dataParcel.WriteString(params)) {
-        HILOG_ERROR("fail to WriteString params");
+        HILOG_ERROR("Ace fail to WriteString params");
         return;
     }
     int result = remote->SendRequest(IDialogCallback::UI_SERVICE_DIALOG_CALLBACK, dataParcel, reply, option);
     if (result == ERR_NONE) {
-        HILOG_INFO("%{public}s SendRequest ok, retval is %{public}d", __func__, reply.ReadInt32());
+        HILOG_INFO("Ace %{public}s SendRequest ok, retval is %{public}d", __func__, reply.ReadInt32());
         return;
     } else {
-        HILOG_ERROR("%{public}s SendRequest error, result=%{public}d", __func__, result);
+        HILOG_ERROR("Ace %{public}s SendRequest error, result=%{public}d", __func__, result);
         return;
     }
 }
