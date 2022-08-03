@@ -170,6 +170,12 @@ void AceFormAbility::OnVisibilityChanged(const std::map<int64_t, int32_t>& formE
     Platform::PaContainer::OnVisibilityChanged(instanceId_, formEventsMap);
 }
 
+bool AceFormAbility::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+{
+    LOGD("AceFormAbility::OnShare called");
+    return Platform::PaContainer::OnShare(instanceId_, formId, wantParams);
+}
+
 void AceFormAbility::OnStart(const OHOS::AAFwk::Want& want)
 {
     LOGI("AceFormAbility::OnStart start");

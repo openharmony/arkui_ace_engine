@@ -49,7 +49,7 @@ BackendDelegateImpl::BackendDelegateImpl(const BackendDelegateImplBuilder& build
       updateCallback_(builder.updateFormCallback), castTemptoNormalCallback_(builder.castTemptoNormalCallback),
       visibilityChangedCallback_(builder.visibilityChangedCallback),
       acquireStateCallback_(builder.acquireStateCallback),
-      commandCallback_(builder.commandCallback),
+      commandCallback_(builder.commandCallback), shareFormCallback_(builder.shareFormCallback),
       dumpHeapSnapshotCallback_(builder.dumpHeapSnapshotCallback),
       manifestParser_(AceType::MakeRefPtr<Framework::ManifestParser>()),
       type_(builder.type),
@@ -545,4 +545,15 @@ bool BackendDelegateImpl::GetResourceData(const std::string& fileUri, std::vecto
     return true;
 }
 
+bool BackendDelegateImpl::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+{
+    bool result = false;
+    taskExecutor_->PostSyncTask(
+        [shareFormCallback = shareFormCallback_, formId, &wantParams, &result] () {
+            result = shareFormCallback(formId, wantParams);
+        },
+        TaskExecutor::TaskType::JS);
+
+    return result;
+}
 } // namespace OHOS::Ace

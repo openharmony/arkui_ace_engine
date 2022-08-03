@@ -158,7 +158,7 @@ public:
     static sptr<IRemoteObject> OnConnect(int32_t instanceId, const OHOS::AAFwk::Want& want);
     static void OnDisConnect(int32_t instanceId, const OHOS::AAFwk::Want& want);
     static void OnCommand(const OHOS::AAFwk::Want &want, int startId, int32_t instanceId);
-
+    static bool OnShare(int32_t instanceId, int64_t formId, OHOS::AAFwk::WantParams &wantParams);
     static std::shared_ptr<AppExecFwk::PacMap> Call(int32_t instanceId, const Uri& uri,
         const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap);
 

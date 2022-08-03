@@ -1454,6 +1454,63 @@ int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want &want)
     return formState;
 }
 
+bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+{
+    LOGD("JsiPaEngine OnShare, create");
+    ACE_DCHECK(engineInstance_);
+    auto runtime = engineInstance_->GetJsRuntime();
+    if (runtime == nullptr) {
+        LOGE("JsiPaEngine JsRuntime Get nullptr!");
+        return false;
+    }
+
+    const std::vector<shared_ptr<JsValue>> argv = { runtime->NewString(std::to_string(formId)) };
+    auto func = GetPaFunc("onShare");
+    auto result = CallFunc(func, argv);
+    if (result == nullptr) {
+        LOGE("JsiPaEngine Call function result is nullptr!");
+        return false;
+    }
+
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(result);
+    if (arkJSValue == nullptr) {
+        LOGE("JsiPaEngine JsValue convert failed!");
+        return false;
+    }
+
+    if (arkJSValue->IsException(runtime)) {
+        LOGE("JsiPaEngine CallFunc FAILED!");
+        return false;
+    }
+
+    auto arkJsRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJsRuntime == nullptr) {
+        LOGE("JsiPaEngine JSRuntime convert failed!");
+        return false;
+    }
+
+    auto nativeValue = ArkNativeEngine::ArkValueToNativeValue(nativeEngine_, arkJSValue->GetValue(arkJsRuntime));
+    if (nativeValue == nullptr) {
+        LOGE("JsiPaEngine nativeValue convert failed!");
+        return false;
+    }
+
+    if (nativeValue->TypeOf() != NativeValueType::NATIVE_OBJECT) {
+        LOGE("%{public}s OnShare return value`s type is %{public}d", __func__,
+            static_cast<int>(nativeValue->TypeOf()));
+        return false;
+    }
+
+    if (!OHOS::AppExecFwk::UnwrapWantParams(reinterpret_cast<napi_env>(nativeEngine_),
+        reinterpret_cast<napi_value>(nativeValue), wantParams)) {
+        LOGE("%{public}s OnShare UnwrapWantParams failed, return false", __func__);
+        return false;
+    }
+
+    LOGD("JsiPaEngine OnShare, end");
+    return true;
+}
+
 void JsiPaEngine::DumpHeapSnapshot(bool isPrivate)
 {
     if (engineInstance_ && engineInstance_->GetJsRuntime()) {
