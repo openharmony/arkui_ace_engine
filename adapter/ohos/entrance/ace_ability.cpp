@@ -376,7 +376,7 @@ void AceAbility::OnStart(const Want& want)
         };
 #endif
         // set view
-        Platform::AceContainer::SetView(flutterAceView, density_, 0, 0, window->GetWindowId(), callback);
+        Platform::AceContainer::SetView(flutterAceView, density_, 0, 0, window, callback);
     } else {
         Platform::AceContainer::SetViewNew(flutterAceView, density_, 0, 0, window);
     }

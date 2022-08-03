@@ -549,7 +549,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     };
 #endif
     // set view
-    Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_->GetWindowId(), callback);
+    Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_, callback);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     // Set sdk version in module json mode
     if (isModelJson) {
