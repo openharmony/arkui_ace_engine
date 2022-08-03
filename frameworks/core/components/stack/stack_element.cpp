@@ -376,12 +376,14 @@ void StackElement::PerformPopPopup(const ComposeId& id)
             child->SetOption(hideOption);
             child->ApplyOptions();
             child->ApplyKeyframes();
-            animator->AddStopListener([weakStack = AceType::WeakClaim(this), child] {
-                auto lastStack = weakStack.Upgrade();
-                if (lastStack) {
-                    lastStack->UpdateChild(child, nullptr);
-                }
-            });
+            animator->AddStopListener(
+                [weakStack = AceType::WeakClaim(this), weakChild = AceType::WeakClaim(AceType::RawPtr(child))] {
+                    auto lastStack = weakStack.Upgrade();
+                    auto child = weakChild.Upgrade();
+                    if (lastStack && child) {
+                        lastStack->UpdateChild(child, nullptr);
+                    }
+                });
             animator->Play();
             break;
         }
