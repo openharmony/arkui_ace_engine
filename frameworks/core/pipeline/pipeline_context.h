@@ -1080,6 +1080,7 @@ protected:
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
+    void FlushReload() override;
     void FlushReloadTransition() override;
 
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;

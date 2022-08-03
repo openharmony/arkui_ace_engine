@@ -458,6 +458,11 @@ public:
 
     void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
+    virtual void FlushReload()
+    {
+        return;
+    }
+
     virtual void FlushReloadTransition()
     {
         return;

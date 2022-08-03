@@ -1374,23 +1374,24 @@ void AceContainer::UpdateFrondend(bool needReloadTransition)
             LOGI("AceContainer::UpdateConfiguration frontend MarkNeedUpdate");
             frontend->FlushReload();
         }
-        // reload transition animation
-        if (!needReloadTransition) {
-            return;
-        }
         auto taskExecutor = container->GetTaskExecutor();
         if (!taskExecutor) {
             return;
         }
-        taskExecutor->PostTask([instanceId, weak]() {
+        taskExecutor->PostTask([instanceId, weak, needReloadTransition]() {
             ContainerScope scope(instanceId);
             auto container = weak.Upgrade();
             if (!container) {
                 return;
             }
-            auto pipline = container->GetPipelineContext();
-            if (pipline) {
-                pipline->FlushReloadTransition();
+            auto pipeline = container->GetPipelineContext();
+            if (!pipeline) {
+                return;
+            }
+            pipeline->FlushReload();
+            if (needReloadTransition) {
+                // reload transition animation
+                pipeline->FlushReloadTransition();
             }
             }, TaskExecutor::TaskType::UI);
         }, TaskExecutor::TaskType::JS);
