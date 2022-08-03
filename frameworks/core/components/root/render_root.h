@@ -64,6 +64,8 @@ public:
 
     void SetBgColor(const Color& color);
 
+    Color GetBgColor() const;
+
     void SetDefaultBgColor(bool isTransparent = false);
 
     void NotifyOnShow() const
