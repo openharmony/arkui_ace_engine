@@ -263,6 +263,16 @@ public:
         elmtId_ = elmtId;
     }
 
+    void SetHitTestMode(HitTestMode hitTestMode)
+    {
+        hitTestMode_ = hitTestMode;
+    }
+
+    HitTestMode GetHitTestMode() const
+    {
+        return hitTestMode_;
+    }
+
 protected:
     TextDirection direction_ = TextDirection::LTR;
 
@@ -287,6 +297,7 @@ private:
     bool useExternalRSNode_ = false;
     std::string inspectorTag_;
     int32_t restoreId_ = -1;
+    HitTestMode hitTestMode_ = HitTestMode::DEFAULT;
 
     ElementIdType elmtId_ = ElementRegister::UndefinedElementId;
 };

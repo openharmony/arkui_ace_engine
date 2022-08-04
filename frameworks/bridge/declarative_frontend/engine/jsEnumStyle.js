@@ -834,3 +834,10 @@ var GridRowDirection;
   GridRowDirection[GridRowDirection["Row"] = 0] = "Row";
   GridRowDirection[GridRowDirection["RowReverse"] = 1] = "RowReverse";
 })(GridRowDirection || (GridRowDirection = {}));
+
+var HitTestMode;
+(function (HitTestMode) {
+  HitTestMode[HitTestMode["Default"] = 0] = "Default";
+  HitTestMode[HitTestMode["Block"] = 1] = "Block";
+  HitTestMode[HitTestMode["Transparent"] = 2] = "Transparent";
+})(HitTestMode || (HitTestMode = {}));
