@@ -17,6 +17,7 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   implements ISinglePropertyChangeSubscriber<T> {
 
   private source_: ObservedPropertyAbstract<T>;
+  private changeNotificationIsOngoing_: boolean = false;
 
   constructor(source: ObservedPropertyAbstract<T>, owningView: IPropertySubscriber, owningViewPropNme: PropertyInfo) {
     super(owningView, owningViewPropNme);
@@ -38,8 +39,10 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   // will call this cb function when property has changed
   // a set (newValue) is not done because get reads through for the source_
   hasChanged(newValue: T): void {
-    console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
-    this.notifyHasChanged(newValue);
+    if (!this.changeNotificationIsOngoing_) {
+      console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
+      this.notifyHasChanged(newValue);
+    }
   }
 
   public getUnmonitored(): T {
@@ -62,9 +65,15 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
     }
 
     console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
+
+    // avoid circular notifications @Link -> source @State -> other but also to same @Link
+    this.changeNotificationIsOngoing_ = true;
+
     // the source_ ObservedProeprty will call: this.hasChanged(newValue);
+    this.source_.set(newValue);
     this.notifyHasChanged(newValue);
-    return this.source_.set(newValue);
+
+    this.changeNotificationIsOngoing_ = false;
   }
 
   /**

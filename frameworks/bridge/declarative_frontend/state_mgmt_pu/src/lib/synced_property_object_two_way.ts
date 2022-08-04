@@ -18,7 +18,8 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   implements ISinglePropertyChangeSubscriber<C> {
 
   private linkedParentProperty_: ObservedPropertyObjectAbstract<C>;
-
+  private changeNotificationIsOngoing_: boolean = false;
+    
   constructor(linkSource: ObservedPropertyObjectAbstract<C>,
     owningChildView: IPropertySubscriber,
     thisPropertyName: PropertyInfo) {
@@ -51,8 +52,10 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   // this object is subscriber to ObservedObject
   // will call this cb function when property has changed
   hasChanged(newValue: C): void {
-    console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
-    this.notifyHasChanged(this.linkedParentProperty_.getUnmonitored());
+    if (!this.changeNotificationIsOngoing_) {
+      console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
+      this.notifyHasChanged(this.linkedParentProperty_.getUnmonitored());
+    }
   }
 
 
@@ -79,9 +82,13 @@ class SynchedPropertyObjectTwoWay<C extends Object>
     console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
 
     ObservedObject.removeOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
+    
+    // avoid circular notifications @Link -> source @State -> other but also back to same @Link
+    this.changeNotificationIsOngoing_ = true;
     this.setObject(newValue);
     ObservedObject.addOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
     this.notifyHasChanged(newValue);
+    this.changeNotificationIsOngoing_ = false;
   }
 
   /**
@@ -96,7 +103,7 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   }
   public createProp(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstract<C> {
-    throw new Error("Creating a 'Prop' proerty is unsuppoeted for Object type prperty value.");
+    throw new Error("Creating a 'Prop' property is unsupported for Object type prperty value.");
   }
 
 }
