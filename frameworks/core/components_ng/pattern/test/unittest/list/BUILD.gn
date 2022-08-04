@@ -23,8 +23,10 @@ if (is_standard_system) {
 ohos_unittest("ListLayoutAlgorithmTest") {
   module_out_path = module_output_path
 
-  sources = [ "list_layout_algorithm_test.cpp",
-              "list_layout_property_test.cpp" ]
+  sources = [
+    "list_layout_algorithm_test.cpp",
+    "list_layout_property_test.cpp",
+  ]
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/base:ace_base_ohos",
