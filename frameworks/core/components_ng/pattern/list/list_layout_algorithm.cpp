@@ -113,9 +113,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(listLayoutProperty);
 
-    // get space
-    auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
-
     // calculate idealSize and set FrameSize
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto idealSize =
@@ -133,7 +130,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     endMainPos_ = currentOffset_ + mainSize;
     LOGD("pre start index: %{public}d, pre end index: %{public}d, offset is %{public}f", preStartIndex_, preEndIndex_,
         currentOffset_);
-    
+
+    auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
     spaceWidth_ = ConvertToPx(space, listLayoutProperty->GetLayoutConstraint()->scaleProperty, mainSize);
 
     // calculate child layout constraint.
@@ -191,7 +189,9 @@ void ListLayoutAlgorithm::LayoutForward(
             }
         }
         itemPosition_[currentIndex] = { currentStartPos, currentEndPos };
-        currentEndPos = currentEndPos + spaceWidth_;
+        if ((currentIndex > 0) && (currentIndex < itemPosition_.size() - 1)) {
+            currentEndPos = currentEndPos + spaceWidth_;
+        }
     } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize));
 
     startIndex_ = newStartIndex.value_or(preStartIndex_);
@@ -270,7 +270,9 @@ void ListLayoutAlgorithm::LayoutBackward(
             }
         }
         itemPosition_[currentIndex] = { currentStartPos, currentEndPos };
-        currentStartPos = currentStartPos - spaceWidth_;
+        if ((currentIndex > 0) && (currentIndex < itemPosition_.size() - 1)) {
+            currentStartPos = currentStartPos - spaceWidth_;
+        }
     } while (GreatNotEqual(currentStartPos, startMainPos_ - cacheSize));
 
     endIndex_ = newEndIndex.value_or(preEndIndex_);

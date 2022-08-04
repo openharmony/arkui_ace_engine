@@ -59,7 +59,7 @@ public:
         return endIndex_.value_or(0);
     }
     
-    PositionMap GetPositionMap()
+    const PositionMap& GetItemPosition() const
     {
         return itemPosition_;
     }
@@ -69,7 +69,7 @@ public:
         spaceWidth_ = spaceWidth;
     }
     
-    float GetSpaceWidth()
+    float GetSpaceWidth() const
     {
         return spaceWidth_;
     }
@@ -102,7 +102,7 @@ private:
     std::optional<int32_t> startIndex_;
     std::optional<int32_t> endIndex_;
 
-    float spaceWidth_ = 0.0;
+    float spaceWidth_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
