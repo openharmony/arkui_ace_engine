@@ -371,7 +371,6 @@ void RenderNode::DumpTree(int32_t depth)
         DumpLog::GetInstance().AddDesc(std::string("TouchRectList: ").append(touchRectList));
         DumpLog::GetInstance().AddDesc(std::string("DirtyRect: ").append(dirtyRect.ToString()));
         DumpLog::GetInstance().AddDesc(std::string("LayoutParam: ").append(layoutParam_.ToString()));
-        DumpLog::GetInstance().AddDesc(std::string("HitTestMode: ").append(std::to_string(static_cast<int32_t>(hitTestMode_))));
 #ifdef ENABLE_ROSEN_BACKEND
         if (rsNode_) {
             DumpLog::GetInstance().AddDesc(rsNode_->DumpNode(depth));
