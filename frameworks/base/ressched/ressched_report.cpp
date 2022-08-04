@@ -76,7 +76,7 @@ void ResSchedReport::MarkNeedUpdate()
     if (reportDataFunc_ == nullptr) {
         reportDataFunc_ = LoadReportDataFunc();
     }
-    if (reportDataFunc_ != nullptr) {
+    if (reportDataFunc_ != nullptr && isInTouchDownUp_) {
         reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, TOUCH_EVENT, payload);
         isInTouchDownUp_ = false;
     }
