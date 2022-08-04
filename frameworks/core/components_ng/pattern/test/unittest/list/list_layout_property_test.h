@@ -20,7 +20,6 @@
 #include "core/components_ng/pattern/list/list_layout_property.h"
 
 namespace OHOS::Ace::NG {
-
 const int32_t START_INDEX = 0;
 const int32_t END_INDEX = 10;
 

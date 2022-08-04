@@ -20,7 +20,6 @@
 #include "core/components_ng/pattern/list/list_layout_property.h"
 
 namespace OHOS::Ace::NG {
-
 const int32_t START_INDEX = 0;
 const int32_t END_INDEX = 10;
 
@@ -37,6 +36,5 @@ const std::vector<Dimension> LIST_LAYOUT_ALGORITHM_SPACE_PXS = {LIST_LAYOUT_ALGO
                                                                 LIST_LAYOUT_ALGORITHM_SPACE_PX_4,
                                                                 LIST_LAYOUT_ALGORITHM_SPACE_PX_5};
 const size_t TEST_SPACE_PX_COUNT = LIST_LAYOUT_ALGORITHM_SPACE_PXS.size();
-
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_TEST_UNITTEST_LIST_LAYOUT_ALGORITHM_TEST_H

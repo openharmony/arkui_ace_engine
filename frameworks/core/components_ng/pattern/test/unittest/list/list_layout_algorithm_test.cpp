@@ -63,7 +63,7 @@ HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest001, TestSize.Level1)
         listLayoutAlgorithm.SetSpaceWidth(space);
 
         listLayoutAlgorithm.Measure(&layoutWrapper);
-        NG::ListLayoutAlgorithm::PositionMap positionMap = listLayoutAlgorithm.GetPositionMap();
+        NG::ListLayoutAlgorithm::PositionMap positionMap = listLayoutAlgorithm.GetItemPosition();
         for (size_t j = NG::START_INDEX; j < NG::END_INDEX; j++) {
             ASSERT_EQ(positionMap[j].first, NG::GEOMETRYNODE_FRAMESIZE * j + space * j);
         }

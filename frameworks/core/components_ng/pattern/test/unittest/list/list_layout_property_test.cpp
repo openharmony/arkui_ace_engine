@@ -29,18 +29,18 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-class ListLayoutAlgorithmTest : public testing::Test {
+class ListLayoutPropertyTest : public testing::Test {
 public:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
 };
 
 /**
- * @tc.name: ListLayoutAlgorithmTest001
- * @tc.desc: set space width into listLayoutAlgorithm and get it
+ * @tc.name: ListLayoutPropertyTest001
+ * @tc.desc: set space width into listLayoutProperty and get it
  * @tc.type: FUNC
  */
-HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest001, TestSize.Level1)
+HWTEST_F(ListLayoutPropertyTest, ListLayoutPropertyTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call CreateFrameNode function to create frameNode
