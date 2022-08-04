@@ -1198,6 +1198,11 @@ void PipelineContext::PopPage()
     CHECK_RUN_ON(UI);
     auto stageElement = GetStageElement();
     if (stageElement) {
+        auto topElement = stageElement->GetTopPage();
+        if (topElement != nullptr) {
+            std::unordered_map<std::string, std::string> params { { "pageUrl", topElement->GetPageUrl() } };
+            ResSchedReport::GetInstance().ResSchedDataReport("pop_page", params);
+        }
         stageElement->Pop();
     }
     ExitAnimation();

@@ -34,6 +34,11 @@ const std::string& AceApplicationInfo::GetPackageName() const
     return packageName_;
 }
 
+const std::string& AceApplicationInfo::GetAbilityName() const
+{
+    return GetProcessName().empty() ? GetPackageName() : GetProcessName();
+}
+
 void AceApplicationInfo::SetUid(int32_t uid)
 {
     uid_ = uid;

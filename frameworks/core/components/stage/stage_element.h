@@ -50,7 +50,7 @@ public:
     bool IsFocusable() const override;
     bool InitTransition(const RefPtr<PageTransitionElement>& transitionIn,
         const RefPtr<PageTransitionElement>& transitionOut, TransitionEvent event);
-
+    RefPtr<PageElement> GetTopPage() const;
     StackOperation GetStackOperation() const
     {
         return operation_;
