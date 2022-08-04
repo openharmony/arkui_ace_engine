@@ -40,7 +40,7 @@ namespace {
 
 constexpr int32_t DOUBLE_WIDTH = 2;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
-constexpr float EXTRA_WIDTH = 1.5f;
+constexpr float EXTRA_WIDTH = 0.5f;
 constexpr float SCALE_DEFAULT = 1.0f;
 constexpr float SCALE_CHANGED = 1.05f;
 const Color BOARD_CHANGED = Color::FromRGBO(0, 0, 0, 0.05);
@@ -339,24 +339,19 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         }
     }
     if (RenderBox::needPaintDebugBoundary_ && SystemProperties::GetDebugBoundaryEnabled()) {
-        auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
-        if (canvas == nullptr) {
-            LOGE("Paint canvas is null.");
+        auto rsnode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
+        if (rsnode == nullptr) {
+            LOGE("rsNode is null.");
             return;
         }
-        SkAutoCanvasRestore acr(canvas, true);
-        auto rsnode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
-        auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-        auto bounds = rsnode->GetStagingProperties().GetBounds();
-        auto frame = rsnode->GetStagingProperties().GetFrame();
-        recordingCanvas->ClipOutsetRect(bounds.z_, bounds.w_);
-        auto size = GetLayoutSize() + Size(EXTRA_WIDTH, EXTRA_WIDTH);
-        if (frame.z_ <= 0 || frame.w_ <= 0) {
-            rsnode->SetFrame(bounds.x_, bounds.y_, GetLayoutSize().Width(), GetLayoutSize().Height());
-        }
-        DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, size);
-        DebugBoundaryPainter::PaintDebugCorner(canvas, offset, size);
-        DebugBoundaryPainter::PaintDebugMargin(canvas, offset, size, RenderBoxBase::margin_);
+        rsnode->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE,
+            [size = GetLayoutSize(), margin = GetMargin()](SkCanvas* canvas) {
+                SkAutoCanvasRestore acr(canvas, true);
+                auto overlayOffset = Offset(EXTRA_WIDTH, EXTRA_WIDTH) - margin.GetOffset();
+                DebugBoundaryPainter::PaintDebugBoundary(canvas, overlayOffset, size);
+                DebugBoundaryPainter::PaintDebugCorner(canvas, overlayOffset, size);
+                DebugBoundaryPainter::PaintDebugMargin(canvas, overlayOffset, size, margin);
+            });
     }
     if (isAccessibilityFocus_) {
         PaintAccessibilityFocus(focusRect, context);
