@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_APPLICATION_INFO_H
 
 #include <chrono>
+#include <cstdint>
 #include <set>
 #include <string>
 #include <vector>
@@ -61,6 +62,7 @@ public:
     void SetProcessName(const std::string& processName);
     const std::string& GetProcessName() const;
 
+    const std::string& GetAbilityName() const;
 
     void SetDataFileDirPath(const std::string& dataDirFilePath)
     {
@@ -143,6 +145,14 @@ public:
     {
         return isAccessibilityEnabled_;
     }
+    void SetPid(int32_t pid)
+    {
+        pid_ = pid;
+    }
+    int32_t GetPid() const
+    {
+        return pid_;
+    }
 
 protected:
     std::string countryOrRegion_;
@@ -154,7 +164,8 @@ protected:
     std::string packageName_;
     std::string processName_;
     std::string dataDirFilePath_;
-    int32_t uid_;
+    int32_t pid_ = 0;
+    int32_t uid_ = 0;
     int32_t barrierfreeDuration_ = 0;
 
     bool isRightToLeft_ = false;
