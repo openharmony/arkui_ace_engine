@@ -835,6 +835,7 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
 class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     constructor(linkSource, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
+        this.changeNotificationIsOngoing_ = false;
         this.linkedParentProperty_ = linkSource;
         // register to the parent property
         this.linkedParentProperty_.subscribeMe(this);
@@ -858,8 +859,10 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     // this object is subscriber to ObservedObject
     // will call this cb function when property has changed
     hasChanged(newValue) {
-        /* console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`); */
-        this.notifyHasChanged(this.linkedParentProperty_.getUnmonitored());
+        if (!this.changeNotificationIsOngoing_) {
+            /* console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`); */
+            this.notifyHasChanged(this.linkedParentProperty_.getUnmonitored());
+        }
     }
     getUnmonitored() {
         /* console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.linkedParentProperty_.getUnmonitored())}' .`); */
@@ -880,9 +883,12 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
         }
         /* console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`); */
         ObservedObject.removeOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
+        // avoid circular notifications @Link -> source @State -> other but also back to same @Link
+        this.changeNotificationIsOngoing_ = true;
         this.setObject(newValue);
         ObservedObject.addOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
         this.notifyHasChanged(newValue);
+        this.changeNotificationIsOngoing_ = false;
     }
     /**
    * These functions are meant for use in connection with the App Stoage and
@@ -894,7 +900,7 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
         return new SynchedPropertyObjectTwoWay(this, subscribeOwner, linkPropName);
     }
     createProp(subscribeOwner, linkPropName) {
-        throw new Error("Creating a 'Prop' proerty is unsuppoeted for Object type prperty value.");
+        throw new Error("Creating a 'Prop' property is unsuppoeted for Object type prperty value.");
     }
 }
 /*
@@ -1010,6 +1016,7 @@ class SynchedPropertySimpleOneWaySubscribing extends SynchedPropertySimpleOneWay
 class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     constructor(source, owningView, owningViewPropNme) {
         super(owningView, owningViewPropNme);
+        this.changeNotificationIsOngoing_ = false;
         this.source_ = source;
         this.source_.subscribeMe(this);
     }
@@ -1026,8 +1033,10 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     // will call this cb function when property has changed
     // a set (newValue) is not done because get reads through for the source_
     hasChanged(newValue) {
-        /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`); */
-        this.notifyHasChanged(newValue);
+        if (!this.changeNotificationIsOngoing_) {
+            /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`); */
+            this.notifyHasChanged(newValue);
+        }
     }
     getUnmonitored() {
         // /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored`); */return this.source_.getUnmonitored();
@@ -1045,9 +1054,12 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
             return;
         }
         /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`); */
+        // avoid circular notifications @Link -> source @State -> other but also to same @Link
+        this.changeNotificationIsOngoing_ = true;
         // the source_ ObservedProeprty will call: this.hasChanged(newValue);
+        this.source_.set(newValue);
         this.notifyHasChanged(newValue);
-        return this.source_.set(newValue);
+        this.changeNotificationIsOngoing_ = false;
     }
     /**
   * These functions are meant for use in connection with the App Stoage and
