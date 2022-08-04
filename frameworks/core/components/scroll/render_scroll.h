@@ -29,6 +29,7 @@
 #include "core/components/scroll/scroll_position_controller.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
 
@@ -122,9 +123,24 @@ public:
         return axis_;
     }
 
-    bool IsRowReverse()
+    void SetDirection(FlexDirection direction)
     {
-        return axis_ == Axis::HORIZONTAL && rightToLeft_;
+        direction_ = direction;
+    }
+
+    FlexDirection GetDirection() const
+    {
+        return direction_;
+    }
+
+    bool IsRowReverse() const
+    {
+        return (axis_ == Axis::HORIZONTAL && rightToLeft_) || direction_ == FlexDirection::ROW_REVERSE;
+    }
+
+    bool IsColReverse() const
+    {
+        return  direction_ == FlexDirection::COLUMN_REVERSE;
     }
 
     virtual bool ReachMaxCount() const
@@ -282,6 +298,7 @@ private:
     void OnReachTop() const;
     void OnReachBottom() const;
 
+    FlexDirection direction_ { FlexDirection::COLUMN };
     using OnReachFunc = std::function<void(const std::string&)>;
     OnReachFunc onReachStart_;
     OnReachFunc onReachEnd_;

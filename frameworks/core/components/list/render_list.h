@@ -107,32 +107,39 @@ public:
     template<typename T>
     T MakeValue(double mainValue, double crossValue) const
     {
-        return direction_ == FlexDirection::ROW ? T(mainValue, crossValue) : T(crossValue, mainValue);
+        return (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)
+                   ? T(mainValue, crossValue)
+                   : T(crossValue, mainValue);
     }
 
     void SetMainSize(Size& size, double mainValue)
     {
-        direction_ == FlexDirection::ROW ? size.SetWidth(mainValue) : size.SetHeight(mainValue);
+        (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? size.SetWidth(mainValue)
+                                                                                       : size.SetHeight(mainValue);
     }
 
     void SetCrossSize(Size& size, double crossValue)
     {
-        direction_ == FlexDirection::ROW ? size.SetHeight(crossValue) : size.SetWidth(crossValue);
+        (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? size.SetHeight(crossValue)
+                                                                                       : size.SetWidth(crossValue);
     }
 
     double GetMainSize(const Size& size) const
     {
-        return direction_ == FlexDirection::ROW ? size.Width() : size.Height();
+        return (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? size.Width()
+                                                                                              : size.Height();
     }
 
     double GetCrossSize(const Size& size) const
     {
-        return direction_ == FlexDirection::ROW ? size.Height() : size.Width();
+        return (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? size.Height()
+                                                                                              : size.Width();
     }
 
     double GetMainPosition(const Offset& offset) const
     {
-        return direction_ == FlexDirection::ROW ? offset.GetX() : offset.GetY();
+        return (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? offset.GetX()
+                                                                                              : offset.GetY();
     }
 
     bool IsLayoutChanged() const
@@ -342,7 +349,7 @@ public:
 
     bool SupportStickyItem() const
     {
-        return !chainAnimation_ && direction_ == FlexDirection::COLUMN;
+        return !chainAnimation_ && (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE);
     }
 
     bool IsCenterLayout() const

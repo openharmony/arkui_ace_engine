@@ -83,7 +83,7 @@ bool RenderScroll::ValidateOffset(int32_t source)
     if (!scrollEffect_ || scrollEffect_->IsRestrictBoundary() || source == SCROLL_FROM_JUMP ||
         source == SCROLL_FROM_BAR || source == SCROLL_FROM_ROTATE || refreshParent_.Upgrade()) {
         if (axis_ == Axis::HORIZONTAL) {
-            if (rightToLeft_) {
+            if (IsRowReverse()) {
                 currentOffset_.SetX(std::clamp(currentOffset_.GetX(), viewPort_.Width() - mainScrollExtent_, 0.0));
             } else {
                 currentOffset_.SetX(std::clamp(currentOffset_.GetX(), 0.0, mainScrollExtent_ - viewPort_.Width()));
@@ -103,7 +103,7 @@ bool RenderScroll::ValidateOffset(int32_t source)
 #endif
         }
     } else {
-        if (IsRowReverse()) {
+        if (IsRowReverse()  || IsColReverse()) {
             if (GetMainOffset(currentOffset_) > 0) {
                 outBoundaryExtent_ = GetMainOffset(currentOffset_);
             }
@@ -391,7 +391,7 @@ bool RenderScroll::ScrollPageByChild(Offset& delta, int32_t source)
 
 bool RenderScroll::IsOutOfBottomBoundary()
 {
-    if (IsRowReverse()) {
+    if (IsRowReverse() || IsColReverse()) {
         return LessOrEqual(GetMainOffset(currentOffset_), (GetMainSize(viewPort_) - mainScrollExtent_)) &&
                ReachMaxCount();
     } else {
@@ -402,7 +402,7 @@ bool RenderScroll::IsOutOfBottomBoundary()
 
 bool RenderScroll::IsOutOfTopBoundary()
 {
-    if (IsRowReverse()) {
+    if (IsRowReverse() || IsColReverse()) {
         return GreatOrEqual(GetMainOffset(currentOffset_), 0.0);
     } else {
         return LessOrEqual(GetMainOffset(currentOffset_), 0.0);
@@ -431,7 +431,7 @@ void RenderScroll::AdjustOffset(Offset& delta, int32_t source)
     double overscrollPastEnd = 0.0;
     double overscrollPast = 0.0;
     bool easing = false;
-    if (IsRowReverse()) {
+    if (IsRowReverse()  || IsColReverse()) {
         overscrollPastStart = std::max(GetCurrentPosition(), 0.0);
         overscrollPastEnd = std::max(-GetCurrentPosition() - maxScrollExtent, 0.0);
         // do not adjust offset if direction opposite from the overScroll direction when out of boundary
@@ -488,7 +488,7 @@ void RenderScroll::ResetEdgeEffect()
         scrollEffect_->SetLeadingCallback([weakScroll = AceType::WeakClaim(this)]() {
             auto scroll = weakScroll.Upgrade();
             if (scroll) {
-                if (!scroll->IsRowReverse()) {
+                if (!scroll->IsRowReverse() && !scroll->IsColReverse()) {
                     return scroll->GetMainSize(scroll->viewPort_) - scroll->mainScrollExtent_;
                 }
             }
@@ -497,7 +497,7 @@ void RenderScroll::ResetEdgeEffect()
         scrollEffect_->SetTrailingCallback([weakScroll = AceType::WeakClaim(this)]() {
             auto scroll = weakScroll.Upgrade();
             if (scroll) {
-                if (scroll->IsRowReverse()) {
+                if (scroll->IsRowReverse() || scroll->IsColReverse()) {
                     return scroll->mainScrollExtent_ - scroll->GetMainSize(scroll->viewPort_);
                 }
             }
@@ -506,7 +506,7 @@ void RenderScroll::ResetEdgeEffect()
         scrollEffect_->SetInitLeadingCallback([weakScroll = AceType::WeakClaim(this)]() {
             auto scroll = weakScroll.Upgrade();
             if (scroll) {
-                if (!scroll->IsRowReverse()) {
+                if (!scroll->IsRowReverse() && !scroll->IsColReverse()) {
                     return scroll->GetMainSize(scroll->viewPort_) - scroll->GetMainScrollExtent();
                 }
             }
@@ -515,7 +515,7 @@ void RenderScroll::ResetEdgeEffect()
         scrollEffect_->SetInitTrailingCallback([weakScroll = AceType::WeakClaim(this)]() {
             auto scroll = weakScroll.Upgrade();
             if (scroll) {
-                if (scroll->IsRowReverse()) {
+                if (scroll->IsRowReverse() || scroll->IsColReverse()) {
                     return scroll->GetMainScrollExtent() - scroll->GetMainSize(scroll->viewPort_);
                 }
             }
