@@ -58,13 +58,4 @@ void Container::UpdateCurrent(int32_t id)
     ContainerScope::UpdateCurrent(id);
 }
 
-bool Container::IsCurrentUsePartialUpdate()
-{
-    // TODO: now choose pipeline using param set as package name, later enable for all.
-    if (SystemProperties::GetPartialUpdatePkg().empty()) {
-        return false;
-    }
-    return AceApplicationInfo::GetInstance().GetPackageName() == SystemProperties::GetPartialUpdatePkg();
-}
-
 } // namespace OHOS::Ace

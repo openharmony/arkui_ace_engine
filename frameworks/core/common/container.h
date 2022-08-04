@@ -192,7 +192,16 @@ public:
         return container ? container->useNewPipeline_ : false;
     }
 
-    static bool IsCurrentUsePartialUpdate();
+    void SetPartialUpdateOn()
+    {
+        partialUpdate_ = true;
+    }
+
+    static bool IsCurrentUsePartialUpdate()
+    {
+        auto container = Current();
+        return container ? container->partialUpdate_ : false;
+    }
 
     bool IsUseNewPipeline() const
     {
@@ -215,6 +224,7 @@ private:
     std::string moduleName_;
     std::string bundlePath_;
     std::string filesDataPath_;
+    bool partialUpdate_ = false;
     Settings settings_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
