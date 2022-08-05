@@ -251,6 +251,9 @@ public:
             return;
         }
         SetComposedId("");
+        if (element_) {
+            element_->UnregisterForPartialUpdates();
+        }
         element_ = host->OnUpdateElement(element_, nullptr);
     }
 
@@ -333,7 +336,12 @@ protected:
 class ListItemElementProxy : public ItemElementProxy {
 public:
     explicit ListItemElementProxy(const WeakPtr<ElementProxyHost>& host) : ItemElementProxy(host) {}
-    ~ListItemElementProxy() override = default;
+    ~ListItemElementProxy() override
+    {
+        if (element_) {
+            element_->UnregisterForPartialUpdates();
+        }
+    }
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
@@ -430,7 +438,12 @@ public:
 class GridItemElementProxy : public ItemElementProxy {
 public:
     explicit GridItemElementProxy(const WeakPtr<ElementProxyHost>& host) : ItemElementProxy(host) {}
-    ~GridItemElementProxy() override {}
+    ~GridItemElementProxy() override
+    {
+        if (element_) {
+            element_->UnregisterForPartialUpdates();
+        }
+    }
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
@@ -1144,9 +1157,8 @@ public:
         auto forEachComponent = AceType::DynamicCast<OHOS::Ace::PartUpd::ForEachComponent>(component);
         ACE_DCHECK(forEachComponent);
 
-        LOGD(
-            "ForEachElementProxy::Update: first render: Creating ForEachElementProxy "
-            "with %{public}s elmtId %{public}d, startIndex_ %{public}d",
+        LOGD("ForEachElementProxy::Update: first render: Creating ForEachElementProxy "
+             "with %{public}s elmtId %{public}d, startIndex_ %{public}d",
             AceType::TypeName(forEachComponent), forEachComponent->GetElementId(), (int)startIndex);
 
         SetElementId(forEachComponent->GetElementId());

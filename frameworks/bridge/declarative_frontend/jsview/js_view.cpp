@@ -111,12 +111,12 @@ JSViewFullUpdate::JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> js
     JSRef<JSFunc> jsRenderFunction) : viewId_(viewId)
 {
     jsViewFunction_ = AceType::MakeRefPtr<ViewFunctions>(jsObject, jsRenderFunction);
-    LOGD("JSView constructor");
+    LOGD("JSViewFullUpdate constructor");
 }
 
 JSViewFullUpdate::~JSViewFullUpdate()
 {
-    LOGD("Destroy");
+    LOGD("JSViewFullUpdate destructor");
     jsViewFunction_.Reset();
 };
 
@@ -477,13 +477,14 @@ void JSViewFullUpdate::ChildAccessedById(const std::string& viewId)
 JSViewPartialUpdate::JSViewPartialUpdate(JSRef<JSObject> jsViewObject)
 {
     jsViewFunction_ = AceType::MakeRefPtr<ViewFunctions>(jsViewObject);
-    LOGD("JSView constructor");
+    LOGD("JSViewPartialUpdate constructor");
     // keep the reference to the JS View object to prevent GC
     jsViewObject_ = jsViewObject;
 }
 
 JSViewPartialUpdate::~JSViewPartialUpdate()
 {
+    LOGD("JSViewPartialUpdate destructor");
     jsViewFunction_.Reset();
 };
 
