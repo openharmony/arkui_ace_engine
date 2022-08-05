@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "base/json/json_util.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -4355,6 +4356,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
+    JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
 }
 
 void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
@@ -4954,6 +4956,24 @@ void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
             ratio = VISIBLE_RATIO_MAX;
         }
         context->AddVisibleAreaChangeNode(nodeId, ratio, onVisibleChangeCallback);
+    }
+}
+
+void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        LOGE("JsHitTestBehavior: The arg is wrong, it is supposed to have 1 arguments");
+        return;
+    }
+
+    HitTestMode hitTestMode = HitTestMode::DEFAULT;
+    if (info[0]->IsNumber()) {
+        hitTestMode = static_cast<HitTestMode>(info[0]->ToNumber<int32_t>());
+    }
+
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    if (component) {
+        component->SetHitTestMode(hitTestMode);
     }
 }
 

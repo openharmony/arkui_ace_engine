@@ -691,6 +691,10 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     }
 
     for (auto&& component : components) {
+        component->SetHitTestMode(mainComponent->GetHitTestMode());
+    }
+
+    for (auto&& component : components) {
         component->SetDisabledStatus(mainComponent->IsDisabledStatus());
     }
 
