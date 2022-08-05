@@ -1152,6 +1152,8 @@ protected:
     virtual void OnMouseHoverExitTest() {}
     void SendAccessibilityEvent(const std::string& eventType);
     void SetAccessibilityClick(RefPtr<ClickRecognizer> clickRecognizer);
+    bool DispatchTouchTestToChildren(const Point& localPoint, const Point& globalPoint,
+        const TouchRestrict& touchRestrict, TouchTestResult& result);
 
     void PrepareLayout();
 

@@ -704,40 +704,7 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     }
 
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
-    bool dispatchSuccess = false;
-    const auto& sortedChildren = SortChildrenByZIndex(GetChildren());
-    if (IsChildrenTouchEnable() && GetHitTestMode() != HitTestMode::BLOCK) {
-        for (auto iter = sortedChildren.rbegin(); iter != sortedChildren.rend(); ++iter) {
-            const auto& child = *iter;
-            if (!child->GetVisible() || child->disabled_ || child->disableTouchEvent_) {
-                continue;
-            }
-            if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
-                dispatchSuccess = true;
-                if (child->GetHitTestMode() != HitTestMode::TRANSPARENT) {
-                    break;
-                }
-            }
-            auto interceptTouchEvent = (child->IsTouchable() &&
-                (child->InterceptTouchEvent() || IsExclusiveEventForChild()) &&
-                child->GetHitTestMode() != HitTestMode::TRANSPARENT);
-            if (child->GetHitTestMode() == HitTestMode::BLOCK || interceptTouchEvent) {
-                auto localTransformPoint = child->GetTransformPoint(localPoint);
-                bool isInRegion = false;
-                for (const auto& rect : child->GetTouchRectList()) {
-                    if (rect.IsInRegion(localTransformPoint)) {
-                        dispatchSuccess = true;
-                        isInRegion = true;
-                        break;
-                    }
-                }
-                if (isInRegion) {
-                    break;
-                }
-            }
-        }
-    }
-
+    bool dispatchSuccess = DispatchTouchTestToChildren(localPoint, globalPoint, touchRestrict, result);
     auto beforeSize = result.size();
     for (const auto& rect : GetTouchRectList()) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
@@ -751,6 +718,47 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     }
     auto endSize = result.size();
     return (dispatchSuccess || beforeSize != endSize) && IsNotSiblingAddRecognizerToResult();
+}
+
+bool RenderNode::DispatchTouchTestToChildren(const Point& localPoint, const Point& globalPoint,
+    const TouchRestrict& touchRestrict, TouchTestResult& result)
+{
+    bool dispatchSuccess = false;
+    if (!IsChildrenTouchEnable() || GetHitTestMode() == HitTestMode::BLOCK) {
+        return dispatchSuccess;
+    }
+
+    const auto& sortedChildren = SortChildrenByZIndex(GetChildren());
+    for (auto iter = sortedChildren.rbegin(); iter != sortedChildren.rend(); ++iter) {
+        const auto& child = *iter;
+        if (!child->GetVisible() || child->disabled_ || child->disableTouchEvent_) {
+            continue;
+        }
+        if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
+            dispatchSuccess = true;
+            if (child->GetHitTestMode() != HitTestMode::TRANSPARENT) {
+                break;
+            }
+        }
+        auto interceptTouchEvent = (child->IsTouchable() &&
+            (child->InterceptTouchEvent() || IsExclusiveEventForChild()) &&
+            child->GetHitTestMode() != HitTestMode::TRANSPARENT);
+        if (child->GetHitTestMode() == HitTestMode::BLOCK || interceptTouchEvent) {
+            auto localTransformPoint = child->GetTransformPoint(localPoint);
+            bool isInRegion = false;
+            for (const auto& rect : child->GetTouchRectList()) {
+                if (rect.IsInRegion(localTransformPoint)) {
+                    dispatchSuccess = true;
+                    isInRegion = true;
+                    break;
+                }
+            }
+            if (isInRegion) {
+                break;
+            }
+        }
+    }
+    return dispatchSuccess;
 }
 
 RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Point& parentLocalPoint)
