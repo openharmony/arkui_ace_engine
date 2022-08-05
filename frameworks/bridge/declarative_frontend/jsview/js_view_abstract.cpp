@@ -429,6 +429,13 @@ void ParsePopupParam(
     JSRef<JSVal> messageVal = popupObj->GetProperty("message");
     popupComponent->SetMessage(messageVal->ToString());
 
+    auto arrowOffset = popupObj->GetProperty("arrowOffset");
+    Dimension offset;
+    if (JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset)) {
+        auto param = popupComponent->GetPopupParam();
+        param->SetArrowOffset(offset);
+    }
+
     JSRef<JSVal> placementOnTopVal = popupObj->GetProperty("placementOnTop");
     if (placementOnTopVal->IsBoolean()) {
         popupComponent->SetPlacementOnTop(placementOnTopVal->ToBoolean());
@@ -534,6 +541,12 @@ void ParseCustomPopupParam(
         if (placement >= 0 && placement <= static_cast<int32_t>(PLACEMENT.size())) {
             popupParam->SetPlacement(PLACEMENT[placement]);
         }
+    }
+
+    auto arrowOffset = popupObj->GetProperty("arrowOffset");
+    Dimension offset;
+    if (JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset)) {
+        popupParam->SetArrowOffset(offset);
     }
 
     auto maskColorValue = popupObj->GetProperty("maskColor");

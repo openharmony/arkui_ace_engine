@@ -131,56 +131,52 @@ void RosenRenderBubble::PaintTopBubble(SkCanvas* skCanvas, const SkPaint& paint)
         return;
     }
     double childHeight = childSize_.Height();
-    double childHalfWidth = childSize_.Width() / 2.0;
-    double bubbleSpacing = NormalizeToPx(BUBBLE_SPACING);
-    double arrowOffset = std::clamp(NormalizeToPx(arrowOffset_),
-        -(childHalfWidth - std::max(NormalizeToPx(padding_.Left()), NormalizeToPx(border_.TopLeftRadius().GetX())) -
-            NormalizeToPx(BEZIER_WIDTH_HALF)),
-        childHalfWidth - std::max(NormalizeToPx(padding_.Right()), NormalizeToPx(border_.TopRightRadius().GetY())) -
-            NormalizeToPx(BEZIER_WIDTH_HALF));
-
+    double childWidth = childSize_.Width();
+    double childOffsetX = childOffset_.GetX();
+    double childOffsetY = childOffset_.GetY();
+    double arrowPositionX = arrowPosition_.GetX();
+    double arrowPositionY = arrowPosition_.GetY();
+    double arrowOffset = GetArrowOffset(Placement::TOP);
     path_.reset();
-    path_.moveTo(arrowPosition_.GetX() + arrowOffset, arrowPosition_.GetY());
-    path_.quadTo(arrowPosition_.GetX() + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
-        arrowPosition_.GetY() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
-        arrowPosition_.GetX() + NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
-        arrowPosition_.GetY() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
-    path_.quadTo(arrowPosition_.GetX() + NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
-        arrowPosition_.GetY() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
-        arrowPosition_.GetX() + NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
-        arrowPosition_.GetY() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
-    path_.lineTo(arrowPosition_.GetX() + (childHalfWidth - NormalizeToPx(border_.BottomRightRadius().GetX())),
-        arrowPosition_.GetY() - bubbleSpacing);
+    path_.moveTo(arrowPositionX + arrowOffset, arrowPositionY);
+    path_.quadTo(arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
+        arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
+    path_.quadTo(arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
+        arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
+    path_.lineTo(childOffsetX + childWidth - NormalizeToPx(border_.BottomRightRadius().GetX()),
+        childOffsetY + childHeight);
     path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
         0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
-        arrowPosition_.GetX() + childHalfWidth,
-        arrowPosition_.GetY() - bubbleSpacing - NormalizeToPx(border_.BottomRightRadius().GetY()));
-    path_.lineTo(arrowPosition_.GetX() + childHalfWidth,
-        arrowPosition_.GetY() - bubbleSpacing - (childHeight - NormalizeToPx(border_.TopRightRadius().GetY())));
+        childOffsetX + childWidth,
+        childOffsetY + childHeight - NormalizeToPx(border_.BottomRightRadius().GetY()));
+    path_.lineTo(childOffsetX + childWidth, childOffsetY + NormalizeToPx(border_.TopRightRadius().GetY()));
     path_.arcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
         SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
-        arrowPosition_.GetX() + childHalfWidth - NormalizeToPx(border_.TopRightRadius().GetX()),
-        arrowPosition_.GetY() - bubbleSpacing - childHeight);
-    path_.lineTo(arrowPosition_.GetX() - (childHalfWidth - NormalizeToPx(border_.TopLeftRadius().GetX())),
-        arrowPosition_.GetY() - bubbleSpacing - childHeight);
+        childOffsetX + childWidth - NormalizeToPx(border_.TopRightRadius().GetX()),
+        childOffsetY);
+    path_.lineTo(childOffsetX + NormalizeToPx(border_.TopLeftRadius().GetX()), childOffsetY);
     path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction, arrowPosition_.GetX() - childHalfWidth,
-        arrowPosition_.GetY() - bubbleSpacing - (childHeight - NormalizeToPx(border_.TopLeftRadius().GetY())));
-    path_.lineTo(arrowPosition_.GetX() - childHalfWidth,
-        arrowPosition_.GetY() - bubbleSpacing - NormalizeToPx(border_.BottomLeftRadius().GetY()));
+        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        childOffsetX,
+        childOffsetY + NormalizeToPx(border_.TopLeftRadius().GetY()));
+    path_.lineTo(childOffsetX, childOffsetY + childHeight - NormalizeToPx(border_.BottomLeftRadius().GetY()));
     path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
         0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
-        arrowPosition_.GetX() - (childHalfWidth - NormalizeToPx(border_.BottomLeftRadius().GetX())),
-        arrowPosition_.GetY() - bubbleSpacing);
-    path_.lineTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
-        arrowPosition_.GetY() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
-    path_.quadTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
-        arrowPosition_.GetY() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
-        arrowPosition_.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
-        arrowPosition_.GetY() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
-    path_.quadTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
-        arrowPosition_.GetY() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPosition_.GetX() + arrowOffset,
-        arrowPosition_.GetY());
+        childOffsetX + NormalizeToPx(border_.BottomLeftRadius().GetX()),
+        childOffsetY + childHeight);
+    path_.lineTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
+    path_.quadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
+        arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
+    path_.quadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPositionX + arrowOffset,
+        arrowPositionY);
     path_.close();
     RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
     skCanvas->drawPath(path_, paint);
@@ -193,55 +189,50 @@ void RosenRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, const SkPaint& pai
         return;
     }
     double childHeight = childSize_.Height();
-    double childHalfWidth = childSize_.Width() / 2.0;
-    double bubbleSpacing = NormalizeToPx(BUBBLE_SPACING);
-    double arrowOffset = std::clamp(NormalizeToPx(arrowOffset_),
-        -(childHalfWidth - std::max(NormalizeToPx(padding_.Left()), NormalizeToPx(border_.BottomLeftRadius().GetX())) -
-            NormalizeToPx(BEZIER_WIDTH_HALF)),
-        childHalfWidth - std::max(NormalizeToPx(padding_.Right()), NormalizeToPx(border_.BottomRightRadius().GetY())) -
-            NormalizeToPx(BEZIER_WIDTH_HALF));
-
+    double childWidth = childSize_.Width();
+    double childOffsetX = childOffset_.GetX();
+    double childOffsetY = childOffset_.GetY();
+    double arrowPositionX = arrowPosition_.GetX();
+    double arrowPositionY = arrowPosition_.GetY();
+    double arrowOffset = GetArrowOffset(Placement::BOTTOM);
     path_.reset();
-    path_.moveTo(arrowPosition_.GetX() + arrowOffset, arrowPosition_.GetY());
-    path_.quadTo(arrowPosition_.GetX() + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
-        arrowPosition_.GetY() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
-        arrowPosition_.GetX() + NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
-        arrowPosition_.GetY() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
-    path_.quadTo(arrowPosition_.GetX() + NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
-        arrowPosition_.GetY() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
-        arrowPosition_.GetX() + NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
-        arrowPosition_.GetY() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
-    path_.lineTo(arrowPosition_.GetX() + (childHalfWidth - NormalizeToPx(border_.TopRightRadius().GetX())),
-        arrowPosition_.GetY() + bubbleSpacing);
+    path_.moveTo(arrowPositionX + arrowOffset, arrowPositionY);
+    path_.quadTo(arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
+        arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
+    path_.quadTo(arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
+        arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
+    path_.lineTo(childOffsetX + childWidth - NormalizeToPx(border_.TopRightRadius().GetX()), childOffsetY);
     path_.arcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
-        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction, arrowPosition_.GetX() + childHalfWidth,
-        arrowPosition_.GetY() + bubbleSpacing + NormalizeToPx(border_.TopRightRadius().GetY()));
-    path_.lineTo(arrowPosition_.GetX() + childHalfWidth,
-        arrowPosition_.GetY() + bubbleSpacing + childHeight - NormalizeToPx(border_.BottomRightRadius().GetY()));
+        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction, childOffsetX + childWidth,
+        childOffsetY + NormalizeToPx(border_.TopRightRadius().GetY()));
+    path_.lineTo(
+        childOffsetX + childWidth, childOffsetY + childHeight - NormalizeToPx(border_.BottomRightRadius().GetY()));
     path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
         0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction,
-        arrowPosition_.GetX() + childHalfWidth - NormalizeToPx(border_.BottomRightRadius().GetX()),
-        arrowPosition_.GetY() + bubbleSpacing + childHeight);
-    path_.lineTo(arrowPosition_.GetX() - (childHalfWidth - NormalizeToPx(border_.BottomLeftRadius().GetX())),
-        arrowPosition_.GetY() + bubbleSpacing + childHeight);
+        childOffsetX + childWidth - NormalizeToPx(border_.BottomRightRadius().GetX()),
+        childOffsetY + childHeight);
+    path_.lineTo(childOffsetX + NormalizeToPx(border_.BottomLeftRadius().GetX()), childOffsetY + childHeight);
     path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
-        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction, arrowPosition_.GetX() - childHalfWidth,
-        arrowPosition_.GetY() + bubbleSpacing + childHeight - NormalizeToPx(border_.BottomLeftRadius().GetY()));
-    path_.lineTo(arrowPosition_.GetX() - childHalfWidth,
-        arrowPosition_.GetY() + bubbleSpacing + NormalizeToPx(border_.TopLeftRadius().GetY()));
-    path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction, childOffsetX,
+        childOffsetY + childHeight - NormalizeToPx(border_.BottomLeftRadius().GetY()));
+    path_.lineTo(childOffsetX, childOffsetY + NormalizeToPx(border_.TopLeftRadius().GetY()));
+    path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()),
+        NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
         SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction,
-        arrowPosition_.GetX() - (childHalfWidth - NormalizeToPx(border_.TopLeftRadius().GetX())),
-        arrowPosition_.GetY() + bubbleSpacing);
-    path_.lineTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
-        arrowPosition_.GetY() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
-    path_.quadTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
-        arrowPosition_.GetY() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
-        arrowPosition_.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
-        arrowPosition_.GetY() + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
-    path_.quadTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
-        arrowPosition_.GetY() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPosition_.GetX() + arrowOffset,
-        arrowPosition_.GetY());
+        childOffsetX + NormalizeToPx(border_.TopLeftRadius().GetX()), childOffsetY);
+    path_.lineTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
+    path_.quadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
+        arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
+    path_.quadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPositionX + arrowOffset,
+        arrowPositionY);
     path_.close();
     RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
     skCanvas->drawPath(path_, paint);

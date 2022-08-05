@@ -38,6 +38,13 @@ constexpr Dimension BEZIER_VERTICAL_OFFSET_THIRD = 8.0_vp;
 
 } // namespace
 
+struct EdgeSize {
+    double topEdgeWidth = 0.0;
+    double bottomEdgeWidth = 0.0;
+    double leftEdgeHeight = 0.0;
+    double rightEdgeHeight = 0.0;
+};
+
 class RenderBubble : public RenderNode {
     DECLARE_ACE_TYPE(RenderBubble, RenderNode);
 
@@ -72,7 +79,7 @@ protected:
     ErrorPositionType GetErrorPositionType(const Offset& childOffset, const Size& childSize);
     void UpdateAccessibilityInfo(Size size, Offset offset);
     void InitAccessibilityEventListener();
-    double GetArrowOffset();
+    double GetArrowOffset(const Placement& placement);
     void BuildCornerPath(SkPath& path, Placement placement, double radius);
     void BuildTopLinePath(SkPath& path, double arrowOffset, double radius);
     void BuildRightLinePath(SkPath& path, double arrowOffset, double radius);
@@ -116,6 +123,7 @@ private:
     void UpdateCustomChildPosition();
     void GenerateChildPosition(const Size& childSize);
     void UpdateTouchRegion();
+    void InitEdgeSize(EdgeSize& edgeSize);
     TouchRegion touchRegion_;
 };
 
