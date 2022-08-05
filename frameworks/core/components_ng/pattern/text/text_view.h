@@ -32,6 +32,14 @@ public:
     static void ItalicFontStyle(const ItalicFontStyle& value);
     static void FontWeight(const FontWeight& value);
     static void FontFamily(const std::vector<std::string>& value);
+    static void TextAlign(const TextAlign& value);
+    static void TextOverflow(const TextOverflow& value);
+    static void MaxLines(const uint32_t& value);
+    static void LineHeight(const Dimension& value);
+    static void TextDecoration(const TextDecoration& value);
+    static void TextDecorationColor(const Color& value);
+    static void BaselineOffset(const Dimension& value);
+    static void TextCase(const TextCase& value);
 };
 } // namespace OHOS::Ace::NG
 

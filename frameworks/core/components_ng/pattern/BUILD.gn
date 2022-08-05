@@ -40,3 +40,9 @@ build_component_ng("pattern_ng") {
     "text/text_view.cpp",
   ]
 }
+
+group("patternTest_ng") {
+  testonly = true
+
+  deps = [ "text/test:textPatternTest_ng" ]
+}
