@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
+#include "bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
 
 #include "base/log/log.h"
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_curves_module.h"
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_matrix4_module.h"
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_router_module.h"
-#include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
-#include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
+#include "bridge/declarative_frontend/engine/quickjs/modules/qjs_curves_module.h"
+#include "bridge/declarative_frontend/engine/quickjs/modules/qjs_matrix4_module.h"
+#include "bridge/declarative_frontend/engine/quickjs/modules/qjs_router_module.h"
+#include "bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine.h"
+#include "bridge/js_frontend/engine/common/js_constants.h"
+#include "bridge/js_frontend/engine/quickjs/qjs_utils.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -155,27 +156,26 @@ JSValue AppRequestFullWindow(JSContext* ctx, JSValue value, int32_t argc, JSValu
 
 JSValue AppSetImageCacheCount(JSContext* ctx, JSValue value, int32_t argc, JSValueConst* argv)
 {
-    auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
-    if (instance == nullptr) {
-        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("current container is null");
         return JS_NULL;
     }
-    auto delegate = instance->GetDelegate();
-    if (!delegate) {
-        LOGE("get frontend delegate failed");
-        return JS_NULL;
-    }
-    auto pipelineContext = instance->GetPipelineContext(ctx);
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
-        LOGE("get frontend pipelineContext failed");
+        LOGE("get pipelineContext failed");
         return JS_NULL;
     }
-    auto uiTaskExecutor = delegate->GetUiTask();
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null.");
+        return JS_NULL;
+    }
     WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
     int32_t size;
     JS_ToInt32(ctx, &size, argv[0]);
     size = size > 0 ? size : 0;
-    uiTaskExecutor.PostTask([pipelineContextWeak, size]() mutable {
+    taskExecutor->PostTask([pipelineContextWeak, size]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
             auto imageCache = pipelineContext->GetImageCache();
@@ -185,33 +185,32 @@ JSValue AppSetImageCacheCount(JSContext* ctx, JSValue value, int32_t argc, JSVal
                 LOGW("image cache is null");
             }
         }
-    });
+    }, TaskExecutor::TaskType::UI);
     return JS_NULL;
 }
 
 JSValue AppSetImageRawDataCacheSize(JSContext* ctx, JSValue value, int32_t argc, JSValueConst* argv)
 {
-    auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
-    if (instance == nullptr) {
-        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("current container is null");
         return JS_NULL;
     }
-    auto delegate = instance->GetDelegate();
-    if (!delegate) {
-        LOGE("get frontend delegate failed");
-        return JS_NULL;
-    }
-    auto pipelineContext = instance->GetPipelineContext(ctx);
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
-        LOGE("get frontend pipelineContext failed");
+        LOGE("get pipelineContext failed");
         return JS_NULL;
     }
-    auto uiTaskExecutor = delegate->GetUiTask();
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null.");
+        return JS_NULL;
+    }
     WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
     int32_t size;
     JS_ToInt32(ctx, &size, argv[0]);
     size = size > 0 ? size : 0;
-    uiTaskExecutor.PostTask([pipelineContextWeak, size]() mutable {
+    taskExecutor->PostTask([pipelineContextWeak, size]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
             auto imageCache = pipelineContext->GetImageCache();
@@ -221,33 +220,32 @@ JSValue AppSetImageRawDataCacheSize(JSContext* ctx, JSValue value, int32_t argc,
                 LOGW("image cache is null");
             }
         }
-    });
+    }, TaskExecutor::TaskType::UI);
     return JS_NULL;
 }
 
 JSValue AppSetImageFileCacheSize(JSContext* ctx, JSValue value, int32_t argc, JSValueConst* argv)
 {
-    auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(ctx));
-    if (instance == nullptr) {
-        LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("current container is null");
         return JS_NULL;
     }
-    auto delegate = instance->GetDelegate();
-    if (!delegate) {
-        LOGE("get frontend delegate failed");
-        return JS_NULL;
-    }
-    auto pipelineContext = instance->GetPipelineContext(ctx);
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
-        LOGE("get frontend pipelineContext failed");
+        LOGE("get pipelineContext failed");
         return JS_NULL;
     }
-    auto uiTaskExecutor = delegate->GetUiTask();
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null.");
+        return JS_NULL;
+    }
     WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
     int32_t size;
     JS_ToInt32(ctx, &size, argv[0]);
     size = size > 0 ? size : 0;
-    uiTaskExecutor.PostTask([pipelineContextWeak, size]() mutable {
+    taskExecutor->PostTask([pipelineContextWeak, size]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
             auto imageCache = pipelineContext->GetImageCache();
@@ -257,7 +255,7 @@ JSValue AppSetImageFileCacheSize(JSContext* ctx, JSValue value, int32_t argc, JS
                 LOGW("image cache is null");
             }
         }
-    });
+    }, TaskExecutor::TaskType::UI);
     return JS_NULL;
 }
 
