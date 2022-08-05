@@ -29,6 +29,12 @@ var Color;
   Color["Yellow"] = "#ffffff00";
 })(Color || (Color = {}));
 
+var TextInputStyle;
+(function (TextInputStyle) {
+  TextInputStyle["Default"] = "Default";
+  TextInputStyle["Inline"] = "Inline";
+})(TextInputStyle || (TextInputStyle = {}));
+
 var TextAlign;
 (function (TextAlign) {
   TextAlign[TextAlign["Start"] = 0] = "Start";
@@ -93,12 +99,6 @@ var RepeatMode;
   RepeatMode["Round"] = "Round";
   RepeatMode["Space"] = "Space";
 })(RepeatMode || (RepeatMode = {}));
-
-var InputStyle;
-(function (InputStyle) {
-  InputStyle["DEFAULT"] = "DEFAULT";
-  InputStyle["INLINE"] = "INLINE";
-})(InputStyle || (InputStyle = {}));
 
 var BorderStyle;
 (function (BorderStyle) {

@@ -176,15 +176,10 @@ void JSTextField::SetInputStyle(const JSCallbackInfo& info)
         return;
     }
     auto styleString = info[0]->ToString();
-    if (repeatString == "INLINE") {
-
+    if (styleString == "Inline") {
+        component->SetInputStyle(InputStyle::INLINE);
     } else {
-        
-    }
-    if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        component->SetTextAlign(TEXT_ALIGNS[value]);
-    } else {
-        LOGE("the value is error");
+        component->SetInputStyle(InputStyle::DEFAULT);
     }
 }
 

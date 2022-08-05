@@ -76,6 +76,11 @@ struct TextFieldAttribute : Attribute {
     std::vector<InputOption> inputOptions;
 };
 
+enum class InputStyle {
+    DEFAULT,
+    INLINE,
+};
+
 struct TextFieldStyle : Style {
     Dimension height;
 
@@ -92,6 +97,7 @@ struct TextFieldStyle : Style {
     TextStyle overCountStyleOuter;
     TextStyle editingStyle;
     TextStyle placeHoldStyle;
+    InputStyle inputStyle;
 
     Color textColor;
     Color focusTextColor;
@@ -106,7 +112,6 @@ struct TextFieldStyle : Style {
     // Style about error text
     // Whether error text show inner or under.
     bool errorIsInner = false;
-    bool useInlineStyle = false;
     TextStyle errorTextStyle;
     // Spacing between error text and input text.
     Dimension errorSpacing;
@@ -212,16 +217,16 @@ public:
         style.editingStyle = textstyle;
     }
 
-    const TextStyle& UsingInlineStyle() const
+    InputStyle GetInputStyle() const
     {
         auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
-        return style.useInlineStyle;
+        return style.inputStyle;
     }
 
-    void SetInlineStyle(bool) const
+    void SetInputStyle(InputStyle inputStyle)
     {
-        auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
-        return style.editingStyle;
+        auto& style = MaybeResetStyle<TextFieldStyle>(StyleTag::SPECIALIZED_STYLE);
+        style.inputStyle = inputStyle;
     }
 
     const TextStyle& GetPlaceHoldStyle() const
