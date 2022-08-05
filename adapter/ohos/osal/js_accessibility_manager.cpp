@@ -1076,7 +1076,7 @@ bool JsAccessibilityManager::AccessibilityActionEvent(const ActionType& action,
 
 void JsAccessibilityManager::SendActionEvent(const Accessibility::ActionType& action, NodeId nodeId)
 {
-    static std::map<Accessibility::ActionType, std::string> actionToStr {
+    static std::unordered_map<Accessibility::ActionType, std::string> actionToStr {
         { Accessibility::ActionType::ACCESSIBILITY_ACTION_CLICK, DOM_CLICK },
         { Accessibility::ActionType::ACCESSIBILITY_ACTION_LONG_CLICK, DOM_LONG_PRESS },
         { Accessibility::ActionType::ACCESSIBILITY_ACTION_FOCUS, DOM_FOCUS },
