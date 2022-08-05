@@ -57,8 +57,6 @@ void RenderGridLayoutTest::TearDown()
  * @tc.name: RenderGridLayoutTest001
  * @tc.desc: Verify Grid Layout PerformLayout can calculate four children with row direction.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SO
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest001, TestSize.Level1)
 {
@@ -99,8 +97,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest001, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest002
  * @tc.desc: Verify Grid Layout PerformLayout can calculate four children with column direction.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SO
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest002, TestSize.Level1)
 {
@@ -145,8 +141,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest002, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest003
  * @tc.desc: Verify Grid Layout can Dynamic adjustment row count.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SO
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest003, TestSize.Level1)
 {
@@ -209,8 +203,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest003, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest004
  * @tc.desc: Verify Grid Layout can Dynamic adjustment column count.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SO
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest004, TestSize.Level1)
 {
@@ -268,8 +260,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest004, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest005
  * @tc.desc: Verify Grid Layout can layout item with index and span when row.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SP
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest005, TestSize.Level1)
 {
@@ -324,8 +314,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest005, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest006
  * @tc.desc: Verify Grid Layout can layout item with index and span when column.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SP
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest006, TestSize.Level1)
 {
@@ -384,8 +372,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest006, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest007
  * @tc.desc: Verify Grid Layout can layout item with index and span.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SM
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest007, TestSize.Level1)
 {
@@ -447,8 +433,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest007, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest008
  * @tc.desc: Verify Grid Layout can support focus obtain.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SN
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest008, TestSize.Level1)
 {
@@ -489,8 +473,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest008, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest009
  * @tc.desc: Verify Grid Layout can support focus lost.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SN
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest009, TestSize.Level1)
 {
@@ -531,8 +513,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest009, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest010
  * @tc.desc: Verify Grid Layout can support focus move.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SN
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest010, TestSize.Level1)
 {
@@ -585,8 +565,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest010, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest011
  * @tc.desc: Verify Grid Layout can support focus move with empty grid.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SN
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest011, TestSize.Level1)
 {
@@ -634,8 +612,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest011, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest012
  * @tc.desc: Verify Grid Layout PerformLayout can calculate children with gap
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SM
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest012, TestSize.Level1)
 {
@@ -694,8 +670,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest012, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest013
  * @tc.desc: Verify Grid Layout PerformLayout can calculate children with gap
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SM
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest013, TestSize.Level1)
 {
@@ -762,8 +736,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest013, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest014
  * @tc.desc: Verify Grid Layout PerformLayout can calculate children when RTL
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SM
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest014, TestSize.Level1)
 {
@@ -823,8 +795,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest014, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest015
  * @tc.desc: Verify Grid Layout can support focus move when RTL.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SN
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest015, TestSize.Level1)
 {
@@ -880,8 +850,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest015, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest016
  * @tc.desc: Verify Grid Layout PerformLayout can calculate children with invalid index.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SM
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest016, TestSize.Level1)
 {
@@ -933,8 +901,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest016, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest017
  * @tc.desc: Verify Grid Layout can layout items with auto params.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SP
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest017, TestSize.Level1)
 {
@@ -988,8 +954,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest017, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest018
  * @tc.desc: Verify Grid Layout can layout items with auto params.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SP
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest018, TestSize.Level1)
 {
@@ -1064,8 +1028,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest018, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest019
  * @tc.desc: Verify Grid Layout is useful for auto-fill in px mode.
  * @tc.type: FUNC
- * @tc.require: AR000F3BAN
- * @tc.author: yangfan
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest019, TestSize.Level1)
 {
@@ -1140,8 +1102,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest019, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest020
  * @tc.desc: Verify Grid Layout is useful for auto-fill in percent mode.
  * @tc.type: FUNC
- * @tc.require: AR000F3BAO
- * @tc.author: yangfan
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest020, TestSize.Level1)
 {
@@ -1216,8 +1176,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest020, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest021
  * @tc.desc: Verify Grid Layout is useful for auto-fill in percent mode when percent and px is mixed.
  * @tc.type: FUNC
- * @tc.require: AR000F3BAO
- * @tc.author: yangfan
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest021, TestSize.Level1)
 {

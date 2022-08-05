@@ -58,8 +58,6 @@ void RenderGridTest::TearDown()
  * @tc.name: RenderGridTest001
  * @tc.desc: Verify Grid PerformLayout can calculate six children with row direction and one column.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest001, TestSize.Level1)
 {
@@ -131,8 +129,6 @@ HWTEST_F(RenderGridTest, RenderGridTest001, TestSize.Level1)
  * @tc.name: RenderGridTest002
  * @tc.desc: Verify Grid PerformLayout can calculate six children with column direction and one column.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest002, TestSize.Level1)
 {
@@ -206,8 +202,6 @@ HWTEST_F(RenderGridTest, RenderGridTest002, TestSize.Level1)
  * @tc.name: RenderGridTest003
  * @tc.desc: Verify Grid PerformLayout can calculate six children with row reverse direction and one column.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest003, TestSize.Level1)
 {
@@ -280,8 +274,6 @@ HWTEST_F(RenderGridTest, RenderGridTest003, TestSize.Level1)
  * @tc.name: RenderGridTest004
  * @tc.desc: Verify Grid PerformLayout can calculate six children with column reverse direction and one column.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest004, TestSize.Level1)
 {
@@ -354,8 +346,6 @@ HWTEST_F(RenderGridTest, RenderGridTest004, TestSize.Level1)
  * @tc.name: RenderGridTest005
  * @tc.desc: Verify Grid PerformLayout can calculate six children with row direction and two columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest005, TestSize.Level1)
 {
@@ -426,8 +416,6 @@ HWTEST_F(RenderGridTest, RenderGridTest005, TestSize.Level1)
  * @tc.name: RenderGridTest006
  * @tc.desc: Verify Grid PerformLayout can calculate six children with column direction and two columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest006, TestSize.Level1)
 {
@@ -500,8 +488,6 @@ HWTEST_F(RenderGridTest, RenderGridTest006, TestSize.Level1)
  * @tc.name: RenderGridTest007
  * @tc.desc: Verify Grid PerformLayout can calculate six children with row reverse direction and two columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest007, TestSize.Level1)
 {
@@ -574,8 +560,6 @@ HWTEST_F(RenderGridTest, RenderGridTest007, TestSize.Level1)
  * @tc.name: RenderGridTest008
  * @tc.desc: Verify Grid PerformLayout can calculate six children with column reverse direction and two columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest008, TestSize.Level1)
 {
@@ -648,8 +632,6 @@ HWTEST_F(RenderGridTest, RenderGridTest008, TestSize.Level1)
  * @tc.name: RenderGridTest009
  * @tc.desc: Verify Grid PerformLayout can calculate six children with row direction and 5 columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest009, TestSize.Level1)
 {
@@ -721,8 +703,6 @@ HWTEST_F(RenderGridTest, RenderGridTest009, TestSize.Level1)
  * @tc.name: RenderGridTest010
  * @tc.desc: Verify Grid PerformLayout can calculate six children with column direction and 5 columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest010, TestSize.Level1)
 {
@@ -795,8 +775,6 @@ HWTEST_F(RenderGridTest, RenderGridTest010, TestSize.Level1)
  * @tc.name: RenderGridTest011
  * @tc.desc: Verify Grid PerformLayout can calculate six children with row reverse direction and 5 columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest011, TestSize.Level1)
 {
@@ -869,8 +847,6 @@ HWTEST_F(RenderGridTest, RenderGridTest011, TestSize.Level1)
  * @tc.name: RenderGridTest012
  * @tc.desc: Verify Grid PerformLayout can calculate six children with column reverse direction and 5 columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest012, TestSize.Level1)
 {
@@ -943,8 +919,6 @@ HWTEST_F(RenderGridTest, RenderGridTest012, TestSize.Level1)
  * @tc.name: RenderGridTest013
  * @tc.desc: Verify Grid PerformLayout can calculate six children with row direction and 999 extent.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest013, TestSize.Level1)
 {
@@ -1014,8 +988,6 @@ HWTEST_F(RenderGridTest, RenderGridTest013, TestSize.Level1)
  * @tc.name: RenderGridTest014
  * @tc.desc: Verify Grid PerformLayout can calculate six children with column direction and 700.0 extent.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest014, TestSize.Level1)
 {
@@ -1089,8 +1061,6 @@ HWTEST_F(RenderGridTest, RenderGridTest014, TestSize.Level1)
  * @tc.name: RenderGridTest015
  * @tc.desc: Verify Grid PerformLayout can calculate six children with row reverse direction and 301 extent.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest015, TestSize.Level1)
 {
@@ -1164,8 +1134,6 @@ HWTEST_F(RenderGridTest, RenderGridTest015, TestSize.Level1)
  * @tc.name: RenderGridTest016
  * @tc.desc: Verify Grid PerformLayout can calculate six children with column reverse direction and 319 extent.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest016, TestSize.Level1)
 {
@@ -1234,8 +1202,6 @@ HWTEST_F(RenderGridTest, RenderGridTest016, TestSize.Level1)
  * @tc.name: RenderGridTest017
  * @tc.desc: Verify Grid PerformLayout can calculate six children with row direction and two columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest017, TestSize.Level1)
 {
@@ -1304,8 +1270,6 @@ HWTEST_F(RenderGridTest, RenderGridTest017, TestSize.Level1)
  * @tc.name: RenderGridTest018
  * @tc.desc: Verify Grid PerformLayout can calculate six children with column direction and 179 extent.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest018, TestSize.Level1)
 {
@@ -1379,8 +1343,6 @@ HWTEST_F(RenderGridTest, RenderGridTest018, TestSize.Level1)
  * @tc.name: RenderGridTest019
  * @tc.desc: Verify Grid PerformLayout can calculate six children with row reverse direction and two columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest019, TestSize.Level1)
 {
@@ -1449,8 +1411,6 @@ HWTEST_F(RenderGridTest, RenderGridTest019, TestSize.Level1)
  * @tc.name: RenderGridTest020
  * @tc.desc: Verify Grid PerformLayout can calculate six children with column reverse direction and 125 extent.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest020, TestSize.Level1)
 {
@@ -1518,8 +1478,6 @@ HWTEST_F(RenderGridTest, RenderGridTest020, TestSize.Level1)
  * @tc.name: RenderGridTest021
  * @tc.desc: Verify Grid PerformLayout can calculate six children with row direction and 400.0 extent.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest021, TestSize.Level1)
 {
@@ -1600,8 +1558,6 @@ HWTEST_F(RenderGridTest, RenderGridTest021, TestSize.Level1)
  * @tc.name: RenderGridTest022
  * @tc.desc: Verify Grid PerformLayout can calculate six children with column direction and 300.0 extent.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest022, TestSize.Level1)
 {
@@ -1674,8 +1630,6 @@ HWTEST_F(RenderGridTest, RenderGridTest022, TestSize.Level1)
  * @tc.name: RenderGridTest023
  * @tc.desc: Verify Grid PerformLayout can calculate six children with row reverse direction and 200.0 extent.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest023, TestSize.Level1)
 {
@@ -1759,8 +1713,6 @@ HWTEST_F(RenderGridTest, RenderGridTest023, TestSize.Level1)
  * @tc.name: RenderGridTest024
  * @tc.desc: Verify Grid PerformLayout can calculate six children with column reverse direction and 5 columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest024, TestSize.Level1)
 {
@@ -1836,8 +1788,6 @@ HWTEST_F(RenderGridTest, RenderGridTest024, TestSize.Level1)
  * @tc.name: RenderGridTest025
  * @tc.desc: Verify Grid PerformLayout can calculate multi children(span 2) by row direction.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest025, TestSize.Level1)
 {
@@ -1899,8 +1849,6 @@ HWTEST_F(RenderGridTest, RenderGridTest025, TestSize.Level1)
  * @tc.name: RenderGridTest026
  * @tc.desc: Verify Grid PerformLayout can calculate multi children(span 3) by column direction.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest026, TestSize.Level1)
 {
@@ -1969,8 +1917,6 @@ HWTEST_F(RenderGridTest, RenderGridTest026, TestSize.Level1)
  * @tc.name: RenderGridTest027
  * @tc.desc: Verify Grid PerformLayout can calculate multi children(span 4) by row reverse direction.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest027, TestSize.Level1)
 {
@@ -2033,8 +1979,6 @@ HWTEST_F(RenderGridTest, RenderGridTest027, TestSize.Level1)
  * @tc.name: RenderGridTest028
  * @tc.desc: Verify Grid PerformLayout can calculate multi children(span 3) by column reverse direction.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest028, TestSize.Level1)
 {
@@ -2096,8 +2040,6 @@ HWTEST_F(RenderGridTest, RenderGridTest028, TestSize.Level1)
  * @tc.name: RenderGridTest029
  * @tc.desc: Verify Grid JumpTo and AnimateTo API when row direction and two columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest029, TestSize.Level1)
 {
@@ -2161,8 +2103,6 @@ HWTEST_F(RenderGridTest, RenderGridTest029, TestSize.Level1)
  * @tc.name: RenderGridTest030
  * @tc.desc: Verify Grid JumpTo and AnimateTo API when column direction and three columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest030, TestSize.Level1)
 {
@@ -2226,8 +2166,6 @@ HWTEST_F(RenderGridTest, RenderGridTest030, TestSize.Level1)
  * @tc.name: RenderGridTest031
  * @tc.desc: Verify Grid JumpTo and AnimateTo API when row reverse direction and four columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest031, TestSize.Level1)
 {
@@ -2289,8 +2227,6 @@ HWTEST_F(RenderGridTest, RenderGridTest031, TestSize.Level1)
  * @tc.name: RenderGridTest032
  * @tc.desc: Verify Grid JumpTo and AnimateTo API when column reverse direction and three columns.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest032, TestSize.Level1)
 {
@@ -2353,8 +2289,6 @@ HWTEST_F(RenderGridTest, RenderGridTest032, TestSize.Level1)
  * @tc.name: RenderGridTest033
  * @tc.desc: Verify Grid Scroll Event can callback when event trigger.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest033, TestSize.Level1)
 {
@@ -2411,8 +2345,6 @@ HWTEST_F(RenderGridTest, RenderGridTest033, TestSize.Level1)
  * @tc.name: RenderGridTest034
  * @tc.desc: Verify Grid ScrollBottom Event can callback when event trigger.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest034, TestSize.Level1)
 {
@@ -2461,8 +2393,6 @@ HWTEST_F(RenderGridTest, RenderGridTest034, TestSize.Level1)
  * @tc.name: RenderGridTest035
  * @tc.desc: Verify Grid ScrollTop Event can callback when event trigger.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest035, TestSize.Level1)
 {
@@ -2511,8 +2441,6 @@ HWTEST_F(RenderGridTest, RenderGridTest035, TestSize.Level1)
  * @tc.name: RenderGridTest036
  * @tc.desc: Verify Grid ScrollEnd Event can callback when event trigger.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest036, TestSize.Level1)
 {
@@ -2559,8 +2487,6 @@ HWTEST_F(RenderGridTest, RenderGridTest036, TestSize.Level1)
  * @tc.name: RenderGridTest037
  * @tc.desc: Verify Grid ScrollTouchUp Event can callback when event trigger.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest037, TestSize.Level1)
 {
@@ -2610,8 +2536,6 @@ HWTEST_F(RenderGridTest, RenderGridTest037, TestSize.Level1)
  * @tc.name: RenderGridTest038
  * @tc.desc: Verify Grid can obtain and lost focus when row direction.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5P
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest038, TestSize.Level1)
 {
@@ -2684,8 +2608,6 @@ HWTEST_F(RenderGridTest, RenderGridTest038, TestSize.Level1)
  * @tc.name: RenderGridTest039
  * @tc.desc: Verify Grid can obtain and lost focus when column direction.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5P
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest039, TestSize.Level1)
 {
@@ -2761,8 +2683,6 @@ HWTEST_F(RenderGridTest, RenderGridTest039, TestSize.Level1)
  * @tc.name: RenderGridTest040
  * @tc.desc: Verify Grid can obtain and lost focus when row reverse direction.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5P
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest040, TestSize.Level1)
 {
@@ -2835,8 +2755,6 @@ HWTEST_F(RenderGridTest, RenderGridTest040, TestSize.Level1)
  * @tc.name: RenderGridTest041
  * @tc.desc: Verify Grid can obtain and lost focus when column reverse direction and diff span.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5P
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest041, TestSize.Level1)
 {
@@ -2911,8 +2829,6 @@ HWTEST_F(RenderGridTest, RenderGridTest041, TestSize.Level1)
  * @tc.name: RenderGridTest042
  * @tc.desc: Verify Grid can obtain and lost focus when column direction and same span.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5P
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderGridTest, RenderGridTest042, TestSize.Level1)
 {

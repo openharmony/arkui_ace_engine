@@ -70,8 +70,6 @@ public:
  * @tc.name: RenderWrapPerformLayout001
  * @tc.desc: Wrap component layout children correctly in horizontal
  * @tc.type: FUNC
- * @tc.require: AR000DBAOR
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout001, TestSize.Level1)
 {
@@ -116,8 +114,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout001, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout002
  * @tc.desc: Wrap component layout children correctly in vertical
  * @tc.type: FUNC
- * @tc.require: AR000DBAOR
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout002, TestSize.Level1)
 {
@@ -164,8 +160,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout002, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout003
  * @tc.desc: Wrap component layout children correctly when the constrain is smaller than requested
  * @tc.type: FUNC
- * @tc.require: AR000DBAOR
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout003, TestSize.Level1)
 {
@@ -213,8 +207,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout003, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout004
  * @tc.desc: Wrap component layout children in vertical correctly when the constrain is smaller than requested
  * @tc.type: FUNC
- * @tc.require: AR000DBAOR
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout004, TestSize.Level1)
 {
@@ -262,8 +254,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout004, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout005
  * @tc.desc: Wrap component layout children in horizontal correctly when the constrain is smaller than requested
  * @tc.type: FUNC
- * @tc.require: AR000DBAOR
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout005, TestSize.Level1)
 {
@@ -306,8 +296,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout005, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout006
  * @tc.desc: Wrap component layout children in horizontal correctly and wrap size is correct
  * @tc.type: FUNC
- * @tc.require: AR000DBAOR
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout006, TestSize.Level1)
 {
@@ -351,8 +339,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout006, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout007
  * @tc.desc: Wrap component layout children in horizontal correctly and set space
  * @tc.type: FUNC
- * @tc.require: AR000DBAOS
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout007, TestSize.Level1)
 {
@@ -400,8 +386,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout007, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout008
  * @tc.desc: Wrap component layout children in vertical correctly and set space
  * @tc.type: FUNC
- * @tc.require: AR000DBAOS
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout008, TestSize.Level1)
 {
@@ -450,8 +434,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout008, TestSize.Level1)
  * @tc.desc: Wrap component layout children in horizontal correctly. Children align by main:START and cross:CENTER
  * alignment.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOT
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout009, TestSize.Level1)
 {
@@ -496,8 +478,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout009, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout010
  * @tc.desc: Wrap component layout children in horizontal correctly. Children align by main:CENTER and cross:START.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOT
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout010, TestSize.Level1)
 {
@@ -542,8 +522,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout010, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout011
  * @tc.desc: Wrap component layout children in horizontal correctly. Children align by main:END and cross:END.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOT
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout011, TestSize.Level1)
 {
@@ -588,8 +566,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout011, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout012
  * @tc.desc: Wrap component layout children in vertical correctly. Children align by main:START and cross:CENTER.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOT
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout012, TestSize.Level1)
 {
@@ -635,8 +611,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout012, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout013
  * @tc.desc: Wrap component layout children in vertical correctly. Children align by main:CENTER and cross:START.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOT
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout013, TestSize.Level1)
 {
@@ -682,8 +656,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout013, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout014
  * @tc.desc: Wrap component layout children in vertical correctly. Children align by main:END and cross:END.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOT
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout014, TestSize.Level1)
 {
@@ -730,8 +702,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout014, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout015
  * @tc.desc: Wrap component layout children in horizontal correctly. Children align by main alignment: space_between.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOT
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout015, TestSize.Level1)
 {
@@ -776,8 +746,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout015, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout016
  * @tc.desc: Wrap component layout children in horizontal correctly. Children align by main alignment: space_around.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOT
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout016, TestSize.Level1)
 {
@@ -822,8 +790,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout016, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout017
  * @tc.desc: Wrap component layout children in horizontal correctly. Children align by cross alignment: stretch.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOT
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout017, TestSize.Level1)
 {
@@ -872,8 +838,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout017, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout018
  * @tc.desc: Wrap component layout children in vertical correctly. Children align by main alignment: space_between.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOT
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout018, TestSize.Level1)
 {
@@ -924,8 +888,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout018, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout019
  * @tc.desc: Wrap component layout children in vertical correctly. Children align by main alignment: space_around.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOT
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout019, TestSize.Level1)
 {
@@ -972,8 +934,6 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout019, TestSize.Level1)
  * @tc.name: RenderWrapPerformLayout020
  * @tc.desc: Wrap component layout children in vertical correctly. Children align by cross alignment: stretch.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOT
- * @tc.author: Yao Yuchi
  */
 HWTEST_F(RenderWrapTest, RenderWrapPerformLayout020, TestSize.Level1)
 {

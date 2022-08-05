@@ -266,8 +266,6 @@ void ViewUpdateTest::UpdateAndValidate()
  * @tc.name: ViewUpdateTest001
  * @tc.desc: View Updates caused by adding components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGB
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest001, TestSize.Level1)
 {
@@ -285,8 +283,6 @@ HWTEST_F(ViewUpdateTest, ViewUpdateTest001, TestSize.Level1)
  * @tc.name: ViewUpdateTest002
  * @tc.desc: View Updates caused by adding components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGB
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest002, TestSize.Level1)
 {
@@ -310,8 +306,6 @@ HWTEST_F(ViewUpdateTest, ViewUpdateTest002, TestSize.Level1)
  * @tc.name: ViewUpdateTest003
  * @tc.desc: View Updates caused by adding components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGB
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest003, TestSize.Level1)
 {
@@ -353,8 +347,6 @@ HWTEST_F(ViewUpdateTest, ViewUpdateTest003, TestSize.Level1)
  * @tc.name: ViewUpdateTest004
  * @tc.desc: View Updates caused by deleting components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGD
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest004, TestSize.Level1)
 {
@@ -379,8 +371,6 @@ HWTEST_F(ViewUpdateTest, ViewUpdateTest004, TestSize.Level1)
  * @tc.name: ViewUpdateTest005
  * @tc.desc: View Updates caused by deleting components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGD
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest005, TestSize.Level1)
 {
@@ -414,8 +404,6 @@ HWTEST_F(ViewUpdateTest, ViewUpdateTest005, TestSize.Level1)
  * @tc.name: ViewUpdateTest006
  * @tc.desc: View Updates caused by deleting components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGD
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest006, TestSize.Level1)
 {
@@ -456,8 +444,6 @@ HWTEST_F(ViewUpdateTest, ViewUpdateTest006, TestSize.Level1)
  * @tc.name: ViewUpdateTest007
  * @tc.desc: View Updates caused by updating components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGC
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest007, TestSize.Level1)
 {
@@ -484,8 +470,6 @@ HWTEST_F(ViewUpdateTest, ViewUpdateTest007, TestSize.Level1)
  * @tc.name: ViewUpdateTest008
  * @tc.desc: View Updates caused by updating components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGC
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest008, TestSize.Level1)
 {
@@ -511,8 +495,6 @@ HWTEST_F(ViewUpdateTest, ViewUpdateTest008, TestSize.Level1)
  * @tc.name: ViewUpdateTest009
  * @tc.desc: View Updates caused by updating components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGC
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest009, TestSize.Level1)
 {
@@ -567,8 +549,6 @@ HWTEST_F(ViewUpdateTest, ViewUpdateTest009, TestSize.Level1)
  * @tc.name: ViewUpdateTest010
  * @tc.desc: View Updates caused by updating components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGC
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest010, TestSize.Level1)
 {
@@ -623,8 +603,6 @@ HWTEST_F(ViewUpdateTest, ViewUpdateTest010, TestSize.Level1)
  * @tc.name: ViewUpdateTest011
  * @tc.desc: View Updates caused by updating components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGC
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest011, TestSize.Level1)
 {
@@ -674,8 +652,6 @@ HWTEST_F(ViewUpdateTest, ViewUpdateTest011, TestSize.Level1)
  * @tc.name: ViewUpdateTest012
  * @tc.desc: View Updates caused by updating components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGC
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest012, TestSize.Level1)
 {
@@ -724,8 +700,6 @@ HWTEST_F(ViewUpdateTest, ViewUpdateTest012, TestSize.Level1)
  * @tc.name: ViewUpdateTest013
  * @tc.desc: View Updates caused by updating components.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGC
- * @tc.author: fanzhaonan
  */
 HWTEST_F(ViewUpdateTest, ViewUpdateTest013, TestSize.Level1)
 {

@@ -56,8 +56,6 @@ public:
  * @tc.name: RenderStackUpdate001
  * @tc.desc: Verify the Update Interface of RenderStack does not work for other components
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN AR000DAQTO AR000DAQTP
- * @tc.author: yangfan
  */
 HWTEST_F(RenderStackTest, RenderStackUpdate001, TestSize.Level1)
 {
@@ -78,8 +76,6 @@ HWTEST_F(RenderStackTest, RenderStackUpdate001, TestSize.Level1)
  * @tc.name: RenderStackUpdate002
  * @tc.desc: Verify that RenderStack works for stack component.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN AR000DAQTO AR000DAQTP
- * @tc.author: yangfan
  */
 HWTEST_F(RenderStackTest, RenderStackUpdate002, TestSize.Level1)
 {
@@ -106,8 +102,6 @@ HWTEST_F(RenderStackTest, RenderStackUpdate002, TestSize.Level1)
  * @tc.name: RenderStackLayout001
  * @tc.desc: Verify the stack with top-left alignment works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN
- * @tc.author: yangfan
  */
 HWTEST_F(RenderStackTest, RenderStackLayout001, TestSize.Level1)
 {
@@ -144,8 +138,6 @@ HWTEST_F(RenderStackTest, RenderStackLayout001, TestSize.Level1)
  * @tc.name: RenderStackLayout002
  * @tc.desc: Verify the stack component with top-center works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN
- * @tc.author: yangfan
  */
 HWTEST_F(RenderStackTest, RenderStackLayout002, TestSize.Level1)
 {
@@ -183,8 +175,6 @@ HWTEST_F(RenderStackTest, RenderStackLayout002, TestSize.Level1)
  * @tc.name: RenderStackLayout003
  * @tc.desc: Verify the stack component with top-right works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN
- * @tc.author: yangfan
  */
 HWTEST_F(RenderStackTest, RenderStackLayout003, TestSize.Level1)
 {
@@ -221,8 +211,6 @@ HWTEST_F(RenderStackTest, RenderStackLayout003, TestSize.Level1)
  * @tc.name: RenderStackLayout004
  * @tc.desc: Verify the stack component with center-left works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN
- * @tc.author: yangfan
  */
 HWTEST_F(RenderStackTest, RenderStackLayout004, TestSize.Level1)
 {
@@ -260,8 +248,6 @@ HWTEST_F(RenderStackTest, RenderStackLayout004, TestSize.Level1)
  * @tc.name: RenderStackLayout005
  * @tc.desc: Verify the stack component with center-center works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN
- * @tc.author: yangfan
  */
 HWTEST_F(RenderStackTest, RenderStackLayout005, TestSize.Level1)
 {
@@ -298,8 +284,6 @@ HWTEST_F(RenderStackTest, RenderStackLayout005, TestSize.Level1)
  * @tc.name: RenderStackLayout006
  * @tc.desc: Verify the stack component with center-right works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN
- * @tc.author: yangfan
  */
 HWTEST_F(RenderStackTest, RenderStackLayout006, TestSize.Level1)
 {
@@ -337,8 +321,6 @@ HWTEST_F(RenderStackTest, RenderStackLayout006, TestSize.Level1)
  * @tc.name: RenderStackLayout007
  * @tc.desc: Verify the stack component with bottom-left works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN
- * @tc.author: yangfan
  */
 HWTEST_F(RenderStackTest, RenderStackLayout007, TestSize.Level1)
 {
@@ -376,8 +358,6 @@ HWTEST_F(RenderStackTest, RenderStackLayout007, TestSize.Level1)
  * @tc.name: RenderStackLayout008
  * @tc.desc: Verify the stack component with bottom-center works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN
- * @tc.author: yangfan
  */
 HWTEST_F(RenderStackTest, RenderStackLayout008, TestSize.Level1)
 {
@@ -415,8 +395,6 @@ HWTEST_F(RenderStackTest, RenderStackLayout008, TestSize.Level1)
  * @tc.name: RenderStackLayout009
  * @tc.desc: Verify the stack component with bottom-right works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN
- * @tc.author: yangfan
  */
 HWTEST_F(RenderStackTest, RenderStackLayout009, TestSize.Level1)
 {
@@ -454,8 +432,6 @@ HWTEST_F(RenderStackTest, RenderStackLayout009, TestSize.Level1)
  * @tc.name: RenderStackLayout010
  * @tc.desc: Verify the stack component with stretch stackfit works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTO
- * @tc.author: yangfan
  */
 HWTEST_F(RenderStackTest, RenderStackLayout010, TestSize.Level1)
 {

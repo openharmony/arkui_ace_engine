@@ -74,8 +74,6 @@ void RatingCreatorTest::TearDown() {}
  * @tc.name: RatingCreator001
  * @tc.desc: Test parse rating's field successfully from the right fields dsl json of rating component.
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB AR000DBSLC AR000DBSLD AR000DBSLE
- * @tc.author: kouxinxin
  */
 HWTEST_F(RatingCreatorTest, RatingCreator001, TestSize.Level1)
 {
@@ -119,8 +117,6 @@ HWTEST_F(RatingCreatorTest, RatingCreator001, TestSize.Level1)
  * @tc.name: RatingCreator002
  * @tc.desc: Test parse rating's field successfully from no field dsl json of rating component.
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB AR000DBSLC AR000DBSLD AR000DBSLE
- * @tc.author: kouxinxin
  */
 HWTEST_F(RatingCreatorTest, RatingCreator002, TestSize.Level1)
 {
@@ -137,8 +133,6 @@ HWTEST_F(RatingCreatorTest, RatingCreator002, TestSize.Level1)
  * @tc.name: RatingCreator003
  * @tc.desc: Test parse rating's field successfully from the type error fields dsl json of rating component.
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB AR000DBSLC AR000DBSLD AR000DBSLE
- * @tc.author: kouxinxin
  */
 HWTEST_F(RatingCreatorTest, RatingCreator003, TestSize.Level1)
 {

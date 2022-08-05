@@ -99,8 +99,6 @@ void FlexItemCreatorTest::CheckItemProperties(const RefPtr<FlexItemComponent>& f
  * @tc.name: FlexItemProperties001
  * @tc.desc: Check flex item component with no properties can be created with default properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1Q
- * @tc.author: yangfan
  */
 HWTEST_F(FlexItemCreatorTest, FlexItemProperties001, TestSize.Level1)
 {
@@ -132,8 +130,6 @@ HWTEST_F(FlexItemCreatorTest, FlexItemProperties001, TestSize.Level1)
  * @tc.name: FlexItemProperties002
  * @tc.desc: Check flex item component with invalid properties can be created with default properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1Q
- * @tc.author: yangfan
  */
 HWTEST_F(FlexItemCreatorTest, FlexItemProperties002, TestSize.Level1)
 {
@@ -168,8 +164,6 @@ HWTEST_F(FlexItemCreatorTest, FlexItemProperties002, TestSize.Level1)
  * @tc.name: FlexItemProperties003
  * @tc.desc: Check flex item component with valid properties can be created with correct properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1Q
- * @tc.author: yangfan
  */
 HWTEST_F(FlexItemCreatorTest, FlexItemProperties003, TestSize.Level1)
 {
@@ -204,8 +198,6 @@ HWTEST_F(FlexItemCreatorTest, FlexItemProperties003, TestSize.Level1)
  * @tc.name: FlexItemChild001
  * @tc.desc: Verify the flex item component with single flex child is correct.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1Q
- * @tc.author: yangfan
  */
 HWTEST_F(FlexItemCreatorTest, FlexItemChild001, TestSize.Level1)
 {
@@ -240,8 +232,6 @@ HWTEST_F(FlexItemCreatorTest, FlexItemChild001, TestSize.Level1)
  * @tc.name: FlexItemChild002
  * @tc.desc: Verify the flex item component with double child returns single child.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1Q
- * @tc.author: yangfan
  */
 HWTEST_F(FlexItemCreatorTest, FlexItemChild002, TestSize.Level1)
 {
@@ -282,8 +272,6 @@ HWTEST_F(FlexItemCreatorTest, FlexItemChild002, TestSize.Level1)
  * @tc.name: FlexItemChild003
  * @tc.desc: Verify the flex item component with no child returns no child.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1Q
- * @tc.author: yangfan
  */
 HWTEST_F(FlexItemCreatorTest, FlexItemChild003, TestSize.Level1)
 {

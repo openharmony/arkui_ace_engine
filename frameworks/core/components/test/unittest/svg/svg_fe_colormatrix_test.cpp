@@ -80,8 +80,6 @@ public:
  * @tc.name: SvgFeColorMatrixTest001
  * @tc.desc: Verify the Update Interface of SvgFeDeclaration work correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGI
- * @tc.author: huye
  */
 HWTEST_F(SvgFeColorMatrixTest, SvgFeColorMatrixTest001, TestSize.Level1)
 {
@@ -110,8 +108,6 @@ HWTEST_F(SvgFeColorMatrixTest, SvgFeColorMatrixTest001, TestSize.Level1)
  * @tc.name: SvgFeColorMatrixTest002
  * @tc.desc: Verify the Update Interface of SvgFeDeclaration work correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGI
- * @tc.author: huye
  */
 HWTEST_F(SvgFeColorMatrixTest, SvgFeColorMatrixTest002, TestSize.Level1)
 {
@@ -170,8 +166,6 @@ HWTEST_F(SvgFeColorMatrixTest, SvgFeColorMatrixTest002, TestSize.Level1)
  * @tc.name: SvgFeColorMatrixTest003
  * @tc.desc: Verify the Update Interface of SvgFeDeclaration work correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGI
- * @tc.author: huye
  */
 HWTEST_F(SvgFeColorMatrixTest, SvgFeColorMatrixTest003, TestSize.Level1)
 {

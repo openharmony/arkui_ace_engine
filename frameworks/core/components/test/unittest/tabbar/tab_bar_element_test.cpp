@@ -126,8 +126,6 @@ void TabBarElementTest::InitFocusTree()
  * @tc.name: TabBarElementTest001
  * @tc.desc: Verify the basic function of request focus and release focus.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5Q
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarElementTest, TabBarElementTest001, TestSize.Level1)
 {
@@ -223,8 +221,6 @@ HWTEST_F(TabBarElementTest, TabBarElementTest001, TestSize.Level1)
  * @tc.name: TabBarElementTest002
  * @tc.desc: when focus lost and got again, TabBar should remember the latest on focused child.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5Q
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarElementTest, TabBarElementTest002, TestSize.Level1)
 {
@@ -338,8 +334,6 @@ HWTEST_F(TabBarElementTest, TabBarElementTest002, TestSize.Level1)
  * @tc.name: TabBarElementTest003
  * @tc.desc: when focus at the edge of left, still left will not lost the focus.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5Q
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarElementTest, TabBarElementTest003, TestSize.Level1)
 {
@@ -382,8 +376,6 @@ HWTEST_F(TabBarElementTest, TabBarElementTest003, TestSize.Level1)
  * @tc.name: TabBarElementTest004
  * @tc.desc: when focus at the edge of child's right, still right will left the next component the focus.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5Q
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarElementTest, TabBarElementTest004, TestSize.Level1)
 {

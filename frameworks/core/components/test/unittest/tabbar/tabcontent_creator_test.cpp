@@ -76,8 +76,6 @@ void TabContentCreatorTest::TearDown() {}
  * @tc.name: TabContentCreator001
  * @tc.desc: Test parse TabContent's field successfully from no field dsl json of tabcontent component.
  * @tc.type: FUNC
- * @tc.require: AR000DAR32
- * @tc.author: liujinwei
  */
 HWTEST_F(TabContentCreatorTest, TabContentCreator001, TestSize.Level1)
 {
@@ -94,8 +92,6 @@ HWTEST_F(TabContentCreatorTest, TabContentCreator001, TestSize.Level1)
  * @tc.name: TabContentCreator002
  * @tc.desc: Test tabContent's field successfully from fields.
  * @tc.type: FUNC
- * @tc.require: AR000DAR32 AR000DAR33
- * @tc.author: liujinwei
  */
 HWTEST_F(TabContentCreatorTest, TabContentCreator002, TestSize.Level1)
 {
@@ -128,8 +124,6 @@ HWTEST_F(TabContentCreatorTest, TabContentCreator002, TestSize.Level1)
  * @tc.name: TabContentCreator003
  * @tc.desc: Test parse TabContent's field successfully from invalid index of tabbar component.
  * @tc.type: FUNC
- * @tc.require: AR000DAR32
- * @tc.author: liujinwei
  */
 HWTEST_F(TabContentCreatorTest, TabContentCreator003, TestSize.Level1)
 {
@@ -192,8 +186,6 @@ HWTEST_F(TabContentCreatorTest, TabContentCreator003, TestSize.Level1)
  * @tc.name: TabContentCreator004
  * @tc.desc: Test tabContent's field successfully from tabbar component without index.
  * @tc.type: FUNC
- * @tc.require: AR000DAR32
- * @tc.author: liujinwei
  */
 HWTEST_F(TabContentCreatorTest, TabContentCreator004, TestSize.Level1)
 {
@@ -242,8 +234,6 @@ HWTEST_F(TabContentCreatorTest, TabContentCreator004, TestSize.Level1)
  * @tc.name: TabContentCreator005
  * @tc.desc: Test tabContent's field successfully from tabbar component with index.
  * @tc.type: FUNC
- * @tc.require: AR000DAR32
- * @tc.author: liujinwei
  */
 HWTEST_F(TabContentCreatorTest, TabContentCreator005, TestSize.Level1)
 {
@@ -292,8 +282,6 @@ HWTEST_F(TabContentCreatorTest, TabContentCreator005, TestSize.Level1)
  * @tc.name: TabContentCreator006
  * @tc.desc: Test tabContent's field successfully from tabbar component without scrollable.
  * @tc.type: FUNC
- * @tc.require: AR000DAR33
- * @tc.author: liujinwei
  */
 HWTEST_F(TabContentCreatorTest, TabContentCreator006, TestSize.Level1)
 {
@@ -324,8 +312,6 @@ HWTEST_F(TabContentCreatorTest, TabContentCreator006, TestSize.Level1)
  * @tc.name: TabContentCreator007
  * @tc.desc: Test tabContent's field successfully from tabbar component with scrollable.
  * @tc.type: FUNC
- * @tc.require: AR000DAR33
- * @tc.author: liujinwei
  */
 HWTEST_F(TabContentCreatorTest, TabContentCreator007, TestSize.Level1)
 {
@@ -357,8 +343,6 @@ HWTEST_F(TabContentCreatorTest, TabContentCreator007, TestSize.Level1)
  * @tc.name: TabContentCreator008
  * @tc.desc: Test tabContent's field successfully.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V3
- * @tc.author: liujinwei
  */
 HWTEST_F(TabContentCreatorTest, TabContentCreator008, TestSize.Level1)
 {
@@ -389,8 +373,6 @@ HWTEST_F(TabContentCreatorTest, TabContentCreator008, TestSize.Level1)
  * @tc.name: TabContentCreator009
  * @tc.desc: Test tabContent's field successfully.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V3
- * @tc.author: liujinwei
  */
 HWTEST_F(TabContentCreatorTest, TabContentCreator009, TestSize.Level1)
 {
@@ -422,8 +404,6 @@ HWTEST_F(TabContentCreatorTest, TabContentCreator009, TestSize.Level1)
  * @tc.name: TabContentCreator010
  * @tc.desc: Test tabContent's field successfully.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V3
- * @tc.author: liujinwei
  */
 HWTEST_F(TabContentCreatorTest, TabContentCreator010, TestSize.Level1)
 {

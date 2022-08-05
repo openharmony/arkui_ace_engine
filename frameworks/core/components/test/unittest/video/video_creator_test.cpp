@@ -121,8 +121,6 @@ void VideoCreatorTest::CompareAllDefault(const RefPtr<VideoComponent>& video)
  * @tc.name: VideoComponentCreator001
  * @tc.desc: Test all the property created properly
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T AR000DACKK
- * @tc.author: HeSu
  */
 HWTEST_F(VideoCreatorTest, VideoComponentCreator001, TestSize.Level1)
 {
@@ -160,8 +158,6 @@ HWTEST_F(VideoCreatorTest, VideoComponentCreator001, TestSize.Level1)
  * @tc.name: VideoComponentCreator002
  * @tc.desc: Test value validation. If src is invalid, create component failed.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T AR000DACKK
- * @tc.author: HeSu
  */
 HWTEST_F(VideoCreatorTest, VideoComponentCreator002, TestSize.Level1)
 {
@@ -197,8 +193,6 @@ HWTEST_F(VideoCreatorTest, VideoComponentCreator002, TestSize.Level1)
  * @tc.name: VideoComponentCreator003
  * @tc.desc: Test the VideoComponent initialized by default value.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T AR000DACKK
- * @tc.author: YaoYuchi
  */
 HWTEST_F(VideoCreatorTest, VideoComponentCreator003, TestSize.Level1)
 {

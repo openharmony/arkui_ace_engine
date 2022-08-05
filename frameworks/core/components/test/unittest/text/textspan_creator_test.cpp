@@ -179,9 +179,6 @@ RefPtr<TextSpanComponent> TextSpanCreatorTest::CreateComponent(const std::string
  * @tc.name: TextSpanCreator001
  * @tc.desc: Test all the properties of text span.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOK AR000DAR00 AR000DAR01 AR000DAR02 AR000DAR03 AR000DAR04 AR000DAR05 AR000DAR06 AR000DBK1A
- *              AR000DBK1B AR000DBK1C AR000DAQVR
- * @tc.author: shanshurong
  */
 HWTEST_F(TextSpanCreatorTest, TextSpanCreator001, TestSize.Level1)
 {
@@ -221,9 +218,6 @@ HWTEST_F(TextSpanCreatorTest, TextSpanCreator001, TestSize.Level1)
  * @tc.name: TextSpanCreator002
  * @tc.desc: Test all the properties of nested text span.
  * @tc.type: FUNC
- * @tc.require: AR000DBAOK AR000DAR00 AR000DAR01 AR000DAR02 AR000DAR03 AR000DAR04 AR000DAR05 AR000DAR06 AR000DBK1A
- *              AR000DBK1B AR000DBK1C AR000DAQVR
- * @tc.author: shanshurong
  */
 HWTEST_F(TextSpanCreatorTest, TextSpanCreator002, TestSize.Level1)
 {

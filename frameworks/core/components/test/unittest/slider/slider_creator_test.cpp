@@ -130,8 +130,6 @@ void SliderCreatorTest::CompareAllEssential(const RefPtr<SliderComponent>& slide
  * @tc.name: SliderComponentCreator001
  * @tc.desc: Test all the property created properly
  * @tc.type: FUNC
- * @tc.require: AR000DAQV7 AR000DAQV8 AR000DAQV9
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator001, TestSize.Level1)
 {
@@ -171,8 +169,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator001, TestSize.Level1)
  * @tc.name: SliderComponentCreator002
  * @tc.desc: Test the SliderComponent initialized by default value
  * @tc.type: FUNC
- * @tc.require: AR000DAQV7 AR000DAQV8 AR000DAQV9
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator002, TestSize.Level1)
 {
@@ -199,8 +195,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator002, TestSize.Level1)
  * @tc.name: SliderComponentCreator003
  * @tc.desc: Test value validation. If the value is invalid, set a default value
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator003, TestSize.Level1)
 {
@@ -242,8 +236,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator003, TestSize.Level1)
  * @tc.name: SliderComponentCreator004
  * @tc.desc: Test max and min validation.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator004, TestSize.Level1)
 {
@@ -269,8 +261,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator004, TestSize.Level1)
  * @tc.name: SliderComponentCreator005
  * @tc.desc: Test the step validation or not
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator005, TestSize.Level1)
 {
@@ -296,8 +286,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator005, TestSize.Level1)
  * @tc.name: SliderComponentCreator006
  * @tc.desc: check step: 0, component is created successfully
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator006, TestSize.Level1)
 {
@@ -331,8 +319,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator006, TestSize.Level1)
  * @tc.name: SliderComponentCreator007
  * @tc.desc: check step: -1, component is created - failed
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator007, TestSize.Level1)
 {
@@ -358,8 +344,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator007, TestSize.Level1)
  * @tc.name: SliderComponentCreator008
  * @tc.desc: missing essential param [value]
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator008, TestSize.Level1)
 {
@@ -384,8 +368,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator008, TestSize.Level1)
  * @tc.name: SliderComponentCreator009
  * @tc.desc: missing essential param [max]
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator009, TestSize.Level1)
 {
@@ -410,8 +392,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator009, TestSize.Level1)
  * @tc.name: SliderComponentCreator010
  * @tc.desc: missing essential param [step]
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator010, TestSize.Level1)
 {
@@ -436,8 +416,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator010, TestSize.Level1)
  * @tc.name: SliderComponentCreator011
  * @tc.desc: missing essential param [min]
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator011, TestSize.Level1)
 {
@@ -462,8 +440,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator011, TestSize.Level1)
  * @tc.name: SliderComponentCreator012
  * @tc.desc: type error essential param [value]
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator012, TestSize.Level1)
 {
@@ -489,8 +465,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator012, TestSize.Level1)
  * @tc.name: SliderComponentCreator013
  * @tc.desc: type error essential param [max]
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator013, TestSize.Level1)
 {
@@ -516,8 +490,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator013, TestSize.Level1)
  * @tc.name: SliderComponentCreator014
  * @tc.desc: type error essential param [min]
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator014, TestSize.Level1)
 {
@@ -543,8 +515,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator014, TestSize.Level1)
  * @tc.name: SliderComponentCreator015
  * @tc.desc: type error essential param [step]
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator015, TestSize.Level1)
 {
@@ -570,8 +540,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator015, TestSize.Level1)
  * @tc.name: SliderComponentCreator016
  * @tc.desc: type error: all non-essential param
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator016, TestSize.Level1)
 {
@@ -602,8 +570,6 @@ HWTEST_F(SliderCreatorTest, SliderComponentCreator016, TestSize.Level1)
  * @tc.name: SliderComponentCreator017
  * @tc.desc: when value, min, max are negative value, test creator performance
  * @tc.type: FUNC
- * @tc.require: AR000DAQVA
- * @tc.author: YaoYuchi
  */
 HWTEST_F(SliderCreatorTest, SliderComponentCreator017, TestSize.Level1)
 {

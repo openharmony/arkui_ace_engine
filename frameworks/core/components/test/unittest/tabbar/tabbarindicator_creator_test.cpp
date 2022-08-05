@@ -68,8 +68,6 @@ void TabBarIndicatorCreatorTest::TearDown() {}
  * @tc.name: TabBarIndicatorCreator001
  * @tc.desc: Verify BoxCreator can create Indicator with empty json string.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarIndicatorCreatorTest, TabBarIndicator001, TestSize.Level1)
 {
@@ -99,8 +97,6 @@ HWTEST_F(TabBarIndicatorCreatorTest, TabBarIndicator001, TestSize.Level1)
  * @tc.name: TabBarIndicatorCreator002
  * @tc.desc: Verify BoxCreator can create Indicator with default style properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarIndicatorCreatorTest, TabBarIndicator002, TestSize.Level1)
 {
@@ -143,8 +139,6 @@ HWTEST_F(TabBarIndicatorCreatorTest, TabBarIndicator002, TestSize.Level1)
  * @tc.name: TabBarIndicatorCreator003
  * @tc.desc: Verify BoxCreator can create Indicator with custom style properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarIndicatorCreatorTest, TabBarIndicator003, TestSize.Level1)
 {

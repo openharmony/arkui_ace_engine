@@ -357,8 +357,6 @@ protected:
  * @tc.name: SharedTransitionTest001
  * @tc.desc: test shared transition with exchange effect when push page. use default page transition parameters.
  * @tc.type: FUNC
- * @tc.require: AR000DQ2TU
- * @tc.author: zhouzebin
  */
 HWTEST_F(SharedTransitionElementTest, SharedTransitionTest001, TestSize.Level1)
 {
@@ -398,8 +396,6 @@ HWTEST_F(SharedTransitionElementTest, SharedTransitionTest001, TestSize.Level1)
  * @tc.name: SharedTransitionTest002
  * @tc.desc: test shared transition with exchange effect when pop page. use default page transition parameters.
  * @tc.type: FUNC
- * @tc.require: AR000DQ200
- * @tc.author: zhouzebin
  */
 HWTEST_F(SharedTransitionElementTest, SharedTransitionTest002, TestSize.Level1)
 {
@@ -442,8 +438,6 @@ HWTEST_F(SharedTransitionElementTest, SharedTransitionTest002, TestSize.Level1)
  * @tc.name: SharedTransitionTest003
  * @tc.desc: test shared transition with static effect when push page. use default page transition parameters.
  * @tc.type: FUNC
- * @tc.require: AR000DQ201
- * @tc.author: zhouzebin
  */
 HWTEST_F(SharedTransitionElementTest, SharedTransitionTest003, TestSize.Level1)
 {
@@ -484,8 +478,6 @@ HWTEST_F(SharedTransitionElementTest, SharedTransitionTest003, TestSize.Level1)
  * @tc.name: SharedTransitionTest004
  * @tc.desc: test shared transition with static effect when pop page. (no effect applied)
  * @tc.type: FUNC
- * @tc.require: AR000DQ201
- * @tc.author: zhouzebin
  */
 HWTEST_F(SharedTransitionElementTest, SharedTransitionTest004, TestSize.Level1)
 {
@@ -524,8 +516,6 @@ HWTEST_F(SharedTransitionElementTest, SharedTransitionTest004, TestSize.Level1)
  * @tc.name: OneShotTransitionBlurTest001
  * @tc.desc: test transition with blur component.
  * @tc.type: FUNC
- * @tc.require: AR000DQ205
- * @tc.author: zhouzebin
  */
 HWTEST_F(SharedTransitionElementTest, OneShotTransitionBlurTest001, TestSize.Level1)
 {
@@ -547,8 +537,6 @@ HWTEST_F(SharedTransitionElementTest, OneShotTransitionBlurTest001, TestSize.Lev
  * @tc.desc: test dynamically modify shareId in shared transition with exchange effect when push page.
  *           use default page transition parameters.
  * @tc.type: FUNC
- * @tc.require: AR000F3CAC
- * @tc.author: chenlien
  */
 HWTEST_F(SharedTransitionElementTest, SharedTransitionTest005, TestSize.Level1)
 {
@@ -590,8 +578,6 @@ HWTEST_F(SharedTransitionElementTest, SharedTransitionTest005, TestSize.Level1)
  * @tc.desc: test dynamically modify shareId in shared transition with exchange effect when push page.
  *           use default page transition parameters.
  * @tc.type: FUNC
- * @tc.require: AR000F3CAC
- * @tc.author: chenlien
  */
 HWTEST_F(SharedTransitionElementTest, SharedTransitionTest006, TestSize.Level1)
 {

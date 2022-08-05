@@ -48,6 +48,7 @@ group("unittest") {
     "scroll:unittest",
     "semimodal:unittest",
     "shadow:unittest",
+    "side_bar:unittest",
     "slider:unittest",
     "stack:unittest",
     "stage:unittest",

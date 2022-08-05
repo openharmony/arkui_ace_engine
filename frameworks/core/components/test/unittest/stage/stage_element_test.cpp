@@ -66,8 +66,6 @@ protected:
  * @tc.name: StagePushTest001
  * @tc.desc: Verify the push interface works fine when there is no children in stage
  * @tc.type: FUNC
- * @tc.require: AR000DACL6
- * @tc.author: yangfan
  */
 HWTEST_F(StageElementTest, StagePushTest001, TestSize.Level1)
 {
@@ -95,8 +93,6 @@ HWTEST_F(StageElementTest, StagePushTest001, TestSize.Level1)
  * @tc.name: StagePushTest002
  * @tc.desc: Verify the push interface works fine when there are children in stage
  * @tc.type: FUNC
- * @tc.require: AR000DACL6
- * @tc.author: yangfan
  */
 HWTEST_F(StageElementTest, StagePushTest002, TestSize.Level1)
 {
@@ -126,8 +122,6 @@ HWTEST_F(StageElementTest, StagePushTest002, TestSize.Level1)
  * @tc.name: StagePopTest001
  * @tc.desc: Verify the pop interface works fine when there are children in stage
  * @tc.type: FUNC
- * @tc.require: AR000DACL6
- * @tc.author: yangfan
  */
 HWTEST_F(StageElementTest, StagePopTest001, TestSize.Level1)
 {
@@ -160,8 +154,6 @@ HWTEST_F(StageElementTest, StagePopTest001, TestSize.Level1)
  * @tc.name: StageReplaceTest001
  * @tc.desc: Verify the Replace interface works fine when there are children in stage
  * @tc.type: FUNC
- * @tc.require: AR000DACL6
- * @tc.author: yangfan
  */
 HWTEST_F(StageElementTest, StageReplaceTest001, TestSize.Level1)
 {
@@ -196,8 +188,6 @@ HWTEST_F(StageElementTest, StageReplaceTest001, TestSize.Level1)
  * @tc.name: StageClearTest001
  * @tc.desc: Verify the clear interface works fine when there are children in stage
  * @tc.type: FUNC
- * @tc.require: AR000DACL6
- * @tc.author: yangfan
  */
 HWTEST_F(StageElementTest, StageClearTest001, TestSize.Level1)
 {

@@ -176,8 +176,6 @@ protected:
  * @tc.name: TweenScaleTest001
  * @tc.desc: test scale animation in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL3
- * @tc.author: zhouzebin
  */
 HWTEST_F(TweenElementTest, TweenScaleTest001, TestSize.Level1)
 {
@@ -218,8 +216,6 @@ HWTEST_F(TweenElementTest, TweenScaleTest001, TestSize.Level1)
  * @tc.name: TweenBackgroundPositionTest001
  * @tc.desc: test background position animation in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DQ20H
- * @tc.author: zhouzebin
  */
 HWTEST_F(TweenElementTest, TweenBackgroundPositionTest001, TestSize.Level1)
 {
@@ -271,8 +267,6 @@ HWTEST_F(TweenElementTest, TweenBackgroundPositionTest001, TestSize.Level1)
  * @tc.name: TweenElementPauseTest001
  * @tc.desc: test pause operation in tween with duration equals 0.
  * @tc.type: FUNC
- * @tc.require: AR000DSB28
- * @tc.author: zhouzebin
  */
 HWTEST_F(TweenElementTest, PauseTest001, TestSize.Level1)
 {
@@ -305,8 +299,6 @@ HWTEST_F(TweenElementTest, PauseTest001, TestSize.Level1)
  * @tc.name: TweenElementCancelTest001
  * @tc.desc: test cancel operation in tween with duration equals 0.
  * @tc.type: FUNC
- * @tc.require: AR000DSB29
- * @tc.author: zhouzebin
  */
 HWTEST_F(TweenElementTest, CancelTest001, TestSize.Level1)
 {
@@ -339,8 +331,6 @@ HWTEST_F(TweenElementTest, CancelTest001, TestSize.Level1)
  * @tc.name: TweenElementDurationTest001
  * @tc.desc: test negative duration value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL1
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, DurationTest001, TestSize.Level1)
 {
@@ -373,8 +363,6 @@ HWTEST_F(TweenElementTest, DurationTest001, TestSize.Level1)
  * @tc.name: TweenElementDurationTest002
  * @tc.desc: test normal duration value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL1
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, DurationTest002, TestSize.Level1)
 {
@@ -406,8 +394,6 @@ HWTEST_F(TweenElementTest, DurationTest002, TestSize.Level1)
  * @tc.name: TweenElementDelayTest001
  * @tc.desc: test negative delay value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL1
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, DelayTest001, TestSize.Level1)
 {
@@ -441,8 +427,6 @@ HWTEST_F(TweenElementTest, DelayTest001, TestSize.Level1)
  * @tc.name: TweenElementDelayTest002
  * @tc.desc: test normal delay value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL1
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, DelayTest002, TestSize.Level1)
 {
@@ -480,8 +464,6 @@ HWTEST_F(TweenElementTest, DelayTest002, TestSize.Level1)
  * @tc.name: TweenElementRepeatTest001
  * @tc.desc: test repeatTimes value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL1
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, RepeatTest001, TestSize.Level1)
 {
@@ -519,8 +501,6 @@ HWTEST_F(TweenElementTest, RepeatTest001, TestSize.Level1)
  * @tc.name: TweenElementRepeatTest002
  * @tc.desc: test repeateTimes value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL1
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, RepeatTest002, TestSize.Level1)
 {
@@ -560,8 +540,6 @@ HWTEST_F(TweenElementTest, RepeatTest002, TestSize.Level1)
  * @tc.name: TweenElementRepeatTest003
  * @tc.desc: test repeateTimes value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL1
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, RepeatTest003, TestSize.Level1)
 {
@@ -599,8 +577,6 @@ HWTEST_F(TweenElementTest, RepeatTest003, TestSize.Level1)
  * @tc.name: TweenElementCurveTest001
  * @tc.desc: test curves value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL1
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, CurveTest001, TestSize.Level1)
 {
@@ -637,8 +613,6 @@ HWTEST_F(TweenElementTest, CurveTest001, TestSize.Level1)
  * @tc.name: TweenElementCurveTest002
  * @tc.desc: test curves value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL1
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, CurveTest002, TestSize.Level1)
 {
@@ -674,8 +648,6 @@ HWTEST_F(TweenElementTest, CurveTest002, TestSize.Level1)
  * @tc.name: TweenElementCurveTest003
  * @tc.desc: test curves value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL1
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, CurveTest003, TestSize.Level1)
 {
@@ -712,8 +684,6 @@ HWTEST_F(TweenElementTest, CurveTest003, TestSize.Level1)
  * @tc.name: TweenElementCurveTest004
  * @tc.desc: test curves value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL1
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, CurveTest004, TestSize.Level1)
 {
@@ -751,8 +721,6 @@ HWTEST_F(TweenElementTest, CurveTest004, TestSize.Level1)
  * @tc.name: TweenElementCurveTest005
  * @tc.desc: test curves value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL1
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, CurveTest005, TestSize.Level1)
 {
@@ -789,8 +757,6 @@ HWTEST_F(TweenElementTest, CurveTest005, TestSize.Level1)
  * @tc.name: TweenElementFillModeTest001
  * @tc.desc: test fillMode value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL2
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, FillModeTest001, TestSize.Level1)
 {
@@ -827,8 +793,6 @@ HWTEST_F(TweenElementTest, FillModeTest001, TestSize.Level1)
  * @tc.name: TweenElementFillModeTest002
  * @tc.desc: test fillMode value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DAUL2
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, FillModeTest002, TestSize.Level1)
 {
@@ -864,8 +828,6 @@ HWTEST_F(TweenElementTest, FillModeTest002, TestSize.Level1)
  * @tc.name: TweenElementFillModeTest003
  * @tc.desc: test fillMode value in tween, fillMode is backwards.
  * @tc.type: FUNC
- * @tc.require: AR000FL0VL
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TweenElementTest, FillModeTest003, TestSize.Level1)
 {
@@ -913,8 +875,6 @@ HWTEST_F(TweenElementTest, FillModeTest003, TestSize.Level1)
  * @tc.name: TweenElementFillModeTest004
  * @tc.desc: test fillMode value in tween, fillMode is both.
  * @tc.type: FUNC
- * @tc.require: AR000FL0VL
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TweenElementTest, FillModeTest004, TestSize.Level1)
 {
@@ -962,8 +922,6 @@ HWTEST_F(TweenElementTest, FillModeTest004, TestSize.Level1)
  * @tc.name: TweenElementFillModeTest005
  * @tc.desc: test fillMode value in tween, fillMode is backwards, duration is 0.
  * @tc.type: FUNC
- * @tc.require: AR000FL0VL
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TweenElementTest, FillModeTest005, TestSize.Level1)
 {
@@ -1007,8 +965,6 @@ HWTEST_F(TweenElementTest, FillModeTest005, TestSize.Level1)
  * @tc.name: TweenElementFillModeTest006
  * @tc.desc: test fillMode value in tween, fillMode is both, duration is 0.
  * @tc.type: FUNC
- * @tc.require: AR000FL0VL
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TweenElementTest, FillModeTest006, TestSize.Level1)
 {
@@ -1052,8 +1008,6 @@ HWTEST_F(TweenElementTest, FillModeTest006, TestSize.Level1)
  * @tc.name: TweenElementFillModeTest007
  * @tc.desc: test fillMode value in tween, fillMode is backwards, repteat time is 2.
  * @tc.type: FUNC
- * @tc.require: AR000FL0VL
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TweenElementTest, FillModeTest007, TestSize.Level1)
 {
@@ -1105,8 +1059,6 @@ HWTEST_F(TweenElementTest, FillModeTest007, TestSize.Level1)
  * @tc.name: TweenElementFillModeTest008
  * @tc.desc: test fillMode value in tween, fillMode is both, repeat time is 2.
  * @tc.type: FUNC
- * @tc.require: AR000FL0VL
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TweenElementTest, FillModeTest008, TestSize.Level1)
 {
@@ -1158,8 +1110,6 @@ HWTEST_F(TweenElementTest, FillModeTest008, TestSize.Level1)
  * @tc.name: TweenElementKeyframeTest001
  * @tc.desc: test Keyframe value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DBULF
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, KeyframeTest001, TestSize.Level1)
 {
@@ -1213,8 +1163,6 @@ HWTEST_F(TweenElementTest, KeyframeTest001, TestSize.Level1)
  * @tc.name: TweenElementKeyframeTest002
  * @tc.desc: test Keyframe value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DBULF
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, KeyframeTest002, TestSize.Level1)
 {
@@ -1267,8 +1215,6 @@ HWTEST_F(TweenElementTest, KeyframeTest002, TestSize.Level1)
  * @tc.name: TweenElementKeyframeTest003
  * @tc.desc: test Keyframe value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DBULF
- * @tc.author: chenlien
  */
 HWTEST_F(TweenElementTest, KeyframeTest003, TestSize.Level1)
 {
@@ -1330,8 +1276,6 @@ HWTEST_F(TweenElementTest, KeyframeTest003, TestSize.Level1)
  * @tc.name: TweenElementKeyframeTest004
  * @tc.desc: test Keyframe value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DBULF
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TweenElementTest, KeyframeTest004, TestSize.Level1)
 {
@@ -1383,8 +1327,6 @@ HWTEST_F(TweenElementTest, KeyframeTest004, TestSize.Level1)
  * @tc.name: TweenElementKeyframeTest005
  * @tc.desc: test Keyframe value in tween.
  * @tc.type: FUNC
- * @tc.require: AR000DBULF
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TweenElementTest, KeyframeTest005, TestSize.Level1)
 {
@@ -1431,8 +1373,6 @@ HWTEST_F(TweenElementTest, KeyframeTest005, TestSize.Level1)
  * @tc.name: PropertyAnimationTest001
  * @tc.desc: verify float property animation
  * @tc.type: FUNC
- * @tc.require: AR000DQ20S
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TweenElementTest, PropertyAnimationTest001, TestSize.Level1)
 {
@@ -1467,8 +1407,6 @@ HWTEST_F(TweenElementTest, PropertyAnimationTest001, TestSize.Level1)
  * @tc.name: PropertyAnimationTest002
  * @tc.desc: verify color property animation
  * @tc.type: FUNC
- * @tc.require: AR000DQ20S
- * @tc.author: jiangdayuan
  */
 HWTEST_F(TweenElementTest, PropertyAnimationTest002, TestSize.Level1)
 {
@@ -1504,8 +1442,6 @@ HWTEST_F(TweenElementTest, PropertyAnimationTest002, TestSize.Level1)
  * @tc.name: TweenElementReplayTest001
  * @tc.desc: replay when previous is done.
  * @tc.type: FUNC
- * @tc.require: AR000DBULF
- * @tc.author: zhouzebin
  */
 HWTEST_F(TweenElementTest, ReplayTest001, TestSize.Level1)
 {
@@ -1555,8 +1491,6 @@ HWTEST_F(TweenElementTest, ReplayTest001, TestSize.Level1)
  * @tc.name: TweenElementReplayTest002
  * @tc.desc: replay when previous is playing.
  * @tc.type: FUNC
- * @tc.require: AR000DBULF
- * @tc.author: zhouzebin
  */
 HWTEST_F(TweenElementTest, ReplayTest002, TestSize.Level1)
 {
@@ -1603,8 +1537,6 @@ HWTEST_F(TweenElementTest, ReplayTest002, TestSize.Level1)
  * @tc.name: TweenElementTimerUpdateTest001
  * @tc.desc: update element when times up.
  * @tc.type: FUNC
- * @tc.require: AR000DSB2A
- * @tc.author: zhouzebin
  */
 HWTEST_F(TweenElementTest, TweenElementTimerUpdateTest001, TestSize.Level1)
 {
@@ -1638,8 +1570,6 @@ HWTEST_F(TweenElementTest, TweenElementTimerUpdateTest001, TestSize.Level1)
  * @tc.name: TweenPlayStateTest001
  * @tc.desc: test animation-play-state in tween.
  * @tc.type: FUNC
- * @tc.require: AR000FL0U6
- * @tc.author: zhouzebin
  */
 HWTEST_F(TweenElementTest, TweenPlayStateTest001, TestSize.Level1)
 {
@@ -1673,8 +1603,6 @@ HWTEST_F(TweenElementTest, TweenPlayStateTest001, TestSize.Level1)
  * @tc.name: TweenAnimationTest001
  * @tc.desc: test animation in tween.
  * @tc.type: FUNC
- * @tc.require: AR000FL0U5
- * @tc.author: zhouzebin
  */
 HWTEST_F(TweenElementTest, TweenAnimationTest001, TestSize.Level1)
 {
@@ -1721,8 +1649,6 @@ HWTEST_F(TweenElementTest, TweenAnimationTest001, TestSize.Level1)
  * @tc.name : TweenPaddingTest001
  * @tc.desc : verify padding property animation
  * @tc.type: FUNC
- * @tc.require : AR000FL0UO
- * @tc.author : jiangtao
  */
 HWTEST_F(TweenElementTest, TweenPaddingTest001, TestSize.Level1)
 {
@@ -1775,8 +1701,6 @@ HWTEST_F(TweenElementTest, TweenPaddingTest001, TestSize.Level1)
  * @tc.name: TweenMarginTest001
  * @tc.desc: verify margin property animation
  * @tc.type: FUNC
- * @tc.require: AR000FL0UP
- * @tc.author: jiangtao
  */
 HWTEST_F(TweenElementTest, TweenMarginTest001, TestSize.Level1)
 {
@@ -1829,8 +1753,6 @@ HWTEST_F(TweenElementTest, TweenMarginTest001, TestSize.Level1)
  * @tc.name: TweenBorderTest001
  * @tc.desc: verify border property animation
  * @tc.type: FUNC
- * @tc.require: AR000FL0UQ
- * @tc.author: jiangtao
  */
 HWTEST_F(TweenElementTest, TweenBorderTest001, TestSize.Level1)
 {
@@ -1923,8 +1845,6 @@ HWTEST_F(TweenElementTest, TweenBorderTest001, TestSize.Level1)
  * @tc.name: TweenBackgroundTest001
  * @tc.desc: test background image animation in tween.
  * @tc.type: FUNC
- * @tc.require: AR000FL0UR
- * @tc.author: jiangtao
  */
 HWTEST_F(TweenElementTest, TweenBackgroundTest001, TestSize.Level1)
 {
@@ -1975,8 +1895,6 @@ HWTEST_F(TweenElementTest, TweenBackgroundTest001, TestSize.Level1)
  * @tc.name: TweenFilterTest001
  * @tc.desc: test filter animation in tween.
  * @tc.type: FUNC
- * @tc.require: AR000FL0US
- * @tc.author: jiangtao
  */
 HWTEST_F(TweenElementTest, TweenFilterTest001, TestSize.Level1)
 {
@@ -2032,8 +1950,6 @@ HWTEST_F(TweenElementTest, TweenFilterTest001, TestSize.Level1)
  * @tc.name: TweenShadowTest001
  * @tc.desc: test shadow animation in tween.
  * @tc.type: FUNC
- * @tc.require: AR000FL0UT
- * @tc.author: jiangtao
  */
 HWTEST_F(TweenElementTest, TweenShadowTest001, TestSize.Level1)
 {

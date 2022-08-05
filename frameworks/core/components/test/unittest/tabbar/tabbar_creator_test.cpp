@@ -60,8 +60,6 @@ void TabBarCreatorTest::TearDown() {}
  * @tc.name: TabBarCreator001
  * @tc.desc: Verify BoxCreator can create TabBar with controllerId and tabs only.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator001, TestSize.Level1)
 {
@@ -98,8 +96,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator001, TestSize.Level1)
  * @tc.name: TabBarCreator002
  * @tc.desc: Verify BoxCreator can not create TabBar with tabs only.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator002, TestSize.Level1)
 {
@@ -129,8 +125,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator002, TestSize.Level1)
  * @tc.name: TabBarCreator003
  * @tc.desc: Verify BoxCreator can not create TabBar with invalid type of controllerId.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator003, TestSize.Level1)
 {
@@ -161,8 +155,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator003, TestSize.Level1)
  * @tc.name: TabBarCreator004
  * @tc.desc: Verify BoxCreator can not create TabBar without tabs.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator004, TestSize.Level1)
 {
@@ -187,8 +179,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator004, TestSize.Level1)
  * @tc.name: TabBarCreator005
  * @tc.desc: Verify BoxCreator can not create TabBar with empty tabs.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator005, TestSize.Level1)
 {
@@ -214,8 +204,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator005, TestSize.Level1)
  * @tc.name: TabBarCreator006
  * @tc.desc: Verify BoxCreator can not create TabBar with invalid value of index.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V AR000DAR30
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator006, TestSize.Level1)
 {
@@ -248,8 +236,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator006, TestSize.Level1)
  * @tc.name: TabBarCreator007
  * @tc.desc: Verify BoxCreator can not create TabBar with invalid value of index.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V AR000DAR30
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator007, TestSize.Level1)
 {
@@ -282,8 +268,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator007, TestSize.Level1)
  * @tc.name: TabBarCreator008
  * @tc.desc: Verify the default value of labelColor and unselectedLabelColor.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator008, TestSize.Level1)
 {
@@ -321,8 +305,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator008, TestSize.Level1)
  * @tc.name: TabBarCreator009
  * @tc.desc: Verify the default value of labelStyle and unselectedLabelStyle.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator009, TestSize.Level1)
 {
@@ -357,8 +339,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator009, TestSize.Level1)
  * @tc.name: TabBarCreator010
  * @tc.desc: Verify TabBarCreator can create TabBar component with all properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator010, TestSize.Level1)
 {
@@ -431,8 +411,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator010, TestSize.Level1)
  * @tc.name: TabBarCreator011
  * @tc.desc: Verify TabBarCreator can not create TabBarItem component with className only.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator011, TestSize.Level1)
 {
@@ -462,8 +440,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator011, TestSize.Level1)
  * @tc.name: TabBarCreator012
  * @tc.desc: Verify TabBarCreator can create TabBarItem component with different property set.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator012, TestSize.Level1)
 {
@@ -547,8 +523,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator012, TestSize.Level1)
  * @tc.name: TabBarCreator013
  * @tc.desc: Verify vertical of TabBarCreator.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V2
- * @tc.author: liujinwei
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator013, TestSize.Level1)
 {
@@ -587,8 +561,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator013, TestSize.Level1)
  * @tc.name: TabBarCreator014
  * @tc.desc: Verify vertical of TabBarCreator.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V2
- * @tc.author: liujinwei
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator014, TestSize.Level1)
 {
@@ -628,8 +600,6 @@ HWTEST_F(TabBarCreatorTest, TabBarCreator014, TestSize.Level1)
  * @tc.name: TabBarCreator015
  * @tc.desc: Verify vertical of TabBarCreator.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V2
- * @tc.author: liujinwei
  */
 HWTEST_F(TabBarCreatorTest, TabBarCreator015, TestSize.Level1)
 {

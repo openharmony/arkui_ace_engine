@@ -107,8 +107,6 @@ void ThemeConstantsTest::TearDown() {}
  * @tc.name: PlatformConstants001
  * @tc.desc: Test get default theme at phone.
  * @tc.type: FUNC
- * @tc.require: AR000DAR29 AR000DAR2C
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, PlatformConstants001, TestSize.Level1)
 {
@@ -131,8 +129,6 @@ HWTEST_F(ThemeConstantsTest, PlatformConstants001, TestSize.Level1)
  * @tc.name: PlatformConstants002
  * @tc.desc: Test get default theme at tv.
  * @tc.type: FUNC
- * @tc.require: AR000DAR29 AR000DAR2C
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, PlatformConstants002, TestSize.Level1)
 {
@@ -155,8 +151,6 @@ HWTEST_F(ThemeConstantsTest, PlatformConstants002, TestSize.Level1)
  * @tc.name: PlatformConstants003
  * @tc.desc: Test get default theme at other platform.
  * @tc.type: FUNC
- * @tc.require: AR000DAR29 AR000DAR2C
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, PlatformConstants003, TestSize.Level1)
 {
@@ -178,8 +172,6 @@ HWTEST_F(ThemeConstantsTest, PlatformConstants003, TestSize.Level1)
  * @tc.name: ConstantsDefine001
  * @tc.desc: Test get value with key corresponding with correct value type.
  * @tc.type: FUNC
- * @tc.require: AR000DAR29 AR000DAR2C
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, ConstantsDefine001, TestSize.Level1)
 {
@@ -204,8 +196,6 @@ HWTEST_F(ThemeConstantsTest, ConstantsDefine001, TestSize.Level1)
  * @tc.name: ConstantsDefine002
  * @tc.desc: Test get value with key corresponding with incorrect value type.
  * @tc.type: FUNC
- * @tc.require: AR000DAR29 AR000DAR2C
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, ConstantsDefine002, TestSize.Level1)
 {
@@ -224,8 +214,6 @@ HWTEST_F(ThemeConstantsTest, ConstantsDefine002, TestSize.Level1)
  * @tc.name: ParseStyle001
  * @tc.desc: Parse user input custom style config.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PR
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, ParseStyle001, TestSize.Level1)
 {
@@ -263,8 +251,6 @@ HWTEST_F(ThemeConstantsTest, ParseStyle001, TestSize.Level1)
  * @tc.name: ParseStyle002
  * @tc.desc: Parse user input custom style config, value format error.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PR
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, ParseStyle002, TestSize.Level1)
 {
@@ -302,8 +288,6 @@ HWTEST_F(ThemeConstantsTest, ParseStyle002, TestSize.Level1)
  * @tc.name: ParseStyle003
  * @tc.desc: Parse user input custom style config, id not found.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PR
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, ParseStyle003, TestSize.Level1)
 {
@@ -328,8 +312,6 @@ HWTEST_F(ThemeConstantsTest, ParseStyle003, TestSize.Level1)
  * @tc.name: ParseStyle004
  * @tc.desc: Parse user input custom style config, id not public.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PR
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, ParseStyle004, TestSize.Level1)
 {
@@ -355,8 +337,6 @@ HWTEST_F(ThemeConstantsTest, ParseStyle004, TestSize.Level1)
  * @tc.name: ThemeStyleRead001
  * @tc.desc: Initialize theme style correctly.
  * @tc.type: FUNC
- * @tc.require: AR000F3L1L
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, ThemeStyleRead001, TestSize.Level1)
 {
@@ -397,8 +377,6 @@ HWTEST_F(ThemeConstantsTest, ThemeStyleRead001, TestSize.Level1)
  * @tc.name: ThemeStyleRead002
  * @tc.desc: Initialize theme style, get attributes with wrong type.
  * @tc.type: FUNC
- * @tc.require: AR000F3L1L
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, ThemeStyleRead002, TestSize.Level1)
 {
@@ -437,8 +415,6 @@ HWTEST_F(ThemeConstantsTest, ThemeStyleRead002, TestSize.Level1)
  * @tc.name: ThemeStyleRead003
  * @tc.desc: Initialize theme style with incorrect theme id.
  * @tc.type: FUNC
- * @tc.require: AR000F3L1L
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, ThemeStyleRead003, TestSize.Level1)
 {
@@ -460,8 +436,6 @@ HWTEST_F(ThemeConstantsTest, ThemeStyleRead003, TestSize.Level1)
  * @tc.name: ThemeStyleRead004
  * @tc.desc: Initialize theme style correctly, override app background color.
  * @tc.type: FUNC
- * @tc.require: AR000F3L1L
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, ThemeStyleRead004, TestSize.Level1)
 {
@@ -486,8 +460,6 @@ HWTEST_F(ThemeConstantsTest, ThemeStyleRead004, TestSize.Level1)
  * @tc.name: ThemeResourceRead001
  * @tc.desc: Read theme resource correctly.
  * @tc.type: FUNC
- * @tc.require: AR000F3L1N
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, ThemeResourceRead001, TestSize.Level1)
 {
@@ -518,8 +490,6 @@ HWTEST_F(ThemeConstantsTest, ThemeResourceRead001, TestSize.Level1)
  * @tc.name: ThemeResourceRead002
  * @tc.desc: Read theme resource with wrong type.
  * @tc.type: FUNC
- * @tc.require: AR000F3L1N
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, ThemeResourceRead002, TestSize.Level1)
 {
@@ -550,8 +520,6 @@ HWTEST_F(ThemeConstantsTest, ThemeResourceRead002, TestSize.Level1)
  * @tc.name: MultiInstance001
  * @tc.desc: Parse custom style with multi theme constants.
  * @tc.type: FUNC
- * @tc.require: AR000F3L1M
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeConstantsTest, MultiInstance001, TestSize.Level1)
 {
@@ -586,8 +554,6 @@ HWTEST_F(ThemeConstantsTest, MultiInstance001, TestSize.Level1)
  * @tc.name: ParseIdStyle001
  * @tc.desc: Parse user input id style config.
  * @tc.type: FUNC
- * @tc.require: AR000FDGO4
- * @tc.author: yangfan
  */
 HWTEST_F(ThemeConstantsTest, ParseIdStyle001, TestSize.Level1)
 {

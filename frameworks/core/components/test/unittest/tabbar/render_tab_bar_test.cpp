@@ -93,8 +93,6 @@ void RenderTabBarTest::TearDown() {}
  * @tc.name: RenderTabBarTest001
  * @tc.desc: Verify TabBar PerformLayout when mod fix.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(RenderTabBarTest, RenderTabBarTest001, TestSize.Level1)
 {
@@ -134,8 +132,6 @@ HWTEST_F(RenderTabBarTest, RenderTabBarTest001, TestSize.Level1)
  * @tc.name: RenderTabBarTest002
  * @tc.desc: Verify TabBar PerformLayout when mod scrollable and children's width greater than TabBar.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(RenderTabBarTest, RenderTabBarTest002, TestSize.Level1)
 {
@@ -175,8 +171,6 @@ HWTEST_F(RenderTabBarTest, RenderTabBarTest002, TestSize.Level1)
  * @tc.name: RenderTabBarTest003
  * @tc.desc: Verify TabBar PerformLayout when mod scrollable and children's width less than TabBar.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(RenderTabBarTest, RenderTabBarTest003, TestSize.Level1)
 {
@@ -216,8 +210,6 @@ HWTEST_F(RenderTabBarTest, RenderTabBarTest003, TestSize.Level1)
  * @tc.name: RenderTabBarTest004
  * @tc.desc: Verify TabBar SetIndex with invalid value.
  * @tc.type: FUNC
- * @tc.require: AR000DAR2V
- * @tc.author: jiangtao
  */
 HWTEST_F(RenderTabBarTest, RenderTabBarTest004, TestSize.Level1)
 {

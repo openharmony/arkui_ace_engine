@@ -49,8 +49,6 @@ void TransformCreatorTest::TearDown() {}
  * @tc.name: TransformCreator001
  * @tc.desc: Verify TransformCreator can create transform component with a translate operation.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: jinwuwen
  */
 HWTEST_F(TransformCreatorTest, TransformCreator001, TestSize.Level1)
 {
@@ -93,8 +91,6 @@ HWTEST_F(TransformCreatorTest, TransformCreator001, TestSize.Level1)
  * @tc.name: TransformCreator002
  * @tc.desc: Verify TransformCreator can create transform component with a rotate operation.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUH
- * @tc.author: jinwuwen
  */
 HWTEST_F(TransformCreatorTest, TransformCreator002, TestSize.Level1)
 {
@@ -140,8 +136,6 @@ HWTEST_F(TransformCreatorTest, TransformCreator002, TestSize.Level1)
  * @tc.name: TransformCreator003
  * @tc.desc: Verify TransformCreator can create transform component with a scale operation.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUI
- * @tc.author: jinwuwen
  */
 HWTEST_F(TransformCreatorTest, TransformCreator003, TestSize.Level1)
 {
@@ -184,8 +178,6 @@ HWTEST_F(TransformCreatorTest, TransformCreator003, TestSize.Level1)
  * @tc.name: TransformCreator004
  * @tc.desc: Verify TransformCreator can create transform component with a scale operation.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUI
- * @tc.author: jinwuwen
  */
 HWTEST_F(TransformCreatorTest, TransformCreator004, TestSize.Level1)
 {
@@ -229,8 +221,6 @@ HWTEST_F(TransformCreatorTest, TransformCreator004, TestSize.Level1)
  * @tc.name: TransformCreator005
  * @tc.desc: Verify TransformCreator can create transform component with a scale operation.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUI
- * @tc.author: jinwuwen
  */
 HWTEST_F(TransformCreatorTest, TransformCreator005, TestSize.Level1)
 {

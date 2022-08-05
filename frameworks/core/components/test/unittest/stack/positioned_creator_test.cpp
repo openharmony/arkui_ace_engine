@@ -105,8 +105,6 @@ void PositionedCreatorTest::CheckItemProperties(const RefPtr<PositionedComponent
  * @tc.name: PositionedProperties001
  * @tc.desc: Check positioned component with no properties can be created with default properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAR27
- * @tc.author: yangfan
  */
 HWTEST_F(PositionedCreatorTest, PositionedProperties001, TestSize.Level1)
 {
@@ -136,8 +134,6 @@ HWTEST_F(PositionedCreatorTest, PositionedProperties001, TestSize.Level1)
  * @tc.name: PositionedProperties002
  * @tc.desc: Check positioned component with invalid properties can be created with default properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAR27
- * @tc.author: yangfan
  */
 HWTEST_F(PositionedCreatorTest, PositionedProperties002, TestSize.Level1)
 {
@@ -173,8 +169,6 @@ HWTEST_F(PositionedCreatorTest, PositionedProperties002, TestSize.Level1)
  * @tc.name: PositionedProperties003
  * @tc.desc: Check positioned component with valid properties can be created with correct properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAR27
- * @tc.author: yangfan
  */
 HWTEST_F(PositionedCreatorTest, PositionedProperties003, TestSize.Level1)
 {
@@ -210,8 +204,6 @@ HWTEST_F(PositionedCreatorTest, PositionedProperties003, TestSize.Level1)
  * @tc.name: PositionedChild001
  * @tc.desc: Verify the positioned component with single flex child is correct.
  * @tc.type: FUNC
- * @tc.require: AR000DAR27
- * @tc.author: yangfan
  */
 HWTEST_F(PositionedCreatorTest, PositionedChild001, TestSize.Level1)
 {
@@ -244,8 +236,6 @@ HWTEST_F(PositionedCreatorTest, PositionedChild001, TestSize.Level1)
  * @tc.name: PositionedChild002
  * @tc.desc: Verify the positioned component with double child returns single child.
  * @tc.type: FUNC
- * @tc.require: AR000DAR27
- * @tc.author: yangfan
  */
 HWTEST_F(PositionedCreatorTest, PositionedChild002, TestSize.Level1)
 {
@@ -284,8 +274,6 @@ HWTEST_F(PositionedCreatorTest, PositionedChild002, TestSize.Level1)
  * @tc.name: PositionedChild003
  * @tc.desc: Verify the positioned component with no child returns no child.
  * @tc.type: FUNC
- * @tc.require: AR000DAR27
- * @tc.author: yangfan
  */
 HWTEST_F(PositionedCreatorTest, PositionedChild003, TestSize.Level1)
 {

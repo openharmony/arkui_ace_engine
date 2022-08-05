@@ -52,8 +52,6 @@ public:
  * @tc.name: PieceComponentBuildChild001
  * @tc.desc: Verify the BuildChild Interface of PieceComponent work correctly with content and showDelete.
  * @tc.type: FUNC
- * @tc.require: AR000F3L33
- * @tc.author: caocan
  */
 HWTEST_F(PieceComponentTest, PieceComponentBuildChild001, TestSize.Level1)
 {
@@ -99,8 +97,6 @@ HWTEST_F(PieceComponentTest, PieceComponentBuildChild001, TestSize.Level1)
  * @tc.name: PieceComponentBuildChild002
  * @tc.desc: Verify the BuildChild Interface of PieceComponent work correctly in RTL.
  * @tc.type: FUNC
- * @tc.require: AR000F3L33
- * @tc.author: caocan
  */
 HWTEST_F(PieceComponentTest, PieceComponentBuildChild002, TestSize.Level1)
 {
@@ -140,8 +136,6 @@ HWTEST_F(PieceComponentTest, PieceComponentBuildChild002, TestSize.Level1)
  * @tc.name: PieceComponentBuildChild003
  * @tc.desc: Verify the BuildChild Interface of PieceComponent work correctly with content only.
  * @tc.type: FUNC
- * @tc.require: AR000F3L33
- * @tc.author: caocan
  */
 HWTEST_F(PieceComponentTest, PieceComponentBuildChild003, TestSize.Level1)
 {
@@ -168,8 +162,6 @@ HWTEST_F(PieceComponentTest, PieceComponentBuildChild003, TestSize.Level1)
  * @tc.name: PieceComponentBuildChild004
  * @tc.desc: Verify the BuildChild Interface of PieceComponent work correctly with showDelete only.
  * @tc.type: FUNC
- * @tc.require: AR000F3L33
- * @tc.author: caocan
  */
 HWTEST_F(PieceComponentTest, PieceComponentBuildChild004, TestSize.Level1)
 {
@@ -191,8 +183,6 @@ HWTEST_F(PieceComponentTest, PieceComponentBuildChild004, TestSize.Level1)
  * @tc.name: PieceComponentBuildChild005
  * @tc.desc: Verify the BuildChild Interface of PieceComponent work correctly no attributes.
  * @tc.type: FUNC
- * @tc.require: AR000F3L33
- * @tc.author: caocan
  */
 HWTEST_F(PieceComponentTest, PieceComponentBuildChild005, TestSize.Level1)
 {
