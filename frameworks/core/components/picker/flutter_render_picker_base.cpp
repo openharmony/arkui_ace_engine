@@ -131,6 +131,12 @@ void FlutterRenderPickerBase::PaintGradient(
         SkPoint points[2] = { beginPoint, endPoint };
         auto backDecoration = theme->GetPopupDecoration(false);
         Color endColor = backDecoration ? backDecoration->GetBackgroundColor() : Color::WHITE;
+
+        auto renderBox = GetBgColorBox();
+        if (data_->GetHasBackgroundColor() && renderBox) {
+            endColor = renderBox->GetColor();
+        }
+
         Color middleColor = endColor.ChangeAlpha(0);
         SkColor colors[] = { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(), endColor.GetValue() };
         const float stopPositions[] = { 0.0f, gradientHeight / rect.Height(),

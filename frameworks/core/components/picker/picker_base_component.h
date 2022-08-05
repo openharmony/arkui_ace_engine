@@ -529,6 +529,15 @@ public:
         return needVibrate_;
     }
 
+    bool GetHasBackgroundColor() const
+    {
+        return hasBackgroundColor_;
+    }
+    void SetHasBackgroundColor(bool value)
+    {
+        hasBackgroundColor_ = value;
+    }
+
     static const char PICKER_YEAR_COLUMN[];
     static const char PICKER_MONTH_COLUMN[];
     static const char PICKER_DAY_COLUMN[];
@@ -568,6 +577,7 @@ private:
     bool masterHasLunar_ = false;
     bool needVibrate_ = true;
     bool isCreateDialogComponent_ = false;
+    bool hasBackgroundColor_ = false;
     int32_t nodeId_ = -1; // default of dialog's node id.
     // used for inspector node in PC preview
     int32_t pickerId_ = -1;

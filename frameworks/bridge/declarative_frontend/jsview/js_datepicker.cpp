@@ -106,6 +106,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("create", &JSDatePicker::Create, opt);
     JSClass<JSDatePicker>::StaticMethod("lunar", &JSDatePicker::SetLunar);
     JSClass<JSDatePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
+    JSClass<JSDatePicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
     // keep compatible, need remove after
     JSClass<JSDatePicker>::StaticMethod("useMilitaryTime", &JSDatePicker::UseMilitaryTime);
     JSClass<JSDatePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -186,6 +187,19 @@ void JSDatePicker::OnChange(const JSCallbackInfo& info)
             auto eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
             func->Execute(*eventInfo);
         }));
+}
+
+void JSDatePicker::PickerBackgroundColor(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBackgroundColor(info);
+
+    auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!pickerBase) {
+        LOGE("PickerBaseComponent is null");
+        return;
+    }
+
+    pickerBase->SetHasBackgroundColor(true);
 }
 
 PickerDate JSDatePicker::ParseDate(const JSRef<JSVal>& dateVal)
@@ -446,6 +460,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTimePicker>::StaticMethod("create", &JSTimePicker::Create, opt);
     JSClass<JSTimePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
+    JSClass<JSTimePicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
     JSClass<JSTimePicker>::StaticMethod("useMilitaryTime", &JSTimePicker::UseMilitaryTime);
     JSClass<JSTimePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTimePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
