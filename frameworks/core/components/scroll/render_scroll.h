@@ -94,6 +94,11 @@ public:
         return (scrollable_ ? scrollable_->IsMotionStop() : true) && (animator_ ? (!animator_->IsRunning()) : true);
     }
 
+    bool IsDragging() const
+    {
+        return scrollable_ && scrollable_->IsDragging();
+    }
+
     bool CanScrollVertically(const Offset& delta);
     bool ScrollPageCheck(Offset& delta, int32_t source);
 
