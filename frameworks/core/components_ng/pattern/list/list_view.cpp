@@ -31,6 +31,11 @@ void ListView::Create()
     stack->Push(frameNode);
 }
 
+void ListView::SetSpace(const Dimension& space)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space);
+}
+
 void ListView::SetListDirection(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListDirection, axis);
