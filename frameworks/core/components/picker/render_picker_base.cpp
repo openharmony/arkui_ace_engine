@@ -847,4 +847,22 @@ void RenderPickerBase::InitializeSelectedOption(const RefPtr<RenderPickerColumn>
     }
 }
 
+const RefPtr<RenderBox> RenderPickerBase::GetBgColorBox() const
+{
+    auto parent = GetParent().Upgrade();
+    while (parent && !parent->IsHeadRenderNode()) {
+        if (AceType::InstanceOf<RenderBox>(parent)) {
+            return AceType::DynamicCast<RenderBox>(parent);
+        }
+
+        parent = parent->GetParent().Upgrade();
+    }
+
+    if (AceType::InstanceOf<RenderBox>(parent)) {
+        return AceType::DynamicCast<RenderBox>(parent);
+    }
+
+    return nullptr;
+}
+
 } // namespace OHOS::Ace
