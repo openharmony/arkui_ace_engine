@@ -559,6 +559,40 @@ double FlutterRenderCustomPaint::MeasureTextHeight(const std::string& text, cons
     return paragraph->GetHeight();
 }
 
+TextMetrics FlutterRenderCustomPaint::MeasureTextMetrics(const std::string& text, const PaintState& state)
+{
+    using namespace Constants;
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    if (!fontCollection) {
+        LOGW("MeasureText: fontCollection is null");
+        return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    }
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
+    ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
+    builder->PushStyle(txtStyle);
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
+    paragraph->Layout(Size::INFINITE_SIZE);
+
+    auto textAlign = state.GetTextAlign();
+    auto textBaseLine = state.GetTextStyle().GetTextBaseline();
+
+    auto width = paragraph->GetMaxIntrinsicWidth();
+    auto height = paragraph->GetHeight();
+
+    auto actualBoundingBoxLeft = -GetAlignOffset(textAlign, paragraph);
+    auto actualBoundingBoxRight = width - actualBoundingBoxLeft;
+    auto actualBoundingBoxAscent = -GetBaselineOffset(textBaseLine, paragraph);
+    auto actualBoundingBoxDescent = height - actualBoundingBoxAscent;
+
+    return { width, height, actualBoundingBoxLeft, actualBoundingBoxRight, actualBoundingBoxAscent,
+        actualBoundingBoxDescent };
+}
+
 void FlutterRenderCustomPaint::PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow)
 {
     paragraph_->Layout(GetLayoutSize().Width());
@@ -566,10 +600,10 @@ void FlutterRenderCustomPaint::PaintText(const Offset& offset, double x, double 
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
-    double dx = offset.GetX() + x + GetAlignOffset(align);
+    double dx = offset.GetX() + x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
-    double dy = offset.GetY() + y + GetBaselineOffset(baseline);
+    double dy = offset.GetY() + y + GetBaselineOffset(baseline, paragraph_);
 
     if (hasShadow) {
         skCanvas_->save();
@@ -583,7 +617,7 @@ void FlutterRenderCustomPaint::PaintText(const Offset& offset, double x, double 
     paragraph_->Paint(skCanvas_.get(), dx, dy);
 }
 
-double FlutterRenderCustomPaint::GetAlignOffset(TextAlign align)
+double FlutterRenderCustomPaint::GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double x = 0.0;
     switch (align) {
@@ -591,16 +625,16 @@ double FlutterRenderCustomPaint::GetAlignOffset(TextAlign align)
             x = 0.0;
             break;
         case TextAlign::START:
-            x = (GetTextDirection() == TextDirection::LTR) ? 0.0 : -paragraph_->GetMaxIntrinsicWidth();
+            x = (GetTextDirection() == TextDirection::LTR) ? 0.0 : -paragraph->GetMaxIntrinsicWidth();
             break;
         case TextAlign::RIGHT:
-            x = -paragraph_->GetMaxIntrinsicWidth();
+            x = -paragraph->GetMaxIntrinsicWidth();
             break;
         case TextAlign::END:
-            x = (GetTextDirection() == TextDirection::LTR) ? -paragraph_->GetMaxIntrinsicWidth() : 0.0;
+            x = (GetTextDirection() == TextDirection::LTR) ? -paragraph->GetMaxIntrinsicWidth() : 0.0;
             break;
         case TextAlign::CENTER:
-            x = -paragraph_->GetMaxIntrinsicWidth() / 2;
+            x = -paragraph->GetMaxIntrinsicWidth() / 2;
             break;
         default:
             x = 0.0;
@@ -609,30 +643,30 @@ double FlutterRenderCustomPaint::GetAlignOffset(TextAlign align)
     return x;
 }
 
-double FlutterRenderCustomPaint::GetBaselineOffset(TextBaseline baseline)
+double FlutterRenderCustomPaint::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double y = 0.0;
     switch (baseline) {
         case TextBaseline::ALPHABETIC:
-            y = -paragraph_->GetAlphabeticBaseline();
+            y = -paragraph->GetAlphabeticBaseline();
             break;
         case TextBaseline::IDEOGRAPHIC:
-            y = -paragraph_->GetIdeographicBaseline();
+            y = -paragraph->GetIdeographicBaseline();
             break;
         case TextBaseline::BOTTOM:
-            y = -paragraph_->GetHeight();
+            y = -paragraph->GetHeight();
             break;
         case TextBaseline::TOP:
             y = 0.0;
             break;
         case TextBaseline::MIDDLE:
-            y = -paragraph_->GetHeight() / 2;
+            y = -paragraph->GetHeight() / 2;
             break;
         case TextBaseline::HANGING:
-            y = -HANGING_PERCENT * (paragraph_->GetHeight() - paragraph_->GetAlphabeticBaseline());
+            y = -HANGING_PERCENT * (paragraph->GetHeight() - paragraph->GetAlphabeticBaseline());
             break;
         default:
-            y = -paragraph_->GetAlphabeticBaseline();
+            y = -paragraph->GetAlphabeticBaseline();
             break;
     }
     return y;
