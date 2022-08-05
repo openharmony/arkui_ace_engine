@@ -19,11 +19,16 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "base/memory/referenced.h"
 #include "frameworks/base/memory/ace_type.h"
 
 namespace OHOS::Ace::V2 {
-    class ElementProxy;
-}
+class ElementProxy;
+} // namespace OHOS::Ace::V2
+
+namespace OHOS::Ace::NG {
+class UINode;
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
 using ElementIdType = int32_t;
@@ -37,50 +42,54 @@ public:
     RefPtr<Element> GetElementById(ElementIdType elementId);
     RefPtr<V2::ElementProxy> GetElementProxyById(ElementIdType elementId);
 
+    RefPtr<AceType> GetNodeById(ElementIdType elementId);
     /**
-     * version of GetElementById(elmtId) function to return an Element of
-     * given class. returns nullptr if Element with this elmtId naddeot found
+     * version of GetNodeById(elmtId) function to return an Element of
+     * given class. returns nullptr if Element with this elmtId baddest found
      * or class mismatch
      */
     template<class E>
-    RefPtr<E> GetSpecificElementById(ElementIdType elmtId)
+    RefPtr<E> GetSpecificItemById(ElementIdType elmtId)
     {
-        return AceType::DynamicCast<E>(GetElementById(elmtId));
+        return AceType::DynamicCast<E>(GetNodeById(elmtId));
     }
 
-    bool Exists(ElementIdType elementId);
     bool AddElementProxy(const WeakPtr<V2::ElementProxy>& element);
     bool AddElement(const RefPtr<Element>& element);
 
+    RefPtr<NG::UINode> GetUINodeById(ElementIdType elementId);
+    bool AddUINode(const RefPtr<NG::UINode>& node);
+
+    bool Exists(ElementIdType elementId);
     /**
      * remove Element with given elmtId from the Map
      * means GetElementById on this elmtId no longer returns an Element
      * method adds the elmtId to the removed Element Set
      */
-    bool RemoveElement(ElementIdType elementId);
+    bool RemoveItem(ElementIdType elementId);
 
     /**
      * remove Element with given elmtId from the Map
      * means GetElementById on this elmtId no longer returns an Element
      * method does NOT add the elmtId to the removed Element Set
-     * Use with cautiuon: e.g. only use when knowing the Element will
+     * Use with caution: e.g. only use when knowing the Element will
      * be added with new ElementId shortly
      */
-    bool RemoveElementSilently(ElementIdType elementId);
+    bool RemoveItemSilently(ElementIdType elementId);
 
     /**
      * return  removed elements set to the caller
      * should be followed by ClearRemovedElements() call
      */
-    std::unordered_set<ElementIdType>& GetRemovedElements();
-    void ClearRemovedElement(ElementIdType elmtId)
+    std::unordered_set<ElementIdType>& GetRemovedItems();
+    void ClearRemovedItems(ElementIdType elmtId)
     {
-        removedElements_.erase(elmtId);
+        removedItems_.erase(elmtId);
     }
 
     /**
      * does a complete reset
-     * clears the Map of Elements and Set of removed Elemnts
+     * clears the Map of Elements and Set of removed Elements
      */
     void Clear();
 
@@ -98,15 +107,15 @@ private:
     //  Singleton instance
     static thread_local ElementRegister* instance_;
 
-    // ElementID assiugned during intial render
-    // first to Component, then syned to Element
+    // ElementID assigned during initial render
+    // first to Component, then synced to Element
     ElementIdType nextUniqueElementId_ = 0;
 
     // Map for created elements
-    std::unordered_map<ElementIdType, WeakPtr<AceType>> elementMap_;
+    std::unordered_map<ElementIdType, WeakPtr<AceType>> itemMap_;
 
-    // Set of removed Elements (not in elementMap_ anymore)
-    std::unordered_set<ElementIdType> removedElements_;
+    // Set of removed Elements (not in itemMap_ anymore)
+    std::unordered_set<ElementIdType> removedItems_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
 };

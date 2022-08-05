@@ -16,6 +16,7 @@
 #include "frameworks/core/pipeline/base/element_register.h"
 
 #include "base/log/log.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "frameworks/base/memory/ace_type.h"
 #include "frameworks/core/pipeline/base/element.h"
@@ -31,33 +32,40 @@ ElementRegister* ElementRegister::GetInstance()
     return (ElementRegister::instance_);
 }
 
-RefPtr<Element> ElementRegister::GetElementById(ElementIdType elmtId)
+RefPtr<Element> ElementRegister::GetElementById(ElementIdType elementId)
 {
-    if (elmtId == ElementRegister::UndefinedElementId) {
+    if (elementId == ElementRegister::UndefinedElementId) {
         return nullptr;
     }
-    auto position = ElementRegister::GetInstance()->elementMap_.find(elmtId);
-    return position == elementMap_.end() ? nullptr : AceType::DynamicCast<Element>(position->second).Upgrade();
+    auto position = itemMap_.find(elementId);
+    return position == itemMap_.end() ? nullptr : AceType::DynamicCast<Element>(position->second).Upgrade();
 }
 
-RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType elmtId)
+RefPtr<AceType> ElementRegister::GetNodeById(ElementIdType elementId)
 {
-    auto position = ElementRegister::GetInstance()->elementMap_.find(elmtId);
-    return (position == elementMap_.end()) ?
-        nullptr :
-        AceType::DynamicCast<V2::ElementProxy>(position->second).Upgrade();
+    if (elementId == ElementRegister::UndefinedElementId) {
+        return nullptr;
+    }
+    auto position = itemMap_.find(elementId);
+    return position == itemMap_.end() ? nullptr : position->second.Upgrade();
+}
+
+RefPtr<V2::ElementProxy> ElementRegister::GetElementProxyById(ElementIdType elementId)
+{
+    auto position = itemMap_.find(elementId);
+    return (position == itemMap_.end()) ? nullptr : AceType::DynamicCast<V2::ElementProxy>(position->second).Upgrade();
 }
 
 bool ElementRegister::Exists(ElementIdType elementId)
 {
     LOGD("ElementRegister::Exists(%{public}d) returns %{public}s", elementId,
-        (elementMap_.find(elementId) != elementMap_.end()) ? "true" : "false");
-    return (elementMap_.find(elementId) != elementMap_.end());
+        (itemMap_.find(elementId) != itemMap_.end()) ? "true" : "false");
+    return (itemMap_.find(elementId) != itemMap_.end());
 }
 
 bool ElementRegister::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>& referenced)
 {
-    auto result = elementMap_.emplace(elmtId, referenced);
+    auto result = itemMap_.emplace(elmtId, referenced);
     if (!result.second) {
         LOGE("Duplicate elmtId %{public}d error.", elmtId);
     }
@@ -91,31 +99,49 @@ bool ElementRegister::AddElementProxy(const WeakPtr<V2::ElementProxy>& elementPr
     return AddReferenced(elmt->GetElementId(), elementProxy);
 }
 
-bool ElementRegister::RemoveElement(ElementIdType elementId)
+RefPtr<NG::UINode> ElementRegister::GetUINodeById(ElementIdType elementId)
+{
+    if (elementId == ElementRegister::UndefinedElementId) {
+        return nullptr;
+    }
+    auto iter = itemMap_.find(elementId);
+    return iter == itemMap_.end() ? nullptr : AceType::DynamicCast<NG::UINode>(iter->second).Upgrade();
+}
+
+bool ElementRegister::AddUINode(const RefPtr<NG::UINode>& node)
+{
+    if (!node || (node->GetId() == ElementRegister::UndefinedElementId)) {
+        return false;
+    }
+
+    LOGD("Add %{public}s with elmtId %{public}d", AceType::TypeName(node), node->GetId());
+    return AddReferenced(node->GetId(), node);
+}
+
+bool ElementRegister::RemoveItem(ElementIdType elementId)
 {
     if (elementId == ElementRegister::UndefinedElementId) {
         return false;
     }
 
-    auto removed = elementMap_.erase(elementId);
+    auto removed = itemMap_.erase(elementId);
     if (removed) {
         LOGD("ElmtId %{public}d successfully removed from registry, added to list of removed Elements.", elementId);
     } else {
         LOGD("ElmtId %{public}d not found. Cannot be removed.", elementId);
     }
-    removedElements_.insert(elementId);
-    LOGD("Size of removedElements_ removedElements_ %{public}d",
-        static_cast<int32_t>(ElementRegister::GetInstance()->removedElements_.size()));
+    removedItems_.insert(elementId);
+    LOGD("Size of removedItems_ removedItems_ %{public}d", static_cast<int32_t>(removedItems_.size()));
     return removed;
 }
 
-bool ElementRegister::RemoveElementSilently(ElementIdType elementId)
+bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
 {
     if (elementId == ElementRegister::UndefinedElementId) {
         return false;
     }
 
-    auto removed = ElementRegister::GetInstance()->elementMap_.erase(elementId);
+    auto removed = itemMap_.erase(elementId);
     if (removed) {
         LOGD("ElmtId %{public}d successfully removed from registry, NOT added to list of removed Elements.", elementId);
     } else {
@@ -125,17 +151,16 @@ bool ElementRegister::RemoveElementSilently(ElementIdType elementId)
     return removed;
 }
 
-std::unordered_set<ElementIdType>& ElementRegister::GetRemovedElements()
+std::unordered_set<ElementIdType>& ElementRegister::GetRemovedItems()
 {
-    LOGD("return set of %{public}d elmtIds",
-        static_cast<int32_t>(ElementRegister::GetInstance()->removedElements_.size()));
-    return ElementRegister::GetInstance()->removedElements_;
+    LOGD("return set of %{public}d elmtIds", static_cast<int32_t>(removedItems_.size()));
+    return removedItems_;
 }
 
 void ElementRegister::Clear()
 {
     LOGD("Empty the ElementRegister");
-    ElementRegister::GetInstance()->elementMap_.clear();
-    ElementRegister::GetInstance()->removedElements_.clear();
+    itemMap_.clear();
+    removedItems_.clear();
 }
 } // namespace OHOS::Ace

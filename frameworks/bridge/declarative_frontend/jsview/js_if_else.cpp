@@ -77,12 +77,12 @@ void JSIfElse::ComponentToElementLocalizedUpdate(
 
     // even though the IfElement will be deleted, do not put to list of deleted elements
     // because new Element with same elmtId will be created
-    ElementRegister::GetInstance()->RemoveElementSilently(ifElseElement->GetElementId());
+    ElementRegister::GetInstance()->RemoveItemSilently(ifElseElement->GetElementId());
     ifElseElement->UnregisterChildrenForPartialUpdates();
 
     auto ifElseParentElement = ifElseElement->GetElementParent().Upgrade();
     LOGD("Doing a deep update IfElseElement <- %{public}s ...", AceType::TypeName(ifElseComponent));
-    LOGD("IfElseelement slot: %{public}d, renderSlot: %{public}d",
+    LOGD("IfElse element slot: %{public}d, renderSlot: %{public}d",
         ifElseElement->GetSlot(), ifElseElement->GetRenderSlot());
     LOGD("   IfElseElement parent Element is %{public}s", AceType::TypeName(ifElseParentElement));
 

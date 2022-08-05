@@ -96,7 +96,7 @@ DeviceType SystemProperties::GetDeviceType()
     return deviceType_;
 }
 
-bool SystemProperties::IsSyscapExist(const char *cap)
+bool SystemProperties::IsSyscapExist(const char* cap)
 {
     return false;
 }
@@ -106,8 +106,8 @@ void SystemProperties::InitDeviceTypeBySystemProperty()
     deviceType_ = DeviceType::PHONE;
 }
 
-void SystemProperties::InitDeviceInfo(int32_t deviceWidth, int32_t deviceHeight, int32_t orientation,
-                                      double resolution, bool isRound)
+void SystemProperties::InitDeviceInfo(
+    int32_t deviceWidth, int32_t deviceHeight, int32_t orientation, double resolution, bool isRound)
 {
     // SetDeviceOrientation should be eralier than deviceWidth/deviceHeight init.
     if (orientation == ORIENTATION_PORTRAIT) {
@@ -172,4 +172,17 @@ std::string SystemProperties::GetRegion()
 {
     return UNDEFINED_PARAM;
 }
+
+std::string SystemProperties::GetPartialUpdatePkg()
+{
+    // TODO: add support for pc preview.
+    return "";
+}
+
+std::string SystemProperties::GetNewPipePkg()
+{
+    // TODO: add support for pc preview.
+    return "";
+}
+
 } // namespace OHOS::Ace

@@ -41,7 +41,6 @@ bool PaBackend::Initialize(BackendType type, const RefPtr<TaskExecutor>& taskExe
 {
     LOGI("PaBackend initialize begin.");
     type_ = type;
-    ACE_DCHECK(type_ == BackendType::SERVICE);
     InitializeBackendDelegate(taskExecutor);
 
     taskExecutor->PostTask(

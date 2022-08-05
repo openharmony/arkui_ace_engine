@@ -25,6 +25,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "core/common/container.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
@@ -454,15 +455,8 @@ bool QJSDeclarativeEngineInstance::InitJSEnv(JSRuntime* runtime, JSContext* cont
         return false;
     }
 
-    bool partialUpdate = false;
-    auto container = Container::Current();
-    if (container) {
-        auto pipelineContext = container->GetPipelineContext();
-        partialUpdate = pipelineContext && pipelineContext->UsePartialUpdate();
-    }
-
     std::string jsProxy;
-    if (partialUpdate) {
+    if (Container::IsCurrentUsePartialUpdate()) {
         jsProxy = std::string(_binary_stateMgmtPU_js_start, _binary_stateMgmtPU_js_end - _binary_stateMgmtPU_js_start);
     } else {
         jsProxy = std::string(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end - _binary_stateMgmt_js_start);

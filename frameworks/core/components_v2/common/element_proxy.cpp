@@ -41,25 +41,6 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 const std::string PREFIX_STEP = "  ";
-
-class ElementProxyHelper {
-public:
-    static bool UsePartialUpdate()
-    {
-        const auto container = Container::Current();
-        if (!container) {
-            LOGW("container is null");
-            return false;
-        }
-        const auto pipelineContext = container->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("pipelineContext is null!");
-            return false;
-        }
-        return pipelineContext->UsePartialUpdate();
-    }
-};
-
 class RenderElementProxy : public ElementProxy {
 public:
     explicit RenderElementProxy(const WeakPtr<ElementProxyHost>& host, bool forceRender = false)
@@ -73,7 +54,7 @@ public:
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
-        if (ElementProxyHelper::UsePartialUpdate()) {
+        if (Container::IsCurrentUsePartialUpdate()) {
             UpdateForPartialUpdate(component, startIndex);
             return;
         }
@@ -175,8 +156,7 @@ public:
 
                 updateElement = updateElement->GetFirstChild();
                 auto singleChild = AceType::DynamicCast<SingleChild>(updateComponent);
-                if ((updateElement == nullptr) || (singleChild == nullptr) ||
-                    (singleChild->GetChild() == nullptr)) {
+                if ((updateElement == nullptr) || (singleChild == nullptr) || (singleChild->GetChild() == nullptr)) {
                     break;
                 }
                 updateComponent = singleChild->GetChild();
@@ -223,7 +203,7 @@ public:
         if (!host) {
             return nullptr;
         }
-        if (ElementProxyHelper::UsePartialUpdate()) {
+        if (Container::IsCurrentUsePartialUpdate()) {
             element_ = CreateElement();
             return element_;
         }
@@ -518,7 +498,7 @@ public:
         }
 
         LOGD("GridIemElementProxy::GetDeepRenderComponent, own elmtId %{public}d, "
-            "deep render result Component %{public}s elmtId %{public}d",
+             "deep render result Component %{public}s elmtId %{public}d",
             GetElementId(), AceType::TypeName(component_), component_->GetElementId());
 
         ACE_DCHECK(GetElementId() == component_->GetElementId());
@@ -906,8 +886,7 @@ public:
 private:
     class LazyForEachCache final {
     public:
-        explicit LazyForEachCache(const RefPtr<LazyForEachComponent>& component)
-            : lazyForEachComponent_(component)
+        explicit LazyForEachCache(const RefPtr<LazyForEachComponent>& component) : lazyForEachComponent_(component)
         {
             if (component) {
                 count_ = component->TotalCount();
@@ -1055,7 +1034,7 @@ public:
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
-        if (ElementProxyHelper::UsePartialUpdate()) {
+        if (Container::IsCurrentUsePartialUpdate()) {
             UpdateForPartialUpdate(component, startIndex);
             return;
         }
@@ -1256,7 +1235,7 @@ public:
 
         LOGD("ForEachElementProxy::Update done, result:");
         LOGD("  ... new Ids %{public}s .", idS.c_str());
-        LOGD("  ... children_ size: %{public}llu .", children_.size());
+        LOGD("  ... children_ size: %{public}d .", static_cast<int32_t>(children_.size()));
 #endif
     }
 
@@ -1283,7 +1262,7 @@ public:
 
     void Append(const RefPtr<ElementProxy>& existingProxyChild)
     {
-        LOGD("ForEachElementProxy::LocalizedUpdate: Append existng %{public}s , count_ %{public}zu",
+        LOGD("ForEachElementProxy::LocalizedUpdate: Append existing %{public}s , count_ %{public}zu",
             AceType::TypeName(existingProxyChild), count_);
         children_.emplace_back(existingProxyChild);
         existingProxyChild->UpdateIndex(startIndex_ + count_);
@@ -1293,7 +1272,8 @@ public:
     void AppendNewComponent(const RefPtr<Component>& newComponent)
     {
         LOGD("ForEachElementProxy::LocalizedUpdate: Append new %{public}s , "
-            "count_ %{public}zu",  AceType::TypeName(newComponent), count_);
+             "count_ %{public}zu",
+            AceType::TypeName(newComponent), count_);
         auto proxyChild = ElementProxy::Create(host_, newComponent);
         children_.emplace_back(proxyChild);
         proxyChild->Update(newComponent, startIndex_ + count_);
@@ -1304,8 +1284,8 @@ public:
     void LocalizedUpdate(
         const RefPtr<Component>& newComponent, const RefPtr<Component>& outmostWrappingComponent) override
     {
-        LOGD("ForEachElementProxy::LocalizedUpdate with %{public}s elmtId %{public}d",
-            AceType::TypeName(newComponent), newComponent->GetElementId());
+        LOGD("ForEachElementProxy::LocalizedUpdate with %{public}s elmtId %{public}d", AceType::TypeName(newComponent),
+            newComponent->GetElementId());
 
         auto forEachComponent = AceType::DynamicCast<OHOS::Ace::PartUpd::ForEachComponent>(newComponent);
         ACE_DCHECK(forEachComponent);
@@ -1315,7 +1295,7 @@ public:
         const auto& oldIds = GetIdArray();
 
         ACE_DCHECK((oldIds.size() == children_.size()) &&
-                   "ForEachElementProxy::LocalizedUpdat:Number of IDs generated during previous render and number of "
+                   "ForEachElementProxy::LocalizedUpdate:Number of IDs generated during previous render and number of "
                    "ForEach child ElementProxy objects must match");
 
         // will build children_ array from scratch
@@ -1341,8 +1321,8 @@ public:
         idS += "]";
         LOGD("  ... new Ids %{public}s .", idS.c_str());
 
-        LOGD("  ... previous render child element: %{public}llu .", children_.size());
-        LOGD("  ... newly added child Components: %{public}llu .", newChildComponents.size());
+        LOGD("  ... previous render child element: %{public}d .", static_cast<int32_t>(children_.size()));
+        LOGD("  ... newly added child Components: %{public}d .", static_cast<int32_t>(newChildComponents.size()));
 #endif
 
         size_t newChildIndex = 0;
@@ -1366,14 +1346,14 @@ public:
 
         SetIdArray(forEachComponent->GetIdArray());
 
-        // host is the parent List, Swiper or Gridelement
+        // host is the parent List, Swiper or Grid element
         auto host = host_.Upgrade();
         if (host) {
             host->UpdateIndex();
-            LOGD("ForEachElementProxy::LocalizedUpdat: Updated startIndex_ %{public}zu, count_: %{public}zu",
+            LOGD("ForEachElementProxy::LocalizedUpdate: Updated startIndex_ %{public}zu, count_: %{public}zu",
                 startIndex_, count_);
             host->OnDataSourceUpdated(startIndex_);
-            LOGD("ForEachElementProxy::LocalizedUpdat: All done!");
+            LOGD("ForEachElementProxy::LocalizedUpdate: All done!");
         }
     }
 
@@ -1429,7 +1409,7 @@ public:
 
     void Update(const RefPtr<Component>& component, size_t startIndex) override
     {
-        if (ElementProxyHelper::UsePartialUpdate()) {
+        if (Container::IsCurrentUsePartialUpdate()) {
             UpdateForPartialUpdate(component, startIndex);
             return;
         }
@@ -1464,7 +1444,7 @@ public:
         ACE_DCHECK(ifElseComponent);
 
         LOGD("IfElseElementProxy::Update: First render: Creating IfElseElementProxy "
-            "with %{public}s elmtId %{public}d, startIndex_  %{public}d",
+             "with %{public}s elmtId %{public}d, startIndex_  %{public}d",
             AceType::TypeName(ifElseComponent), ifElseComponent->GetElementId(), (int)startIndex);
 
         SetElementId(ifElseComponent->GetElementId());
@@ -1523,11 +1503,10 @@ void ElementProxy::Dump(const std::string& prefix) const
 
 RefPtr<ElementProxy> ElementProxy::Create(const WeakPtr<ElementProxyHost>& host, const RefPtr<Component>& component)
 {
-
     if (AceType::InstanceOf<LazyForEachComponent>(component)) {
         return AceType::MakeRefPtr<LazyForEachElementProxy>(host);
     }
-    if (!ElementProxyHelper::UsePartialUpdate()) {
+    if (!Container::IsCurrentUsePartialUpdate()) {
         if (AceType::InstanceOf<ForEachComponent>(component)) {
             return AceType::MakeRefPtr<ForEachElementProxy>(host);
         }
@@ -1654,7 +1633,7 @@ void ElementProxy::AddSelfToElementRegistry()
 void ElementProxy::RemoveSelfFromElementRegistry()
 {
     LOGD(" ElementProxy::RemoveSelfFromElementRegistry() elmtId %{public}d", GetElementId());
-    ElementRegister::GetInstance()->RemoveElement(GetElementId());
+    ElementRegister::GetInstance()->RemoveItem(GetElementId());
 }
 
 std::list<std::string> ForEachElementLookup::GetIdArray(int32_t elmtId)
@@ -1673,7 +1652,7 @@ std::list<std::string> ForEachElementLookup::GetIdArray(int32_t elmtId)
     }
 
     LOGW("Can not find ForEachElement or ForEachElementProxy with elmtId %{public}d. (ok on first render)", elmtId);
-    return std::list<std::string>();
+    return {};
 }
 
 } // namespace OHOS::Ace::V2

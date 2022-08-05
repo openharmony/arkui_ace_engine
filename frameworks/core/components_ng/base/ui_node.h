@@ -140,6 +140,13 @@ public:
 
     virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
+    virtual void FlushUpdateAndMarkDirty()
+    {
+        for (const auto& child : children_) {
+            child->FlushUpdateAndMarkDirty();
+        }
+    }
+
 protected:
     virtual void OnChildAdded(const RefPtr<UINode>& child) {}
 
@@ -156,8 +163,6 @@ protected:
     virtual void OnDetachFromMainTree();
 
     std::list<RefPtr<UINode>> children_;
-
-private:
     WeakPtr<PipelineContext> context_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";

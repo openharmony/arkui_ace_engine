@@ -23,10 +23,11 @@
 namespace OHOS::Ace::NG {
 void RowView::Create()
 {
-    auto pattern = AceType::MakeRefPtr<LinearLayoutPattern>(false);
-    // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, pattern);
-    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    stack->Push(frameNode);
 }
 
 void RowView::AlignItems(FlexAlign flexAlign)

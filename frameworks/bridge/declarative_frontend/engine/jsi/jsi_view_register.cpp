@@ -172,7 +172,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
     LOGI("Load Document setting root view, page[%{public}d]", page->GetPageId());
     if (Container::IsCurrentUseNewPipeline()) {
-        auto pageRootNode = view->CreateNode();
+        auto pageRootNode = view->CreateUINode();
         page->SetRootNode(pageRootNode);
     } else {
         auto rootComponent = view->CreateComponent();

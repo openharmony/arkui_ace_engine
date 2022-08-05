@@ -16,8 +16,9 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_STACK_PROCESSOR_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_STACK_PROCESSOR_H
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "bridge/declarative_frontend/engine/bindings_defines.h"
+#include "core/components/common/properties/state_attributes.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -34,24 +35,13 @@ public:
         return ElementRegister::GetInstance()->MakeUniqueId();
     }
 
-    static void JsStartGetAccessRecordingFor(ElementIdType elmtId)
-    {
-        return ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(elmtId);
-    }
+    static void JsStartGetAccessRecordingFor(ElementIdType elmtId);
 
-    static int32_t JsGetElmtIdToAccountFor()
-    {
-        return ViewStackProcessor::GetInstance()->GetElmtIdToAccountFor();
-    }
-    static void JsSetElmtIdToAccountFor(ElementIdType elmtId)
-    {
-        ViewStackProcessor::GetInstance()->SetElmtIdToAccountFor(elmtId);
-    }
+    static int32_t JsGetElmtIdToAccountFor();
 
-    static void JsStopGetAccessRecording()
-    {
-        return ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
+    static void JsSetElmtIdToAccountFor(ElementIdType elmtId);
+
+    static void JsStopGetAccessRecording();
 
     static void JsImplicitPopBeforeContinue();
 

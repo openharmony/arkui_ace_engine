@@ -15,6 +15,8 @@
 
 #include "core/common/container.h"
 
+#include "base/utils/system_properties.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 
@@ -54,6 +56,15 @@ RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
 void Container::UpdateCurrent(int32_t id)
 {
     ContainerScope::UpdateCurrent(id);
+}
+
+bool Container::IsCurrentUsePartialUpdate()
+{
+    // TODO: now choose pipeline using param set as package name, later enable for all.
+    if (SystemProperties::GetPartialUpdatePkg().empty()) {
+        return false;
+    }
+    return AceApplicationInfo::GetInstance().GetPackageName() == SystemProperties::GetPartialUpdatePkg();
 }
 
 } // namespace OHOS::Ace

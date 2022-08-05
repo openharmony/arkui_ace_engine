@@ -19,6 +19,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -28,6 +29,7 @@ RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::strin
     auto node = MakeRefPtr<CustomNode>(nodeId, viewKey);
     node->SetContext(PipelineContext::GetCurrentContext());
     node->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(node);
     return node;
 }
 
@@ -35,11 +37,22 @@ CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
     : FrameNode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
 {}
 
-CustomNode::~CustomNode() = default;
+CustomNode::~CustomNode()
+{
+    if (destroyFunc_) {
+        destroyFunc_();
+    }
+}
 
-void CustomNode::Rebuild() {}
+void CustomNode::Update()
+{
+    if (updateFunc_) {
+        updateFunc_();
+    }
+    needRebuild_ = false;
+}
 
-void CustomNode::MarkNeedRebuild()
+void CustomNode::MarkNeedUpdate()
 {
     auto context = GetContext();
     if (!context) {
@@ -50,6 +63,6 @@ void CustomNode::MarkNeedRebuild()
         return;
     }
     needRebuild_ = true;
-    context->AddDirtyComposedNode(Claim(this));
+    context->AddDirtyCustomNode(Claim(this));
 }
 } // namespace OHOS::Ace::NG

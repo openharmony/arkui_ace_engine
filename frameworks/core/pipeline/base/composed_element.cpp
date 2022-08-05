@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/common/frontend.h"
 #include "core/components/flex/flex_item_element.h"
 #include "core/components/page/page_element.h"
@@ -69,9 +70,9 @@ void ComposedElement::PerformBuild()
 
     auto component = HasRenderFunction() ? CallRenderFunction(component_) : BuildChild();
 
-    if (!component && context->UsePartialUpdate()) {
+    if (!component && Container::IsCurrentUsePartialUpdate()) {
         // partial update re-render code path calls JSView::MakeElementUpdatesToCompleteRerender
-        // this function returns no component, ComposedElement does not require updqates
+        // this function returns no component, ComposedElement does not require update
         return;
     }
 
@@ -96,8 +97,8 @@ void ComposedElement::Update()
 {
     const RefPtr<ComposedComponent> compose = AceType::DynamicCast<ComposedComponent>(component_);
     if (compose != nullptr) {
-        LOGD("Update on %{public}s with %{public}s, elmtId %{public}d",
-            AceType::TypeName(this), AceType::TypeName(compose), compose->GetElementId());
+        LOGD("Update on %{public}s with %{public}s, elmtId %{public}d", AceType::TypeName(this),
+            AceType::TypeName(compose), compose->GetElementId());
         name_ = compose->GetName();
         SetElementId(compose->GetElementId());
         if (id_ != compose->GetId()) {
@@ -215,8 +216,8 @@ bool ComposedElement::NeedUpdateWithComponent(const RefPtr<Component>& newCompon
 
 void ComposedElement::UnregisterForPartialUpdates()
 {
-    LOGD("unregistering %{public}s(%{public}d) with %{public}d children.",
-        AceType::TypeName(this), GetElementId(), static_cast<int32_t>(GetChildren().size()));
+    LOGD("unregistering %{public}s(%{public}d) with %{public}d children.", AceType::TypeName(this), GetElementId(),
+        static_cast<int32_t>(GetChildren().size()));
 
     if (HasRemoveFunction()) {
         LOGD("... calling Remove function to Destroy JSView.");

@@ -231,7 +231,7 @@ public:
      * Use reserved elementId for given component
      * sets the reserved lemntId to none
      */
-    void ClaimElementId(RefPtr<Component> component);
+    void ClaimElementId(const RefPtr<Component>& component);
 
     int32_t ClaimElementId()
     {

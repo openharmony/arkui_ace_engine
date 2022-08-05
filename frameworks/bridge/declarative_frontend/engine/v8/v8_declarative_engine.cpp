@@ -508,13 +508,7 @@ void V8DeclarativeEngineInstance::InitJSContext()
     InitJsNativeModuleObject(localContext);
     InitJsExportsUtilObject(localContext);
 
-    bool partialUpdate = false;
-    auto container = Container::Current();
-    if (container) {
-        auto pipelineContext = container->GetPipelineContext();
-        partialUpdate = pipelineContext && pipelineContext->UsePartialUpdate();
-    }
-    if (partialUpdate) {
+    if (Container::IsCurrentUsePartialUpdate()) {
         LOGE("Loading State Mgmt JS lib for Partial Update");
         InitAceModules(_binary_stateMgmtPU_js_start, _binary_stateMgmtPU_js_end, isolate_.Get());
     } else {

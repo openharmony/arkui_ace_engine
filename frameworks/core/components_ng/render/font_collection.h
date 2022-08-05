@@ -22,10 +22,11 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT FontCollection : public virtual AceType {
+    DECLARE_ACE_TYPE(FontCollection, AceType)
 public:
     static RefPtr<FontCollection> Current();
 };
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_FONT_COLLECTION_H

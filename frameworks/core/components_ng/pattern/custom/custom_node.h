@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_CUSTOM_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_CUSTOM_NODE_H
 
+#include <functional>
 #include <string>
 
 #include "base/utils/macros.h"
@@ -41,15 +42,27 @@ public:
         }
     }
 
+    void SetUpdateFunction(std::function<void()>&& updateFunc)
+    {
+        updateFunc_ = std::move(updateFunc);
+    }
+
+    void SetDestroyFunction(std::function<void()>&& destroyFunc)
+    {
+        destroyFunc_ = std::move(destroyFunc);
+    }
+
     // called by view in js thread
-    void MarkNeedRebuild();
+    void MarkNeedUpdate();
 
     // called by pipeline in js thread of update.
-    void Rebuild();
+    void Update();
 
 private:
     void BuildChildren(const RefPtr<FrameNode>& child);
 
+    std::function<void()> updateFunc_;
+    std::function<void()> destroyFunc_;
     std::string viewKey_;
     bool needRebuild_ = false;
 };
