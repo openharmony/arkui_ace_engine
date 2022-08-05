@@ -435,9 +435,6 @@ void JsiAnimationBridge::JsCreateAnimation(const RefPtr<JsAcePage>& page, const 
         tweenOption.SetDelay(iterDelay->second);
     }
     tweenOption.SetIteration(iterations);
-    if (SystemProperties::GetRosenBackendEnabled()) {
-        tweenOption.SetAllowRunningAsynchronously(true);
-    }
 
     auto domDocument = page->GetDomDocument();
     if (!domDocument) {
