@@ -137,9 +137,6 @@ RefPtr<TextComponent> TextStyleCreatorTest::CreateComponent(const std::string& t
  * @tc.name: TextStyleCreator001
  * @tc.desc: Test all the properties of text style.
  * @tc.type: FUNC
- * @tc.require: AR000DAR00 AR000DAR01 AR000DAR02 AR000DAR03 AR000DAR04 AR000DAR05 AR000DAR06 AR000DBK1A AR000DBK1B
- *              AR000DBK1C
- * @tc.author: shanshurong
  */
 HWTEST_F(TextStyleCreatorTest, TextStyleCreator001, TestSize.Level1)
 {
@@ -181,8 +178,6 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator001, TestSize.Level1)
  * @tc.name: TextStyleCreator002
  * @tc.desc: Test all the properties set by default value when value is invalid.
  * @tc.type: FUNC
- * @tc.require: AR000DAR01 AR000DAR02 AR000DAR03 AR000DAR04 AR000DAR05 AR000DAR06 AR000DBK1B AR000DBK1C
- * @tc.author: shanshurong
  */
 HWTEST_F(TextStyleCreatorTest, TextStyleCreator002, TestSize.Level1)
 {
@@ -235,8 +230,6 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator002, TestSize.Level1)
  * @tc.name: TextStyleCreator003
  * @tc.desc: Test all the properties when initialized by default value.
  * @tc.type: FUNC
- * @tc.require: AR000DAR01 AR000DAR02 AR000DAR03 AR000DAR04 AR000DAR05 AR000DAR06 AR000DBK1A AR000DBK1B AR000DBK1C
- * @tc.author: shanshurong
  */
 HWTEST_F(TextStyleCreatorTest, TextStyleCreator003, TestSize.Level1)
 {

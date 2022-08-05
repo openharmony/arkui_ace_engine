@@ -48,8 +48,6 @@ public:
  * @tc.name: SvgFeComponentTransferTest001
  * @tc.desc: Verify the Update Interface of SvgFeComponentTransferDeclaration work correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGI
- * @tc.author: huye
  */
 HWTEST_F(SvgFeComponentTransferTest, SvgFeComponentTransferTest001, TestSize.Level1)
 {

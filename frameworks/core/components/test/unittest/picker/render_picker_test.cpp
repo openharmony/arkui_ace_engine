@@ -58,8 +58,6 @@ public:
  * @tc.name: RenderPicker001
  * @tc.desc: Verify the max day of february would be calculate correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DTE1R
- * @tc.author: huangzhangmin
  */
 HWTEST_F(RenderPickerTest, RenderPicker001, TestSize.Level1)
 {
@@ -84,8 +82,6 @@ HWTEST_F(RenderPickerTest, RenderPicker001, TestSize.Level1)
  * @tc.name: RenderPicker002
  * @tc.desc: Verify the flag of render mark after update function.
  * @tc.type: FUNC
- * @tc.require: AR000DTE1R
- * @tc.author: huangzhangmin
  */
 HWTEST_F(RenderPickerTest, RenderPicker002, TestSize.Level1)
 {
@@ -108,8 +104,6 @@ HWTEST_F(RenderPickerTest, RenderPicker002, TestSize.Level1)
  * @tc.name: RenderPicker003
  * @tc.desc: Verify the flag of selected of render picker option.
  * @tc.type: FUNC
- * @tc.require: AR000DTE1R
- * @tc.author: huangzhangmin
  */
 HWTEST_F(RenderPickerTest, RenderPicker003, TestSize.Level1)
 {
@@ -132,8 +126,6 @@ HWTEST_F(RenderPickerTest, RenderPicker003, TestSize.Level1)
  * @tc.name: RenderPicker004
  * @tc.desc: Verify the text of option after calling of UpdateValue.
  * @tc.type: FUNC
- * @tc.require: AR000DTE1R
- * @tc.author: huangzhangmin
  */
 HWTEST_F(RenderPickerTest, RenderPicker004, TestSize.Level1)
 {
@@ -162,8 +154,6 @@ HWTEST_F(RenderPickerTest, RenderPicker004, TestSize.Level1)
  * @tc.name: RenderPicker005
  * @tc.desc: Verify the flag of render mark after call function of UpdateScrollDelta.
  * @tc.type: FUNC
- * @tc.require: AR000DTE1R
- * @tc.author: huangzhangmin
  */
 HWTEST_F(RenderPickerTest, RenderPicker005, TestSize.Level1)
 {
@@ -192,8 +182,6 @@ HWTEST_F(RenderPickerTest, RenderPicker005, TestSize.Level1)
  * @tc.name: RenderPicker006
  * @tc.desc: Verify the column tag of render picker column.
  * @tc.type: FUNC
- * @tc.require: AR000DTE1R
- * @tc.author: huangzhangmin
  */
 HWTEST_F(RenderPickerTest, RenderPicker006, TestSize.Level1)
 {
@@ -221,8 +209,6 @@ HWTEST_F(RenderPickerTest, RenderPicker006, TestSize.Level1)
  * @tc.name: RenderPicker007
  * @tc.desc: Verify the max day of big month would be calculate correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1Q8
- * @tc.author: huangzhangmin
  */
 HWTEST_F(RenderPickerTest, RenderPicker007, TestSize.Level1)
 {
@@ -243,8 +229,6 @@ HWTEST_F(RenderPickerTest, RenderPicker007, TestSize.Level1)
  * @tc.name: RenderPicker008
  * @tc.desc: Verify the max day of small month would be calculate correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1Q8
- * @tc.author: huangzhangmin
  */
 HWTEST_F(RenderPickerTest, RenderPicker008, TestSize.Level1)
 {
@@ -265,8 +249,6 @@ HWTEST_F(RenderPickerTest, RenderPicker008, TestSize.Level1)
  * @tc.name: RenderPicker009
  * @tc.desc: Verify the leap year would be calculate correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1Q8
- * @tc.author: huangzhangmin
  */
 HWTEST_F(RenderPickerTest, RenderPicker009, TestSize.Level1)
 {
@@ -290,8 +272,6 @@ HWTEST_F(RenderPickerTest, RenderPicker009, TestSize.Level1)
  * @tc.name: RenderPicker010
  * @tc.desc: Verify the none leap year would be calculate correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1Q8
- * @tc.author: huangzhangmin
  */
 HWTEST_F(RenderPickerTest, RenderPicker010, TestSize.Level1)
 {
@@ -315,8 +295,6 @@ HWTEST_F(RenderPickerTest, RenderPicker010, TestSize.Level1)
  * @tc.name: RenderPicker011
  * @tc.desc: Verify the flags of picker would be setted correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1Q8
- * @tc.author: huangzhangmin
  */
 HWTEST_F(RenderPickerTest, RenderPicker011, TestSize.Level1)
 {
@@ -344,8 +322,6 @@ HWTEST_F(RenderPickerTest, RenderPicker011, TestSize.Level1)
  * @tc.name: RenderPicker012
  * @tc.desc: Verify the column would be removed correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1Q8
- * @tc.author: huangzhangmin
  */
 HWTEST_F(RenderPickerTest, RenderPicker012, TestSize.Level1)
 {

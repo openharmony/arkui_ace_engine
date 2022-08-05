@@ -43,8 +43,6 @@ void ListCreatorTest::TearDown() {}
  * @tc.name: ListCreator001
  * @tc.desc: Verify TransformCreator can create list component without child.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0A
- * @tc.author: zhongjianfei
  */
 HWTEST_F(ListCreatorTest, ListCreator001, TestSize.Level1)
 {
@@ -82,8 +80,6 @@ HWTEST_F(ListCreatorTest, ListCreator001, TestSize.Level1)
  * @tc.name: ListCreatorTest001
  * @tc.desc: Verify list component can open scrollpage.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SR
- * @tc.author: chenlien
  */
 HWTEST_F(ListCreatorTest, ListCreatorTest001, TestSize.Level1)
 {
@@ -117,8 +113,6 @@ HWTEST_F(ListCreatorTest, ListCreatorTest001, TestSize.Level1)
  * @tc.name: ListCreatorTest002
  * @tc.desc: Verify list component can close scrollpage.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0J
- * @tc.author: chenlien
  */
 HWTEST_F(ListCreatorTest, ListCreatorTest002, TestSize.Level1)
 {
@@ -152,8 +146,6 @@ HWTEST_F(ListCreatorTest, ListCreatorTest002, TestSize.Level1)
  * @tc.name: ListCreatorScrollBarTest001
  * @tc.desc: Verify list component can close scrollbar.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UI
- * @tc.author: chenlien
  */
 HWTEST_F(ListCreatorTest, ListCreatorScrollBarTest001, TestSize.Level1)
 {

@@ -168,8 +168,6 @@ void RenderRefreshTest::DragRefresh(const DragDirection& dragDirection)
  * @tc.name: RenderRefreshTest001
  * @tc.desc: Test the refresh
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RK
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderRefreshTest, RenderRefreshTest001, TestSize.Level1)
 {
@@ -189,8 +187,6 @@ HWTEST_F(RenderRefreshTest, RenderRefreshTest001, TestSize.Level1)
  * @tc.name: RenderRefreshTest002
  * @tc.desc: Test the refresh
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RK
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderRefreshTest, RenderRefreshTest002, TestSize.Level1)
 {
@@ -209,8 +205,6 @@ HWTEST_F(RenderRefreshTest, RenderRefreshTest002, TestSize.Level1)
  * @tc.name: RenderRefreshTest003
  * @tc.desc: Test the refresh
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RK
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderRefreshTest, RenderRefreshTest003, TestSize.Level1)
 {
@@ -229,8 +223,6 @@ HWTEST_F(RenderRefreshTest, RenderRefreshTest003, TestSize.Level1)
  * @tc.name: RenderRefreshTest004
  * @tc.desc: Test the refresh
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RI
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderRefreshTest, RenderRefreshTest004, TestSize.Level1)
 {
@@ -250,8 +242,6 @@ HWTEST_F(RenderRefreshTest, RenderRefreshTest004, TestSize.Level1)
  * @tc.name: RenderRefreshTest005
  * @tc.desc: Test the refresh
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RL
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderRefreshTest, RenderRefreshTest005, TestSize.Level1)
 {
@@ -270,8 +260,6 @@ HWTEST_F(RenderRefreshTest, RenderRefreshTest005, TestSize.Level1)
  * @tc.name: RenderRefreshTest006
  * @tc.desc: Test the refresh
  * @tc.type: FUNC
- * @tc.require: AR000DQ1RL
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderRefreshTest, RenderRefreshTest006, TestSize.Level1)
 {
@@ -291,8 +279,6 @@ HWTEST_F(RenderRefreshTest, RenderRefreshTest006, TestSize.Level1)
  * @tc.name: RenderRefreshTest007
  * @tc.desc: Test the refresh
  * @tc.type: FUNC
- * @tc.require: AR000E8T7M
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderRefreshTest, RenderRefreshTest007, TestSize.Level1)
 {
@@ -340,8 +326,6 @@ HWTEST_F(RenderRefreshTest, RenderRefreshTest007, TestSize.Level1)
  * @tc.name: RenderRefreshTest008
  * @tc.desc: Test the refresh
  * @tc.type: FUNC
- * @tc.require: AR000E8T7M
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderRefreshTest, RenderRefreshTest008, TestSize.Level1)
 {
@@ -392,8 +376,6 @@ HWTEST_F(RenderRefreshTest, RenderRefreshTest008, TestSize.Level1)
  * @tc.name: RenderRefreshTest009
  * @tc.desc: Test the refresh pulldown to OVER_DRAG STATE
  * @tc.type: FUNC
- * @tc.require: AR000F3CAK
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderRefreshTest, RenderRefreshTest009, TestSize.Level1)
 {
@@ -439,8 +421,6 @@ HWTEST_F(RenderRefreshTest, RenderRefreshTest009, TestSize.Level1)
  * @tc.name: RenderRefreshTest010
  * @tc.desc: Test the refresh pulldown to DRAG STATE
  * @tc.type: FUNC
- * @tc.require: AR000F3CAL
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderRefreshTest, RenderRefreshTest010, TestSize.Level1)
 {
@@ -486,8 +466,6 @@ HWTEST_F(RenderRefreshTest, RenderRefreshTest010, TestSize.Level1)
  * @tc.name: RenderRefreshTest011
  * @tc.desc: Test the refresh change from REFRESH to NONE STATE
  * @tc.type: FUNC
- * @tc.require: AR000F3CAM
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderRefreshTest, RenderRefreshTest011, TestSize.Level1)
 {

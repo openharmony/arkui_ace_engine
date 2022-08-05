@@ -71,8 +71,6 @@ void SwiperCreatorTest::TearDown() {}
  * @tc.name: SwiperCreator001
  * @tc.desc: Test parse swiper's field successfully from the right fields dsl json of swiper component.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVD AR000DAQVE AR000DAQVF AR000DAQVH AR000DAQVG AR000DAQVI AR000DAQVJ
- * @tc.author: kouxinxin
  */
 HWTEST_F(SwiperCreatorTest, SwiperCreator001, TestSize.Level1)
 {
@@ -136,8 +134,6 @@ HWTEST_F(SwiperCreatorTest, SwiperCreator001, TestSize.Level1)
  * @tc.name: SwiperCreator002
  * @tc.desc: Test parse swiper's field successfully from no field dsl json of swiper component.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVD AR000DAQVE AR000DAQVF AR000DAQVH AR000DAQVG AR000DAQVI AR000DAQVJ
- * @tc.author: kouxinxin
  */
 HWTEST_F(SwiperCreatorTest, SwiperCreator002, TestSize.Level1)
 {
@@ -154,8 +150,6 @@ HWTEST_F(SwiperCreatorTest, SwiperCreator002, TestSize.Level1)
  * @tc.name: SwiperCreator003
  * @tc.desc: Test parse swiper's field successfully from the type error fields dsl json of swiper component.
  * @tc.type: FUNC
- * @tc.require: AR000DAQVD AR000DAQVE AR000DAQVF AR000DAQVH AR000DAQVG AR000DAQVI AR000DAQVJ
- * @tc.author: kouxinxin
  */
 HWTEST_F(SwiperCreatorTest, SwiperCreator003, TestSize.Level1)
 {

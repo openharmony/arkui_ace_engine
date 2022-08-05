@@ -53,8 +53,6 @@ public:
  * @tc.name: SvgTransformParse001
  * @tc.desc: Parse single param of tranform.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TT
- * @tc.author: huye
  */
 HWTEST_F(TransformParseTest, SvgTransformParse001, TestSize.Level0)
 {
@@ -77,8 +75,6 @@ HWTEST_F(TransformParseTest, SvgTransformParse001, TestSize.Level0)
  * @tc.name: SvgTransformParse002
  * @tc.desc: Parse translate param of tranform.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TT
- * @tc.author: huye
  */
 HWTEST_F(TransformParseTest, SvgTransformParse002, TestSize.Level0)
 {
@@ -97,8 +93,6 @@ HWTEST_F(TransformParseTest, SvgTransformParse002, TestSize.Level0)
  * @tc.name: SvgTransformParse003
  * @tc.desc: Parse skew param of tranform.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TT
- * @tc.author: huye
  */
 HWTEST_F(TransformParseTest, SvgTransformParse003, TestSize.Level0)
 {
@@ -114,8 +108,6 @@ HWTEST_F(TransformParseTest, SvgTransformParse003, TestSize.Level0)
  * @tc.name: SvgTransformParse004
  * @tc.desc: Parse completed param of tranform.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TT
- * @tc.author: huye
  */
 HWTEST_F(TransformParseTest, SvgTransformParse004, TestSize.Level0)
 {
@@ -137,8 +129,6 @@ HWTEST_F(TransformParseTest, SvgTransformParse004, TestSize.Level0)
  * @tc.name: SvgTransformParse005
  * @tc.desc: Parse completed param of tranform.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TT
- * @tc.author: huye
  */
 HWTEST_F(TransformParseTest, SvgTransformParse005, TestSize.Level0)
 {
@@ -187,8 +177,6 @@ HWTEST_F(TransformParseTest, SvgTransformParse005, TestSize.Level0)
  * @tc.name: SvgTransformAlignment001
  * @tc.desc: Alignment attr from and to.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TT
- * @tc.author: huye
  */
 HWTEST_F(TransformParseTest, SvgTransformAlignment001, TestSize.Level0)
 {
@@ -257,8 +245,6 @@ HWTEST_F(TransformParseTest, SvgTransformAlignment001, TestSize.Level0)
  * @tc.name: SvgTransformAlignment002
  * @tc.desc: Alignment attr values.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TT
- * @tc.author: huye
  */
 HWTEST_F(TransformParseTest, SvgTransformAlignment002, TestSize.Level0)
 {

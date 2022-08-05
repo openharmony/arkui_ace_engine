@@ -175,8 +175,6 @@ void RenderScrollTest::TearDown()
  * @tc.name: RenderScrollTest001
  * @tc.desc: Verify PerformLayout can calculate scroll properties without setting direction.
  * @tc.type: FUNC
- * @tc.require: AR000DAR08 AR000DAR0B
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderScrollTest, RenderScrollTest001, TestSize.Level1)
 {
@@ -203,8 +201,6 @@ HWTEST_F(RenderScrollTest, RenderScrollTest001, TestSize.Level1)
  * @tc.name: RenderScrollTest002
  * @tc.desc: Verify PerformLayout can calculate scroll properties where direction is set to horizontal.
  * @tc.type: FUNC
- * @tc.require: AR000DAR08 AR000DAR0B
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderScrollTest, RenderScrollTest002, TestSize.Level1)
 {
@@ -233,8 +229,6 @@ HWTEST_F(RenderScrollTest, RenderScrollTest002, TestSize.Level1)
  * @tc.name: RenderScrollTest003
  * @tc.desc: Verify PerformLayout can calculate scroll properties when execute animate to method.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0C
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderScrollTest, RenderScrollTest003, TestSize.Level1)
 {
@@ -272,8 +266,6 @@ HWTEST_F(RenderScrollTest, RenderScrollTest003, TestSize.Level1)
  * @tc.name: RenderScrollTest004
  * @tc.desc: Verify scroll can jump to fixed offset where axis is set to vertical.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0D
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderScrollTest, RenderScrollTest004, TestSize.Level1)
 {
@@ -308,8 +300,6 @@ HWTEST_F(RenderScrollTest, RenderScrollTest004, TestSize.Level1)
  * @tc.name: RenderScrollTest005
  * @tc.desc: Verify scroll can jump to fixed offset where axis is set to horizontal.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0D
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderScrollTest, RenderScrollTest005, TestSize.Level1)
 {
@@ -343,8 +333,6 @@ HWTEST_F(RenderScrollTest, RenderScrollTest005, TestSize.Level1)
  * @tc.name: RenderScrollTest006
  * @tc.desc: Verify PerformLayout can calculate scroll properties with a padding properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0E
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderScrollTest, RenderScrollTest006, TestSize.Level1)
 {
@@ -382,8 +370,6 @@ HWTEST_F(RenderScrollTest, RenderScrollTest006, TestSize.Level1)
  * @tc.name: RenderScrollTest007
  * @tc.desc: Verify PerformLayout can calculate scroll properties with a initialOffset and direction is vertical.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0F AR000DAR0G
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderScrollTest, RenderScrollTest007, TestSize.Level1)
 {
@@ -416,8 +402,6 @@ HWTEST_F(RenderScrollTest, RenderScrollTest007, TestSize.Level1)
  * @tc.name: RenderScrollTest008
  * @tc.desc: Verify PerformLayout can calculate scroll properties with a initialOffset and direction is horizontal.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0F AR000DAR0G
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderScrollTest, RenderScrollTest008, TestSize.Level1)
 {
@@ -449,8 +433,6 @@ HWTEST_F(RenderScrollTest, RenderScrollTest008, TestSize.Level1)
  * @tc.name: RenderScrollTest009
  * @tc.desc: Verify PerformLayout can calculate scroll and update offset.
  * @tc.type: FUNC
- * @tc.require: AR000DAR09
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderScrollTest, RenderScrollTest009, TestSize.Level1)
 {
@@ -494,8 +476,6 @@ HWTEST_F(RenderScrollTest, RenderScrollTest009, TestSize.Level1)
  * @tc.name: RenderScrollScrollpageChangeTest001
  * @tc.desc: Verify Scroll UpdateOffset When scrollpage is true.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SR
- * @tc.author: chenlien
  */
 HWTEST_F(RenderScrollTest, RenderScrollScrollpageChangeTest001, TestSize.Level1)
 {
@@ -549,8 +529,6 @@ HWTEST_F(RenderScrollTest, RenderScrollScrollpageChangeTest001, TestSize.Level1)
  * @tc.name: RenderScrollScrollpageChangeTest002
  * @tc.desc: Verify Scroll UpdateOffset When scrollpage is true.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SR
- * @tc.author: chenlien
  */
 HWTEST_F(RenderScrollTest, RenderScrollScrollpageChangeTest002, TestSize.Level1)
 {
@@ -604,8 +582,6 @@ HWTEST_F(RenderScrollTest, RenderScrollScrollpageChangeTest002, TestSize.Level1)
  * @tc.name: RenderScrollFocusTest001
  * @tc.desc: Verify scroll support move child into viewport.
  * @tc.type: FUNC
- * @tc.require: AR000DRS0L
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderScrollTest, RenderScrollFocusTest001, TestSize.Level1)
 {
@@ -658,8 +634,6 @@ HWTEST_F(RenderScrollTest, RenderScrollFocusTest001, TestSize.Level1)
  * @tc.name: RenderScrollScrollerTest001
  * @tc.desc: Verify renderScroll can get currentOffset.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UT
- * @tc.author: chenlien
  */
 HWTEST_F(RenderScrollTest, RenderScrollScrollerTest001, TestSize.Level1)
 {
@@ -700,8 +674,6 @@ HWTEST_F(RenderScrollTest, RenderScrollScrollerTest001, TestSize.Level1)
  * @tc.name: RenderScrollScrollerTest002
  * @tc.desc: Verify renderScroll can scroll up one page.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UU
- * @tc.author: chenlien
  */
 HWTEST_F(RenderScrollTest, RenderScrollScrollerTest002, TestSize.Level1)
 {
@@ -752,8 +724,6 @@ HWTEST_F(RenderScrollTest, RenderScrollScrollerTest002, TestSize.Level1)
  * @tc.name: RenderScrollScrollerTest003
  * @tc.desc: Verify renderScroll can scroll down one page.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UU
- * @tc.author: chenlien
  */
 HWTEST_F(RenderScrollTest, RenderScrollScrollerTest003, TestSize.Level1)
 {
@@ -807,8 +777,6 @@ HWTEST_F(RenderScrollTest, RenderScrollScrollerTest003, TestSize.Level1)
  * @tc.name: RenderScrollScrollerTest004
  * @tc.desc: Verify renderScroll can scroll to top.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UV
- * @tc.author: chenlien
  */
 HWTEST_F(RenderScrollTest, RenderScrollScrollerTest004, TestSize.Level1)
 {
@@ -848,8 +816,6 @@ HWTEST_F(RenderScrollTest, RenderScrollScrollerTest004, TestSize.Level1)
  * @tc.name: RenderScrollScrollerTest005
  * @tc.desc: Verify renderScroll can scroll to bottom.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UV
- * @tc.author: chenlien
  */
 HWTEST_F(RenderScrollTest, RenderScrollScrollerTest005, TestSize.Level1)
 {
@@ -889,8 +855,6 @@ HWTEST_F(RenderScrollTest, RenderScrollScrollerTest005, TestSize.Level1)
  * @tc.name: RenderScrollRotateTest001
  * @tc.desc: Verify renderScroll by rotate.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1T4
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderScrollTest, RenderScrollRotateTest001, TestSize.Level1)
 {
@@ -938,8 +902,6 @@ HWTEST_F(RenderScrollTest, RenderScrollRotateTest001, TestSize.Level1)
  * @tc.name: RenderScrollRotateTest002
  * @tc.desc: Verify renderScroll by rotate.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1T4
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderScrollTest, RenderScrollRotateTest002, TestSize.Level1)
 {
@@ -1003,8 +965,6 @@ HWTEST_F(RenderScrollTest, RenderScrollRotateTest002, TestSize.Level1)
  * @tc.name: RenderScrollRotateTest003
  * @tc.desc: Verify renderScroll by rotate.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1T4
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderScrollTest, RenderScrollRotateTest003, TestSize.Level1)
 {

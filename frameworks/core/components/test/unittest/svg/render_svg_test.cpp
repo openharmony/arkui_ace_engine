@@ -51,8 +51,6 @@ public:
  * @tc.name: RenderSvgTest001
  * @tc.desc: Verify the Update Interface of RenderSvg work correctly with svg component.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TG
- * @tc.author: chenlien
  */
 HWTEST_F(RenderSvgTest, RenderSvgTest001, TestSize.Level1)
 {
@@ -81,8 +79,6 @@ HWTEST_F(RenderSvgTest, RenderSvgTest001, TestSize.Level1)
  * @tc.name: RenderSvgTest002
  * @tc.desc: Verify the Update Interface of RenderSvgRect work correctly with svg rect component.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TH
- * @tc.author: chenlien
  */
 HWTEST_F(RenderSvgTest, RenderSvgTest002, TestSize.Level1)
 {
@@ -119,8 +115,6 @@ HWTEST_F(RenderSvgTest, RenderSvgTest002, TestSize.Level1)
  * @tc.name: RenderSvgTest003
  * @tc.desc: Verify the Update Interface of RenderSvgCircle work correctly with svg circle component.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TI
- * @tc.author: chenlien
  */
 HWTEST_F(RenderSvgTest, RenderSvgTest003, TestSize.Level1)
 {
@@ -151,8 +145,6 @@ HWTEST_F(RenderSvgTest, RenderSvgTest003, TestSize.Level1)
  * @tc.name: RenderSvgTest004
  * @tc.desc: Verify the Update Interface of RenderSvgEllipse work correctly with svg ellipse component.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TJ
- * @tc.author: chenlien
  */
 HWTEST_F(RenderSvgTest, RenderSvgTest004, TestSize.Level1)
 {
@@ -185,8 +177,6 @@ HWTEST_F(RenderSvgTest, RenderSvgTest004, TestSize.Level1)
  * @tc.name: RenderSvgTest005
  * @tc.desc: Verify the Update Interface of RenderSvgPath work correctly with svg path component.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TK
- * @tc.author: chenlien
  */
 HWTEST_F(RenderSvgTest, RenderSvgTest005, TestSize.Level1)
 {
@@ -213,8 +203,6 @@ HWTEST_F(RenderSvgTest, RenderSvgTest005, TestSize.Level1)
  * @tc.name: RenderSvgTest006
  * @tc.desc: Verify the Update Interface of RenderSvgLine work correctly with svg line component.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TL
- * @tc.author: chenlien
  */
 HWTEST_F(RenderSvgTest, RenderSvgTest006, TestSize.Level1)
 {
@@ -247,8 +235,6 @@ HWTEST_F(RenderSvgTest, RenderSvgTest006, TestSize.Level1)
  * @tc.name: RenderSvgTest007
  * @tc.desc: Verify the Update Interface of RenderSvgPolyline work correctly with svg polyline component.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TM
- * @tc.author: chenlien
  */
 HWTEST_F(RenderSvgTest, RenderSvgTest007, TestSize.Level1)
 {
@@ -275,8 +261,6 @@ HWTEST_F(RenderSvgTest, RenderSvgTest007, TestSize.Level1)
  * @tc.name: RenderSvgTest008
  * @tc.desc: Verify the Update Interface of RenderSvgPolygon work correctly with svg polygon component.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TN
- * @tc.author: chenlien
  */
 HWTEST_F(RenderSvgTest, RenderSvgTest008, TestSize.Level1)
 {

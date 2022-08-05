@@ -58,8 +58,6 @@ public:
  * @tc.name: HorizontalLayout001
  * @tc.desc: verify the stack with positioned children works fine, where the positioned are set left.
  * @tc.type: FUNC
- * @tc.require: AR000DAR27
- * @tc.author: yangfan
  */
 HWTEST_F(RenderPositionedTest, HorizontalLayout001, TestSize.Level1)
 {
@@ -93,8 +91,6 @@ HWTEST_F(RenderPositionedTest, HorizontalLayout001, TestSize.Level1)
  * @tc.name: HorizontalLayout002
  * @tc.desc: verify the stack with positioned children works fine, where the positioned are both set left and right.
  * @tc.type: FUNC
- * @tc.require: AR000DAR27
- * @tc.author: yangfan
  */
 HWTEST_F(RenderPositionedTest, HorizontalLayout002, TestSize.Level1)
 {
@@ -129,8 +125,6 @@ HWTEST_F(RenderPositionedTest, HorizontalLayout002, TestSize.Level1)
  * @tc.name: HorizontalLayout003
  * @tc.desc: verify the stack with positioned children works fine, where the positioned are set width.
  * @tc.type: FUNC
- * @tc.require: AR000DAR27
- * @tc.author: yangfan
  */
 HWTEST_F(RenderPositionedTest, HorizontalLayout003, TestSize.Level1)
 {
@@ -165,8 +159,6 @@ HWTEST_F(RenderPositionedTest, HorizontalLayout003, TestSize.Level1)
  * @tc.name: VerticalLayout001
  * @tc.desc: verify the stack with positioned children works fine, where the positioned are set top.
  * @tc.type: FUNC
- * @tc.require: AR000DAR27
- * @tc.author: yangfan
  */
 HWTEST_F(RenderPositionedTest, VerticalLayout001, TestSize.Level1)
 {
@@ -200,8 +192,6 @@ HWTEST_F(RenderPositionedTest, VerticalLayout001, TestSize.Level1)
  * @tc.name: VerticalLayout002
  * @tc.desc: verify the stack with positioned children works fine, where the positioned are both set top and bottom.
  * @tc.type: FUNC
- * @tc.require: AR000DAR27
- * @tc.author: yangfan
  */
 HWTEST_F(RenderPositionedTest, VerticalLayout002, TestSize.Level1)
 {
@@ -236,8 +226,6 @@ HWTEST_F(RenderPositionedTest, VerticalLayout002, TestSize.Level1)
  * @tc.name: VerticalLayout003
  * @tc.desc: verify the stack with positioned children works fine, where the positioned are set height.
  * @tc.type: FUNC
- * @tc.require: AR000DAR27
- * @tc.author: yangfan
  */
 HWTEST_F(RenderPositionedTest, VerticalLayout003, TestSize.Level1)
 {

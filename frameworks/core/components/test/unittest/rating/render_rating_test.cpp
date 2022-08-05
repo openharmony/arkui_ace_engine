@@ -174,8 +174,6 @@ void RatingComponentTest::DragRating(const DragDirection& dragDirection, double 
  * @tc.name: RatingOperation001
  * @tc.desc: Test when rating component receives drag event, score is increased by stepsize and won't exceed starNum
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB
- * @tc.author: chenxuankai
  */
 HWTEST_F(RatingComponentTest, RatingOperation001, TestSize.Level1)
 {
@@ -220,8 +218,6 @@ HWTEST_F(RatingComponentTest, RatingOperation001, TestSize.Level1)
  * @tc.name: RatingOperation002
  * @tc.desc: Test when stepsize is greater than starNum, score won't exceed starNum
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB
- * @tc.author: chenxuankai
  */
 HWTEST_F(RatingComponentTest, RatingOperation002, TestSize.Level1)
 {
@@ -258,8 +254,6 @@ HWTEST_F(RatingComponentTest, RatingOperation002, TestSize.Level1)
  * @tc.name: RatingOperation003
  * @tc.desc: Test while operating rating, if stepsize is greater than starNum, score won't be less than starNum
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB
- * @tc.author: chenxuankai
  */
 HWTEST_F(RatingComponentTest, RatingOperation003, TestSize.Level1)
 {
@@ -297,8 +291,6 @@ HWTEST_F(RatingComponentTest, RatingOperation003, TestSize.Level1)
  * @tc.desc: Test while operating rating, if stepsize is less than starNum, score won't be less than stepsize and
  *           change event will trigger even if score doesn't change when click event occurs.
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB
- * @tc.author: chenxuankai
  */
 HWTEST_F(RatingComponentTest, RatingOperation004, TestSize.Level1)
 {
@@ -347,8 +339,6 @@ HWTEST_F(RatingComponentTest, RatingOperation004, TestSize.Level1)
  * @tc.name: RatingOperation005
  * @tc.desc: Test when rating component receives keyevent:right, score is increased by stepsize and won't exceed starNum
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB
- * @tc.author: chenxuankai
  */
 HWTEST_F(RatingComponentTest, RatingOperation005, TestSize.Level1)
 {
@@ -386,8 +376,6 @@ HWTEST_F(RatingComponentTest, RatingOperation005, TestSize.Level1)
  * @tc.name: RatingOperation006
  * @tc.desc: Test when stepsize is greater than starNum, keyevent won't make score greater than starNum
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB
- * @tc.author: chenxuankai
  */
 HWTEST_F(RatingComponentTest, RatingOperation006, TestSize.Level1)
 {
@@ -426,8 +414,6 @@ HWTEST_F(RatingComponentTest, RatingOperation006, TestSize.Level1)
  * @tc.desc: Test while operating rating via keyboard, if stepsize is greater than starNum,
  *           score won't be less than starNum.
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB
- * @tc.author: chenxuankai
  */
 HWTEST_F(RatingComponentTest, RatingOperation007, TestSize.Level1)
 {
@@ -466,8 +452,6 @@ HWTEST_F(RatingComponentTest, RatingOperation007, TestSize.Level1)
  * @tc.desc: Test while operating rating via keyboard, if stepsize is less than starNum, score won't be less than
  *           stepsize. And change event still triggers via keyevent:enter even if score doesn't change.
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB
- * @tc.author: chenxuankai
  */
 HWTEST_F(RatingComponentTest, RatingOperation008, TestSize.Level1)
 {
@@ -512,8 +496,6 @@ HWTEST_F(RatingComponentTest, RatingOperation008, TestSize.Level1)
  * @tc.name: RatingUpdate001
  * @tc.desc: Test rating component can handle valid params
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB
- * @tc.author: chenxuankai
  */
 HWTEST_F(RatingComponentTest, RatingUpdate001, TestSize.Level1)
 {
@@ -541,8 +523,6 @@ HWTEST_F(RatingComponentTest, RatingUpdate001, TestSize.Level1)
  * @tc.name: RatingUpdate002
  * @tc.desc: Test rating component can handle invalid params
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB
- * @tc.author: chenxuankai
  */
 HWTEST_F(RatingComponentTest, RatingUpdate002, TestSize.Level1)
 {
@@ -570,8 +550,6 @@ HWTEST_F(RatingComponentTest, RatingUpdate002, TestSize.Level1)
  * @tc.name: RatingUpdate003
  * @tc.desc: Test rating component can handle valid params that does not match
  * @tc.type: FUNC
- * @tc.require: AR000DBSLB
- * @tc.author: chenxuankai
  */
 HWTEST_F(RatingComponentTest, RatingUpdate003, TestSize.Level1)
 {

@@ -302,8 +302,6 @@ void RenderGridLayoutAnimationTest::WaitAndMockVsync(int64_t waitFor)
  * @tc.name: RenderGridLayoutSpringTest001
  * @tc.desc:
  * @tc.type: FUNC
- * @tc.require:
- * @tc.author:
  */
 HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutSpringTest001, TestSize.Level1)
 {
@@ -336,8 +334,6 @@ HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutSpringTest001, TestSize.
  * @tc.name: RenderGridLayoutSpringTest002
  * @tc.desc:
  * @tc.type: FUNC
- * @tc.require:
- * @tc.author:
  */
 HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutSpringTest002, TestSize.Level1)
 {
@@ -370,8 +366,6 @@ HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutSpringTest002, TestSize.
  * @tc.name: RenderGridLayoutDragDropTest001
  * @tc.desc:
  * @tc.type: FUNC
- * @tc.require:
- * @tc.author:
  */
 HWTEST_F(RenderGridLayoutAnimationTest, RenderGridLayoutDragDropTest001, TestSize.Level1)
 {

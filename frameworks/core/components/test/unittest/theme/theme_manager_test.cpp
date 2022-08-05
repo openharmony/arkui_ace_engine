@@ -88,8 +88,6 @@ void ThemeManagerTest::TearDown() {}
  * @tc.name: GlobalTheme001
  * @tc.desc: Test global theme exists.
  * @tc.type: FUNC
- * @tc.require: AR000DAR29 AR000DAR2C
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeManagerTest, GlobalTheme001, TestSize.Level1)
 {
@@ -106,8 +104,6 @@ HWTEST_F(ThemeManagerTest, GlobalTheme001, TestSize.Level1)
  * @tc.name: GlobalTheme002
  * @tc.desc: Test global theme contains all components' theme.
  * @tc.type: FUNC
- * @tc.require: AR000DAR29 AR000DAR2C
- * @tc.author: liruokun
  */
 HWTEST_F(ThemeManagerTest, GlobalTheme002, TestSize.Level1)
 {

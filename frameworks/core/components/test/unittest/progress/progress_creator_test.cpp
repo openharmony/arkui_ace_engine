@@ -132,8 +132,6 @@ void ProgressCreatorTest::CompareAllDefault(const RefPtr<ProgressComponent>& pro
  * @tc.name: ProgressComponentCreator001
  * @tc.desc: Test all the property created properly
  * @tc.type: FUNC
- * @tc.require: AR000DAR1T AR000DAR1V
- * @tc.author: YaoYuchi
  */
 HWTEST_F(ProgressCreatorTest, ProgressComponentCreator001, TestSize.Level1)
 {
@@ -176,8 +174,6 @@ HWTEST_F(ProgressCreatorTest, ProgressComponentCreator001, TestSize.Level1)
  * @tc.name: ProgressComponentCreator002
  * @tc.desc: Test default property. And all essential properly.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1T AR000DAR1V
- * @tc.author: YaoYuchi
  */
 HWTEST_F(ProgressCreatorTest, ProgressComponentCreator002, TestSize.Level1)
 {
@@ -204,8 +200,6 @@ HWTEST_F(ProgressCreatorTest, ProgressComponentCreator002, TestSize.Level1)
  * @tc.name: ProgressComponentCreator003
  * @tc.desc: Missing min property. Fail to create component.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1T AR000DAR1V
- * @tc.author: YaoYuchi
  */
 HWTEST_F(ProgressCreatorTest, ProgressComponentCreator003, TestSize.Level1)
 {
@@ -230,8 +224,6 @@ HWTEST_F(ProgressCreatorTest, ProgressComponentCreator003, TestSize.Level1)
  * @tc.name: ProgressComponentCreator004
  * @tc.desc: Missing max property. Fail to create component.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1T AR000DAR1V
- * @tc.author: YaoYuchi
  */
 HWTEST_F(ProgressCreatorTest, ProgressComponentCreator004, TestSize.Level1)
 {
@@ -256,8 +248,6 @@ HWTEST_F(ProgressCreatorTest, ProgressComponentCreator004, TestSize.Level1)
  * @tc.name: ProgressComponentCreator005
  * @tc.desc: Missing value property. Fail to create component.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1T AR000DAR1V
- * @tc.author: YaoYuchi
  */
 HWTEST_F(ProgressCreatorTest, ProgressComponentCreator005, TestSize.Level1)
 {
@@ -282,8 +272,6 @@ HWTEST_F(ProgressCreatorTest, ProgressComponentCreator005, TestSize.Level1)
  * @tc.name: ProgressComponentCreator006
  * @tc.desc: Missing cachedValue property. Fail to create component.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1T AR000DAR1V
- * @tc.author: YaoYuchi
  */
 HWTEST_F(ProgressCreatorTest, ProgressComponentCreator006, TestSize.Level1)
 {
@@ -308,8 +296,6 @@ HWTEST_F(ProgressCreatorTest, ProgressComponentCreator006, TestSize.Level1)
  * @tc.name: ProgressComponentCreator007
  * @tc.desc: Max and min value is illegal.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1T AR000DAR1V
- * @tc.author: YaoYuchi
  */
 HWTEST_F(ProgressCreatorTest, ProgressComponentCreator007, TestSize.Level1)
 {
@@ -335,8 +321,6 @@ HWTEST_F(ProgressCreatorTest, ProgressComponentCreator007, TestSize.Level1)
  * @tc.name: ProgressComponentCreator008
  * @tc.desc: Value is illegal.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1T AR000DAR1V
- * @tc.author: YaoYuchi
  */
 HWTEST_F(ProgressCreatorTest, ProgressComponentCreator008, TestSize.Level1)
 {
@@ -362,8 +346,6 @@ HWTEST_F(ProgressCreatorTest, ProgressComponentCreator008, TestSize.Level1)
  * @tc.name: ProgressComponentCreator009
  * @tc.desc: CachedValue is illegal.
  * @tc.type: FUNC
- * @tc.require: AR000DAR1T AR000DAR1V
- * @tc.author: YaoYuchi
  */
 HWTEST_F(ProgressCreatorTest, ProgressComponentCreator009, TestSize.Level1)
 {
@@ -389,8 +371,6 @@ HWTEST_F(ProgressCreatorTest, ProgressComponentCreator009, TestSize.Level1)
  * @tc.name: ProgressComponentCreator010
  * @tc.desc: Create circular progress with all parameter
  * @tc.type: FUNC
- * @tc.require: AR000DAR1U AR000DAR1V
- * @tc.author: YaoYuchi
  */
 HWTEST_F(ProgressCreatorTest, ProgressComponentCreator010, TestSize.Level1)
 {
@@ -433,8 +413,6 @@ HWTEST_F(ProgressCreatorTest, ProgressComponentCreator010, TestSize.Level1)
  * @tc.name: LoadingProgressCreator001
  * @tc.desc: Input correct loading progress json. The loading progress can be generated correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DAUN8
- * @tc.author: YaoYuchi
  */
 HWTEST_F(ProgressCreatorTest, LoadingProgressCreator001, TestSize.Level1)
 {
@@ -463,8 +441,6 @@ HWTEST_F(ProgressCreatorTest, LoadingProgressCreator001, TestSize.Level1)
  * @tc.desc: Input correct loading progress json. The loading progress can be generated correctly. And the diameter
  * is default value.
  * @tc.type: FUNC
- * @tc.require: AR000DAUN8
- * @tc.author: YaoYuchi
  */
 HWTEST_F(ProgressCreatorTest, LoadingProgressCreator002, TestSize.Level1)
 {

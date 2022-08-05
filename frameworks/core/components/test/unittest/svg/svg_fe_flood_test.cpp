@@ -48,8 +48,6 @@ public:
  * @tc.name: SvgFeFloodTest001
  * @tc.desc: Verify the Update Interface of SvgFeDeclaration work correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGI
- * @tc.author: huye
  */
 HWTEST_F(SvgFeFloodTest, SvgFeFloodTest001, TestSize.Level1)
 {
@@ -78,8 +76,6 @@ HWTEST_F(SvgFeFloodTest, SvgFeFloodTest001, TestSize.Level1)
  * @tc.name: SvgFeFloodTest002
  * @tc.desc: Verify the Update Interface of SvgFeDeclaration work correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGI
- * @tc.author: huye
  */
 HWTEST_F(SvgFeFloodTest, SvgFeFloodTest002, TestSize.Level1)
 {

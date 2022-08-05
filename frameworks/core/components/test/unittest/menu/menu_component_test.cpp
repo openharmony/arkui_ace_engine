@@ -44,8 +44,6 @@ public:
  * @tc.name: MenuComponent001
  * @tc.desc: Verify MenuComponent can get and set title correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1QT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(MenuComponentTest, MenuComponent001, TestSize.Level1)
 {
@@ -67,8 +65,6 @@ HWTEST_F(MenuComponentTest, MenuComponent001, TestSize.Level1)
  * @tc.name: MenuComponent002
  * @tc.desc: Verify MenuComponent can get option with invalidate index.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1QT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(MenuComponentTest, MenuComponent002, TestSize.Level1)
 {
@@ -89,8 +85,6 @@ HWTEST_F(MenuComponentTest, MenuComponent002, TestSize.Level1)
  * @tc.name: MenuComponent003
  * @tc.desc: Verify MenuComponent can append option correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1QT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(MenuComponentTest, MenuComponent003, TestSize.Level1)
 {
@@ -116,8 +110,6 @@ HWTEST_F(MenuComponentTest, MenuComponent003, TestSize.Level1)
  * @tc.name: MenuComponent004
  * @tc.desc: Verify MenuComponent can clear all option correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1QT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(MenuComponentTest, MenuComponent004, TestSize.Level1)
 {
@@ -144,8 +136,6 @@ HWTEST_F(MenuComponentTest, MenuComponent004, TestSize.Level1)
  * @tc.name: MenuComponent005
  * @tc.desc: Verify MenuComponent can set text color correctly.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1QT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(MenuComponentTest, MenuComponent005, TestSize.Level1)
 {

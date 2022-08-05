@@ -56,8 +56,6 @@ void RenderProgressTest::TearDown()
  * @tc.name: RenderProgressTest001
  * @tc.desc: Verify the default value for loading progress.
  * @tc.type: FUNC
- * @tc.require: AR000F3CAF
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderProgressTest, RenderProgressTest001, TestSize.Level1)
 {
@@ -78,8 +76,6 @@ HWTEST_F(RenderProgressTest, RenderProgressTest001, TestSize.Level1)
  * @tc.name: RenderProgressTest002
  * @tc.desc: Verify the set value for loading progress.
  * @tc.type: FUNC
- * @tc.require: AR000F3CAG
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderProgressTest, RenderProgressTest002, TestSize.Level1)
 {
@@ -116,8 +112,6 @@ HWTEST_F(RenderProgressTest, RenderProgressTest002, TestSize.Level1)
  * @tc.name: RenderProgressTest003
  * @tc.desc: Verify the layout size for loading progress.
  * @tc.type: FUNC
- * @tc.require: AR000F3CAH
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderProgressTest, RenderProgressTest003, TestSize.Level1)
 {
@@ -154,8 +148,6 @@ HWTEST_F(RenderProgressTest, RenderProgressTest003, TestSize.Level1)
  * @tc.name: RenderProgressTest004
  * @tc.desc: Verify layout size effect the loading progress size.
  * @tc.type: FUNC
- * @tc.require: AR000F3CAG
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderProgressTest, RenderProgressTest004, TestSize.Level1)
 {
@@ -211,8 +203,6 @@ HWTEST_F(RenderProgressTest, RenderProgressTest004, TestSize.Level1)
  * @tc.name: RenderProgressTest005
  * @tc.desc: Verify layout size effect the loading progress size.
  * @tc.type: FUNC
- * @tc.require: AR000F3CAG
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderProgressTest, RenderProgressTest005, TestSize.Level1)
 {

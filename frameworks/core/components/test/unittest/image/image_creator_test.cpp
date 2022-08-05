@@ -61,8 +61,6 @@ void ImageCreatorTest::TearDown() {}
  * @tc.name: ImageCreator001
  * @tc.desc: Verify that ImageCreator can parse json when all attributes are set.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPR AR000DAQUL AR000DAQUM AR000DAQUN AR000DAQUO AR000DAQUP AR000DAQUR
- * @tc.author: chenxuankai
  */
 HWTEST_F(ImageCreatorTest, ImageCreator001, TestSize.Level1)
 {
@@ -105,8 +103,6 @@ HWTEST_F(ImageCreatorTest, ImageCreator001, TestSize.Level1)
  * @tc.name: ImageCreator002
  * @tc.desc: Verify that ImageCreator can parse json with no attributes set.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPR AR000DAQUL AR000DAQUM AR000DAQUN AR000DAQUO AR000DAQUP AR000DAQUR
- * @tc.author: chenxuankai
  */
 HWTEST_F(ImageCreatorTest, ImageCreator002, TestSize.Level1)
 {
@@ -145,8 +141,6 @@ HWTEST_F(ImageCreatorTest, ImageCreator002, TestSize.Level1)
  * @tc.name: ImageCreator003
  * @tc.desc: Verify that ImageCreator can parse json when all attributes are set incorrectly.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPR AR000DAQUL AR000DAQUM AR000DAQUN AR000DAQUO AR000DAQUP AR000DAQUR
- * @tc.author: chenxuankai
  */
 HWTEST_F(ImageCreatorTest, ImageCreator003, TestSize.Level1)
 {

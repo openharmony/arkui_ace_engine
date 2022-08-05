@@ -162,8 +162,6 @@ protected:
  * @tc.name: ImageAnimatorTest001
  * @tc.desc: test image animator element(go forward).
  * @tc.type: FUNC
- * @tc.require: AR000E3DMG
- * @tc.author: jiangdayuan
  */
 HWTEST_F(ImageAnimatorTest, ImageAnimatorTest001, TestSize.Level1)
 {
@@ -208,8 +206,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest001, TestSize.Level1)
  * @tc.name: ImageAnimatorTest002
  * @tc.desc: test image animator element(go back).
  * @tc.type: FUNC
- * @tc.require: AR000E3DMG
- * @tc.author: jiangdayuan
  */
 HWTEST_F(ImageAnimatorTest, ImageAnimatorTest002, TestSize.Level1)
 {
@@ -255,8 +251,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest002, TestSize.Level1)
  * @tc.name: ImageAnimatorTest003
  * @tc.desc: test image animator element(infinite play).
  * @tc.type: FUNC
- * @tc.require: AR000E3DMG
- * @tc.author: jiangdayuan
  */
 HWTEST_F(ImageAnimatorTest, ImageAnimatorTest003, TestSize.Level1)
 {
@@ -304,8 +298,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest003, TestSize.Level1)
  * @tc.name: ImageAnimatorTest004
  * @tc.desc: test image animator element(go forward).
  * @tc.type: FUNC
- * @tc.require: AR000FL0UC
- * @tc.author: jiachunhui
  */
 HWTEST_F(ImageAnimatorTest, ImageAnimatorTest004, TestSize.Level1)
 {
@@ -350,8 +342,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest004, TestSize.Level1)
  * @tc.name: ImageAnimatorTest005
  * @tc.desc: test image animator element(go back).
  * @tc.type: FUNC
- * @tc.require: AR000FL0UC
- * @tc.author: jiachunhui
  */
 HWTEST_F(ImageAnimatorTest, ImageAnimatorTest005, TestSize.Level1)
 {
@@ -397,8 +387,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest005, TestSize.Level1)
  * @tc.name: ImageAnimatorTest006
  * @tc.desc: test image animator element(infinite play).
  * @tc.type: FUNC
- * @tc.require: AR000FL0UC
- * @tc.author: jiachunhui
  */
 HWTEST_F(ImageAnimatorTest, ImageAnimatorTest006, TestSize.Level1)
 {
@@ -446,8 +434,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest006, TestSize.Level1)
  * @tc.name: ImageAnimatorTest007
  * @tc.desc: test image animator element(go forward).
  * @tc.type: FUNC
- * @tc.require: AR000FL0UC
- * @tc.author: jiachunhui
  */
 HWTEST_F(ImageAnimatorTest, ImageAnimatorTest007, TestSize.Level1)
 {
@@ -492,8 +478,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest007, TestSize.Level1)
  * @tc.name: ImageAnimatorTest008
  * @tc.desc: test image animator element(go back).
  * @tc.type: FUNC
- * @tc.require: AR000FL0UC
- * @tc.author: jiachunhui
  */
 HWTEST_F(ImageAnimatorTest, ImageAnimatorTest008, TestSize.Level1)
 {
@@ -539,8 +523,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest008, TestSize.Level1)
  * @tc.name: ImageAnimatorTest009
  * @tc.desc: test image animator element(infinite play).
  * @tc.type: FUNC
- * @tc.require: AR000FL0UC
- * @tc.author: jiachunhui
  */
 HWTEST_F(ImageAnimatorTest, ImageAnimatorTest009, TestSize.Level1)
 {
@@ -588,8 +570,6 @@ HWTEST_F(ImageAnimatorTest, ImageAnimatorTest009, TestSize.Level1)
  * @tc.name: ImageAnimatorTest010
  * @tc.desc: test image animator paly duration.
  * @tc.type: FUNC
- * @tc.require: AR000FL0UC
- * @tc.author: jiachunhui
  */
 HWTEST_F(ImageAnimatorTest, ImageAnimatorTest010, TestSize.Level1)
 {
