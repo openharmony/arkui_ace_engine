@@ -76,6 +76,7 @@ public:
     void StrokeText(const std::string& text, const Offset& textOffset);
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     void MoveTo(double x, double y);
     void LineTo(double x, double y);
     void BezierCurveTo(const BezierCurveParam& param);
