@@ -227,6 +227,7 @@ public:
     virtual void StrokeText(const std::string& text, double x, double y, const PaintState& state) = 0;
     virtual double MeasureText(const std::string& text, const PaintState& state) = 0;
     virtual double MeasureTextHeight(const std::string& text, const PaintState& state) = 0;
+    virtual TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) = 0;
     virtual void AddRect(const Rect& rect) = 0;
     virtual void Fill() = 0;
     virtual void Fill(const RefPtr<CanvasPath2D>& path) = 0;
