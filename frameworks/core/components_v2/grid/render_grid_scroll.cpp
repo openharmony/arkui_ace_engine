@@ -1233,7 +1233,7 @@ void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
     startRankItemIndex_ = GetStartingItem(index);
     // Build items
     if ((index < startShowItemIndex_ || index > endShowItemIndex_) &&
-        (index - startRankItemIndex_ < metaData_.size())) {
+        (index - startRankItemIndex_ < static_cast<int32_t>(metaData_.size()))) {
         // do not need layout transition
         auto option = context->GetExplicitAnimationOption();
         context->SaveExplicitAnimationOption(AnimationOption());
