@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
-#include <sstream>
 #include <string>
 #include <vector>
 

@@ -18,7 +18,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/render/canvas.h"
-#include "core/components_ng/render/render_property.h"
+#include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
 FlutterRenderContext::~FlutterRenderContext()

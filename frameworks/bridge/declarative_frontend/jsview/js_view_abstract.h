@@ -59,13 +59,7 @@ enum class ResponseType : int32_t {
     LONGPRESS,
 };
 
-enum class JSCallbackInfoType {
-    STRING,
-    NUMBER,
-    OBJECT,
-    BOOLEAN,
-    FUNCTION
-};
+enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
 class JSViewAbstract {
 public:
@@ -114,14 +108,14 @@ public:
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoration> decoration = nullptr);
     static void JsBorderImage(const JSCallbackInfo& info);
-    static void ParseBorderImageSource(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage,
-        RefPtr<Decoration>& boxDecoration);
+    static void ParseBorderImageSource(
+        const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage, RefPtr<Decoration>& boxDecoration);
     static void ParseBorderImageRepeat(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
     static void ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
     static void ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
     static void ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<BorderImage>& borderImage);
-    static void ParseBorderImageDimension(const JSRef<JSVal>& args,
-        BorderImage::BorderImageOption& borderImageDimension);
+    static void ParseBorderImageDimension(
+        const JSRef<JSVal>& args, BorderImage::BorderImageOption& borderImageDimension);
     static void ParseBorderImageLinearGradient(const JSRef<JSVal>& args, RefPtr<Decoration>& backDecoration);
     static void JsBlur(const JSCallbackInfo& info);
     static void JsColorBlend(const JSCallbackInfo& info);
@@ -292,6 +286,15 @@ protected:
     static RefPtr<ThemeConstants> GetThemeConstants(const JSRef<JSObject>& jsObj = JSRef<JSObject>());
     static bool JsWidth(const JSRef<JSVal>& jsValue);
     static bool JsHeight(const JSRef<JSVal>& jsValue);
+    static void SetDefaultTransition(TransitionType transitionType);
+    static bool ParseAndSetOpacityTransition(
+        const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
+    static bool ParseAndSetRotateTransition(
+        const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
+    static bool ParseAndSetScaleTransition(
+        const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
+    static bool ParseAndSetTranslateTransition(
+        const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
 
     template<typename T>
     static RefPtr<T> GetTheme()

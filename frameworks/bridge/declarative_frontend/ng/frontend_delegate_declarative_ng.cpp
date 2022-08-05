@@ -67,7 +67,7 @@ void FrontendDelegateDeclarativeNG::RunPage(
     taskExecutor_->PostTask(
         [manifestParser = manifestParser_, delegate = Claim(this)]() {
             auto pipeline = delegate->GetPipelineContext();
-            // TODO: get platform version from context, and shuould stored in AceApplicationInfo.
+            // TODO: get platform version from context, and should stored in AceApplicationInfo.
             if (manifestParser->GetMinPlatformVersion() > 0) {
                 pipeline->SetMinPlatformVersion(manifestParser->GetMinPlatformVersion());
             }
