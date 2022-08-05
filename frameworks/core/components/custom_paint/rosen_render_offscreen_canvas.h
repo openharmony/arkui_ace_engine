@@ -46,6 +46,7 @@ public:
     void StrokeText(const std::string& text, double x, double y, const PaintState& state) override;
     double MeasureText(const std::string& text, const PaintState& state) override;
     double MeasureTextHeight(const std::string& text, const PaintState& state) override;
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) override;
     std::string ToDataURL(const std::string& type, const double quality) override;
     std::unique_ptr<ImageData> GetImageData(double left, double top, double width, double height) override;
     void BeginPath() override;
@@ -108,12 +109,12 @@ private:
     void UpdatePaintShader(SkPaint& paint, const Gradient& gradient);
     void UpdatePaintShader(const Pattern& pattern, SkPaint& paint);
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
-    double GetBaselineOffset(TextBaseline baseline);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     std::unique_ptr<txt::Paragraph> paragraph_;
     bool HasShadow() const;
     bool HasImageShadow() const;
     void UpdateTextStyleForeground(bool isStroke, txt::TextStyle& style, bool hasShadow);
-    double GetAlignOffset(const std::string& text, TextAlign align);
+    double GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     TextDirection GetTextDirection(const std::string& text);
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
     void UpdateLineDash(SkPaint& paint);
