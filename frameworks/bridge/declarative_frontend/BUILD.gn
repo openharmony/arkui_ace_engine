@@ -446,6 +446,7 @@ template("declarative_js_engine_ng") {
     deps += [
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
+      ":gen_obj_src_js_proxyclass_pu",
     ]
   }
 }

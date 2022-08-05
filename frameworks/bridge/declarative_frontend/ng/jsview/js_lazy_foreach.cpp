@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 
-
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/lazy_for_each.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"

@@ -41,8 +41,10 @@ build_component_ng("pattern_ng") {
   ]
 }
 
-group("patternTest_ng") {
-  testonly = true
+if (!is_cross_platform_build) {
+  group("patternTest_ng") {
+    testonly = true
 
-  deps = [ "text/test:textPatternTest_ng" ]
+    deps = [ "text/test:textPatternTest_ng" ]
+  }
 }

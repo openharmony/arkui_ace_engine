@@ -37,6 +37,9 @@ declare_args() {
 
   # Enable build for new ng pipeline, also will use new flutter
   enable_ng_build = false
+
+  # Enable metal in iOS or MacOS
+  shell_enable_metal = false
 }
 
 use_external_v8_snapshot = false

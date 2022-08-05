@@ -75,7 +75,7 @@ void JsBindViews(BindingTarget globalObj)
 
 void CreatePageRoot(RefPtr<JsAcePage>& page, JSView* view)
 {
-    auto pageRootNode = view->CreateNode();
+    auto pageRootNode = view->CreateUINode();
     page->SetRootNode(pageRootNode);
 }
 
