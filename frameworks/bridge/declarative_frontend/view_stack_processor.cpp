@@ -585,9 +585,15 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     std::string componentNames[] = { "stepperItem", "stepperDisplay", "flexItem", "display", "transform", "touch",
         "pan_gesture", "click_gesture", "focusable", "coverage", "box", "shared_transition", "mouse",
         "stepperScroll" };
+    // In RS extra case, use isFirstNode to determine the top node.
+    bool isFirstNode = true;
     for (auto& name : componentNames) {
         auto iter = wrappingComponentsMap.find(name);
         if (iter != wrappingComponentsMap.end()) {
+            if (isFirstNode) {
+                iter->second->SetIsFirst(isFirstNode);
+                isFirstNode = false;
+            }
             iter->second->OnWrap();
             components.emplace_back(iter->second);
             if (videoComponentV2 && saveComponentEvent) {

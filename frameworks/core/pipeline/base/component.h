@@ -246,6 +246,16 @@ public:
         restoreId_ = restoreId;
     }
 
+    void SetIsFirst(bool flag)
+    {
+        isFirstNode_ = flag;
+    }
+
+    bool IsFirstNode()
+    {
+        return isFirstNode_;
+    }
+
     /*
      * Assign unique elmtId to Component
      * will move to the Element when updating the Element
@@ -265,6 +275,7 @@ public:
 
 protected:
     TextDirection direction_ = TextDirection::LTR;
+    bool isFirstNode_ = false;
 
 private:
     bool ignoreInspector_ = false;

@@ -1213,7 +1213,7 @@ protected:
 #ifdef ENABLE_ROSEN_BACKEND
         return SystemProperties::GetRosenBackendEnabled() ? isHeadRenderNode_ : false;
 #else
-        return false;
+        return isFirstNode_;
 #endif
     }
     bool IsTailRenderNode() const
@@ -1235,6 +1235,9 @@ protected:
     Point coordinatePoint_;
     WeakPtr<V2::InspectorNode> inspector_;
     WeakPtr<AccessibilityNode> accessibilityNode_;
+
+    // Used for RS extra case.
+    bool isFirstNode_ = false;
 
     Rect touchRect_;                  // Self touch rect
     std::vector<Rect> touchRectList_; // Self and all children touch rect
