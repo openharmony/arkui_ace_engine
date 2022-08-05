@@ -1085,6 +1085,9 @@ void JsAccessibilityManager::SendActionEvent(const Accessibility::ActionType& ac
         { Accessibility::ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD, SCROLL_END_EVENT },
         { Accessibility::ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD, SCROLL_END_EVENT },
     };
+    if (actionToStr.find(action) == actionToStr.end()) {
+        return;
+    }
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.eventType = actionToStr[action];
     accessibilityEvent.nodeId = static_cast<int>(nodeId);
