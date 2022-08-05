@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_app_module.h"
+#include "bridge/declarative_frontend/engine/jsi/modules/jsi_app_module.h"
 
 #include "base/log/log.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "bridge/js_frontend/engine/common/js_constants.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -79,19 +80,14 @@ shared_ptr<JsValue> AppTerminate(const shared_ptr<JsRuntime>& runtime, const sha
 shared_ptr<JsValue> AppSetImageCacheCount(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("current container is null");
         return runtime->NewNull();
     }
-    auto delegate = instance->GetDelegate();
-    if (!delegate) {
-        LOGE("get frontend delegate failed");
-        return runtime->NewNull();
-    }
-    auto pipelineContext = delegate->GetPipelineContext();
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
-        LOGE("get frontend pipelineContext failed");
+        LOGE("get pipelineContext failed");
         return runtime->NewNull();
     }
     if (argc != 1 || !argv[0]->IsNumber(runtime)) {
@@ -103,9 +99,13 @@ shared_ptr<JsValue> AppSetImageCacheCount(const shared_ptr<JsRuntime>& runtime, 
         LOGE("size: %{public}d less than zero is invalid for cache image", size);
         return runtime->NewNull();
     }
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null.");
+        return runtime->NewNull();
+    }
     WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
-    auto uiTaskExecutor = delegate->GetUiTask();
-    uiTaskExecutor.PostTask([ pipelineContextWeak, size ]() mutable {
+    taskExecutor->PostTask([ pipelineContextWeak, size ]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
             auto imageCache = pipelineContext->GetImageCache();
@@ -115,7 +115,7 @@ shared_ptr<JsValue> AppSetImageCacheCount(const shared_ptr<JsRuntime>& runtime, 
                 LOGW("image cache is null");
             }
         }
-    });
+    }, TaskExecutor::TaskType::UI);
     return runtime->NewNull();
 }
 
@@ -124,19 +124,14 @@ shared_ptr<JsValue> AppSetImageRawDataCacheSize(
     const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("current container is null");
         return runtime->NewNull();
     }
-    auto delegate = instance->GetDelegate();
-    if (!delegate) {
-        LOGE("get frontend delegate failed");
-        return runtime->NewNull();
-    }
-    auto pipelineContext = delegate->GetPipelineContext();
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
-        LOGE("get frontend pipelineContext failed");
+        LOGE("get pipelineContext failed");
         return runtime->NewNull();
     }
     if (argc != 1 || !argv[0]->IsNumber(runtime)) {
@@ -148,9 +143,13 @@ shared_ptr<JsValue> AppSetImageRawDataCacheSize(
         LOGE("size: %{public}d less than zero is invalid for cache image raw data", size);
         return runtime->NewNull();
     }
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null.");
+        return runtime->NewNull();
+    }
     WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
-    auto uiTaskExecutor = delegate->GetUiTask();
-    uiTaskExecutor.PostTask([ pipelineContextWeak, size ]() mutable {
+    taskExecutor->PostTask([ pipelineContextWeak, size ]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
             auto imageCache = pipelineContext->GetImageCache();
@@ -160,26 +159,21 @@ shared_ptr<JsValue> AppSetImageRawDataCacheSize(
                 LOGW("image cache is null");
             }
         }
-    });
+    }, TaskExecutor::TaskType::UI);
     return runtime->NewNull();
 }
 
 shared_ptr<JsValue> AppSetImageFileCacheSize(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    auto instance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
-    if (instance == nullptr) {
-        LOGE("get jsi engine instance failed");
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("current container is null");
         return runtime->NewNull();
     }
-    auto delegate = instance->GetDelegate();
-    if (!delegate) {
-        LOGE("get frontend delegate failed");
-        return runtime->NewNull();
-    }
-    auto pipelineContext = delegate->GetPipelineContext();
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
-        LOGE("get frontend pipelineContext failed");
+        LOGE("get pipelineContext failed");
         return runtime->NewNull();
     }
     if (argc != 1 || !argv[0]->IsNumber(runtime)) {
@@ -191,9 +185,13 @@ shared_ptr<JsValue> AppSetImageFileCacheSize(const shared_ptr<JsRuntime>& runtim
         LOGE("size: %{public}d less than zero is invalid for cache image files", size);
         return runtime->NewNull();
     }
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null.");
+        return runtime->NewNull();
+    }
     WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
-    auto uiTaskExecutor = delegate->GetUiTask();
-    uiTaskExecutor.PostTask([ pipelineContextWeak, size ]() mutable {
+    taskExecutor->PostTask([ pipelineContextWeak, size ]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
             auto imageCache = pipelineContext->GetImageCache();
@@ -203,7 +201,7 @@ shared_ptr<JsValue> AppSetImageFileCacheSize(const shared_ptr<JsRuntime>& runtim
                 LOGW("image cache is null");
             }
         }
-    });
+    }, TaskExecutor::TaskType::UI);
     return runtime->NewNull();
 }
 
