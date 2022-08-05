@@ -51,6 +51,7 @@ public:
     void StrokeText(const Offset& offset, const std::string& text, double x, double y) override;
     double MeasureText(const std::string& text, const PaintState& state) override;
     double MeasureTextHeight(const std::string& text, const PaintState& state) override;
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) override;
     void MoveTo(const Offset& offset, double x, double y) override;
     void LineTo(const Offset& offset, double x, double y) override;
     void BezierCurveTo(const Offset& offset, const BezierCurveParam& param) override;
@@ -91,8 +92,8 @@ private:
     void InitCachePaint();
     bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = true);
     void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = true);
-    double GetAlignOffset(TextAlign align);
-    double GetBaselineOffset(TextBaseline baseline);
+    double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     SkPaint GetStrokePaint();
     bool HasShadow() const;
     void UpdatePaintShader(const Offset& offset, SkPaint& paint, const Gradient& gradient);
