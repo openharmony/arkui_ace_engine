@@ -918,6 +918,7 @@ std::string RenderText::GetSelectedContent() const
 
 void RenderText::Dump()
 {
+    DumpLog::GetInstance().AddDesc(std::string("Data: ").append(text_->GetData()));
     DumpLog::GetInstance().AddDesc(std::string("FontColor: ").append(textStyle_.GetTextColor().ColorToString()));
     DumpLog::GetInstance().AddDesc(std::string("FontSize: ").append(textStyle_.GetFontSize().ToString()));
     DumpLog::GetInstance().AddDesc(

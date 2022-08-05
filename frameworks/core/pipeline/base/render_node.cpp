@@ -1322,6 +1322,7 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     hitTestMode_ = component->GetHitTestMode();
     touchable_ = component->IsTouchable();
     disabled_ = component->IsDisabledStatus();
+    isFirstNode_ = component->IsFirstNode();
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
     positionParam_ = renderComponent->GetPositionParam();
     if (renderComponent) {
@@ -1462,6 +1463,7 @@ void RenderNode::ClearRenderObject()
     rsNode_ = nullptr;
     isHeadRenderNode_ = false;
     isTailRenderNode_ = false;
+    isFirstNode_ = false;
     accessibilityText_ = "";
     layoutParam_ = LayoutParam();
     paintRect_ = Rect();
