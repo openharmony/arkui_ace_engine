@@ -736,6 +736,18 @@ void PipelineContext::FlushReloadTransition()
     });
 }
 
+void PipelineContext::FlushReload()
+{
+    if (!rootElement_) {
+        LOGE("PipelineContext::FlushReload rootElement is nullptr");
+        return;
+    }
+    auto containerElement = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+    if (containerElement) {
+        containerElement->FlushReload();
+    }
+}
+
 void PipelineContext::FlushPostAnimation()
 {
     CHECK_RUN_ON(UI);

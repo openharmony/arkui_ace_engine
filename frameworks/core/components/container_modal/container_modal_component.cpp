@@ -15,6 +15,7 @@
 
 #include "core/components/container_modal/container_modal_component.h"
 
+#include "base/utils/system_properties.h"
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
 #include "core/components/clip/clip_component.h"
@@ -293,15 +294,17 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
             isFloating ? std::to_string(FLOATING_TITLE_LABEL) : std::to_string(TITLE_LABEL), DOM_NODE_TAG_TEXT,
             titleLabel_));
     }
+    auto rightPadding = SystemProperties::GetDeviceAccess() ? TITLE_ELEMENT_MARGIN_HORIZONTAL_ACCESS_DEVICE
+                                                            : TITLE_ELEMENT_MARGIN_HORIZONTAL;
     if (!hideSplit_) {
-        titleChildren.emplace_back(SetPadding(titleLeftSplitButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+        titleChildren.emplace_back(SetPadding(titleLeftSplitButton, ZERO_PADDING, rightPadding));
     }
     if (!hideMaximize_) {
         titleChildren.emplace_back(
-            SetPadding(titleMaximizeRecoverButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+            SetPadding(titleMaximizeRecoverButton, ZERO_PADDING, rightPadding));
     }
     if (!hideMinimize_) {
-        titleChildren.emplace_back(SetPadding(titleMinimizeButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+        titleChildren.emplace_back(SetPadding(titleMinimizeButton, ZERO_PADDING, rightPadding));
     }
     titleChildren.emplace_back(SetPadding(titleCloseButton, ZERO_PADDING, TITLE_PADDING_END));
     return titleChildren;

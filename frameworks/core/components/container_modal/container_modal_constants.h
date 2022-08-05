@@ -26,6 +26,7 @@ const Dimension TITLE_PADDING_START = 20.0_vp;
 const Dimension TITLE_PADDING_END = 20.0_vp;
 const Dimension ZERO_PADDING = 0.0_vp;
 const Dimension TITLE_ELEMENT_MARGIN_HORIZONTAL = 12.0_vp;
+const Dimension TITLE_ELEMENT_MARGIN_HORIZONTAL_ACCESS_DEVICE = 8.0_vp;
 const Dimension TITLE_ICON_SIZE = 20.0_vp;
 const Dimension TITLE_BUTTON_SIZE = 24.0_vp;
 const Dimension TITLE_TEXT_FONT_SIZE = 16.0_fp;
