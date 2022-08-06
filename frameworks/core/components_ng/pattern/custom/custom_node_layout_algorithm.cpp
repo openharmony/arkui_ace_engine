@@ -31,7 +31,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             return;
         }
         buildItem_ = child;
-        child->AdjustLayoutWrapperTree(Claim(layoutWrapper), false, false);
+        child->AdjustLayoutWrapperTree(Claim(layoutWrapper), true, true);
     }
     // then use normal measure step.
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
