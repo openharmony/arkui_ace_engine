@@ -223,7 +223,7 @@ JSValue AppLogPrint(JSContext* ctx, Framework::JsLogLevel level, JSValueConst va
 
 JSValue AppLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
-    return AppLogPrint(ctx, Framework::JsLogLevel::DEBUG, value, argc, argv);
+    return AppLogPrint(ctx, Framework::JsLogLevel::INFO, value, argc, argv);
 }
 
 JSValue AppDebugLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
