@@ -67,8 +67,8 @@ template("js_pa_engine_ark") {
       "//arkcompiler/ets_runtime:libark_jsruntime",
       "//foundation/arkui/napi:ace_napi",
       "//foundation/arkui/napi:ace_napi_ark",
-      "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-      "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+      "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+      "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//utils/native/base:utils",
     ]
     external_deps = [

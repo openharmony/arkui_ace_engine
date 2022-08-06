@@ -20,7 +20,7 @@ ohos_unittest("ui_mgr_service_test") {
   module_out_path = module_output_path
 
   include_dirs =
-      [ "//foundation/distributedschedule/safwk/services/safwk/include" ]
+      [ "//foundation/systemabilitymgr/safwk/services/safwk/include" ]
 
   sources = [ "ui_mgr_service_test.cpp" ]
 

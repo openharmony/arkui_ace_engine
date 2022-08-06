@@ -30,7 +30,7 @@
                 "appexecfwk_standard",
                 "ipc",
                 "ipc_js",
-                "samgr_standard",
+                "samgr",
                 "preferences",
                 "relational_store",
                 "hisysevent_native",
