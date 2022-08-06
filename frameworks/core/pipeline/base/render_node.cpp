@@ -2129,7 +2129,7 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
     if (IsTailRenderNode()) {
         if (!child->GetRSNode()) {
             // workaround if child have no RSNode while it should
-            LOGW("Child render_node has no RSNode, creating now.");
+            LOGD("Child render_node has no RSNode, creating now.");
             child->SyncRSNodeBoundary(true, true);
         }
     } else {
