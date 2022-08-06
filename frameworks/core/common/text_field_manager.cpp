@@ -70,4 +70,45 @@ const Offset& TextFieldManager::GetClickPosition()
     return position_;
 }
 
+bool TextFieldManager::UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight)
+{
+    auto onFocusTextField = onFocusTextField_.Upgrade();
+    if (!onFocusTextField) {
+        return false;
+    }
+    auto slidingPanelParent = onFocusTextField->GetSlidingPanelAncest();
+    if (!slidingPanelParent) {
+        return false;
+    }
+    if (GreatNotEqual(onFocusTextField->GetPaintRect().Height() +
+        onFocusTextField->GetGlobalOffset().GetY(), fullHeight)) {
+        LOGI("Raising panel with offset %{public}f",
+            onFocusTextField->GetPaintRect().Height() +
+            onFocusTextField->GetGlobalOffset().GetY() - fullHeight);
+        offsetY -= onFocusTextField->GetPaintRect().Height() +
+            onFocusTextField->GetGlobalOffset().GetY() - fullHeight;
+    }
+    slidingPanelParent->LiftPanelForVirtualKeyboard(offsetY);
+    return true;
+}
+
+bool TextFieldManager::ResetSlidingPanelParentHeight()
+{
+    auto onFocusTextField = onFocusTextField_.Upgrade();
+    if (!onFocusTextField) {
+        return false;
+    }
+    auto slidingPanelParent = onFocusTextField->GetSlidingPanelAncest();
+    if (!slidingPanelParent) {
+        return false;
+    }
+    slidingPanelParent->UpdatePanelHeightByCurrentMode();
+    return true;
+}
+
+void TextFieldManager::ClearOnFocusTextField()
+{
+    onFocusTextField_ = nullptr;
+}
+
 }; // namespace OHOS::Ace

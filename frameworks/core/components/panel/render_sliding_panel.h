@@ -132,6 +132,10 @@ public:
 
     void Dump() override;
 
+    void LiftPanelForVirtualKeyboard(double offsetY);
+
+    void UpdatePanelHeightByCurrentMode();
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;

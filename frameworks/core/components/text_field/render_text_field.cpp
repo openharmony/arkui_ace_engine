@@ -26,6 +26,7 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
+#include "core/common/text_field_manager.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text/text_utils.h"
 #include "core/components/text_overlay/text_overlay_component.h"
@@ -941,6 +942,47 @@ void RenderTextField::PopTextOverlay()
     isOverlayShowed_ = false;
 }
 
+RefPtr<RenderSlidingPanel> RenderTextField::GetSlidingPanelAncest()
+{
+    auto parent = GetParent().Upgrade();
+    while (parent) {
+        auto renderSlidingPanel = AceType::DynamicCast<RenderSlidingPanel>(parent);
+        if (renderSlidingPanel) {
+            return renderSlidingPanel;
+        }
+        parent = parent->GetParent().Upgrade();
+    }
+    return nullptr;
+}
+
+void RenderTextField::ResetSlidingPanelParentHeight()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("ResetSlidingPanelParentHeight: Context is null");
+        return;
+    }
+    auto manager = context->GetTextFieldManager();
+    if (manager && AceType::InstanceOf<TextFieldManager>(manager)) {
+        auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
+        textFieldManager->ResetSlidingPanelParentHeight();
+    }
+}
+
+void RenderTextField::ResetOnFocusForTextFieldManager()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("ResetOnFocusForTextFieldManager: Context is null");
+        return;
+    }
+    auto manager = context->GetTextFieldManager();
+    if (manager && AceType::InstanceOf<TextFieldManager>(manager)) {
+        auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
+        textFieldManager->ClearOnFocusTextField();
+    }
+}
+
 bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling)
 {
     if (!enabled_) {
@@ -974,7 +1016,14 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         connection_->Show(isFocusViewChanged, GetInstanceId());
 #endif
     }
-
+    auto context = context_.Upgrade();
+    if (context) {
+        auto manager = context->GetTextFieldManager();
+        if (manager && AceType::InstanceOf<TextFieldManager>(manager)) {
+            auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
+            textFieldManager->SetOnFocusTextField(WeakClaim(this));
+        }
+    }
     if (keyboard_ != TextInputType::MULTILINE) {
         resetToStart_ = false;
         MarkNeedLayout();
@@ -1007,7 +1056,7 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
             UpdateSelection(GetEditingValue().selection.GetEnd());
             MarkNeedLayout();
         }
-
+        ResetSlidingPanelParentHeight();
         if (keyboard_ != TextInputType::MULTILINE && keyboard_ != TextInputType::VISIBLE_PASSWORD) {
             resetToStart_ = true;
             MarkNeedLayout();
