@@ -3359,7 +3359,7 @@ void V8EngineInstance::InitJsConsoleObject(v8::Local<v8::Context>& localContext,
     consoleObj
         ->Set(localContext, v8::String::NewFromUtf8(isolate, "log").ToLocalChecked(),
             v8::Function::New(
-                localContext, AppLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::DEBUG)))
+                localContext, AppLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::INFO)))
                 .ToLocalChecked())
         .ToChecked();
     consoleObj
@@ -3393,7 +3393,7 @@ void V8EngineInstance::InitJsConsoleObject(v8::Local<v8::Context>& localContext,
     aceConsoleObj
         ->Set(localContext, v8::String::NewFromUtf8(isolate, "log").ToLocalChecked(),
             v8::Function::New(
-                localContext, JsLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::DEBUG)))
+                localContext, JsLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::INFO)))
                 .ToLocalChecked())
         .ToChecked();
     aceConsoleObj
