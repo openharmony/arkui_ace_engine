@@ -74,7 +74,8 @@ void TextPatternTestNg::SetUpTestCase() {}
 void TextPatternTestNg::TearDownTestCase() {}
 void TextPatternTestNg::SetUp() {}
 void TextPatternTestNg::TearDown() {}
-RefPtr<FrameNode> TextPatternTestNg::CreateTextParagraph(const std::string& createValue, TestProperty testProperty)
+RefPtr<FrameNode> TextPatternTestNg::CreateTextParagraph(
+    const std::string& createValue, const TestProperty& testProperty)
 {
     TextView::Create(createValue);
     if (testProperty.fontSizeValue.has_value())
