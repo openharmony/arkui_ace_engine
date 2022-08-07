@@ -22,8 +22,8 @@ build_component_ng("render_ng") {
     "adapter/txt_font_collection.cpp",
     "adapter/txt_paragraph.cpp",
     "image_painter.cpp",
+    "paint_wrapper.cpp",
     "render_context_creator.cpp",
-    "render_wrapper.cpp",
   ]
 
   if (enable_ng_build) {

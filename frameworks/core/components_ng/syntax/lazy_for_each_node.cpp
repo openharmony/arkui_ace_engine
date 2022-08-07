@@ -60,6 +60,7 @@ void LazyForEachNode::UpdateCachedItems(const std::unordered_set<int32_t>& activ
             iter = cachedItems.erase(iter);
         }
     }
+    LOGD("cachedItems size is %{public}d", static_cast<int32_t>(cachedItems.size()));
 }
 
 } // namespace OHOS::Ace::NG

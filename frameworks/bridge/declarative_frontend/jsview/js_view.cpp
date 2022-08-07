@@ -30,6 +30,7 @@
 #include "core/components_v2/common/element_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/composed_element.h"
+#include "core/pipeline/base/element_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
@@ -182,7 +183,7 @@ RefPtr<NG::CustomNode> JSViewFullUpdate::CreateUINode()
     ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
     // create component, return new something, need to set proper ID
     std::string key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
-    auto composedNode = NG::CustomNode::CreateCustomNode(0, key);
+    auto composedNode = NG::CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), key);
     node_ = composedNode;
 
     {

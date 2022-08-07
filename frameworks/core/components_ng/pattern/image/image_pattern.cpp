@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/image/image_pattern.h"
 
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -116,20 +118,18 @@ void ImagePattern::OnImageObjectReady(const RefPtr<ImageObject>& imageObj)
     }
 }
 
-void ImagePattern::PaintImage(RenderContext* renderContext, const OffsetF& offset)
+RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
-    LOGD("PaintImage, %{public}s", imageObject_->GetSourceInfo().GetSrc().c_str());
-    CHECK_NULL_VOID(image_);
-    CHECK_NULL_VOID(imageObject_);
+    CHECK_NULL_RETURN(image_, nullptr);
+    CHECK_NULL_RETURN(imageObject_, nullptr);
     auto size = imageObject_->GetImageSize();
     SizeF imageSize = { static_cast<float>(size.Width()), static_cast<float>(size.Height()) };
-    ImagePainter ImagePainter(image_, imageSize, GetHostContentSize().value_or(SizeF()));
-    ImagePainter.DrawImage(renderContext->GetCanvas(), offset);
+    return MakeRefPtr<ImagePaintMethod>(image_, imageSize);
 }
 
 bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
 {
-    if (skipMeasure) {
+    if (skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
     return image_;

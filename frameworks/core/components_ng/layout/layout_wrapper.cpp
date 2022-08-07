@@ -15,9 +15,11 @@
 
 #include "core/components_ng/layout/layout_wrapper.h"
 
+#include "base/log/ace_trace.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -124,15 +126,23 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         LOGE("Measure failed: the layoutProperty_ or geometryNode_ or host is nullptr");
         return;
     }
+    if (!CheckMeasureFlag(layoutProperty_->GetPropertyChangeFlag()) &&
+        parentConstraint == geometryNode_->GetParentLayoutConstraint()) {
+        skipMeasureContent_ = true;
+    }
     geometryNode_->SetParentLayoutConstraint(parentConstraint.value_or(LayoutConstraintF()));
     layoutProperty_->UpdateLayoutConstraint(parentConstraint.value_or(LayoutConstraintF()));
     layoutProperty_->UpdateContentConstraint();
     LOGD("Measure: %{public}s, Constraint: %{public}s", GetHostTag().c_str(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
-    auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
-    if (size.has_value()) {
-        geometryNode_->SetContentSize(size.value());
+
+    if (!skipMeasureContent_) {
+        auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
+        if (size.has_value()) {
+            geometryNode_->SetContentSize(size.value());
+        }
     }
+
     layoutAlgorithm_->Measure(this);
     LOGD("on Measure Done: %{public}s, Size: %{public}s", GetHostTag().c_str(),
         geometryNode_->GetFrameSize().ToString().c_str());
@@ -174,18 +184,17 @@ std::list<RefPtr<FrameNode>> LayoutWrapper::GetChildrenInRenderArea() const
 void LayoutWrapper::MountToHostOnMainThread()
 {
     SwapDirtyLayoutWrapperOnMainThread();
-    UITaskScheduler::GetInstance()->FlushRenderTask();
 }
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
-    for (const auto& [index, wrapper] : children_) {
+    for (const auto& [index, wrapper] : pendingRender_) {
         if (wrapper) {
             wrapper->SwapDirtyLayoutWrapperOnMainThread();
         }
     }
+
     if (layoutWrapperBuilder_) {
-        layoutWrapperBuilder_->SwapDirtyChildrenOnMainThread();
         layoutWrapperBuilder_->UpdateBuildCacheOnMainThread();
     }
 

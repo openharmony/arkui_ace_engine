@@ -18,8 +18,10 @@
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/canvas.h"
 
 namespace OHOS::Ace::NG {
@@ -91,6 +93,37 @@ void RosenRenderContext::UpdateBgColor(const Color& value)
     }
     rsNode_->SetBackgroundColor(value.GetValue());
     RequestNextFrame();
+}
+
+void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDraw)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(contentDraw);
+    rsNode_->DrawOnNode(Rosen::RSModifierType::CONTENT_STYLE, [contentDraw = std::move(contentDraw)](SkCanvas* canvas) {
+        auto canvasWrapper = MakeRefPtr<SkiaCanvas>(canvas);
+        contentDraw(canvasWrapper);
+    });
+}
+
+void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(foregroundDraw);
+    rsNode_->DrawOnNode(
+        Rosen::RSModifierType::FOREGROUND_STYLE, [foregroundDraw = std::move(foregroundDraw)](SkCanvas* canvas) {
+            auto canvasWrapper = MakeRefPtr<SkiaCanvas>(canvas);
+            foregroundDraw(canvasWrapper);
+        });
+}
+
+void RosenRenderContext::FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(overlayDraw);
+    rsNode_->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE, [overlayDraw = std::move(overlayDraw)](SkCanvas* canvas) {
+        auto canvasWrapper = MakeRefPtr<SkiaCanvas>(canvas);
+        overlayDraw(canvasWrapper);
+    });
 }
 
 RefPtr<Canvas> RosenRenderContext::GetCanvas()

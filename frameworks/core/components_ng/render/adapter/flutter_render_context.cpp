@@ -31,6 +31,9 @@ void FlutterRenderContext::StartRecording()
     if (!flutterNode_) {
         return;
     }
+    if (IsRecording()) {
+        return;
+    }
     recorder_ = std::make_unique<SkPictureRecorder>();
     recordingCanvas_ = Canvas::Create(recorder_->beginRecording(
         SkRect::MakeXYWH(0, 0, flutterNode_->FrameRect().Width(), flutterNode_->FrameRect().Height())));
@@ -80,6 +83,24 @@ void FlutterRenderContext::UpdateBgColor(const Color& value)
     flutterNode_->SetBgColor(value);
     RequestNextFrame();
 }
+
+void FlutterRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDraw)
+{
+    auto canvas = GetCanvas();
+    if (contentDraw) {
+        contentDraw(canvas);
+    }
+}
+
+void FlutterRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)
+{
+    auto canvas = GetCanvas();
+    if (foregroundDraw) {
+        foregroundDraw(canvas);
+    }
+}
+
+void FlutterRenderContext::FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
 
 RefPtr<Canvas> FlutterRenderContext::GetCanvas()
 {
