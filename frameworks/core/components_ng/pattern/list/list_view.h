@@ -27,6 +27,7 @@ class ACE_EXPORT ListView {
 public:
     static void Create();
     static void SetSpace(const Dimension& space);
+    static void SetInitialIndex(const int32_t& initialIndex);
     static void SetListDirection(Axis axis);
     static void SetEdgeEffect(EdgeEffect edgeEffect);
 };

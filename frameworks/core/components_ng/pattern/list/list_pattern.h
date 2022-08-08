@@ -45,6 +45,7 @@ public:
         auto listLayoutAlgorithm = MakeRefPtr<ListLayoutAlgorithm>(startIndex_, endIndex_);
         listLayoutAlgorithm->SetCurrentOffset(currentOffset_);
         currentOffset_ = 0;
+        listLayoutAlgorithm->SetIsInitialized(isInitialized_);
         return listLayoutAlgorithm;
     }
 
@@ -58,6 +59,7 @@ private:
     RefPtr<ScrollableEvent> scrollableEvent_;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
+    bool isInitialized_ = false;
     float currentOffset_ = 0.0;
 };
 } // namespace OHOS::Ace::NG
