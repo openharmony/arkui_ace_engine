@@ -492,9 +492,29 @@ enum class SideBarPosition {
 };
 
 enum class HitTestMode {
+    /**
+     *  Both self and children respond to the hit test for touch events,
+     *  but block hit test of the other nodes which is masked by this node.
+     */
     DEFAULT = 0,
+
+    /**
+     * Self respond to the hit test for touch events,
+     * but block hit test of children and other nodes which is masked by this node.
+     */
     BLOCK,
-    TRANSPARENT
+
+    /**
+     * Self and child respond to the hit test for touch events,
+     * and allow hit test of other nodes which is masked by this node.
+     */
+    TRANSPARENT,
+
+    /**
+     * Self not respond to the hit test for touch events,
+     * but children respond to the hit test for touch events.
+     */
+    NONE
 };
 
 inline constexpr uint32_t STATE_NORMAL = 0;

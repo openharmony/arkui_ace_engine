@@ -753,7 +753,7 @@ bool RenderNode::DispatchTouchTestToChildren(const Point& localPoint, const Poin
                     break;
                 }
             }
-            if (isInRegion) {
+            if (isInRegion && child->GetHitTestMode() != HitTestMode::DEFAULT) {
                 break;
             }
         }
