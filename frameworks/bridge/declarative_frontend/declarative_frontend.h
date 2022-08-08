@@ -150,6 +150,7 @@ public:
     // distribute
     std::string RestoreRouterStack(const std::string& contentInfo) override;
     std::string GetContentInfo() const override;
+    int32_t GetRouterSize() const override;
 
     void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data);
 

@@ -1357,7 +1357,8 @@ bool PipelineContext::CallRouterBackToPopPage()
         return true;
     }
     auto stageElement = GetStageElement();
-    if (stageElement && (stageElement->GetChildrenList().empty() || stageElement->GetChildrenList().size() == 1)) {
+    // declarative frontend need use GetRouterSize to judge, others use GetChildrenList
+    if (frontend->GetRouterSize() <= 1 && stageElement && stageElement->GetChildrenList().size() <= 1) {
         LOGI("CallRouterBackToPopPage(): current page is the last page");
         return false;
     }
