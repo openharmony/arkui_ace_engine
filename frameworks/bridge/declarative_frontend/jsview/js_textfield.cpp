@@ -162,6 +162,27 @@ void JSTextField::SetTextAlign(int32_t value)
     }
 }
 
+void JSTextField::SetInputStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg(SetInputStyle) is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("textAlign component is not valid");
+        return;
+    }
+    auto styleString = info[0]->ToString();
+    if (styleString == "Inline") {
+        component->SetInputStyle(InputStyle::INLINE);
+    } else {
+        component->SetInputStyle(InputStyle::DEFAULT);
+    }
+}
+
 void JSTextField::SetCaretColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {

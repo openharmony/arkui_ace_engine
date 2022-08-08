@@ -524,6 +524,7 @@ protected:
     // For ensuring caret is visible on screen, we take a strategy that move the whole text painting area.
     // It maybe seems rough, and doesn't support scrolling smoothly.
     Offset textOffsetForShowCaret_;
+    InputStyle inputStyle_;
 
 private:
     void SetCallback(const RefPtr<TextFieldComponent>& textField);

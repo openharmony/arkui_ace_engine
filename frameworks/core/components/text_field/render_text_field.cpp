@@ -287,7 +287,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     onTranslate_ = textField->GetOnTranslate();
     onShare_ = textField->GetOnShare();
     onSearch_ = textField->GetOnSearch();
-
+    inputStyle_ = textField->GetInputStyle();
 #if defined(ENABLE_STANDARD_INPUT)
     UpdateConfiguration();
 #endif

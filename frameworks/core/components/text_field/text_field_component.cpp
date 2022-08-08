@@ -313,6 +313,16 @@ void TextFieldComponent::SetExtend(bool extend)
     declaration_->SetExtend(extend);
 }
 
+InputStyle TextFieldComponent::GetInputStyle() const
+{
+    return declaration_->GetInputStyle();
+}
+
+void TextFieldComponent::SetInputStyle(InputStyle style)
+{
+    declaration_->SetInputStyle(style);
+}
+
 bool TextFieldComponent::ShowEllipsis() const
 {
     return declaration_->ShowEllipsis();

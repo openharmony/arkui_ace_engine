@@ -131,6 +131,9 @@ public:
     bool IsExtend() const;
     void SetExtend(bool extend);
 
+    InputStyle GetInputStyle() const;
+    void SetInputStyle(InputStyle style);
+
     bool ShowEllipsis() const;
     void SetShowEllipsis(bool showEllipsis);
 

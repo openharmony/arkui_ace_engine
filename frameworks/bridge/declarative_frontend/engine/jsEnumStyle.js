@@ -30,6 +30,12 @@ var Color;
   Color["Transparent"] = "#00000000";
 })(Color || (Color = {}));
 
+var TextInputStyle;
+(function (TextInputStyle) {
+  TextInputStyle["Default"] = "Default";
+  TextInputStyle["Inline"] = "Inline";
+})(TextInputStyle || (TextInputStyle = {}));
+
 var TextAlign;
 (function (TextAlign) {
   TextAlign[TextAlign["Start"] = 0] = "Start";
