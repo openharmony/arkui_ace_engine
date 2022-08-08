@@ -29,7 +29,7 @@ HdcJdwpSimulator::HdcJdwpSimulator(uv_loop_t *loopIn, const std::string pkgName)
     ctxPoint_ = (HCtxJdwpSimulator)MallocContext();
 }
 
-HdcJdwpSimulator::~HdcJdwpSimulator()
+void HdcJdwpSimulator::FreeContext()
 {
     if (ctxPoint_ != nullptr && loop_ != nullptr) {
         if (!uv_is_closing((uv_handle_t *)&ctxPoint_->pipe)) {
@@ -39,10 +39,16 @@ HdcJdwpSimulator::~HdcJdwpSimulator()
             uv_close((uv_handle_t *)&ctxPoint_->newFd, nullptr);
         }
     }
-    delete ctxPoint_;
-    ctxPoint_ = nullptr;
-    delete connect_;
-    connect_ = nullptr;
+}
+
+HdcJdwpSimulator::~HdcJdwpSimulator()
+{
+    if (ctxPoint_ != nullptr && connect_ != nullptr) {
+        delete ctxPoint_;
+        ctxPoint_ = nullptr;
+        delete connect_;
+        connect_ = nullptr;
+    }
 }
 
 void HdcJdwpSimulator::FinishWriteCallback(uv_write_t *req, int status)

@@ -27,6 +27,7 @@ public:
     explicit HdcJdwpSimulator(uv_loop_t *loopIn, string pkgName);
     ~HdcJdwpSimulator();
     bool Connect();
+    void FreeContext();
     uv_loop_t *loop_;
 
 protected:
