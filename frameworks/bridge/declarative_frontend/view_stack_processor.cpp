@@ -22,6 +22,7 @@
 #include "core/accessibility/accessibility_node.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/button/button_component.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/form/form_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/image/image_component.h"
@@ -693,7 +694,7 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     }
 
     for (auto&& component : components) {
-        component->SetTouchable(mainComponent->IsTouchable());
+        component->SetTouchable(mainComponent->IsTouchable() && mainComponent->GetHitTestMode() != HitTestMode::NONE);
     }
 
     for (auto&& component : components) {

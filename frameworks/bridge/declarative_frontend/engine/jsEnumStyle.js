@@ -841,4 +841,5 @@ var HitTestMode;
   HitTestMode[HitTestMode["Default"] = 0] = "Default";
   HitTestMode[HitTestMode["Block"] = 1] = "Block";
   HitTestMode[HitTestMode["Transparent"] = 2] = "Transparent";
+  HitTestMode[HitTestMode["None"] = 3] = "None";
 })(HitTestMode || (HitTestMode = {}));
