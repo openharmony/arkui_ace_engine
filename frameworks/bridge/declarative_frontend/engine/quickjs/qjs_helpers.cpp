@@ -105,7 +105,7 @@ JSValue JsLogPrint(JSContext* ctx, JsLogLevel level, JSValueConst value, int32_t
 
 JSValue JsLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
-    return JsLogPrint(ctx, JsLogLevel::DEBUG, value, argc, argv);
+    return JsLogPrint(ctx, JsLogLevel::INFO, value, argc, argv);
 }
 
 JSValue JsDebugLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
@@ -158,7 +158,7 @@ JSValue AppLogPrint(JSContext* ctx, JsLogLevel level, JSValueConst value, int32_
 
 JSValue AppLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
-    return AppLogPrint(ctx, JsLogLevel::DEBUG, value, argc, argv);
+    return AppLogPrint(ctx, JsLogLevel::INFO, value, argc, argv);
 }
 
 JSValue AppDebugLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
