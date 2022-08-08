@@ -72,6 +72,26 @@ public:
         selectable_ = selectable;
     }
 
+    void SetSwiperStartComponent(RefPtr<Component> component)
+    {
+        swiperStartComponent_ = component;
+    }
+
+    RefPtr<Component> GetSwiperStartComponent()
+    {
+        return swiperStartComponent_;
+    }
+
+    void SetSwiperEndComponent(RefPtr<Component> component)
+    {
+        swiperEndComponent_ = component;
+    }
+
+    RefPtr<Component> GetSwiperEndComponent()
+    {
+        return swiperEndComponent_;
+    }
+
     OnSelectFunc GetOnSelectId() const
     {
         return onSelectId_;
@@ -114,6 +134,8 @@ private:
     DeepRenderFunc deepRenderFunc_ = nullptr;
     bool isLazyCreating_ = false;
     bool selectable_ = true;
+    RefPtr<Component> swiperStartComponent_;
+    RefPtr<Component> swiperEndComponent_;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemComponent);
 };
 
