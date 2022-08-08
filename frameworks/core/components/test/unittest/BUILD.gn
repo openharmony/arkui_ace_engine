@@ -80,7 +80,8 @@ group("unittest") {
       "select:unittest",
       "tabbar:unittest",
       "text_field:unittest",
-      "text_select:unittest",
+
+      #"text_select:unittest",
     ]
   }
 }
