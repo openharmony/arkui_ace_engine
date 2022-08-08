@@ -69,6 +69,47 @@ const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 } // namespace
 
+void WebMessagePortOhos::SetPortHandle(std::string& handle)
+{
+    handle_ = handle;
+}
+
+std::string WebMessagePortOhos::GetPortHandle()
+{
+    return handle_;
+}
+
+void WebMessagePortOhos::Close()
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        LOGE("delegate its null");
+        return;
+    }
+    delegate->ClosePort(handle_);
+    
+}
+
+void WebMessagePortOhos::PostMessage(std::string& data)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        LOGE("delegate its null");
+        return;
+    }
+    delegate->PostPortMessage(handle_, data);
+}
+
+void WebMessagePortOhos::SetWebMessageCallback(std::function<void(const std::string&)>&& callback)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        LOGE("delegate its null");
+        return;
+    }
+    delegate->SetPortMessageCallback(handle_, std::move(callback));
+}
+
 int ConsoleLogOhos::GetLineNumber()
 {
     if (message_) {
@@ -731,6 +772,67 @@ void WebDelegate::SetWebViewJavaScriptResultCallBack(
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports)
+{
+    if (nweb_) {
+        std::vector<std::string> portStr;
+        nweb_->CreateWebMessagePorts(portStr);
+        RefPtr<WebMessagePort> port0 =  AceType::MakeRefPtr<WebMessagePortOhos>(WeakClaim(this));
+        RefPtr<WebMessagePort> port1 =  AceType::MakeRefPtr<WebMessagePortOhos>(WeakClaim(this));
+        port0->SetPortHandle(portStr[0]);
+        port1->SetPortHandle(portStr[1]);
+        ports.push_back(port0);
+        ports.push_back(port1);
+    }
+}
+
+void WebDelegate::PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri)
+{
+    if (nweb_) {
+        std::vector<std::string> sendPorts;
+        for (RefPtr<WebMessagePort> port : ports) {
+            sendPorts.push_back(port->GetPortHandle());
+        }
+        nweb_->PostWebMessage(message, sendPorts, uri);
+    }
+}
+
+void WebDelegate::ClosePort(std::string& port)
+{
+    if (nweb_) {
+        nweb_->ClosePort(port);
+    }
+}
+
+void WebDelegate::PostPortMessage(std::string& port, std::string& data)
+{
+    if (nweb_) {
+        nweb_->PostPortMessage(port, data);
+    }
+}
+
+void WebDelegate::SetPortMessageCallback(std::string& port, std::function<void(const std::string&)>&& callback)
+{
+    if (nweb_) {
+        auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>(Container::CurrentId());
+        if (callbackImpl && callback) {
+            callbackImpl->SetCallBack([weak = WeakClaim(this), func = std::move(callback)](std::string result) {
+                auto delegate = weak.Upgrade();
+                if (!delegate) {
+                    return;
+                }
+                auto context = delegate->context_.Upgrade();
+                if (context) {
+                    context->GetTaskExecutor()->PostTask(
+                        [callback = std::move(func), result]() { callback(result); },
+                        TaskExecutor::TaskType::JS);
+                }
+            });
+        }
+        nweb_->SetPortMessageCallback(port, callbackImpl);
+    }
+}
+
 void WebDelegate::RequestFocus()
 {
     auto context = context_.Upgrade();
@@ -1263,6 +1365,21 @@ void WebDelegate::SetWebCallBack()
                     return delegate->GetTitle();
                 }
                 return std::string();
+            });
+        webController->SetCreateMsgPortsImpl(
+            [weak = WeakClaim(this)](std::vector<RefPtr<WebMessagePort>>& ports) {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->CreateWebMessagePorts(ports);
+                }
+            });
+        webController->SetPostWebMessageImpl(
+            [weak = WeakClaim(this)](std::string& message, std::vector<RefPtr<WebMessagePort>>& ports,
+                std::string& uri) {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->PostWebMessage(message, ports, uri);
+                }
             });
         webController->SetGetDefaultUserAgentImpl(
             [weak = WeakClaim(this)]() {

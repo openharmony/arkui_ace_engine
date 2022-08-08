@@ -238,6 +238,206 @@ std::shared_ptr<WebJSValue> JSWebController::GetJavaScriptResult(
     return ParseValue(result, jsResult);
 }
 
+class JSWebMessageEvent;
+class JSWebMessagePort : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebMessagePort>::Declare("WebMessagePort");
+        JSClass<JSWebMessagePort>::CustomMethod("close", &JSWebMessagePort::Close);
+        JSClass<JSWebMessagePort>::CustomMethod("postMessageEvent", &JSWebMessagePort::PostMessage);
+        JSClass<JSWebMessagePort>::CustomMethod("onMessageEvent", &JSWebMessagePort::SetWebMessageCallback);
+        JSClass<JSWebMessagePort>::Bind(globalObj, JSWebMessagePort::Constructor, JSWebMessagePort::Destructor);
+    }
+
+    void PostMessage(const JSCallbackInfo& args);
+
+    void Close(const JSCallbackInfo& args)
+    {
+        if (port_ != nullptr) {
+            port_->Close();
+        } else {
+            LOGE("port is null");
+        }
+    }
+
+    void SetWebMessageCallback(const JSCallbackInfo& args)
+    {
+        LOGI("JSWebController onMessageEvent");
+        if (args.Length() < 1 || !args[0]->IsObject()) {
+            LOGE("invalid onEvent params");
+            return;
+        }
+
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        JSRef<JSVal> tsCallback = JSRef<JSVal>::Cast(obj);
+        std::function<void(std::string)> callback = nullptr;
+        if (tsCallback->IsFunction()) {
+            auto jsCallback =
+                AceType::MakeRefPtr<JsWebViewFunction>(JSRef<JSFunc>::Cast(tsCallback));
+            callback = [execCtx = args.GetExecutionContext(), func = std::move(jsCallback)](std::string result) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("onMessageEvent CallBack");
+                LOGI("About to call onMessageEvent callback method on js");
+                func->Execute(result);
+            };
+            if (port_ != nullptr) {
+                port_->SetWebMessageCallback(std::move(callback));
+            } else {
+                LOGE("port is null");
+            }
+        } else {
+            LOGE("JSAPI callback param is not a function");
+        }
+    }
+
+    void SetWebMessagePort(const RefPtr<WebMessagePort>& port)
+    {
+        port_ = port;
+    }
+
+    RefPtr<WebMessagePort> GetWebMessagePort()
+    {
+        return port_;
+    }
+
+private:
+    RefPtr<WebMessagePort> port_;
+
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebMessagePort = Referenced::MakeRefPtr<JSWebMessagePort>();
+        jsWebMessagePort->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebMessagePort));
+    }
+
+    static void Destructor(JSWebMessagePort* jsWebMessagePort)
+    {
+        if (jsWebMessagePort != nullptr) {
+            jsWebMessagePort->DecRefCount();
+        }
+    }
+};
+
+class JSWebMessageEvent : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebMessageEvent>::Declare("WebMessageEvent");
+        JSClass<JSWebMessageEvent>::CustomMethod("getData", &JSWebMessageEvent::GetData);
+        JSClass<JSWebMessageEvent>::CustomMethod("setData", &JSWebMessageEvent::SetData);
+        JSClass<JSWebMessageEvent>::CustomMethod("getPorts", &JSWebMessageEvent::GetPorts);
+        JSClass<JSWebMessageEvent>::CustomMethod("setPorts", &JSWebMessageEvent::SetPorts);
+        JSClass<JSWebMessageEvent>::Bind(globalObj, JSWebMessageEvent::Constructor, JSWebMessageEvent::Destructor);
+    }
+
+    void GetData(const JSCallbackInfo& args)
+    {
+        auto jsVal = JSVal(ToJSValue(data_));
+        auto retVal = JSRef<JSVal>::Make(jsVal);
+        args.SetReturnValue(retVal);
+    }
+
+    void SetData(const JSCallbackInfo& args)
+    {
+        if (args.Length() < 1 || !args[0]->IsString()) {
+            LOGE("invalid url params");
+            return;
+        }
+        data_ = args[0]->ToString();
+    }
+
+    void SetPorts(const JSCallbackInfo& args)
+    {
+        if (args.Length() <= 0) {
+            LOGW("invalid url params");
+            return;
+        }
+        JSRef<JSArray> jsPorts = JSRef<JSArray>::Cast(args[0]);
+        std::vector<RefPtr<WebMessagePort>> sendPorts;
+        if (jsPorts->IsArray()) {
+            JSRef<JSArray> array = JSRef<JSArray>::Cast(jsPorts);
+            for (size_t i = 0; i <  array->Length(); i++) {
+                JSRef<JSVal> jsValue = array->GetValueAt(i);
+                if (!jsValue->IsObject()) {
+                    LOGW("invalid not object");
+                    continue;
+                }
+                JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+                RefPtr<JSWebMessagePort> jswebPort = Referenced::Claim(jsObj->Unwrap<JSWebMessagePort>());
+                if (jswebPort) {
+                    ports_.push_back(jswebPort);
+                } else {
+                    LOGE("jswebPort is null");
+                }
+            }
+        } else {
+            LOGE("jswebPort is not array");
+        }
+    }
+
+    void GetPorts(const JSCallbackInfo& args)
+    {
+        JSRef<JSArray> jsPorts = JSRef<JSArray>::New();
+        JSRef<JSObject> jsObj;
+        RefPtr<JSWebMessagePort> jswebPort;
+        for (size_t i = 0; i <  ports_.size(); i++) {
+            jsObj = JSClass<JSWebMessagePort>::NewInstance();
+            jswebPort = Referenced::Claim(jsObj->Unwrap<JSWebMessagePort>());
+            jswebPort->SetWebMessagePort(ports_[i]->GetWebMessagePort());
+            jsPorts->SetValueAt(i, jsObj);
+        }
+        args.SetReturnValue(jsPorts);
+    }
+
+    std::string GetDataInternal()
+    {
+        return data_;
+    }
+
+    std::vector<RefPtr<JSWebMessagePort>> GetPortsInternal()
+    {
+        return ports_;
+    }
+
+private:
+    std::string data_;
+    std::vector<RefPtr<JSWebMessagePort>> ports_;
+
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebMessageEvent = Referenced::MakeRefPtr<JSWebMessageEvent>();
+        jsWebMessageEvent->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebMessageEvent));
+    }
+
+    static void Destructor(JSWebMessageEvent* jsWebMessageEvent)
+    {
+        if (jsWebMessageEvent != nullptr) {
+            jsWebMessageEvent->DecRefCount();
+        }
+    }
+};
+
+void JSWebMessagePort::PostMessage(const JSCallbackInfo& args)
+{
+    if (args.Length() <= 0 || !(args[0]->IsObject())) {
+        LOGE("invalid PostMessage params");
+        return;
+    }
+    // get ports
+    JSRef<JSVal> jsPorts = JSRef<JSVal>::Cast(args[0]);
+    if (!jsPorts->IsObject()) {
+        LOGE("invalid param, not a object");
+        return;
+    }
+    auto jsRes = Referenced::Claim(JSRef<JSObject>::Cast(jsPorts)->Unwrap<JSWebMessageEvent>());
+    std::string data = jsRes->GetDataInternal();
+    if (port_) {
+        port_->PostMessage(data);
+    }
+}
+
 void JSWebController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWebController>::Declare("WebController");
@@ -266,11 +466,15 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("zoomOut", &JSWebController::ZoomOut);
     JSClass<JSWebController>::CustomMethod("getPageHeight", &JSWebController::GetPageHeight);
     JSClass<JSWebController>::CustomMethod("getTitle", &JSWebController::GetTitle);
+    JSClass<JSWebController>::CustomMethod("createWebMessagePorts", &JSWebController::CreateWebMessagePorts);
+    JSClass<JSWebController>::CustomMethod("postMessage", &JSWebController::PostWebMessage);
     JSClass<JSWebController>::CustomMethod("getWebId", &JSWebController::GetWebId);
     JSClass<JSWebController>::CustomMethod("getDefaultUserAgent", &JSWebController::GetDefaultUserAgent);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
     JSWebCookie::JSBind(globalObj);
     JSHitTestValue::JSBind(globalObj);
+    JSWebMessagePort::JSBind(globalObj);
+    JSWebMessageEvent::JSBind(globalObj);
 }
 
 void JSWebController::Constructor(const JSCallbackInfo& args)
@@ -293,6 +497,70 @@ void JSWebController::Reload() const
 {
     if (webController_) {
         webController_->Reload();
+    }
+}
+
+void JSWebController::CreateWebMessagePorts(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController CreateWebMessagePorts");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        std::vector<RefPtr<WebMessagePort>> ports;
+        webController_->CreateMsgPorts(ports);
+        // 2: port size check.
+        if (ports.size() != 2) {
+            LOGE("JSWebController ports size wrong");
+        }
+        JSRef<JSObject> jsPort0 = JSClass<JSWebMessagePort>::NewInstance();
+        auto port0 = Referenced::Claim(jsPort0->Unwrap<JSWebMessagePort>());
+        port0->SetWebMessagePort(ports.at(0));
+
+        JSRef<JSObject> jsPort1 = JSClass<JSWebMessagePort>::NewInstance();
+        auto port1 = Referenced::Claim(jsPort1->Unwrap<JSWebMessagePort>());
+        port1->SetWebMessagePort(ports.at(1));
+
+        JSRef<JSArray> result = JSRef<JSArray>::New();
+        result->SetValueAt(0, jsPort0);
+        result->SetValueAt(1, jsPort1);
+        args.SetReturnValue(result);
+    } else {
+        LOGE("JSWebController webcontroller its null");
+    }
+}
+
+void JSWebController::PostWebMessage(const JSCallbackInfo& args)
+{
+    LOGI("JSWebController PostMessage");
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        LOGE("invalid postMessage params");
+        return;
+    }
+
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    std::string uri;
+    if (!ConvertFromJSValue(obj->GetProperty("uri"), uri)) {
+        LOGE("invalid uri param");
+        return;
+    }
+
+    JSRef<JSVal> jsPorts = obj->GetProperty("message");
+    if (!jsPorts->IsObject()) {
+        LOGE("invalid message param");
+        return;
+    }
+    auto jsRes = JSRef<JSObject>::Cast(jsPorts)->Unwrap<JSWebMessageEvent>();
+    std::string eventData = jsRes->GetDataInternal();
+    std::vector<RefPtr<JSWebMessagePort>> eventPorts = jsRes->GetPortsInternal();
+    std::vector<RefPtr<WebMessagePort>> sendPorts;
+    for (auto jsport : eventPorts) {
+        auto webPort = jsport->GetWebMessagePort();
+        if (webPort) {
+            sendPorts.push_back(webPort);
+        }
+    }
+
+    if (webController_ && sendPorts.size() >= 1) {
+        webController_->PostWebMessage(eventData, sendPorts, uri);
     }
 }
 
