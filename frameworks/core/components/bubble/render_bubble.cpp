@@ -326,6 +326,26 @@ void RenderBubble::InitArrowState()
         arrowWidth);
 }
 
+void RenderBubble::InitArrowTopAndBottomPosition(Offset& topArrowPosition, Offset& bottomArrowPosition,
+    Offset& topPosition, Offset& bottomPosition, const Size& childSize)
+{
+    double scaledBubbleSpacing = NormalizeToPx(BUBBLE_SPACING);
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        topArrowPosition = topPosition + Offset(
+            std::max(NormalizeToPx(padding_.Left()), NormalizeToPx(border_.TopLeftRadius().GetX())) +
+            NormalizeToPx(BEZIER_WIDTH_HALF), childSize.Height() + NormalizeToPx(BUBBLE_SPACING));
+        bottomArrowPosition = bottomPosition + Offset(
+            std::max(NormalizeToPx(padding_.Left()), NormalizeToPx(border_.BottomLeftRadius().GetX())) +
+            NormalizeToPx(BEZIER_WIDTH_HALF), -NormalizeToPx(BUBBLE_SPACING));
+        return;
+    }
+    topArrowPosition = Offset(targetOffset_.GetX() + targetSize_.Width() / 2.0,
+        targetOffset_.GetY() - scaledBubbleSpacing - NormalizePercentToPx(margin_.Bottom(), true));
+    bottomArrowPosition = Offset(targetOffset_.GetX() + targetSize_.Width() / 2.0,
+        targetOffset_.GetY() + targetSize_.Height() + scaledBubbleSpacing + NormalizePercentToPx(margin_.Top(), true));
+}
+
 Offset RenderBubble::GetChildPosition(const Size& childSize)
 {
     InitArrowState();
@@ -340,13 +360,9 @@ Offset RenderBubble::GetChildPosition(const Size& childSize)
     if (showTopArrow_) {
         topPosition += Offset(0.0, -scaledBubbleSpacing);
     }
-
-    Offset topArrowPosition = topPosition + Offset(
-        std::max(NormalizeToPx(padding_.Left()), NormalizeToPx(border_.TopLeftRadius().GetX())) +
-        NormalizeToPx(BEZIER_WIDTH_HALF), childSize.Height() + NormalizeToPx(BUBBLE_SPACING));
-    Offset bottomArrowPosition = bottomPosition + Offset(
-        std::max(NormalizeToPx(padding_.Left()), NormalizeToPx(border_.BottomLeftRadius().GetX())) +
-        NormalizeToPx(BEZIER_WIDTH_HALF), -NormalizeToPx(BUBBLE_SPACING));
+    Offset topArrowPosition;
+    Offset bottomArrowPosition;
+    InitArrowTopAndBottomPosition(topArrowPosition, bottomArrowPosition, topPosition, bottomPosition, childSize);
     Offset originOffset =
         GetPositionWithPlacement(childSize, topPosition, bottomPosition, topArrowPosition, bottomArrowPosition);
     Offset childPosition = originOffset;
@@ -739,66 +755,54 @@ void RenderBubble::BuildCompletePath(SkPath& path)
     path.close();
 }
 
-void RenderBubble::InitEdgeSize(EdgeSize& edgeSize)
+void RenderBubble::InitEdgeSize(Edge& edge)
 {
-    edgeSize.topEdgeWidth = std::max(NormalizeToPx(padding_.Left()), NormalizeToPx(border_.TopLeftRadius().GetX())) +
-        std::max(NormalizeToPx(padding_.Right()), NormalizeToPx(border_.TopRightRadius().GetX()));
-    edgeSize.bottomEdgeWidth = std::max(NormalizeToPx(padding_.Left()),
+    edge.SetTop(Dimension(std::max(NormalizeToPx(padding_.Left()), NormalizeToPx(border_.TopLeftRadius().GetX())) +
+        std::max(NormalizeToPx(padding_.Right()), NormalizeToPx(border_.TopRightRadius().GetX()))));
+    edge.SetBottom(Dimension(std::max(NormalizeToPx(padding_.Left()),
         NormalizeToPx(border_.BottomLeftRadius().GetX())) + std::max(NormalizeToPx(padding_.Right()),
-        NormalizeToPx(border_.BottomRightRadius().GetX()));
-    edgeSize.leftEdgeHeight = std::max(NormalizeToPx(padding_.Top()), NormalizeToPx(border_.TopRightRadius().GetY())) +
-        std::max(NormalizeToPx(padding_.Bottom()), NormalizeToPx(border_.BottomRightRadius().GetY()));
-    edgeSize.rightEdgeHeight = std::max(NormalizeToPx(padding_.Top()), NormalizeToPx(border_.TopLeftRadius().GetY())) +
-        std::max(NormalizeToPx(padding_.Bottom()), NormalizeToPx(border_.BottomLeftRadius().GetY()));
+        NormalizeToPx(border_.BottomRightRadius().GetX()))));
+    edge.SetLeft(Dimension(std::max(NormalizeToPx(padding_.Top()), NormalizeToPx(border_.TopRightRadius().GetY())) +
+        std::max(NormalizeToPx(padding_.Bottom()), NormalizeToPx(border_.BottomRightRadius().GetY()))));
+    edge.SetRight(Dimension(std::max(NormalizeToPx(padding_.Top()), NormalizeToPx(border_.TopLeftRadius().GetY())) +
+        std::max(NormalizeToPx(padding_.Bottom()), NormalizeToPx(border_.BottomLeftRadius().GetY()))));
 }
 
 double RenderBubble::GetArrowOffset(const Placement& placement)
 {
-    double arrowOffset = 0.0;
     double motionRange = 0.0;
-    EdgeSize edgeSize;
-    InitEdgeSize(edgeSize);
+    Edge edge;
+    InitEdgeSize(edge);
     switch (placement) {
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
-            motionRange = childSize_.Width() - edgeSize.topEdgeWidth - NormalizeToPx(ARROW_WIDTH);
-            arrowOffset = std::clamp(arrowOffset_.Unit() == DimensionUnit::PERCENT ? arrowOffset_.Value() *
-                motionRange : NormalizeToPx(arrowOffset_), 0.0, motionRange);
+            motionRange = childSize_.Width() - edge.Top().Value() - NormalizeToPx(ARROW_WIDTH);
             break;
         case Placement::TOP:
-            motionRange = childSize_.Width() - edgeSize.topEdgeWidth - NormalizeToPx(ARROW_WIDTH);
-            arrowOffset = std::clamp(arrowOffset_.Unit() == DimensionUnit::PERCENT ? arrowOffset_.Value() *
-                motionRange : NormalizeToPx(arrowOffset_), 0.0, motionRange);
+            motionRange = childSize_.Width() - edge.Top().Value() - NormalizeToPx(ARROW_WIDTH);
             break;
         case Placement::BOTTOM:
-            motionRange = childSize_.Width() - edgeSize.bottomEdgeWidth - NormalizeToPx(ARROW_WIDTH);
-            arrowOffset = std::clamp(arrowOffset_.Unit() == DimensionUnit::PERCENT ? arrowOffset_.Value() *
-                motionRange : NormalizeToPx(arrowOffset_), 0.0, motionRange);
+            motionRange = childSize_.Width() - edge.Bottom().Value() - NormalizeToPx(ARROW_WIDTH);
             break;
         case Placement::LEFT:
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
-            motionRange = childSize_.Height() - edgeSize.leftEdgeHeight - NormalizeToPx(ARROW_WIDTH);
-            arrowOffset = std::clamp(arrowOffset_.Unit() == DimensionUnit::PERCENT ? arrowOffset_.Value() *
-                motionRange : NormalizeToPx(arrowOffset_), 0.0, motionRange);
+            motionRange = childSize_.Height() - edge.Left().Value() - NormalizeToPx(ARROW_WIDTH);
             break;
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
-            motionRange = childSize_.Height() - edgeSize.rightEdgeHeight - NormalizeToPx(ARROW_WIDTH);
-            arrowOffset = std::clamp(arrowOffset_.Unit() == DimensionUnit::PERCENT ? arrowOffset_.Value() *
-                motionRange : NormalizeToPx(arrowOffset_), 0.0, motionRange);
+            motionRange = childSize_.Height() - edge.Right().Value() - NormalizeToPx(ARROW_WIDTH);
             break;
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
-            motionRange = childSize_.Width() - edgeSize.bottomEdgeWidth - NormalizeToPx(ARROW_WIDTH);
-            arrowOffset = std::clamp(arrowOffset_.Unit() == DimensionUnit::PERCENT ? arrowOffset_.Value() *
-                motionRange : NormalizeToPx(arrowOffset_), 0.0, motionRange);
+            motionRange = childSize_.Width() - edge.Bottom().Value()  - NormalizeToPx(ARROW_WIDTH);
             break;
         default:
             break;
     }
-    return arrowOffset;
+    return std::clamp(arrowOffset_.Unit() == DimensionUnit::PERCENT ? arrowOffset_.Value() * motionRange :
+        NormalizeToPx(arrowOffset_), 0.0, motionRange);
 }
 
 } // namespace OHOS::Ace

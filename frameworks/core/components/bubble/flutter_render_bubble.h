@@ -43,6 +43,9 @@ private:
     void PaintBubble(RenderContext& context);
     void PaintTopBubble(SkCanvas* skCanvas, const SkPaint& paint);
     void PaintBottomBubble(SkCanvas* skCanvas, const SkPaint& paint);
+    void PaintTopBubbleInJs(SkCanvas* skCanvas, const SkPaint& paint);
+    void PaintBottomBubbleInJs(SkCanvas* skCanvas, const SkPaint& paint);
+    void PaintNonCustomPopup(SkCanvas* skCanvas, const SkPaint& paint);
     void PaintBubbleWithArrow(SkCanvas* skCanvas, const SkPaint& paint);
     void PaintDefaultBubble(SkCanvas* skCanvas, const SkPaint& paint);
     void PaintBorder(RenderContext& context);
