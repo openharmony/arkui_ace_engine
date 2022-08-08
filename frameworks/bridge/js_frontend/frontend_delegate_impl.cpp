@@ -447,7 +447,7 @@ void FrontendDelegateImpl::CallPopPage()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto& currentPage = pageRouteStack_.back();
-    if (!pageRouteStack_.empty() && currentPage.isAlertBeforeBackPage) {
+    if (!pageRouteStack_.empty() && currentPage.alertCallback) {
         backUri_ = "";
         taskExecutor_->PostTask(
             [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
@@ -617,7 +617,7 @@ void FrontendDelegateImpl::Back(const std::string& uri, const std::string& param
 
     std::lock_guard<std::mutex> lock(mutex_);
     auto& currentPage = pageRouteStack_.back();
-    if (!pageRouteStack_.empty() && currentPage.isAlertBeforeBackPage) {
+    if (!pageRouteStack_.empty() && currentPage.alertCallback) {
         backUri_ = uri;
         taskExecutor_->PostTask(
             [context = pipelineContextHolder_.Get(), dialogProperties = pageRouteStack_.back().dialogProperties,
@@ -1018,7 +1018,7 @@ void FrontendDelegateImpl::EnableAlertBeforeBackPage(
     }
 
     auto& currentPage = pageRouteStack_.back();
-    currentPage.isAlertBeforeBackPage = true;
+    ClearAlertCallback(currentPage);
     currentPage.dialogProperties = {
         .content = message,
         .autoCancel = false,
@@ -1036,7 +1036,7 @@ void FrontendDelegateImpl::DisableAlertBeforeBackPage()
         return;
     }
     auto& currentPage = pageRouteStack_.back();
-    currentPage.isAlertBeforeBackPage = false;
+    ClearAlertCallback(currentPage);
 }
 
 void FrontendDelegateImpl::SetCallBackResult(const std::string& callBackId, const std::string& result)
@@ -1322,6 +1322,7 @@ void FrontendDelegateImpl::OnPopToPageSuccess(const std::string& url)
         OnPageDestroy(pageRouteStack_.back().pageId);
         pageMap_.erase(pageRouteStack_.back().pageId);
         pageParamMap_.erase(pageRouteStack_.back().pageId);
+        ClearAlertCallback(pageRouteStack_.back());
         pageRouteStack_.pop_back();
     }
     if (isRouteStackFull_) {
@@ -1383,6 +1384,7 @@ int32_t FrontendDelegateImpl::OnPopPageSuccess()
     std::lock_guard<std::mutex> lock(mutex_);
     pageMap_.erase(pageRouteStack_.back().pageId);
     pageParamMap_.erase(pageRouteStack_.back().pageId);
+    ClearAlertCallback(pageRouteStack_.back());
     pageRouteStack_.pop_back();
     if (isRouteStackFull_) {
         isRouteStackFull_ = false;
@@ -1455,6 +1457,7 @@ int32_t FrontendDelegateImpl::OnClearInvisiblePagesSuccess()
     PageInfo pageInfo = std::move(pageRouteStack_.back());
     pageRouteStack_.pop_back();
     for (const auto& info : pageRouteStack_) {
+        ClearAlertCallback(info);
         OnPageDestroy(info.pageId);
         pageMap_.erase(info.pageId);
         pageParamMap_.erase(info.pageId);
@@ -1495,6 +1498,7 @@ void FrontendDelegateImpl::OnReplacePageSuccess(const RefPtr<JsAcePage>& page, c
     if (!pageRouteStack_.empty()) {
         pageMap_.erase(pageRouteStack_.back().pageId);
         pageParamMap_.erase(pageRouteStack_.back().pageId);
+        ClearAlertCallback(pageRouteStack_.back());
         pageRouteStack_.pop_back();
     }
     pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
@@ -1628,6 +1632,15 @@ void FrontendDelegateImpl::OnPageHide()
 void FrontendDelegateImpl::OnConfigurationUpdated(const std::string& configurationData)
 {
     FireSyncEvent("_root", std::string("\"onConfigurationUpdated\","), configurationData);
+}
+
+void FrontendDelegateImpl::ClearAlertCallback(PageInfo pageInfo)
+{
+    if (pageInfo.alertCallback) {
+        // notify to clear js reference
+        pageInfo.alertCallback(static_cast<int32_t>(AlertState::RECOVERY));
+        pageInfo.alertCallback = nullptr;
+    }
 }
 
 void FrontendDelegateImpl::OnPageDestroy(int32_t pageId)
