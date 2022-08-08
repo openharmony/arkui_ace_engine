@@ -74,6 +74,7 @@ public:
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
+    static void SetCopyOption(const JSCallbackInfo& info);
 
 protected:
     /**

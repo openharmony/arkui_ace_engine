@@ -207,7 +207,7 @@ private:
     RefPtr<ClickRecognizer> hideTextOverlayRecognizer_;
     RefPtr<PanRecognizer> selectRecognizer_;
     RefPtr<Clipboard> clipboard_;
-    CopyOption copyOption_ = CopyOption::NoCopy;
+    CopyOptions copyOption_ = CopyOptions::None;
     Offset startOffset_;
     Offset endOffset_;
 };

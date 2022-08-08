@@ -1936,7 +1936,7 @@ void RenderTextField::HandleOnCut()
     if (GetEditingValue().GetSelectedText().empty()) {
         return;
     }
-    if (copyOption_ != CopyOption::NoCopy) {
+    if (copyOption_ != CopyOptions::None) {
         clipboard_->SetData(GetEditingValue().GetSelectedText());
     }
     if (onCut_) {
@@ -1959,7 +1959,7 @@ void RenderTextField::HandleOnCopy()
     if (GetEditingValue().GetSelectedText().empty()) {
         return;
     }
-    if (copyOption_ != CopyOption::NoCopy) {
+    if (copyOption_ != CopyOptions::None) {
         clipboard_->SetData(GetEditingValue().GetSelectedText());
     }
     if (onCopy_) {
@@ -2378,7 +2378,7 @@ void RenderTextField::ApplyAspectRatio()
 
 void RenderTextField::Dump()
 {
-    DumpLog::GetInstance().AddDesc(std::string("CopyOption: ").append(V2::ConvertWrapCopyOptionToStirng(copyOption_)));
+    DumpLog::GetInstance().AddDesc(std::string("CopyOptions: ").append(V2::ConvertWrapCopyOptionToString(copyOption_)));
 }
 
 } // namespace OHOS::Ace

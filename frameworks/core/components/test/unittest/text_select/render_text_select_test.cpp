@@ -252,6 +252,21 @@ public:
         }
         return true;
     };
+    static bool MockGetPixmapData(
+        const std::function<void(const RefPtr<PixelMap>&)>& callback, const WeakPtr<TaskExecutor>& taskExecutor)
+    {
+        auto executor = taskExecutor.Upgrade();
+        if (executor) {
+            executor->PostTask(
+                [callback] {
+                    if (callback) {
+                        callback(nullptr);
+                    }
+                },
+                TaskExecutor::TaskType::BACKGROUND);
+        }
+        return true;
+    };
 
 private:
     MockClipboardJni() = delete;
@@ -271,6 +286,18 @@ public:
             taskExecutor_->PostTask(
                 [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_))] {
                     MockClipboardJni::MockGetData(callback, taskExecutor);
+                },
+                TaskExecutor::TaskType::BACKGROUND);
+        }
+    };
+    void SetPixelMapData(const RefPtr<PixelMap>& pixmap) override {};
+    virtual void GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback,
+        bool syncMode = false) override
+    {
+        if (taskExecutor_) {
+            taskExecutor_->PostTask(
+                [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_))] {
+                    MockClipboardJni::MockGetPixmapData(callback, taskExecutor);
                 },
                 TaskExecutor::TaskType::BACKGROUND);
         }

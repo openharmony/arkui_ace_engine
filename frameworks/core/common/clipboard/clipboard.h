@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CLIPBOARD_CLIPBOARD_H
 
+#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/task_executor.h"
 
@@ -29,6 +30,9 @@ public:
 
     virtual void SetData(const std::string& data) = 0;
     virtual void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false) = 0;
+    virtual void SetPixelMapData(const RefPtr<PixelMap>& pixmap) = 0;
+    virtual void GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback,
+        bool syncMode = false) = 0;
     virtual void Clear() = 0;
 
 protected:

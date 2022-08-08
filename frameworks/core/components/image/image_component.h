@@ -147,6 +147,9 @@ public:
         onDropId_ = onDropId;
     }
 
+    const CopyOptions& GetCopyOption() const;
+    void SetCopyOption(const CopyOptions& copyOption);
+
 private:
     std::string src_;
     std::string alt_;
@@ -180,6 +183,8 @@ private:
     OnDropFunc onDragMoveId_;
     OnDropFunc onDragLeaveId_;
     OnDropFunc onDropId_;
+
+    CopyOptions copyOption_ = CopyOptions::None;
 };
 
 } // namespace OHOS::Ace
