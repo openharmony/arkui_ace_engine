@@ -321,6 +321,7 @@ private:
     void AddRouterTask(const RouterTask& task);
     bool IsNavigationStage(const PageTarget& target);
     void RecycleSinglePage();
+    void ClearAlertCallback(PageInfo pageInfo);
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;

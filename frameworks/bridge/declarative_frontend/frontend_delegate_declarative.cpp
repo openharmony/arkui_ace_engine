@@ -983,7 +983,7 @@ void FrontendDelegateDeclarative::BackCheckAlert(const PageTarget& target, const
             return;
         }
         auto& currentPage = pageRouteStack_.back();
-        if (currentPage.isAlertBeforeBackPage) {
+        if (currentPage.alertCallback) {
             backUri_ = target;
             backParam_ = params;
             auto context = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
@@ -1303,7 +1303,8 @@ void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
     }
 
     auto& currentPage = pageRouteStack_.back();
-    currentPage.isAlertBeforeBackPage = true;
+    ClearAlertCallback(currentPage);
+    currentPage.alertCallback = callback;
     currentPage.dialogProperties = {
         .content = message,
         .autoCancel = false,
@@ -1321,7 +1322,8 @@ void FrontendDelegateDeclarative::DisableAlertBeforeBackPage()
         return;
     }
     auto& currentPage = pageRouteStack_.back();
-    currentPage.isAlertBeforeBackPage = false;
+    ClearAlertCallback(currentPage);
+    currentPage.alertCallback = nullptr;
 }
 
 Rect FrontendDelegateDeclarative::GetBoundingRectData(NodeId nodeId)
@@ -1750,6 +1752,7 @@ void FrontendDelegateDeclarative::OnPopToPageSuccess(const std::string& url)
         OnPageDestroy(pageRouteStack_.back().pageId);
         pageMap_.erase(pageRouteStack_.back().pageId);
         pageParamMap_.erase(pageRouteStack_.back().pageId);
+        ClearAlertCallback(pageRouteStack_.back());
         pageRouteStack_.pop_back();
     }
 
@@ -1763,6 +1766,7 @@ int32_t FrontendDelegateDeclarative::OnPopPageSuccess()
     std::lock_guard<std::mutex> lock(mutex_);
     pageMap_.erase(pageRouteStack_.back().pageId);
     pageParamMap_.erase(pageRouteStack_.back().pageId);
+    ClearAlertCallback(pageRouteStack_.back());
     pageRouteStack_.pop_back();
     if (isRouteStackFull_) {
         isRouteStackFull_ = false;
@@ -1892,6 +1896,7 @@ int32_t FrontendDelegateDeclarative::OnClearInvisiblePagesSuccess()
     PageInfo pageInfo = std::move(pageRouteStack_.back());
     pageRouteStack_.pop_back();
     for (const auto& info : pageRouteStack_) {
+        ClearAlertCallback(info);
         OnPageDestroy(info.pageId);
         pageMap_.erase(info.pageId);
         pageParamMap_.erase(info.pageId);
@@ -1941,6 +1946,7 @@ void FrontendDelegateDeclarative::OnReplacePageSuccess(const RefPtr<JsAcePage>& 
     if (!pageRouteStack_.empty()) {
         pageMap_.erase(pageRouteStack_.back().pageId);
         pageParamMap_.erase(pageRouteStack_.back().pageId);
+        ClearAlertCallback(pageRouteStack_.back());
         pageRouteStack_.pop_back();
     }
     pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
@@ -2155,6 +2161,15 @@ void FrontendDelegateDeclarative::OnPageHide()
         page->FireDeclarativeOnPageDisAppearCallback();
     }
     FireAsyncEvent("_root", std::string("\"viewdisappear\",null,null"), std::string(""));
+}
+
+void FrontendDelegateDeclarative::ClearAlertCallback(PageInfo pageInfo)
+{
+    if (pageInfo.alertCallback) {
+        // notify to clear js reference
+        pageInfo.alertCallback(static_cast<int32_t>(AlertState::RECOVERY));
+        pageInfo.alertCallback = nullptr;
+    }
 }
 
 void FrontendDelegateDeclarative::OnPageDestroy(int32_t pageId)
