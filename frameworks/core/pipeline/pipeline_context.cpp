@@ -53,6 +53,7 @@
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
 #include "core/common/manager_interface.h"
+#include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/components/checkable/render_checkable.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -1955,9 +1956,21 @@ void PipelineContext::OnVirtualKeyboardAreaChange(Rect keyboardArea)
     LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
         (height_ - keyboardHeight), offsetFix);
     if (NearZero(keyboardHeight)) {
+        if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
+            auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
+            if (textFieldManager->ResetSlidingPanelParentHeight()) {
+                return;
+            }
+        }
         SetRootSizeWithWidthHeight(width_, height_, 0);
         rootOffset_.SetY(0.0);
     } else if (positionY > (height_ - keyboardHeight) && offsetFix > 0.0) {
+        if (textFieldManager_ && AceType::InstanceOf<TextFieldManager>(textFieldManager_)) {
+            auto textFieldManager = AceType::DynamicCast<TextFieldManager>(textFieldManager_);
+            if (textFieldManager->UpdatePanelForVirtualKeyboard(-offsetFix, height_)) {
+                return;
+            }
+        }
         SetRootSizeWithWidthHeight(width_, height_, -offsetFix);
         rootOffset_.SetY(-offsetFix);
     }

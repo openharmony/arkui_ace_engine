@@ -207,6 +207,7 @@ void TextFieldElement::OnBlur()
         textField->StopTwinkling();
         textField->PopTextOverlay();
         textField->OnEditChange(false);
+        textField->ResetOnFocusForTextFieldManager();
     }
     CloseKeyboard();
     FocusNode::OnBlur();

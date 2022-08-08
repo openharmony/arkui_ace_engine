@@ -21,6 +21,7 @@
 #include "base/utils/macros.h"
 #include "core/common/manager_interface.h"
 #include "core/components/stack/stack_element.h"
+#include "core/components/text_field/render_text_field.h"
 
 namespace OHOS::Ace {
 
@@ -37,10 +38,27 @@ public:
     void SetScrollElement(int32_t pageId, const WeakPtr<ScrollElement>& scrollElement) override;
     void RemovePageId(int32_t pageId) override;
 
+    WeakPtr<RenderTextField>& GetOnFocusTextField()
+    {
+        return onFocusTextField_;
+    }
+
+    void SetOnFocusTextField(const WeakPtr<RenderTextField>& onFocusTextField)
+    {
+        onFocusTextField_ = onFocusTextField;
+    }
+
+    void ClearOnFocusTextField();
+
+    bool ResetSlidingPanelParentHeight();
+
+    bool UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight);
+
 private:
     bool hasMove_ = false;
     Offset position_;
     std::unordered_map<int32_t, WeakPtr<ScrollElement>> scrollMap_;
+    WeakPtr<RenderTextField> onFocusTextField_;
 };
 
 } // namespace OHOS::Ace
