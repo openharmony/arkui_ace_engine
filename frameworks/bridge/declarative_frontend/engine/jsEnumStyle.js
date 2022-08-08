@@ -27,6 +27,7 @@ var Color;
   Color["Pink"] = "#ffffc0cb";
   Color["Red"] = "#ffff0000";
   Color["Yellow"] = "#ffffff00";
+  Color["Transparent"] = "#00000000";
 })(Color || (Color = {}));
 
 var TextAlign;
