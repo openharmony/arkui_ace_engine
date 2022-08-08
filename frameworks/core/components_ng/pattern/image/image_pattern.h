@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_PATTERN_H
 
+#include "base/memory/referenced.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
@@ -32,23 +33,14 @@ public:
     ImagePattern() = default;
     ~ImagePattern() override = default;
 
-    RenderWrapper::ContentPaintImpl CreateContentPaintImpl() override
-    {
-        auto task = [weak = WeakClaim(this)](RenderContext* renderContext, const OffsetF& offset) {
-            auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->PaintImage(renderContext, offset);
-            }
-        };
-        return task;
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ImageLayoutProperty>();
     }
 
-    RefPtr<PaintProperty> CreateRenderProperty() override
+    RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<ImageRenderProperty>();
     }
@@ -61,7 +53,7 @@ public:
         return layoutAlgorithm;
     }
 
-        // Called on main thread to check if need rerender of the content.
+    // Called on main thread to check if need rerender of the content.
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
 private:

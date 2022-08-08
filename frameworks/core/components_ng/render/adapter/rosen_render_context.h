@@ -69,6 +69,12 @@ public:
         }
     }
 
+    void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
+
+    void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) override;
+
+    void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) override;
+
 private:
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 

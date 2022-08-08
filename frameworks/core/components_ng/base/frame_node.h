@@ -33,7 +33,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/render_context.h"
-#include "core/components_ng/render/render_wrapper.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
 namespace OHOS::Ace::NG {
@@ -154,7 +154,7 @@ private:
     std::optional<LayoutConstraintF> GetLayoutConstraint() const;
     std::optional<OffsetF> GetParentGlobalOffset() const;
 
-    RefPtr<RenderWrapper> CreateRenderWrapper();
+    RefPtr<PaintWrapper> CreatePaintWrapper();
 
     void MarkNeedSyncRenderTree() override
     {

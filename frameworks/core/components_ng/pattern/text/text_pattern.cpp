@@ -21,27 +21,16 @@
 #include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace::NG {
-void TextPattern::PaintContent(RenderContext* renderContext, const OffsetF& offset)
-{
-    CHECK_NULL_VOID(textLayoutAlgorithm_);
-    const auto& paragraph = textLayoutAlgorithm_->GetTxtParagraph();
-    CHECK_NULL_VOID(paragraph);
-
-    const auto& canvas = renderContext->GetCanvas();
-    renderContext->SetDrawContentAtLast(true);
-    paragraph->Paint(canvas, offset.GetX(), offset.GetY());
-}
-
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
 {
-    if (skipMeasure) {
+    if (skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textLayoutAlgorithm, false);
-    textLayoutAlgorithm_ = textLayoutAlgorithm;
+    paragraph_ = textLayoutAlgorithm->GetTxtParagraph();
     return true;
 }
 } // namespace OHOS::Ace::NG

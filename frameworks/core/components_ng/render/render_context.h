@@ -41,6 +41,12 @@ public:
         requestFrame_ = requestFrame;
     }
 
+    virtual void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) {}
+
+    virtual void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) {}
+
+    virtual void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
+
     virtual void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
 
     virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}

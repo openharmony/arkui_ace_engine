@@ -24,6 +24,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -57,7 +58,7 @@ public:
         OnAttachToFrameNode();
     }
 
-    virtual RefPtr<PaintProperty> CreateRenderProperty()
+    virtual RefPtr<PaintProperty> CreatePaintProperty()
     {
         return MakeRefPtr<PaintProperty>();
     }
@@ -72,7 +73,7 @@ public:
         return MakeRefPtr<BoxLayoutAlgorithm>();
     }
 
-    virtual RenderWrapper::ContentPaintImpl CreateContentPaintImpl()
+    virtual RefPtr<NodePaintMethod> CreateNodePaintMethod()
     {
         return nullptr;
     }
@@ -85,12 +86,6 @@ public:
     virtual void OnContextAttached() {}
 
     virtual void OnModifyDone() {}
-
-    virtual RefPtr<LayoutWrapper> AdjustChildLayoutWrapper(
-        const RefPtr<LayoutWrapper>& self, const RefPtr<LayoutWrapper>& child)
-    {
-        return self;
-    }
 
     virtual bool IsRootPattern() const
     {

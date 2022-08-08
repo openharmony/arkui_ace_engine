@@ -23,8 +23,10 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_paint_method.h"
 #include "core/components_ng/pattern/text/text_paragraph.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
@@ -35,15 +37,9 @@ public:
     TextPattern() = default;
     ~TextPattern() override = default;
 
-    RenderWrapper::ContentPaintImpl CreateContentPaintImpl() override
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto task = [weak = WeakClaim(this)](RenderContext* renderContext, const OffsetF& offset) {
-            auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->PaintContent(renderContext, offset);
-            }
-        };
-        return task;
+        return MakeRefPtr<TextPaintMethod>(paragraph_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -62,11 +58,9 @@ public:
     }
 
 private:
-    void PaintContent(RenderContext* renderContext, const OffsetF& offset);
-
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
-    RefPtr<TextLayoutAlgorithm> textLayoutAlgorithm_;
+    RefPtr<Paragraph> paragraph_;
 };
 } // namespace OHOS::Ace::NG
 

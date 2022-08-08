@@ -109,7 +109,7 @@ void ApplyImageFit(const SizeF& imageSize, const SizeF& dstSize, ImageFit imageF
 
 } // namespace
 
-void ImagePainter::DrawImage(const RefPtr<Canvas>& canvas, const OffsetF& offset)
+void ImagePainter::DrawImage(const RefPtr<Canvas>& canvas, const OffsetF& offset) const
 {
     CHECK_NULL_VOID(image_);
     RectF srcRect = RectF(OffsetF(), imageSize_);
