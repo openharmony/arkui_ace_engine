@@ -107,7 +107,7 @@ std::string RevSourceMap::GetOriginalNames(const std::string& sourceCode, uint32
             LOGW("Add overflow of sourceCode.");
             return jsCode;
         }
-        if (flagPos < jsCode.length() && jsCode[flagPos] == '^' && flagPos + posDiff - 1 > 0) {
+        if (flagPos < static_cast<int32_t>(jsCode.length()) && jsCode[flagPos] == '^' && flagPos + posDiff - 1 > 0) {
             jsCode.erase(flagPos + posDiff - 1, -posDiff);
         }
     } else if (posDiff > 0) {
