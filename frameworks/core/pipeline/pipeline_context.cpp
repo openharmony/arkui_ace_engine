@@ -16,6 +16,7 @@
 #include "core/pipeline/pipeline_context.h"
 
 #include <utility>
+#include <unordered_set>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -1624,12 +1625,61 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     if (isSubPipe) {
         return;
     }
+    if (scalePoint.type == TouchType::MOVE) {
+        touchEvents_.emplace_back(point);
+        window_->RequestFrame();
+        return;
+    }
+
+    std::optional<TouchEvent> lastMoveEvent;
+    if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
+        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end(); ++iter) {
+            auto movePoint = (*iter).CreateScalePoint(GetViewScale());
+            if (scalePoint.id == movePoint.id) {
+                lastMoveEvent = movePoint;
+                touchEvents_.erase(iter++);
+            }
+        }
+        if (lastMoveEvent.has_value()) {
+            ResSchedReport::GetInstance().DispatchTouchEventStart(lastMoveEvent->type);
+            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
+            ResSchedReport::GetInstance().DispatchTouchEventEnd();
+        }
+    }
+
     ResSchedReport::GetInstance().DispatchTouchEventStart(scalePoint.type);
     eventManager_->DispatchTouchEvent(scalePoint);
     ResSchedReport::GetInstance().DispatchTouchEventEnd();
     if (scalePoint.type == TouchType::UP) {
         touchPluginPipelineContext_.clear();
         eventManager_->SetInstanceId(GetInstanceId());
+    }
+    window_->RequestFrame();
+}
+
+void PipelineContext::FlushTouchEvents()
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+    if (!rootElement_) {
+        LOGE("root element is nullptr");
+        return;
+    }
+    {
+        std::unordered_set<int32_t> moveEventIds;
+        decltype(touchEvents_) touchEvents(std::move(touchEvents_));
+        if (touchEvents.empty()) {
+            return;
+        }
+        for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
+            auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
+            auto result = moveEventIds.emplace(scalePoint.id);
+            if (result.second) {
+                ResSchedReport::GetInstance().DispatchTouchEventStart(scalePoint.type);
+                eventManager_->DispatchTouchEvent(scalePoint);
+                ResSchedReport::GetInstance().DispatchTouchEventEnd();
+            }
+        }
     }
 }
 
@@ -1907,6 +1957,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
 #endif
     if (isSurfaceReady_) {
+        FlushTouchEvents();
         FlushAnimation(GetTimeFromExternalTimer());
         FlushPipelineWithoutAnimation();
         FlushAnimationTasks();
