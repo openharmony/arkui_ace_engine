@@ -229,7 +229,7 @@ bool RenderText::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
         !GetEventMarker(GetTouchPosition(localOffset), GestureType::TOUCH_CANCEL).IsEmpty()) {
         needTouchDetector_ = true;
     }
-    if (!needClickDetector_ && !needLongPressDetector_ && !needTouchDetector_ && copyOption_ == CopyOption::NoCopy &&
+    if (!needClickDetector_ && !needLongPressDetector_ && !needTouchDetector_ && copyOption_ == CopyOptions::None &&
         !onDragStart_) {
         return false;
     }
@@ -248,7 +248,7 @@ bool RenderText::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
 void RenderText::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    if (copyOption_ != CopyOption::NoCopy) {
+    if (copyOption_ != CopyOptions::None) {
         if (!textOverlayRecognizer_) {
             textOverlayRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(context_);
             textOverlayRecognizer_->SetOnLongPress([weak = WeakClaim(this)](const LongPressInfo& info) {
@@ -453,7 +453,7 @@ void RenderText::OnLongPress(const LongPressInfo& longPressInfo)
 
 bool RenderText::HandleMouseEvent(const MouseEvent& event)
 {
-    if (copyOption_ == CopyOption::NoCopy) {
+    if (copyOption_ == CopyOptions::None) {
         return false;
     }
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
@@ -930,7 +930,7 @@ void RenderText::Dump()
         fontFamilies += ",";
     }
     DumpLog::GetInstance().AddDesc(std::string("FontFamily: ").append(fontFamilies));
-    DumpLog::GetInstance().AddDesc(std::string("CopyOption: ").append(V2::ConvertWrapCopyOptionToStirng(copyOption_)));
+    DumpLog::GetInstance().AddDesc(std::string("CopyOptions: ").append(V2::ConvertWrapCopyOptionToString(copyOption_)));
 }
 
 DragItemInfo RenderText::GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info)

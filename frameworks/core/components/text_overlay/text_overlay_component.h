@@ -64,6 +64,9 @@ public:
     void SetWeakText(const WeakPtr<RenderText>& weakText);
     const WeakPtr<RenderText>& GetWeakText() const;
 
+    void SetWeakImage(const WeakPtr<RenderImage>& weakImage);
+    const WeakPtr<RenderImage>& GetWeakImage() const;
+
     bool HasMoreButton() const;
 
     void SetIsPassword(bool isPassword);
@@ -173,6 +176,16 @@ public:
         return isUsingMouse_;
     }
 
+    void SetNeedCilpRect(bool needClipRect)
+    {
+        needClipRect_ = needClipRect;
+    }
+
+    bool GetNeedCilpRect() const
+    {
+        return needClipRect_;
+    }
+
 private:
     RefPtr<ButtonComponent> BuildButton(const std::string& data, const EventMarker& onClick);
     RefPtr<ButtonComponent> BuildMoreIconButton(bool hasMenu);
@@ -187,6 +200,7 @@ private:
     WeakPtr<PipelineContext> context_;
     WeakPtr<RenderTextField> weakTextField_;
     WeakPtr<RenderText> weakText_;
+    WeakPtr<RenderImage> weakImage_;
     RefPtr<TextOverlayTheme> theme_;
     RefPtr<SelectPopupComponent> menu_;
     RefPtr<ThemeManager> themeManager_;
@@ -230,6 +244,7 @@ private:
 
     std::vector<InputOption> options_; // Options for menu.
     bool isUsingMouse_ = false;
+    bool needClipRect_ = true;
 };
 
 } // namespace OHOS::Ace

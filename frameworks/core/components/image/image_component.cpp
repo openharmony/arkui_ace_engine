@@ -293,4 +293,14 @@ const ImageObjectPosition& ImageComponent::GetImageObjectPosition() const
     return imageObjectPosition_;
 }
 
+const CopyOptions& ImageComponent::GetCopyOption() const
+{
+    return copyOption_;
+}
+
+void ImageComponent::SetCopyOption(const CopyOptions& copyOption)
+{
+    copyOption_ = copyOption;
+}
+
 } // namespace OHOS::Ace

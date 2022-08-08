@@ -28,12 +28,16 @@ public:
     // Implement Clipboard
     void SetData(const std::string& data) override;
     void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false) override;
+    void SetPixelMapData(const RefPtr<PixelMap>& pixmap) override;
+    void GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode = false) override;
     void Clear() override;
 
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
 private:
     void GetDataSync(const std::function<void(const std::string&)>& callback);
     void GetDataAsync(const std::function<void(const std::string&)>& callback);
+    void GetPixelMapDataSync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
+    void GetPixelMapDataAsync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
 #endif
 };
 

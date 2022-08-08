@@ -801,12 +801,13 @@ var MessageLevel
   MessageLevel[MessageLevel["Log"] = 5] = "Log";
 })(MessageLevel || (MessageLevel = {}));
 
-var CopyOption;
-(function (CopyOption) {
-  CopyOption[CopyOption["InApp"] = 0] = "InApp";
-  CopyOption[CopyOption["LocalDevice"] = 1] = "LocalDevice";
-  CopyOption[CopyOption["CrossDevice"] = 2] = "CrossDevice";
-})(CopyOption || (CopyOption = {}));
+var CopyOptions;
+(function (CopyOptions) {
+  CopyOptions[CopyOptions["None"] = 0] = "None";
+  CopyOptions[CopyOptions["InApp"] = 1] = "InApp";
+  CopyOptions[CopyOptions["LocalDevice"] = 2] = "LocalDevice";
+  CopyOptions[CopyOptions["CrossDevice"] = 3] = "CrossDevice";
+})(CopyOptions || (CopyOptions = {}));
 
 var ListItemAlign;
 (function (ListItemAlign) {

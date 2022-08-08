@@ -121,12 +121,12 @@ void TextComponent::SetFocusColor(const Color& focusColor)
     declaration_->SetFocusColor(focusColor);
 }
 
-const CopyOption& TextComponent::GetCopyOption() const
+const CopyOptions& TextComponent::GetCopyOption() const
 {
     return declaration_->GetCopyOption();
 }
 
-void TextComponent::SetCopyOption(const CopyOption& copyOption)
+void TextComponent::SetCopyOption(const CopyOptions& copyOption)
 {
     declaration_->SetCopyOption(copyOption);
 }

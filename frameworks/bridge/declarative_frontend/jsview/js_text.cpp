@@ -548,16 +548,13 @@ void JSText::SetCopyOption(const JSCallbackInfo& info)
         LOGE("component is not valid");
         return;
     }
-    auto copyOption = CopyOption::NoCopy;
-    if (info[0]->IsBoolean()) {
-        auto enable = info[0]->ToBoolean();
-        copyOption = enable ? CopyOption::Distributed : CopyOption::NoCopy;
-    } else if (info[0]->IsNumber()) {
-        auto emunNumber = info[0]->ToNumber<int>() + 1;
-        copyOption = static_cast<CopyOption>(emunNumber);
+    auto copyOptions = CopyOptions::None;
+    if (info[0]->IsNumber()) {
+        auto emunNumber = info[0]->ToNumber<int>();
+        copyOptions = static_cast<CopyOptions>(emunNumber);
     }
-    LOGI("copy option: %{public}d", copyOption);
-    component->SetCopyOption(copyOption);
+    LOGI("copy option: %{public}d", copyOptions);
+    component->SetCopyOption(copyOptions);
 }
 
 void JSText::JsOnDragStart(const JSCallbackInfo& info)

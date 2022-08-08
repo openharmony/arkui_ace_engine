@@ -591,7 +591,7 @@ private:
     Color hoverColor_;
     TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
-    CopyOption copyOption_ = CopyOption::Distributed;
+    CopyOptions copyOption_ = CopyOptions::Distributed;
     std::function<void()> onValueChange_;
     std::function<void(bool)> onKeyboardClose_;
     std::function<void(const Rect&)> onClipRectChanged_;

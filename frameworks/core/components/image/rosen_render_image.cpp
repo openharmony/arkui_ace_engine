@@ -32,6 +32,7 @@
 #include "core/components/common/properties/radius.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
+#include "core/components/text_overlay/text_overlay_component.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_object.h"
 #include "core/pipeline/base/constants.h"
@@ -1352,6 +1353,42 @@ void RosenRenderImage::OnVisibleChanged()
     } else if (imageObj_ && !GetVisible()) {
         imageObj_->Pause();
     }
+}
+
+RefPtr<PixelMap> RosenRenderImage::GetPixmapFromSkImage()
+{
+    if (!image_ || !image_->image()) {
+        return nullptr;
+    }
+    auto image = image_->image();
+    auto rasterizedImage = image->makeRasterImage();
+    SkPixmap srcPixmap;
+    if (!rasterizedImage->peekPixels(&srcPixmap)) {
+        return nullptr;
+    }
+    SkPixmap newSrcPixmap = CloneSkPixmap(srcPixmap);
+    auto addr = newSrcPixmap.addr32();
+    int32_t width = static_cast<int32_t>(newSrcPixmap.width());
+    int32_t height = static_cast<int32_t>(newSrcPixmap.height());
+    auto length = width * height;
+    return PixelMap::ConvertSkImageToPixmap(addr, length, width, height);
+}
+
+SkPixmap RosenRenderImage::CloneSkPixmap(SkPixmap &srcPixmap)
+{
+    SkImageInfo dstImageInfo = SkImageInfo::Make(srcPixmap.info().width(), srcPixmap.info().height(),
+        SkColorType::kBGRA_8888_SkColorType, srcPixmap.alphaType());
+    auto dstPixels = std::make_unique<uint8_t[]>(srcPixmap.computeByteSize());
+    SkPixmap dstPixmap(dstImageInfo, dstPixels.release(), srcPixmap.rowBytes());
+
+    SkBitmap dstBitmap;
+    if (!dstBitmap.installPixels(dstPixmap)) {
+        return dstPixmap;
+    }
+    if (!dstBitmap.writePixels(srcPixmap, 0, 0)) {
+        return dstPixmap;
+    }
+    return dstPixmap;
 }
 
 } // namespace OHOS::Ace
