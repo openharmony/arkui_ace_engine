@@ -1106,6 +1106,7 @@ private:
     void CorrectPosition();
     void CreateTouchEventOnZoom(const AxisEvent& event);
     void HandleVisibleAreaChangeEvent();
+    void FlushTouchEvents();
 
     template<typename T>
     struct NodeCompare {
@@ -1300,6 +1301,7 @@ private:
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     std::vector<RectCallback> rectCallbackList_;
+    std::list<TouchEvent> touchEvents_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
