@@ -39,6 +39,7 @@ public:
     std::string GetSideBarWidth() const;
     std::string GetMinSideBarWidth() const;
     std::string GetMaxSideBarWidth() const;
+    std::string GetSideBarPosition() const;
 
 private:
     RefPtr<RenderSideBarContainer> GetRenderSideBar() const;
