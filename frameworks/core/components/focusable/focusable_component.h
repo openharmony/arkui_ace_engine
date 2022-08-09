@@ -207,6 +207,33 @@ public:
         enabled_ = enabled;
     }
 
+    bool IsFocusOnTouch() const
+    {
+        return isFocusOnTouch_;
+    }
+    void SetIsFocusOnTouch(bool isFocusOnTouch)
+    {
+        isFocusOnTouch_ = isFocusOnTouch;
+    }
+
+    bool IsDefaultFocus() const
+    {
+        return isDefaultFocus_;
+    }
+    void SetIsDefaultFocus(bool isDefaultFocus)
+    {
+        isDefaultFocus_ = isDefaultFocus;
+    }
+
+    bool IsDefaultGroupFocus() const
+    {
+        return isDefaultGroupFocus_;
+    }
+    void SetIsDefaultGroupFocus(bool isDefaultGroupFocus)
+    {
+        isDefaultGroupFocus_ = isDefaultGroupFocus;
+    }
+
 private:
     EventMarker onClickId_;
     EventMarker onFocusId_;
@@ -224,6 +251,9 @@ private:
     bool show_ { true };
     bool deleteDisabled_ { false };
     bool enabled_ { true };
+    bool isFocusOnTouch_ { false };
+    bool isDefaultFocus_ { false };
+    bool isDefaultGroupFocus_ { false };
 
     std::function<void(int)> onFocusMove_;
     std::function<void()> onFocus_;

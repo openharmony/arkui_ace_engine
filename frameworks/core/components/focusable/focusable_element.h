@@ -40,6 +40,8 @@ public:
     void OnBlur() override;
     void HandleFocus() override;
 
+    bool SetFocusOnTouchCallback();
+
 protected:
     RefPtr<RenderNode> GetCachedRenderNode() override
     {

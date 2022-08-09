@@ -512,6 +512,39 @@ JSValue JsGetInspectorNodeById(JSContext* ctx, JSValueConst new_target, int argc
     return JS_ParseJSON(ctx, infoStr.c_str(), infoStr.length(), nullptr);
 }
 
+static JSValue RequestFocus(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    if (argc != 1) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, it is supposed to have 1 arguments");
+    }
+
+    if (!JS_IsString(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "input value must be string");
+    }
+    ScopedString targetString(ctx, argv[0]);
+    std::string inspectorKey = targetString.get();
+
+    QJSContext::Scope scp(ctx);
+    auto container = Container::Current();
+    if (!container) {
+        return JS_ThrowSyntaxError(ctx, "container is null");
+    }
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    if (!pipelineContext) {
+        return JS_ThrowSyntaxError(ctx, "pipeline is null");
+    }
+    bool result = false;
+    if (!pipelineContext->GetTaskExecutor()) {
+        LOGE("pipelineContext's task excutor is null");
+        return JS_NewBool(ctx, result);
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext, inspectorKey, &result]() { result = pipelineContext->RequestFocus(inspectorKey); },
+        TaskExecutor::TaskType::UI);
+
+    return JS_NewBool(ctx, result);
+}
+
 void JsRegisterViews(BindingTarget globalObj)
 {
     JSContext* ctx = QJSContext::Current();
@@ -535,6 +568,7 @@ void JsRegisterViews(BindingTarget globalObj)
     QJSUtils::DefineGlobalFunction(ctx, SetAppBackgroundColor, "setAppBgColor", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorNodes, "getInspectorNodes", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorNodeById, "getInspectorNodeById", 1);
+    QJSUtils::DefineGlobalModuleFunction(ctx, RequestFocus, "focusControl", "requestFocus", 1);
 
     JsBindViews(globalObj);
 
