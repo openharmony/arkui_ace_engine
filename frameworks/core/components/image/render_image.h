@@ -258,7 +258,7 @@ protected:
     void ApplyFitWidth(Rect& srcRect, Rect& dstRect, const Size& rawPicSize, const Size& imageComponentSize);
     void ApplyFitHeight(Rect& srcRect, Rect& dstRect, const Size& rawPicSize, const Size& imageComponentSize);
     void ApplyNone(Rect& srcRect, Rect& dstRect, const Size& rawPicSize, const Size& imageComponentSize);
-    void FireLoadEvent(const Size& picSize) const;
+    void FireLoadEvent(const Size& picSize, const std::string& errorMsg = "") const;
     void SetRadius(const Border& border);
     void CalculateResizeTarget();
     bool NeedResize() const;

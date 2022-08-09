@@ -150,14 +150,16 @@ void StaticImageObject::UploadToGpuForRender(
             skData = ImageProvider::LoadImageRawData(imageSource, pipelineContext, imageSize);
             if (!skData) {
                 LOGE("reload image data failed. imageSource: %{private}s", imageSource.ToString().c_str());
-                ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr);
+                ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
+                    "Image data may be broken or absent, please check if image file or image data is valid.");
                 return;
             }
         }
         auto rawImage = SkImage::MakeFromEncoded(skData);
         if (!rawImage) {
             LOGE("static image MakeFromEncoded fail! imageSource: %{private}s", imageSource.ToString().c_str());
-            ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr);
+            ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
+                "Image data may be broken, please check if image file or image data is broken.");
             return;
         }
         auto image = ImageProvider::ResizeSkImage(rawImage, imageSource.GetSrc(), imageSize, forceResize);

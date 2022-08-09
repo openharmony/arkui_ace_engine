@@ -103,7 +103,7 @@ void RosenRenderImage::InitializeCallbacks()
             renderImage->sourceInfo_.ToString().c_str(), info.ToString().c_str());
     };
 
-    failedCallback_ = [weak = AceType::WeakClaim(this)](ImageSourceInfo info) {
+    failedCallback_ = [weak = AceType::WeakClaim(this)](ImageSourceInfo info, const std::string& errorMsg) {
         auto renderImage = weak.Upgrade();
         if (!renderImage) {
             LOGE("renderImage upgrade fail when image load fail. callback image source info: %{private}s",
@@ -126,7 +126,7 @@ void RosenRenderImage::InitializeCallbacks()
             LOGI("retry loading. sourceInfo: %{private}s", renderImage->sourceInfo_.ToString().c_str());
             return;
         }
-        renderImage->ImageObjFailed();
+        renderImage->ImageObjFailed(errorMsg);
     };
 
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
@@ -201,7 +201,7 @@ void RosenRenderImage::ImageObjReady(const RefPtr<ImageObject>& imageObj)
     MarkNeedLayout(selfOnly);
 }
 
-void RosenRenderImage::ImageObjFailed()
+void RosenRenderImage::ImageObjFailed(const std::string& errorMsg)
 {
     LOGW("image load failed, sourceInfo : %{private}s", sourceInfo_.ToString().c_str());
     currentDstRectList_.clear();
@@ -214,7 +214,7 @@ void RosenRenderImage::ImageObjFailed()
     proceedPreviousLoading_ = false;
     imageLoadingStatus_ = ImageLoadingStatus::LOAD_FAIL;
     retryCnt_ = 0;
-    FireLoadEvent(imageSizeForEvent_);
+    FireLoadEvent(imageSizeForEvent_, errorMsg);
     MarkNeedLayout();
 }
 
@@ -345,7 +345,8 @@ std::function<void()> RosenRenderImage::GenerateThumbnailLoadTask()
                             sourceInfo.GetSrc().c_str());
                         return;
                     }
-                    renderImage->failedCallback_(sourceInfo);
+                    renderImage->failedCallback_(sourceInfo,
+                        "Fail to get thumbnail data of dataability or datashare, please check the validation of src.");
                 },
                 TaskExecutor::TaskType::UI);
             return;
@@ -381,7 +382,7 @@ void RosenRenderImage::FetchImageObject()
     if (!sourceInfo_.IsValid()) {
         LOGW("Invalid image source. sourceInfo_ is %{private}s", sourceInfo_.ToString().c_str());
         if (context->GetIsDeclarative()) {
-            ImageObjFailed();
+            ImageObjFailed("Invalid image source, input of src may be null, please check.");
         }
         return;
     }
@@ -470,7 +471,7 @@ void RosenRenderImage::ProcessPixmapForPaint()
         LOGE("pixmap paint failed due to SkImage data verification fail. rawImageSize: %{public}s",
             rawImageSize_.ToString().c_str());
         imageLoadingStatus_ = ImageLoadingStatus::LOAD_FAIL;
-        FireLoadEvent(Size());
+        FireLoadEvent(Size(), "Image data from PixelMap is invalid, please check PixelMap data.");
         image_ = nullptr;
         imageObj_->ClearData();
         return;
@@ -1076,7 +1077,8 @@ void RosenRenderImage::PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLayou
         auto svgImage = svgImageWeak.Upgrade();
         if (svgImage) {
             LOGE("svg data wrong: %{private}s", svgImage->sourceInfo_.ToString().c_str());
-            svgImage->ImageObjFailed(); // if Upgrade fail, just callback with nullptr
+            // if Upgrade fail, just callback with nullptr
+            svgImage->ImageObjFailed("SVG data may be broken, please check the SVG file.");
         }
     };
     SkColorEx skColor;

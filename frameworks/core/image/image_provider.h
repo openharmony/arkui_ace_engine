@@ -55,7 +55,7 @@ class SvgDom;
 using ImageObjSuccessCallback = std::function<void(ImageSourceInfo, const RefPtr<ImageObject>)>;
 using UploadSuccessCallback = std::function<void(ImageSourceInfo, const fml::RefPtr<flutter::CanvasImage>&)>;
 using SvgDomSuccessCallback =  std::function<void(ImageSourceInfo, const RefPtr<SvgDom>&)>;
-using FailedCallback = std::function<void(ImageSourceInfo)>;
+using FailedCallback = std::function<void(ImageSourceInfo, const std::string&)>;
 using CancelableTask = CancelableCallback<void()>;
 using OnPostBackgroundTask = std::function<void(CancelableTask)>;
 
@@ -164,7 +164,8 @@ public:
         bool canStartUploadImageObj,
         const RefPtr<ImageObject>& imageObj,
         const RefPtr<PipelineBase>& context,
-        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder);
+        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+        const std::string& errorMsg = "");
 
     static bool TryUploadingImage(
         const std::string& key,
@@ -175,7 +176,8 @@ public:
         const RefPtr<TaskExecutor>& taskExecutor,
         const ImageSourceInfo& imageInfo,
         const Size& imageSize,
-        const fml::RefPtr<flutter::CanvasImage>& canvasImage);
+        const fml::RefPtr<flutter::CanvasImage>& canvasImage,
+        const std::string& errorMsg = "");
 
 private:
     static std::mutex loadingImageMutex_;

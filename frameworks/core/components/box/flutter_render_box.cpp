@@ -89,7 +89,7 @@ FlutterRenderBox::FlutterRenderBox()
         renderBox->ImageObjReady(imageObj);
     };
 
-    failedCallback_ = [weak = AceType::WeakClaim(this)](ImageSourceInfo info) {
+    failedCallback_ = [weak = AceType::WeakClaim(this)](ImageSourceInfo info, const std::string& errorMsg = "") {
         auto renderBox = weak.Upgrade();
         if (renderBox) {
             renderBox->ImageObjFailed();

@@ -68,7 +68,8 @@ void ImageProvider::ProccessLoadingResult(
     bool canStartUploadImageObj,
     const RefPtr<ImageObject>& imageObj,
     const RefPtr<PipelineBase>& context,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder)
+    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+    const std::string& errorMsg)
 {
     std::lock_guard lock(loadingImageMutex_);
     std::vector<LoadCallback> callbacks;
@@ -77,21 +78,25 @@ void ImageProvider::ProccessLoadingResult(
     if (iter != loadingImage_.end()) {
         std::swap(callbacks, iter->second);
         for (const auto& callback : callbacks) {
-            if (imageObj != nullptr) {
-                auto obj = imageObj->Clone();
-                taskExecutor->PostTask([obj, imageInfo, callback]() {
-                    callback.successCallback(imageInfo, obj);
+            if (imageObj == nullptr) {
+                taskExecutor->PostTask([imageInfo, callback, errorMsg]() {
+                    callback.failedCallback(imageInfo, errorMsg);
                 }, TaskExecutor::TaskType::UI);
-                if (canStartUploadImageObj) {
-                    bool forceResize = (!obj->IsSvg()) && (imageInfo.IsSourceDimensionValid());
-                    obj->UploadToGpuForRender(
-                        context,
-                        renderTaskHolder,
-                        callback.uploadCallback,
-                        callback.failedCallback,
-                        obj->GetImageSize(),
-                        forceResize, true);
-                }
+                return;
+            }
+            auto obj = imageObj->Clone();
+            taskExecutor->PostTask([obj, imageInfo, callback]() {
+                callback.successCallback(imageInfo, obj);
+            }, TaskExecutor::TaskType::UI);
+            if (canStartUploadImageObj) {
+                bool forceResize = (!obj->IsSvg()) && (imageInfo.IsSourceDimensionValid());
+                obj->UploadToGpuForRender(
+                    context,
+                    renderTaskHolder,
+                    callback.uploadCallback,
+                    callback.failedCallback,
+                    obj->GetImageSize(),
+                    forceResize, true);
             }
         }
     } else {
@@ -121,7 +126,8 @@ void ImageProvider::ProccessUploadResult(
     const RefPtr<TaskExecutor>& taskExecutor,
     const ImageSourceInfo& imageInfo,
     const Size& imageSize,
-    const fml::RefPtr<flutter::CanvasImage>& canvasImage)
+    const fml::RefPtr<flutter::CanvasImage>& canvasImage,
+    const std::string& errorMsg)
 {
     std::lock_guard lock(uploadMutex_);
     std::vector<LoadCallback> callbacks;
@@ -129,12 +135,12 @@ void ImageProvider::ProccessUploadResult(
     auto iter = uploadingImage_.find(key);
     if (iter != uploadingImage_.end()) {
         std::swap(callbacks, iter->second);
-        taskExecutor->PostTask([callbacks, imageInfo, canvasImage]() {
+        taskExecutor->PostTask([callbacks, imageInfo, canvasImage, errorMsg]() {
             for (auto callback : callbacks) {
                 if (canvasImage) {
                     callback.uploadCallback(imageInfo, canvasImage);
                 } else {
-                    callback.failedCallback(imageInfo);
+                    callback.failedCallback(imageInfo, errorMsg);
                 }
             }
         }, TaskExecutor::TaskType::UI);
@@ -179,10 +185,12 @@ void ImageProvider::FetchImageObject(
         }
         if (!imageObj) { // if it fails to generate an image object, trigger fail callback.
             if (syncMode) {
-                failedCallback(imageInfo);
+                failedCallback(imageInfo,
+                    "Image data may be broken or absent, please check if image file or image data is valid");
                 return;
             }
-            ProccessLoadingResult(taskExecutor, imageInfo, false, nullptr, pipelineContext, renderTaskHolder);
+            ProccessLoadingResult(taskExecutor, imageInfo, false, nullptr, pipelineContext, renderTaskHolder,
+                "Image data may be broken or absent, please check if image file or image data is valid.");
             return;
         }
         if (syncMode) {
@@ -227,7 +235,6 @@ RefPtr<ImageObject> ImageProvider::GeneratorAceImageObject(
         LOGE("load image data failed. imageInfo: %{private}s", imageInfo.ToString().c_str());
         return nullptr;
     }
-
     return ImageObject::BuildImageObject(imageInfo, context, imageData, useSkiaSvg);
 }
 
