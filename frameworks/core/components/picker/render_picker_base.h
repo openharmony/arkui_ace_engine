@@ -143,6 +143,7 @@ protected:
     }
 
     void InitializeSelectedOption(const RefPtr<RenderPickerColumn>& pickerColumn);
+    const RefPtr<RenderBox> GetBgColorBox() const;
     Size focusBoxSize_;
     Offset focusBoxOffset_;
 

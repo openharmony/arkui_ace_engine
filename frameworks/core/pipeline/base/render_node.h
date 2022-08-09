@@ -1143,6 +1143,16 @@ public:
         return restoreInfo_;
     }
 
+    // JSview boundary, all nodes in [head, tail] share the same RSNode
+    bool IsHeadRenderNode() const
+    {
+#ifdef ENABLE_ROSEN_BACKEND
+        return SystemProperties::GetRosenBackendEnabled() ? isHeadRenderNode_ : false;
+#else
+        return false;
+#endif
+    }
+
 protected:
     explicit RenderNode(bool takeBoundary = false);
     virtual void ClearRenderObject();
@@ -1214,15 +1224,6 @@ protected:
 
     virtual std::shared_ptr<RSNode> CreateRSNode() const;
     virtual void OnRSTransition(TransitionType type) {}
-    // JSview boundary, all nodes in [head, tail] share the same RSNode
-    bool IsHeadRenderNode() const
-    {
-#ifdef ENABLE_ROSEN_BACKEND
-        return SystemProperties::GetRosenBackendEnabled() ? isHeadRenderNode_ : false;
-#else
-        return isFirstNode_;
-#endif
-    }
     bool IsTailRenderNode() const
     {
         return isTailRenderNode_;
