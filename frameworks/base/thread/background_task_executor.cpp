@@ -156,7 +156,7 @@ void BackgroundTaskExecutor::StartNewThreads(size_t num)
 
 void BackgroundTaskExecutor::ThreadLoop(uint32_t threadNo)
 {
-    LOGI("Background thread is started");
+    LOGD("Background thread is started");
 
     SetThreadName(threadNo);
 

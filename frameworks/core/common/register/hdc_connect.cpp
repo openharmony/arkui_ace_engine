@@ -101,7 +101,6 @@ void FreeInstance()
     TryCloseLoop(&loopMain, "Hdcjdwp exit");
     delete clsHdcJdwpSimulator;
     clsHdcJdwpSimulator = nullptr;
-    LOGI("jdwp_process exit.");
 }
 
 void Stop(int signo)
@@ -120,7 +119,6 @@ void StopConnect()
 void* HdcConnectRun(void* pkgContent)
 {
     uv_loop_init(&loopMain);
-    LOGI("jdwp_process start.");
     if (signal(SIGINT, Stop) == SIG_ERR) {
         LOGE("jdwp_process signal fail.");
     }
