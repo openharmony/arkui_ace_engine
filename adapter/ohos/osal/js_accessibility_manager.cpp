@@ -428,7 +428,7 @@ bool JsAccessibilityManager::UnsubscribeToastObserver()
 
 bool JsAccessibilityManager::SubscribeStateObserver(const int eventType)
 {
-    LOGI("JsAccessibilityManager::SubscribeStateObserver");
+    LOGD("JsAccessibilityManager::SubscribeStateObserver");
     if (!stateObserver_) {
         stateObserver_ = std::make_shared<JsAccessibilityStateObserver>();
     }
@@ -464,7 +464,7 @@ bool JsAccessibilityManager::UnsubscribeStateObserver(const int eventType)
 
 void JsAccessibilityManager::InitializeCallback()
 {
-    LOGI("JsAccessibilityManager::InitializeCallback");
+    LOGD("JsAccessibilityManager::InitializeCallback");
     if (IsRegister()) {
         return;
     }
