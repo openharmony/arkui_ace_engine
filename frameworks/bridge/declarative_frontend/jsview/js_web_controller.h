@@ -54,6 +54,9 @@ public:
     void ZoomIn(const JSCallbackInfo& args);
     void ZoomOut(const JSCallbackInfo& args);
     void RequestFocus(const JSCallbackInfo& args);
+    void SearchAllAsync(const JSCallbackInfo& args);
+    void ClearMatches(const JSCallbackInfo& args);
+    void SearchNext(const JSCallbackInfo& args);
 
     // Backward and Forward for web page
     void Backward(const JSCallbackInfo& args);

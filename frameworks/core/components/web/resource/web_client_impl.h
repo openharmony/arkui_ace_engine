@@ -44,6 +44,25 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class FindListenerImpl : public OHOS::NWeb::NWebFindCallback {
+public:
+    FindListenerImpl() = default;
+    explicit FindListenerImpl(int32_t instanceId) : instanceId_(instanceId) {}
+    ~FindListenerImpl() = default;
+
+    void OnFindResultReceived(
+        const int activeMatchOrdinal, const int numberOfMatches, const bool isDoneCounting) override;
+
+    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
+    {
+        webDelegate_ = delegate;
+    }
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+    int32_t instanceId_ = -1;
+};
+
 class WebClientImpl : public OHOS::NWeb::NWebHandler {
 public:
     WebClientImpl() = default;

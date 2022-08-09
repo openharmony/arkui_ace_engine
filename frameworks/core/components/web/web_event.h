@@ -797,6 +797,37 @@ private:
     RefPtr<WebContextMenuParam> param_;
     RefPtr<ContextMenuResult> result_;
 };
+
+class ACE_EXPORT SearchResultReceiveEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(SearchResultReceiveEvent, BaseEventInfo);
+
+public:
+    SearchResultReceiveEvent(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting)
+        : BaseEventInfo("SearchResultReceiveEvent"), activeMatchOrdinal_(activeMatchOrdinal),
+          numberOfMatches_(numberOfMatches), isDoneCounting_(isDoneCounting)
+    {}
+    ~SearchResultReceiveEvent() = default;
+
+    int GetActiveMatchOrdinal() const
+    {
+        return activeMatchOrdinal_;
+    }
+
+    int GetNumberOfMatches() const
+    {
+        return numberOfMatches_;
+    }
+
+    bool GetIsDoneCounting() const
+    {
+        return isDoneCounting_;
+    }
+
+private:
+    int activeMatchOrdinal_;
+    int numberOfMatches_;
+    bool isDoneCounting_;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H

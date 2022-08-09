@@ -268,6 +268,9 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("getTitle", &JSWebController::GetTitle);
     JSClass<JSWebController>::CustomMethod("getWebId", &JSWebController::GetWebId);
     JSClass<JSWebController>::CustomMethod("getDefaultUserAgent", &JSWebController::GetDefaultUserAgent);
+    JSClass<JSWebController>::CustomMethod("searchAllAsync", &JSWebController::SearchAllAsync);
+    JSClass<JSWebController>::CustomMethod("clearMatches", &JSWebController::ClearMatches);
+    JSClass<JSWebController>::CustomMethod("searchNext", &JSWebController::SearchNext);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
     JSWebCookie::JSBind(globalObj);
     JSHitTestValue::JSBind(globalObj);
@@ -794,6 +797,39 @@ void JSWebController::RequestFocus(const JSCallbackInfo& args)
     ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->RequestFocus();
+    }
+}
+
+void JSWebController::SearchAllAsync(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    std::string searchStr;
+    if (args.Length() < 1 || !ConvertFromJSValue(args[0], searchStr)) {
+        LOGE("SearchAllAsync parameter is invalid.");
+        return;
+    }
+    if (webController_) {
+        webController_->SearchAllAsync(searchStr);
+    }
+}
+void JSWebController::ClearMatches(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        webController_->ClearMatches();
+    }
+}
+void JSWebController::SearchNext(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    bool forward = false;
+    if (args.Length() < 1 || !ConvertFromJSValue(args[0], forward)) {
+        LOGE("SearchNext parameter is invalid.");
+        return;
+    }
+
+    if (webController_) {
+        webController_->SearchNext(forward);
     }
 }
 } // namespace OHOS::Ace::Framework

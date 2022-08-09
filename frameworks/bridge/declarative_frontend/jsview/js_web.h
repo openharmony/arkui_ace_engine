@@ -76,6 +76,7 @@ public:
     static void OnHttpAuthRequest(const JSCallbackInfo& args);
     static void OnPermissionRequest(const JSCallbackInfo& args);
     static void OnContextMenuShow(const JSCallbackInfo& args);
+    static void OnSearchResultReceive(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
