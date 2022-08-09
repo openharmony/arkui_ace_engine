@@ -49,6 +49,10 @@ public:
     void PaintText(const Offset& textOffset, RenderContext& context) const;
 
     void InitCurrentPointPosition();
+    RefPtr<SwitchComponent> GetSwitchComponent() const
+    {
+        return component_;
+    }
 
 protected:
     void UpdateRenderText(const RefPtr<SwitchComponent>& component);

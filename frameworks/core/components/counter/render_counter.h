@@ -29,6 +29,11 @@ public:
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
 
+    RefPtr<Component> GetComponent() override
+    {
+        return component_;
+    }
+
 private:
     RefPtr<Component> component_;
 };

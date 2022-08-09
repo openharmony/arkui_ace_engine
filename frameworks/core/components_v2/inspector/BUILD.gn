@@ -25,6 +25,7 @@ build_component("inspector_v2") {
     "checkbox_composed_element.cpp",
     "column_composed_element.cpp",
     "column_split_composed_element.cpp",
+    "counter_composed_element.cpp",
     "customdialog_composed_element.cpp",
     "data_panel_composed_element.cpp",
     "date_picker_composed_element.cpp",
