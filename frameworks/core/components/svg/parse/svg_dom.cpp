@@ -115,6 +115,9 @@ SvgDom::SvgDom(const WeakPtr<PipelineContext>& context) : context_(context)
             return;
         }
         if (svgDom->svgContext_) {
+            if (attrPair.first == "clip-path") {
+                svgDom->SetHasClipPath(true);
+            }
             svgDom->svgContext_->PushStyle(styleName, attrPair);
         }
     };

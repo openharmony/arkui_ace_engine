@@ -104,6 +104,16 @@ public:
         finishEvent_ = finishEvent;
     }
 
+    void SetHasClipPath(bool hasClipPath)
+    {
+        hasClipPath_ = hasClipPath;
+    }
+
+    bool HasClipPath()
+    {
+        return hasClipPath_;
+    }
+
     bool HasAnimate() const
     {
         return svgAnimate_;
@@ -140,6 +150,7 @@ private:
     std::optional<Color> fillColor_;
     PushAttr attrCallback_;
     bool svgAnimate_ = false;
+    bool hasClipPath_ = false;
 };
 
 } // namespace OHOS::Ace
