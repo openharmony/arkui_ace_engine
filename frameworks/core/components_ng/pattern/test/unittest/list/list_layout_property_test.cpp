@@ -57,6 +57,7 @@ HWTEST_F(ListLayoutPropertyTest, ListLayoutPropertyTest001, TestSize.Level1)
         }
         auto layoutProperty = frameNode->GetLayoutProperty();
         auto listLayoutProperty = AceType::DynamicCast<OHOS::Ace::NG::ListLayoutProperty>(layoutProperty);
+        ASSERT_NE(listLayoutProperty, nullptr);
         auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
         ASSERT_EQ(NG::LIST_LAYOUT_ALGORITHM_SPACE_PXS[i].Value(), space.Value());
     }
@@ -84,6 +85,7 @@ HWTEST_F(ListLayoutPropertyTest, ListLayoutPropertyTest002, TestSize.Level1)
         }
         auto layoutProperty = frameNode->GetLayoutProperty();
         auto listLayoutProperty = AceType::DynamicCast<OHOS::Ace::NG::ListLayoutProperty>(layoutProperty);
+        ASSERT_NE(listLayoutProperty, nullptr);
         auto initialIndex = listLayoutProperty->GetInitialIndex().value_or(0);
         ASSERT_EQ(index, initialIndex);
     }
