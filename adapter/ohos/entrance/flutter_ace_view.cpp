@@ -220,7 +220,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     events.time = time;
-    LOGI("ConvertMouseEvent: (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
+    LOGD("ConvertMouseEvent: (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
          "DeviceType: %{public}d. PressedButton: %{public}d. Time: %{public}lld",
         events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
         (long long)pointerEvent->GetActionTime());
@@ -267,7 +267,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.time = time;
-    LOGI("ConvertAxisEvent: (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: %{public}f. "
+    LOGD("ConvertAxisEvent: (x,y): (%{public}f,%{public}f). HorizontalAxis: %{public}f. VerticalAxis: %{public}f. "
          "Action: %{public}d. DeviceType: %{public}d. Time: %{public}lld",
         event.x, event.y, event.horizontalAxis, event.verticalAxis, event.action, event.sourceType,
         (long long)pointerEvent->GetActionTime());
@@ -294,24 +294,24 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
         pressedKeyStr += (std::to_string(curCode) + " ");
         event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
-    LOGI("ConvertKeyEvent: KeyCode: %{private}d. KeyAction: %{public}d. PressedCodes: %{private}s. Time: %{public}lld",
+    LOGD("ConvertKeyEvent: KeyCode: %{private}d. KeyAction: %{public}d. PressedCodes: %{private}s. Time: %{public}lld",
         event.code, event.action, pressedKeyStr.c_str(), (long long)(keyEvent->GetActionTime()));
 }
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    LOGI("point source: %{public}d", pointerEvent->GetSourceType());
+    LOGD("point source: %{public}d", pointerEvent->GetSourceType());
     auto actionId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(actionId, item)) {
-        LOGI("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d", actionId,
+        LOGD("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d", actionId,
             item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction());
     }
     auto ids = pointerEvent->GetPointerIds();
     for (auto&& id : ids) {
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(id, item)) {
-            LOGI("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d", actionId,
+            LOGD("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d", actionId,
                 item.GetWindowX(), item.GetWindowY(), item.IsPressed());
         }
     }
@@ -335,8 +335,8 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
 #endif
     settings.platform_as_ui_thread = usePlatformThread;
     settings.use_current_event_runner = useCurrentEventRunner;
-    LOGI("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
-    LOGI("use platform as ui thread: %{public}s", settings.platform_as_ui_thread ? "true" : "false");
+    LOGD("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
+    LOGD("use platform as ui thread: %{public}s", settings.platform_as_ui_thread ? "true" : "false");
     settings.idle_notification_callback = [instanceId](int64_t deadline) {
         ContainerScope scope(instanceId);
         auto container = Container::Current();
@@ -367,15 +367,15 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen
         LOGE("FlutterAceView::SurfaceCreated, view is nullptr");
         return;
     }
-    LOGI(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", &(*window));
+    LOGD(">>> FlutterAceView::SurfaceCreated, pWnd:%{public}p", &(*window));
     auto platformView = view->GetShellHolder()->GetPlatformView();
-    LOGI("FlutterAceView::SurfaceCreated, GetPlatformView");
+    LOGD("FlutterAceView::SurfaceCreated, GetPlatformView");
     if (platformView && !SystemProperties::GetRosenBackendEnabled()) {
-        LOGI("FlutterAceView::SurfaceCreated, call NotifyCreated");
+        LOGD("FlutterAceView::SurfaceCreated, call NotifyCreated");
         platformView->NotifyCreated(window);
     }
 
-    LOGI("<<< FlutterAceView::SurfaceCreated, end");
+    LOGD("<<< FlutterAceView::SurfaceCreated, end");
 }
 
 void FlutterAceView::SurfaceChanged(
@@ -388,12 +388,12 @@ void FlutterAceView::SurfaceChanged(
 
     view->NotifySurfaceChanged(width, height, type);
     auto platformView = view->GetShellHolder()->GetPlatformView();
-    LOGI("FlutterAceView::SurfaceChanged, GetPlatformView");
+    LOGD("FlutterAceView::SurfaceChanged, GetPlatformView");
     if (platformView) {
-        LOGI("FlutterAceView::SurfaceChanged, call NotifyChanged");
+        LOGD("FlutterAceView::SurfaceChanged, call NotifyChanged");
         platformView->NotifyChanged(SkISize::Make(width, height));
     }
-    LOGI("<<< FlutterAceView::SurfaceChanged, end");
+    LOGD("<<< FlutterAceView::SurfaceChanged, end");
 }
 
 void FlutterAceView::SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics)
