@@ -123,7 +123,8 @@ public:
 
     bool IsRowReverse() const
     {
-        return (rightToLeft_ && direction_ == FlexDirection::ROW) || (!rightToLeft_ && direction_ == FlexDirection::ROW_REVERSE);
+        return (rightToLeft_ && direction_ == FlexDirection::ROW)
+         || (!rightToLeft_ && direction_ == FlexDirection::ROW_REVERSE);
     }
 
     bool IsColReverse() const
