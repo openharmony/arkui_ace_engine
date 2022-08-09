@@ -169,6 +169,9 @@ public:
     // zindex settings
     int32_t GetZIndex() const override;
 
+    // hit test behavior settings
+    std::string GetHitTestBehaviorStr() const override;
+
     // graphical transformation
     DimensionOffset GetOriginPoint() const override;
     std::unique_ptr<JsonValue> GetRotate() const override;
