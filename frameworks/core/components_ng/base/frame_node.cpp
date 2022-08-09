@@ -139,6 +139,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     if (needSyncRenderTree_) {
+        LOGE("CCCC RebuildRenderContextTree");
         RebuildRenderContextTree(dirty->GetChildrenInRenderArea());
         needSyncRenderTree_ = false;
     }

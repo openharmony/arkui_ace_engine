@@ -2656,6 +2656,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
         return false;
     }
     result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
+    LOGE("CCCC resId: %{public}d", resId->ToNumber<uint32_t>());
     return true;
 }
 

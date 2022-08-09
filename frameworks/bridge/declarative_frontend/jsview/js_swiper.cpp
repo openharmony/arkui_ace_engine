@@ -21,6 +21,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_component.h"
+#include "core/components_ng/pattern/swiper/swiper_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -37,6 +38,11 @@ JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
 
 void JSSwiper::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SwiperView::Create();
+        return;
+    }
+
     std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
     RefPtr<OHOS::Ace::SwiperComponent> component = AceType::MakeRefPtr<OHOS::Ace::SwiperComponent>(componentChildren);
     if (info.Length() > 0 && info[0]->IsObject()) {
@@ -238,6 +244,11 @@ void JSSwiper::SetLoop(bool loop)
 
 void JSSwiper::SetVertical(bool isVertical)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SwiperView::SetDirection(isVertical ? Axis::VERTICAL : Axis::HORIZONTAL);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
     if (swiper) {
@@ -429,6 +440,11 @@ void JSSwiper::SetWidth(const JSCallbackInfo& info)
 
 void JSSwiper::SetWidth(const JSRef<JSVal>& jsValue)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsWidth(jsValue);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
     if (swiper) {
@@ -444,6 +460,11 @@ void JSSwiper::SetWidth(const JSRef<JSVal>& jsValue)
 
 void JSSwiper::SetHeight(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsHeight(info);
+        return;
+    }
+
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;

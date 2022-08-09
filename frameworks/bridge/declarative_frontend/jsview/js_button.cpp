@@ -32,14 +32,24 @@ namespace OHOS::Ace::Framework {
 
 void JSButton::SetFontSize(const JSCallbackInfo& info)
 {
+    LOGE("CCCC JSButton::SetFontSize start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     if (info.Length() < 1) {
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Dimension fontSize;
+
+    if (info[0]->IsNumber()) {
+        LOGE("CCCC JSButton::SetFontSize number: %{public}lf", info[0]->ToNumber<double>());
+    } else if (info[0]->IsString()) {
+        LOGE("CCCC JSButton::SetFontSize string: %{public}s", info[0]->ToString().c_str());
+    } else if (info[0]->IsObject()) {
+        LOGE("CCCC JSButton::SetFontSize object");
+    }
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
+    LOGE("CCCC JSButton::SetFontSize %{public}lf - %{public}d end <<<<<<<<<<<<<<<<<<<<<<<<<<<", fontSize.Value(), fontSize.Unit());
     auto textComponent = GetTextComponent();
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
