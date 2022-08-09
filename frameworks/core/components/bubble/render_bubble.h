@@ -72,7 +72,7 @@ protected:
     ErrorPositionType GetErrorPositionType(const Offset& childOffset, const Size& childSize);
     void UpdateAccessibilityInfo(Size size, Offset offset);
     void InitAccessibilityEventListener();
-    double GetArrowOffset();
+    double GetArrowOffset(const Placement& placement);
     void BuildCornerPath(SkPath& path, Placement placement, double radius);
     void BuildTopLinePath(SkPath& path, double arrowOffset, double radius);
     void BuildRightLinePath(SkPath& path, double arrowOffset, double radius);
@@ -116,6 +116,9 @@ private:
     void UpdateCustomChildPosition();
     void GenerateChildPosition(const Size& childSize);
     void UpdateTouchRegion();
+    void InitEdgeSize(Edge& edge);
+    void InitArrowTopAndBottomPosition(Offset& topArrowPosition, Offset& bottomArrowPosition, Offset& topPosition,
+        Offset& bottomPosition, const Size& childSize);
     TouchRegion touchRegion_;
 };
 
