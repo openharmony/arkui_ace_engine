@@ -336,10 +336,9 @@ std::string ConvertInputTypeToString(AceTextCategory type)
     }
 }
 
-bool FindFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>& resultNode, int32_t focusType)
+bool FindAccessibilityFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>& resultNode)
 {
-    bool focused = focusType == FOCUS_TYPE_INPUT ? node->GetFocusedState() : node->GetAccessibilityFocusedState();
-    if (focused) {
+    if (node->GetAccessibilityFocusedState()) {
         resultNode = node;
         LOGI("FindFocus nodeId(%{public}d)", resultNode->GetNodeId());
         return true;
@@ -349,11 +348,35 @@ bool FindFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>&
             if (resultNode != nullptr) {
                 return true;
             }
-            if (FindFocus(item, resultNode, focusType)) {
-                LOGI("FindFocus nodeId:%{public}d", resultNode->GetNodeId());
+            if (FindAccessibilityFocus(item, resultNode)) {
+                LOGI("FindFocus nodeId:%{public}d", item->GetNodeId());
                 return true;
             }
         }
+    }
+
+    return false;
+}
+
+bool FindInputFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>& resultNode)
+{
+    LOGI("FindFocus nodeId(%{public}d focus(%{public}d))", node->GetNodeId(), node->GetFocusedState());
+    if (!node->GetFocusedState() && !node->IsRootNode()) {
+        return false;
+    }
+    if (node->GetFocusableState()) {
+        resultNode = node;
+        LOGI("FindFocus nodeId:%{public}d", resultNode->GetNodeId());
+    }
+    if (!node->GetChildList().empty()) {
+        for (const auto& item : node->GetChildList()) {
+            if (FindInputFocus(item, resultNode)) {
+                return true;
+            }
+        }
+    }
+    if (node->GetFocusableState()) {
+        return true;
     }
 
     return false;
@@ -987,7 +1010,15 @@ void JsAccessibilityManager::FindFocusedElementInfo(const int32_t elementId, con
     }
 
     RefPtr<AccessibilityNode> resultNode = nullptr;
-    bool status = FindFocus(node, resultNode, focusType);
+    bool status = false;
+    if (focusType == FOCUS_TYPE_ACCESSIBILITY) {
+        status = FindAccessibilityFocus(node, resultNode);
+    }
+    if (focusType == FOCUS_TYPE_INPUT) {
+        status = FindInputFocus(node, resultNode);
+    }
+
+    LOGI("FindFocus status(%{public}d)", status);
     if ((status) && (resultNode != nullptr)) {
         LOGI("FindFocus nodeId:%{public}d", resultNode->GetNodeId());
         UpdateAccessibilityNodeInfo(resultNode, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
