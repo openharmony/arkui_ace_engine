@@ -111,7 +111,7 @@ void SubwindowOhos::InitContainer()
 
     Ace::Platform::UIEnvCallback callback = nullptr;
     // set view
-    Platform::AceContainer::SetView(flutterAceView, config.Density(), width, height, window_->GetWindowId(), callback);
+    Platform::AceContainer::SetView(flutterAceView, config.Density(), width, height, window_, callback);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, config.Orientation());
 
 #ifdef ENABLE_ROSEN_BACKEND

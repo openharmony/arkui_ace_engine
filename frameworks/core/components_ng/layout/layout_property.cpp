@@ -91,10 +91,10 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         }
     }
     layoutConstraint_->scaleProperty = parentConstraint.scaleProperty;
-    CheckSelfIdealSize(updateFlag);
+    CheckSelfIdealSize();
 }
 
-void LayoutProperty::CheckSelfIdealSize(bool updateFlag)
+void LayoutProperty::CheckSelfIdealSize()
 {
     if (measureType_ == MeasureType::MATCH_PARENT && layoutConstraint_->parentIdealSize.has_value()) {
         layoutConstraint_->UpdateSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize.value());

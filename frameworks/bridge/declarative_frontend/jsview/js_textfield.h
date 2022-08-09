@@ -40,6 +40,7 @@ public:
     static void SetFontStyle(int32_t value);
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetInputFilter(const JSCallbackInfo& info);
+    static void SetInputStyle(const JSCallbackInfo& info);
     static void SetShowPasswordIcon(const JSCallbackInfo& info);
     static void SetBackgroundColor(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);

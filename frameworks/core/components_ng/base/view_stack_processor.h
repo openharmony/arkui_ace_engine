@@ -49,7 +49,7 @@
         }                                                                       \
     } while (false)
 
-#define ACE_UPDATE_RENDER_CONTEXT(name, value)                                 \
+#define ACE_UPDATE_RENDER_CONTEXT(name, value)                                  \
     do {                                                                        \
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
         CHECK_NULL_VOID(frameNode);                                             \
@@ -166,6 +166,58 @@ public:
         return gestureStack_.Reset();
     }
 
+    /**
+     * when nesting observeComponentCreation functions, such as in the case of
+     * If, and the if branch creates a Text etc that requires an implicit pop
+     * this function is needed after executing the inner observeComponentCreation
+     * and before read ViewStackProcessor.GetTopMostElementId(); on the outer one
+     */
+    void ImplicitPopBeforeContinue();
+
+    // End of Rerender function, flush modifier task.
+    void FlushRerenderTask();
+
+    /**
+     * start 'get' access recording
+     * account all get access to given node id
+     * next node creation will claim the given node id
+     * see ClaimNodeId()
+     */
+    void StartGetAccessRecordingFor(int32_t elmtId)
+    {
+        accountGetAccessToNodeId_ = elmtId;
+        reservedNodeId_ = elmtId;
+    }
+
+    int32_t ClaimNodeId()
+    {
+        const auto result = reservedNodeId_;
+        reservedNodeId_ = ElementRegister::UndefinedElementId;
+        return result;
+    }
+
+    /**
+     * get the elmtId to which all get access should be accounted
+     * ElementRegister::UndefinedElementId; means no get access recording enabled
+     */
+    ElementIdType GetNodeIdToAccountFor() const
+    {
+        return accountGetAccessToNodeId_;
+    }
+    void SetNodeIdToAccountFor(ElementIdType elmtId)
+    {
+        accountGetAccessToNodeId_ = elmtId;
+    }
+
+    /**
+     * inverse of StartGetAccessRecordingFor
+     */
+    void StopGetAccessRecording()
+    {
+        accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
+        reservedNodeId_ = ElementRegister::UndefinedElementId;
+    }
+
 private:
     ViewStackProcessor();
 
@@ -185,6 +237,12 @@ private:
     std::stack<int32_t> parentIdStack_;
 
     std::optional<VisualState> visualState_ = std::nullopt;
+
+    // elmtId reserved for next component creation
+    ElementIdType reservedNodeId_ = ElementRegister::UndefinedElementId;
+
+    // elmtId to account get access to
+    ElementIdType accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
 
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };

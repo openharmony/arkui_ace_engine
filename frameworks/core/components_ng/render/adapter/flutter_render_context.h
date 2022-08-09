@@ -22,8 +22,8 @@
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
-#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/render/adapter/flutter_node.h"
+#include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 class FlutterRenderContext : public RenderContext {
@@ -58,6 +58,12 @@ public:
     void SetDrawContentAtLast(bool useDrawContentLastOrder) override {}
 
     void SetClipToFrame(bool useClip) override {}
+
+    void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
+
+    void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) override;
+
+    void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) override;
 
     const std::shared_ptr<FlutterNode> GetNode()
     {

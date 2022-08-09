@@ -74,8 +74,6 @@ void RenderListTest::TearDown()
  * @tc.name: RenderListTest001
  * @tc.desc: Verify List PerformLayout can calculate children with row direction.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7B
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListTest001, TestSize.Level1)
 {
@@ -118,8 +116,6 @@ HWTEST_F(RenderListTest, RenderListTest001, TestSize.Level1)
  * @tc.name: RenderListTest002
  * @tc.desc: Verify List PerformLayout can calculate children with column direction.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7C
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListTest002, TestSize.Level1)
 {
@@ -163,8 +159,6 @@ HWTEST_F(RenderListTest, RenderListTest002, TestSize.Level1)
  * @tc.name: RenderListTest003
  * @tc.desc: Verify List PerformLayout can load children by step.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0A
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListTest003, TestSize.Level1)
 {
@@ -209,8 +203,6 @@ HWTEST_F(RenderListTest, RenderListTest003, TestSize.Level1)
  * @tc.name: RenderListTest004
  * @tc.desc: Verify List Scroll Event can callback when event trigger.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0J
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListTest004, TestSize.Level1)
 {
@@ -259,8 +251,6 @@ HWTEST_F(RenderListTest, RenderListTest004, TestSize.Level1)
  * @tc.name: RenderListTest005
  * @tc.desc: Verify List ScrollBottom Event can callback when event trigger.
  * @tc.type: FUNC
- * @tc.require: AR000DC9BF
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListTest005, TestSize.Level1)
 {
@@ -300,8 +290,6 @@ HWTEST_F(RenderListTest, RenderListTest005, TestSize.Level1)
  * @tc.name: RenderListTest006
  * @tc.desc: Verify List ScrollTop Event can callback when event trigger.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0K
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListTest006, TestSize.Level1)
 {
@@ -343,8 +331,6 @@ HWTEST_F(RenderListTest, RenderListTest006, TestSize.Level1)
  * @tc.name: RenderListTest007
  * @tc.desc: Verify List ScrollEnd Event can callback when event trigger.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0M
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListTest007, TestSize.Level1)
 {
@@ -384,8 +370,6 @@ HWTEST_F(RenderListTest, RenderListTest007, TestSize.Level1)
  * @tc.name: RenderListTest008
  * @tc.desc: Verify List ScrollTouchUp Event can callback when event trigger.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0L
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListTest008, TestSize.Level1)
 {
@@ -427,8 +411,6 @@ HWTEST_F(RenderListTest, RenderListTest008, TestSize.Level1)
  * @tc.name: ScrollMotionTest001
  * @tc.desc: Verify scroll can calculate attributes with different edge effect.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UO AR000DQ1UP
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderListTest, ScrollMotionTest001, TestSize.Level1)
 {
@@ -465,8 +447,6 @@ HWTEST_F(RenderListTest, ScrollMotionTest001, TestSize.Level1)
  * @tc.name: ScrollMotionTest002
  * @tc.desc: Verify scroll can calculate attributes with different edge effect.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UO AR000DQ1UQ
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderListTest, ScrollMotionTest002, TestSize.Level1)
 {
@@ -519,8 +499,6 @@ HWTEST_F(RenderListTest, ScrollMotionTest002, TestSize.Level1)
  * @tc.name: ScrollMotionTest003
  * @tc.desc: Verify scroll can calculate attributes with different edge effect.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UO AR000DQ1UQ
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderListTest, ScrollMotionTest003, TestSize.Level1)
 {
@@ -569,8 +547,6 @@ HWTEST_F(RenderListTest, ScrollMotionTest003, TestSize.Level1)
  * @tc.name: ScrollMotionTest004
  * @tc.desc: Verify scroll can calculate attributes with different edge effect.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UQ
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderListTest, ScrollMotionTest004, TestSize.Level1)
 {
@@ -603,8 +579,6 @@ HWTEST_F(RenderListTest, ScrollMotionTest004, TestSize.Level1)
  * @tc.name: RenderListItemExtentTest001
  * @tc.desc: Verify List PerformLayout can calculate children with row direction.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UC
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListItemExtentTest001, TestSize.Level1)
 {
@@ -655,8 +629,6 @@ HWTEST_F(RenderListTest, RenderListItemExtentTest001, TestSize.Level1)
  * @tc.name: RenderListItemExtentTest002
  * @tc.desc: Verify List PerformLayout can calculate children with row direction.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UC
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListItemExtentTest002, TestSize.Level1)
 {
@@ -707,8 +679,6 @@ HWTEST_F(RenderListTest, RenderListItemExtentTest002, TestSize.Level1)
  * @tc.name: RenderListItemExtentTest003
  * @tc.desc: Verify List PerformLayout can calculate children with row direction.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UC
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListItemExtentTest003, TestSize.Level1)
 {
@@ -761,8 +731,6 @@ HWTEST_F(RenderListTest, RenderListItemExtentTest003, TestSize.Level1)
  * @tc.name: RenderListItemExtentTest004
  * @tc.desc: Verify List PerformLayout can calculate children with row direction.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UC
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListItemExtentTest004, TestSize.Level1)
 {
@@ -815,8 +783,6 @@ HWTEST_F(RenderListTest, RenderListItemExtentTest004, TestSize.Level1)
  * @tc.name: ListInteractionTest001
  * @tc.desc: Verify list interaction effect when item clicked on phone.
  * @tc.type: FUNC
- * @tc.require: AR000DQ4FT
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderListTest, ListInteractionTest001, TestSize.Level1)
 {
@@ -872,8 +838,6 @@ HWTEST_F(RenderListTest, ListInteractionTest001, TestSize.Level1)
  * @tc.name: ListInteractionTest002
  * @tc.desc: Verify list interaction effect when on TV.
  * @tc.type: FUNC
- * @tc.require: AR000DQ4FU
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderListTest, ListInteractionTest002, TestSize.Level1)
 {
@@ -924,8 +888,6 @@ HWTEST_F(RenderListTest, ListInteractionTest002, TestSize.Level1)
  * @tc.name: ListInteractionTest003
  * @tc.desc: Verify list interaction effect when on watch.
  * @tc.type: FUNC
- * @tc.require: AR000DQ4FV
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderListTest, ListInteractionTest003, TestSize.Level1)
 {
@@ -976,8 +938,6 @@ HWTEST_F(RenderListTest, ListInteractionTest003, TestSize.Level1)
  * @tc.name: ListItemFocusTest001
  * @tc.desc: Verify list item effect when focus switch.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1T7
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderListTest, ListItemFocusTest001, TestSize.Level1)
 {
@@ -1037,8 +997,6 @@ HWTEST_F(RenderListTest, ListItemFocusTest001, TestSize.Level1)
  * @tc.name: ListItemFocusTest002
  * @tc.desc: Verify list item effect when focus switch.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1T8
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderListTest, ListItemFocusTest002, TestSize.Level1)
 {
@@ -1099,8 +1057,6 @@ HWTEST_F(RenderListTest, ListItemFocusTest002, TestSize.Level1)
  * @tc.name: ListItemFocusTest003
  * @tc.desc: Verify list item effect when item clicked.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1T6
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderListTest, ListItemFocusTest003, TestSize.Level1)
 {
@@ -1154,8 +1110,6 @@ HWTEST_F(RenderListTest, ListItemFocusTest003, TestSize.Level1)
  * @tc.name: RenderListFocusMoveTest001
  * @tc.desc: Verify List can move focus when single column and Direction::ROW.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UC
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListFocusMoveTest001, TestSize.Level1)
 {
@@ -1215,8 +1169,6 @@ HWTEST_F(RenderListTest, RenderListFocusMoveTest001, TestSize.Level1)
  * @tc.name: RenderListFocusMoveTest002
  * @tc.desc: Verify List can move focus when single column and Direction::ROW and RTL.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UC
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListFocusMoveTest002, TestSize.Level1)
 {
@@ -1276,8 +1228,6 @@ HWTEST_F(RenderListTest, RenderListFocusMoveTest002, TestSize.Level1)
  * @tc.name: RenderListFocusMoveTest003
  * @tc.desc: Verify List can move focus when single column and Direction::COLUMN.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UC
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListFocusMoveTest003, TestSize.Level1)
 {
@@ -1335,8 +1285,6 @@ HWTEST_F(RenderListTest, RenderListFocusMoveTest003, TestSize.Level1)
  * @tc.name: RenderListFocusMoveTest004
  * @tc.desc: Verify List can move focus when multi columns and Direction::ROW.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UC
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListFocusMoveTest004, TestSize.Level1)
 {
@@ -1399,8 +1347,6 @@ HWTEST_F(RenderListTest, RenderListFocusMoveTest004, TestSize.Level1)
  * @tc.name: RenderListFocusMoveTest005
  * @tc.desc: Verify List can move focus when multi columns and Direction::ROW and RTL.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UC
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListFocusMoveTest005, TestSize.Level1)
 {
@@ -1465,8 +1411,6 @@ HWTEST_F(RenderListTest, RenderListFocusMoveTest005, TestSize.Level1)
  * @tc.name: RenderListFocusMoveTest006
  * @tc.desc: Verify List can move focus when multi columns and Direction::COLUMN.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UC
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListFocusMoveTest006, TestSize.Level1)
 {
@@ -1529,8 +1473,6 @@ HWTEST_F(RenderListTest, RenderListFocusMoveTest006, TestSize.Level1)
  * @tc.name: RenderListFocusMoveTest007
  * @tc.desc: Verify List can move focus when multi columns and Direction::COLUMN and RTL.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1UC
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderListTest, RenderListFocusMoveTest007, TestSize.Level1)
 {
@@ -1595,8 +1537,6 @@ HWTEST_F(RenderListTest, RenderListFocusMoveTest007, TestSize.Level1)
  * @tc.name: AceListExpansion001
  * @tc.desc: Verify List can create groupItem without second Level item.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TB
- * @tc.author: chenlien
  */
 HWTEST_F(RenderListTest, AceListExpansion001, TestSize.Level1)
 {
@@ -1644,8 +1584,6 @@ HWTEST_F(RenderListTest, AceListExpansion001, TestSize.Level1)
  * @tc.name: AceListExpansion002
  * @tc.desc: Verify List can create groupItem with second Level item.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TC
- * @tc.author: chenlien
  */
 HWTEST_F(RenderListTest, AceListExpansion002, TestSize.Level1)
 {
@@ -1694,8 +1632,6 @@ HWTEST_F(RenderListTest, AceListExpansion002, TestSize.Level1)
  * @tc.name: AceListExpansion003
  * @tc.desc: Verify List can create groupItem with multiple second Level item and not specify primary.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TC
- * @tc.author: chenlien
  */
 HWTEST_F(RenderListTest, AceListExpansion003, TestSize.Level1)
 {
@@ -1744,8 +1680,6 @@ HWTEST_F(RenderListTest, AceListExpansion003, TestSize.Level1)
  * @tc.name: AceListExpansion006
  * @tc.desc: Verify itemGroup click event.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TD
- * @tc.author: chenlien
  */
 HWTEST_F(RenderListTest, AceListExpansion006, TestSize.Level1)
 {
@@ -1815,8 +1749,6 @@ HWTEST_F(RenderListTest, AceListExpansion006, TestSize.Level1)
  * @tc.name: AceListExpansion007
  * @tc.desc: Verify itemGroup coollapse event.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TD
- * @tc.author: chenlien
  */
 HWTEST_F(RenderListTest, AceListExpansion007, TestSize.Level1)
 {
@@ -1886,8 +1818,6 @@ HWTEST_F(RenderListTest, AceListExpansion007, TestSize.Level1)
  * @tc.name: AceListExpansion008
  * @tc.desc: Verify itemGroup expand event.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TD
- * @tc.author: chenlien
  */
 HWTEST_F(RenderListTest, AceListExpansion008, TestSize.Level1)
 {
@@ -1957,8 +1887,6 @@ HWTEST_F(RenderListTest, AceListExpansion008, TestSize.Level1)
  * @tc.name: AceListExpansion010
  * @tc.desc: Verify List can create groupItem with multiple second Level item and not specify primary.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TH
- * @tc.author: chenlien
  */
 HWTEST_F(RenderListTest, AceListExpansion010, TestSize.Level1)
 {
@@ -2006,8 +1934,6 @@ HWTEST_F(RenderListTest, AceListExpansion010, TestSize.Level1)
  * @tc.name: ListDividerTest001
  * @tc.desc: Verify list divider.
  * @tc.type: FUNC
- * @tc.require: AR000DQ4FT
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderListTest, ListDividerTest001, TestSize.Level1)
 {
@@ -2055,8 +1981,6 @@ HWTEST_F(RenderListTest, ListDividerTest001, TestSize.Level1)
  * @tc.name: ListDividerTest002
  * @tc.desc: Verify list divider.
  * @tc.type: FUNC
- * @tc.require: AR000DQ4FT
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderListTest, ListDividerTest002, TestSize.Level1)
 {
@@ -2108,8 +2032,6 @@ HWTEST_F(RenderListTest, ListDividerTest002, TestSize.Level1)
  * @tc.name: AceListScrollBar001
  * @tc.desc: Verify List can create scrollBar.
  * @tc.type: FUNC
- * @tc.require:AR000F3CBO
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderListTest, AceListScrollBar001, TestSize.Level1)
 {
@@ -2176,8 +2098,6 @@ HWTEST_F(RenderListTest, AceListScrollBar001, TestSize.Level1)
  * @tc.name: AceListScrollBar002
  * @tc.desc: Verify List can create scrollBar.
  * @tc.type: FUNC
- * @tc.require:AR000F3CBK
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderListTest, AceListScrollBar002, TestSize.Level1)
 {
@@ -2268,8 +2188,6 @@ HWTEST_F(RenderListTest, AceListScrollBar002, TestSize.Level1)
  * @tc.name: AceListScrollBar003
  * @tc.desc: Verify List can create scrollBar.
  * @tc.type: FUNC
- * @tc.require:AR000F3CBL
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderListTest, AceListScrollBar003, TestSize.Level1)
 {
@@ -2352,8 +2270,6 @@ HWTEST_F(RenderListTest, AceListScrollBar003, TestSize.Level1)
  * @tc.name: AceListScrollBar004
  * @tc.desc: Verify List can create scrollBar.
  * @tc.type: FUNC
- * @tc.require:AR000F3CBM
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderListTest, AceListScrollBar004, TestSize.Level1)
 {
@@ -2444,8 +2360,6 @@ HWTEST_F(RenderListTest, AceListScrollBar004, TestSize.Level1)
  * @tc.name: AceListScrollBar005
  * @tc.desc: Verify the scrollBar param.
  * @tc.type: FUNC
- * @tc.require:AR000F3CBN
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderListTest, AceListScrollBar005, TestSize.Level1)
 {
@@ -2513,8 +2427,6 @@ HWTEST_F(RenderListTest, AceListScrollBar005, TestSize.Level1)
  * @tc.name: AceListScrollBar006
  * @tc.desc: Verify the scrollBar param.
  * @tc.type: FUNC
- * @tc.require:AR000F3CBK
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderListTest, AceListScrollBar006, TestSize.Level1)
 {
@@ -2580,8 +2492,6 @@ HWTEST_F(RenderListTest, AceListScrollBar006, TestSize.Level1)
  * @tc.name: AceListScrollBar007
  * @tc.desc: Verify List can create scrollBar.
  * @tc.type: FUNC
- * @tc.require:AR000F3CBL
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderListTest, AceListScrollBar007, TestSize.Level1)
 {
@@ -2662,8 +2572,6 @@ HWTEST_F(RenderListTest, AceListScrollBar007, TestSize.Level1)
  * @tc.name: AceListScrollBar008
  * @tc.desc: Verify the scrollBar param.
  * @tc.type: FUNC
- * @tc.require:AR000F3CBM
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderListTest, AceListScrollBar008, TestSize.Level1)
 {
@@ -2737,8 +2645,6 @@ HWTEST_F(RenderListTest, AceListScrollBar008, TestSize.Level1)
  * @tc.name: AceListScrollBar009
  * @tc.desc: Verify the scrollBar param.
  * @tc.type: FUNC
- * @tc.require:AR000F3L35
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderListTest, AceListScrollBar009, TestSize.Level1)
 {
@@ -2761,8 +2667,6 @@ HWTEST_F(RenderListTest, AceListScrollBar009, TestSize.Level1)
  * @tc.name: AceListScrollBar010
  * @tc.desc: Verify List can create scrollBar.
  * @tc.type: FUNC
- * @tc.require:AR000F3L36
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderListTest, AceListScrollBar010, TestSize.Level1)
 {
@@ -2788,8 +2692,6 @@ HWTEST_F(RenderListTest, AceListScrollBar010, TestSize.Level1)
  * @tc.name: AceListScrollBar011
  * @tc.desc: Verify List can create scrollBar.
  * @tc.type: FUNC
- * @tc.require:AR000F3L37
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderListTest, AceListScrollBar011, TestSize.Level1)
 {
@@ -2881,8 +2783,6 @@ HWTEST_F(RenderListTest, AceListScrollBar011, TestSize.Level1)
  * @tc.name: AceListScrollBar012
  * @tc.desc: Verify List can create scrollBar.
  * @tc.type: FUNC
- * @tc.require:AR000F3L37
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderListTest, AceListScrollBar012, TestSize.Level1)
 {
@@ -2958,8 +2858,6 @@ HWTEST_F(RenderListTest, AceListScrollBar012, TestSize.Level1)
  * @tc.name: RenderListItemCardTransitionTest001
  * @tc.desc: Verify that the list item can get correct RRect.
  * @tc.type: FUNC
- * @tc.require: AR000F3CA8
- * @tc.author: chenlien
  */
 HWTEST_F(RenderListTest, RenderListItemCardTransitionTest001, TestSize.Level1)
 {

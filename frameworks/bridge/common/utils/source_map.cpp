@@ -88,7 +88,7 @@ std::string RevSourceMap::GetOriginalNames(const std::string& sourceCode, uint32
             jsCode.replace(found, names_[i].length(), names_[i + 1]);
             if (static_cast<uint32_t>(found) < errorPos) {
                 // sum the errorPos differences to adjust position of ^
-                posDiff += names_[i + 1].length() - names_[i].length();
+                posDiff += static_cast<int32_t>(names_[i + 1].length()) - static_cast<int32_t>(names_[i].length());
             }
             // In case there are other variable names not replaced.
             // example:var e = process.a.b + _ohos_process_1.a.b;
@@ -102,8 +102,12 @@ std::string RevSourceMap::GetOriginalNames(const std::string& sourceCode, uint32
     }
     // adjust position of ^ in dump file
     if (posDiff < 0) {
-        auto flagPos = lineBreakPos + errorPos;
-        if (flagPos < jsCode.length() && jsCode[flagPos] == '^' && flagPos + posDiff - 1 > 0) {
+        int32_t flagPos = static_cast<int32_t>(lineBreakPos) + static_cast<int32_t>(errorPos);
+        if (lineBreakPos > 0 && errorPos > 0 && flagPos < 0) {
+            LOGW("Add overflow of sourceCode.");
+            return jsCode;
+        }
+        if (flagPos < static_cast<int32_t>(jsCode.length()) && jsCode[flagPos] == '^' && flagPos + posDiff - 1 > 0) {
             jsCode.erase(flagPos + posDiff - 1, -posDiff);
         }
     } else if (posDiff > 0) {

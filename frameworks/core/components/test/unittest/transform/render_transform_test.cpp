@@ -88,8 +88,6 @@ void RenderTransformTest::TearDown() {}
  * @tc.desc: Verify PerformLayout can calculate transform properties with a child where tansfrom origin set in PX
  * and transform origin set to (25,25).
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderTransformTest, RenderTransformTest001, TestSize.Level1)
 {
@@ -132,8 +130,6 @@ HWTEST_F(RenderTransformTest, RenderTransformTest001, TestSize.Level1)
  * @tc.name: RenderTransformTest002
  * @tc.desc: Verify PerformLayout can calculate transform properties with a child where tansform origin is default
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderTransformTest, RenderTransformTest002, TestSize.Level1)
 {
@@ -177,8 +173,6 @@ HWTEST_F(RenderTransformTest, RenderTransformTest002, TestSize.Level1)
  * @tc.name: RenderTransformTest003
  * @tc.desc: Verify PerformLayout can calculate transform properties with a child where origin is set by percent
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderTransformTest, RenderTransformTest003, TestSize.Level1)
 {
@@ -224,8 +218,6 @@ HWTEST_F(RenderTransformTest, RenderTransformTest003, TestSize.Level1)
  * @tc.desc: Verify PerformLayout can calculate transform properties with a child where transform origin is set by px
  * and percent.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderTransformTest, RenderTransformTest004, TestSize.Level1)
 {
@@ -271,8 +263,6 @@ HWTEST_F(RenderTransformTest, RenderTransformTest004, TestSize.Level1)
  * @tc.desc: Verify Multi Rotate Effect can overlay to Matrix by transform Component.
  * and percent.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderTransformTest, RenderTransformTest005, TestSize.Level1)
 {
@@ -320,8 +310,6 @@ HWTEST_F(RenderTransformTest, RenderTransformTest005, TestSize.Level1)
  * @tc.desc: Verify Multi Scale Effect can overlay to Matrix by transform Component.
  * and percent.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderTransformTest, RenderTransformTest006, TestSize.Level1)
 {
@@ -364,8 +352,6 @@ HWTEST_F(RenderTransformTest, RenderTransformTest006, TestSize.Level1)
  * @tc.desc: Verify Multi Translate Effect can overlay to Matrix by transform Component.
  * and percent.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderTransformTest, RenderTransformTest007, TestSize.Level1)
 {
@@ -408,8 +394,6 @@ HWTEST_F(RenderTransformTest, RenderTransformTest007, TestSize.Level1)
  * @tc.desc: Verify Rotate/Scale/Translate Effect can overlay to Matrix by transform Component.
  * and percent.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderTransformTest, RenderTransformTest008, TestSize.Level1)
 {
@@ -469,8 +453,6 @@ HWTEST_F(RenderTransformTest, RenderTransformTest008, TestSize.Level1)
  * @tc.desc: Verify Multi Rotate Effect can overlay to Matrix by render transform.
  * and percent.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderTransformTest, RenderTransformTest009, TestSize.Level1)
 {
@@ -518,8 +500,6 @@ HWTEST_F(RenderTransformTest, RenderTransformTest009, TestSize.Level1)
  * @tc.desc: Verify Multi Scale Effect can overlay to Matrix by render transform.
  * and percent.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderTransformTest, RenderTransformTest010, TestSize.Level1)
 {
@@ -562,8 +542,6 @@ HWTEST_F(RenderTransformTest, RenderTransformTest010, TestSize.Level1)
  * @tc.desc: Verify Multi Translate Effect can overlay to Matrix by render transform.
  * and percent.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderTransformTest, RenderTransformTest011, TestSize.Level1)
 {
@@ -606,8 +584,6 @@ HWTEST_F(RenderTransformTest, RenderTransformTest011, TestSize.Level1)
  * @tc.desc: Verify Rotate/Scale/Translate Effect can overlay to Matrix by render transform.
  * and percent.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUJ
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderTransformTest, RenderTransformTest012, TestSize.Level1)
 {

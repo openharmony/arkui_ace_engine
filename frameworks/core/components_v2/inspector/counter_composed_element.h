@@ -26,6 +26,8 @@ public:
     explicit CounterComposedElement(const ComposeId& id) : InspectorComposedElement(id) {}
     ~CounterComposedElement() override = default;
 
+    std::string GetWidth() const override;
+    std::string GetHeight() const override;
     void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
     void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
     void DeleteChildWithSlot(int32_t slot) override;

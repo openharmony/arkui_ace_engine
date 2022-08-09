@@ -17,8 +17,35 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/counter/counter_element.h"
+#include "core/components/counter/render_counter.h"
 
 namespace OHOS::Ace::V2 {
+std::string CounterComposedElement::GetWidth() const
+{
+    auto renderCounter = GetContentRender<RenderCounter>(CounterElement::TypeId());
+    if (!renderCounter) {
+        return "";
+    }
+    auto component = AceType::DynamicCast<CounterComponent>(renderCounter->GetComponent());
+    if (!component) {
+        return "";
+    }
+    return component->GetWidth().ToString();
+}
+
+std::string CounterComposedElement::GetHeight() const
+{
+    auto renderCounter = GetContentRender<RenderCounter>(CounterElement::TypeId());
+    if (!renderCounter) {
+        return "";
+    }
+    auto component = AceType::DynamicCast<CounterComponent>(renderCounter->GetComponent());
+    if (!component) {
+        return "";
+    }
+    return component->GetHeight().ToString();
+}
+
 void CounterComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
 {
     auto counterElement = GetContentElement<CounterElement>(CounterElement::TypeId());

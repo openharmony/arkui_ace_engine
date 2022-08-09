@@ -376,7 +376,7 @@ void AceAbility::OnStart(const Want& want)
         };
 #endif
         // set view
-        Platform::AceContainer::SetView(flutterAceView, density_, 0, 0, window->GetWindowId(), callback);
+        Platform::AceContainer::SetView(flutterAceView, density_, 0, 0, window, callback);
     } else {
         Platform::AceContainer::SetViewNew(flutterAceView, density_, 0, 0, window);
     }
@@ -531,14 +531,6 @@ void AceAbility::OnAbilityResult(int requestCode, int resultCode, const OHOS::AA
     LOGI("AceAbility::OnAbilityResult called ");
     AbilityProcess::GetInstance()->OnAbilityResult(this, requestCode, resultCode, resultData);
     LOGI("AceAbility::OnAbilityResult called End");
-}
-
-void AceAbility::OnRequestPermissionsFromUserResult(
-    int requestCode, const std::vector<std::string>& permissions, const std::vector<int>& grantResults)
-{
-    LOGI("AceAbility::OnRequestPermissionsFromUserResult called ");
-    AbilityProcess::GetInstance()->OnRequestPermissionsFromUserResult(this, requestCode, permissions, grantResults);
-    LOGI("AceAbility::OnRequestPermissionsFromUserResult called End");
 }
 
 bool AceAbility::OnStartContinuation()

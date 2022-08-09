@@ -174,6 +174,7 @@ public:
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
     int32_t OnAcquireFormState(const OHOS::AAFwk::Want &want) override;
     void OnCommand(const OHOS::AAFwk::Want &want, int startId) override;
+    bool OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams) override;
     void DumpHeapSnapshot(bool isPrivate) override {}
 
 private:

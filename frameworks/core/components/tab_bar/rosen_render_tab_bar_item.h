@@ -26,7 +26,7 @@ class RosenRenderTabBarItem : public RenderTabBarItem {
 
 public:
     void Paint(RenderContext& context, const Offset& offset) override;
-    void RenderTabBarItemBoundary(SkCanvas* canvas, const Offset& offset,
+    void RenderTabBarItemBoundary(RenderContext& context, const Offset& offset,
         double width, double height);
 private:
 };

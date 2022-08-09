@@ -508,13 +508,7 @@ void V8DeclarativeEngineInstance::InitJSContext()
     InitJsNativeModuleObject(localContext);
     InitJsExportsUtilObject(localContext);
 
-    bool partialUpdate = false;
-    auto container = Container::Current();
-    if (container) {
-        auto pipelineContext = container->GetPipelineContext();
-        partialUpdate = pipelineContext && pipelineContext->UsePartialUpdate();
-    }
-    if (partialUpdate) {
+    if (Container::IsCurrentUsePartialUpdate()) {
         LOGE("Loading State Mgmt JS lib for Partial Update");
         InitAceModules(_binary_stateMgmtPU_js_start, _binary_stateMgmtPU_js_end, isolate_.Get());
     } else {
@@ -563,7 +557,7 @@ void V8DeclarativeEngineInstance::InitJsConsoleObject(v8::Local<v8::Context>& lo
     consoleObj
         ->Set(localContext, v8::String::NewFromUtf8(isolate, "log").ToLocalChecked(),
             v8::Function::New(
-                localContext, AppLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::DEBUG)))
+                localContext, AppLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::INFO)))
                 .ToLocalChecked())
         .ToChecked();
     consoleObj
@@ -597,7 +591,7 @@ void V8DeclarativeEngineInstance::InitJsConsoleObject(v8::Local<v8::Context>& lo
     aceConsoleObj
         ->Set(localContext, v8::String::NewFromUtf8(isolate, "log").ToLocalChecked(),
             v8::Function::New(
-                localContext, JsLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::DEBUG)))
+                localContext, JsLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::INFO)))
                 .ToLocalChecked())
         .ToChecked();
     aceConsoleObj

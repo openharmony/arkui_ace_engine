@@ -202,8 +202,6 @@ void RenderBoxPercentTest::TearDown()
  * @tc.name: RenderBoxHandlePercentTest001
  * @tc.desc: RenderBox could handle width and height in percent.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxHandlePercentTest001, TestSize.Level1)
 {
@@ -223,8 +221,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxHandlePercentTest001, TestSize.Level1)
  * @tc.name: RenderBoxHandlePercentTest002
  * @tc.desc: RenderBox could handle width and height in negative percent.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxHandlePercentTest002, TestSize.Level1)
 {
@@ -244,8 +240,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxHandlePercentTest002, TestSize.Level1)
  * @tc.name: RenderBoxHandlePercentTest003
  * @tc.desc: RenderBox could handle width and height in percent over 100%.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxHandlePercentTest003, TestSize.Level1)
 {
@@ -265,8 +259,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxHandlePercentTest003, TestSize.Level1)
  * @tc.name: RenderBoxHandlePercentTest004
  * @tc.desc: RenderBox could handle width and height in percent, parent size is INFINITE.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxHandlePercentTest004, TestSize.Level1)
 {
@@ -286,8 +278,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxHandlePercentTest004, TestSize.Level1)
  * @tc.name: RenderBoxPercentBoxInWrap001
  * @tc.desc: RenderBox could handle width and height in percent, parent is wrap, horizontal direction.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInWrap001, TestSize.Level1)
 {
@@ -298,8 +288,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInWrap001, TestSize.Level1)
  * @tc.name: RenderBoxPercentBoxInWrap002
  * @tc.desc: RenderBox could handle width and height in percent, parent is wrap, vertical direction.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInWrap002, TestSize.Level1)
 {
@@ -311,8 +299,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInWrap002, TestSize.Level1)
  * @tc.desc: RenderBox could handle width and height in percent, parent is flexItem(flexGrow=0, flexShrink=0,
  *           flexBasis=0).
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInFLexItem001, TestSize.Level1)
 {
@@ -324,8 +310,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInFLexItem001, TestSize.Level1
  * @tc.desc: RenderBox could handle width and height in percent, parent is flexItem(flexGrow=1, flexShrink=0,
  *           flexBasis=0).
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInFLexItem002, TestSize.Level1)
 {
@@ -337,8 +321,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInFLexItem002, TestSize.Level1
  * @tc.desc: RenderBox could handle width and height in percent, parent is flexItem(flexGrow=0, flexShrink=1,
  *           flexBasis=0).
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInFLexItem003, TestSize.Level1)
 {
@@ -350,8 +332,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInFLexItem003, TestSize.Level1
  * @tc.desc: RenderBox could handle width and height in percent, parent is flexItem(flexGrow=1, flexShrink=0,
  *           flexBasis=10).
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInFLexItem004, TestSize.Level1)
 {
@@ -363,8 +343,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInFLexItem004, TestSize.Level1
  * @tc.desc: RenderBox could handle width and height in percent, parent is flexItem(flexGrow=0, flexShrink=1,
  *           flexBasis=100).
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInFLexItem005, TestSize.Level1)
 {
@@ -375,8 +353,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInFLexItem005, TestSize.Level1
  * @tc.name: RenderBoxPercentBoxInGridLayout001
  * @tc.desc: RenderBox could handle width and height in percent, parent is GridLayout.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInGridLayout001, TestSize.Level1)
 {
@@ -407,8 +383,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInGridLayout001, TestSize.Leve
  * @tc.name: RenderBoxPercentBoxInScroll001
  * @tc.desc: RenderBox could handle width and height in percent, parent is scroll.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInScroll001, TestSize.Level1)
 {
@@ -434,8 +408,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInScroll001, TestSize.Level1)
  * @tc.name: RenderBoxPercentBoxInList001
  * @tc.desc: RenderBox could handle width and height in percent, parent is list.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInList001, TestSize.Level1)
 {
@@ -468,8 +440,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInList001, TestSize.Level1)
  * @tc.name: RenderBoxPercentBoxInListItem001
  * @tc.desc: RenderBox could handle width and height in percent, parent is listItem.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInListItem001, TestSize.Level1)
 {
@@ -495,8 +465,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInListItem001, TestSize.Level1
  * @tc.name: RenderBoxPercentBoxInStack001
  * @tc.desc: RenderBox could handle width and height in percent, parent is stack.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInStack001, TestSize.Level1)
 {
@@ -522,8 +490,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInStack001, TestSize.Level1)
  * @tc.name: RenderBoxPercentBoxInSwiper001
  * @tc.desc: RenderBox could handle width and height in percent, parent is swiper.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInSwiper001, TestSize.Level1)
 {
@@ -550,8 +516,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInSwiper001, TestSize.Level1)
  * @tc.name: RenderBoxPercentBoxInTabBar001
  * @tc.desc: RenderBox could handle width and height in percent, parent is tabBar.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInTabBar001, TestSize.Level1)
 {
@@ -582,8 +546,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInTabBar001, TestSize.Level1)
  * @tc.name: RenderBoxPercentBoxInTabContent001
  * @tc.desc: RenderBox could handle width and height in percent, parent is tab content.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInTabContent001, TestSize.Level1)
 {
@@ -614,8 +576,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInTabContent001, TestSize.Leve
  * @tc.name: RenderBoxPercentBoxInBubble001
  * @tc.desc: RenderBox could handle width and height in percent, parent is bubble (popup).
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInBubble001, TestSize.Level1)
 {
@@ -642,8 +602,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentBoxInBubble001, TestSize.Level1)
  * @tc.name: RenderBoxPercentSwiperIndicator001
  * @tc.desc: Swiper indicator could handle position in percent, left = 50%, top = 50%.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentSwiperIndicator001, TestSize.Level1)
 {
@@ -667,8 +625,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentSwiperIndicator001, TestSize.Leve
  * @tc.name: RenderBoxPercentSwiperIndicator002
  * @tc.desc: Swiper indicator could handle position in percent, left = -50%, top = -50%.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentSwiperIndicator002, TestSize.Level1)
 {
@@ -692,8 +648,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentSwiperIndicator002, TestSize.Leve
  * @tc.name: RenderBoxPercentSwiperIndicator003
  * @tc.desc: Swiper indicator could handle position in percent, left = 100%, top = 100%.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentSwiperIndicator003, TestSize.Level1)
 {
@@ -724,8 +678,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentSwiperIndicator003, TestSize.Leve
  * @tc.name: RenderBoxPercentSwiperIndicator004
  * @tc.desc: Swiper indicator could handle position in percent, right = 50%, bottom = 50%.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentSwiperIndicator004, TestSize.Level1)
 {
@@ -756,8 +708,6 @@ HWTEST_F(RenderBoxPercentTest, RenderBoxPercentSwiperIndicator004, TestSize.Leve
  * @tc.name: RenderBoxPercentSwiperIndicator005
  * @tc.desc: Swiper indicator could handle position in percent, left, top, right, bottom = 50%.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1PV
- * @tc.author: liruokun
  */
 HWTEST_F(RenderBoxPercentTest, RenderBoxPercentSwiperIndicator005, TestSize.Level1)
 {

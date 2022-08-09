@@ -16,9 +16,12 @@
 #include "core/components/focusable/focusable_element.h"
 
 #include "core/components/focusable/focusable_component.h"
+#include "core/components/touch_listener/touch_listener_component.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
+
+constexpr int32_t TOUCH_ELEMENT_UPPER_LEVEL = 5;
 
 void FocusableElement::Update()
 {
@@ -59,6 +62,16 @@ void FocusableElement::Update()
     onFocus_ = focusableComponent->GetOnFocus();
     onBlur_ = focusableComponent->GetOnBlur();
     tabIndex_ = focusableComponent->GetTabIndex();
+    inspectorKey_ = focusableComponent->GetInspectorKey();
+    isFocusOnTouch_ = focusableComponent->IsFocusOnTouch();
+    isDefaultFocus_ = focusableComponent->IsDefaultFocus();
+    isDefaultGroupFocus_ = focusableComponent->IsDefaultGroupFocus();
+
+    if (isFocusOnTouch_) {
+        if (!SetFocusOnTouchCallback()) {
+            LOGW("Set focus on touch callback failed");
+        }
+    }
 
     if (!onClickId.IsEmpty()) {
         auto context = context_.Upgrade();
@@ -113,6 +126,49 @@ void FocusableElement::Update()
             }
         });
     }
+}
+
+bool FocusableElement::SetFocusOnTouchCallback()
+{
+    int32_t loop = 0;
+    auto parent = GetElementParent().Upgrade();
+    while (parent) {
+        auto element = AceType::DynamicCast<TouchListenerElement>(parent);
+        if (element) {
+            auto render = element->GetRenderNode();
+            if (!render) {
+                parent = parent->GetElementParent().Upgrade();
+                ++loop;
+                continue;
+            }
+            auto renderTouch = AceType::DynamicCast<RenderTouchListener>(render);
+            if (!renderTouch) {
+                parent = parent->GetElementParent().Upgrade();
+                ++loop;
+                continue;
+            }
+            renderTouch->SetOnTouchFocusEventCallback(
+                [wp = AceType::WeakClaim(this), wcontext = GetContext()]() {
+                    auto focusNode = wp.Upgrade();
+                    auto context = wcontext.Upgrade();
+                    if (!focusNode) {
+                        return;
+                    }
+                    if (!focusNode->IsFocusableWholePath() && context) {
+                        context->RootLostFocus();
+                    } else {
+                        focusNode->RequestFocusImmediately();
+                    }
+            });
+            return true;
+        }
+        parent = parent->GetElementParent().Upgrade();
+        ++loop;
+        if (loop == TOUCH_ELEMENT_UPPER_LEVEL) {
+            break;
+        }
+    }
+    return false;
 }
 
 bool FocusableElement::IsFocusable() const

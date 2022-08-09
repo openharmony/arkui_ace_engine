@@ -89,7 +89,21 @@ void FlutterRenderBubble::PaintBubble(RenderContext& context)
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(backgroundColor_.GetValue());
-        if (!useCustom_) {
+    if (!useCustom_) {
+        PaintNonCustomPopup(skCanvas, paint);
+        return;
+    }
+    if (enableArrow_ && showCustomArrow_) {
+        PaintBubbleWithArrow(skCanvas, paint);
+    } else {
+        PaintDefaultBubble(skCanvas, paint);
+    }
+}
+
+void FlutterRenderBubble::PaintNonCustomPopup(SkCanvas* skCanvas, const SkPaint& paint)
+{
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
         switch (arrowPlacement_) {
             case Placement::TOP:
                 showTopArrow_ ? PaintTopBubble(skCanvas, paint) : PaintDefaultBubble(skCanvas, paint);
@@ -100,14 +114,17 @@ void FlutterRenderBubble::PaintBubble(RenderContext& context)
             default:
                 break;
         }
-
         return;
     }
-
-    if (enableArrow_ && showCustomArrow_) {
-        PaintBubbleWithArrow(skCanvas, paint);
-    } else {
-        PaintDefaultBubble(skCanvas, paint);
+    switch (arrowPlacement_) {
+        case Placement::TOP:
+            showTopArrow_ ? PaintTopBubbleInJs(skCanvas, paint) : PaintDefaultBubble(skCanvas, paint);
+            break;
+        case Placement::BOTTOM:
+            showBottomArrow_ ? PaintBottomBubbleInJs(skCanvas, paint) : PaintDefaultBubble(skCanvas, paint);
+            break;
+        default:
+            break;
     }
 }
 
@@ -116,14 +133,13 @@ void FlutterRenderBubble::PaintBubbleWithArrow(SkCanvas* skCanvas, const SkPaint
     if (skCanvas == nullptr) {
         return;
     }
-
     BuildCompletePath(path_);
     FlutterDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
     skCanvas->drawPath(path_, paint);
     skCanvas->clipPath(path_, SkClipOp::kIntersect);
 }
 
-void FlutterRenderBubble::PaintTopBubble(SkCanvas* skCanvas, const SkPaint& paint)
+void FlutterRenderBubble::PaintTopBubbleInJs(SkCanvas* skCanvas, const SkPaint& paint)
 {
     if (skCanvas == nullptr) {
         return;
@@ -185,7 +201,7 @@ void FlutterRenderBubble::PaintTopBubble(SkCanvas* skCanvas, const SkPaint& pain
     skCanvas->clipPath(path_, SkClipOp::kIntersect);
 }
 
-void FlutterRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, const SkPaint& paint)
+void FlutterRenderBubble::PaintBottomBubbleInJs(SkCanvas* skCanvas, const SkPaint& paint)
 {
     if (skCanvas == nullptr) {
         return;
@@ -240,6 +256,120 @@ void FlutterRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, const SkPaint& p
     path_.quadTo(arrowPosition_.GetX() - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
         arrowPosition_.GetY() - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPosition_.GetX() + arrowOffset,
         arrowPosition_.GetY());
+    path_.close();
+    FlutterDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
+    skCanvas->drawPath(path_, paint);
+    skCanvas->clipPath(path_, SkClipOp::kIntersect);
+}
+
+void FlutterRenderBubble::PaintTopBubble(SkCanvas* skCanvas, const SkPaint& paint)
+{
+    if (skCanvas == nullptr) {
+        return;
+    }
+    double childHeight = childSize_.Height();
+    double childWidth = childSize_.Width();
+    double childOffsetX = childOffset_.GetX();
+    double childOffsetY = childOffset_.GetY();
+    double arrowPositionX = arrowPosition_.GetX();
+    double arrowPositionY = arrowPosition_.GetY();
+    double arrowOffset = GetArrowOffset(Placement::TOP);
+    path_.reset();
+    path_.moveTo(arrowPositionX + arrowOffset, arrowPositionY);
+    path_.quadTo(arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
+        arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
+    path_.quadTo(arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
+        arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
+    path_.lineTo(
+        childOffsetX + childWidth - NormalizeToPx(border_.BottomRightRadius().GetX()), childOffsetY + childHeight);
+    path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        childOffsetX + childWidth,
+        childOffsetY + childHeight - NormalizeToPx(border_.BottomRightRadius().GetY()));
+    path_.lineTo(childOffsetX + childWidth, childOffsetY + NormalizeToPx(border_.TopRightRadius().GetY()));
+    path_.arcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
+        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        childOffsetX + childWidth - NormalizeToPx(border_.TopRightRadius().GetX()),
+        childOffsetY);
+    path_.lineTo(childOffsetX + NormalizeToPx(border_.TopLeftRadius().GetX()), childOffsetY);
+    path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()), NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
+        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        childOffsetX,
+        childOffsetY + NormalizeToPx(border_.TopLeftRadius().GetY()));
+    path_.lineTo(childOffsetX, childOffsetY + childHeight - NormalizeToPx(border_.BottomLeftRadius().GetY()));
+    path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCCW_Direction,
+        childOffsetX + NormalizeToPx(border_.BottomLeftRadius().GetX()),
+        childOffsetY + childHeight);
+    path_.lineTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
+    path_.quadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
+        arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
+    path_.quadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPositionX + arrowOffset,
+        arrowPositionY);
+    path_.close();
+    FlutterDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
+    skCanvas->drawPath(path_, paint);
+    skCanvas->clipPath(path_, SkClipOp::kIntersect);
+}
+
+void FlutterRenderBubble::PaintBottomBubble(SkCanvas* skCanvas, const SkPaint& paint)
+{
+    if (skCanvas == nullptr) {
+        return;
+    }
+    double childHeight = childSize_.Height();
+    double childWidth = childSize_.Width();
+    double childOffsetX = childOffset_.GetX();
+    double childOffsetY = childOffset_.GetY();
+    double arrowPositionX = arrowPosition_.GetX();
+    double arrowPositionY = arrowPosition_.GetY();
+    double arrowOffset = GetArrowOffset(Placement::BOTTOM);
+    path_.reset();
+    path_.moveTo(arrowPositionX + arrowOffset, arrowPositionY);
+    path_.quadTo(arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST),
+        arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
+    path_.quadTo(arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
+        arrowPositionX + NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
+    path_.lineTo(childOffsetX + childWidth - NormalizeToPx(border_.TopRightRadius().GetX()), childOffsetY);
+    path_.arcTo(NormalizeToPx(border_.TopRightRadius().GetX()), NormalizeToPx(border_.TopRightRadius().GetY()), 0.0f,
+        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction, childOffsetX + childWidth,
+        childOffsetY + NormalizeToPx(border_.TopRightRadius().GetY()));
+    path_.lineTo(
+        childOffsetX + childWidth, childOffsetY + childHeight - NormalizeToPx(border_.BottomRightRadius().GetY()));
+    path_.arcTo(NormalizeToPx(border_.BottomRightRadius().GetX()), NormalizeToPx(border_.BottomRightRadius().GetY()),
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction,
+        childOffsetX + childWidth - NormalizeToPx(border_.BottomRightRadius().GetX()),
+        childOffsetY + childHeight);
+    path_.lineTo(childOffsetX + NormalizeToPx(border_.BottomLeftRadius().GetX()), childOffsetY + childHeight);
+    path_.arcTo(NormalizeToPx(border_.BottomLeftRadius().GetX()), NormalizeToPx(border_.BottomLeftRadius().GetY()),
+        0.0f, SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction, childOffsetX,
+        childOffsetY + childHeight - NormalizeToPx(border_.BottomLeftRadius().GetY()));
+    path_.lineTo(childOffsetX, childOffsetY + NormalizeToPx(border_.TopLeftRadius().GetY()));
+    path_.arcTo(NormalizeToPx(border_.TopLeftRadius().GetX()),
+        NormalizeToPx(border_.TopLeftRadius().GetY()), 0.0f,
+        SkPath::ArcSize::kSmall_ArcSize, SkPath::Direction::kCW_Direction,
+        childOffsetX + NormalizeToPx(border_.TopLeftRadius().GetX()), childOffsetY);
+    path_.lineTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FOURTH) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD));
+    path_.quadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_THIRD) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_THIRD),
+        arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_SECOND) + arrowOffset,
+        arrowPositionY + NormalizeToPx(BEZIER_VERTICAL_OFFSET_SECOND));
+    path_.quadTo(arrowPositionX - NormalizeToPx(BEZIER_HORIZON_OFFSET_FIRST) + arrowOffset,
+        arrowPositionY - NormalizeToPx(BEZIER_VERTICAL_OFFSET_FIRST), arrowPositionX + arrowOffset,
+        arrowPositionY);
     path_.close();
     FlutterDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
     skCanvas->drawPath(path_, paint);

@@ -111,6 +111,11 @@ public:
         return Offset(deltaX_ - offset.deltaX_, deltaY_ - offset.deltaY_);
     }
 
+    Offset operator-(const Size& size) const
+    {
+        return Offset(deltaX_ - size.Width(), deltaY_ - size.Height());
+    }
+
     Offset operator*(double value) const
     {
         return Offset(deltaX_ * value, deltaY_ * value);
@@ -167,7 +172,6 @@ private:
     AnimationOption deltaXAnimationOption_;
     AnimationOption deltaYAnimationOption_;
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_OFFSET_H

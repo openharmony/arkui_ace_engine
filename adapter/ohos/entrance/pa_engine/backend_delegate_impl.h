@@ -69,6 +69,7 @@ using VisibilityChangedCallback = std::function<void(const std::map<int64_t, int
 using AcquireStateCallback = std::function<int32_t(const OHOS::AAFwk::Want &want)>;
 using CommandCallback = std::function<void(const OHOS::AAFwk::Want &want, int startId)>;
 using CommandApplicationCallback = std::function<void(const std::string& intent, int startId)>;
+using ShareFormCallback = std::function<bool(int64_t formId, OHOS::AAFwk::WantParams& wntParams)>;
 using DumpHeapSnapshotCallback = std::function<void(bool isPrivate)>;
 
 struct BackendDelegateImplBuilder {
@@ -101,6 +102,7 @@ struct BackendDelegateImplBuilder {
     AcquireStateCallback acquireStateCallback;
     CommandCallback commandCallback;
     CommandApplicationCallback commandApplicationCallback;
+    ShareFormCallback shareFormCallback;
     DumpHeapSnapshotCallback dumpHeapSnapshotCallback;
     BackendType type;
 };
@@ -194,6 +196,7 @@ public:
     void OnCastTemptoNormal(const int64_t formId);
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap);
     int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want);
+    bool OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams);
 
 private:
     void LoadPa(const std::string& url, const OHOS::AAFwk::Want& want);
@@ -237,6 +240,7 @@ private:
     VisibilityChangedCallback visibilityChangedCallback_;
     AcquireStateCallback acquireStateCallback_;
     CommandCallback commandCallback_;
+    ShareFormCallback shareFormCallback_;
     DumpHeapSnapshotCallback dumpHeapSnapshotCallback_;
 
     RefPtr<Framework::ManifestParser> manifestParser_;

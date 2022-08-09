@@ -105,6 +105,15 @@ struct ImageData {
     std::vector<Color> data;
 };
 
+struct TextMetrics {
+    double width;
+    double height;
+    double actualBoundingBoxLeft;
+    double actualBoundingBoxRight;
+    double actualBoundingBoxAscent;
+    double actualBoundingBoxDescent;
+};
+
 enum class ContextType {
     RENDER_2D,
     RENDER_3D,

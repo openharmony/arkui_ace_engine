@@ -22,6 +22,7 @@
 #include "core/accessibility/accessibility_node.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/button/button_component.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/form/form_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/image/image_component.h"
@@ -585,9 +586,15 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     std::string componentNames[] = { "stepperItem", "stepperDisplay", "flexItem", "display", "transform", "touch",
         "pan_gesture", "click_gesture", "focusable", "coverage", "box", "shared_transition", "mouse",
         "stepperScroll" };
+    // In RS extra case, use isFirstNode to determine the top node.
+    bool isFirstNode = true;
     for (auto& name : componentNames) {
         auto iter = wrappingComponentsMap.find(name);
         if (iter != wrappingComponentsMap.end()) {
+            if (isFirstNode) {
+                iter->second->SetIsFirst(isFirstNode);
+                isFirstNode = false;
+            }
             iter->second->OnWrap();
             components.emplace_back(iter->second);
             if (videoComponentV2 && saveComponentEvent) {
@@ -687,7 +694,11 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     }
 
     for (auto&& component : components) {
-        component->SetTouchable(mainComponent->IsTouchable());
+        component->SetTouchable(mainComponent->IsTouchable() && mainComponent->GetHitTestMode() != HitTestMode::NONE);
+    }
+
+    for (auto&& component : components) {
+        component->SetHitTestMode(mainComponent->GetHitTestMode());
     }
 
     for (auto&& component : components) {
@@ -875,9 +886,8 @@ void ViewStackProcessor::SetIsPercentSize(RefPtr<Component>& component)
     }
 }
 
-void ViewStackProcessor::ClaimElementId(RefPtr<Component> component)
+void ViewStackProcessor::ClaimElementId(const RefPtr<Component>& component)
 {
-    ACE_DCHECK((reservedElementId_ != ElementRegister::UndefinedElementId) && "No reserved elmtId, internal error!");
     LOGD("Assigning elmtId %{public}u to new %{public}s .", reservedElementId_, AceType::TypeName(component));
     component->AssignUniqueElementId(reservedElementId_);
     reservedElementId_ = ElementRegister::UndefinedElementId;

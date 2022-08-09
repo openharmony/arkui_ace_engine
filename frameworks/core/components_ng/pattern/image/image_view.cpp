@@ -24,12 +24,12 @@ namespace OHOS::Ace::NG {
 void ImageView::Create(const std::string& src)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    // TODO: Add unique id.
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 0, AceType::MakeRefPtr<ImagePattern>());
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
-    ImageSourceInfo imageSourceInfo(src);
 
+    ImageSourceInfo imageSourceInfo(src);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
 }
 

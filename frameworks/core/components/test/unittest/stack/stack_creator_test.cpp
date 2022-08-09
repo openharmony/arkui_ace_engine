@@ -72,8 +72,6 @@ RefPtr<Component> StackCreatorTest::CreateComponent(const std::string& testJson)
  * @tc.name: StackProperties001
  * @tc.desc: Check stack component with no properties in the json returns default properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN AR000DAQTO AR000DAQTP
- * @tc.author: yangfan
  */
 HWTEST_F(StackCreatorTest, StackProperties001, TestSize.Level1)
 {
@@ -111,8 +109,6 @@ HWTEST_F(StackCreatorTest, StackProperties001, TestSize.Level1)
  * @tc.name: StackProperties002
  * @tc.desc: Check stack component with invalid properties in the json returns default properties
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN AR000DAQTO AR000DAQTP
- * @tc.author: yangfan
  */
 HWTEST_F(StackCreatorTest, StackProperties002, TestSize.Level1)
 {
@@ -149,8 +145,6 @@ HWTEST_F(StackCreatorTest, StackProperties002, TestSize.Level1)
  * @tc.name: StackProperties003
  * @tc.desc: Check stack component with valid properties in the json returns correct properties
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN AR000DAQTO AR000DAQTP
- * @tc.author: yangfan
  */
 HWTEST_F(StackCreatorTest, StackProperties003, TestSize.Level1)
 {
@@ -191,8 +185,6 @@ HWTEST_F(StackCreatorTest, StackProperties003, TestSize.Level1)
  * @tc.name: StackChild001
  * @tc.desc: Verify stack component with single flex child is correct when load the json
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN AR000DAQTO AR000DAQTP
- * @tc.author: yangfan
  */
 HWTEST_F(StackCreatorTest, StackChild001, TestSize.Level1)
 {
@@ -238,8 +230,6 @@ HWTEST_F(StackCreatorTest, StackChild001, TestSize.Level1)
  * @tc.name: StackChild002
  * @tc.desc: Verify stack component with two child is correct when load the json
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN AR000DAQTO AR000DAQTP
- * @tc.author: yangfan
  */
 HWTEST_F(StackCreatorTest, StackChild002, TestSize.Level1)
 {
@@ -297,8 +287,6 @@ HWTEST_F(StackCreatorTest, StackChild002, TestSize.Level1)
  * @tc.name: StackChild003
  * @tc.desc: Verify stack component with no child is correct when load the json
  * @tc.type: FUNC
- * @tc.require: AR000DAQTN AR000DAQTO AR000DAQTP
- * @tc.author: yangfan
  */
 HWTEST_F(StackCreatorTest, StackChild003, TestSize.Level1)
 {

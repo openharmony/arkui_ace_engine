@@ -36,7 +36,7 @@ public:
     {}
     ~ImagePainter() = default;
 
-    void DrawImage(const RefPtr<Canvas>& canvas, const OffsetF& offset);
+    void DrawImage(const RefPtr<Canvas>& canvas, const OffsetF& offset) const;
 
 private:
     RefPtr<CanvasImage> image_;

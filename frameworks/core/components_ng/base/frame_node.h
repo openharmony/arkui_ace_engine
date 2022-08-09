@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 
 #include <list>
+#include <utility>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/memory/ace_type.h"
@@ -30,9 +31,9 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/components_ng/render/render_wrapper.h"
+#include "core/components_ng/render/render_context.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
 namespace OHOS::Ace::NG {
@@ -48,17 +49,19 @@ class ACE_EXPORT FrameNode : public UINode {
     DECLARE_ACE_TYPE(FrameNode, UINode);
 
 public:
-    // create a new child element and mount to element tree.
-    static RefPtr<FrameNode> CreateFrameNodeAndMountToParent(const std::string& tag, int32_t nodeId,
-        const RefPtr<Pattern>& pattern, const RefPtr<FrameNode>& parent, int32_t slot);
-
     // create a new child element with new element tree.
     static RefPtr<FrameNode> CreateFrameNodeWithTree(
         const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, const RefPtr<PipelineContext>& context);
 
+    static RefPtr<FrameNode> GetOrCreateFrameNode(
+        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+
     // create a new element with new pattern.
     static RefPtr<FrameNode> CreateFrameNode(
         const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+
+    // get element with nodeId from node map.
+    static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
     // avoid use creator function, use CreateFrameNode
     FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
@@ -71,11 +74,7 @@ public:
 
     void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
-    // When a component is first created, the node properties are refreshed based on the StateModifyTask.
-    void FlushStateModifyTaskOnCreate(StateModifyTask& stateModifyTask);
-
-    // When a component is rerendered, the node properties are refreshed based on the StateModifyTask.
-    void FlushStateModifyTaskOnRerender(StateModifyTask& stateModifyTask);
+    void FlushUpdateAndMarkDirty() override;
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
@@ -155,7 +154,7 @@ private:
     std::optional<LayoutConstraintF> GetLayoutConstraint() const;
     std::optional<OffsetF> GetParentGlobalOffset() const;
 
-    RefPtr<RenderWrapper> CreateRenderWrapper();
+    RefPtr<PaintWrapper> CreatePaintWrapper();
 
     void MarkNeedSyncRenderTree() override
     {

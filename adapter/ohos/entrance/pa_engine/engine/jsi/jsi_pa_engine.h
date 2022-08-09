@@ -167,6 +167,7 @@ public:
     void OnCastTemptoNormal(const int64_t formId) override;
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
     int32_t OnAcquireFormState(const OHOS::AAFwk::Want &want) override;
+    bool OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams) override;
     void DumpHeapSnapshot(bool isPrivate) override;
 
 private:

@@ -41,10 +41,10 @@ build_component("plugin") {
       "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
       "$ability_runtime_services_path/abilitymgr:abilityms",
       "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-      "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
-      "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
+      "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+      "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//foundation/window/window_manager/wm:libwm",
     ]
 

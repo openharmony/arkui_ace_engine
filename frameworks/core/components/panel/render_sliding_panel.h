@@ -132,6 +132,10 @@ public:
 
     void Dump() override;
 
+    void LiftPanelForVirtualKeyboard(double offsetY);
+
+    void UpdatePanelHeightByCurrentMode();
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -143,7 +147,7 @@ protected:
     PanelType type_ = PanelType::FOLDABLE_BAR;
     bool hasBoxStyle_ = false;
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> onSizeChange_;
-    std::function<void(double)> onHeightChange_;
+    std::function<void(int32_t)> onHeightChange_;
 
 private:
     void InitializeRecognizer();

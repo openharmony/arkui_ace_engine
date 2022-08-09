@@ -69,8 +69,6 @@ public:
  * @tc.name: RenderFlexUpdate001
  * @tc.desc: Verify the Update Interface of RenderFlex does not work for other components
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH AR000DAIH4
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderFlexUpdate001, TestSize.Level1)
 {
@@ -93,8 +91,6 @@ HWTEST_F(RenderRowTest, RenderFlexUpdate001, TestSize.Level1)
  * @tc.name: RenderFlexUpdate002
  * @tc.desc: Verify that RenderFlex works for flex component.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH AR000DAIH4
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderFlexUpdate002, TestSize.Level1)
 {
@@ -122,8 +118,6 @@ HWTEST_F(RenderRowTest, RenderFlexUpdate002, TestSize.Level1)
  * @tc.name: RenderRowLayout001
  * @tc.desc: Verify the row component with main(start) and cross(start) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH AR000DAIH5
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderRowLayout001, TestSize.Level1)
 {
@@ -162,8 +156,6 @@ HWTEST_F(RenderRowTest, RenderRowLayout001, TestSize.Level1)
  * @tc.name: RenderRowLayout002
  * @tc.desc: Verify the row component with main(start) and cross(center) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH AR000DAIH5
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderRowLayout002, TestSize.Level1)
 {
@@ -202,8 +194,6 @@ HWTEST_F(RenderRowTest, RenderRowLayout002, TestSize.Level1)
  * @tc.name: RenderRowLayout003
  * @tc.desc: Verify the row component with main(start) and cross(end) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH AR000DAIH5
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderRowLayout003, TestSize.Level1)
 {
@@ -242,8 +232,6 @@ HWTEST_F(RenderRowTest, RenderRowLayout003, TestSize.Level1)
  * @tc.name: RenderRowLayout004
  * @tc.desc: Verify the row component with main(start) and cross(stretch) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH AR000DAIH5
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderRowLayout004, TestSize.Level1)
 {
@@ -285,8 +273,6 @@ HWTEST_F(RenderRowTest, RenderRowLayout004, TestSize.Level1)
  * @tc.name: RenderRowLayout005
  * @tc.desc: Verify the row component with main(center) and cross(start) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH AR000DAIH5
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderRowLayout005, TestSize.Level1)
 {
@@ -325,8 +311,6 @@ HWTEST_F(RenderRowTest, RenderRowLayout005, TestSize.Level1)
  * @tc.name: RenderRowLayout006
  * @tc.desc: Verify the row component with main(end) and cross(start) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH AR000DAIH5
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderRowLayout006, TestSize.Level1)
 {
@@ -365,8 +349,6 @@ HWTEST_F(RenderRowTest, RenderRowLayout006, TestSize.Level1)
  * @tc.name: RenderRowLayout007
  * @tc.desc: Verify the row component with main(space-between) and cross(start) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH AR000DAIH5
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderRowLayout007, TestSize.Level1)
 {
@@ -405,8 +387,6 @@ HWTEST_F(RenderRowTest, RenderRowLayout007, TestSize.Level1)
  * @tc.name: RenderRowLayout008
  * @tc.desc: Verify the row component with main(space-around) and cross(start) works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH AR000DAIH5
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderRowLayout008, TestSize.Level1)
 {
@@ -446,8 +426,6 @@ HWTEST_F(RenderRowTest, RenderRowLayout008, TestSize.Level1)
  * @tc.name: RenderRowLayout009
  * @tc.desc: Verify the row component with main(center) and cross(center) under row component works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH AR000DAIH5
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderRowLayout009, TestSize.Level1)
 {
@@ -500,8 +478,6 @@ HWTEST_F(RenderRowTest, RenderRowLayout009, TestSize.Level1)
  * @tc.name: RenderRowLayout010
  * @tc.desc: Verify the row component with main(center) and cross(center) under column component works fine.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTH AR000DAIH5
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderRowLayout010, TestSize.Level1)
 {
@@ -554,8 +530,6 @@ HWTEST_F(RenderRowTest, RenderRowLayout010, TestSize.Level1)
  * @tc.name: RenderRowLayout011
  * @tc.desc: Verify the row component with main(space-evenly) and cross(start) works fine.
  * @tc.type: FUNC
- * @tc.require: SR000F3BA7 AR000F3BA9
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderRowLayout011, TestSize.Level1)
 {
@@ -594,8 +568,6 @@ HWTEST_F(RenderRowTest, RenderRowLayout011, TestSize.Level1)
  * @tc.name: RenderBaseline001
  * @tc.desc: Verify the row component with main(start) and cross(baseline) works fine when all the children are text.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTI
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderBaseline001, TestSize.Level1)
 {
@@ -634,8 +606,6 @@ HWTEST_F(RenderRowTest, RenderBaseline001, TestSize.Level1)
  * @tc.name: RenderBaseline002
  * @tc.desc: Verify the row component with main(start) and cross(baseline) works fine when not all children are text.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTI
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderBaseline002, TestSize.Level1)
 {
@@ -674,8 +644,6 @@ HWTEST_F(RenderRowTest, RenderBaseline002, TestSize.Level1)
  * @tc.name: RenderBaseline003
  * @tc.desc: Verify the row component with main(start) and cross(baseline) works fine when some children are flexItem.
  * @tc.type: FUNC
- * @tc.require: AR000DAQTI
- * @tc.author: yangfan
  */
 HWTEST_F(RenderRowTest, RenderBaseline003, TestSize.Level1)
 {

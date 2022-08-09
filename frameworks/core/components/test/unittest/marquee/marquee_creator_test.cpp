@@ -90,8 +90,6 @@ void MarqueeCreatorTest::TearDown() {}
  * @tc.name: MarqueeCreator001
  * @tc.desc: Test parse marquee component successfully from dsl that contains all attributes.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDJ AR000DAVDK AR000DAVDL AR000DAVDM AR000DAVDN
- * @tc.author: liruokun
  */
 HWTEST_F(MarqueeCreatorTest, MarqueeCreator001, TestSize.Level1)
 {
@@ -148,8 +146,6 @@ HWTEST_F(MarqueeCreatorTest, MarqueeCreator001, TestSize.Level1)
  * @tc.name: MarqueeCreator002
  * @tc.desc: Test parse marquee successfully from dsl json with no attributes defined.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDJ AR000DAVDK AR000DAVDL AR000DAVDM AR000DAVDN
- * @tc.author: liruokun
  */
 HWTEST_F(MarqueeCreatorTest, MarqueeCreator002, TestSize.Level1)
 {
@@ -166,8 +162,6 @@ HWTEST_F(MarqueeCreatorTest, MarqueeCreator002, TestSize.Level1)
  * @tc.name: MarqueeCreator003
  * @tc.desc: Test parse marquee from dsl json with illegal attributes.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDJ AR000DAVDK AR000DAVDL AR000DAVDM AR000DAVDN
- * @tc.author: liruokun
  */
 HWTEST_F(MarqueeCreatorTest, MarqueeCreator003, TestSize.Level1)
 {

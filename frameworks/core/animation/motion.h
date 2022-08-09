@@ -29,6 +29,11 @@ public:
     virtual double GetCurrentVelocity() = 0;
     virtual bool IsCompleted() = 0;
 
+    virtual std::string GetMotionType() const
+    {
+        return "motion";
+    }
+
     // Each subclass should override this method to perform motion in each timestamp.
     virtual void Move(float offsetTime) = 0;
 

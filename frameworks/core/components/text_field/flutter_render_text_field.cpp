@@ -43,6 +43,8 @@ namespace {
 
 constexpr char16_t NEWLINE_CODE = u'\n';
 // pixel for how far the caret to the top of paint rect. Sometimes may leave some space for the floor.
+constexpr Dimension INLINE_STYLE_CARET_HEIGHT = 24.0_vp;
+constexpr Color INLINE_STYLE_SELECTED_COLOR = Color(0x1A0A59F7);
 constexpr double CARET_HEIGHT_OFFSET = 2.0;
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr Dimension COUNT_SPACING = 4.0_vp;
@@ -118,6 +120,11 @@ bool FlutterRenderTextField::GetCaretRect(int32_t extent, Rect& caretRect, doubl
             // The reason may be text lines is exceed the paragraph maxline.
             LOGD("Illegal caret height. Consider release restriction of paragraph max_line.");
             return false;
+        }
+        if (inputStyle_ == InputStyle::INLINE) {
+            caretRect.SetRect(metrics.offset.GetX(), (GetLayoutSize().Height() - metrics.height) / 2.0,
+                NormalizeToPx(CURSOR_WIDTH), metrics.height);
+            return true;
         }
         caretRect.SetRect(metrics.offset.GetX(), metrics.offset.GetY() + caretHeightOffset, NormalizeToPx(CURSOR_WIDTH),
             metrics.height - caretHeightOffset * 2.0);
@@ -261,27 +268,48 @@ void FlutterRenderTextField::PaintSelection(SkCanvas* canvas) const
     if (!IsSelectiveDevice()) {
         return;
     }
-    using namespace Constants;
 
     if (!paragraph_ || (canvas == nullptr)) {
         return;
     }
+
     const auto& selection = GetEditingValue().selection;
     if (GetEditingValue().text.empty() || selection.GetStart() == selection.GetEnd()) {
         return;
     }
-    const auto& boxes = paragraph_->GetRectsForRange(selection.GetStart(), selection.GetEnd(),
+    
+    DrawSelection(selection.GetStart(), selection.GetEnd(), canvas);
+}
+
+void FlutterRenderTextField::DrawSelection(unsigned start, unsigned end, SkCanvas* canvas) const
+{
+    using namespace Constants;
+    const auto& boxes = paragraph_->GetRectsForRange(start, end,
         txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
     if (boxes.empty()) {
         return;
     }
     canvas->save();
     SkPaint paint;
-    paint.setColor(selectedColor_.GetValue());
-    Offset effectiveOffset = innerRect_.GetOffset() + textOffsetForShowCaret_ +
-        ComputeVerticalOffsetForCenter(innerRect_.Height(), paragraph_->GetHeight());
+    if (inputStyle_ == InputStyle::INLINE) {
+        paint.setColor(INLINE_STYLE_SELECTED_COLOR.GetValue());
+    } else {
+        paint.setColor(selectedColor_.GetValue());
+    }
+    Offset effectiveOffset = innerRect_.GetOffset() + textOffsetForShowCaret_;
     for (const auto& box : boxes) {
-        const auto& selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
+        auto selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
+        switch (inputStyle_) {
+            case InputStyle::INLINE:
+                selectionRect.SetHeight(GetLayoutSize().Height());
+                break;
+            case InputStyle::DEFAULT:
+                selectionRect += ComputeVerticalOffsetForCenter(innerRect_.Height(), paragraph_->GetHeight());
+                break;
+            default:
+                LOGE("Unknown textinput style");
+                break;
+        }
         if (box.direction == txt::TextDirection::ltr) {
             canvas->drawRect(SkRect::MakeLTRB(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(),
                 selectionRect.Bottom()), paint);
@@ -292,6 +320,26 @@ void FlutterRenderTextField::PaintSelection(SkCanvas* canvas) const
     }
     canvas->restore();
 }
+
+#if defined(IOS_PLATFORM)
+void FlutterRenderTextField::PaintCompose(SkCanvas* canvas) const
+{
+    if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
+        return;
+    }
+
+    if (!paragraph_ || (canvas == nullptr)) {
+        return;
+    }
+
+    const auto& compose = GetEditingValue().compose;
+    if (GetEditingValue().text.empty() || compose.GetStart() == compose.GetEnd()) {
+        return;
+    }
+    
+    DrawSelection(compose.GetStart(), compose.GetEnd(), canvas);
+}
+#endif
 
 void FlutterRenderTextField::PaintTextAndPlaceholder(SkCanvas* canvas) const
 {
@@ -666,6 +714,9 @@ void FlutterRenderTextField::ComputeOffsetAfterLayout()
             caretRect_ -= textOffsetForShowCaret_;
             textOffsetForShowCaret_ = Offset();
         }
+        if (inputStyle_ == InputStyle::INLINE) {
+            return;
+        }
         if (showPlaceholder_) {
             caretRect_ += ComputeVerticalOffsetForCenter(innerRect_.Height(), placeholderParagraph_->GetHeight());
         } else {
@@ -888,6 +939,11 @@ std::unique_ptr<txt::TextStyle> FlutterRenderTextField::CreateTextStyle(const Te
 
 void FlutterRenderTextField::UpdateCaretProto()
 {
+    if (inputStyle_ == InputStyle::INLINE) {
+        caretProto_.SetRect(0.0, (GetLayoutSize().Height() - NormalizeToPx(INLINE_STYLE_CARET_HEIGHT)) / 2.0,
+            NormalizeToPx(CURSOR_WIDTH), NormalizeToPx(INLINE_STYLE_CARET_HEIGHT));
+        return;
+    }
     caretProto_.SetRect(
         0.0, CARET_HEIGHT_OFFSET, NormalizeToPx(CURSOR_WIDTH), PreferredLineHeight() - 2.0 * CARET_HEIGHT_OFFSET);
 }
@@ -972,7 +1028,9 @@ bool FlutterRenderTextField::ComputeOffsetForCaretUpstream(int32_t extent, Caret
     result.offset.SetX(offsetX);
     result.offset.SetY(textBox.rect.fTop);
     result.height = textBox.rect.fBottom - textBox.rect.fTop;
-
+    if (inputStyle_ == InputStyle::INLINE) {
+        result.height = NormalizeToPx(INLINE_STYLE_CARET_HEIGHT);
+    }
     return true;
 }
 
@@ -1003,7 +1061,9 @@ bool FlutterRenderTextField::ComputeOffsetForCaretDownstream(int32_t extent, Car
     result.offset.SetX(offsetX);
     result.offset.SetY(textBox.rect.fTop);
     result.height = textBox.rect.fBottom - textBox.rect.fTop;
-
+    if (inputStyle_ == InputStyle::INLINE) {
+        result.height = NormalizeToPx(INLINE_STYLE_CARET_HEIGHT);
+    }
     return true;
 }
 
@@ -1341,6 +1401,9 @@ Offset FlutterRenderTextField::GetHandleOffset(int32_t extend)
     Rect result;
     GetCaretRect(extend, result);
     selectHeight_ = result.Bottom() - result.Top();
+    if (inputStyle_ == InputStyle::INLINE) {
+        return Offset(0.0, 0.0);
+    }
     Offset handleLocalOffset = Offset((result.Left() + result.Right()) / 2.0, result.Bottom());
     Offset handleOffset = handleLocalOffset + innerRect_.GetOffset() + GetOffsetToPage() + textOffsetForShowCaret_;
     if (paragraph_) {
@@ -1384,6 +1447,9 @@ void FlutterRenderTextField::PaintTextField(
     canvas->clipRect(SkRect::MakeLTRB(innerRect_.Left(), innerRect_.Top(), innerRect_.Right(), innerRect_.Bottom()),
         SkClipOp::kIntersect);
     PaintSelection(canvas);
+#if defined(IOS_PLATFORM)
+    PaintCompose(canvas);
+#endif
     // Paint cursor.
     PaintCaret(*canvas, caretRect_);
     PaintTextAndPlaceholder(canvas);

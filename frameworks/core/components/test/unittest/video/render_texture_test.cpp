@@ -56,8 +56,6 @@ public:
  * @tc.desc: Verify the video display area with contain fit when the horizontal video is on the vertical screen,
  *           and the video resolution is smaller than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest001, TestSize.Level1)
 {
@@ -101,8 +99,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest001, TestSize.Level1)
  * @tc.desc: Verify the video display area with contain fit when the vertical video is on the vertical screen,
  *           and the video resolution is smaller than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest002, TestSize.Level1)
 {
@@ -145,8 +141,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest002, TestSize.Level1)
  * @tc.desc: Verify the video display area with contain fit when the horizontal video is on the vertical screen,
  *           and the video resolution is greater than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest003, TestSize.Level1)
 {
@@ -189,8 +183,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest003, TestSize.Level1)
  * @tc.desc: Verify the video display area with contain fit when the vertical video is on the vertical screen,
  *           and the video resolution is greater than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest004, TestSize.Level1)
 {
@@ -233,8 +225,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest004, TestSize.Level1)
  * @tc.desc: Verify the video display area with cover fit when the horizontal video is on the vertical screen,
  *           and the video resolution is smaller than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest005, TestSize.Level1)
 {
@@ -278,8 +268,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest005, TestSize.Level1)
  * @tc.desc: Verify the video display area with cover fit when the vertical video is on the vertical screen,
  *           and the video resolution is smaller than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest006, TestSize.Level1)
 {
@@ -322,8 +310,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest006, TestSize.Level1)
  * @tc.desc: Verify the video display area with cover fit when the horizontal video is on the vertical screen,
  *           and the video resolution is greater than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest007, TestSize.Level1)
 {
@@ -366,8 +352,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest007, TestSize.Level1)
  * @tc.desc: Verify the video display area with cover fit when the vertical video is on the vertical screen,
  *           and the video resolution is greater than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest008, TestSize.Level1)
 {
@@ -409,8 +393,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest008, TestSize.Level1)
  * @tc.desc: Verify the video display area with fill fit when the horizontal video is on the vertical screen,
  *           and the video resolution is smaller than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest009, TestSize.Level1)
 {
@@ -452,8 +434,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest009, TestSize.Level1)
  * @tc.desc: Verify the video display area with fill fit when the vertical video is on the vertical screen,
  *           and the video resolution is smaller than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest010, TestSize.Level1)
 {
@@ -495,8 +475,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest010, TestSize.Level1)
  * @tc.desc: Verify the video display area with fill fit when the horizontal video is on the vertical screen,
  *           and the video resolution is greater than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest011, TestSize.Level1)
 {
@@ -538,8 +516,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest011, TestSize.Level1)
  * @tc.desc: Verify the video display area with fill fit when the vertical video is on the vertical screen,
  *           and the video resolution is greater than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest012, TestSize.Level1)
 {
@@ -582,8 +558,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest012, TestSize.Level1)
  * @tc.desc: Verify the video display area with none fit when the horizontal video is on the vertical screen,
  *           and the video resolution is smaller than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest013, TestSize.Level1)
 {
@@ -627,8 +601,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest013, TestSize.Level1)
  * @tc.desc: Verify the video display area with none fit when the vertical video is on the vertical screen,
  *           and the video resolution is smaller than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest014, TestSize.Level1)
 {
@@ -671,8 +643,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest014, TestSize.Level1)
  * @tc.desc: Verify the video display area with none fit when the horizontal video is on the vertical screen,
  *           and the video resolution is greater than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest015, TestSize.Level1)
 {
@@ -715,8 +685,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest015, TestSize.Level1)
  * @tc.desc: Verify the video display area with none fit when the vertical video is on the vertical screen,
  *           and the video resolution is greater than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest016, TestSize.Level1)
 {
@@ -759,8 +727,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest016, TestSize.Level1)
  * @tc.desc: Verify the video display area with scaledown fit when the horizontal video is on the vertical screen,
  *           and the video resolution is smaller than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest017, TestSize.Level1)
 {
@@ -804,8 +770,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest017, TestSize.Level1)
  * @tc.desc: Verify the video display area with scaledown fit when the vertical video is on the vertical screen,
  *           and the video resolution is smaller than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest018, TestSize.Level1)
 {
@@ -848,8 +812,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest018, TestSize.Level1)
  * @tc.desc: Verify the video display area with scaledown fit when the horizontal video is on the vertical screen,
  *           and the video resolution is greater than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest019, TestSize.Level1)
 {
@@ -892,8 +854,6 @@ HWTEST_F(RenderTextureTest, RenderTextureTest019, TestSize.Level1)
  * @tc.desc: Verify the video display area with scaledown fit when the vertical video is on the vertical screen,
  *           and the video resolution is greater than the screen resolution.
  * @tc.type: FUNC
- * @tc.require: AR000DAR0T
- * @tc.author: HeSu
  */
 HWTEST_F(RenderTextureTest, RenderTextureTest020, TestSize.Level1)
 {

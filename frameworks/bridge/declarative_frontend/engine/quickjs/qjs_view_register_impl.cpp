@@ -445,7 +445,7 @@ void JsBindViews(BindingTarget globalObj)
 void CreatePageRoot(RefPtr<JsAcePage>& page, JSView* view)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        auto pageRootNode = view->CreateNode();
+        auto pageRootNode = view->CreateUINode();
         page->SetRootNode(pageRootNode);
     } else {
         auto rootComponent = view->CreateComponent();

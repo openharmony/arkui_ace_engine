@@ -30,6 +30,7 @@
 #include "core/components/page/page_target.h"
 #include "core/components/page_transition/page_transition_component.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/utils/source_map.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -278,12 +279,12 @@ public:
         component_ = component;
     }
 
-    void SetRootNode(const RefPtr<NG::FrameNode>& node)
+    void SetRootNode(const RefPtr<NG::UINode>& node)
     {
         pageRootNode_ = node;
     }
 
-    const RefPtr<NG::FrameNode>& GetRootNode() const
+    const RefPtr<NG::UINode>& GetRootNode() const
     {
         return pageRootNode_;
     }
@@ -391,7 +392,7 @@ private:
     WeakPtr<PipelineBase> pipelineContext_;
     RefPtr<PageTransitionComponent> pageTransition_;
     RefPtr<Component> component_;
-    RefPtr<NG::FrameNode> pageRootNode_;
+    RefPtr<NG::UINode> pageRootNode_;
     RefPtr<DOMDocument> domDoc_;
     std::string url_;
     WeakPtr<StageElement> container_;

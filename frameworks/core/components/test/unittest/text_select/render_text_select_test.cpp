@@ -252,6 +252,21 @@ public:
         }
         return true;
     };
+    static bool MockGetPixmapData(
+        const std::function<void(const RefPtr<PixelMap>&)>& callback, const WeakPtr<TaskExecutor>& taskExecutor)
+    {
+        auto executor = taskExecutor.Upgrade();
+        if (executor) {
+            executor->PostTask(
+                [callback] {
+                    if (callback) {
+                        callback(nullptr);
+                    }
+                },
+                TaskExecutor::TaskType::BACKGROUND);
+        }
+        return true;
+    };
 
 private:
     MockClipboardJni() = delete;
@@ -271,6 +286,18 @@ public:
             taskExecutor_->PostTask(
                 [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_))] {
                     MockClipboardJni::MockGetData(callback, taskExecutor);
+                },
+                TaskExecutor::TaskType::BACKGROUND);
+        }
+    };
+    void SetPixelMapData(const RefPtr<PixelMap>& pixmap) override {};
+    virtual void GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback,
+        bool syncMode = false) override
+    {
+        if (taskExecutor_) {
+            taskExecutor_->PostTask(
+                [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_))] {
+                    MockClipboardJni::MockGetPixmapData(callback, taskExecutor);
                 },
                 TaskExecutor::TaskType::BACKGROUND);
         }
@@ -330,8 +357,6 @@ void RenderTextSelectTest::WaitAndMockVsync(int64_t waitFor)
  * @tc.name: RenderTextSelectTest001
  * @tc.desc: Verify the Update Interface of RenderTextSelect.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCI
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTextSelectTest, RenderTextSelectTest001, TestSize.Level1)
 {
@@ -353,8 +378,6 @@ HWTEST_F(RenderTextSelectTest, RenderTextSelectTest001, TestSize.Level1)
  * @tc.name: RenderTextSelectTest002
  * @tc.desc: Verify the Update Interface of RenderTextSelect.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCM
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTextSelectTest, RenderTextSelectTest002, TestSize.Level1)
 {
@@ -382,8 +405,6 @@ HWTEST_F(RenderTextSelectTest, RenderTextSelectTest002, TestSize.Level1)
  * @tc.name: RenderTextSelectTest003
  * @tc.desc: Verify the selection of RenderTextSelect.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCJ
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTextSelectTest, RenderTextSelectTest003, TestSize.Level1)
 {
@@ -435,8 +456,6 @@ HWTEST_F(RenderTextSelectTest, RenderTextSelectTest003, TestSize.Level1)
  * @tc.name: RenderTextSelectTest004
  * @tc.desc: Verify the selection of RenderTextSelect.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCK
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTextSelectTest, RenderTextSelectTest004, TestSize.Level1)
 {
@@ -478,8 +497,6 @@ HWTEST_F(RenderTextSelectTest, RenderTextSelectTest004, TestSize.Level1)
  * @tc.name: RenderTextSelectTest005
  * @tc.desc: Verify the selection of RenderTextSelect.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCL
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTextSelectTest, RenderTextSelectTest005, TestSize.Level1)
 {

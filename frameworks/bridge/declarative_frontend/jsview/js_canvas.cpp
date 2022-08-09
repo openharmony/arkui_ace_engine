@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 
+#include "core/common/container.h"
 #include "core/components/custom_paint/custom_paint_component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -74,16 +75,16 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
 
     auto elmtId =  component->GetElementId();
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto readyEvent_ = context->UsePartialUpdate() ?
+    auto readyEvent_ = Container::IsCurrentUsePartialUpdate() ?
         EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-            accountableCanvaselement = elmtId]() {
+            accountableCanvasElement = elmtId]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Canvas.onReady");
-            LOGD("Canvas elmtId %d executing JS onReady function - start", accountableCanvaselement);
-            ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(accountableCanvaselement);
+            LOGD("Canvas elmtId %{public}d executing JS onReady function - start", accountableCanvasElement);
+            ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(accountableCanvasElement);
             func->Execute();
             ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-            LOGD("Canvas elmtId %d executing JS onReady function - end", accountableCanvaselement);
+            LOGD("Canvas elmtId %{public}d executing JS onReady function - end", accountableCanvasElement);
         })
         :
         EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {

@@ -205,8 +205,6 @@ void ListElementTest::DisableAddDeleteEffect(const RefPtr<RenderNode>& multiChil
  * @tc.name: ListElementTest001
  * @tc.desc: Verify the basic function of request focus and release focus, while the direction is column.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5O
- * @tc.author: xuliangjun
  */
 HWTEST_F(ListElementTest, ListElementTest001, TestSize.Level1)
 {
@@ -269,8 +267,6 @@ HWTEST_F(ListElementTest, ListElementTest001, TestSize.Level1)
  * @tc.name: ListElementTest002
  * @tc.desc: Verify the basic function of request focus and release focus, while the direction is row.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5O
- * @tc.author: xuliangjun
  */
 HWTEST_F(ListElementTest, ListElementTest002, TestSize.Level1)
 {
@@ -333,8 +329,6 @@ HWTEST_F(ListElementTest, ListElementTest002, TestSize.Level1)
  * @tc.name: ListElementTest003
  * @tc.desc: Verify the basic function of moving focus in list, while the direction is column.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5O
- * @tc.author: xuliangjun
  */
 HWTEST_F(ListElementTest, ListElementTest003, TestSize.Level1)
 {
@@ -415,8 +409,6 @@ HWTEST_F(ListElementTest, ListElementTest003, TestSize.Level1)
  * @tc.name: ListElementTest004
  * @tc.desc: Verify the basic function of moving focus in list, while the direction is row.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5O
- * @tc.author: xuliangjun
  */
 HWTEST_F(ListElementTest, ListElementTest004, TestSize.Level1)
 {
@@ -505,8 +497,6 @@ RefPtr<Element> ListElementTest::BuildElementTree(const RefPtr<Component>& listC
  * @tc.name: InsertionAndDeletion001
  * @tc.desc: Verify insertion when there is no item.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SV
- * @tc.author: zhanghaibo
  */
 HWTEST_F(ListElementTest, InsertionAndDeletion001, TestSize.Level1)
 {
@@ -613,8 +603,6 @@ bool ListElementTest::CheckInsertAndDelete(const RefPtr<RenderNode>& multiChildN
  * @tc.name: InsertionAndDeletion002
  * @tc.desc: Verify insertion and deletion before display range.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SV
- * @tc.author: zhanghaibo
  */
 HWTEST_F(ListElementTest, InsertionAndDeletion002, TestSize.Level1)
 {
@@ -678,8 +666,6 @@ HWTEST_F(ListElementTest, InsertionAndDeletion002, TestSize.Level1)
  * @tc.name: InsertionAndDeletion003
  * @tc.desc: Verify insertion and deletion at beginning of the display range.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SV
- * @tc.author: zhanghaibo
  */
 HWTEST_F(ListElementTest, InsertionAndDeletion003, TestSize.Level1)
 {
@@ -742,8 +728,6 @@ HWTEST_F(ListElementTest, InsertionAndDeletion003, TestSize.Level1)
  * @tc.name: InsertionAndDeletion004
  * @tc.desc: Verify insertion and deletion at middle of the display range.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1SV
- * @tc.author: zhanghaibo
  */
 HWTEST_F(ListElementTest, InsertionAndDeletion004, TestSize.Level1)
 {
@@ -805,8 +789,6 @@ HWTEST_F(ListElementTest, InsertionAndDeletion004, TestSize.Level1)
  * @tc.name: InsertionAndDeletion005
  * @tc.desc: Verify insertion and deletion at end of the display range.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1T0
- * @tc.author: zhanghaibo
  */
 HWTEST_F(ListElementTest, InsertionAndDeletion005, TestSize.Level1)
 {
@@ -876,8 +858,6 @@ HWTEST_F(ListElementTest, InsertionAndDeletion005, TestSize.Level1)
  * @tc.name: InsertionAndDeletion006
  * @tc.desc: Verify insertion and deletion after the display range.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1T0
- * @tc.author: zhanghaibo
  */
 HWTEST_F(ListElementTest, InsertionAndDeletion006, TestSize.Level1)
 {
@@ -952,8 +932,6 @@ HWTEST_F(ListElementTest, InsertionAndDeletion006, TestSize.Level1)
  * @tc.name: InsertionAndDeletion007
  * @tc.desc: Verify deletion when there is no item.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1T0
- * @tc.author: zhanghaibo
  */
 HWTEST_F(ListElementTest, InsertionAndDeletion007, TestSize.Level1)
 {
@@ -985,8 +963,6 @@ HWTEST_F(ListElementTest, InsertionAndDeletion007, TestSize.Level1)
  * @tc.name: InsertionAndDeletion008
  * @tc.desc: Verify delete all.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1T0
- * @tc.author: zhanghaibo
  */
 HWTEST_F(ListElementTest, InsertionAndDeletion008, TestSize.Level1)
 {
@@ -1036,8 +1012,6 @@ HWTEST_F(ListElementTest, InsertionAndDeletion008, TestSize.Level1)
  * @tc.name: InsertionAndDeletion009
  * @tc.desc: Verify insertion and deletion randomly.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1T1
- * @tc.author: zhanghaibo
  */
 HWTEST_F(ListElementTest, InsertionAndDeletion009, TestSize.Level1)
 {
@@ -1095,8 +1069,6 @@ HWTEST_F(ListElementTest, InsertionAndDeletion009, TestSize.Level1)
  * @tc.name: ListElementItemFocusTest001
  * @tc.desc: Verify list item by render sequence.
  * @tc.type: FUNC
- * @tc.require: AR000DR6DF
- * @tc.author: jinwuwen
  */
 HWTEST_F(ListElementTest, ListElementItemFocusTest001, TestSize.Level1)
 {
@@ -1139,8 +1111,6 @@ HWTEST_F(ListElementTest, ListElementItemFocusTest001, TestSize.Level1)
  * @tc.name: ListElementItemFocusTest002
  * @tc.desc: Verify list item support long jump.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1T9
- * @tc.author: jinwuwen
  */
 HWTEST_F(ListElementTest, ListElementItemFocusTest002, TestSize.Level1)
 {
@@ -1199,8 +1169,6 @@ HWTEST_F(ListElementTest, ListElementItemFocusTest002, TestSize.Level1)
  * @tc.name: ListElementItemFocusTest003
  * @tc.desc: Verify list item support long jump.
  * @tc.type: FUNC
- * @tc.require: AR000DRS0L
- * @tc.author: jinwuwen
  */
 HWTEST_F(ListElementTest, ListElementItemFocusTest003, TestSize.Level1)
 {
@@ -1259,8 +1227,6 @@ HWTEST_F(ListElementTest, ListElementItemFocusTest003, TestSize.Level1)
  * @tc.name: ListItemFocusTest004
  * @tc.desc: Verify list item support long jump.
  * @tc.type: FUNC
- * @tc.require: AR000DR6DF
- * @tc.author: jinwuwen
  */
 HWTEST_F(ListElementTest, ListElementItemFocusTest004, TestSize.Level1)
 {
@@ -1325,8 +1291,6 @@ HWTEST_F(ListElementTest, ListElementItemFocusTest004, TestSize.Level1)
  * @tc.name: ListItemGroupFocusTest001
  * @tc.desc: Verify list item group nextFocusNode when item group is collapse.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TB
- * @tc.author: chenlien
  */
 HWTEST_F(ListElementTest, ListItemGroupFocusTest001, TestSize.Level1)
 {
@@ -1369,8 +1333,6 @@ HWTEST_F(ListElementTest, ListItemGroupFocusTest001, TestSize.Level1)
  * @tc.name: ListItemGroupFocusTest002
  * @tc.desc: Verify list item group nextFocusNode when item group is expanded.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TB
- * @tc.author: chenlien
  */
 HWTEST_F(ListElementTest, ListItemGroupFocusTest002, TestSize.Level1)
 {

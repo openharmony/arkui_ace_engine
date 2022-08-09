@@ -18,12 +18,15 @@
 
 #include "base/resource/internal_resource.h"
 #include "core/components/box/drag_drop_event.h"
+#include "core/common/clipboard/clipboard.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/radius.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
+#include "core/gestures/long_press_recognizer.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -37,10 +40,12 @@ enum class ImageLoadingStatus {
     LOAD_FAIL,
 };
 
-class RenderImage : public RenderNode, public DragDropEvent {
-    DECLARE_ACE_TYPE(RenderImage, RenderNode, DragDropEvent);
+class RenderImage : public RenderNode, public DragDropEvent, public TextOverlayBase {
+    DECLARE_ACE_TYPE(RenderImage, RenderNode, DragDropEvent, TextOverlayBase);
 
 public:
+    ~RenderImage() override;
+
     static RefPtr<RenderNode> Create();
     static bool IsSVG(const std::string& src, InternalResource::ResourceId resourceId);
     virtual Size Measure() = 0;
@@ -252,6 +257,26 @@ public:
         return nullptr;
     }
 
+    virtual RefPtr<PixelMap> GetPixmapFromSkImage()
+    {
+        return nullptr;
+    }
+
+    void OnPaintFinish() override;
+    void OnLongPress(const LongPressInfo& longPressInfo);
+    bool HandleMouseEvent(const MouseEvent& event) override;
+    void ShowTextOverlay(const Offset& showOffset) override;
+    void RegisterCallbacksToOverlay() override;
+
+    std::string GetSelectedContent() const override
+    {
+        return "";
+    };
+    Offset GetHandleOffset(int32_t extend) override
+    {
+        return Offset(0, 0);
+    };
+
 protected:
     void ApplyImageFit(Rect& srcRect, Rect& dstRect);
     void ApplyContain(Rect& srcRect, Rect& dstRect, const Size& rawPicSize, const Size& imageComponentSize);
@@ -372,6 +397,14 @@ protected:
     void* pixmapRawPtr_ = nullptr;
     bool syncMode_ = false;
     Border border_;
+
+private:
+    void UpdateOverlay();
+    void HandleOnCopy();
+    RefPtr<LongPressRecognizer> textOverlayRecognizer_;
+    RefPtr<Clipboard> clipboard_;
+    Offset popOverlayOffset_;
+    CopyOptions copyOption_ = CopyOptions::None;
 };
 
 } // namespace OHOS::Ace

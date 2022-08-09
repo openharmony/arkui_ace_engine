@@ -37,6 +37,16 @@ public:
         return NearEqual(inputValue, INFINITE_SIZE);
     }
 
+    static Size ErrorSize()
+    {
+        return Size((std::numeric_limits<double>::max)(), (std::numeric_limits<double>::max)());
+    }
+
+    bool IsErrorSize() const
+    {
+        return operator==(ErrorSize());
+    }
+
     double Width() const
     {
         return width_;
@@ -112,9 +122,27 @@ public:
         return width_ > 0.0 && height_ > 0.0;
     }
 
+    Size operator+(const Size& size) const
+    {
+        return Size(width_ + size.Width(), height_ + size.Height());
+    }
+
+    Size operator-(const Size& size) const
+    {
+        return Size(width_ - size.Width(), height_ - size.Height());
+    }
+
     Size operator*(double value) const
     {
         return Size(width_ * value, height_ * value);
+    }
+
+    Size operator/(double value) const
+    {
+        if (NearZero(value)) {
+            return ErrorSize();
+        }
+        return Size(width_ / value, height_ / value);
     }
 
     bool operator==(const Size& size) const
@@ -127,21 +155,11 @@ public:
         return !operator==(size);
     }
 
-    Size operator+(const Size& size) const
-    {
-        return Size(width_ + size.Width(), height_ + size.Height());
-    }
-
     Size operator+=(const Size& size)
     {
         width_ += size.Width();
         height_ += size.Height();
         return *this;
-    }
-
-    Size operator-(const Size& size) const
-    {
-        return Size(width_ - size.Width(), height_ - size.Height());
     }
 
     Size operator-=(const Size& size)
@@ -216,7 +234,6 @@ private:
     double width_ = 0.0;
     double height_ = 0.0;
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_SIZE_H

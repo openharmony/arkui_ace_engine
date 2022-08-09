@@ -66,8 +66,6 @@ public:
  * @tc.name: SvgFeOffsetTest001
  * @tc.desc: Verify the Update Interface of SvgFeDeclaration work correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGI
- * @tc.author: huye
  */
 HWTEST_F(SvgFeOffsetTest, SvgFeOffsetTest001, TestSize.Level1)
 {
@@ -96,8 +94,6 @@ HWTEST_F(SvgFeOffsetTest, SvgFeOffsetTest001, TestSize.Level1)
  * @tc.name: SvgFeOffsetTest002
  * @tc.desc: Verify the Update Interface of SvgFeDeclaration work correctly.
  * @tc.type: FUNC
- * @tc.require: AR000FQJGI
- * @tc.author: huye
  */
 HWTEST_F(SvgFeOffsetTest, SvgFeOffsetTest002, TestSize.Level1)
 {

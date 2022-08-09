@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/engine/v8/v8_module_manager.h"
+#include "bridge/declarative_frontend/engine/v8/v8_module_manager.h"
 
 #include "base/log/log.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
-#include "frameworks/bridge/declarative_frontend/engine/v8/v8_js_matrix4.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
-#include "frameworks/core/animation/cubic_curve.h"
-#include "frameworks/core/animation/spring_curve.h"
+#include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
+#include "bridge/declarative_frontend/engine/v8/v8_js_matrix4.h"
+#include "bridge/js_frontend/engine/common/js_constants.h"
+#include "core/animation/cubic_curve.h"
+#include "core/animation/spring_curve.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 ModuleManager* ModuleManager::GetInstance()
@@ -311,6 +312,21 @@ void AppTerminate(const v8::FunctionCallbackInfo<v8::Value>& args)
 
 void AppSetImageCacheCount(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("current container is null");
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("get pipelineContext failed");
+        return;
+    }
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null.");
+        return;
+    }
     v8::Isolate* isolate = args.GetIsolate();
     v8::HandleScope handleScope(isolate);
     auto context = isolate->GetCurrentContext();
@@ -318,13 +334,11 @@ void AppSetImageCacheCount(const v8::FunctionCallbackInfo<v8::Value>& args)
         LOGE("The arguments must be one int number.");
         return;
     }
-    auto delegate =
-        static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
-    WeakPtr<PipelineContext> pipelineContextWeak = (*delegate)->GetPipelineContext();
-    auto uiTaskExecutor = (*delegate)->GetUiTask();
+
+    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
     int32_t size = args[0]->Int32Value(context).ToChecked();
     size = size > 0 ? size : 0;
-    uiTaskExecutor.PostTask([pipelineContextWeak, size]() mutable {
+    taskExecutor->PostTask([pipelineContextWeak, size]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
             auto imageCache = pipelineContext->GetImageCache();
@@ -334,11 +348,26 @@ void AppSetImageCacheCount(const v8::FunctionCallbackInfo<v8::Value>& args)
                 LOGW("image cache is null");
             }
         }
-    });
+    }, TaskExecutor::TaskType::UI);
 }
 
 void AppSetImageRawDataCacheSize(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("current container is null");
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("get pipelineContext failed");
+        return;
+    }
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null.");
+        return;
+    }
     v8::Isolate* isolate = args.GetIsolate();
     v8::HandleScope handleScope(isolate);
     auto context = isolate->GetCurrentContext();
@@ -346,13 +375,11 @@ void AppSetImageRawDataCacheSize(const v8::FunctionCallbackInfo<v8::Value>& args
         LOGE("The arguments must be one int number.");
         return;
     }
-    auto delegate =
-        static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
-    WeakPtr<PipelineContext> pipelineContextWeak = (*delegate)->GetPipelineContext();
-    auto uiTaskExecutor = (*delegate)->GetUiTask();
+
+    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
     int32_t size = args[0]->Int32Value(context).ToChecked();
     size = size > 0 ? size : 0;
-    uiTaskExecutor.PostTask([pipelineContextWeak, size]() mutable {
+    taskExecutor->PostTask([pipelineContextWeak, size]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
             auto imageCache = pipelineContext->GetImageCache();
@@ -362,11 +389,26 @@ void AppSetImageRawDataCacheSize(const v8::FunctionCallbackInfo<v8::Value>& args
                 LOGW("image cache is null");
             }
         }
-    });
+    }, TaskExecutor::TaskType::UI);
 }
 
 void AppSetImageFileCacheSize(const v8::FunctionCallbackInfo<v8::Value>& args)
 {
+    auto container = Container::Current();
+    if (!container) {
+        LOGE("current container is null");
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("get pipelineContext failed");
+        return;
+    }
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null.");
+        return;
+    }
     v8::Isolate* isolate = args.GetIsolate();
     v8::HandleScope handleScope(isolate);
     auto context = isolate->GetCurrentContext();
@@ -374,13 +416,11 @@ void AppSetImageFileCacheSize(const v8::FunctionCallbackInfo<v8::Value>& args)
         LOGE("The arguments must be one int number.");
         return;
     }
-    auto delegate =
-        static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
-    WeakPtr<PipelineContext> pipelineContextWeak = (*delegate)->GetPipelineContext();
+    WeakPtr<PipelineContext> pipelineContextWeak(pipelineContext);
     auto uiTaskExecutor = (*delegate)->GetUiTask();
     int32_t size = args[0]->Int32Value(context).ToChecked();
     size = size > 0 ? size : 0;
-    uiTaskExecutor.PostTask([pipelineContextWeak, size]() mutable {
+    taskExecutor->PostTask([pipelineContextWeak, size]() mutable {
         auto pipelineContext = pipelineContextWeak.Upgrade();
         if (pipelineContext) {
             auto imageCache = pipelineContext->GetImageCache();
@@ -390,7 +430,7 @@ void AppSetImageFileCacheSize(const v8::FunctionCallbackInfo<v8::Value>& args)
                 LOGW("image cache is null");
             }
         }
-    });
+    }, TaskExecutor::TaskType::UI);
 }
 
 void InitAppModule(v8::Local<v8::Object> moduleObj, v8::Isolate* isolate)
@@ -682,39 +722,43 @@ void ModuleManager::SetWaitTimer(const v8::FunctionCallbackInfo<v8::Value>& args
         LOGE("set time out or interval, context is empty!");
         return;
     }
+    auto delegate =
+        static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
 
-    LOGI("Enter SetWaitTimer %{private}d %{private}d", isInterval, args.Length());
+    int argc = args.Length();
+    if (argc < 1) {
+        LOGW("JsSetTimer: invalid callback value");
+    }
+
+    LOGI("Enter SetWaitTimer %{private}d %{private}d", isInterval, argc);
 
     if (!args[0]->IsFunction()) {
-        LOGE("args[0] is not function");
+        LOGW("args[0] is not function");
         return;
     }
     v8::Local<v8::Function> jsFunc = v8::Local<v8::Function>::Cast(args[0]);
-
-    int index = 1;
-    uint32_t delay = 0;
-    if (args[1]->IsNumber()) {
-        LOGE("args[1] is number");
-        delay = args[1]->ToInt32(context).ToLocalChecked()->Value();
-        index = 2;
-    }
-
     CopyablePersistent<v8::Function> pFunction;
     pFunction.Reset(isolate, jsFunc);
 
+    uint32_t delay = 0;
     std::vector<v8::Persistent<v8::Value, v8::CopyablePersistentTraits<v8::Value>>> callbackArray;
-    while (index < args.Length()) {
+    if (argc < 2 || !args[1]->IsNumber()) {
+        uint32_t callbackId = ModuleManager::GetInstance()->AddCallback(pFunction, callbackArray, isolate, isInterval);
+        args.GetReturnValue().Set(v8::Integer::New(isolate, callbackId));
+        (*delegate)->WaitTimer(std::to_string(callbackId), std::to_string(delay), isInterval, true);
+        return;
+    }
+
+    delay = args[1]->ToInt32(context).ToLocalChecked()->Value();
+
+    for (int index  = 2; index < argc; ++index) {
         CopyablePersistent<v8::Value> pValue;
         pValue.Reset(isolate, args[index]);
         callbackArray.emplace_back(pValue);
-        ++index;
     }
 
     uint32_t callbackId = ModuleManager::GetInstance()->AddCallback(pFunction, callbackArray, isolate, isInterval);
-
     args.GetReturnValue().Set(v8::Integer::New(isolate, callbackId));
-    auto delegate =
-        static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
     (*delegate)->WaitTimer(std::to_string(callbackId), std::to_string(delay), isInterval, true);
 }
 

@@ -180,6 +180,8 @@ public:
 
     static float GetAnimationScale();
 
+    static std::string GetPartialUpdatePkg();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;

@@ -52,6 +52,8 @@ RefPtr<ImageCache> ImageCache::Create()
 {
     return AceType::MakeRefPtr<MockImageCache>();
 }
+
+void ImageCache::Purge() {}
 #endif
 
 template<typename T>

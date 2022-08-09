@@ -18,9 +18,11 @@
 #include <algorithm>
 #include <set>
 #include <sstream>
+#include <string>
 #include <unistd.h>
 
 #include "base/memory/ace_type.h"
+#include "core/components/common/layout/constants.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_canvas_node.h"
@@ -702,32 +704,9 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     }
 
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
-    bool dispatchSuccess = false;
-    const auto& sortedChildren = SortChildrenByZIndex(GetChildren());
-    if (IsChildrenTouchEnable()) {
-        for (auto iter = sortedChildren.rbegin(); iter != sortedChildren.rend(); ++iter) {
-            auto& child = *iter;
-            if (!child->GetVisible() || child->disabled_ || child->disableTouchEvent_) {
-                continue;
-            }
-            if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
-                dispatchSuccess = true;
-                break;
-            }
-            if (child->IsTouchable() && (child->InterceptTouchEvent() || IsExclusiveEventForChild())) {
-                auto localTransformPoint = child->GetTransformPoint(localPoint);
-                for (auto& rect : child->GetTouchRectList()) {
-                    if (rect.IsInRegion(localTransformPoint)) {
-                        dispatchSuccess = true;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
+    bool dispatchSuccess = DispatchTouchTestToChildren(localPoint, globalPoint, touchRestrict, result);
     auto beforeSize = result.size();
-    for (auto& rect : GetTouchRectList()) {
+    for (const auto& rect : GetTouchRectList()) {
         if (touchable_ && rect.IsInRegion(transformPoint)) {
             // Calculates the coordinate offset in this node.
             globalPoint_ = globalPoint;
@@ -739,6 +718,47 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
     }
     auto endSize = result.size();
     return (dispatchSuccess || beforeSize != endSize) && IsNotSiblingAddRecognizerToResult();
+}
+
+bool RenderNode::DispatchTouchTestToChildren(const Point& localPoint, const Point& globalPoint,
+    const TouchRestrict& touchRestrict, TouchTestResult& result)
+{
+    bool dispatchSuccess = false;
+    if (!IsChildrenTouchEnable() || GetHitTestMode() == HitTestMode::BLOCK) {
+        return dispatchSuccess;
+    }
+
+    const auto& sortedChildren = SortChildrenByZIndex(GetChildren());
+    for (auto iter = sortedChildren.rbegin(); iter != sortedChildren.rend(); ++iter) {
+        const auto& child = *iter;
+        if (!child->GetVisible() || child->disabled_ || child->disableTouchEvent_) {
+            continue;
+        }
+        if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
+            dispatchSuccess = true;
+            if (child->GetHitTestMode() != HitTestMode::TRANSPARENT) {
+                break;
+            }
+        }
+        auto interceptTouchEvent = (child->IsTouchable() &&
+            (child->InterceptTouchEvent() || IsExclusiveEventForChild()) &&
+            child->GetHitTestMode() != HitTestMode::TRANSPARENT);
+        if (child->GetHitTestMode() == HitTestMode::BLOCK || interceptTouchEvent) {
+            auto localTransformPoint = child->GetTransformPoint(localPoint);
+            bool isInRegion = false;
+            for (const auto& rect : child->GetTouchRectList()) {
+                if (rect.IsInRegion(localTransformPoint)) {
+                    dispatchSuccess = true;
+                    isInRegion = true;
+                    break;
+                }
+            }
+            if (isInRegion && child->GetHitTestMode() != HitTestMode::DEFAULT) {
+                break;
+            }
+        }
+    }
+    return dispatchSuccess;
 }
 
 RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Point& parentLocalPoint)
@@ -1299,8 +1319,10 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
         LOGE("fail to update all due to component is null");
         return;
     }
+    hitTestMode_ = component->GetHitTestMode();
     touchable_ = component->IsTouchable();
     disabled_ = component->IsDisabledStatus();
+    isFirstNode_ = component->IsFirstNode();
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
     positionParam_ = renderComponent->GetPositionParam();
     if (renderComponent) {
@@ -1441,6 +1463,7 @@ void RenderNode::ClearRenderObject()
     rsNode_ = nullptr;
     isHeadRenderNode_ = false;
     isTailRenderNode_ = false;
+    isFirstNode_ = false;
     accessibilityText_ = "";
     layoutParam_ = LayoutParam();
     paintRect_ = Rect();
@@ -2130,7 +2153,7 @@ void RenderNode::RSNodeAddChild(const RefPtr<RenderNode>& child)
     if (IsTailRenderNode()) {
         if (!child->GetRSNode()) {
             // workaround if child have no RSNode while it should
-            LOGW("Child render_node has no RSNode, creating now.");
+            LOGD("Child render_node has no RSNode, creating now.");
             child->SyncRSNodeBoundary(true, true);
         }
     } else {

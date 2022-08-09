@@ -18,11 +18,13 @@
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components/text_overlay/text_overlay_component.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
@@ -32,12 +34,35 @@ constexpr double RESIZE_AGAIN_THRESHOLD = 1.2;
 
 } // namespace
 
+RenderImage::~RenderImage()
+{
+    auto textOverlayManager = GetTextOverlayManager(context_);
+    if (textOverlayManager) {
+        auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
+        if (textOverlayBase) {
+            auto targetNode = textOverlayManager->GetTargetNode();
+            if (targetNode == this) {
+                textOverlayManager->PopTextOverlay();
+                textOverlayBase->MarkIsOverlayShowed(false);
+                targetNode->MarkNeedRender();
+            }
+        }
+    }
+}
+
 void RenderImage::Update(const RefPtr<Component>& component)
 {
     const RefPtr<ImageComponent> image = AceType::DynamicCast<ImageComponent>(component);
     if (!image) {
         LOGE("image component is null!");
         return;
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    if (!clipboard_ && context) {
+        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
     }
     currentSrcRect_ = srcRect_;
     currentDstRect_ = dstRect_;
@@ -55,7 +80,6 @@ void RenderImage::Update(const RefPtr<Component>& component)
     SetTextDirection(image->GetTextDirection());
     matchTextDirection_ = image->IsMatchTextDirection();
     SetRadius(image->GetBorder());
-    auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
         loadImgSuccessEvent_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             image->GetLoadSuccessEvent(), context_);
@@ -98,6 +122,8 @@ void RenderImage::Update(const RefPtr<Component>& component)
         CreateDragDropRecognizer(context_);
     }
 
+    copyOption_ = image->GetCopyOption();
+
     // this value is used for update frequency with same image source info.
     LOGD("sourceInfo %{public}s", sourceInfo_.ToString().c_str());
     LOGD("inComingSource %{public}s", inComingSource.ToString().c_str());
@@ -121,6 +147,199 @@ void RenderImage::UpdateThemeIcon(ImageSourceInfo& sourceInfo)
             sourceInfo.UpdateSrcType();
         }
     }
+}
+
+void RenderImage::OnPaintFinish()
+{
+    UpdateOverlay();
+}
+
+void RenderImage::OnTouchTestHit(
+    const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
+{
+    if (dragDropGesture_) {
+        result.emplace_back(dragDropGesture_);
+    }
+
+    if (copyOption_ != CopyOptions::None && imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS
+        && !sourceInfo_.IsSvg()) {
+        if (!textOverlayRecognizer_) {
+            textOverlayRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(context_);
+            textOverlayRecognizer_->SetOnLongPress([weak = WeakClaim(this)](const LongPressInfo& info) {
+                auto client = weak.Upgrade();
+                if (client) {
+                    client->OnLongPress(info);
+                }
+            });
+        }
+        textOverlayRecognizer_->SetCoordinateOffset(coordinateOffset);
+        textOverlayRecognizer_->SetTouchRestrict(touchRestrict);
+        textOverlayRecognizer_->SetUseCatchMode(false);
+        result.emplace_back(textOverlayRecognizer_);
+    }
+}
+
+void RenderImage::OnLongPress(const LongPressInfo& longPressInfo)
+{
+    auto textOverlayManager = GetTextOverlayManager(context_);
+    if (textOverlayManager) {
+        auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
+        if (textOverlayBase) {
+            auto targetNode = textOverlayManager->GetTargetNode();
+            if (targetNode) {
+                textOverlayManager->PopTextOverlay();
+                textOverlayBase->MarkIsOverlayShowed(false);
+                targetNode->MarkNeedRender();
+            }
+        }
+        textOverlayManager->SetTextOverlayBase(AceType::WeakClaim(this));
+    }
+
+    Offset longPressPosition = longPressInfo.GetGlobalLocation();
+    ShowTextOverlay(longPressPosition);
+}
+
+bool RenderImage::HandleMouseEvent(const MouseEvent& event)
+{
+    if (copyOption_ == CopyOptions::None || imageLoadingStatus_ != ImageLoadingStatus::LOAD_SUCCESS
+        || sourceInfo_.IsSvg()) {
+        return false;
+    }
+    if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
+        Offset rightClickOffset = event.GetOffset();
+        auto textOverlayManager = GetTextOverlayManager(context_);
+        if (textOverlayManager) {
+            auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
+            if (textOverlayBase) {
+                auto targetNode = textOverlayManager->GetTargetNode();
+                if (targetNode) {
+                    textOverlayManager->PopTextOverlay();
+                    textOverlayBase->MarkIsOverlayShowed(false);
+                    targetNode->MarkNeedRender();
+                }
+            }
+            textOverlayManager->SetTextOverlayBase(AceType::WeakClaim(this));
+        }
+        ShowTextOverlay(rightClickOffset);
+        return true;
+    }
+    return false;
+}
+
+void RenderImage::ShowTextOverlay(const Offset& showOffset)
+{
+    popOverlayOffset_ = showOffset;
+    Offset startHandleOffset = popOverlayOffset_;
+    Offset endHandleOffset = popOverlayOffset_;
+    if (isOverlayShowed_ && updateHandlePosition_) {
+        OverlayShowOption option { .showMenu = isOverlayShowed_,
+            .updateOverlayType = UpdateOverlayType::LONG_PRESS,
+            .startHandleOffset = startHandleOffset,
+            .endHandleOffset = endHandleOffset};
+        updateHandlePosition_(option);
+        if (!animator_) {
+            LOGE("Show textOverlay error, animator is nullptr");
+            return;
+        }
+        if (!animator_->IsStopped()) {
+            animator_->Stop();
+        }
+        animator_->Play();
+        return;
+    }
+
+    textOverlay_ =
+        AceType::MakeRefPtr<TextOverlayComponent>(GetThemeManager(), context_.Upgrade()->GetAccessibilityManager());
+    textOverlay_->SetWeakImage(WeakClaim(this));
+    textOverlay_->SetNeedCilpRect(false);
+    textOverlay_->SetStartHandleOffset(startHandleOffset);
+    textOverlay_->SetEndHandleOffset(endHandleOffset);
+    textOverlay_->SetContext(context_);
+    InitAnimation(context_);
+    RegisterCallbacksToOverlay();
+    MarkNeedRender();
+}
+
+void RenderImage::RegisterCallbacksToOverlay()
+{
+    if (!textOverlay_) {
+        return;
+    }
+
+    textOverlay_->SetOnCopy([weak = AceType::WeakClaim(this)] {
+        auto image = weak.Upgrade();
+        if (image) {
+            image->HandleOnCopy();
+        }
+    });
+
+    auto callback = [weak = WeakClaim(this), pipelineContext = context_,
+        textOverlay = textOverlay_](const RefPtr<PixelMap>& pixmap) {
+        auto context = pipelineContext.Upgrade();
+        if (!context) {
+            return;
+        }
+        auto textOverlayManager = context->GetTextOverlayManager();
+        if (!textOverlayManager) {
+            return;
+        }
+        textOverlayManager->PushTextOverlayToStack(textOverlay, pipelineContext);
+
+        auto image = weak.Upgrade();
+        if (image) {
+            image->UpdateOverlay();
+        }
+        image->MarkIsOverlayShowed(true);
+    };
+    if (clipboard_) {
+        clipboard_->GetPixelMapData(callback);
+    }
+}
+
+void RenderImage::UpdateOverlay()
+{
+    if (isOverlayShowed_ && updateHandlePosition_) {
+        OverlayShowOption option { .showMenu = isOverlayShowed_,
+            .updateOverlayType = UpdateOverlayType::LONG_PRESS,
+            .startHandleOffset = popOverlayOffset_,
+            .endHandleOffset = popOverlayOffset_ };
+        updateHandlePosition_(option);
+    }
+}
+
+void RenderImage::HandleOnCopy()
+{
+    if (!clipboard_) {
+        return;
+    }
+    auto renderImage = AceType::Claim(this);
+    auto type = sourceInfo_.GetSrcType();
+    switch (type) {
+        case SrcType::PIXMAP: {
+            clipboard_->SetPixelMapData(sourceInfo_.GetPixmap());
+            break;
+        }
+        case SrcType::BASE64: {
+            clipboard_->SetData(sourceInfo_.GetSrc());
+            break;
+        }
+        case SrcType::DATA_ABILITY_DECODED:
+        case SrcType::DATA_ABILITY: {
+            clipboard_->SetData(sourceInfo_.GetSrc());
+            break;
+        }
+        default: {
+            clipboard_->SetPixelMapData(renderImage->GetPixmapFromSkImage());
+            break;
+        }
+    }
+
+    auto textOverlayManager = GetTextOverlayManager(context_);
+    if (textOverlayManager) {
+        textOverlayManager->PopTextOverlay();
+    }
+    isOverlayShowed_ = false;
+    MarkNeedRender();
 }
 
 void RenderImage::PerformLayout()
@@ -685,14 +904,6 @@ void RenderImage::PrintImageLog(const Size& srcSize, const BackgroundImageSize& 
 void RenderImage::Dump()
 {
     DumpLog::GetInstance().AddDesc(std::string("UsingWideGamut: ").append(IsSourceWideGamut() ? "true" : "false"));
-}
-
-void RenderImage::OnTouchTestHit(
-    const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
-{
-    if (dragDropGesture_) {
-        result.emplace_back(dragDropGesture_);
-    }
 }
 
 DragItemInfo RenderImage::GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info)

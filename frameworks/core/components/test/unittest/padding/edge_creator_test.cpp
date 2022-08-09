@@ -63,7 +63,6 @@ Edge EdgeCreatorTest::CreateFromDsl(const std::string jsonEdgeStr) const
  * @tc.name: EdgeCreator001
  * @tc.desc: Verify EdgeCreator can create edge with value.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUF
  */
 HWTEST_F(EdgeCreatorTest, EdgeCreator001, TestSize.Level1)
 {
@@ -91,7 +90,6 @@ HWTEST_F(EdgeCreatorTest, EdgeCreator001, TestSize.Level1)
  * @tc.name: EdgeCreator002
  * @tc.desc: Verify EdgeCreator can create edge with left | top | right | bottom.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUF
  */
 HWTEST_F(EdgeCreatorTest, EdgeCreator002, TestSize.Level1)
 {
@@ -122,7 +120,6 @@ HWTEST_F(EdgeCreatorTest, EdgeCreator002, TestSize.Level1)
  * @tc.name: EdgeCreator003
  * @tc.desc: Verify EdgeCreator can create Edge with className only.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUF
  */
 HWTEST_F(EdgeCreatorTest, EdgeCreator003, TestSize.Level1)
 {

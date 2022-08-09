@@ -63,6 +63,23 @@ bool ViewStackProcessor::ShouldPopImmediately()
     return GetMainElementNode()->IsAtomicNode();
 }
 
+void ViewStackProcessor::ImplicitPopBeforeContinue()
+{
+    if ((elementsStack_.size() > 1) && ShouldPopImmediately()) {
+        Pop();
+        LOGD("Implicit Pop done, top component is %{public}s", GetMainElementNode()->GetTag().c_str());
+    } else {
+        LOGD("NO Implicit Pop before continue. top component is %{public}s", GetMainElementNode()->GetTag().c_str());
+    }
+}
+
+void ViewStackProcessor::FlushRerenderTask()
+{
+    auto node = Finish();
+    CHECK_NULL_VOID(node);
+    node->FlushUpdateAndMarkDirty();
+}
+
 void ViewStackProcessor::Pop()
 {
     if (elementsStack_.size() == 1) {

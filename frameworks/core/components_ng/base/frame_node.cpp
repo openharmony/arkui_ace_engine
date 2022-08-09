@@ -26,7 +26,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/render_wrapper.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -36,7 +36,7 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
     renderContext_->InitContext(IsRootNode());
-    paintProperty_ = pattern->CreateRenderProperty();
+    paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
 }
@@ -44,14 +44,6 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
 FrameNode::~FrameNode()
 {
     pattern_->DetachFromFrameNode();
-}
-
-RefPtr<FrameNode> FrameNode::CreateFrameNodeAndMountToParent(const std::string& tag, int32_t nodeId,
-    const RefPtr<Pattern>& pattern, const RefPtr<FrameNode>& parent, int32_t slot)
-{
-    auto newChild = CreateFrameNode(tag, nodeId, pattern);
-    newChild->MountToParent(parent, slot);
-    return newChild;
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -62,12 +54,38 @@ RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     return newChild;
 }
 
+RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
+    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+{
+    auto frameNode = GetFrameNode(tag, nodeId);
+    if (frameNode) {
+        return frameNode;
+    }
+    auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
+    return CreateFrameNode(tag, nodeId, pattern);
+}
+
+RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId)
+{
+    auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
+    if (!frameNode) {
+        return nullptr;
+    }
+    if (frameNode->tag_ != tag) {
+        LOGE("the tag is changed");
+        ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
+        return nullptr;
+    }
+    return frameNode;
+}
+
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
     frameNode->SetContext(PipelineContext::GetCurrentContext());
     frameNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(frameNode);
     return frameNode;
 }
 
@@ -105,6 +123,7 @@ void FrameNode::RequestNextFrame()
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
 {
+    ACE_FUNCTION_TRACE();
     LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
     CHECK_NULL_VOID(dirty);
     if (dirty->IsActive()) {
@@ -139,7 +158,7 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool onCreate, bool forceUseMa
     if (!isLayoutDirtyMarked_) {
         return std::nullopt;
     }
-    ACE_SCOPED_TRACE("prepare layout task");
+    ACE_SCOPED_TRACE("CreateLayoutTask:PrepareTask");
     RefPtr<LayoutWrapper> layoutWrapper;
     if (!onCreate) {
         UpdateLayoutPropertyFlag();
@@ -179,9 +198,8 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     if (!isRenderDirtyMarked_) {
         return std::nullopt;
     }
-    ACE_SCOPED_TRACE("prepare render task");
-    LOGD("create ui render task");
-    auto wrapper = CreateRenderWrapper();
+    ACE_SCOPED_TRACE("CreateRenderTask:PrepareTask");
+    auto wrapper = CreatePaintWrapper();
     auto task = [wrapper]() {
         ACE_SCOPED_TRACE("FrameNode::RenderTask");
         wrapper->FlushRender();
@@ -292,13 +310,13 @@ void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, boo
     parent->AppendChild(layoutWrapper);
 }
 
-RefPtr<RenderWrapper> FrameNode::CreateRenderWrapper()
+RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
 {
     isRenderDirtyMarked_ = false;
-    auto renderWrapper = MakeRefPtr<RenderWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
-    renderWrapper->SetContentPaintImpl(pattern_->CreateContentPaintImpl());
+    auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
+    paintWrapper->SetNodePaintMethod(pattern_->CreateNodePaintMethod());
     paintProperty_->CleanDirty();
-    return renderWrapper;
+    return paintWrapper;
 }
 
 void FrameNode::PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType)
@@ -322,6 +340,12 @@ void FrameNode::RebuildRenderContextTree(const std::list<RefPtr<FrameNode>>& chi
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
+}
+
+void FrameNode::FlushUpdateAndMarkDirty()
+{
+    MarkDirtyNode();
+    RequestNextFrame();
 }
 
 void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)

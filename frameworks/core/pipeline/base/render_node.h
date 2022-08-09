@@ -892,6 +892,11 @@ public:
         return touchable_;
     }
 
+    HitTestMode GetHitTestMode() const
+    {
+        return hitTestMode_;
+    }
+
     bool IsDisabled() const
     {
         return disabled_;
@@ -1157,6 +1162,8 @@ protected:
     virtual void OnMouseHoverExitTest() {}
     void SendAccessibilityEvent(const std::string& eventType);
     void SetAccessibilityClick(RefPtr<ClickRecognizer> clickRecognizer);
+    bool DispatchTouchTestToChildren(const Point& localPoint, const Point& globalPoint,
+        const TouchRestrict& touchRestrict, TouchTestResult& result);
 
     void PrepareLayout();
 
@@ -1236,6 +1243,9 @@ protected:
     Point coordinatePoint_;
     WeakPtr<V2::InspectorNode> inspector_;
     WeakPtr<AccessibilityNode> accessibilityNode_;
+
+    // Used for RS extra case.
+    bool isFirstNode_ = false;
 
     Rect touchRect_;                  // Self touch rect
     std::vector<Rect> touchRectList_; // Self and all children touch rect
@@ -1346,6 +1356,7 @@ private:
 
     std::string restoreInfo_;
     bool isNotSiblingAddRecognizerToResult_ = true;
+    HitTestMode hitTestMode_ = HitTestMode::DEFAULT;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
 };

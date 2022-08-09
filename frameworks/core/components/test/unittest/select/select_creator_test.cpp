@@ -55,8 +55,6 @@ public:
  * @tc.name: SelectCreator001
  * @tc.desc: Verify SelectCreator can create SelectComponent with default value.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPS
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator001, TestSize.Level1)
 {
@@ -93,8 +91,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator001, TestSize.Level1)
  * @tc.name: SelectCreator002
  * @tc.desc: Verify SelectCreator can create SelectComponent with all values.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPS
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator002, TestSize.Level1)
 {
@@ -153,8 +149,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator002, TestSize.Level1)
  * @tc.name: SelectCreator003
  * @tc.desc: Verify SelectCreator can create SelectComponent with enabled.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPS
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator003, TestSize.Level1)
 {
@@ -186,8 +180,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator003, TestSize.Level1)
  * @tc.name: SelectCreator004
  * @tc.desc: Verify SelectCreator can create SelectComponent with disabled.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPS
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator004, TestSize.Level1)
 {
@@ -219,8 +211,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator004, TestSize.Level1)
  * @tc.name: SelectCreator005
  * @tc.desc: Verify SelectCreator can create SelectComponent with clicked color.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPS
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator005, TestSize.Level1)
 {
@@ -252,8 +242,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator005, TestSize.Level1)
  * @tc.name: SelectCreator006
  * @tc.desc: Verify SelectCreator can create SelectComponent with selected color.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPS
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator006, TestSize.Level1)
 {
@@ -285,8 +273,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator006, TestSize.Level1)
  * @tc.name: SelectCreator007
  * @tc.desc: Verify SelectCreator can create SelectComponent with disabled color.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPS
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator007, TestSize.Level1)
 {
@@ -318,8 +304,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator007, TestSize.Level1)
  * @tc.name: SelectCreator008
  * @tc.desc: Verify SelectCreator can create SelectComponent with onchange event.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPS
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator008, TestSize.Level1)
 {
@@ -351,8 +335,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator008, TestSize.Level1)
  * @tc.name: SelectCreator009
  * @tc.desc: Verify SelectCreator can create SelectComponent with tipText.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPS
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator009, TestSize.Level1)
 {
@@ -384,8 +366,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator009, TestSize.Level1)
  * @tc.name: SelectCreator010
  * @tc.desc: Verify SelectCreator can create SelectComponent with fontSize.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPS
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator010, TestSize.Level1)
 {
@@ -417,8 +397,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator010, TestSize.Level1)
  * @tc.name: SelectCreator011
  * @tc.desc: Verify SelectCreator can create SelectComponent with fontFamily.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPS
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator011, TestSize.Level1)
 {
@@ -450,8 +428,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator011, TestSize.Level1)
  * @tc.name: SelectCreator012
  * @tc.desc: Verify SelectCreator can create SelectComponent with optionSize.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPS
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator012, TestSize.Level1)
 {
@@ -483,8 +459,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator012, TestSize.Level1)
  * @tc.name: SelectCreator013
  * @tc.desc: Verify SelectCreator can create SelectComponent has OptionComponent with icon.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator013, TestSize.Level1)
 {
@@ -517,8 +491,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator013, TestSize.Level1)
  * @tc.name: SelectCreator014
  * @tc.desc: Verify SelectCreator can create SelectComponent has OptionComponent with value.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator014, TestSize.Level1)
 {
@@ -550,8 +522,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator014, TestSize.Level1)
  * @tc.name: SelectCreator015
  * @tc.desc: Verify SelectCreator can create SelectComponent has OptionComponent with text.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator015, TestSize.Level1)
 {
@@ -584,8 +554,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator015, TestSize.Level1)
  * @tc.name: SelectCreator016
  * @tc.desc: Verify SelectCreator can create SelectComponent has OptionComponent with selected.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator016, TestSize.Level1)
 {
@@ -617,8 +585,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator016, TestSize.Level1)
  * @tc.name: SelectCreator017
  * @tc.desc: Verify SelectCreator can create SelectComponent has OptionComponent with unselected.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator017, TestSize.Level1)
 {
@@ -650,8 +616,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator017, TestSize.Level1)
  * @tc.name: SelectCreator018
  * @tc.desc: Verify SelectCreator can create SelectComponent has OptionComponent with fontColor.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator018, TestSize.Level1)
 {
@@ -684,8 +648,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator018, TestSize.Level1)
  * @tc.name: SelectCreator019
  * @tc.desc: Verify SelectCreator can create SelectComponent has OptionComponent with fontWeight.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator019, TestSize.Level1)
 {
@@ -717,8 +679,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator019, TestSize.Level1)
  * @tc.name: SelectCreator020
  * @tc.desc: Verify SelectCreator can create SelectComponent has OptionComponent with fontFamily.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator020, TestSize.Level1)
 {
@@ -751,8 +711,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator020, TestSize.Level1)
  * @tc.name: SelectCreator021
  * @tc.desc: Verify SelectCreator can create SelectComponent has OptionComponent with textDecoration.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator021, TestSize.Level1)
 {
@@ -784,8 +742,6 @@ HWTEST_F(SelectCreatorTest, SelectCreator021, TestSize.Level1)
  * @tc.name: SelectCreator022
  * @tc.desc: Verify SelectCreator can create SelectComponent has OptionComponent with fontSize.
  * @tc.type: FUNC
- * @tc.require: AR000DBAPT
- * @tc.author: huangzhangmin
  */
 HWTEST_F(SelectCreatorTest, SelectCreator022, TestSize.Level1)
 {

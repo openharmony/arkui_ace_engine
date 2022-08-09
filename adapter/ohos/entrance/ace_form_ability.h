@@ -105,6 +105,8 @@ public:
      */
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
 
+    bool OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams) override;
+
 private:
     void LoadFormEnv(const OHOS::AAFwk::Want& want);
 

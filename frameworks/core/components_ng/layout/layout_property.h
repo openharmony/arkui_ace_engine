@@ -173,7 +173,7 @@ protected:
 
 private:
     // This will call after ModifyLayoutConstraint.
-    void CheckSelfIdealSize(bool updateFlag);
+    void CheckSelfIdealSize();
 
     std::optional<LayoutConstraintF> layoutConstraint_;
     std::optional<LayoutConstraintF> contentConstraint_;

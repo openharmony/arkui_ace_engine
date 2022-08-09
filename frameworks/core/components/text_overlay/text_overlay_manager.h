@@ -39,8 +39,8 @@ class PipelineContext;
 class TextOverlayComponent;
 class TextOverlayManager;
 
-enum class CopyOption {
-    NoCopy = 0,
+enum class CopyOptions {
+    None = 0,
     InApp,
     Local,
     Distributed,

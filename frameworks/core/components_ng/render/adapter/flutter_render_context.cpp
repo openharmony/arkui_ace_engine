@@ -18,7 +18,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/render/canvas.h"
-#include "core/components_ng/render/render_property.h"
+#include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
 FlutterRenderContext::~FlutterRenderContext()
@@ -29,6 +29,9 @@ FlutterRenderContext::~FlutterRenderContext()
 void FlutterRenderContext::StartRecording()
 {
     if (!flutterNode_) {
+        return;
+    }
+    if (IsRecording()) {
         return;
     }
     recorder_ = std::make_unique<SkPictureRecorder>();
@@ -80,6 +83,24 @@ void FlutterRenderContext::UpdateBgColor(const Color& value)
     flutterNode_->SetBgColor(value);
     RequestNextFrame();
 }
+
+void FlutterRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDraw)
+{
+    auto canvas = GetCanvas();
+    if (contentDraw) {
+        contentDraw(canvas);
+    }
+}
+
+void FlutterRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)
+{
+    auto canvas = GetCanvas();
+    if (foregroundDraw) {
+        foregroundDraw(canvas);
+    }
+}
+
+void FlutterRenderContext::FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
 
 RefPtr<Canvas> FlutterRenderContext::GetCanvas()
 {

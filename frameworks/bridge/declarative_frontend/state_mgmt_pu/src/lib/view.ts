@@ -123,21 +123,12 @@ abstract class View extends NativeView implements
     this.providedVars_.clear();
   }
 
-  protected abstract setStateSourcePropertiesUnchanged(): void;
-  protected abstract setTwoWaySyncPropertiesUnchanged(): void;
-  protected abstract setOneWaySyncPropertiesUnchanged(): void;
   protected abstract purgeVariableDependenciesOnElmtId(removedelementId: ElementIdOnSecondRender);
   protected abstract initialRender(): void;
   protected abstract rerender(): void;
 
   protected initialRenderView(): void {
     this.initialRender();
-
-    // set propertyHasChanged_ for each @State, @Link (but not @Prop, @StorageProp)
-    // state variable, from now on any change to the var will be notified 
-    this.setStateSourcePropertiesUnchanged();
-    this.setTwoWaySyncPropertiesUnchanged();
-    this.setOneWaySyncPropertiesUnchanged();
   }
 
   propertyHasChanged(info?: PropertyInfo): void {

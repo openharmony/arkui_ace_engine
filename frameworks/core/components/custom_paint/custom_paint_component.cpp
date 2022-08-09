@@ -147,6 +147,15 @@ double CanvasTaskPool::MeasureTextHeight(const std::string& text, const PaintSta
     return paint->MeasureTextHeight(text, state);
 }
 
+TextMetrics CanvasTaskPool::MeasureTextMetrics(const std::string& text, const PaintState& state)
+{
+    auto paint = renderNode_.Upgrade();
+    if (!paint) {
+        return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    }
+    return paint->MeasureTextMetrics(text, state);
+}
+
 void CanvasTaskPool::MoveTo(double x, double y)
 {
     auto task = [x, y](RenderCustomPaint& interface, const Offset& offset) { interface.MoveTo(offset, x, y); };

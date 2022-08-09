@@ -268,7 +268,7 @@ void RenderSlidingPanel::FireHeightChangeEvent()
     if (!onHeightChange_) {
         return;
     }
-    auto currentHeight = GetLayoutParam().GetMaxSize().Height() - blankHeight_;
+    int32_t currentHeight = static_cast<int32_t>(GetLayoutParam().GetMaxSize().Height() - blankHeight_);
     if (!visible) {
         currentHeight = 0;
     }
@@ -382,6 +382,22 @@ void RenderSlidingPanel::UpdateTouchRect()
     touchRect_ = GetChildren().back()->GetPaintRect();
     touchRectList_.emplace_back(touchRect_);
     SetTouchRectList(touchRectList_);
+}
+
+void RenderSlidingPanel::LiftPanelForVirtualKeyboard(double offsetY)
+{
+    double maxBlankHeight = GetLayoutSize().Height() - CONTENT_MIN_TOLERANCE;
+    if (dragBar_) {
+        maxBlankHeight -= dragBar_->GetLayoutSize().Height();
+    }
+    blankHeight_ = std::min(blankHeight_ + offsetY, maxBlankHeight);
+    FireHeightChangeEvent();
+    MarkNeedLayout();
+}
+
+void RenderSlidingPanel::UpdatePanelHeightByCurrentMode()
+{
+    AnimateTo(defaultBlankHeights_[mode_], mode_);
 }
 
 void RenderSlidingPanel::HandleDragStart(const Offset& startPoint)

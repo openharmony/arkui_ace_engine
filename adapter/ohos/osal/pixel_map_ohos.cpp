@@ -177,4 +177,25 @@ std::string PixelMapOhos::GetModifyId()
     return std::string();
 }
 
+std::shared_ptr<Media::PixelMap> PixelMapOhos::GetPixelMapSharedPtr()
+{
+    return pixmap_;
+}
+
+RefPtr<PixelMap> PixelMap::ConvertSkImageToPixmap(const uint32_t *colors, uint32_t colorLength,
+    int32_t width, int32_t height)
+{
+    Media::InitializationOptions opts;
+    opts.size.width = width;
+    opts.size.height = height;
+    opts.editable = true;
+    std::unique_ptr<Media::PixelMap> pixmap = Media::PixelMap::Create(colors, colorLength, opts);
+    if (!pixmap) {
+        LOGE("fail to create media pixelmap");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> sharedPixelmap(pixmap.release());
+    return AceType::MakeRefPtr<PixelMapOhos>(sharedPixelmap);
+}
+
 } // namespace OHOS::Ace

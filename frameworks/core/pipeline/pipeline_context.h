@@ -384,6 +384,8 @@ public:
     bool AccessibilityRequestFocus(const ComposeId& id);
 
     bool RequestFocus(const RefPtr<Element>& targetElement);
+    bool RequestFocus(const std::string& targetNodeId);
+    bool RequestDefaultFocus();
 
     RefPtr<AccessibilityManager> GetAccessibilityManager() const override;
 
@@ -1077,6 +1079,7 @@ protected:
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
+    void FlushReload() override;
     void FlushReloadTransition() override;
 
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
@@ -1105,6 +1108,7 @@ private:
     void CorrectPosition();
     void CreateTouchEventOnZoom(const AxisEvent& event);
     void HandleVisibleAreaChangeEvent();
+    void FlushTouchEvents();
 
     template<typename T>
     struct NodeCompare {
@@ -1299,6 +1303,7 @@ private:
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 
     std::vector<RectCallback> rectCallbackList_;
+    std::list<TouchEvent> touchEvents_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

@@ -620,6 +620,17 @@ void QJSUtils::DefineGlobalFunction(JSContext* ctx, JSCFunction cFunc, const cha
     JS_FreeValue(ctx, global);
 }
 
+void QJSUtils::DefineGlobalModuleFunction(
+    JSContext* ctx, JSCFunction cFunc, const char* moduleName, const char* funcName, const int paramNum)
+{
+    JSValue global = JS_GetGlobalObject(ctx);
+    JSValue jsFocusControl = JS_NewObject(ctx);
+    JSValue jsFuncVal = JS_NewCFunction2(ctx, cFunc, funcName, paramNum, JS_CFUNC_generic, 0);
+    JS_SetPropertyStr(ctx, jsFocusControl, funcName, jsFuncVal);
+    JS_SetPropertyStr(ctx, global, moduleName, jsFocusControl);
+    JS_FreeValue(ctx, global);
+}
+
 #if defined(USE_CLANG_COVERAGE) || defined(CLANG_COVERAGE)
 std::stack<JSContext*> QJSContext::s_qjsContextStack;
 #else

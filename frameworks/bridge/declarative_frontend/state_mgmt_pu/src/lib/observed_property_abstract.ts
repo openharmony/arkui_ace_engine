@@ -46,9 +46,9 @@ abstract class ObservedPropertyAbstract<T>  {
   // settting the flag to true at startup implies 
   // that any delayed initialization in View.setInitiallyProvidedValue()
   // will _not_ trigger any change notifcations to subscribers.
-  // propertyHasChanged_ will be set to false in (initial) render() function
+  //  markDependentElementsIsPending will be set to false in (initial) render() function
   // hence, from this moment, the first change will be notified to subscribers
-  private propertyHasChanged_: boolean = true;
+  private markDependentElementsIsPending: boolean = false;
   private dependentElementIds_: Set<number> = new Set<number>();
 
   constructor(subscribeMe?: IPropertySubscriber, info?: PropertyInfo) {
@@ -80,14 +80,6 @@ abstract class ObservedPropertyAbstract<T>  {
     }
   }
 
-  // View.render() (initial render) calls this function
-  // when this.propertyHasChanged_ == false, it imlpies that notifyHasChange
-  // will notify subscribers (just once) and set propertyHasChanged_ = true;
-  // until markDependentElementsDirty sets it to false again.
-  public SetPropertyUnchanged() {
-    this.propertyHasChanged_ = false;
-  }
-
   // get property and notify 'get' access
   public abstract get(): T;
 
@@ -115,10 +107,6 @@ abstract class ObservedPropertyAbstract<T>  {
 
   protected notifyHasChanged(newValue: T) {
     console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, dependent elmtIds [${Array.from(this.dependentElementIds_)}].`);
-    if (this.propertyHasChanged_) {
-      console.debug(`   ... propertyHasChanged_ is already true. Not notifying again.`);
-      return;
-    }
     console.debug(`   ... notifying ${this.subscribers_.size} subscribers (these might not all be 'set' access subscribers).`);
     var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.subscribers_.forEach((subscribedId) => {
@@ -134,7 +122,10 @@ abstract class ObservedPropertyAbstract<T>  {
         console.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
       }
     });
-    this.propertyHasChanged_ = true;
+
+    // for properties owned by a View"
+    // markDependentElementsDirty needs to be executed
+    this.markDependentElementsIsPending = true;
   }
 
   protected notifyPropertyRead() {
@@ -189,7 +180,7 @@ abstract class ObservedPropertyAbstract<T>  {
 
 
   /**
-   * durign get access recording take note of the created component and its elmtId
+   * during 'get' access recording take note of the created component and its elmtId
    * and add this component to the list of components who are dependent on this property
    */
   protected recordDependentUpdate() {
@@ -203,19 +194,26 @@ abstract class ObservedPropertyAbstract<T>  {
   }
 
   public markDependentElementsDirty(view: View) {
-    if (!this.propertyHasChanged_) {
+    if (!this.markDependentElementsIsPending) {
       return;
     }
-    console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']:markDependentElementsDirty`);
-    this.dependentElementIds_.forEach(elmtId => {
-      view.markElemenDirtyById(elmtId)
-      console.debug(`   - elmtId ${elmtId}.`);
-    });
-    this.SetPropertyUnchanged();
+    if (this.dependentElementIds_.size > 0) {
+      console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']:markDependentElementsDirty`);
+      this.dependentElementIds_.forEach(elmtId => {
+        view.markElemenDirtyById(elmtId)
+        console.debug(`   - elmtId ${elmtId}.`);
+      });
+    }
+    this.markDependentElementsIsPending = false;
   }
 
   public purgeDependencyOnElmtId(rmElmtId: ElementIdOnSecondRender): void {
     console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']:purgeDependencyOnElmtId ${rmElmtId}`);
     this.dependentElementIds_.delete(rmElmtId);
+  }
+
+  public SetPropertyUnchanged() : void {
+    // function to be removed
+    // keep it here until transpiler is updated.
   }
 }

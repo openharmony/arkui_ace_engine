@@ -40,8 +40,6 @@ void RenderImageFitOthersTest::TearDown() {}
  * @tc.desc: Verify the implementation of imageFit : FILL with any alignment and combination of srcSize and dstSize,
  *           set this alignment to BOTTOM_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers001, TestSize.Level1)
 {
@@ -56,8 +54,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers001, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : CONTAIN with srcRatio > dstRatio, in which ratio = width / height.
  *           In this case, only alignY takes effect, set alignment to TOP_LEFT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers002, TestSize.Level1)
 {
@@ -72,8 +68,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers002, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : CONTAIN with srcRatio > dstRatio, in which ratio = width / height.
  *           In this case, only alignY takes effect, set alignment to CENTER_LEFT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers003, TestSize.Level1)
 {
@@ -88,8 +82,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers003, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : CONTAIN with srcRatio > dstRatio, in which ratio = width / height.
  *           In this case, only alignY takes effect, set alignment to BOTTOM_LEFT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers004, TestSize.Level1)
 {
@@ -104,8 +96,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers004, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : CONTAIN with srcRatio <= dstRatio, in which ratio = width / height.
  *           In this case, only alignX takes effect, set alignment to BOTTOM_LEFT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers005, TestSize.Level1)
 {
@@ -120,8 +110,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers005, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : CONTAIN with srcRatio <= dstRatio, in which ratio = width / height.
  *           In this case, only alignX takes effect, set alignment to BOTTOM_CENTER
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers006, TestSize.Level1)
 {
@@ -136,8 +124,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers006, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : CONTAIN with srcRatio <= dstRatio, in which ratio = width / height.
  *           In this case, only alignX takes effect, set alignment to CENTER_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers007, TestSize.Level1)
 {
@@ -152,8 +138,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers007, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : COVER with srcRatio > dstRatio, in which ratio = width / height.
  *           In this case, only alignX takes effect, set alignment to CENTER_LEFT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers008, TestSize.Level1)
 {
@@ -168,8 +152,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers008, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : COVER with srcRatio > dstRatio, in which ratio = width / height.
  *           In this case, only alignX takes effect, set alignment to CENTER
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers009, TestSize.Level1)
 {
@@ -184,8 +166,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers009, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : COVER with srcRatio > dstRatio, in which ratio = width / height.
  *           In this case, only alignX takes effect, set alignment to CENTER_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers010, TestSize.Level1)
 {
@@ -200,8 +180,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers010, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : COVER with srcRatio <= dstRatio, in which ratio = width / height.
  *           In this case, only alignY takes effect, set alignment to TOP_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers011, TestSize.Level1)
 {
@@ -216,8 +194,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers011, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : COVER with srcRatio <= dstRatio, in which ratio = width / height.
  *           In this case, only alignY takes effect, set alignment to CENTER_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers012, TestSize.Level1)
 {
@@ -232,8 +208,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers012, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : COVER with srcRatio <= dstRatio, in which ratio = width / height.
  *           In this case, only alignY takes effect, set alignment to BOTTOM_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers013, TestSize.Level1)
 {
@@ -248,8 +222,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers013, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : FITWIDTH with srcRatio > dstRatio, in which ratio = width / height.
  *           In this case, only alignY takes effect, set alignment to TOP_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers014, TestSize.Level1)
 {
@@ -264,8 +236,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers014, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : FITWIDTH with srcRatio > dstRatio, in which ratio = width / height.
  *           In this case, only alignY takes effect, set alignment to CENTER_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers015, TestSize.Level1)
 {
@@ -280,8 +250,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers015, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : FITWIDTH with srcRatio > dstRatio, in which ratio = width / height.
  *           In this case, only alignY takes effect, set alignment to BOTTOM_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers016, TestSize.Level1)
 {
@@ -296,8 +264,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers016, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : FITWIDTH with srcRatio <= dstRatio, in which ratio = width /
  *           height. In this case, only alignY takes effect, set alignment to TOP_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers017, TestSize.Level1)
 {
@@ -312,8 +278,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers017, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : FITWIDTH with srcRatio <= dstRatio, in which ratio = width /
  *           height. In this case, only alignY takes effect, set alignment to CENTER_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers018, TestSize.Level1)
 {
@@ -328,8 +292,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers018, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : FITWIDTH with srcRatio <= dstRatio, in which ratio = width /
  *           height. In this case, only alignY takes effect, set alignment to BOTTOM_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers019, TestSize.Level1)
 {
@@ -344,8 +306,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers019, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : FITHEIGHT with srcRatio > dstRatio, in which ratio = width /
  *           height. In this case, only alignX takes effect, set alignment to BOTTOM_LEFT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers020, TestSize.Level1)
 {
@@ -360,8 +320,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers020, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : FITHEIGHT with srcRatio > dstRatio, in which ratio = width /
  *           height. In this case, only alignX takes effect, set alignment to BOTTOM_CENTER
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers021, TestSize.Level1)
 {
@@ -376,8 +334,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers021, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : FITHEIGHT with srcRatio > dstRatio, in which ratio = width /
  *           height. In this case, only alignX takes effect, set alignment to BOTTOM_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers022, TestSize.Level1)
 {
@@ -392,8 +348,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers022, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : FITHEIGHT with srcRatio <= dstRatio, in which ratio = width /
  *           height. In this case, only alignX takes effect, set alignment to BOTTOM_LEFT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers023, TestSize.Level1)
 {
@@ -408,8 +362,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers023, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : FITHEIGHT with srcRatio <= dstRatio, in which ratio = width /
  *           height. In this case, only alignX takes effect, set alignment to BOTTOM_CENTER
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers024, TestSize.Level1)
 {
@@ -424,8 +376,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers024, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : FITHEIGHT with srcRatio <= dstRatio, in which ratio = width /
  *           height. In this case, only alignX takes effect, set alignment to BOTTOM_RIGHT
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers025, TestSize.Level1)
 {
@@ -440,8 +390,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers025, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : SCALEDOWN with srcHeight <= dstHeight and srcWidth <= dstWidth.
  *           In this kind of situation, we apply the same strategy as the implementation of imageFit : NONE.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers026, TestSize.Level1)
 {
@@ -456,8 +404,6 @@ HWTEST_F(RenderImageFitOthersTest, ImageFitOthers026, TestSize.Level1)
  * @tc.desc: Verify the implementation of imageFit : SCALEDOWN with srcHeight > dstHeight or srcWidth > dstWidth.
  *           In this kind of situation, we apply the same strategy as the implementation of imageFit : CONTAIN.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUO
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageFitOthersTest, ImageFitOthers027, TestSize.Level1)
 {

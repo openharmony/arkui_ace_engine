@@ -218,8 +218,6 @@ RefPtr<RenderNode> RenderMarquee::Create()
  * @tc.name: RenderMarqueeLoop001
  * @tc.desc: Test marquee could loop continuously by default.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDL
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueeLoop001, TestSize.Level1)
 {
@@ -242,8 +240,6 @@ HWTEST_F(RenderMarqueeTest, RenderMarqueeLoop001, TestSize.Level1)
  * @tc.name: RenderMarqueeLoop002
  * @tc.desc: Test marquee could loop as user defined.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDL
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueeLoop002, TestSize.Level1)
 {
@@ -265,8 +261,6 @@ HWTEST_F(RenderMarqueeTest, RenderMarqueeLoop002, TestSize.Level1)
  * @tc.name: RenderMarqueeLoop003
  * @tc.desc: Test marquee loop value is invalid.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDL
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueeLoop003, TestSize.Level1)
 {
@@ -288,8 +282,6 @@ HWTEST_F(RenderMarqueeTest, RenderMarqueeLoop003, TestSize.Level1)
  * @tc.name: RenderMarqueeScrollAmount001
  * @tc.desc: Test marquee default scroll amount.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDK
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueeScrollAmount001, TestSize.Level1)
 {
@@ -310,8 +302,6 @@ HWTEST_F(RenderMarqueeTest, RenderMarqueeScrollAmount001, TestSize.Level1)
  * @tc.name: RenderMarqueeScrollAmount002
  * @tc.desc: Test marquee custom scroll amount.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDK
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueeScrollAmount002, TestSize.Level1)
 {
@@ -333,8 +323,6 @@ HWTEST_F(RenderMarqueeTest, RenderMarqueeScrollAmount002, TestSize.Level1)
  * @tc.name: RenderMarqueeScrollAmount003
  * @tc.desc: Test marquee use default scroll amount when an invalid value is set.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDK
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueeScrollAmount003, TestSize.Level1)
 {
@@ -356,8 +344,6 @@ HWTEST_F(RenderMarqueeTest, RenderMarqueeScrollAmount003, TestSize.Level1)
  * @tc.name: RenderMarqueeDirection001
  * @tc.desc: Test marquee default scroll direction.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDJ
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueeDirection001, TestSize.Level1)
 {
@@ -381,8 +367,6 @@ HWTEST_F(RenderMarqueeTest, RenderMarqueeDirection001, TestSize.Level1)
  * @tc.name: RenderMarqueeDirection002
  * @tc.desc: Test marquee scroll direction to right.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDJ
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueeDirection002, TestSize.Level1)
 {
@@ -407,8 +391,6 @@ HWTEST_F(RenderMarqueeTest, RenderMarqueeDirection002, TestSize.Level1)
  * @tc.name: RenderMarqueeEvent001
  * @tc.desc: Test marquee bounce event.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDM
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueeEvent001, TestSize.Level1)
 {
@@ -440,8 +422,6 @@ HWTEST_F(RenderMarqueeTest, RenderMarqueeEvent001, TestSize.Level1)
  * @tc.name: RenderMarqueeEvent002
  * @tc.desc: Test marquee finish event.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDM
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueeEvent002, TestSize.Level1)
 {
@@ -474,8 +454,6 @@ HWTEST_F(RenderMarqueeTest, RenderMarqueeEvent002, TestSize.Level1)
  * @tc.name: RenderMarqueeEvent003
  * @tc.desc: Test marquee start event.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDM
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueeEvent003, TestSize.Level1)
 {
@@ -507,8 +485,6 @@ HWTEST_F(RenderMarqueeTest, RenderMarqueeEvent003, TestSize.Level1)
  * @tc.name: RenderMarqueePlayControl001
  * @tc.desc: Test marquee animation could stop.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDN
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueePlayControl001, TestSize.Level1)
 {
@@ -536,8 +512,6 @@ HWTEST_F(RenderMarqueeTest, RenderMarqueePlayControl001, TestSize.Level1)
  * @tc.name: RenderMarqueePlayControl002
  * @tc.desc: Test marquee animation could start after a stop.
  * @tc.type: FUNC
- * @tc.require: AR000DAVDN
- * @tc.author: liruokun
  */
 HWTEST_F(RenderMarqueeTest, RenderMarqueePlayControl002, TestSize.Level1)
 {

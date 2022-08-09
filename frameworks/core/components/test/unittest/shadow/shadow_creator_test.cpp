@@ -66,8 +66,6 @@ Shadow ShadowCreatorTest::CreateFromDsl(const std::string content) const
  * @tc.name: ShadowCreator001
  * @tc.desc: Verify ShadowCreator can create a shadow with value.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU7
- * @tc.author: chenlien
  */
 HWTEST_F(ShadowCreatorTest, ShadowCreator001, TestSize.Level1)
 {
@@ -104,8 +102,6 @@ HWTEST_F(ShadowCreatorTest, ShadowCreator001, TestSize.Level1)
  * @tc.name: ShadowCreator002
  * @tc.desc: Verify ShadowCreator can create a shadow with value.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU7
- * @tc.author: chenlien
  */
 HWTEST_F(ShadowCreatorTest, ShadowCreator002, TestSize.Level1)
 {
@@ -129,8 +125,6 @@ HWTEST_F(ShadowCreatorTest, ShadowCreator002, TestSize.Level1)
  * @tc.name: ShadowCreator003
  * @tc.desc: Verify ShadowCreator can create a shadow with spreadRadius.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU7
- * @tc.author: jiangdayuan
  */
 HWTEST_F(ShadowCreatorTest, ShadowCreator003, TestSize.Level1)
 {
@@ -162,8 +156,6 @@ HWTEST_F(ShadowCreatorTest, ShadowCreator003, TestSize.Level1)
  * @tc.name: ShadowCreator004
  * @tc.desc: Verify ShadowCreator can create a shadow with elevation.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU7
- * @tc.author: jiangdayuan
  */
 HWTEST_F(ShadowCreatorTest, ShadowCreator004, TestSize.Level1)
 {
@@ -195,8 +187,6 @@ HWTEST_F(ShadowCreatorTest, ShadowCreator004, TestSize.Level1)
  * @tc.name: ShadowCreator005
  * @tc.desc: Verify error shadow properties.
  * @tc.type: FUNC
- * @tc.require: AR000DAQU7
- * @tc.author: jiangdayuan
  */
 HWTEST_F(ShadowCreatorTest, ShadowCreator005, TestSize.Level1)
 {

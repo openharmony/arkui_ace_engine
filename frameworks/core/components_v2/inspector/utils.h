@@ -326,17 +326,17 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
         return index < 0 ? "FontWeight.Normal" : fontWeightTable[index].value;
     }
 
-    inline std::string ConvertWrapCopyOptionToStirng(CopyOption copyOption)
+    inline std::string ConvertWrapCopyOptionToString(CopyOptions copyOptions)
     {
-        static const LinearEnumMapNode<CopyOption, std::string> copyOptionTable[] = {
-            { CopyOption::NoCopy, "CopyOption::NoCopy" },
-            { CopyOption::InApp, "CopyOption:InApp" },
-            { CopyOption::Local, "CopyOption:Local" },
-            { CopyOption::Distributed, "CopyOption:Distributed" },
+        static const LinearEnumMapNode<CopyOptions, std::string> copyOptionsTable[] = {
+            { CopyOptions::None, "CopyOptions::None" },
+            { CopyOptions::InApp, "CopyOptions:InApp" },
+            { CopyOptions::Local, "CopyOptions:Local" },
+            { CopyOptions::Distributed, "CopyOptions:Distributed" },
         };
 
-        auto index = BinarySearchFindIndex(copyOptionTable, ArraySize(copyOptionTable), copyOption);
-        return index < 0 ? "CopyOption::NoCopy" : copyOptionTable[index].value;
+        auto index = BinarySearchFindIndex(copyOptionsTable, ArraySize(copyOptionsTable), copyOptions);
+        return index < 0 ? "CopyOptions::None" : copyOptionsTable[index].value;
     }
 
     inline std::string ConvertColorToString(Color color)

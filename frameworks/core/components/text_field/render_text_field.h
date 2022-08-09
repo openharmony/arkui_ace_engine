@@ -35,6 +35,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/image/render_image.h"
+#include "core/components/panel/render_sliding_panel.h"
 #include "core/components/text_field/text_field_component.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/gestures/click_recognizer.h"
@@ -112,6 +113,9 @@ public:
     void StopTwinkling();
     void EditingValueFilter(TextEditingValue& result);
     void PopTextOverlay();
+    RefPtr<RenderSlidingPanel> GetSlidingPanelAncest();
+    void ResetOnFocusForTextFieldManager();
+    void ResetSlidingPanelParentHeight();
 
     void SetInputFilter(const std::string& inputFilter)
     {
@@ -524,6 +528,7 @@ protected:
     // For ensuring caret is visible on screen, we take a strategy that move the whole text painting area.
     // It maybe seems rough, and doesn't support scrolling smoothly.
     Offset textOffsetForShowCaret_;
+    InputStyle inputStyle_;
 
 private:
     void SetCallback(const RefPtr<TextFieldComponent>& textField);
@@ -591,7 +596,7 @@ private:
     Color hoverColor_;
     TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
-    CopyOption copyOption_ = CopyOption::Distributed;
+    CopyOptions copyOption_ = CopyOptions::Distributed;
     std::function<void()> onValueChange_;
     std::function<void(bool)> onKeyboardClose_;
     std::function<void(const Rect&)> onClipRectChanged_;

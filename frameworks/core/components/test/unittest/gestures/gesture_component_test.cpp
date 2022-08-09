@@ -124,8 +124,6 @@ void GestureComponentTest::TearDown() {}
  * @tc.name: TouchListener001
  * @tc.desc: Verify the touch listener component can response to touch down event.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGO
- * @tc.author: yanshuifeng
  */
 HWTEST_F(GestureComponentTest, TouchListener001, TestSize.Level1)
 {
@@ -175,8 +173,6 @@ HWTEST_F(GestureComponentTest, TouchListener001, TestSize.Level1)
  * @tc.name: TouchListener002
  * @tc.desc: Verify the touch listener component can response to touch move event.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGO
- * @tc.author: huye
  */
 HWTEST_F(GestureComponentTest, TouchListener002, TestSize.Level1)
 {
@@ -226,8 +222,6 @@ HWTEST_F(GestureComponentTest, TouchListener002, TestSize.Level1)
  * @tc.name: TouchListener003
  * @tc.desc: Verify the touch listener component can response to touch up event.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGO
- * @tc.author: huye
  */
 HWTEST_F(GestureComponentTest, TouchListener003, TestSize.Level1)
 {
@@ -277,8 +271,6 @@ HWTEST_F(GestureComponentTest, TouchListener003, TestSize.Level1)
  * @tc.name: TouchListener004
  * @tc.desc: Verify the touch listener component can response to touch cancel event.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGO
- * @tc.author: huye
  */
 HWTEST_F(GestureComponentTest, TouchListener004, TestSize.Level1)
 {
@@ -329,8 +321,6 @@ HWTEST_F(GestureComponentTest, TouchListener004, TestSize.Level1)
  * @tc.name: GestureListener001
  * @tc.desc: Verify the gesture listener component can response to touch click event.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGP
- * @tc.author: huye
  */
 HWTEST_F(GestureComponentTest, GestureListener001, TestSize.Level1)
 {
@@ -384,8 +374,6 @@ HWTEST_F(GestureComponentTest, GestureListener001, TestSize.Level1)
  * @tc.name: GestureListener002
  * @tc.desc: Verify the gesture listener component can response to touch click event.
  * @tc.type: FUNC
- * @tc.require: AR000DAIGP
- * @tc.author: huye
  */
 HWTEST_F(GestureComponentTest, GestureListener002, TestSize.Level1)
 {

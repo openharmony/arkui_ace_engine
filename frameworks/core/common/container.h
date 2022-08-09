@@ -192,6 +192,8 @@ public:
         return container ? container->useNewPipeline_ : false;
     }
 
+    static bool IsCurrentUsePartialUpdate();
+
     bool IsUseNewPipeline() const
     {
         return useNewPipeline_;

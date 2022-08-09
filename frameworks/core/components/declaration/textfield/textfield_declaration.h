@@ -76,6 +76,11 @@ struct TextFieldAttribute : Attribute {
     std::vector<InputOption> inputOptions;
 };
 
+enum class InputStyle {
+    DEFAULT,
+    INLINE,
+};
+
 struct TextFieldStyle : Style {
     Dimension height;
 
@@ -92,6 +97,7 @@ struct TextFieldStyle : Style {
     TextStyle overCountStyleOuter;
     TextStyle editingStyle;
     TextStyle placeHoldStyle;
+    InputStyle inputStyle;
 
     Color textColor;
     Color focusTextColor;
@@ -209,6 +215,18 @@ public:
     {
         auto& style = MaybeResetStyle<TextFieldStyle>(StyleTag::SPECIALIZED_STYLE);
         style.editingStyle = textstyle;
+    }
+
+    InputStyle GetInputStyle() const
+    {
+        auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        return style.inputStyle;
+    }
+
+    void SetInputStyle(InputStyle inputStyle)
+    {
+        auto& style = MaybeResetStyle<TextFieldStyle>(StyleTag::SPECIALIZED_STYLE);
+        style.inputStyle = inputStyle;
     }
 
     const TextStyle& GetPlaceHoldStyle() const

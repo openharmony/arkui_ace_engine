@@ -103,6 +103,8 @@ public:
     static std::string typeAsString(JSValueConst val);
     static JSValue GetArgvSafe(int idx, int argc, JSValueConst* argv);
     static void DefineGlobalFunction(JSContext* ctx, JSCFunction jsFunc, const char* name, const int paramNum);
+    static void DefineGlobalModuleFunction(
+        JSContext* ctx, JSCFunction cFunc, const char* moduleName, const char* funcName, const int paramNum);
     static std::string JsDumpSourceFile(const char* stack, const RefPtr<RevSourceMap>& pageMap,
         const RefPtr<RevSourceMap>& appMap, bool isEts = false);
 };

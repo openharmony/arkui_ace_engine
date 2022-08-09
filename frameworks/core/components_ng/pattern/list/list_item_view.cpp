@@ -25,10 +25,11 @@ namespace OHOS::Ace::NG {
 
 void ListItemView::Create()
 {
-    // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, 0, AceType::MakeRefPtr<ListItemPattern>());
-    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListItemPattern>(); });
+    stack->Push(frameNode);
 }
 
 } // namespace OHOS::Ace::NG

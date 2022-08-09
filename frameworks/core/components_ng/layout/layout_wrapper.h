@@ -145,6 +145,11 @@ public:
         return taskThread;
     }
 
+    bool SkipMeasureContent() const
+    {
+        return skipMeasureContent_;
+    }
+
     // dirty layoutBox mount to host and switch layoutBox.
     // Notice: only the cached layoutWrapper (after call GetChildLayoutWrapper) will update the host.
     void MountToHostOnMainThread();
@@ -162,6 +167,7 @@ private:
     RefPtr<LayoutWrapperBuilder> layoutWrapperBuilder_;
 
     int32_t currentChildCount_ = 0;
+    bool skipMeasureContent_ = false;
     bool isActive_ = false;
 };
 } // namespace OHOS::Ace::NG

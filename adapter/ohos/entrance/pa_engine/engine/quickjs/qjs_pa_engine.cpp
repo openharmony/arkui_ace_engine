@@ -223,7 +223,7 @@ JSValue AppLogPrint(JSContext* ctx, Framework::JsLogLevel level, JSValueConst va
 
 JSValue AppLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
-    return AppLogPrint(ctx, Framework::JsLogLevel::DEBUG, value, argc, argv);
+    return AppLogPrint(ctx, Framework::JsLogLevel::INFO, value, argc, argv);
 }
 
 JSValue AppDebugLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
@@ -1554,4 +1554,36 @@ void QjsPaEngine::OnCommand(const OHOS::AAFwk::Want &want, int startId)
     JS_FreeValue(ctx, retVal);
 }
 
+bool QjsPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+{
+    LOGD("PA: QjsPaEngine OnShare, begin");
+    // call onCreate
+    auto ctx = engineInstance_->GetQjsContext();
+    ACE_DCHECK(ctx);
+    Framework::QJSHandleScope handleScope(ctx);
+    auto paOnShareFunc = GetPaFunc("onShare");
+    auto formIdJs = JS_NewString(ctx, std::to_string(formId).c_str());
+    JSValueConst argv[] = { formIdJs };
+
+    auto retVal = Framework::QJSUtils::Call(ctx, paOnShareFunc, JS_UNDEFINED, countof(argv), argv);
+    if (JS_IsException(retVal)) {
+        LOGE("PA: QjsPaEngine QJSUtils::Call IsException");
+    }
+
+    auto nativeValue = reinterpret_cast<NativeValue*>(&retVal);
+    if (nativeValue->TypeOf() != NativeValueType::NATIVE_OBJECT) {
+        LOGE("%{public}s OnShare return value`s type is %{public}d", __func__,
+            static_cast<int>(nativeValue->TypeOf()));
+        return false;
+    }
+
+    if (!OHOS::AppExecFwk::UnwrapWantParams(reinterpret_cast<napi_env>(nativeEngine_),
+        reinterpret_cast<napi_value>(nativeValue), wantParams)) {
+        LOGE("%{public}s OnShare UnwrapWantParams failed, return false", __func__);
+        return false;
+    }
+
+    LOGD("PA: QjsPaEngine OnShare, end");
+    return true;
+}
 } // namespace OHOS::Ace

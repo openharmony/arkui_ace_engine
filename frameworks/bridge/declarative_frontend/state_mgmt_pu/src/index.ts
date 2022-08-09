@@ -14,3 +14,7 @@
  */
 
 console.debug("ACE State Mgmt for partial update init ...")
+
+Environment.ConfigureBackend(new EnvironmentSetting());
+
+PersistentStorage.ConfigureBackend(new Storage());

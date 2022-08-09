@@ -28,6 +28,7 @@
 #include "core/components/common/properties/radius.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
+#include "core/components/text_overlay/text_overlay_component.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_object.h"
 #include "core/pipeline/base/constants.h"

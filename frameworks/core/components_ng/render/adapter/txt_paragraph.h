@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 
 // Paragraph is interface for drawing text and text paragraph.
-class TxtParagraph : public virtual Paragraph {
+class TxtParagraph : public Paragraph {
     DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph)
 
 public:

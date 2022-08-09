@@ -41,7 +41,6 @@ bool PaBackend::Initialize(BackendType type, const RefPtr<TaskExecutor>& taskExe
 {
     LOGI("PaBackend initialize begin.");
     type_ = type;
-    ACE_DCHECK(type_ == BackendType::SERVICE);
     InitializeBackendDelegate(taskExecutor);
 
     taskExecutor->PostTask(
@@ -332,6 +331,15 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         jsBackendEngine->OnCommand(want, startId);
     };
 
+    builder.shareFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
+            int64_t formId, OHOS::AAFwk::WantParams &wantParams) {
+        auto jsBackendEngine = weakEngine.Upgrade();
+        if (!jsBackendEngine) {
+            return false;
+        }
+        return jsBackendEngine->OnShare(formId, wantParams);
+    };
+
     builder.dumpHeapSnapshotCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
             bool isPrivate) {
         auto jsBackendEngine = weakEngine.Upgrade();
@@ -532,6 +540,11 @@ sptr<IRemoteObject> PaBackend::OnConnect(const OHOS::AAFwk::Want& want)
 void PaBackend::OnDisConnect(const OHOS::AAFwk::Want& want)
 {
     delegate_->OnDisConnect(want);
+}
+
+bool PaBackend::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+{
+    return delegate_->OnShare(formId, wantParams);
 }
 
 void PaBackend::DumpHeapSnapshot(bool isPrivate)

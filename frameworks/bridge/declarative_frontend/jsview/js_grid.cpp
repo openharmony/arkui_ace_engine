@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/components_v2/grid/render_grid_scroll.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -59,18 +60,7 @@ void JSGrid::Create(const JSCallbackInfo& info)
         }
     }
 
-    auto container = Container::Current();
-    if (!container) {
-        LOGE("fail to get container");
-        return;
-    }
-    auto context = container->GetPipelineContext();
-    if (!context) {
-        LOGE("fail to get context");
-        return;
-    }
-
-    if (context->UsePartialUpdate()) {
+    if (Container::IsCurrentUsePartialUpdate()) {
         ViewStackProcessor::GetInstance()->PushGrid(gridComponent);
     } else {
         ViewStackProcessor::GetInstance()->Push(gridComponent);

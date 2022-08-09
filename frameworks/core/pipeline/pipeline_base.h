@@ -442,11 +442,6 @@ public:
         return isRebuildFinished_;
     }
 
-    bool UsePartialUpdate() const
-    {
-        return usePartialUpdate_;
-    }
-
     void RequestFrame();
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc);
@@ -458,6 +453,11 @@ public:
     void PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
     void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+
+    virtual void FlushReload()
+    {
+        return;
+    }
 
     virtual void FlushReloadTransition()
     {
@@ -478,7 +478,6 @@ protected:
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
     bool isRightToLeft_ = false;
-    bool usePartialUpdate_ = false;
     int32_t minPlatformVersion_ = 0;
     int32_t windowId_ = 0;
     float fontScale_ = 1.0f;

@@ -32,7 +32,8 @@ const std::unordered_map<std::string, std::function<std::string(const SideBarCom
     { "showControlButton", [](const SideBarComposedElement& inspector) { return inspector.GetShowControlButton(); } },
     { "sideBarWidth", [](const SideBarComposedElement& inspector) { return inspector.GetSideBarWidth(); } },
     { "minSideBarWidth", [](const SideBarComposedElement& inspector) { return inspector.GetMinSideBarWidth(); } },
-    { "maxSideBarWidth", [](const SideBarComposedElement& inspector) { return inspector.GetMaxSideBarWidth(); } }
+    { "maxSideBarWidth", [](const SideBarComposedElement& inspector) { return inspector.GetMaxSideBarWidth(); } },
+    { "sideBarPosition", [](const SideBarComposedElement& inspector) { return inspector.GetSideBarPosition(); } }
 };
 
 } // namespace
@@ -47,6 +48,7 @@ void SideBarComposedElement::Dump()
     DumpLog::GetInstance().AddDesc(std::string("sideBarWidth: ").append(GetSideBarWidth()));
     DumpLog::GetInstance().AddDesc(std::string("minSideBarWidth: ").append(GetMinSideBarWidth()));
     DumpLog::GetInstance().AddDesc(std::string("maxSideBarWidth: ").append(GetMaxSideBarWidth()));
+    DumpLog::GetInstance().AddDesc(std::string("sideBarPosition: ").append(GetSideBarPosition()));
 }
 
 std::unique_ptr<JsonValue> SideBarComposedElement::ToJsonObject() const
@@ -133,6 +135,19 @@ std::string SideBarComposedElement::GetMaxSideBarWidth() const
         return std::to_string(render->GetSideBarMaxWidth().Value()).c_str();
     }
     return "280";
+}
+
+std::string SideBarComposedElement::GetSideBarPosition() const
+{
+    auto render = GetRenderSideBar();
+    if (render) {
+        if (render->GetSideBarPosition() == SideBarPosition::START) {
+            return "SideBarPosition.Start";
+        } else {
+            return "SideBarPosition.End";
+        }
+    }
+    return "SideBarPosition.Start";
 }
 
 RefPtr<RenderSideBarContainer> SideBarComposedElement::GetRenderSideBar() const
