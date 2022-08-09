@@ -552,7 +552,7 @@ void PipelineContext::FlushLayout()
         return;
     }
     if (isFirstLoaded_) {
-        LOGI("PipelineContext::FlushLayout()");
+        LOGD("PipelineContext::FlushLayout()");
     }
     decltype(dirtyLayoutNodes_) dirtyNodes(std::move(dirtyLayoutNodes_));
     for (const auto& dirtyNode : dirtyNodes) {
@@ -682,7 +682,7 @@ void PipelineContext::FlushRender()
         renderRoot->FinishRender(drawDelegate_, dirtyRect_.CombineRect(curDirtyRect));
         dirtyRect_ = curDirtyRect;
         if (isFirstLoaded_) {
-            LOGI("PipelineContext::FlushRender()");
+            LOGD("PipelineContext::FlushRender()");
             isFirstLoaded_ = false;
         }
     }
