@@ -624,6 +624,7 @@ void RenderGridScroll::CalculateViewPort()
 {
     while (!NearZero(currentOffset_) || needCalculateViewPort_) {
         if (currentOffset_ > 0) {
+            // [currentOffset_] > 0  means grid items are going to move down
             // move to top/left of first row/column
             if (!NearZero(firstItemOffset_)) {
                 if (gridCells_.find(startIndex_ + 1) != gridCells_.end()) {
@@ -631,7 +632,6 @@ void RenderGridScroll::CalculateViewPort()
                 }
                 firstItemOffset_ = 0.0;
             }
-            // Move up
             while (currentOffset_ > 0) {
                 if (startIndex_ > 0) {
                     if (gridCells_.find(startIndex_ - 1) == gridCells_.end()) {
@@ -655,19 +655,22 @@ void RenderGridScroll::CalculateViewPort()
             }
             currentOffset_ = 0.0;
         } else {
+            // [currentOffset_] <= 0  means grid items are going to move up.
             if (!NearZero(firstItemOffset_)) {
                 currentOffset_ -= firstItemOffset_;
                 firstItemOffset_ = 0.0;
             }
-            // Move down
+            // step1: move [currentOffset_] to the last one of [gridCells_]
             while (startIndex_ < *mainCount_ && (currentOffset_ < 0 || needCalculateViewPort_)) {
                 currentOffset_ += GetSize(gridCells_.at(startIndex_++).at(0)) + *mainGap_;
             }
             needCalculateViewPort_ = false;
+            // step2: if [currentOffset_] is positive, it means that we've had enough grid items
             if (currentOffset_ > 0) {
                 firstItemOffset_ = GetSize(gridCells_.at(--startIndex_).at(0)) + *mainGap_ - currentOffset_;
                 currentOffset_ = 0.0;
             } else {
+                // step3: if [currentOffset_] is non-positive, it means we need to build more grid items
                 if (!GreatOrEqual(0.0, BuildLazyGridLayout(*mainCount_, -currentOffset_))) {
                     continue;
                 }
@@ -677,7 +680,7 @@ void RenderGridScroll::CalculateViewPort()
             if (GreatOrEqual(0.0, blank)) {
                 return;
             }
-            // request new item.
+            // request new item until the blank is filled up
             blank -= BuildLazyGridLayout(*mainCount_, blank);
             if (blank < 0) {
                 return;
@@ -1227,8 +1230,10 @@ void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
         LOGE("context is null");
         return;
     }
+    startRankItemIndex_ = GetStartingItem(index);
     // Build items
-    if (index < startShowItemIndex_ || index > endShowItemIndex_) {
+    if ((index < startShowItemIndex_ || index > endShowItemIndex_) &&
+        (index - startRankItemIndex_ < metaData_.size())) {
         // do not need layout transition
         auto option = context->GetExplicitAnimationOption();
         context->SaveExplicitAnimationOption(AnimationOption());
@@ -1236,7 +1241,6 @@ void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
         if (scrollable_ && !scrollable_->IsStopped()) {
             scrollable_->StopScrollable();
         }
-        startRankItemIndex_ = GetStartingItem(index);
         ClearItems();
         ClearLayout(false);
         currentOffset_ = 0;
@@ -1244,59 +1248,183 @@ void RenderGridScroll::ScrollToIndex(int32_t index, int32_t source)
         context->SaveExplicitAnimationOption(option);
         return;
     }
-    // Calculate scroll length
+
+    if (index < startShowItemIndex_) {
+        BuildItemsForwardByRange(index, startShowItemIndex_);
+    } else if (index > endShowItemIndex_) {
+        BuildItemsBackwardByRange(endShowItemIndex_, index);
+    }
+
+    // when scrollLength > 0, it means grid items moving forward
+    // when scrollLength < 0, it means grid items moving backward
+    currentOffset_ = -CalculateScrollLength(index);
+    PerformLayout();
+    MarkNeedRender();
+}
+
+double RenderGridScroll::CalculateScrollLength(int32_t index)
+{
     double scrollLength = 0.0;
-    inputIdx = GetItemMainIndex(index);
-    if (inputIdx >= endIndex_) {
-        double mainLen = -firstItemOffset_;
-        for (int32_t i = startIndex_; i <= endIndex_; ++i) {
-            if (gridCells_.find(i) != gridCells_.end()) {
-                mainLen += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
+    auto inputIndex = GetItemMainIndex(index);
+    do {
+        if (inputIndex >= endIndex_) {
+            // when inputIndex >= endIndex_, grid items need to move forward (i.e. jump backward)
+            double originalTotalLen = 0; // total length from startIndex_ to endIndex_
+            for (int32_t i = startIndex_; i <= endIndex_; ++i) {
+                if (gridCells_.find(i) != gridCells_.end()) {
+                    originalTotalLen += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
+                }
             }
-        }
-        scrollLength += (mainLen - GetSize(GetLayoutSize()));
-        for (int32_t i = endIndex_; i < inputIdx; ++i) {
-            SupplyItems(i, index);
-            if (i != inputIdx) {
-                scrollLength += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
+            // reduce a mainGap because the last item need to be placed to the bottom of viewport
+            originalTotalLen -= (*mainGap_ + firstItemOffset_);
+            // [itemLengthOutOfViewport] is the length of grid items that is out of viewport
+            double itemLengthOutOfViewport = originalTotalLen - GetSize(GetLayoutSize());
+            double newlyBuiltItemLength = 0;
+            for (int32_t i = endIndex_; i < inputIndex; ++i) {
+                SupplyItems(i, index);
+                if (i != inputIndex) {
+                    newlyBuiltItemLength += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
+                }
             }
+            // grid items move forward by scrollLength
+            scrollLength = itemLengthOutOfViewport + newlyBuiltItemLength;
+            break;
         }
-        scrollLength = -scrollLength;
-    } else if (inputIdx <= startIndex_) {
-        scrollLength += firstItemOffset_;
-        for (int32_t i = startIndex_; i >= inputIdx; --i) {
-            SupplyItems(i, index, i != inputIdx);
-            if (i != inputIdx) {
-                scrollLength += GetSize(gridCells_.at(i).at(0)) + *mainGap_;
+        if (inputIndex <= startIndex_) {
+            // when inputIndex <= startIndex_, grid items need to move backward (i.e. jump forward)
+            double newlyBuiltItemLength = 0;
+            for (int32_t i = startIndex_; i >= inputIndex; --i) {
+                SupplyItems(i, index, i != inputIndex);
+                if (i != inputIndex) {
+                    newlyBuiltItemLength -= (GetSize(gridCells_.at(i).at(0)) + *mainGap_);
+                }
             }
+            scrollLength = newlyBuiltItemLength - firstItemOffset_;
+            break;
         }
-    } else {
+        LOGE("branch: [startIndex_ < inputIndex < endIndex_] should not be entered here, please check.");
+    } while (0);
+    return scrollLength;
+}
+
+void RenderGridScroll::BuildItemsBackwardByRange(int32_t startItemIdx, int32_t endItemIdx)
+{
+    if (startItemIdx >= endItemIdx) {
         return;
     }
-    // Start animation
-    if (!animator_->IsStopped()) {
-        animator_->Stop();
+    auto itemIndex = startItemIdx;
+    auto end = endItemIdx;
+    while (itemIndex <= end) {
+        if (GetItemMainIndex(itemIndex) != -1) {
+            ++itemIndex;
+            continue;
+        }
+        int32_t itemMain = -1;
+        int32_t itemCross = -1;
+        int32_t itemMainSpan = -1;
+        int32_t itemCrossSpan = -1;
+        if (!GetItemPropsByIndex(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
+            return;
+        }
+        if (itemCrossSpan > *crossCount_) {
+            itemIndex++;
+            continue;
+        }
+        if (itemMain >= 0 && itemCross >= 0 && itemCross < *crossCount_ &&
+            CheckGridPlaced(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
+        } else {
+            // itemMain < 0 means this item is not placed, place it to the end of the gridMatrix_.
+            if (itemMain < 0) {
+                itemMain = gridMatrix_.rbegin()->first;
+                itemCross = gridMatrix_.rbegin()->second.rbegin()->first;
+                GetNextGrid(itemMain, itemCross);
+                while (!CheckGridPlaced(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
+                    GetNextGrid(itemMain, itemCross);
+                }
+            }
+        }
+        itemIndex++;
     }
-    animator_->ClearInterpolators();
-    animateDelta_ = 0.0;
-    auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(0, scrollLength, Curves::LINEAR);
-    animation->AddListener([weakScroll = AceType::WeakClaim(this)](double value) {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            scroll->animatorJumpFlag_ = true;
-            scroll->DoJump(value, SCROLL_FROM_JUMP);
+    // Check current end main line is placed completely or not.
+    int32_t lastCross = gridMatrix_.rbegin()->second.rbegin()->first;
+    ++end;
+    for (int32_t crossIndex = lastCross + 1; crossIndex < *crossCount_; ++crossIndex) {
+        int32_t itemMain = -1;
+        int32_t itemCross = -1;
+        int32_t itemMainSpan = -1;
+        int32_t itemCrossSpan = -1;
+        if (!GetItemPropsByIndex(end, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
+            return;
         }
-    });
-    animator_->AddInterpolator(animation);
-    animator_->ApplyOption(context->GetExplicitAnimationOption());
-    animator_->ClearStopListeners();
-    animator_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            scroll->animateDelta_ = 0.0;
+        if (itemCrossSpan > *crossCount_) {
+            ++end;
+            continue;
         }
-    });
-    animator_->Play();
+        itemMain = gridMatrix_.rbegin()->first;
+        itemCross = itemCross == -1 ? crossIndex : itemCross;
+        CheckGridPlaced(end, itemMain, itemCross, itemMainSpan, itemCrossSpan);
+        ++end;
+    }
+}
+
+void RenderGridScroll::BuildItemsForwardByRange(int32_t startItemIdx, int32_t endItemIdx)
+{
+    if (startItemIdx <= endItemIdx) {
+        return;
+    }
+    auto itemIndex = startItemIdx;
+    auto end = endItemIdx;
+    while (itemIndex >= end) {
+        if (GetItemMainIndex(itemIndex) != -1) {
+            --itemIndex;
+            continue;
+        }
+        int32_t itemMain = -1;
+        int32_t itemCross = -1;
+        int32_t itemMainSpan = -1;
+        int32_t itemCrossSpan = -1;
+        if (!GetItemPropsByIndex(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
+            return;
+        }
+        if (itemCrossSpan > *crossCount_) {
+            --itemIndex;
+            continue;
+        }
+        if (itemMain >= 0 && itemCross >= 0 && itemCross < *crossCount_ &&
+            CheckGridPlaced(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
+        } else {
+            // itemMain < 0 means this item is not placed, place it to the front of the gridMatrix_.
+            if (itemMain < 0) {
+                itemMain = gridMatrix_.begin()->first;
+                itemCross = gridMatrix_.begin()->second.begin()->first;
+                GetPreviousGrid(itemMain, itemCross);
+                while (!CheckGridPlaced(itemIndex, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
+                    GetPreviousGrid(itemMain, itemCross);
+                }
+            }
+        }
+        --itemIndex;
+    }
+    // Check current front main line is placed completely or not.
+    int32_t firstCross = gridMatrix_.begin()->second.begin()->first;
+    --end;
+    for (int32_t crossIndex = firstCross - 1; crossIndex >= 0; --crossIndex) {
+        int32_t itemMain = -1;
+        int32_t itemCross = -1;
+        int32_t itemMainSpan = -1;
+        int32_t itemCrossSpan = -1;
+        if (!GetItemPropsByIndex(end, itemMain, itemCross, itemMainSpan, itemCrossSpan)) {
+            return;
+        }
+        if (itemCrossSpan > *crossCount_) {
+            --end;
+            continue;
+        }
+        itemMain = gridMatrix_.begin()->first;
+        itemCross = itemCross == -1 ? crossIndex : itemCross;
+        CheckGridPlaced(end, itemMain, itemCross, itemMainSpan, itemCrossSpan);
+        --end;
+    }
 }
 
 bool RenderGridScroll::AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve)
