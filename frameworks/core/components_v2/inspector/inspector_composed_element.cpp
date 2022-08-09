@@ -70,6 +70,13 @@ constexpr const char* TEXT_DIRECTION[] = { "Direction.Ltr", "Direction.Rtl", "Di
 
 constexpr const char* BASIC_SHAPE_TYPE[] { "None", "Inset", "Circle", "Ellipse", "Polygon", "Path", "Rect" };
 
+constexpr const char* HIT_TEST_BEHAVIOR[] = {
+    "HitTestMode.Default",
+    "HitTestMode.Block",
+    "HitTestMode.Transparent",
+    "HitTestMode.None",
+};
+
 const std::unordered_map<std::string, DoubleJsonFunc> CREATE_JSON_DOUBLE_MAP {
     { "opacity", [](const InspectorNode& inspector) { return inspector.GetOpacity(); } },
     { "flexGrow", [](const InspectorNode& inspector) { return inspector.GetFlexGrow(); } },
@@ -111,6 +118,7 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
         [](const InspectorNode& inspector) { return inspector.GetBackgroundImagePosition(); } },
     { "padding", [](const InspectorNode& inspector) { return inspector.GetPadding(); } },
     { "margin", [](const InspectorNode& inspector) { return inspector.GetAllMargin(); } },
+    { "hitTestBehavior", [](const InspectorNode& inspector) { return inspector.GetHitTestBehaviorStr(); } },
 };
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
@@ -1737,6 +1745,16 @@ void InspectorComposedElement::OnVisibleAreaChangeCallback(
     if (callbackInfo.callback) {
         callbackInfo.callback(visibleType, currentVisibleRatio);
     }
+}
+
+std::string InspectorComposedElement::GetHitTestBehaviorStr() const
+{
+    auto node = GetInspectorNode(GetTargetTypeId());
+    if (!node) {
+        return HIT_TEST_BEHAVIOR[0];
+    }
+    auto hitTestMode = static_cast<int32_t>(node->GetHitTestMode());
+    return HIT_TEST_BEHAVIOR[hitTestMode];
 }
 
 } // namespace OHOS::Ace::V2
