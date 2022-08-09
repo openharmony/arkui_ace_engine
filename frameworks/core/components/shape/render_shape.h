@@ -122,6 +122,11 @@ public:
         return static_cast<Dimension>(height_);
     }
 
+    RefPtr<ShapeComponent> GetShapeComponent() const
+    {
+        return component_;
+    }
+
     void NormalToPxOfShape(AnimatableDimension sizeFromComponent, AnimatableDimension& sizeOfCurrent);
     void NotifySizeTransition(const AnimationOption& option, Size fromSize, Size toSize, int32_t nodeId) override;
 
@@ -140,6 +145,7 @@ protected:
     FillState fillState_;
     StrokeState strokeState_;
     std::pair<bool, bool> antiAlias_ = std::make_pair(false, true);
+    RefPtr<ShapeComponent> component_;
 };
 
 } // namespace OHOS::Ace
