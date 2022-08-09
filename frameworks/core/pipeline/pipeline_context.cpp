@@ -287,8 +287,10 @@ void PipelineContext::FlushFocus()
         }
     }
     if (isTabKeyPressed_) {
-        if (rootElement_ && !rootElement_->IsCurrentFocus()) {
-            rootElement_->RequestFocusImmediately();
+        if (!RequestDefaultFocus()) {
+            if (rootElement_ && !rootElement_->IsCurrentFocus()) {
+                rootElement_->RequestFocusImmediately();
+            }
         }
     }
 
@@ -1731,8 +1733,25 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN && !isTabKeyPressed_) {
         isTabKeyPressed_ = true;
         FlushFocus();
+        return true;
     }
     return eventManager_->DispatchKeyEvent(event, rootElement_);
+}
+
+bool PipelineContext::RequestDefaultFocus()
+{
+    auto curPageElement = GetLastPage();
+    CHECK_NULL_RETURN(curPageElement, false);
+    if (curPageElement->IsFocused()) {
+        return false;
+    }
+    curPageElement->SetIsFocused(true);
+    auto defaultFocusNode = curPageElement->GetChildDefaultFoucsNode();
+    CHECK_NULL_RETURN(defaultFocusNode, false);
+    if (!defaultFocusNode->IsFocusableWholePath()) {
+        return false;
+    }
+    return defaultFocusNode->RequestFocusImmediately();
 }
 
 void PipelineContext::SetShortcutKey(const KeyEvent& event)
@@ -2547,6 +2566,12 @@ bool PipelineContext::RequestFocus(const RefPtr<Element>& targetElement)
         }
     }
     return false;
+}
+
+bool PipelineContext::RequestFocus(const std::string& targetNodeId)
+{
+    CHECK_NULL_RETURN(rootElement_, false);
+    return rootElement_->RequestFocusImmediatelyById(targetNodeId);
 }
 
 RefPtr<AccessibilityManager> PipelineContext::GetAccessibilityManager() const

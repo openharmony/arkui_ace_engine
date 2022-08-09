@@ -221,6 +221,9 @@ public:
     static void JsOnFocus(const JSCallbackInfo& args);
     static void JsOnBlur(const JSCallbackInfo& args);
     static void JsTabIndex(const JSCallbackInfo& info);
+    static void JsFocusOnTouch(const JSCallbackInfo& info);
+    static void JsDefaultFocus(const JSCallbackInfo& info);
+    static void JsGroupDefaultFocus(const JSCallbackInfo& info);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     static void JsDebugLine(const JSCallbackInfo& info);
 #endif

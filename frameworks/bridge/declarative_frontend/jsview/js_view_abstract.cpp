@@ -4043,6 +4043,56 @@ void JSViewAbstract::JsTabIndex(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsFocusOnTouch(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        LOGE("Param is wrong, it is supposed to be a boolean");
+        return;
+    }
+    auto touchComponent = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
+    if (!touchComponent) {
+        LOGE("Touch listener component get failed!");
+        return;
+    }
+    auto isFocusOnTouch = info[0]->ToBoolean();
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (!focusableComponent) {
+        LOGE("focusable component get failed!");
+        return;
+    }
+    focusableComponent->SetIsFocusOnTouch(isFocusOnTouch);
+}
+
+void JSViewAbstract::JsDefaultFocus(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        LOGE("Param is wrong, it is supposed to be a boolean");
+        return;
+    }
+    auto isDefaultFocus = info[0]->ToBoolean();
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (!focusableComponent) {
+        LOGE("focusable component get failed!");
+        return;
+    }
+    focusableComponent->SetIsDefaultFocus(isDefaultFocus);
+}
+
+void JSViewAbstract::JsGroupDefaultFocus(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        LOGE("Param is wrong, it is supposed to be a boolean");
+        return;
+    }
+    auto isGroupDefaultFocus = info[0]->ToBoolean();
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (!focusableComponent) {
+        LOGE("focusable component get failed!");
+        return;
+    }
+    focusableComponent->SetIsDefaultGroupFocus(isGroupDefaultFocus);
+}
+
 void JSViewAbstract::JsKey(const std::string& key)
 {
     auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
@@ -4053,6 +4103,11 @@ void JSViewAbstract::JsKey(const std::string& key)
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     if (flexItem) {
         flexItem->SetInspectorKey(key);
+    }
+
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+    if (focusableComponent) {
+        focusableComponent->SetInspectorKey(key);
     }
 }
 
@@ -4345,6 +4400,9 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("onFocus", &JSViewAbstract::JsOnFocus);
     JSClass<JSViewAbstract>::StaticMethod("onBlur", &JSViewAbstract::JsOnBlur);
     JSClass<JSViewAbstract>::StaticMethod("tabIndex", &JSViewAbstract::JsTabIndex);
+    JSClass<JSViewAbstract>::StaticMethod("focusOnTouch", &JSViewAbstract::JsFocusOnTouch);
+    JSClass<JSViewAbstract>::StaticMethod("defaultFocus", &JSViewAbstract::JsDefaultFocus);
+    JSClass<JSViewAbstract>::StaticMethod("groupDefaultFocus", &JSViewAbstract::JsGroupDefaultFocus);
     JSClass<JSViewAbstract>::StaticMethod("brightness", &JSViewAbstract::JsBrightness);
     JSClass<JSViewAbstract>::StaticMethod("contrast", &JSViewAbstract::JsContrast);
     JSClass<JSViewAbstract>::StaticMethod("saturate", &JSViewAbstract::JsSaturate);

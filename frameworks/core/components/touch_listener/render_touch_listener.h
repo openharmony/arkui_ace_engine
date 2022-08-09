@@ -74,6 +74,11 @@ public:
     bool HandleEvent(const TouchEvent& point) override;
     bool TriggerTouchCallBack(const TouchEvent& changedPoint);
 
+    void SetOnTouchFocusEventCallback(const std::function<void(void)>& onTouchFocusEventCallback)
+    {
+        onTouchFocusEventCallback_ = onTouchFocusEventCallback;
+    }
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -85,6 +90,7 @@ private:
     bool isVisible_ = true;
     Offset coordinateOffset_;
     std::function<void(const std::shared_ptr<TouchEventInfo>&)> onTouchEventCallback_;
+    std::function<void(void)> onTouchFocusEventCallback_;
     std::map<int, TouchEvent> touchPointMap_;
 };
 

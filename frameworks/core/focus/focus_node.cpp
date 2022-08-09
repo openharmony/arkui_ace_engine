@@ -119,6 +119,18 @@ bool FocusNode::IsFocusableByTab() const
     return tabIndex_ == 0;
 }
 
+bool FocusNode::IsFocusableWholePath() const
+{
+    auto parent = GetParent().Upgrade();
+    while (parent) {
+        if (!parent->IsFocusable()) {
+            return false;
+        }
+        parent = parent->GetParent().Upgrade();
+    }
+    return IsFocusable();
+}
+
 bool FocusNode::RequestFocusImmediately()
 {
     auto renderNode = GetRenderNode(AceType::Claim(this));
@@ -150,6 +162,62 @@ bool FocusNode::RequestFocusImmediately()
 
     HandleFocus();
     return true;
+}
+
+RefPtr<FocusNode> FocusNode::GetChildDefaultFoucsNode(bool isGetDefaultFocus)
+{
+    if (isGetDefaultFocus && isDefaultFocus_ && IsFocusable()) {
+        return AceType::Claim(this);
+    }
+    if (!isGetDefaultFocus && isDefaultGroupFocus_ && IsFocusable()) {
+        return AceType::Claim(this);
+    }
+    RefPtr<FocusGroup> scope = AceType::DynamicCast<FocusGroup>(AceType::Claim(this));
+    if (!scope) {
+        return nullptr;
+    }
+    auto children = scope->GetChildrenList();
+    for (const auto& child : children) {
+        auto findNode = child->GetChildDefaultFoucsNode(isGetDefaultFocus);
+        if (findNode) {
+            return findNode;
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<FocusNode> FocusNode::GetChildFocusNodeById(const std::string& id)
+{
+    if (id.empty()) {
+        return nullptr;
+    }
+    if (GetInspectorKey() == id) {
+        return AceType::Claim(this);
+    }
+    RefPtr<FocusGroup> scope = AceType::DynamicCast<FocusGroup>(AceType::Claim(this));
+    if (scope) {
+        auto children = scope->GetChildrenList();
+        for (const auto& child : children) {
+            auto findNode = child->GetChildFocusNodeById(id);
+            if (findNode) {
+                return findNode;
+            }
+        }
+    }
+    return nullptr;
+}
+
+bool FocusNode::RequestFocusImmediatelyById(const std::string& id)
+{
+    auto focusNode = GetChildFocusNodeById(id);
+    if (!focusNode) {
+        LOGW("Can not find focus node by id: %{public}s", id.c_str());
+        return false;
+    }
+    if (!focusNode->IsFocusableWholePath()) {
+        return false;
+    }
+    return focusNode->RequestFocusImmediately();
 }
 
 void FocusNode::UpdateAccessibilityFocusInfo()

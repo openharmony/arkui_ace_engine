@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 class SharedTransitionElement;
 class TransformElement;
 
-class PageElement : public ComposedElement, FocusGroup {
+class PageElement : public ComposedElement, public FocusGroup {
     DECLARE_ACE_TYPE(PageElement, ComposedElement, FocusGroup);
 
 public:
@@ -92,10 +92,20 @@ public:
     void Dump() override;
     int32_t GetComponentsCount();
 
+    bool IsFocused() const
+    {
+        return isFocused_;
+    }
+    void SetIsFocused(bool isFocused)
+    {
+        isFocused_ = isFocused;
+    }
+
 protected:
     bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) override;
 
 private:
+    bool isFocused_ = false;
     int32_t callbackId_ = 0;
     int32_t pageId_ = -1;
     std::string pageUrl_;

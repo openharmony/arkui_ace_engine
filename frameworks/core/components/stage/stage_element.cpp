@@ -306,6 +306,12 @@ void StageElement::RefreshFocus()
     // Process focus logic on the current top page when page changes
     if (IsFocusable()) {
         focusNodes_.back()->RequestFocus();
+        auto iter = focusNodes_.rbegin();
+        ++iter;
+        while (iter != focusNodes_.rend()) {
+            (*iter)->SetParentFocusable(false);
+            ++iter;
+        }
     } else {
         auto context = context_.Upgrade();
         if (!context) {

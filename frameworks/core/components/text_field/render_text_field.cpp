@@ -1983,9 +1983,11 @@ void RenderTextField::HandleOnCut()
         return;
     }
     if (GetEditingValue().GetSelectedText().empty()) {
+        LOGD("copy value is empty");
         return;
     }
     if (copyOption_ != CopyOptions::None) {
+        LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
         clipboard_->SetData(GetEditingValue().GetSelectedText());
     }
     if (onCut_) {
@@ -2006,9 +2008,11 @@ void RenderTextField::HandleOnCopy()
         return;
     }
     if (GetEditingValue().GetSelectedText().empty()) {
+        LOGW("copy value is empty");
         return;
     }
     if (copyOption_ != CopyOptions::None) {
+        LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
         clipboard_->SetData(GetEditingValue().GetSelectedText());
     }
     if (onCopy_) {
@@ -2025,8 +2029,10 @@ void RenderTextField::HandleOnPaste()
     auto textSelection = GetEditingValue().selection;
     auto pasteCallback = [weak = WeakClaim(this), textSelection](const std::string& data) {
         if (data.empty()) {
+            LOGW("paste value is empty");
             return;
         }
+        LOGD("paste value is %{private}s", data.c_str());
         auto textfield = weak.Upgrade();
         if (textfield) {
             auto value = textfield->GetEditingValue();

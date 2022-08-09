@@ -384,6 +384,8 @@ public:
     bool AccessibilityRequestFocus(const ComposeId& id);
 
     bool RequestFocus(const RefPtr<Element>& targetElement);
+    bool RequestFocus(const std::string& targetNodeId);
+    bool RequestDefaultFocus();
 
     RefPtr<AccessibilityManager> GetAccessibilityManager() const override;
 
