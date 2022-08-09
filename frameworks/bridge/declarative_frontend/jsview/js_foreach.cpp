@@ -111,8 +111,8 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
 
     size_t index = 0;
     for (const auto& id : cppList) {
-        LOGD("  array id %{public}s", id.c_str());
-        jsArr->SetValueAt(index++, JSRef<JSString>::New(id.c_str()));
+        LOGD("  array id %{public}d - '%{public}s'", static_cast<int32_t>(index), id.c_str());
+        jsArr->SetValueAt(index++, JSRef<JSVal>::Make(ToJSValue(id.c_str())));
     }
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(index > 0)));
 }
@@ -139,6 +139,7 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
     for (size_t i = 0; i < jsArr->Length(); i++) {
         JSRef<JSVal> strId = jsArr->GetValueAt(i);
         std::string value = strId->ToString();
+        LOGD("JSForEach::SetIdArray %{public}d - value '%{public}s'", static_cast<int32_t>(i), value.c_str());
         newIdArr.insert(newIdArr.end(), value);
     }
 
