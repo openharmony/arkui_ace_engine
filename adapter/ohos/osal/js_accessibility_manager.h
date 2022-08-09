@@ -90,6 +90,7 @@ public:
         Accessibility::AccessibilityElementOperatorCallback& callback);
     bool ClearCurrentFocus();
     void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node);
+    void SendActionEvent(const Accessibility::ActionType& action, NodeId nodeId);
 
 private:
     class JsInteractionOperation : public Accessibility::AccessibilityElementOperator {

@@ -1074,6 +1074,26 @@ bool JsAccessibilityManager::AccessibilityActionEvent(const ActionType& action,
     }
 }
 
+void JsAccessibilityManager::SendActionEvent(const Accessibility::ActionType& action, NodeId nodeId)
+{
+    static std::unordered_map<Accessibility::ActionType, std::string> actionToStr {
+        { Accessibility::ActionType::ACCESSIBILITY_ACTION_CLICK, DOM_CLICK },
+        { Accessibility::ActionType::ACCESSIBILITY_ACTION_LONG_CLICK, DOM_LONG_PRESS },
+        { Accessibility::ActionType::ACCESSIBILITY_ACTION_FOCUS, DOM_FOCUS },
+        { Accessibility::ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, ACCESSIBILITY_FOCUSED_EVENT },
+        { Accessibility::ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, ACCESSIBILITY_CLEAR_FOCUS_EVENT },
+        { Accessibility::ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD, SCROLL_END_EVENT },
+        { Accessibility::ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD, SCROLL_END_EVENT },
+    };
+    if (actionToStr.find(action) == actionToStr.end()) {
+        return;
+    }
+    AccessibilityEvent accessibilityEvent;
+    accessibilityEvent.eventType = actionToStr[action];
+    accessibilityEvent.nodeId = static_cast<int>(nodeId);
+    SendAccessibilityAsyncEvent(accessibilityEvent);
+}
+
 void JsAccessibilityManager::ExecuteAction(const int32_t elementId, const ActionType& action,
     const std::map<std::string, std::string> actionArguments, const int32_t requestId,
     AccessibilityElementOperatorCallback& callback)
@@ -1100,6 +1120,9 @@ void JsAccessibilityManager::ExecuteAction(const int32_t elementId, const Action
 
     LOGI("SetExecuteActionResult actionResult= %{public}d", actionResult);
     callback.SetExecuteActionResult(actionResult, requestId);
+    if (actionResult) {
+        SendActionEvent(action, node->GetNodeId());
+    }
 }
 
 void JsAccessibilityManager::JsInteractionOperation::ClearFocus()
