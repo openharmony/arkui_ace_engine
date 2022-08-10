@@ -269,8 +269,6 @@ void SystemProperties::SetDeviceOrientation(int32_t orientation)
     } else if (orientation == ORIENTATION_LANDSCAPE && orientation_ != DeviceOrientation::LANDSCAPE) {
         Swap(deviceWidth_, deviceHeight_);
         orientation_ = DeviceOrientation::LANDSCAPE;
-    } else {
-        LOGI("SetDeviceOrientation, no change info: %{public}d", orientation);
     }
 }
 

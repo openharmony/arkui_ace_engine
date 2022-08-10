@@ -892,7 +892,7 @@ void PipelineContext::SetupRootElement()
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_ && renderRoot) {
-        LOGI("rosen ui director call set root.");
+        LOGD("rosen ui director call set root.");
         rsUIDirector_->SetRoot(rootRenderNode->GetRSNode()->GetId());
         if (windowModal_ == WindowModal::CONTAINER_MODAL) {
             rsUIDirector_->SetAbilityBGAlpha(appBgColor_.GetAlpha());
@@ -911,7 +911,7 @@ void PipelineContext::SetupRootElement()
     }
 
     requestedRenderNode_.Reset();
-    LOGI("SetupRootElement success!");
+    LOGD("SetupRootElement success!");
 }
 
 RefPtr<Element> PipelineContext::SetupSubRootElement()
@@ -2100,7 +2100,7 @@ void PipelineContext::NotifyWebPaint() const
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     CHECK_RUN_ON(UI);
-    LOGI("PipelineContext: OnSurfaceChanged start.");
+    LOGD("PipelineContext: OnSurfaceChanged start.");
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (width_ == width && height_ == height && isSurfaceReady_ && type != WindowSizeChangeReason::DRAG_START &&
@@ -2154,7 +2154,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     if (isSurfaceReady_) {
         return;
     }
-    LOGI("Surface is ready.");
+    LOGD("Surface is ready.");
     isSurfaceReady_ = true;
     FlushPipelineWithoutAnimation();
     MarkForcedRefresh();
@@ -3040,7 +3040,7 @@ void PipelineContext::WindowFocus(bool isFocus)
         OnVirtualKeyboardAreaChange(Rect());
     }
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
-        LOGW("WindowFocus failed, Window modal is not container.");
+        LOGD("WindowFocus failed, Window modal is not container.");
         return;
     }
     if (!rootElement_) {

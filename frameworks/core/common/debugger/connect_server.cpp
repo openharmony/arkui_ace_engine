@@ -31,7 +31,6 @@ void ConnectServer::RunServer()
         int appPid = getpid();
         std::string pidStr = std::to_string(appPid);
         std::string sockName = '\0' + pidStr + bundleName_;
-        LOGI("App Connect Server Run: %{private}d%{private}s", appPid, bundleName_.c_str());
         localSocket::endpoint endPoint(sockName);
         localSocket::socket socket(ioContext);
         localSocket::acceptor acceptor(ioContext, endPoint);
@@ -48,7 +47,6 @@ void ConnectServer::RunServer()
                 return;
             }
             std::string message = boost::beast::buffers_to_string(buffer.data());
-            LOGI("Connect Server OnMessage: %{private}s", message.c_str());
             wsOnMessage_(std::move(message));
             usleep(DEBUGGER_WAIT_SEND_SIGNAL_TIME);
         }
@@ -63,14 +61,12 @@ void ConnectServer::RunServer()
 
 void ConnectServer::StopServer()
 {
-    LOGI("App Connect Server Stop");
     terminateExecution_ = true;
 }
 
 void ConnectServer::SendMessage(const std::string& message) const
 {
     try {
-        LOGI("send msg to Debug Manager message=%s", message.c_str());
         boost::beast::multi_buffer buffer;
         boost::beast::ostream(buffer) << message;
 

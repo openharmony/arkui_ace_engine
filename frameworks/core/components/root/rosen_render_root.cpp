@@ -30,7 +30,7 @@ void RosenRenderRoot::Paint(RenderContext& context, const Offset& offset)
         LOGE("Paint canvas is null");
         return;
     }
-    LOGI("color is %{public}s", bgColor_.ColorToString().c_str());
+    LOGD("color is %{public}s", bgColor_.ColorToString().c_str());
     if (isContextMenu_) {
         bgColor_ = Color::TRANSPARENT;
     }

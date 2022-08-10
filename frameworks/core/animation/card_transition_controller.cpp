@@ -45,7 +45,7 @@ void CardTransitionController::RegisterTransitionListener()
     pipelineContext->AddPageTransitionListener(
         [weak](const TransitionEvent& event, const WeakPtr<PageElement>& in, const WeakPtr<PageElement>& out) {
             if ((event != TransitionEvent::POP_START) && (event != TransitionEvent::PUSH_START)) {
-                LOGE("handle event: %{public}d failed. unknown event.", event);
+                LOGD("handle event: %{public}d failed. unknown event.", event);
                 return;
             }
             auto controller = weak.Upgrade();
@@ -80,7 +80,7 @@ void CardTransitionController::PrepareTransition()
     }
     auto pageDest = (event_ == TransitionEvent::PUSH_START) ? pageDest_.Upgrade() : pageSrc_.Upgrade();
     if (!pageDest || pageDest->GetCardComposeId().empty()) {
-        LOGE("prepare card transition failed. page dest is null. event: %{public}d", event_);
+        LOGD("prepare card transition failed. page dest is null. event: %{public}d", event_);
         return;
     }
     auto composeId = pageDest->GetCardComposeId();

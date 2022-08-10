@@ -68,7 +68,7 @@ bool ArkJSRuntime::InitializeFromExistVM(EcmaVM* vm)
 {
     vm_ = vm;
     usingExistVM_ = true;
-    LOGI("InitializeFromExistVM %{public}p", vm);
+    LOGD("InitializeFromExistVM %{public}p", vm);
     return vm_ != nullptr;
 }
 
