@@ -57,8 +57,37 @@ HWTEST_F(ListLayoutPropertyTest, ListLayoutPropertyTest001, TestSize.Level1)
         }
         auto layoutProperty = frameNode->GetLayoutProperty();
         auto listLayoutProperty = AceType::DynamicCast<OHOS::Ace::NG::ListLayoutProperty>(layoutProperty);
+        ASSERT_NE(listLayoutProperty, nullptr);
         auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
         ASSERT_EQ(NG::LIST_LAYOUT_ALGORITHM_SPACE_PXS[i].Value(), space.Value());
+    }
+}
+
+/**
+ * @tc.name: ListLayoutPropertyTest002
+ * @tc.desc: set initialIndex into listLayoutProperty and get it
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutPropertyTest, ListLayoutPropertyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateFrameNode function to create frameNode
+     * @tc.steps: step2. call GetLayoutProperty function to get layoutProperty and set initialIndex
+     * @tc.steps: step3. call GetInitialIndex function to get initialIndex and compare
+     * @tc.expected: if initialIndex is number, value should not be changed
+     */
+    for (int32_t index = START_INDEX; index < END_INDEX; index++) {
+        auto frameNode = NG::FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<NG::ListPattern>());
+        NG::ViewStackProcessor::GetInstance()->Push(frameNode);
+        auto castListLayoutProperty = frameNode->GetLayoutProperty<NG::ListLayoutProperty>();
+        if (castListLayoutProperty) {
+            castListLayoutProperty->UpdateInitialIndex(index);
+        }
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        auto listLayoutProperty = AceType::DynamicCast<OHOS::Ace::NG::ListLayoutProperty>(layoutProperty);
+        ASSERT_NE(listLayoutProperty, nullptr);
+        auto initialIndex = listLayoutProperty->GetInitialIndex().value_or(0);
+        ASSERT_EQ(index, initialIndex);
     }
 }
 } // namespace OHOS::Ace

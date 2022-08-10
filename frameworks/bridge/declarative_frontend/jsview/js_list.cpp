@@ -81,6 +81,10 @@ void JSList::Create(const JSCallbackInfo& args)
             if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsValid()) {
                 NG::ListView::SetSpace(space);
             }
+            int32_t initialIndex = 0;
+            if (ConvertFromJSValue(obj->GetProperty("initialIndex"), initialIndex) && initialIndex >= 0) {
+                NG::ListView::SetInitialIndex(initialIndex);
+            }
         }
         return;
     }

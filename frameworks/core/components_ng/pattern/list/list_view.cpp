@@ -36,6 +36,11 @@ void ListView::SetSpace(const Dimension& space)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space);
 }
 
+void ListView::SetInitialIndex(const int32_t& initialIndex)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex);
+}
+
 void ListView::SetListDirection(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListDirection, axis);

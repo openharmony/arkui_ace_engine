@@ -74,6 +74,16 @@ public:
         return spaceWidth_;
     }
 
+    void SetIsInitialized(bool isInitialized)
+    {
+        isInitialized_ = isInitialized;
+    }
+
+    bool GetIsInitialized() const
+    {
+        return isInitialized_;
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
@@ -103,6 +113,8 @@ private:
     std::optional<int32_t> endIndex_;
 
     float spaceWidth_ = 0.0f;
+
+    bool isInitialized_ = false;
 };
 } // namespace OHOS::Ace::NG
 

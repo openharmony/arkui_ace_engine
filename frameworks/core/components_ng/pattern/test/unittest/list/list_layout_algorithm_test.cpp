@@ -69,4 +69,42 @@ HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest001, TestSize.Level1)
         }
     }
 }
+
+/**
+ * @tc.name: ListLayoutAlgorithmTest002
+ * @tc.desc: set initialIndex into frameNode and test layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateFrameNode function to create frameNode
+     * @tc.steps: step2. call GeometryNode function to create geometryNode and set frameSize
+     * @tc.steps: step3. call LayoutWrapper function to create layoutWrapper
+     * @tc.steps: step4. call ListLayoutAlgorithm function to create listLayoutAlgorithm and set initialIndex
+     * @tc.steps: step5. call Measure function to measure and compare result
+     * @tc.expected: layout should be correct
+     */
+    for (int32_t index = START_INDEX; index < END_INDEX; index++) {
+        auto frameNode = NG::FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<NG::ListPattern>());
+        NG::ViewStackProcessor::GetInstance()->Push(frameNode);
+        
+        RefPtr<NG::GeometryNode> geometryNode;
+        geometryNode->SetFrameSize(OHOS::Ace::NG::SizeF(NG::GEOMETRYNODE_FRAMESIZE, NG::GEOMETRYNODE_FRAMESIZE));
+        auto castListLayoutProperty = frameNode->GetLayoutProperty<NG::ListLayoutProperty>();
+        if (castListLayoutProperty) {
+            castListLayoutProperty->UpdateInitialIndex(index);
+        }
+
+        NG::LayoutWrapper layoutWrapper = NG::LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+        auto listLayoutAlgorithm = OHOS::Ace::NG::ListLayoutAlgorithm(NG::START_INDEX, NG::END_INDEX);
+        
+        listLayoutAlgorithm.Measure(&layoutWrapper);
+        NG::ListLayoutAlgorithm::PositionMap positionMap = listLayoutAlgorithm.GetItemPosition();
+        for (size_t j = NG::START_INDEX; j < NG::END_INDEX; j++) {
+            ASSERT_EQ(positionMap[j].first, NG::GEOMETRYNODE_FRAMESIZE * (j - index));
+        }
+    }
+}
 } // namespace OHOS::Ace

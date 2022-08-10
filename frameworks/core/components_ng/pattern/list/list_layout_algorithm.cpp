@@ -112,6 +112,12 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(listLayoutProperty);
+    
+    auto initialIndex = listLayoutProperty->GetInitialIndex().value_or(0);
+    if (!isInitialized_) {
+        preStartIndex_ = initialIndex;
+        isInitialized_ = true;
+    }
 
     // calculate idealSize and set FrameSize
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
