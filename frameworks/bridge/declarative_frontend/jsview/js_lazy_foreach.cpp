@@ -398,13 +398,15 @@ public:
     {
         auto totalIndex = GetTotalIndexCount();
         auto* stack = ViewStackProcessor::GetInstance();
+        JSRef<JSVal> params[2];
         for (auto index = 0; index < totalIndex; index++) {
-            JSRef<JSVal> result = CallJSFunction(getDataFunc_, dataSourceObj_, index);
-            std::string key = keyGenFunc_(result, index);
+            params[0] = CallJSFunction(getDataFunc_, dataSourceObj_, index);
+            params[1] = JSRef<JSVal>::Make(ToJSValue(index));
+            std::string key = keyGenFunc_(params[0], index);
             auto multiComposed = AceType::MakeRefPtr<MultiComposedComponent>(key, "LazyForEach");
             stack->Push(multiComposed);
             stack->PushKey(key);
-            itemGenFunc_->Call(JSRef<JSObject>(), 1, &result);
+            itemGenFunc_->Call(JSRef<JSObject>(), 2, params);
             stack->PopContainer();
             stack->PopKey();
         }
@@ -417,8 +419,10 @@ public:
             return nullptr;
         }
 
-        JSRef<JSVal> result = CallJSFunction(getDataFunc_, dataSourceObj_, index);
-        std::string key = keyGenFunc_(result, index);
+        JSRef<JSVal> params[2];
+        params[0] = CallJSFunction(getDataFunc_, dataSourceObj_, index);
+        params[1] = JSRef<JSVal>::Make(ToJSValue(index));
+        std::string key = keyGenFunc_(params[0], index);
 
         ScopedViewStackProcessor scopedViewStackProcessor;
         auto* viewStack = ViewStackProcessor::GetInstance();
@@ -428,7 +432,7 @@ public:
             parentView_->MarkLazyForEachProcess(key);
         }
         viewStack->PushKey(key);
-        itemGenFunc_->Call(JSRef<JSObject>(), 1, &result);
+        itemGenFunc_->Call(JSRef<JSObject>(), 2, params);
         viewStack->PopKey();
         if (parentView_) {
             parentView_->ResetLazyForEachProcess();
@@ -497,8 +501,10 @@ public:
             return info;
         }
 
-        JSRef<JSVal> result = CallJSFunction(getDataFunc_, dataSourceObj_, index);
-        std::string key = keyGenFunc_(result, index);
+        JSRef<JSVal> params[2];
+        params[0] = CallJSFunction(getDataFunc_, dataSourceObj_, index);
+        params[1] = JSRef<JSVal>::Make(ToJSValue(index));
+        std::string key = keyGenFunc_(params[0], index);
 
         ScopedViewStackProcessor scopedViewStackProcessor;
         auto* viewStack = NG::ViewStackProcessor::GetInstance();
@@ -506,7 +512,7 @@ public:
             parentView_->MarkLazyForEachProcess(key);
         }
         viewStack->PushKey(key);
-        itemGenFunc_->Call(JSRef<JSObject>(), 1, &result);
+        itemGenFunc_->Call(JSRef<JSObject>(), 2, params);
         viewStack->PopKey();
         if (parentView_) {
             parentView_->ResetLazyForEachProcess();
@@ -564,7 +570,7 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
     } else {
         keyGenFunc = [viewId, keyGenerator = JSRef<JSFunc>::Cast(params[PARAM_KEY_GENERATOR])](
                          const JSRef<JSVal>& jsVal, size_t index) {
-            JSRef<JSVal> params[] = { jsVal };
+            JSRef<JSVal> params[] = { jsVal, JSRef<JSVal>::Make(ToJSValue(index)) };
             auto key = keyGenerator->Call(JSRef<JSObject>(), ArraySize(params), params);
             return viewId + "-" + (key->IsString() || key->IsNumber() ? key->ToString() : std::to_string(index));
         };
