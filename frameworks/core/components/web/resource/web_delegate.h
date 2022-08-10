@@ -36,6 +36,25 @@
 
 namespace OHOS::Ace {
 
+class WebMessagePortOhos : public WebMessagePort {
+    DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
+
+public:
+    WebMessagePortOhos(WeakPtr<WebDelegate> webDelegate): webDelegate_(webDelegate) {}
+    WebMessagePortOhos() = default;
+    ~WebMessagePortOhos() = default;
+
+    void Close() override;
+    void PostMessage(std::string& data) override;
+    void SetWebMessageCallback(std::function<void(const std::string&)>&& callback) override;
+    void SetPortHandle(std::string& handle) override;
+    std::string GetPortHandle() override;
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+    std::string handle_;
+};
+
 class ConsoleLogOhos : public WebConsoleLog {
     DECLARE_ACE_TYPE(ConsoleLogOhos, WebConsoleLog)
 
@@ -228,6 +247,11 @@ public:
     void UpdateTextZoomAtio(const int32_t& textZoomAtioNum);
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
     void LoadUrl();
+    void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
+    void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
+    void ClosePort(std::string& handle);
+    void PostPortMessage(std::string& handle, std::string& data);
+    void SetPortMessageCallback(std::string& handle, std::function<void(const std::string&)>&& callback);
     void HandleTouchDown(const int32_t& id, const double& x, const double& y);
     void HandleTouchUp(const int32_t& id, const double& x, const double& y);
     void HandleTouchMove(const int32_t& id, const double& x, const double& y);

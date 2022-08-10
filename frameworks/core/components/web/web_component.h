@@ -82,6 +82,19 @@ private:
     int hitType_ = static_cast<int>(WebHitTestType::UNKNOWN);
 };
 
+class WebMessagePort : public virtual AceType {
+    DECLARE_ACE_TYPE(WebMessagePort, AceType);
+
+public:
+    WebMessagePort() = default;
+    virtual ~WebMessagePort() = default;
+    virtual void SetPortHandle(std::string& handle) = 0;
+    virtual std::string GetPortHandle() = 0;
+    virtual void Close() = 0;
+    virtual void PostMessage(std::string& data) = 0;
+    virtual void SetWebMessageCallback(std::function<void(const std::string&)>&& callback) = 0;
+};
+
 class WebCookie : public virtual AceType {
     DECLARE_ACE_TYPE(WebCookie, AceType);
 
@@ -472,6 +485,32 @@ public:
         getTitleImpl_ = getTitleImpl;
     }
 
+    using CreateMsgPortsImpl = std::function<void(std::vector<RefPtr<WebMessagePort>>&)>;
+    void CreateMsgPorts(std::vector<RefPtr<WebMessagePort>>& ports)
+    {
+        if (createMsgPortsImpl_) {
+            createMsgPortsImpl_(ports);
+        }
+    }
+    void SetCreateMsgPortsImpl(CreateMsgPortsImpl&& createMsgPortsImpl)
+    {
+        createMsgPortsImpl_ = createMsgPortsImpl;
+    }
+
+    using PostWebMessageImpl = std::function<void(std::string&, std::vector<RefPtr<WebMessagePort>>&, std::string&)>;
+    void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri)
+    {
+        if (postWebMessageImpl_) {
+            postWebMessageImpl_(message, ports, uri);
+        }
+    }
+    void SetPostWebMessageImpl(PostWebMessageImpl&& postWebMessageImpl)
+    {
+        postWebMessageImpl_ = postWebMessageImpl;
+    }
+
+
+
     using GetDefaultUserAgentImpl = std::function<std::string()>;
     std::string GetDefaultUserAgent()
     {
@@ -665,6 +704,8 @@ private:
     GetPageHeightImpl getPageHeightImpl_;
     GetWebIdImpl getWebIdImpl_;
     GetTitleImpl getTitleImpl_;
+    CreateMsgPortsImpl createMsgPortsImpl_;
+    PostWebMessageImpl postWebMessageImpl_;
     GetDefaultUserAgentImpl getDefaultUserAgentImpl_;
     SaveCookieSyncImpl saveCookieSyncImpl_;
     SetCookieImpl setCookieImpl_;
