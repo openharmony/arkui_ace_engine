@@ -508,9 +508,9 @@ void RosenRenderImage::SyncCreateSvgNodes(bool isReady)
     }
     svgDom_ = currentSvgDom;
 
-    if (!currentSvgDom->HasAnimate()) {
+    if (!currentSvgDom->HasAnimate() && !currentSvgDom->HasClipPath()) {
         directPaint_ = true;
-        LOGD("svg has not animate tag, can use direct paint.");
+        LOGD("svg has not animate tag and clip-path, can use direct paint.");
     }
     if (directPaint_ == true && isReady) {
         // svg imageObject from map buffer, use as directly
