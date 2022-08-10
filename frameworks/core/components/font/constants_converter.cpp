@@ -224,9 +224,9 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtShadow.offset.fX = static_cast<SkScalar>(spanShadow.GetOffset().GetX());
         txtShadow.offset.fY = static_cast<SkScalar>(spanShadow.GetOffset().GetY());
 #ifdef NG_BUILD
-    txtShadow.blur_sigma = spanShadow.GetBlurRadius();
+        txtShadow.blur_sigma = spanShadow.GetBlurRadius();
 #else
-    txtShadow.blur_radius = spanShadow.GetBlurRadius();
+        txtShadow.blur_radius = spanShadow.GetBlurRadius();
 #endif
         txtStyle.text_shadows.emplace_back(txtShadow);
     }
