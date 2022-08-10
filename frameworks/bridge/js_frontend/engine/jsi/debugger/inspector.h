@@ -16,8 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_ARK_DEBUGGER_INSPECTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_ARK_DEBUGGER_INSPECTOR_H
 
+#include "ws_server.h"
+
 #include <string>
-#include "frameworks/bridge/js_frontend/engine/jsi/debugger/ws_server.h"
+
+#include <pthread.h>
 
 namespace panda::ecmascript {
 class EcmaVM;
