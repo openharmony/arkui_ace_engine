@@ -33,9 +33,9 @@ class FormPlatformEventCallback final : public Platform::PlatformEventCallback {
 public:
     explicit FormPlatformEventCallback(FormPlatformFinish onFinish) : onFinish_(onFinish) {}
 
-    ~FormPlatformEventCallback() = default;
+    ~FormPlatformEventCallback() override = default;
 
-    virtual void OnFinish() const
+    void OnFinish() const override
     {
         LOGI("FormPlatformEventCallback OnFinish");
         if (onFinish_) {
@@ -43,7 +43,7 @@ public:
         }
     }
 
-    virtual void OnStatusBarBgColorChanged(uint32_t color)
+    void OnStatusBarBgColorChanged(uint32_t color) override
     {
         LOGI("FormPlatformEventCallback OnStatusBarBgColorChanged");
     }
@@ -168,6 +168,12 @@ void AceFormAbility::OnVisibilityChanged(const std::map<int64_t, int32_t>& formE
 {
     LOGI("AceFormAbility::OnVisibilityChanged called");
     Platform::PaContainer::OnVisibilityChanged(instanceId_, formEventsMap);
+}
+
+bool AceFormAbility::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+{
+    LOGD("AceFormAbility::OnShare called");
+    return Platform::PaContainer::OnShare(instanceId_, formId, wantParams);
 }
 
 void AceFormAbility::OnStart(const OHOS::AAFwk::Want& want)

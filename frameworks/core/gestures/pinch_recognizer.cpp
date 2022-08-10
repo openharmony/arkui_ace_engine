@@ -31,6 +31,7 @@ constexpr int32_t AXIS_PINCH_FINGERS = 2;
 void PinchRecognizer::OnAccepted()
 {
     SendCallbackMsg(onActionStart_);
+    SendCallbackMsg(onActionUpdate_);
 
     if (pendingEnd_) {
         SendCallbackMsg(onActionEnd_);

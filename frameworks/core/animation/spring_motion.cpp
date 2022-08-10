@@ -120,4 +120,9 @@ void ScrollSpringMotion::Move(float offsetTime)
     }
 }
 
+std::string SpringMotion::GetMotionType() const
+{
+    return "spring";
+}
+
 } // namespace OHOS::Ace

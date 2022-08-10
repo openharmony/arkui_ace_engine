@@ -359,6 +359,12 @@ void StackElement::PerformPopPopup(const ComposeId& id)
                 return;
             }
 
+            auto context = context_.Upgrade();
+            if (context && !context->GetOnShow()) {
+                UpdateChild(child, nullptr);
+                break;
+            }
+
             auto theme = themeManager->GetTheme<PopupTheme>();
             auto hideAlphaAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0f, 0.0f, Curves::FAST_OUT_SLOW_IN);
             TweenOption hideOption;
@@ -370,12 +376,14 @@ void StackElement::PerformPopPopup(const ComposeId& id)
             child->SetOption(hideOption);
             child->ApplyOptions();
             child->ApplyKeyframes();
-            animator->AddStopListener([weakStack = AceType::WeakClaim(this), child] {
-                auto lastStack = weakStack.Upgrade();
-                if (lastStack) {
-                    lastStack->UpdateChild(child, nullptr);
-                }
-            });
+            animator->AddStopListener(
+                [weakStack = AceType::WeakClaim(this), weakChild = AceType::WeakClaim(AceType::RawPtr(child))] {
+                    auto lastStack = weakStack.Upgrade();
+                    auto child = weakChild.Upgrade();
+                    if (lastStack && child) {
+                        lastStack->UpdateChild(child, nullptr);
+                    }
+                });
             animator->Play();
             break;
         }
@@ -504,7 +512,7 @@ void StackElement::CreateInspectorComponent(PopupComponentInfo& componentInfo) c
     auto inspectorTag = dialog->GetInspectorTag();
     if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {
         auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(
-            std::to_string(dialog->GetDialogId()) + inspectorTag, inspectorTag);
+            V2::InspectorComposedComponent::GenerateId(), inspectorTag);
         composedComponent->SetChild(componentInfo.component);
         componentInfo.component = composedComponent;
     }

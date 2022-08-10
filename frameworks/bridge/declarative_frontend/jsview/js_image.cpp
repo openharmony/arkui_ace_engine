@@ -436,6 +436,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onDragMove", &JSImage::JsOnDragMove);
     JSClass<JSImage>::StaticMethod("onDragLeave", &JSImage::JsOnDragLeave);
     JSClass<JSImage>::StaticMethod("onDrop", &JSImage::JsOnDrop);
+    JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
@@ -538,6 +539,29 @@ void JSImage::JsOnDrop(const JSCallbackInfo& info)
     if (image) {
         image->SetOnDropId(onDropId);
     }
+}
+
+void JSImage::SetCopyOption(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    if (!stack) {
+        return;
+    }
+    auto component = AceType::DynamicCast<ImageComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("component is not valid");
+        return;
+    }
+    auto copyOptions = CopyOptions::None;
+    if (info[0]->IsNumber()) {
+        auto emunNumber = info[0]->ToNumber<int>();
+        copyOptions = static_cast<CopyOptions>(emunNumber);
+    }
+    LOGI("copy option: %{public}d", copyOptions);
+    component->SetCopyOption(copyOptions);
 }
 
 } // namespace OHOS::Ace::Framework

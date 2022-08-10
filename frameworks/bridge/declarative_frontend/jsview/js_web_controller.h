@@ -43,6 +43,8 @@ public:
     void GetCookieManager(const JSCallbackInfo& args);
     void GetPageHeight(const JSCallbackInfo& args);
     void GetTitle(const JSCallbackInfo& args);
+    void CreateWebMessagePorts(const JSCallbackInfo& args);
+    void PostWebMessage(const JSCallbackInfo& args);
     void GetWebId(const JSCallbackInfo& args);
     void GetDefaultUserAgent(const JSCallbackInfo& args);
     void AddJavascriptInterface(const JSCallbackInfo& args);
@@ -54,6 +56,9 @@ public:
     void ZoomIn(const JSCallbackInfo& args);
     void ZoomOut(const JSCallbackInfo& args);
     void RequestFocus(const JSCallbackInfo& args);
+    void SearchAllAsync(const JSCallbackInfo& args);
+    void ClearMatches(const JSCallbackInfo& args);
+    void SearchNext(const JSCallbackInfo& args);
 
     // Backward and Forward for web page
     void Backward(const JSCallbackInfo& args);

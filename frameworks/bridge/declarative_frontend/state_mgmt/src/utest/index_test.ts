@@ -13,19 +13,20 @@
  * limitations under the License.
  */
 
+
 initTest();
 
 testLocalStorage();
 
 testAppStorage();
 
-testAppStorageArray
+testAppStorageArray();
 
-// testEnvironment(); FIXME issue #I4TC8S
+testEnvironment();
 
 testPersistentStorage();
 
- testViewState();
+testViewState();
 
 nestedObsObjProps();
 

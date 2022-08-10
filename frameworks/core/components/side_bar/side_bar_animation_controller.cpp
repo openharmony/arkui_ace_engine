@@ -83,8 +83,8 @@ void SideBarAnimation::Stop()
 
 void SideBarAnimationController::StopAnimation()
 {
-    StopHideAnimation();
-    StopShowAnimation();
+    StopRightToLeftAnimation();
+    StopLeftToRightAnimation();
 }
 
 void SideBarAnimationController::PlaySideBarContainerToAnimation(SideStatus status)
@@ -93,24 +93,39 @@ void SideBarAnimationController::PlaySideBarContainerToAnimation(SideStatus stat
         CreateAnimation();
     }
 
-    StopHideAnimation();
+    StopRightToLeftAnimation();
     if (rightToLeftAnimation_) {
         rightToLeftAnimation_->ClearStopListenerCallback();
     }
 
-    StopShowAnimation();
+    StopLeftToRightAnimation();
     if (leftToRightAnimation_) {
         leftToRightAnimation_->ClearStopListenerCallback();
     }
+    bool isSideBarStart = sidebarpositon_ == SideBarPosition::START;
     if (status == SideStatus::HIDDEN) {
-        if (rightToLeftAnimation_ && stopCallback_) {
-            rightToLeftAnimation_->AddStopListenerCallback(stopCallback_);
-            PlayHideAnimation();
+        if (isSideBarStart) {
+            if (rightToLeftAnimation_ && stopCallback_) {
+                rightToLeftAnimation_->AddStopListenerCallback(stopCallback_);
+                PlayRightToLeftAnimation();
+            }
+        } else {
+            if (leftToRightAnimation_ && stopCallback_) {
+                leftToRightAnimation_->AddStopListenerCallback(stopCallback_);
+                PlayLeftToRightAnimation();
+            }
         }
     } else {
-        if (leftToRightAnimation_ && stopCallback_) {
-            leftToRightAnimation_->AddStopListenerCallback(stopCallback_);
-            PlayShowAnimation();
+        if (isSideBarStart) {
+            if (leftToRightAnimation_ && stopCallback_) {
+                leftToRightAnimation_->AddStopListenerCallback(stopCallback_);
+                PlayLeftToRightAnimation();
+            }
+        } else {
+            if (rightToLeftAnimation_ && stopCallback_) {
+                rightToLeftAnimation_->AddStopListenerCallback(stopCallback_);
+                PlayRightToLeftAnimation();
+            }
         }
     }
 }
@@ -132,28 +147,28 @@ void SideBarAnimationController::CreateAnimation()
     isAnimationCreated_ = true;
 }
 
-void SideBarAnimationController::PlayHideAnimation()
+void SideBarAnimationController::PlayRightToLeftAnimation()
 {
     if (rightToLeftAnimation_) {
         rightToLeftAnimation_->Play();
     }
 }
 
-void SideBarAnimationController::StopHideAnimation()
+void SideBarAnimationController::StopRightToLeftAnimation()
 {
     if (rightToLeftAnimation_) {
         rightToLeftAnimation_->Stop();
     }
 }
 
-void SideBarAnimationController::PlayShowAnimation()
+void SideBarAnimationController::PlayLeftToRightAnimation()
 {
     if (leftToRightAnimation_) {
         leftToRightAnimation_->Play();
     }
 }
 
-void SideBarAnimationController::StopShowAnimation()
+void SideBarAnimationController::StopLeftToRightAnimation()
 {
     if (leftToRightAnimation_) {
         leftToRightAnimation_->Stop();

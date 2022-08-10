@@ -30,6 +30,7 @@
 #include "core/components/page/page_target.h"
 #include "core/components/page_transition/page_transition_component.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/utils/source_map.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -47,6 +48,9 @@ class ACE_EXPORT JsAcePage final : public AcePage {
     DECLARE_ACE_TYPE(JsAcePage, AcePage);
 
 public:
+#ifdef NG_BUILD
+    JsAcePage(int32_t pageId, const std::string& url) : AcePage(pageId), url_(url) {}
+#else
     JsAcePage(int32_t pageId, const RefPtr<DOMDocument>& document, const std::string& url,
         const WeakPtr<StageElement>& container = nullptr)
         : AcePage(pageId), domDoc_(document), url_(url), container_(container),
@@ -54,16 +58,19 @@ public:
     {
         ACE_DCHECK(domDoc_);
     }
+#endif
 
     ~JsAcePage() override;
 
     RefPtr<PageComponent> BuildPage(const std::string& url) override;
+#ifndef NG_BUILD
     RefPtr<ComposedComponent> BuildPagePatch(int32_t nodeId);
 
     RefPtr<DOMDocument> GetDomDocument() const
     {
         return domDoc_;
     }
+#endif
 
     const std::string& GetUrl() const
     {
@@ -80,6 +87,7 @@ public:
         pageCreated_ = true;
     }
 
+#ifndef NG_BUILD
     void SetPageTransition(const RefPtr<PageTransitionComponent>& pageTransition)
     {
         pageTransition_ = pageTransition;
@@ -94,6 +102,7 @@ public:
     {
         jsCommands = std::move(jsCommands_);
     }
+#endif
 
     void PushNewNode(NodeId nodeId, NodeId parentNodeId)
     {
@@ -125,6 +134,7 @@ public:
         dirtyNodes_.clear();
     }
 
+#ifndef NG_BUILD
     void ReserveShowCommand(const RefPtr<JsCommand>& command)
     {
         if (command) {
@@ -158,6 +168,7 @@ public:
         showCommands_.clear();
         showCommandConsumed_ = false;
     }
+#endif
 
     RefPtr<BaseCanvasBridge> GetBridgeById(NodeId nodeId);
     void PushCanvasBridge(NodeId nodeId, const RefPtr<BaseCanvasBridge>& bridge);
@@ -211,10 +222,12 @@ public:
         return fragmentCount_;
     }
 
+#ifndef NG_BUILD
     size_t GetCommandSize() const
     {
         return jsCommands_.size();
     }
+#endif
 
     void SetPipelineContext(const WeakPtr<PipelineBase>& pipelineContext)
     {
@@ -266,12 +279,12 @@ public:
         component_ = component;
     }
 
-    void SetRootNode(const RefPtr<NG::FrameNode>& node)
+    void SetRootNode(const RefPtr<NG::UINode>& node)
     {
         pageRootNode_ = node;
     }
 
-    const RefPtr<NG::FrameNode>& GetRootNode() const
+    const RefPtr<NG::UINode>& GetRootNode() const
     {
         return pageRootNode_;
     }
@@ -367,7 +380,9 @@ public:
     void OnJsEngineDestroy();
 
 private:
+#ifndef NG_BUILD
     void SwapBackgroundDecoration(const RefPtr<PageTransitionComponent>& transition);
+#endif
     std::string GetCardId() const;
 
     bool pageCreated_ = false;
@@ -377,7 +392,7 @@ private:
     WeakPtr<PipelineBase> pipelineContext_;
     RefPtr<PageTransitionComponent> pageTransition_;
     RefPtr<Component> component_;
-    RefPtr<NG::FrameNode> pageRootNode_;
+    RefPtr<NG::UINode> pageRootNode_;
     RefPtr<DOMDocument> domDoc_;
     std::string url_;
     WeakPtr<StageElement> container_;

@@ -22,6 +22,7 @@
 #include "core/accessibility/accessibility_node.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/button/button_component.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/form/form_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/image/image_component.h"
@@ -43,7 +44,6 @@
 
 namespace OHOS::Ace::Framework {
 thread_local std::unique_ptr<ViewStackProcessor> ViewStackProcessor::instance = nullptr;
-thread_local int32_t ViewStackProcessor::composedElementId_ = 1;
 
 ViewStackProcessor* ViewStackProcessor::GetInstance()
 {
@@ -106,7 +106,8 @@ RefPtr<PopupComponentV2> ViewStackProcessor::GetPopupComponent(bool createNewCom
         return nullptr;
     }
 
-    RefPtr<PopupComponentV2> popupComponent = AceType::MakeRefPtr<OHOS::Ace::PopupComponentV2>(GenerateId(), "popup");
+    RefPtr<PopupComponentV2> popupComponent =
+        AceType::MakeRefPtr<OHOS::Ace::PopupComponentV2>(V2::InspectorComposedComponent::GenerateId(), "popup");
     wrappingComponentsMap.emplace("popup", popupComponent);
     return popupComponent;
 }
@@ -123,7 +124,8 @@ RefPtr<MenuComponent> ViewStackProcessor::GetMenuComponent(bool createNewCompone
         return nullptr;
     }
 
-    RefPtr<MenuComponent> menuComponent = AceType::MakeRefPtr<OHOS::Ace::MenuComponent>(GenerateId(), "menu");
+    RefPtr<MenuComponent> menuComponent =
+        AceType::MakeRefPtr<OHOS::Ace::MenuComponent>(V2::InspectorComposedComponent::GenerateId(), "menu");
     wrappingComponentsMap.emplace("menu", menuComponent);
     return menuComponent;
 }
@@ -584,9 +586,15 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     std::string componentNames[] = { "stepperItem", "stepperDisplay", "flexItem", "display", "transform", "touch",
         "pan_gesture", "click_gesture", "focusable", "coverage", "box", "shared_transition", "mouse",
         "stepperScroll" };
+    // In RS extra case, use isFirstNode to determine the top node.
+    bool isFirstNode = true;
     for (auto& name : componentNames) {
         auto iter = wrappingComponentsMap.find(name);
         if (iter != wrappingComponentsMap.end()) {
+            if (isFirstNode) {
+                iter->second->SetIsFirst(isFirstNode);
+                isFirstNode = false;
+            }
             iter->second->OnWrap();
             components.emplace_back(iter->second);
             if (videoComponentV2 && saveComponentEvent) {
@@ -615,6 +623,7 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
         // we should not touch itemChildComponent as it's already marked.
         //    (head)       (tail)      (unchanged)
         // mainComponent - others - itemChildComponent
+        Component::MergeRSNode(mainComponent);
         Component::MergeRSNode(components);
         if (itemChildComponent) {
             components.emplace_back(itemChildComponent);
@@ -685,7 +694,15 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     }
 
     for (auto&& component : components) {
-        component->SetTouchable(mainComponent->IsTouchable());
+        component->SetTouchable(mainComponent->IsTouchable() && mainComponent->GetHitTestMode() != HitTestMode::NONE);
+    }
+
+    for (auto&& component : components) {
+        component->SetHitTestMode(mainComponent->GetHitTestMode());
+    }
+
+    for (auto&& component : components) {
+        component->SetDisabledStatus(mainComponent->IsDisabledStatus());
     }
 
 #ifdef ACE_DEBUG_LOG
@@ -719,11 +736,6 @@ void ViewStackProcessor::UpdateTopComponentProps(const RefPtr<Component>& compon
                 renderComponent->SetPositionType(positionedComponent->GetPositionType());
             }
         }
-    }
-
-    if (wrappingComponentsMap.find("root") != wrappingComponentsMap.end()) {
-        auto rootComponent = GetRootComponent();
-        component->SetDisabledStatus(rootComponent->IsDisabledStatus());
     }
 }
 
@@ -806,11 +818,6 @@ void ViewStackProcessor::SetZIndex(RefPtr<Component>& component)
     }
 }
 
-std::string ViewStackProcessor::GenerateId()
-{
-    return std::to_string(composedElementId_++);
-}
-
 RefPtr<V2::InspectorComposedComponent> ViewStackProcessor::GetInspectorComposedComponent() const
 {
     if (componentsStack_.empty()) {
@@ -840,7 +847,8 @@ RefPtr<Component> ViewStackProcessor::GetScoringComponent() const
 void ViewStackProcessor::CreateInspectorComposedComponent(const std::string& inspectorTag)
 {
     if (V2::InspectorComposedComponent::HasInspectorFinished(inspectorTag)) {
-        auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(GenerateId(), inspectorTag);
+        auto composedComponent = AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+            V2::InspectorComposedComponent::GenerateId(), inspectorTag);
         auto& wrappingComponentsMap = componentsStack_.top();
         wrappingComponentsMap.emplace("inspector", composedComponent);
     }
@@ -878,10 +886,8 @@ void ViewStackProcessor::SetIsPercentSize(RefPtr<Component>& component)
     }
 }
 
-void ViewStackProcessor::ClaimElementId(RefPtr<Component> component)
+void ViewStackProcessor::ClaimElementId(const RefPtr<Component>& component)
 {
-    ACE_DCHECK((reservedElementId_ != ElementRegister::UndefinedElementId) && "No reserved elmtId, internal error!");
-    ACE_DCHECK(mainComponent != nullptr);
     LOGD("Assigning elmtId %{public}u to new %{public}s .", reservedElementId_, AceType::TypeName(component));
     component->AssignUniqueElementId(reservedElementId_);
     reservedElementId_ = ElementRegister::UndefinedElementId;

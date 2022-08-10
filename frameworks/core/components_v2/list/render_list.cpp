@@ -15,6 +15,7 @@
 
 #include "core/components_v2/list/render_list.h"
 
+#include "base/geometry/axis.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/utils/string_utils.h"
@@ -103,12 +104,13 @@ void RenderList::Update(const RefPtr<Component>& component)
 {
     component_ = AceType::DynamicCast<ListComponent>(component);
     ACE_DCHECK(component_);
-    InitScrollBar();
 
     RemoveAllItems();
 
     auto axis = component_->GetDirection();
     vertical_ = axis == Axis::VERTICAL;
+
+    InitScrollBar();
 
     // Start index should be updated only for the first time
     if (startIndex_ == INITIAL_CHILD_INDEX) {
@@ -173,6 +175,15 @@ void RenderList::Update(const RefPtr<Component>& component)
 
     if (onItemDragStart_) {
         CreateDragDropRecognizer();
+    }
+    auto parent = GetParent().Upgrade();
+    while (parent) {
+        auto refresh = AceType::DynamicCast<RenderRefresh>(parent);
+        if (refresh) {
+            refreshParent_ = AceType::WeakClaim(AceType::RawPtr(refresh));
+            break;
+        }
+        parent = parent->GetParent().Upgrade();
     }
 
     isMultiSelectable_ = component_->GetMultiSelectable();
@@ -247,6 +258,27 @@ void RenderList::InitScrollable(Axis axis)
         list->listEventFlags_[ListEvents::SCROLL_STOP] = true;
         list->HandleListEvent();
     });
+    scrollable_->SetDragEndCallback([weakScroll = AceType::WeakClaim(this)]() {
+        auto scroll = weakScroll.Upgrade();
+        if (scroll) {
+            auto refresh = scroll->refreshParent_.Upgrade();
+            if (refresh && scroll->inLinkRefresh_) {
+                refresh->HandleDragEnd();
+                scroll->inLinkRefresh_ = false;
+            }
+        }
+    });
+
+    scrollable_->SetDragCancel([weakScroll = AceType::WeakClaim(this)]() {
+        auto scroll = weakScroll.Upgrade();
+        if (scroll) {
+            auto refresh = scroll->refreshParent_.Upgrade();
+            if (refresh && scroll->inLinkRefresh_) {
+                refresh->HandleDragCancel();
+                scroll->inLinkRefresh_ = false;
+            }
+        }
+    });
     scrollable_->SetOnScrollBegin(component_->GetOnScrollBegin());
     if (vertical_) {
         scrollable_->InitRelatedParent(GetParent());
@@ -308,6 +340,9 @@ void RenderList::InitScrollBar()
     scrollBar_->SetNormalWidth(theme->GetNormalWidth());
     scrollBar_->SetActiveWidth(theme->GetActiveWidth());
     scrollBar_->SetTouchWidth(theme->GetTouchWidth());
+    if (!vertical_) {
+        scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    }
     scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
     SetScrollBarCallback();
 }
@@ -1069,19 +1104,18 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
     if (source == SCROLL_FROM_START) {
         return true;
     }
-
     if (NearZero(offset)) {
         return true;
     }
-
     if (scrollBar_ && scrollBar_->NeedScrollBar()) {
         scrollBar_->SetActive(SCROLL_FROM_CHILD != source);
     }
-
+    if (reachStart_ && HandleRefreshEffect(offset, source)) {
+        return false;
+    }
     if (reachStart_ && reachEnd_) {
         return false;
     }
-
     if (offset > 0.0) {
         if (reachStart_ && (!scrollEffect_ || source == SCROLL_FROM_AXIS)) {
             return false;
@@ -1093,7 +1127,6 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
         }
         reachStart_ = false;
     }
-
     auto context = context_.Upgrade();
     if (context) {
         dipScale_ = context->GetDipScale();
@@ -1119,6 +1152,24 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
     }
     MarkNeedLayout(true);
     return true;
+}
+
+bool RenderList::HandleRefreshEffect(double& delta, int32_t source)
+{
+    auto refresh = refreshParent_.Upgrade();
+    if (!refresh) {
+        LOGD("not support refresh");
+        return false;
+    }
+
+    if ((LessOrEqual(currentOffset_, 0.0) && source == SCROLL_FROM_UPDATE) || inLinkRefresh_) {
+        refresh->UpdateScrollableOffset(delta);
+        inLinkRefresh_ = true;
+    }
+    if (refresh->GetStatus() != RefreshStatus::INACTIVE) {
+        return true;
+    }
+    return false;
 }
 
 bool RenderList::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,

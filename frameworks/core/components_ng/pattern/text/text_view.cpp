@@ -18,7 +18,6 @@
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/text/text_modifier.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -26,34 +25,76 @@ namespace OHOS::Ace::NG {
 void TextView::Create(const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, V2::TEXT_ETS_TAG, AceType::MakeRefPtr<TextPattern>());
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     stack->Push(frameNode);
-    stack->PushLayoutTask(ContentModifier(content));
+
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
 }
 
 void TextView::FontSize(const Dimension& value)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(FontSizeModifier(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
 }
 
 void TextView::TextColor(const Color& value)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(FontColorModifier(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
 }
 
 void TextView::ItalicFontStyle(const NG::ItalicFontStyle& value)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(ItalicFontStyleModifier(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, value);
 }
 
 void TextView::FontWeight(const Ace::FontWeight& value)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(FontWeightModifier(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
 }
 
 void TextView::FontFamily(const std::vector<std::string>& value)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(FontFamilyModifier(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value);
+}
+
+void TextView::TextAlign(const Ace::TextAlign& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value);
+}
+
+void TextView::TextOverflow(const Ace::TextOverflow& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value);
+}
+
+void TextView::MaxLines(const uint32_t& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value);
+}
+
+void TextView::LineHeight(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value);
+}
+
+void TextView::TextDecoration(const Ace::TextDecoration& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, value);
+}
+
+void TextView::TextDecorationColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationColor, value);
+}
+
+void TextView::BaselineOffset(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, value);
+}
+
+void TextView::TextCase(const Ace::TextCase& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value);
 }
 } // namespace OHOS::Ace::NG

@@ -45,6 +45,8 @@ public:
     double GetFinalPosition() const;
     bool GetTimeByPosition(double position, double& time) const;
 
+    std::string GetMotionType() const override;
+
 private:
     bool IsValid(double friction) const;
 

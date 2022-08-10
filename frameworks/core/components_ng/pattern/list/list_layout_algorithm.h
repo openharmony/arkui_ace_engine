@@ -16,14 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_LAYOUT_ALGORITHM_H
 
-#include <list>
-#include <unordered_map>
-#include <vector>
+#include <map>
 
+#include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/list/list_item_builder.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -39,15 +37,7 @@ public:
 
     ~ListLayoutAlgorithm() override = default;
 
-    void OnReset() override
-    {
-        builder_.Reset();
-    }
-
-    void SetBuilder(const RefPtr<ListItemBuilder>& builder)
-    {
-        builder_ = builder;
-    }
+    void OnReset() override {}
 
     void SetCurrentOffset(float offset)
     {
@@ -68,12 +58,42 @@ public:
     {
         return endIndex_.value_or(0);
     }
+    
+    const PositionMap& GetItemPosition() const
+    {
+        return itemPosition_;
+    }
+
+    void SetSpaceWidth(float spaceWidth)
+    {
+        spaceWidth_ = spaceWidth;
+    }
+    
+    float GetSpaceWidth() const
+    {
+        return spaceWidth_;
+    }
+
+    void SetIsInitialized(bool isInitialized)
+    {
+        isInitialized_ = isInitialized;
+    }
+
+    bool GetIsInitialized() const
+    {
+        return isInitialized_;
+    }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void LayoutForward(
+        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis, float mainSize);
+    void LayoutBackward(
+        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis, float mainSize);
+
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
@@ -83,15 +103,18 @@ private:
     std::pair<int32_t, float> RequestNewItemsBackward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
-    RefPtr<ListItemBuilder> builder_;
     PositionMap itemPosition_;
     float currentOffset_ = 0.0f;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     int32_t preStartIndex_ = 0;
     int32_t preEndIndex_ = 0;
-    std::optional<int32_t> startIndex_ = 0;
-    std::optional<int32_t> endIndex_ = 0;
+    std::optional<int32_t> startIndex_;
+    std::optional<int32_t> endIndex_;
+
+    float spaceWidth_ = 0.0f;
+
+    bool isInitialized_ = false;
 };
 } // namespace OHOS::Ace::NG
 

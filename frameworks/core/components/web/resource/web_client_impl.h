@@ -44,6 +44,25 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class FindListenerImpl : public OHOS::NWeb::NWebFindCallback {
+public:
+    FindListenerImpl() = default;
+    explicit FindListenerImpl(int32_t instanceId) : instanceId_(instanceId) {}
+    ~FindListenerImpl() = default;
+
+    void OnFindResultReceived(
+        const int activeMatchOrdinal, const int numberOfMatches, const bool isDoneCounting) override;
+
+    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
+    {
+        webDelegate_ = delegate;
+    }
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+    int32_t instanceId_ = -1;
+};
+
 class WebClientImpl : public OHOS::NWeb::NWebHandler {
 public:
     WebClientImpl() = default;
@@ -93,6 +112,9 @@ public:
     void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;
     bool OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthResult> result, const std::string &host,
         const std::string &realm) override;
+    void OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request) override;
+    bool RunContextMenu(std::shared_ptr<NWeb::NWebContextMenuParams> params,
+        std::shared_ptr<NWeb::NWebContextMenuCallback> callback) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

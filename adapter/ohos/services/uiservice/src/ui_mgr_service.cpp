@@ -16,35 +16,29 @@
 #include "ui_mgr_service.h"
 
 #include <atomic>
-#include <axis_event.h>
-#include <key_event.h>
-#include <pointer_event.h>
-
-#include "adapter/ohos/entrance/ace_application_info.h"
-#include "adapter/ohos/entrance/ace_container.h"
-#include "adapter/ohos/entrance/flutter_ace_view.h"
-#include "adapter/ohos/entrance/utils.h"
-#include "core/components/theme/app_theme.h"
+#include <unistd.h>
 
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
-#include "init_data.h"
 #include "ipc_skeleton.h"
-#include "locale_config.h"
-#ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_ui_director.h"
-#endif
-#include "res_config.h"
+#include "securec.h"
+
 #include "string_ex.h"
 #include "system_ability_definition.h"
 #include "ui_service_mgr_errors.h"
-#include "wm/window.h"
+#include "uiservice_dialog/uiservice_dialog_impl.h"
+#include "uiservice_dialog/uiservice_dialog_proxy.h"
 
 namespace OHOS {
 namespace Ace {
-constexpr int UI_MGR_SERVICE_SA_ID = 7001;
+namespace {
+constexpr int32_t UI_MGR_SERVICE_SA_ID = 7001;
+constexpr uint32_t UI_SERVICE_FLOGS = 0x10;
 const bool REGISTER_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<UIMgrService>::GetInstance().get());
+}
+
+// UiservicePluginDialog UIMgrService::dialogPlugin_;
 
 UIMgrService::UIMgrService()
     : SystemAbility(UI_MGR_SERVICE_SA_ID, true),
@@ -62,172 +56,89 @@ UIMgrService::~UIMgrService()
 
 static std::atomic<int32_t> gDialogId = 0;
 
-class UIMgrServiceWindowChangeListener : public Rosen::IWindowChangeListener {
-public:
-    explicit UIMgrServiceWindowChangeListener(WeakPtr<Platform::AceContainer> container)
-    {
-        container_ = container;
-    }
-    void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override
-    {
-        HILOG_INFO("UIMgrServiceWindowChangeListener size change");
-        auto container = container_.Upgrade();
-        if (container) {
-            container->SetWindowPos(rect.posX_, rect.posY_);
-            auto taskExecutor = container->GetTaskExecutor();
-            if (!taskExecutor) {
-                LOGE("OnSizeChange: taskExecutor is null.");
-                return;
-            }
-            taskExecutor->PostTask(
-                [rect, reason, container]() {
-                    auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-                    if (!flutterAceView) {
-                        LOGE("OnSizeChange: flutterAceView is null.");
-                        return;
-                    }
-                    Platform::FlutterAceView::SurfaceChanged(flutterAceView, rect.width_, rect.height_,
-                        rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason));
-                },
-                TaskExecutor::TaskType::PLATFORM);
-                }
-    }
-    void OnModeChange(OHOS::Rosen::WindowMode mode) override
-    {
-        HILOG_INFO("UIMgrServiceWindowChangeListener mode change");
-    }
-
-private:
-    WeakPtr<Platform::AceContainer> container_;
-};
-
-class UIMgrServiceInputEventConsumer : public Rosen::IInputEventConsumer {
-public:
-    explicit UIMgrServiceInputEventConsumer(Ace::Platform::FlutterAceView* flutterAceView)
-    {
-        flutterAceView_ = flutterAceView;
-    }
-    ~UIMgrServiceInputEventConsumer() override = default;
-
-    bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override
-    {
-        if (flutterAceView_ != nullptr) {
-            flutterAceView_->DispatchTouchEvent(flutterAceView_, pointerEvent);
-            return true;
-        }
-        return false;
-    }
-
-    bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const override
-    {
-        // do nothing
-        return false;
-    }
-
-    bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const override
-    {
-        // do nothing
-        return false;
-    }
-
-private:
-    Ace::Platform::FlutterAceView* flutterAceView_ = nullptr;
-};
-
-using AcePlatformFinish = std::function<void()>;
-class AcePlatformEventCallback final : public Ace::Platform::PlatformEventCallback {
-public:
-    explicit AcePlatformEventCallback(AcePlatformFinish onFinish) : onFinish_(onFinish) {}
-
-    ~AcePlatformEventCallback() = default;
-
-    virtual void OnFinish() const
-    {
-        LOGI("AcePlatformEventCallback OnFinish");
-        if (onFinish_) {
-            onFinish_();
-        }
-    }
-
-    virtual void OnStatusBarBgColorChanged(uint32_t color)
-    {
-        LOGI("AcePlatformEventCallback OnStatusBarBgColorChanged");
-    }
-
-private:
-    AcePlatformFinish onFinish_;
-};
-
-void UIMgrService::InitResourceManager()
+AppSpawnMsg* UIMgrService::MakeAppSpawnMsg(const std::string& name, int32_t id)
 {
-    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
-    if (resourceManager == nullptr) {
-        HILOG_ERROR("InitResourceManager create resourceManager failed");
-        return;
+    size_t msgSize = sizeof(AppSpawnMsg) + 1;
+    AppSpawnMsg* msg = static_cast<AppSpawnMsg *>(malloc(msgSize));
+    if (msg == nullptr) {
+        HILOG_ERROR("Ace uiservice failed to malloc!");
+        return nullptr;
     }
-
-    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-    UErrorCode status = U_ZERO_ERROR;
-    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
-    resConfig->SetLocaleInfo(locale);
-    if (resConfig->GetLocaleInfo() != nullptr) {
-        HILOG_DEBUG("InitResourceManager language: %{public}s, script: %{public}s, region: %{public}s,",
-            resConfig->GetLocaleInfo()->getLanguage(),
-            resConfig->GetLocaleInfo()->getScript(),
-            resConfig->GetLocaleInfo()->getCountry());
-    } else {
-        HILOG_ERROR("InitResourceManager language: GetLocaleInfo is null.");
+    if (memset_s(msg, msgSize, 0, msgSize) != EOK) {
+        HILOG_ERROR("Ace uiservice failed to memset!");
+        return nullptr;
     }
-    resourceManager->UpdateResConfig(*resConfig);
-    resourceManager_ = resourceManager;
-}
-
-std::shared_ptr<OHOS::AppExecFwk::Ability> UIMgrService::CreateAbility()
-{
-    auto ability = OHOS::AppExecFwk::Ability::Create(nullptr);
-    if (ability == nullptr) {
-        HILOG_ERROR("create ability failed");
+    HILOG_ERROR("Ace uid is %{public}d", getuid());
+    msg->uid = getuid();
+    msg->gid = getgid();
+    std::string proccessName = name + std::to_string(id);
+    if (strcpy_s(msg->processName, sizeof(msg->processName), proccessName.c_str()) != EOK) {
+        HILOG_ERROR("failed to copy proccess name!");
         return nullptr;
     }
 
-    auto deal = std::make_shared<OHOS::AppExecFwk::ContextDeal>();
-    if (deal == nullptr) {
-        HILOG_ERROR("create deal failed");
-        delete ability;
-        return nullptr;
-    }
-
-    deal->initResourceManager(resourceManager_);
-    ability->AttachBaseContext(deal);
-    std::shared_ptr<OHOS::AppExecFwk::Ability> sharedAbility(ability);
-    return sharedAbility;
+    msg->code = AppOperateType::DEFAULT;
+    msg->flags = UI_SERVICE_FLOGS;
+    return msg;
 }
 
-static void SetDialogBackgroundColor(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)
+int32_t UIMgrService::AttachToUiService(const sptr<IRemoteObject>& dialog, int32_t pid)
 {
-    auto themeManager = context->GetThemeManager();
-    if (themeManager) {
-        auto appTheme = themeManager->GetTheme<AppTheme>();
-        if (appTheme) {
-            HILOG_INFO("set bg color TRANSPARENT");
-            appTheme->SetBackgroundColor(Color::TRANSPARENT);
-        }
+    HILOG_INFO("Ace uiservice AttachToUiService pid: %{public}d", pid);
+    if (dialog == nullptr) {
+        HILOG_ERROR("Ace dialog is nullptr");
     }
-}
+    auto dialogProxy = iface_cast<OHOS::Ace::IUiServiceDialog>(dialog);
+    if (dialogProxy == nullptr) {
+        HILOG_ERROR("Ace dialogProxy is nullptr");
+        return -1;
+    }
 
-int UIMgrService::ShowDialog(const std::string& name,
-                             const std::string& params,
-                             OHOS::Rosen::WindowType windowType,
-                             int x,
-                             int y,
-                             int width,
-                             int height,
-                             const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
-                             int* id)
-{
-    HILOG_INFO("Show dialog in service start");
     if (handler_ == nullptr) {
-        HILOG_ERROR("Show dialog failed! handler is nullptr");
+        HILOG_ERROR("Ace uiservice Show dialog failed! handler is nullptr");
+        return UI_SERVICE_HANDLER_IS_NULL;
+    }
+
+    auto attachFunc = [ pid, dialogProxy, this ] () {
+        dialogMap_.emplace(pid, dialogProxy);
+        auto iter = dialogRecords_.find(pid);
+        if (iter == dialogRecords_.end()) {
+            HILOG_ERROR("Ace no dialog record: %{public}d", pid);
+            return;
+        }
+        auto dialogRecord = iter->second;
+        dialogProxy->ShowDialog(
+            dialogRecord.name, dialogRecord.params, dialogRecord.windowType,
+            dialogRecord.x, dialogRecord.y, dialogRecord.width, dialogRecord.height,
+            dialogRecord.id);
+    };
+
+    if (!handler_->PostSyncTask(attachFunc)) {
+        HILOG_ERROR("Post sync task error");
+        return UI_SERVICE_POST_TASK_FAILED;
+    }
+
+    return NO_ERROR;
+}
+
+int UIMgrService::ShowDialog(
+    const std::string& name,
+    const std::string& params,
+    uint32_t windowType,
+    int x,
+    int y,
+    int width,
+    int height,
+    const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
+    int* id)
+{
+    if (OpenAppSpawnConnection() != 0) {
+        HILOG_ERROR("Ace ShowDialog ui service failed to open app spawn connection.");
+        return UI_SERVICE_HANDLER_IS_NULL;
+    }
+    HILOG_INFO("Ace uiservice Show dialog name: %{public}s in service start %{public}s", name.c_str(), params.c_str());
+    if (handler_ == nullptr) {
+        HILOG_ERROR("Ace uiservice Show dialog failed! handler is nullptr");
         return UI_SERVICE_HANDLER_IS_NULL;
     }
 
@@ -235,228 +146,139 @@ int UIMgrService::ShowDialog(const std::string& name,
     if (id != nullptr) {
         *id = dialogId;
     }
-    HILOG_INFO("Show dialog id: %{public}d", dialogId);
-    sptr<OHOS::Rosen::Window> dialogWindow = nullptr;
-    auto showDialogCallback = [&]() {
-        SetHwIcuDirectory();
-        InitResourceManager();
-
-        std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-        if (resourceManager_ != nullptr) {
-            resourceManager_->GetResConfig(*resConfig);
-            auto localeInfo = resConfig->GetLocaleInfo();
-            Ace::Platform::AceApplicationInfoImpl::GetInstance().SetResourceManager(resourceManager_);
-            if (localeInfo != nullptr) {
-                auto language = localeInfo->getLanguage();
-                auto region = localeInfo->getCountry();
-                auto script = localeInfo->getScript();
-                Ace::AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
-                    (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
-            }
-        }
-
-        std::string resPath;
-        // create container
-        auto ability = CreateAbility();
-        Ace::Platform::AceContainer::CreateContainer(dialogId, Ace::FrontendType::JS, false, "", ability,
-            std::make_unique<AcePlatformEventCallback>([]() {}), true);
-        abilityMaps_[dialogId] = ability;
-        auto container = Ace::Platform::AceContainer::GetContainer(dialogId);
-        if (!container) {
-            HILOG_ERROR("container is null, set configuration failed.");
-        } else {
-            auto aceResCfg = container->GetResourceConfiguration();
-            aceResCfg.SetOrientation(Ace::SystemProperties::GetDeviceOrientation());
-            aceResCfg.SetDensity(Ace::SystemProperties::GetResolution());
-            aceResCfg.SetDeviceType(Ace::SystemProperties::GetDeviceType());
-            container->SetResourceConfiguration(aceResCfg);
-            container->SetPackagePathStr(resPath);
-        }
-
-        Ace::Platform::AceContainer::SetDialogCallback(dialogId,
-            [callback = dialogCallback, id = dialogId](const std::string& event, const std::string& params) {
-                HILOG_INFO("Dialog callback from service");
-                callback->OnDialogCallback(id, event, params);
-            });
-
-        // create view.
-        auto flutterAceView = Ace::Platform::FlutterAceView::CreateView(dialogId, true);
-
-        sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
-        HILOG_INFO("Show dialog: windowConfig: x: %{public}d, y: %{public}d, width: %{public}d, height: %{public}d",
-            x, y, width, height);
-        option->SetWindowRect({ x, y, width, height });
-        option->SetWindowType(windowType);
-        std::string windowName = "system_dialog_window";
-        windowName += std::to_string(dialogId);
-        dialogWindow = OHOS::Rosen::Window::Create(windowName, option);
-        if (dialogWindow == nullptr) {
-            HILOG_ERROR("Create window failed");
+    HILOG_INFO("Ace uiservice Show dialog id: %{public}d", dialogId);
+    DialogParam dialogParams = {
+        name, params, static_cast<uint32_t>(windowType), x, y, width, height, dialogId };
+    auto showDialogFunc = [dialogId, &name, &dialogParams, dialogCallback, this] () {
+        AppSpawnMsg* message = MakeAppSpawnMsg(name, dialogId);
+        AppSpawnPidMsg pidMsg;
+        auto result = clientSocket_->WriteSocketMessage(message, sizeof(AppSpawnMsg));
+        if (result != sizeof(AppSpawnMsg)) {
+            HILOG_ERROR("Ace uiservice WriteMessage failed!");
             return;
         }
-
-        // register surface change callback
-        OHOS::sptr<OHOS::Rosen::IWindowChangeListener> listener =
-            new UIMgrServiceWindowChangeListener(AceType::WeakClaim(AceType::RawPtr(container)));
-        dialogWindow->RegisterWindowChangeListener(listener);
-
-        std::shared_ptr<Rosen::IInputEventConsumer> inputEventListener =
-            std::make_shared<UIMgrServiceInputEventConsumer>(flutterAceView);
-        dialogWindow->SetInputEventConsumer(inputEventListener);
-
-        Ace::Platform::FlutterAceView::SurfaceCreated(flutterAceView, dialogWindow);
-
-        // set metrics
-        flutter::ViewportMetrics metrics;
-        metrics.physical_width = width;
-        metrics.physical_height = height;
-        metrics.device_pixel_ratio = density_;
-        Ace::Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-
-        std::string packagePathStr = "/system/etc/SADialog/";
-        std::vector<std::string> assetBasePathStr = { name + "/" };
-        Ace::Platform::AceContainer::AddAssetPath(dialogId, packagePathStr, assetBasePathStr);
-
-        Ace::Platform::UIEnvCallback callback = nullptr;
-        callback =
-#ifdef ENABLE_ROSEN_BACKEND
-            [dialogWindow, listener, dialogId] (const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
-                if (SystemProperties::GetRosenBackendEnabled()) {
-                    auto rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-                    if (rsUiDirector != nullptr) {
-                        rsUiDirector->SetRSSurfaceNode(dialogWindow->GetSurfaceNode());
-                        dialogWindow->RegisterWindowChangeListener(listener);
-
-                        rsUiDirector->SetUITaskRunner(
-                            [taskExecutor = Ace::Platform::AceContainer::GetContainer(dialogId)->GetTaskExecutor()]
-                                (const std::function<void()>& task) {
-                                    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                                });
-                        if (context != nullptr) {
-                            context->SetRSUIDirector(rsUiDirector);
-                        }
-                        rsUiDirector->Init();
-                        HILOG_INFO("Init Rosen Backend");
-                    }
-                } else {
-                    HILOG_INFO("not Init Rosen Backend");
-                }
-                SetDialogBackgroundColor(context);
-            };
-#else
-            [] (const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
-                SetDialogBackgroundColor(context);
-            }
-#endif
-
-        // set view
-        Ace::Platform::AceContainer::SetView(
-            flutterAceView, density_, width, height, dialogWindow->GetWindowId(), callback);
-        Ace::Platform::AceContainer::SetUIWindow(dialogId, dialogWindow);
-        Ace::Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
-        container->SetWindowPos(x, y);
-
-        // run page.
-        Ace::Platform::AceContainer::RunPage(
-            dialogId, Ace::Platform::AceContainer::GetContainer(dialogId)->GeneratePageId(), "", params);
+        result = clientSocket_->ReadSocketMessage(reinterpret_cast<void *>(pidMsg.pidBuf), sizeof(pid_t));
+        if (result !=  sizeof(pid_t)) {
+            HILOG_ERROR("Ace uiservice ReadMessage failed!");
+            return;
+        }
+        HILOG_INFO("Ace uiservice id: %{public}d", pidMsg.pid);
+        dialogIDMap_.emplace(dialogId, pidMsg.pid);
+        dialogRecords_.emplace(pidMsg.pid, dialogParams);
+        dialogCallbackProxyMap_.emplace(dialogId, dialogCallback);
+        return;
     };
 
-    if (!handler_->PostSyncTask(showDialogCallback)) {
+    if (!handler_->PostSyncTask(showDialogFunc)) {
         HILOG_ERROR("Post sync task error");
         return UI_SERVICE_POST_TASK_FAILED;
     }
 
-    if (dialogWindow == nullptr) {
-        HILOG_ERROR("No window available");
-        return UI_SERVICE_CREATE_WINDOW_FAILED;
-    }
-
-    dialogWindow->Show();
-    dialogWindow->MoveTo(x, y);
-    dialogWindow->Resize(width, height);
-
-    int32_t windowWidth = static_cast<int32_t>(dialogWindow->GetRect().width_);
-    int32_t windowHeight = static_cast<int32_t>(dialogWindow->GetRect().height_);
-    int32_t windowX = static_cast<int32_t>(dialogWindow->GetRect().posX_);
-    int32_t windowY = static_cast<int32_t>(dialogWindow->GetRect().posY_);
-    HILOG_INFO("Show dialog: size: width: %{public}d, height: %{public}d, pos: x: %{public}d, y: %{public}d",
-        windowWidth, windowHeight, windowX, windowY);
-
-    HILOG_INFO("Show dialog in service end");
     return NO_ERROR;
 }
 
 int UIMgrService::CancelDialog(int id)
 {
-    auto cancelDialogCallback = [id, this]() {
-        HILOG_INFO("Cancel dialog id: %{public}d", id);
-        int ret = abilityMaps_.erase(id);
-        if (ret == 0) {
-            HILOG_ERROR("Cancel dialog failed: no such dialog(%{public}d)", id);
-            return;
-        }
-        auto container = Platform::AceContainer::GetContainer(id);
-        if (!container) {
-            HILOG_INFO("Container(%{public}d) not found.", id);
-            return;
-        }
-        auto dialogWindow = Platform::AceContainer::GetUIWindow(id);
-        if (dialogWindow) {
-            dialogWindow->Destroy();
-        }
-#ifdef ENABLE_ROSEN_BACKEND
-        auto taskExecutor = Platform::AceContainer::GetContainer(id)->GetTaskExecutor();
-        taskExecutor->PostTask(
-            [id]() {
-
-                if (auto context = AceType::DynamicCast<PipelineContext>(
-                        Ace::Platform::AceContainer::GetContainer(id)->GetPipelineContext())) {
-                    context->SetRSUIDirector(nullptr);
-                }
-            },
-            TaskExecutor::TaskType::UI);
-#endif
-        Platform::AceContainer::DestroyContainer(id);
-    };
-
-    if (!handler_->PostTask(cancelDialogCallback)) {
-        return UI_SERVICE_POST_TASK_FAILED;
+    HILOG_INFO("Ace CancelDialog id: %{public}d", id);
+    auto errorCode = UI_SERVICE_NO_ERROR;
+    if (handler_ == nullptr) {
+        HILOG_ERROR("Ace uiservice Show dialog failed! handler is nullptr");
+        return UI_SERVICE_HANDLER_IS_NULL;
     }
 
-    return NO_ERROR;
+    auto cancelDialogFunc = [ id, this ] () {
+        auto pidIter = dialogIDMap_.find(id);
+        if (pidIter == dialogIDMap_.end()) {
+            HILOG_ERROR("Ace dialog id : %{public}d not found in pid map", id);
+            return;
+        }
+        int32_t pid = pidIter->second;
+        auto dialogIter = dialogMap_.find(pid);
+        if (dialogIter == dialogMap_.end()) {
+            HILOG_ERROR("Ace dialog pid : %{public}d not found in dialog map", pid);
+            return;
+        }
+        dialogIter->second->CancelDialog(id);
+    };
+
+    if (!handler_->PostSyncTask(cancelDialogFunc)) {
+        errorCode = UI_SERVICE_POST_TASK_FAILED;
+    }
+    HILOG_INFO("Ace uidialog cancel end");
+    return errorCode;
 }
 
 int UIMgrService::UpdateDialog(int id, const std::string& data)
 {
-    auto updateDialogCallback = [id, data]() {
-        HILOG_INFO("Update dialog id: %{public}d", id);
-        auto container = Platform::AceContainer::GetContainer(id);
-        if (!container) {
-            HILOG_INFO("Container(%{public}d) not found.", id);
-            return;
-        }
-        Platform::AceContainer::OnDialogUpdated(id, data);
-    };
-    if (!handler_->PostTask(updateDialogCallback)) {
-        return UI_SERVICE_POST_TASK_FAILED;
+    HILOG_INFO("Ace UpdateDialog id: %{public}d", id);
+    auto errorCode = UI_SERVICE_NO_ERROR;
+    if (handler_ == nullptr) {
+        HILOG_ERROR("Ace uiservice Show dialog failed! handler is nullptr");
+        return UI_SERVICE_HANDLER_IS_NULL;
     }
 
-    return NO_ERROR;
+    auto updateDialogFunc = [ id, data, this] () {
+        auto pidIter = dialogIDMap_.find(id);
+        if (pidIter == dialogIDMap_.end()) {
+            HILOG_ERROR("Ace dialog id : %{public}d not found in pid map", id);
+            return;
+        }
+        int32_t pid = pidIter->second;
+        auto dialogIter = dialogMap_.find(pid);
+        if (dialogIter == dialogMap_.end()) {
+            HILOG_ERROR("Ace dialog pid : %{public}d not found in dialog map", pid);
+            return;
+        }
+        dialogIter->second->UpdateDialog(id, data);
+    };
+
+    if (!handler_->PostSyncTask(updateDialogFunc)) {
+        errorCode = UI_SERVICE_POST_TASK_FAILED;
+    }
+    HILOG_INFO("Ace uidialog update end");
+    return errorCode;
+}
+
+int32_t UIMgrService::RemoteDialogCallback(int32_t id, const std::string& event, const std::string& params)
+{
+    HILOG_INFO("Ace RemoteDialogCallback id: %{public}d", id);
+    auto errorCode = UI_SERVICE_NO_ERROR;
+    if (handler_ == nullptr) {
+        HILOG_ERROR("Ace uiservice Show dialog failed! handler is nullptr");
+        return UI_SERVICE_HANDLER_IS_NULL;
+    }
+
+    auto remoteDialogCallback = [ id, event, params, this] () {
+        auto dialogProxyIter = dialogCallbackProxyMap_.find(id);
+        if (dialogProxyIter == dialogCallbackProxyMap_.end()) {
+            HILOG_ERROR("Ace no dialog proxy for id: %{public}d", id);
+            return;
+        }
+        dialogProxyIter->second->OnDialogCallback(id, event, params);
+    };
+
+    if (!handler_->PostSyncTask(remoteDialogCallback)) {
+        errorCode = UI_SERVICE_POST_TASK_FAILED;
+    }
+    HILOG_INFO("Ace uidialog RemoteDialogCallback end");
+    return errorCode;
 }
 
 void UIMgrService::OnStart()
 {
+    HILOG_INFO("Ace ui manager service OnStart");
     if (state_ == UIServiceRunningState::STATE_RUNNING) {
-        HILOG_INFO("ui Manager Service has already started.");
+        HILOG_INFO("Ace ui Manager Service has already started.");
         return;
     }
-    HILOG_INFO("ui Manager Service started.");
+    HILOG_INFO("Ace ui Manager Service started.");
     if (!Init()) {
-        HILOG_ERROR("failed to init service.");
+        HILOG_ERROR("Ace ui service failed to init service.");
         return;
     }
     state_ = UIServiceRunningState::STATE_RUNNING;
     eventLoop_->Run();
+
     /* Publish service maybe failed, so we need call this function at the last,
      * so it can't affect the TDD test program */
     bool ret = Publish(DelayedSingleton<UIMgrService>::GetInstance().get());
@@ -466,6 +288,38 @@ void UIMgrService::OnStart()
     }
 
     HILOG_INFO("UIMgrService  start success.");
+}
+
+int32_t UIMgrService::OpenAppSpawnConnection()
+{
+    if (clientSocket_ == nullptr) {
+        clientSocket_ = std::make_shared<AppSpawn::ClientSocket>("AppSpawn");
+        if (clientSocket_ == nullptr) {
+            HILOG_ERROR("Ace ui service create app spawn socket client failed.");
+            return -1;
+        }
+        if (clientSocket_->CreateClient() != ERR_OK) {
+            HILOG_ERROR("Ace ui service failed to create socketClient");
+            return -1;
+        }
+        if (clientSocket_->ConnectSocket() != ERR_OK) {
+            HILOG_ERROR("Ace ui service failed to connect socket");
+            clientSocket_->CloseClient();
+            return -1;
+        }
+        HILOG_INFO("Ace ui service connection has been opened");
+    }
+    return 0;
+}
+
+void UIMgrService::CloseAppSpawnConnection()
+{
+    if (clientSocket_ != nullptr) {
+        clientSocket_->CloseClient();
+        HILOG_INFO("Ace ui service connection has been closed");
+        return;
+    }
+    HILOG_INFO("Ace ui service app spawn socket client is null.");
 }
 
 bool UIMgrService::Init()
@@ -480,7 +334,7 @@ bool UIMgrService::Init()
         return false;
     }
 
-    HILOG_INFO("init success");
+    HILOG_INFO("Ace ui service init success");
     return true;
 }
 
@@ -490,6 +344,7 @@ void UIMgrService::OnStop()
     eventLoop_.reset();
     handler_.reset();
     state_ = UIServiceRunningState::STATE_NOT_START;
+    CloseAppSpawnConnection();
 }
 
 UIServiceRunningState UIMgrService::QueryServiceState() const

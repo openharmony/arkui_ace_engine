@@ -172,7 +172,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
     LOGI("Load Document setting root view, page[%{public}d]", page->GetPageId());
     if (Container::IsCurrentUseNewPipeline()) {
-        auto pageRootNode = view->CreateNode();
+        auto pageRootNode = view->CreateUINode();
         page->SetRootNode(pageRootNode);
     } else {
         auto rootComponent = view->CreateComponent();
@@ -868,6 +868,42 @@ panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo*
     return panda::JSValueRef::Undefined(vm);
 }
 
+panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    if (vm == nullptr) {
+        LOGE("The EcmaVM is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (argc < 1 || !firstArg->IsString()) {
+        LOGE("The arg is wrong, must have one object argument");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::string inspectorKey = firstArg->ToString(vm)->ToString();
+
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    if (pipelineContext == nullptr) {
+        LOGE("pipelineContext==nullptr");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    bool result = false;
+    if (!pipelineContext->GetTaskExecutor()) {
+        LOGE("pipelineContext's task excutor is null");
+        return panda::BooleanRef::New(vm, result);
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext, inspectorKey, &result]() { result = pipelineContext->RequestFocus(inspectorKey); },
+        TaskExecutor::TaskType::UI);
+    return panda::BooleanRef::New(vm, result);
+}
+
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
     { "Flex", JSFlexImpl::JSBind },
     { "Text", JSText::JSBind },
@@ -1166,6 +1202,11 @@ void JsRegisterViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
+
+    BindingTarget focusControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
+    focusControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "requestFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RequestFocus));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "focusControl"), focusControlObj);
 
     JSViewAbstract::JSBind();
     JSContainerBase::JSBind();

@@ -13,4 +13,9 @@
  * limitations under the License.
  */
 
-console.debug("ACE State Mgmt init ...")
+console.debug("ACE State Mgmt init start ...")
+
+PersistentStorage.ConfigureBackend(new Storage());
+
+Environment.ConfigureBackend(new EnvironmentSetting());
+

@@ -28,6 +28,7 @@
 #include "core/components/common/properties/radius.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
+#include "core/components/text_overlay/text_overlay_component.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_object.h"
 #include "core/pipeline/base/constants.h"
@@ -293,7 +294,7 @@ void FlutterRenderImage::Update(const RefPtr<Component>& component)
     // curImageSrc represents the picture currently shown and imageSrc represents next picture to be shown
     imageLoadingStatus_ = (sourceInfo_ != curSourceInfo_) ? ImageLoadingStatus::UPDATING : imageLoadingStatus_;
     UpdateRenderAltImage(component);
-    if (proceedPreviousLoading_ && !sourceInfo_.IsSvg() && sourceInfo_.GetSrcType() != SrcType::MEMORY) {
+    if (proceedPreviousLoading_ && !sourceInfo_.IsSvg()) {
         LOGI("Proceed previous loading, imageSrc is %{private}s, image loading status: %{public}d",
             sourceInfo_.ToString().c_str(), imageLoadingStatus_);
         return;
@@ -366,11 +367,10 @@ void FlutterRenderImage::UpdateSharedMemoryImage(const RefPtr<PipelineContext>& 
         return;
     }
     auto nameOfSharedImage = ImageLoader::RemovePathHead(sourceInfo_.GetSrc());
-    if (sharedImageManager->IsResourceToReload(nameOfSharedImage)) {
+    if (sharedImageManager->IsResourceToReload(nameOfSharedImage, AceType::WeakClaim(this))) {
         // This case means that the image to load is a memory image and its data is not ready.
         // Add [this] to [providerMapToReload_] so that it will be notified to start loading image.
         // When the data is ready, [SharedImageManager] will call [UpdateData] in [AddImageData].
-        sharedImageManager->AddProviderToReloadMap(nameOfSharedImage, AceType::WeakClaim(this));
         return;
     }
     // this is when current picName is not found in [ProviderMapToReload], indicating that image data of this
@@ -945,7 +945,7 @@ void FlutterRenderImage::OnHiddenChanged(bool hidden)
         if (imageObj_ && imageObj_->GetFrameCount() > 1) {
             LOGI("Animated image Pause");
             imageObj_->Pause();
-        } else {
+        } else if (sourceInfo_.GetSrcType() != SrcType::MEMORY) {
             CancelBackgroundTasks();
         }
     } else {
@@ -954,6 +954,11 @@ void FlutterRenderImage::OnHiddenChanged(bool hidden)
             imageObj_->Resume();
         } else if (backgroundTaskCancled_) {
             backgroundTaskCancled_ = false;
+            if (sourceInfo_.GetSrcType() == SrcType::MEMORY) {
+                LOGE("memory image: %{public}s should not be notified to resume loading.",
+                    sourceInfo_.ToString().c_str());
+            }
+            imageLoadingStatus_ = ImageLoadingStatus::UNLOADED;
             FetchImageObject();
         }
     }

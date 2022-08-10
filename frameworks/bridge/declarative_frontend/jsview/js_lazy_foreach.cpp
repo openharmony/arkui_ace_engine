@@ -29,10 +29,12 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "core/components_ng/syntax/foreach/for_each.h"
-#include "core/components_ng/syntax/foreach/lazy_for_each_builder.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/syntax/lazy_for_each.h"
+#include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_v2/tabs/tabs_component.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/multi_composed_component.h"
@@ -392,6 +394,22 @@ public:
         return static_cast<size_t>(GetTotalIndexCount());
     }
 
+    void ExpandChildrenOnInitial()
+    {
+        auto totalIndex = GetTotalIndexCount();
+        auto* stack = ViewStackProcessor::GetInstance();
+        for (auto index = 0; index < totalIndex; index++) {
+            JSRef<JSVal> result = CallJSFunction(getDataFunc_, dataSourceObj_, index);
+            std::string key = keyGenFunc_(result, index);
+            auto multiComposed = AceType::MakeRefPtr<MultiComposedComponent>(key, "LazyForEach");
+            stack->Push(multiComposed);
+            stack->PushKey(key);
+            itemGenFunc_->Call(JSRef<JSObject>(), 1, &result);
+            stack->PopContainer();
+            stack->PopKey();
+        }
+    }
+
     RefPtr<Component> OnGetChildByIndex(size_t index) override
     {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, nullptr);
@@ -471,9 +489,9 @@ public:
         return GetTotalIndexCount();
     }
 
-    std::pair<std::string, RefPtr<NG::FrameNode>> OnGetChildByIndex(int32_t index) override
+    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(int32_t index) override
     {
-        std::pair<std::string, RefPtr<NG::FrameNode>> info;
+        std::pair<std::string, RefPtr<NG::UINode>> info;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, info);
         if (getDataFunc_.IsEmpty()) {
             return info;
@@ -557,7 +575,7 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
         builder->SetParentViewObj(parentViewObj);
         builder->SetDataSourceObj(dataSourceObj);
         builder->SetItemGenerator(itemGenerator, std::move(keyGenFunc));
-        NG::ForEach::Create(builder);
+        NG::LazyForEach::Create(builder);
         return;
     }
 
@@ -566,6 +584,12 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
     component->SetParentViewObj(parentViewObj);
     component->SetDataSourceObj(dataSourceObj);
     component->SetItemGenerator(itemGenerator, std::move(keyGenFunc));
+
+    auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto tabsComponent = AceType::DynamicCast<V2::TabsComponent>(mainComponent);
+    if (tabsComponent) {
+        component->ExpandChildrenOnInitial();
+    }
 
     ViewStackProcessor::GetInstance()->Push(component);
 }

@@ -160,7 +160,8 @@ void RenderTrack::UpdateAnimation()
 
 Size RenderTrack::Measure()
 {
-    if (GetLayoutParam().GetMaxSize().IsInfinite()) {
+    if ((NearEqual(GetLayoutParam().GetMaxSize().Width(), Size::INFINITE_SIZE) && direction_ == Axis::HORIZONTAL) ||
+        (NearEqual(GetLayoutParam().GetMaxSize().Height(), Size::INFINITE_SIZE) && direction_ == Axis::VERTICAL)) {
         auto defaultWidth = theme_ != nullptr ? NormalizeToPx(theme_->GetTrackWidth()) : 0.0;
         defaultWidth =
             std::min(defaultWidth, std::min(GetLayoutParam().GetMaxSize().Width(), defaultWidth));

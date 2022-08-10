@@ -73,7 +73,7 @@ SizeF CreateSize(float mainSize, float crossSize, bool isVertical)
 
 void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, LinearMeasureProperty& linearMeasureProperty)
 {
-    for (const auto& child : layoutWrapper->GetChildren()) {
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         const auto& magicItemProperty = child->GetLayoutProperty()->GetMagicItemProperty();
         if (magicItemProperty && (magicItemProperty->GetLayoutWeight().value_or(-1) > 0)) {
             linearMeasureProperty.totalFlexWeight += magicItemProperty->GetLayoutWeight().value();
@@ -179,19 +179,21 @@ void LinearLayoutUtils::Layout(LayoutWrapper* layoutWrapper, bool isVertical, Fl
     auto paddingOffset = OffsetF(left, top);
     if (isVertical) {
         float yPos = 0;
-        for (const auto& child : layoutWrapper->GetChildren()) {
+        for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
             auto frameSize = child->GetGeometryNode()->GetFrameSize();
             float xOffset = CalculateCrossOffset(size.Width(), frameSize.Width(), flexAlign);
             child->GetGeometryNode()->SetFrameOffset(paddingOffset + OffsetF(xOffset, yPos));
+            LOGD("Set Child Position: %{public}s", child->GetGeometryNode()->GetFrameOffset().ToString().c_str());
             yPos += frameSize.Height();
         }
         return;
     }
     float xPos = 0;
-    for (const auto& child : layoutWrapper->GetChildren()) {
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto frameSize = child->GetGeometryNode()->GetFrameSize();
         float yOffset = CalculateCrossOffset(size.Height(), frameSize.Height(), flexAlign);
         child->GetGeometryNode()->SetFrameOffset(paddingOffset + OffsetF(xPos, yOffset));
+        LOGD("Set Child Position: %{public}s", child->GetGeometryNode()->GetFrameOffset().ToString().c_str());
         xPos += frameSize.Width();
     }
 }

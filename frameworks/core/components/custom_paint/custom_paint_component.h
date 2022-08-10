@@ -86,6 +86,7 @@ public:
     void StrokeText(const std::string& text, const Offset& textOffset);
     double MeasureText(const std::string& text, const PaintState& state);
     double MeasureTextHeight(const std::string& text, const PaintState& state);
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     void MoveTo(double x, double y);
     void LineTo(double x, double y);
     void BezierCurveTo(const BezierCurveParam& param);
@@ -95,6 +96,7 @@ public:
     void ArcTo(const ArcToParam& param);
     void Ellipse(const EllipseParam& param);
     void Fill();
+    void Fill(const RefPtr<CanvasPath2D>& path);
     void Stroke();
     void Stroke(const RefPtr<CanvasPath2D>& path);
     void Clip();
@@ -115,6 +117,8 @@ public:
     double GetWidth() const;
     double GetHeight() const;
 
+    void UpdateFillRuleForPath(const CanvasFillRule rule);
+    void UpdateFillRuleForPath2D(const CanvasFillRule rule);
     void UpdateFillColor(const Color& color);
     void UpdateStrokeColor(const Color& color);
     void UpdateFillGradient(const Gradient& gradient);

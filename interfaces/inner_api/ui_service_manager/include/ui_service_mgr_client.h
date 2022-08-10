@@ -25,9 +25,9 @@
 #include "ui_service_mgr_errors.h"
 #include "ui_service_mgr_interface.h"
 #include "uri.h"
+#include "wm_common.h"
 
-namespace OHOS {
-namespace Ace {
+namespace OHOS::Ace {
 /**
  * @class UIServiceMgrClient
  * UIServiceMgrClient is used to access UIService manager services.
@@ -84,6 +84,5 @@ private:
     static std::shared_ptr<UIServiceMgrClient> instance_;
     sptr<IRemoteObject> remoteObject_;
 };
-}  // namespace Ace
-}  // namespace OHOS
+} // namespace OHOS::Ace
 #endif  // OHOS_AAFWK_UI_SERVICE_MANAGER_CLIENT_H

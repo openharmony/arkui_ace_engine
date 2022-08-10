@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
 #include <unistd.h>
+
 #include "scope_manager/native_scope_manager.h"
 
 #include "base/i18n/localization.h"
@@ -30,19 +31,19 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_context_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_module_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_timer_module.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -51,6 +52,8 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_stateMgmt_abc_end[];
+extern const char _binary_stateMgmtPU_abc_start[];
+extern const char _binary_stateMgmtPU_abc_end[];
 extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsEnumStyle_abc_end[];
 
@@ -196,17 +199,16 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    if (!isModulePreloaded_ || IsPlugin()) {
+    if (!isModulePreloaded_  || !usingSharedRuntime_ || IsPlugin()) {
         InitGlobalObjectTemplate();
     }
-
 
     // no need to initialize functions on global when use shared runtime
     if (usingSharedRuntime_ && isModuleInitialized_) {
         LOGI("InitJsEnv SharedRuntime has initialized, skip...");
     } else {
         InitGroupJsBridge();
-        if (!isModulePreloaded_ || IsPlugin()) {
+        if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin()) {
             InitConsoleModule();
             InitAceModule();
             InitJsExportsUtilObject();
@@ -236,8 +238,16 @@ bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
 
 void JsiDeclarativeEngineInstance::InitAceModule()
 {
-    bool stateMgmtResult = runtime_->EvaluateJsCode(
-        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+    uint8_t* codeStart;
+    int32_t codeLength;
+    if (Container::IsCurrentUsePartialUpdate()) {
+        codeStart = (uint8_t*)_binary_stateMgmtPU_abc_start;
+        codeLength = _binary_stateMgmtPU_abc_end - _binary_stateMgmtPU_abc_start;
+    } else {
+        codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+        codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
+    }
+    bool stateMgmtResult = runtime_->EvaluateJsCode(codeStart, codeLength);
     if (!stateMgmtResult) {
         LOGE("EvaluateJsCode stateMgmt failed");
     }
@@ -248,7 +258,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
     }
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
-                                   _binary_jsMockSystemPlugin_abc_end - _binary_jsMockSystemPlugin_abc_start);
+        _binary_jsMockSystemPlugin_abc_end - _binary_jsMockSystemPlugin_abc_start);
     bool jsMockSystemPlugin =
         runtime_->EvaluateJsCode((uint8_t*)(jsMockSystemPluginString.c_str()), jsMockSystemPluginString.length());
     if (!jsMockSystemPlugin) {
@@ -294,7 +304,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     shared_ptr<JsValue> aceConsoleObj = arkRuntime->NewObject();
-    aceConsoleObj->SetProperty(arkRuntime, "log", arkRuntime->NewFunction(JsiBaseUtils::JsDebugLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "log", arkRuntime->NewFunction(JsiBaseUtils::JsInfoLogPrint));
     aceConsoleObj->SetProperty(arkRuntime, "debug", arkRuntime->NewFunction(JsiBaseUtils::JsDebugLogPrint));
     aceConsoleObj->SetProperty(arkRuntime, "info", arkRuntime->NewFunction(JsiBaseUtils::JsInfoLogPrint));
     aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsiBaseUtils::JsWarnLogPrint));
@@ -324,8 +334,16 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
 
     // preload state management
-    bool evalResult = arkRuntime->EvaluateJsCode(
-        (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start);
+    uint8_t* codeStart;
+    int32_t codeLength;
+    if (Container::IsCurrentUsePartialUpdate()) {
+        codeStart = (uint8_t*)_binary_stateMgmtPU_abc_start;
+        codeLength = _binary_stateMgmtPU_abc_end - _binary_stateMgmtPU_abc_start;
+    } else {
+        codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+        codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
+    }
+    bool evalResult = arkRuntime->EvaluateJsCode(codeStart, codeLength);
     if (!evalResult) {
         LOGE("PreloadAceModule EvaluateJsCode stateMgmt failed");
     }
@@ -344,7 +362,7 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
     // app log method
     if (!usingSharedRuntime_) {
         shared_ptr<JsValue> consoleObj = runtime_->NewObject();
-        consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::AppDebugLogPrint));
+        consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
         consoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(JsiBaseUtils::AppDebugLogPrint));
         consoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
         consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::AppWarnLogPrint));
@@ -352,14 +370,14 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
         global->SetProperty(runtime_, "console", consoleObj);
     }
 
-    if (isModulePreloaded_ && !IsPlugin()) {
+    if (isModulePreloaded_ && usingSharedRuntime_ && !IsPlugin()) {
         LOGD("console module has already preloaded");
         return;
     }
 
     // js framework log method
     shared_ptr<JsValue> aceConsoleObj = runtime_->NewObject();
-    aceConsoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::JsDebugLogPrint));
+    aceConsoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::JsInfoLogPrint));
     aceConsoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(JsiBaseUtils::JsDebugLogPrint));
     aceConsoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(JsiBaseUtils::JsInfoLogPrint));
     aceConsoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::JsWarnLogPrint));
@@ -381,7 +399,7 @@ void JsiDeclarativeEngineInstance::InitConsoleModule(ArkNativeEngine* engine)
     // app log method
     NativeValue* console = engine->CreateObject();
     auto consoleObj = reinterpret_cast<NativeObject*>(console->GetInterface(NativeObject::INTERFACE_ID));
-    consoleObj->SetProperty("log", engine->CreateFunction("log", strlen("log"), AppDebugLogPrint, nullptr));
+    consoleObj->SetProperty("log", engine->CreateFunction("log", strlen("log"), AppInfoLogPrint, nullptr));
     consoleObj->SetProperty("debug", engine->CreateFunction("debug", strlen("debug"), AppDebugLogPrint, nullptr));
     consoleObj->SetProperty("info", engine->CreateFunction("info", strlen("info"), AppInfoLogPrint, nullptr));
     consoleObj->SetProperty("warn", engine->CreateFunction("warn", strlen("warn"), AppWarnLogPrint, nullptr));
@@ -510,12 +528,12 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
     rootViewMap_.clear();
 }
 
-void JsiDeclarativeEngineInstance::MarkAllRootViewNeedUpdate()
+void JsiDeclarativeEngineInstance::FlushReload()
 {
     CHECK_RUN_ON(JS);
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     if (rootViewMap_.empty()) {
-        LOGW("MarkAllRootViewNeedUpdate release left %{private}zu views ", rootViewMap_.size());
+        LOGW("FlushReload release left %{private}zu views ", rootViewMap_.size());
         return;
     }
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
@@ -706,7 +724,7 @@ void JsiDeclarativeEngine::Destroy()
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     engineInstance_->DestroyAllRootViewHandle();
     if (!runtime_ && nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         nativeEngine_->DeleteEngine();
@@ -763,7 +781,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     engineInstance_->SetNativeEngine(nativeEngine_);
     if (!sharedRuntime) {
         SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CheckUVLoop();
 #endif
 
@@ -884,7 +902,7 @@ void JsiDeclarativeEngine::RegisterOffWorkerFunc()
 void JsiDeclarativeEngine::RegisterAssetFunc()
 {
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content, std::string &ami) {
+    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
@@ -910,7 +928,7 @@ void JsiDeclarativeEngine::RegisterWorker()
     RegisterAssetFunc();
 }
 
-bool JsiDeclarativeEngine::ExecuteAbc(const std::string &fileName)
+bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();

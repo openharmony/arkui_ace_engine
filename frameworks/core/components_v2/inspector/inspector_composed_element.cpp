@@ -41,13 +41,6 @@ namespace OHOS::Ace::V2 {
 
 namespace {
 
-std::atomic<int32_t> g_currentInspectorId(0);
-
-int32_t GetCurrentInspectorId()
-{
-    return g_currentInspectorId.fetch_add(1, std::memory_order_relaxed) + 1;
-}
-
 constexpr uint32_t WINDOW_BLUR_STYLE_ENUM_OFFSET = 100;
 
 const char* VISIBLE_TYPE[] = { "Visibility.Visible", "Visibility.Hidden", "Visibility.None" };
@@ -76,6 +69,13 @@ const char* GRID_SIZE_TYPE[] = { "default", "sx", "sm", "md", "lg" };
 constexpr const char* TEXT_DIRECTION[] = { "Direction.Ltr", "Direction.Rtl", "Direction.Inherit", "Direction.Auto" };
 
 constexpr const char* BASIC_SHAPE_TYPE[] { "None", "Inset", "Circle", "Ellipse", "Polygon", "Path", "Rect" };
+
+constexpr const char* HIT_TEST_BEHAVIOR[] = {
+    "HitTestMode.Default",
+    "HitTestMode.Block",
+    "HitTestMode.Transparent",
+    "HitTestMode.None",
+};
 
 const std::unordered_map<std::string, DoubleJsonFunc> CREATE_JSON_DOUBLE_MAP {
     { "opacity", [](const InspectorNode& inspector) { return inspector.GetOpacity(); } },
@@ -118,6 +118,7 @@ const std::unordered_map<std::string, StringJsonFunc> CREATE_JSON_STRING_MAP {
         [](const InspectorNode& inspector) { return inspector.GetBackgroundImagePosition(); } },
     { "padding", [](const InspectorNode& inspector) { return inspector.GetPadding(); } },
     { "margin", [](const InspectorNode& inspector) { return inspector.GetAllMargin(); } },
+    { "hitTestBehavior", [](const InspectorNode& inspector) { return inspector.GetHitTestBehaviorStr(); } },
 };
 
 const std::unordered_map<std::string, BoolJsonFunc> CREATE_JSON_BOOL_MAP {
@@ -197,7 +198,7 @@ void InspectorComposedElement::OnInactive()
 
 void InspectorComposedElement::OnActive()
 {
-    inspectorId_ = GetCurrentInspectorId();
+    inspectorId_ = std::stoi(id_);
 }
 
 RefPtr<PopupElementV2> InspectorComposedElement::GetPopupElement() const
@@ -342,7 +343,9 @@ void InspectorComposedElement::AddComposedComponentId()
     if (accessibilityEnabled_) {
         accessibilityNode_ =
             InspectorComposedComponent::CreateAccessibilityNode(inspectorTag_, inspectorId_, inspectorParentId_, -1);
-        accessibilityNode_->SetJsComponentId(key_);
+        if (accessibilityNode_) {
+            accessibilityNode_->SetJsComponentId(key_);
+        }
     }
 }
 
@@ -1742,6 +1745,16 @@ void InspectorComposedElement::OnVisibleAreaChangeCallback(
     if (callbackInfo.callback) {
         callbackInfo.callback(visibleType, currentVisibleRatio);
     }
+}
+
+std::string InspectorComposedElement::GetHitTestBehaviorStr() const
+{
+    auto node = GetInspectorNode(GetTargetTypeId());
+    if (!node) {
+        return HIT_TEST_BEHAVIOR[0];
+    }
+    auto hitTestMode = static_cast<int32_t>(node->GetHitTestMode());
+    return HIT_TEST_BEHAVIOR[hitTestMode];
 }
 
 } // namespace OHOS::Ace::V2

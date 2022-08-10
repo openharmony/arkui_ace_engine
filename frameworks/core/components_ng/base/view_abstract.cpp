@@ -17,42 +17,46 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/modifier/layout/layout_weight_modifier.h"
-#include "core/components_ng/modifier/layout/padding_modifier.h"
-#include "core/components_ng/modifier/layout/size_modifier.h"
-#include "core/components_ng/modifier/render/bg_color_modifier.h"
 
 namespace OHOS::Ace::NG {
 void ViewAbstract::SetWidth(const CalcLength& width)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(WidthModifier(width));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcSelfIdealSize(CalcSize(width, CalcLength(-1.0f)));
 }
 
 void ViewAbstract::SetHeight(const CalcLength& height)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(HeightModifier(height));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcSelfIdealSize(CalcSize(CalcLength(-1.0f), height));
 }
 
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
-    ViewStackProcessor::GetInstance()->PushRenderContextTask(BgColorModifier(color));
+    ACE_UPDATE_RENDER_CONTEXT(BgColor, color);
 }
 
 void ViewAbstract::SetLayoutWeight(int32_t value)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(LayoutWeightModifier(static_cast<float>(value)));
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
 }
 
 void ViewAbstract::SetPadding(const CalcLength& value)
 {
     PaddingProperty padding;
     padding.SetEdges(value);
-    ViewStackProcessor::GetInstance()->PushLayoutTask(PaddingModifier(padding));
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding);
 }
 
 void ViewAbstract::SetPadding(const PaddingProperty& value)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(PaddingModifier(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, value);
 }
 
 void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)

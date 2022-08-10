@@ -17,11 +17,13 @@
 
 namespace OHOS::Ace::NG {
 
+#ifndef NG_BUILD
 SkFilterQuality ToSkFilterQuality(FilterQuality quality)
 {
     // keep FilterQuality define same with SkFilterQuality
     return static_cast<SkFilterQuality>(quality);
 }
+#endif
 
 SkPaint::Style ToSkStyle(PaintStyle style)
 {
@@ -46,7 +48,24 @@ void SkiaPaint::EnableAntiAlias()
 
 void SkiaPaint::SetFilterQuality(FilterQuality quality)
 {
+#ifdef NG_BUILD
+    options_ = SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
+    switch (quality) {
+        case FilterQuality::HIGH:
+            options_ = SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f });
+            break;
+        case FilterQuality::MEDIUM:
+            options_ =  SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
+            break;
+        case FilterQuality::LOW:
+            options_ = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone);
+            break;
+        case FilterQuality::NONE:
+            break;
+    }
+#else
     rawPaint_.setFilterQuality(ToSkFilterQuality(quality));
+#endif
 }
 
 void SkiaPaint::SetStyle(PaintStyle style)

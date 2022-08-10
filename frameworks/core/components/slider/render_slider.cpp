@@ -124,8 +124,41 @@ void RenderSlider::PerformLayout()
     UpdateTouchRegion();
 }
 
+void RenderSlider::HandleFocus()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Pipeline context upgrade fail!");
+        return;
+    }
+    auto block = AceType::DynamicCast<RenderBlock>(block_);
+    auto track = AceType::DynamicCast<RenderTrack>(track_);
+    if (!block || !track) {
+        return;
+    }
+
+    if (GetFocus()) {
+        const double focusPadding = NormalizeToPx(FOCUS_PADDING);
+        if (mode_ == SliderMode::INSET) {
+            const Size focus = Size(trackLength_ + track->GetTrackThickness(), track->GetTrackThickness());
+            context->ShowFocusAnimation(
+                RRect::MakeRRect(Rect(Offset(), focus), focus.Height() * HALF, focus.Height() * HALF), Color::BLUE,
+                track->GetGlobalOffset() - Offset(track->GetTrackThickness() * HALF, 0.0));
+        } else if (mode_ == SliderMode::OUTSET) {
+            const double blockSize = NormalizeToPx(block->GetBlockSize());
+            const Size focus = Size(blockSize, blockSize) + Size(focusPadding, focusPadding);
+            context->ShowFocusAnimation(
+                RRect::MakeRRect(Rect(Offset(), focus), focus.Width() * HALF, focus.Width() * HALF), Color::BLUE,
+                block->GetGlobalOffset() - Offset(focus.Width() * HALF, focus.Width() * HALF));
+        } else {
+            LOGW("invalid mode");
+        }
+    }
+}
+
 void RenderSlider::OnPaintFinish()
 {
+    HandleFocus();
     UpdateAccessibilityAttr();
 }
 

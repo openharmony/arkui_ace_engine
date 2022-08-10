@@ -30,7 +30,8 @@ const std::unordered_map<std::string, std::function<std::string(const PanelCompo
     { "fullHeight", [](const PanelComposedElement& inspector) { return inspector.GetFullHeight(); } },
     { "halfHeight", [](const PanelComposedElement& inspector) { return inspector.GetHalfHeight(); } },
     { "miniHeight", [](const PanelComposedElement& inspector) { return inspector.GetMiniHeight(); } },
-    { "show", [](const PanelComposedElement& inspector) { return inspector.GetShow(); } }
+    { "show", [](const PanelComposedElement& inspector) { return inspector.GetShow(); } },
+    { "backgroundMask", [](const PanelComposedElement& inspector) { return inspector.GetBackgroundMask(); } }
 };
 
 }
@@ -62,6 +63,8 @@ void PanelComposedElement::Dump()
         std::string("miniHeight: ").append(GetMiniHeight()));
     DumpLog::GetInstance().AddDesc(
         std::string("show: ").append(GetShow()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("backgroundMask: ").append(GetBackgroundMask()));
 }
 
 std::string PanelComposedElement::GetPanelType() const
@@ -154,6 +157,37 @@ std::string PanelComposedElement::GetMiniHeight() const
         return renderPanel->GetMiniHeight().ToString();
     }
     return "-";
+}
+
+std::string PanelComposedElement::GetBackgroundMask() const
+{
+    auto renderNode = GetInspectorNode(SlidingPanelElement::TypeId());
+    if (!renderNode) {
+        return "-";
+    }
+    int32_t findCount = 10;
+    while (renderNode && findCount > 0) {
+        auto parentWeak = renderNode->GetParent();
+        renderNode = parentWeak.Upgrade();
+        if (!renderNode) {
+            return "-";
+        }
+        if (AceType::InstanceOf<RenderDisplay>(renderNode)) {
+            break;
+        }
+        findCount--;
+    }
+    if (!renderNode) {
+        return "-";
+    }
+    auto renderDisplay = AceType::DynamicCast<RenderDisplay>(renderNode);
+    if (!renderDisplay) {
+        return "-";
+    }
+    if (!renderDisplay->HasBackgroundMask()) {
+        return "-";
+    }
+    return renderDisplay->GetBackgroundMask().ColorToString();
 }
 
 std::string PanelComposedElement::GetShow() const

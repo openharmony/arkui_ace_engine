@@ -147,6 +147,15 @@ double CanvasTaskPool::MeasureTextHeight(const std::string& text, const PaintSta
     return paint->MeasureTextHeight(text, state);
 }
 
+TextMetrics CanvasTaskPool::MeasureTextMetrics(const std::string& text, const PaintState& state)
+{
+    auto paint = renderNode_.Upgrade();
+    if (!paint) {
+        return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    }
+    return paint->MeasureTextMetrics(text, state);
+}
+
 void CanvasTaskPool::MoveTo(double x, double y)
 {
     auto task = [x, y](RenderCustomPaint& interface, const Offset& offset) { interface.MoveTo(offset, x, y); };
@@ -199,6 +208,12 @@ void CanvasTaskPool::Ellipse(const OHOS::Ace::EllipseParam& param)
 void CanvasTaskPool::Fill()
 {
     auto task = [](RenderCustomPaint& interface, const Offset& offset) { interface.Fill(offset); };
+    PushTask(task);
+}
+
+void CanvasTaskPool::Fill(const RefPtr<CanvasPath2D>& path)
+{
+    auto task = [path](RenderCustomPaint& interface, const Offset& offset) { interface.Fill(offset, path); };
     PushTask(task);
 }
 
@@ -340,6 +355,22 @@ double CanvasTaskPool::GetHeight() const
     }
 
     return paint->GetLayoutSize().Height();
+}
+
+void CanvasTaskPool::UpdateFillRuleForPath(const CanvasFillRule rule)
+{
+    auto task = [rule](RenderCustomPaint& interface, const Offset& offset) {
+        interface.SetFillRuleForPath(rule);
+    };
+    PushTask(task);
+}
+
+void CanvasTaskPool::UpdateFillRuleForPath2D(const CanvasFillRule rule)
+{
+    auto task = [rule](RenderCustomPaint& interface, const Offset& offset) {
+        interface.SetFillRuleForPath2D(rule);
+    };
+    PushTask(task);
 }
 
 void CanvasTaskPool::UpdateFillColor(const Color& color)

@@ -18,10 +18,11 @@
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/canvas.h"
-#include "core/components_ng/render/render_property.h"
 
 namespace OHOS::Ace::NG {
 RosenRenderContext::~RosenRenderContext()
@@ -29,16 +30,15 @@ RosenRenderContext::~RosenRenderContext()
     StopRecordingIfNeeded();
 }
 
-void RosenRenderContext::StartRecording(float x, float y, float width, float height)
+void RosenRenderContext::StartRecording()
 {
     if (rsNode_ == nullptr) {
         return;
     }
     auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>();
     if (rsCanvasNode) {
-        rosenCanvas_ =
-            Canvas::Create(rsCanvasNode->BeginRecording(ceil(rsCanvasNode->GetPaintWidth()),
-                ceil(rsCanvasNode->GetPaintHeight())));
+        rosenCanvas_ = Canvas::Create(
+            rsCanvasNode->BeginRecording(ceil(rsCanvasNode->GetPaintWidth()), ceil(rsCanvasNode->GetPaintHeight())));
     }
 }
 
@@ -95,6 +95,37 @@ void RosenRenderContext::UpdateBgColor(const Color& value)
     RequestNextFrame();
 }
 
+void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDraw)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(contentDraw);
+    rsNode_->DrawOnNode(Rosen::RSModifierType::CONTENT_STYLE, [contentDraw = std::move(contentDraw)](SkCanvas* canvas) {
+        auto canvasWrapper = MakeRefPtr<SkiaCanvas>(canvas);
+        contentDraw(canvasWrapper);
+    });
+}
+
+void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(foregroundDraw);
+    rsNode_->DrawOnNode(
+        Rosen::RSModifierType::FOREGROUND_STYLE, [foregroundDraw = std::move(foregroundDraw)](SkCanvas* canvas) {
+            auto canvasWrapper = MakeRefPtr<SkiaCanvas>(canvas);
+            foregroundDraw(canvasWrapper);
+        });
+}
+
+void RosenRenderContext::FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(overlayDraw);
+    rsNode_->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE, [overlayDraw = std::move(overlayDraw)](SkCanvas* canvas) {
+        auto canvasWrapper = MakeRefPtr<SkiaCanvas>(canvas);
+        overlayDraw(canvasWrapper);
+    });
+}
+
 RefPtr<Canvas> RosenRenderContext::GetCanvas()
 {
     // if picture recording, return recording canvas
@@ -122,15 +153,16 @@ void RosenRenderContext::Restore()
     }
 }
 
-void RosenRenderContext::RebuildFrame(FrameNode* self)
+void RosenRenderContext::RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children)
 {
-    ReCreateRsNodeTree(self);
+    ReCreateRsNodeTree(children);
 }
 
-void RosenRenderContext::ReCreateRsNodeTree(FrameNode* node)
+void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
 {
     rsNode_->ClearChildren();
-    for (const auto& child : node->GetChildren()) {
+    for (const auto& child : children) {
+        ACE_DCHECK(child);
         auto rosenRenderContext = DynamicCast<RosenRenderContext>(child->renderContext_);
         if (!rosenRenderContext) {
             continue;

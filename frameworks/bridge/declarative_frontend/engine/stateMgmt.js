@@ -40,6 +40,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 class SubscriberManager {
     constructor() {
         this.subscriberById_ = new Map();
@@ -746,6 +760,7 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
 class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     constructor(linkSource, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
+        this.changeNotificationIsOngoing_ = false;
         this.linkedParentProperty_ = linkSource;
         // register to the parent property
         this.linkedParentProperty_.subscribeMe(this);
@@ -773,8 +788,10 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     // this object is subscriber to ObservedObject
     // will call this cb function when property has changed
     hasChanged(newValue) {
-        /* console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`); */
-        this.notifyHasChanged(this.getObject());
+        if (!this.changeNotificationIsOngoing_) {
+            /* console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`); */
+            this.notifyHasChanged(this.getObject());
+        }
     }
     // get 'read through` from the ObservedProperty
     get() {
@@ -789,9 +806,13 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
         }
         /* console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`); */
         ObservedObject.removeOwningProperty(this.getObject(), this);
+        // the purpose of the changeNotificationIsOngoing_ is to avoid 
+        // circular notifications @Link -> source @State -> other but alos same @Link
+        this.changeNotificationIsOngoing_ = true;
         this.setObject(newValue);
         ObservedObject.addOwningProperty(this.getObject(), this);
         this.notifyHasChanged(newValue);
+        this.changeNotificationIsOngoing_ = false;
     }
     /**
    * These functions are meant for use in connection with the App Stoage and
@@ -801,85 +822,6 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
    */
     createLink(subscribeOwner, linkPropName) {
         return new SynchedPropertyObjectTwoWay(this, subscribeOwner, linkPropName);
-    }
-    createProp(subscribeOwner, linkPropName) {
-        throw new Error("Creating a 'Prop' proerty is unsuppoeted for Object type prperty value.");
-    }
-}
-/*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
-    /**
-     * Construct a Property of a su component that links to a variable of parent view that holds an ObservedObject
-     * example
-     *   this.b.$a with b of type PC and a of type C, or
-     *   this.$b[5] with this.b of type PC and array item b[5] of type C;
-     *
-     * @param subscribeMe
-     * @param propName
-     */
-    constructor(obsObject, owningChildView, propertyName) {
-        super(owningChildView, propertyName);
-        this.obsObject_ = obsObject;
-        // register to the ObservedObject
-        ObservedObject.addOwningProperty(this.obsObject_, this);
-    }
-    /*
-    like a destructor, need to call this before deleting
-    the property.
-    */
-    aboutToBeDeleted() {
-        // unregister from the ObservedObject
-        ObservedObject.removeOwningProperty(this.obsObject_, this);
-        super.aboutToBeDeleted();
-    }
-    // this object is subscriber to ObservedObject
-    // will call this cb function when property has changed
-    hasChanged(newValue) {
-        /* console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`); */
-        this.notifyHasChanged(this.obsObject_);
-    }
-    // get 'read through` from the ObservedProperty
-    get() {
-        /* console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: get`); */
-        this.notifyPropertyRead();
-        return this.obsObject_;
-    }
-    // set 'writes through` to the ObservedProperty
-    set(newValue) {
-        if (this.obsObject_ == newValue) {
-            /* console.debug(`SynchedPropertyNesedObject[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`); */
-            return;
-        }
-        /* console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`); */
-        // unsubscribe from the old value ObservedObject
-        ObservedObject.removeOwningProperty(this.obsObject_, this);
-        this.obsObject_ = newValue;
-        // subscribe to the new value ObservedObject
-        ObservedObject.addOwningProperty(this.obsObject_, this);
-        // notify value change to subscribing View
-        this.notifyHasChanged(this.obsObject_);
-    }
-    /**
-   * These functions are meant for use in connection with the App Stoage and
-   * business logic implementation.
-   * the created Link and Prop will update when 'this' property value
-   * changes.
-   */
-    createLink(subscribeOwner, linkPropName) {
-        throw new Error("Method not supported for property linking to a nested objects.");
     }
     createProp(subscribeOwner, linkPropName) {
         throw new Error("Creating a 'Prop' proerty is unsuppoeted for Object type prperty value.");
@@ -990,6 +932,7 @@ class SynchedPropertySimpleOneWaySubscribing extends SynchedPropertySimpleOneWay
 class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     constructor(source, owningView, owningViewPropNme) {
         super(owningView, owningViewPropNme);
+        this.changeNotificationIsOngoing_ = false;
         this.source_ = source;
         this.source_.subscribeMe(this);
     }
@@ -1006,25 +949,39 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     // will call this cb function when property has changed
     // a set (newValue) is not done because get reads through for the source_
     hasChanged(newValue) {
-        /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`); */
-        this.notifyHasChanged(newValue);
+        if (!this.changeNotificationIsOngoing_) {
+            /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`); */
+            this.notifyHasChanged(newValue);
+        }
     }
     // get 'read through` from the ObservedProperty
     get() {
         /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: get`); */
+        if (!this.source_) {
+            console.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: get value is undefined.`);
+            return undefined;
+        }
         this.notifyPropertyRead();
         return this.source_.get();
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
+        if (!this.source_) {
+            console.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: set '${newValue}' ignoring.`);
+            return;
+        }
         if (this.source_.get() == newValue) {
             /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`); */
             return;
         }
         /* console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`); */
         // the source_ ObservedProeprty will call: this.hasChanged(newValue);
+        // the purpose of the changeNotificationIsOngoing_ is to avoid 
+        // circular notifications @Link -> source @State -> other but alos same @Link
+        this.changeNotificationIsOngoing_ = true;
+        this.source_.set(newValue);
         this.notifyHasChanged(newValue);
-        return this.source_.set(newValue);
+        this.changeNotificationIsOngoing_ = false;
     }
     /**
   * These functions are meant for use in connection with the App Stoage and
@@ -1037,6 +994,85 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     }
     createProp(subscribeOwner, propPropName) {
         return new SynchedPropertySimpleOneWaySubscribing(this, subscribeOwner, propPropName);
+    }
+}
+/*
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
+    /**
+     * Construct a Property of a su component that links to a variable of parent view that holds an ObservedObject
+     * example
+     *   this.b.$a with b of type PC and a of type C, or
+     *   this.$b[5] with this.b of type PC and array item b[5] of type C;
+     *
+     * @param subscribeMe
+     * @param propName
+     */
+    constructor(obsObject, owningChildView, propertyName) {
+        super(owningChildView, propertyName);
+        this.obsObject_ = obsObject;
+        // register to the ObservedObject
+        ObservedObject.addOwningProperty(this.obsObject_, this);
+    }
+    /*
+    like a destructor, need to call this before deleting
+    the property.
+    */
+    aboutToBeDeleted() {
+        // unregister from the ObservedObject
+        ObservedObject.removeOwningProperty(this.obsObject_, this);
+        super.aboutToBeDeleted();
+    }
+    // this object is subscriber to ObservedObject
+    // will call this cb function when property has changed
+    hasChanged(newValue) {
+        /* console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`); */
+        this.notifyHasChanged(this.obsObject_);
+    }
+    // get 'read through` from the ObservedProperty
+    get() {
+        /* console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: get`); */
+        this.notifyPropertyRead();
+        return this.obsObject_;
+    }
+    // set 'writes through` to the ObservedProperty
+    set(newValue) {
+        if (this.obsObject_ == newValue) {
+            /* console.debug(`SynchedPropertyNesedObject[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`); */
+            return;
+        }
+        /* console.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`); */
+        // unsubscribe from the old value ObservedObject
+        ObservedObject.removeOwningProperty(this.obsObject_, this);
+        this.obsObject_ = newValue;
+        // subscribe to the new value ObservedObject
+        ObservedObject.addOwningProperty(this.obsObject_, this);
+        // notify value change to subscribing View
+        this.notifyHasChanged(this.obsObject_);
+    }
+    /**
+   * These functions are meant for use in connection with the App Stoage and
+   * business logic implementation.
+   * the created Link and Prop will update when 'this' property value
+   * changes.
+   */
+    createLink(subscribeOwner, linkPropName) {
+        throw new Error("Method not supported for property linking to a nested objects.");
+    }
+    createProp(subscribeOwner, linkPropName) {
+        throw new Error("Creating a 'Prop' proerty is unsuppoeted for Object type prperty value.");
     }
 }
 /*
@@ -1905,7 +1941,6 @@ class PersistentStorage {
 }
 PersistentStorage.Instance_ = undefined;
 ;
-PersistentStorage.ConfigureBackend(new Storage());
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2183,34 +2218,21 @@ class Environment {
     }
 }
 Environment.Instance_ = undefined;
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/* console.debug("ACE State Mgmt init start ..."); */
+PersistentStorage.ConfigureBackend(new Storage());
 Environment.ConfigureBackend(new EnvironmentSetting());
-/*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/* console.debug("ACE State Mgmt init ..."); */
 

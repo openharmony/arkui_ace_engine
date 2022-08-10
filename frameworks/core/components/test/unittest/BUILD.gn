@@ -44,10 +44,12 @@ group("unittest") {
     "progress:unittest",
 
     #"refresh:unittest",
+    "relative_container:unittest",
     "rotation:unittest",
     "scroll:unittest",
     "semimodal:unittest",
     "shadow:unittest",
+    "side_bar:unittest",
     "slider:unittest",
     "stack:unittest",
     "stage:unittest",
@@ -73,10 +75,9 @@ group("unittest") {
 
       #"picker:unittest",
       "piece:unittest",
-      "rating:unittest",
-
-      #"select:unittest",
       "plugin:unittest",
+      "rating:unittest",
+      "select:unittest",
       "tabbar:unittest",
       "text_field:unittest",
 

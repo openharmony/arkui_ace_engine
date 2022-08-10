@@ -18,8 +18,9 @@
 
 #include <utility>
 
-#include "core/components_ng/base/custom_node.h"
+#include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
@@ -38,12 +39,9 @@ public:
 
     ~PipelineContext() override = default;
 
-    void SetupRootElement() override;
+    static RefPtr<PipelineContext> GetCurrentContext();
 
-    uint64_t GetTimeFromExternalTimer() override
-    {
-        return 0;
-    }
+    void SetupRootElement() override;
 
     bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
         const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr) override
@@ -70,10 +68,7 @@ public:
     }
 
     // add schedule task and return the unique mark id.
-    uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) override
-    {
-        return 0;
-    }
+    uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) override;
 
     // remove schedule task by id.
     void RemoveScheduleTask(uint32_t id) override {}
@@ -124,9 +119,9 @@ public:
 
     void ClearExplicitAnimationOption() override {}
 
-    const AnimationOption GetExplicitAnimationOption() const override
+    AnimationOption GetExplicitAnimationOption() const override
     {
-        return AnimationOption();
+        return {};
     }
 
     void Destroy() override {}
@@ -154,7 +149,9 @@ public:
         return false;
     }
 
-    void AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElement);
+    void AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode);
+
+    void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
 
@@ -164,7 +161,7 @@ protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
-    void FlushAnimation(uint64_t nanoTimestamp) override {}
+    void FlushAnimation(uint64_t nanoTimestamp) override;
 
 private:
     void FlushTouchEvents();
@@ -197,13 +194,14 @@ private:
         }
     };
 
-    std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyComposedNodes_;
+    std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
+    std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_ = nullptr;
     RefPtr<StageManager> stageManager_ = nullptr;
+    uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
-
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };
 

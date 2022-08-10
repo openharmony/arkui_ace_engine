@@ -43,6 +43,8 @@ namespace {
 
 constexpr char16_t NEWLINE_CODE = u'\n';
 // pixel for how far the caret to the top of paint rect. Sometimes may leave some space for the floor.
+constexpr Dimension INLINE_STYLE_CARET_HEIGHT = 24.0_vp;
+constexpr Color INLINE_STYLE_SELECTED_COLOR = Color(0x1A0A59F7);
 constexpr double CARET_HEIGHT_OFFSET = -2.0;
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr Dimension COUNT_SPACING = 4.0_vp;
@@ -110,6 +112,11 @@ bool RosenRenderTextField::GetCaretRect(int32_t extent, Rect& caretRect, double 
             LOGD("Illegal caret height. Consider release restriction of paragraph max_line.");
             return false;
         }
+        if (inputStyle_ == InputStyle::INLINE) {
+            caretRect.SetRect(metrics.offset.GetX(), (GetLayoutSize().Height() - metrics.height) / 2.0,
+                NormalizeToPx(CURSOR_WIDTH), metrics.height);
+            return true;
+        }
         caretRect.SetRect(metrics.offset.GetX(), metrics.offset.GetY() + caretHeightOffset, NormalizeToPx(CURSOR_WIDTH),
             metrics.height - caretHeightOffset * 2.0);
     } else {
@@ -117,7 +124,6 @@ bool RosenRenderTextField::GetCaretRect(int32_t extent, Rect& caretRect, double 
         // Use proto caret.
         caretRect = caretProto_ + MakeEmptyOffset();
     }
-
     return true;
 }
 
@@ -272,11 +278,25 @@ void RosenRenderTextField::PaintSelection(SkCanvas* canvas) const
     }
     canvas->save();
     SkPaint paint;
-    paint.setColor(selectedColor_.GetValue());
-    Offset effectiveOffset = innerRect_.GetOffset() + textOffsetForShowCaret_ +
-        ComputeVerticalOffsetForCenter(innerRect_.Height(), paragraph_->GetHeight());
+    if (inputStyle_ == InputStyle::INLINE) {
+        paint.setColor(INLINE_STYLE_SELECTED_COLOR.GetValue());
+    } else {
+        paint.setColor(selectedColor_.GetValue());
+    }
+    Offset effectiveOffset = innerRect_.GetOffset() + textOffsetForShowCaret_;
     for (const auto& box : boxes) {
-        const auto& selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
+        auto selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
+        switch (inputStyle_) {
+            case InputStyle::INLINE:
+                selectionRect.SetHeight(GetLayoutSize().Height());
+                break;
+            case InputStyle::DEFAULT:
+                selectionRect += ComputeVerticalOffsetForCenter(innerRect_.Height(), paragraph_->GetHeight());
+                break;
+            default:
+                LOGE("Unknown textinput style");
+                break;
+        }
         if (box.direction == txt::TextDirection::ltr) {
             canvas->drawRect(SkRect::MakeLTRB(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(),
                                  selectionRect.Bottom()),
@@ -659,6 +679,9 @@ void RosenRenderTextField::ComputeOffsetAfterLayout()
             caretRect_ -= textOffsetForShowCaret_;
             textOffsetForShowCaret_ = Offset();
         }
+        if (inputStyle_ == InputStyle::INLINE) {
+            return;
+        }
         if (showPlaceholder_) {
             caretRect_ += ComputeVerticalOffsetForCenter(innerRect_.Height(), placeholderParagraph_->GetHeight());
         } else {
@@ -853,6 +876,9 @@ std::unique_ptr<txt::ParagraphStyle> RosenRenderTextField::CreateParagraphStyle(
         realTextDirection_ = textDirection_;
     }
     UpdateDirectionStatus();
+    if (keyboard_ != TextInputType::MULTILINE) {
+        style->word_break_type = minikin::WordBreakType::kWordBreakType_BreakAll;
+    }
     return style;
 }
 
@@ -878,6 +904,11 @@ std::unique_ptr<txt::TextStyle> RosenRenderTextField::CreateTextStyle(const Text
 
 void RosenRenderTextField::UpdateCaretProto()
 {
+    if (inputStyle_ == InputStyle::INLINE) {
+        caretProto_.SetRect(0.0, (GetLayoutSize().Height() - NormalizeToPx(INLINE_STYLE_CARET_HEIGHT)) / 2.0,
+            NormalizeToPx(CURSOR_WIDTH), NormalizeToPx(INLINE_STYLE_CARET_HEIGHT));
+        return;
+    }
     caretProto_.SetRect(
         0.0, CARET_HEIGHT_OFFSET, NormalizeToPx(CURSOR_WIDTH), PreferredLineHeight() - 2.0 * CARET_HEIGHT_OFFSET);
 }
@@ -962,7 +993,9 @@ bool RosenRenderTextField::ComputeOffsetForCaretUpstream(int32_t extent, CaretMe
     result.offset.SetX(offsetX);
     result.offset.SetY(textBox.rect.fTop);
     result.height = textBox.rect.fBottom - textBox.rect.fTop;
-
+    if (inputStyle_ == InputStyle::INLINE) {
+        result.height = NormalizeToPx(INLINE_STYLE_CARET_HEIGHT);
+    }
     return true;
 }
 
@@ -993,7 +1026,9 @@ bool RosenRenderTextField::ComputeOffsetForCaretDownstream(int32_t extent, Caret
     result.offset.SetX(offsetX);
     result.offset.SetY(textBox.rect.fTop);
     result.height = textBox.rect.fBottom - textBox.rect.fTop;
-
+    if (inputStyle_ == InputStyle::INLINE) {
+        result.height = NormalizeToPx(INLINE_STYLE_CARET_HEIGHT);
+    }
     return true;
 }
 
@@ -1331,6 +1366,9 @@ Offset RosenRenderTextField::GetHandleOffset(int32_t extend)
     Rect result;
     GetCaretRect(extend, result);
     selectHeight_ = result.Bottom() - result.Top();
+    if (inputStyle_ == InputStyle::INLINE) {
+        return Offset(0.0, 0.0);
+    }
     Offset handleLocalOffset = Offset((result.Left() + result.Right()) / 2.0, result.Bottom());
     Offset handleOffset = handleLocalOffset + innerRect_.GetOffset() + GetOffsetToPage() + textOffsetForShowCaret_;
     if (paragraph_) {

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/image/image_pattern.h"
 
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -35,7 +37,11 @@ ImageObjSuccessCallback ImagePattern::CreateSuccessCallback()
 UploadSuccessCallback ImagePattern::CreateUploadSuccessCallback()
 {
     auto task = [weak = WeakClaim(this)](
+#ifdef NG_BUILD
+                    const ImageSourceInfo& imageSourceInfo, RefPtr<CanvasImage> image) {
+#else
                     const ImageSourceInfo& imageSourceInfo, fml::RefPtr<flutter::CanvasImage> image) {
+#endif
         auto pattern = weak.Upgrade();
         if (pattern && pattern->isActive_) {
             pattern->OnImageDataUploaded(image);
@@ -61,10 +67,18 @@ OnPostBackgroundTask ImagePattern::CreateOnBackgroundTaskPostCallback()
     return task;
 }
 
+#ifdef NG_BUILD
+void ImagePattern::OnImageDataUploaded(RefPtr<CanvasImage> image)
+#else
 void ImagePattern::OnImageDataUploaded(fml::RefPtr<flutter::CanvasImage> image)
+#endif
 {
     LOGD("on image data uploaded, %{public}s.", imageObject_->GetSourceInfo().GetSrc().c_str());
+#ifdef NG_BUILD
+    image_ = image;
+#else
     image_ = CanvasImage::Create(&image);
+#endif
     if (imageObject_ && (imageObject_->GetSourceInfo().GetSrcType() != SrcType::MEMORY) &&
         imageObject_->IsSingleFrame()) {
         imageObject_->ClearData();
@@ -104,15 +118,21 @@ void ImagePattern::OnImageObjectReady(const RefPtr<ImageObject>& imageObj)
     }
 }
 
-void ImagePattern::PaintImage(RenderContext* renderContext, const OffsetF& offset)
+RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
-    LOGD("PaintImage, %{public}s", imageObject_->GetSourceInfo().GetSrc().c_str());
-    CHECK_NULL_VOID(image_);
-    CHECK_NULL_VOID(imageObject_);
+    CHECK_NULL_RETURN(image_, nullptr);
+    CHECK_NULL_RETURN(imageObject_, nullptr);
     auto size = imageObject_->GetImageSize();
     SizeF imageSize = { static_cast<float>(size.Width()), static_cast<float>(size.Height()) };
-    ImagePainter ImagePainter(image_, imageSize, GetHostContentSize().value_or(SizeF()));
-    ImagePainter.DrawImage(renderContext->GetCanvas(), offset);
+    return MakeRefPtr<ImagePaintMethod>(image_, imageSize);
+}
+
+bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+{
+    if (skipMeasure || dirty->SkipMeasureContent()) {
+        return false;
+    }
+    return image_;
 }
 
 } // namespace OHOS::Ace::NG

@@ -25,6 +25,11 @@ namespace OHOS::Ace::Framework {
 void JSContextMenu::Close(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
     SubwindowManager::GetInstance()->CloseMenu();
 #else

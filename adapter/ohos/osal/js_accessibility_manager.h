@@ -20,6 +20,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "accessibility_config.h"
 #include "accessibility_element_operator.h"
 #include "accessibility_state_event.h"
 
@@ -68,6 +69,8 @@ public:
 
     bool IsRegister();
     void Register(bool state);
+    virtual bool SubscribeToastObserver();
+    virtual bool UnsubscribeToastObserver();
     virtual bool SubscribeStateObserver(const int eventType);
     virtual bool UnsubscribeStateObserver(const int eventType);
     virtual int RegisterInteractionOperation(const int windowId);
@@ -86,10 +89,10 @@ public:
         const std::map<std::string, std::string> actionArguments, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback);
     bool ClearCurrentFocus();
+    void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node);
+    void SendActionEvent(const Accessibility::ActionType& action, NodeId nodeId);
 
 private:
-    void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node);
-
     class JsInteractionOperation : public Accessibility::AccessibilityElementOperator {
     public:
         virtual ~JsInteractionOperation() = default;
@@ -120,6 +123,12 @@ private:
 
     private:
         WeakPtr<JsAccessibilityManager> js_;
+    };
+    class ToastAccessibilityConfigObserver : public AccessibilityConfig::AccessibilityConfigObserver {
+    public:
+        ToastAccessibilityConfigObserver() = default;
+        void OnConfigChanged(
+            const AccessibilityConfig::CONFIG_ID id, const AccessibilityConfig::ConfigValue& value) override;
     };
 
     class JsAccessibilityStateObserver : public Accessibility::AccessibilityStateObserver {
@@ -170,6 +179,7 @@ private:
     int windowId_ = 0;
     bool isReg_ = false;
     std::shared_ptr<JsAccessibilityStateObserver> stateObserver_ = nullptr;
+    std::shared_ptr<ToastAccessibilityConfigObserver> toastObserver_ = nullptr;
     std::shared_ptr<JsInteractionOperation> interactionOperation_ = nullptr;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;

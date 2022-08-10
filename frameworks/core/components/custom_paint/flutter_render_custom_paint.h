@@ -52,6 +52,7 @@ public:
     void StrokeText(const Offset& offset, const std::string& text, double x, double y) override;
     double MeasureText(const std::string& text, const PaintState& state) override;
     double MeasureTextHeight(const std::string& text, const PaintState& state) override;
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) override;
     void MoveTo(const Offset& offset, double x, double y) override;
     void LineTo(const Offset& offset, double x, double y) override;
     void BezierCurveTo(const Offset& offset, const BezierCurveParam& param) override;
@@ -61,6 +62,7 @@ public:
     void Ellipse(const Offset& offset, const EllipseParam& param) override;
     void AddRect(const Offset& offset, const Rect& rect) override;
     void Fill(const Offset& offset) override;
+    void Fill(const Offset& offset, const RefPtr<CanvasPath2D>& path) override;
     void Stroke(const Offset& offset) override;
     void Stroke(const Offset& offset, const RefPtr<CanvasPath2D>& path) override;
     void Clip() override;
@@ -83,13 +85,16 @@ public:
     void WebGLUpdate() override;
     RenderLayer GetRenderLayer() override;
 
+    void SetFillRuleForPath(const CanvasFillRule& rule) override;
+    void SetFillRuleForPath2D(const CanvasFillRule& rule) override;
+
 private:
     void InitImagePaint();
     void InitCachePaint();
     bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = true);
     void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = true);
-    double GetAlignOffset(TextAlign align);
-    double GetBaselineOffset(TextBaseline baseline);
+    double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     SkPaint GetStrokePaint();
     bool HasShadow() const;
     void UpdatePaintShader(const Offset& offset, SkPaint& paint, const Gradient& gradient);
@@ -109,12 +114,14 @@ private:
     void Path2DRect(const Offset& offset, const PathArgs& args);
     void Path2DClosePath(const Offset& offset, const PathArgs& args);
     void Path2DStroke(const Offset& offset);
+    void Path2DFill(const Offset& offset);
+    void ParsePath2D(const Offset& offset, const RefPtr<CanvasPath2D>& path);
 
     bool antiAlias_ = false;
     std::unique_ptr<txt::Paragraph> paragraph_;
     RefPtr<Flutter::ClipLayer> layer_;
     SkPath skPath_;
-    SkPath strokePath_;
+    SkPath skPath2d_;
     SkPaint imagePaint_;
     SkPaint cachePaint_;
     SkBitmap cacheBitmap_;

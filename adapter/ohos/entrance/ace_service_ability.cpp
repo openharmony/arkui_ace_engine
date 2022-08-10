@@ -37,9 +37,9 @@ class ServicePlatformEventCallback final : public Platform::PlatformEventCallbac
 public:
     explicit ServicePlatformEventCallback(ServicePlatformFinish onFinish) : onFinish_(onFinish) {}
 
-    ~ServicePlatformEventCallback() = default;
+    ~ServicePlatformEventCallback() override = default;
 
-    virtual void OnFinish() const
+    void OnFinish() const override
     {
         LOGI("ServicePlatformEventCallback OnFinish");
         if (onFinish_) {
@@ -47,7 +47,7 @@ public:
         }
     }
 
-    virtual void OnStatusBarBgColorChanged(uint32_t color)
+    void OnStatusBarBgColorChanged(uint32_t color) override
     {
         LOGI("ServicePlatformEventCallback OnStatusBarBgColorChanged");
     }

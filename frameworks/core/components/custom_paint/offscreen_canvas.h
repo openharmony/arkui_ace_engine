@@ -227,8 +227,10 @@ public:
     virtual void StrokeText(const std::string& text, double x, double y, const PaintState& state) = 0;
     virtual double MeasureText(const std::string& text, const PaintState& state) = 0;
     virtual double MeasureTextHeight(const std::string& text, const PaintState& state) = 0;
+    virtual TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) = 0;
     virtual void AddRect(const Rect& rect) = 0;
     virtual void Fill() = 0;
+    virtual void Fill(const RefPtr<CanvasPath2D>& path) = 0;
     virtual void Clip() = 0;
     virtual void PutImageData(const ImageData& imageData) = 0;
     virtual void DrawImage(const CanvasImage& image, double width, double height) = 0;
@@ -247,6 +249,8 @@ public:
     virtual bool IsPointInPath(double x, double y) = 0;
     virtual bool IsPointInPath(const RefPtr<CanvasPath2D>& path, double x, double y) = 0;
     virtual void ResetTransform() = 0;
+    virtual void SetFillRuleForPath(const CanvasFillRule& rule) = 0;
+    virtual void SetFillRuleForPath2D(const CanvasFillRule& rule) = 0;
 protected:
     int32_t width_;
     int32_t height_;

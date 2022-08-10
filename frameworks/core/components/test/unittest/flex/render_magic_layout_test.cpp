@@ -55,8 +55,6 @@ public:
  * @tc.name: FlexWeight001
  * @tc.desc: Verify the row component with 1 weight child works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F2BCC
- * @tc.author: yangfan
  */
 HWTEST_F(RenderMagicLayoutTest, FlexWeight001, TestSize.Level1)
 {
@@ -87,8 +85,6 @@ HWTEST_F(RenderMagicLayoutTest, FlexWeight001, TestSize.Level1)
  * @tc.name: FlexWeight002
  * @tc.desc: Verify the row component with 3 same weight child works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F3BAS
- * @tc.author: yangfan
  */
 HWTEST_F(RenderMagicLayoutTest, FlexWeight002, TestSize.Level1)
 {
@@ -129,8 +125,6 @@ HWTEST_F(RenderMagicLayoutTest, FlexWeight002, TestSize.Level1)
  * @tc.name: FlexWeight003
  * @tc.desc: Verify the column component with 3 same weight child works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F2BCC
- * @tc.author: yangfan
  */
 HWTEST_F(RenderMagicLayoutTest, FlexWeight003, TestSize.Level1)
 {
@@ -171,8 +165,6 @@ HWTEST_F(RenderMagicLayoutTest, FlexWeight003, TestSize.Level1)
  * @tc.name: FlexWeight004
  * @tc.desc: Verify the row component with 3 different weight and aspect ratio children works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F3BAI
- * @tc.author: yangfan
  */
 HWTEST_F(RenderMagicLayoutTest, FlexWeight004, TestSize.Level1)
 {
@@ -213,8 +205,6 @@ HWTEST_F(RenderMagicLayoutTest, FlexWeight004, TestSize.Level1)
  * @tc.name: FlexWeight005
  * @tc.desc: Verify the column component with 3 different weight and aspect ratio children works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F3BAR
- * @tc.author: yangfan
  */
 HWTEST_F(RenderMagicLayoutTest, FlexWeight005, TestSize.Level1)
 {
@@ -255,8 +245,6 @@ HWTEST_F(RenderMagicLayoutTest, FlexWeight005, TestSize.Level1)
  * @tc.name: FlexWeight006
  * @tc.desc: Verify the row component with 3 different weight and constraint children works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F3BAJ
- * @tc.author: yangfan
  */
 HWTEST_F(RenderMagicLayoutTest, FlexWeight006, TestSize.Level1)
 {
@@ -298,8 +286,6 @@ HWTEST_F(RenderMagicLayoutTest, FlexWeight006, TestSize.Level1)
  * @tc.name: FlexWeight007
  * @tc.desc: Verify the column component with 3 different weight and displayIndex children works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F3BAK
- * @tc.author: yangfan
  */
 HWTEST_F(RenderMagicLayoutTest, FlexWeight007, TestSize.Level1)
 {
@@ -341,8 +327,6 @@ HWTEST_F(RenderMagicLayoutTest, FlexWeight007, TestSize.Level1)
  * @tc.name: FlexWeight008
  * @tc.desc: Verify the row component in weight and stretch works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F7J2H
- * @tc.author: yangfan
  */
 HWTEST_F(RenderMagicLayoutTest, FlexWeight008, TestSize.Level1)
 {
@@ -384,8 +368,6 @@ HWTEST_F(RenderMagicLayoutTest, FlexWeight008, TestSize.Level1)
  * @tc.name: FlexWeight009
  * @tc.desc: Verify the column component with 3 different weight and stretch-mode works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F7JGL
- * @tc.author: yangfan
  */
 HWTEST_F(RenderMagicLayoutTest, FlexWeight009, TestSize.Level1)
 {
@@ -427,8 +409,6 @@ HWTEST_F(RenderMagicLayoutTest, FlexWeight009, TestSize.Level1)
  * @tc.name: FlexWeight010
  * @tc.desc: Verify the row component with illegal weight works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F7JGL
- * @tc.author: yangfan
  */
 HWTEST_F(RenderMagicLayoutTest, FlexWeight010, TestSize.Level1)
 {
@@ -470,8 +450,6 @@ HWTEST_F(RenderMagicLayoutTest, FlexWeight010, TestSize.Level1)
  * @tc.name: DisplayIndexTest001
  * @tc.desc: Verify the row component with 3 constrainted and displayIndex children with no aspect-ratio works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F3BAI
- * @tc.author: yangfan
  */
 HWTEST_F(RenderMagicLayoutTest, DisplayIndexTest001, TestSize.Level1)
 {
@@ -513,8 +491,6 @@ HWTEST_F(RenderMagicLayoutTest, DisplayIndexTest001, TestSize.Level1)
  * @tc.name: DisplayIndexTest002
  * @tc.desc: Verify the row component with 3 constrainted and displayIndex children with aspect-ratio works fine.
  * @tc.type: FUNC
- * @tc.require: AR000F3BAS
- * @tc.author: yangfan
  */
 HWTEST_F(RenderMagicLayoutTest, DisplayIndexTest002, TestSize.Level1)
 {

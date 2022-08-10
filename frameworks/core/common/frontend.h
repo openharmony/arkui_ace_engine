@@ -206,6 +206,11 @@ public:
     {
         return "";
     }
+    virtual int32_t GetRouterSize() const
+    {
+        // only declarative frontend need to support
+        return -1;
+    }
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -223,7 +228,7 @@ public:
         dialogCallback_ = callback;
     }
 
-    virtual void MarkNeedUpdate()
+    virtual void FlushReload()
     {
         return;
     }

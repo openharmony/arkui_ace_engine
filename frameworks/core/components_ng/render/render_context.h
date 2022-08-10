@@ -41,13 +41,19 @@ public:
         requestFrame_ = requestFrame;
     }
 
-    virtual void RebuildFrame(FrameNode* self) {};
+    virtual void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) {}
+
+    virtual void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) {}
+
+    virtual void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
+
+    virtual void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
 
     virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}
 
     virtual void InitContext(bool isRoot = false) {}
 
-    virtual void StartRecording(float x, float y, float width, float height) {}
+    virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
 
     virtual void SetDrawContentAtLast(bool usedrawContentLastOrder) {}

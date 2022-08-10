@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_item.h"
 
+#include "core/common/container.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_mouse_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/pipeline/base/element_register.h"
@@ -38,7 +39,7 @@ void JSGridItem::Create(const JSCallbackInfo& args)
     ViewStackProcessor::GetInstance()->ClaimElementId(itemComponent);
     ViewStackProcessor::GetInstance()->Push(itemComponent);
 
-    if (!context->UsePartialUpdate()) {
+    if (!Container::IsCurrentUsePartialUpdate()) {
         return;
     }
 

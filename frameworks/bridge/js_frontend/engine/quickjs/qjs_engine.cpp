@@ -2281,7 +2281,7 @@ JSValue AppLogPrint(JSContext* ctx, JsLogLevel level, JSValueConst value, int32_
 
 JSValue AppLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
-    return AppLogPrint(ctx, JsLogLevel::DEBUG, value, argc, argv);
+    return AppLogPrint(ctx, JsLogLevel::INFO, value, argc, argv);
 }
 
 JSValue AppDebugLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
@@ -2500,7 +2500,7 @@ JSValue JsLogPrint(JSContext* ctx, JsLogLevel level, JSValueConst value, int32_t
 
 JSValue JsLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
 {
-    return JsLogPrint(ctx, JsLogLevel::DEBUG, value, argc, argv);
+    return JsLogPrint(ctx, JsLogLevel::INFO, value, argc, argv);
 }
 
 JSValue JsDebugLogPrint(JSContext* ctx, JSValueConst value, int32_t argc, JSValueConst* argv)
@@ -2959,10 +2959,15 @@ JSValue QjsEngineInstance::FireJsEvent(const std::string& param)
                         JS_SetPropertyStr(
                             ctx, arg1, "setDragImage", JS_NewCFunction(ctx, AppSetDataImage, "setDragImage", 3));
                         JS_SetPropertyStr(ctx, arg2, "dataTransfer", arg1);
+                        JS_FreeValue(ctx, arg1);
                     }
+                    JS_FreeValue(ctx, arg2);
                 }
+                JS_FreeValue(ctx, stdDrag);
             }
+            JS_FreeValue(ctx, args);
         }
+        JS_FreeValue(ctx, itemVal);
     }
     JSValueConst argv[] = {
         QJSUtils::NewString(ctx, std::to_string(runningPage_->GetPageId()).c_str()),
@@ -3174,18 +3179,19 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 
     engineInstance_ = AceType::MakeRefPtr<QjsEngineInstance>(delegate, instanceId_);
     nativeEngine_ = new QuickJSNativeEngine(runtime, context, static_cast<void*>(this));
-    engineInstance_->SetQuickJSNativeEngine(nativeEngine_);
+    engineInstance_->SetQuickJSNativeEngine(static_cast<QuickJSNativeEngine*>(nativeEngine_));
     bool ret = engineInstance_->InitJsEnv(runtime, context, GetExtraNativeObject());
 
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
     RegisterWorker();
     if (delegate && delegate->GetAssetManager()) {
         std::string packagePath = delegate->GetAssetManager()->GetLibPath();
         if (!packagePath.empty()) {
-            nativeEngine_->SetPackagePath(packagePath);
+            auto qjsEngine = static_cast<QuickJSNativeEngine*>(nativeEngine_);
+            qjsEngine->SetPackagePath(packagePath);
         }
     }
 
@@ -3196,14 +3202,21 @@ void QjsEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine = nativeEngine_, id = instanceId_](bool needSync) {
+    auto&& postTask = [weakDelegate, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync, id]() {
+
+        delegate->PostJsTask([weakEngine, needSync, id]() {
             ContainerScope scope(id);
+            auto jsEngine = weakEngine.Upgrade();
+            if (jsEngine == nullptr) {
+                LOGW("jsEngine is nullptr");
+                return;
+            }
+            auto nativeEngine = jsEngine->GetNativeEngine();
             if (nativeEngine == nullptr) {
                 return;
             }
@@ -3269,8 +3282,9 @@ void QjsEngine::RegisterWorker()
 
 QjsEngine::~QjsEngine()
 {
+    LOG_DESTROY();
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         nativeEngine_->DeleteEngine();
@@ -3278,6 +3292,7 @@ QjsEngine::~QjsEngine()
     }
     if (engineInstance_ && engineInstance_->GetQjsRuntime()) {
         JS_RunGC(engineInstance_->GetQjsRuntime());
+        engineInstance_->SetNativeEngine(nullptr);
     }
 }
 

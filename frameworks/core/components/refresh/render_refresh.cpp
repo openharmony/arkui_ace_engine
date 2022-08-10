@@ -99,6 +99,10 @@ void RenderRefresh::Update(const RefPtr<Component>& component)
     backgroundColor_ = refresh->GetBackgroundColor();
     frictionRatio_ = refresh->GetFriction() * PERCENT;
     isRefresh_ = refresh->GetIsRefresh();
+    if (!refresh->GetChangeEvent().IsEmpty()) {
+        changeEvent_ =
+            AceAsyncEvent<void(const std::string&)>::Create(refresh->GetChangeEvent(), context_);
+    }
 
     loadingComponent_->SetProgressColor(progressColor_);
     loadingComponent_->SetDiameter(Dimension(GetLoadingDiameter()));
@@ -284,6 +288,9 @@ void RenderRefresh::HandleDragCancel()
 {
     LOGD("RenderRefresh HandleDragCancel");
     refreshing_ = false;
+    if (changeEvent_) {
+        changeEvent_("false");
+    }
     refreshStatus_ = RefreshStatus::INACTIVE;
     scrollableOffset_.Reset();
     loading_->SetLoadingMode(MODE_DRAG);
@@ -356,6 +363,9 @@ void RenderRefresh::HandleStopListener(bool isFinished)
             loading_->SetLoadingMode(MODE_LOOP);
         }
         refreshing_ = true;
+        if (changeEvent_) {
+            changeEvent_("true");
+        }
         FireRefreshEvent();
     } else {
         loading_->SetLoadingMode(MODE_DRAG);
@@ -569,14 +579,18 @@ void RenderRefresh::UpdateScrollableOffset(double delta)
 
 void RenderRefresh::OnHiddenChanged(bool hidden)
 {
-    if (!hidden) {
-        refreshing_ = false;
-        refreshStatus_ = RefreshStatus::INACTIVE;
-        scrollableOffset_.Reset();
-        loading_->SetLoadingMode(MODE_DRAG);
-        loading_->SetDragDistance(scrollableOffset_.GetY());
-        MarkNeedLayout();
+    if (hidden) {
+        return;
     }
+    refreshing_ = false;
+    if (changeEvent_) {
+        changeEvent_("false");
+    }
+    refreshStatus_ = RefreshStatus::INACTIVE;
+    scrollableOffset_.Reset();
+    loading_->SetLoadingMode(MODE_DRAG);
+    loading_->SetDragDistance(scrollableOffset_.GetY());
+    MarkNeedLayout();
 }
 
 void RenderRefresh::PerformLayout()

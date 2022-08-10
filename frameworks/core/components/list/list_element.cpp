@@ -286,21 +286,6 @@ bool ListElement::SupportStickyItem() const
     return renderList_->SupportStickyItem();
 }
 
-RefPtr<Element> ListElement::GetCachedElement(const std::string& type)
-{
-    // Find same type element.
-    auto bucket = cacheBuckets_.find(type);
-
-    RefPtr<Element> element;
-    if (bucket != cacheBuckets_.end() && !bucket->second.empty()) {
-        element = bucket->second.front();
-        bucket->second.pop_front();
-        LOGD("[recycle] pop element from bucket. now size: %{public}zu", bucket->second.size());
-    }
-
-    return element;
-}
-
 void ListElement::RemoveComposedChildFromMap(RefPtr<Element> element)
 {
     // Remove all composed element children in list-item from pipeline context composed element map.
@@ -362,10 +347,6 @@ bool ListElement::BuildListComponent(const RefPtr<Component>& component)
         if (item != itemElements_.end()) {
             element = item->second;
         }
-    }
-
-    if (!element) {
-        element = GetCachedElement(itemComponent->GetType());
     }
 
     if (element) {
@@ -519,23 +500,6 @@ void ListElement::RecycleByItems(const std::vector<int32_t>& items)
     itemElements_.swap(newItems);
 }
 
-bool ListElement::RemoveFromCache(const RefPtr<Element>& item)
-{
-    auto itemElement = ListItemElement::GetListItem(item);
-    if (!itemElement) {
-        return false;
-    }
-
-    auto bucket = cacheBuckets_.find(itemElement->GetItemType());
-    if (bucket == cacheBuckets_.end()) {
-        return false;
-    }
-
-    auto& elements = bucket->second;
-    elements.remove(item);
-    return true;
-}
-
 bool ListElement::RecycleItem(int32_t index)
 {
     auto element = itemElements_.find(index);
@@ -547,21 +511,6 @@ bool ListElement::RecycleItem(int32_t index)
         return false;
     }
     itemElement->SetKey(-1);
-    auto bucket = cacheBuckets_.find(itemElement->GetItemType());
-    if (bucket != cacheBuckets_.end()) {
-        auto& elements = bucket->second;
-        size_t size = elements.size();
-        if (size < bucketSize_) {
-            LOGD("[recycle] bucket size is: %{public}zu, add it", size);
-            elements.emplace_back(element->second);
-        } else {
-            LOGD("[recycle] recycle element: bucket size is too large: %{public}zu, drop it", size);
-        }
-    } else {
-        std::list<RefPtr<Element>> newBucket { element->second };
-        cacheBuckets_.emplace(std::make_pair(itemElement->GetItemType(), newBucket));
-        LOGD("[recycle] recycle element: new bucket, type: %{public}s", itemElement->GetItemType().c_str());
-    }
     return true;
 }
 
@@ -806,7 +755,6 @@ void ListElement::RebuildElements(int32_t tailIndex)
                 auto oldElementIter = items.find(item->GetIndex());
                 if (oldElementIter != items.end()) {
                     oldElement = oldElementIter->second;
-                    RemoveFromCache(oldElement);
                 }
 
                 item->SetIndex(index);

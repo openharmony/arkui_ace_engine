@@ -58,6 +58,7 @@ public:
     void StrokeText(const Offset& offset, const std::string& text, double x, double y) override;
     double MeasureText(const std::string& text, const PaintState& state) override;
     double MeasureTextHeight(const std::string& text, const PaintState& state) override;
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) override;
     void MoveTo(const Offset& offset, double x, double y) override;
     void LineTo(const Offset& offset, double x, double y) override;
     void BezierCurveTo(const Offset& offset, const BezierCurveParam& param) override;
@@ -67,6 +68,7 @@ public:
     void Ellipse(const Offset& offset, const EllipseParam& param) override;
     void AddRect(const Offset& offset, const Rect& rect) override;
     void Fill(const Offset& offset) override;
+    void Fill(const Offset& offset, const RefPtr<CanvasPath2D>& path) override;
     void Stroke(const Offset& offset) override;
     void Stroke(const Offset& offset, const RefPtr<CanvasPath2D>& path) override;
     void Clip() override;
@@ -88,6 +90,9 @@ public:
     void WebGLInit(CanvasRenderContextBase* context) override;
     void WebGLUpdate() override;
 
+    void SetFillRuleForPath(const CanvasFillRule& rule) override;
+    void SetFillRuleForPath2D(const CanvasFillRule& rule) override;
+
     bool IsRepaintBoundary() const override
     {
         return RenderNode::IsRepaintBoundary();
@@ -98,8 +103,8 @@ private:
     void InitPaintBlend(SkPaint& paint);
     bool UpdateParagraph(const Offset& offset, const std::string& text, bool isStroke, bool hasShadow = true);
     void PaintText(const Offset& offset, double x, double y, bool isStroke, bool hasShadow = true);
-    double GetAlignOffset(TextAlign align);
-    double GetBaselineOffset(TextBaseline baseline);
+    double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     SkPaint GetStrokePaint();
     bool HasShadow() const;
     void UpdatePaintShader(const Offset& offset, SkPaint& paint, const Gradient& gradient);
@@ -119,6 +124,8 @@ private:
     void Path2DRect(const Offset& offset, const PathArgs& args);
     void Path2DClosePath(const Offset& offset, const PathArgs& args);
     void Path2DStroke(const Offset& offset);
+    void Path2DFill(const Offset& offset);
+    void ParsePath2D(const Offset& offset, const RefPtr<CanvasPath2D>& path);
     void InitImageCallbacks();
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed();
@@ -130,7 +137,8 @@ private:
     bool antiAlias_ = false;
     std::unique_ptr<txt::Paragraph> paragraph_;
     SkPath skPath_;
-    SkPath strokePath_;
+    // Specifically refers to the class Path2D in canvas.d.ts
+    SkPath skPath2d_;
     SkPaint imagePaint_;
     SkBitmap canvasCache_;
     SkBitmap webglBitmap_;

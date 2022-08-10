@@ -273,6 +273,104 @@ private:
     RefPtr<WebGeolocation> webGeolocation_;
 };
 
+class JSWebPermissionRequest : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebPermissionRequest>::Declare("WebPermissionRequest");
+        JSClass<JSWebPermissionRequest>::CustomMethod("deny", &JSWebPermissionRequest::Deny);
+        JSClass<JSWebPermissionRequest>::CustomMethod("getOrigin", &JSWebPermissionRequest::GetOrigin);
+        JSClass<JSWebPermissionRequest>::CustomMethod("getAccessibleResource", &JSWebPermissionRequest::GetResources);
+        JSClass<JSWebPermissionRequest>::CustomMethod("grant", &JSWebPermissionRequest::Grant);
+        JSClass<JSWebPermissionRequest>::Bind(globalObj, &JSWebPermissionRequest::Constructor,
+            &JSWebPermissionRequest::Destructor);
+    }
+
+    void SetEvent(const WebPermissionRequestEvent& eventInfo)
+    {
+        webPermissionRequest_ = eventInfo.GetWebPermissionRequest();
+    }
+
+    void Deny(const JSCallbackInfo& args)
+    {
+        if (webPermissionRequest_) {
+            webPermissionRequest_->Deny();
+        }
+    }
+
+    void GetOrigin(const JSCallbackInfo& args)
+    {
+        std::string origin;
+        if (webPermissionRequest_) {
+            origin = webPermissionRequest_->GetOrigin();
+        }
+        auto originJs = JSVal(ToJSValue(origin));
+        auto originJsRef = JSRef<JSVal>::Make(originJs);
+        args.SetReturnValue(originJsRef);
+    }
+
+    void GetResources(const JSCallbackInfo& args)
+    {
+        JSRef<JSArray> result = JSRef<JSArray>::New();
+        if (webPermissionRequest_) {
+            std::vector<std::string> resources = webPermissionRequest_->GetResources();
+            uint32_t index = 0;
+            for (auto iterator = resources.begin(); iterator != resources.end(); ++iterator) {
+                auto valueStr = JSVal(ToJSValue(*iterator));
+                auto value = JSRef<JSVal>::Make(valueStr);
+                result->SetValueAt(index++, value);
+            }
+        }
+        args.SetReturnValue(result);
+    }
+
+    void Grant(const JSCallbackInfo& args)
+    {
+        if (args.Length() < 1) {
+            if (webPermissionRequest_) {
+                webPermissionRequest_->Deny();
+            }
+        }
+        std::vector<std::string> resources;
+        if (args[0]->IsArray()) {
+            JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
+            for (size_t i = 0; i < array->Length(); i++) {
+                JSRef<JSVal> val = array->GetValueAt(i);
+                if (!val->IsString()) {
+                    LOGW("resources list is not string at index %{public}zu", i);
+                    continue;
+                }
+                std::string res;
+                if (!ConvertFromJSValue(val, res)) {
+                    LOGW("can't convert resource at index %{public}zu of JSWebPermissionRequest, so skip it.", i);
+                    continue;
+                }
+                resources.push_back(res);
+            }
+        }
+
+        if (webPermissionRequest_) {
+            webPermissionRequest_->Grant(resources);
+        }
+    }
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebPermissionRequest = Referenced::MakeRefPtr<JSWebPermissionRequest>();
+        jsWebPermissionRequest->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebPermissionRequest));
+    }
+
+    static void Destructor(JSWebPermissionRequest* jsWebPermissionRequest)
+    {
+        if (jsWebPermissionRequest != nullptr) {
+            jsWebPermissionRequest->DecRefCount();
+        }
+    }
+
+    RefPtr<WebPermissionRequest> webPermissionRequest_;
+};
+
 class JSWebResourceError : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -714,6 +812,158 @@ private:
     RefPtr<FileSelectorResult> result_;
 };
 
+class JSContextMenuParam : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSContextMenuParam>::Declare("WebContextMenuParam");
+        JSClass<JSContextMenuParam>::CustomMethod("x", &JSContextMenuParam::GetXCoord);
+        JSClass<JSContextMenuParam>::CustomMethod("y", &JSContextMenuParam::GetYCoord);
+        JSClass<JSContextMenuParam>::CustomMethod("getLinkUrl", &JSContextMenuParam::GetLinkUrl);
+        JSClass<JSContextMenuParam>::CustomMethod("getUnfilterendLinkUrl",
+            &JSContextMenuParam::GetUnfilteredLinkUrl);
+        JSClass<JSContextMenuParam>::CustomMethod("getSourceUrl", &JSContextMenuParam::GetSourceUrl);
+        JSClass<JSContextMenuParam>::CustomMethod("existsImageContents",
+            &JSContextMenuParam::HasImageContents);
+        JSClass<JSContextMenuParam>::Bind(
+            globalObj, &JSContextMenuParam::Constructor, &JSContextMenuParam::Destructor);
+    }
+
+    void SetParam(const ContextMenuEvent& eventInfo)
+    {
+        param_ = eventInfo.GetParam();
+    }
+
+    void GetXCoord(const JSCallbackInfo& args)
+    {
+        int32_t ret = -1;
+        if (param_) {
+            ret = param_->GetXCoord();
+        }
+        auto xCoord = JSVal(ToJSValue(ret));
+        auto descriptionRef = JSRef<JSVal>::Make(xCoord);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetYCoord(const JSCallbackInfo& args)
+    {
+        int32_t ret = -1;
+        if (param_) {
+            ret = param_->GetYCoord();
+        }
+        auto yCoord = JSVal(ToJSValue(ret));
+        auto descriptionRef = JSRef<JSVal>::Make(yCoord);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetLinkUrl(const JSCallbackInfo& args)
+    {
+        std::string url;
+        if (param_) {
+            url = param_->GetLinkUrl();
+        }
+        auto linkUrl = JSVal(ToJSValue(url));
+        auto descriptionRef = JSRef<JSVal>::Make(linkUrl);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetUnfilteredLinkUrl(const JSCallbackInfo& args)
+    {
+        std::string url;
+        if (param_) {
+            url = param_->GetUnfilteredLinkUrl();
+        }
+        auto unfilteredLinkUrl = JSVal(ToJSValue(url));
+        auto descriptionRef = JSRef<JSVal>::Make(unfilteredLinkUrl);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetSourceUrl(const JSCallbackInfo& args)
+    {
+        std::string url;
+        if (param_) {
+            url = param_->GetSourceUrl();
+        }
+        auto sourceUrl = JSVal(ToJSValue(url));
+        auto descriptionRef = JSRef<JSVal>::Make(sourceUrl);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void HasImageContents(const JSCallbackInfo& args)
+    {
+        bool ret = false;
+        if (param_) {
+            ret = param_->HasImageContents();
+        }
+        auto hasImageContents = JSVal(ToJSValue(ret));
+        auto descriptionRef = JSRef<JSVal>::Make(hasImageContents);
+        args.SetReturnValue(descriptionRef);
+    }
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jSContextMenuParam = Referenced::MakeRefPtr<JSContextMenuParam>();
+        jSContextMenuParam->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jSContextMenuParam));
+    }
+
+    static void Destructor(JSContextMenuParam* jSContextMenuParam)
+    {
+        if (jSContextMenuParam != nullptr) {
+            jSContextMenuParam->DecRefCount();
+        }
+    }
+
+    RefPtr<WebContextMenuParam> param_;
+};
+
+class JSContextMenuResult : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSContextMenuResult>::Declare("WebContextMenuResult");
+        JSClass<JSContextMenuResult>::CustomMethod("closeContextMenu", &JSContextMenuResult::Cancel);
+        JSClass<JSContextMenuResult>::CustomMethod("copyImage", &JSContextMenuResult::CopyImage);
+        JSClass<JSContextMenuResult>::Bind(globalObj, &JSContextMenuResult::Constructor,
+            &JSContextMenuResult::Destructor);
+    }
+
+    void SetResult(const ContextMenuEvent& eventInfo)
+    {
+        result_ = eventInfo.GetContextMenuResult();
+    }
+
+    void Cancel(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Cancel();
+        }
+    }
+
+    void CopyImage(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->CopyImage();
+        }
+    }
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsContextMenuResult = Referenced::MakeRefPtr<JSContextMenuResult>();
+        jsContextMenuResult->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsContextMenuResult));
+    }
+
+    static void Destructor(JSContextMenuResult* jsContextMenuResult)
+    {
+        if (jsContextMenuResult != nullptr) {
+            jsContextMenuResult->DecRefCount();
+        }
+    }
+
+    RefPtr<ContextMenuResult> result_;
+};
+
 void JSWeb::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWeb>::Declare("Web");
@@ -766,6 +1016,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("tableData", &JSWeb::TableData);
     JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::OnFileSelectorShowAbandoned);
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::OnHttpAuthRequest);
+    JSClass<JSWeb>::StaticMethod("onPermissionRequest", &JSWeb::OnPermissionRequest);
+    JSClass<JSWeb>::StaticMethod("onContextMenuShow", &JSWeb::OnContextMenuShow);
+    JSClass<JSWeb>::StaticMethod("onSearchResultReceive", &JSWeb::OnSearchResultReceive);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -777,6 +1030,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSFileSelectorParam::JSBind(globalObj);
     JSFileSelectorResult::JSBind(globalObj);
     JSWebHttpAuth::JSBind(globalObj);
+    JSWebPermissionRequest::JSBind(globalObj);
+    JSContextMenuParam::JSBind(globalObj);
+    JSContextMenuResult::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
@@ -890,6 +1146,15 @@ JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("host", eventInfo.GetHost());
     obj->SetProperty("realm", eventInfo.GetRealm());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> SearchResultReceiveEventToJSValue(const SearchResultReceiveEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("activeMatchOrdinal", eventInfo.GetActiveMatchOrdinal());
+    obj->SetProperty("numberOfMatches", eventInfo.GetNumberOfMatches());
+    obj->SetProperty("isDoneCounting", eventInfo.GetIsDoneCounting());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -1354,6 +1619,55 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
     webComponent->SetOnFileSelectorShow(std::move(jsCallback));
 }
 
+
+JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+
+    JSRef<JSObject> paramObj = JSClass<JSContextMenuParam>::NewInstance();
+    auto contextMenuParam = Referenced::Claim(paramObj->Unwrap<JSContextMenuParam>());
+    contextMenuParam->SetParam(eventInfo);
+
+    JSRef<JSObject> resultObj = JSClass<JSContextMenuResult>::NewInstance();
+    auto contextMenuResult = Referenced::Claim(resultObj->Unwrap<JSContextMenuResult>());
+    contextMenuResult->SetResult(eventInfo);
+
+    obj->SetPropertyObject("result", resultObj);
+    obj->SetPropertyObject("param", paramObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb: OnContextMenuShow");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("param is invalid.");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ContextMenuEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ContextMenuEventToJSValue);
+    auto jsCallback = [func = std::move(jsFunc)]
+        (const BaseEventInfo* info) -> bool {
+            ACE_SCORING_EVENT("onContextMenuShow CallBack");
+            if (func == nullptr) {
+                LOGW("function is null");
+                return false;
+            }
+            auto eventInfo = TypeInfoHelper::DynamicCast<ContextMenuEvent>(info);
+            if (eventInfo == nullptr) {
+                LOGW("eventInfo is null");
+                return false;
+            }
+            JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
+            if (result->IsBoolean()) {
+                return result->ToBoolean();
+            }
+            return false;
+        };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnContextMenuShow(std::move(jsCallback));
+}
+
 void JSWeb::JsEnabled(bool isJsEnabled)
 {
     auto stack = ViewStackProcessor::GetInstance();
@@ -1699,6 +2013,34 @@ void JSWeb::OnScaleChange(const JSCallbackInfo& args)
     webComponent->SetScaleChangeId(eventMarker);
 }
 
+JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
+    auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
+    permissionEvent->SetEvent(eventInfo);
+    obj->SetPropertyObject("request", permissionObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnPermissionRequest(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebPermissionRequestEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), PermissionRequestEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetPermissionRequestEventId(eventMarker);
+}
+
 void JSWeb::BackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1742,5 +2084,23 @@ void JSWeb::TableData(bool tableData)
 void JSWeb::OnFileSelectorShowAbandoned(const JSCallbackInfo& args)
 {
     LOGI("JSWeb: OnFileSelectorShow Abandoned");
+}
+
+void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<SearchResultReceiveEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), SearchResultReceiveEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<SearchResultReceiveEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetSearchResultReceiveEventId(eventMarker);
 }
 } // namespace OHOS::Ace::Framework

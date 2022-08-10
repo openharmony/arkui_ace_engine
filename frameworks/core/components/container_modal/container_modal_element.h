@@ -37,6 +37,7 @@ public:
     void SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
     void Update() override;
     void PerformBuild() override;
+    void FlushReload();
 
 private:
     RefPtr<StackElement> GetStackElement() const;
@@ -54,6 +55,7 @@ private:
     float density_ = 1.0f;
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;
+    bool windowFocus_ = true;
 };
 
 } // namespace OHOS::Ace

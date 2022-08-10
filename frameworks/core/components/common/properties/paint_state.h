@@ -105,9 +105,24 @@ struct ImageData {
     std::vector<Color> data;
 };
 
+struct TextMetrics {
+    double width;
+    double height;
+    double actualBoundingBoxLeft;
+    double actualBoundingBoxRight;
+    double actualBoundingBoxAscent;
+    double actualBoundingBoxDescent;
+};
+
 enum class ContextType {
     RENDER_2D,
     RENDER_3D,
+};
+
+// following the definition of FillType in skPath
+enum class CanvasFillRule {
+    NONZERO = 0,
+    EVENODD,
 };
 
 // following the definition in skPaint

@@ -16,16 +16,15 @@ import(
 
 build_component_ng("base_ng") {
   sources = [
-    "custom_node.cpp",
     "frame_node.cpp",
     "geometry_node.cpp",
+    "ui_node.cpp",
     "view_abstract.cpp",
     "view_stack_processor.cpp",
   ]
   component_ng_deps = [
     "event_ng",
     "layout_ng",
-    "modifier_ng",
     "pattern_ng",
     "property_ng",
     "render_ng",

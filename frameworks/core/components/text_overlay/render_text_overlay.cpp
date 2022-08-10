@@ -159,9 +159,11 @@ void RenderTextOverlay::Update(const RefPtr<Component>& component)
     textDirection_ = overlay->GetTextDirection();
     realTextDirection_ = overlay->GetRealTextDirection();
     isUsingMouse_ = overlay->GetIsUsingMouse();
+    needClipRect_ = overlay->GetNeedCilpRect();
     BindBackendEvent(overlay);
     UpdateWeakTextField(overlay);
     UpdateWeakText(overlay);
+    UpdateWeakImage(overlay);
     MarkNeedLayout();
 }
 
@@ -460,6 +462,45 @@ void RenderTextOverlay::UpdateWeakText(const RefPtr<TextOverlayComponent>& overl
     renderText->SetOnClipRectChanged(onClipRectChanged);
 }
 
+void RenderTextOverlay::UpdateWeakImage(const RefPtr<TextOverlayComponent>& overlay)
+{
+    if (!overlay) {
+        return;
+    }
+    weakImage_ = overlay->GetWeakImage();
+    auto renderImage = weakImage_.Upgrade();
+    if (!renderImage) {
+        return;
+    }
+    auto callback = [weak = WeakClaim(this)](const OverlayShowOption& option) {
+        auto overlay = weak.Upgrade();
+        if (!overlay) {
+            return;
+        }
+        if (option.updateOverlayType == UpdateOverlayType::CLICK ||
+            option.updateOverlayType == UpdateOverlayType::LONG_PRESS) {
+            overlay->childRightBoundary_ = 0.0;
+        }
+        overlay->SetVisible(true);
+        overlay->showOption_ = option;
+        overlay->startHandleOffset_ = option.startHandleOffset;
+        overlay->endHandleOffset_ = option.endHandleOffset;
+        overlay->isSingleHandle_ = option.isSingleHandle;
+        if (option.updateOverlayType == UpdateOverlayType::CLICK) {
+            if (overlay->onRebuild_) {
+                overlay->hasMenu_ = false;
+                overlay->onRebuild_(true, false, false, false, false);
+            }
+        } else if (option.updateOverlayType == UpdateOverlayType::LONG_PRESS) {
+            if (overlay->onRebuild_) {
+                overlay->hasMenu_ = false;
+                overlay->onRebuild_(false, true, false, true, false);
+            }
+        }
+    };
+    renderImage->SetUpdateHandlePosition(callback);
+}
+
 void RenderTextOverlay::PerformLayout()
 {
     double handleRadius = NormalizeToPx(handleRadius_);
@@ -558,15 +599,19 @@ void RenderTextOverlay::PerformLayout()
 
 Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)
 {
+    // Adjust position of overlay.
     Offset startHandleOffset = startHandleOffset_;
-    startHandleOffset.SetX(std::clamp(startHandleOffset.GetX(), clipRect_.Left(), clipRect_.Right()));
-    startHandleOffset.SetY(std::clamp(startHandleOffset.GetY(), clipRect_.Top(), clipRect_.Bottom()));
     Offset endHandleOffset = endHandleOffset_;
-    endHandleOffset.SetX(std::clamp(endHandleOffset.GetX(), clipRect_.Left(), clipRect_.Right()));
-    endHandleOffset.SetY(std::clamp(endHandleOffset.GetY(), clipRect_.Top(), clipRect_.Bottom()));
-    if (!NearEqual(startHandleOffset.GetY(), endHandleOffset.GetY())) {
-        startHandleOffset.SetX(clipRect_.Left());
-        endHandleOffset.SetX(clipRect_.Right());
+    if (needClipRect_) {
+        startHandleOffset.SetX(std::clamp(startHandleOffset.GetX(), clipRect_.Left(), clipRect_.Right()));
+        startHandleOffset.SetY(std::clamp(startHandleOffset.GetY(), clipRect_.Top(), clipRect_.Bottom()));
+        endHandleOffset.SetX(std::clamp(endHandleOffset.GetX(), clipRect_.Left(), clipRect_.Right()));
+        endHandleOffset.SetY(std::clamp(endHandleOffset.GetY(), clipRect_.Top(), clipRect_.Bottom()));
+
+        if (!NearEqual(startHandleOffset.GetY(), endHandleOffset.GetY())) {
+            startHandleOffset.SetX(clipRect_.Left());
+            endHandleOffset.SetX(clipRect_.Right());
+        }
     }
 
     // Calculate the spacing with text and handle, menu is fixed up the handle and text.

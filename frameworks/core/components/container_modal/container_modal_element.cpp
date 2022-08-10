@@ -247,12 +247,39 @@ void ContainerModalElement::PerformBuild()
         tween->ApplyKeyframes();
     }
 
+    ChangeTitleIcon();
+
     // The first time it starts up, it needs to hide title if mode as follows.
     windowMode_ = context_.Upgrade()->FireWindowGetModeCallBack();
     if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
         windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         ShowTitle(false);
     }
+}
+
+void ContainerModalElement::FlushReload()
+{
+    auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
+    if (!containerBox) {
+        LOGE("ContainerModalElement WindowFocus failed, container box element is null!");
+        return;
+    }
+    auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
+    if (containerRenderBox) {
+        auto containerDecoration = containerRenderBox->GetBackDecoration();
+        containerDecoration->SetBackgroundColor(
+            windowFocus_ ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
+        auto border = containerDecoration->GetBorder();
+        border.SetColor(windowFocus_ ? CONTAINER_BORDER_COLOR : CONTAINER_BORDER_COLOR_LOST_FOCUS);
+        containerDecoration->SetBorder(border);
+        containerRenderBox->SetBackDecoration(containerDecoration);
+    }
+    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        ChangeFloatingTitleIcon(windowFocus_);
+        return;
+    }
+    ChangeTitleIcon(windowFocus_);
 }
 
 void ContainerModalElement::Update()
@@ -458,28 +485,8 @@ void ContainerModalElement::BlurWindow(bool isBlur)
 
 void ContainerModalElement::WindowFocus(bool isFocus)
 {
-    auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
-    if (!containerBox) {
-        LOGE("ContainerModalElement WindowFocus failed, container box element is null!");
-        return;
-    }
-
-    auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
-    if (containerRenderBox) {
-        auto containerDecoration = containerRenderBox->GetBackDecoration();
-        containerDecoration->SetBackgroundColor(
-            isFocus ? CONTAINER_BACKGROUND_COLOR : CONTAINER_BACKGROUND_COLOR_LOST_FOCUS);
-        auto border = containerDecoration->GetBorder();
-        border.SetColor(isFocus ? CONTAINER_BORDER_COLOR : CONTAINER_BORDER_COLOR_LOST_FOCUS);
-        containerDecoration->SetBorder(border);
-        containerRenderBox->SetBackDecoration(containerDecoration);
-    }
-    if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
-        ChangeFloatingTitleIcon(isFocus);
-    } else {
-        ChangeTitleIcon(isFocus);
-    }
+    windowFocus_ = isFocus;
+    FlushReload();
 }
 
 void ContainerModalElement::SetAppBgColor(const Color& color)

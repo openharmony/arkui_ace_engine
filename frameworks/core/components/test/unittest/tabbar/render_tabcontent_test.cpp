@@ -21,6 +21,7 @@
 #include "core/components/tab_bar/render_tab_bar_item.h"
 #include "core/components/tab_bar/render_tab_content.h"
 #include "core/components/test/unittest/mock/mock_render_depend.h"
+#include "frameworks/core/components/text_overlay/text_overlay_component.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -46,9 +47,9 @@ static int64_t GetTickCount()
     return (ts.tv_sec * SEC_TO_NANOSEC + ts.tv_nsec);
 }
 
-const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::DOWN };
-const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::MOVE };
-const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 540.0f, 500.0f, TouchType::UP };
+const TouchEvent MOCK_DOWN_TOUCH_EVENT { 10, 540.0f, 500.0f, 540.0f, 500.0f, TouchType::DOWN };
+const TouchEvent MOCK_MOVE_TOUCH_EVENT { 10, 540.0f, 500.0f, 540.0f, 500.0f, TouchType::MOVE };
+const TouchEvent MOCK_UP_TOUCH_EVENT { 10, 540.0f, 500.0f, 540.0f, 500.0f, TouchType::UP };
 
 std::function<void(const RefPtr<RenderTabContent>&)> hookContent;
 std::function<void(const RefPtr<RenderTabBar>&)> hookBar;
@@ -318,8 +319,6 @@ bool RenderTabContentTest::TestContentPosition(int32_t index, double position)
  * @tc.desc: Test the invalid index value to create a tab component. The component can be successfully created, but
  * the initial tabContent display page is the default value.
  * @tc.type: FUNC
- * @tc.require: AR000DAR32 AR000DHJ5Q
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTabContentTest, RenderTabContentTest001, TestSize.Level1)
 {
@@ -342,8 +341,6 @@ HWTEST_F(RenderTabContentTest, RenderTabContentTest001, TestSize.Level1)
  * @tc.desc: Test the invalid index value to create a tab component. The component can be successfully created, but
  * the initial tabContent display page is the default value.
  * @tc.type: FUNC
- * @tc.require: AR000DAR32 AR000DHJ5Q
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTabContentTest, RenderTabContentTest002, TestSize.Level1)
 {
@@ -367,8 +364,6 @@ HWTEST_F(RenderTabContentTest, RenderTabContentTest002, TestSize.Level1)
  * @tc.desc: Test the valid index value to create a tab component. The component can be successfully created,
  * the initial tabContent display page is the index value.
  * @tc.type: FUNC
- * @tc.require: AR000DAR32 AR000DHJ5Q
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTabContentTest, RenderTabContentTest003, TestSize.Level1)
 {
@@ -392,8 +387,6 @@ HWTEST_F(RenderTabContentTest, RenderTabContentTest003, TestSize.Level1)
  * @tc.desc: Create a tab component. The component can be successfully created,
  * then test the link of bar and content
  * @tc.type: FUNC
- * @tc.require: AR000DAR32 AR000DHJ5Q
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTabContentTest, RenderTabContentTest004, TestSize.Level1)
 {
@@ -427,8 +420,6 @@ HWTEST_F(RenderTabContentTest, RenderTabContentTest004, TestSize.Level1)
  * @tc.name: RenderTabContentTest005
  * @tc.desc: Test the event
  * @tc.type: FUNC
- * @tc.require: AR000DAR32 AR000DHJ5Q
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTabContentTest, RenderTabContentTest005, TestSize.Level1)
 {
@@ -481,8 +472,6 @@ HWTEST_F(RenderTabContentTest, RenderTabContentTest005, TestSize.Level1)
  * @tc.name: RenderTabContentTest006
  * @tc.desc: Test the drag
  * @tc.type: FUNC
- * @tc.require: AR000DAR32 AR000DHJ5Q
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTabContentTest, RenderTabContentTest006, TestSize.Level1)
 {
@@ -566,8 +555,6 @@ HWTEST_F(RenderTabContentTest, RenderTabContentTest006, TestSize.Level1)
  * @tc.desc: Create a tab component. The component can be successfully created,
  * then test the lazy build of the content
  * @tc.type: FUNC
- * @tc.require: AR000DAR32
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTabContentTest, RenderTabContentTest007, TestSize.Level1)
 {
@@ -607,8 +594,6 @@ HWTEST_F(RenderTabContentTest, RenderTabContentTest007, TestSize.Level1)
  * @tc.name: RenderTabContentTest008
  * @tc.desc: Test the event of the first tab and last one
  * @tc.type: FUNC
- * @tc.require: AR000DAR32
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTabContentTest, RenderTabContentTest008, TestSize.Level1)
 {
@@ -674,8 +659,6 @@ HWTEST_F(RenderTabContentTest, RenderTabContentTest008, TestSize.Level1)
  * @tc.name: RenderTabContentTest009
  * @tc.desc: Test the event of the first tab and last one
  * @tc.type: FUNC
- * @tc.require: AR000DAR32
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTabContentTest, RenderTabContentTest009, TestSize.Level1)
 {
@@ -732,8 +715,6 @@ HWTEST_F(RenderTabContentTest, RenderTabContentTest009, TestSize.Level1)
  * @tc.name: RenderTabContentTest010
  * @tc.desc: Test the drag
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V2 AR000DQ1V3
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTabContentTest, RenderTabContentTest010, TestSize.Level1)
 {
@@ -818,8 +799,6 @@ HWTEST_F(RenderTabContentTest, RenderTabContentTest010, TestSize.Level1)
  * @tc.desc: Create a tab component. The component can be successfully created,
  * then test the link of bar and content when vertical is true
  * @tc.type: FUNC
- * @tc.require: AR000DQ1V2 AR000DQ1V3
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTabContentTest, RenderTabContentTest011, TestSize.Level1)
 {
@@ -854,8 +833,6 @@ HWTEST_F(RenderTabContentTest, RenderTabContentTest011, TestSize.Level1)
  * @tc.desc: Create a tab component. The component can be successfully created,
  * then test the link of bar and content
  * @tc.type: FUNC
- * @tc.require: AR000DQ4E3
- * @tc.author: liujinwei
  */
 HWTEST_F(RenderTabContentTest, RenderTabContentTest012, TestSize.Level1)
 {

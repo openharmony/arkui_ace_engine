@@ -117,6 +117,10 @@ public:
     ACE_DEFINE_PARAGRAPH_PROPERTY(TextLineStyle, TextBaseline, TextBaseline);
     ACE_DEFINE_PARAGRAPH_PROPERTY(TextLineStyle, BaselineOffset, Dimension);
     ACE_DEFINE_PARAGRAPH_PROPERTY(TextLineStyle, TextAlign, TextAlign);
+    ACE_DEFINE_PARAGRAPH_PROPERTY(TextLineStyle, TextCase, TextCase);
+    ACE_DEFINE_PARAGRAPH_PROPERTY(TextLineStyle, TextDecorationColor, Color);
+    ACE_DEFINE_PARAGRAPH_PROPERTY(TextLineStyle, TextDecoration, TextDecoration);
+    ACE_DEFINE_PARAGRAPH_PROPERTY(TextLineStyle, TextOverflow, TextOverflow);
     ACE_DEFINE_PARAGRAPH_PROPERTY(TextLineStyle, MaxLines, uint32_t);
 
 private:

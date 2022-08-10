@@ -51,6 +51,8 @@
 
 extern const char _binary_stateMgmt_js_start[];
 extern const char _binary_stateMgmt_js_end[];
+extern const char _binary_stateMgmtPU_js_start[];
+extern const char _binary_stateMgmtPU_js_end[];
 extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsEnumStyle_js_end[];
 
@@ -505,7 +507,15 @@ void V8DeclarativeEngineInstance::InitJSContext()
     InitJsPerfUtilObject(localContext);
     InitJsNativeModuleObject(localContext);
     InitJsExportsUtilObject(localContext);
-    InitAceModules(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end, isolate_.Get());
+
+    if (Container::IsCurrentUsePartialUpdate()) {
+        LOGE("Loading State Mgmt JS lib for Partial Update");
+        InitAceModules(_binary_stateMgmtPU_js_start, _binary_stateMgmtPU_js_end, isolate_.Get());
+    } else {
+        LOGE("Loading State Mgmt JS lib for full update");
+        InitAceModules(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end, isolate_.Get());
+    }
+
     InitAceModules(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end, isolate_.Get());
 
     auto groupJsBridge = DynamicCast<V8DeclarativeGroupJsBridge>(frontendDelegate_->GetGroupJsBridge());
@@ -547,7 +557,7 @@ void V8DeclarativeEngineInstance::InitJsConsoleObject(v8::Local<v8::Context>& lo
     consoleObj
         ->Set(localContext, v8::String::NewFromUtf8(isolate, "log").ToLocalChecked(),
             v8::Function::New(
-                localContext, AppLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::DEBUG)))
+                localContext, AppLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::INFO)))
                 .ToLocalChecked())
         .ToChecked();
     consoleObj
@@ -581,7 +591,7 @@ void V8DeclarativeEngineInstance::InitJsConsoleObject(v8::Local<v8::Context>& lo
     aceConsoleObj
         ->Set(localContext, v8::String::NewFromUtf8(isolate, "log").ToLocalChecked(),
             v8::Function::New(
-                localContext, JsLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::DEBUG)))
+                localContext, JsLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::INFO)))
                 .ToLocalChecked())
         .ToChecked();
     aceConsoleObj
@@ -898,7 +908,7 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         new V8NativeEngine(GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
     engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {

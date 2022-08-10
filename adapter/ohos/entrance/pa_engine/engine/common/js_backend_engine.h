@@ -23,6 +23,7 @@
 #include "data_ability_predicates.h"
 #include "form_provider_info.h"
 #include "iremote_object.h"
+#include "pac_map.h"
 #include "values_bucket.h"
 #include "want.h"
 
@@ -57,6 +58,8 @@ public:
     virtual void DestroyApplication(const std::string& packageName) = 0;
 
     virtual int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value) = 0;
+    virtual std::shared_ptr<AppExecFwk::PacMap> Call(const std::string& method,
+        const std::string& arg, const AppExecFwk::PacMap& pacMap) = 0;
     virtual std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(const Uri& uri,
         const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates) = 0;
     virtual int32_t Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
@@ -80,6 +83,7 @@ public:
     virtual void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) = 0;
     virtual int32_t OnAcquireFormState(const OHOS::AAFwk::Want &want) = 0;
     virtual void OnCommand(const OHOS::AAFwk::Want &want, int startId) = 0;
+    virtual bool OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams) = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) = 0;
 
     void SetFormData(const AppExecFwk::FormProviderData &formProviderData)

@@ -51,8 +51,6 @@ void RenderSliderTest::SetUp()
  * @tc.name: RenderSliderTest001
  * @tc.desc: Verify PerformLayout can calculate slider properties.
  * @tc.type: FUNC
- * @tc.require: AR000F3L3A
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderSliderTest, RenderSliderTest001, TestSize.Level1)
 {
@@ -82,8 +80,6 @@ HWTEST_F(RenderSliderTest, RenderSliderTest001, TestSize.Level1)
  * @tc.name: RenderSliderTest002
  * @tc.desc: Verify PerformLayout can calculate slider properties.
  * @tc.type: FUNC
- * @tc.require: AR000F3L3B
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderSliderTest, RenderSliderTest002, TestSize.Level1)
 {
@@ -118,8 +114,6 @@ HWTEST_F(RenderSliderTest, RenderSliderTest002, TestSize.Level1)
  * @tc.name: RenderSliderTest003
  * @tc.desc: Verify PerformLayout can calculate slider properties.
  * @tc.type: FUNC
- * @tc.require: AR000F3L3B
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderSliderTest, RenderSliderTest003, TestSize.Level1)
 {
@@ -164,8 +158,6 @@ HWTEST_F(RenderSliderTest, RenderSliderTest003, TestSize.Level1)
  * @tc.name: RenderSliderTest004
  * @tc.desc: Verify PerformLayout can calculate slider properties.
  * @tc.type: FUNC
- * @tc.require: AR000F3CBT
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderSliderTest, RenderSliderTest004, TestSize.Level1)
 {
@@ -202,8 +194,6 @@ HWTEST_F(RenderSliderTest, RenderSliderTest004, TestSize.Level1)
  * @tc.name: RenderSliderTest005
  * @tc.desc: Verify PerformLayout can calculate slider properties.
  * @tc.type: FUNC
- * @tc.require: AR000F3CBU
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderSliderTest, RenderSliderTest005, TestSize.Level1)
 {

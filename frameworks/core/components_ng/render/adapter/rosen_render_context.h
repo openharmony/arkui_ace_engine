@@ -34,7 +34,7 @@ public:
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
-    void RebuildFrame(FrameNode* self) override;
+    void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
     void UpdateBgColor(const Color& value) override;
 
@@ -43,7 +43,7 @@ public:
 
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
-    void StartRecording(float x, float y, float width, float height) override;
+    void StartRecording() override;
 
     void StopRecordingIfNeeded() override;
 
@@ -69,13 +69,19 @@ public:
         }
     }
 
-private:
-    void ReCreateRsNodeTree(FrameNode* node);
+    void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
 
-    std::shared_ptr<Rosen::RSNode> rsNode_ = nullptr;
+    void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) override;
+
+    void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) override;
+
+private:
+    void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
+
+    std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
-    RefPtr<Canvas> recordingCanvas_ = nullptr;
-    RefPtr<Canvas> rosenCanvas_ = nullptr;
+    RefPtr<Canvas> recordingCanvas_;
+    RefPtr<Canvas> rosenCanvas_;
 };
 } // namespace OHOS::Ace::NG
 

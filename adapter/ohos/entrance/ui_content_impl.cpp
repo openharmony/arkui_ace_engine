@@ -23,6 +23,7 @@
 #include "configuration.h"
 #include "dm/display_manager.h"
 #include "init_data.h"
+#include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
 #include "native_reference.h"
 #include "service_extension_context.h"
@@ -70,9 +71,9 @@ public:
     explicit ContentEventCallback(ContentFinishCallback onFinish) : onFinish_(onFinish) {}
     ContentEventCallback(ContentFinishCallback onFinish, ContentStartAbilityCallback onStartAbility)
         : onFinish_(onFinish), onStartAbility_(onStartAbility) {}
-    ~ContentEventCallback() = default;
+    ~ContentEventCallback() override = default;
 
-    virtual void OnFinish() const
+    void OnFinish() const override
     {
         LOGI("UIContent OnFinish");
         if (onFinish_) {
@@ -80,7 +81,7 @@ public:
         }
     }
 
-    virtual void OnStartAbility(const std::string& address)
+    void OnStartAbility(const std::string& address) override
     {
         LOGI("UIContent OnStartAbility");
         if (onStartAbility_) {
@@ -88,7 +89,7 @@ public:
         }
     }
 
-    virtual void OnStatusBarBgColorChanged(uint32_t color)
+    void OnStatusBarBgColorChanged(uint32_t color) override
     {
         LOGI("UIContent OnStatusBarBgColorChanged");
     }
@@ -297,6 +298,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
         AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
+        AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
+        AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
         CapabilityRegistry::Register();
         ImageCache::SetImageCacheFilePath(context->GetCacheDir());
         ImageCache::SetCacheFileInfo();
@@ -343,7 +346,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             SystemProperties::SetColorMode(ColorMode::LIGHT);
             LOGI("UIContent set light mode");
         }
-        SystemProperties::SetInputDevice(
+        SystemProperties::SetDeviceAccess(
             resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
     }
 
@@ -511,7 +514,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
-    aceResCfg.SetInputDevice(SystemProperties::GetInputDevice());
+    aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetAssetManager(flutterAssetManager);
@@ -549,7 +552,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     };
 #endif
     // set view
-    Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_->GetWindowId(), callback);
+    Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_, callback);
     Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     // Set sdk version in module json mode
     if (isModelJson) {
@@ -690,7 +693,6 @@ bool UIContentImpl::ProcessBackPressed()
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    LOGI("UIContent ProcessPointerEvent");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (container) {
         auto aceView = static_cast<Platform::FlutterAceView*>(container->GetAceView());
@@ -738,8 +740,9 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         return;
     }
     auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    auto inputDevice = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-    container->UpdateConfiguration(colorMode, inputDevice);
+    auto deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+    auto languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    container->UpdateConfiguration(colorMode, deviceAccess, languageTag);
     LOGI("UIContentImpl::UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
 }
 
@@ -826,7 +829,7 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
         LOGE("get container(id=%{public}d) failed", instanceId_);
         return;
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
         LOGE("get pipeline context failed");
         return;
@@ -937,6 +940,11 @@ void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
         return;
     }
     pipelineContext->SetNextFrameLayoutCallback(std::move(callback));
+}
+
+void UIContentImpl::NotifyMemoryLevel(int32_t level)
+{
+    LOGI("Receive memory level notification, level: %{public}d", level);
 }
 
 } // namespace OHOS::Ace

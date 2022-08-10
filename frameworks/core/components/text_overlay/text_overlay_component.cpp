@@ -701,6 +701,16 @@ const WeakPtr<RenderText>& TextOverlayComponent::GetWeakText() const
     return weakText_;
 }
 
+void TextOverlayComponent::SetWeakImage(const WeakPtr<RenderImage>& weakImage)
+{
+    weakImage_ = weakImage;
+}
+
+const WeakPtr<RenderImage>& TextOverlayComponent::GetWeakImage() const
+{
+    return weakImage_;
+}
+
 void TextOverlayComponent::SetRealTextDirection(TextDirection realTextDirection)
 {
     realTextDirection_ = realTextDirection;

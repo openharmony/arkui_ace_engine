@@ -127,4 +127,9 @@ bool FrictionMotion::GetTimeByPosition(double position, double& time) const
     return true;
 }
 
+std::string FrictionMotion::GetMotionType() const
+{
+    return "friction";
+}
+
 } // namespace OHOS::Ace

@@ -37,7 +37,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
         return;
     }
     // first clean.
-    GestureReferee::GetInstance().CleanGestureScope(touchPoint.id);
+    GestureReferee::GetInstance()->CleanGestureScope(touchPoint.id);
     // collect
     TouchTestResult hitTestResult;
     const Point point { touchPoint.x, touchPoint.y, touchPoint.sourceType };
@@ -68,7 +68,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         return;
     }
     // first clean.
-    GestureReferee::GetInstance().CleanGestureScope(touchPoint.id);
+    GestureReferee::GetInstance()->CleanGestureScope(touchPoint.id);
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
@@ -195,7 +195,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
         }
 
         if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
-            GestureReferee::GetInstance().CleanGestureScope(point.id);
+            GestureReferee::GetInstance()->CleanGestureScope(point.id);
             touchTestResults_.erase(point.id);
         }
 
@@ -228,7 +228,7 @@ void EventManager::CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode)
         return;
     }
     RefPtr<FocusGroup> rootScope = AceType::DynamicCast<FocusGroup>(rootNode);
-    if (rootScope) {
+    if (rootScope && rootScope->IsFocusable()) {
         auto children = rootScope->GetChildrenList();
         if (children.size() == 1 && !AceType::DynamicCast<FocusGroup>(children.front())) {
             if (rootScope->GetTabIndex() > 0) {
@@ -240,7 +240,7 @@ void EventManager::CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode)
             CollectTabIndexNodes(child);
         }
     }
-    if (rootNode->GetTabIndex() > 0) {
+    if (rootNode->IsFocusable() && rootNode->GetTabIndex() > 0) {
         tabIndexNodes_.emplace_back(rootNode->GetTabIndex(), WeakClaim(AceType::RawPtr(rootNode)));
     }
 }
@@ -307,6 +307,18 @@ bool EventManager::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<Foc
         return false;
     }
     LOGI("Focus on tab index node(%{public}d)", curTabFocusedIndex_);
+    auto defaultFocusNode = nodeNeedToFocus->GetChildDefaultFoucsNode(false);
+    if (defaultFocusNode) {
+        if (!defaultFocusNode->IsFocusableWholePath()) {
+            LOGW("node(%{public}d) is not focusable", curTabFocusedIndex_);
+            return false;
+        }
+        return defaultFocusNode->RequestFocusImmediately();
+    }
+    if (!nodeNeedToFocus->IsFocusableWholePath()) {
+        LOGW("node(%{public}d) is not focusable", curTabFocusedIndex_);
+        return false;
+    }
     return nodeNeedToFocus->RequestFocusImmediately();
 }
 

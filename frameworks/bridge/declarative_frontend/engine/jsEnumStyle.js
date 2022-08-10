@@ -27,7 +27,14 @@ var Color;
   Color["Pink"] = "#ffffc0cb";
   Color["Red"] = "#ffff0000";
   Color["Yellow"] = "#ffffff00";
+  Color["Transparent"] = "#00000000";
 })(Color || (Color = {}));
+
+var TextInputStyle;
+(function (TextInputStyle) {
+  TextInputStyle["Default"] = "Default";
+  TextInputStyle["Inline"] = "Inline";
+})(TextInputStyle || (TextInputStyle = {}));
 
 var TextAlign;
 (function (TextAlign) {
@@ -380,6 +387,12 @@ var Visibility;
   Visibility[Visibility["Hidden"] = 1] = "Hidden";
   Visibility[Visibility["None"] = 2] = "None";
 })(Visibility || (Visibility = {}));
+
+var RelateType;
+(function (RelateType) {
+  RelateType[RelateType["FILL"] = 0] = "FILL";
+  RelateType[RelateType["FIT"] = 1] = "FIT";
+})(RelateType || (RelateType = {}));
 
 var FlexDirection;
 (function (FlexDirection) {
@@ -735,6 +748,12 @@ var SideBarContainerType;
   SideBarContainerType[SideBarContainerType["Embed"] = 0] = "Embed";
 })(SideBarContainerType || (SideBarContainerType = {}));
 
+var SideBarPosition;
+(function (SideBarPosition){
+  SideBarPosition[SideBarPosition["Start"] = 0] = "Start";
+  SideBarPosition[SideBarPosition["End"] = 1] = "End";
+})(SideBarPosition || (SideBarPosition = {}));
+
 var PlaybackSpeed;
 (function (PlaybackSpeed) {
   PlaybackSpeed["Speed_Forward_0_75_X"] = "0.75";
@@ -789,12 +808,13 @@ var MessageLevel
   MessageLevel[MessageLevel["Log"] = 5] = "Log";
 })(MessageLevel || (MessageLevel = {}));
 
-var CopyOption;
-(function (CopyOption) {
-  CopyOption[CopyOption["InApp"] = 0] = "InApp";
-  CopyOption[CopyOption["LocalDevice"] = 1] = "LocalDevice";
-  CopyOption[CopyOption["CrossDevice"] = 2] = "CrossDevice";
-})(CopyOption || (CopyOption = {}));
+var CopyOptions;
+(function (CopyOptions) {
+  CopyOptions[CopyOptions["None"] = 0] = "None";
+  CopyOptions[CopyOptions["InApp"] = 1] = "InApp";
+  CopyOptions[CopyOptions["LocalDevice"] = 2] = "LocalDevice";
+  CopyOptions[CopyOptions["CrossDevice"] = 3] = "CrossDevice";
+})(CopyOptions || (CopyOptions = {}));
 
 var ListItemAlign;
 (function (ListItemAlign) {
@@ -822,3 +842,11 @@ var GridRowDirection;
   GridRowDirection[GridRowDirection["Row"] = 0] = "Row";
   GridRowDirection[GridRowDirection["RowReverse"] = 1] = "RowReverse";
 })(GridRowDirection || (GridRowDirection = {}));
+
+var HitTestMode;
+(function (HitTestMode) {
+  HitTestMode[HitTestMode["Default"] = 0] = "Default";
+  HitTestMode[HitTestMode["Block"] = 1] = "Block";
+  HitTestMode[HitTestMode["Transparent"] = 2] = "Transparent";
+  HitTestMode[HitTestMode["None"] = 3] = "None";
+})(HitTestMode || (HitTestMode = {}));

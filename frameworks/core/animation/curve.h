@@ -215,6 +215,51 @@ private:
     friend class NativeCurveHelper;
 };
 
+class ResponsiveSpringMotion final : public Curve {
+    DECLARE_ACE_TYPE(ResponsiveSpringMotion, Curve);
+
+public:
+    ResponsiveSpringMotion(float response, float dampingRatio, float blendDuration = 0.0f)
+        : response_(response), dampingRatio_(dampingRatio), blendDuration_(blendDuration) {}
+    ~ResponsiveSpringMotion() override = default;
+    // this MoveInterval function is not the real implementation of the function.
+    // The curve should use the curve in rosen.
+    float MoveInternal(float time) override
+    {
+        return 0.0f;
+    }
+    const std::string ToString() override
+    {
+        std::string curveString("responsive-spring-motion");
+        std::string comma(",");
+        curveString.append(std::string("(") + std::to_string(response_) + comma + std::to_string(dampingRatio_) +
+                            comma + std::to_string(blendDuration_) + std::string(")"));
+        return curveString;
+    }
+    float GetResponse() const
+    {
+        return response_;
+    }
+    float GetDampingRatio() const
+    {
+        return dampingRatio_;
+    }
+    float GetBlendDuration() const
+    {
+        return blendDuration_;
+    }
+    static constexpr float DEFAULT_SPRING_MOTION_RESPONSE = 0.55f;
+    static constexpr float DEFAULT_SPRING_MOTION_DAMPING_RATIO = 0.825f;
+    static constexpr float DEFAULT_SPRING_MOTION_BLEND_DURATION = 0.0f;
+    static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE = 0.15f;
+    static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO = 0.86f;
+    static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION = 0.25f;
+private:
+    float response_;
+    float dampingRatio_;
+    float blendDuration_;
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CURVE_H

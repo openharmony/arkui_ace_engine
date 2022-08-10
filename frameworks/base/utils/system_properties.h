@@ -178,6 +178,10 @@ public:
 
     static std::string GetNewPipePkg();
 
+    static float GetAnimationScale();
+
+    static std::string GetPartialUpdatePkg();
+
     static bool GetRosenBackendEnabled()
     {
         return rosenBackendEnabled_;
@@ -236,14 +240,14 @@ public:
         return colorMode_;
     }
 
-    static void SetInputDevice(bool hasInputDevice)
+    static void SetDeviceAccess(bool isDeviceAccess)
     {
-        hasInputDevice_ = hasInputDevice;
+        isDeviceAccess_ = isDeviceAccess;
     }
 
-    static bool GetInputDevice()
+    static bool GetDeviceAccess()
     {
-        return hasInputDevice_;
+        return isDeviceAccess_;
     }
 
     static void InitMccMnc(int32_t mcc, int32_t mnc);
@@ -288,7 +292,7 @@ private:
     static bool svgTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
-    static bool hasInputDevice_;
+    static bool isDeviceAccess_;
     static int32_t deviceWidth_;
     static int32_t deviceHeight_;
     static double resolution_;

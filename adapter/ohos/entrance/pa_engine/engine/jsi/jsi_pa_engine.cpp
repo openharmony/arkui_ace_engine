@@ -198,7 +198,7 @@ void JsiPaEngineInstance::RegisterConsoleModule()
 
     // app log method
     shared_ptr<JsValue> consoleObj = runtime_->NewObject();
-    consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::AppDebugLogPrint));
+    consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
     consoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(JsiBaseUtils::AppDebugLogPrint));
     consoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
     consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::AppWarnLogPrint));
@@ -220,7 +220,7 @@ void JsiPaEngineInstance::RegisterConsoleModule(ArkNativeEngine* engine)
     // app log method
     NativeValue* console = engine->CreateObject();
     auto consoleObj = reinterpret_cast<NativeObject*>(console->GetInterface(NativeObject::INTERFACE_ID));
-    consoleObj->SetProperty("log", engine->CreateFunction("log", strlen("log"), AppDebugLogPrint, nullptr));
+    consoleObj->SetProperty("log", engine->CreateFunction("log", strlen("log"), AppInfoLogPrint, nullptr));
     consoleObj->SetProperty("debug", engine->CreateFunction("debug", strlen("debug"), AppDebugLogPrint, nullptr));
     consoleObj->SetProperty("info", engine->CreateFunction("info", strlen("info"), AppInfoLogPrint, nullptr));
     consoleObj->SetProperty("warn", engine->CreateFunction("warn", strlen("warn"), AppWarnLogPrint, nullptr));
@@ -910,6 +910,77 @@ int32_t JsiPaEngine::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     return arkJSValue->ToInt32(runtime);
 }
 
+std::string JsiPaEngine::ExcludeTag(const std::string& jsonString, const std::string& tagString)
+{
+    size_t pos = jsonString.find(tagString);
+    if (pos == std::string::npos) {
+        return jsonString;
+    }
+    std::string valueString = jsonString.substr(pos);
+    pos = valueString.find(":");
+    if (pos == std::string::npos) {
+        return "";
+    }
+    size_t valuePos = pos + 1;
+    while (valuePos < valueString.size()) {
+        if (valueString.at(valuePos) != ' ' && valueString.at(valuePos) != '\t') {
+            break;
+        }
+        valuePos++;
+    }
+    if (valuePos >= valueString.size()) {
+        return "";
+    }
+    valueString = valueString.substr(valuePos);
+    return valueString.substr(0, valueString.size() - 1);
+}
+
+std::string JsiPaEngine::IncludeTag(const std::string& jsonString, const std::string& tagString)
+{
+    std::string result = "{\"" + tagString + "\":";
+    result += jsonString;
+    result += "}";
+    return result;
+}
+
+std::shared_ptr<AppExecFwk::PacMap> JsiPaEngine::Call(const std::string& method,
+    const std::string& arg, const AppExecFwk::PacMap& pacMap)
+{
+    LOGD("JsiPaEngine Call");
+    ACE_DCHECK(engineInstance_);
+
+    std::string pacString = const_cast<AppExecFwk::PacMap&>(pacMap).ToString();
+    std::string params = ExcludeTag(pacString, "pacmap");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime->NewString(method));
+    argv.push_back(runtime->NewString(arg));
+    argv.push_back(runtime->NewString(params));
+    auto func = GetPaFunc("call");
+    if (func == nullptr) {
+        return nullptr;
+    }
+    shared_ptr<JsValue> retVal = CallFunc(func, argv);
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
+    if (arkJSValue->IsException(runtime)) {
+        LOGE("JsiPaEngine Query FAILED!");
+        return nullptr;
+    }
+    if (arkJSValue->IsUndefined(runtime)) {
+        LOGE("JsiPaEngine Query return value is undefined!");
+        return nullptr;
+    }
+    std::string retStr = IncludeTag(arkJSValue->ToString(runtime), "pacmap");
+    auto result = std::make_shared<AppExecFwk::PacMap>();
+    if (result == nullptr) {
+        LOGE("fail to create PacMap");
+        return nullptr;
+    }
+    result->FromString(retStr);
+    LOGD("JsiPaEngine Call End: %{public}s", result->ToString().c_str());
+    return result;
+}
+
 int32_t JsiPaEngine::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values)
 {
     LOGI("JsiPaEngine BatchInsert");
@@ -1381,6 +1452,63 @@ int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want &want)
     int32_t formState = arkJSValue->ToInt32(runtime);
     LOGI("JsiPaEngine OnAcquireFormState, formState: %{public}d", formState);
     return formState;
+}
+
+bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+{
+    LOGD("JsiPaEngine OnShare, create");
+    ACE_DCHECK(engineInstance_);
+    auto runtime = engineInstance_->GetJsRuntime();
+    if (runtime == nullptr) {
+        LOGE("JsiPaEngine JsRuntime Get nullptr!");
+        return false;
+    }
+
+    const std::vector<shared_ptr<JsValue>> argv = { runtime->NewString(std::to_string(formId)) };
+    auto func = GetPaFunc("onShare");
+    auto result = CallFunc(func, argv);
+    if (result == nullptr) {
+        LOGE("JsiPaEngine Call function result is nullptr!");
+        return false;
+    }
+
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(result);
+    if (arkJSValue == nullptr) {
+        LOGE("JsiPaEngine JsValue convert failed!");
+        return false;
+    }
+
+    if (arkJSValue->IsException(runtime)) {
+        LOGE("JsiPaEngine CallFunc FAILED!");
+        return false;
+    }
+
+    auto arkJsRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJsRuntime == nullptr) {
+        LOGE("JsiPaEngine JSRuntime convert failed!");
+        return false;
+    }
+
+    auto nativeValue = ArkNativeEngine::ArkValueToNativeValue(nativeEngine_, arkJSValue->GetValue(arkJsRuntime));
+    if (nativeValue == nullptr) {
+        LOGE("JsiPaEngine nativeValue convert failed!");
+        return false;
+    }
+
+    if (nativeValue->TypeOf() != NativeValueType::NATIVE_OBJECT) {
+        LOGE("%{public}s OnShare return value`s type is %{public}d", __func__,
+            static_cast<int>(nativeValue->TypeOf()));
+        return false;
+    }
+
+    if (!OHOS::AppExecFwk::UnwrapWantParams(reinterpret_cast<napi_env>(nativeEngine_),
+        reinterpret_cast<napi_value>(nativeValue), wantParams)) {
+        LOGE("%{public}s OnShare UnwrapWantParams failed, return false", __func__);
+        return false;
+    }
+
+    LOGD("JsiPaEngine OnShare, end");
+    return true;
 }
 
 void JsiPaEngine::DumpHeapSnapshot(bool isPrivate)

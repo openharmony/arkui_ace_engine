@@ -23,16 +23,21 @@
 
 namespace OHOS::Ace::Framework {
 
-void ViewFunctions::InitViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction, bool partialUpdate)
+void ViewFunctions::InitViewFunctions(
+    const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsRenderFunction, bool partialUpdate)
 {
     jsObject_ = jsObject;
 
     if (partialUpdate) {
-        JSRef<JSVal> jsRenderFunc = jsObject->GetProperty("initialRenderView");
-        if (jsRenderFunc->IsFunction()) {
-            jsRenderFunc_ = JSRef<JSFunc>::Cast(jsRenderFunc);
+        if (jsObject->GetProperty("initialRender")->IsFunction()) {
+            JSRef<JSVal> jsRenderFunc = jsObject->GetProperty("initialRenderView");
+            if (jsRenderFunc->IsFunction()) {
+                jsRenderFunc_ = JSRef<JSFunc>::Cast(jsRenderFunc);
+            } else {
+                LOGE("View lacks mandatory 'initialRenderView()' function, fatal internal error.");
+            }
         } else {
-            LOGE("View lacks mandatory 'initialRenderView()' function, fatal internal error.");
+            LOGE("View lacks mandatory 'initialRender()' function, fatal internal error.");
         }
 
         JSRef<JSVal> jsRerenderFunc = jsObject->GetProperty("rerender");
@@ -130,7 +135,7 @@ void ViewFunctions::InitViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> js
     }
 }
 
-ViewFunctions::ViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction)
+ViewFunctions::ViewFunctions(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsRenderFunction)
 {
     ACE_DCHECK(jsObject);
     InitViewFunctions(jsObject, jsRenderFunction, false);
@@ -334,7 +339,7 @@ void ViewFunctions::ExecuteRerender()
 }
 
 // Partial update method
-ViewFunctions::ViewFunctions(JSRef<JSObject> jsObject)
+ViewFunctions::ViewFunctions(const JSRef<JSObject>& jsObject)
 {
     InitViewFunctions(jsObject, JSRef<JSFunc>(), true);
 }

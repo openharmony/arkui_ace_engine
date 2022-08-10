@@ -132,6 +132,79 @@ void RosenRenderOffscreenCanvas::AddRect(const Rect& rect)
     skPath_.addRect(skRect);
 }
 
+void RosenRenderOffscreenCanvas::SetFillRuleForPath(const CanvasFillRule& rule)
+{
+    if (rule == CanvasFillRule::NONZERO) {
+        skPath_.setFillType(SkPath::FillType::kWinding_FillType);
+    } else if (rule == CanvasFillRule::EVENODD) {
+        skPath_.setFillType(SkPath::FillType::kEvenOdd_FillType);
+    }
+}
+
+void RosenRenderOffscreenCanvas::SetFillRuleForPath2D(const CanvasFillRule& rule)
+{
+    if (rule == CanvasFillRule::NONZERO) {
+        skPath2d_.setFillType(SkPath::FillType::kWinding_FillType);
+    } else if (rule == CanvasFillRule::EVENODD) {
+        skPath2d_.setFillType(SkPath::FillType::kEvenOdd_FillType);
+    }
+}
+
+void RosenRenderOffscreenCanvas::ParsePath2D(const RefPtr<CanvasPath2D>& path)
+{
+    for (const auto& [cmd, args] : path->GetCaches()) {
+        switch (cmd) {
+            case PathCmd::CMDS: {
+                Path2DAddPath(args);
+                break;
+            }
+            case PathCmd::TRANSFORM: {
+                Path2DSetTransform(args);
+                break;
+            }
+            case PathCmd::MOVE_TO: {
+                Path2DMoveTo(args);
+                break;
+            }
+            case PathCmd::LINE_TO: {
+                Path2DLineTo(args);
+                break;
+            }
+            case PathCmd::ARC: {
+                Path2DArc(args);
+                break;
+            }
+            case PathCmd::ARC_TO: {
+                Path2DArcTo(args);
+                break;
+            }
+            case PathCmd::QUADRATIC_CURVE_TO: {
+                Path2DQuadraticCurveTo(args);
+                break;
+            }
+            case PathCmd::BEZIER_CURVE_TO: {
+                Path2DBezierCurveTo(args);
+                break;
+            }
+            case PathCmd::ELLIPSE: {
+                Path2DEllipse(args);
+                break;
+            }
+            case PathCmd::RECT: {
+                Path2DRect(args);
+                break;
+            }
+            case PathCmd::CLOSE_PATH: {
+                Path2DClosePath(args);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+}
+
 void RosenRenderOffscreenCanvas::Fill()
 {
     SkPaint paint;
@@ -158,6 +231,17 @@ void RosenRenderOffscreenCanvas::Fill()
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
         cacheBitmap_.eraseColor(0);
     }
+}
+
+void RosenRenderOffscreenCanvas::Fill(const RefPtr<CanvasPath2D>& path)
+{
+    if (path == nullptr) {
+        LOGE("Fill failed in offscreenCanvas, target path is null.");
+        return;
+    }
+    ParsePath2D(path);
+    Path2DFill();
+    skPath2d_.reset();
 }
 
 void RosenRenderOffscreenCanvas::Clip()
@@ -741,60 +825,9 @@ void RosenRenderOffscreenCanvas::Stroke(const RefPtr<CanvasPath2D>& path)
     if (path == nullptr) {
         return;
     }
-    strokePath_.reset();
-
-    for (const auto& [cmd, args] : path->GetCaches()) {
-        switch (cmd) {
-        case PathCmd::CMDS: {
-            Path2DAddPath(args);
-            break;
-        }
-        case PathCmd::TRANSFORM: {
-            Path2DSetTransform(args);
-            break;
-        }
-        case PathCmd::MOVE_TO: {
-            Path2DMoveTo(args);
-            break;
-        }
-        case PathCmd::LINE_TO: {
-            Path2DLineTo(args);
-            break;
-        }
-        case PathCmd::ARC: {
-            Path2DArc(args);
-            break;
-        }
-        case PathCmd::ARC_TO: {
-            Path2DArcTo(args);
-            break;
-        }
-        case PathCmd::QUADRATIC_CURVE_TO: {
-            Path2DQuadraticCurveTo(args);
-            break;
-        }
-        case PathCmd::BEZIER_CURVE_TO: {
-            Path2DBezierCurveTo(args);
-            break;
-        }
-        case PathCmd::ELLIPSE: {
-            Path2DEllipse(args);
-            break;
-        }
-        case PathCmd::RECT: {
-            Path2DRect(args);
-            break;
-        }
-        case PathCmd::CLOSE_PATH: {
-            Path2DClosePath(args);
-            break;
-        }
-        default: {
-            break;
-        }
-        }
-    }
+    ParsePath2D(path);
     Path2DStroke();
+    skPath2d_.reset();
 }
 SkPaint RosenRenderOffscreenCanvas::GetStrokePaint()
 {
@@ -847,7 +880,7 @@ void RosenRenderOffscreenCanvas::Path2DAddPath(const PathArgs& args)
 {
     SkPath out;
     SkParsePath::FromSVGString(args.cmds.c_str(), &out);
-    strokePath_.addPath(out);
+    skPath2d_.addPath(out);
 }
 
 void RosenRenderOffscreenCanvas::Path2DSetTransform(const PathArgs& args)
@@ -860,21 +893,21 @@ void RosenRenderOffscreenCanvas::Path2DSetTransform(const PathArgs& args)
     double translateX = args.para5;
     double translateY = args.para6;
     skMatrix.setAll(scaleX, skewY, translateX, skewX, scaleY, translateY, 0, 0, 1);
-    strokePath_.transform(skMatrix);
+    skPath2d_.transform(skMatrix);
 }
 
 void RosenRenderOffscreenCanvas::Path2DMoveTo(const PathArgs& args)
 {
     double x = args.para1;
     double y = args.para2;
-    strokePath_.moveTo(x, y);
+    skPath2d_.moveTo(x, y);
 }
 
 void RosenRenderOffscreenCanvas::Path2DLineTo(const PathArgs& args)
 {
     double x = args.para1;
     double y = args.para2;
-    strokePath_.lineTo(x, y);
+    skPath2d_.lineTo(x, y);
 }
 
 void RosenRenderOffscreenCanvas::Path2DArc(const PathArgs& args)
@@ -895,10 +928,10 @@ void RosenRenderOffscreenCanvas::Path2DArc(const PathArgs& args)
             sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
     }
     if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
-        strokePath_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
-        strokePath_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+        skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
+        skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
     } else {
-        strokePath_.arcTo(rect, startAngle, sweepAngle, false);
+        skPath2d_.arcTo(rect, startAngle, sweepAngle, false);
     }
 }
 
@@ -909,7 +942,7 @@ void RosenRenderOffscreenCanvas::Path2DArcTo(const PathArgs& args)
     double x2 = args.para3;
     double y2 = args.para4;
     double r = args.para5;
-    strokePath_.arcTo(x1, y1, x2, y2, r);
+    skPath2d_.arcTo(x1, y1, x2, y2, r);
 }
 
 void RosenRenderOffscreenCanvas::Path2DQuadraticCurveTo(const PathArgs& args)
@@ -918,7 +951,7 @@ void RosenRenderOffscreenCanvas::Path2DQuadraticCurveTo(const PathArgs& args)
     double cpy = args.para2;
     double x = args.para3;
     double y = args.para4;
-    strokePath_.quadTo(cpx, cpy, x, y);
+    skPath2d_.quadTo(cpx, cpy, x, y);
 }
 
 void RosenRenderOffscreenCanvas::Path2DBezierCurveTo(const PathArgs& args)
@@ -929,7 +962,7 @@ void RosenRenderOffscreenCanvas::Path2DBezierCurveTo(const PathArgs& args)
     double cp2y = args.para4;
     double x = args.para5;
     double y = args.para6;
-    strokePath_.cubicTo(cp1x, cp1y, cp2x, cp2y, x, y);
+    skPath2d_.cubicTo(cp1x, cp1y, cp2x, cp2y, x, y);
 }
 
 void RosenRenderOffscreenCanvas::Path2DEllipse(const PathArgs& args)
@@ -964,19 +997,19 @@ void RosenRenderOffscreenCanvas::Path2DEllipse(const PathArgs& args)
     if (!NearZero(rotation)) {
         SkMatrix matrix;
         matrix.setRotate(-rotation, x, y);
-        strokePath_.transform(matrix);
+        skPath2d_.transform(matrix);
     }
     if (NearZero(sweepAngle) && !NearZero(args.para6 - args.para7)) {
         // The entire ellipse needs to be drawn with two arcTo.
-        strokePath_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
-        strokePath_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+        skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
+        skPath2d_.arcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
     } else {
-        strokePath_.arcTo(rect, startAngle, sweepAngle, false);
+        skPath2d_.arcTo(rect, startAngle, sweepAngle, false);
     }
     if (!NearZero(rotation)) {
         SkMatrix matrix;
         matrix.setRotate(rotation, x, y);
-        strokePath_.transform(matrix);
+        skPath2d_.transform(matrix);
     }
 }
 
@@ -986,19 +1019,20 @@ void RosenRenderOffscreenCanvas::Path2DRect(const PathArgs& args)
     double top = args.para2;
     double right = args.para3;
     double bottom = args.para4;
-    strokePath_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
+    skPath2d_.addRect(SkRect::MakeLTRB(left, top, right, bottom));
 }
 
 void RosenRenderOffscreenCanvas::Path2DClosePath(const PathArgs& args)
 {
-    strokePath_.close();
+    skPath2d_.close();
 }
+
 void RosenRenderOffscreenCanvas::Path2DStroke()
 {
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
     if (HasShadow()) {
-        FlutterDecorationPainter::PaintShadow(strokePath_, shadow_, skCanvas_.get());
+        FlutterDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
     }
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(paint, strokeState_.GetGradient());
@@ -1007,14 +1041,43 @@ void RosenRenderOffscreenCanvas::Path2DStroke()
         UpdatePaintShader(strokeState_.GetPattern(), paint);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
-        skCanvas_->drawPath(strokePath_, paint);
+        skCanvas_->drawPath(skPath2d_, paint);
     } else {
         InitCachePaint();
-        cacheCanvas_->drawPath(strokePath_, paint);
+        cacheCanvas_->drawPath(skPath2d_, paint);
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
         cacheBitmap_.eraseColor(0);
     }
 }
+
+void RosenRenderOffscreenCanvas::Path2DFill()
+{
+    SkPaint paint;
+    paint.setAntiAlias(antiAlias_);
+    paint.setColor(fillState_.GetColor().GetValue());
+    paint.setStyle(SkPaint::Style::kFill_Style);
+    if (HasShadow()) {
+        FlutterDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
+    }
+    if (fillState_.GetGradient().IsValid()) {
+        UpdatePaintShader(paint, fillState_.GetGradient());
+    }
+    if (fillState_.GetPattern().IsValid()) {
+        UpdatePaintShader(fillState_.GetPattern(), paint);
+    }
+    if (globalState_.HasGlobalAlpha()) {
+        paint.setAlphaf(globalState_.GetAlpha());
+    }
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawPath(skPath2d_, paint);
+    } else {
+        InitCachePaint();
+        cacheCanvas_->drawPath(skPath2d_, paint);
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
+}
+
 void RosenRenderOffscreenCanvas::UpdateLineDash(SkPaint& paint)
 {
     if (!strokeState_.GetLineDash().lineDash.empty()) {
@@ -1122,6 +1185,41 @@ double RosenRenderOffscreenCanvas::MeasureTextHeight(const std::string& text, co
     return paragraph->GetHeight();
 }
 
+TextMetrics RosenRenderOffscreenCanvas::MeasureTextMetrics(const std::string& text, const PaintState& state)
+{
+    using namespace Constants;
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
+    style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+    auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
+    if (!fontCollection) {
+        LOGW("MeasureText: fontCollection is null");
+        return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    }
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
+    ConvertTxtStyle(state.GetTextStyle(), pipelineContext_, txtStyle);
+    txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
+    builder->PushStyle(txtStyle);
+    builder->AddText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->Build();
+    paragraph->Layout(Size::INFINITE_SIZE);
+
+    auto textAlign = state.GetTextAlign();
+    auto textBaseLine = state.GetTextStyle().GetTextBaseline();
+
+    auto width = paragraph->GetMaxIntrinsicWidth();
+    auto height = paragraph->GetHeight();
+
+    auto actualBoundingBoxLeft = -GetAlignOffset(text, textAlign, paragraph);
+    auto actualBoundingBoxRight = width - actualBoundingBoxLeft;
+    auto actualBoundingBoxAscent = -GetBaselineOffset(textBaseLine, paragraph);
+    auto actualBoundingBoxDescent = height - actualBoundingBoxAscent;
+
+    return { width, height, actualBoundingBoxLeft, actualBoundingBoxRight, actualBoundingBoxAscent,
+        actualBoundingBoxDescent };
+}
+
 void RosenRenderOffscreenCanvas::PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow)
 {
     paragraph_->Layout(width_);
@@ -1129,10 +1227,10 @@ void RosenRenderOffscreenCanvas::PaintText(const std::string& text, double x, do
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
-    double dx = x + GetAlignOffset(text, align);
+    double dx = x + GetAlignOffset(text, align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
-    double dy = y + GetBaselineOffset(baseline);
+    double dy = y + GetBaselineOffset(baseline, paragraph_);
 
     if (hasShadow) {
         skCanvas_->save();
@@ -1145,7 +1243,8 @@ void RosenRenderOffscreenCanvas::PaintText(const std::string& text, double x, do
     paragraph_->Paint(skCanvas_.get(), dx, dy);
 }
 
-double RosenRenderOffscreenCanvas::GetAlignOffset(const std::string& text, TextAlign align)
+double RosenRenderOffscreenCanvas::GetAlignOffset(const std::string& text, TextAlign align,
+    std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double x = 0.0;
     switch (align) {
@@ -1153,16 +1252,16 @@ double RosenRenderOffscreenCanvas::GetAlignOffset(const std::string& text, TextA
             x = 0.0;
             break;
         case TextAlign::START:
-            x = (GetTextDirection(text) == TextDirection::LTR) ? 0.0 : -paragraph_->GetMaxIntrinsicWidth();
+            x = (GetTextDirection(text) == TextDirection::LTR) ? 0.0 : -paragraph->GetMaxIntrinsicWidth();
             break;
         case TextAlign::RIGHT:
-            x = -paragraph_->GetMaxIntrinsicWidth();
+            x = -paragraph->GetMaxIntrinsicWidth();
             break;
         case TextAlign::END:
-            x = (GetTextDirection(text) == TextDirection::LTR) ? -paragraph_->GetMaxIntrinsicWidth() : 0.0;
+            x = (GetTextDirection(text) == TextDirection::LTR) ? -paragraph->GetMaxIntrinsicWidth() : 0.0;
             break;
         case TextAlign::CENTER:
-            x = -paragraph_->GetMaxIntrinsicWidth() / 2;
+            x = -paragraph->GetMaxIntrinsicWidth() / 2;
             break;
         default:
             x = 0.0;
@@ -1271,30 +1370,31 @@ void RosenRenderOffscreenCanvas::UpdateTextStyleForeground(
     }
 }
 
-double RosenRenderOffscreenCanvas::GetBaselineOffset(TextBaseline baseline)
+double RosenRenderOffscreenCanvas::GetBaselineOffset(TextBaseline baseline,
+    std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double y = 0.0;
     switch (baseline) {
         case TextBaseline::ALPHABETIC:
-            y = -paragraph_->GetAlphabeticBaseline();
+            y = -paragraph->GetAlphabeticBaseline();
             break;
         case TextBaseline::IDEOGRAPHIC:
-            y = -paragraph_->GetIdeographicBaseline();
+            y = -paragraph->GetIdeographicBaseline();
             break;
         case TextBaseline::BOTTOM:
-            y = -paragraph_->GetHeight();
+            y = -paragraph->GetHeight();
             break;
         case TextBaseline::TOP:
             y = 0.0;
             break;
         case TextBaseline::MIDDLE:
-            y = -paragraph_->GetHeight() / 2;
+            y = -paragraph->GetHeight() / 2;
             break;
         case TextBaseline::HANGING:
-            y = -HANGING_PERCENT * (paragraph_->GetHeight() - paragraph_->GetAlphabeticBaseline());
+            y = -HANGING_PERCENT * (paragraph->GetHeight() - paragraph->GetAlphabeticBaseline());
             break;
         default:
-            y = -paragraph_->GetAlphabeticBaseline();
+            y = -paragraph->GetAlphabeticBaseline();
             break;
     }
     return y;
@@ -1388,7 +1488,7 @@ void RosenRenderOffscreenCanvas::Translate(double x, double y)
 
 void RosenRenderOffscreenCanvas::TranspareCmdToPath(const RefPtr<CanvasPath2D>& path)
 {
-    strokePath_.reset();
+    skPath2d_.reset();
     for (const auto& [cmd, args] : path->GetCaches()) {
         switch (cmd) {
             case PathCmd::CMDS: {
@@ -1475,7 +1575,7 @@ bool RosenRenderOffscreenCanvas::IsPointInPath(double x, double y)
 bool RosenRenderOffscreenCanvas::IsPointInPath(const RefPtr<CanvasPath2D>& path, double x, double y)
 {
     TranspareCmdToPath(path);
-    return IsPointInPathByColor(x, y, strokePath_, SK_ColorRED);
+    return IsPointInPathByColor(x, y, skPath2d_, SK_ColorRED);
 }
 
 bool RosenRenderOffscreenCanvas::IsPointInStroke(double x, double y)
@@ -1486,7 +1586,7 @@ bool RosenRenderOffscreenCanvas::IsPointInStroke(double x, double y)
 bool RosenRenderOffscreenCanvas::IsPointInStroke(const RefPtr<CanvasPath2D>& path, double x, double y)
 {
     TranspareCmdToPath(path);
-    return IsPointInPathByColor(x, y, strokePath_, SK_ColorBLUE);
+    return IsPointInPathByColor(x, y, skPath2d_, SK_ColorBLUE);
 }
 
 void RosenRenderOffscreenCanvas::ResetTransform()

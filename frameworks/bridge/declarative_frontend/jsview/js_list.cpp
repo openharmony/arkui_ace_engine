@@ -75,6 +75,17 @@ void JSList::Create(const JSCallbackInfo& args)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ListView::Create();
+        if (args.Length() >= 1 && args[0]->IsObject()) {
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+            Dimension space;
+            if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsValid()) {
+                NG::ListView::SetSpace(space);
+            }
+            int32_t initialIndex = 0;
+            if (ConvertFromJSValue(obj->GetProperty("initialIndex"), initialIndex) && initialIndex >= 0) {
+                NG::ListView::SetInitialIndex(initialIndex);
+            }
+        }
         return;
     }
 

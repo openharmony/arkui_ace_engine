@@ -23,14 +23,38 @@
 #include "core/common/thread_checker.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
+namespace {
+constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
+}
+
 namespace OHOS::Ace::NG {
 
 RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
-    auto& rsClient = OHOS::Rosen::RSInterfaces::GetInstance();
-    vsyncReceiver_ = rsClient.CreateVSyncReceiver("ACE");
-    vsyncReceiver_->Init();
+    vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
+    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos) {
+        auto taskExecutor = weakTask.Upgrade();
+        auto onVsync = [id, timeStampNanos] {
+            ContainerScope scope(id);
+            // use container to get window can make sure the window is valid
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto window = container->GetWindow();
+            CHECK_NULL_VOID(window);
+            window->OnVsync(static_cast<uint64_t>(timeStampNanos), 0);
+            auto pipeline = container->GetPipelineContext();
+            if (pipeline) {
+                pipeline->OnIdle(timeStampNanos);
+            }
+        };
+        auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            onVsync();
+            return;
+        }
+        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); });
+    };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
     rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
     rsUIDirector_->Init();
@@ -49,29 +73,25 @@ void RosenWindow::RequestFrame()
         return;
     }
     CHECK_RUN_ON(UI);
-    OHOS::Rosen::VSyncReceiver::FrameCallback callback = {
-        .userData_ = nullptr,
-        .callback_ =
-            [weakTask = taskExecutor_, id = id_](int64_t nanoTimestamp, void* data) {
+    if (isRequestVsync_) {
+        return;
+    }
+    LOGD("request next vsync");
+    rsWindow_->RequestVsync(vsyncCallback_);
+    isRequestVsync_ = true;
+    auto taskExecutor = taskExecutor_.Upgrade();
+    if (taskExecutor) {
+        taskExecutor->PostDelayedTask(
+            [id = id_]() {
                 ContainerScope scope(id);
-                auto onVsync = [nanoTimestamp] {
-                    // use container to get window can make sure the window is valid
-                    auto container = Container::Current();
-                    CHECK_NULL_VOID(container);
-                    auto window = container->GetWindow();
-                    CHECK_NULL_VOID(window);
-                    window->OnVsync(static_cast<uint64_t>(nanoTimestamp), 0);
-                };
-                auto taskExecutor = weakTask.Upgrade();
-                if (taskExecutor) {
-                    taskExecutor->PostTask(onVsync, TaskExecutor::TaskType::UI);
+                auto container = Container::Current();
+                CHECK_NULL_VOID(container);
+                auto pipeline = container->GetPipelineContext();
+                if (pipeline) {
+                    pipeline->OnIdle(0);
                 }
             },
-    };
-    if (!isRequestVsync_) {
-        LOGD("request next vsync");
-        vsyncReceiver_->RequestNextVSync(callback);
-        isRequestVsync_ = true;
+            TaskExecutor::TaskType::UI, IDLE_TASK_DELAY_MILLISECOND);
     }
 }
 
@@ -79,8 +99,8 @@ void RosenWindow::Destroy()
 {
     LOG_DESTROY();
     rsWindow_ = nullptr;
+    vsyncCallback_.reset();
     rootNode_.Reset();
-    vsyncReceiver_.reset();
     rsUIDirector_->Destroy();
     rsUIDirector_.reset();
     callbacks_.clear();

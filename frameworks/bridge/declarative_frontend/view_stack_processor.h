@@ -61,7 +61,6 @@ public:
     static ViewStackProcessor* GetInstance();
     ~ViewStackProcessor() = default;
     // possible wrapping components
-    static std::string GenerateId();
     RefPtr<FlexItemComponent> GetFlexItemComponent();
     RefPtr<StepperItemComponent> GetStepperItemComponent();
     RefPtr<DisplayComponent> GetStepperDisplayComponent();
@@ -232,7 +231,7 @@ public:
      * Use reserved elementId for given component
      * sets the reserved lemntId to none
      */
-    void ClaimElementId(RefPtr<Component> component);
+    void ClaimElementId(const RefPtr<Component>& component);
 
     int32_t ClaimElementId()
     {
@@ -309,8 +308,6 @@ private:
 
     AnimationOption implicitAnimationOption_;
     VisualState visualState_ = VisualState::NOTSET;
-
-    static thread_local int32_t composedElementId_;
 
     bool isScoringEnable_ = false;
 

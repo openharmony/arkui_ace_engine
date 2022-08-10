@@ -127,7 +127,6 @@ void Component::ExtendRSNode(const RefPtr<Component>& newHead, const RefPtr<Comp
 
 void Component::AssignUniqueElementId(int32_t elmtId)
 {
-    ACE_DCHECK((elmtId != ElementRegister::UndefinedElementId) && "Must not assign undefined elmtId to Component");
     elmtId_ = elmtId;
 }
 

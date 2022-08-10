@@ -124,8 +124,10 @@ void RenderSlidingPanel::Update(const RefPtr<Component>& component)
     halfHeight_ = slidingPanel->GetHalfHeight();
     miniHeight_ = slidingPanel->GetMiniHeight();
     panelId_ = slidingPanel->GetPanelId();
+    visible = slidingPanel->Visible();
     onSizeChange_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
         slidingPanel->GetOnSizeChanged(), context_);
+    onHeightChange_ = slidingPanel->GetOnHeightChanged();
     MarkNeedLayout();
 }
 
@@ -261,6 +263,18 @@ void RenderSlidingPanel::SetDragBarCallBack()
     });
 }
 
+void RenderSlidingPanel::FireHeightChangeEvent()
+{
+    if (!onHeightChange_) {
+        return;
+    }
+    int32_t currentHeight = static_cast<int32_t>(GetLayoutParam().GetMaxSize().Height() - blankHeight_);
+    if (!visible) {
+        currentHeight = 0;
+    }
+    onHeightChange_(currentHeight);
+}
+
 void RenderSlidingPanel::FireSizeChangeEvent()
 {
     if (!onSizeChange_) {
@@ -370,6 +384,22 @@ void RenderSlidingPanel::UpdateTouchRect()
     SetTouchRectList(touchRectList_);
 }
 
+void RenderSlidingPanel::LiftPanelForVirtualKeyboard(double offsetY)
+{
+    double maxBlankHeight = GetLayoutSize().Height() - CONTENT_MIN_TOLERANCE;
+    if (dragBar_) {
+        maxBlankHeight -= dragBar_->GetLayoutSize().Height();
+    }
+    blankHeight_ = std::min(blankHeight_ + offsetY, maxBlankHeight);
+    FireHeightChangeEvent();
+    MarkNeedLayout();
+}
+
+void RenderSlidingPanel::UpdatePanelHeightByCurrentMode()
+{
+    AnimateTo(defaultBlankHeights_[mode_], mode_);
+}
+
 void RenderSlidingPanel::HandleDragStart(const Offset& startPoint)
 {
     if (isAnimating_) {
@@ -398,6 +428,7 @@ void RenderSlidingPanel::HandleDragUpdate(const Offset& currentPoint)
         targetBlankHeight = maxBlankHeight;
     }
     blankHeight_ = targetBlankHeight;
+    FireHeightChangeEvent();
     MarkNeedLayout();
 }
 
@@ -524,6 +555,7 @@ void RenderSlidingPanel::AppendBlankHeightAnimation(double blankHeight, PanelMod
             panel->dragBar_->ShowInPanelMode(mode);
         }
         panel->blankHeight_ = start + (end - start) * value;
+        panel->FireHeightChangeEvent();
         panel->MarkNeedLayout();
     });
     animator_->AddInterpolator(heightAnimation);

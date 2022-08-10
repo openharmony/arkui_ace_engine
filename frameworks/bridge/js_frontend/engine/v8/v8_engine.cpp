@@ -3359,7 +3359,7 @@ void V8EngineInstance::InitJsConsoleObject(v8::Local<v8::Context>& localContext,
     consoleObj
         ->Set(localContext, v8::String::NewFromUtf8(isolate, "log").ToLocalChecked(),
             v8::Function::New(
-                localContext, AppLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::DEBUG)))
+                localContext, AppLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::INFO)))
                 .ToLocalChecked())
         .ToChecked();
     consoleObj
@@ -3393,7 +3393,7 @@ void V8EngineInstance::InitJsConsoleObject(v8::Local<v8::Context>& localContext,
     aceConsoleObj
         ->Set(localContext, v8::String::NewFromUtf8(isolate, "log").ToLocalChecked(),
             v8::Function::New(
-                localContext, JsLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::DEBUG)))
+                localContext, JsLogPrint, v8::Integer::New(isolate, static_cast<int32_t>(JsLogLevel::INFO)))
                 .ToLocalChecked())
         .ToChecked();
     aceConsoleObj
@@ -3666,7 +3666,7 @@ bool V8Engine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
     engineInstance_->SetV8NativeEngine(nativeEngine_);
     SetPostTask();
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
     RegisterWorker();
@@ -3684,16 +3684,20 @@ void V8Engine::SetPostTask()
 {
     LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    std::weak_ptr<V8NativeEngine> weakNativeEngine(nativeEngine_);
-    auto&& postTask = [weakDelegate, weakNativeEngine, id = instanceId_](bool needSync) {
+    auto&& postTask = [weakDelegate, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask([weakNativeEngine, needSync, id]() {
+        delegate->PostJsTask([weakEngine, needSync, id]() {
+            auto jsEngine = weakEngine.Upgrade();
+            if (jsEngine == nullptr) {
+                LOGW("jsEngine is nullptr");
+                return;
+            }
+            auto nativeEngine = jsEngine->GetNativeEngine();
             ContainerScope scope(id);
-            auto nativeEngine = weakNativeEngine.lock();
             if (!nativeEngine) {
                 LOGE("native v8 engine weak pointer invalid");
                 return;
@@ -3777,7 +3781,7 @@ V8Engine::~V8Engine()
         }
     }
 
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     if (nativeEngine_) {
         nativeEngine_->CancelCheckUVLoop();
     }

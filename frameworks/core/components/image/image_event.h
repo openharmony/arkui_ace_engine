@@ -80,7 +80,7 @@ public:
         return componentHeight_;
     }
 
-    std::string GetErrorMessage() const
+    const std::string& GetErrorMessage() const
     {
         return errorMessage_;
     }
@@ -88,7 +88,7 @@ public:
 private:
     double componentWidth_ = 0.0;
     double componentHeight_ = 0.0;
-    std::string errorMessage_ = "";
+    std::string errorMessage_;
 };
 
 } // namespace OHOS::Ace

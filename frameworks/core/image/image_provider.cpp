@@ -15,14 +15,15 @@
 
 #include "core/image/image_provider.h"
 
+#ifndef NG_BUILD
 #include "experimental/svg/model/SkSVGDOM.h"
+#endif
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/skia/include/core/SkStream.h"
 
 #include "base/thread/background_task_executor.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "core/components/image/flutter_render_image.h"
 #include "core/event/ace_event_helper.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_object.h"
@@ -126,7 +127,11 @@ void ImageProvider::ProccessUploadResult(
     const RefPtr<TaskExecutor>& taskExecutor,
     const ImageSourceInfo& imageInfo,
     const Size& imageSize,
+#ifdef NG_BUILD
+    const RefPtr<NG::CanvasImage>& canvasImage,
+#else
     const fml::RefPtr<flutter::CanvasImage>& canvasImage,
+#endif
     const std::string& errorMsg)
 {
     std::lock_guard lock(uploadMutex_);
@@ -278,6 +283,7 @@ sk_sp<SkData> ImageProvider::LoadImageRawData(
     return data;
 }
 
+#ifndef NG_BUILD
 void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
     std::function<void(const sk_sp<SkSVGDOM>&)> successCallback, std::function<void()> failedCallback,
     const WeakPtr<PipelineBase> context, uint64_t svgThemeColor, OnPostBackgroundTask onBackgroundTaskPostCallback)
@@ -355,9 +361,9 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
     }
     BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
 }
+#endif
 
-void ImageProvider::UploadImageToGPUForRender(
-    const sk_sp<SkImage>& image,
+void ImageProvider::UploadImageToGPUForRender(const sk_sp<SkImage>& image,
     const std::function<void(flutter::SkiaGPUObject<SkImage>)>&& callback,
     const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder)
 {
@@ -399,7 +405,11 @@ void ImageProvider::UploadImageToGPUForRender(
             return;
         }
         auto textureImage =
+#ifdef NG_BUILD
+            SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, true);
+#else
             SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, pixmap.colorSpace(), true);
+#endif
         callback({ textureImage ? textureImage : rasterizedImage, renderTaskHolder->unrefQueue });
 
         // Trigger purge cpu bitmap resource, after image upload to gpu.
@@ -410,10 +420,7 @@ void ImageProvider::UploadImageToGPUForRender(
 }
 
 sk_sp<SkImage> ImageProvider::ResizeSkImage(
-    const sk_sp<SkImage>& rawImage,
-    const std::string& src,
-    Size imageSize,
-    bool forceResize)
+    const sk_sp<SkImage>& rawImage, const std::string& src, Size imageSize, bool forceResize)
 {
     if (!imageSize.IsValid()) {
         LOGE("not valid size!, imageSize: %{private}s, src: %{private}s", imageSize.ToString().c_str(), src.c_str());
@@ -441,30 +448,29 @@ sk_sp<SkImage> ImageProvider::ResizeSkImage(
         return rawImage;
     }
     return ApplySizeToSkImage(
-        rawImage,
-        dstWidth,
-        dstHeight,
-        ImageObject::GenerateCacheKey(ImageSourceInfo(src), imageSize));
+        rawImage, dstWidth, dstHeight, ImageObject::GenerateCacheKey(ImageSourceInfo(src), imageSize));
 }
 
 sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
-    const sk_sp<SkImage>& rawImage,
-    int32_t dstWidth,
-    int32_t dstHeight,
-    const std::string& srcKey)
+    const sk_sp<SkImage>& rawImage, int32_t dstWidth, int32_t dstHeight, const std::string& srcKey)
 {
     auto scaledImageInfo =
         SkImageInfo::Make(dstWidth, dstHeight, rawImage->colorType(), rawImage->alphaType(), rawImage->refColorSpace());
     SkBitmap scaledBitmap;
     if (!scaledBitmap.tryAllocPixels(scaledImageInfo)) {
         LOGE("Could not allocate bitmap when attempting to scale. srcKey: %{private}s, destination size: [%{public}d x"
-            " %{public}d], raw image size: [%{public}d x %{public}d]",
+             " %{public}d], raw image size: [%{public}d x %{public}d]",
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
         return rawImage;
     }
+#ifdef NG_BUILD
+    if (!rawImage->scalePixels(scaledBitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone),
+            SkImage::kDisallow_CachingHint)) {
+#else
     if (!rawImage->scalePixels(scaledBitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint)) {
+#endif
         LOGE("Could not scale pixels srcKey: %{private}s, destination size: [%{public}d x"
-            " %{public}d], raw image size: [%{public}d x %{public}d]",
+             " %{public}d], raw image size: [%{public}d x %{public}d]",
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
         return rawImage;
     }
@@ -490,7 +496,7 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         return scaledImage;
     }
     LOGE("Could not create a scaled image from a scaled bitmap. srcKey: %{private}s, destination size: [%{public}d x"
-        " %{public}d], raw image size: [%{public}d x %{public}d]",
+         " %{public}d], raw image size: [%{public}d x %{public}d]",
         srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
     return rawImage;
 }
@@ -561,7 +567,8 @@ bool ImageProvider::IsWideGamut(const sk_sp<SkColorSpace>& colorSpace)
     // the formula for calculating the area of triangle ABC is as follows:
     // S = (x1 * y2 + x2 * y3 + x3 * y1 - x1 * y3 - x2 * y1 - x3 * y2) / 2.0
     auto areaOfPoint = std::fabs(red.GetX() * green.GetY() + green.GetX() * blue.GetY() + blue.GetX() * green.GetY() -
-        red.GetX() * blue.GetY() - blue.GetX() * green.GetY() - green.GetX() * red.GetY()) / 2.0;
+                                 red.GetX() * blue.GetY() - blue.GetX() * green.GetY() - green.GetX() * red.GetY()) /
+                       2.0;
     return GreatNotEqual(areaOfPoint, SRGB_GAMUT_AREA);
 }
 

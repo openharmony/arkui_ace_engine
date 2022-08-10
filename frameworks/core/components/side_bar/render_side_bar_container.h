@@ -111,6 +111,11 @@ public:
         return maxSidebarWidth_;
     }
 
+    SideBarPosition GetSideBarPosition() const
+    {
+        return sideBarPosition_;
+    }
+
 private:
     void DoSideBarAnimation();
     void SetChildrenStatus() override;
@@ -124,6 +129,7 @@ private:
     Dimension ConvertWidthToVp(const Dimension& dimension) const;
     Dimension ConvertWidthToPercent(const Dimension& dimension) const;
     void PlaceChildren();
+    void LayoutChildren();
 
     RefPtr<GestureRecognizer> dragRecognizer_;
     RefPtr<SideBarAnimationController> animationController_;
@@ -154,6 +160,7 @@ private:
     Rect exceptRegion_;
     Dimension customSidebarWidth_;
     bool autoHide_ = true;
+    SideBarPosition sideBarPosition_ = SideBarPosition::START;
 };
 
 } // namespace OHOS::Ace

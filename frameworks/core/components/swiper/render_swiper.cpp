@@ -1619,7 +1619,7 @@ void RenderSwiper::SetSwiperEffect(double dragOffset)
 void RenderSwiper::UpdateChildPosition(double offset, int32_t fromIndex, bool inLayout)
 {
     if (itemCount_ <= 0) {
-        LOGW("No child in swiper. return.");
+        LOGD("No child in swiper. return.");
         return;
     }
     if (std::abs(currentIndex_ - fromIndex) == 1) {
@@ -3057,11 +3057,16 @@ void RenderSwiper::BuildLazyItems()
         }
     }
     LOGI("currentIndex_ = %{public}d, init cached: %{public}d - %{public}d", currentIndex_, cacheStart_, cacheEnd_);
-    int32_t index = cacheStart_;
-    while ((index >= cacheStart_ && cacheStart_ > cacheEnd_) || index <= cacheEnd_) {
-        buildChildByIndex_(index++);
-        if (loop_) {
-            index = index % itemCount_;
+    if (cacheStart_ > cacheEnd_) { // CacheStart may greater than cacheEnd when enable loop.
+        for (int32_t index = cacheStart_; index < itemCount_; ++index) {
+            buildChildByIndex_(index);
+        }
+        for (int32_t index = 0; index <= cacheEnd_; ++index) {
+            buildChildByIndex_(index);
+        }
+    } else {
+        for (int32_t index = cacheStart_; index <= cacheEnd_; ++index) {
+            buildChildByIndex_(index);
         }
     }
 
@@ -3081,7 +3086,7 @@ void RenderSwiper::LoadItems()
         for (auto iter = children.begin(); iter != children.end(); ++iter, ++index) {
             items_.emplace(std::make_pair(index, *iter));
         }
-        if (context_.Upgrade()->UsePartialUpdate()) {
+        if (Container::IsCurrentUsePartialUpdate()) {
             itemCount_ = static_cast<int32_t>(children.size());
         }
     } else {
@@ -3300,7 +3305,7 @@ void RenderSwiper::OnPaintFinish()
 // it will still keep initial list of children.
 void RenderSwiper::OnChildAdded(const RefPtr<RenderNode>& child)
 {
-    if (!context_.Upgrade()->UsePartialUpdate()) {
+    if (!Container::IsCurrentUsePartialUpdate()) {
         return;
     }
 
@@ -3318,7 +3323,7 @@ void RenderSwiper::OnChildAdded(const RefPtr<RenderNode>& child)
 
 void RenderSwiper::OnChildRemoved(const RefPtr<RenderNode>& child)
 {
-    if (!context_.Upgrade()->UsePartialUpdate()) {
+    if (!Container::IsCurrentUsePartialUpdate()) {
         return;
     }
 

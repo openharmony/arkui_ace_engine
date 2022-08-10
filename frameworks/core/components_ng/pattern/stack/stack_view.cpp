@@ -25,18 +25,16 @@
 namespace OHOS::Ace::NG {
 void StackView::Create()
 {
-    // TODO: Add unique id.
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, V2::STACK_ETS_TAG, AceType::MakeRefPtr<StackPattern>());
-    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+    stack->Push(frameNode);
 }
 
 void StackView::Create(Alignment alignment)
 {
-    // TODO: Add unique id.
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, V2::STACK_ETS_TAG, AceType::MakeRefPtr<StackPattern>());
-    frameNode->GetLayoutProperty()->UpdateAlignment(alignment);
-    ViewStackProcessor::GetInstance()->Push(frameNode);
+    Create();
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 } // namespace OHOS::Ace::NG

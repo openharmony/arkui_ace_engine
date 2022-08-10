@@ -15,6 +15,7 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include <cstdint>
 #include <memory>
 
 #include "base/log/ace_trace.h"
@@ -24,12 +25,11 @@
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
-#include "core/components_ng/base/custom_node.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/modifier/modify_task.h"
-#include "core/components_ng/modifier/render/bg_color_modifier.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -49,16 +49,52 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
 {}
 
-void PipelineContext::AddDirtyComposedNode(const RefPtr<CustomNode>& dirtyElement)
+RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
+{
+    auto currentContainer = Container::Current();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
+}
+
+void PipelineContext::AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);
-    if (!dirtyElement) {
+    if (!dirtyNode) {
         LOGW("dirtyElement is null");
         return;
     }
-    dirtyComposedNodes_.emplace(dirtyElement);
+    dirtyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     window_->RequestFrame();
+}
+
+void PipelineContext::FlushDirtyNodeUpdate()
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushBuild();
+    }
+
+    decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
+    for (const auto& weakNode : dirtyNodes) {
+        auto node = weakNode.Upgrade();
+        if (node) {
+            node->Update();
+        }
+    }
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushBuild();
+    }
+}
+
+uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
+{
+    CHECK_RUN_ON(UI);
+    scheduleTasks_.try_emplace(++nextScheduleTaskId_, task);
+    window_->RequestFrame();
+    return nextScheduleTaskId_;
 }
 
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
@@ -73,6 +109,28 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     FlushPipelineWithoutAnimation();
 }
 
+void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().BeginFlushAnimation();
+    }
+
+    decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
+    for (const auto& [id, weakTask] : temp) {
+        auto task = weakTask.Upgrade();
+        if (task) {
+            task->OnFrame(nanoTimestamp);
+        }
+    }
+
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushAnimation();
+    }
+}
+
 void PipelineContext::FlushMessages()
 {
     ACE_FUNCTION_TRACE();
@@ -81,6 +139,7 @@ void PipelineContext::FlushMessages()
 
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
+    FlushDirtyNodeUpdate();
     FlushTouchEvents();
     UITaskScheduler::GetInstance()->FlushTask();
     FlushMessages();
@@ -89,13 +148,11 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
-    // TODO: Add unique id.
-    rootNode_ =
-        FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, V2::ROOT_ETS_TAG, MakeRefPtr<StagePattern>(), Claim(this));
+    rootNode_ = FrameNode::CreateFrameNodeWithTree(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>(), Claim(this));
     rootNode_->SetHostRootId(GetInstanceId());
-    StateModifyTask modifyTask;
-    modifyTask.GetRenderContextTask().emplace_back(BgColorModifier(Color::WHITE));
-    rootNode_->FlushStateModifyTaskOnCreate(modifyTask);
+    rootNode_->SetHostPageId(-1);
+    rootNode_->GetRenderContext()->UpdateBgColor(Color::WHITE);
     CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
@@ -103,6 +160,7 @@ void PipelineContext::SetupRootElement()
     rootNode_->UpdateLayoutConstraint(layoutConstraint);
     window_->SetRootFrameNode(rootNode_);
     stageManager_ = MakeRefPtr<StageManager>(rootNode_);
+    rootNode_->AttachToMainTree();
     LOGI("SetupRootElement success!");
 }
 
@@ -114,7 +172,7 @@ RefPtr<StageManager> PipelineContext::GetStageManager()
 void PipelineContext::SetRootRect(double width, double height, double offset)
 {
     CHECK_RUN_ON(UI);
-    UpdateRootSizeAndSacle(width, height);
+    UpdateRootSizeAndScale(width, height);
     if (!rootNode_) {
         LOGE("rootNode_ is nullptr");
         return;

@@ -19,6 +19,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "base/geometry/dimension.h"
 #include "base/resource/asset_manager.h"
@@ -54,11 +55,11 @@ public:
     PipelineBase() = default;
     PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    virtual ~PipelineBase();
+    ~PipelineBase() override;
 
     virtual void SetupRootElement() = 0;
 
-    virtual uint64_t GetTimeFromExternalTimer() = 0;
+    virtual uint64_t GetTimeFromExternalTimer();
 
     virtual bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
         const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr) = 0;
@@ -121,7 +122,7 @@ public:
 
     virtual void ClearExplicitAnimationOption() = 0;
 
-    virtual const AnimationOption GetExplicitAnimationOption() const = 0;
+    virtual AnimationOption GetExplicitAnimationOption() const = 0;
 
     virtual void Destroy() = 0;
 
@@ -150,10 +151,11 @@ public:
 
     virtual void RequestFullWindow(int32_t duration) {}
 
-    virtual bool Dump(const std::vector<std::string>& params) const
-    {
-        return false;
-    }
+    // Called by AceAbility and UiContent.
+    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const;
+
+    // Called by AceEngine.
+    bool Dump(const std::vector<std::string>& params) const;
 
     virtual bool IsLastPage()
     {
@@ -231,7 +233,7 @@ public:
     {
         popPageSuccessEventHandler_.push_back(std::move(listener));
     }
-    void NotifyPopPageSuccessDismiss(const std::string& pageUrl, const int32_t pageId) const;
+    void NotifyPopPageSuccessDismiss(const std::string& pageUrl, int32_t pageId) const;
 
     using IsPagePathInvalidEventHandler = std::function<void(bool& isPageInvalid)>;
     void SetIsPagePathInvalidEventHandler(IsPagePathInvalidEventHandler&& listener)
@@ -284,7 +286,7 @@ public:
         onRouterChangeCallback_ = onRouterChangeCallback;
     }
 
-    void onRouterChange(const std::string url);
+    void onRouterChange(const std::string& url);
 
     void ResetOnVsyncProfiler()
     {
@@ -340,7 +342,7 @@ public:
     }
     void SetThemeManager(RefPtr<ThemeManager> theme)
     {
-        themeManager_ = theme;
+        themeManager_ = std::move(theme);
     }
 
     const RefPtr<ManagerInterface>& GetTextFieldManager()
@@ -440,11 +442,6 @@ public:
         return isRebuildFinished_;
     }
 
-    bool UsePartialUpdate()
-    {
-        return usePartialupdate_;
-    }
-
     void RequestFrame();
 
     void RegisterFont(const std::string& familyName, const std::string& familySrc);
@@ -457,17 +454,30 @@ public:
 
     void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
+    virtual void FlushReload()
+    {
+        return;
+    }
+
+    virtual void FlushReloadTransition()
+    {
+        return;
+    }
+
 protected:
+    virtual bool OnDumpInfo(const std::vector<std::string>& params) const
+    {
+        return false;
+    }
     virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
     virtual void FlushMessages() = 0;
-    void UpdateRootSizeAndSacle(int32_t width, int32_t height);
+    void UpdateRootSizeAndScale(int32_t width, int32_t height);
 
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
     bool isRightToLeft_ = false;
-    bool usePartialupdate_ = false;
     int32_t minPlatformVersion_ = 0;
     int32_t windowId_ = 0;
     float fontScale_ = 1.0f;

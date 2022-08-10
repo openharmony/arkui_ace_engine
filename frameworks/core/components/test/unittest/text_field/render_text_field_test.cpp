@@ -159,8 +159,6 @@ void RenderTextFieldTest::TearDown() {}
  * @tc.name: RenderTextFieldUpdate001
  * @tc.desc: Verify the Update Interface of RenderTextField work correctly with show cursor.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7U
- * @tc.author: hushilong
  */
 HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate001, TestSize.Level1)
 {
@@ -184,8 +182,6 @@ HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate001, TestSize.Level1)
  * @tc.name: RenderTextFieldUpdate002
  * @tc.desc: Verify the Update Interface of RenderTextField work correctly with textfield component.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7U
- * @tc.author: hushilong
  */
 HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate002, TestSize.Level1)
 {
@@ -210,8 +206,6 @@ HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate002, TestSize.Level1)
  * @tc.name: RenderTextFieldUpdate003
  * @tc.desc: Verify the Update Interface of RenderTextField work correctly with maxLength.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7U
- * @tc.author: hushilong
  */
 HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate003, TestSize.Level1)
 {
@@ -235,8 +229,6 @@ HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate003, TestSize.Level1)
  * @tc.name: RenderTextFieldUpdate004
  * @tc.desc: Verify the Update Interface of RenderTextField work correctly with placeholder.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7U
- * @tc.author: hushilong
  */
 HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate004, TestSize.Level1)
 {
@@ -263,8 +255,6 @@ HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate004, TestSize.Level1)
  * @tc.name: RenderTextFieldUpdate005
  * @tc.desc: Verify the Update Interface of RenderTextField work correctly with maxLines.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7U
- * @tc.author: hushilong
  */
 HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate005, TestSize.Level1)
 {
@@ -288,8 +278,6 @@ HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate005, TestSize.Level1)
  * @tc.name: RenderTextFieldUpdate006
  * @tc.desc: Verify the Update Interface of RenderTextField work correctly with keyboard_.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7U
- * @tc.author: hushilong
  */
 HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate006, TestSize.Level1)
 {
@@ -314,8 +302,6 @@ HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate006, TestSize.Level1)
  * @tc.name: RenderTextFieldUpdate007
  * @tc.desc: Verify the Update Interface of RenderTextField work correctly with action_.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7U
- * @tc.author: hushilong
  */
 HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate007, TestSize.Level1)
 {
@@ -339,8 +325,6 @@ HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate007, TestSize.Level1)
  * @tc.name: RenderTextFieldUpdate008
  * @tc.desc: Verify the Update Interface of RenderTextField work correctly with textAlign_.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7U
- * @tc.author: hushilong
  */
 HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate008, TestSize.Level1)
 {
@@ -364,8 +348,6 @@ HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate008, TestSize.Level1)
  * @tc.name: RenderTextFieldUpdate009
  * @tc.desc: Verify the Update Interface of RenderTextField work correctly with enabled_.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7U
- * @tc.author: hushilong
  */
 HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate009, TestSize.Level1)
 {
@@ -389,8 +371,6 @@ HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate009, TestSize.Level1)
  * @tc.name: RenderTextFieldUpdate010
  * @tc.desc: Verify the Update Interface of RenderTextField work correctly with extend_.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1Q2
- * @tc.author: caocan
  */
 HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate010, TestSize.Level1)
 {

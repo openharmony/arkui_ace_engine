@@ -27,6 +27,7 @@
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
@@ -280,6 +281,7 @@ void AceContainer::OnShow(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
+        LOGE("container is null, OnShow failed.");
         return;
     }
 
@@ -291,17 +293,30 @@ void AceContainer::OnShow(int32_t instanceId)
         front->UpdateState(Frontend::State::ON_SHOW);
         front->OnShow();
     }
-    auto context = container->GetPipelineContext();
-    if (!context) {
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null, OnShow failed.");
         return;
     }
-    context->OnShow();
+
+    taskExecutor->PostTask(
+        [container]() {
+            auto pipelineContext = DynamicCast<PipelineContext>(container->GetPipelineContext());
+            if (!pipelineContext) {
+                LOGE("pipeline context is null, OnShow failed.");
+                return;
+            }
+            pipelineContext->OnShow();
+            pipelineContext->SetForegroundCalled(true);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::OnHide(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
+        LOGE("container is null, OnHide failed.");
         return;
     }
     ContainerScope scope(instanceId);
@@ -316,11 +331,21 @@ void AceContainer::OnHide(int32_t instanceId)
             taskExecutor->PostTask([front]() { front->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
         }
     }
-    auto context = container->GetPipelineContext();
-    if (!context) {
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("taskExecutor is null, OnHide failed.");
         return;
     }
-    context->OnHide();
+    taskExecutor->PostTask(
+        [container]() {
+            auto pipelineContext = container->GetPipelineContext();
+            if (!pipelineContext) {
+                LOGE("pipeline context is null, OnHide failed.");
+                return;
+            }
+            pipelineContext->OnHide();
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void AceContainer::OnActive(int32_t instanceId)
@@ -642,13 +667,6 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
 
-    auto&& idleCallback = [context = pipelineContext_, id = instanceId_](int64_t deadline) {
-        ContainerScope scope(id);
-        context->GetTaskExecutor()->PostTask(
-            [context, deadline]() { context->OnIdle(deadline); }, TaskExecutor::TaskType::UI);
-    };
-    aceView_->RegisterIdleCallback(idleCallback);
-
     auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
                                    int32_t x, int32_t y, const DragEventAction& action) {
         ContainerScope scope(id);
@@ -685,7 +703,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
     jsFront->SetInstanceName(instanceName);
 }
 
-void AceContainer::DestroyContainer(int32_t instanceId)
+void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     if (!container) {
@@ -704,34 +722,31 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
     if (taskExecutor) {
         taskExecutor->PostTask(
-            [instanceId] {
+            [instanceId, destroyCallback] {
                 LOGI("Remove on Platform thread...");
                 EngineHelper::RemoveEngine(instanceId);
                 AceEngine::Get().RemoveContainer(instanceId);
                 ConnectServerManager::Get().RemoveInstance(instanceId);
+                if (destroyCallback) {
+                    destroyCallback();
+                }
             },
             TaskExecutor::TaskType::PLATFORM);
     }
 }
 
-void AceContainer::SetView(
-    AceView* view, double density, int32_t width, int32_t height, int32_t windowId, UIEnvCallback callback)
+void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t height,
+    sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback)
 {
-    if (view == nullptr) {
-        return;
-    }
-
+    CHECK_NULL_VOID(view);
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
-    if (!container) {
-        return;
-    }
-    auto platformWindow = PlatformWindow::Create(view);
-    if (!platformWindow) {
-        LOGE("Create PlatformWindow failed!");
-        return;
-    }
-    std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
-    container->AttachView(std::move(window), view, density, width, height, windowId, callback);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    std::unique_ptr<Window> window =
+        std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), callback);
 }
 
 void AceContainer::SetViewNew(
@@ -1307,9 +1322,10 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
     return context->CreateModuleContext(bundle, module);
 }
 
-void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::string& inputDevice)
+void AceContainer::UpdateConfiguration(
+    const std::string& colorMode, const std::string& deviceAccess, const std::string& languageTag)
 {
-    if (colorMode.empty() && inputDevice.empty()) {
+    if (colorMode.empty() && deviceAccess.empty() && languageTag.empty()) {
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
         return;
     }
@@ -1334,19 +1350,34 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
             resConfig.SetColorMode(ColorMode::LIGHT);
         }
     }
-    if (!inputDevice.empty()) {
-        SystemProperties::SetInputDevice(inputDevice == "true");
-        resConfig.SetInputDevice(inputDevice == "true");
+    if (!deviceAccess.empty()) {
+        // Event of accessing mouse or keyboard
+        SystemProperties::SetDeviceAccess(deviceAccess == "true");
+        resConfig.SetDeviceAccess(deviceAccess == "true");
+    }
+    if (!languageTag.empty()) {
+        std::string language;
+        std::string script;
+        std::string region;
+        Localization::ParseLocaleTag(languageTag, language, script, region, false);
+        if (!language.empty() || !script.empty() || !region.empty()) {
+            AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
+        }
     }
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     themeManager->LoadResourceThemes();
+    UpdateFrondend(!deviceAccess.empty());
+}
+
+void AceContainer::UpdateFrondend(bool needReloadTransition)
+{
     auto taskExecutor = GetTaskExecutor();
     if (!taskExecutor) {
         LOGE("AceContainer::UpdateConfiguration taskExecutor is null.");
         return;
     }
-    taskExecutor->PostTask([instanceId = instanceId_, weak = WeakClaim(this)]() {
+    taskExecutor->PostTask([instanceId = instanceId_, weak = WeakClaim(this), needReloadTransition]() {
         ContainerScope scope(instanceId);
         auto container = weak.Upgrade();
         if (!container) {
@@ -1354,9 +1385,29 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
         }
         auto frontend = container->GetFrontend();
         if (frontend) {
-            LOGE("AceContainer::UpdateConfiguration frontend MarkNeedUpdate.");
-            frontend->MarkNeedUpdate();
+            LOGI("AceContainer::UpdateConfiguration frontend MarkNeedUpdate");
+            frontend->FlushReload();
         }
+        auto taskExecutor = container->GetTaskExecutor();
+        if (!taskExecutor) {
+            return;
+        }
+        taskExecutor->PostTask([instanceId, weak, needReloadTransition]() {
+            ContainerScope scope(instanceId);
+            auto container = weak.Upgrade();
+            if (!container) {
+                return;
+            }
+            auto pipeline = container->GetPipelineContext();
+            if (!pipeline) {
+                return;
+            }
+            pipeline->FlushReload();
+            if (needReloadTransition) {
+                // reload transition animation
+                pipeline->FlushReloadTransition();
+            }
+            }, TaskExecutor::TaskType::UI);
         }, TaskExecutor::TaskType::JS);
 }
 } // namespace OHOS::Ace::Platform

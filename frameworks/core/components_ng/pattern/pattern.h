@@ -24,7 +24,8 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/render_property.h"
+#include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
 // Pattern is the base class for different measure, layout and paint behavior.
@@ -57,9 +58,9 @@ public:
         OnAttachToFrameNode();
     }
 
-    virtual RefPtr<RenderProperty> CreateRenderProperty()
+    virtual RefPtr<PaintProperty> CreatePaintProperty()
     {
-        return MakeRefPtr<RenderProperty>();
+        return MakeRefPtr<PaintProperty>();
     }
 
     virtual RefPtr<LayoutProperty> CreateLayoutProperty()
@@ -72,7 +73,7 @@ public:
         return MakeRefPtr<BoxLayoutAlgorithm>();
     }
 
-    virtual RenderWrapper::ContentPaintImpl CreateContentPaintImpl()
+    virtual RefPtr<NodePaintMethod> CreateNodePaintMethod()
     {
         return nullptr;
     }
@@ -85,12 +86,6 @@ public:
     virtual void OnContextAttached() {}
 
     virtual void OnModifyDone() {}
-
-    virtual RefPtr<LayoutWrapper> AdjustChildLayoutWrapper(
-        const RefPtr<LayoutWrapper>& self, const RefPtr<LayoutWrapper>& child)
-    {
-        return self;
-    }
 
     virtual bool IsRootPattern() const
     {
@@ -142,6 +137,11 @@ public:
             return std::nullopt;
         }
         return content->GetRect().GetSize();
+    }
+
+    RefPtr<FrameNode> GetHost() const
+    {
+        return frameNode_.Upgrade();
     }
 
     virtual void OnInActive() {}

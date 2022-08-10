@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_STAGE_MANAGER_H
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -31,7 +32,7 @@ public:
     explicit StageManager(const RefPtr<FrameNode>& root);
     ~StageManager() override = default;
 
-    void PushPage(const RefPtr<FrameNode>& node);
+    void PushPage(const RefPtr<UINode>& node);
 
 private:
     RefPtr<FrameNode> rootNode_;

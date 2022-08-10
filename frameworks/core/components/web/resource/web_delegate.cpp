@@ -63,7 +63,52 @@ constexpr char NTC_PARAM_DESCRIPTION[] = "description";
 constexpr char WEB_ERROR_CODE_CREATEFAIL[] = "error-web-delegate-000001";
 constexpr char WEB_ERROR_MSG_CREATEFAIL[] = "create web_delegate failed.";
 
+const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
+const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
+const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
+const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 } // namespace
+
+void WebMessagePortOhos::SetPortHandle(std::string& handle)
+{
+    handle_ = handle;
+}
+
+std::string WebMessagePortOhos::GetPortHandle()
+{
+    return handle_;
+}
+
+void WebMessagePortOhos::Close()
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        LOGE("delegate its null");
+        return;
+    }
+    delegate->ClosePort(handle_);
+    
+}
+
+void WebMessagePortOhos::PostMessage(std::string& data)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        LOGE("delegate its null");
+        return;
+    }
+    delegate->PostPortMessage(handle_, data);
+}
+
+void WebMessagePortOhos::SetWebMessageCallback(std::function<void(const std::string&)>&& callback)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        LOGE("delegate its null");
+        return;
+    }
+    delegate->SetPortMessageCallback(handle_, std::move(callback));
+}
 
 int ConsoleLogOhos::GetLineNumber()
 {
@@ -185,6 +230,123 @@ void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result)
 {
     if (callback_) {
         callback_->OnReceiveValue(result);
+    }
+}
+
+void WebPermissionRequestOhos::Deny() const
+{
+    if (request_) {
+        request_->Refuse();
+    }
+}
+
+std::string WebPermissionRequestOhos::GetOrigin() const
+{
+    if (request_) {
+        return request_->Origin();
+    }
+    return "";
+}
+
+std::vector<std::string> WebPermissionRequestOhos::GetResources() const
+{
+    std::vector<std::string> resources;
+    if (request_) {
+        uint32_t resourcesId = static_cast<uint32_t>(request_->ResourceAcessId());
+        if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::VIDEO_CAPTURE) {
+            resources.push_back(RESOURCE_VIDEO_CAPTURE);
+        }
+        if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::AUDIO_CAPTURE) {
+            resources.push_back(RESOURCE_AUDIO_CAPTURE);
+        }
+        if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::PROTECTED_MEDIA_ID) {
+            resources.push_back(RESOURCE_PROTECTED_MEDIA_ID);
+        }
+        if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::MIDI_SYSEX) {
+            resources.push_back(RESOURCE_MIDI_SYSEX);
+        }
+    }
+    return resources;
+}
+
+void WebPermissionRequestOhos::Grant(std::vector<std::string>& resources) const
+{
+    if (request_) {
+        uint32_t resourcesId = 0;
+        for (auto res : resources) {
+            if (res == RESOURCE_VIDEO_CAPTURE) {
+                resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::VIDEO_CAPTURE;
+            } else if (res == RESOURCE_AUDIO_CAPTURE) {
+                resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::AUDIO_CAPTURE;
+            } else if (res == RESOURCE_PROTECTED_MEDIA_ID) {
+                resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::PROTECTED_MEDIA_ID;
+            } else if (res == RESOURCE_MIDI_SYSEX) {
+                resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::MIDI_SYSEX;
+            }
+        }
+        request_->Agree(resourcesId);
+    }
+}
+
+int32_t ContextMenuParamOhos::GetXCoord() const
+{
+    if (param_) {
+        return param_->GetXCoord();
+    }
+    return -1;
+}
+
+int32_t ContextMenuParamOhos::GetYCoord() const
+{
+    if (param_) {
+        return param_->GetYCoord();
+    }
+    return -1;
+}
+
+std::string ContextMenuParamOhos::GetLinkUrl() const
+{
+    if (param_) {
+        return param_->GetLinkUrl();
+    }
+    return "";
+}
+
+std::string ContextMenuParamOhos::GetUnfilteredLinkUrl() const
+{
+    if (param_) {
+        return param_->GetUnfilteredLinkUrl();
+    }
+    return "";
+}
+
+std::string ContextMenuParamOhos::GetSourceUrl() const
+{
+    if (param_) {
+        return param_->GetSourceUrl();
+    }
+    return "";
+}
+
+bool ContextMenuParamOhos::HasImageContents() const
+{
+    if (param_) {
+        return param_->HasImageContents();
+    }
+    return false;
+}
+
+void ContextMenuResultOhos::Cancel() const
+{
+    if (callback_) {
+        callback_->Cancel();
+    }
+}
+
+void ContextMenuResultOhos::CopyImage() const
+{
+    if (callback_) {
+        callback_->Cancel();
     }
 }
 
@@ -610,6 +772,67 @@ void WebDelegate::SetWebViewJavaScriptResultCallBack(
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports)
+{
+    if (nweb_) {
+        std::vector<std::string> portStr;
+        nweb_->CreateWebMessagePorts(portStr);
+        RefPtr<WebMessagePort> port0 =  AceType::MakeRefPtr<WebMessagePortOhos>(WeakClaim(this));
+        RefPtr<WebMessagePort> port1 =  AceType::MakeRefPtr<WebMessagePortOhos>(WeakClaim(this));
+        port0->SetPortHandle(portStr[0]);
+        port1->SetPortHandle(portStr[1]);
+        ports.push_back(port0);
+        ports.push_back(port1);
+    }
+}
+
+void WebDelegate::PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri)
+{
+    if (nweb_) {
+        std::vector<std::string> sendPorts;
+        for (RefPtr<WebMessagePort> port : ports) {
+            sendPorts.push_back(port->GetPortHandle());
+        }
+        nweb_->PostWebMessage(message, sendPorts, uri);
+    }
+}
+
+void WebDelegate::ClosePort(std::string& port)
+{
+    if (nweb_) {
+        nweb_->ClosePort(port);
+    }
+}
+
+void WebDelegate::PostPortMessage(std::string& port, std::string& data)
+{
+    if (nweb_) {
+        nweb_->PostPortMessage(port, data);
+    }
+}
+
+void WebDelegate::SetPortMessageCallback(std::string& port, std::function<void(const std::string&)>&& callback)
+{
+    if (nweb_) {
+        auto callbackImpl = std::make_shared<WebJavaScriptExecuteCallBack>(Container::CurrentId());
+        if (callbackImpl && callback) {
+            callbackImpl->SetCallBack([weak = WeakClaim(this), func = std::move(callback)](std::string result) {
+                auto delegate = weak.Upgrade();
+                if (!delegate) {
+                    return;
+                }
+                auto context = delegate->context_.Upgrade();
+                if (context) {
+                    context->GetTaskExecutor()->PostTask(
+                        [callback = std::move(func), result]() { callback(result); },
+                        TaskExecutor::TaskType::JS);
+                }
+            });
+        }
+        nweb_->SetPortMessageCallback(port, callbackImpl);
+    }
+}
+
 void WebDelegate::RequestFocus()
 {
     auto context = context_.Upgrade();
@@ -625,6 +848,63 @@ void WebDelegate::RequestFocus()
             auto webCom = delegate->webComponent_.Upgrade();
             if (webCom) {
                 webCom->RequestFocus();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::SearchAllAsync(const std::string& searchStr)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), searchStr]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->FindAllAsync(searchStr);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::ClearMatches()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->ClearMatches();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::SearchNext(bool forward)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), forward]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->FindNext(forward);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -962,6 +1242,10 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
             webCom->GetResourceLoadId(), pipelineContext);
         onScaleChangeV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webCom->GetScaleChangeId(), pipelineContext);
+        onPermissionRequestV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webCom->GetPermissionRequestEventId(), pipelineContext);
+        onSearchResultReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webCom->GetSearchResultReceiveEventId(), pipelineContext);
     }
 }
 
@@ -1141,6 +1425,21 @@ void WebDelegate::SetWebCallBack()
                 }
                 return std::string();
             });
+        webController->SetCreateMsgPortsImpl(
+            [weak = WeakClaim(this)](std::vector<RefPtr<WebMessagePort>>& ports) {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->CreateWebMessagePorts(ports);
+                }
+            });
+        webController->SetPostWebMessageImpl(
+            [weak = WeakClaim(this)](std::string& message, std::vector<RefPtr<WebMessagePort>>& ports,
+                std::string& uri) {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->PostWebMessage(message, ports, uri);
+                }
+            });
         webController->SetGetDefaultUserAgentImpl(
             [weak = WeakClaim(this)]() {
                 auto delegate = weak.Upgrade();
@@ -1266,6 +1565,31 @@ void WebDelegate::SetWebCallBack()
                     }
                 });
             });
+
+        webController->SetSearchAllAsyncImpl([weak = WeakClaim(this), uiTaskExecutor](const std::string& searchStr) {
+            uiTaskExecutor.PostTask([weak, searchStr]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->SearchAllAsync(searchStr);
+                }
+            });
+        });
+        webController->SetClearMatchesImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ClearMatches();
+                }
+            });
+        });
+        webController->SetSearchNextImpl([weak = WeakClaim(this), uiTaskExecutor](bool forward) {
+            uiTaskExecutor.PostTask([weak, forward]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->SearchNext(forward);
+                }
+            });
+        });
     }
 }
 
@@ -1321,6 +1645,10 @@ void WebDelegate::InitWebViewWithWindow()
             auto downloadListenerImpl = std::make_shared<DownloadListenerImpl>(Container::CurrentId());
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
+
+            auto findListenerImpl = std::make_shared<FindListenerImpl>(Container::CurrentId());
+            findListenerImpl->SetWebDelegate(weak);
+            delegate->nweb_->PutFindCallback(findListenerImpl);
 
             std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
             setting->PutDomStorageEnabled(true);
@@ -1382,6 +1710,10 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->SetNWebHandler(nweb_handler);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
+
+            auto findListenerImpl = std::make_shared<FindListenerImpl>(Container::CurrentId());
+            findListenerImpl->SetWebDelegate(weak);
+            delegate->nweb_->PutFindCallback(findListenerImpl);
 
             std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
             setting->PutDomStorageEnabled(component->GetDomStorageAccessEnabled());
@@ -2049,6 +2381,15 @@ void WebDelegate::OnGeolocationPermissionsShowPrompt(const std::string& origin,
     }
 }
 
+void WebDelegate::OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request)
+{
+    // ace 2.0
+    if (onPermissionRequestV2_) {
+        onPermissionRequestV2_(std::make_shared<WebPermissionRequestEvent>(
+            AceType::MakeRefPtr<WebPermissionRequestOhos>(request)));
+    }
+}
+
 bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message)
 {
     auto webCom = webComponent_.Upgrade();
@@ -2224,6 +2565,15 @@ bool WebDelegate::OnFileSelectorShow(const BaseEventInfo* info)
     return webCom->OnFileSelectorShow(info);
 }
 
+bool WebDelegate::OnContextMenuShow(const BaseEventInfo* info)
+{
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return false;
+    }
+    return webCom->OnContextMenuShow(info);
+}
+
 bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
 {
     auto webCom = webComponent_.Upgrade();
@@ -2245,6 +2595,14 @@ void WebDelegate::OnScaleChange(float oldScaleFactor, float newScaleFactor)
 {
     if (onScaleChangeV2_) {
         onScaleChangeV2_(std::make_shared<ScaleChangeEvent>(oldScaleFactor, newScaleFactor));
+    }
+}
+
+void WebDelegate::OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting)
+{
+    if (onSearchResultReceiveV2_) {
+        onSearchResultReceiveV2_(
+            std::make_shared<SearchResultReceiveEvent>(activeMatchOrdinal, numberOfMatches, isDoneCounting));
     }
 }
 

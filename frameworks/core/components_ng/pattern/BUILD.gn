@@ -16,7 +16,9 @@ import(
 
 build_component_ng("pattern_ng") {
   sources = [
+    "custom/custom_node.cpp",
     "custom/custom_node_layout_algorithm.cpp",
+    "custom/custom_node_pattern.cpp",
     "image/image_layout_algorithm.cpp",
     "image/image_pattern.cpp",
     "image/image_view.cpp",
@@ -37,4 +39,10 @@ build_component_ng("pattern_ng") {
     "text/text_styles.cpp",
     "text/text_view.cpp",
   ]
+}
+
+group("patternTest_ng") {
+  testonly = true
+
+  deps = [ "text/test:textPatternTest_ng" ]
 }

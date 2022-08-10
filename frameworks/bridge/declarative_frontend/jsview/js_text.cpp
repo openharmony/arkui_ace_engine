@@ -145,27 +145,45 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
 
 void JSText::SetTextOverflow(const JSCallbackInfo& info)
 {
-    auto component = GetComponent();
-    if (info[0]->IsObject() && component) {
+    do {
+        if (!info[0]->IsObject()) {
+            LOGE("info[0] not is Object");
+            break;
+        }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
-
-        if (overflowValue->IsNumber()) {
-            auto overflow = overflowValue->ToNumber<int32_t>();
-            if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
-                auto textStyle = component->GetTextStyle();
-                textStyle.SetTextOverflow(TEXT_OVERFLOWS[overflow]);
-                component->SetTextStyle(std::move(textStyle));
-            } else {
-                LOGE("Text: textOverflow(%d) illegal value", overflow);
-            }
+        if (!overflowValue->IsNumber()) {
+            LOGE("overflow value is not a number");
+            break;
         }
-    }
+        auto overflow = overflowValue->ToNumber<int32_t>();
+        if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+            LOGE("Text: textOverflow(%{public}d) illegal value", overflow);
+            break;
+        }
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::TextView::TextOverflow(TEXT_OVERFLOWS[overflow]);
+            break;
+        }
+        auto component = GetComponent();
+        if (!component) {
+            LOGE("component is not valid");
+            break;
+        }
+        auto textStyle = component->GetTextStyle();
+        textStyle.SetTextOverflow(TEXT_OVERFLOWS[overflow]);
+        component->SetTextStyle(std::move(textStyle));
+    } while (false);
+    
     info.SetReturnValue(info.This());
 }
 
 void JSText::SetMaxLines(int32_t value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::MaxLines(value);
+        return;
+    }
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
@@ -202,19 +220,23 @@ void JSText::SetFontStyle(int32_t value)
 
 void JSText::SetTextAlign(int32_t value)
 {
+    if (value < 0 || value >= static_cast<int32_t>(TEXT_ALIGNS.size())) {
+        LOGE("Text: TextAlign(%d) expected positive number", value);
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::TextAlign(TEXT_ALIGNS[value]);
+        return;
+    }
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
         return;
     }
 
-    if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        auto textStyle = component->GetTextStyle();
-        textStyle.SetTextAlign(TEXT_ALIGNS[value]);
-        component->SetTextStyle(std::move(textStyle));
-    } else {
-        LOGE("Text: TextAlign(%d) expected positive number", value);
-    }
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetTextAlign(TEXT_ALIGNS[value]);
+    component->SetTextStyle(std::move(textStyle));
 }
 
 void JSText::SetAlign(int32_t value)
@@ -244,6 +266,10 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
     }
     Dimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::LineHeight(value);
         return;
     }
     auto component = GetComponent();
@@ -348,19 +374,23 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 
 void JSText::SetTextCase(int32_t value)
 {
+    if (value < 0 || value >= static_cast<int32_t>(TEXT_CASES.size())) {
+        LOGE("Text textCase(%d) illegal value", value);
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::TextCase(TEXT_CASES[value]);
+        return;
+    }
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
         return;
     }
 
-    if (value >= 0 && value < static_cast<int32_t>(TEXT_CASES.size())) {
-        auto textStyle = component->GetTextStyle();
-        textStyle.SetTextCase(TEXT_CASES[value]);
-        component->SetTextStyle(std::move(textStyle));
-    } else {
-        LOGE("Text textCase(%d) illegal value", value);
-    }
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetTextCase(TEXT_CASES[value]);
+    component->SetTextStyle(std::move(textStyle));
 }
 
 void JSText::SetBaselineOffset(const JSCallbackInfo& info)
@@ -371,6 +401,10 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
     }
     Dimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::BaselineOffset(value);
         return;
     }
     auto component = GetComponent();
@@ -386,25 +420,41 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 
 void JSText::SetDecoration(const JSCallbackInfo& info)
 {
-    if (info[0]->IsObject()) {
-        auto component = GetComponent();
-        if (component) {
-            auto textStyle = component->GetTextStyle();
+    do {
+        if (!info[0]->IsObject()) {
+            LOGE("info[0] not is Object");
+            break;
+        }
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> typeValue = obj->GetProperty("type");
+        JSRef<JSVal> colorValue = obj->GetProperty("color");
 
-            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-            JSRef<JSVal> typeValue = obj->GetProperty("type");
-            JSRef<JSVal> colorValue = obj->GetProperty("color");
-
+        if (Container::IsCurrentUseNewPipeline()) {
             if (typeValue->IsNumber()) {
-                textStyle.SetTextDecoration(TextDecoration(typeValue->ToNumber<int32_t>()));
+                NG::TextView::TextDecoration(TextDecoration(typeValue->ToNumber<int32_t>()));
             }
             Color colorVal;
             if (ParseJsColor(colorValue, colorVal)) {
-                textStyle.SetTextDecorationColor(colorVal);
+                NG::TextView::TextDecorationColor(colorVal);
             }
-            component->SetTextStyle(std::move(textStyle));
+            break;
         }
-    }
+        
+        auto component = GetComponent();
+        if (!component) {
+            LOGE("component is not valid");
+            break;
+        }
+        auto textStyle = component->GetTextStyle();
+        if (typeValue->IsNumber()) {
+            textStyle.SetTextDecoration(TextDecoration(typeValue->ToNumber<int32_t>()));
+        }
+        Color colorVal;
+        if (ParseJsColor(colorValue, colorVal)) {
+            textStyle.SetTextDecorationColor(colorVal);
+        }
+        component->SetTextStyle(std::move(textStyle));
+    } while (false);
     info.SetReturnValue(info.This());
 }
 
@@ -548,16 +598,13 @@ void JSText::SetCopyOption(const JSCallbackInfo& info)
         LOGE("component is not valid");
         return;
     }
-    auto copyOption = CopyOption::NoCopy;
-    if (info[0]->IsBoolean()) {
-        auto enable = info[0]->ToBoolean();
-        copyOption = enable ? CopyOption::Distributed : CopyOption::NoCopy;
-    } else if (info[0]->IsNumber()) {
-        auto emunNumber = info[0]->ToNumber<int>() + 1;
-        copyOption = static_cast<CopyOption>(emunNumber);
+    auto copyOptions = CopyOptions::None;
+    if (info[0]->IsNumber()) {
+        auto emunNumber = info[0]->ToNumber<int>();
+        copyOptions = static_cast<CopyOptions>(emunNumber);
     }
-    LOGI("copy option: %{public}d", copyOption);
-    component->SetCopyOption(copyOption);
+    LOGI("copy option: %{public}d", copyOptions);
+    component->SetCopyOption(copyOptions);
 }
 
 void JSText::JsOnDragStart(const JSCallbackInfo& info)

@@ -62,6 +62,17 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
     delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
 }
 
+void FindListenerImpl::OnFindResultReceived(
+    const int activeMatchOrdinal, const int numberOfMatches, const bool isDoneCounting)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnSearchResultReceive(activeMatchOrdinal, numberOfMatches, isDoneCounting);
+}
+
 void WebClientImpl::OnPageLoadEnd(int httpStatusCode, const std::string& url)
 {
     ContainerScope scope(instanceId_);
@@ -388,6 +399,42 @@ bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthRe
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
 
     LOGI("OnHttpAuthRequestByJS result:%{public}d", jsResult);
+    return jsResult;
+}
+
+void WebClientImpl::OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request)
+{
+    LOGI("OnPermissionRequest");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnPermissionRequestPrompt(request);
+}
+
+bool WebClientImpl::RunContextMenu(
+    std::shared_ptr<NWeb::NWebContextMenuParams> params,
+    std::shared_ptr<NWeb::NWebContextMenuCallback> callback)
+{
+    ContainerScope scope(instanceId_);
+    bool jsResult = false;
+    auto param = std::make_shared<ContextMenuEvent>(AceType::MakeRefPtr<ContextMenuParamOhos>(params),
+        AceType::MakeRefPtr<ContextMenuResultOhos>(callback));
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+    task->PostSyncTask([webClient = this, &param, &jsResult] {
+        if (webClient == nullptr) {
+            return;
+        }
+        auto delegate = webClient->GetWebDelegate();
+        if (delegate) {
+            jsResult = delegate->OnContextMenuShow(param.get());
+        }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS);
+    LOGI("OnContextMenuEventShow result:%{public}d", jsResult);
     return jsResult;
 }
 } // namespace OHOS::Ace

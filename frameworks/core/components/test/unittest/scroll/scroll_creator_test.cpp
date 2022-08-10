@@ -50,8 +50,6 @@ void ScrollCreatorTest::TearDown() {}
  * @tc.name: ScrollCreator001
  * @tc.desc: Verify TransformCreator can create scroll component without child.
  * @tc.type: FUNC
- * @tc.require: AR000DAR08
- * @tc.author: jinwuwen
  */
 HWTEST_F(ScrollCreatorTest, ScrollCreator001, TestSize.Level1)
 {
@@ -88,8 +86,6 @@ HWTEST_F(ScrollCreatorTest, ScrollCreator001, TestSize.Level1)
  * @tc.name: ScrollCreator002
  * @tc.desc: Verify TransformCreator can create scroll component with a box child.
  * @tc.type: FUNC
- * @tc.require: AR000DAR08
- * @tc.author: jinwuwen
  */
 HWTEST_F(ScrollCreatorTest, ScrollCreator002, TestSize.Level1)
 {
@@ -131,8 +127,6 @@ HWTEST_F(ScrollCreatorTest, ScrollCreator002, TestSize.Level1)
  * @tc.name: ScrollCreator003
  * @tc.desc: Verify TransformCreator can create scroll component with a box child when direction is missing.
  * @tc.type: FUNC
- * @tc.require: AR000DAR08
- * @tc.author: jinwuwen
  */
 HWTEST_F(ScrollCreatorTest, ScrollCreator003, TestSize.Level1)
 {

@@ -93,6 +93,9 @@ protected:
         return reinterpret_cast<void *>(&image_);
     }
 
+    RefPtr<PixelMap> GetPixmapFromSkImage() override;
+    SkPixmap CloneSkPixmap(SkPixmap &srcPixmap);
+
 private:
     void InitializeCallbacks();
     Size Measure() override;

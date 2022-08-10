@@ -18,7 +18,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_modifier.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -26,14 +25,14 @@ namespace OHOS::Ace::NG {
 void ColumnView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto pattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
-    // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, V2::COLUMN_ETS_TAG, pattern);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     stack->Push(frameNode);
 }
 
 void ColumnView::AlignItems(FlexAlign flexAlign)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(CrossAxisAlignModifier(flexAlign));
+    ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign);
 }
 } // namespace OHOS::Ace::NG

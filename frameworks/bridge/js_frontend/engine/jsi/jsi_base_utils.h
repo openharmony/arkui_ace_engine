@@ -24,6 +24,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
 
 namespace OHOS::Ace::Framework {
+using ErrorPos = std::pair<uint32_t, uint32_t>;
 int32_t GetLineOffset(const AceType *data);
 RefPtr<JsAcePage> GetRunningPage(const AceType *data);
 NativeValue* AppDebugLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info);
@@ -64,7 +65,10 @@ public:
 
 private:
     static std::string GenerateSummaryBody(std::shared_ptr<JsValue> error, std::shared_ptr<JsRuntime> runtime);
-    static std::string JsiDumpSourceFile(const std::string& stackStr, const std::string& pageUrl,
+    static ErrorPos GetErrorPos(const std::string& rawStack);
+    static std::string GetSourceCodeInfo(std::shared_ptr<JsRuntime> runtime,
+        const shared_ptr<JsValue>& errorFunc, ErrorPos pos);
+    static std::string TranslateStack(const std::string& stackStr, const std::string& pageUrl,
         const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, const AceType *data = nullptr);
     static void ExtractEachInfo(const std::string& tempStack, std::vector<std::string>& res);
     static void GetPosInfo(const std::string& temp, int32_t start, std::string& line, std::string& column);

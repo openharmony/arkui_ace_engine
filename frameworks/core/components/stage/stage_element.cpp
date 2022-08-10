@@ -180,6 +180,21 @@ void StageElement::Pop()
     MarkDirty();
 }
 
+RefPtr<PageElement> StageElement::GetTopPage() const
+{
+    if (children_.empty()) {
+        LOGE("Can not deal with empty children_.");
+        return nullptr;
+    }
+    auto elementIter = children_.rbegin();
+    auto topElement = *elementIter;
+    if (!topElement) {
+        LOGE("top element is null, invalid data.");
+        return nullptr;
+    }
+    return topElement->GetPageElement();
+}
+
 void StageElement::PopToPage(int32_t pageId)
 {
     if (!CanPopPage()) {
@@ -291,6 +306,12 @@ void StageElement::RefreshFocus()
     // Process focus logic on the current top page when page changes
     if (IsFocusable()) {
         focusNodes_.back()->RequestFocus();
+        auto iter = focusNodes_.rbegin();
+        ++iter;
+        while (iter != focusNodes_.rend()) {
+            (*iter)->SetParentFocusable(false);
+            ++iter;
+        }
     } else {
         auto context = context_.Upgrade();
         if (!context) {

@@ -45,6 +45,7 @@ public:
     void StrokeText(const std::string& text, double x, double y, const PaintState& state) override;
     double MeasureText(const std::string& text, const PaintState& state) override;
     double MeasureTextHeight(const std::string& text, const PaintState& state) override;
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) override;
     std::string ToDataURL(const std::string& type, const double quality) override;
     std::unique_ptr<ImageData> GetImageData(double left, double top, double width, double height) override;
     void BeginPath() override;
@@ -58,6 +59,7 @@ public:
     void Scale(double x, double y) override;
     void AddRect(const Rect& rect) override;
     void Fill() override;
+    void Fill(const RefPtr<CanvasPath2D>& path) override;
     void Clip() override;
     void PutImageData(const ImageData& imageData) override;
     void DrawImage(const CanvasImage& canvasImage, double width, double height) override;
@@ -76,6 +78,8 @@ public:
     bool IsPointInPath(double x, double y) override;
     bool IsPointInPath(const RefPtr<CanvasPath2D>& path, double x, double y) override;
     void ResetTransform() override;
+    void SetFillRuleForPath(const CanvasFillRule& rule) override;
+    void SetFillRuleForPath2D(const CanvasFillRule& rule) override;
 private:
     void InitImagePaint();
     void InitCachePaint();
@@ -84,7 +88,7 @@ private:
     WeakPtr<PipelineBase> pipelineContext_;
     SkBitmap skBitmap_;
     SkPath skPath_;
-    SkPath strokePath_;
+    SkPath skPath2d_;
     SkPaint imagePaint_;
     SkPaint cachePaint_;
     SkBitmap cacheBitmap_;
@@ -95,12 +99,12 @@ private:
     void UpdatePaintShader(SkPaint& paint, const Gradient& gradient);
     void UpdatePaintShader(const Pattern& pattern, SkPaint& paint);
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
-    double GetBaselineOffset(TextBaseline baseline);
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     std::unique_ptr<txt::Paragraph> paragraph_;
     bool HasShadow() const;
     bool HasImageShadow() const;
     void UpdateTextStyleForeground(bool isStroke, txt::TextStyle& style, bool hasShadow);
-    double GetAlignOffset(const std::string& text, TextAlign align);
+    double GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     TextDirection GetTextDirection(const std::string& text);
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
     void UpdateLineDash(SkPaint& paint);
@@ -116,6 +120,8 @@ private:
     void Path2DRect(const PathArgs& args);
     void Path2DClosePath(const PathArgs& args);
     void Path2DStroke();
+    void Path2DFill();
+    void ParsePath2D(const RefPtr<CanvasPath2D>& path);
     void TranspareCmdToPath(const RefPtr<CanvasPath2D>& path);
     bool IsPointInPathByColor(double x, double y, SkPath& path, SkColor colorMatch);
     void SetPaintImage();

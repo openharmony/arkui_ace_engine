@@ -23,7 +23,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace {
-  class ComposedElement;
+class ComposedElement;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -34,9 +34,9 @@ class ViewFunctions : public AceType {
     DECLARE_ACE_TYPE(ViewFunctions, AceType);
 
 public:
-    ViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction);
-    ViewFunctions(JSRef<JSObject> jsObject);
-    ~ViewFunctions()
+    ViewFunctions(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsRenderFunction);
+    explicit ViewFunctions(const JSRef<JSObject>& jsObject);
+    ~ViewFunctions() override
     {
         LOGD("Destroy: ViewFunctions");
     }
@@ -69,7 +69,7 @@ public:
     }
 
 protected:
-    void InitViewFunctions(JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction, bool partialUpdate);
+    void InitViewFunctions(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsRenderFunction, bool partialUpdate);
 
 private:
     JSWeak<JSObject> jsObject_;

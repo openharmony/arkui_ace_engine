@@ -22,6 +22,7 @@
 #include "data_ability_predicates.h"
 #include "form_provider_info.h"
 #include "iremote_object.h"
+#include "pac_map.h"
 #include "values_bucket.h"
 #include "want.h"
 
@@ -157,6 +158,9 @@ public:
     static sptr<IRemoteObject> OnConnect(int32_t instanceId, const OHOS::AAFwk::Want& want);
     static void OnDisConnect(int32_t instanceId, const OHOS::AAFwk::Want& want);
     static void OnCommand(const OHOS::AAFwk::Want &want, int startId, int32_t instanceId);
+    static bool OnShare(int32_t instanceId, int64_t formId, OHOS::AAFwk::WantParams &wantParams);
+    static std::shared_ptr<AppExecFwk::PacMap> Call(int32_t instanceId, const Uri& uri,
+        const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap);
 
 private:
     void InitializeBackend();

@@ -22,12 +22,42 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/base/custom_node.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/modifier/modify_task.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/render_context.h"
+
+#define ACE_UPDATE_LAYOUT_PROPERTY(target, name, value)                         \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetLayoutProperty<target>();             \
+        if (cast##target) {                                                     \
+            cast##target->Update##name(value);                                  \
+        }                                                                       \
+    } while (false)
+
+#define ACE_UPDATE_PAINT_PROPERTY(target, name, value)                          \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetPaintProperty<target>();              \
+        if (cast##target) {                                                     \
+            cast##target->Update##name(value);                                  \
+        }                                                                       \
+    } while (false)
+
+#define ACE_UPDATE_RENDER_CONTEXT(name, value)                                  \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto target = frameNode->GetRenderContext();                            \
+        if (target) {                                                           \
+            target->Update##name(value);                                        \
+        }                                                                       \
+    } while (false)
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewStackProcessor final {
@@ -69,11 +99,11 @@ public:
     RefPtr<FrameNode> GetMainFrameNode() const;
 
     // Get main component include composed component created by js view.
-    RefPtr<FrameNode> GetMainElementNode() const;
+    RefPtr<UINode> GetMainElementNode() const;
 
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
-    void Push(const RefPtr<FrameNode>& element, bool isCustomView = false);
+    void Push(const RefPtr<UINode>& element, bool isCustomView = false);
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrapped component has child of the new stack top's main component.
@@ -83,13 +113,7 @@ public:
     void PopContainer();
 
     // End of Render function, create component tree and flush modify task.
-    RefPtr<FrameNode> Finish();
-
-    void PushLayoutTask(Modifier<LayoutProperty>&& task);
-
-    void PushRenderTask(Modifier<RenderProperty>&& task);
-
-    void PushRenderContextTask(Modifier<RenderContext>&& task);
+    RefPtr<UINode> Finish();
 
     // Set key to be used for next node on the stack
     void PushKey(const std::string& key);
@@ -125,7 +149,7 @@ public:
 
     void ClearStack()
     {
-        auto emptyStack = std::stack<RefPtr<FrameNode>>();
+        auto emptyStack = std::stack<RefPtr<UINode>>();
         elementsStack_.swap(emptyStack);
     }
 
@@ -142,23 +166,68 @@ public:
         return gestureStack_.Reset();
     }
 
+    /**
+     * when nesting observeComponentCreation functions, such as in the case of
+     * If, and the if branch creates a Text etc that requires an implicit pop
+     * this function is needed after executing the inner observeComponentCreation
+     * and before read ViewStackProcessor.GetTopMostElementId(); on the outer one
+     */
+    void ImplicitPopBeforeContinue();
+
+    // End of Rerender function, flush modifier task.
+    void FlushRerenderTask();
+
+    /**
+     * start 'get' access recording
+     * account all get access to given node id
+     * next node creation will claim the given node id
+     * see ClaimNodeId()
+     */
+    void StartGetAccessRecordingFor(int32_t elmtId)
+    {
+        accountGetAccessToNodeId_ = elmtId;
+        reservedNodeId_ = elmtId;
+    }
+
+    int32_t ClaimNodeId()
+    {
+        const auto result = reservedNodeId_;
+        reservedNodeId_ = ElementRegister::UndefinedElementId;
+        return result;
+    }
+
+    /**
+     * get the elmtId to which all get access should be accounted
+     * ElementRegister::UndefinedElementId; means no get access recording enabled
+     */
+    ElementIdType GetNodeIdToAccountFor() const
+    {
+        return accountGetAccessToNodeId_;
+    }
+    void SetNodeIdToAccountFor(ElementIdType elmtId)
+    {
+        accountGetAccessToNodeId_ = elmtId;
+    }
+
+    /**
+     * inverse of StartGetAccessRecordingFor
+     */
+    void StopGetAccessRecording()
+    {
+        accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
+        reservedNodeId_ = ElementRegister::UndefinedElementId;
+    }
+
 private:
     ViewStackProcessor();
 
     bool ShouldPopImmediately();
 
-    // Go through the wrappingComponentsMap and wrap the components
-    // should be done before pushing to the stack.
-    RefPtr<FrameNode> WrapElements();
-
     // Singleton instance
     static thread_local std::unique_ptr<ViewStackProcessor> instance;
 
     // render component stack
-    std::stack<RefPtr<FrameNode>> elementsStack_;
-
-    // modifier task
-    std::stack<RefPtr<StateModifyTask>> modifyTaskStack_;
+    std::stack<RefPtr<UINode>> elementsStack_;
 
     RefPtr<GestureProcessor> gestureStack_;
 
@@ -168,6 +237,12 @@ private:
     std::stack<int32_t> parentIdStack_;
 
     std::optional<VisualState> visualState_ = std::nullopt;
+
+    // elmtId reserved for next component creation
+    ElementIdType reservedNodeId_ = ElementRegister::UndefinedElementId;
+
+    // elmtId to account get access to
+    ElementIdType accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
 
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };

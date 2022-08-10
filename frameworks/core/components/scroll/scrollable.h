@@ -88,6 +88,11 @@ public:
         return springController_ ? springController_->IsRunning() : false;
     }
 
+    bool IsDragging() const
+    {
+        return isTouching_ && controller_->IsRunning();
+    }
+
     void SetAxis(Axis axis)
     {
         axis_ = axis;

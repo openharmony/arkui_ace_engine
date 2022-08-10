@@ -162,7 +162,7 @@ bool ParseResourceParam(napi_env env, napi_value value, int32_t& id, int32_t& ty
         napi_get_element(env, paramsNApi, i, &indexValue);
         napi_typeof(env, indexValue, &valueType);
         if (valueType == napi_string) {
-            size_t strLen = GetParamLen(indexValue);
+            size_t strLen = GetParamLen(indexValue) + 1;
             std::unique_ptr<char[]> indexStr = std::make_unique<char[]>(strLen);
             napi_get_value_string_utf8(env, indexValue, indexStr.get(), strLen, &ret);
             params.emplace_back(indexStr.get());

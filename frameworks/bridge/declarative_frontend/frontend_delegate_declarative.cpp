@@ -1600,9 +1600,6 @@ void FrontendDelegateDeclarative::OnPageReady(
                 delegate->ProcessRouterTask();
             }
             delegate->isStagingPageExist_ = false;
-            if (isMainPage) {
-                delegate->OnPageShow();
-            }
         },
         TaskExecutor::TaskType::UI);
 }
@@ -2057,6 +2054,7 @@ void FrontendDelegateDeclarative::ReplacePageInSubStage(const RefPtr<JsAcePage>&
                     }
                     delegate->OnReplacePageSuccess(page, url);
                     delegate->SetCurrentPage(page->GetPageId());
+                    delegate->OnPageShow();
                     delegate->OnMediaQueryUpdate();
                     delegate->ProcessRouterTask();
                 });

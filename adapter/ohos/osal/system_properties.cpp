@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
-#include "base/utils/system_properties.h"
-
+#include <mutex>
+#include <shared_mutex>
 #include <unistd.h>
 
+#include "base/utils/system_properties.h"
+
+#include "parameter.h"
 #include "parameters.h"
 
 #include "base/log/log.h"
@@ -37,9 +40,15 @@ const char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 const char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 const char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
+const char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
+constexpr float DEFAULT_ANIMATION_SCALE = 1.0f;
+
+float animationScale_ = DEFAULT_ANIMATION_SCALE;
+
+std::shared_mutex mutex_;
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 {
@@ -111,6 +120,32 @@ bool IsGpuUploadEnabled()
     return (system::GetParameter("persist.ace.gpuupload.enabled", "0") == "1" ||
             system::GetParameter("debug.ace.gpuupload.enabled", "0") == "1");
 }
+
+void OnAnimationScaleChanged(const char *key, const char *value, void *context)
+{
+    if (key == nullptr) {
+        LOGE("AnimationScale changes failed. key is null.");
+        return;
+    }
+    if (strcmp(key, ANIMATION_SCALE_KEY) != 0) {
+        LOGE("AnimationScale key not matched. key: %{public}s", key);
+        return;
+    }
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    if (value == nullptr) {
+        LOGW("AnimationScale changes with null value, use default. key: %{public}s", key);
+        animationScale_ = DEFAULT_ANIMATION_SCALE;
+        return;
+    }
+    auto animationScale = std::atof(value);
+    if (animationScale < 0.0f) {
+        LOGE("AnimationScale changes with invalid value: %{public}s. ignore", value);
+        return;
+    }
+    LOGI("AnimationScale: %{public}f -> %{public}f", animationScale_, animationScale);
+    animationScale_ = animationScale;
+}
+
 } // namespace
 
 bool SystemProperties::IsSyscapExist(const char* cap)
@@ -151,7 +186,7 @@ size_t SystemProperties::GetLongPauseTime()
 
 bool SystemProperties::GetAsmInterpreterEnabled()
 {
-    return system::GetParameter("persist.ark.asminterpreter", "false") == "true";
+    return system::GetParameter("persist.ark.asminterpreter", "true") == "true";
 }
 
 std::string SystemProperties::GetAsmOpcodeDisableRange()
@@ -176,7 +211,7 @@ bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
-bool SystemProperties::hasInputDevice_ = false;
+bool SystemProperties::isDeviceAccess_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;
 double SystemProperties::resolution_ = 1.0;
@@ -252,6 +287,8 @@ void SystemProperties::InitDeviceInfo(
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     debugBoundaryEnabled_ = system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
+    animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
+    WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -307,6 +344,17 @@ std::string SystemProperties::GetRegion()
 std::string SystemProperties::GetNewPipePkg()
 {
     return system::GetParameter("persist.ace.newpipe.pkgname", "");
+}
+
+float SystemProperties::GetAnimationScale()
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return animationScale_;
+}
+
+std::string SystemProperties::GetPartialUpdatePkg()
+{
+    return system::GetParameter("persist.ace.partial.pkgname", "");
 }
 
 } // namespace OHOS::Ace

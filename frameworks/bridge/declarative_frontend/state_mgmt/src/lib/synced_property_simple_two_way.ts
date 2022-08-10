@@ -17,6 +17,7 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   implements ISinglePropertyChangeSubscriber<T> {
 
   private source_: ObservedPropertyAbstract<T>;
+  private changeNotificationIsOngoing_: boolean = false;
 
   constructor(source: ObservedPropertyAbstract<T>, owningView: IPropertySubscriber, owningViewPropNme: PropertyInfo) {
     super(owningView, owningViewPropNme);
@@ -38,19 +39,29 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   // will call this cb function when property has changed
   // a set (newValue) is not done because get reads through for the source_
   hasChanged(newValue: T): void {
-    console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
-    this.notifyHasChanged(newValue);
+    if (!this.changeNotificationIsOngoing_) {
+      console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`)
+      this.notifyHasChanged(newValue);
+    }
   }
 
   // get 'read through` from the ObservedProperty
   public get(): T {
-    console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: get`)
+    console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: get`);
+    if (!this.source_) {
+      console.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: get value is undefined.`);
+      return undefined;
+    }
     this.notifyPropertyRead();
     return this.source_.get();
   }
 
   // set 'writes through` to the ObservedProperty
   public set(newValue: T): void {
+    if (!this.source_) {
+      console.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: set '${newValue}' ignoring.`);
+      return;
+    }
     if (this.source_.get() == newValue) {
       console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
       return;
@@ -58,8 +69,12 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
 
     console.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
     // the source_ ObservedProeprty will call: this.hasChanged(newValue);
+    // the purpose of the changeNotificationIsOngoing_ is to avoid 
+    // circular notifications @Link -> source @State -> other but alos same @Link
+    this.changeNotificationIsOngoing_ = true;
+    this.source_.set(newValue);
     this.notifyHasChanged(newValue);
-    return this.source_.set(newValue);
+    this.changeNotificationIsOngoing_ = false;
   }
 
   /**

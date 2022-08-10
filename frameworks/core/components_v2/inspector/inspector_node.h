@@ -143,6 +143,9 @@ public:
     // zindex settings
     virtual int32_t GetZIndex() const = 0;
 
+    // hit test behavior settings
+    virtual std::string GetHitTestBehaviorStr() const = 0;
+
     // graphical transformation
     virtual DimensionOffset GetOriginPoint() const = 0;
     virtual std::unique_ptr<JsonValue> GetRotate() const = 0;

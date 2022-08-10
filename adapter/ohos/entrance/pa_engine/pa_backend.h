@@ -102,6 +102,10 @@ public:
     int32_t OpenRawFile(const Uri& uri, const std::string& mode);
     Uri NormalizeUri(const Uri& uri);
     Uri DenormalizeUri(const Uri& uri);
+    std::shared_ptr<AppExecFwk::PacMap> Call(const Uri& uri,
+        const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap);
+    bool OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams);
+
     AppExecFwk::FormProviderData GetFormData() const
     {
         if (jsBackendEngine_) {

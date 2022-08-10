@@ -43,8 +43,6 @@ void GridCreatorTest::TearDown() {}
  * @tc.name: GridCreator001
  * @tc.desc: Verify GridCreator can create grid component without child by row direction.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7I
- * @tc.author: zhongjianfei
  */
 HWTEST_F(GridCreatorTest, GridCreator001, TestSize.Level1)
 {
@@ -93,8 +91,6 @@ HWTEST_F(GridCreatorTest, GridCreator001, TestSize.Level1)
  * @tc.name: GridCreator002
  * @tc.desc: Verify GridCreator can create grid component with one child by column direction.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7I
- * @tc.author: zhongjianfei
  */
 HWTEST_F(GridCreatorTest, GridCreator002, TestSize.Level1)
 {
@@ -139,8 +135,6 @@ HWTEST_F(GridCreatorTest, GridCreator002, TestSize.Level1)
  * @tc.name: GridCreator003
  * @tc.desc: Verify GridCreator can create grid component with five children by row reverse direction.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7I
- * @tc.author: zhongjianfei
  */
 HWTEST_F(GridCreatorTest, GridCreator003, TestSize.Level1)
 {
@@ -182,8 +176,6 @@ HWTEST_F(GridCreatorTest, GridCreator003, TestSize.Level1)
  * @tc.name: GridCreator004
  * @tc.desc: Verify GridCreator can create grid component with three children by column reverse direction.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7I
- * @tc.author: zhongjianfei
  */
 HWTEST_F(GridCreatorTest, GridCreator004, TestSize.Level1)
 {
@@ -225,8 +217,6 @@ HWTEST_F(GridCreatorTest, GridCreator004, TestSize.Level1)
  * @tc.name: GridCreator005
  * @tc.desc: Verify GridCreator can create grid component with three children by invalid attribute.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7I
- * @tc.author: zhongjianfei
  */
 HWTEST_F(GridCreatorTest, GridCreator005, TestSize.Level1)
 {
@@ -281,8 +271,6 @@ HWTEST_F(GridCreatorTest, GridCreator005, TestSize.Level1)
  * @tc.name: GridCreator006
  * @tc.desc: Verify GridCreator can create grid component with no children by invalid attribute.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7I
- * @tc.author: zhongjianfei
  */
 HWTEST_F(GridCreatorTest, GridCreator006, TestSize.Level1)
 {

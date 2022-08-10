@@ -40,6 +40,7 @@ template("ace_ohos_standard_source_set") {
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/ui_dialog_impl.cpp",
 
       # drag window
       "$ace_root/adapter/ohos/entrance/window/drag_window_ohos.cpp",
@@ -63,12 +64,9 @@ template("ace_ohos_standard_source_set") {
       "$ability_runtime_napi_path/featureAbility",
       "//foundation/arkui/napi/interfaces/kits",
       "//foundation/arkui/napi/native_engine",
-      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/dataability/include",
-      "//foundation/distributeddatamgr/appdatamgr/relational_store/interfaces/inner_api/rdb/include",
       "//foundation/window/window_manager/interfaces/innerkits",
       "//third_party/node/src",
       "//utils/native/base/include",
-      "//foundation/distributeddatamgr/appdatamgr/preferences/interfaces/inner_api/include/",
     ]
 
     deps = [
@@ -80,8 +78,6 @@ template("ace_ohos_standard_source_set") {
       "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
-      "//foundation/window/window_manager/dm:libdm",
-      "//foundation/window/window_manager/wm:libwm",
       "//third_party/zlib:libz",
     ]
 
@@ -105,6 +101,8 @@ template("ace_ohos_standard_source_set") {
       "preferences:native_preferences",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
+      "window_manager:libdm",
+      "window_manager:libwm",
     ]
   }
 }

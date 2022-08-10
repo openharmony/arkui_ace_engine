@@ -37,6 +37,8 @@ public:
     std::string GetSelectedColor() const;
     std::string GetPointColor() const;
     std::string GetToggleType() const;
+    std::string GetWidth() const override;
+    std::string GetHeight() const override;
 
     AceType::IdType GetTargetTypeId() const override
     {

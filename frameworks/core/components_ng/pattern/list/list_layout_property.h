@@ -35,6 +35,8 @@ public:
     {
         auto value = MakeRefPtr<ListLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propSpace_ = CloneSpace();
+        value->propInitialIndex_ = CloneInitialIndex();
         value->propListDirection_ = CloneListDirection();
         return value;
     }
@@ -42,10 +44,14 @@ public:
     void Reset() override
     {
         LayoutProperty::Reset();
+        ResetSpace();
+        ResetInitialIndex();
         ResetListDirection();
     }
 
-    ACE_DEFINE_CLASS_PROPERTY_WITHOUT_GROUP(ListDirection, Axis, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InitialIndex, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListDirection, Axis, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

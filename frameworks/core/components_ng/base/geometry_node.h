@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
@@ -82,6 +83,16 @@ public:
             content_ = std::make_unique<GeometryProperty>();
         }
         content_->rect_.SetOffset(translate);
+    }
+
+    SizeF GetContentSize() const
+    {
+        return content_ ? content_->rect_.GetSize() : SizeF();
+    }
+
+    OffsetF GetContentOffset() const
+    {
+        return content_ ? content_->rect_.GetOffset() : OffsetF();
     }
 
     const std::unique_ptr<GeometryProperty>& GetContent() const

@@ -32,6 +32,9 @@ Rosen::RSAnimationTimingCurve NativeCurveHelper::ToNativeCurve(const RefPtr<Curv
             springCurve->stiffness_, springCurve->damping_);
     } else if (auto customCurve = AceType::DynamicCast<CustomCurve>(curve)) {
         return Rosen::RSAnimationTimingCurve::CreateCustomCurve(customCurve->interpolateFunc_);
+    } else if (auto springMotionCurve = AceType::DynamicCast<ResponsiveSpringMotion>(curve)) {
+        return Rosen::RSAnimationTimingCurve::CreateSpring(springMotionCurve->GetResponse(),
+            springMotionCurve->GetDampingRatio(), springMotionCurve->GetBlendDuration());
     } else {
         return Rosen::RSAnimationTimingCurve::CreateCustomCurve(
             [weak = WeakPtr<Curve>(curve)](float fraction) -> float {
@@ -46,13 +49,15 @@ Rosen::RSAnimationTimingCurve NativeCurveHelper::ToNativeCurve(const RefPtr<Curv
     }
 }
 
-Rosen::RSMotionPathOption NativeCurveHelper::ToNativeMotionPathOption(const MotionPathOption& option)
+Rosen::RSMotionPathOption NativeCurveHelper::ToNativeMotionPathOption(const MotionPathOption& option,
+    bool pathNeedOrigin)
 {
     auto motionOption = Rosen::RSMotionPathOption(option.GetPath());
     motionOption.SetBeginFraction(option.GetBegin());
     motionOption.SetEndFraction(option.GetEnd());
     motionOption.SetRotationMode(
         option.GetRotate() ? Rosen::RotationMode::ROTATE_AUTO : Rosen::RotationMode::ROTATE_NONE);
+    motionOption.SetPathNeedAddOrigin(pathNeedOrigin);
     return motionOption;
 }
 

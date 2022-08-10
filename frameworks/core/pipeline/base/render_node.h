@@ -113,6 +113,7 @@ public:
             parent->MarkNeedLayout();
             parent->RemoveChild(AceType::Claim(this));
         }
+        parent_ = nullptr;
     }
 
     // Update node with attr, style, event, method and so on.
@@ -891,6 +892,11 @@ public:
         return touchable_;
     }
 
+    HitTestMode GetHitTestMode() const
+    {
+        return hitTestMode_;
+    }
+
     bool IsDisabled() const
     {
         return disabled_;
@@ -1137,6 +1143,16 @@ public:
         return restoreInfo_;
     }
 
+    // JSview boundary, all nodes in [head, tail] share the same RSNode
+    bool IsHeadRenderNode() const
+    {
+#ifdef ENABLE_ROSEN_BACKEND
+        return SystemProperties::GetRosenBackendEnabled() ? isHeadRenderNode_ : false;
+#else
+        return false;
+#endif
+    }
+
 protected:
     explicit RenderNode(bool takeBoundary = false);
     virtual void ClearRenderObject();
@@ -1146,6 +1162,8 @@ protected:
     virtual void OnMouseHoverExitTest() {}
     void SendAccessibilityEvent(const std::string& eventType);
     void SetAccessibilityClick(RefPtr<ClickRecognizer> clickRecognizer);
+    bool DispatchTouchTestToChildren(const Point& localPoint, const Point& globalPoint,
+        const TouchRestrict& touchRestrict, TouchTestResult& result);
 
     void PrepareLayout();
 
@@ -1206,15 +1224,6 @@ protected:
 
     virtual std::shared_ptr<RSNode> CreateRSNode() const;
     virtual void OnRSTransition(TransitionType type) {}
-    // JSview boundary, all nodes in [head, tail] share the same RSNode
-    bool IsHeadRenderNode() const
-    {
-#ifdef ENABLE_ROSEN_BACKEND
-        return SystemProperties::GetRosenBackendEnabled() ? isHeadRenderNode_ : false;
-#else
-        return false;
-#endif
-    }
     bool IsTailRenderNode() const
     {
         return isTailRenderNode_;
@@ -1234,6 +1243,9 @@ protected:
     Point coordinatePoint_;
     WeakPtr<V2::InspectorNode> inspector_;
     WeakPtr<AccessibilityNode> accessibilityNode_;
+
+    // Used for RS extra case.
+    bool isFirstNode_ = false;
 
     Rect touchRect_;                  // Self touch rect
     std::vector<Rect> touchRectList_; // Self and all children touch rect
@@ -1344,6 +1356,7 @@ private:
 
     std::string restoreInfo_;
     bool isNotSiblingAddRecognizerToResult_ = true;
+    HitTestMode hitTestMode_ = HitTestMode::DEFAULT;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
 };

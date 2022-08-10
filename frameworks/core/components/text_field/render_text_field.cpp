@@ -26,6 +26,7 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
+#include "core/common/text_field_manager.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text/text_utils.h"
 #include "core/components/text_overlay/text_overlay_component.h"
@@ -287,7 +288,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     onTranslate_ = textField->GetOnTranslate();
     onShare_ = textField->GetOnShare();
     onSearch_ = textField->GetOnSearch();
-
+    inputStyle_ = textField->GetInputStyle();
 #if defined(ENABLE_STANDARD_INPUT)
     UpdateConfiguration();
 #endif
@@ -941,6 +942,47 @@ void RenderTextField::PopTextOverlay()
     isOverlayShowed_ = false;
 }
 
+RefPtr<RenderSlidingPanel> RenderTextField::GetSlidingPanelAncest()
+{
+    auto parent = GetParent().Upgrade();
+    while (parent) {
+        auto renderSlidingPanel = AceType::DynamicCast<RenderSlidingPanel>(parent);
+        if (renderSlidingPanel) {
+            return renderSlidingPanel;
+        }
+        parent = parent->GetParent().Upgrade();
+    }
+    return nullptr;
+}
+
+void RenderTextField::ResetSlidingPanelParentHeight()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("ResetSlidingPanelParentHeight: Context is null");
+        return;
+    }
+    auto manager = context->GetTextFieldManager();
+    if (manager && AceType::InstanceOf<TextFieldManager>(manager)) {
+        auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
+        textFieldManager->ResetSlidingPanelParentHeight();
+    }
+}
+
+void RenderTextField::ResetOnFocusForTextFieldManager()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("ResetOnFocusForTextFieldManager: Context is null");
+        return;
+    }
+    auto manager = context->GetTextFieldManager();
+    if (manager && AceType::InstanceOf<TextFieldManager>(manager)) {
+        auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
+        textFieldManager->ClearOnFocusTextField();
+    }
+}
+
 bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling)
 {
     if (!enabled_) {
@@ -974,7 +1016,14 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         connection_->Show(isFocusViewChanged, GetInstanceId());
 #endif
     }
-
+    auto context = context_.Upgrade();
+    if (context) {
+        auto manager = context->GetTextFieldManager();
+        if (manager && AceType::InstanceOf<TextFieldManager>(manager)) {
+            auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
+            textFieldManager->SetOnFocusTextField(WeakClaim(this));
+        }
+    }
     if (keyboard_ != TextInputType::MULTILINE) {
         resetToStart_ = false;
         MarkNeedLayout();
@@ -1007,8 +1056,8 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
             UpdateSelection(GetEditingValue().selection.GetEnd());
             MarkNeedLayout();
         }
-
-        if (keyboard_ != TextInputType::MULTILINE) {
+        ResetSlidingPanelParentHeight();
+        if (keyboard_ != TextInputType::MULTILINE && keyboard_ != TextInputType::VISIBLE_PASSWORD) {
             resetToStart_ = true;
             MarkNeedLayout();
         }
@@ -1239,8 +1288,8 @@ void RenderTextField::EditingValueFilter(TextEditingValue& result)
             wstrInSelection = WstringSearch(wstrInSelection, filterRegex);
         }
         std::wstring wstrAfterSelection;
-        size_t lenLeft = wideText.length() - static_cast<size_t>(end);
-        if (lenLeft > 0) {
+        if (end >= start && end <= static_cast<int32_t>(wideText.length())) {
+            size_t lenLeft = wideText.length() - static_cast<size_t>(end);
             wstrAfterSelection = wideText.substr(end, lenLeft);
             wstrAfterSelection = WstringSearch(wstrAfterSelection, filterRegex);
         }
@@ -1934,9 +1983,11 @@ void RenderTextField::HandleOnCut()
         return;
     }
     if (GetEditingValue().GetSelectedText().empty()) {
+        LOGD("copy value is empty");
         return;
     }
-    if (copyOption_ != CopyOption::NoCopy) {
+    if (copyOption_ != CopyOptions::None) {
+        LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
         clipboard_->SetData(GetEditingValue().GetSelectedText());
     }
     if (onCut_) {
@@ -1957,9 +2008,11 @@ void RenderTextField::HandleOnCopy()
         return;
     }
     if (GetEditingValue().GetSelectedText().empty()) {
+        LOGW("copy value is empty");
         return;
     }
-    if (copyOption_ != CopyOption::NoCopy) {
+    if (copyOption_ != CopyOptions::None) {
+        LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
         clipboard_->SetData(GetEditingValue().GetSelectedText());
     }
     if (onCopy_) {
@@ -1976,8 +2029,10 @@ void RenderTextField::HandleOnPaste()
     auto textSelection = GetEditingValue().selection;
     auto pasteCallback = [weak = WeakClaim(this), textSelection](const std::string& data) {
         if (data.empty()) {
+            LOGW("paste value is empty");
             return;
         }
+        LOGD("paste value is %{private}s", data.c_str());
         auto textfield = weak.Upgrade();
         if (textfield) {
             auto value = textfield->GetEditingValue();
@@ -2154,6 +2209,8 @@ void RenderTextField::InitAccessibilityEventListener()
             textField->OnLongPress(LongPressInfo(0));
         }
     });
+
+    accessibilityNode->AddSupportAction(AceAction::ACTION_SET_TEXT);
 }
 
 void RenderTextField::UpdateDirectionStatus()
@@ -2376,7 +2433,7 @@ void RenderTextField::ApplyAspectRatio()
 
 void RenderTextField::Dump()
 {
-    DumpLog::GetInstance().AddDesc(std::string("CopyOption: ").append(V2::ConvertWrapCopyOptionToStirng(copyOption_)));
+    DumpLog::GetInstance().AddDesc(std::string("CopyOptions: ").append(V2::ConvertWrapCopyOptionToString(copyOption_)));
 }
 
 } // namespace OHOS::Ace

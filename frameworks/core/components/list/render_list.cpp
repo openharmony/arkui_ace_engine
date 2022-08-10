@@ -736,7 +736,7 @@ bool RenderList::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
         stickyItem_->TouchTest(globalPoint, localPoint, touchRestrict, result);
     }
 
-    if (scroll->IsScrollStop()) {
+    if (!scroll->IsDragging()) {
         return RenderNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
     }
 

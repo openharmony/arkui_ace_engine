@@ -14,12 +14,20 @@
 */
 
 #include "core/gestures/multi_fingers_recognizer.h"
+#include "base/memory/ace_type.h"
+#include "core/gestures/pinch_recognizer.h"
 
 namespace OHOS::Ace {
 
 void MultiFingersRecognizer::OnAccepted(size_t touchId)
 {
     if (!IsInReferee(touchId)) {
+        return;
+    }
+
+    if (AceType::InstanceOf<PinchRecognizer>(this)) {
+        OnAccepted();
+        refereePointers_.clear();
         return;
     }
 

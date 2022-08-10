@@ -19,8 +19,11 @@
 #include "third_party/skia/include/core/SkPixelRef.h"
 
 #include "base/log/log.h"
-#include "core/components/image/flutter_render_image.h"
 #include "core/image/image_provider.h"
+
+#ifdef NG_BUILD
+#include "core/components_ng/render/canvas_image.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -48,6 +51,9 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
             if (!player) {
                 return;
             }
+#ifdef NG_BUILD
+            auto canvasImage = NG::CanvasImage::Create(nullptr);
+#else
             auto canvasImage = flutter::CanvasImage::Create();
             sk_sp<SkImage> skImage = player->DecodeFrameImage(index);
             if (dstWidth > 0 && dstHeight > 0) {
@@ -59,6 +65,7 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
                 LOGW("animated player cannot get the %{public}d skImage!", index);
                 return;
             }
+#endif
             taskExecutor->PostTask([callback = player->successCallback_, canvasImage,
                                        source = player->imageSource_] { callback(source, canvasImage); },
                 TaskExecutor::TaskType::UI);

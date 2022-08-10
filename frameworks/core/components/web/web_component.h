@@ -82,6 +82,19 @@ private:
     int hitType_ = static_cast<int>(WebHitTestType::UNKNOWN);
 };
 
+class WebMessagePort : public virtual AceType {
+    DECLARE_ACE_TYPE(WebMessagePort, AceType);
+
+public:
+    WebMessagePort() = default;
+    virtual ~WebMessagePort() = default;
+    virtual void SetPortHandle(std::string& handle) = 0;
+    virtual std::string GetPortHandle() = 0;
+    virtual void Close() = 0;
+    virtual void PostMessage(std::string& data) = 0;
+    virtual void SetWebMessageCallback(std::function<void(const std::string&)>&& callback) = 0;
+};
+
 class WebCookie : public virtual AceType {
     DECLARE_ACE_TYPE(WebCookie, AceType);
 
@@ -472,6 +485,32 @@ public:
         getTitleImpl_ = getTitleImpl;
     }
 
+    using CreateMsgPortsImpl = std::function<void(std::vector<RefPtr<WebMessagePort>>&)>;
+    void CreateMsgPorts(std::vector<RefPtr<WebMessagePort>>& ports)
+    {
+        if (createMsgPortsImpl_) {
+            createMsgPortsImpl_(ports);
+        }
+    }
+    void SetCreateMsgPortsImpl(CreateMsgPortsImpl&& createMsgPortsImpl)
+    {
+        createMsgPortsImpl_ = createMsgPortsImpl;
+    }
+
+    using PostWebMessageImpl = std::function<void(std::string&, std::vector<RefPtr<WebMessagePort>>&, std::string&)>;
+    void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri)
+    {
+        if (postWebMessageImpl_) {
+            postWebMessageImpl_(message, ports, uri);
+        }
+    }
+    void SetPostWebMessageImpl(PostWebMessageImpl&& postWebMessageImpl)
+    {
+        postWebMessageImpl_ = postWebMessageImpl;
+    }
+
+
+
     using GetDefaultUserAgentImpl = std::function<std::string()>;
     std::string GetDefaultUserAgent()
     {
@@ -593,6 +632,44 @@ public:
         requestFocusImpl_ = std::move(requestFocusImpl);
     }
 
+    using SearchAllAsyncImpl = std::function<void(const std::string&)>;
+    void SearchAllAsync(const std::string& searchStr)
+    {
+        if (searchAllAsyncImpl_) {
+            searchAllAsyncImpl_(searchStr);
+        }
+    }
+
+    void SetSearchAllAsyncImpl(SearchAllAsyncImpl&& searchAllAsyncImpl)
+    {
+        searchAllAsyncImpl_ = std::move(searchAllAsyncImpl);
+    }
+
+    using ClearMatchesImpl = std::function<void()>;
+    void ClearMatches()
+    {
+        if (clearMatchesImpl_) {
+            clearMatchesImpl_();
+        }
+    }
+    void SetClearMatchesImpl(ClearMatchesImpl&& clearMatchesImpl)
+    {
+        clearMatchesImpl_ = std::move(clearMatchesImpl);
+    }
+
+    using SearchNextImpl = std::function<void(bool)>;
+    void SearchNext(bool forward)
+    {
+        if (searchNextImpl_) {
+            searchNextImpl_(forward);
+        }
+    }
+
+    void SetSearchNextImpl(SearchNextImpl&& searchNextImpl)
+    {
+        searchNextImpl_ = std::move(searchNextImpl);
+    }
+
     void Reload() const
     {
         declaration_->webMethod.Reload();
@@ -627,6 +704,8 @@ private:
     GetPageHeightImpl getPageHeightImpl_;
     GetWebIdImpl getWebIdImpl_;
     GetTitleImpl getTitleImpl_;
+    CreateMsgPortsImpl createMsgPortsImpl_;
+    PostWebMessageImpl postWebMessageImpl_;
     GetDefaultUserAgentImpl getDefaultUserAgentImpl_;
     SaveCookieSyncImpl saveCookieSyncImpl_;
     SetCookieImpl setCookieImpl_;
@@ -636,6 +715,9 @@ private:
     RemoveJavascriptInterfaceImpl removeJavascriptInterfaceImpl_;
     WebViewJavaScriptResultCallBackImpl webViewJavaScriptResultCallBackImpl_;
     RequestFocusImpl requestFocusImpl_;
+    SearchAllAsyncImpl searchAllAsyncImpl_;
+    ClearMatchesImpl clearMatchesImpl_;
+    SearchNextImpl searchNextImpl_;
 };
 
 // A component can show HTML5 webpages.
@@ -834,6 +916,16 @@ public:
     const EventMarker& GetScaleChangeId() const
     {
         return declaration_->GetScaleChangeId();
+    }
+
+    void SetPermissionRequestEventId(const EventMarker& permissionRequestEventId)
+    {
+        declaration_->SetPermissionRequestEventId(permissionRequestEventId);
+    }
+
+    const EventMarker& GetPermissionRequestEventId() const
+    {
+        return declaration_->GetPermissionRequestEventId();
     }
 
     void SetDeclaration(const RefPtr<WebDeclaration>& declaration)
@@ -1135,6 +1227,22 @@ public:
         onFileSelectorShowImpl_ = onFileSelectorShowImpl;
     }
 
+    using OnContextMenuImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnContextMenuShow(const BaseEventInfo* info) const
+    {
+        if (onContextMenuImpl_) {
+            return onContextMenuImpl_(info);
+        }
+        return false;
+    }
+    void SetOnContextMenuShow(OnContextMenuImpl && onContextMenuImpl)
+    {
+        if (onContextMenuImpl == nullptr) {
+            return;
+        }
+        onContextMenuImpl_ = std::move(onContextMenuImpl);
+    }
+
     using OnUrlLoadInterceptImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnUrlLoadIntercept(const BaseEventInfo* info) const
     {
@@ -1187,6 +1295,16 @@ public:
         return onMouseEvent_;
     }
 
+    void SetSearchResultReceiveEventId(const EventMarker& searchResultReceiveEventId)
+    {
+        declaration_->SetSearchResultReceiveEventId(searchResultReceiveEventId);
+    }
+
+    const EventMarker& GetSearchResultReceiveEventId() const
+    {
+        return declaration_->GetSearchResultReceiveEventId();
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -1202,6 +1320,7 @@ private:
     OnFileSelectorShowImpl onFileSelectorShowImpl_;
     OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
+    OnContextMenuImpl onContextMenuImpl_;
     OnInterceptRequestImpl onInterceptRequestImpl_ = nullptr;
 
     std::string type_;

@@ -15,8 +15,9 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 
-#include "core/components_ng/base/custom_node.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -37,7 +38,7 @@ RefPtr<FrameNode> ViewStackProcessor::GetMainFrameNode() const
     return AceType::DynamicCast<FrameNode>(GetMainElementNode());
 }
 
-RefPtr<FrameNode> ViewStackProcessor::GetMainElementNode() const
+RefPtr<UINode> ViewStackProcessor::GetMainElementNode() const
 {
     if (elementsStack_.empty()) {
         return nullptr;
@@ -45,42 +46,12 @@ RefPtr<FrameNode> ViewStackProcessor::GetMainElementNode() const
     return elementsStack_.top();
 }
 
-void ViewStackProcessor::Push(const RefPtr<FrameNode>& element, bool isCustomView)
+void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool isCustomView)
 {
     if (ShouldPopImmediately()) {
         Pop();
     }
     elementsStack_.push(element);
-    if (AceType::InstanceOf<FrameNode>(element)) {
-        modifyTaskStack_.push(Referenced::MakeRefPtr<StateModifyTask>());
-    }
-}
-
-void ViewStackProcessor::PushLayoutTask(Modifier<LayoutProperty>&& task)
-{
-    if (modifyTaskStack_.empty()) {
-        LOGE("the modify task is null");
-        return;
-    }
-    modifyTaskStack_.top()->GetLayoutTask().emplace_back(std::move(task));
-}
-
-void ViewStackProcessor::PushRenderTask(Modifier<RenderProperty>&& task)
-{
-    if (modifyTaskStack_.empty()) {
-        LOGE("the modify task is null");
-        return;
-    }
-    modifyTaskStack_.top()->GetRenderTask().emplace_back(std::move(task));
-}
-
-void ViewStackProcessor::PushRenderContextTask(Modifier<RenderContext>&& task)
-{
-    if (modifyTaskStack_.empty()) {
-        LOGE("the modify task is null");
-        return;
-    }
-    modifyTaskStack_.top()->GetRenderContextTask().emplace_back(std::move(task));
 }
 
 bool ViewStackProcessor::ShouldPopImmediately()
@@ -92,22 +63,34 @@ bool ViewStackProcessor::ShouldPopImmediately()
     return GetMainElementNode()->IsAtomicNode();
 }
 
+void ViewStackProcessor::ImplicitPopBeforeContinue()
+{
+    if ((elementsStack_.size() > 1) && ShouldPopImmediately()) {
+        Pop();
+        LOGD("Implicit Pop done, top component is %{public}s", GetMainElementNode()->GetTag().c_str());
+    } else {
+        LOGD("NO Implicit Pop before continue. top component is %{public}s", GetMainElementNode()->GetTag().c_str());
+    }
+}
+
+void ViewStackProcessor::FlushRerenderTask()
+{
+    auto node = Finish();
+    CHECK_NULL_VOID(node);
+    node->FlushUpdateAndMarkDirty();
+}
+
 void ViewStackProcessor::Pop()
 {
     if (elementsStack_.size() == 1) {
         return;
     }
 
-    auto element = WrapElements();
+    auto element = elementsStack_.top();
     elementsStack_.pop();
-    if (!modifyTaskStack_.empty() && AceType::InstanceOf<FrameNode>(element)) {
-        // TODO: Add Task create on rerender case.
-        element->FlushStateModifyTaskOnCreate(*modifyTaskStack_.top());
-        modifyTaskStack_.pop();
-    }
-    if (strcmp(element->GetTag().c_str(), V2::LIST_ITEM_ETS_TAG) == 0) {
-        // for list item, hold in item builder.
-        return;
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    if (frameNode) {
+        frameNode->MarkModifyDone();
     }
     element->MountToParent(GetMainElementNode());
     LOGD("ViewStackProcessor Pop size %{public}zu", elementsStack_.size());
@@ -129,35 +112,23 @@ void ViewStackProcessor::PopContainer()
     Pop();
 }
 
-RefPtr<FrameNode> ViewStackProcessor::WrapElements()
-{
-    return elementsStack_.top();
-}
-
-RefPtr<FrameNode> ViewStackProcessor::Finish()
+RefPtr<UINode> ViewStackProcessor::Finish()
 {
     if (elementsStack_.empty()) {
         LOGE("ViewStackProcessor Finish failed, input empty render or invalid root component");
         return nullptr;
     }
-    auto element = WrapElements();
+    auto element = elementsStack_.top();
     elementsStack_.pop();
-    if (!modifyTaskStack_.empty() && AceType::InstanceOf<FrameNode>(element)) {
-        // TODO: Add Task create on rerender case.
-        element->FlushStateModifyTaskOnCreate(*modifyTaskStack_.top());
-        modifyTaskStack_.pop();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    if (frameNode) {
+        frameNode->MarkModifyDone();
     }
     if (!elementsStack_.empty()) {
         LOGE("the elementsStack size is not right");
         do {
             elementsStack_.pop();
         } while (!elementsStack_.empty());
-    }
-    if (!modifyTaskStack_.empty()) {
-        LOGE("the modifyTaskStack_ size is not right");
-        do {
-            modifyTaskStack_.pop();
-        } while (!modifyTaskStack_.empty());
     }
     return element;
 }

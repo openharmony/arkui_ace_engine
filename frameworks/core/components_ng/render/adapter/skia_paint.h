@@ -18,6 +18,10 @@
 
 #include "third_party/skia/include/core/SkPaint.h"
 
+#ifdef NG_BUILD
+#include "third_party/skia/include/core/SkSamplingOptions.h"
+#endif
+
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/paint.h"
 
@@ -46,8 +50,18 @@ public:
         return rawPaint_;
     }
 
+#ifdef NG_BUILD
+    const SkSamplingOptions& GetSamplingOptions()
+    {
+        return options_;
+    }
+#endif
+
 private:
     SkPaint rawPaint_;
+#ifdef NG_BUILD
+    SkSamplingOptions options_;
+#endif
 };
 
 } // namespace OHOS::Ace::NG

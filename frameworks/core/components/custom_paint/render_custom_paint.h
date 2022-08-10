@@ -40,6 +40,8 @@ public:
     static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
+    void OnPositionChanged() override;
+    void OnSizeChanged() override;
 
     void PushTask(const TaskFunc& func);
 
@@ -74,6 +76,7 @@ public:
     virtual void StrokeText(const Offset& offset, const std::string& text, double x, double y) = 0;
     virtual double MeasureText(const std::string& text, const PaintState& state) = 0;
     virtual double MeasureTextHeight(const std::string& text, const PaintState& state) = 0;
+    virtual TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) = 0;
 
     virtual void MoveTo(const Offset& offset, double x, double y) = 0;
     virtual void LineTo(const Offset& offset, double x, double y) = 0;
@@ -85,6 +88,7 @@ public:
     virtual void AddRect(const Offset& offset, const Rect& rect) = 0;
 
     virtual void Fill(const Offset& offset) = 0;
+    virtual void Fill(const Offset& offset, const RefPtr<CanvasPath2D>& path) = 0;
     virtual void Stroke(const Offset& offset) = 0;
     virtual void Stroke(const Offset& offset, const RefPtr<CanvasPath2D>& path) = 0;
     virtual void Clip() = 0;
@@ -108,6 +112,9 @@ public:
 
     virtual void WebGLInit(CanvasRenderContextBase* context) = 0;
     virtual void WebGLUpdate() = 0;
+
+    virtual void SetFillRuleForPath(const CanvasFillRule& rule) = 0;
+    virtual void SetFillRuleForPath2D(const CanvasFillRule& rule) = 0;
 
     bool IsRepaintBoundary() const override
     {

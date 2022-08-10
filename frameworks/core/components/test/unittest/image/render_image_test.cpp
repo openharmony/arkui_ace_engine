@@ -55,8 +55,6 @@ void RenderImageTest::TearDown() {}
  * @tc.name: DecideLayoutSize001
  * @tc.desc: Verify that RenderImage can decide a right layout size when width and height are set and maxSize > piSize.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUM
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageTest, DecideLayoutSize001, TestSize.Level1)
 {
@@ -81,8 +79,6 @@ HWTEST_F(RenderImageTest, DecideLayoutSize001, TestSize.Level1)
  * @tc.name: DecideLayoutSize002
  * @tc.desc: Verify that RenderImage can decide a right layout size when width and height are set and maxSize < picSize.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUM
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageTest, DecideLayoutSize002, TestSize.Level1)
 {
@@ -107,8 +103,6 @@ HWTEST_F(RenderImageTest, DecideLayoutSize002, TestSize.Level1)
  * @tc.name: DecideLayoutSize003
  * @tc.desc: Verify that RenderImage can decide a right layout size when maxSize > picSize with no width and height.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUM
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageTest, DecideLayoutSize003, TestSize.Level1)
 {
@@ -133,8 +127,6 @@ HWTEST_F(RenderImageTest, DecideLayoutSize003, TestSize.Level1)
  * @tc.name: DecideLayoutSize004
  * @tc.desc: Verify that RenderImage can decide a right layout size when maxSize < picSize with no width and height.
  * @tc.type: FUNC
- * @tc.require: AR000DAQUM
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageTest, DecideLayoutSize004, TestSize.Level1)
 {
@@ -159,8 +151,6 @@ HWTEST_F(RenderImageTest, DecideLayoutSize004, TestSize.Level1)
  * @tc.name: DecideLayoutSize005
  * @tc.desc: Verify that RenderImage can use max size of layout param when imageComponent is set to fit max size
  * @tc.type: FUNC
- * @tc.require: AR000DAQUM
- * @tc.author: chenxuankai
  */
 HWTEST_F(RenderImageTest, DecideLayoutSize005, TestSize.Level1)
 {

@@ -25,6 +25,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "core/common/container.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/modules/qjs_module_manager.h"
@@ -41,15 +42,18 @@
 #endif
 
 extern const char _binary_stateMgmt_js_start[];
+extern const char _binary_stateMgmtPU_js_start[];
 extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsMockSystemPlugin_js_start[];
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM) || defined(IOS_PLATFORM)
 extern const char* _binary_stateMgmt_js_end;
+extern const char* _binary_stateMgmtPU_js_end;
 extern const char* _binary_jsEnumStyle_js_end;
 extern const char* _binary_jsMockSystemPlugin_js_end;
 #else
 extern const char _binary_stateMgmt_js_end[];
+extern const char _binary_stateMgmtPU_js_end[];
 extern const char _binary_jsEnumStyle_js_end[];
 extern const char _binary_jsMockSystemPlugin_js_end[];
 #endif
@@ -133,6 +137,7 @@ JSContext* QJSDeclarativeEngineInstance::GetCurrentContext()
 
 void QJSDeclarativeEngineInstance::PushJSCommand(const RefPtr<JsCommand>& jsCommand, bool forcePush) const
 {
+#ifndef NG_BUILD
     auto page = GetRunningPage();
     if (page == nullptr) {
         LOGE("Internal error: running page is null.");
@@ -145,6 +150,7 @@ void QJSDeclarativeEngineInstance::PushJSCommand(const RefPtr<JsCommand>& jsComm
     if (!page->CheckPageCreated() && (forcePush || (page->GetCommandSize() > (FRAGMENT_SIZE + 4)))) {
         page->FlushCommands();
     }
+#endif
 }
 
 void QJSDeclarativeEngineInstance::PushJSCommand(JSContext* ctx, const RefPtr<JsCommand>& jsCommand, bool forceFlush)
@@ -449,8 +455,14 @@ bool QJSDeclarativeEngineInstance::InitJSEnv(JSRuntime* runtime, JSContext* cont
         return false;
     }
 
+    std::string jsProxy;
+    if (Container::IsCurrentUsePartialUpdate()) {
+        jsProxy = std::string(_binary_stateMgmtPU_js_start, _binary_stateMgmtPU_js_end - _binary_stateMgmtPU_js_start);
+    } else {
+        jsProxy = std::string(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end - _binary_stateMgmt_js_start);
+    }
+
     // make jsProxy end of '\0'
-    std::string jsProxy(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end - _binary_stateMgmt_js_start);
     std::string jsEnum(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end - _binary_jsEnumStyle_js_start);
     if (!InitAceModules(jsProxy.c_str(), jsProxy.length(), "stateMgmt.js")
         || !InitAceModules(jsEnum.c_str(), jsEnum.length(), "jsEnumStyle.js")) {

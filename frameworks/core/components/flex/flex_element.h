@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FLEX_FLEX_ELEMENT_H
 
 #include "base/utils/macros.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/component_group.h"
 #include "core/focus/focus_node.h"
@@ -37,6 +38,12 @@ public:
         auto flexComponent = AceType::DynamicCast<ComponentGroup>(newComponent);
         if (!flexComponent) {
             return false;
+        }
+
+        // partial update does not produce children
+        auto pipelineContext = context_.Upgrade();
+        if (Container::IsCurrentUsePartialUpdate()) {
+            return true;
         }
         return GetChildren().size() == flexComponent->GetSizeOfChildren();
     }

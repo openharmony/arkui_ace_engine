@@ -27,7 +27,8 @@ namespace OHOS::Ace {
 class ACE_EXPORT NativeCurveHelper {
 public:
     static Rosen::RSAnimationTimingCurve ToNativeCurve(const RefPtr<Curve>& curve);
-    static Rosen::RSMotionPathOption ToNativeMotionPathOption(const MotionPathOption& option);
+    static Rosen::RSMotionPathOption ToNativeMotionPathOption(const MotionPathOption& option,
+	    bool pathNeedOrigin);
 };
 
 } // namespace OHOS::Ace

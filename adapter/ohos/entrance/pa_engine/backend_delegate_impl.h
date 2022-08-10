@@ -24,6 +24,7 @@
 #include "data_ability_predicates.h"
 #include "form_provider_info.h"
 #include "iremote_object.h"
+#include "pac_map.h"
 #include "values_bucket.h"
 #include "want.h"
 
@@ -42,6 +43,8 @@ using JsMessageDispatcherSetterCallback = std::function<void(const RefPtr<JsMess
 using PaEventCallback = std::function<void(const std::string&, const std::string&)>;
 using DestroyApplicationCallback = std::function<void(const std::string& packageName)>;
 using InsertCallback = std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value)>;
+using CallCallback = std::function<std::shared_ptr<AppExecFwk::PacMap>(const std::string& method,
+    const std::string& arg, const AppExecFwk::PacMap& pacMap)>;
 using QueryCallback = std::function<std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet>(
     const Uri& uri, const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates)>;
 using UpdateCallback = std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
@@ -66,6 +69,7 @@ using VisibilityChangedCallback = std::function<void(const std::map<int64_t, int
 using AcquireStateCallback = std::function<int32_t(const OHOS::AAFwk::Want &want)>;
 using CommandCallback = std::function<void(const OHOS::AAFwk::Want &want, int startId)>;
 using CommandApplicationCallback = std::function<void(const std::string& intent, int startId)>;
+using ShareFormCallback = std::function<bool(int64_t formId, OHOS::AAFwk::WantParams& wntParams)>;
 using DumpHeapSnapshotCallback = std::function<void(bool isPrivate)>;
 
 struct BackendDelegateImplBuilder {
@@ -76,6 +80,7 @@ struct BackendDelegateImplBuilder {
     JsMessageDispatcherSetterCallback transferCallback;
     DestroyApplicationCallback destroyApplicationCallback;
     InsertCallback insertCallback;
+    CallCallback callCallback;
     QueryCallback queryCallback;
     UpdateCallback updateCallback;
     DeleteCallback deleteCallback;
@@ -97,6 +102,7 @@ struct BackendDelegateImplBuilder {
     AcquireStateCallback acquireStateCallback;
     CommandCallback commandCallback;
     CommandApplicationCallback commandApplicationCallback;
+    ShareFormCallback shareFormCallback;
     DumpHeapSnapshotCallback dumpHeapSnapshotCallback;
     BackendType type;
 };
@@ -167,6 +173,8 @@ public:
     void MethodChannel(const std::string& methodName, std::string& jsonStr);
 
     int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value);
+    std::shared_ptr<AppExecFwk::PacMap> Call(const Uri& uri,
+        const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap);
     std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(const Uri& uri, const std::vector<std::string>& columns,
         const OHOS::NativeRdb::DataAbilityPredicates& predicates);
     int32_t Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
@@ -188,6 +196,7 @@ public:
     void OnCastTemptoNormal(const int64_t formId);
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap);
     int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want);
+    bool OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams);
 
 private:
     void LoadPa(const std::string& url, const OHOS::AAFwk::Want& want);
@@ -206,6 +215,7 @@ private:
     PaEventCallback syncEvent_;
 
     InsertCallback insert_;
+    CallCallback call_;
     QueryCallback query_;
     UpdateCallback update_;
     DeleteCallback delete_;
@@ -230,6 +240,7 @@ private:
     VisibilityChangedCallback visibilityChangedCallback_;
     AcquireStateCallback acquireStateCallback_;
     CommandCallback commandCallback_;
+    ShareFormCallback shareFormCallback_;
     DumpHeapSnapshotCallback dumpHeapSnapshotCallback_;
 
     RefPtr<Framework::ManifestParser> manifestParser_;

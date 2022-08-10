@@ -21,8 +21,8 @@
 
 namespace OHOS::Ace::NG {
 struct LinearLayoutAttribute {
-    ACE_DEFINE_STRUCT_PROPERTY(CrossAxisAlign, FlexAlign);
-    ACE_DEFINE_STRUCT_PROPERTY(MainAxisAlign, FlexAlign);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(CrossAxisAlign, FlexAlign);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MainAxisAlign, FlexAlign);
 };
 } // namespace OHOS::Ace::NG
 

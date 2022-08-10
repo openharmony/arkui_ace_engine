@@ -17,21 +17,21 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_modifier.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void RowView::Create()
 {
-    auto pattern = AceType::MakeRefPtr<LinearLayoutPattern>(false);
-    // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, V2::ROW_ETS_TAG, pattern);
-    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    stack->Push(frameNode);
 }
 
 void RowView::AlignItems(FlexAlign flexAlign)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(CrossAxisAlignModifier(flexAlign));
+    ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign);
 }
 } // namespace OHOS::Ace::NG

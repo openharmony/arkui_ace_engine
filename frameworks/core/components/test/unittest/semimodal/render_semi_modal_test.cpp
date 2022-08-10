@@ -175,8 +175,6 @@ protected:
  * @tc.name: SemiModalAnimationTest001
  * @tc.desc: Test Semi Modal enter transition
  * @tc.type: FUNC
- * @tc.require: AR000ELMHS
- * @tc.author: zhouzebin
  */
 HWTEST_F(RenderSemiModalTest, SemiModalAnimationTest001, TestSize.Level1)
 {
@@ -199,8 +197,6 @@ HWTEST_F(RenderSemiModalTest, SemiModalAnimationTest001, TestSize.Level1)
  * @tc.name: SemiModalAnimationTest002
  * @tc.desc: Test Semi Modal full window transition
  * @tc.type: FUNC
- * @tc.require: AR000ELMHT
- * @tc.author: zhouzebin
  */
 HWTEST_F(RenderSemiModalTest, SemiModalAnimationTest002, TestSize.Level1)
 {
@@ -228,8 +224,6 @@ HWTEST_F(RenderSemiModalTest, SemiModalAnimationTest002, TestSize.Level1)
  * @tc.name: SemiModalAnimationTest003
  * @tc.desc: Test Semi Modal System bar height padding
  * @tc.type: FUNC
- * @tc.require: AR000EMO97
- * @tc.author: zhouzebin
  */
 HWTEST_F(RenderSemiModalTest, SemiModalAnimationTest003, TestSize.Level1)
 {
@@ -256,8 +250,6 @@ HWTEST_F(RenderSemiModalTest, SemiModalAnimationTest003, TestSize.Level1)
  * @tc.name: SemiModalAnimationTest004
  * @tc.desc: Test Semi Modal with drag_bar init show mode
  * @tc.type: FUNC
- * @tc.require: AR000F3CBH
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderSemiModalTest, SemiModalAnimationTest004, TestSize.Level1)
 {
@@ -278,8 +270,6 @@ HWTEST_F(RenderSemiModalTest, SemiModalAnimationTest004, TestSize.Level1)
  * @tc.name: SemiModalAnimationTest005
  * @tc.desc: Test Semi Modal with drag_bar FullWindow show mode
  * @tc.type: FUNC
- * @tc.require: AR000F3CBI
- * @tc.author: zhongjianfei
  */
 HWTEST_F(RenderSemiModalTest, SemiModalAnimationTest005, TestSize.Level1)
 {

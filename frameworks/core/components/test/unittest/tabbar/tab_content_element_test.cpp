@@ -147,8 +147,6 @@ RefPtr<FlexComponent> TabContentElementTest::CreateContent()
  * @tc.name: TabContentElementTest001
  * @tc.desc: Verify the basic function of request focus and release focus.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5Q
- * @tc.author: jiangtao
  */
 HWTEST_F(TabContentElementTest, TabContentElementTest001, TestSize.Level1)
 {
@@ -211,8 +209,6 @@ HWTEST_F(TabContentElementTest, TabContentElementTest001, TestSize.Level1)
  * @tc.name: TabContentElementTest002
  * @tc.desc: When tabContent got the focus, change to another focusable child.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5Q
- * @tc.author: jiangtao
  */
 HWTEST_F(TabContentElementTest, TabContentElementTest002, TestSize.Level1)
 {
@@ -257,8 +253,6 @@ HWTEST_F(TabContentElementTest, TabContentElementTest002, TestSize.Level1)
  * @tc.name: TabContentElementTest003
  * @tc.desc: When tabContent got the focus, change to another can't not focusable child.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5Q
- * @tc.author: jiangtao
  */
 HWTEST_F(TabContentElementTest, TabContentElementTest003, TestSize.Level1)
 {
@@ -310,8 +304,6 @@ HWTEST_F(TabContentElementTest, TabContentElementTest003, TestSize.Level1)
  * @tc.name: TabContentElementTest004
  * @tc.desc: When tabContent lost the focus, change to another focusable child.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5Q
- * @tc.author: jiangtao
  */
 HWTEST_F(TabContentElementTest, TabContentElementTest004, TestSize.Level1)
 {
@@ -352,8 +344,6 @@ HWTEST_F(TabContentElementTest, TabContentElementTest004, TestSize.Level1)
  * @tc.name: TabContentElementTest005
  * @tc.desc: When tabContent lost the focus, change to another can't not focusable child.
  * @tc.type: FUNC
- * @tc.require: AR000DHJ5Q
- * @tc.author: jiangtao
  */
 HWTEST_F(TabContentElementTest, TabContentElementTest005, TestSize.Level1)
 {

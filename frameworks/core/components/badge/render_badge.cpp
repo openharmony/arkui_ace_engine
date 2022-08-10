@@ -16,6 +16,7 @@
 #include "core/components/badge/render_badge.h"
 
 #include "base/log/event_report.h"
+#include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/event/ace_event_helper.h"
@@ -114,7 +115,7 @@ void RenderBadge::PerformLayout()
         // without executing of RenderBadge::Update
         // In that case showMessage_ remains false and
         // Badge never shown.
-        if (!context_.Upgrade()->UsePartialUpdate()) {
+        if (!Container::IsCurrentUsePartialUpdate()) {
             showMessage_ = false;
         }
         return;
@@ -169,10 +170,10 @@ void RenderBadge::InitialBadgeText()
     badgeRenderText_->SetLayoutParam(innerLayout);
 }
 
-bool RenderBadge::ParseBadgeStatus(const std::string& label, int64_t messageCount, int64_t countLimit)
+bool RenderBadge::ParseBadgeStatus(const std::optional<std::string>& label, int64_t messageCount, int64_t countLimit)
 {
-    if (!label.empty()) {
-        textData_ = label;
+    if (label.has_value()) {
+        textData_ = label.value();
         return true;
     }
     if (messageCount < 0) {

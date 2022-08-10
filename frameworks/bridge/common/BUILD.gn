@@ -167,8 +167,60 @@ template("bridge_common") {
   }
 }
 
+template("bridge_common_ng") {
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    part_name = ace_engine_part
+    defines += invoker.defines
+
+    configs = [ "$ace_root:ace_config" ]
+
+    sources = [
+      # manifest
+      "dom/dom_type.cpp",
+      "manifest/manifest_appinfo.cpp",
+      "manifest/manifest_parser.cpp",
+      "manifest/manifest_router.cpp",
+      "manifest/manifest_widget.cpp",
+      "manifest/manifest_window.cpp",
+
+      # media query
+      "media_query/media_query_info.cpp",
+      "media_query/media_queryer.cpp",
+
+      # plugin adapter
+      "plugin_adapter/plugin_bridge.cpp",
+
+      # utils
+      "../js_frontend/engine/common/js_constants.cpp",
+      "../js_frontend/frontend_delegate.cpp",
+      "../js_frontend/js_ace_page.cpp",
+      "utils/engine_helper.cpp",
+      "utils/source_map.cpp",
+      "utils/utils.cpp",
+    ]
+
+    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  }
+}
+
 foreach(item, ace_platforms) {
   bridge_common("bridge_common_" + item.name) {
+    defines = []
+    config = {
+    }
+
+    if (defined(item.config)) {
+      config = item.config
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+  }
+
+  bridge_common_ng("bridge_common_ng_" + item.name) {
     defines = []
     config = {
     }

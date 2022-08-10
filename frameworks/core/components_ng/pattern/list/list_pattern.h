@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/list/list_item_builder.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -44,20 +43,10 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto listLayoutAlgorithm = MakeRefPtr<ListLayoutAlgorithm>(startIndex_, endIndex_);
-        listLayoutAlgorithm->SetBuilder(builder_);
         listLayoutAlgorithm->SetCurrentOffset(currentOffset_);
         currentOffset_ = 0;
+        listLayoutAlgorithm->SetIsInitialized(isInitialized_);
         return listLayoutAlgorithm;
-    }
-
-    void AddForEachBuilder(const RefPtr<ForEachBuilder>& builder)
-    {
-        builder_->AddUiNodeId(builder);
-    }
-
-    void AddNonLazyItem(const RefPtr<FrameNode>& node)
-    {
-        builder_->AddUiNodeId(node);
     }
 
     void UpdateCurrentOffset(float offset);
@@ -66,15 +55,11 @@ private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
-    void OnDetachFromFrameNode() override
-    {
-        builder_->Clean();
-    }
 
     RefPtr<ScrollableEvent> scrollableEvent_;
-    RefPtr<ListItemBuilder> builder_ = MakeRefPtr<ListItemBuilder>();
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
+    bool isInitialized_ = false;
     float currentOffset_ = 0.0;
 };
 } // namespace OHOS::Ace::NG

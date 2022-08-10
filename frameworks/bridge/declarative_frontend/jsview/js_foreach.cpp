@@ -20,16 +20,17 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/functions/js_foreach_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container.h"
 #include "core/components/foreach/for_each_component.h"
 #include "core/components_part_upd/foreach/foreach_component.h"
 #include "core/components_part_upd/foreach/foreach_element.h"
+#include "core/components_v2/common/element_proxy.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSForEach::Create(const JSCallbackInfo& info)
 {
-    auto const context = JSViewAbstract::GetPipelineContext();
-    if (context && context->UsePartialUpdate()) {
+    if (Container::IsCurrentUsePartialUpdate()) {
         CreateForPartialUpdate();
         return;
     }
@@ -52,7 +53,7 @@ void JSForEach::Create(const JSCallbackInfo& info)
         jsForEachFunction = AceType::MakeRefPtr<JsForEachFunction>(jsArray, JSRef<JSFunc>::Cast(jsViewMapperFunc));
     }
 
-    auto viewStack = ViewStackProcessor::GetInstance();
+    auto* viewStack = ViewStackProcessor::GetInstance();
     std::string viewId = viewStack->ProcessViewId(info[0]->ToString());
     viewStack->Push(AceType::MakeRefPtr<ForEachComponent>(viewId, "ForEach"));
 
@@ -106,12 +107,12 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
     }
 
     const int32_t elmtId = info[0]->ToNumber<int32_t>();
-    std::list<std::string> cppList = PartUpd::ForEachElementLookup::GetIdArray(elmtId);
+    std::list<std::string> cppList = OHOS::Ace::V2::ForEachElementLookup::GetIdArray(elmtId);
 
     size_t index = 0;
     for (const auto& id : cppList) {
-        LOGD("  array id %{public}s", id.c_str());
-        jsArr->SetValueAt(index++, JSRef<JSString>::New(id.c_str()));
+        LOGD("  array id %{public}d - '%{public}s'", static_cast<int32_t>(index), id.c_str());
+        jsArr->SetValueAt(index++, JSRef<JSVal>::Make(ToJSValue(id.c_str())));
     }
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(index > 0)));
 }
@@ -129,7 +130,7 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
         return;
     }
 
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<PartUpd::ForEachComponent>(stack->GetMainComponent());
 
     JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[1]);
@@ -138,6 +139,7 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
     for (size_t i = 0; i < jsArr->Length(); i++) {
         JSRef<JSVal> strId = jsArr->GetValueAt(i);
         std::string value = strId->ToString();
+        LOGD("JSForEach::SetIdArray %{public}d - value '%{public}s'", static_cast<int32_t>(i), value.c_str());
         newIdArr.insert(newIdArr.end(), value);
     }
 
@@ -146,9 +148,8 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
     // re-render case
     // children of IfElement will be replaced
     // mark them as removed in ElementRegistry
-    RefPtr<OHOS::Ace::PartUpd::ForEachElement> forEachElement =
-        ElementRegister::GetInstance()->GetSpecificElementById<OHOS::Ace::PartUpd::ForEachElement>(
-            component->GetElementId());
+    auto forEachElement =
+        ElementRegister::GetInstance()->GetSpecificItemById<PartUpd::ForEachElement>(component->GetElementId());
     if (!forEachElement) {
         // first render case
         return;
@@ -170,7 +171,7 @@ void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
     const auto id = info[0]->ToString();
 
     LOGD("Start create child with array id %{public}s.", id.c_str());
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     stack->PushKey(id);
     const auto stacksKey = stack->GetKey();
     stack->Push(AceType::MakeRefPtr<MultiComposedComponent>(stacksKey, "ForEachItem"));
@@ -188,7 +189,7 @@ void JSForEach::CreateNewChildFinish(const JSCallbackInfo& info)
 
     const auto id = info[0]->ToString();
     LOGD("Finish create child with array id %{public}s.", id.c_str());
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     stack->PopKey();
     stack->PopContainer();
 }

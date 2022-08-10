@@ -317,6 +317,22 @@ public:
     virtual void Invoke(const std::string& origin, const bool& allow, const bool& retain) = 0;
 };
 
+class ACE_EXPORT WebPermissionRequest : public AceType {
+    DECLARE_ACE_TYPE(WebPermissionRequest, AceType)
+
+public:
+    WebPermissionRequest() = default;
+    ~WebPermissionRequest() = default;
+
+    virtual void Deny() const = 0;
+
+    virtual std::string GetOrigin() const = 0;
+
+    virtual std::vector<std::string> GetResources() const = 0;
+
+    virtual void Grant(std::vector<std::string>& resources) const = 0;
+};
+
 class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageStartEvent, BaseEventInfo);
 
@@ -440,6 +456,23 @@ public:
 private:
     std::string origin_;
     RefPtr<WebGeolocation> webGeolocation_;
+};
+
+class ACE_EXPORT WebPermissionRequestEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebPermissionRequestEvent, BaseEventInfo);
+
+public:
+    WebPermissionRequestEvent(const RefPtr<WebPermissionRequest>& webPermissionRequest)
+        : BaseEventInfo("WebPermissionRequestEvent"), webPermissionRequest_(webPermissionRequest) {}
+    ~WebPermissionRequestEvent() = default;
+
+    const RefPtr<WebPermissionRequest>& GetWebPermissionRequest() const
+    {
+        return webPermissionRequest_;
+    }
+
+private:
+    RefPtr<WebPermissionRequest> webPermissionRequest_;
 };
 
 class ACE_EXPORT DownloadStartEvent : public BaseEventInfo {
@@ -710,6 +743,90 @@ public:
 private:
     float oldScale_ = 0.0f;
     float newScale_ = 0.0f;
+};
+
+class WebContextMenuParam : public AceType {
+    DECLARE_ACE_TYPE(WebContextMenuParam, AceType)
+
+public:
+    WebContextMenuParam() = default;
+    ~WebContextMenuParam() = default;
+
+    virtual int32_t GetXCoord() const = 0;
+    virtual int32_t GetYCoord() const = 0;
+    virtual std::string GetLinkUrl() const = 0;
+    virtual std::string GetUnfilteredLinkUrl() const = 0;
+    virtual std::string GetSourceUrl() const = 0;
+    virtual bool HasImageContents() const = 0;
+};
+
+class ACE_EXPORT ContextMenuResult : public AceType {
+    DECLARE_ACE_TYPE(ContextMenuResult, AceType)
+
+public:
+    ContextMenuResult() = default;
+    ~ContextMenuResult() = default;
+
+    virtual void Cancel() const = 0;
+    virtual void CopyImage() const = 0;
+};
+
+class ACE_EXPORT ContextMenuEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ContextMenuEvent, BaseEventInfo);
+
+public:
+    ContextMenuEvent(const RefPtr<WebContextMenuParam>& param,
+                      const RefPtr<ContextMenuResult>& result)
+        : BaseEventInfo("ContextShowEvent"), param_(param), result_(result)
+    {
+        LOGI("ContextShowEvent constructor");
+    }
+    ~ContextMenuEvent() = default;
+
+    const RefPtr<WebContextMenuParam>& GetParam() const
+    {
+        return param_;
+    }
+
+    const RefPtr<ContextMenuResult>& GetContextMenuResult() const
+    {
+        return result_;
+    }
+
+private:
+    RefPtr<WebContextMenuParam> param_;
+    RefPtr<ContextMenuResult> result_;
+};
+
+class ACE_EXPORT SearchResultReceiveEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(SearchResultReceiveEvent, BaseEventInfo);
+
+public:
+    SearchResultReceiveEvent(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting)
+        : BaseEventInfo("SearchResultReceiveEvent"), activeMatchOrdinal_(activeMatchOrdinal),
+          numberOfMatches_(numberOfMatches), isDoneCounting_(isDoneCounting)
+    {}
+    ~SearchResultReceiveEvent() = default;
+
+    int GetActiveMatchOrdinal() const
+    {
+        return activeMatchOrdinal_;
+    }
+
+    int GetNumberOfMatches() const
+    {
+        return numberOfMatches_;
+    }
+
+    bool GetIsDoneCounting() const
+    {
+        return isDoneCounting_;
+    }
+
+private:
+    int activeMatchOrdinal_;
+    int numberOfMatches_;
+    bool isDoneCounting_;
 };
 } // namespace OHOS::Ace
 

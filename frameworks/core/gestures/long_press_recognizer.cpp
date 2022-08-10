@@ -119,6 +119,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     } else {
         pendingEnd_ = true;
     }
+    Reset();
 }
 
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
@@ -161,6 +162,7 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     } else {
         pendingCancel_ = true;
     }
+    Reset();
 }
 
 void LongPressRecognizer::HandleOverdueDeadline()

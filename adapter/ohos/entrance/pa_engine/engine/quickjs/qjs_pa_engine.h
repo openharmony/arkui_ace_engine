@@ -149,6 +149,8 @@ public:
     void FireSyncEvent(const std::string& eventId, const std::string& param) override;
 
     int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value) override;
+    std::shared_ptr<AppExecFwk::PacMap> Call(const std::string& method,
+        const std::string& arg, const AppExecFwk::PacMap& pacMap) override;
     std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(const Uri& uri, const std::vector<std::string>& columns,
         const OHOS::NativeRdb::DataAbilityPredicates& predicates) override;
     int32_t Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
@@ -172,6 +174,7 @@ public:
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
     int32_t OnAcquireFormState(const OHOS::AAFwk::Want &want) override;
     void OnCommand(const OHOS::AAFwk::Want &want, int startId) override;
+    bool OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams) override;
     void DumpHeapSnapshot(bool isPrivate) override {}
 
 private:

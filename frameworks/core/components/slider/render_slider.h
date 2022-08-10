@@ -21,9 +21,11 @@
 #include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
 #include "core/components/slider/block_component.h"
+#include "core/components/slider/render_block.h"
 #include "core/components/slider/slider_component.h"
 #include "core/components/text/render_text.h"
 #include "core/components/text/text_component.h"
+#include "core/components/track/render_track.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
@@ -35,6 +37,7 @@ constexpr double DEFAULT_VALUE = 0.0;
 constexpr double DEFAULT_MAX = 1.0;
 constexpr double DEFAULT_MIN = 0.0;
 constexpr double DEFAULT_STEP = 1.0;
+constexpr Dimension FOCUS_PADDING = 2.0_vp;
 const Dimension SLIDER_PADDING_DP = 13.5_vp;
 
 enum class SliderEvent {
@@ -243,6 +246,7 @@ protected:
     void UpdateAccessibilityAttr();
     void InitAccessibilityEventListener();
     void HandleScrollUpdate(double delta);
+    void HandleFocus();
     RefPtr<RawRecognizer> touchDetector_;
 
     bool renderWholeNode_ = true;
@@ -288,6 +292,8 @@ protected:
     WeakPtr<SliderComponent> sliderComponent_;
 
     std::function<void(double,int)> onChange_;
+    RefPtr<RenderNode> block_ = AceType::MakeRefPtr<RenderBlock>();
+    RefPtr<RenderNode> track_ = AceType::MakeRefPtr<RenderTrack>();
 
 private:
     // Slider render information

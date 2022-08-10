@@ -182,8 +182,6 @@ protected:
  * @tc.name: TransitionPropertyTest001
  * @tc.desc: test width animation in transition.
  * @tc.type: FUNC
- * @tc.require: AR000FL0U3
- * @tc.author: jiachunhui
  */
 HWTEST_F(TransitionPropertyElementTest, TransitionPropertyTest001, TestSize.Level1)
 {
@@ -216,8 +214,6 @@ HWTEST_F(TransitionPropertyElementTest, TransitionPropertyTest001, TestSize.Leve
  * @tc.name: TransitionPropertyTest002
  * @tc.desc: test width animation in transition.
  * @tc.type: FUNC
- * @tc.require: AR000FL0TV
- * @tc.author: jiachunhui
  */
 HWTEST_F(TransitionPropertyElementTest, TransitionPropertyTest002, TestSize.Level1)
 {
@@ -251,8 +247,6 @@ HWTEST_F(TransitionPropertyElementTest, TransitionPropertyTest002, TestSize.Leve
  * @tc.name: TransitionPropertyTest003
  * @tc.desc: test height animation in transition.
  * @tc.type: FUNC
- * @tc.require: AR000FL0U0
- * @tc.author: jiachunhui
  */
 HWTEST_F(TransitionPropertyElementTest, TransitionPropertyTest003, TestSize.Level1)
 {
@@ -285,8 +279,6 @@ HWTEST_F(TransitionPropertyElementTest, TransitionPropertyTest003, TestSize.Leve
  * @tc.name: TransitionPropertyTest004
  * @tc.desc: test height animation in transition.
  * @tc.type: FUNC
- * @tc.require: AR000FL0U1
- * @tc.author: jiachunhui
  */
 HWTEST_F(TransitionPropertyElementTest, TransitionPropertyTest004, TestSize.Level1)
 {
@@ -320,8 +312,6 @@ HWTEST_F(TransitionPropertyElementTest, TransitionPropertyTest004, TestSize.Leve
  * @tc.name: TransitionPropertyTest005
  * @tc.desc: test color animation in transition.
  * @tc.type: FUNC
- * @tc.require: AR000FL0U2
- * @tc.author: jiachunhui
  */
 HWTEST_F(TransitionPropertyElementTest, TransitionPropertyTest005, TestSize.Level1)
 {

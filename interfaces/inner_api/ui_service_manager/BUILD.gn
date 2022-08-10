@@ -25,6 +25,7 @@ config("uiservice_manager_public_config") {
     "//foundation/graphic/graphic_2d/interfaces/innerkits/common",
     "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
     "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
     "$ability_runtime_innerkits_path/ability_manager/include/",
     "$ability_runtime_path/interfaces/kits/native/ability/native",
     "$ability_runtime_services_path/uiservicemgr/include",
@@ -59,11 +60,7 @@ ohos_shared_library("ui_service_mgr") {
   ]
 
   deps = [
-    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//foundation/window/window_manager/utils:libwmutil",
-    "//foundation/window/window_manager/wm:libwm",
-    "//third_party/icu/icu4c:shared_icui18n",
-    "//third_party/icu/icu4c:shared_icuuc",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//utils/native/base:utils",
   ]
 

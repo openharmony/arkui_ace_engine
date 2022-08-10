@@ -47,7 +47,7 @@ constexpr int32_t LOAD_DOCUMENT_STR_LENGTH = 16;
 QJSDeclarativeEngine::~QJSDeclarativeEngine()
 {
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         nativeEngine_->DeleteEngine();
@@ -80,7 +80,7 @@ bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         return false;
     }
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {
@@ -292,6 +292,9 @@ void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::s
 #endif
 RefPtr<Component> QJSDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode)
 {
+#ifdef NG_BUILD
+    return nullptr;
+#else
     ViewStackProcessor::GetInstance()->ClearStack();
     bool result = engineInstance_->InitAceModules(jsCode.c_str(), jsCode.length(), "AddComponent");
     if (!result) {
@@ -300,6 +303,7 @@ RefPtr<Component> QJSDeclarativeEngine::GetNewComponentWithJsCode(const std::str
     }
     auto component = ViewStackProcessor::GetInstance()->GetNewComponent();
     return component;
+#endif
 }
 
 void QJSDeclarativeEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
@@ -567,6 +571,7 @@ void QJSDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
 void QJSDeclarativeEngine::FireExternalEvent(
     const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
+#ifndef NG_BUILD
 #ifdef XCOMPONENT_SUPPORTED
     if (isDestroy) {
         XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
@@ -652,6 +657,7 @@ void QJSDeclarativeEngine::FireExternalEvent(
         return;
     }
     delegate->PostSyncTaskToPage(task);
+#endif
 #endif
 }
 

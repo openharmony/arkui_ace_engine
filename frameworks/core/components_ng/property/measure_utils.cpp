@@ -28,9 +28,10 @@ SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty, co
 float ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty, float parentLength)
 {
     double result = -1.0;
-    if (!value.NormalizeToPx(scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale,
-            parentLength, result)) {
-        LOGE("fail to Convert CalcDimension To Px");
+    if (!value.NormalizeToPx(
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength, result)) {
+        LOGE("fail to Convert CalcDimension To Px: %{public}f, %{public}f, %{public}f, %{public}f",
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength);
     }
     return static_cast<float>(result);
 }
@@ -42,9 +43,10 @@ std::optional<float> ConvertToPx(
         return std::nullopt;
     }
     double result = -1.0;
-    if (!value.value().NormalizeToPx(scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale,
-            parentLength, result)) {
-        LOGE("fail to Convert CalcDimension To Px");
+    if (!value.value().NormalizeToPx(
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength, result)) {
+        LOGE("optional: fail to Convert CalcDimension To Px: %{public}f, %{public}f, %{public}f, %{public}f",
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength);
         return std::nullopt;
     }
     return static_cast<float>(result);
@@ -53,9 +55,10 @@ std::optional<float> ConvertToPx(
 float ConvertToPx(const Dimension& dimension, const ScaleProperty& scaleProperty, float parentLength)
 {
     double result = -1.0;
-    if (!dimension.NormalizeToPx(scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale,
-            parentLength, result)) {
-        LOGE("fail to Convert dimension To Px");
+    if (!dimension.NormalizeToPx(
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength, result)) {
+        LOGE("fail to Convert dimension To Px: %{public}f, %{public}f, %{public}f, %{public}f", scaleProperty.vpScale,
+            scaleProperty.fpScale, scaleProperty.lpxScale, parentLength);
     }
     return static_cast<float>(result);
 }

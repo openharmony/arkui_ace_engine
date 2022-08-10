@@ -70,9 +70,15 @@ public:
         return !onShow_;
     }
 
+    void SetDensity(double density)
+    {
+        density_ = density;
+    }
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
+    double density_ = 1.0;
     std::list<AceVsyncCallback> callbacks_;
 
 private:

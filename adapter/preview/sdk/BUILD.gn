@@ -24,15 +24,6 @@ if (is_standard_system) {
   system_resource_path =
       get_label_info("//utils/system_resources/systemres:systemres_hap",
                      "target_out_dir") + "/resources"
-  if (host_os == "mac") {
-    resource_manager_library = get_label_info(
-                                   "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
-                                   "root_out_dir") + "/global/resource_management/libglobal_resmgr_mac.dylib"
-  } else {
-    resource_manager_library = get_label_info(
-                                   "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
-                                   "root_out_dir") + "/global/resource_management/libglobal_resmgr_win.dll"
-  }
 } else {
   system_resource_hap_path =
       get_label_info("//utils/system_resources/systemres:systemres_hap",
@@ -56,144 +47,15 @@ action("get_system_resource") {
 
 # Triggered only when the SDK is compiled
 if (is_standard_system) {
-  ohos_copy("copy_preview_shared_library") {
-    if (use_mac) {
-      mac_shared_library_path =
-          get_label_info(":libace_engine_mac($mac_buildtool)", "root_out_dir") +
-          "/common/common/libace_engine_mac.dylib"
-      deps = [
-        "$ace_root/adapter/preview/build:libace_engine_mac(${mac_buildtool})",
-      ]
-      if (enable_glfw_window) {
-        deps += [
-          "$ace_root/adapter/preview/build:ace_for_mac",
-          "$ace_root/adapter/preview/entrance/test:test_bridge_mac",
-        ]
-      }
-      sources = [ mac_shared_library_path ]
-      outputs =
-          [ target_out_dir + "/previewer/common/bin/libace_engine_mac.dylib" ]
-      module_source_dir = target_out_dir + "/previewer/common/bin/"
-      module_install_name = ""
-    } else {
-      windows_shared_library_path =
-          get_label_info(":libace_engine_windows", "root_out_dir") +
-          "/common/common/libace_engine_windows.dll"
-      deps = [ "$ace_root/adapter/preview/build:libace_engine_windows" ]
-      if (enable_glfw_window) {
-        deps += [
-          "$ace_root/adapter/preview/build:ace_for_windows",
-          "$ace_root/adapter/preview/entrance/test:test_bridge_windows",
-        ]
-      }
-      sources = [ windows_shared_library_path ]
-      outputs =
-          [ target_out_dir + "/previewer/common/bin/libace_engine_windows.dll" ]
-      module_source_dir = target_out_dir + "/previewer/common/bin/"
-      module_install_name = ""
-    }
+  # Avoid conditional judgment branches caused by dynamic library suffixes.
+  if (use_mac) {
+    dylib_suffix = ".dylib"
+  } else {
+    dylib_suffix = ".dll"
   }
 
-  ohos_copy("copy_ohos_fonts") {
-    sources = [
-      "//foundation/arkui/ace_engine/adapter/preview/sdk/fontconfig.json",
-      "//utils/system_resources/fonts",
-    ]
-    outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
-    module_source_dir = target_out_dir + "/previewer/common/bin/"
-    module_install_name = ""
-  }
-
-  ohos_copy("copy_napi_shared_library") {
-    shared_library_path_napi =
-        get_label_info("//foundation/arkui/napi:ace_napi", "root_out_dir")
-    shared_library_path_uv =
-        get_label_info("//third_party/libuv:uv", "root_out_dir")
-    icu_shared_library =
-        get_label_info("//third_party/icu/icu4c:shared_icuuc", "root_out_dir")
-
-    # ark js engine relvant dynamic library
-    if (enable_ark_preview) {
-      ark_core_shared_library =
-          get_label_info("//arkcompiler/runtime_core/libpandabase:libarkbase",
-                         "root_out_dir") + "/ark/ark"
-      ark_js_shared_library =
-          get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
-                         "root_out_dir") + "/ark/ark_js_runtime"
-      deps = [
-        "$ace_napi:ace_napi",
-        "$ace_napi:ace_napi_ark",
-        "//arkcompiler/ets_runtime:libark_jsruntime",
-        "//arkcompiler/runtime_core/libpandabase:libarkbase",
-        "//arkcompiler/runtime_core/libpandafile:libarkfile",
-        "//arkcompiler/runtime_core/libziparchive:libarkziparchive",
-        "//third_party/icu/icu4c:shared_icui18n",
-        "//third_party/icu/icu4c:shared_icuuc",
-        "//third_party/libuv:uv",
-      ]
-      if (use_mingw_win) {
-        sources = [
-          "$ark_core_shared_library/libarkbase.dll",
-          "$ark_core_shared_library/libarkfile.dll",
-          "$ark_core_shared_library/libarkziparchive.dll",
-          "$ark_js_shared_library/libark_jsruntime.dll",
-          "$icu_shared_library/thirdparty/icu/libhmicui18n.dll",
-          "$icu_shared_library/thirdparty/icu/libhmicuuc.dll",
-          "$shared_library_path_napi/arkui/napi/libace_napi.dll",
-          "$shared_library_path_napi/arkui/napi/libace_napi_ark.dll",
-          "$shared_library_path_uv/thirdparty/libuv/libuv.dll",
-          "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
-        ]
-      } else {
-        sources = [
-          "$ark_core_shared_library/libarkbase.dylib",
-          "$ark_core_shared_library/libarkfile.dylib",
-          "$ark_core_shared_library/libarkziparchive.dylib",
-          "$ark_js_shared_library/libark_jsruntime.dylib",
-          "$icu_shared_library/thirdparty/icu/libhmicui18n.dylib",
-          "$icu_shared_library/thirdparty/icu/libhmicuuc.dylib",
-          "$shared_library_path_napi/arkui/napi/libace_napi.dylib",
-          "$shared_library_path_napi/arkui/napi/libace_napi_ark.dylib",
-          "$shared_library_path_uv/thirdparty/libuv/libuv.dylib",
-          "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
-        ]
-      }
-    } else {
-      deps = [
-        "//foundation/arkui/napi:ace_napi",
-        "//foundation/arkui/napi:ace_napi_quickjs",
-        "//third_party/icu/icu4c:shared_icui18n",
-        "//third_party/icu/icu4c:shared_icuuc",
-        "//third_party/libuv:uv",
-      ]
-      if (use_mac) {
-        sources = [
-          "$icu_shared_library/thirdparty/icu/libhmicui18n.dylib",
-          "$icu_shared_library/thirdparty/icu/libhmicuuc.dylib",
-          "$shared_library_path_napi/arkui/napi/libace_napi.dylib",
-          "$shared_library_path_napi/arkui/napi/libace_napi_quickjs.dylib",
-          "$shared_library_path_uv/thirdparty/libuv/libuv.dylib",
-        ]
-      } else {
-        # ark windows compiling check
-        deps += [
-          "$ace_napi:ace_napi_ark",
-          "//arkcompiler/ets_runtime/ecmascript/js_vm:ark_js_vm",
-        ]
-        sources = [
-          "$icu_shared_library/thirdparty/icu/libhmicui18n.dll",
-          "$icu_shared_library/thirdparty/icu/libhmicuuc.dll",
-          "$shared_library_path_napi/arkui/napi/libace_napi.dll",
-          "$shared_library_path_napi/arkui/napi/libace_napi_quickjs.dll",
-          "$shared_library_path_uv/thirdparty/libuv/libuv.dll",
-        ]
-      }
-    }
-    outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
-    module_source_dir = target_out_dir + "/previewer/common/bin"
-    module_install_name = ""
-  }
-
+  # All dynamic libraries to be copied to the path "/previewer/common/bin/module/",
+  # which are called by the napi framework, can be added to this script.
   ohos_copy("copy_napi_modules_shared_library") {
     deps = []
     sources = []
@@ -201,11 +63,7 @@ if (is_standard_system) {
       out_path = get_label_info("$ace_root/interfaces/napi/kits:${module}",
                                 "root_out_dir")
       deps += [ "$ace_root/interfaces/napi/kits:${module}" ]
-      if (use_mac) {
-        sources += [ "${out_path}/arkui/ace_engine/lib${module}.dylib" ]
-      } else {
-        sources += [ "${out_path}/arkui/ace_engine/lib${module}.dll" ]
-      }
+      sources += [ "${out_path}/arkui/ace_engine/lib${module}${dylib_suffix}" ]
     }
 
     outputs =
@@ -214,21 +72,116 @@ if (is_standard_system) {
     module_install_name = ""
   }
 
-  ohos_copy("copy_resource_dynamic_library_standard") {
-    if (host_os == "mac") {
-      deps = [
+  # All dynamic libraries to be copied to the path "/previewer/common/bin/",
+  # which are related to the previewer, can be added to this script.
+  ohos_copy("copy_preview_shared_library") {
+    deps = []
+    sources = []
+
+    # The two dynamic libraries here are used for local testing of the previewer.
+    if (enable_glfw_window) {
+      deps += [
+        "$ace_root/adapter/preview/entrance/samples:previewer_demo",
+        "$ace_root/adapter/preview/entrance/test:test_bridge",
+      ]
+    }
+
+    # Add some resources
+    # Add ohos fonts
+    sources += [
+      "//foundation/arkui/ace_engine/adapter/preview/sdk/fontconfig.json",
+      "//utils/system_resources/fonts",
+    ]
+
+    # Add the dynamic library with the same name on the mac and windows system here.
+    # Add dynamic library "libcurl_shared"
+    curl_path = get_label_info("//third_party/curl:curl_shared", "root_out_dir")
+    deps += [ "//third_party/curl:curl_shared" ]
+    sources += [ curl_path + "/thirdparty/curl/libcurl_shared${dylib_suffix}" ]
+
+    # Add dynamic library "libsec_shared"
+    sec_path =
+        get_label_info("//third_party/bounds_checking_function:libsec_shared",
+                       "root_out_dir")
+    deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
+    sources +=
+        [ sec_path + "/thirdparty/bounds_checking_function/libsec_shared" +
+          dylib_suffix ]
+
+    # Add napi framework-related dynamic libraries
+    ace_napi_path =
+        get_label_info("//foundation/arkui/napi:ace_napi", "root_out_dir")
+    uv_path = get_label_info("//third_party/libuv:uv", "root_out_dir")
+    icu_path =
+        get_label_info("//third_party/icu/icu4c:shared_icuuc", "root_out_dir")
+    deps += [
+      "$ace_napi:ace_napi",
+      "//third_party/icu/icu4c:shared_icui18n",
+      "//third_party/icu/icu4c:shared_icuuc",
+      "//third_party/libuv:uv",
+    ]
+    sources += [
+      "$ace_napi_path/arkui/napi/libace_napi${dylib_suffix}",
+      "$icu_path/thirdparty/icu/libhmicui18n${dylib_suffix}",
+      "$icu_path/thirdparty/icu/libhmicuuc${dylib_suffix}",
+      "$uv_path/thirdparty/libuv/libuv${dylib_suffix}",
+    ]
+
+    # Add qjs or ark engine-related dynamic libraries
+    if (enable_ark_preview) {
+      ark_js_path = get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
+                                   "root_out_dir")
+      deps += [
+        "$ace_napi:ace_napi_ark",
+        "//arkcompiler/ets_runtime:libark_jsruntime",
+      ]
+      sources += [
+        "$ace_napi_path/arkui/napi/libace_napi_ark${dylib_suffix}",
+        "$ark_js_path/ark/ark_js_runtime/libark_jsruntime${dylib_suffix}",
+        "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
+      ]
+    } else {
+      deps += [ "$ace_napi:ace_napi_quickjs" ]
+      sources +=
+          [ "$ace_napi_path/arkui/napi/libace_napi_quickjs${dylib_suffix}" ]
+    }
+
+    # Add dynamic libraries with different names on mac and windows systems here.
+    if (use_mac) {
+      ace_engine_path =
+          get_label_info("$ace_root/adapter/preview/build::libace_engine_mac",
+                         "root_out_dir") + "/common/common/libace_engine_mac" +
+          dylib_suffix
+      resource_manager_path = get_label_info(
+                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
+                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_mac${dylib_suffix}"
+      deps += [
+        "$ace_root/adapter/preview/build:libace_engine_mac",
         "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
       ]
     } else {
-      deps = [
+      ace_engine_path =
+          get_label_info(
+              "$ace_root/adapter/preview/build::libace_engine_windows",
+              "root_out_dir") + "/common/common/libace_engine_windows" +
+          dylib_suffix
+      resource_manager_path = get_label_info(
+                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
+                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_win${dylib_suffix}"
+      deps += [
+        "$ace_root/adapter/preview/build:libace_engine_windows",
         "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
       ]
     }
 
-    sources = [ resource_manager_library ]
+    sources += [
+      ace_engine_path,
+      resource_manager_path,
+    ]
 
+    # Set the output directory for all dynamic libraries.
     outputs = [ target_out_dir + "/previewer/common/bin/{{source_file_part}}" ]
-    module_source_dir = target_out_dir + "/previewer/common/bin"
+    module_source_dir = target_out_dir + "/previewer/common/bin/"
     module_install_name = ""
   }
 
@@ -249,27 +202,6 @@ if (is_standard_system) {
       module_source_dir = target_out_dir + "/previewer/resources"
       module_install_name = ""
     }
-  }
-
-  ohos_copy("copy_curl_shared_library") {
-    if (use_mac) {
-      mac_shared_library_path =
-          get_label_info("//third_party/curl:curl_shared", "root_out_dir") +
-          "/thirdparty/curl/libcurl_shared.dylib"
-      deps = [ "//third_party/curl:curl_shared" ]
-      sources = [ mac_shared_library_path ]
-      outputs =
-          [ target_out_dir + "/previewer/common/bin/libcurl_shared.dylib" ]
-    } else {
-      windows_shared_library_path =
-          get_label_info("//third_party/curl:curl_shared", "root_out_dir") +
-          "/thirdparty/curl/libcurl_shared.dll"
-      deps = [ "//third_party/curl:curl_shared" ]
-      sources = [ windows_shared_library_path ]
-      outputs = [ target_out_dir + "/previewer/common/bin/libcurl_shared.dll" ]
-    }
-    module_source_dir = target_out_dir + "/previewer/common/bin/"
-    module_install_name = ""
   }
 } else {
   ohos_copy("copy_system_resource") {

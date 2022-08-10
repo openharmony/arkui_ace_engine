@@ -37,9 +37,9 @@ class DataPlatformEventCallback final : public Platform::PlatformEventCallback {
 public:
     explicit DataPlatformEventCallback(DataPlatformFinish onFinish) : onFinish_(onFinish) {}
 
-    ~DataPlatformEventCallback() = default;
+    ~DataPlatformEventCallback() override = default;
 
-    virtual void OnFinish() const
+    void OnFinish() const override
     {
         LOGI("DataPlatformEventCallback OnFinish");
         if (onFinish_) {
@@ -47,7 +47,7 @@ public:
         }
     }
 
-    virtual void OnStatusBarBgColorChanged(uint32_t color)
+    void OnStatusBarBgColorChanged(uint32_t color) override
     {
         LOGI("DataPlatformEventCallback OnStatusBarBgColorChanged");
     }
@@ -222,5 +222,12 @@ Uri AceDataAbility::DenormalizeUri(const Uri& uri)
     return ret;
 }
 
+std::shared_ptr<AppExecFwk::PacMap> AceDataAbility::Call(const Uri& uri,
+    const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
+{
+    LOGD("AceDataAbility::Call called");
+    std::shared_ptr<AppExecFwk::PacMap> ret = Platform::PaContainer::Call(abilityId_, uri, method, arg, pacMap);
+    return ret;
+}
 } // namespace Ace
 } // namespace OHOS

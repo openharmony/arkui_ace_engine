@@ -17,7 +17,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/list/list_modifier.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -26,14 +25,25 @@ namespace OHOS::Ace::NG {
 void ListView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, V2::LIST_ETS_TAG, AceType::MakeRefPtr<ListPattern>());
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::LIST_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListPattern>(); });
     stack->Push(frameNode);
+}
+
+void ListView::SetSpace(const Dimension& space)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space);
+}
+
+void ListView::SetInitialIndex(const int32_t& initialIndex)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex);
 }
 
 void ListView::SetListDirection(Axis axis)
 {
-    ViewStackProcessor::GetInstance()->PushLayoutTask(ListDirectionModifier(axis));
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListDirection, axis);
 }
 
 void ListView::SetEdgeEffect(EdgeEffect edgeEffect)

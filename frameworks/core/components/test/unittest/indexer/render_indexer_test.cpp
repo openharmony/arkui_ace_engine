@@ -210,8 +210,6 @@ void RenderIndexerTest::TearDown()
  * @tc.name: RenderIndexerTest001
  * @tc.desc: Verify IndexList can create with list mode, the input is sorted.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TJ
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest001, TestSize.Level1)
 {
@@ -260,8 +258,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest001, TestSize.Level1)
  * @tc.name: RenderIndexerTest002
  * @tc.desc: Verify IndexList can create with list mode, the input is not sorted.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TK
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest002, TestSize.Level1)
 {
@@ -310,8 +306,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest002, TestSize.Level1)
  * @tc.name: RenderIndexerTest003
  * @tc.desc: Verify IndexList can return section index by item index.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TM
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest003, TestSize.Level1)
 {
@@ -360,8 +354,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest003, TestSize.Level1)
  * @tc.name: RenderIndexerTest004
  * @tc.desc: Verify IndexList can create with circle mode, the input is not sorted.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TP
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest004, TestSize.Level1)
 {
@@ -409,8 +401,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest004, TestSize.Level1)
  * @tc.name: RenderIndexerTest005
  * @tc.desc: Verify IndexList can return section index by item index.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TP
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest005, TestSize.Level1)
 {
@@ -458,8 +448,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest005, TestSize.Level1)
  * @tc.name: RenderIndexerTest006
  * @tc.desc: Verify IndexList can create with list mode, the input is not sorted, and the indexkey is NULL.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TK
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest006, TestSize.Level1)
 {
@@ -508,8 +496,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest006, TestSize.Level1)
  * @tc.name: RenderIndexerTest007
  * @tc.desc: Verify IndexList can index with circle mode, the input is not sorted, and the indexkey is NULL.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TK
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest007, TestSize.Level1)
 {
@@ -557,8 +543,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest007, TestSize.Level1)
  * @tc.name: RenderIndexerTest008
  * @tc.desc: Verify IndexList can create with list mode, return section index by item index, and the indexkey is Null.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TM
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest008, TestSize.Level1)
 {
@@ -608,8 +592,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest008, TestSize.Level1)
  * @tc.desc: Verify IndexList can create with circle mode, return section index by item index, and the indexkey is
  * number.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TM
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest009, TestSize.Level1)
 {
@@ -657,8 +639,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest009, TestSize.Level1)
  * @tc.name: RenderIndexerTest010
  * @tc.desc: Verify IndexList can index with list mode, the input is not sorted, and the indexkey is number.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TP
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest010, TestSize.Level1)
 {
@@ -706,8 +686,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest010, TestSize.Level1)
  * @tc.name: RenderIndexerTest011
  * @tc.desc: Verify IndexList can return section index by item index with list mode, while indexkey is number.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TP
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest011, TestSize.Level1)
 {
@@ -755,8 +733,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest011, TestSize.Level1)
  * @tc.name: RenderIndexerTest012
  * @tc.desc: Verify IndexList can index with circle mode, the input is not sorted, and the indexkey is number.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TP
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest012, TestSize.Level1)
 {
@@ -804,8 +780,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest012, TestSize.Level1)
  * @tc.name: RenderIndexerTest013
  * @tc.desc: Verify IndexList can return section index by item index with circle mode, while indexkey is number.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TP
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest013, TestSize.Level1)
 {
@@ -853,8 +827,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest013, TestSize.Level1)
  * @tc.name: RenderIndexerTest014
  * @tc.desc: Verify IndexList can return section index by item index with list mode, while indexkey is number.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TP
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest014, TestSize.Level1)
 {
@@ -906,8 +878,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest014, TestSize.Level1)
  * @tc.name: RenderIndexerTest015
  * @tc.desc: Verify IndexList can return section index by item index with list mode, while indexkey is number.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TP
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest015, TestSize.Level1)
 {
@@ -959,8 +929,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest015, TestSize.Level1)
  * @tc.name: RenderIndexerTest016
  * @tc.desc: Verify IndexList can return section index by item index with list mode, while indexkey is number.
  * @tc.type: FUNC
- * @tc.require: AR000DQ1TP
- * @tc.author: xuliangjun
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest016, TestSize.Level1)
 {
@@ -1012,8 +980,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest016, TestSize.Level1)
  * @tc.name: RenderIndexerTest017
  * @tc.desc: Verify IndexList has a bubble component with default setting.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCD
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest017, TestSize.Level1)
 {
@@ -1063,8 +1029,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest017, TestSize.Level1)
  * @tc.name: RenderIndexerTest018
  * @tc.desc: Verify IndexList children count with circle mode、 non-bubble、multi-language.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCD
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest018, TestSize.Level1)
 {
@@ -1124,8 +1088,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest018, TestSize.Level1)
  * @tc.name: RenderIndexerTest019
  * @tc.desc: Verify IndexList can shown correctly with circle-mode、bubble、multi-language.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCD
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest019, TestSize.Level1)
 {
@@ -1189,8 +1151,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest019, TestSize.Level1)
  * @tc.name: RenderIndexerTest020
  * @tc.desc: Verify IndexList can change language when touch specific item when on expand status.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCD
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest020, TestSize.Level1)
 {
@@ -1249,8 +1209,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest020, TestSize.Level1)
  * @tc.name: RenderIndexerTest021
  * @tc.desc: Verify IndexList can change language when touch specific item when on collapse status.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCD
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest021, TestSize.Level1)
 {
@@ -1311,8 +1269,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest021, TestSize.Level1)
  * @tc.name: RenderIndexerTest022
  * @tc.desc: Verify IndexList can shown correctly after language changed.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCF
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest022, TestSize.Level1)
 {
@@ -1376,8 +1332,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest022, TestSize.Level1)
  * @tc.name: RenderIndexerTest023
  * @tc.desc: Verify IndexList can change index correctly.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCF
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest023, TestSize.Level1)
 {
@@ -1450,8 +1404,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest023, TestSize.Level1)
  * @tc.name: RenderIndexerTest024
  * @tc.desc: Verify bubble text when focus change on circle mode.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCF
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest024, TestSize.Level1)
 {
@@ -1517,8 +1469,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest024, TestSize.Level1)
  * @tc.name: RenderIndexerTest025
  * @tc.desc: Verify indexer shown correctly when section letter than four.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCF
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest025, TestSize.Level1)
 {
@@ -1573,8 +1523,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest025, TestSize.Level1)
  * @tc.name: RenderIndexerTest026
  * @tc.desc: Verify indexer shown correctly when section letter than four with multi-language
  * @tc.type: FUNC
- * @tc.require: AR000F3CCF
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest026, TestSize.Level1)
 {
@@ -1652,8 +1600,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest026, TestSize.Level1)
  * @tc.name: RenderIndexerTest027
  * @tc.desc: Verify indexer can change focus when list scroll on circle mode.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCF
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest027, TestSize.Level1)
 {
@@ -1719,8 +1665,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest027, TestSize.Level1)
  * @tc.name: RenderIndexerTest028
  * @tc.desc: Verify indexer handle rotation event correctly on circle mode.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCC
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest028, TestSize.Level1)
 {
@@ -1787,8 +1731,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest028, TestSize.Level1)
  * @tc.name: RenderIndexerTest029
  * @tc.desc: Verify indexer can change focus when list scroll on list mode.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCF
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest029, TestSize.Level1)
 {
@@ -1856,8 +1798,6 @@ HWTEST_F(RenderIndexerTest, RenderIndexerTest029, TestSize.Level1)
  * @tc.name: RenderIndexerTest030
  * @tc.desc: Verify indexer can change focus when list scroll on circle mode with different status.
  * @tc.type: FUNC
- * @tc.require: AR000F3CCE
- * @tc.author: jinwuwen
  */
 HWTEST_F(RenderIndexerTest, RenderIndexerTest030, TestSize.Level1)
 {

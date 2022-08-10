@@ -149,7 +149,8 @@ ErrCode UIServiceMgrClient::ShowDialog(const std::string& name,
         HILOG_ERROR("doms is nullptr");
         return UI_SERVICE_GET_PROXY_FAILED;
     }
-    return doms->ShowDialog(name, params, windowType, x, y, width, height, dialogCallbackStub, id);
+    return doms->ShowDialog(
+        name, params, static_cast<uint32_t>(windowType), x, y, width, height, dialogCallbackStub, id);
 }
 
 ErrCode UIServiceMgrClient::CancelDialog(int32_t id)

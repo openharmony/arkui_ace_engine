@@ -43,6 +43,32 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
         TaskExecutor::TaskType::UI);
 }
 
+void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap)
+{
+    if (!taskExecutor_ || !callbackSetClipboardPixmapData_) {
+        LOGE("Failed to set the pixmap data to clipboard.");
+        return;
+    }
+    taskExecutor_->PostTask(
+        [callbackSetClipboardPixmapData = callbackSetClipboardPixmapData_, pixmap] {
+            callbackSetClipboardPixmapData(pixmap);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void ClipboardImpl::GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode)
+{
+    if (!taskExecutor_ || !callbackGetClipboardPixmapData_ || !callback) {
+        LOGE("Failed to get the pixmap data from clipboard.");
+        return;
+    }
+    taskExecutor_->PostTask(
+        [callbackGetClipboardPixmapData = callbackGetClipboardPixmapData_, callback] {
+            callback(callbackGetClipboardPixmapData());
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void ClipboardImpl::Clear() {}
 
 void ClipboardImpl::RegisterCallbackSetClipboardData(CallbackSetClipboardData callback)
@@ -55,4 +81,13 @@ void ClipboardImpl::RegisterCallbackGetClipboardData(CallbackGetClipboardData ca
     callbackGetClipboardData_ = callback;
 }
 
+void ClipboardImpl::RegisterCallbackSetClipboardPixmapData(CallbackSetClipboardPixmapData callback)
+{
+    callbackSetClipboardPixmapData_ = callback;
+}
+
+void ClipboardImpl::RegisterCallbackGetClipboardPixmapData(CallbackGetClipboardPixmapData callback)
+{
+    callbackGetClipboardPixmapData_ = callback;
+}
 } // namespace OHOS::Ace::Platform

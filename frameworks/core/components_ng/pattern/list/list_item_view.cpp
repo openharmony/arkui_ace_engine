@@ -26,13 +26,9 @@ namespace OHOS::Ace::NG {
 void ListItemView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    // TODO: Add unique id.
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, V2::LIST_ITEM_ETS_TAG, AceType::MakeRefPtr<ListItemPattern>());
-    auto listPattern = stack->GetMainFrameNodePattern<NG::ListPattern>();
-    if (listPattern) {
-        listPattern->AddNonLazyItem(frameNode);
-    }
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListItemPattern>(); });
     stack->Push(frameNode);
 }
 

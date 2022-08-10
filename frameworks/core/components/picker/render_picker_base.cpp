@@ -106,6 +106,7 @@ void RenderPickerBase::Update(const RefPtr<Component>& component)
     if (datePicker) {
         startDateSolar_ = datePicker->GetStartDate();
         endDateSolar_ = datePicker->GetEndDate();
+        selectedDate_ = datePicker->GetSelectedDate();
     }
 
     columnHeight_ = picker->GetColumnHeight();
@@ -845,6 +846,24 @@ void RenderPickerBase::InitializeSelectedOption(const RefPtr<RenderPickerColumn>
         focusBoxOffset_ = focusRenderBox->GetGlobalOffset() - GetGlobalOffset();
         break;
     }
+}
+
+const RefPtr<RenderBox> RenderPickerBase::GetBgColorBox() const
+{
+    auto parent = GetParent().Upgrade();
+    while (parent && !parent->IsHeadRenderNode()) {
+        if (AceType::InstanceOf<RenderBox>(parent)) {
+            return AceType::DynamicCast<RenderBox>(parent);
+        }
+
+        parent = parent->GetParent().Upgrade();
+    }
+
+    if (AceType::InstanceOf<RenderBox>(parent)) {
+        return AceType::DynamicCast<RenderBox>(parent);
+    }
+
+    return nullptr;
 }
 
 } // namespace OHOS::Ace

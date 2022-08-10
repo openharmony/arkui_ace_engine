@@ -38,8 +38,8 @@ const char PA_MANIFEST_JSON[] = "manifest.json";
 BackendDelegateImpl::BackendDelegateImpl(const BackendDelegateImplBuilder& builder)
     : loadJs_(builder.loadCallback), dispatcherCallback_(builder.transferCallback),
       asyncEvent_(builder.asyncEventCallback), syncEvent_(builder.syncEventCallback), insert_(builder.insertCallback),
-      query_(builder.queryCallback), update_(builder.updateCallback), delete_(builder.deleteCallback),
-      batchInsert_(builder.batchInsertCallback), getType_(builder.getTypeCallback),
+      call_(builder.callCallback), query_(builder.queryCallback), update_(builder.updateCallback),
+      delete_(builder.deleteCallback), batchInsert_(builder.batchInsertCallback), getType_(builder.getTypeCallback),
       getFileTypes_(builder.getFileTypesCallback), openFile_(builder.openFileCallback),
       openRawFile_(builder.openRawFileCallback), normalizeUri_(builder.normalizeUriCallback),
       denormalizeUri_(builder.denormalizeUriCallback), destroyApplication_(builder.destroyApplicationCallback),
@@ -49,7 +49,7 @@ BackendDelegateImpl::BackendDelegateImpl(const BackendDelegateImplBuilder& build
       updateCallback_(builder.updateFormCallback), castTemptoNormalCallback_(builder.castTemptoNormalCallback),
       visibilityChangedCallback_(builder.visibilityChangedCallback),
       acquireStateCallback_(builder.acquireStateCallback),
-      commandCallback_(builder.commandCallback),
+      commandCallback_(builder.commandCallback), shareFormCallback_(builder.shareFormCallback),
       dumpHeapSnapshotCallback_(builder.dumpHeapSnapshotCallback),
       manifestParser_(AceType::MakeRefPtr<Framework::ManifestParser>()),
       type_(builder.type),
@@ -322,6 +322,16 @@ int32_t BackendDelegateImpl::Insert(const Uri& uri, const OHOS::NativeRdb::Value
     return ret;
 }
 
+std::shared_ptr<AppExecFwk::PacMap> BackendDelegateImpl::Call(const Uri& uri,
+    const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
+{
+    std::shared_ptr<AppExecFwk::PacMap> ret = nullptr;
+    taskExecutor_->PostSyncTask(
+        [call = call_, &ret, method, arg, pacMap] { ret = call(method, arg, pacMap); },
+        TaskExecutor::TaskType::JS);
+    return ret;
+}
+
 std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> BackendDelegateImpl::Query(
     const Uri& uri, const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates)
 {
@@ -535,4 +545,15 @@ bool BackendDelegateImpl::GetResourceData(const std::string& fileUri, std::vecto
     return true;
 }
 
+bool BackendDelegateImpl::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+{
+    bool result = false;
+    taskExecutor_->PostSyncTask(
+        [shareFormCallback = shareFormCallback_, formId, &wantParams, &result] () {
+            result = shareFormCallback(formId, wantParams);
+        },
+        TaskExecutor::TaskType::JS);
+
+    return result;
+}
 } // namespace OHOS::Ace

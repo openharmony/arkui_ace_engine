@@ -15,6 +15,7 @@
 
 #include "core/components/container_modal/container_modal_component.h"
 
+#include "base/utils/system_properties.h"
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
 #include "core/components/clip/clip_component.h"
@@ -87,7 +88,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
 
     if (isDeclarative_) {
         return AceType::MakeRefPtr<DisplayComponent>(AceType::MakeRefPtr<V2::InspectorComposedComponent>(
-            std::to_string(TITLE_ROW), V2::ROW_COMPONENT_TAG, titleBox));
+            V2::InspectorComposedComponent::GenerateId(), V2::ROW_COMPONENT_TAG, titleBox));
     } else {
         return AceType::MakeRefPtr<DisplayComponent>(
             AceType::MakeRefPtr<ComposedComponent>(std::to_string(TITLE_ROW), DOM_FLEX_ROW, titleBox));
@@ -112,7 +113,7 @@ RefPtr<Component> ContainerModalComponent::BuildFloatingTitle()
     if (isDeclarative_) {
         return AceType::MakeRefPtr<TweenComponent>(
             "ContainerModal", AceType::MakeRefPtr<V2::InspectorComposedComponent>(
-                                  std::to_string(FLOATING_TITLE_ROW), V2::ROW_COMPONENT_TAG, titleBox));
+                                  V2::InspectorComposedComponent::GenerateId(), V2::ROW_COMPONENT_TAG, titleBox));
     } else {
         return AceType::MakeRefPtr<TweenComponent>("ContainerModal",
             AceType::MakeRefPtr<ComposedComponent>(std::to_string(FLOATING_TITLE_ROW), DOM_FLEX_ROW, titleBox));
@@ -162,7 +163,7 @@ RefPtr<Component> ContainerModalComponent::BuildControlButton(
         return AceType::MakeRefPtr<ComposedComponent>(std::to_string(buttonId), DOM_NODE_TAG_BUTTON, button);
     } else {
         return AceType::MakeRefPtr<V2::InspectorComposedComponent>(
-            std::to_string(buttonId), V2::BUTTON_COMPONENT_TAG, button);
+            V2::InspectorComposedComponent::GenerateId(), V2::BUTTON_COMPONENT_TAG, button);
     }
 }
 
@@ -287,22 +288,23 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     titleChildren.emplace_back(SetPadding(titleIcon_, TITLE_PADDING_START, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     if (isDeclarative_) {
         titleChildren.emplace_back(AceType::MakeRefPtr<V2::InspectorComposedComponent>(
-            isFloating ? std::to_string(FLOATING_TITLE_LABEL) : std::to_string(TITLE_LABEL), V2::TEXT_COMPONENT_TAG,
-            titleLabel_));
+            V2::InspectorComposedComponent::GenerateId(), V2::TEXT_COMPONENT_TAG, titleLabel_));
     } else {
         titleChildren.emplace_back(AceType::MakeRefPtr<ComposedComponent>(
             isFloating ? std::to_string(FLOATING_TITLE_LABEL) : std::to_string(TITLE_LABEL), DOM_NODE_TAG_TEXT,
             titleLabel_));
     }
+    auto rightPadding = SystemProperties::GetDeviceAccess() ? TITLE_ELEMENT_MARGIN_HORIZONTAL_ACCESS_DEVICE
+                                                            : TITLE_ELEMENT_MARGIN_HORIZONTAL;
     if (!hideSplit_) {
-        titleChildren.emplace_back(SetPadding(titleLeftSplitButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+        titleChildren.emplace_back(SetPadding(titleLeftSplitButton, ZERO_PADDING, rightPadding));
     }
     if (!hideMaximize_) {
         titleChildren.emplace_back(
-            SetPadding(titleMaximizeRecoverButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+            SetPadding(titleMaximizeRecoverButton, ZERO_PADDING, rightPadding));
     }
     if (!hideMinimize_) {
-        titleChildren.emplace_back(SetPadding(titleMinimizeButton, ZERO_PADDING, TITLE_ELEMENT_MARGIN_HORIZONTAL));
+        titleChildren.emplace_back(SetPadding(titleMinimizeButton, ZERO_PADDING, rightPadding));
     }
     titleChildren.emplace_back(SetPadding(titleCloseButton, ZERO_PADDING, TITLE_PADDING_END));
     return titleChildren;

@@ -16,10 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_FRAME_NODE_H
 
-#include <atomic>
 #include <list>
-#include <memory>
-#include <mutex>
+#include <utility>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/memory/ace_type.h"
@@ -28,14 +26,14 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/render_context.h"
-#include "core/components_ng/render/render_property.h"
-#include "core/components_ng/render/render_wrapper.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
 namespace OHOS::Ace::NG {
@@ -47,78 +45,48 @@ class UITask;
 constexpr int32_t DEFAULT_FRAME_SLOT = -1;
 
 // FrameNode will display rendering region in the screen.
-class ACE_EXPORT FrameNode : public virtual UiNodeId {
-    DECLARE_ACE_TYPE(FrameNode, UiNodeId);
+class ACE_EXPORT FrameNode : public UINode {
+    DECLARE_ACE_TYPE(FrameNode, UINode);
 
 public:
-    // create a new child element and mount to element tree.
-    static RefPtr<FrameNode> CreateFrameNodeAndMountToParent(const std::string& tag, const std::string& id,
-        const RefPtr<Pattern>& pattern, const RefPtr<FrameNode>& parent, int32_t slot);
-
     // create a new child element with new element tree.
-    static RefPtr<FrameNode> CreateFrameNodeWithTree(const std::string& tag, const std::string& id,
-        const RefPtr<Pattern>& pattern, const RefPtr<PipelineContext>& context);
+    static RefPtr<FrameNode> CreateFrameNodeWithTree(
+        const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, const RefPtr<PipelineContext>& context);
+
+    static RefPtr<FrameNode> GetOrCreateFrameNode(
+        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
     // create a new element with new pattern.
     static RefPtr<FrameNode> CreateFrameNode(
-        const std::string& tag, const std::string& id, const RefPtr<Pattern>& pattern, bool isRoot = false);
+        const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+
+    // get element with nodeId from node map.
+    static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
     // avoid use creator function, use CreateFrameNode
-    FrameNode(const std::string& tag, const std::string& id, const RefPtr<Pattern>& pattern, bool isRoot = false);
+    FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+
     ~FrameNode() override;
 
     void InitializePatternAndContext();
 
-    // Tree operation start.
-    void AddChild(const RefPtr<FrameNode>& child, int32_t slot = DEFAULT_FRAME_SLOT);
-    void RemoveChild(const RefPtr<FrameNode>& child);
-    void MovePosition(uint32_t slot);
-    void ClearChildren();
-    RefPtr<FrameNode> GetChildBySlot(uint32_t slot);
-    void MountToParent(const RefPtr<FrameNode>& parent, int32_t slot = DEFAULT_FRAME_SLOT);
+    void MarkModifyDone();
 
-    const std::list<RefPtr<FrameNode>>& GetChildren() const
-    {
-        return children_;
-    }
+    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
-    const WeakPtr<FrameNode>& GetParent() const
-    {
-        return parent_;
-    }
-
-    void SetParent(const WeakPtr<FrameNode>& parent)
-    {
-        parent_ = parent;
-    }
-    // Tree operation end.
-
-    void AttachContextRecursively(const RefPtr<PipelineContext>& context);
-
-    RefPtr<PipelineContext> GetContext() const;
-
-    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
-
-    void MarkDirtyNode(
-        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
-
-    // When a component is first created, the node properties are refreshed based on the StateModifyTask.
-    void FlushStateModifyTaskOnCreate(StateModifyTask& stateModifyTask);
-
-    // When a component is rerendered, the node properties are refreshed based on the StateModifyTask.
-    void FlushStateModifyTaskOnRerender(StateModifyTask& stateModifyTask);
+    void FlushUpdateAndMarkDirty() override;
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
     RefPtr<LayoutWrapper> CreateLayoutWrapperOnCreate();
+
+    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
     std::optional<UITask> CreateLayoutTask(bool onCreate = false, bool forceUseMainThread = false);
 
     std::optional<UITask> CreateRenderTask(bool forceUseMainThread = false);
 
     void SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty);
-
-    void RebuildRenderContextTree();
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
@@ -140,9 +108,9 @@ public:
     }
 
     template<typename T>
-    RefPtr<T> GetRenderProperty() const
+    RefPtr<T> GetPaintProperty() const
     {
-        return DynamicCast<T>(renderProperty_);
+        return DynamicCast<T>(paintProperty_);
     }
 
     template<typename T>
@@ -163,93 +131,61 @@ public:
 
     void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
 
-    // DFX info.
-    void DumpTree(int32_t depth);
-
-    const std::string& GetTag() const
-    {
-        return tag_;
-    }
-
-    const std::string& GetId() const
-    {
-        return id_;
-    }
-
-    void SetDepth(int32_t depth)
-    {
-        depth_ = depth;
-        for (auto& child : children_) {
-            child->SetDepth(depth_ + 1);
-        }
-    }
-
-    int32_t GetDepth() const
-    {
-        return depth_;
-    }
-
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     bool TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,
-        TouchTestResult& result);
+        TouchTestResult& result) override;
 
-    bool IsAtomicNode() const;
+    bool IsAtomicNode() const override;
 
     void RequestNextFrame();
 
-protected:
-    virtual void OnContextAttached() {}
-    // dump self info.
-    virtual void DumpInfo() {}
-
-    void OnInActive();
-    void OnActive();
-
-    std::list<RefPtr<FrameNode>> children_;
-    WeakPtr<PipelineContext> context_;
-    WeakPtr<FrameNode> parent_;
-
 private:
-    void SetPipelineContext(const RefPtr<PipelineContext>& context);
+    RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
-    void UpdateLayoutPropertyFlag();
-    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
+    void MarkDirtyNode(
+        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+
+    void UpdateLayoutPropertyFlag() override;
+    void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
+
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, bool forceMeasure, bool forceLayout);
+    void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
 
     std::optional<LayoutConstraintF> GetLayoutConstraint() const;
     std::optional<OffsetF> GetParentGlobalOffset() const;
 
-    RefPtr<RenderWrapper> CreateRenderWrapper();
+    RefPtr<PaintWrapper> CreatePaintWrapper();
+
+    void MarkNeedSyncRenderTree() override
+    {
+        needSyncRenderTree_ = true;
+    }
+
+    void RebuildRenderContextTree(const std::list<RefPtr<FrameNode>>& children);
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
 
-    std::string tag_ = "FrameNode";
-    std::string id_;
+    void OnDetachFromMainTree() override {}
+    void OnAttachToMainTree() override {}
+
+    // dump self info.
+    void DumpInfo() override;
 
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
     RefPtr<LayoutProperty> layoutProperty_;
-    RefPtr<RenderProperty> renderProperty_;
-    RefPtr<Pattern> pattern_;
-    RefPtr<EventHub> eventHub_;
-
-    // for state temp node
-    RefPtr<LayoutProperty> stateLayoutBox_;
-    RefPtr<RenderProperty> stateRenderPropertyNode_;
-    RefPtr<Pattern> statePattern_;
-
+    RefPtr<PaintProperty> paintProperty_;
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
+    RefPtr<EventHub> eventHub_;
+    RefPtr<Pattern> pattern_;
 
     bool needSyncRenderTree_ = false;
-
-    int32_t depth_ = 0;
 
     bool isLayoutDirtyMarked_ = false;
     bool isRenderDirtyMarked_ = false;
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
-    bool isRoot_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

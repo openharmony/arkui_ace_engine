@@ -76,7 +76,8 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_TEXT,
     THEME_PATTERN_TEXTFIELD,
     THEME_PATTERN_TEXT_OVERLAY,
-    THEME_PATTERN_VIDEO
+    THEME_PATTERN_VIDEO,
+    THEME_PATTERN_ICON
 };
 
 } // namespace
@@ -101,6 +102,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     sysResourceManager_ = newResMgr;
     resourceManager_ = sysResourceManager_;
     packagePathStr_ = resPath;
+    resConfig_ = resConfig;
 }
 
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
@@ -110,7 +112,11 @@ void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
         "colorMode=%{publid}d, inputDevice=%{public}d",
         resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType(),
         resConfig->GetColorMode(), resConfig->GetInputDevice());
-    resourceManager_->UpdateResConfig(*resConfig);
+    sysResourceManager_->UpdateResConfig(*resConfig);
+    for (auto& resMgr : resourceManagers_) {
+        resMgr.second->UpdateResConfig(*resConfig);
+    }
+    resConfig_ = resConfig;
 }
 
 RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
@@ -304,6 +310,7 @@ void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, c
         }
         resourceManagers_[{ bundleName, moduleName }] = context->GetResourceManager();
         resourceManager_ = context->GetResourceManager();
+        resourceManager_->UpdateResConfig(*resConfig_);
     }
 }
 

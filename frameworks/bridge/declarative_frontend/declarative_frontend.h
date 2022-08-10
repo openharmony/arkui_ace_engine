@@ -33,7 +33,7 @@ namespace OHOS::Ace {
 // DeclarativeFrontend is the unique entrance from ACE backend to frontend.
 // The relationship between AceActivity, AceContainer and DeclarativeFrontend is 1:1:1.
 // So DeclarativeFrontend would be responsible for below things:
-// - Create and initialize QuickJS engine.
+// - Create and initialize JS engine.
 // - Load pages of a JS app, and parse the manifest.json before loading main page.
 // - Maintain the page stack of JS app by FrontendDelegateDeclarative.
 // - Lifecycle of JS app (also AceActivity).
@@ -150,6 +150,7 @@ public:
     // distribute
     std::string RestoreRouterStack(const std::string& contentInfo) override;
     std::string GetContentInfo() const override;
+    int32_t GetRouterSize() const override;
 
     void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data);
 
@@ -196,10 +197,10 @@ public:
 
     void AttachSubPipelineContext(const RefPtr<PipelineContext>& context);
 
-    void MarkNeedUpdate() override
+    void FlushReload() override
     {
         if (jsEngine_) {
-            jsEngine_->MarkNeedUpdate();
+            jsEngine_->FlushReload();
         }
     }
 

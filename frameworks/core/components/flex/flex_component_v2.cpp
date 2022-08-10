@@ -64,6 +64,10 @@ RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component)
         auto newFlexItem = AceType::MakeRefPtr<FlexItemComponent>(0.0, 1.0, 0.0);
         newFlexItem->SetChild(composedChild);
         composedComponent->SetChild(newFlexItem);
+        if (composedChild && !composedChild->IsTailComponent()) {
+            // extend already marked component group with flex item component
+            Component::ExtendRSNode(newFlexItem, composedChild);
+        }
         return component;
     }
 
@@ -71,6 +75,10 @@ RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component)
     if (!multiComposedComponent) {
         auto newFlexItem = AceType::MakeRefPtr<FlexItemComponent>(0.0, 1.0, 0.0);
         newFlexItem->SetChild(component);
+        if (component && !component->IsTailComponent()) {
+            // extend already marked component group with flex item component
+            Component::ExtendRSNode(newFlexItem, component);
+        }
         return newFlexItem;
     }
 

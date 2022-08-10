@@ -157,6 +157,16 @@ public:
         return autoHide_;
     }
 
+    void SetSideBarPosition(SideBarPosition sideBarPosition)
+    {
+        sideBarPosition_ = sideBarPosition;
+    }
+    
+    SideBarPosition GetSideBarPositon() const
+    {
+        return sideBarPosition_;
+    }
+
 private:
     RefPtr<Component> BuildButton();
 
@@ -169,6 +179,7 @@ private:
     bool isShow_ = true;
     SideStatus sideStatus_ = SideStatus::AUTO;
     bool autoHide_ = true;
+    SideBarPosition sideBarPosition_ = SideBarPosition::START;
 };
 
 } // namespace OHOS::Ace

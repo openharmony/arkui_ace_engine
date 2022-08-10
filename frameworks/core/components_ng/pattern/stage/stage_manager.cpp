@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/page/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -27,14 +28,18 @@ StageManager::StageManager(const RefPtr<FrameNode>& root) : rootNode_(root)
     stagePattern_ = DynamicCast<StagePattern>(rootNode_->GetPattern());
 }
 
-void StageManager::PushPage(const RefPtr<FrameNode>& node)
+void StageManager::PushPage(const RefPtr<UINode>& node)
 {
     if (!rootNode_) {
         LOGE("the root node is nullptr");
         return;
     }
-    // Add unique id.
-    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, V2::PAGE_ETS_TAG, MakeRefPtr<PagePattern>());
+    if (!node) {
+        LOGE("page node is nullptr, maybe js file execute failed");
+        return;
+    }
+    auto pageNode = FrameNode::CreateFrameNode(
+        V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<PagePattern>());
     node->MountToParent(pageNode);
     pageNode->MountToParent(rootNode_);
     // TODO: change page index

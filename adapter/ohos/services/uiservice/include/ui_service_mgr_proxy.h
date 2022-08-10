@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_UI_SERVICE_MANAGER_PROXY_H
-#define OHOS_AAFWK_UI_SERVICE_MANAGER_PROXY_H
+#ifndef OHOS_ACE_UI_SERVICE_MANAGER_PROXY_H
+#define OHOS_ACE_UI_SERVICE_MANAGER_PROXY_H
 
 #include "hilog_wrapper.h"
 #include "iremote_proxy.h"
@@ -30,33 +30,37 @@ class UIServiceMgrProxy : public IRemoteProxy<IUIServiceMgr> {
 public:
     explicit UIServiceMgrProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<IUIServiceMgr>(impl)
     {}
-    virtual ~UIServiceMgrProxy()
-    {}
-    virtual int RegisterCallBack(const AAFwk::Want& want, const sptr<IUIService>& uiService);
+    ~UIServiceMgrProxy() override = default;
 
-    virtual int UnregisterCallBack(const AAFwk::Want& want);
+    int RegisterCallBack(const AAFwk::Want& want, const sptr<IUIService>& uiService) override;
+
+    virtual int UnregisterCallBack(const AAFwk::Want& want) override;
 
     virtual int Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
-        const std::string& data, const std::string& extraData);
+        const std::string& data, const std::string& extraData) override;
 
-    virtual int Request(const AAFwk::Want& want, const std::string& name, const std::string& data);
+    virtual int Request(const AAFwk::Want& want, const std::string& name, const std::string& data) override;
 
     virtual int ReturnRequest(const AAFwk::Want& want, const std::string& source, const std::string& data,
-        const std::string& extraData);
+        const std::string& extraData) override;
 
     virtual int ShowDialog(const std::string& name,
                            const std::string& params,
-                           OHOS::Rosen::WindowType windowType,
+                           uint32_t windowType,
                            int x,
                            int y,
                            int width,
                            int height,
                            const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
-                           int* id = nullptr);
+                           int* id = nullptr) override;
 
-    virtual int CancelDialog(int id);
+    virtual int CancelDialog(int id) override;;
 
-    virtual int UpdateDialog(int id, const std::string& data);
+    virtual int UpdateDialog(int id, const std::string& data) override;;
+
+    int32_t AttachToUiService(const sptr<IRemoteObject>& dialog, int32_t pid) override;
+
+    int32_t RemoteDialogCallback(int32_t id, const std::string& event, const std::string& params) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel& data);

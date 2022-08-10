@@ -17,6 +17,7 @@
 
 #include <cerrno>
 #include <csignal>
+#include <cstdint>
 #include <pthread.h>
 #include <shared_mutex>
 
@@ -25,6 +26,7 @@
 #include "base/log/event_report.h"
 #include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
+#include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_application_info.h"
@@ -33,13 +35,13 @@
 namespace OHOS::Ace {
 namespace {
 
-constexpr int32_t NORMAL_CHECK_PERIOD = 3;
-constexpr int32_t WARNING_CHECK_PERIOD = 2;
-constexpr int32_t FREEZE_CHECK_PERIOD = 1;
+constexpr int32_t NORMAL_CHECK_PERIOD = 6;
+constexpr int32_t WARNING_CHECK_PERIOD = 5;
+constexpr int32_t FREEZE_CHECK_PERIOD = 4;
 constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
 constexpr char UNKNOWN_THREAD_NAME[] = "unknown thread";
-constexpr uint64_t ANR_INPUT_FREEZE_TIME = 5000;
+constexpr uint64_t ANR_INPUT_FREEZE_TIME = 10000;
 constexpr int32_t IMMEDIATELY_PERIOD = 0;
 constexpr int32_t ANR_DIALOG_BLOCK_TIME = 20;
 
@@ -161,7 +163,10 @@ private:
     std::string threadName_;
     int32_t loopTime_ = 0;
     int32_t threadTag_ = 0;
+    int32_t lastLoopTime_ = 0;
+    int32_t lastThreadTag_ = 0;
     int32_t freezeCount_ = 0;
+    int64_t lastTaskId_ = -1;
     State state_ = State::NORMAL;
     WeakPtr<TaskExecutor> taskExecutor_;
     std::queue<uint64_t> inputTaskIds_;
@@ -330,9 +335,18 @@ void ThreadWatcher::CheckAndResetIfNeeded()
 bool ThreadWatcher::IsThreadStuck()
 {
     bool res = false;
+    auto taskExecutor = taskExecutor_.Upgrade();
+    if (!taskExecutor) {
+        LOGW("taskExecutor is null");
+        return false;
+    }
+    uint32_t taskId = taskExecutor->GetTotalTaskNum(type_);
+    if (useUIAsJSThread_) {
+        taskId += taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::JS);
+    }
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
-        if (threadTag_ != loopTime_) {
+        if (((loopTime_ - threadTag_) > (lastLoopTime_ - lastThreadTag_)) && (lastTaskId_ == taskId)) {
             std::string abilityName;
             if (AceEngine::Get().GetContainer(instanceId_) != nullptr) {
                 abilityName = AceEngine::Get().GetContainer(instanceId_)->GetHostClassName();
@@ -340,10 +354,11 @@ bool ThreadWatcher::IsThreadStuck()
             LOGE("thread stuck, ability: %{public}s, instanceId: %{public}d, thread: %{public}s, looptime: %{public}d, "
                  "checktime: %{public}d",
                 abilityName.c_str(), instanceId_, threadName_.c_str(), loopTime_, threadTag_);
-            // or threadTag_ != loopTime_ will always be true
-            threadTag_ = loopTime_;
             res = true;
         }
+        lastTaskId_ = taskId;
+        lastLoopTime_ = loopTime_;
+        lastThreadTag_ = threadTag_;
     }
     CheckAndResetIfNeeded();
     PostCheckTask();
@@ -401,6 +416,11 @@ void ThreadWatcher::PostCheckTask()
             type_);
         std::unique_lock<std::shared_mutex> lock(mutex_);
         ++loopTime_;
+        if (state_ != State::NORMAL) {
+            LOGW("thread check, instanceId: %{public}d, thread: %{public}s, looptime: %{public}d, "
+                 "checktime: %{public}d",
+                instanceId_, threadName_.c_str(), loopTime_, threadTag_);
+        }
     } else {
         LOGW("task executor with instanceId %{public}d invalid when check %{public}s thread whether stuck or not",
             instanceId_, threadName_.c_str());
@@ -411,8 +431,11 @@ void ThreadWatcher::TagIncrease()
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
     ++threadTag_;
-    LOGD("thread check, instanceId: %{public}d, thread: %{public}s, looptime: %{public}d, "
-         "checktime: %{public}d", instanceId_, threadName_.c_str(), loopTime_, threadTag_);
+    if (state_ != State::NORMAL) {
+        LOGW("thread check, instanceId: %{public}d, thread: %{public}s, looptime: %{public}d, "
+             "checktime: %{public}d",
+            instanceId_, threadName_.c_str(), loopTime_, threadTag_);
+    }
 }
 
 WatchDog::WatchDog()

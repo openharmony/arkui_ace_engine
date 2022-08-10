@@ -44,9 +44,9 @@ const testEnvironment = tsuite("Environment", () => {
   });
 
   tcase("Value retrieval", () => {
-    test("Environment value 'accessibilityEnabled' correct", AppStorage.Get<boolean>("accessibilityEnabled") == false);
+    // the native backend treats bool as string
+    test("Environment value 'accessibilityEnabled' correct", AppStorage.Get<string>("accessibilityEnabled") == "false");
     test("Environment value 'languageCode' correct", AppStorage.Get<string>("languageCode") == "cn");
-
   });
 
   tcase("Value changes from backend", () => {

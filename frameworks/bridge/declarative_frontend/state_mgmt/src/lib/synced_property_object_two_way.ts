@@ -18,6 +18,7 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   implements ISinglePropertyChangeSubscriber<C> {
 
   private linkedParentProperty_: ObservedPropertyObjectAbstract<C>;
+  private changeNotificationIsOngoing_: boolean = false;
 
   constructor(linkSource: ObservedPropertyObjectAbstract<C>,
     owningChildView: IPropertySubscriber,
@@ -56,8 +57,10 @@ class SynchedPropertyObjectTwoWay<C extends Object>
   // this object is subscriber to ObservedObject
   // will call this cb function when property has changed
   hasChanged(newValue: C): void {
-    console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
-    this.notifyHasChanged(this.getObject());
+    if (!this.changeNotificationIsOngoing_) {
+      console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
+      this.notifyHasChanged(this.getObject());
+    }
   }
 
 
@@ -78,10 +81,14 @@ class SynchedPropertyObjectTwoWay<C extends Object>
     console.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
 
     ObservedObject.removeOwningProperty(this.getObject(), this);
+
+    // the purpose of the changeNotificationIsOngoing_ is to avoid 
+    // circular notifications @Link -> source @State -> other but alos same @Link
+    this.changeNotificationIsOngoing_ = true;
     this.setObject(newValue);
     ObservedObject.addOwningProperty(this.getObject(), this);
-
     this.notifyHasChanged(newValue);
+    this.changeNotificationIsOngoing_ = false;
   }
 
   /**

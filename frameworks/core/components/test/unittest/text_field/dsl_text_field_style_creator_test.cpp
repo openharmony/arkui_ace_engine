@@ -75,8 +75,6 @@ void TextFieldStyleCreatorTest::TearDown() {}
  * @tc.name: TextFieldStyleCreator001
  * @tc.desc: Test all the properties of text filed style.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7U
- * @tc.author: hushilong
  */
 HWTEST_F(TextFieldStyleCreatorTest, TextFieldStyleCreator001, TestSize.Level1)
 {
@@ -168,8 +166,6 @@ HWTEST_F(TextFieldStyleCreatorTest, TextFieldStyleCreator001, TestSize.Level1)
  * @tc.name: TextFieldStyleCreator002
  * @tc.desc: Test all the properties when initialized by default value.
  * @tc.type: FUNC
- * @tc.require: AR000DBI7U
- * @tc.author: hushilong
  */
 HWTEST_F(TextFieldStyleCreatorTest, TextFieldStyleCreator002, TestSize.Level1)
 {

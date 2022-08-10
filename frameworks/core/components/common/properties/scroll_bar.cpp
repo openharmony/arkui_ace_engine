@@ -32,7 +32,11 @@ void ScrollBar::UpdateScrollBarRegion(
 {
     if (!NearZero(estimatedHeight)) {
         SetBarRegion(offset, size);
-        SetTrickRegion(offset, size, lastOffset, estimatedHeight);
+        if (shapeMode_ == ShapeMode::RECT) {
+            SetRectTrickRegion(offset, size, lastOffset, estimatedHeight);
+        } else {
+            SetRoundTrickRegion(offset, size, lastOffset, estimatedHeight);
+        }
     }
 }
 
@@ -43,63 +47,79 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size)
         double height = std::max(size.Height() - NormalizeToPx(reservedHeight_), 0.0);
         if (positionMode_ == PositionMode::LEFT) {
             barRect_ = Rect(0.0, 0.0, normalWidth, height) + offset;
-        } else {
+        } else if (positionMode_ == PositionMode::RIGHT) {
             barRect_ = Rect(size.Width() - normalWidth - NormalizeToPx(padding_.Right()), 0.0,
                 normalWidth, height) + offset;
+        } else if (positionMode_ == PositionMode::BOTTOM) {
+            auto scrollBarWidth = std::max(size.Width() - NormalizeToPx(reservedHeight_), 0.0);
+            barRect_ = Rect(0.0, size.Height() - normalWidth - NormalizeToPx(padding_.Bottom()),
+                scrollBarWidth, normalWidth) + offset;
         }
     }
 }
 
-void ScrollBar::SetTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
+void ScrollBar::SetRectTrickRegion(const Offset& offset, const Size& size,
+    const Offset& lastOffset, double estimatedHeight)
 {
-    if (shapeMode_ == ShapeMode::RECT) {
-        double height = size.Height();
-        double barRegionHeight = std::max(height - NormalizeToPx(reservedHeight_), 0.0);
-        double activeHeight = barRegionHeight * height / estimatedHeight - outBoundary_;
-        if (!NearEqual(height, estimatedHeight)) {
-            double width = size.Width();
-            if (!NearZero(outBoundary_)) {
-                activeHeight = std::max(
-                    std::max(activeHeight, NormalizeToPx(minHeight_) - outBoundary_), NormalizeToPx(minDynamicHeight_));
-            } else {
-                activeHeight = std::max(activeHeight, NormalizeToPx(minHeight_));
-            }
-            double lastOffsetY = std::max(lastOffset.GetY(), 0.0);
-            double activeOffsetY = (height - activeHeight) * lastOffsetY / (estimatedHeight - height);
-            activeOffsetY = std::min(activeOffsetY, barRegionHeight - activeHeight);
-            double normalWidth = NormalizeToPx(normalWidth_);
-            if (positionMode_ == PositionMode::LEFT) {
-                activeRect_ = Rect(-NormalizeToPx(position_), activeOffsetY, normalWidth, activeHeight) + offset;
-                touchRegion_ = activeRect_ + Size(NormalizeToPx(touchWidth_), 0);
-            } else {
-                double x = width - normalWidth - NormalizeToPx(padding_.Right()) + NormalizeToPx(position_);
-                activeRect_ = Rect(x, activeOffsetY, normalWidth, activeHeight) + offset;
-                // Update the hot region
-                touchRegion_ =
-                    activeRect_ -
-                    Offset(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Right()),
-                        0.0) +
-                    Size(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_), 0);
-            }
+    double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
+    double barRegionSize = std::max(mainSize - NormalizeToPx(reservedHeight_), 0.0);
+    double activeSize = barRegionSize * mainSize / estimatedHeight - outBoundary_;
+    if (!NearEqual(mainSize, estimatedHeight)) {
+        if (!NearZero(outBoundary_)) {
+            activeSize = std::max(
+                std::max(activeSize, NormalizeToPx(minHeight_) - outBoundary_), NormalizeToPx(minDynamicHeight_));
+        } else {
+            activeSize = std::max(activeSize, NormalizeToPx(minHeight_));
         }
-    } else {
-        double diameter = std::min(size.Width(), size.Height());
-        if (!NearEqual(estimatedHeight, diameter)) {
-            double maxAngle = bottomAngle_ - topAngle_;
-            trickSweepAngle_ = std::max(diameter * maxAngle / estimatedHeight, minAngle_);
-            double lastOffsetY = std::max(lastOffset.GetY(), 0.0);
-            double trickStartAngle = (maxAngle - trickSweepAngle_) * lastOffsetY / (estimatedHeight - diameter);
-            trickStartAngle = std::clamp(0.0, trickStartAngle, maxAngle) - maxAngle * FACTOR_HALF;
-            if (positionMode_ == PositionMode::LEFT) {
-                if (trickStartAngle > 0.0) {
-                    trickStartAngle_ = STRAIGHT_ANGLE - trickStartAngle;
-                } else {
-                    trickStartAngle_ = -(trickStartAngle + STRAIGHT_ANGLE);
-                }
-                trickSweepAngle_ = -trickSweepAngle_;
+        double lastMainOffset =
+            std::max(positionMode_ == PositionMode::BOTTOM ? lastOffset.GetX() : lastOffset.GetY(), 0.0);
+        double activeMainOffset = (mainSize - activeSize) * lastMainOffset / (estimatedHeight - mainSize);
+        activeMainOffset = std::min(activeMainOffset, barRegionSize - activeSize);
+        double normalWidth = NormalizeToPx(normalWidth_);
+        if (positionMode_ == PositionMode::LEFT) {
+            activeRect_ = Rect(-NormalizeToPx(position_), activeMainOffset, normalWidth, activeSize) + offset;
+            touchRegion_ = activeRect_ + Size(NormalizeToPx(touchWidth_), 0);
+        } else if (positionMode_ == PositionMode::RIGHT) {
+            double x = size.Width() - normalWidth - NormalizeToPx(padding_.Right()) + NormalizeToPx(position_);
+            activeRect_ = Rect(x, activeMainOffset, normalWidth, activeSize) + offset;
+            // Update the hot region
+            touchRegion_ =
+                activeRect_ -
+                Offset(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Right()),
+                    0.0) +
+                Size(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_), 0);
+        } else if (positionMode_ == PositionMode::BOTTOM) {
+            auto positionY =
+                size.Height() - normalWidth - NormalizeToPx(padding_.Bottom()) + NormalizeToPx(position_);
+            activeRect_ = Rect(activeMainOffset, positionY, activeSize, normalWidth) + offset;
+            auto hotRegionOffset =
+                Offset(0.0, NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_)
+                    - NormalizeToPx(padding_.Bottom()));
+            auto hotRegionSize = Size(0, NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_));
+            touchRegion_ = activeRect_ - hotRegionOffset + hotRegionSize;
+        }
+    }
+}
+
+void ScrollBar::SetRoundTrickRegion(const Offset& offset, const Size& size,
+    const Offset& lastOffset, double estimatedHeight)
+{
+    double diameter = std::min(size.Width(), size.Height());
+    if (!NearEqual(estimatedHeight, diameter)) {
+        double maxAngle = bottomAngle_ - topAngle_;
+        trickSweepAngle_ = std::max(diameter * maxAngle / estimatedHeight, minAngle_);
+        double lastOffsetY = std::max(lastOffset.GetY(), 0.0);
+        double trickStartAngle = (maxAngle - trickSweepAngle_) * lastOffsetY / (estimatedHeight - diameter);
+        trickStartAngle = std::clamp(0.0, trickStartAngle, maxAngle) - maxAngle * FACTOR_HALF;
+        if (positionMode_ == PositionMode::LEFT) {
+            if (trickStartAngle > 0.0) {
+                trickStartAngle_ = STRAIGHT_ANGLE - trickStartAngle;
             } else {
-                trickStartAngle_ = trickStartAngle;
+                trickStartAngle_ = -(trickStartAngle + STRAIGHT_ANGLE);
             }
+            trickSweepAngle_ = -trickSweepAngle_;
+        } else {
+            trickStartAngle_ = trickStartAngle;
         }
     }
 }
@@ -126,7 +146,8 @@ void ScrollBar::InitScrollBar(const WeakPtr<RenderNode>& scroll, const WeakPtr<P
         if (!barController_) {
             barController_ = AceType::MakeRefPtr<ScrollBarController>();
         }
-        barController_->Initialize(context);
+        bool isVertical = (positionMode_ == PositionMode::LEFT || positionMode_ == PositionMode::RIGHT);
+        barController_->Initialize(context, isVertical);
         barController_->SetScrollNode(scroll);
         barController_->SetActiveWidth(activeWidth_);
         barController_->SetInactiveWidth(inactiveWidth_);

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PROGRESS_PROGRESS_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PROGRESS_PROGRESS_ELEMENT_H
 
+#include "core/common/container.h"
 #include "core/components/padding/padding_component.h"
 #include "core/pipeline/base/render_element.h"
 
@@ -34,6 +35,9 @@ public:
 
     bool CanUpdate(const RefPtr<Component>& newComponent) override
     {
+        if (Container::IsCurrentUsePartialUpdate()) {
+            return Element::CanUpdate(newComponent);
+        }
         return (newComponent == customComponent_) && Element::CanUpdate(newComponent);
     }
 

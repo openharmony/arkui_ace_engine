@@ -36,6 +36,25 @@
 
 namespace OHOS::Ace {
 
+class WebMessagePortOhos : public WebMessagePort {
+    DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
+
+public:
+    WebMessagePortOhos(WeakPtr<WebDelegate> webDelegate): webDelegate_(webDelegate) {}
+    WebMessagePortOhos() = default;
+    ~WebMessagePortOhos() = default;
+
+    void Close() override;
+    void PostMessage(std::string& data) override;
+    void SetWebMessageCallback(std::function<void(const std::string&)>&& callback) override;
+    void SetPortHandle(std::string& handle) override;
+    std::string GetPortHandle() override;
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+    std::string handle_;
+};
+
 class ConsoleLogOhos : public WebConsoleLog {
     DECLARE_ACE_TYPE(ConsoleLogOhos, WebConsoleLog)
 
@@ -110,6 +129,36 @@ private:
     std::shared_ptr<OHOS::NWeb::FileSelectorCallback> callback_;
 };
 
+class ContextMenuParamOhos : public WebContextMenuParam {
+    DECLARE_ACE_TYPE(ContextMenuParamOhos, WebContextMenuParam)
+
+public:
+    ContextMenuParamOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param)
+        : param_(param) {}
+
+    int32_t GetXCoord() const override;
+    int32_t GetYCoord() const override;
+    std::string GetLinkUrl() const override;
+    std::string GetUnfilteredLinkUrl() const override;
+    std::string GetSourceUrl() const override;
+    bool HasImageContents() const override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
+};
+
+class ContextMenuResultOhos : public ContextMenuResult {
+    DECLARE_ACE_TYPE(ContextMenuResultOhos, ContextMenuResult)
+
+public:
+    ContextMenuResultOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback)
+        : callback_(callback) {}
+
+    void Cancel() const override;
+    void CopyImage() const override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;
+};
+
 class WebGeolocationOhos : public WebGeolocation {
     DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
 
@@ -119,6 +168,24 @@ public:
     void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
 private:
     std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> geolocationCallback_;
+};
+
+class WebPermissionRequestOhos : public WebPermissionRequest {
+    DECLARE_ACE_TYPE(WebPermissionRequestOhos, WebPermissionRequest)
+
+public:
+    WebPermissionRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request)
+        : request_(request) {}
+
+    void Deny() const override;
+
+    std::string GetOrigin() const override;
+
+    std::vector<std::string> GetResources() const override;
+
+    void Grant(std::vector<std::string>& resources) const override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebAccessRequest> request_;
 };
 
 class WebDelegate : public WebResource {
@@ -180,6 +247,11 @@ public:
     void UpdateTextZoomAtio(const int32_t& textZoomAtioNum);
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
     void LoadUrl();
+    void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
+    void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
+    void ClosePort(std::string& handle);
+    void PostPortMessage(std::string& handle, std::string& data);
+    void SetPortMessageCallback(std::string& handle, std::function<void(const std::string&)>&& callback);
     void HandleTouchDown(const int32_t& id, const double& x, const double& y);
     void HandleTouchUp(const int32_t& id, const double& x, const double& y);
     void HandleTouchMove(const int32_t& id, const double& x, const double& y);
@@ -189,6 +261,7 @@ public:
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action);
     void OnFocus();
     void OnBlur();
+    void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -215,10 +288,13 @@ public:
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason);
     void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed);
     bool OnFileSelectorShow(const BaseEventInfo* info);
+    bool OnContextMenuShow(const BaseEventInfo* info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);
     bool LoadDataWithRichText();
+    void OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -273,6 +349,11 @@ private:
     void BackOrForward(int32_t step);
     bool AccessBackward();
     bool AccessForward();
+
+    void SearchAllAsync(const std::string& searchStr);
+    void ClearMatches();
+    void SearchNext(bool forward);
+
 #if defined(ENABLE_ROSEN_BACKEND)
     void InitWebViewWithSurface(sptr<Surface> surface);
 #endif
@@ -311,6 +392,8 @@ private:
     EventCallbackV2 onRenderExitedV2_;
     EventCallbackV2 onResourceLoadV2_;
     EventCallbackV2 onScaleChangeV2_;
+    EventCallbackV2 onPermissionRequestV2_;
+    EventCallbackV2 onSearchResultReceiveV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;

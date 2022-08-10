@@ -1418,15 +1418,53 @@ void JSCanvasRenderer::JsEllipse(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsFill(const JSCallbackInfo& info)
 {
-    if (isOffscreen_) {
-        offscreenCanvas_->Fill();
-    } else {
-        pool_->Fill();
+    std::string ruleStr = "";
+    if (info.Length() == 1 && info[0]->IsString()) {
+        // fill(rule) uses fillRule specified by the application developers
+        JSViewAbstract::ParseJsString(info[0], ruleStr);
+    } else if (info.Length() == 2) {
+        // fill(path, rule) uses fillRule specified by the application developers
+        JSViewAbstract::ParseJsString(info[1], ruleStr);
+    }
+    auto fillRule = CanvasFillRule::NONZERO;
+    if (ruleStr == "nonzero") {
+        fillRule = CanvasFillRule::NONZERO;
+    } else if (ruleStr == "evenodd") {
+        fillRule = CanvasFillRule::EVENODD;
+    }
+
+    if (info.Length() == 0 ||
+        (info.Length() == 1 && info[0]->IsString())) {
+        if (isOffscreen_) {
+            offscreenCanvas_->SetFillRuleForPath(fillRule);
+            offscreenCanvas_->Fill();
+        } else {
+            pool_->UpdateFillRuleForPath(fillRule);
+            pool_->Fill();
+        }
+    } else if (info.Length() == 2 ||
+        (info.Length() == 1 && info[0]->IsObject())) {
+        JSPath2D* jsCanvasPath = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPath2D>();
+        if (jsCanvasPath == nullptr) {
+            LOGE("The arg is wrong, it is supposed to have JSPath2D argument");
+            return;
+        }
+        auto path = jsCanvasPath->GetCanvasPath2d();
+
+        if (isOffscreen_) {
+            offscreenCanvas_->SetFillRuleForPath2D(fillRule);
+            offscreenCanvas_->Fill(path);
+        } else {
+            pool_->UpdateFillRuleForPath2D(fillRule);
+            pool_->Fill(path);
+        }
     }
 }
 
 void JSCanvasRenderer::JsStroke(const JSCallbackInfo& info)
 {
+    // stroke always uses non-zero fillRule
+    auto fillRule = CanvasFillRule::NONZERO;
     if (info.Length() == 1) {
         JSPath2D* jsCanvasPath = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPath2D>();
         if (jsCanvasPath == nullptr) {
@@ -1435,24 +1473,32 @@ void JSCanvasRenderer::JsStroke(const JSCallbackInfo& info)
         }
         auto path = jsCanvasPath->GetCanvasPath2d();
         if (isOffscreen_) {
+            offscreenCanvas_->SetFillRuleForPath(fillRule);
             offscreenCanvas_->Stroke(path);
         } else {
+            pool_->UpdateFillRuleForPath2D(fillRule);
             pool_->Stroke(path);
         }
         return;
     }
     if (isOffscreen_) {
+        offscreenCanvas_->SetFillRuleForPath2D(fillRule);
         offscreenCanvas_->Stroke();
     } else {
+        pool_->UpdateFillRuleForPath(fillRule);
         pool_->Stroke();
     }
 }
 
 void JSCanvasRenderer::JsClip(const JSCallbackInfo& info)
 {
+    // clip() uses non-zero fillRule for default
+    auto fillRule = CanvasFillRule::NONZERO;
     if (isOffscreen_) {
+        offscreenCanvas_->SetFillRuleForPath(fillRule);
         offscreenCanvas_->Clip();
     } else {
+        pool_->UpdateFillRuleForPath(fillRule);
         pool_->Clip();
     }
 }
@@ -1720,19 +1766,48 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
     paintState_.SetTextStyle(style_);
     double width = 0.0;
     double height = 0.0;
+    TextMetrics textMetric;
+    double actualBoundingBoxLeft = 0.0;
+    double actualBoundingBoxRight = 0.0;
+    double actualBoundingBoxAscent = 0.0;
+    double actualBoundingBoxDescent = 0.0;
+    double hangingBaseline = 0.0;
+    double alphabeticBaseline = 0.0;
+    double ideographicBaseline = 0.0;
+    double emHeightAscent = 0.0;
+    double emHeightDescent = 0.0;
+    double fontBoundingBoxAscent = 0.0;
+    double fontBoundingBoxDescent = 0.0;
     if (info[0]->IsString()) {
         JSViewAbstract::ParseJsString(info[0], text);
         if (isOffscreen_) {
             width = offscreenCanvas_->MeasureText(text, paintState_);
             height = offscreenCanvas_->MeasureTextHeight(text, paintState_);
+            textMetric = offscreenCanvas_->MeasureTextMetrics(text, paintState_);
         } else {
             width = pool_->MeasureText(text, paintState_);
             height = pool_->MeasureTextHeight(text, paintState_);
+            textMetric = pool_->MeasureTextMetrics(text, paintState_);
         }
+        actualBoundingBoxLeft = textMetric.actualBoundingBoxLeft;
+        actualBoundingBoxRight = textMetric.actualBoundingBoxRight;
+        actualBoundingBoxAscent = textMetric.actualBoundingBoxAscent;
+        actualBoundingBoxDescent = textMetric.actualBoundingBoxDescent;
 
         auto retObj = JSRef<JSObject>::New();
         retObj->SetProperty("width", SystemProperties::Px2Vp(width));
         retObj->SetProperty("height", SystemProperties::Px2Vp(height));
+        retObj->SetProperty("actualBoundingBoxLeft", SystemProperties::Px2Vp(actualBoundingBoxLeft));
+        retObj->SetProperty("actualBoundingBoxRight", SystemProperties::Px2Vp(actualBoundingBoxRight));
+        retObj->SetProperty("actualBoundingBoxAscent", SystemProperties::Px2Vp(actualBoundingBoxAscent));
+        retObj->SetProperty("actualBoundingBoxDescent", SystemProperties::Px2Vp(actualBoundingBoxDescent));
+        retObj->SetProperty("hangingBaseline", SystemProperties::Px2Vp(hangingBaseline));
+        retObj->SetProperty("alphabeticBaseline", SystemProperties::Px2Vp(alphabeticBaseline));
+        retObj->SetProperty("ideographicBaseline", SystemProperties::Px2Vp(ideographicBaseline));
+        retObj->SetProperty("emHeightAscent", SystemProperties::Px2Vp(emHeightAscent));
+        retObj->SetProperty("emHeightDescent", SystemProperties::Px2Vp(emHeightDescent));
+        retObj->SetProperty("fontBoundingBoxAscent", SystemProperties::Px2Vp(fontBoundingBoxAscent));
+        retObj->SetProperty("fontBoundingBoxDescent", SystemProperties::Px2Vp(fontBoundingBoxDescent));
         info.SetReturnValue(retObj);
     }
 }

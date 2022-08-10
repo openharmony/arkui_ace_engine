@@ -50,6 +50,8 @@ public:
 
     void Reset(double start, double end, double velocity, const RefPtr<SpringProperty>& spring);
 
+    std::string GetMotionType() const override;
+
 protected:
     double endPosition_ = 0.0;
     double currentPosition_ = 0.0;
@@ -59,7 +61,7 @@ protected:
 
 private:
     // the threshold close to zero
-    static constexpr double NEAR_ZERO = 0.001;
+    static constexpr double NEAR_ZERO = 0.1;
 };
 
 class ScrollSpringMotion : public SpringMotion {

@@ -19,11 +19,21 @@ build_component_ng("render_ng") {
     "adapter/skia_canvas.cpp",
     "adapter/skia_canvas_image.cpp",
     "adapter/skia_paint.cpp",
+    "adapter/txt_font_collection.cpp",
     "adapter/txt_paragraph.cpp",
     "image_painter.cpp",
+    "paint_wrapper.cpp",
     "render_context_creator.cpp",
-    "render_wrapper.cpp",
   ]
+
+  if (enable_ng_build) {
+    sources += [
+      "adapter/flutter_node.cpp",
+      "adapter/flutter_render_context.cpp",
+      "adapter/flutter_window.cpp",
+    ]
+  }
+
   rosen_sources = [
     "adapter/rosen_render_context.cpp",
     "adapter/rosen_window.cpp",

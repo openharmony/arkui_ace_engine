@@ -53,6 +53,8 @@ public:
 
     virtual bool IsFocusableByTab() const;
 
+    bool IsFocusableWholePath() const;
+
     virtual bool AcceptFocusByRectOfLastFocus(const Rect& rect)
     {
         return IsFocusable();
@@ -178,6 +180,40 @@ public:
         tabIndex_ = tabIndex;
     }
 
+    const std::string& GetInspectorKey() const
+    {
+        return inspectorKey_;
+    }
+
+    void SetInspectorKey(std::string& inspectorKey)
+    {
+        inspectorKey_ = inspectorKey;
+    }
+
+    RefPtr<FocusNode> GetChildDefaultFoucsNode(bool isGetDefaultFocus = true);
+
+    RefPtr<FocusNode> GetChildFocusNodeById(const std::string& id);
+
+    bool RequestFocusImmediatelyById(const std::string& id);
+
+    bool IsDefaultFocus() const
+    {
+        return isDefaultFocus_;
+    }
+    void SetIsDefaultFocus(bool isDefaultFocus)
+    {
+        isDefaultFocus_ = isDefaultFocus;
+    }
+
+    bool IsDefaultGroupFocus() const
+    {
+        return isDefaultGroupFocus_;
+    }
+    void SetIsDefaultGroupFocus(bool isDefaultGroupFocus)
+    {
+        isDefaultGroupFocus_ = isDefaultGroupFocus;
+    }
+
 protected:
     virtual bool OnKeyEvent(const KeyEvent& keyEvent);
 
@@ -235,6 +271,10 @@ protected:
     std::function<void()> onFocus_;
     std::function<void()> onBlur_;
     int32_t tabIndex_ = 0;
+    std::string inspectorKey_;
+    bool isFocusOnTouch_ = false;
+    bool isDefaultFocus_ = false;
+    bool isDefaultGroupFocus_ = false;
 
 private:
     static int32_t GenerateFocusIndex();

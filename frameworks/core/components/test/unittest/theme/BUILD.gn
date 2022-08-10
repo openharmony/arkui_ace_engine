@@ -37,6 +37,7 @@ ohos_unittest("ThemeManagerTest") {
 
     # theme
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
+    "$ace_root/frameworks/core/components/theme/icon_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
     "$ace_root/frameworks/core/components/theme/theme_constants.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager.cpp",

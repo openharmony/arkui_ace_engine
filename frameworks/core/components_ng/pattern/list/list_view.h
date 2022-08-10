@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_VIEW_H
 
 #include "base/geometry/axis.h"
+#include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 
@@ -25,6 +26,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ListView {
 public:
     static void Create();
+    static void SetSpace(const Dimension& space);
+    static void SetInitialIndex(const int32_t& initialIndex);
     static void SetListDirection(Axis axis);
     static void SetEdgeEffect(EdgeEffect edgeEffect);
 };

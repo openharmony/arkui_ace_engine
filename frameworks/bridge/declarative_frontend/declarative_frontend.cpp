@@ -539,6 +539,15 @@ std::string DeclarativeFrontend::GetContentInfo() const
     }
 }
 
+int32_t DeclarativeFrontend::GetRouterSize() const
+{
+    if (delegate_) {
+        return delegate_->GetStackSize();
+    } else {
+        return -1;
+    }
+}
+
 void DeclarativeFrontend::SendCallbackMessage(const std::string& callbackId, const std::string& data) const
 {
     if (delegate_) {
