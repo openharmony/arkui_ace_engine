@@ -147,14 +147,18 @@ void RenderProgressDataPanel::Update(const RefPtr<Component>& component)
     }
     if (isLoading_ && !animationInitialized_) {
         animation_ = AceType::MakeRefPtr<CurveAnimation<double>>(0.0, 2.0, Curves::LINEAR);
-        animation_->AddListener([this](const double& value) {
-            rotateAngle_ = 360 * (1 - std::cos(M_PI * value / 2.0) + value / 2.0) / 3;
-            if (value > 1.0) {
-                sweepDegree_ = 90.0 * (2 - value);
-            } else {
-                sweepDegree_ = 90.0 * value;
+        animation_->AddListener([weak = WeakClaim(this)](const double& value) {
+            auto renderDataPanel = weak.Upgrade();
+            if (!renderDataPanel) {
+                return;
             }
-            MarkNeedRender();
+            renderDataPanel->rotateAngle_ = 360 * (1 - std::cos(M_PI * value / 2.0) + value / 2.0) / 3;
+            if (value > 1.0) {
+                renderDataPanel->sweepDegree_ = 90.0 * (2 - value);
+            } else {
+                renderDataPanel->sweepDegree_ = 90.0 * value;
+            }
+            renderDataPanel->MarkNeedRender();
         });
         PrepareAnimation();
         PlayAnimation();
@@ -162,19 +166,27 @@ void RenderProgressDataPanel::Update(const RefPtr<Component>& component)
         animationInitialized_ = true;
     } else if (!isLoading_ && needUpdateAnimation) {
         animation_ = AceType::MakeRefPtr<CurveAnimation<double>>(0.0, 1.5, Curves::LINEAR);
-        animation_->AddListener([this](const double& value) {
-            percent_ = value;
-            if (percent_ > 1.0) {
-                percent_ = 1.0;
+        animation_->AddListener([weak = WeakClaim(this)](const double& value) {
+            auto renderDataPanel = weak.Upgrade();
+            if (!renderDataPanel) {
+                return;
             }
-            MarkNeedRender();
+            renderDataPanel->percent_ = value;
+            if (renderDataPanel->percent_ > 1.0) {
+                renderDataPanel->percent_ = 1.0;
+            }
+            renderDataPanel->MarkNeedRender();
         });
 
         transitionAnimation_ =
             AceType::MakeRefPtr<CurveAnimation<double>>(progress_, previousPercentValue_, Curves::EASE_OUT);
-        transitionAnimation_->AddListener([this](const double& value) {
-            progress_ = value;
-            MarkNeedRender();
+        transitionAnimation_->AddListener([weak = WeakClaim(this)](const double& value) {
+            auto renderDataPanel = weak.Upgrade();
+            if (!renderDataPanel) {
+                return;
+            }
+            renderDataPanel->progress_ = value;
+            renderDataPanel->MarkNeedRender();
         });
         PrepareAnimation();
         StopAnimation();
@@ -243,9 +255,13 @@ void RenderPercentageDataPanel::Update(const RefPtr<Component>& component)
     if (!animationInitialized_) {
         auto springProperty = AceType::MakeRefPtr<SpringProperty>(1.0f, 100.0f, 15.0f);
         auto springAnimation = AceType::MakeRefPtr<SpringAnimation>(springProperty);
-        springAnimation->AddListener([this](const double& value) {
-            animationPercent_ = value;
-            MarkNeedRender();
+        springAnimation->AddListener([weak = WeakClaim(this)](const double& value) {
+            auto renderDataPanel = weak.Upgrade();
+            if (!renderDataPanel) {
+                return;
+            }
+            renderDataPanel->animationPercent_ = value;
+            renderDataPanel->MarkNeedRender();
         });
         animator_->AddInterpolator(springAnimation);
         animationInitialized_ = true;
