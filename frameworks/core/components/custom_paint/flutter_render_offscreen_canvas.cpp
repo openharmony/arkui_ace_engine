@@ -467,14 +467,33 @@ void FlutterRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const
 std::unique_ptr<ImageData> FlutterRenderOffscreenCanvas::GetImageData(double left, double top,
     double width, double height)
 {
+    double viewScale = 1.0;
+    auto pipeline = pipelineContext_.Upgrade();
+    if (pipeline) {
+        viewScale = pipeline->GetViewScale();
+    }
+    // copy the bitmap to tempCanvas
     auto imageInfo =
         SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
+    double scaledLeft = left * viewScale;
+    double scaledTop = top * viewScale;
     double dirtyWidth = width >= 0 ? width : 0;
     double dirtyHeight = height >= 0 ? height : 0;
     int32_t size = dirtyWidth * dirtyHeight;
+    auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, width * viewScale, height * viewScale);
+    auto dstRect = SkRect::MakeXYWH(0.0, 0.0, dirtyWidth, dirtyHeight);
+    SkBitmap tempCache;
+    tempCache.allocPixels(imageInfo);
+    SkCanvas tempCanvas(tempCache);
+#ifdef USE_SYSTEM_SKIA_S
+    tempCanvas.drawImageRect(
+        skBitmap_.asImage(), srcRect, dstRect, SkSamplingOptions(), nullptr, SkCanvas::kFast_SrcRectConstraint);
+#else
+    tempCanvas.drawBitmapRect(skBitmap_, srcRect, dstRect, nullptr);
+#endif
     // write color
     std::unique_ptr<uint8_t[]> pixels = std::make_unique<uint8_t[]>(size * 4);
-    skCanvas_->readPixels(imageInfo, pixels.get(), dirtyWidth * imageInfo.bytesPerPixel(), 0, 0);
+    tempCanvas.readPixels(imageInfo, pixels.get(), dirtyWidth * imageInfo.bytesPerPixel(), 0, 0);
     std::unique_ptr<ImageData> imageData = std::make_unique<ImageData>();
     imageData->dirtyWidth = dirtyWidth;
     imageData->dirtyHeight = dirtyHeight;
