@@ -195,7 +195,7 @@ void ListLayoutAlgorithm::LayoutForward(
             }
         }
         itemPosition_[currentIndex] = { currentStartPos, currentEndPos };
-        if ((currentIndex > 0) && (currentIndex < itemPosition_.size() - 1)) {
+        if ((currentIndex > 0) && (currentIndex < static_cast<int32_t>(itemPosition_.size()) - 1)) {
             currentEndPos = currentEndPos + spaceWidth_;
         }
     } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize));
@@ -276,7 +276,7 @@ void ListLayoutAlgorithm::LayoutBackward(
             }
         }
         itemPosition_[currentIndex] = { currentStartPos, currentEndPos };
-        if ((currentIndex > 0) && (currentIndex < itemPosition_.size() - 1)) {
+        if ((currentIndex > 0) && (currentIndex < static_cast<int32_t>(itemPosition_.size()) - 1)) {
             currentStartPos = currentStartPos - spaceWidth_;
         }
     } while (GreatNotEqual(currentStartPos, startMainPos_ - cacheSize));
