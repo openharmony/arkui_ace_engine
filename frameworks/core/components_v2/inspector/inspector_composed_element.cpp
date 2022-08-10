@@ -796,7 +796,11 @@ std::string InspectorComposedElement::GetBorderStyle() const
 std::string InspectorComposedElement::GetBorderWidth() const
 {
     auto border = GetBorder();
-    return border.Left().GetWidth().ToString();
+    auto borderWidth = border.Left().GetWidth();
+    if (NearZero(borderWidth.Value())) {
+        return "0.00vp";
+    }
+    return borderWidth.ToString();
 }
 
 std::string InspectorComposedElement::GetBorderColor() const
