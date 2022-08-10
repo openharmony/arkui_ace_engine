@@ -300,18 +300,18 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    LOGI("point source: %{public}d", pointerEvent->GetSourceType());
+    LOGD("point source: %{public}d", pointerEvent->GetSourceType());
     auto actionId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(actionId, item)) {
-        LOGI("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d", actionId,
+        LOGD("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d", actionId,
             item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction());
     }
     auto ids = pointerEvent->GetPointerIds();
     for (auto&& id : ids) {
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(id, item)) {
-            LOGI("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d", actionId,
+            LOGD("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d", actionId,
                 item.GetWindowX(), item.GetWindowY(), item.IsPressed());
         }
     }

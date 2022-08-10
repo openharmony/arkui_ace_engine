@@ -187,6 +187,16 @@ public:
         onClickId_ = onClickId;
     }
 
+    RefPtr<Gesture> GetOnContainerModalClickId() const
+    {
+        return onContainerModalClickId_;
+    }
+
+    void SetOnContainerModalClickId(const RefPtr<Gesture>& onContainerModalClickId)
+    {
+        onContainerModalClickId_ = onContainerModalClickId;
+    }
+
     void AddGesture(GesturePriority priority, RefPtr<Gesture> gesture)
     {
         if (gesturePriority_ != priority || gestureHierarchy_.empty()) {
@@ -376,6 +386,7 @@ private:
     OnTouchEventCallback onTouchUpId_;
     OnTouchEventCallback onTouchDownId_;
     RefPtr<Gesture> onClickId_;
+    RefPtr<Gesture> onContainerModalClickId_;
     RefPtr<Gesture> onLongPressId_;
     RefPtr<Gesture> onDoubleClickId_;
     GesturePriority gesturePriority_ = GesturePriority::Low;

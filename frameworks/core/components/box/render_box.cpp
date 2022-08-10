@@ -21,6 +21,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/event_report.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/animation/property_animatable_helper.h"
 #include "core/common/clipboard/clipboard_proxy.h"
@@ -105,6 +106,16 @@ void RenderBox::Update(const RefPtr<Component>& component)
 
         responseRegion_ = box->GetResponseRegion();
         isResponseRegion_ = box->IsResponseRegion();
+
+        auto containerModalTapGesture = box->GetOnContainerModalClickId();
+        if (containerModalTapGesture) {
+            onContainerModalClick_ =
+                AceType::DynamicCast<ClickRecognizer>(containerModalTapGesture->CreateRecognizer(context_));
+            if (onContainerModalClick_) {
+                onContainerModalClick_->SetIsExternalGesture(true);
+                onContainerModalClick_->SetUseCatchMode(false);
+            }
+        }
 
         auto tapGesture = box->GetOnClick();
         if (tapGesture) {
@@ -802,6 +813,7 @@ void RenderBox::ClearRenderObject()
     onDragLeave_ = nullptr;
     onDrop_ = nullptr;
     onClick_ = nullptr;
+    onContainerModalClick_ = nullptr;
     onLongPress_ = nullptr;
 }
 
@@ -1589,6 +1601,11 @@ void RenderBox::OnTouchTestHit(
     if (touchRecognizer_) {
         touchRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(touchRecognizer_);
+    }
+    if (onContainerModalClick_) {
+        onContainerModalClick_->SetCoordinateOffset(coordinateOffset);
+        result.emplace_back(onContainerModalClick_);
+        MarkIsNotSiblingAddRecognizerToResult(true);
     }
     if (onClick_) {
         onClick_->SetCoordinateOffset(coordinateOffset);
