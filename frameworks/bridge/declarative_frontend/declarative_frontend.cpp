@@ -176,7 +176,7 @@ void DeclarativeFrontend::Destroy()
 
 bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
 {
-    LOGI("DeclarativeFrontend initialize begin.");
+    LOGD("DeclarativeFrontend initialize begin.");
     type_ = type;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
     InitializeFrontendDelegate(taskExecutor);
@@ -190,13 +190,13 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
         },
         TaskExecutor::TaskType::JS);
 
-    LOGI("DeclarativeFrontend initialize end.");
+    LOGD("DeclarativeFrontend initialize end.");
     return true;
 }
 
 void DeclarativeFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
-    LOGI("DeclarativeFrontend AttachPipelineContext.");
+    LOGD("DeclarativeFrontend AttachPipelineContext.");
     if (!delegate_) {
         return;
     }

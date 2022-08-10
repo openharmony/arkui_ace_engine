@@ -21,7 +21,6 @@ std::unique_ptr<ConnectInspector> g_inspector = nullptr;
 
 void* HandleDebugManager(void* const server)
 {
-    LOGI("HandleDebugManager");
     if (server == nullptr) {
         LOGE("HandleDebugManager server nullptr");
         return nullptr;
@@ -36,7 +35,6 @@ void OnMessage(const std::string& message)
         LOGE("message is empty");
         return;
     }
-    LOGI("message will be sent");
 
     std::string checkMessage = "connected";
     if (message.find(checkMessage, 0) != std::string::npos) {
@@ -60,7 +58,6 @@ void ResetService()
 
 void StartServer(const std::string& componentName)
 {
-    LOGI("StartServer: %{private}s", componentName.c_str());
     g_inspector = std::make_unique<ConnectInspector>();
     g_inspector->connectServer_ = std::make_unique<ConnectServer>(componentName,
         std::bind(&OnMessage, std::placeholders::_1));
@@ -72,19 +69,15 @@ void StartServer(const std::string& componentName)
         ResetService();
         return;
     }
-    LOGI("StartServer Continue.");
 }
 
 void StopServer(const std::string& componentName)
 {
-    LOGI("StopServer: %{private}s", componentName.c_str());
     ResetService();
-    LOGI("StopServer end");
 }
 
 void StoreMessage(int32_t instanceId, const std::string& message)
 {
-    LOGI("Add message to information buffer.");
     if (g_inspector->infoBuffer_.count(instanceId) == 1) {
         LOGE("The message with the current instance id has been existed.");
         return;
@@ -94,7 +87,6 @@ void StoreMessage(int32_t instanceId, const std::string& message)
 
 void RemoveMessage(int32_t instanceId)
 {
-    LOGI("Remove message from information buffer.");
     if (g_inspector->infoBuffer_.count(instanceId) != 1) {
         LOGE("The message with the current instance id does not exist.");
         return;
@@ -104,7 +96,6 @@ void RemoveMessage(int32_t instanceId)
 
 void SendMessage(const std::string& message)
 {
-    LOGI("Enter SendMessage");
     if (g_inspector != nullptr && g_inspector->connectServer_ != nullptr && !g_inspector->waitingForDebugger_) {
         g_inspector->connectServer_->SendMessage(message);
     }

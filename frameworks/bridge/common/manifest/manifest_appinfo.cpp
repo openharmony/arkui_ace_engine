@@ -27,7 +27,6 @@ const std::string APP_NAME_PREFIX = "$string:";
 std::string ParseI18nAppName(std::string& rawAppName)
 {
     if (!StringUtils::StartWith(rawAppName, APP_NAME_PREFIX) || rawAppName.size() <= APP_NAME_PREFIX.size()) {
-        LOGW("not i18n appName");
         return rawAppName;
     }
 

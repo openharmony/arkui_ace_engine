@@ -1649,7 +1649,7 @@ void FrontendDelegateDeclarative::RecycleSinglePage()
 
 void FrontendDelegateDeclarative::OnPrePageChange(const RefPtr<JsAcePage>& page)
 {
-    LOGI("FrontendDelegateDeclarative OnPrePageChange");
+    LOGD("FrontendDelegateDeclarative OnPrePageChange");
     if (page && page->GetDomDocument() && jsAccessibilityManager_) {
         jsAccessibilityManager_->SetRootNodeId(page->GetDomDocument()->GetRootNodeId());
     }
@@ -1662,7 +1662,7 @@ void FrontendDelegateDeclarative::FlushPageCommand(
         ProcessRouterTask();
         return;
     }
-    LOGI("FlushPageCommand FragmentCount(%{public}d)", page->FragmentCount());
+    LOGD("FlushPageCommand FragmentCount(%{public}d)", page->FragmentCount());
     if (page->FragmentCount() == 1) {
         OnPageReady(page, url, isMainPage, isRestore);
     } else {
