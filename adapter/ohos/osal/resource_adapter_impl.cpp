@@ -54,6 +54,7 @@ void ResourceAdapterImpl::Init(const ResourceInfo& resourceInfo)
     sysResourceManager_ = newResMgr;
     resourceManager_ = sysResourceManager_;
     packagePathStr_ = resPath;
+    resConfig_ = resConfig;
 }
 
 void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
@@ -61,7 +62,11 @@ void ResourceAdapterImpl::UpdateConfig(const ResourceConfiguration& config)
     auto resConfig = ConvertConfigToGlobal(config);
     LOGI("UpdateConfig ori=%{public}d, dpi=%{public}d, device=%{public}d",
         resConfig->GetDirection(), resConfig->GetScreenDensity(), resConfig->GetDeviceType());
-    resourceManager_->UpdateResConfig(*resConfig);
+    sysResourceManager_->UpdateResConfig(*resConfig);
+    for (auto& resMgr : resourceManagers_) {
+        resMgr.second->UpdateResConfig(*resConfig);
+    }
+    resConfig_ = resConfig;
 }
 
 RefPtr<ThemeStyle> ResourceAdapterImpl::GetTheme(int32_t themeId)
@@ -267,6 +272,7 @@ void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, c
         }
         resourceManagers_[{ bundleName, moduleName }] = context->GetResourceManager();
         resourceManager_ = context->GetResourceManager();
+        resourceManager_->UpdateResConfig(*resConfig_);
     }
 }
 
