@@ -54,5 +54,5 @@ config("config_render_wrap_test") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":ListLayoutAlgorithmTest" ]
+  deps = []
 }
