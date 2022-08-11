@@ -131,6 +131,11 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
     iconSwitch_ = sideBar_->GetSwitchIcon();
     showControlButton_ = sideBar_->GetShowControlButton();
     autoHide_ = sideBar_->GetAutoHide();
+
+    if (isInitialized_ && sideBarPosition_ != sideBar_->GetSideBarPositon()) {
+        animationController_->SetSideBarPositon(sideBar_->GetSideBarPositon());
+    }
+
     sideBarPosition_ = sideBar_->GetSideBarPositon();
 
     exceptRegion_.SetRect(SystemProperties::Vp2Px(sideBar_->GetButtonLeft()),
