@@ -803,7 +803,7 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     if (front) {
-        LOGI("RunPage content=[%{private}s]", content.c_str());
+        LOGD("RunPage content=[%{private}s]", content.c_str());
         front->RunPage(pageId, content, params);
         return true;
     }
@@ -1117,7 +1117,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         taskExecutor_->PostTask(
             [themeManager, assetManager = assetManager_, colorScheme = colorScheme_] {
                 ACE_SCOPED_TRACE("OHOS::LoadThemes()");
-                LOGI("UIContent load theme");
+                LOGD("UIContent load theme");
                 themeManager->SetColorScheme(colorScheme);
                 themeManager->LoadCustomTheme(assetManager);
                 themeManager->LoadResourceThemes();
@@ -1269,10 +1269,10 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 
 void AceContainer::InitWindowCallback()
 {
-    LOGI("AceContainer InitWindowCallback");
+    LOGD("AceContainer InitWindowCallback");
     auto aceAbility = aceAbility_.lock();
     if (aceAbility == nullptr) {
-        LOGW("AceContainer::InitWindowCallback failed, aceAbility is null.");
+        LOGD("AceContainer::InitWindowCallback failed, aceAbility is null.");
         return;
     }
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_);

@@ -249,7 +249,7 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     // run page.
     Platform::AceContainer::RunPage(
         instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
-    LOGI("Initialize UIContentImpl done.");
+    LOGD("Initialize UIContentImpl done.");
 }
 
 void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
@@ -390,7 +390,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         if (flutterAssetManager && !resPath.empty()) {
             auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
             if (assetProvider->Initialize(resPath, assetBasePathStr)) {
-                LOGI("Push AssetProvider to queue.");
+                LOGD("Push AssetProvider to queue.");
                 flutterAssetManager->PushBack(std::move(assetProvider));
             }
         }
@@ -422,7 +422,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         if (flutterAssetManager && !packagePathStr.empty()) {
             auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
             if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
-                LOGI("Push AssetProvider to queue.");
+                LOGD("Push AssetProvider to queue.");
                 flutterAssetManager->PushBack(std::move(assetProvider));
             }
         }
@@ -547,7 +547,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                     context->SetRSUIDirector(rsUiDirector);
                 }
                 flutterAceView->InitIOManager(container->GetTaskExecutor());
-                LOGI("UIContent Init Rosen Backend");
+                LOGD("UIContent Init Rosen Backend");
         }
     };
 #endif

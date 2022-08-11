@@ -202,7 +202,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
 panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGI("Load Document start");
+    LOGD("Load Document start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {

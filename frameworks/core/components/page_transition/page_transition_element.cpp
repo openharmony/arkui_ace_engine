@@ -191,7 +191,7 @@ void PageTransitionElement::UpdateTransitionOption()
     }
     isRightToLeft_ = transitionComponent->GetTextDirection() == TextDirection::RTL;
 
-    LOGI("Use user-defined transition parameters.");
+    LOGD("Use user-defined transition parameters.");
     contentInOption_ = transitionComponent->GetContentTransitionInOption();
     contentOutOption_ = transitionComponent->GetContentTransitionOutOption();
     pageTransitions_ = transitionComponent->GetPageTransitions();
