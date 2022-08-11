@@ -150,15 +150,6 @@ RefPtr<Element> TabContentProxyElement::OnUpdateElement(
                 }
             }
         }
-
-        if (usePartialUpdate) {
-            // Check if we removing focused element
-            // Does not work for last element
-            bool active = TabsHelper::IsActiveTabBarItemFor(element);
-            if (active) {
-                TabsHelper::SetIndex(Referenced::Claim<Element>(this), 0);
-            }
-        }
     }
     return UpdateChild(element, component);
 }

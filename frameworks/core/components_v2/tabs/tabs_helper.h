@@ -36,7 +36,7 @@ namespace OHOS::Ace::V2 {
         </TabBar>
     </Box>
 
-    // Last child
+    // Last child (or first if tab bar is at the end)
     <FlexItem>
         <TabContent>
         </TabContent>
@@ -51,6 +51,12 @@ namespace OHOS::Ace::V2 {
 
     first child BoxElement
     last  child FlexItemElement
+
+    if TabBar positioned at the .End, order reversed:
+
+    first child FlexItemElement
+    last child BoxElement
+
     */
 
 const int32_t INVALID_TAB_BAR_INDEX = -1;
@@ -58,15 +64,16 @@ const int32_t INVALID_TAB_BAR_INDEX = -1;
 class TabsHelper {
 public:
     template<class T>
-    static RefPtr<T> FindFirstChildOfType(const RefPtr<Element>& parent)
+    static RefPtr<Element> FindFirstChildOfType(const RefPtr<Element>& parent)
     {
-        auto element = parent;
-        while (element) {
-            auto tabContentItemElement = AceType::DynamicCast<T>(element);
-            if (tabContentItemElement) {
-                return tabContentItemElement;
+        if (AceType::InstanceOf<T>(parent)) {
+            return parent;
+        }
+        for (const auto& child : parent->GetChildren()) {
+            const auto foundTypedChild = FindFirstChildOfType<T>(child);
+            if (foundTypedChild) {
+                return foundTypedChild;
             }
-            element = element->GetFirstChild();
         }
         return nullptr;
     }
@@ -75,7 +82,6 @@ public:
     static std::tuple<RefPtr<Element>, RefPtr<Element>> FindFirstParentOfType(const RefPtr<Element>& child)
     {
         RefPtr<Element> parentElement = nullptr;
-        RefPtr<Element> tabBarElement = nullptr;
         auto currentElement = child;
         while (currentElement && (parentElement = currentElement->GetElementParent().Upgrade())) {
             if (AceType::InstanceOf<T>(parentElement)) {
@@ -88,7 +94,7 @@ public:
     }
 
     template<class T>
-    static RefPtr<T> TraverseTo(const RefPtr<Component>& component)
+    static RefPtr<T> TraverseComponentTo(const RefPtr<Component>& component)
     {
         if (!component) {
             LOGE("null component");
@@ -102,62 +108,28 @@ public:
         auto single = AceType::DynamicCast<SingleChild>(component);
 
         if (single) {
-            return TraverseTo<T>(single->GetChild());
+            return TraverseComponentTo<T>(single->GetChild());
         }
         return nullptr;
     }
 
-    static RefPtr<Element> FindTabsElement(const RefPtr<Element>& child)
+    static RefPtr<TabsElement> FindTabsElement(const RefPtr<Element>& child)
     {
-        if (!child) {
-            LOGE("null child element");
-            return nullptr;
-        }
-        auto parent = child->GetElementParent();
-        RefPtr<Element> parentStrong;
-        RefPtr<TabsElement> tabsElement = nullptr;
-        do {
-            const auto parentStrong = parent.Upgrade();
-            if (parentStrong == nullptr) {
-                break;
-            }
-            if (AceType::InstanceOf<TabsElement>(parentStrong)) {
-                tabsElement = AceType::DynamicCast<TabsElement>(parentStrong);
-                break;
-            }
-            parent = parentStrong->GetElementParent();
-        } while (true);
-        return tabsElement;
+        return AceType::DynamicCast<TabsElement>(std::get<0>(TabsHelper::FindFirstParentOfType<TabsElement>(child)));
     }
 
     static RefPtr<TabBarElement> FindTabBarElement(const RefPtr<Element>& child)
     {
-        if (!child) {
-            LOGE("nullptr child element");
-            return nullptr;
-        }
-
         auto tabsElement = FindTabsElement(child);
         if (tabsElement == nullptr) {
             LOGE("nullptr tabsElement");
             return nullptr;
         }
-
-        auto box = tabsElement->GetFirstChild();
-        if (box == nullptr) {
-            LOGE("nullptr box");
-            return nullptr;
-        }
-
-        auto tabBarElement = box->GetFirstChild();
-        if (tabBarElement == nullptr) {
-            LOGE("nullptr tabBar");
-            return nullptr;
-        }
+        auto tabBarElement = TabsHelper::FindFirstChildOfType<TabBarElement>(tabsElement);
         return AceType::DynamicCast<TabBarElement>(tabBarElement);
     }
 
-    static RefPtr<Element> FindTabContentElement(const RefPtr<Element>& child)
+    static RefPtr<TabContentElement> FindTabContentElement(const RefPtr<Element>& child)
     {
         // Go up to the parent to find Tabs
         auto tabsElement = FindTabsElement(child);
@@ -169,52 +141,7 @@ public:
         // TabsElement
         //    FlexItemElement
         //       TabContentProxyElement
-
-        auto item = tabsElement->GetLastChild();
-        if (item == nullptr) {
-            LOGE("nullptr FlexItemElement");
-            return nullptr;
-        }
-
-        LOGD("FlexItemElement? %{public}s", AceType::TypeName(item));
-        auto tabContentElement = item->GetFirstChild();
-        if (tabContentElement == nullptr) {
-            LOGE("nullptr tabBar");
-            return nullptr;
-        }
-
-        LOGD("tabContentElement? %{public}s", AceType::TypeName(tabContentElement));
-
-        return tabContentElement;
-    }
-
-    static bool IsActiveTabBarItemFor(const RefPtr<Element>& element)
-    {
-        if (!element) {
-            LOGE("tabContentItemElement missing");
-            return false;
-        }
-        auto tabContentItemElement = TabsHelper::FindFirstChildOfType<TabContentItemElement>(element);
-        if (!tabContentItemElement) {
-            LOGE("tabContentItemElement missing");
-            return false;
-        }
-
-        auto tabBarItemChild = ElementRegister::GetInstance()->GetElementById(tabContentItemElement->GetBarElementId());
-        if (!tabBarItemChild) {
-            return false;
-        }
-        LOGD("tabBarItemChild ID %{public}d, %{public}s",
-            tabContentItemElement->GetBarElementId(), AceType::TypeName(tabBarItemChild));
-
-        auto parent = FindFirstParentOfType<TabBarElement>(tabBarItemChild);
-        if (std::get<0>(parent) && std::get<1>(parent)) {
-            auto tabBarElement = std::get<0>(parent);
-            auto tabBarItemElement = std::get<1>(parent);
-            auto renderTabBar = AceType::DynamicCast<RenderTabBar>(tabBarElement->GetRenderNode());
-            return renderTabBar? renderTabBar->IsActive(tabBarItemElement->GetRenderNode()) : false;
-        }
-        return false;
+        return AceType::DynamicCast<TabContentElement>(FindFirstChildOfType<TabContentElement>(tabsElement));
     }
 
     static void RemoveTabBarItemById(ElementIdType id)
@@ -239,52 +166,46 @@ public:
         }
     }
 
-    static void AddTabBarElement(const RefPtr<Element>& host, const RefPtr<Element>& contentItemElement,
-        const RefPtr<Component>& contentItemComponent)
+    static void AddTabBarElement(const RefPtr<Element>& host,
+        const RefPtr<TabContentItemComponent>& tabContentItemComponent)
     {
-        // Add TabBar Item
+        auto tabsElement = FindTabsElement(host);
+
+        if (!tabsElement) {
+            LOGE("TabsElement is null");
+            return;
+        }
+
+        // tabBar is nullptr for initial render if tab tab positioned at the .End
+        // In case if tab bar is missing we keep TabBarItemComponent(s) in memory
+        // and attach them at the end of TabsElement::PerformBuild execution.
         auto tabBar = TabsHelper::FindTabBarElement(host);
-        if (!tabBar) {
-            LOGE("TabBar missing");
-            return;
-        }
 
-        std::string text;
-        std::string icon;
+        RefPtr<TabBarItemComponent> newBarItemComponent;
 
-        auto tabContentItemElement = AceType::DynamicCast<TabContentItemElement>(contentItemElement);
-        auto tabContentItemComponent = AceType::DynamicCast<TabContentItemComponent>(contentItemComponent);
-
-        if (tabContentItemElement) {
-            text = tabContentItemElement->GetText();
-            icon = tabContentItemElement->GetIcon();
-        } else if (tabContentItemComponent) {
-            text = tabContentItemComponent->GetBarText();
-            icon = tabContentItemComponent->GetBarIcon();
+        if (tabContentItemComponent && tabContentItemComponent->HasBarBuilder()) {
+            newBarItemComponent = AceType::MakeRefPtr<TabBarItemComponent>(
+                tabContentItemComponent->ExecuteBarBuilder());
         } else {
-            LOGE("Neither Element nor Component provided to build tab menu item");
-            return;
+            newBarItemComponent = AceType::MakeRefPtr<TabBarItemComponent>(
+                TabBarItemComponent::BuildWithTextIcon(
+                    tabContentItemComponent->GetBarText(), tabContentItemComponent->GetBarIcon()));
         }
-
-        auto newBarItemComponent = AceType::MakeRefPtr<TabBarItemComponent>(
-            TabBarItemComponent::BuildWithTextIcon(text, icon));
-
-        tabBar->GetTabBarComponent()->UpdateItemStyle(newBarItemComponent);
 
         // Link tab item and Tab bar item with id
         const auto id = ElementRegister::GetInstance()->MakeUniqueId();
         newBarItemComponent->SetElementId(id);
 
-        if (tabContentItemElement) {
-            LOGD("setting id on tabContentItemElement to %{public}d", id);
-            tabContentItemElement->SetBarElementId(id);
-        } else if (tabContentItemComponent) {
-            LOGD("setting id on tabContentItemComponent to %{public}d", id);
-            tabContentItemComponent->SetBarElementId(id);
-        }
+        LOGD("setting id on tabContentItemComponent to %{public}d", id);
+        tabContentItemComponent->SetBarElementId(id);
 
-        // That adds element to TabBar
-        tabBar->UpdateChild(nullptr, newBarItemComponent);
+        // Add element to TabBar or store component to be added later
+        if (tabBar) {
+            tabBar->GetTabBarComponent()->UpdateItemStyle(newBarItemComponent);
+            tabBar->UpdateChild(nullptr, newBarItemComponent);
+        } else {
+            tabsElement->AddPendingTabBarItem(newBarItemComponent);
+        }
     }
 
     static void UpdateTabBarElement(const RefPtr<Element>& host, const RefPtr<Element>& contentItemElement,
@@ -325,6 +246,11 @@ public:
         auto newBarItemComponent = AceType::MakeRefPtr<TabBarItemComponent>(
             TabBarItemComponent::BuildWithTextIcon(text, icon));
         tabBar->GetTabBarComponent()->UpdateItemStyle(newBarItemComponent);
+
+        if (tabContentItemComponent && tabContentItemComponent->HasBarBuilder()) {
+            newBarItemComponent = AceType::MakeRefPtr<TabBarItemComponent>(
+                tabContentItemComponent->ExecuteBarBuilder());
+        }
 
         auto tabBarItemElement = ElementRegister::GetInstance()->GetElementById(id);
         if (!tabBarItemElement) {
@@ -432,7 +358,7 @@ public:
     {
         // TODO: ContentCount should be managed by render_tab_content itself
         // element is a TabContentItemElement
-        auto tabContent = AceType::DynamicCast<TabContentElement>(FindTabContentElement(element));
+        auto tabContent = FindTabContentElement(element);
         auto tabContentProxyElement = AceType::DynamicCast<TabContentProxyElement>(tabContent);
 
         if (!tabContent || !tabContentProxyElement) {
@@ -497,9 +423,9 @@ public:
         }
     }
 
-    // Dump Elements or RenderNodes
-    template<class T>
-    static void DumpElements(T node, const std::string& header = "", int depth = 4, const std::string& shift = "")
+    // Dump Elemens
+    static void DumpElements(const RefPtr<Element>& node,
+        const std::string& header = "", int depth = 4, const std::string& shift = "")
     {
         if (depth == 0) {
             return;
@@ -509,7 +435,7 @@ public:
             return;
         }
         if (!header.empty()) {
-            LOGD("Dumping tree for  %{public}s  %{public}s id: %{public}d",
+            LOGE("Dumping tree for  %{public}s  %{public}s id: %{public}d",
                 AceType::TypeName(node), header.c_str(), node->GetElementId());
         }
 
@@ -524,7 +450,7 @@ public:
             LOGD("%{public}s %{public}s ", shift.c_str(), AceType::TypeName(renderNode));
         }
         for (const auto& child : node->GetChildren()) {
-            DumpTabElements(child, "", depth -1, shift + "  ");
+            TabsHelper::DumpElements(child, "", depth -1, shift + "  ");
         }
     }
 

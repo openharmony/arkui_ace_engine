@@ -95,11 +95,35 @@ public:
         return builder_ != nullptr;
     }
 
+    RefPtr<Component> ExecuteBarBuilder() const
+    {
+        if (barBuilder_) {
+            return (*barBuilder_)();
+        }
+        LOGD("No builder function for tab.");
+        return nullptr;
+    }
+
+    void SetBarBuilder(std::function<RefPtr<Component>()>&& barBuilder)
+    {
+        if (barBuilder) {
+            barBuilder_ = std::make_unique<std::function<RefPtr<Component>()>>(std::move(barBuilder));
+        } else {
+            barBuilder_.reset();
+        }
+    }
+
+    bool HasBarBuilder()
+    {
+        return barBuilder_ != nullptr;
+    }
+
 private:
     WeakPtr<TabsComponent> tabsComponent_;
     std::string barIcon_;
     std::string barText_;
     std::unique_ptr<std::function<RefPtr<Component>()>> builder_ = nullptr;
+    std::unique_ptr<std::function<RefPtr<Component>()>> barBuilder_ = nullptr;
     ElementIdType tabBarItemElementId_ = ElementRegister::UndefinedElementId;
 };
 
