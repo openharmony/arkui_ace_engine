@@ -40,11 +40,3 @@ build_component_ng("pattern_ng") {
     "text/text_view.cpp",
   ]
 }
-
-if (!is_cross_platform_build) {
-  group("patternTest_ng") {
-    testonly = true
-
-    deps = [ "text/test:textPatternTest_ng" ]
-  }
-}

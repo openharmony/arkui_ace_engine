@@ -11,10 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
-
-group("unittest") {
+group("render_unittest") {
   testonly = true
-  deps = [ "list:unittest" ]
+  deps = []
 }

@@ -11,12 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
-import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
-
-group("textPatternTest_ng") {
+group("property_unittest") {
   testonly = true
-
-  deps = [ "unittest:textPatternUnittest_ng" ]
+  deps = []
 }
