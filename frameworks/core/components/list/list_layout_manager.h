@@ -86,6 +86,10 @@ private:
     void InitChainAnimation(int32_t nodeCount);
     double GetChainDelta(int32_t index) const;
     void UpdateItemPosition(void);
+    void UpdateMaxEndOffset(int32_t index, double curMainSize);
+
+    int32_t maxEndIndex_ = LIST_PARAM_INVAID;
+    double maxEndOffset_ = 0.0;
 
     int32_t cachedCount_ = 1;
     int32_t maxCount_ = 0;
