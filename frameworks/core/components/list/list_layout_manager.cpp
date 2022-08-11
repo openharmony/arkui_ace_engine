@@ -455,7 +455,8 @@ void ListLayoutManager::PerformLayout()
     RequestMoreItemsIfNeeded(firstIndex, itemIndex);
     renderList_.RecycleTail(itemIndex + 1); // Recycle tail items.
 
-    Size layoutSize = renderList_.MakeValue<Size>(curMainSize, renderList_.GetCrossSize(viewPort_));
+    UpdateMaxEndOffset(itemIndex, curMainSize);
+    Size layoutSize = renderList_.MakeValue<Size>(maxEndOffset_, renderList_.GetCrossSize(viewPort_));
     renderList_.SetLayoutSize(layoutSize);
     renderList_.CalculateStickyItem(position_);
     ShowItemFocusAnimation();
@@ -567,7 +568,8 @@ void ListLayoutManager::LayoutToItem(int32_t toIndex)
             curMainSize += chainInterval_ * HALF_ITEM_SIZE;
         }
     }
-    curMainSize = AdjustLayoutSize(curMainSize);
+    UpdateMaxEndOffset(curTailIndex, curMainSize);
+    curMainSize = AdjustLayoutSize(maxEndOffset_);
     Size layoutSize = renderList_.MakeValue<Size>(curMainSize, renderList_.GetCrossSize(viewPort_));
     renderList_.SetLayoutSize(layoutSize);
 }
@@ -597,7 +599,8 @@ void ListLayoutManager::LayoutToPosition(double position)
             curMainSize += chainInterval_ * HALF_ITEM_SIZE;
         }
     }
-    curMainSize = AdjustLayoutSize(curMainSize);
+    UpdateMaxEndOffset(curTailIndex, curMainSize);
+    curMainSize = AdjustLayoutSize(maxEndOffset_);
     Size layoutSize = renderList_.MakeValue<Size>(curMainSize, renderList_.GetCrossSize(viewPort_));
     renderList_.SetLayoutSize(layoutSize);
 }
@@ -629,7 +632,8 @@ void ListLayoutManager::LayoutMore(double incDistance)
             curMainSize += chainInterval_ * HALF_ITEM_SIZE;
         }
     }
-    curMainSize = AdjustLayoutSize(curMainSize);
+    UpdateMaxEndOffset(curTailIndex, curMainSize);
+    curMainSize = AdjustLayoutSize(maxEndOffset_);
     Size layoutSize = renderList_.MakeValue<Size>(curMainSize, renderList_.GetCrossSize(viewPort_));
     renderList_.SetLayoutSize(layoutSize);
 }
@@ -811,6 +815,15 @@ void ListLayoutManager::UpdateItemPosition(void)
         double childSize = renderList_.GetMainSize(itemChild->GetLayoutSize());
         position = it->second + childSize;
         positionVaild = true;
+    }
+}
+
+void ListLayoutManager::UpdateMaxEndOffset(int32_t index, double curMainSize)
+{
+    if ((index >= maxEndIndex_) || (index + 1 >= renderList_.GetMaxCount()) ||
+        LessNotEqual(maxEndOffset_, curMainSize)) {
+        maxEndIndex_ = index;
+        maxEndOffset_ = curMainSize;
     }
 }
 
