@@ -2865,6 +2865,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     }
 
     if (!isFocus) {
+        NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
     }
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
