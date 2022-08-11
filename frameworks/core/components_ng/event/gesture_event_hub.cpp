@@ -50,6 +50,10 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
         clickEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }
 
+    if (panEventActuator_) {
+        panEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+    }
+
     std::list<RefPtr<GestureRecognizer>> innerRecognizers;
 
     for (auto const& eventTarget : innerTargets) {

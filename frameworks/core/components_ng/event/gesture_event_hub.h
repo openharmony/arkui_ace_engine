@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/event/touch_event.h"
 
@@ -108,6 +109,31 @@ public:
         clickEventActuator_->RemoveClickEvent(clickEvent);
     }
 
+    // Set by user define, which will replace old one.
+    void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, float distance)
+    {
+        if (!panEventActuator_) {
+            panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance);
+        }
+        panEventActuator_->ReplacePanEvent(panEvent);
+    }
+
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, float distance)
+    {
+        if (!panEventActuator_) {
+            panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance);
+        }
+        panEventActuator_->AddPanEvent(panEvent);
+    }
+
+    void RemovePanEvent(const RefPtr<PanEvent>& panEvent)
+    {
+        if (!panEventActuator_) {
+            return;
+        }
+        panEventActuator_->RemovePanEvent(panEvent);
+    }
+
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult);
@@ -126,6 +152,7 @@ private:
     RefPtr<ScrollableActuator> scrollableActuator_;
     RefPtr<TouchEventActuator> touchEventActuator_;
     RefPtr<ClickEventActuator> clickEventActuator_;
+    RefPtr<PanEventActuator> panEventActuator_;
 
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<Gesture>> gestures_;
