@@ -146,6 +146,7 @@ public:
     void SetArrowOffset(const Dimension& arrowOffset)
     {
         arrowOffset_ = arrowOffset;
+        isArrowOffsetDefined_ = true;
     }
 
     const ComposeId& GetTargetId() const
@@ -198,6 +199,16 @@ public:
         targetSpace_ = targetSpace;
     }
 
+    bool HasSetArrowOffset() const
+    {
+        return isArrowOffsetDefined_;
+    }
+
+    void SetArrowOffsetFlag(bool isArrowOffsetDefined)
+    {
+        isArrowOffsetDefined_ = isArrowOffsetDefined;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -205,6 +216,7 @@ private:
     bool isMaskColorSetted_ = false;
     bool isBackgrouhdColorSetted_ = false;
     bool useCustom_ = false;
+    bool isArrowOffsetDefined_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;

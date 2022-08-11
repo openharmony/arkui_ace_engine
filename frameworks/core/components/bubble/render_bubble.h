@@ -119,6 +119,7 @@ private:
     void InitEdgeSize(Edge& edge);
     void InitArrowTopAndBottomPosition(Offset& topArrowPosition, Offset& bottomArrowPosition, Offset& topPosition,
         Offset& bottomPosition, const Size& childSize);
+    void UpdateArrowOffset(const RefPtr<BubbleComponent>& bubble, const Placement& placement);
     TouchRegion touchRegion_;
 };
 
