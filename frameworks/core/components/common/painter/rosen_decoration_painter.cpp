@@ -649,26 +649,20 @@ public:
     {
         auto sweepGradient = gradient.GetSweepGradient();
         SkPoint center = GetCenter(sweepGradient, size, dipScale);
-        float startAngle = 0.0f;
-        if (sweepGradient.startAngle) {
-            startAngle = fmod(sweepGradient.startAngle.value().Value(), 360.0f);
-            if (LessNotEqual(startAngle, 0.0f)) {
-                startAngle += 360.0f;
-            }
-        }
-        float endAngle = 360.0f;
-        if (sweepGradient.endAngle) {
-            endAngle = fmod(sweepGradient.endAngle.value().Value(), 360.0f);
-            if (LessNotEqual(endAngle, 0.0f)) {
-                endAngle += 360.0f;
-            }
-        }
         float rotationAngle = 0.0f;
         if (sweepGradient.rotation) {
             rotationAngle = fmod(sweepGradient.rotation.value().Value(), 360.0f);
             if (LessNotEqual(rotationAngle, 0.0f)) {
                 rotationAngle += 360.0f;
             }
+        }
+        float startAngle = 0.0f;
+        float endAngle = 0.0f;
+        if (sweepGradient.startAngle.has_value()) {
+            startAngle = sweepGradient.startAngle.value().Value();
+        }
+        if (sweepGradient.endAngle.has_value()) {
+            endAngle = sweepGradient.endAngle.value().Value();
         }
         return std::make_unique<SweepGradientShader>(gradient, center, startAngle, endAngle, rotationAngle);
     }

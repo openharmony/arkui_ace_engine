@@ -237,11 +237,25 @@ public:
 
     void ClearColors();
 
+    bool IsSweepGradientValid() const
+    {
+        if (sweepGradient_.startAngle.has_value() && sweepGradient_.endAngle.has_value()) {
+            return LessOrEqual(sweepGradient_.startAngle.value().Value(),
+                sweepGradient_.endAngle.value().Value());
+        }
+        if (sweepGradient_.startAngle.has_value() && !sweepGradient_.endAngle.has_value()) {
+            return LessOrEqual(sweepGradient_.startAngle.value().Value(), 0.0);
+        }
+        if (!sweepGradient_.startAngle.has_value() && sweepGradient_.endAngle.has_value()) {
+            return LessOrEqual(0.0, sweepGradient_.endAngle.value().Value());
+        }
+        return true;
+    }
+
     bool IsValid() const
     {
         if (GetType() == GradientType::SWEEP) {
-            return LessOrEqual(sweepGradient_.startAngle.value().Value(),
-                sweepGradient_.endAngle.value().Value()) && colors_.size() > 1;
+            return IsSweepGradientValid() && colors_.size() > 1;
         }
         return colors_.size() > 1;
     }
