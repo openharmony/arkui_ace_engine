@@ -26,7 +26,9 @@
 #include "core/animation/animator_info.h"
 #include "core/common/ace_page.h"
 #include "core/common/thread_checker.h"
+#ifndef NG_BUILD
 #include "core/components/checkable/radio_group_component.h"
+#endif
 #include "core/components/page/page_target.h"
 #include "core/components/page_transition/page_transition_component.h"
 #include "core/components_ng/base/frame_node.h"
@@ -41,7 +43,9 @@
 
 namespace OHOS::Ace::Framework {
 
+#ifndef NG_BUILD
 using JsPageRadioGroups = std::unordered_map<std::string, RadioGroupComponent<std::string>>;
+#endif
 
 // One JsAcePage corresponding to a JS bundle, so it should maintain page's lifecycle.
 class ACE_EXPORT JsAcePage final : public AcePage {
@@ -272,7 +276,9 @@ public:
     void AddNodeEvent(int32_t nodeId, const std::string& actionType, const std::string& eventAction);
 
     std::string GetNodeEventAction(int32_t nodeId, const std::string& actionType);
+#ifndef NG_BUILD
     std::shared_ptr<JsPageRadioGroups> GetRadioGroups();
+#endif
 
     void SetRootComponent(const RefPtr<Component>& component)
     {
@@ -420,7 +426,9 @@ private:
     std::unordered_map<int32_t, RefPtr<BaseAnimationBridge>> animatorBridges_;
     std::unordered_map<std::string, RefPtr<Curve>> curves_;
     std::unordered_map<std::string, RefPtr<AnimatorInfo>> animatorInfos_;
+#ifndef NG_BUILD
     std::shared_ptr<JsPageRadioGroups> radioGroups_;
+#endif
 
     std::function<void()> onPageAppear_;
     std::function<void()> onPageDisAppear_;

@@ -52,8 +52,8 @@ UploadSuccessCallback ImagePattern::CreateUploadSuccessCallback()
 
 FailedCallback ImagePattern::CreateFailedCallback()
 {
-    // TODO: impl
-    return nullptr;
+    auto task = [](const ImageSourceInfo& info, const std::string& errorMsg) {};
+    return task;
 }
 
 OnPostBackgroundTask ImagePattern::CreateOnBackgroundTaskPostCallback()

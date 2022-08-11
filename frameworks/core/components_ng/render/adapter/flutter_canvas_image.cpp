@@ -13,21 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H
+#include "core/components_ng/render/adapter/flutter_canvas_image.h"
 
-#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 
-// CanvasImage is interface for drawing image.
-class CanvasImage : public virtual AceType {
-    DECLARE_ACE_TYPE(CanvasImage, AceType)
+RefPtr<CanvasImage> CanvasImage::Create()
+{
+    return AceType::MakeRefPtr<FlutterCanvasImage>();
+}
 
-public:
-    static RefPtr<CanvasImage> Create(void* rawImage);
-    static RefPtr<CanvasImage> Create();
-};
 } // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H

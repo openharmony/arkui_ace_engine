@@ -398,10 +398,12 @@ std::string JsAcePage::GetNodeEventAction(int32_t nodeId, const std::string& act
     return nodeEvent_[nodeId][actionType];
 }
 
+#ifndef NG_BUILD
 std::shared_ptr<JsPageRadioGroups> JsAcePage::GetRadioGroups()
 {
     return radioGroups_;
 }
+#endif
 
 void JsAcePage::OnJsEngineDestroy()
 {

@@ -511,6 +511,7 @@ template("ace_core_ng_source_set") {
       "gestures/timeout_gesture.cpp",
 
       # pipeline
+      "pipeline/base/element_register.cpp",
       "pipeline/base/related_node.cpp",
       "pipeline/pipeline_base.cpp",
 
@@ -568,6 +569,7 @@ template("ace_core_ng_source_set") {
       "components/font/font_manager_creator.cpp",
       "components/scroll/scrollable.cpp",
       "components/theme/app_theme.cpp",
+      "components/theme/icon_theme.cpp",
       "components/theme/theme_attributes.cpp",
       "components/theme/theme_constants.cpp",
       "components/theme/theme_manager.cpp",

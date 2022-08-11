@@ -46,7 +46,7 @@ RefPtr<Component> JSViewFullUpdate::CreateComponent()
     return nullptr;
 }
 
-RefPtr<NG::FrameNode> JSViewFullUpdate::CreateNode()
+RefPtr<NG::CustomNode> JSViewFullUpdate::CreateUINode()
 {
     ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
     // create component, return new something, need to set proper ID
@@ -95,12 +95,7 @@ RefPtr<NG::UINode> JSViewFullUpdate::InternalRender()
 void JSViewFullUpdate::MarkNeedUpdate()
 {
     ACE_SCOPED_TRACE("JSView::MarkNeedUpdate");
-
-    auto node = node_.Upgrade();
-    if (node) {
-        node->MarkNeedRebuild();
-    }
-    needsUpdate_ = true;
+    LOGW("not support full update in ng structure");
 }
 
 void JSViewFullUpdate::Create(const JSCallbackInfo& info)
@@ -112,7 +107,7 @@ void JSViewFullUpdate::Create(const JSCallbackInfo& info)
             LOGE("JSView is null");
             return;
         }
-        NG::ViewStackProcessor::GetInstance()->Push(view->CreateNode(), true);
+        NG::ViewStackProcessor::GetInstance()->Push(view->CreateUINode(), true);
     } else {
         LOGE("JSView Object is expected.");
     }

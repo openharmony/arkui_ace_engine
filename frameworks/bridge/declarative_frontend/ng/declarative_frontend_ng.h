@@ -191,10 +191,10 @@ public:
 
     void AttachSubPipelineContext(const RefPtr<PipelineContext>& context);
 
-    void MarkNeedUpdate() override
+    void FlushReload() override
     {
         if (jsEngine_) {
-            jsEngine_->MarkNeedUpdate();
+            jsEngine_->FlushReload();
         }
     }
 

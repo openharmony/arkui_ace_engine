@@ -37,7 +37,7 @@ public:
 
     ~SkiaCanvasImage() override = default;
 
-    sk_sp<SkImage> GetCanvasImage() const
+    virtual sk_sp<SkImage> GetCanvasImage() const
     {
 #ifndef NG_BUILD
         if (image_) {
@@ -48,7 +48,7 @@ public:
     }
 
 private:
-    // TODO: add adapter for image.
+    // TODO: should not deps on flutter.
 #ifndef NG_BUILD
     fml::RefPtr<flutter::CanvasImage> image_;
 #endif

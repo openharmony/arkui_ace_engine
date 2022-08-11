@@ -22,6 +22,7 @@
 #include "core/image/flutter_image_cache.h"
 
 #ifdef NG_BUILD
+#include "core/components_ng/render/adapter/flutter_canvas_image.h"
 #include "core/components_ng/render/canvas_image.h"
 #endif
 
@@ -34,10 +35,7 @@ std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, Size t
 }
 
 RefPtr<ImageObject> ImageObject::BuildImageObject(
-    ImageSourceInfo source,
-    const RefPtr<PipelineBase> context,
-    const sk_sp<SkData>& skData,
-    bool useSkiaSvg)
+    ImageSourceInfo source, const RefPtr<PipelineBase> context, const sk_sp<SkData>& skData, bool useSkiaSvg)
 {
     // build svg image object.
     if (source.IsSvg()) {
@@ -112,14 +110,9 @@ Size SvgSkiaImageObject::MeasureForImage(RefPtr<RenderImage> image)
 }
 #endif
 
-void StaticImageObject::UploadToGpuForRender(
-    const WeakPtr<PipelineBase>& context,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-    const UploadSuccessCallback& successCallback,
-    const FailedCallback& failedCallback,
-    const Size& imageSize,
-    bool forceResize,
-    bool syncMode)
+void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& context,
+    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder, const UploadSuccessCallback& successCallback,
+    const FailedCallback& failedCallback, const Size& imageSize, bool forceResize, bool syncMode)
 {
     auto task = [context, renderTaskHolder, successCallback, failedCallback, imageSize, forceResize, skData = skData_,
                     imageSource = imageSource_, id = Container::CurrentId()]() mutable {
@@ -141,7 +134,7 @@ void StaticImageObject::UploadToGpuForRender(
             return;
         }
 #ifdef NG_BUILD
-        RefPtr<NG::CanvasImage> cachedFlutterImage = NG::CanvasImage::Create(nullptr);
+        RefPtr<NG::CanvasImage> cachedFlutterImage;
 #else
         fml::RefPtr<flutter::CanvasImage> cachedFlutterImage;
 #endif
@@ -182,7 +175,11 @@ void StaticImageObject::UploadToGpuForRender(
                             id = Container::CurrentId()](flutter::SkiaGPUObject<SkImage> image) {
             ContainerScope scope(id);
 #ifdef NG_BUILD
-            auto canvasImage = NG::CanvasImage::Create(nullptr);
+            auto canvasImage = NG::CanvasImage::Create();
+            auto flutterImage = AceType::DynamicCast<NG::FlutterCanvasImage>(canvasImage);
+            if (flutterImage) {
+                flutterImage->SetImage(std::move(image));
+            }
 #else
             auto canvasImage = flutter::CanvasImage::Create();
             canvasImage->set_image(std::move(image));
@@ -208,14 +205,9 @@ bool StaticImageObject::CancelBackgroundTasks()
     return uploadForPaintTask_ ? uploadForPaintTask_.Cancel(false) : false;
 }
 
-void AnimatedImageObject::UploadToGpuForRender(
-    const WeakPtr<PipelineBase>& context,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-    const UploadSuccessCallback& successCallback,
-    const FailedCallback& failedCallback,
-    const Size& imageSize,
-    bool forceResize,
-    bool syncMode)
+void AnimatedImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& context,
+    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder, const UploadSuccessCallback& successCallback,
+    const FailedCallback& failedCallback, const Size& imageSize, bool forceResize, bool syncMode)
 {
     if (!animatedPlayer_ && skData_) {
         auto codec = SkCodec::MakeFromData(skData_);
@@ -225,15 +217,8 @@ void AnimatedImageObject::UploadToGpuForRender(
             dstWidth = static_cast<int32_t>(imageSize.Width() + 0.5);
             dstHeight = static_cast<int32_t>(imageSize.Height() + 0.5);
         }
-        animatedPlayer_ = MakeRefPtr<AnimatedImagePlayer>(
-            imageSource_,
-            successCallback,
-            context,
-            renderTaskHolder->ioManager,
-            renderTaskHolder->unrefQueue,
-            std::move(codec),
-            dstWidth,
-            dstHeight);
+        animatedPlayer_ = MakeRefPtr<AnimatedImagePlayer>(imageSource_, successCallback, context,
+            renderTaskHolder->ioManager, renderTaskHolder->unrefQueue, std::move(codec), dstWidth, dstHeight);
         ClearData();
     } else if (animatedPlayer_ && forceResize && imageSize.IsValid()) {
         LOGI("animated player has been constructed, forceResize: %{public}s", imageSize.ToString().c_str());

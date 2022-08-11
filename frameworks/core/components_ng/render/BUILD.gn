@@ -28,6 +28,7 @@ build_component_ng("render_ng") {
 
   if (enable_ng_build) {
     sources += [
+      "adapter/flutter_canvas_image.cpp",
       "adapter/flutter_node.cpp",
       "adapter/flutter_render_context.cpp",
       "adapter/flutter_window.cpp",
