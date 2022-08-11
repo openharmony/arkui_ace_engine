@@ -265,6 +265,7 @@ private:
     std::vector<std::pair<GesturePriority, std::vector<RefPtr<GestureRecognizer>>>> recognizerHierarchy_;
 
     RefPtr<GestureRecognizer> onClick_;
+    RefPtr<ClickRecognizer> onContainerModalClick_;
     RefPtr<GestureRecognizer> onLongPress_;
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_;

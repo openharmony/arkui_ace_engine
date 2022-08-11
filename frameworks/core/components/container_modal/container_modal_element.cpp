@@ -363,7 +363,7 @@ void ContainerModalElement::Update()
         });
         containerElement->controller_->Backward();
     });
-    containerBox->SetOnClick(tapGesture);
+    containerBox->SetOnContainerModalClickId(tapGesture);
 }
 
 bool ContainerModalElement::CanShowFloatingTitle()
