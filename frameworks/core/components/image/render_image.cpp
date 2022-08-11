@@ -562,7 +562,7 @@ void RenderImage::ApplyNone(Rect& srcRect, Rect& dstRect, const Size& rawPicSize
     srcRect.SetRect(Alignment::GetAlignPosition(rawPicSize, srcSize, alignment_), srcSize);
 }
 
-void RenderImage::FireLoadEvent(const Size& picSize) const
+void RenderImage::FireLoadEvent(const Size& picSize, const std::string& errorMsg) const
 {
     auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
@@ -573,7 +573,8 @@ void RenderImage::FireLoadEvent(const Size& picSize) const
                 GetLayoutSize().Width(), GetLayoutSize().Height(), 1));
         }
         if (loadImgFailEvent_ && (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL)) {
-            loadImgFailEvent_(std::make_shared<LoadImageFailEvent>(GetLayoutSize().Width(), GetLayoutSize().Height()));
+            loadImgFailEvent_(std::make_shared<LoadImageFailEvent>(
+                GetLayoutSize().Width(), GetLayoutSize().Height(), errorMsg));
         }
         return;
     }

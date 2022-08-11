@@ -1322,7 +1322,7 @@ void RosenRenderCustomPaint::InitImageCallbacks()
         }
     };
 
-    failedCallback_ = [weak = AceType::WeakClaim(this)](ImageSourceInfo info) {
+    failedCallback_ = [weak = AceType::WeakClaim(this)](ImageSourceInfo info, const std::string& errorMsg = "") {
         auto render = weak.Upgrade();
         LOGE("tkh failedCallback_");
         render->ImageObjFailed();

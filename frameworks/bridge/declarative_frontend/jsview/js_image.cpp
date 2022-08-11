@@ -44,6 +44,7 @@ JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo)
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("componentWidth", eventInfo.GetComponentWidth());
     obj->SetProperty("componentHeight", eventInfo.GetComponentHeight());
+    obj->SetProperty("message", eventInfo.GetErrorMessage());
     return JSRef<JSVal>::Cast(obj);
 }
 

@@ -63,7 +63,7 @@ public:
 
     void ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image);
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
-    void ImageObjFailed();
+    void ImageObjFailed(const std::string& errorMsg);
     bool NeedUploadImageObjToGpu();
 
     void SetFetchImageObjBackgroundTask(CancelableTask task)
