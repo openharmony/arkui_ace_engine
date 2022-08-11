@@ -653,16 +653,20 @@ void RenderButton::UpdateProgressAnimation()
         return;
     }
     auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(progressPercent_, previousValue_, Curves::EASE_OUT);
-    animation->AddListener([this](const double& value) {
-        progressDisplay_ = GreatNotEqual(value, 0.0) ? true : false;
-        progressPercent_ = value;
-        progressWidth_ = buttonSize_.Width() * progressPercent_ / DOWNLOAD_FULL_PERCENT;
-        if (GreatOrEqual(progressPercent_, DOWNLOAD_FULL_PERCENT)) {
-            progressDisplay_ = false;
+    animation->AddListener([weak = WeakClaim(this)](const double& value) {
+        auto renderButton = weak.Upgrade();
+        if (!renderButton) {
+            return;
         }
-        MarkNeedRender();
+        renderButton->progressDisplay_ = GreatNotEqual(value, 0.0) ? true : false;
+        renderButton->progressPercent_ = value;
+        renderButton->progressWidth_ =
+            renderButton->buttonSize_.Width() * renderButton->progressPercent_ / DOWNLOAD_FULL_PERCENT;
+        if (GreatOrEqual(renderButton->progressPercent_, DOWNLOAD_FULL_PERCENT)) {
+            renderButton->progressDisplay_ = false;
+        }
+        renderButton->MarkNeedRender();
     });
-
     if (!progressController_) {
         return;
     }

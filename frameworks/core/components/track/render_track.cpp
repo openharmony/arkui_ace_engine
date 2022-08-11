@@ -117,9 +117,13 @@ void RenderTrack::UpdateAnimation()
     if (needUpdateAnimation_) {
         auto transistionAnimation =
             AceType::MakeRefPtr<CurveAnimation<double>>(totalRatio_, prevousPercentValue_, Curves::EASE_OUT);
-        transistionAnimation->AddListener([this](const double& value) {
-            totalRatio_ = value;
-            MarkNeedRender();
+        transistionAnimation->AddListener([weak = WeakClaim(this)](const double& value) {
+            auto renderTrack = weak.Upgrade();
+            if (!renderTrack) {
+                return;
+            }
+            renderTrack->totalRatio_ = value;
+            renderTrack->MarkNeedRender();
         });
         if (progressTransitionController_) {
             double animationTime = 0.0;
@@ -128,7 +132,6 @@ void RenderTrack::UpdateAnimation()
             } else {
                 animationTime = animationDuring_.count() * SECOND_TO_MILLISECOND;
             }
-
             if (animationTime < MIN_TRANSITION_TIME || NearEqual(prevousPercentValue_, 100.0)) {
                 animationTime = MIN_TRANSITION_TIME;
             } else if (animationTime > MAX_TRANSITION_TIME) {
@@ -143,9 +146,13 @@ void RenderTrack::UpdateAnimation()
         }
 
         auto scanAnimation = AceType::MakeRefPtr<CurveAnimation<double>>(0, prevousPercentValue_, Curves::LINEAR);
-        scanAnimation->AddListener([this](const double& value) {
-            scanHighLightValue_ = value;
-            MarkNeedRender();
+        scanAnimation->AddListener([weak = WeakClaim(this)](const double& value) {
+            auto renderTrack = weak.Upgrade();
+            if (!renderTrack) {
+                return;
+            }
+            renderTrack->scanHighLightValue_ = value;
+            renderTrack->MarkNeedRender();
         });
         if (scanHaloController_) {
             scanHaloController_->ClearInterpolators();
