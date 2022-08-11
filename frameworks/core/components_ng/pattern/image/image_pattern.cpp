@@ -52,7 +52,7 @@ UploadSuccessCallback ImagePattern::CreateUploadSuccessCallback()
 
 FailedCallback ImagePattern::CreateFailedCallback()
 {
-    auto task = [](const ImageSourceInfo& info) {};
+    auto task = [](const ImageSourceInfo& info, const std::string& errorMsg) {};
     return task;
 }
 
