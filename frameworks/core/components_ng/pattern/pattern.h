@@ -144,6 +144,22 @@ public:
         return frameNode_.Upgrade();
     }
 
+    template<typename T>
+    RefPtr<T> GetLayoutProperty() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        return DynamicCast<T>(host->GetLayoutProperty<T>());
+    }
+
+    template<typename T>
+    RefPtr<T> GetPaintProperty() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        return DynamicCast<T>(host->GetPaintProperty<T>());
+    }
+
     virtual void OnInActive() {}
     virtual void OnActive() {}
 

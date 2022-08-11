@@ -133,7 +133,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     geometryNode_->SetParentLayoutConstraint(parentConstraint.value_or(LayoutConstraintF()));
     layoutProperty_->UpdateLayoutConstraint(parentConstraint.value_or(LayoutConstraintF()));
     layoutProperty_->UpdateContentConstraint();
-    LOGI("Measure: %{public}s, Constraint: %{public}s", GetHostTag().c_str(),
+    LOGD("Measure: %{public}s, Constraint: %{public}s", GetHostTag().c_str(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
 
     if (!skipMeasureContent_) {
@@ -144,7 +144,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     }
 
     layoutAlgorithm_->Measure(this);
-    LOGI("on Measure Done: %{public}s, Size: %{public}s", GetHostTag().c_str(),
+    LOGD("on Measure Done: %{public}s, Size: %{public}s", GetHostTag().c_str(),
         geometryNode_->GetFrameSize().ToString().c_str());
 }
 

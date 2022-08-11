@@ -29,9 +29,9 @@ public:
 protected:
     static void SetAutoplay(bool autoPlay);
     static void SetDigital(bool digitalIndicator);
-    static void SetDuration(double duration);
+    static void SetDuration(int32_t duration);
     static void SetIndex(uint32_t index);
-    static void SetInterval(double interval);
+    static void SetInterval(uint32_t interval);
     static void SetLoop(bool loop);
     static void SetVertical(bool isVertical);
     static void SetIndicator(bool showIndicator);
@@ -49,7 +49,7 @@ protected:
     static void SetDisplayCount(const JSCallbackInfo& info);
     static void SetCachedCount(int32_t cachedCount);
     static void SetEnabled(const JSCallbackInfo& info);
-    static void SetDisableSwipe(bool disable);
+    static void SetDisableSwipe(bool disableSwipe);
     static void SetCurve(const std::string& curveStr);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);

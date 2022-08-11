@@ -65,12 +65,12 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    float currentOffset_ = 0.0f;
-    int32_t currentIndex_ = 0;
+    uint32_t currentIndex_ = 0;
     int32_t preStartIndex_ = 0;
     int32_t preEndIndex_ = 0;
     std::optional<int32_t> startIndex_;
     std::optional<int32_t> endIndex_;
+    float currentOffset_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

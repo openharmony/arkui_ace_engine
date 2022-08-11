@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve.h"
+#include "core/animation/curves.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
@@ -31,7 +32,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-constexpr int32_t ANIMATION_DURATION = 500;
 constexpr Dimension MIN_TURN_PAGE_VELOCITY = 10.0_vp;
 constexpr Dimension MIN_DRAG_DISTANCE = 25.0_vp;
 
@@ -55,6 +55,7 @@ void SwiperPattern::OnModifyDone()
 
     InitPanEvent(gestureHub);
     InitTouchEvent(gestureHub);
+    InitAutoPlay();
 }
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -142,9 +143,49 @@ void SwiperPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddTouchEvent(touchEvent_);
 }
 
+void SwiperPattern::InitAutoPlay()
+{
+    auto weak = AceType::WeakClaim(this);
+    if (!scheduler_) {
+        auto&& callback = [weak](uint64_t duration) {
+            auto swiper = weak.Upgrade();
+            if (swiper) {
+                swiper->Tick(duration);
+            }
+        };
+        scheduler_ = SchedulerBuilder::Build(callback, GetHost()->GetContext());
+    } else if (scheduler_->IsActive()) {
+        scheduler_->Stop();
+    }
+
+    if (IsAutoPlay() && !scheduler_->IsActive()) {
+        scheduler_->Start();
+    }
+}
+
+void SwiperPattern::Tick(uint64_t duration)
+{
+    elapsedTime_ += duration;
+    if (elapsedTime_ >= GetInterval()) {
+        if (currentIndex_ >= static_cast<int32_t>(GetHost()->GetChildren().size()) - 1 && !IsLoop()) {
+            LOGD("already last one, stop auto play because not loop");
+            if (scheduler_) {
+                scheduler_->Stop();
+            }
+        } else {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto geometryNode = host->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto mainSize = geometryNode->GetFrameSize().MainSize(GetDirection());
+            PlayTranslateAnimation(0, -mainSize, currentIndex_ + 1);
+        }
+        elapsedTime_ = 0;
+    }
+}
+
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
-    LOGE("CCCC SwiperPattern::UpdateCurrentOffset offset: %{public}lf, current: %{public}lf", offset, currentOffset_);
     currentOffset_ = currentOffset_ + offset;
     auto host = frameNode_.Upgrade();
     CHECK_NULL_VOID(host);
@@ -153,7 +194,6 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
 
 void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    LOGE("CCCC SwiperPattern::HandleTouchEvent %{public}d", info.GetTouches().size());
     if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
         if (controller_ && !controller_->IsStopped()) {
             // Clear stop listener before stop, otherwise the previous swipe will be considered complete.
@@ -193,14 +233,17 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         nextIndex = GreatNotEqual(dragVelocity, 0.0) ? (nextIndex -1) : (nextIndex + 1);
     }
 
-    LOGE("CCCC SwiperPattern::HandleDragEnd start: %{public}lf, end: %{public}lf, dragVelocity: %{public}lf", currentOffset_, end, dragVelocity);
     PlayTranslateAnimation(start, end, nextIndex);
 }
 
 void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex)
 {
     LOGI("Play translate animation startPos: %{public}lf, endPos: %{public}lf, nextIndex: %{public}d", startPos, endPos, nextIndex);
-    auto translate = AceType::MakeRefPtr<CurveAnimation<double>>(startPos, endPos, Curves::LINEAR);
+    auto curve = GetCurve();
+    if (!curve) {
+        curve = Curves::LINEAR;
+    }
+    auto translate = AceType::MakeRefPtr<CurveAnimation<double>>(startPos, endPos, curve);
     auto weak = AceType::WeakClaim(this);
     translate->AddListener(Animation<double>::ValueCallback([weak, startPos, endPos](double value) {
         auto swiper = weak.Upgrade();
@@ -224,20 +267,54 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
         swiper->currentIndex_ = nextIndex;
     });
 
-    controller_->SetDuration(ANIMATION_DURATION);
+    controller_->SetDuration(GetDuration());
     controller_->AddInterpolator(translate);
     controller_->Play();
 }
 
 Axis SwiperPattern::GetDirection() const
 {
-    Axis axis = Axis::HORIZONTAL;
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, axis);
-    auto swiperLayoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(swiperLayoutProperty, axis);
-    axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
-    return axis;
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, Axis::HORIZONTAL);
+    return swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+}
+
+bool SwiperPattern::IsAutoPlay() const
+{
+    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, false);
+    return swiperPaintProperty->GetAutoPlay().value_or(false);
+}
+
+int32_t SwiperPattern::GetDuration() const
+{
+    static const int32_t DEFAULT_DURATION = 400;
+    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, DEFAULT_DURATION);
+    return swiperPaintProperty->GetDuration().value_or(DEFAULT_DURATION);
+}
+
+int32_t SwiperPattern::GetInterval() const
+{
+    static const int32_t DEFAULT_INTERVAL = 3000;
+    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, DEFAULT_INTERVAL);
+    return swiperPaintProperty->GetAutoPlayInterval().value_or(DEFAULT_INTERVAL);
+}
+
+RefPtr<Curve> SwiperPattern::GetCurve() const
+{
+    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
+    return swiperPaintProperty->GetCurve().value_or(nullptr);
+}
+
+bool SwiperPattern::IsLoop() const
+{
+    static const int32_t DEFAULT_DURATION = 400;
+    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, DEFAULT_DURATION);
+    return swiperPaintProperty->GetLoop().value_or(false);
 }
 
 } // namespace OHOS::Ace::NG

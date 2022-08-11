@@ -81,9 +81,13 @@ SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, Meas
 
 void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    preEndIndex_ = 0;
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
+
+    // currentIndex_ = swiperLayoutProperty->GetIndex().value_or(0);
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::VERTICAL);
+
     auto idealSize =
         CreateIdealSize(swiperLayoutProperty->GetLayoutConstraint().value(), axis, swiperLayoutProperty->GetMeasureType());
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
@@ -105,16 +109,11 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             wrapper->Measure(layoutConstraint);
         }
         auto childSize = wrapper->GetGeometryNode()->GetFrameSize();
-        LOGE("CCCC index: %{public}d, size: %{public}s, total: %{public}d",
-            currentIndex, childSize.ToString().c_str(), layoutWrapper->GetTotalChildCount());
         maxChildSize = SizeF(std::max(maxChildSize.Width(), childSize.Width()), std::max(maxChildSize.Height(), childSize.Height()));
     } while (currentIndex < totalCount);
 
     startIndex_ = 0;
     endIndex_ = totalCount - 1;
-
-    LOGE("CCCC idelSize: %{public}s, maxChildSize: %{public}s, %{public}d - %{public}d",
-        idealSize.ToString().c_str(), maxChildSize.ToString().c_str(), preStartIndex_, preEndIndex_);
 }
 
 void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -140,9 +139,6 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         wrapper->GetGeometryNode()->SetFrameOffset(offset);
         wrapper->Layout(parentOffset);
-
-        LOGE("CCCC index: %{public}d, offset: %{public}s, parentOffset: %{public}s, current: %{public}lf",
-            index, offset.ToString().c_str(), parentOffset.ToString().c_str(), currentOffset_);
     }
 }
 

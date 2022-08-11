@@ -17,9 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 
 #include "base/geometry/axis.h"
+#include "base/memory/referenced.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -41,9 +43,13 @@ public:
         return MakeRefPtr<SwiperLayoutProperty>();
     }
 
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<SwiperPaintProperty>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        LOGE("CCCC CreateLayoutAlgorithm: %{public}lf", currentOffset_);
         auto layoutAlgorithm = MakeRefPtr<SwiperLayoutAlgorithm>(currentIndex_, startIndex_, endIndex_);
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         return layoutAlgorithm;
@@ -62,24 +68,38 @@ private:
     // Init touch event, stop animation when touch down.
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
 
+    // Init auto play, show next item in duration time when auto play.
+    void InitAutoPlay();
+
     void HandleDragStart();
     void HandleDragEnd(double dragVelocity);
     void HandleTouchEvent(const TouchEventInfo& info);
 
     void PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex);
 
+    // Timer tick callback, duration is in millisecond.
+    void Tick(uint64_t duration);
+
     Axis GetDirection() const;
+    int32_t GetDuration() const;
+    int32_t GetInterval() const;
+    RefPtr<Curve> GetCurve() const;
+    bool IsAutoPlay() const;
+    bool IsLoop() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
 
     RefPtr<Animator> controller_;
+    RefPtr<Scheduler> scheduler_;
 
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
     int32_t currentIndex_ = 0;
 
     float currentOffset_ = 0.0;
+
+    uint64_t elapsedTime_ = 0; // millisecond.
 };
 } // namespace OHOS::Ace::NG
 

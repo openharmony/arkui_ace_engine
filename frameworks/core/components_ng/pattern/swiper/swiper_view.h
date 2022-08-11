@@ -17,8 +17,12 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_VIEW_H
 
 #include "base/geometry/axis.h"
+#include "base/geometry/dimension.h"
+#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/scroll_bar.h"
+#include "core/components/declaration/swiper/swiper_declaration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -26,6 +30,20 @@ class ACE_EXPORT SwiperView {
 public:
     static void Create();
     static void SetDirection(Axis axis);
+    static void SetIndex(uint32_t index);
+    static void SetAutoPlay(bool autoPlay);
+    static void SetAutoPlayInterval(uint32_t interval);
+    static void SetDuration(uint32_t duration);
+    static void SetCurve(const RefPtr<Curve>& curve);
+    static void SetLoop(bool loop);
+    static void SetEnabled(bool enabled);
+    static void SetDisableSwipe(bool disableSwipe);
+    static void SetEdgeEffect(EdgeEffect EdgeEffect);
+    static void SetDisplayMode(SwiperDisplayMode displayMode);
+    static void SetDisplayCount(int32_t displayCount);
+    static void SetShowIndicator(bool showIndicator);
+    static void SetItemSpace(const Dimension& itemSpace);
+    static void SetCachedCount(int32_t cachedCount);
 };
 
 } // namespace OHOS::Ace::NG
