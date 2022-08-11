@@ -89,8 +89,18 @@ std::string BadgeComposedElement::GetBadgePosition(void) const
 std::string BadgeComposedElement::GetLabel(void) const
 {
     auto renderBadge = GetRenderBadge();
-    std::string label =  renderBadge ? renderBadge->GetBadgeComponent()->GetBadgeLabel().value() : "";
-    return label;
+    if (!renderBadge) {
+        return "";
+    }
+    auto badgeComponent = renderBadge->GetBadgeComponent();
+    if (!badgeComponent) {
+        return "";
+    }
+    auto label = badgeComponent->GetBadgeLabel();
+    if (!label.has_value()) {
+        return "";
+    }
+    return label.value();
 }
 
 std::string BadgeComposedElement::GetStyle() const
