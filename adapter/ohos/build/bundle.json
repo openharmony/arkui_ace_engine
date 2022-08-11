@@ -12,7 +12,9 @@
     "component": {
         "name": "ace_engine",
         "subsystem": "arkui",
-        "syscap": [],
+        "syscap": [
+            "SystemCapability.ArkUI.ArkUI.Full"
+        ],
         "features": [],
         "adapted_system_type": [
             "standard"
