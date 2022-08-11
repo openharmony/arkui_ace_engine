@@ -138,15 +138,14 @@ public:
         border_ = border;
     }
 
-    const Dimension& GetArrowOffset() const
+    const std::optional<Dimension>& GetArrowOffset() const
     {
         return arrowOffset_;
     }
 
-    void SetArrowOffset(const Dimension& arrowOffset)
+    void SetArrowOffset(const std::optional<Dimension>& arrowOffset)
     {
         arrowOffset_ = arrowOffset;
-        isArrowOffsetDefined_ = true;
     }
 
     const ComposeId& GetTargetId() const
@@ -199,16 +198,6 @@ public:
         targetSpace_ = targetSpace;
     }
 
-    bool HasSetArrowOffset() const
-    {
-        return isArrowOffsetDefined_;
-    }
-
-    void SetArrowOffsetFlag(bool isArrowOffsetDefined)
-    {
-        isArrowOffsetDefined_ = isArrowOffsetDefined;
-    }
-
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -216,7 +205,6 @@ private:
     bool isMaskColorSetted_ = false;
     bool isBackgrouhdColorSetted_ = false;
     bool useCustom_ = false;
-    bool isArrowOffsetDefined_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
@@ -225,7 +213,7 @@ private:
     Edge margin_;
     Edge targetMargin_;
     Border border_;
-    Dimension arrowOffset_;
+    std::optional<Dimension> arrowOffset_;
     ComposeId targetId_;
     Dimension targetSpace_;
 };

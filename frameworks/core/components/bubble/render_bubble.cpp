@@ -114,7 +114,7 @@ void RenderBubble::Update(const RefPtr<Component>& component)
 
 void RenderBubble::UpdateArrowOffset(const RefPtr<BubbleComponent>& bubble, const Placement& placement)
 {
-    if (bubble->GetPopupParam()->HasSetArrowOffset()) {
+    if (bubble->GetPopupParam()->GetArrowOffset().has_value()) {
         arrowOffset_ = bubble->GetPopupParam()->GetArrowOffset();
         auto context = context_.Upgrade();
         if (context && context->GetIsDeclarative() && arrowOffset_.Unit() == DimensionUnit::PERCENT) {

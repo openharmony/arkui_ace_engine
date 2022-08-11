@@ -109,7 +109,6 @@ bool DOMPopup::SetSpecializedAttr(const std::pair<std::string, std::string>& att
         return true;
     } else if (attr.first == DOM_ARROW_OFFSET) {
         popupChild_->GetPopupParam()->SetArrowOffset(ParseDimension(attr.second));
-        popupChild_->GetPopupParam()->SetArrowOffsetFlag(true);
         return true;
     } else if (attr.first == DOM_CLICKABLE) {
         clickable_ = StringToBool(attr.second);
