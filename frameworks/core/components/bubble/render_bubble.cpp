@@ -41,6 +41,9 @@ constexpr Dimension HORIZON_SPACING_WITH_SCREEN = 6.0_vp;
 constexpr int32_t GRID_NUMBER_LANDSCAPE = 8;
 constexpr int32_t BUBBLR_GRID_MAX_LANDSCAPE = 6;
 constexpr Dimension BUBBLE_RADIUS = 16.0_vp;
+constexpr Dimension ARROW_ZERO_PERCENT_VALUE = Dimension(0.0, DimensionUnit::PERCENT);
+constexpr Dimension ARROW_HALF_PERCENT_VALUE = Dimension(0.5, DimensionUnit::PERCENT);
+constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = Dimension(1.0, DimensionUnit::PERCENT);
 } // namespace
 
 const Dimension RenderBubble::BUBBLE_SPACING(8.0, DimensionUnit::VP);
@@ -84,10 +87,7 @@ void RenderBubble::Update(const RefPtr<Component>& component)
     padding_ = bubble->GetPopupParam()->GetPadding();
     margin_ = bubble->GetPopupParam()->GetMargin();
     border_ = bubble->GetPopupParam()->GetBorder();
-    arrowOffset_ = bubble->GetPopupParam()->GetArrowOffset();
-    if (arrowOffset_.Unit() == DimensionUnit::PERCENT) {
-        arrowOffset_.SetValue(std::clamp(arrowOffset_.Value(), 0.0, 1.0));
-    }
+    UpdateArrowOffset(bubble, placement_);
     targetId_ = bubble->GetPopupParam()->GetTargetId();
     weakStack_ = bubble->GetWeakStack();
     useCustom_ = bubble->GetPopupParam()->IsUseCustom();
@@ -110,6 +110,40 @@ void RenderBubble::Update(const RefPtr<Component>& component)
     }
 
     MarkNeedLayout();
+}
+
+void RenderBubble::UpdateArrowOffset(const RefPtr<BubbleComponent>& bubble, const Placement& placement)
+{
+    if (bubble->GetPopupParam()->GetArrowOffset().has_value()) {
+        arrowOffset_ = bubble->GetPopupParam()->GetArrowOffset().value();
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative() && arrowOffset_.Unit() == DimensionUnit::PERCENT) {
+            arrowOffset_.SetValue(std::clamp(arrowOffset_.Value(), 0.0, 1.0));
+        }
+        return;
+    }
+    switch (placement_) {
+        case Placement::LEFT:
+        case Placement::RIGHT:
+        case Placement::TOP:
+        case Placement::BOTTOM:
+            arrowOffset_ = ARROW_HALF_PERCENT_VALUE;
+            break;
+        case Placement::TOP_LEFT:
+        case Placement::BOTTOM_LEFT:
+        case Placement::LEFT_TOP:
+        case Placement::RIGHT_TOP:
+            arrowOffset_ = ARROW_ZERO_PERCENT_VALUE;
+            break;
+        case Placement::TOP_RIGHT:
+        case Placement::BOTTOM_RIGHT:
+        case Placement::LEFT_BOTTOM:
+        case Placement::RIGHT_BOTTOM:
+            arrowOffset_ = ARROW_ONE_HUNDRED_PERCENT_VALUE;
+            break;
+        default:
+            break;
+    }
 }
 
 void RenderBubble::UpdateAccessibilityInfo(Size size, Offset offset)

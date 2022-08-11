@@ -138,12 +138,12 @@ public:
         border_ = border;
     }
 
-    const Dimension& GetArrowOffset() const
+    const std::optional<Dimension>& GetArrowOffset() const
     {
         return arrowOffset_;
     }
 
-    void SetArrowOffset(const Dimension& arrowOffset)
+    void SetArrowOffset(const std::optional<Dimension>& arrowOffset)
     {
         arrowOffset_ = arrowOffset;
     }
@@ -213,7 +213,7 @@ private:
     Edge margin_;
     Edge targetMargin_;
     Border border_;
-    Dimension arrowOffset_;
+    std::optional<Dimension> arrowOffset_;
     ComposeId targetId_;
     Dimension targetSpace_;
 };
