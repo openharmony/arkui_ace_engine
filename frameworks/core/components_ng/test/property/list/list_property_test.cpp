@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/test/unittest/list/list_layout_algorithm_test.h"
+#include "list_property_test.h"
 
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/base/memory/referenced.h"
@@ -29,7 +29,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-class ListLayoutPropertyTest : public testing::Test {
+class ListPropertyTest  : public testing::Test {
 public:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
@@ -40,7 +40,7 @@ public:
  * @tc.desc: set space width into listLayoutProperty and get it
  * @tc.type: FUNC
  */
-HWTEST_F(ListLayoutPropertyTest, ListLayoutPropertyTest001, TestSize.Level1)
+HWTEST_F(ListPropertyTest , ListLayoutPropertyTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call CreateFrameNode function to create frameNode
@@ -68,7 +68,7 @@ HWTEST_F(ListLayoutPropertyTest, ListLayoutPropertyTest001, TestSize.Level1)
  * @tc.desc: set initialIndex into listLayoutProperty and get it
  * @tc.type: FUNC
  */
-HWTEST_F(ListLayoutPropertyTest, ListLayoutPropertyTest002, TestSize.Level1)
+HWTEST_F(ListPropertyTest , ListLayoutPropertyTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call CreateFrameNode function to create frameNode

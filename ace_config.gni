@@ -119,6 +119,13 @@ if (is_standard_system) {
   ark_runtime_path = "//ark/runtime"
 }
 
+# Config test output path
+if (is_standard_system) {
+  test_output_path = "ace_engine/backenduiFrameNode"
+} else {
+  test_output_path = "ace_engine_full/backenduiFrameNode"
+}
+
 # Config defines
 ace_wearable_defines = [ "WEARABLE_PRODUCT" ]
 ace_ivi_defines = [ "IVI_PRODUCT" ]

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/test/unittest/list/list_layout_algorithm_test.h"
+#include "list_layout_test.h"
 
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -29,18 +29,18 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-class ListLayoutAlgorithmTest : public testing::Test {
+class ListLayoutTest : public testing::Test {
 public:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
 };
 
 /**
- * @tc.name: ListLayoutAlgorithmTest001
+ * @tc.name: ListLayoutTest001
  * @tc.desc: set space width into frameNode and test layout
  * @tc.type: FUNC
  */
-HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest001, TestSize.Level1)
+HWTEST_F(ListLayoutTest, ListLayoutTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call CreateFrameNode function to create frameNode
@@ -52,7 +52,7 @@ HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest001, TestSize.Level1)
      */
     for (size_t i = 0; i < NG::TEST_SPACE_PX_COUNT; i++) {
         auto frameNode = NG::FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<NG::ListPattern>());
-        
+
         RefPtr<NG::GeometryNode> geometryNode;
         geometryNode->SetFrameSize(OHOS::Ace::NG::SizeF(NG::GEOMETRYNODE_FRAMESIZE, NG::GEOMETRYNODE_FRAMESIZE));
 
@@ -71,11 +71,11 @@ HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ListLayoutAlgorithmTest002
+ * @tc.name: ListLayoutTest002
  * @tc.desc: set initialIndex into frameNode and test layout
  * @tc.type: FUNC
  */
-HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest002, TestSize.Level1)
+HWTEST_F(ListLayoutTest, ListLayoutTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. call CreateFrameNode function to create frameNode
@@ -88,7 +88,7 @@ HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest002, TestSize.Level1)
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
         auto frameNode = NG::FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<NG::ListPattern>());
         NG::ViewStackProcessor::GetInstance()->Push(frameNode);
-        
+
         RefPtr<NG::GeometryNode> geometryNode;
         geometryNode->SetFrameSize(OHOS::Ace::NG::SizeF(NG::GEOMETRYNODE_FRAMESIZE, NG::GEOMETRYNODE_FRAMESIZE));
         auto castListLayoutProperty = frameNode->GetLayoutProperty<NG::ListLayoutProperty>();
@@ -99,7 +99,7 @@ HWTEST_F(ListLayoutAlgorithmTest, ListLayoutAlgorithmTest002, TestSize.Level1)
         NG::LayoutWrapper layoutWrapper = NG::LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
         auto listLayoutAlgorithm = OHOS::Ace::NG::ListLayoutAlgorithm(NG::START_INDEX, NG::END_INDEX);
-        
+
         listLayoutAlgorithm.Measure(&layoutWrapper);
         NG::ListLayoutAlgorithm::PositionMap positionMap = listLayoutAlgorithm.GetItemPosition();
         for (size_t j = NG::START_INDEX; j < NG::END_INDEX; j++) {
