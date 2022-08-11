@@ -657,10 +657,10 @@ public:
         }
         float startAngle = 0.0f;
         float endAngle = 0.0f;
-        if (sweepGradient.startAngle) {
+        if (sweepGradient.startAngle.has_value()) {
             startAngle = sweepGradient.startAngle.value().Value();
         }
-        if (sweepGradient.endAngle) {
+        if (sweepGradient.endAngle.has_value()) {
             endAngle = sweepGradient.endAngle.value().Value();
         }
         return std::make_unique<SweepGradientShader>(gradient, center, startAngle, endAngle, rotationAngle);
