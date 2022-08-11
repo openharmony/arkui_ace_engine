@@ -1,32 +1,52 @@
 {
   "files": [
-    "src/lib/environment_setting.d.ts",
-    "src/lib/storage.d.ts",
-    "src/lib/local_storage_native.d.ts",
-    "src/lib/i_environment_backend.ts",
-    "src/lib/view_native.d.ts",
+    // common:
+    // delcrations of C++ exposed classes
+    "src/lib/common/environment_setting.d.ts",
+    "src/lib/common/storage.d.ts",
+    "src/lib/common/local_storage_native.d.ts",
+    // interfaces
+    "src/lib/common/i_environment_backend.ts",
+    "src/lib/common/i_property_subscriber.ts",
+    "src/lib/common/i_property_subscriber_lookup.ts",
+    "src/lib/common/i_storage.ts",
+    "src/lib/common/local_storage.ts",
+    "src/lib/common/app_storage.ts",
+    "src/lib/common/persistent_storage.ts",
+    "src/lib/common/distributed_storage.ts",
+    "src/lib/common/environment.ts",
+    "src/lib/common/subscriber_lookup.ts",
+    "src/lib/common/subscribable_abstract.ts",
+    "src/lib/common/observed_object.ts",
+    "src/lib/common/observed_property_abstract.ts",
+    // full_update specific
+    "src/lib/full_update/fu_view_native.d.ts",
+    "src/lib/full_update/fu_observed_property_object_abstract.ts",
+    "src/lib/full_update/fu_observed_property_simple_abstract.ts",
+    "src/lib/full_update/fu_observed_property_object.ts",
+    "src/lib/full_update/fu_observed_property_simple.ts",
+    "src/lib/full_update/fu_synced_property_object_two_way.ts",
+    "src/lib/full_update/fu_synced_property_simple_one_way.ts",
+    "src/lib/full_update/fu_synced_property_simple_two_way.ts",
+    "src/lib/full_update/fu_synced_property_object_nested.ts",
+    "src/lib/full_update/fu_view.ts",
 
-    "src/lib/i_property_subscriber.ts",
-    "src/lib/i_property_subscriber_lookup.ts",
-    "src/lib/subscriber_lookup.ts",
-    "src/lib/subscribable_abstract.ts",
-    "src/lib/observed_object.ts",
-    "src/lib/observed_property_abstract.ts",
-    "src/lib/observed_property_object_abstract.ts",
-    "src/lib/observed_property_object.ts",
-    "src/lib/observed_property_simple_abstract.ts",
-    "src/lib/observed_property_simple.ts",
-    "src/lib/synced_property_object_two_way.ts",
-    "src/lib/synced_property_simple_one_way.ts",
-    "src/lib/synced_property_simple_two_way.ts",
-    "src/lib/synced_property_object_nested.ts",
-    "src/lib/i_storage.ts",
-    "src/lib/local_storage.ts",
-    "src/lib/app_storage.ts",
-    "src/lib/view.ts",
-    "src/lib/persistent_storage.ts",
-    "src/lib/distributed_storage.ts",
-    "src/lib/environment.ts",
+    // partial_update specifc
+    "src/lib/partial_update/pu_viewstack_processor.d.ts",
+    "src/lib/partial_update/pu_foreach.d.ts",
+    "src/lib/partial_update/pu_view_native.d.ts",
+    "src/lib/partial_update/pu_observed_property_abstract.ts",
+    "src/lib/partial_update/pu_observed_property_object_abstract.ts",
+    "src/lib/partial_update/pu_observed_property_simple_abstract.ts",
+    "src/lib/partial_update/pu_observed_property_object.ts",
+    "src/lib/partial_update/pu_observed_property_simple.ts",
+    "src/lib/partial_update/pu_synced_property_object_two_way.ts",
+    "src/lib/partial_update/pu_synced_property_simple_one_way.ts",
+    "src/lib/partial_update/pu_synced_property_simple_two_way.ts",
+    "src/lib/partial_update/pu_synced_property_object_nested.ts",
+    "src/lib/partial_update/pu_view.ts",
+  
+    // init
     "src/index.ts",
   ],
   "compilerOptions": {
@@ -36,6 +56,8 @@
     "outFile": "./distRelease/stateMgmt.js",
     "rootDir": "./src/",
     "declaration": true,
-    "lib" : ["ES6"],
+    "lib": [
+      "ES6"
+    ],
   }
 }

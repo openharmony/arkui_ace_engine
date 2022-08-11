@@ -13,29 +13,15 @@
  * limitations under the License.
  */
 
+/**
+ * common bbase class of ObservedPropertyObject and
+ * SyncedObjectPropertyTwoWay
+ * adds the createObjectLink to the ObservedPropertyAbstract base
+ */
+abstract class ObservedPropertyObjectAbstractPU<C extends Object>
+  extends ObservedPropertyAbstractPU<C> {
 
-initTest();
-
-testLocalStorage();
-
-testAppStorage();
-
-testAppStorageArray();
-
-testEnvironment();
-
-testPersistentStorage();
-
-testViewStateFU();
-
-nestedObsObjPropsFU();
-
-array1ObsObjPropsFU();
-
-nestedObsObjPropsPU();
-
-array1ObsObjPropsPU();
-
-testViewAppStorage();
-
-reportTestResults();
+  constructor(owningView: IPropertySubscriber, thisPropertyName: PropertyInfo) {
+    super(owningView, thisPropertyName)
+  }
+}

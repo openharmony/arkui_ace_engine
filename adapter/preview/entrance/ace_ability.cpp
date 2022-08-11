@@ -192,9 +192,6 @@ void AceAbility::InitEnv()
         runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
     auto view = new FlutterAceView(ACE_INSTANCE_ID);
-    if (runArgs_.aceVersion == AceVersion::ACE_Partial_Update) {
-        container->SetPartialUpdateOn();
-    }
     if (runArgs_.aceVersion == AceVersion::ACE_2_0 || runArgs_.aceVersion == AceVersion::ACE_Partial_Update) {
         AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
         AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");

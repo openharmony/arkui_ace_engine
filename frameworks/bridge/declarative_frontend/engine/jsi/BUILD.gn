@@ -18,7 +18,6 @@ import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
 abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
-abcproxyclasspu_obj_path = base_output_path + "/abc_proxy_class_pu.o"
 abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
 jsmocksystemplugin_obj_path = base_output_path + "/abc_js_mock_system_plugin.o"
 
@@ -30,16 +29,6 @@ es2abc_gen_abc("gen_stateMgmt_abc") {
 
   in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/stateMgmt.js" ]
   out_puts = [ base_output_path + "/stateMgmt.abc" ]
-}
-
-es2abc_gen_abc("gen_stateMgmtPU_abc") {
-  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
-  src_js = rebase_path(
-          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/stateMgmtPU.js")
-  dst_file = rebase_path(base_output_path + "/stateMgmtPU.abc")
-
-  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/stateMgmtPU.js" ]
-  out_puts = [ base_output_path + "/stateMgmtPU.abc" ]
 }
 
 es2abc_gen_abc("gen_jsEnumStyle_abc") {
@@ -71,15 +60,6 @@ gen_obj("abc_proxyclass") {
   }
   output = abcproxyclass_obj_path
   snapshot_dep = [ ":gen_stateMgmt_abc" ]
-}
-
-gen_obj("abc_proxyclass_pu") {
-  input = base_output_path + "/stateMgmtPU.abc"
-  if (use_mac || use_mingw_win || use_ios) {
-    abcproxyclasspu_obj_path = base_output_path + "/js_proxy_class_pu.c"
-  }
-  output = abcproxyclasspu_obj_path
-  snapshot_dep = [ ":gen_stateMgmtPU_abc" ]
 }
 
 gen_obj("abc_enum_style") {
@@ -156,7 +136,6 @@ template("declarative_js_engine_ark") {
     deps += [
       ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
-      ":gen_obj_src_abc_proxyclass_pu",
     ]
   }
 }

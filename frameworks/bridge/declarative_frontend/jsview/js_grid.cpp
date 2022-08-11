@@ -181,7 +181,7 @@ void JSGrid::JsOnScrollIndex(const JSCallbackInfo& info)
 
 void JSGrid::JSBind(BindingTarget globalObj)
 {
-    LOGD("JSGrid:V8Bind");
+    LOGD("JSGrid:Bind");
     JSClass<JSGrid>::Declare("Grid");
 
     MethodOptions opt = MethodOptions::NONE;

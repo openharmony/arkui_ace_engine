@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,28 +14,15 @@
  */
 
 
-initTest();
-
-testLocalStorage();
-
-testAppStorage();
-
-testAppStorageArray();
-
-testEnvironment();
-
-testPersistentStorage();
-
-testViewStateFU();
-
-nestedObsObjPropsFU();
-
-array1ObsObjPropsFU();
-
-nestedObsObjPropsPU();
-
-array1ObsObjPropsPU();
-
-testViewAppStorage();
-
-reportTestResults();
+class ForEach {
+    static create(): void {}
+    static pop(): void { }
+    static getIdArray(elmtId: number, emptyArray: string[]): boolean { return false; }
+    static setIdArray(elmtId: number, newIdArray: string[]): void {}
+    static createNewChildStart(id: string, parentView: NativeViewPartialUpdate): void {}
+    static createNewChildFinish(id: string, parentView: NativeViewPartialUpdate): void {}
+}
+  
+  
+  
+  

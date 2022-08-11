@@ -165,6 +165,10 @@ namespace OHOS::Ace::Framework {
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
     JSView* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
+        LOGE("loadDocument: argument provided is not a View!");
+        return;
+    }
 
     auto runtime = JsiDeclarativeEngineInstance::GetCurrentRuntime();
     auto page = JsiDeclarativeEngineInstance::GetStagingPage(Container::CurrentId());
@@ -172,9 +176,13 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
     LOGI("Load Document setting root view, page[%{public}d]", page->GetPageId());
     if (Container::IsCurrentUseNewPipeline()) {
+        Container::SetCurrentUsePartialUpdate(true);
         auto pageRootNode = view->CreateUINode();
         page->SetRootNode(pageRootNode);
     } else {
+        Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
+        LOGD("Loading page root component: Setting pipeline to use %{public}s.",
+            view->isFullUpdate() ? "Full Update" : "Partial Update");
         auto rootComponent = view->CreateComponent();
         std::list<RefPtr<Component>> stackChildren;
         stackChildren.emplace_back(rootComponent);

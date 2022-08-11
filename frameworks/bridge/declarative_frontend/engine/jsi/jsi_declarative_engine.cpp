@@ -52,8 +52,6 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_stateMgmt_abc_end[];
-extern const char _binary_stateMgmtPU_abc_start[];
-extern const char _binary_stateMgmtPU_abc_end[];
 extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsEnumStyle_abc_end[];
 
@@ -240,13 +238,8 @@ void JsiDeclarativeEngineInstance::InitAceModule()
 {
     uint8_t* codeStart;
     int32_t codeLength;
-    if (Container::IsCurrentUsePartialUpdate()) {
-        codeStart = (uint8_t*)_binary_stateMgmtPU_abc_start;
-        codeLength = _binary_stateMgmtPU_abc_end - _binary_stateMgmtPU_abc_start;
-    } else {
-        codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-        codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    }
+    codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+    codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
     bool stateMgmtResult = runtime_->EvaluateJsCode(codeStart, codeLength);
     if (!stateMgmtResult) {
         LOGE("EvaluateJsCode stateMgmt failed");
@@ -336,13 +329,8 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     // preload state management
     uint8_t* codeStart;
     int32_t codeLength;
-    if (Container::IsCurrentUsePartialUpdate()) {
-        codeStart = (uint8_t*)_binary_stateMgmtPU_abc_start;
-        codeLength = _binary_stateMgmtPU_abc_end - _binary_stateMgmtPU_abc_start;
-    } else {
-        codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-        codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    }
+    codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+    codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
     bool evalResult = arkRuntime->EvaluateJsCode(codeStart, codeLength);
     if (!evalResult) {
         LOGE("PreloadAceModule EvaluateJsCode stateMgmt failed");

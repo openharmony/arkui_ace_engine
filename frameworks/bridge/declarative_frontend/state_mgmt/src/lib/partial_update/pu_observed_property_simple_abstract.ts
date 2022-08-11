@@ -13,29 +13,9 @@
  * limitations under the License.
  */
 
+abstract class ObservedPropertySimpleAbstractPU<T> extends ObservedPropertyAbstractPU<T>  {
 
-initTest();
-
-testLocalStorage();
-
-testAppStorage();
-
-testAppStorageArray();
-
-testEnvironment();
-
-testPersistentStorage();
-
-testViewStateFU();
-
-nestedObsObjPropsFU();
-
-array1ObsObjPropsFU();
-
-nestedObsObjPropsPU();
-
-array1ObsObjPropsPU();
-
-testViewAppStorage();
-
-reportTestResults();
+  constructor(owningView: IPropertySubscriber, propertyName: PropertyInfo) {
+    super(owningView, propertyName);
+  }
+}
