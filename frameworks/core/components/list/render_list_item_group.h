@@ -124,7 +124,7 @@ private:
     void ResetChildVisibleState();
     void UpdateGroupComponentStatus(bool expand);
     void FireExpandEvent();
-    double getRotateAngle(bool expand);
+    double GetRotateAngle(bool expand);
     void InitAccessibilityEventListener();
 
     RebuildFunc rebuild_;

@@ -77,7 +77,7 @@ void RenderListItemGroup::FireExpandEvent()
     }
 }
 
-double RenderListItemGroup::getRotateAngle(bool expand)
+double RenderListItemGroup::GetRotateAngle(bool expand)
 {
     double rotateAngle = 0.0;
     if (direction_ == FlexDirection::COLUMN) {
@@ -147,7 +147,7 @@ void RenderListItemGroup::AddArrowImage(double mainSize)
              "%{public}lf,primarySizeW: %{public}lf,primarySizeH: %{public}lf",
             offsetX, offsetY, mainSize, primarySize.Width(), primarySize.Height());
         arrowImage_->SetPosition(Offset(offsetX, offsetY));
-        double rotateAngle = getRotateAngle(expand_);
+        double rotateAngle = GetRotateAngle(expand_);
         arrowImage_->SetRotate(rotateAngle);
         // arrow need rendered after setRotate
         arrowImage_->MarkNeedRender();
@@ -542,7 +542,7 @@ void RenderListItemGroup::InitialImage()
     InternalResource::ResourceId resourceId = SystemProperties::GetDeviceType() == DeviceType::WATCH
                                                   ? InternalResource::ResourceId::WATCH_DOWN_ARROW_SVG
                                                   : InternalResource::ResourceId::DOWN_ARROW_SVG;
-    double rotateAngle = getRotateAngle(expand_);
+    double rotateAngle = GetRotateAngle(expand_);
     auto imageComponent = AceType::MakeRefPtr<ImageComponent>(resourceId);
     imageComponent->SetWidth(imageSize_);
     imageComponent->SetHeight(imageSize_);
