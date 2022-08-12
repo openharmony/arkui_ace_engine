@@ -40,6 +40,7 @@
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/frontend.h"
@@ -168,6 +169,59 @@ const std::string AceAbility::PAGE_URI = "url";
 const std::string AceAbility::CONTINUE_PARAMS_KEY = "__remoteData";
 
 REGISTER_AA(AceAbility)
+void AceWindowListener::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
+{
+    CHECK_NULL_VOID(callbackOwner_);
+    callbackOwner_->OnDrag(x, y, event);
+}
+
+void AceWindowListener::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+{
+    CHECK_NULL_VOID(callbackOwner_);
+    callbackOwner_->OnSizeChange(info);
+}
+
+void AceWindowListener::SetBackgroundColor(uint32_t color)
+{
+    CHECK_NULL_VOID(callbackOwner_);
+    callbackOwner_->SetBackgroundColor(color);
+}
+
+uint32_t AceWindowListener::GetBackgroundColor()
+{
+    CHECK_NULL_RETURN(callbackOwner_, 0);
+    return callbackOwner_->GetBackgroundColor();
+}
+
+void AceWindowListener::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason)
+{
+    CHECK_NULL_VOID(callbackOwner_);
+    callbackOwner_->OnSizeChange(rect, reason);
+}
+
+void AceWindowListener::OnModeChange(OHOS::Rosen::WindowMode mode)
+{
+    CHECK_NULL_VOID(callbackOwner_);
+    callbackOwner_->OnModeChange(mode);
+}
+
+bool AceWindowListener::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const
+{
+    CHECK_NULL_RETURN(callbackOwner_, false);
+    return callbackOwner_->OnInputEvent(keyEvent);
+}
+
+bool AceWindowListener::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
+{
+    CHECK_NULL_RETURN(callbackOwner_, false);
+    return callbackOwner_->OnInputEvent(pointerEvent);
+}
+
+bool AceWindowListener::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const
+{
+    CHECK_NULL_RETURN(callbackOwner_, false);
+    return callbackOwner_->OnInputEvent(axisEvent);
+}
 
 void AceAbility::OnStart(const Want& want)
 {
@@ -197,25 +251,19 @@ void AceAbility::OnStart(const Want& want)
         rsUiDirector->Init();
     }
 
+    std::shared_ptr<AceAbility> self = std::static_pointer_cast<AceAbility>(shared_from_this());
+    OHOS::sptr<AceWindowListener> aceWindowListener = new AceWindowListener(self);
     // register surface change callback and window mode change callback
-    OHOS::sptr<OHOS::Rosen::IWindowChangeListener> thisAbility(this);
-    window->RegisterWindowChangeListener(thisAbility);
-
-    // register input consumer callback
-    std::shared_ptr<OHOS::Rosen::IInputEventConsumer> inputEventConsumer(this);
-    window->SetInputEventConsumer(inputEventConsumer);
-
+    window->RegisterWindowChangeListener(aceWindowListener);
     // register drag event callback
-    OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener(this);
-    window->RegisterDragListener(dragWindowListener);
-
+    window->RegisterDragListener(aceWindowListener);
     // register Occupied Area callback
-    OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener(this);
-    window->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener);
-
+    window->RegisterOccupiedAreaChangeListener(aceWindowListener);
     // register ace ability handler callback
-    OHOS::sptr<OHOS::Rosen::IAceAbilityHandler> aceAbilityHandler(this);
-    window->SetAceAbilityHandler(aceAbilityHandler);
+    window->SetAceAbilityHandler(aceWindowListener);
+    // register input consumer callback
+    std::shared_ptr<AceWindowListener> aceInputConsumer = std::make_shared<AceWindowListener>(self);
+    window->SetInputEventConsumer(aceInputConsumer);
 
     int32_t deviceWidth = 0;
     int32_t deviceHeight = 0;
@@ -599,7 +647,7 @@ void AceAbility::OnRemoteTerminated()
     LOGI("AceAbility::OnRemoteTerminated finish.");
 }
 
-void AceAbility::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason)
+void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason)
 {
     LOGI("AceAbility::OnSizeChange width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d",
         rect.width_, rect.height_, rect.posX_, rect.posY_);
