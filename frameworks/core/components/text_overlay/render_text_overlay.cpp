@@ -147,6 +147,8 @@ void RenderTextOverlay::Update(const RefPtr<Component>& component)
     onEndHandleMove_ = overlay->GetOnEndHandleMove();
     isSingleHandle_ = overlay->GetIsSingleHandle() || (startHandleOffset_ == endHandleOffset_);
     lineHeight_ = overlay->GetLineHeight();
+    startHandleHeight_ = overlay->GetStartHandleHeight();
+    endHandleHeight_ = overlay->GetEndHandleHeight();
     handleDiameter_ = overlay->GetHandleDiameter();
     menuSpacingWithHandle_ = handleDiameter_;
     handleDiameterInner_ = overlay->GetHandleDiameterInner();
@@ -553,8 +555,9 @@ void RenderTextOverlay::PerformLayout()
         startHandleRegion_ = TouchRegion(startHandleOffset_ + Offset(-hotZoneRadius, 0.0),
             startHandleOffset_ + Offset(hotZoneRadius, hotZoneDiameter));
     } else {
-        startHandleRegion_ = TouchRegion(startHandleOffset_ + Offset(-hotZoneRadius, -lineHeight_ - hotZoneDiameter),
-            startHandleOffset_ + Offset(hotZoneRadius, -lineHeight_));
+        startHandleRegion_ = TouchRegion(
+            startHandleOffset_ + Offset(-hotZoneRadius, -startHandleHeight_.value_or(lineHeight_) - hotZoneDiameter),
+            startHandleOffset_ + Offset(hotZoneRadius, -startHandleHeight_.value_or(lineHeight_)));
         endHandleRegion_ = TouchRegion(
             endHandleOffset_ + Offset(-hotZoneRadius, 0.0), endHandleOffset_ + Offset(hotZoneRadius, hotZoneDiameter));
     }

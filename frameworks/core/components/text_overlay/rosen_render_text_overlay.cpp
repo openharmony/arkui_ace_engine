@@ -78,7 +78,8 @@ void RosenRenderTextOverlay::PaintHandles(RenderContext& context) const
     // Paint start handle of textOverlay.
     if (showOption_.showStartHandle &&
         clipRect_.IsInRegion(Point(startHandleOffset_.GetX(), startHandleOffset_.GetY()))) {
-        PaintHandle(canvas, startHandleOffset_ + Offset(0.0, -lineHeight_ - NormalizeToPx(handleRadius_)), true);
+        PaintHandle(canvas, startHandleOffset_ + Offset(0.0, -startHandleHeight_.value_or(lineHeight_) -
+                    NormalizeToPx(handleRadius_)), true);
     }
 
     // Paint end handle of textOverlay.
@@ -111,10 +112,11 @@ void RosenRenderTextOverlay::PaintHandle(SkCanvas* skCanvas, Offset centerOffset
     // 1.0 is avoid separation of handle circle and handle line.
     Offset startPoint(Offset(0.0, NormalizeToPx(-handleRadius_) + 1.0));
     // 1.0_dp is designed by UX, handle line is higher than height of select region.
-    Offset endPoint(Offset(0.0, NormalizeToPx(-handleRadius_) - lineHeight_ - NormalizeToPx(1.0_vp)));
+    Offset endPoint(Offset(0.0,
+        NormalizeToPx(-handleRadius_) - endHandleHeight_.value_or(lineHeight_) - NormalizeToPx(1.0_vp)));
     if (isLeftHandle) {
         startPoint.SetY(NormalizeToPx(handleRadius_) - 1.0);
-        endPoint.SetY(NormalizeToPx(handleRadius_) + lineHeight_ + NormalizeToPx(1.0_vp));
+        endPoint.SetY(NormalizeToPx(handleRadius_) + startHandleHeight_.value_or(lineHeight_) + NormalizeToPx(1.0_vp));
     }
     skCanvas->drawLine(startPoint.GetX(), startPoint.GetY(), endPoint.GetX(), endPoint.GetY(), paint);
     skCanvas->restore();

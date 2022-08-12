@@ -78,6 +78,12 @@ public:
     void SetLineHeight(double lineHeight);
     double GetLineHeight() const;
 
+    void SetStartHandleHeight(double startHandleHeight);
+    const std::optional<double>& GetStartHandleHeight() const;
+
+    void SetEndHandleHeight(double endHandleHeight);
+    const std::optional<double>& GetEndHandleHeight() const;
+
     void SetClipRect(const Rect& clipRect);
     const Rect& GetClipRect() const;
 
@@ -210,6 +216,8 @@ private:
     bool isPassword_ = false;
     bool isSingleHandle_ = false;
     double lineHeight_ = 0.0;
+    std::optional<double> startHandleHeight_;
+    std::optional<double> endHandleHeight_;
     Rect clipRect_;
     Color handleColor_;
     Color handleColorInner_;

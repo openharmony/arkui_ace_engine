@@ -481,6 +481,26 @@ double TextOverlayComponent::GetLineHeight() const
     return lineHeight_;
 }
 
+void TextOverlayComponent::SetStartHandleHeight(double startHandleHeight)
+{
+    startHandleHeight_ = startHandleHeight;
+}
+
+const std::optional<double>& TextOverlayComponent::GetStartHandleHeight() const
+{
+    return startHandleHeight_;
+}
+
+void TextOverlayComponent::SetEndHandleHeight(double endHandleHeight)
+{
+    endHandleHeight_ = endHandleHeight;
+}
+
+const std::optional<double>& TextOverlayComponent::GetEndHandleHeight() const
+{
+    return endHandleHeight_;
+}
+
 void TextOverlayComponent::SetClipRect(const Rect& clipRect)
 {
     clipRect_ = clipRect;
