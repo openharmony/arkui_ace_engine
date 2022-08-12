@@ -16,6 +16,7 @@
 #include "core/components_v2/tabs/tab_content_proxy_element.h"
 
 #include "core/components/tab_bar/render_tab_content.h"
+#include "core/components_v2/tabs/tabs_helper.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -47,6 +48,8 @@ void TabContentProxyElement::Update()
     }
     controller_->SetContentElement(AceType::Claim(this));
     RenderElement::Update();
+
+    SetElementId(component_->GetElementId());
 }
 
 void TabContentProxyElement::PerformBuild()
@@ -101,6 +104,7 @@ void TabContentProxyElement::PerformBuild()
     }
     // process for new content requested by tab bar
     if (target == newBarIndex_) {
+        // That actually brings tab into view with animation
         tabContent->ChangeScroll(newBarIndex_, fromController_);
         UpdateLastFocusNode();
         newBarIndex_ = -1;
@@ -128,6 +132,8 @@ void TabContentProxyElement::PrepareContent(int32_t index)
 RefPtr<Element> TabContentProxyElement::OnUpdateElement(
     const RefPtr<Element>& element, const RefPtr<Component>& component)
 {
+    bool usePartialUpdate  = Container::IsCurrentUsePartialUpdate();
+
     if (element && !component) {
         auto tabContent = AceType::DynamicCast<RenderTabContent>(renderNode_);
         if (!tabContent) {
@@ -137,7 +143,20 @@ RefPtr<Element> TabContentProxyElement::OnUpdateElement(
             if (!renderNode) {
                 LOGW("delete render child is null.");
             } else {
-                tabContent->RemoveChildContent(renderNode);
+                if (!usePartialUpdate) {
+                    tabContent->RemoveChildContent(renderNode);
+                } else {
+                    tabContent->RemoveChildContentUpdateMap(renderNode);
+                }
+            }
+        }
+
+        if (usePartialUpdate) {
+            // Check if we removing focused element
+            // Does not work for last element
+            bool active = TabsHelper::IsActiveTabBarItemFor(element);
+            if (active) {
+                TabsHelper::SetIndex(Referenced::Claim<Element>(this), 0);
             }
         }
     }
@@ -153,6 +172,27 @@ RefPtr<Component> TabContentProxyElement::OnMakeEmptyComponent()
 void TabContentProxyElement::OnDataSourceUpdated(size_t startIndex)
 {
     LOGI("tab content does not support lazyForEach yet");
+}
+
+void TabContentProxyElement::UpdateIndex()
+{
+    if (!Container::IsCurrentUsePartialUpdate()) {
+        return;
+    }
+
+    // We arrive here with new set of children (some can be dropped or added),
+    // and focus index for TabBar already adjusted to point to correct render node.
+    // Focused render node might move to new position after call to
+    // ElementProxyHost::UpdateIndex();
+    // So we have to move focus to new index (by same render node will be focused)
+
+    auto renderNode = TabsHelper::GetTabBarFocusedElement(AceType::Claim(this));
+    ElementProxyHost::UpdateIndex();
+    auto idx2 = TabsHelper::GetTabBarElementIndex(AceType::Claim(this), renderNode);
+
+    // idx2 can already be corrected value, so update focus in any case
+    idx2 = idx2 < 0 ? 0 : idx2;
+    TabsHelper::SetIndex(Referenced::Claim<Element>(this), idx2);
 }
 
 } // namespace OHOS::Ace::V2

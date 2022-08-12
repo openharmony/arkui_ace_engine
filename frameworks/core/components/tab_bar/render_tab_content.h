@@ -99,6 +99,40 @@ public:
         }
     }
 
+    void RemoveChildContentUpdateMap(const RefPtr<RenderNode>& child)
+    {
+        LOGI("RemoveChildContent by content, map update");
+        int32_t idx = -1;
+
+        for (const auto& item : contentMap_) {
+            if (item.second == child) {
+                item.second->SetHidden(true);
+                idx = item.first;
+                break;
+            }
+        }
+
+        if (idx < 0) {
+            return;
+        }
+
+        std::unordered_map<int32_t, RefPtr<RenderNode>> newContentMap;
+        for (const auto& item : contentMap_) {
+            if (item.first < idx) {
+                newContentMap.emplace(item);
+            } else if (item.first > idx) {
+                newContentMap.emplace(std::pair<int32_t, RefPtr<RenderNode>>(item.first - 1, item.second));
+            }
+        }
+
+        std::swap(contentMap_, newContentMap);
+    }
+
+    void UpdateContentCount(int32_t count)
+    {
+        contentCount_ = count;
+    }
+
     // Used by declarative element to flush index after performBuild.
     void FlushIndex();
 

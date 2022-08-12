@@ -61,6 +61,16 @@ public:
         return barText_;
     }
 
+    void SetBarElementId(ElementIdType id)
+    {
+        tabBarItemElementId_ = id;
+    }
+
+    ElementIdType GetBarElementId() const
+    {
+        return tabBarItemElementId_;
+    }
+
     RefPtr<Component> ExecuteBuilder() const
     {
         if (builder_) {
@@ -90,6 +100,7 @@ private:
     std::string barIcon_;
     std::string barText_;
     std::unique_ptr<std::function<RefPtr<Component>()>> builder_ = nullptr;
+    ElementIdType tabBarItemElementId_ = ElementRegister::UndefinedElementId;
 };
 
 } // namespace OHOS::Ace::V2

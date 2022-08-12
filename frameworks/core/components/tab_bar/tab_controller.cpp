@@ -15,6 +15,7 @@
 
 #include "core/components/tab_bar/tab_controller.h"
 
+#include "core/common/container.h"
 #include "core/components/tab_bar/render_tab_bar.h"
 #include "core/components/tab_bar/tab_bar_element.h"
 #include "core/components/tab_bar/tab_content_element.h"
@@ -51,7 +52,8 @@ void TabController::SetPageReady(bool ready)
 
 void TabController::SetIndex(int32_t index)
 {
-    if (index_ == index || index < 0) {
+    // There can be different tab at the same index
+    if ((index_ == index && !Container::IsCurrentUsePartialUpdate()) ||  index < 0) {
         LOGI("SetIndex: Input index is not valid, %{public}d, %{public}d", index_, index);
         return;
     }

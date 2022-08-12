@@ -25,24 +25,50 @@ constexpr char DEFAULT_TAB_BAR_NAME[] = "TabBar";
 
 } // namespace
 
-void JSTabContent::Create()
+void JSTabContent::Create(const JSCallbackInfo& info)
 {
-    auto tabsComponent = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetTopTabs());
-    if (tabsComponent) {
-        auto tabBar = tabsComponent->GetTabBarChild();
-        std::list<RefPtr<Component>> components;
-        auto tabContentItemComponent = AceType::MakeRefPtr<V2::TabContentItemComponent>(components);
-        tabContentItemComponent->SetCrossAxisSize(CrossAxisSize::MAX);
-        tabContentItemComponent->SetTabsComponent(AceType::WeakClaim(AceType::RawPtr(tabsComponent)));
-        tabBar->AppendChild(CreateTabBarLabelComponent(tabContentItemComponent, std::string(DEFAULT_TAB_BAR_NAME)));
-        ViewStackProcessor::GetInstance()->Push(tabContentItemComponent);
-        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        if (box) {
-            box->SetBoxClipFlag(true);
+    std::list<RefPtr<Component>> components;
+    auto tabContentItemComponent = AceType::MakeRefPtr<V2::TabContentItemComponent>(components);
+    tabContentItemComponent->SetCrossAxisSize(CrossAxisSize::MAX);
+    ViewStackProcessor::GetInstance()->ClaimElementId(tabContentItemComponent);
+
+    RefPtr<V2::TabsComponent>  tabsComponent = nullptr;
+
+    bool usePartialUpdate = Container::IsCurrentUsePartialUpdate();
+
+    if (!usePartialUpdate) {
+        tabsComponent = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetTopTabs());
+        if (!tabsComponent) {
+            LOGE("fail to create tab content due to tabs missing");
+            return;
         }
-    } else {
-        LOGE("fail to create tab content due to tabs missing");
+        // GetTabsComponent used only by JSTabContent::SetTabBar
+        // To Find TabBarComponent eventually
+        tabContentItemComponent->SetTabsComponent(AceType::WeakClaim(AceType::RawPtr(tabsComponent)));
+
+        auto tabBar = tabsComponent->GetTabBarChild();
+        tabBar->AppendChild(CreateTabBarLabelComponent(tabContentItemComponent, std::string(DEFAULT_TAB_BAR_NAME)));
     }
+
+    ViewStackProcessor::GetInstance()->Push(tabContentItemComponent);
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (box) {
+        box->SetBoxClipFlag(true);
+    }
+
+    if (usePartialUpdate && info.Length() > 0 && info[0]->IsFunction()) {
+        JSRef<JSVal> builderFunctionJS = info[0];
+        LOGD("We have a build function for a tab");
+        auto jsWrapperFunc =
+            [context = info.GetExecutionContext(), builder = builderFunctionJS]() -> RefPtr<Component> {
+            JAVASCRIPT_EXECUTION_SCOPE(context)
+            JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
+            return ViewStackProcessor::GetInstance()->Finish();
+        };
+        tabContentItemComponent->SetBuilder(jsWrapperFunc);
+        return;
+    }
+    LOGE("No build function for a tab provided");
 }
 
 void JSTabContent::SetTabBar(const JSCallbackInfo& info)
@@ -53,21 +79,32 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
         return;
     }
     auto weakTabs = tabContentItemComponent->GetTabsComponent();
-    auto tabs = weakTabs.Upgrade();
-    if (!tabs) {
-        LOGE("can not get Tabs parent component error.");
-        return;
+
+    RefPtr<V2::TabsComponent> tabs;
+    RefPtr<TabBarComponent> tabBar;
+
+    if (!Container::IsCurrentUsePartialUpdate()) {
+        tabs = weakTabs.Upgrade();
+        if (!tabs) {
+            LOGE("can not get Tabs parent component error.");
+            return;
+        }
+        tabBar = tabs->GetTabBarChild();
+        if (!tabBar) {
+            LOGE("can not get TabBar component error.");
+            return;
+        }
     }
-    RefPtr<TabBarComponent> tabBar = tabs->GetTabBarChild();
-    if (!tabBar) {
-        LOGE("can not get TabBar component error.");
-        return;
-    }
+
     RefPtr<Component> tabBarChild = nullptr;
     std::string infoStr;
     if (ParseJsString(info[0], infoStr)) {
         auto textVal = infoStr.empty() ? DEFAULT_TAB_BAR_NAME : infoStr;
-        tabBarChild = CreateTabBarLabelComponent(tabContentItemComponent, textVal);
+        if (!Container::IsCurrentUsePartialUpdate()) {
+            tabBarChild = CreateTabBarLabelComponent(tabContentItemComponent, textVal);
+        } else {
+            tabContentItemComponent->SetBarText(textVal);
+        }
     } else {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
@@ -75,20 +112,34 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
         JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
         auto isTextEmpty = textParam->IsEmpty() || textParam->IsUndefined() || textParam->IsNull();
         auto isIconEmpty = iconParam->IsEmpty() || iconParam->IsUndefined() || iconParam->IsNull();
+
         if (builderFuncParam->IsFunction()) {
             tabBarChild = ProcessTabBarBuilderFunction(tabContentItemComponent, builderFuncParam);
-            // for custom build, no need for indicator.
-            tabBar->ResetIndicator();
-            tabBar->SetAlignment(Alignment::TOP_LEFT);
+            if (!Container::IsCurrentUsePartialUpdate()) {
+                tabBar->ResetIndicator();
+                tabBar->SetAlignment(Alignment::TOP_LEFT);
+            }
         } else if (!isTextEmpty && !isIconEmpty) {
             tabBarChild = ProcessTabBarTextIconPair(tabContentItemComponent, textParam, iconParam);
         } else if (!isTextEmpty && isIconEmpty) {
             tabBarChild = ProcessTabBarLabel(tabContentItemComponent, textParam);
         }
     }
-    auto defaultTabChild = tabBar->GetChildren().back();
-    tabBar->RemoveChildDirectly(defaultTabChild);
-    tabBar->AppendChild(tabBarChild);
+
+    if (!Container::IsCurrentUsePartialUpdate()) {
+        auto defaultTabChild = tabBar->GetChildren().back();
+        tabBar->RemoveChildDirectly(defaultTabChild);
+        tabBar->AppendChild(tabBarChild);
+        return;
+    }
+
+    // Partial Update only
+    if (tabContentItemComponent->GetBarElementId() == ElementRegister::UndefinedElementId) {
+        const auto id = ElementRegister::GetInstance()->MakeUniqueId();
+        tabContentItemComponent->SetBarElementId(id);
+        LOGD("Setting ID for tab bar item to %{public}d tabContentItemComponent id %{public}d",
+            id, tabContentItemComponent->GetBarElementId());
+    }
 }
 
 RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(
@@ -117,7 +168,12 @@ RefPtr<Component> JSTabContent::ProcessTabBarLabel(
     if (!ParseJsString(labelVal, textStr)) {
         textStr = DEFAULT_TAB_BAR_NAME;
     }
-    return CreateTabBarLabelComponent(tabContent, textStr);
+    tabContent->SetBarText(textStr);
+
+    if (!Container::IsCurrentUsePartialUpdate()) {
+        return CreateTabBarLabelComponent(tabContent, textStr);
+    }
+    return nullptr;
 }
 
 RefPtr<Component> JSTabContent::ProcessTabBarTextIconPair(
@@ -132,8 +188,12 @@ RefPtr<Component> JSTabContent::ProcessTabBarTextIconPair(
         textStr = DEFAULT_TAB_BAR_NAME;
     }
     tabContent->SetBarText(textStr);
+    tabContent->SetBarIcon(iconUri);
 
-    return TabBarItemComponent::BuildWithTextIcon(textStr, iconUri);
+    if (!Container::IsCurrentUsePartialUpdate()) {
+        return TabBarItemComponent::BuildWithTextIcon(textStr, iconUri);
+    }
+    return nullptr;
 }
 
 void JSTabContent::JSBind(BindingTarget globalObj)

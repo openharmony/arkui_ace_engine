@@ -31,6 +31,7 @@
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_v2/list/list_item_component.h"
+#include "core/components_v2/tabs/tabs_helper.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/composed_component.h"
 #include "frameworks/core//components_part_upd/foreach/foreach_component.h"
@@ -110,6 +111,8 @@ public:
 
         startIndex_ = startIndex;
         count_ = component_ ? 1 : 0;
+
+        LOGD("RenderElementProxy my id: %{public}d ", GetElementId());
 
         if (GetElementId() == ElementRegister::UndefinedElementId) {
             // first render case, add the ElementRegistry
@@ -278,6 +281,103 @@ protected:
     bool forceRender_ = false;
     RefPtr<Component> component_;
     RefPtr<Element> element_;
+};
+
+class TabContentItemElementProxy : public RenderElementProxy {
+public:
+    explicit TabContentItemElementProxy(const WeakPtr<ElementProxyHost>& host, bool forceRender = false)
+        : RenderElementProxy(host, forceRender) {}
+
+    ~TabContentItemElementProxy() override
+    {
+        auto tabContentItemComponent = TabsHelper::TraverseTo<TabContentItemComponent>(component_);
+        if (tabContentItemComponent) {
+            LOGD("Removing tab bar item TabContentItemElementProxy DTOR");
+
+            TabsHelper::RemoveTabBarItemById(tabContentItemComponent->GetBarElementId());
+
+            if (!host_.Upgrade()) {
+                LOGE("Host_ is nullptr");
+                return;
+            }
+            auto element = AceType::DynamicCast<TabContentProxyElement>(host_.Upgrade());
+            if (!element) {
+                LOGE("DTOR host is NOT TabContentProxyElement is nullptr");
+                return;
+            }
+            TabsHelper::DecTabContentRenderCount(AceType::DynamicCast<TabContentProxyElement>(host_.Upgrade()));
+        }
+    }
+
+    void Update(const RefPtr<Component>& component, size_t startIndex) override
+    {
+        LOGD("TabContentItemElementProxy::Update START with Component elmtId %{public}d",
+            component->GetElementId());
+
+        if (GetElementId() == ElementRegister::UndefinedElementId) {
+            // first render case, add the ElementRegistry
+            ACE_DCHECK(element_ == nullptr);
+
+            auto tabContentItemComponent = TabsHelper::TraverseTo<TabContentItemComponent>(component);
+            if (tabContentItemComponent) {
+                LOGD("TabContentItemComponent %{public}d  %{public}s",
+                    tabContentItemComponent->GetElementId(), AceType::TypeName(tabContentItemComponent));
+                SetElementId(tabContentItemComponent->GetElementId());
+            }
+            LOGD("TabContentItemElementProxy NEW my id, adding: %{public}d ", GetElementId());
+            AddSelfToElementRegistry();
+            realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
+            LOGD("TabContentItemElementProxy: initial render case, setting elmtId %{public}d, "
+                "realelmtId will be %{public}d",
+                tabContentItemComponent->GetElementId(), realElmtId_);
+        }
+
+        // Add Tab Bar Item
+        auto tabContentProxyElement = AceType::DynamicCast<TabContentProxyElement>(host_.Upgrade());
+        if (tabContentProxyElement && !element_) {
+            auto tabContentItemComponent = TabsHelper::TraverseTo<TabContentItemComponent>(component);
+            LOGD("TabContentItemElementProxy -- found tabContentProxyElement and %{public}s will create TBI",
+                AceType::TypeName(tabContentItemComponent));
+            TabsHelper::AddTabBarElement(tabContentProxyElement, nullptr, tabContentItemComponent);
+            TabsHelper::IncTabContentRenderCount(tabContentProxyElement);
+        }
+
+        RenderElementProxy::Update(component, startIndex);
+        LOGD("TabContentItemElementProxy::Update END with Component elmtId %{public}d", component->GetElementId());
+    }
+
+    void LocalizedUpdate(
+        const RefPtr<Component>& inwardWrappingComponent, const RefPtr<Component>& newTabContentItemComponent) override
+    {
+        LOGD("RenderItemElementProxy (own elmtId %{public}d)::LocalizedUpdate with %{public}s, "
+            "wrapComponent is %{public}s",
+            GetElementId(), AceType::TypeName(newTabContentItemComponent), AceType::TypeName(inwardWrappingComponent));
+        ACE_DCHECK(
+            (component_ != nullptr) && (GetElementId() != ElementRegister::UndefinedElementId) && "Is re-render");
+
+
+        // Update TabBar element
+        auto tabContentProxyElement = AceType::DynamicCast<TabContentProxyElement>(host_.Upgrade());
+        if (tabContentProxyElement) {
+            auto tabContentItemComponent = TabsHelper::TraverseTo<TabContentItemComponent>(inwardWrappingComponent);
+            auto oldComponent = TabsHelper::TraverseTo<TabContentItemComponent>(component_);
+            tabContentItemComponent->SetBarElementId(oldComponent->GetBarElementId());
+            LOGD("TabContentItemElementProxy -- found TabContentItemComponent and %{public}s will update TBI",
+                AceType::TypeName(tabContentItemComponent));
+            TabsHelper::UpdateTabBarElement(tabContentProxyElement, element_, inwardWrappingComponent);
+        }
+
+        RenderElementProxy::LocalizedUpdate(inwardWrappingComponent, newTabContentItemComponent);
+    }
+
+    void UpdateIndex(size_t startIndex) override
+    {
+        startIndex_ = startIndex;
+        LOGD("TabContentItemElementProxy startIndex_ %{public}d", static_cast<int32_t>(startIndex));
+        TabsHelper::SetTabBarElementIndex(element_,
+            TabsHelper::TraverseTo<TabContentItemComponent>(component_), startIndex);
+        RenderElementProxy::UpdateIndex(startIndex);
+    }
 };
 
 class ItemElementProxy : public RenderElementProxy {
@@ -1530,6 +1630,17 @@ RefPtr<ElementProxy> ElementProxy::Create(const WeakPtr<ElementProxyHost>& host,
     if (AceType::InstanceOf<MultiComposedComponent>(component)) {
         return AceType::MakeRefPtr<MultiComposedElementProxy>(host);
     }
+
+    if (Container::IsCurrentUsePartialUpdate()) {
+        auto tabContentItemComponent = TabsHelper::TraverseTo<TabContentItemComponent>(component);
+        if (tabContentItemComponent) {
+            LOGD("creating TabContentItemElementProxy for %{public}s.", AceType::TypeName(component));
+            return AceType::MakeRefPtr<TabContentItemElementProxy>(host);
+        }
+    }
+    LOGD("Default case: creating RenderElementProxy for %{public}s.", AceType::TypeName(component));
+    LOGD("creating RenderElementProxy");
+
     return AceType::MakeRefPtr<RenderElementProxy>(host);
 }
 

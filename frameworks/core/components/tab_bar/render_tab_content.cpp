@@ -16,6 +16,7 @@
 #include "core/components/tab_bar/render_tab_content.h"
 
 #include "core/animation/curve_animation.h"
+#include "core/common/container.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
@@ -201,6 +202,15 @@ void RenderTabContent::HandleDragEnd()
 void RenderTabContent::ChangeScroll(int32_t index, bool fromController)
 {
     LOGI("Change scroll index is %{public}d", index);
+    if (Container::IsCurrentUsePartialUpdate() && contentMap_.find(currentIndex_) == contentMap_.end()) {
+        // That happens in case we just updated index only
+        // so we needed to keep content as is.
+        // There might be a better way to update index via controller
+        // without triggering of a scrolling
+        LOGD("currentIndex_, state is missing, update index only");
+        currentIndex_ = index;
+        return;
+    }
     ScrollContents(index, true, fromController);
 }
 
@@ -410,6 +420,7 @@ void RenderTabContent::UpdateChildPosition(double offset, int32_t currentIndex, 
     }
     // at the first one item or the last one item, no more switching
     if (newIndex < 0 || newIndex >= contentCount_) {
+        LOGD("exit animation newIndex %{public}d  contentCount_ %{public}d", newIndex, contentCount_);
         return;
     }
 

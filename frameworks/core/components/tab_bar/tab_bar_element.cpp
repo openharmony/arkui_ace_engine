@@ -56,6 +56,8 @@ void TabBarElement::Update()
 {
     if (component_) {
         RefPtr<TabBarComponent> tabBar = AceType::DynamicCast<TabBarComponent>(component_);
+        tabBar_ = tabBar;
+
         if (!tabBar) {
             LOGE("TabBarElement::Update: get TabBarComponent failed!");
             return;

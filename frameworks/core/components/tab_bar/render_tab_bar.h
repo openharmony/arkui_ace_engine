@@ -69,6 +69,79 @@ public:
         return barPosition_;
     }
 
+    int32_t FirstItemOffset() const
+    {
+        return indicator_ ? 1 : 0;
+    }
+
+    bool IsActive(const RefPtr<RenderNode>& child) const
+    {
+        const auto& kids = GetChildren();
+        auto pos = std::find(kids.begin(), kids.end(), child);
+        if (pos != std::end(kids)) {
+            auto idx = std::distance(kids.begin(), pos);
+            if (indicator_) {
+                idx--;
+            }
+            if (idx == index_) {
+                LOGD("found active item at %{public}d", static_cast<int>(idx));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Update current focused index before removing of the child
+    // We can not use lifecycle callback OnChildRemoved here
+    // Since it is invoked only after RenderNode removed
+    // from list of the children
+    void AboutToRemove(const RefPtr<RenderNode>& child)
+    {
+        auto kids = GetChildren();
+        auto pos = std::find(kids.begin(), kids.end(), child);
+        if (pos != std::end(kids)) {
+            auto idx = std::distance(kids.begin(), pos);
+            if (indicator_) {
+                idx--;
+            }
+            if (idx <= index_ && index_ > 0) {
+                index_--;
+            }
+        }
+    }
+
+    int32_t GetFocusedTabBarItemIndex() const
+    {
+        return  index_;
+    }
+
+    RefPtr<RenderNode> GetFocusedTabBarItem() const
+    {
+        auto size = static_cast<int32_t>(GetChildren().size());
+
+        int index = indicator_? index_ + 1 : index_;
+        if (index < 0 || index >= size) {
+            return nullptr;
+        }
+        auto pos = GetChildren().begin();
+        std::advance(pos, index);
+        return *pos;
+    }
+
+    int32_t GetIndexForTabBarItem(const RefPtr<RenderNode>& child) const
+    {
+        auto kids = GetChildren();
+        auto pos = std::find(kids.begin(), kids.end(), child);
+        if (pos != std::end(kids)) {
+            auto idx = std::distance(kids.begin(), pos);
+            if (indicator_) {
+                idx--;
+            }
+            return idx;
+        }
+        return -1;
+    }
+
 protected:
     RenderTabBar();
     void OnTouchTestHit(
