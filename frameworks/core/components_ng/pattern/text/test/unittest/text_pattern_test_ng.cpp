@@ -137,13 +137,11 @@ HWTEST_F(TextPatternTestNg, TextFrameNodeCreator001, TestSize.Level1)
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     EXPECT_EQ(layoutProperty == nullptr, false);
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
-    EXPECT_EQ(layoutProperty == nullptr, false);
-    const std::unique_ptr<TextParagraph>& propTextParagraph = textLayoutProperty->GetTextParagraph();
-    EXPECT_EQ(propTextParagraph == nullptr, false);
-    EXPECT_EQ(propTextParagraph->CheckContent(CREATE_VALUE), true);
-    const std::unique_ptr<FontStyle>& fontStyle = propTextParagraph->GetFontStyle();
+    EXPECT_EQ(textLayoutProperty == nullptr, false);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
+    const std::unique_ptr<FontStyle>& fontStyle = textLayoutProperty->GetFontStyle();
     EXPECT_EQ(fontStyle == nullptr, false);
-    const std::unique_ptr<TextLineStyle>& textLineStyle = propTextParagraph->GetTextLineStyle();
+    const std::unique_ptr<TextLineStyle>& textLineStyle = textLayoutProperty->GetTextLineStyle();
     EXPECT_EQ(textLineStyle == nullptr, false);
     TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, textLineStyle, nullptr);
     EXPECT_EQ(textStyle.GetFontSize(), FONT_SIZE_VALUE);

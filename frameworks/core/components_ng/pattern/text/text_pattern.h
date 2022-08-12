@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
-#include "core/components_ng/pattern/text/text_paragraph.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 
