@@ -31,6 +31,11 @@ enum class StickyMode {
     OPACITY,
 };
 
+enum class SwipeEdgeEffect {
+    Spring = 0,
+    None,
+};
+
 struct EditMode {
     enum : uint32_t {
         NONE = 0,
@@ -57,6 +62,7 @@ public:
     ACE_DEFINE_COMPONENT_PROP(Sticky, StickyMode, StickyMode::NONE);
     ACE_DEFINE_COMPONENT_PROP(EditMode, uint32_t, EditMode::NONE);
     ACE_DEFINE_COMPONENT_PROP(BorderRadius, Dimension, 0.0_vp);
+    ACE_DEFINE_COMPONENT_PROP(EdgeEffect, SwipeEdgeEffect, SwipeEdgeEffect::Spring);
 
     static RefPtr<ListItemComponent> FindListItem(const RefPtr<Component>& component);
 

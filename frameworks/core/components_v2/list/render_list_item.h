@@ -147,6 +147,7 @@ private:
     void HandleDragEnd(const DragEndInfo& info);
     void StartSpringMotion(double start, double end, double velocity);
     double GetFriction();
+    void UpdatePostion(double delta);
 
     RefPtr<ListItemComponent> component_;
     std::function<RefPtr<RenderNode>(ListItemChildType)> getChildCallback_;
@@ -170,6 +171,7 @@ private:
     int32_t currPage_ = 0;
     Size startSize_;
     Size endSize_;
+    SwipeEdgeEffect edgeEffect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderListItem);
 };

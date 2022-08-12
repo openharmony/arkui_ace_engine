@@ -32,6 +32,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const V2::StickyMode STICKY_MODE_TABLE[] = { V2::StickyMode::NONE, V2::StickyMode::NORMAL, V2::StickyMode::OPACITY };
+const V2::SwipeEdgeEffect SWIPE_EDGE_EFFECT_TABLE[] = { V2::SwipeEdgeEffect::Spring, V2::SwipeEdgeEffect::None };
 
 } // namespace
 
@@ -175,6 +176,12 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
         builderFunc->Execute();
         RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
         listItem->SetSwiperEndComponent(customComponent);
+    }
+
+    auto edgeEffect = obj->GetProperty("edgeEffect");
+    if (edgeEffect->IsNumber()) {
+        JSViewSetProperty(&V2::ListItemComponent::SetEdgeEffect, edgeEffect->ToNumber<int32_t>(),
+            SWIPE_EDGE_EFFECT_TABLE, V2::SwipeEdgeEffect::Spring);
     }
 }
 
