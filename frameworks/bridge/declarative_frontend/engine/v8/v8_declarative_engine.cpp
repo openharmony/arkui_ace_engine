@@ -1044,7 +1044,6 @@ V8DeclarativeEngine::~V8DeclarativeEngine()
         }
     }
     LOG_DESTROY();
-    XComponentClient::GetInstance().SetRegisterCallbackToNull();
     XComponentClient::GetInstance().SetJSValCallToNull();
     if (nativeEngine_ != nullptr) {
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)

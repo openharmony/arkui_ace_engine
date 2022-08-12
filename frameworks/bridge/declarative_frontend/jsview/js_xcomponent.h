@@ -26,7 +26,6 @@
 namespace OHOS::Ace::Framework {
 class XComponentClient {
 public:
-    using GetCallback = std::function<bool(RefPtr<XComponentComponent>& component)>;
     using GetJSValCallback = std::function<bool(JSRef<JSVal>& param)>;
     using DeleteCallback = std::function<void()>;
     XComponentClient& operator=(const XComponentClient&) = delete;
@@ -39,28 +38,9 @@ public:
         return instance;
     }
 
-    void RegisterCallback(GetCallback&& callback)
-    {
-        getCallback_ = callback;
-    }
-
     void RegisterJSValCallback(GetJSValCallback&& callback)
     {
         getJSValCallback_ = callback;
-    }
-
-    void SetRegisterCallbackToNull()
-    {
-        getCallback_ = nullptr;
-    }
-
-    bool GetXComponent(RefPtr<XComponentComponent>& component)
-    {
-        if (getCallback_) {
-            return getCallback_(component);
-        } else {
-            return false;
-        }
     }
 
     RefPtr<XComponentComponent> GetXComponentFromXcomponentsMap(const std::string& xcomponentId)
@@ -161,7 +141,6 @@ public:
 
 private:
     XComponentClient() = default;
-    GetCallback getCallback_ = nullptr;
     GetJSValCallback getJSValCallback_ = nullptr;
     std::unordered_map<std::string, WeakPtr<XComponentComponent>> xcomponentsMap_;
     std::unordered_map<std::string, RefPtr<JSXComponentController>> jsXComponentControllersMap_;
