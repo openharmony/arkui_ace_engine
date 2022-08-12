@@ -490,6 +490,14 @@ struct KeyEvent final {
         return true;
     }
 
+    bool IsCtrlWith(KeyCode expectCodes) const
+    {
+        return IsKey({ KeyCode::KEY_CTRL_LEFT, expectCodes }) || IsKey({ KeyCode::KEY_CTRL_RIGHT, expectCodes });
+    }
+    bool IsShiftWith(KeyCode expectCodes) const
+    {
+        return IsKey({ KeyCode::KEY_SHIFT_LEFT, expectCodes }) || IsKey({ KeyCode::KEY_SHIFT_RIGHT, expectCodes });
+    }
     bool IsNumberKey() const
     {
         return ((KeyCode::KEY_0 <= code && code <= KeyCode::KEY_9) ||

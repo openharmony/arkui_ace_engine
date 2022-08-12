@@ -4061,6 +4061,12 @@ void JSViewAbstract::JsFocusOnTouch(const JSCallbackInfo& info)
         return;
     }
     focusableComponent->SetIsFocusOnTouch(isFocusOnTouch);
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    if (!component) {
+        LOGE("main component get failed!");
+        return;
+    }
+    component->SetIsFocusOnTouch(isFocusOnTouch);
 }
 
 void JSViewAbstract::JsDefaultFocus(const JSCallbackInfo& info)

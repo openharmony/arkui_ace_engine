@@ -592,6 +592,7 @@ private:
     bool hasTextOverlayPushed_ = false;
     bool softKeyboardEnabled_ = true;
     bool isInEditStatus_ = false;
+    bool isFocusOnTouch_ = true;
     Color pressColor_;
     Color hoverColor_;
     TextSelection selection_; // Selection from custom.
