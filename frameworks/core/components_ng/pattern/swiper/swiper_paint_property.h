@@ -18,6 +18,7 @@
 
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -53,6 +54,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Enabled, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, EdgeEffect, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FadeColor, Color, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

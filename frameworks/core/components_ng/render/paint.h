@@ -41,6 +41,41 @@ enum class PaintStyle {
     STROKE_AND_FILL,
 };
 
+enum class BlendMode {
+    CLEAR,
+    SRC,
+    DST,
+    SRC_OVER,
+    DST_OVER,
+    SRC_IN,
+    DST_IN,
+    SRC_OUT,
+    DST_OUT,
+    SRC_A_TOP,
+    DST_A_TOP,
+    XOR,
+    PLUS,
+    MODULATE,
+    SCREEN,
+    LAST_COEFF_MODE = SCREEN,
+    OVERLAY,
+    DARKEN,
+    LIGHTEN,
+    COLOR_DODGE,
+    COLOR_BURN,
+    HARD_LIGHT,
+    SOFT_LIGHT,
+    DIFFERENCE,
+    EXCLUSION,
+    MULTIPLY,
+    LAST_SEPARABLE_MODE = MULTIPLY,
+    HUE,
+    SATURATION,
+    COLOR,
+    LUMINOSITY,
+    LAST_MODE = LUMINOSITY,
+};
+
 // Paint is interface for drawing styles.
 class Paint : public virtual AceType {
     DECLARE_ACE_TYPE(NG::Paint, AceType)
@@ -56,6 +91,8 @@ public:
     virtual void SetStyle(PaintStyle style) = 0;
     virtual void SetColor(const Color& color) = 0;
     virtual void SetStrokeWidth(float width) = 0;
+    virtual void SetAlphaf(float alpha) = 0;
+    virtual void SetBlendMode(BlendMode blendMode) = 0;
 };
 } // namespace OHOS::Ace::NG
 

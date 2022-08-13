@@ -31,6 +31,12 @@ SkPaint::Style ToSkStyle(PaintStyle style)
     return static_cast<SkPaint::Style>(style);
 }
 
+SkBlendMode ToSkBlendMode(BlendMode blendMode)
+{
+    // keep BlendMode define same with SkBlendMode in skia
+    return static_cast<SkBlendMode>(blendMode);
+}
+
 RefPtr<Paint> Paint::Create()
 {
     return AceType::MakeRefPtr<SkiaPaint>();
@@ -81,6 +87,16 @@ void SkiaPaint::SetColor(const Color& color)
 void SkiaPaint::SetStrokeWidth(float width)
 {
     rawPaint_.setStrokeWidth(width);
+}
+
+void SkiaPaint::SetAlphaf(float alpha)
+{
+    rawPaint_.setAlphaf(alpha);
+}
+
+void SkiaPaint::SetBlendMode(BlendMode blendMode)
+{
+    rawPaint_.setBlendMode(ToSkBlendMode(blendMode));
 }
 
 } // namespace OHOS::Ace::NG

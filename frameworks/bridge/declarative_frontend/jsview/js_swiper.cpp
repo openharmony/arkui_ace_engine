@@ -176,11 +176,6 @@ void JSSwiper::SetEffectMode(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (!swiper) {
-        return;
-    }
 
     if (!info[0]->IsNumber()) {
         LOGE("info is not a  number ");
@@ -194,6 +189,12 @@ void JSSwiper::SetEffectMode(const JSCallbackInfo& info)
             return;
         }
         NG::SwiperView::SetEdgeEffect(EDGE_EFFECT[edgeEffect]);
+        return;
+    }
+
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (!swiper) {
         return;
     }
 
@@ -213,11 +214,6 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-    if (!swiper) {
-        return;
-    }
 
     if (Container::IsCurrentUseNewPipeline()) {
         if (info[0]->IsString() && info[0]->ToString() == "auto") {
@@ -225,6 +221,12 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
         } else if (info[0]->IsNumber()) {
             NG::SwiperView::SetDisplayCount(info[0]->ToNumber<int32_t>());
         }
+        return;
+    }
+
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (!swiper) {
         return;
     }
 

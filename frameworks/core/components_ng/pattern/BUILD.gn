@@ -35,6 +35,7 @@ build_component_ng("pattern_ng") {
     "stage/stage_manager.cpp",
     "stage/stage_pattern.cpp",
     "swiper/swiper_layout_algorithm.cpp",
+    "swiper/swiper_paint_method.cpp",
     "swiper/swiper_pattern.cpp",
     "swiper/swiper_view.cpp",
     "text/text_layout_algorithm.cpp",

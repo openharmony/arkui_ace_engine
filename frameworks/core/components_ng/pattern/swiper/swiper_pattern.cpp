@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
@@ -34,6 +35,15 @@ namespace {
 
 constexpr Dimension MIN_TURN_PAGE_VELOCITY = 10.0_vp;
 constexpr Dimension MIN_DRAG_DISTANCE = 25.0_vp;
+
+float CalculateFriction(float gamma)
+{
+    constexpr float SCROLL_RATIO = 0.72;
+    if (GreatOrEqual(gamma, 1.0)) {
+        gamma = 1.0;
+    }
+    return SCROLL_RATIO * std::pow(1.0 - gamma, SQUARE);
+}
 
 } // namespace
 
@@ -85,7 +95,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->UpdateCurrentOffset(static_cast<float>(info.GetMainDelta()));
+            pattern->HandleDragUpdate(info);
         }
     };
 
@@ -173,64 +183,138 @@ void SwiperPattern::Tick(uint64_t duration)
                 scheduler_->Stop();
             }
         } else {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            auto geometryNode = host->GetGeometryNode();
-            CHECK_NULL_VOID(geometryNode);
-            auto mainSize = geometryNode->GetFrameSize().MainSize(GetDirection());
-            PlayTranslateAnimation(0, -mainSize, currentIndex_ + 1);
+            PlayTranslateAnimation(0, -MainSize(), currentIndex_ + 1);
         }
         elapsedTime_ = 0;
+    }
+}
+
+void SwiperPattern::StartAutoPlay()
+{
+    if (!scheduler_ || !IsAutoPlay()) {
+        return;
+    }
+    bool reachEnd = currentIndex_ >= static_cast<int32_t>(GetHost()->GetChildren().size()) - 1 && !IsLoop();
+    if (reachEnd && scheduler_->IsActive()) {
+        scheduler_->Stop();
+    } else {
+        scheduler_->Start();
     }
 }
 
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     currentOffset_ = currentOffset_ + offset;
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_REQUEST_NEW_CHILD_NODE);
 }
 
 void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-        if (controller_ && !controller_->IsStopped()) {
-            // Clear stop listener before stop, otherwise the previous swipe will be considered complete.
-            controller_->ClearStopListeners();
-            controller_->Stop();
-        }
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        HandleTouchDown();
+    } else if (touchType == TouchType::UP) {
+        HandleTouchUp();
     }
+}
+
+void SwiperPattern::HandleTouchDown()
+{
+    // Stop translate animation when touch down.
+    if (controller_ && !controller_->IsStopped()) {
+        // Clear stop listener before stop, otherwise the previous swipe will be considered complete.
+        controller_->ClearStopListeners();
+        controller_->Stop();
+    }
+
+    // Stop auto play when touch down.
+    if (IsAutoPlay() && scheduler_) {
+        scheduler_->Stop();
+    }
+}
+
+void SwiperPattern::HandleTouchUp()
+{
+    StartAutoPlay();
 }
 
 void SwiperPattern::HandleDragStart()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
+    currentOffset_ = std::fmod(currentOffset_, MainSize());
+}
 
-    currentOffset_ = std::fmod(currentOffset_, geometryNode->GetFrame().GetRect().MainSize(GetDirection()));
+void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
+{
+    auto mainDelta = static_cast<float>(info.GetMainDelta());
+    auto isOutOfBoundary = IsOutOfBoundary(mainDelta + currentOffset_);
+    if (!IsLoop() && isOutOfBoundary) {
+        auto edgeEffect = GetEdgeEffect();
+        if (edgeEffect == EdgeEffect::SPRING) {
+            LOGI("Swiper has reached boundary, can't drag any more, effect spring.");
+            auto mainOffset = std::fmod(currentOffset_, MainSize());
+            auto friction = CalculateFriction(std::abs(mainOffset) / MainSize());
+            UpdateCurrentOffset(friction * mainDelta);
+            return;
+        }
+
+        if (edgeEffect == EdgeEffect::FADE) {
+            LOGI("Swiper has reached boundary, can't drag any more, effect fade");
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            currentOffset_ += mainDelta;
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            return;
+        }
+
+        if (edgeEffect == EdgeEffect::NONE) {
+            LOGI("Swiper has reached boundary, can't drag any more.");
+            return;
+        }
+    }
+
+    UpdateCurrentOffset(static_cast<float>(mainDelta));
 }
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
+    LOGI("Drag end velocity: %{public}lf, currentOffset: %{public}lf", dragVelocity, currentOffset_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto mainSize = geometryNode->GetFrameSize().MainSize(GetDirection());
 
+    // Play edge effect animation.
+    if (!IsLoop() && IsOutOfBoundary(currentOffset_)) {
+        auto edgeEffect = GetEdgeEffect();
+        if (edgeEffect == EdgeEffect::SPRING) {
+            PlaySpringAnimation(dragVelocity);
+            return;
+        }
+
+        if (edgeEffect == EdgeEffect::FADE) {
+            PlayFadeAnimation();
+            return;
+        }
+
+        if (edgeEffect == EdgeEffect::NONE) {
+            return;
+        }
+    }
+
+    // Play translate animation.
+    auto mainSize = MainSize();
     int32_t nextIndex = currentIndex_;
     float start = currentOffset_;
     float end = 0.0;
     if (std::abs(dragVelocity) > context->NormalizeToPx(MIN_TURN_PAGE_VELOCITY) &&
         std::abs(currentOffset_) > context->NormalizeToPx(MIN_DRAG_DISTANCE)) {
-        // If dragVelocity if greater than zero, show previous item, otherwise show next items.
-        end = GreatNotEqual(dragVelocity, 0.0) ? mainSize : -mainSize;
-        nextIndex = GreatNotEqual(dragVelocity, 0.0) ? (nextIndex -1) : (nextIndex + 1);
+        if (GreatNotEqual(dragVelocity * currentOffset_ , 0.0)) {
+            auto intervalSize = static_cast<int32_t>(std::floor(std::abs(currentOffset_) / mainSize)) + 1;
+            end = GreatNotEqual(dragVelocity, 0.0) ? mainSize * intervalSize : -mainSize * intervalSize;
+            nextIndex = GreatNotEqual(dragVelocity, 0.0) ? (nextIndex - intervalSize) : (nextIndex + intervalSize);
+        }
     }
 
     PlayTranslateAnimation(start, end, nextIndex);
@@ -272,6 +356,87 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
     controller_->Play();
 }
 
+void SwiperPattern::PlaySpringAnimation(double dragVelocity)
+{
+    LOGI("Play spring animation start");
+    if (!springController_) {
+        springController_ = AceType::MakeRefPtr<Animator>(GetHost()->GetContext());
+    }
+    springController_->ClearStopListeners();
+    springController_->ClearInterpolators();
+
+    constexpr double SPRING_SCROLL_MASS = 0.5;
+    constexpr double SPRING_SCROLL_STIFFNESS = 100.0;
+    constexpr double SPRING_SCROLL_DAMPING = 15.55635;
+    const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
+    AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
+    ExtentPair ententPair = ExtentPair(0.0, 0.0);
+    double friction = CalculateFriction(std::abs(currentOffset_) / MainSize());
+    auto scrollMotion = AceType::MakeRefPtr<ScrollMotion>(currentOffset_, dragVelocity * friction, ententPair,
+        ententPair, DEFAULT_OVER_SPRING_PROPERTY);
+    scrollMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {
+        auto swiper = weak.Upgrade();
+        if (swiper) {
+            swiper->UpdateCurrentOffset(static_cast<float>(position) - swiper->currentOffset_);
+        }
+    });
+    springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+    });
+    springController_->PlayMotion(scrollMotion);
+}
+
+void SwiperPattern::PlayFadeAnimation()
+{
+    if (NearZero(currentOffset_)) {
+        return;
+    }
+
+    LOGI("Play fade animation start");
+    if (!fadeController_) {
+        fadeController_ = AceType::MakeRefPtr<Animator>(GetHost()->GetContext());
+    }
+    fadeController_->ClearAllListeners();
+
+    auto translate = AceType::MakeRefPtr<CurveAnimation<double>>(currentOffset_, 0, Curves::LINEAR);
+    auto weak = AceType::WeakClaim(this);
+    translate->AddListener(Animation<double>::ValueCallback([weak](double value) {
+        auto swiper = weak.Upgrade();
+        if (swiper) {
+            swiper->currentOffset_ = value;
+            swiper->GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }));
+
+    fadeController_->AddStopListener([weak]() {
+    });
+    static constexpr double FADE_DURATION = 500.0;
+    fadeController_->SetDuration(FADE_DURATION);
+    fadeController_->AddInterpolator(translate);
+    fadeController_->Play();
+}
+
+bool SwiperPattern::IsOutOfBoundary(double mainOffset) const
+{
+    if (IsLoop() || !GetHost()) {
+        return false;
+    }
+
+    mainOffset = std::fmod(currentOffset_, MainSize());
+    auto childrenSize = static_cast<int32_t>(GetHost()->GetChildren().size());
+    auto isOutOfStart = currentIndex_ == 0 && GreatOrEqual(mainOffset, 0.0);
+    auto isOutOfEnd = currentIndex_ == childrenSize - 1 && LessOrEqual(mainOffset, 0.0);
+    return isOutOfStart || isOutOfEnd;
+}
+
+float SwiperPattern::MainSize() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0);
+    return geometryNode->GetFrameSize().MainSize(GetDirection());
+}
+
 Axis SwiperPattern::GetDirection() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
@@ -311,10 +476,16 @@ RefPtr<Curve> SwiperPattern::GetCurve() const
 
 bool SwiperPattern::IsLoop() const
 {
-    static const int32_t DEFAULT_DURATION = 400;
     auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, DEFAULT_DURATION);
-    return swiperPaintProperty->GetLoop().value_or(false);
+    CHECK_NULL_RETURN(swiperPaintProperty, true);
+    return swiperPaintProperty->GetLoop().value_or(true);
+}
+
+EdgeEffect SwiperPattern::GetEdgeEffect() const
+{
+    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, EdgeEffect::SPRING);
+    return swiperPaintProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
 }
 
 } // namespace OHOS::Ace::NG

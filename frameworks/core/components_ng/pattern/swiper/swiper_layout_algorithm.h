@@ -65,7 +65,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    uint32_t currentIndex_ = 0;
+    int32_t currentIndex_ = 0;
     int32_t preStartIndex_ = 0;
     int32_t preEndIndex_ = 0;
     std::optional<int32_t> startIndex_;

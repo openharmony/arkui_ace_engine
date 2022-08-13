@@ -18,9 +18,11 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -55,6 +57,15 @@ public:
         return layoutAlgorithm;
     }
 
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        LOGE("CCCC CreateNodePaintMethod currentOffset: %{public}lf, index: %{public}d", currentOffset_, currentIndex_);
+        if (!IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && IsOutOfBoundary(currentOffset_)) {
+            return MakeRefPtr<SwiperPaintMethod>(GetDirection(), currentOffset_);
+        }
+        return nullptr;
+    }
+
     void UpdateCurrentOffset(float offset);
 
 private:
@@ -72,25 +83,43 @@ private:
     void InitAutoPlay();
 
     void HandleDragStart();
+    void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity);
+
     void HandleTouchEvent(const TouchEventInfo& info);
+    void HandleTouchDown();
+    void HandleTouchUp();
 
     void PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex);
+    void PlaySpringAnimation(double dragVelocity);
+    void PlayFadeAnimation();
 
     // Timer tick callback, duration is in millisecond.
     void Tick(uint64_t duration);
+    void StartAutoPlay();
+    bool IsOutOfBoundary(double mainOffset) const;
+    float MainSize() const;
 
     Axis GetDirection() const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
+    EdgeEffect GetEdgeEffect() const;
     bool IsAutoPlay() const;
     bool IsLoop() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
 
+    // Control translate animation when drag end.
     RefPtr<Animator> controller_;
+
+    // Control spring animation when drag beyond boundary and drag end.
+    RefPtr<Animator> springController_;
+
+    // Control fade animation when drag beyond boundary and drag end.
+    RefPtr<Animator> fadeController_;
+
     RefPtr<Scheduler> scheduler_;
 
     int32_t startIndex_ = 0;
