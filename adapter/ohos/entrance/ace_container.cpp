@@ -301,12 +301,14 @@ void AceContainer::OnShow(int32_t instanceId)
 
     taskExecutor->PostTask(
         [container]() {
-            auto pipelineContext = DynamicCast<PipelineContext>(container->GetPipelineContext());
+            auto pipelineBase = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineBase);
+            pipelineBase->OnShow();
+            auto pipelineContext = DynamicCast<PipelineContext>(pipelineBase);
             if (!pipelineContext) {
-                LOGE("pipeline context is null, OnShow failed.");
+                LOGE("pipeline context is null, SetForegroundCalled failed.");
                 return;
             }
-            pipelineContext->OnShow();
             pipelineContext->SetForegroundCalled(true);
         },
         TaskExecutor::TaskType::UI);

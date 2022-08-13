@@ -35,6 +35,7 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propFontStyle_ = CloneFontStyle();
         value->propTextLineStyle_ = CloneTextLineStyle();
+        value->propContent_ = CloneContent();
         return value;
     }
 
@@ -43,6 +44,7 @@ public:
         LayoutProperty::Reset();
         ResetFontStyle();
         ResetTextLineStyle();
+        ResetContent();
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);

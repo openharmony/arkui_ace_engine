@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_LINEAR_LAYOUT_STYLES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_LINEAR_LAYOUT_STYLES_H
 
+#include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/property/property.h"
 
@@ -23,6 +24,7 @@ namespace OHOS::Ace::NG {
 struct LinearLayoutAttribute {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CrossAxisAlign, FlexAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MainAxisAlign, FlexAlign);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Space, Dimension);
 };
 } // namespace OHOS::Ace::NG
 

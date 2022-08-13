@@ -87,7 +87,6 @@ void ImagePattern::OnImageDataUploaded(fml::RefPtr<flutter::CanvasImage> image)
     auto host = frameNode_.Upgrade();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    host->RequestNextFrame();
 }
 
 void ImagePattern::CacheImageObject()
@@ -113,7 +112,6 @@ void ImagePattern::OnImageObjectReady(const RefPtr<ImageObject>& imageObj)
     const auto& geometryNode = host->GetGeometryNode();
     if (!geometryNode->GetContent()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        host->RequestNextFrame();
         return;
     }
 }

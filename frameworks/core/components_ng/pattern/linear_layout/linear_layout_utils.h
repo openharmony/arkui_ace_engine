@@ -22,11 +22,12 @@ namespace OHOS::Ace::NG {
 // used for linear measure and layout
 struct LinearMeasureProperty {
     SizeF realSize;
-    float crossSize = 0;
-    float allocatedSize = 0.0;
+    float crossSize = 0.0f;
+    float allocatedSize = 0.0f;
     std::list<RefPtr<LayoutWrapper>> relativeNodes;
     std::list<RefPtr<LayoutWrapper>> weightNodes;
-    float totalFlexWeight = 0;
+    float totalFlexWeight = 0.0f;
+    float space = 0.0f;
 };
 
 // BoxLayout is the class for box type measure, layout.

@@ -28,7 +28,7 @@ class ACE_EXPORT LazyForEachNode : public UINode {
     DECLARE_ACE_TYPE(LazyForEachNode, UINode);
 
 public:
-    static RefPtr<LazyForEachNode> CreateLazyForEachNode(
+    static RefPtr<LazyForEachNode> GetOrCreateLazyForEachNode(
         int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder);
 
     LazyForEachNode(int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)

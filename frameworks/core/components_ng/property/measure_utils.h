@@ -16,20 +16,25 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_UTILS_H
 
+#include <optional>
+
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
-float ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty, float parentLength);
+std::optional<float> ConvertToPx(
+    const CalcLength& value, const ScaleProperty& scaleProperty, float parentLength = -1.0f);
 
 std::optional<float> ConvertToPx(
-    const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty, float parentLength);
+    const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty, float parentLength = -1.0f);
 
-float ConvertToPx(const Dimension& dimension, const ScaleProperty& scaleProperty, float parentLength);
+std::optional<float> ConvertToPx(
+    const Dimension& dimension, const ScaleProperty& scaleProperty, float parentLength = -1.0f);
 
-SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& parentSize);
+SizeF ConvertToSize(
+    const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& parentSize = SizeF(-1.0f, -1.0f));
 
 SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSize);
 
@@ -38,10 +43,10 @@ void MinusPaddingToConstraint(const std::unique_ptr<PaddingProperty>& padding, L
 void MinusPaddingToConstraint(const PaddingProperty& padding, LayoutConstraintF& size);
 
 PaddingPropertyF ConvertToPaddingPropertyF(
-    const std::unique_ptr<PaddingProperty>& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize);
+    const std::unique_ptr<PaddingProperty>& padding, const ScaleProperty& scaleProperty, float parentWidth = -1.0f);
 
 PaddingPropertyF ConvertToPaddingPropertyF(
-    const PaddingProperty& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize);
+    const PaddingProperty& padding, const ScaleProperty& scaleProperty, float parentWidth = -1.0f);
 
 void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize,
     PaddingPropertyF& paddingValue);

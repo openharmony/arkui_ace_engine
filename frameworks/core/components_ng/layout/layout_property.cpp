@@ -15,6 +15,7 @@
 
 #include "core/components_ng/layout/layout_property.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
 
@@ -101,40 +102,21 @@ void LayoutProperty::CheckSelfIdealSize()
     }
 }
 
-void LayoutProperty::UpdateContentConstraint(const std::optional<LayoutConstraintF>& replace, bool updateFlag)
+void LayoutProperty::UpdateContentConstraint()
 {
-    if (replace) {
-        if (replace == contentConstraint_) {
-            return;
-        }
-        contentConstraint_ = replace;
-        if (updateFlag) {
-            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
-        }
-        return;
-    }
     auto contentConstraint = layoutConstraint_.value_or(LayoutConstraintF());
     if (padding_) {
-        auto paddingF = ConvertToPaddingPropertyF(
-            *padding_, contentConstraint.scaleProperty, contentConstraint.selfIdealSize.value_or(SizeF(0, 0)));
+        auto paddingF = ConvertToPaddingPropertyF(*padding_, contentConstraint.scaleProperty,
+            contentConstraint.parentIdealSize.value_or(SizeF(0, 0)).Width());
         contentConstraint.MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
     }
-    if (contentConstraint_ == contentConstraint) {
-        return;
-    }
     contentConstraint_ = contentConstraint;
-    if (updateFlag) {
-        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
-    }
 }
 
 PaddingPropertyF LayoutProperty::CreatePaddingPropertyF()
 {
-    auto layoutConstraint = layoutConstraint_.value_or(LayoutConstraintF());
-    auto sizeF = SizeF(0, 0);
-    if (layoutConstraint_.has_value()) {
-        sizeF = layoutConstraint_->selfIdealSize.value_or(SizeF(0, 0));
-    }
-    return ConvertToPaddingPropertyF(padding_, layoutConstraint.scaleProperty, sizeF);
+    CHECK_NULL_RETURN(layoutConstraint_, PaddingPropertyF());
+    return ConvertToPaddingPropertyF(
+        padding_, layoutConstraint_->scaleProperty, layoutConstraint_->parentIdealSize.value_or(SizeF(-1, -1)).Width());
 }
 } // namespace OHOS::Ace::NG

@@ -24,8 +24,17 @@ namespace OHOS::Ace::Framework {
 
 void JSRow::Create(const JSCallbackInfo& info)
 {
+    std::optional<Dimension> space;
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> spaceVal = obj->GetProperty("space");
+        Dimension value;
+        if (ParseJsDimensionVp(spaceVal, value)) {
+            space = value;
+        }
+    }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::RowView::Create();
+        NG::RowView::Create(space);
         return;
     }
     std::list<RefPtr<Component>> children;
@@ -34,15 +43,12 @@ void JSRow::Create(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->ClaimElementId(rowComponent);
     rowComponent->SetMainAxisSize(MainAxisSize::MIN);
     rowComponent->SetCrossAxisSize(CrossAxisSize::MIN);
+    if (space.has_value()) {
+        rowComponent->SetSpace(space.value());
+    }
 
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> space = obj->GetProperty("space");
-        Dimension value;
-        if (ParseJsDimensionVp(space, value)) {
-            rowComponent->SetSpace(value);
-        }
-
         JSRef<JSVal> useAlign = obj->GetProperty("useAlign");
         if (useAlign->IsObject()) {
             VerticalAlignDeclaration* declaration = JSRef<JSObject>::Cast(useAlign)->Unwrap<VerticalAlignDeclaration>();

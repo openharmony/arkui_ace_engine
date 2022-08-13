@@ -112,7 +112,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(listLayoutProperty);
-    
+
     auto initialIndex = listLayoutProperty->GetInitialIndex().value_or(0);
     if (!isInitialized_) {
         preStartIndex_ = initialIndex;
@@ -138,7 +138,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         currentOffset_);
 
     auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
-    spaceWidth_ = ConvertToPx(space, listLayoutProperty->GetLayoutConstraint()->scaleProperty, mainSize);
+    spaceWidth_ = ConvertToPx(space, listLayoutProperty->GetLayoutConstraint()->scaleProperty, mainSize).value_or(0);
 
     // calculate child layout constraint.
     auto contentLayoutConstraint = listLayoutProperty->CreateChildConstraint();

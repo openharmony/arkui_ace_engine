@@ -46,6 +46,6 @@ private:
     std::list<std::string> idArray_;
 };
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::PartUpd
 
 #endif

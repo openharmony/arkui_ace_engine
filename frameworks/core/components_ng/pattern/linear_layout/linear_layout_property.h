@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_LINEAR_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_LINEAR_LAYOUT_PROPERTY_H
 
+#include "base/geometry/dimension.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_styles.h"
 #include "core/components_ng/property/property.h"
@@ -48,13 +49,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LinearLayoutAttribute, CrossAxisAlign, FlexAlign, PROPERTY_UPDATE_LAYOUT);
 
-    FlexAlign GetCrossAxisAlign() const
-    {
-        if (!propLinearLayoutAttribute_) {
-            return FlexAlign::CENTER;
-        }
-        return propLinearLayoutAttribute_->GetCrossAxisAlign().value_or(FlexAlign::CENTER);
-    }
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LinearLayoutAttribute, Space, Dimension, PROPERTY_UPDATE_LAYOUT);
 
     bool IsVertical() const
     {

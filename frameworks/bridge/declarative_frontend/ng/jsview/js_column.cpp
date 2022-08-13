@@ -23,7 +23,16 @@ std::string JSColumn::inspectorTag_ = "";
 
 void JSColumn::Create(const JSCallbackInfo& info)
 {
-    NG::ColumnView::Create();
+    std::optional<Dimension> space;
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> spaceVal = obj->GetProperty("space");
+        Dimension value;
+        if (ParseJsDimensionVp(spaceVal, value)) {
+            space = value;
+        }
+    }
+    NG::ColumnView::Create(space);
 }
 
 void JSColumn::CreateWithWrap(const JSCallbackInfo& info) {}

@@ -16,15 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_ROW_VIEW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_ROW_VIEW_H
 
+#include <optional>
 #include <string>
 
+#include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RowView {
 public:
-    static void Create();
+    static void Create(const std::optional<Dimension>& space);
     static void AlignItems(FlexAlign flexAlign);
 };
 } // namespace OHOS::Ace::NG

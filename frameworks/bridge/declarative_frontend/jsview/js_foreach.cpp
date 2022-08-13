@@ -22,6 +22,8 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/components/foreach/for_each_component.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/syntax/for_each.h"
 #include "core/components_part_upd/foreach/foreach_component.h"
 #include "core/components_part_upd/foreach/foreach_element.h"
 #include "core/components_v2/common/element_proxy.h"
@@ -51,6 +53,13 @@ void JSForEach::Create(const JSCallbackInfo& info)
             jsArray, JSRef<JSFunc>::Cast(jsIdentityMapperFunc), JSRef<JSFunc>::Cast(jsViewMapperFunc));
     } else {
         jsForEachFunction = AceType::MakeRefPtr<JsForEachFunction>(jsArray, JSRef<JSFunc>::Cast(jsViewMapperFunc));
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ForEachFunc forEachFunc = { [jsForEachFunction]() { return jsForEachFunction->ExecuteIdentityMapper(); },
+            [jsForEachFunction](int32_t index) { jsForEachFunction->ExecuteBuilderForIndex(index); } };
+        NG::ForEach::Create(forEachFunc);
+        return;
     }
 
     auto* viewStack = ViewStackProcessor::GetInstance();
@@ -83,6 +92,10 @@ void JSForEach::CreateForPartialUpdate()
 
 void JSForEach::Pop()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
+        return;
+    }
     ViewStackProcessor::GetInstance()->PopContainer();
 }
 

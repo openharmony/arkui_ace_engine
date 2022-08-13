@@ -26,8 +26,9 @@ class ACE_EXPORT LazyForEach {
 public:
     static void Create(const RefPtr<LazyForEachBuilder>& forEachBuilder)
     {
-        // TODO: Add unique id.
-        auto lazyForEach = LazyForEachNode::CreateLazyForEachNode(0, forEachBuilder);
+        auto* stack = ViewStackProcessor::GetInstance();
+        auto nodeId = stack->ClaimNodeId();
+        auto lazyForEach = LazyForEachNode::GetOrCreateLazyForEachNode(nodeId, forEachBuilder);
         ViewStackProcessor::GetInstance()->Push(lazyForEach);
     }
 };
