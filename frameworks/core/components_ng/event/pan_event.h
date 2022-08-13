@@ -31,7 +31,8 @@ class PanEvent : public Referenced {
 public:
     PanEvent(GestureEventFunc&& actionStart, GestureEventFunc&& actionUpdate,
         GestureEventFunc&& actionEnd, GestureEventNoParameter&& actionCancel) : actionStart_(std::move(actionStart)),
-        actionUpdate_(std::move(actionUpdate)), actionEnd_(std::move(actionEnd)), actionCancel_(std::move(actionCancel)) {}
+        actionUpdate_(std::move(actionUpdate)), actionEnd_(std::move(actionEnd)),
+        actionCancel_(std::move(actionCancel)) {}
     ~PanEvent() override = default;
 
     const GestureEventFunc& GetActionStartEventFunc() const

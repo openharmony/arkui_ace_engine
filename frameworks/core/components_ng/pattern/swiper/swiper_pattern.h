@@ -35,7 +35,7 @@ public:
     SwiperPattern() = default;
     ~SwiperPattern() override = default;
 
-    bool IsAtomicNode() const override 
+    bool IsAtomicNode() const override
     {
         return false;
     }
@@ -59,7 +59,6 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        LOGE("CCCC CreateNodePaintMethod currentOffset: %{public}lf, index: %{public}d", currentOffset_, currentIndex_);
         if (!IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && IsOutOfBoundary(currentOffset_)) {
             return MakeRefPtr<SwiperPaintMethod>(GetDirection(), currentOffset_);
         }

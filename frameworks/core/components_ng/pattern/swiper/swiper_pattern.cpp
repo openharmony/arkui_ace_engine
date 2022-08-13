@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include <cmath>
-#include <stdint.h>
+#include <cstdint>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -183,7 +183,8 @@ void SwiperPattern::Tick(uint64_t duration)
                 scheduler_->Stop();
             }
         } else {
-            PlayTranslateAnimation(0, -MainSize(), currentIndex_ + 1);
+            PlayTranslateAnimation(0, -MainSize(),
+                (currentIndex_ + 1) % static_cast<int32_t>(GetHost()->GetChildren().size()));
         }
         elapsedTime_ = 0;
     }
@@ -310,10 +311,20 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     float end = 0.0;
     if (std::abs(dragVelocity) > context->NormalizeToPx(MIN_TURN_PAGE_VELOCITY) &&
         std::abs(currentOffset_) > context->NormalizeToPx(MIN_DRAG_DISTANCE)) {
-        if (GreatNotEqual(dragVelocity * currentOffset_ , 0.0)) {
+        if (GreatNotEqual(dragVelocity * currentOffset_, 0.0)) {
             auto intervalSize = static_cast<int32_t>(std::floor(std::abs(currentOffset_) / mainSize)) + 1;
             end = GreatNotEqual(dragVelocity, 0.0) ? mainSize * intervalSize : -mainSize * intervalSize;
             nextIndex = GreatNotEqual(dragVelocity, 0.0) ? (nextIndex - intervalSize) : (nextIndex + intervalSize);
+        }
+    }
+
+    // Adjust next item index when loop and index is out of range.
+    auto childrenSize = static_cast<int32_t>(GetHost()->GetChildren().size());
+    if (IsLoop()) {
+        if (nextIndex < 0) {
+            nextIndex = childrenSize + nextIndex;
+        } else if (nextIndex >= childrenSize) {
+            nextIndex = nextIndex % childrenSize;
         }
     }
 
@@ -322,7 +333,8 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
 
 void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex)
 {
-    LOGI("Play translate animation startPos: %{public}lf, endPos: %{public}lf, nextIndex: %{public}d", startPos, endPos, nextIndex);
+    LOGI("Play translate animation startPos: %{public}lf, endPos: %{public}lf, nextIndex: %{public}d",
+        startPos, endPos, nextIndex);
     auto curve = GetCurve();
     if (!curve) {
         curve = Curves::LINEAR;
@@ -333,7 +345,8 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
         if (value != startPos && value != endPos && startPos != endPos) {
-            double moveRate = Curves::EASE_OUT->MoveInternal(static_cast<float>((value - startPos) / (endPos - startPos)));
+            double moveRate =
+                Curves::EASE_OUT->MoveInternal(static_cast<float>((value - startPos) / (endPos - startPos)));
             value = startPos + (endPos - startPos) * moveRate;
         }
         swiper->UpdateCurrentOffset(static_cast<float>(value - swiper->currentOffset_));
