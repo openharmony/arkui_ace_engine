@@ -28,6 +28,55 @@ namespace {
 
 constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
 
+void InheritGridRowOption(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+    std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT])
+{
+    if (!containerSizeArray[0].has_value()) {
+        containerSizeArray[0] = 1;
+    }
+    for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; i++) {
+        if (!containerSizeArray[i].has_value()) {
+            containerSizeArray[i] = containerSizeArray[i - 1].value();
+        }
+    }
+    gridContainerSize->xs = containerSizeArray[0].value();
+    gridContainerSize->sm = containerSizeArray[1].value();
+    gridContainerSize->md = containerSizeArray[2].value();
+    gridContainerSize->lg = containerSizeArray[3].value();
+    gridContainerSize->xl = containerSizeArray[4].value();
+    gridContainerSize->xxl = containerSizeArray[5].value();
+}
+
+void InheritGridRowGutterOption(const RefPtr<V2::Getter>& getter, bool isHorizontal,
+    std::optional<Dimension> (&GetterSizeArray)[MAX_NUMBER_BREAKPOINT])
+{
+    if (!GetterSizeArray[0].has_value()) {
+        GetterSizeArray[0] = Dimension(0);
+    }
+    for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; i++) {
+        if (!GetterSizeArray[i].has_value()) {
+            GetterSizeArray[i] = GetterSizeArray[i - 1].value();
+        }
+    }
+    
+    if (isHorizontal) {
+        getter->xXs = GetterSizeArray[0].value();
+        getter->xSm = GetterSizeArray[1].value();
+        getter->xMd = GetterSizeArray[2].value();
+        getter->xLg = GetterSizeArray[3].value();
+        getter->xXl = GetterSizeArray[4].value();
+        getter->xXXl = GetterSizeArray[5].value();
+    } else {
+        getter->yXs = GetterSizeArray[0].value();
+        getter->ySm = GetterSizeArray[1].value();
+        getter->yMd = GetterSizeArray[2].value();
+        getter->yLg = GetterSizeArray[3].value();
+        getter->yXl = GetterSizeArray[4].value();
+        getter->yXXl = GetterSizeArray[5].value();
+    }
+    
+}
+
 void ParserGutter(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>& gridRow)
 {
     Dimension result;
@@ -43,72 +92,76 @@ void ParserGutter(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>& gri
         auto yObject = paramGutter->GetProperty("y");
         auto gutter = AceType::MakeRefPtr<V2::Getter>();
         if (xObject->IsObject()) {
+            std::optional<Dimension> gutterOptions[MAX_NUMBER_BREAKPOINT];
             auto xParamGutter = JSRef<JSObject>::Cast(xObject);
             auto xs = xParamGutter->GetProperty("xs");
-            Dimension xsDimension;
-            if (JSContainerBase::ParseJsDimensionVp(xs, xsDimension)) {
-                gutter->xXs = xsDimension;
+            Dimension xXsDimension;
+            if (JSContainerBase::ParseJsDimensionVp(xs, xXsDimension)) {
+                gutterOptions[0] = xXsDimension;
             }
             auto sm = xParamGutter->GetProperty("sm");
-            Dimension xsmDimension;
-            if (JSContainerBase::ParseJsDimensionVp(sm, xsDimension)) {
-                gutter->xSm = xsmDimension;
+            Dimension xSmDimension;
+            if (JSContainerBase::ParseJsDimensionVp(sm, xSmDimension)) {
+                gutterOptions[1] = xSmDimension;
             }
             auto md = xParamGutter->GetProperty("md");
-            Dimension xmdDimension;
-            if (JSContainerBase::ParseJsDimensionVp(md, xsDimension)) {
-                gutter->xMd = xmdDimension;
+            Dimension xMdDimension;
+            if (JSContainerBase::ParseJsDimensionVp(md, xMdDimension)) {
+                gutterOptions[2] = xMdDimension;
             }
             auto lg = xParamGutter->GetProperty("lg");
-            Dimension xlgDimension;
-            if (JSContainerBase::ParseJsDimensionVp(lg, xlgDimension)) {
-                gutter->xLg = xlgDimension;
+            Dimension xLgDimension;
+            if (JSContainerBase::ParseJsDimensionVp(lg, xLgDimension)) {
+                gutterOptions[3] = xLgDimension;
             }
             auto xl = xParamGutter->GetProperty("xl");
-            Dimension xxlDimension;
-            if (JSContainerBase::ParseJsDimensionVp(xl, xxlDimension)) {
-                gutter->xXl = xxlDimension;
+            Dimension xXlDimension;
+            if (JSContainerBase::ParseJsDimensionVp(xl, xXlDimension)) {
+                gutterOptions[4] = xXlDimension;
             }
             auto xxl = xParamGutter->GetProperty("xxl");
-            Dimension xxxlDimension;
-            if (JSContainerBase::ParseJsDimensionVp(xxl, xxxlDimension)) {
-                gutter->xXXl = xxxlDimension;
+            Dimension xXxlDimension;
+            if (JSContainerBase::ParseJsDimensionVp(xxl, xXxlDimension)) {
+                gutterOptions[5] = xXxlDimension;
             }
+            InheritGridRowGutterOption(gutter, true, gutterOptions);
         } else if (xObject->IsNumber()) {
             gutter->SetXGutter(Dimension(xObject->ToNumber<double>()));
         }
         if (yObject->IsObject()) {
+            std::optional<Dimension> gutterOptions[MAX_NUMBER_BREAKPOINT];
             auto yParamGutter = JSRef<JSObject>::Cast(yObject);
             auto xs = yParamGutter->GetProperty("xs");
-            Dimension xsDimension;
-            if (JSContainerBase::ParseJsDimensionVp(xs, xsDimension)) {
-                gutter->yXs = xsDimension;
+            Dimension yXsDimension;
+            if (JSContainerBase::ParseJsDimensionVp(xs, yXsDimension)) {
+                gutterOptions[0] = yXsDimension;
             }
             auto sm = yParamGutter->GetProperty("sm");
-            Dimension xsmDimension;
-            if (JSContainerBase::ParseJsDimensionVp(sm, xsDimension)) {
-                gutter->ySm = xsmDimension;
+            Dimension ySmDimension;
+            if (JSContainerBase::ParseJsDimensionVp(sm, ySmDimension)) {
+                gutterOptions[1] = ySmDimension;
             }
             auto md = yParamGutter->GetProperty("md");
-            Dimension xmdDimension;
-            if (JSContainerBase::ParseJsDimensionVp(md, xsDimension)) {
-                gutter->yMd = xmdDimension;
+            Dimension yMdDimension;
+            if (JSContainerBase::ParseJsDimensionVp(md, yMdDimension)) {
+                gutterOptions[2] = yMdDimension;
             }
             auto lg = yParamGutter->GetProperty("lg");
-            Dimension xlgDimension;
-            if (JSContainerBase::ParseJsDimensionVp(lg, xlgDimension)) {
-                gutter->yLg = xlgDimension;
+            Dimension yLgDimension;
+            if (JSContainerBase::ParseJsDimensionVp(lg, yLgDimension)) {
+                gutterOptions[3] = yLgDimension;
             }
             auto xl = yParamGutter->GetProperty("xl");
-            Dimension xxlDimension;
-            if (JSContainerBase::ParseJsDimensionVp(xl, xxlDimension)) {
-                gutter->yXl = xxlDimension;
+            Dimension yXlDimension;
+            if (JSContainerBase::ParseJsDimensionVp(xl, yXlDimension)) {
+                gutterOptions[4] = yXlDimension;
             }
             auto xxl = yParamGutter->GetProperty("xxl");
-            Dimension xxxlDimension;
-            if (JSContainerBase::ParseJsDimensionVp(xxl, xxxlDimension)) {
-                gutter->yXXl = xxxlDimension;
+            Dimension yXxlDimension;
+            if (JSContainerBase::ParseJsDimensionVp(xxl, yXxlDimension)) {
+                gutterOptions[5] = yXxlDimension;
             }
+            InheritGridRowGutterOption(gutter, false, gutterOptions);
         } else if (yObject->IsNumber()) {
             gutter->SetYGutter(Dimension(yObject->ToNumber<double>()));
         }
@@ -126,30 +179,32 @@ void ParserColumns(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent> gri
     } else if (jsValue->IsObject()) {
         auto gridContainerSize = AceType::MakeRefPtr<V2::GridContainerSize>(12);
         auto gridParam = JSRef<JSObject>::Cast(jsValue);
+        std::optional<int32_t> containerSizeArray[MAX_NUMBER_BREAKPOINT];
         auto xs = gridParam->GetProperty("xs");
         if (xs->IsNumber() && xs->ToNumber<int32_t>() > 0) {
-            gridContainerSize->xs = xs->ToNumber<int32_t>();
+            containerSizeArray[0] = xs->ToNumber<int32_t>();
         }
         auto sm = gridParam->GetProperty("sm");
         if (sm->IsNumber() && sm->ToNumber<int32_t>() > 0) {
-            gridContainerSize->sm = sm->ToNumber<int32_t>();
+            containerSizeArray[1] = sm->ToNumber<int32_t>();
         }
         auto md = gridParam->GetProperty("md");
         if (md->IsNumber() && md->ToNumber<int32_t>() > 0) {
-            gridContainerSize->md = md->ToNumber<int32_t>();
+            containerSizeArray[2] = md->ToNumber<int32_t>();
         }
         auto lg = gridParam->GetProperty("lg");
         if (lg->IsNumber() && lg->ToNumber<int32_t>() > 0) {
-            gridContainerSize->lg = lg->ToNumber<int32_t>();
+            containerSizeArray[3] = lg->ToNumber<int32_t>();
         }
         auto xl = gridParam->GetProperty("xl");
         if (xl->IsNumber() && xl->ToNumber<int32_t>() > 0) {
-            gridContainerSize->xl = xl->ToNumber<int32_t>();
+            containerSizeArray[4] = xl->ToNumber<int32_t>();
         }
         auto xxl = gridParam->GetProperty("xxl");
         if (xxl->IsNumber() && xxl->ToNumber<int32_t>() > 0) {
-            gridContainerSize->xxl = xxl->ToNumber<int32_t>();
+            containerSizeArray[5] = xxl->ToNumber<int32_t>();
         }
+        InheritGridRowOption(gridContainerSize, containerSizeArray);
         gridRow->SetTotalCol(gridContainerSize);
     } else {
         LOGI("parse column error");
@@ -171,7 +226,7 @@ void ParserBreakpoints(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>
     if (value->IsArray()) {
         JSRef<JSArray> array = JSRef<JSArray>::Cast(value);
         breakpoint->breakpoints.clear();
-        if (array->Length() > MAX_NUMBER_BREAKPOINT) {
+        if (array->Length() > MAX_NUMBER_BREAKPOINT - 1) {
             LOGI("The maximum number of breakpoints is %{public}zu", MAX_NUMBER_BREAKPOINT);
             breakpoint->breakpoints = { "320vp", "600vp", "840vp" };
             gridRow->SetBreakPoints(breakpoint);
@@ -179,10 +234,10 @@ void ParserBreakpoints(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>
         }
         double width = -1.0;
         for (size_t i = 0; i < array->Length(); i++) {
-            JSRef<JSVal> thredhold = array->GetValueAt(i);
-            if (thredhold->IsString() || thredhold->IsNumber()) {
+            JSRef<JSVal> threshold = array->GetValueAt(i);
+            if (threshold->IsString() || threshold->IsNumber()) {
                 Dimension valueDimension;
-                JSContainerBase::ParseJsDimensionVp(thredhold, valueDimension);
+                JSContainerBase::ParseJsDimensionVp(threshold, valueDimension);
                 if (GreatNotEqual(width, valueDimension.Value())) {
                     LOGI("Array data must be sorted in ascending order");
                     breakpoint->breakpoints = { "320vp", "600vp", "840vp" };
@@ -190,7 +245,7 @@ void ParserBreakpoints(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>
                     return;
                 }
                 width = valueDimension.Value();
-                breakpoint->breakpoints.push_back(thredhold->ToString());
+                breakpoint->breakpoints.push_back(threshold->ToString());
             }
         }
     }
@@ -200,14 +255,7 @@ void ParserBreakpoints(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>
 void ParserDirection(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent> gridRow)
 {
     if (gridRow && jsValue->IsNumber()) {
-        int32_t value = jsValue->ToNumber<int32_t>();
-        if (value == 0) {
-            gridRow->SetDirection(V2::GridRowDirection::Row);
-        } else if (value == 1) {
-            gridRow->SetDirection(V2::GridRowDirection::RowReverse);
-        } else {
-            return;
-        }
+        gridRow->SetDirection(static_cast<V2::GridRowDirection>(jsValue->ToNumber<int32_t>()));
     }
 }
 

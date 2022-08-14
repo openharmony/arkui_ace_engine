@@ -25,6 +25,12 @@ namespace OHOS::Ace::V2 {
 class RenderGridRow : public RenderNode {
     DECLARE_ACE_TYPE(RenderGridRow, RenderNode);
 
+struct NewLineOffset {
+    bool isValid = false;
+    int32_t newLineCount = false;
+    int32_t offset = 0;
+};
+
 public:
     ~RenderGridRow() override = default;
 
@@ -32,11 +38,16 @@ public:
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
-    void LayoutEachChild(double childWidthLimit, double childHeightLimit, double getter, GridSizeType sizeType);
+    void LayoutEachChild(double childWidthLimit, double childHeightLimit, double xGetter, GridSizeType sizeType,
+        int32_t columnNum);
 
-    bool NeedNewLine(const RefPtr<RenderNode>& node, int32_t offset, int32_t totalColNums, GridSizeType sizeType) const;
+    void CalculateOffsetOfNewline(const RefPtr<RenderNode>& node, int32_t currentChildSpan, int32_t restColumnNum,
+        int32_t totalColumnNum, GridSizeType sizeType, NewLineOffset& newLineOffset) const;
+    bool ParseNewLineForLargeOffset(int32_t childSpan, int32_t childOffset, int32_t restColumnNum,
+        int32_t totalColumnNum, NewLineOffset& newLineOffset) const;
     inline int32_t GetRelativeOffset(const RefPtr<RenderNode>& node, GridSizeType sizeType) const;
     inline int32_t GetGridColSpan(const RefPtr<RenderNode>& node, GridSizeType sizeType) const;
+    void FindGridColChild(RefPtr<RenderNode>& node) const;
 
 private:
     RefPtr<Component> gridRowComponent_;

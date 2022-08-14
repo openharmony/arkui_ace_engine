@@ -66,7 +66,7 @@ enum class GridSizeType {
 struct GridSizeInfo : public AceType {
     std::vector<Dimension> sizeInfo {
         Dimension(320, DimensionUnit::VP),
-        Dimension(520, DimensionUnit::VP),
+        Dimension(600, DimensionUnit::VP),
         Dimension(840, DimensionUnit::VP),
     };
 

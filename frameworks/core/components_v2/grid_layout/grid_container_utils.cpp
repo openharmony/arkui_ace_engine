@@ -25,7 +25,7 @@ RefPtr<GridSizeInfo> ParseBreakpoints(const RefPtr<BreakPoints>& breakpoints)
 {
     auto sizeInfo = AceType::MakeRefPtr<GridSizeInfo>();
     if (!breakpoints) {
-        LOGI("user hasnt set breakpoint, use WindowSize and xs: 320vp, sm: 520vp, md: 840vp");
+        LOGI("user hasnt set breakpoint, use WindowSize and xs: 320vp, sm: 600vp, md: 840vp");
     } else {
         sizeInfo->Reset();
         for (const auto& breakpoint : breakpoints->breakpoints) {
@@ -40,7 +40,7 @@ RefPtr<GridSizeInfo> ParseBreakpoints(const RefPtr<BreakPoints>& breakpoints)
 GridSizeType GridContainerUtils::ProcessGridSizeType(
     const RefPtr<BreakPoints>& breakpoints, const Size& size, const RefPtr<PipelineContext>& pipeline)
 {
-    auto threadhold = ParseBreakpoints(breakpoints);
+    auto threshold = ParseBreakpoints(breakpoints);
     double windowWidth = 0.0;
     if (breakpoints->reference == BreakPointsReference::WindowSize) {
         windowWidth = GridSystemManager::GetInstance().GetScreenWidth();
@@ -48,7 +48,7 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(
         windowWidth = size.Width();
     }
     int index = 0;
-    for (const auto& cur : threadhold->sizeInfo) {
+    for (const auto& cur : threshold->sizeInfo) {
         if (pipeline->NormalizeToPx(cur) > windowWidth) {
             break;
         }
