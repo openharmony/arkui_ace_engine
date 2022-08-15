@@ -1734,6 +1734,7 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             setting->PutDatabaseAllowed(component->GetDatabaseAccessEnabled());
             setting->PutZoomingForTextFactor(component->GetTextZoomAtio());
             setting->PutWebDebuggingAccess(component->GetWebDebuggingAccessEnabled());
+            setting->PutMediaPlayGestureAccess(component->IsMediaPlayGestureAccess());
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -2038,6 +2039,25 @@ void WebDelegate::UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled)
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
                 setting->PutWebDebuggingAccess(isWebDebuggingAccessEnabled);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateMediaPlayGestureAccess(bool isNeedGestureAccess)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isNeedGestureAccess]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutMediaPlayGestureAccess(isNeedGestureAccess);
+                }
             }
         },
         TaskExecutor::TaskType::PLATFORM);

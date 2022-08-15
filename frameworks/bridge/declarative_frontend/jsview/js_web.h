@@ -77,6 +77,7 @@ public:
     static void OnPermissionRequest(const JSCallbackInfo& args);
     static void OnContextMenuShow(const JSCallbackInfo& args);
     static void OnSearchResultReceive(const JSCallbackInfo& args);
+    static void MediaPlayGestureAccess(bool isNeedGestureAccess);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

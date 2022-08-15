@@ -1305,6 +1305,16 @@ public:
         return declaration_->GetSearchResultReceiveEventId();
     }
 
+    void SetMediaPlayGestureAccess(bool isNeedGestureAccess)
+    {
+        isNeedGestureAccess_ = isNeedGestureAccess;
+    }
+
+    bool IsMediaPlayGestureAccess() const
+    {
+        return isNeedGestureAccess_;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -1346,6 +1356,7 @@ private:
     bool isInitialScaleSet_ = false;
     int32_t backgroundColor_;
     bool isBackgroundColor_ = false;
+    bool isNeedGestureAccess_ = true;
 };
 
 } // namespace OHOS::Ace
