@@ -68,6 +68,21 @@ bool IsSvgTraceEnabled()
     return (system::GetParameter("persist.ace.trace.svg.enabled", "0") == "1");
 }
 
+bool IsHookModeEnabled()
+{
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    return false;
+#endif
+    const int bufferLen = 128;
+    char paramOutBuf[bufferLen] = {0};
+    const char *hook_mode = "startup:";
+    int ret = GetParameter("persist.libc.hook_mode", "", paramOutBuf, bufferLen);
+    if (ret <= 0 || strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) != 0) {
+        return false;
+    }
+    return true;
+}
+
 bool IsRosenBackendEnabled()
 {
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -230,6 +245,7 @@ ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
+bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 bool SystemProperties::debugEnabled_ = IsDebugEnabled();
@@ -286,6 +302,7 @@ void SystemProperties::InitDeviceInfo(
     svgTraceEnable_ = IsSvgTraceEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
+    isHookModeEnabled_ = IsHookModeEnabled();
     debugBoundaryEnabled_ = system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);

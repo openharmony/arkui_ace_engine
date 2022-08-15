@@ -85,6 +85,7 @@ bool SystemProperties::rosenBackendEnabled_ = false;
 bool SystemProperties::windowAnimationEnabled_ = false;
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
+bool SystemProperties::isHookModeEnabled_ = false;
 
 bool SystemProperties::GetDebugBoundaryEnabled()
 {

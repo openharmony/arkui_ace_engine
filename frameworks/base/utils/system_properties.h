@@ -187,6 +187,11 @@ public:
         return rosenBackendEnabled_;
     }
 
+    static bool GetHookModeEnabled()
+    {
+        return isHookModeEnabled_;
+    }
+
     static bool GetDebugBoundaryEnabled();
 
     static bool GetTraceEnabled()
@@ -315,6 +320,7 @@ private:
     static bool debugEnabled_;
     static bool debugBoundaryEnabled_;
     static bool gpuUploadEnabled_;
+    static bool isHookModeEnabled_;
 };
 
 } // namespace OHOS::Ace
