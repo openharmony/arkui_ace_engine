@@ -80,9 +80,9 @@ public:
     shared_ptr<JsValue> NewArray() override;
     shared_ptr<JsValue> NewFunction(RegisterFunctionType func) override;
     shared_ptr<JsValue> NewNativePointer(void* ptr) override;
-    shared_ptr<JsValue> NewException() override;
     void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) override;
     void HandleUncaughtException() override;
+    bool HasPendingException() override;
     void ExecutePendingJob() override;
     void DumpHeapSnapshot(bool isPrivate) override;
 

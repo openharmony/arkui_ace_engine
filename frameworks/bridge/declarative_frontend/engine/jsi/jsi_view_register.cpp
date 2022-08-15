@@ -848,18 +848,18 @@ panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo*
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         LOGE("The arg is wrong, must have one argument");
-        return panda::JSValueRef::Exception(vm);
+        return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsString()) {
         LOGE("The arg is wrong, value must be number");
-        return panda::JSValueRef::Exception(vm);
+        return panda::JSValueRef::Undefined(vm);
     }
     std::string backgroundColorStr = firstArg->ToString(vm)->ToString();
     auto container = Container::Current();
     if (!container) {
         LOGW("container is null");
-        return panda::JSValueRef::Exception(vm);
+        return panda::JSValueRef::Undefined(vm);
     }
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext) {

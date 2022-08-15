@@ -102,49 +102,49 @@ shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequest(const shared_ptr<JsRuntim
     auto container = AceType::DynamicCast<OHOS::Ace::Platform::AceContainer>(AceEngine::Get().GetContainer(0));
     if (!container) {
         LOGE("ProcessJsRequest container is null!");
-        return runtime->NewException();
+        return runtime->NewUndefined();
     }
     auto type = container->GetType();
     if (type == FrontendType::JS) {
         instance = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
         if (instance == nullptr) {
             LOGE("invalid args, failed to get JsiEngineInstance from the runtime");
-            return runtime->NewException();
+            return runtime->NewUndefined();
         }
         groupJsBridge = AceType::DynamicCast<JsiGroupJsBridge>(instance->GetDelegate()->GetGroupJsBridge());
     } else if (type == FrontendType::DECLARATIVE_JS) {
         declarativeInstance = static_cast<JsiDeclarativeEngineInstance*>(runtime->GetEmbedderData());
         if (declarativeInstance == nullptr) {
             LOGE("invalid args, failed to get JsiDeclarativeEngineInstance from the runtime");
-            return runtime->NewException();
+            return runtime->NewUndefined();
         }
         groupJsBridge =
             AceType::DynamicCast<JsiGroupJsBridge>(declarativeInstance->GetDelegate()->GetGroupJsBridge());
     } else {
         LOGE("Frontend type not supported");
-        return runtime->NewException();
+        return runtime->NewUndefined();
     }
 
     if (groupJsBridge == nullptr) {
         LOGE("invalid args, failed to get GroupJsBridge from the JSContext");
-        return runtime->NewException();
+        return runtime->NewUndefined();
     }
 
     // Should have at least 4 parameters
     if (argv.size() < PLUGIN_REQUEST_MIN_ARGC_NUM) {
         LOGE("invalid args number:%{public}d", argc);
-        return runtime->NewException();
+        return runtime->NewUndefined();
     }
     int32_t callbackId = groupJsBridge->GetPendingCallbackIdAndIncrement();
     if (!groupJsBridge->SetModuleGroupCallbackFuncs(argv, PLUGIN_REQUEST_ARG_RESOLVE_INDEX,
         PLUGIN_REQUEST_ARG_REJECT_INDEX, callbackId)) {
         LOGE("set module callback function failed!");
-        return runtime->NewException();
+        return runtime->NewUndefined();
     }
     std::string groupName  = argv[PLUGIN_REQUEST_ARG_GROUP_NAME_INDEX]->ToString(runtime);
     if (groupName.empty()) {
         LOGE("invalid paras, groupName:%{private}s", groupName.c_str());
-        return runtime->NewException();
+        return runtime->NewUndefined();
     }
     LOGI("send message, groupName: %{private}s, callbackId: %{private}d", groupName.c_str(), callbackId);
     std::string strFunctionName = argv[PLUGIN_REQUEST_ARG_FUNCTION_NAME_INDEX]->ToString(runtime);
@@ -153,7 +153,7 @@ shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequest(const shared_ptr<JsRuntim
     // adaptation is required.
     if (strFunctionName != "fetch") {
         LOGE("unsupported function %{private}s", strFunctionName.c_str());
-        return runtime->NewException();
+        return runtime->NewUndefined();
     }
     OHOS::Ace::RequestData requestData;
     ParseJsDataResult parseJsResult = groupJsBridge->ParseRequestData(argc, argv, requestData, callbackId);

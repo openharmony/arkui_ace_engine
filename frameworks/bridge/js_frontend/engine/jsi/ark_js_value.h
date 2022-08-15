@@ -95,6 +95,9 @@ public:
     }
 
 private:
+    bool CheckException(const shared_ptr<ArkJSRuntime> &runtime, const Local<JSValueRef> &value) const;
+    bool CheckException(const shared_ptr<ArkJSRuntime> &runtime) const;
+
     Global<JSValueRef> value_ {};
 };
 }  // namespace OHOS::Ace::Framework

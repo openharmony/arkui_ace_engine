@@ -404,7 +404,7 @@ void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
     Local<ObjectRef> obj = arkObjectRef->ToObject(pandaRuntime->GetEcmaVm());
-    if (obj.CheckException()) {
+    if (obj.IsEmpty() || pandaRuntime->HasPendingException()) {
         LOGE("Get local object failed.");
         return;
     }
