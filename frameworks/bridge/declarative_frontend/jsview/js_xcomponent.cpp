@@ -81,18 +81,6 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
         LOGE("JSXComponent::JsOnLoad xcomponentComponent is null.");
         return;
     }
-    auto getXComponentCallback = [xcomponentComponent](RefPtr<XComponentComponent> &component) {
-        component = xcomponentComponent;
-        if (!component) {
-            LOGE("component is null");
-        }
-        return true;
-    };
-    XComponentClient::GetInstance().RegisterCallback(getXComponentCallback);
-
-    JSRef<JSVal> jsVal;
-    XComponentClient::GetInstance().GetJSVal(jsVal);
-    args.SetReturnValue(jsVal);
 
     std::vector<std::string> keys = {"load"};
     xcomponentComponent->SetXComponentInitEventId(GetEventMarker(args, keys));
@@ -103,7 +91,7 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
     auto stack = ViewStackProcessor::GetInstance();
     auto xcomponentComponent = AceType::DynamicCast<XComponentComponent>(stack->GetMainComponent());
     if (!xcomponentComponent) {
-        LOGE("JSXComponent::JsOnLoad xcomponentComponent is.");
+        LOGE("JSXComponent::JsOnDestroy xcomponentComponent is null.");
         return;
     }
     std::vector<std::string> keys = {"destroy"};
@@ -127,7 +115,7 @@ EventMarker JSXComponent::GetEventMarker(const JSCallbackInfo& info, const std::
                 ACE_SCORING_EVENT("XComponent.onLoad");
                 func->ExecuteNew(keys, param);
             } else {
-                ACE_SCORING_EVENT("XComponent.onLoad");
+                ACE_SCORING_EVENT("XComponent.onDestroy");
                 func->Execute(keys, param);
             }
         });

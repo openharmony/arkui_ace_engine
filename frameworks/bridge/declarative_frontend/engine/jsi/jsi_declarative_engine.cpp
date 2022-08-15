@@ -713,7 +713,6 @@ void JsiDeclarativeEngine::Destroy()
 {
     LOGI("JsiDeclarativeEngine Destroy");
     CHECK_RUN_ON(JS);
-    XComponentClient::GetInstance().SetRegisterCallbackToNull();
     XComponentClient::GetInstance().SetJSValCallToNull();
 
 #ifdef USE_ARK_ENGINE
