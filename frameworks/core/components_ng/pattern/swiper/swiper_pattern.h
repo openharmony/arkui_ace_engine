@@ -100,6 +100,7 @@ private:
     float MainSize() const;
 
     Axis GetDirection() const;
+    int32_t CurrentIndex() const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;

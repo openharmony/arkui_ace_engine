@@ -63,6 +63,7 @@ void SwiperPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
+    currentIndex_ = CurrentIndex();
     InitPanEvent(gestureHub);
     InitTouchEvent(gestureHub);
     InitAutoPlay();
@@ -455,6 +456,13 @@ Axis SwiperPattern::GetDirection() const
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, Axis::HORIZONTAL);
     return swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+}
+
+int32_t SwiperPattern::CurrentIndex() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, 0);
+    return swiperLayoutProperty->GetIndex().value_or(0);
 }
 
 bool SwiperPattern::IsAutoPlay() const
