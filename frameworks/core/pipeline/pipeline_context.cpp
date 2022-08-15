@@ -2948,7 +2948,7 @@ void PipelineContext::DumpAccessibility(const std::vector<std::string>& params) 
         accessibilityManager->DumpTree(0, 0);
     } else if (params.size() == 2) {
         accessibilityManager->DumpProperty(params);
-    } else if (params.size() == 3) {
+    } else if (params.size() == 3 || params.size() == 4) {
         accessibilityManager->DumpHandleEvent(params);
     }
 }
