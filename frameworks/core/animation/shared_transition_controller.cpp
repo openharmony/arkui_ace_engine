@@ -121,7 +121,7 @@ void SharedTransitionController::KickoffSharedTransition(TransitionEvent event, 
 {
     auto pageDest = pageDest_.Upgrade();
     if (!pageDest) {
-        LOGE("Kickoff shared transition failed. page dest is null. event: %{public}d", event);
+        LOGD("Kickoff shared transition failed. page dest is null. event: %{public}d", event);
         return;
     }
     auto destTransition = PageTransitionElement::GetTransitionElement(pageDest);

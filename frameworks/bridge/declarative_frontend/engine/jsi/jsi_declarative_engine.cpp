@@ -160,11 +160,11 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     CHECK_RUN_ON(JS);
     ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::InitJsEnv");
     if (runtime != nullptr) {
-        LOGI("JsiDeclarativeEngineInstance InitJsEnv usingSharedRuntime");
+        LOGD("JsiDeclarativeEngineInstance InitJsEnv usingSharedRuntime");
         runtime_ = runtime;
         usingSharedRuntime_ = true;
     } else {
-        LOGI("JsiDeclarativeEngineInstance InitJsEnv not usingSharedRuntime, create own");
+        LOGD("JsiDeclarativeEngineInstance InitJsEnv not usingSharedRuntime, create own");
         runtime_.reset(new ArkJSRuntime());
     }
 

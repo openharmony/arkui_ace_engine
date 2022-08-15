@@ -26,7 +26,7 @@ RootComponent::RootComponent(const RefPtr<Component>& child) : child_(child) {}
 
 RefPtr<RenderNode> RootComponent::CreateRenderNode()
 {
-    LOGI("CreateRenderRoot.");
+    LOGD("CreateRenderRoot.");
     return RenderRoot::Create();
 }
 
@@ -42,7 +42,7 @@ RefPtr<RootComponent> RootComponent::Create(const RefPtr<Component>& child)
 
 RefPtr<RootElement> RootComponent::SetupElementTree(const RefPtr<PipelineContext>& context)
 {
-    LOGI("First build for element tree.");
+    LOGD("First build for element tree.");
     RefPtr<RootElement> rootElement = AceType::DynamicCast<RootElement>(CreateElement());
     rootElement->SetPipelineContext(context);
     rootElement->SetNewComponent(AceType::Claim(this));

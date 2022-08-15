@@ -52,7 +52,7 @@ RefPtr<JsEngine> DeclarativeEngineLoader::CreateJsEngine(int32_t instanceId) con
 RefPtr<JsEngine> DeclarativeEngineLoader::CreateJsEngineUsingSharedRuntime(int32_t instanceId, void* runtime) const
 {
 #ifdef USE_ARK_ENGINE
-    LOGI("CreateJsEngineUsingSharedRuntime id:%{public}d runtime:%{public}p", instanceId, runtime);
+    LOGD("CreateJsEngineUsingSharedRuntime id:%{public}d runtime:%{public}p", instanceId, runtime);
     return AceType::MakeRefPtr<JsiDeclarativeEngine>(instanceId, runtime);
 #else
     return nullptr;

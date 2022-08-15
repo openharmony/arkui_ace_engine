@@ -53,8 +53,6 @@ void ManifestWidgetGroup::WidgetParse(const std::unique_ptr<JsonValue>& root)
                 LOGE("Duplicate Widget Names: %{public}s", widgetName.c_str());
             }
         }
-    } else {
-        LOGW("Widget Format is invalid");
     }
 }
 
