@@ -152,12 +152,12 @@ HWTEST_F(TextFieldStyleCreatorTest, TextFieldStyleCreator001, TestSize.Level1)
     EXPECT_EQ(textStyle.GetTextColor().GetValue(), TEXT_FIELD_STYLE_TEXT_COLOR_VALUE);
     EXPECT_EQ(textStyle.GetFontFamilies(), TEXT_FIELD_STYLE_FONT_FAMILIES);
     // shadow
-    const auto& textShadow = textStyle.GetShadow();
+    const auto& textShadow = textStyle.GetTextShadows()[0];
     EXPECT_TRUE(NearEqual(textShadow.GetOffset().GetX(), TEXT_FIELD_STYLE_OFFSET_DX));
     EXPECT_TRUE(NearEqual(textShadow.GetOffset().GetY(), TEXT_FIELD_STYLE_OFFSET_DY));
     EXPECT_TRUE(NearEqual(textShadow.GetBlurRadius(), TEXT_FIELD_STYLE_BLURRADIUS));
     // color
-    const auto& textShadowColor = textStyle.GetShadow().GetColor();
+    const auto& textShadowColor = textStyle.GetTextShadows()[0].GetColor();
     EXPECT_EQ(textShadowColor.GetAlpha(), TEXT_FIELD_STYLE_TEXT_COLOR_ALPHA);
     EXPECT_EQ(textShadowColor.GetRed(), TEXT_FIELD_STYLE_TEXT_COLOR_RED);
     EXPECT_EQ(textShadowColor.GetGreen(), TEXT_FIELD_STYLE_TEXT_COLOR_GREEN);
@@ -203,7 +203,7 @@ HWTEST_F(TextFieldStyleCreatorTest, TextFieldStyleCreator002, TestSize.Level1)
     EXPECT_EQ(textStyle.GetLetterSpacing().Unit(), TEXT_FIELD_STYLE_LETTER_SPACING_DEFAULT.Unit());
     EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing().Value(), TEXT_FIELD_STYLE_LETTER_SPACING_DEFAULT.Value()));
     EXPECT_TRUE(NearEqual(textStyle.GetLineHeight().Value(), TEXT_FIELD_STYLE_LINE_HEIGHT_DEFAULT));
-    const auto& textShadowColor = textStyle.GetShadow().GetColor().GetValue();
+    const auto& textShadowColor = textStyle.GetTextShadows()[0].GetColor().GetValue();
     EXPECT_EQ(static_cast<uint32_t>(textShadowColor), TEXT_FIELD_STYLE_COLOR_VALUE_DEFAULT);
 }
 
