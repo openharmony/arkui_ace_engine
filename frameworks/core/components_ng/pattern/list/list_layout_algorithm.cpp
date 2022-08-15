@@ -146,14 +146,19 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     itemPosition_.clear();
 
-    lanes_ = listLayoutProperty->GetLanes().value_or(-1);
-    minLaneLength_ = listLayoutProperty->GetLaneMinLength().value_or(Dimension(-1)).Value();
-    maxLaneLength_ = listLayoutProperty->GetLaneMaxLength().value_or(Dimension(-1)).Value();
+    lanes_ = listLayoutProperty->GetLanes();
+    if (listLayoutProperty->GetLaneMinLength().has_value()) {
+        minLaneLength_ = ConvertToPx(listLayoutProperty->GetLaneMinLength().value(),
+            listLayoutProperty->GetLayoutConstraint()->scaleProperty, mainSize);
+    }
+    if (listLayoutProperty->GetLaneMaxLength().has_value()) {
+        maxLaneLength_ = ConvertToPx(listLayoutProperty->GetLaneMaxLength().value(),
+            listLayoutProperty->GetLayoutConstraint()->scaleProperty, mainSize);
+    }
     listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::CENTER);
-    isLaneList_ = (lanes_ != -1) || ((minLaneLength_ != -1) && (maxLaneLength_ != -1));
     CalculateLanes(listLayoutProperty->GetLayoutConstraint().value(), axis);
 
-    if (isLaneList_) {
+    if (lanes_.has_value() && lanes_.value() > 1) {
         if (NonNegative(currentOffset_)) {
             LayoutForwardForLaneList(layoutWrapper, contentLayoutConstraint.value(), axis, mainSize);
         } else {
@@ -343,16 +348,16 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (auto index = startIndex_.value(); index <= endIndex_.value(); ++index) {
         auto offset = paddingOffset;
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (isLaneList_) {
-            int32_t laneIndex = (index - startIndex_.value()) % lanes_;
+        if (lanes_.has_value() && lanes_.value() > 1) {
+            int32_t laneIndex = (index - startIndex_.value()) % lanes_.value();
             float laneCrossOffset = CalculateLaneCrossOffset(GetCrossAxisSize(size, axis),
-                GetCrossAxisSize(wrapper->GetGeometryNode()->GetFrameSize() * lanes_, axis));
+                GetCrossAxisSize(wrapper->GetGeometryNode()->GetFrameSize() * lanes_.value(), axis));
             if (axis == Axis::VERTICAL) {
                 offset = offset + OffsetF(0, itemPosition_[index].first - currentOffset_)
-                    + OffsetF(size.Width() / lanes_ * laneIndex, 0) + OffsetF(laneCrossOffset, 0);
+                    + OffsetF(size.Width() / lanes_.value() * laneIndex, 0) + OffsetF(laneCrossOffset, 0);
             } else {
                 offset = offset + OffsetF(itemPosition_[index].first - currentOffset_, 0)
-                    + OffsetF(0, size.Width() / lanes_ * laneIndex) + OffsetF(0, laneCrossOffset);
+                    + OffsetF(0, size.Width() / lanes_.value() * laneIndex) + OffsetF(0, laneCrossOffset);
             }
         } else {
             if (axis == Axis::VERTICAL) {
@@ -369,37 +374,36 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
 {
     float delta = crossSize - childCrossSize;
-    if (delta <= 0) {
-        return 0.0;
+    if (LessOrEqual(delta, 0)) {
+        return 0.0f;
     }
     switch (listItemAlign_) {
         case OHOS::Ace::V2::ListItemAlign::START:
-            return 0.0;
+            return 0.0f;
         case OHOS::Ace::V2::ListItemAlign::CENTER:
-            return delta / 2.0;
+            return delta / 2.0f;
         case OHOS::Ace::V2::ListItemAlign::END:
             return delta;
         default:
             LOGW("Invalid ListItemAlign: %{public}d", listItemAlign_);
-            return 0.0;
+            return 0.0f;
     }
 }
 
 void ListLayoutAlgorithm::CalculateLanes(const LayoutConstraintF& layoutConstraint, Axis axis)
 {
-    int32_t lanes = lanes_;
     do {
         SizeF layoutParamMaxSize = layoutConstraint.maxSize;
         SizeF layoutParamMinSize = layoutConstraint.minSize;
         // Case 1: lane length constrain is not set
         //      1.1: use [lanes_] set by user if [lanes_] is set
         //      1.2: set [lanes_] to 1 if [lanes_] is not set
-        if (minLaneLength_ < 0 || maxLaneLength_ < 0) {
-            if (lanes <= 0) {
-                lanes = 1;
+        if (!minLaneLength_.has_value() || !maxLaneLength_.has_value()) {
+            if (!lanes.has_value() || lanes_.value() <= 0) {
+                lanes_ = 1;
             }
-            maxLaneLength_ = GetCrossAxisSize(layoutParamMaxSize, axis) / lanes;
-            minLaneLength_ = GetCrossAxisSize(layoutParamMinSize, axis) / lanes;
+            maxLaneLength_ = GetCrossAxisSize(layoutParamMaxSize, axis) / lanes_.value();
+            minLaneLength_ = GetCrossAxisSize(layoutParamMinSize, axis) / lanes_.value();
             break;
         }
         // Case 2: lane length constrain is set --> need to calculate [lanes_] according to contraint.
@@ -418,8 +422,8 @@ void ListLayoutAlgorithm::CalculateLanes(const LayoutConstraintF& layoutConstrai
         // when list's width is 80, lanes_ = 2
         // when list's width is 70, lanes_ = 1
         float maxCrossSize = GetCrossAxisSize(layoutParamMaxSize, axis);
-        float maxLanes = maxCrossSize / minLaneLength_;
-        float minLanes = maxCrossSize / maxLaneLength_;
+        float maxLanes = maxCrossSize / minLaneLength_.value();
+        float minLanes = maxCrossSize / maxLaneLength_.value();
         // let's considerate scenarios when maxCrossSize > 0
         // now it's guaranteed that [minLaneLength_] <= [maxLaneLength_], i.e., maxLanes >= minLanes > 0
         // there are 3 scenarios:
@@ -429,39 +433,40 @@ void ListLayoutAlgorithm::CalculateLanes(const LayoutConstraintF& layoutConstrai
 
         // 1. 1 > maxLanes >= minLanes > 0 ---> maxCrossSize < minLaneLength_ =< maxLaneLength
         if (GreatNotEqual(1, maxLanes) && GreatOrEqual(maxLanes, minLanes)) {
-            lanes = 1;
+            lanes_ = 1;
             minLaneLength_ = maxCrossSize;
             maxLaneLength_ = maxCrossSize;
             break;
         }
         // 2. maxLanes >= 1 >= minLanes > 0 ---> minLaneLength_ = maxCrossSize < maxLaneLength
         if (GreatOrEqual(maxLanes, 1) && LessOrEqual(minLanes, 1)) {
-            lanes = std::floor(maxLanes);
+            lanes_ = std::floor(maxLanes);
             maxLaneLength_ = maxCrossSize;
             break;
         }
         // 3. maxLanes >= minLanes > 1 ---> minLaneLength_ <= maxLaneLength < maxCrossSize
         if (GreatOrEqual(maxLanes, minLanes) && GreatNotEqual(minLanes, 1)) {
-            lanes = std::floor(maxLanes);
+            lanes_ = std::floor(maxLanes);
             break;
         }
-        lanes = 1;
+        lanes_ = 1;
         LOGE("unexpected situation, set lanes to 1, maxLanes: %{public}f, minLanes: %{public}f, minLaneLength_: "
-            "%{public}f, maxLaneLength_: %{public}f", maxLanes, minLanes, minLaneLength_, maxLaneLength_);
+            "%{public}f, maxLaneLength_: %{public}f",
+            maxLanes, minLanes, minLaneLength_.value(), maxLaneLength_.value());
     } while (0);
 }
 
 void ListLayoutAlgorithm::ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis)
 {
-    if (LessOrEqual(maxLaneLength_, 0.0)) {
+    if (LessOrEqual(maxLaneLength_.value(), 0.0)) {
         maxLaneLength_ = GetCrossAxisSize(layoutConstraint.maxSize, axis);
     }
-    if (LessOrEqual(minLaneLength_, 0.0)) {
-        minLaneLength_ = std::min(GetCrossAxisSize(layoutConstraint.maxSize, axis), maxLaneLength_);
+    if (LessOrEqual(minLaneLength_.value(), 0.0)) {
+        minLaneLength_ = std::min(GetCrossAxisSize(layoutConstraint.maxSize, axis), maxLaneLength_.value());
     }
-    if (GreatNotEqual(minLaneLength_, maxLaneLength_)) {
+    if (GreatNotEqual(minLaneLength_.value(), maxLaneLength_.value())) {
         LOGI("minLaneLength: %{public}f is greater than maxLaneLength: %{public}f, assign minLaneLength to"
-            " maxLaneLength", minLaneLength_, maxLaneLength_);
+            " maxLaneLength", minLaneLength_.value(), maxLaneLength_.value());
         maxLaneLength_ = minLaneLength_;
     }
 }
@@ -485,7 +490,7 @@ void ListLayoutAlgorithm::LayoutForwardForLaneList(
     bool outOfListSize = false;
     do {
         currentStartPos = currentEndPos;
-        for (int32_t i = 0; i < lanes_; i++) {
+        for (int32_t i = 0; i < lanes_.value(); i++) {
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
             if (!wrapper) {
                 LOGE("the start %{public}d index wrapper is null", currentIndex + 1);
@@ -568,7 +573,7 @@ void ListLayoutAlgorithm::LayoutBackwardForLaneList(
     do {
         currentEndPos = currentStartPos;
         float mainLength;
-        for (int32_t i = 0; i < lanes_; i++) {
+        for (int32_t i = 0; i < lanes_.value(); i++) {
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
             if (!wrapper) {
                 LOGE("the start %{public}d index wrapper is null", currentIndex - 1);

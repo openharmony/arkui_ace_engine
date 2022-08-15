@@ -60,16 +60,6 @@ public:
         return endIndex_.value_or(0);
     }
 
-    void SetItemPosition(PositionMap& itemPosition)
-    {
-        itemPosition_ = itemPosition;
-    }
-    
-    const PositionMap& GetItemPosition() const
-    {
-        return itemPosition_;
-    }
-
     void SetSpaceWidth(float spaceWidth)
     {
         spaceWidth_ = spaceWidth;
@@ -92,11 +82,10 @@ public:
 
     void SetLanes(int32_t lanes)
     {
-        isLaneList_ = true;
         lanes_ = lanes;
     }
 
-    int32_t GetLanes()
+    std::optional<int32_t> GetLanes() const
     {
         return lanes_;
     }
@@ -141,10 +130,9 @@ private:
 
     bool isInitialized_ = false;
 
-    bool isLaneList_ = false;
-    int32_t lanes_ = -1;
-    float minLaneLength_ = -1.0;
-    float maxLaneLength_ = -1.0;
+    std::optional<int32_t> lanes_;
+    std::optional<float> minLaneLength_;
+    std::optional<float> maxLaneLength_;
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::CENTER;
 };
 } // namespace OHOS::Ace::NG

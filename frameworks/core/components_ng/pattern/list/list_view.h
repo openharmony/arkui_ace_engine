@@ -32,8 +32,8 @@ public:
     static void SetListDirection(Axis axis);
     static void SetEdgeEffect(EdgeEffect edgeEffect);
     static void SetLanes(int32_t lanes);
-    static void SetLaneMinLength(Dimension laneMinLength);
-    static void SetLaneMaxLength(Dimension laneMaxLength);
+    static void SetLaneMinLength(const Dimension& laneMinLength);
+    static void SetLaneMaxLength(const Dimension& laneMaxLength);
     static void SetListItemAlign(V2::ListItemAlign listItemAlign);
 };
 

@@ -56,12 +56,12 @@ void ListView::SetLanes(int32_t lanes)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Lanes, lanes);
 }
 
-void ListView::SetLaneMinLength(Dimension laneMinLength)
+void ListView::SetLaneMinLength(const Dimension& laneMinLength)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMinLength, laneMinLength);
 }
 
-void ListView::SetLaneMaxLength(Dimension laneMaxLength)
+void ListView::SetLaneMaxLength(const Dimension& laneMaxLength)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneMaxLength, laneMaxLength);
 }
