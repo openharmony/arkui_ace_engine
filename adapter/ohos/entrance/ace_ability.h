@@ -27,13 +27,38 @@
 #include "wm/window.h"
 
 namespace OHOS::Ace {
+class AceAbility;
+class AceWindowListener : public OHOS::Rosen::IWindowDragListener,
+                          public OHOS::Rosen::IWindowChangeListener,
+                          public OHOS::Rosen::IOccupiedAreaChangeListener,
+                          public OHOS::Rosen::IAceAbilityHandler,
+                          public OHOS::Rosen::IInputEventConsumer {
+public:
+    explicit AceWindowListener(std::shared_ptr<AceAbility> owner) : callbackOwner_(owner) {}
+    ~AceWindowListener() = default;
+    // override Rosen::IWindowDragListener virtual callback function
+    void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event) override;
 
-class AceAbility final : public OHOS::AppExecFwk::Ability,
-                         public OHOS::Rosen::IWindowChangeListener,
-                         public OHOS::Rosen::IWindowDragListener,
-                         public OHOS::Rosen::IOccupiedAreaChangeListener,
-                         public OHOS::Rosen::IInputEventConsumer,
-                         public OHOS::Rosen::IAceAbilityHandler {
+    // override Rosen::IOccupiedAreaChangeListener virtual callback function
+    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) override;
+
+    // override Rosen::IAceAbilityHandler virtual callback function
+    void SetBackgroundColor(uint32_t color) override;
+    uint32_t GetBackgroundColor() override;
+
+    // override Rosen::IWindowChangeListener virtual callback function
+    void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override;
+    void OnModeChange(OHOS::Rosen::WindowMode mode) override;
+
+    // override Rosen::IInputEventConsumer virtual callback function
+    bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const override;
+    bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
+    bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const override;
+private:
+    std::shared_ptr<AceAbility> callbackOwner_;
+};
+
+class AceAbility final : public OHOS::AppExecFwk::Ability {
 public:
     AceAbility()
     {
@@ -61,24 +86,24 @@ public:
     void OnCompleteContinuation(int result) override;
     void OnRemoteTerminated() override;
 
-    // override Rosen::IWindowDragListener virtual callback function
-    void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event) override;
+    // handle window Rosen::IWindowDragListener
+    void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event);
 
-    // override Rosen::IWindowChangeListener virtual callback function
-    void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override;
-    void OnModeChange(OHOS::Rosen::WindowMode mode) override;
+    // handle window Rosen::IWindowChangeListener
+    void OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason);
+    void OnModeChange(OHOS::Rosen::WindowMode mode);
 
-    // override Rosen::IOccupiedAreaChangeListener virtual callback function
-    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info) override;
+    // handle window Rosen::IOccupiedAreaChangeListener
+    void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info);
 
-    // override Rosen::IInputEventConsumer virtual callback function
-    bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const override;
-    bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
-    bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const override;
+    // handle window Rosen::IInputEventConsumer
+    bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
+    bool OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+    bool OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axisEvent) const;
 
-    // override Rosen::IAceAbilityHandler virtual callback function
-    void SetBackgroundColor(uint32_t color) override;
-    uint32_t GetBackgroundColor() override;
+    // handle window Rosen::IAceAbilityHandler
+    void SetBackgroundColor(uint32_t color);
+    uint32_t GetBackgroundColor();
 
     void Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
