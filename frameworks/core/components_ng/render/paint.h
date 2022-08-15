@@ -65,7 +65,7 @@ enum class BlendMode {
     COLOR_BURN,
     HARD_LIGHT,
     SOFT_LIGHT,
-    DIFFERENCE,
+    DIFFERENT,
     EXCLUSION,
     MULTIPLY,
     LAST_SEPARABLE_MODE = MULTIPLY,

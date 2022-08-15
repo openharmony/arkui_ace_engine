@@ -24,7 +24,9 @@ namespace OHOS::Ace::NG {
 
 void SwiperView::Create()
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, 0,
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
 }

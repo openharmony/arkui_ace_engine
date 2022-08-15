@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
+
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "base/utils/utils.h"
 
