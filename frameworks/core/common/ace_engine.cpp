@@ -53,7 +53,9 @@ void HandleSignal(int signo)
 
 AceEngine::AceEngine()
 {
-    watchDog_ = AceType::MakeRefPtr<WatchDog>();
+    if (!SystemProperties::GetHookModeEnabled()) {
+        watchDog_ = AceType::MakeRefPtr<WatchDog>();
+    }
 }
 
 AceEngine& AceEngine::Get()
