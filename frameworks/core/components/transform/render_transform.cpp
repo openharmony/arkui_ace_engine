@@ -430,6 +430,11 @@ void RenderTransform::UpdateTransformOrigin()
         LOGE("child component is nullptr.");
         return;
     }
+
+    if (AceType::InstanceOf<RenderBoxBase>(child) && AceType::InstanceOf<RenderBoxBase>(child->GetFirstChild())) {
+        child = child->GetFirstChild();
+    }
+
     Size layoutSize = GetLayoutSize();
     const auto& renderBoxBase = AceType::DynamicCast<RenderBoxBase>(child);
     if (renderBoxBase) {
