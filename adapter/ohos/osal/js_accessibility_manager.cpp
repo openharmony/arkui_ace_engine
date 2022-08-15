@@ -35,8 +35,13 @@ using namespace std;
 
 namespace OHOS::Ace::Framework {
 namespace {
-const int32_t EVENT_DUMP_PARAM_LENGTH = 3;
-const int32_t PROPERTY_DUMP_PARAM_LENGTH = 2;
+constexpr int32_t EVENT_DUMP_PARAM_LENGTH_UPPER = 4;
+constexpr int32_t EVENT_DUMP_PARAM_LENGTH_LOWER = 3;
+constexpr int32_t PROPERTY_DUMP_PARAM_LENGTH = 2;
+constexpr int32_t EVENT_DUMP_ORDER_INDEX = 0;
+constexpr int32_t EVENT_DUMP_ID_INDEX = 1;
+constexpr int32_t EVENT_DUMP_ACTION_INDEX = 2;
+constexpr int32_t EVENT_DUMP_ACTION_PARAM_INDEX = 3;
 const char DUMP_ORDER[] = "-accessibility";
 const char DUMP_INSPECTOR[] = "-inspector";
 const char ACCESSIBILITY_FOCUSED_EVENT[] = "accessibilityfocus";
@@ -626,46 +631,40 @@ void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& par
         DumpLog::GetInstance().Print("Error: params is empty!");
         return;
     }
-    if (params.size() != EVENT_DUMP_PARAM_LENGTH) {
+    if (!(params.size() == EVENT_DUMP_PARAM_LENGTH_LOWER || params.size() == EVENT_DUMP_PARAM_LENGTH_UPPER)) {
         DumpLog::GetInstance().Print("Error: params length is illegal!");
         return;
     }
-    if (params[0] != DUMP_ORDER && params[0] != DUMP_INSPECTOR) {
+    if (params[EVENT_DUMP_ORDER_INDEX] != DUMP_ORDER && params[EVENT_DUMP_ORDER_INDEX] != DUMP_INSPECTOR) {
         DumpLog::GetInstance().Print("Error: not accessibility dump order!");
         return;
     }
-    int32_t ID = StringUtils::StringToInt(params[1]);
+    int32_t ID = StringUtils::StringToInt(params[EVENT_DUMP_ID_INDEX]);
     auto node = GetAccessibilityNodeFromPage(ID);
     if (!node) {
         DumpLog::GetInstance().Print("Error: can't find node with ID");
         return;
     }
-    auto action = static_cast<AceAction>(StringUtils::StringToInt(params[2]));
-    static const ActionTable actionEventTable[] = {
-        { AceAction::ACTION_CLICK, ActionType::ACCESSIBILITY_ACTION_CLICK },
-        { AceAction::ACTION_LONG_CLICK, ActionType::ACCESSIBILITY_ACTION_LONG_CLICK },
-        { AceAction::ACTION_SCROLL_FORWARD, ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD },
-        { AceAction::ACTION_SCROLL_BACKWARD, ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD },
-        { AceAction::ACTION_FOCUS, ActionType::ACCESSIBILITY_ACTION_FOCUS },
-        { AceAction::ACTION_ACCESSIBILITY_FOCUS, ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS },
-    };
-    ActionType op = ActionType::ACCESSIBILITY_ACTION_INVALID;
-    for (const auto& item : actionEventTable) {
-        if (action == item.aceAction) {
-            op = item.action;
-            break;
-        }
+    auto action = static_cast<AceAction>(StringUtils::StringToInt(params[EVENT_DUMP_ACTION_INDEX]));
+    std::string eventParams;
+    if (params.size()==EVENT_DUMP_PARAM_LENGTH_UPPER) {
+        eventParams = params[EVENT_DUMP_ACTION_PARAM_INDEX];
+    }
+    auto op = ConvertAceAction(action);
+    std::map<std::string, std::string> paramsMap;
+    if (op == ActionType::ACCESSIBILITY_ACTION_SET_TEXT) {
+        paramsMap = {{ ACTION_ARGU_SET_TEXT, eventParams }};
     }
     auto context = GetPipelineContext().Upgrade();
     if (context) {
         context->GetTaskExecutor()->PostTask(
-            [weak = WeakClaim(this), op, node, context]() {
+            [weak = WeakClaim(this), op, node, paramsMap, context]() {
                 auto jsAccessibilityManager = weak.Upgrade();
                 if (!jsAccessibilityManager) {
                     return;
                 }
                 jsAccessibilityManager->AccessibilityActionEvent(
-                    op, {}, node, AceType::DynamicCast<PipelineContext>(context));
+                    op, paramsMap, node, AceType::DynamicCast<PipelineContext>(context));
             },
             TaskExecutor::TaskType::UI);
     }
@@ -1080,6 +1079,14 @@ bool JsAccessibilityManager::AccessibilityActionEvent(const ActionType& action,
                 return true;
             }
             return node->ActionLongClick();
+        }
+        case ActionType::ACCESSIBILITY_ACTION_SET_TEXT: {
+            if (!node->GetSetTextEventMarker().IsEmpty()) {
+                context->SendEventToFrontend(node->GetSetTextEventMarker());
+                node->ActionSetText(actionArguments.find(ACTION_ARGU_SET_TEXT)->second);
+                return true;
+            }
+            return node->ActionSetText(actionArguments.find(ACTION_ARGU_SET_TEXT)->second);
         }
         case ActionType::ACCESSIBILITY_ACTION_FOCUS: {
             context->AccessibilityRequestFocus(std::to_string(node->GetNodeId()));

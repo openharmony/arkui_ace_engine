@@ -322,6 +322,7 @@ public:
 
     bool hasFocus_ = false;
     void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
+    void SetEditingValue(const std::string& text);
 
     const std::function<void(bool)>& GetOnEditChanged() const
     {

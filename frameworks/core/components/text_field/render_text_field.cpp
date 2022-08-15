@@ -1094,9 +1094,15 @@ void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFire
             SetTextStyle(placeHoldStyle_);
         }
     }
-
     controller_->SetValue(newValue, needFireChangeEvent);
     UpdateAccessibilityAttr();
+}
+
+void RenderTextField::SetEditingValue(const std::string& text)
+{
+    auto newValue = GetEditingValue();
+    newValue.text = text;
+    SetEditingValue(std::move(newValue));
 }
 
 void RenderTextField::ClearEditingValue()
@@ -2156,6 +2162,12 @@ void RenderTextField::InitAccessibilityEventListener()
     });
 
     accessibilityNode->AddSupportAction(AceAction::ACTION_SET_TEXT);
+    accessibilityNode->SetActionSetTextImpl([weakPtr = WeakClaim(this)](const std::string& text) {
+        const auto& textField = weakPtr.Upgrade();
+        if (textField) {
+            textField->SetEditingValue(text);
+        }
+    });
 }
 
 void RenderTextField::UpdateDirectionStatus()
