@@ -33,6 +33,12 @@ PanEventActuator::PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventH
     if (LessOrEqual(distance_, DEFAULT_PAN_DISTANCE)) {
         distance_ = DEFAULT_PAN_DISTANCE;
     }
+
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    panRecognizer_ = MakeRefPtr<PanRecognizer>(frameNode->GetContext(), fingers_, direction_, distance_);
 }
 
 void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -41,15 +47,6 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
     if (panEvents_.empty() && !userCallback_) {
         return;
     }
-
-    auto gestureHub = gestureEventHub_.Upgrade();
-    CHECK_NULL_VOID(gestureHub);
-    auto frameNode = gestureHub->GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-
-    PanDirection panDirection;
-    panDirection.type = PanDirection::HORIZONTAL;
-    auto panRecognizer = MakeRefPtr<PanRecognizer>(frameNode->GetContext(), fingers_, direction_, distance_);
 
     auto actionStart = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
@@ -69,7 +66,7 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
             userActionStart(info);
         }
     };
-    panRecognizer->SetOnActionStart(actionStart);
+    panRecognizer_->SetOnActionStart(actionStart);
 
     auto actionUpdate = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
@@ -89,7 +86,7 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
             userActionUpdate(info);
         }
     };
-    panRecognizer->SetOnActionUpdate(actionUpdate);
+    panRecognizer_->SetOnActionUpdate(actionUpdate);
 
     auto actionEnd = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
@@ -109,7 +106,7 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
             userActionEnd(info);
         }
     };
-    panRecognizer->SetOnActionEnd(actionEnd);
+    panRecognizer_->SetOnActionEnd(actionEnd);
 
     auto actionCancel = [weak = WeakClaim(this)]() {
         auto actuator = weak.Upgrade();
@@ -129,11 +126,11 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
             userActionCancel();
         }
     };
-    panRecognizer->SetOnActionCancel(actionCancel);
+    panRecognizer_->SetOnActionCancel(actionCancel);
 
-    panRecognizer->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-    panRecognizer->SetGetEventTargetImpl(getEventTargetImpl);
-    result.emplace_back(panRecognizer);
+    panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(panRecognizer_);
 }
 
 } // namespace OHOS::Ace::NG

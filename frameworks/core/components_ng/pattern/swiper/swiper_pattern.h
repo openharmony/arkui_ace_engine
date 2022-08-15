@@ -126,7 +126,9 @@ private:
     int32_t endIndex_ = 0;
     int32_t currentIndex_ = 0;
 
-    float currentOffset_ = 0.0;
+    float currentOffset_ = 0.0f;
+
+    Axis direction_ = Axis::HORIZONTAL;
 
     uint64_t elapsedTime_ = 0; // millisecond.
 };

@@ -185,7 +185,7 @@ void JSSwiper::SetEffectMode(const JSCallbackInfo& info)
     if (Container::IsCurrentUseNewPipeline()) {
         auto edgeEffect = info[0]->ToNumber<int32_t>();
         if (edgeEffect < 0 || edgeEffect >= static_cast<int32_t>(EDGE_EFFECT.size())) {
-            LOGE("Edge effect: (%d) illegal value", edgeEffect);
+            LOGE("Edge effect: %{public}d illegal value", edgeEffect);
             return;
         }
         NG::SwiperView::SetEdgeEffect(EDGE_EFFECT[edgeEffect]);
@@ -221,6 +221,7 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
         } else if (info[0]->IsNumber()) {
             NG::SwiperView::SetDisplayCount(info[0]->ToNumber<int32_t>());
         }
+        LOGE("display count is not valid");
         return;
     }
 
@@ -250,6 +251,11 @@ void JSSwiper::SetDigital(bool digitalIndicator)
 
 void JSSwiper::SetDuration(int32_t duration)
 {
+    if (duration < 0) {
+        LOGE("duration is not valid: %{public}d", duration);
+        return;
+    }
+
     if (Container::IsCurrentUseNewPipeline()) {
         NG::SwiperView::SetDuration(duration);
         return;
@@ -262,8 +268,13 @@ void JSSwiper::SetDuration(int32_t duration)
     }
 }
 
-void JSSwiper::SetIndex(uint32_t index)
+void JSSwiper::SetIndex(int32_t index)
 {
+    if (index < 0) {
+        LOGE("index is not valid: %{public}d", index);
+        return;
+    }
+
     if (Container::IsCurrentUseNewPipeline()) {
         NG::SwiperView::SetIndex(index);
         return;
@@ -276,8 +287,13 @@ void JSSwiper::SetIndex(uint32_t index)
     }
 }
 
-void JSSwiper::SetInterval(uint32_t interval)
+void JSSwiper::SetInterval(int32_t interval)
 {
+    if (interval <= 0) {
+        LOGE("interval is not valid: %{public}d", interval);
+        return;
+    }
+
     if (Container::IsCurrentUseNewPipeline()) {
         NG::SwiperView::SetAutoPlayInterval(interval);
         return;
@@ -430,6 +446,7 @@ void JSSwiper::SetItemSpace(const JSCallbackInfo& info)
 void JSSwiper::SetDisplayMode(int32_t index)
 {
     if (index < 0 || index >= static_cast<int32_t>(DISPLAY_MODE.size())) {
+        LOGE("display mode is not valid: %{public}d", index);
         return;
     }
 

@@ -72,9 +72,9 @@ public:
         return calcLayoutConstraint_;
     }
 
-    MeasureType GetMeasureType() const
+    MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
     {
-        return measureType_.value_or(MeasureType::MATCH_CONTENT);
+        return measureType_.value_or(defaultType);
     }
 
     void UpdatePadding(const PaddingProperty& value)

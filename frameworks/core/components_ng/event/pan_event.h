@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/gestures/gesture_info.h"
+#include "core/gestures/pan_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -100,6 +101,7 @@ private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<PanEvent>> panEvents_;
     RefPtr<PanEvent> userCallback_;
+    RefPtr<PanRecognizer> panRecognizer_;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

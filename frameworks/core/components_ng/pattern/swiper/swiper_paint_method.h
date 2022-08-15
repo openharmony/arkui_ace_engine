@@ -36,8 +36,7 @@ private:
     void PaintFade(const RefPtr<Canvas>& canvas, PaintWrapper* paintWrapper) const;
 
     Axis axis_;
-    float mainDelta_ = 0.0;
-
+    float mainDelta_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

@@ -30,8 +30,8 @@ protected:
     static void SetAutoplay(bool autoPlay);
     static void SetDigital(bool digitalIndicator);
     static void SetDuration(int32_t duration);
-    static void SetIndex(uint32_t index);
-    static void SetInterval(uint32_t interval);
+    static void SetIndex(int32_t index);
+    static void SetInterval(int32_t interval);
     static void SetLoop(bool loop);
     static void SetVertical(bool isVertical);
     static void SetIndicator(bool showIndicator);

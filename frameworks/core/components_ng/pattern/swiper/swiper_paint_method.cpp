@@ -41,11 +41,12 @@ void SwiperPaintMethod::PaintFade(const RefPtr<Canvas>& canvas, PaintWrapper* pa
     auto paintProperty = DynamicCast<SwiperPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
 
-    static constexpr float FADE_MAX_DISTANCE = 2000.0f;
-    static constexpr float FADE_MAX_TRANSLATE = 40.0f;
-    static constexpr float FADE_MAX_RADIUS = 2.0f;
-    static constexpr float FADE_ALPHA = 0.45f;
-    static constexpr float FADE_SCALE_RATE = 0.2f;
+    // TODO use theme.
+    constexpr float FADE_MAX_DISTANCE = 2000.0f;
+    constexpr float FADE_MAX_TRANSLATE = 40.0f;
+    constexpr float FADE_MAX_RADIUS = 2.0f;
+    constexpr float FADE_ALPHA = 0.45f;
+    constexpr float FADE_SCALE_RATE = 0.2f;
 
     bool isVertical = (axis_ == Axis::VERTICAL);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();

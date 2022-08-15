@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -54,6 +55,16 @@ void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty&
 void AddPaddingToSize(const PaddingPropertyF& padding, SizeF& size);
 
 void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size);
+
+float GetCrossAxisSize(const SizeF& size, Axis axis);
+
+float GetMainAxisOffset(const OffsetF& offset, Axis axis);
+
+float GetMainAxisSize(const SizeF& size, Axis axis);
+
+void SetCrossAxisSize(float value, Axis axis, SizeF& size);
+
+SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_UTILS_H

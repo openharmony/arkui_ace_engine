@@ -39,6 +39,12 @@ public:
         auto value = MakeRefPtr<SwiperLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propDirection_ = CloneDirection();
+        value->propIndex_ = CloneIndex();
+        value->propItemSpace_ = CloneItemSpace();
+        value->propCachedCount_ = CloneCachedCount();
+        value->propDisplayMode_ = CloneDisplayMode();
+        value->propDisplayCount_ = CloneDisplayCount();
+        value->propShowIndicator_ = CloneShowIndicator();
         return value;
     }
 
@@ -46,6 +52,12 @@ public:
     {
         LayoutProperty::Reset();
         ResetDirection();
+        ResetIndex();
+        ResetItemSpace();
+        ResetCachedCount();
+        ResetDisplayMode();
+        ResetDisplayCount();
+        ResetShowIndicator();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, Axis, PROPERTY_UPDATE_MEASURE);

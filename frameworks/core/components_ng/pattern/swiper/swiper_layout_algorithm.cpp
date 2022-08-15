@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 
-#include <algorithm>
-#include <unordered_set>
-
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -30,54 +27,6 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-
-float GetCrossAxisSize(const SizeF& size, Axis axis)
-{
-    return axis == Axis::HORIZONTAL ? size.Height() : size.Width();
-}
-
-void SetCrossAxisSize(float value, Axis axis, SizeF& size)
-{
-    if (axis == Axis::VERTICAL) {
-        size.SetWidth(value);
-        return;
-    }
-    size.SetHeight(value);
-}
-
-SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType)
-{
-    SizeF idealSize = { -1.0f, -1.0f };
-    do {
-        // Use idea size first if it is valid.
-        if (layoutConstraint.selfIdealSize.has_value()) {
-            const auto& selfIdeaSize = layoutConstraint.selfIdealSize.value();
-            idealSize.UpdateSizeWithCheck(selfIdeaSize);
-            if (idealSize.IsNonNegative()) {
-                break;
-            }
-        }
-
-        if (measureType == MeasureType::MATCH_PARENT && layoutConstraint.parentIdealSize.has_value()) {
-            idealSize.UpdateIllegalSizeWithCheck(*layoutConstraint.parentIdealSize);
-            if (idealSize.IsNonNegative()) {
-                break;
-            }
-        }
-        if (GetCrossAxisSize(idealSize, axis) < 0) {
-            auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize.value_or(SizeF(-1, -1)), axis);
-            if (parentCrossSize < 0) {
-                parentCrossSize = GetCrossAxisSize(layoutConstraint.maxSize, axis);
-            }
-            SetCrossAxisSize(parentCrossSize, axis, idealSize);
-        }
-    } while (false);
-    idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
-    return idealSize;
-}
-
-} // namespace
 
 void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -85,16 +34,15 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
 
-    auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::VERTICAL);
+    auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto idealSize = CreateIdealSize(swiperLayoutProperty->GetLayoutConstraint().value(), axis,
-        swiperLayoutProperty->GetMeasureType());
+        swiperLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 
     // Measure children.
     auto layoutConstraint = swiperLayoutProperty->CreateChildConstraint();
     auto currentIndex = preStartIndex_ - 1;
     auto totalCount = layoutWrapper->GetTotalChildCount();
-    SizeF maxChildSize = SizeF(0.0, 0.0);
     do {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(++currentIndex);
         if (!wrapper) {
@@ -106,9 +54,6 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             ACE_SCOPED_TRACE("SwiperLayoutAlgorithm::Measure child");
             wrapper->Measure(layoutConstraint);
         }
-        auto childSize = wrapper->GetGeometryNode()->GetFrameSize();
-        maxChildSize = SizeF(std::max(maxChildSize.Width(), childSize.Width()),
-            std::max(maxChildSize.Height(), childSize.Height()));
     } while (currentIndex < totalCount);
 
     startIndex_ = 0;

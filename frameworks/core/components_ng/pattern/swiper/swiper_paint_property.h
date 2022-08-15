@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_PAINT_PROPERTY_H
 
+#include "src/core/SkPaintPriv.h"
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -34,18 +35,35 @@ public:
     {
         auto paintProperty = MakeRefPtr<SwiperPaintProperty>();
         paintProperty->UpdatePaintProperty(this);
+        paintProperty->propLoop_ = CloneLoop();
         paintProperty->propAutoPlay_ = CloneAutoPlay();
+        paintProperty->propAutoPlayInterval_ = CloneAutoPlayInterval();
+        paintProperty->propDuration_ = CloneDuration();
+        paintProperty->propCurve_ = CloneCurve();
+        paintProperty->propEnabled_ = CloneEnabled();
+        paintProperty->propDisableSwipe_ = CloneDisableSwipe();
+        paintProperty->propEdgeEffect_ = CloneEdgeEffect();
+        paintProperty->propFadeColor_ = CloneFadeColor();
         return paintProperty;
     }
 
     void Reset() override
     {
         PaintProperty::Reset();
-        propAutoPlay_.reset();
+        ResetLoop();
+        ResetAutoPlay();
+        ResetAutoPlayInterval();
+        ResetDuration();
+        ResetCurve();
+        ResetEnabled();
+        ResetDisableSwipe();
+        ResetEdgeEffect();
+        ResetFadeColor();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_RENDER);
 
+    // TODO use group
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoPlay, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoPlayInterval, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Duration, int32_t, PROPERTY_UPDATE_RENDER);

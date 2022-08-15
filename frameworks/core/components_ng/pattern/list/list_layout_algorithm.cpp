@@ -32,61 +32,6 @@ namespace {
 
 constexpr float CACHE_SIZE_RADIO = 0.1;
 
-float GetMainAxisOffset(const OffsetF& offset, Axis axis)
-{
-    return axis == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
-}
-
-float GetMainAxisSize(const SizeF& size, Axis axis)
-{
-    return axis == Axis::HORIZONTAL ? size.Width() : size.Height();
-}
-
-float GetCrossAxisSize(const SizeF& size, Axis axis)
-{
-    return axis == Axis::HORIZONTAL ? size.Height() : size.Width();
-}
-
-void SetCrossAxisSize(float value, Axis axis, SizeF& size)
-{
-    if (axis == Axis::VERTICAL) {
-        size.SetWidth(value);
-        return;
-    }
-    size.SetHeight(value);
-}
-
-SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType)
-{
-    SizeF idealSize = { -1.0f, -1.0f };
-    do {
-        // Use idea size first if it is valid.
-        if (layoutConstraint.selfIdealSize.has_value()) {
-            const auto& selfIdeaSize = layoutConstraint.selfIdealSize.value();
-            idealSize.UpdateSizeWithCheck(selfIdeaSize);
-            if (idealSize.IsNonNegative()) {
-                break;
-            }
-        }
-
-        if (measureType == MeasureType::MATCH_PARENT && layoutConstraint.parentIdealSize.has_value()) {
-            idealSize.UpdateIllegalSizeWithCheck(*layoutConstraint.parentIdealSize);
-            if (idealSize.IsNonNegative()) {
-                break;
-            }
-        }
-        if (GetCrossAxisSize(idealSize, axis) < 0) {
-            auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize.value_or(SizeF(-1, -1)), axis);
-            if (parentCrossSize < 0) {
-                parentCrossSize = GetCrossAxisSize(layoutConstraint.maxSize, axis);
-            }
-            SetCrossAxisSize(parentCrossSize, axis, idealSize);
-        }
-    } while (false);
-    idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
-    return idealSize;
-}
-
 void UpdateListItemConstraint(Axis axis, const SizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
 {
     contentConstraint.parentIdealSize = selfIdealSize;

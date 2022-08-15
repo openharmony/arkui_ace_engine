@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_LAYOUT_ALGORITHM_H
 
 #include <map>
-#include <stdint.h>
+#include <cstdint>
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
@@ -25,14 +25,11 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
-class PipelineContext;
 
 class ACE_EXPORT SwiperLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(SwiperLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    using PositionMap = std::map<int32_t, std::pair<float, float>>;
-
     SwiperLayoutAlgorithm(int32_t currentIndex, int32_t startIndex, int32_t endIndex) :
         currentIndex_(currentIndex), preStartIndex_(startIndex), preEndIndex_(endIndex) {}
 
