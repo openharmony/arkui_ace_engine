@@ -289,6 +289,9 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     onShare_ = textField->GetOnShare();
     onSearch_ = textField->GetOnSearch();
     inputStyle_ = textField->GetInputStyle();
+    if (textField->IsSetFocusOnTouch()) {
+        isFocusOnTouch_ = textField->IsFocusOnTouch();
+    }
 #if defined(ENABLE_STANDARD_INPUT)
     UpdateConfiguration();
 #endif
@@ -575,7 +578,7 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     if (SearchAction(globalPosition, globalOffset)) {
         return;
     }
-    if (tapCallback_) {
+    if (isFocusOnTouch_ && tapCallback_) {
         if (!tapCallback_()) {
             return;
         }
@@ -697,7 +700,7 @@ void RenderTextField::OnDoubleClick(const ClickInfo& clickInfo)
 
 void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
 {
-    if (tapCallback_ && !isOverlayShowed_) {
+    if (isFocusOnTouch_ && tapCallback_ && !isOverlayShowed_) {
         if (!tapCallback_()) {
             return;
         }

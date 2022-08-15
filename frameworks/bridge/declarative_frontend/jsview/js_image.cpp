@@ -301,7 +301,7 @@ void JSImage::Create(const JSCallbackInfo& info)
     imageComponent->SetUseSkiaSvg(false);
     ViewStackProcessor::GetInstance()->Push(imageComponent);
     JSInteractableView::SetFocusable(false);
-    JSInteractableView::SetFocusNode(false);
+    JSInteractableView::SetFocusNode(true);
     if (noPixMap) {
         return;
     }

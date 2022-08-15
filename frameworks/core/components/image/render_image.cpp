@@ -226,6 +226,18 @@ bool RenderImage::HandleMouseEvent(const MouseEvent& event)
     return false;
 }
 
+bool RenderImage::HandleKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.IsCtrlWith(KeyCode::KEY_C)) {
+        HandleOnCopy();
+        return true;
+    }
+    return false;
+}
+
 void RenderImage::ShowTextOverlay(const Offset& showOffset)
 {
     popOverlayOffset_ = showOffset;

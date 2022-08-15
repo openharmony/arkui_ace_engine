@@ -17,12 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_ELEMENT_H
 
 #include "core/components/image/image_component.h"
+#include "core/components/image/render_image.h"
 #include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace {
 
-class ImageElement : public RenderElement {
-    DECLARE_ACE_TYPE(ImageElement, RenderElement);
+class ImageElement : public RenderElement, public FocusNode {
+    DECLARE_ACE_TYPE(ImageElement, RenderElement, FocusNode);
+
+public:
+    bool OnKeyEvent(const KeyEvent& keyEvent) override;
 
 protected:
     RefPtr<RenderNode> GetCachedRenderNode() override

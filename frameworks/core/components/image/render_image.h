@@ -265,6 +265,7 @@ public:
     void OnPaintFinish() override;
     void OnLongPress(const LongPressInfo& longPressInfo);
     bool HandleMouseEvent(const MouseEvent& event) override;
+    bool HandleKeyEvent(const KeyEvent& event);
     void ShowTextOverlay(const Offset& showOffset) override;
     void RegisterCallbacksToOverlay() override;
 

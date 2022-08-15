@@ -20,6 +20,7 @@ build_component("image") {
     "image_animator_component.cpp",
     "image_animator_element.cpp",
     "image_component.cpp",
+    "image_element.cpp",
     "render_image.cpp",
     "render_image_creator.cpp",
   ]

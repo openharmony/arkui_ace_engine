@@ -130,6 +130,19 @@ public:
         touchable_ = touchable;
     }
 
+    bool IsSetFocusOnTouch() const
+    {
+        return isFocusOnTouch_.has_value();
+    }
+    bool IsFocusOnTouch() const
+    {
+        return isFocusOnTouch_.value();
+    }
+    void SetIsFocusOnTouch(bool isFocusOnTouch)
+    {
+        isFocusOnTouch_ = isFocusOnTouch;
+    }
+
     void SetRetakeId(int32_t retakeId);
     int32_t GetRetakeId() const;
 
@@ -294,6 +307,7 @@ private:
     WeakPtr<Component> parent_;
     bool disabledStatus_ = false;
     bool touchable_ = true;
+    std::optional<bool> isFocusOnTouch_;
     static std::atomic<int32_t> key_;
     // Set the id for the component to identify the unique component.
     int32_t retakeId_ = 0;
