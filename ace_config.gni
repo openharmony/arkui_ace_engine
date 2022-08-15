@@ -116,7 +116,7 @@ if (is_standard_system) {
     ace_engine_part = "ace_engine_full"
   }
   hilog_deps = [ "hilog:libhilog" ]
-  ark_runtime_path = "//ark/runtime"
+  ark_runtime_path = "//arkcompiler/runtime_core"
 }
 
 # Config test output path
