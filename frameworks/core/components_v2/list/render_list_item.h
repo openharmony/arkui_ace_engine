@@ -22,6 +22,7 @@
 #include "core/gestures/drag_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/animation/spring_motion.h"
+#include "core/components/list/list_item_theme.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -29,6 +30,12 @@ enum class ListItemChildType {
     ITEM_CHILD,
     SWIPER_START,
     SWIPER_END
+};
+
+enum class ListItemSwipeIndex {
+    SWIPER_END = -1,
+    ITEM_CHILD = 0,
+    SWIPER_START = 1,
 };
 
 class RenderListItem : public RenderNode {
@@ -115,7 +122,7 @@ public:
 
     void RegisterGetChildCallback(std::function<RefPtr<RenderNode>(ListItemChildType)> callback)
     {
-        getChildCallback_ = callback;
+        getChildCallback_ = std::move(callback);
     }
 
     RefPtr<RenderNode> GetSwiperStartRnderNode() const
@@ -148,6 +155,7 @@ private:
     void StartSpringMotion(double start, double end, double velocity);
     double GetFriction();
     void UpdatePostion(double delta);
+    double CalculateFriction(double gamma);
 
     RefPtr<ListItemComponent> component_;
     std::function<RefPtr<RenderNode>(ListItemChildType)> getChildCallback_;
@@ -168,10 +176,11 @@ private:
     RefPtr<DragRecognizer> dragDetector_;
     RefPtr<Animator> springController_;
     RefPtr<SpringMotion> springMotion_;
-    int32_t currPage_ = 0;
+    ListItemSwipeIndex swipeIndex = ListItemSwipeIndex::ITEM_CHILD;
     Size startSize_;
     Size endSize_;
-    SwipeEdgeEffect edgeEffect_;
+    SwipeEdgeEffect edgeEffect_ = SwipeEdgeEffect::Spring;
+    RefPtr<ListItemTheme> theme_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderListItem);
 };

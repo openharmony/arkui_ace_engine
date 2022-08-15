@@ -28,22 +28,21 @@ RefPtr<RenderNode> ListItemElement::CreateRenderNode()
         return nullptr;
     }
     renderListItem->RegisterGetChildCallback(
-        [weak = AceType::WeakClaim(this)] (ListItemChildType type) {
-            auto nullRet = RefPtr<RenderNode>(nullptr);
+        [weak = AceType::WeakClaim(this)] (ListItemChildType type) -> RefPtr<RenderNode> {
             auto element = weak.Upgrade();
             if (!element) {
-                return nullRet;
+                return nullptr;
             }
             if (type == ListItemChildType::ITEM_CHILD) {
-                return element->itemChild_ ? element->itemChild_->GetRenderNode() : nullRet;
+                return element->itemChild_ ? element->itemChild_->GetRenderNode() : nullptr;
             }
             if (type == ListItemChildType::SWIPER_START) {
-                return element->swiperStartElement_ ? element->swiperStartElement_->GetRenderNode() : nullRet;
+                return element->swiperStartElement_ ? element->swiperStartElement_->GetRenderNode() : nullptr;
             }
             if (type == ListItemChildType::SWIPER_END) {
-                return element->swiperEndElement_ ? element->swiperEndElement_->GetRenderNode() : nullRet;
+                return element->swiperEndElement_ ? element->swiperEndElement_->GetRenderNode() : nullptr;
             }
-            return nullRet;
+            return nullptr;
         }
     );
     return renderListItem;
@@ -56,7 +55,11 @@ void ListItemElement::PerformBuild()
         return;
     }
     itemChild_ = UpdateChild(itemChild_, listItemComponent->GetChild());
-    swiperStartElement_ = UpdateChild(swiperStartElement_, listItemComponent->GetSwiperStartComponent());
-    swiperEndElement_ = UpdateChild(swiperEndElement_, listItemComponent->GetSwiperEndComponent());
+    if (swiperStartElement_ || listItemComponent->GetSwiperStartComponent()) {
+        swiperStartElement_ = UpdateChild(swiperStartElement_, listItemComponent->GetSwiperStartComponent());
+    }
+    if (swiperEndElement_ || listItemComponent->GetSwiperEndComponent()) {
+        swiperEndElement_ = UpdateChild(swiperEndElement_, listItemComponent->GetSwiperEndComponent());
+    }
 }
 } // namespace OHOS::Ace::V2

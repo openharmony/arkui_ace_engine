@@ -26,8 +26,13 @@ namespace {
 
 constexpr Dimension ICON_WIDTH = 24.0_px;
 constexpr Dimension BUTTON_WIDTH = 72.0_px;
+
 constexpr double SWIPER_TH = 0.25;
 constexpr double SWIPER_SPEED_TH = 1200;
+constexpr double SWIPE_RATIO = 0.6;
+constexpr double SWIPE_SPRING_MASS = 1;
+constexpr double SWIPE_SPRING_STIFFNESS = 228;
+constexpr double SWIPE_SPRING_DAMPING = 30;
 
 } // namespace
 
@@ -63,6 +68,10 @@ void RenderListItem::Update(const RefPtr<Component>& component)
     } else {
         dragDetector_.Reset();
         springController_.Reset();
+    }
+    theme_ = GetTheme<ListItemTheme>();
+    if (!theme_) {
+        LOGE("theme is null");
     }
 
     MarkNeedLayout();
@@ -304,13 +313,13 @@ void RenderListItem::HandleDragStart(const DragStartInfo& info)
     }
 }
 
-static double CalculateFriction(double gamma)
+double RenderListItem::CalculateFriction(double gamma)
 {
-    constexpr double SCROLL_RATIO = 0.72;
+    double ratio = theme_ ? theme_->GetItemSwipeRatio() : SWIPE_RATIO;
     if (GreatOrEqual(gamma, 1.0)) {
         gamma = 1.0;
     }
-    return SCROLL_RATIO * std::pow(1.0 - gamma, SQUARE);
+    return ratio * std::pow(1.0 - gamma, SQUARE);
 }
 
 double RenderListItem::GetFriction()
@@ -365,11 +374,11 @@ void RenderListItem::StartSpringMotion(double start, double end, double velocity
         return;
     }
 
-    constexpr double SPRING_SCROLL_MASS = 1;
-    constexpr double SPRING_SCROLL_STIFFNESS = 228;
-    constexpr double SPRING_SCROLL_DAMPING = 30;
+    double mass = theme_ ? theme_->GetItemSwipeSpringMass() : SWIPE_SPRING_MASS;
+    double stiffness = theme_ ? theme_->GetItemSwipeSpringStiffness() : SWIPE_SPRING_STIFFNESS;
+    double damping = theme_ ? theme_->GetItemSwipeSpringDamping() : SWIPE_SPRING_DAMPING;
     const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
-    AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
+    AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
 
     springMotion_ = AceType::MakeRefPtr<SpringMotion>(start, end, velocity, DEFAULT_OVER_SPRING_PROPERTY);
     springMotion_->AddListener([weakScroll = AceType::WeakClaim(this), start, end](double position) {
@@ -399,28 +408,32 @@ void RenderListItem::HandleDragEnd(const DragEndInfo& info)
 {
     double end = 0;
     double friction = GetFriction();
-    bool reachRightSpeed = info.GetMainVelocity() > SWIPER_SPEED_TH;
-    bool reachLeftSpeed = -info.GetMainVelocity() > SWIPER_SPEED_TH;
+    double threshold = theme_ ? theme_->GetItemSwipeThreshold() : SWIPER_TH;
+    double speedThreshold = theme_ ? theme_->GetItemSwipeSpeedThreshold() : SWIPER_SPEED_TH;
+    bool reachRightSpeed = info.GetMainVelocity() > speedThreshold;
+    bool reachLeftSpeed = -info.GetMainVelocity() > speedThreshold;
     if (GreatNotEqual(curOffset_, 0.0) && swiperStart_) {
         double width = startSize_.Width();
-        if (currPage_ == 0 && (curOffset_ > width * SWIPER_TH || reachRightSpeed)) {
-            currPage_ = 1;
-        } else if (currPage_ == 1 && (curOffset_ < width * (1 - SWIPER_TH) || reachLeftSpeed)) {
-            currPage_ = 0;
-        } else if (currPage_ < 0) {
-            currPage_ = 0;
+        if (swipeIndex == ListItemSwipeIndex::ITEM_CHILD && (curOffset_ > width * threshold || reachRightSpeed)) {
+            swipeIndex = ListItemSwipeIndex::SWIPER_START;
+        } else if (swipeIndex == ListItemSwipeIndex::SWIPER_START &&
+            (curOffset_ < width * (1 - threshold) || reachLeftSpeed)) {
+            swipeIndex = ListItemSwipeIndex::ITEM_CHILD;
+        } else if (swipeIndex == ListItemSwipeIndex::SWIPER_END) {
+            swipeIndex = ListItemSwipeIndex::ITEM_CHILD;
         }
-        end = width * currPage_;
+        end = width * static_cast<int32_t>(swipeIndex);
     } else if (LessNotEqual(curOffset_, 0.0) && swiperEnd_) {
         double width = endSize_.Width();
-        if (currPage_ == 0 && (width * SWIPER_TH < -curOffset_ || reachLeftSpeed)) {
-            currPage_ = -1;
-        } else if (currPage_ == -1 && (-curOffset_ < width * (1 - SWIPER_TH) || reachRightSpeed)) {
-            currPage_ = 0;
-        } else if (currPage_ > 0) {
-            currPage_ = 0;
+        if (swipeIndex == ListItemSwipeIndex::ITEM_CHILD && (width * threshold < -curOffset_ || reachLeftSpeed)) {
+            swipeIndex = ListItemSwipeIndex::SWIPER_END;
+        } else if (swipeIndex == ListItemSwipeIndex::SWIPER_END &&
+            (-curOffset_ < width * (1 - threshold) || reachRightSpeed)) {
+            swipeIndex = ListItemSwipeIndex::ITEM_CHILD;
+        } else if (swipeIndex == ListItemSwipeIndex::SWIPER_START) {
+            swipeIndex = ListItemSwipeIndex::ITEM_CHILD;
         }
-        end = width * currPage_;
+        end = width * static_cast<int32_t>(swipeIndex);
     }
     StartSpringMotion(curOffset_, end, info.GetMainVelocity() * friction);
 }
@@ -434,7 +447,7 @@ void RenderListItem::OnTouchTestHit(
 
     RefPtr<RenderNode> parent = GetParent().Upgrade();
     RefPtr<RenderList> renderList = AceType::DynamicCast<RenderList>(parent);
-    if (!renderList || !renderList->GetDirection()) {
+    if (!renderList || !renderList->IsVertical()) {
         return;
     }
 

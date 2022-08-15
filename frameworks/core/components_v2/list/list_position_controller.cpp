@@ -44,7 +44,7 @@ Axis ListPositionController::GetScrollDirection() const
     if (!list) {
         return Axis::NONE;
     }
-    return list->GetDirection() ? Axis::VERTICAL : Axis::HORIZONTAL;
+    return list->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
 }
 
 Offset ListPositionController::GetCurrentOffset() const
