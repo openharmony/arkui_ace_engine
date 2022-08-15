@@ -32,6 +32,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const V2::StickyMode STICKY_MODE_TABLE[] = { V2::StickyMode::NONE, V2::StickyMode::NORMAL, V2::StickyMode::OPACITY };
+const V2::SwipeEdgeEffect SWIPE_EDGE_EFFECT_TABLE[] = { V2::SwipeEdgeEffect::Spring, V2::SwipeEdgeEffect::None };
 
 } // namespace
 
@@ -146,6 +147,44 @@ void JSListItem::SetSelectable(bool selectable)
     }
 }
 
+void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        LOGE("fail to bind SwiperAction event due to info is not object");
+        return;
+    }
+    auto listItem = AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!listItem) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListItemComponent>());
+        return;
+    }
+    
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    auto startObject = obj->GetProperty("start");
+    if (startObject->IsFunction()) {
+        ScopedViewStackProcessor builderViewStackProcessor;
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(startObject));
+        builderFunc->Execute();
+        RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
+        listItem->SetSwiperStartComponent(customComponent);
+    }
+
+    auto endObject = obj->GetProperty("end");
+    if (endObject->IsFunction()) {
+        ScopedViewStackProcessor builderViewStackProcessor;
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(endObject));
+        builderFunc->Execute();
+        RefPtr<Component> customComponent = ViewStackProcessor::GetInstance()->Finish();
+        listItem->SetSwiperEndComponent(customComponent);
+    }
+
+    auto edgeEffect = obj->GetProperty("edgeEffect");
+    if (edgeEffect->IsNumber()) {
+        JSViewSetProperty(&V2::ListItemComponent::SetEdgeEffect, edgeEffect->ToNumber<int32_t>(),
+            SWIPE_EDGE_EFFECT_TABLE, V2::SwipeEdgeEffect::Spring);
+    }
+}
+
 void JSListItem::SelectCallback(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
@@ -186,6 +225,7 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("selectable", &JSListItem::SetSelectable);
     JSClass<JSListItem>::StaticMethod("onSelect", &JSListItem::SelectCallback);
     JSClass<JSListItem>::StaticMethod("borderRadius", &JSListItem::JsBorderRadius);
+    JSClass<JSListItem>::StaticMethod("swipeAction", &JSListItem::SetSwiperAction);
 
     JSClass<JSListItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSListItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);

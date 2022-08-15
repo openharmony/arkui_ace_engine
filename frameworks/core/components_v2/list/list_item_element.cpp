@@ -14,7 +14,52 @@
  */
 
 #include "core/components_v2/list/list_item_element.h"
+#include "core/components_v2/list/list_item_component.h"
+#include "core/components_v2/list/render_list_item.h"
+#include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace::V2 {
 
+RefPtr<RenderNode> ListItemElement::CreateRenderNode()
+{
+    auto renderListItem = AceType::DynamicCast<RenderListItem>(RenderElement::CreateRenderNode());
+    if (!renderListItem) {
+        LOGE("Failed to create render node for list element");
+        return nullptr;
+    }
+    renderListItem->RegisterGetChildCallback(
+        [weak = AceType::WeakClaim(this)] (ListItemChildType type) -> RefPtr<RenderNode> {
+            auto element = weak.Upgrade();
+            if (!element) {
+                return nullptr;
+            }
+            if (type == ListItemChildType::ITEM_CHILD) {
+                return element->itemChild_ ? element->itemChild_->GetRenderNode() : nullptr;
+            }
+            if (type == ListItemChildType::SWIPER_START) {
+                return element->swiperStartElement_ ? element->swiperStartElement_->GetRenderNode() : nullptr;
+            }
+            if (type == ListItemChildType::SWIPER_END) {
+                return element->swiperEndElement_ ? element->swiperEndElement_->GetRenderNode() : nullptr;
+            }
+            return nullptr;
+        }
+    );
+    return renderListItem;
+}
+
+void ListItemElement::PerformBuild()
+{
+    auto listItemComponent = AceType::DynamicCast<ListItemComponent>(component_);
+    if (!listItemComponent) {
+        return;
+    }
+    itemChild_ = UpdateChild(itemChild_, listItemComponent->GetChild());
+    if (swiperStartElement_ || listItemComponent->GetSwiperStartComponent()) {
+        swiperStartElement_ = UpdateChild(swiperStartElement_, listItemComponent->GetSwiperStartComponent());
+    }
+    if (swiperEndElement_ || listItemComponent->GetSwiperEndComponent()) {
+        swiperEndElement_ = UpdateChild(swiperEndElement_, listItemComponent->GetSwiperEndComponent());
+    }
+}
 } // namespace OHOS::Ace::V2

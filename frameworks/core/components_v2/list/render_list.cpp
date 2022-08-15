@@ -1609,7 +1609,7 @@ void RenderList::AnimateTo(const Dimension& position, float duration, const RefP
         animator_->Stop();
     }
     animator_->ClearInterpolators();
-    auto pos = NormalizePercentToPx(position, GetDirection());
+    auto pos = NormalizePercentToPx(position, IsVertical());
     double currentOffset = startIndexOffset_ - currentOffset_;
     auto animation = AceType::MakeRefPtr<CurveAnimation<double>>(currentOffset, pos, curve);
     animation->AddListener([weak = AceType::WeakClaim(this)](double pos) {

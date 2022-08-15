@@ -27,7 +27,15 @@ public:
     ListItemElement() = default;
     ~ListItemElement() override = default;
 
+    void PerformBuild() override;
+
 private:
+    RefPtr<RenderNode> CreateRenderNode() override;
+
+    RefPtr<Element> itemChild_;
+    RefPtr<Element> swiperStartElement_;
+    RefPtr<Element> swiperEndElement_;
+
     ACE_DISALLOW_COPY_AND_MOVE(ListItemElement);
 };
 

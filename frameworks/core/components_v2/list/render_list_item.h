@@ -19,9 +19,24 @@
 #include "base/geometry/dimension.h"
 #include "core/components_v2/list/list_item_component.h"
 #include "core/gestures/long_press_recognizer.h"
+#include "core/gestures/drag_recognizer.h"
 #include "core/pipeline/base/render_node.h"
+#include "core/animation/spring_motion.h"
+#include "core/components/list/list_item_theme.h"
 
 namespace OHOS::Ace::V2 {
+
+enum class ListItemChildType {
+    ITEM_CHILD,
+    SWIPER_START,
+    SWIPER_END
+};
+
+enum class ListItemSwipeIndex {
+    SWIPER_END = -1,
+    ITEM_CHILD = 0,
+    SWIPER_START = 1,
+};
 
 class RenderListItem : public RenderNode {
     DECLARE_ACE_TYPE(V2::RenderListItem, RenderNode);
@@ -36,9 +51,6 @@ public:
     void PerformLayout() override;
     void Paint(RenderContext& context, const Offset& offset) override;
     void UpdateTouchRect() override;
-
-    void OnChildAdded(const RefPtr<RenderNode>& child) override;
-    void OnChildRemoved(const RefPtr<RenderNode>& child) override;
 
     bool IsDeletable() const
     {
@@ -107,11 +119,48 @@ public:
     {
         return index_;
     }
+
+    void RegisterGetChildCallback(std::function<RefPtr<RenderNode>(ListItemChildType)> callback)
+    {
+        getChildCallback_ = std::move(callback);
+    }
+
+    RefPtr<RenderNode> GetSwiperStartRnderNode() const
+    {
+        return getChildCallback_ ? getChildCallback_(ListItemChildType::SWIPER_START) : nullptr;
+    }
+
+    RefPtr<RenderNode> GetSwiperEndRnderNode() const
+    {
+        return getChildCallback_ ? getChildCallback_(ListItemChildType::SWIPER_END) : nullptr;
+    }
+
+    RefPtr<RenderNode> GetItemChildRnderNode() const
+    {
+        return getChildCallback_ ? getChildCallback_(ListItemChildType::ITEM_CHILD) : nullptr;
+    }
+
+protected:
+    void OnTouchTestHit(
+        const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+
 private:
     int index_ = -1;
     void CreateDeleteButton();
+    void PerfLayoutSwiperMode();
+    void InitDragRecognizer();
+    void HandleDragStart(const DragStartInfo& info);
+    void HandleDragUpdate(const DragUpdateInfo& info);
+    void HandleDragEnd(const DragEndInfo& info);
+    void StartSpringMotion(double start, double end, double velocity);
+    double GetFriction();
+    void UpdatePostion(double delta);
+    double CalculateFriction(double gamma);
 
     RefPtr<ListItemComponent> component_;
+    std::function<RefPtr<RenderNode>(ListItemChildType)> getChildCallback_;
+    RefPtr<RenderNode> swiperStart_;
+    RefPtr<RenderNode> swiperEnd_;
 
     RefPtr<RenderNode> child_;
     RefPtr<RenderNode> button_;
@@ -122,6 +171,16 @@ private:
     bool selectable_ = true;
     bool isSelected_ = false;
     Dimension borderRadius_;
+
+    double curOffset_ = 0.0;
+    RefPtr<DragRecognizer> dragDetector_;
+    RefPtr<Animator> springController_;
+    RefPtr<SpringMotion> springMotion_;
+    ListItemSwipeIndex swipeIndex = ListItemSwipeIndex::ITEM_CHILD;
+    Size startSize_;
+    Size endSize_;
+    SwipeEdgeEffect edgeEffect_ = SwipeEdgeEffect::Spring;
+    RefPtr<ListItemTheme> theme_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderListItem);
 };

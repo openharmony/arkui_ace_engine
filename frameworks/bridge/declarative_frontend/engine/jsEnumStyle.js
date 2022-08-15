@@ -293,6 +293,12 @@ var EdgeEffect;
   EdgeEffect[EdgeEffect["None"] = 2] = "None";
 })(EdgeEffect || (EdgeEffect = {}));
 
+var SwipeEdgeEffect;
+(function (SwipeEdgeEffect) {
+  SwipeEdgeEffect[SwipeEdgeEffect["Spring"] = 0] = "Spring";
+  SwipeEdgeEffect[SwipeEdgeEffect["None"] = 1] = "None";
+})(SwipeEdgeEffect || (SwipeEdgeEffect = {}));
+
 var ScrollState;
 (function (ScrollState) {
   ScrollState[ScrollState["Idle"] = 0] = "Idle";

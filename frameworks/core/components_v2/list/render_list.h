@@ -118,7 +118,7 @@ public:
         return initialIndex_;
     }
 
-    bool GetDirection() const
+    bool IsVertical() const
     {
         return vertical_;
     }

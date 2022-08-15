@@ -31,6 +31,11 @@ enum class StickyMode {
     OPACITY,
 };
 
+enum class SwipeEdgeEffect {
+    Spring = 0,
+    None,
+};
+
 struct EditMode {
     enum : uint32_t {
         NONE = 0,
@@ -57,6 +62,7 @@ public:
     ACE_DEFINE_COMPONENT_PROP(Sticky, StickyMode, StickyMode::NONE);
     ACE_DEFINE_COMPONENT_PROP(EditMode, uint32_t, EditMode::NONE);
     ACE_DEFINE_COMPONENT_PROP(BorderRadius, Dimension, 0.0_vp);
+    ACE_DEFINE_COMPONENT_PROP(EdgeEffect, SwipeEdgeEffect, SwipeEdgeEffect::Spring);
 
     static RefPtr<ListItemComponent> FindListItem(const RefPtr<Component>& component);
 
@@ -70,6 +76,26 @@ public:
     void SetSelectable(bool selectable)
     {
         selectable_ = selectable;
+    }
+
+    void SetSwiperStartComponent(RefPtr<Component> component)
+    {
+        swiperStartComponent_ = component;
+    }
+
+    RefPtr<Component> GetSwiperStartComponent()
+    {
+        return swiperStartComponent_;
+    }
+
+    void SetSwiperEndComponent(RefPtr<Component> component)
+    {
+        swiperEndComponent_ = component;
+    }
+
+    RefPtr<Component> GetSwiperEndComponent()
+    {
+        return swiperEndComponent_;
     }
 
     OnSelectFunc GetOnSelectId() const
@@ -114,6 +140,8 @@ private:
     DeepRenderFunc deepRenderFunc_ = nullptr;
     bool isLazyCreating_ = false;
     bool selectable_ = true;
+    RefPtr<Component> swiperStartComponent_;
+    RefPtr<Component> swiperEndComponent_;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemComponent);
 };
 

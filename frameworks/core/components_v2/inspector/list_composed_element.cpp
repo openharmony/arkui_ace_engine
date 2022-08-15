@@ -102,7 +102,7 @@ std::string ListComposedElement::GetListDirection() const
     }
     auto renderList = AceType::DynamicCast<RenderList>(node);
     if (renderList) {
-        return renderList->GetDirection() ? "Axis.Vertical" : "Axis.Horizontal";
+        return renderList->IsVertical() ? "Axis.Vertical" : "Axis.Horizontal";
     }
     return "Axis.Vertical";
 }

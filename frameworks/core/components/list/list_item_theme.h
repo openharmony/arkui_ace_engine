@@ -127,6 +127,30 @@ public:
     {
         return groupImageSize_;
     }
+    double GetItemSwipeThreshold() const
+    {
+        return swipeThreshold_;
+    }
+    double GetItemSwipeSpeedThreshold() const
+    {
+        return swipeSpeedThreshold_;
+    }
+    double GetItemSwipeRatio() const
+    {
+        return swipeRatio_;
+    }
+    double GetItemSwipeSpringMass() const
+    {
+        return swipeSpringMass_;
+    }
+    double GetItemSwipeSpringStiffness() const
+    {
+        return swipeSpringStiffness_;
+    }
+    double GetItemSwipeSpringDamping() const
+    {
+        return swipeSpringDamping_;
+    }
 
 protected:
     ListItemTheme() = default;
@@ -146,6 +170,12 @@ private:
     double focusAnimationDuration_ = 100.0;
     double clickAnimationDuration_ = 200.0;
     double paddingInPercent_ = 0.0;
+    double swipeThreshold_ = 0.25;
+    double swipeSpeedThreshold_ = 1200;
+    double swipeRatio_ = 0.6;
+    double swipeSpringMass_ = 1;
+    double swipeSpringStiffness_ = 228;
+    double swipeSpringDamping_ = 30;
     Dimension itemSize_;
     Dimension groupImageSize_;
 };
