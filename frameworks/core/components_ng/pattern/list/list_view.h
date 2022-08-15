@@ -20,6 +20,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_v2/list/list_component.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,6 +31,10 @@ public:
     static void SetInitialIndex(const int32_t& initialIndex);
     static void SetListDirection(Axis axis);
     static void SetEdgeEffect(EdgeEffect edgeEffect);
+    static void SetLanes(int32_t lanes);
+    static void SetLaneMinLength(Dimension laneMinLength);
+    static void SetLaneMaxLength(Dimension laneMaxLength);
+    static void SetListItemAlign(V2::ListItemAlign listItemAlign);
 };
 
 } // namespace OHOS::Ace::NG
