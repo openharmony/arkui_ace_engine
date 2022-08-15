@@ -448,7 +448,7 @@ void ListLayoutAlgorithm::CalculateLanes(const LayoutConstraintF& layoutConstrai
         lanes = 1;
         LOGE("unexpected situation, set lanes to 1, maxLanes: %{public}f, minLanes: %{public}f, minLaneLength_: "
             "%{public}f, maxLaneLength_: %{public}f", maxLanes, minLanes, minLaneLength_, maxLaneLength_);
-    } while(0);
+    } while (0);
 }
 
 void ListLayoutAlgorithm::ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis)
