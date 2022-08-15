@@ -59,12 +59,12 @@ public:
     {
         return endIndex_.value_or(0);
     }
-    
-    const PositionMap& GetItemPosition() const
-    {
-        return itemPosition_;
-    }
 
+    void SetItemPosition(PositionMap& itemPosition)
+    {
+        itemPosition_ = itemPosition;
+    }
+    
     const PositionMap& GetItemPosition() const
     {
         return itemPosition_;
