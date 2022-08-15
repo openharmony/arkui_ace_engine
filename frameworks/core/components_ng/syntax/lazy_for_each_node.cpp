@@ -22,11 +22,18 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<LazyForEachNode> LazyForEachNode::CreateLazyForEachNode(
+RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
     int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
 {
-    auto node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
-    node->SetContext(PipelineContext::GetCurrentContext());
+    auto node = ElementRegister::GetInstance()->GetSpecificItemById<LazyForEachNode>(nodeId);
+    if (node) {
+        if (node->builder_ != forEachBuilder) {
+            LOGW("replace old lazy for each builder");
+            node->builder_ = forEachBuilder;
+        }
+        return node;
+    }
+    node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
 }

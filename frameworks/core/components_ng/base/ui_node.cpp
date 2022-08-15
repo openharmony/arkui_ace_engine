@@ -154,8 +154,9 @@ void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 void UINode::MarkNeedSyncRenderTree()
 {
     auto parent = parent_.Upgrade();
-    CHECK_NULL_VOID(parent);
-    parent->MarkNeedSyncRenderTree();
+    if (parent) {
+        parent->MarkNeedSyncRenderTree();
+    }
 }
 
 void UINode::OnDetachFromMainTree()
@@ -194,16 +195,9 @@ void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool f
     }
 }
 
-void UINode::SetContext(const RefPtr<PipelineContext>& context)
+RefPtr<PipelineContext> UINode::GetContext()
 {
-    CHECK_NULL_VOID(context);
-    context_ = context;
-    OnContextAttached();
-}
-
-RefPtr<PipelineContext> UINode::GetContext() const
-{
-    return context_.Upgrade();
+    return PipelineContext::GetCurrentContext();
 }
 
 bool UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,

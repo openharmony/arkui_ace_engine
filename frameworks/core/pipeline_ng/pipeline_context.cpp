@@ -24,6 +24,7 @@
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
@@ -59,11 +60,26 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 void PipelineContext::AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);
-    if (!dirtyNode) {
-        LOGW("dirtyElement is null");
-        return;
-    }
+    CHECK_NULL_VOID(dirtyNode);
     dirtyNodes_.emplace(dirtyNode);
+    hasIdleTasks_ = true;
+    window_->RequestFrame();
+}
+
+void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(dirty);
+    UITaskScheduler::GetInstance()->AddDirtyLayoutNode(dirty);
+    hasIdleTasks_ = true;
+    window_->RequestFrame();
+}
+
+void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(dirty);
+    UITaskScheduler::GetInstance()->AddDirtyRenderNode(dirty);
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -186,7 +202,6 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         layoutConstraint.maxSize = idealSize;
         rootNode_->UpdateLayoutConstraint(layoutConstraint);
         rootNode_->MarkDirtyNode();
-        UITaskScheduler::GetInstance()->FlushLayoutTask(false, true);
     }
 }
 

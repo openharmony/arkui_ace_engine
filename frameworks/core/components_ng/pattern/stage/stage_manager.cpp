@@ -15,10 +15,12 @@
 
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
+#include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/page/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -45,7 +47,11 @@ void StageManager::PushPage(const RefPtr<UINode>& node)
     // TODO: change page index
     stagePattern_->currentPageIndex_ = 0;
     // flush layout task.
-    rootNode_->MarkDirtyNode();
-    UITaskScheduler::GetInstance()->FlushLayoutTask(true, true);
+    if (rootNode_->GetGeometryNode()->GetFrameSize() == SizeF(0.0f, 0.0f)) {
+        // in first load case, wait for window size.
+        LOGI("waiting for window size");
+        return;
+    }
+    rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

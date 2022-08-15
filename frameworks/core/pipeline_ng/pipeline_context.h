@@ -151,6 +151,10 @@ public:
 
     void AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode);
 
+    void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
+
+    void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;

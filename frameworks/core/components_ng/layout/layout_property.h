@@ -141,8 +141,7 @@ public:
         }
     }
 
-    void UpdateContentConstraint(
-        const std::optional<LayoutConstraintF>& replace = std::nullopt, bool updateFlag = false);
+    void UpdateContentConstraint();
 
     std::optional<LayoutConstraintF> CreateChildConstraint() const
     {

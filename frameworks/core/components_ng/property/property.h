@@ -98,6 +98,32 @@ public:                                                                    \
         }                                                                  \
         groupProperty->Update##name(value);                                \
         UpdatePropertyChangeFlag(#name, changeFlag);                       \
+    }                                                                      \
+    std::optional<type> Get##name() const                                  \
+    {                                                                      \
+        auto& groupProperty = Get##group();                                \
+        if (groupProperty) {                                               \
+            return groupProperty->Get##name();                             \
+        }                                                                  \
+        return std::nullopt;                                               \
+    }                                                                      \
+    bool Has##name() const                                                 \
+    {                                                                      \
+        auto& groupProperty = Get##group();                                \
+        if (groupProperty) {                                               \
+            return groupProperty->Has##name();                             \
+        }                                                                  \
+        return false;                                                      \
+    }                                                                      \
+    type Get##name##Value(const type& defaultValue) const                  \
+    {                                                                      \
+        auto& groupProperty = Get##group();                                \
+        if (groupProperty) {                                               \
+            if (groupProperty->Has##name()) {                              \
+                return groupProperty->Get##name##Value();                  \
+            }                                                              \
+        }                                                                  \
+        return defaultValue;                                               \
     }
 
 #define ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(name, type, changeFlag) \

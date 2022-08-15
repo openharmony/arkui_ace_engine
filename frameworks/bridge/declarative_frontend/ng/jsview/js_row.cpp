@@ -22,7 +22,16 @@ namespace OHOS::Ace::Framework {
 
 void JSRow::Create(const JSCallbackInfo& info)
 {
-    NG::RowView::Create();
+    std::optional<Dimension> space;
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> spaceVal = obj->GetProperty("space");
+        Dimension value;
+        if (ParseJsDimensionVp(spaceVal, value)) {
+            space = value;
+        }
+    }
+    NG::RowView::Create(space);
 }
 
 void JSRow::CreateWithWrap(const JSCallbackInfo& info) {}

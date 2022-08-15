@@ -67,9 +67,7 @@ public:
     }
     // Tree operation end.
 
-    void SetContext(const RefPtr<PipelineContext>& context);
-
-    RefPtr<PipelineContext> GetContext() const;
+    static RefPtr<PipelineContext> GetContext();
 
     // When FrameNode creates a layout task, the corresponding LayoutWrapper tree is created, and UINode needs to update
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
@@ -163,7 +161,6 @@ protected:
     virtual void OnDetachFromMainTree();
 
     std::list<RefPtr<UINode>> children_;
-    WeakPtr<PipelineContext> context_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
     int32_t depth_ = 0;

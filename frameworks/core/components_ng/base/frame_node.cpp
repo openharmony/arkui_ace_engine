@@ -21,6 +21,8 @@
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -74,6 +76,10 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
     if (frameNode->tag_ != tag) {
         LOGE("the tag is changed");
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
+        auto parent = frameNode->GetParent();
+        if (parent) {
+            parent->RemoveChild(frameNode);
+        }
         return nullptr;
     }
     return frameNode;
@@ -83,7 +89,6 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
-    frameNode->SetContext(PipelineContext::GetCurrentContext());
     frameNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(frameNode);
     return frameNode;
@@ -95,9 +100,14 @@ void FrameNode::InitializePatternAndContext()
     pattern_->AttachToFrameNode(WeakClaim(this));
     renderContext_->SetRequestFrame([weak = WeakClaim(this)] {
         auto frameNode = weak.Upgrade();
-        if (frameNode) {
-            frameNode->RequestNextFrame();
+        CHECK_NULL_VOID(frameNode);
+        if (frameNode->onMainTree_) {
+            auto context = frameNode->GetContext();
+            CHECK_NULL_VOID(context);
+            context->RequestFrame();
+            return;
         }
+        frameNode->hasPendingRequest_ = true;
     });
 }
 
@@ -111,14 +121,16 @@ void FrameNode::DumpInfo()
                                                    : "NA"));
 }
 
-void FrameNode::RequestNextFrame()
+void FrameNode::OnAttachToMainTree()
 {
-    auto context = GetContext();
-    if (context) {
-        context->RequestFrame();
-    } else {
-        hasPendingRequest_ = true;
+    UINode::OnAttachToMainTree();
+    if (!hasPendingRequest_) {
+        return;
     }
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RequestFrame();
+    hasPendingRequest_ = false;
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -345,7 +357,6 @@ void FrameNode::MarkModifyDone()
 void FrameNode::FlushUpdateAndMarkDirty()
 {
     MarkDirtyNode();
-    RequestNextFrame();
 }
 
 void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
@@ -373,6 +384,9 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     if (CheckNoChanged(flag)) {
         return;
     }
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+
     if (CheckNeedRequestMeasureAndLayout(flag)) {
         if (isLayoutDirtyMarked_) {
             return;
@@ -385,17 +399,18 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
             }
             return;
         }
-        UITaskScheduler::GetInstance()->AddDirtyLayoutNode(Claim(this));
+        context->AddDirtyLayoutNode(Claim(this));
         return;
     }
     layoutProperty_->CleanDirty();
+
     // If has dirtyLayoutBox, need to mark dirty after layout done.
     if (isRenderDirtyMarked_ || isLayoutDirtyMarked_) {
         return;
     }
     isRenderDirtyMarked_ = true;
     if (isRenderBoundary) {
-        UITaskScheduler::GetInstance()->AddDirtyRenderNode(Claim(this));
+        context->AddDirtyRenderNode(Claim(this));
         return;
     }
     auto parent = GetAncestorNodeOfFrame();

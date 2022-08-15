@@ -15,19 +15,28 @@
 
 #include "core/components_ng/pattern/linear_layout/row_view.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void RowView::Create()
+void RowView::Create(const std::optional<Dimension>& space)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     stack->Push(frameNode);
+    if (!space) {
+        return;
+    }
+    if (GreatOrEqual(space->Value(), 0.0)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value());
+    } else {
+        LOGE("Row: the space value is illegal due to space is less than zero");
+    }
 }
 
 void RowView::AlignItems(FlexAlign flexAlign)

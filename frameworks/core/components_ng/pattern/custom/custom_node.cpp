@@ -27,7 +27,6 @@ namespace OHOS::Ace::NG {
 RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::string& viewKey)
 {
     auto node = MakeRefPtr<CustomNode>(nodeId, viewKey);
-    node->SetContext(PipelineContext::GetCurrentContext());
     node->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(node);
     return node;

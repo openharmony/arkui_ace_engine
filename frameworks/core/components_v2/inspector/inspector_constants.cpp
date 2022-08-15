@@ -54,8 +54,12 @@ const char ROOT_ETS_TAG[] = "root";
 const char PAGE_ETS_TAG[] = "page";
 // js custom view
 const char JS_VIEW_ETS_TAG[] = "JsView";
-// js lazy foreach view
+// js lazy foreach node
 const char JS_LAZY_FOR_EACH_ETS_TAG[] = "LazyForEach";
+// js lazy foreach node
+const char JS_FOR_EACH_ETS_TAG[] = "ForEach";
+// js if lese node
+const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
 
 // column
 const char COLUMN_COMPONENT_TAG[] = "ColumnComponent";

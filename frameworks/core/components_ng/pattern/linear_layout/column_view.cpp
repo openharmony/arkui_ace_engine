@@ -22,13 +22,21 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void ColumnView::Create()
+void ColumnView::Create(const std::optional<Dimension>& space)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     stack->Push(frameNode);
+    if (!space) {
+        return;
+    }
+    if (GreatOrEqual(space->Value(), 0.0)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value());
+    } else {
+        LOGE("Column: the space value is illegal due to space is less than zero");
+    }
 }
 
 void ColumnView::AlignItems(FlexAlign flexAlign)

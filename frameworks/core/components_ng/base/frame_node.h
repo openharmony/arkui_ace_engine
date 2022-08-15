@@ -32,8 +32,8 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_node.h"
 
 namespace OHOS::Ace::NG {
@@ -137,8 +137,6 @@ public:
 
     bool IsAtomicNode() const override;
 
-    void RequestNextFrame();
-
 private:
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
@@ -167,7 +165,7 @@ private:
     bool IsRenderBoundary();
 
     void OnDetachFromMainTree() override {}
-    void OnAttachToMainTree() override {}
+    void OnAttachToMainTree() override;
 
     // dump self info.
     void DumpInfo() override;

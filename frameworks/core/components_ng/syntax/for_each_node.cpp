@@ -13,22 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_VIEW_H
+#include "core/components_ng/syntax/for_each_node.h"
 
-#include <optional>
-#include <string>
-
-#include "base/geometry/dimension.h"
-#include "base/utils/macros.h"
-#include "core/components/common/layout/constants.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ColumnView {
-public:
-    static void Create(const std::optional<Dimension>& space);
-    static void AlignItems(FlexAlign flexAlign);
-};
-} // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_VIEW_H
+RefPtr<ForEachNode> ForEachNode::GetOrCreateLazyForEachNode(int32_t nodeId)
+{
+    auto node = ElementRegister::GetInstance()->GetSpecificItemById<ForEachNode>(nodeId);
+    if (node) {
+        return node;
+    }
+    node = MakeRefPtr<ForEachNode>(nodeId);
+    ElementRegister::GetInstance()->AddUINode(node);
+    return node;
+}
+
+} // namespace OHOS::Ace::NG

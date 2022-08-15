@@ -15,23 +15,28 @@
 
 #include "core/components_ng/property/measure_utils.h"
 
+#include <optional>
+
+#include "base/geometry/ng/size_t.h"
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& parentSize)
 {
     auto width = ConvertToPx(size.Width(), scaleProperty, parentSize.Width());
     auto height = ConvertToPx(size.Height(), scaleProperty, parentSize.Height());
-    return { width, height };
+    return { width.value_or(-1.0f), height.value_or(-1.0f) };
 }
 
-float ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty, float parentLength)
+std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty, float parentLength)
 {
     double result = -1.0;
     if (!value.NormalizeToPx(
             scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength, result)) {
         LOGE("fail to Convert CalcDimension To Px: %{public}f, %{public}f, %{public}f, %{public}f",
             scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength);
+        return std::nullopt;
     }
     return static_cast<float>(result);
 }
@@ -52,13 +57,14 @@ std::optional<float> ConvertToPx(
     return static_cast<float>(result);
 }
 
-float ConvertToPx(const Dimension& dimension, const ScaleProperty& scaleProperty, float parentLength)
+std::optional<float> ConvertToPx(const Dimension& dimension, const ScaleProperty& scaleProperty, float parentLength)
 {
     double result = -1.0;
     if (!dimension.NormalizeToPx(
             scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength, result)) {
         LOGE("fail to Convert dimension To Px: %{public}f, %{public}f, %{public}f, %{public}f", scaleProperty.vpScale,
             scaleProperty.fpScale, scaleProperty.lpxScale, parentLength);
+        return std::nullopt;
     }
     return static_cast<float>(result);
 }
@@ -96,22 +102,22 @@ void MinusPaddingToConstraint(const PaddingProperty& padding, LayoutConstraintF&
 }
 
 PaddingPropertyF ConvertToPaddingPropertyF(
-    const std::unique_ptr<PaddingProperty>& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize)
+    const std::unique_ptr<PaddingProperty>& padding, const ScaleProperty& scaleProperty, float parentWidth)
 {
     if (!padding) {
         return {};
     }
-    return ConvertToPaddingPropertyF(*padding, scaleProperty, selfSize);
+    return ConvertToPaddingPropertyF(*padding, scaleProperty, parentWidth);
 }
 
 PaddingPropertyF ConvertToPaddingPropertyF(
-    const PaddingProperty& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize)
+    const PaddingProperty& padding, const ScaleProperty& scaleProperty, float parentWidth)
 {
-    auto left = ConvertToPx(padding.left, scaleProperty, selfSize.Width());
-    auto right = ConvertToPx(padding.right, scaleProperty, selfSize.Width());
-    auto top = ConvertToPx(padding.top, scaleProperty, selfSize.Height());
-    auto bottom = ConvertToPx(padding.bottom, scaleProperty, selfSize.Height());
-    return { left, right, top, bottom };
+    auto left = ConvertToPx(padding.left, scaleProperty, parentWidth);
+    auto right = ConvertToPx(padding.right, scaleProperty, parentWidth);
+    auto top = ConvertToPx(padding.top, scaleProperty, parentWidth);
+    auto bottom = ConvertToPx(padding.bottom, scaleProperty, parentWidth);
+    return PaddingPropertyF { left, right, top, bottom };
 }
 
 void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize,

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
@@ -30,8 +31,8 @@ void LinearLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto linearLayoutProperty = DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty());
     if (linearLayoutProperty) {
-        LinearLayoutUtils::Layout(
-            layoutWrapper, linearLayoutProperty->IsVertical(), linearLayoutProperty->GetCrossAxisAlign());
+        LinearLayoutUtils::Layout(layoutWrapper, linearLayoutProperty->IsVertical(),
+            linearLayoutProperty->GetCrossAxisAlignValue(FlexAlign::CENTER));
     } else {
         LOGW("fail to cast to LinearLayoutProperty");
     }

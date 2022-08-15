@@ -13,22 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_H
 
-#include <optional>
+#include <cstdint>
+#include <functional>
 #include <string>
+#include <vector>
 
-#include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
-#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ColumnView {
+struct ForEachFunc {
+    std::function<std::vector<std::string>()> idGenFunc_;
+    std::function<void(int32_t index)> itemGenFunc_;
+};
+
+class ACE_EXPORT ForEach {
 public:
-    static void Create(const std::optional<Dimension>& space);
-    static void AlignItems(FlexAlign flexAlign);
+    static void Create(const ForEachFunc& ForEachFunc);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_H
