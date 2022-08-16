@@ -24,6 +24,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/frontend.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/settings.h"
@@ -197,15 +198,20 @@ public:
         partialUpdate_ = true;
     }
 
-    static bool IsCurrentUsePartialUpdate()
-    {
-        auto container = Current();
-        return container ? container->partialUpdate_ : false;
-    }
-
     bool IsUseNewPipeline() const
     {
         return useNewPipeline_;
+    }
+
+    static bool IsCurrentUsePartialUpdate()
+    {
+        auto container = Current();
+        CHECK_NULL_RETURN(container, false);
+        if (container->partialUpdate_) {
+            return true;
+        }
+        auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
+        return !(packageName.empty()) && (packageName == SystemProperties::GetPartialUpdatePkg());
     }
 
     Window* GetWindow()
