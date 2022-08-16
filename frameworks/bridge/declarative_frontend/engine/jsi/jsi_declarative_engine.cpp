@@ -1147,18 +1147,18 @@ void JsiDeclarativeEngine::FireExternalEvent(
     auto arkObjectRef = arkNativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, arguments,
         OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_));
 
-    if (arkObjectRef.CheckException()) {
+    auto runtime = engineInstance_->GetJsRuntime();
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkObjectRef.IsEmpty() || pandaRuntime->HasPendingException()) {
         LOGE("LoadModuleByName failed.");
         return;
     }
 
-    auto runtime = engineInstance_->GetJsRuntime();
     renderContext_ = runtime->NewObject();
     auto renderContext = std::static_pointer_cast<ArkJSValue>(renderContext_);
-    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
     Local<ObjectRef> objXComp = arkObjectRef->ToObject(pandaRuntime->GetEcmaVm());
-    if (objXComp.CheckException()) {
+    if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
         LOGE("Get local object failed.");
         return;
     }

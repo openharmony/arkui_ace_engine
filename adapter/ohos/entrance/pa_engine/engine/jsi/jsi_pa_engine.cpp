@@ -594,8 +594,8 @@ void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
             runtime->GetGlobal()->SetProperty(runtime, "___mainEntry___", runtime->NewUndefined());
             const std::vector<shared_ptr<JsValue>>& argv = { runtime->GetGlobal() };
             shared_ptr<JsValue> retVal = CallFunc(mainEntryFunc, argv);
-            auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-            if (arkJSValue->IsException(runtime)) {
+            auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+            if (arkJSRuntime->HasPendingException()) {
                 LOGE("JsiPaEngine call mainEntryFunc FAILED!");
             }
         }
@@ -902,11 +902,12 @@ int32_t JsiPaEngine::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     auto func = GetPaFunc("insert");
     shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine Insert FAILED!");
         return 0;
     }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     return arkJSValue->ToInt32(runtime);
 }
 
@@ -961,11 +962,12 @@ std::shared_ptr<AppExecFwk::PacMap> JsiPaEngine::Call(const std::string& method,
         return nullptr;
     }
     shared_ptr<JsValue> retVal = CallFunc(func, argv);
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine Query FAILED!");
         return nullptr;
     }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (arkJSValue->IsUndefined(runtime)) {
         LOGE("JsiPaEngine Query return value is undefined!");
         return nullptr;
@@ -1007,11 +1009,12 @@ int32_t JsiPaEngine::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeR
     argv.push_back(NativeValueToJsValue(argColumnsNativeValue));
     auto func = GetPaFunc("batchInsert");
     shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine BatchInsert FAILED!");
         return 0;
     }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     return arkJSValue->ToInt32(runtime);
 }
 
@@ -1055,19 +1058,19 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> JsiPaEngine::Query(
     auto func = GetPaFunc("query");
     shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine Query FAILED!");
         return resultSet;
     }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (arkJSValue->IsUndefined(runtime)) {
         LOGE("JsiPaEngine Query return value is undefined!");
         return resultSet;
     }
 
-    auto arkJsRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     NativeValue* nativeValue = ArkNativeEngine::ArkValueToNativeValue(
-        nativeEngine_, arkJSValue->GetValue(arkJsRuntime));
+        nativeEngine_, arkJSValue->GetValue(arkJSRuntime));
     if (nativeValue == nullptr) {
         LOGE("JsiPaEngine nativeValue is nullptr");
         return resultSet;
@@ -1109,11 +1112,12 @@ int32_t JsiPaEngine::Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     auto func = GetPaFunc("update");
     shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine Update FAILED!");
         return 0;
     }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     return arkJSValue->ToInt32(runtime);
 }
 
@@ -1139,11 +1143,12 @@ int32_t JsiPaEngine::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPr
     auto func = GetPaFunc("delete");
     shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine Delete FAILED!");
         return 0;
     }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     return arkJSValue->ToInt32(runtime);
 }
 
@@ -1157,11 +1162,12 @@ std::string JsiPaEngine::GetType(const Uri& uri)
     auto func = GetPaFunc("getType");
     shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine GetType FAILED!");
         return std::string();
     }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     return arkJSValue->ToString(runtime);
 }
 
@@ -1177,11 +1183,12 @@ std::vector<std::string> JsiPaEngine::GetFileTypes(const Uri& uri, const std::st
     shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
     std::vector<std::string> ret;
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine GetFileTypes FAILED!");
         return ret;
     }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     if (!arkJSValue->IsArray(runtime)) {
         LOGE("JsiPaEngine GetFileTypes return not array!");
         return ret;
@@ -1206,11 +1213,12 @@ int32_t JsiPaEngine::OpenFile(const Uri& uri, const std::string& mode)
     auto func = GetPaFunc("openFile");
     shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine OpenFile FAILED!");
         return 0;
     }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     return arkJSValue->ToInt32(runtime);
 }
 
@@ -1225,11 +1233,12 @@ int32_t JsiPaEngine::OpenRawFile(const Uri& uri, const std::string& mode)
     auto func = GetPaFunc("openRawFile");
     shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine OpenRawFile FAILED!");
         return 0;
     }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     return arkJSValue->ToInt32(runtime);
 }
 
@@ -1243,11 +1252,12 @@ Uri JsiPaEngine::NormalizeUri(const Uri& uri)
     auto func = GetPaFunc("normalizeUri");
     shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine NormalizeUri FAILED!");
         return Uri("");
     }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     return Uri(arkJSValue->ToString(runtime));
 }
 
@@ -1261,11 +1271,12 @@ Uri JsiPaEngine::DenormalizeUri(const Uri& uri)
     auto func = GetPaFunc("denormalizeUri");
     shared_ptr<JsValue> retVal = CallAsyncFunc(func, argv);
 
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine DenormalizeUri FAILED!");
         return Uri("");
     }
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     return Uri(arkJSValue->ToString(runtime));
 }
 
@@ -1273,19 +1284,19 @@ sptr<IRemoteObject> JsiPaEngine::OnConnectService(const OHOS::AAFwk::Want& want)
 {
     LOGI("JsiPaEngine OnConnectService");
     ACE_DCHECK(engineInstance_);
-    auto arkJsRuntime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
     const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want) };
     auto func = GetPaFunc("onConnect");
     shared_ptr<JsValue> retVal = CallFunc(func, argv);
 
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    if (arkJSValue->IsException(arkJsRuntime)) {
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine onConnectService FAILED!");
         return nullptr;
     }
 
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     NativeValue* nativeValue = ArkNativeEngine::ArkValueToNativeValue(
-        nativeEngine_, arkJSValue->GetValue(arkJsRuntime));
+        nativeEngine_, arkJSValue->GetValue(arkJSRuntime));
     if (nativeValue == nullptr) {
         LOGE("JsiPaEngine nativeValue is nullptr");
         return nullptr;
@@ -1325,12 +1336,13 @@ void JsiPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
     const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want) };
     auto func = GetPaFunc("onCreate");
     auto result = CallFunc(func, argv);
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(result);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine CallFunc FAILED!");
         return;
     }
 
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(result);
     shared_ptr<JsValue> propertyNames;
     int32_t len = 0;
     if (!arkJSValue->GetPropertyNames(runtime, propertyNames, len)) {
@@ -1349,9 +1361,9 @@ void JsiPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
     shared_ptr<JsValue> formImageData = arkJSValue->GetProperty(runtime, "image");
     if (formImageData != nullptr) {
         std::map<std::string, int> rawImageDataMap;
-        auto arkJsRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+        auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
         NativeValue* nativeValue = ArkNativeEngine::ArkValueToNativeValue(nativeEngine_,
-            std::static_pointer_cast<ArkJSValue>(formImageData)->GetValue(arkJsRuntime));
+            std::static_pointer_cast<ArkJSValue>(formImageData)->GetValue(arkJSRuntime));
         UnwrapRawImageDataMap(nativeEngine_, nativeValue, rawImageDataMap);
         for (const auto& data : rawImageDataMap) {
             formData.AddImageData(data.first, data.second);
@@ -1438,12 +1450,13 @@ int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want &want)
     }
 
     auto result = CallFunc(func, argv);
-    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(result);
-    if (arkJSValue->IsException(runtime)) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine CallFunc FAILED!");
         return (int32_t)AppExecFwk::FormState::DEFAULT;
     }
 
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(result);
     if (!arkJSValue->IsInt32(runtime)) {
         LOGE("invalid return value!");
         return (int32_t)AppExecFwk::FormState::DEFAULT;
@@ -1478,18 +1491,18 @@ bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
         return false;
     }
 
-    if (arkJSValue->IsException(runtime)) {
-        LOGE("JsiPaEngine CallFunc FAILED!");
-        return false;
-    }
-
-    auto arkJsRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    if (arkJsRuntime == nullptr) {
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime == nullptr) {
         LOGE("JsiPaEngine JSRuntime convert failed!");
         return false;
     }
 
-    auto nativeValue = ArkNativeEngine::ArkValueToNativeValue(nativeEngine_, arkJSValue->GetValue(arkJsRuntime));
+    if (arkJSRuntime->HasPendingException()) {
+        LOGE("JsiPaEngine CallFunc FAILED!");
+        return false;
+    }
+
+    auto nativeValue = ArkNativeEngine::ArkValueToNativeValue(nativeEngine_, arkJSValue->GetValue(arkJSRuntime));
     if (nativeValue == nullptr) {
         LOGE("JsiPaEngine nativeValue convert failed!");
         return false;

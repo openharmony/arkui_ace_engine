@@ -67,9 +67,9 @@ public:
     virtual shared_ptr<JsValue> NewArray() = 0;
     virtual shared_ptr<JsValue> NewFunction(RegisterFunctionType func) = 0;
     virtual shared_ptr<JsValue> NewNativePointer(void *ptr) = 0;
-    virtual shared_ptr<JsValue> NewException() = 0;
     virtual void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) = 0;
     virtual void HandleUncaughtException() = 0;
+    virtual bool HasPendingException() = 0;
     virtual void ExecutePendingJob() = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) {}
 

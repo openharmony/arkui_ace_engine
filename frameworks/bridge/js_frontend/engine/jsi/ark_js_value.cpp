@@ -23,7 +23,7 @@ int32_t ArkJSValue::ToInt32(shared_ptr<JsRuntime> runtime)
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
-    if (value_.CheckException()) {
+    if (CheckException(pandaRuntime)) {
         return 0;
     }
     return value_->Int32Value(pandaRuntime->GetEcmaVm());
@@ -33,11 +33,11 @@ double ArkJSValue::ToDouble(shared_ptr<JsRuntime> runtime)
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
-    if (value_.CheckException()) {
+    if (CheckException(pandaRuntime)) {
         return 0;
     }
     Local<NumberRef> number = value_->ToNumber(pandaRuntime->GetEcmaVm());
-    if (!number.CheckException()) {
+    if (!CheckException(pandaRuntime, number)) {
         return number->Value();
     }
     return 0;
@@ -47,11 +47,11 @@ std::string ArkJSValue::ToString(shared_ptr<JsRuntime> runtime)
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
-    if (value_.CheckException()) {
+    if (CheckException(pandaRuntime)) {
         return "";
     }
     Local<StringRef> string = value_->ToString(pandaRuntime->GetEcmaVm());
-    if (!string.CheckException()) {
+    if (!CheckException(pandaRuntime, string)) {
         return string->ToString();
     }
     return "";
@@ -61,7 +61,7 @@ bool ArkJSValue::ToBoolean(shared_ptr<JsRuntime> runtime)
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
-    return !value_.CheckException() && value_->BooleaValue();
+    return !CheckException(pandaRuntime) && value_->BooleaValue();
 }
 
 bool ArkJSValue::IsUndefined([[maybe_unused]] shared_ptr<JsRuntime> runtime)
@@ -118,7 +118,8 @@ bool ArkJSValue::IsFunction([[maybe_unused]] shared_ptr<JsRuntime> runtime)
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
 bool ArkJSValue::IsException([[maybe_unused]] shared_ptr<JsRuntime> runtime)
 {
-    return value_.IsEmpty() || value_->IsException();
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    return value_.IsEmpty() || pandaRuntime->HasPendingException();
 }
 
 shared_ptr<JsValue> ArkJSValue::Call(shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
@@ -128,7 +129,7 @@ shared_ptr<JsValue> ArkJSValue::Call(shared_ptr<JsRuntime> runtime, shared_ptr<J
     JSExecutionScope executionScope(pandaRuntime->GetEcmaVm());
     LocalScope scope(pandaRuntime->GetEcmaVm());
     if (!IsFunction(pandaRuntime)) {
-        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Exception(pandaRuntime->GetEcmaVm()));
+        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Undefined(pandaRuntime->GetEcmaVm()));
     }
     std::vector<Local<JSValueRef>> arguments;
     arguments.reserve(argc);
@@ -150,11 +151,11 @@ bool ArkJSValue::GetPropertyNames(shared_ptr<JsRuntime> runtime, shared_ptr<JsVa
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
-    if (value_.CheckException()) {
+    if (CheckException(pandaRuntime)) {
         return false;
     }
     Local<ObjectRef> obj = value_->ToObject(pandaRuntime->GetEcmaVm());
-    if (obj.CheckException()) {
+    if (CheckException(pandaRuntime, obj)) {
         return false;
     }
     Local<ArrayRef> names = obj->GetOwnPropertyNames(pandaRuntime->GetEcmaVm());
@@ -171,11 +172,11 @@ bool ArkJSValue::GetEnumerablePropertyNames(shared_ptr<JsRuntime> runtime, share
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
-    if (value_.CheckException()) {
+    if (CheckException(pandaRuntime)) {
         return false;
     }
     Local<ObjectRef> obj = value_->ToObject(pandaRuntime->GetEcmaVm());
-    if (obj.CheckException()) {
+    if (CheckException(pandaRuntime, obj)) {
         return false;
     }
     Local<ArrayRef> names = obj->GetOwnEnumerablePropertyNames(pandaRuntime->GetEcmaVm());
@@ -192,16 +193,16 @@ shared_ptr<JsValue> ArkJSValue::GetProperty(shared_ptr<JsRuntime> runtime, int32
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
-    if (value_.CheckException()) {
-        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Exception(pandaRuntime->GetEcmaVm()));
+    if (CheckException(pandaRuntime)) {
+        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Undefined(pandaRuntime->GetEcmaVm()));
     }
     Local<ObjectRef> obj = value_->ToObject(pandaRuntime->GetEcmaVm());
-    if (obj.CheckException()) {
-        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Exception(pandaRuntime->GetEcmaVm()));
+    if (CheckException(pandaRuntime, obj)) {
+        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Undefined(pandaRuntime->GetEcmaVm()));
     }
     Local<JSValueRef> property = obj->Get(pandaRuntime->GetEcmaVm(), idx);
-    if (property.CheckException()) {
-        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Exception(pandaRuntime->GetEcmaVm()));
+    if (CheckException(pandaRuntime, property)) {
+        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Undefined(pandaRuntime->GetEcmaVm()));
     }
     return std::make_shared<ArkJSValue>(pandaRuntime, property);
 }
@@ -218,17 +219,17 @@ shared_ptr<JsValue> ArkJSValue::GetProperty(shared_ptr<JsRuntime> runtime, const
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
-    if (value_.CheckException()) {
-        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Exception(pandaRuntime->GetEcmaVm()));
+    if (CheckException(pandaRuntime)) {
+        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Undefined(pandaRuntime->GetEcmaVm()));
     }
     Local<ObjectRef> obj = value_->ToObject(pandaRuntime->GetEcmaVm());
-    if (obj.CheckException()) {
-        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Exception(pandaRuntime->GetEcmaVm()));
+    if (CheckException(pandaRuntime, obj)) {
+        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Undefined(pandaRuntime->GetEcmaVm()));
     }
     Local<JSValueRef> key = std::static_pointer_cast<ArkJSValue>(name)->GetValue(pandaRuntime);
     Local<JSValueRef> property = obj->Get(pandaRuntime->GetEcmaVm(), key);
-    if (property.CheckException()) {
-        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Exception(pandaRuntime->GetEcmaVm()));
+    if (CheckException(pandaRuntime, property)) {
+        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Undefined(pandaRuntime->GetEcmaVm()));
     }
     return std::make_shared<ArkJSValue>(pandaRuntime, property);
 }
@@ -246,11 +247,11 @@ bool ArkJSValue::SetProperty(shared_ptr<JsRuntime> runtime, const shared_ptr<JsV
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
-    if (value_.CheckException()) {
+    if (CheckException(pandaRuntime)) {
         return false;
     }
     Local<ObjectRef> obj = value_->ToObject(pandaRuntime->GetEcmaVm());
-    if (obj.CheckException()) {
+    if (CheckException(pandaRuntime, obj)) {
         return false;
     }
     Local<JSValueRef> key = std::static_pointer_cast<ArkJSValue>(name)->GetValue(pandaRuntime);
@@ -272,11 +273,11 @@ bool ArkJSValue::SetAccessorProperty(shared_ptr<JsRuntime> runtime, const shared
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
-    if (value_.CheckException()) {
+    if (CheckException(pandaRuntime)) {
         return false;
     }
     Local<ObjectRef> obj = value_->ToObject(pandaRuntime->GetEcmaVm());
-    if (obj.CheckException()) {
+    if (CheckException(pandaRuntime, obj)) {
         return false;
     }
     Local<JSValueRef> key = std::static_pointer_cast<ArkJSValue>(name)->GetValue(pandaRuntime);
@@ -289,7 +290,7 @@ int32_t ArkJSValue::GetArrayLength(shared_ptr<JsRuntime> runtime)
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
-    if (value_.CheckException()) {
+    if (CheckException(pandaRuntime)) {
         return -1;
     }
     Local<ArrayRef> array(GetValue(pandaRuntime));
@@ -300,16 +301,16 @@ shared_ptr<JsValue> ArkJSValue::GetElement(shared_ptr<JsRuntime> runtime, int32_
 {
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
-    if (value_.CheckException()) {
-        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Exception(pandaRuntime->GetEcmaVm()));
+    if (CheckException(pandaRuntime)) {
+        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Undefined(pandaRuntime->GetEcmaVm()));
     }
     Local<ArrayRef> obj(GetValue(pandaRuntime));
-    if (obj.CheckException()) {
-        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Exception(pandaRuntime->GetEcmaVm()));
+    if (CheckException(pandaRuntime, obj)) {
+        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Undefined(pandaRuntime->GetEcmaVm()));
     }
     Local<JSValueRef> property = obj->Get(pandaRuntime->GetEcmaVm(), idx);
-    if (property.CheckException()) {
-        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Exception(pandaRuntime->GetEcmaVm()));
+    if (CheckException(pandaRuntime, property)) {
+        return std::make_shared<ArkJSValue>(pandaRuntime, JSValueRef::Undefined(pandaRuntime->GetEcmaVm()));
     }
     return std::make_shared<ArkJSValue>(pandaRuntime, property);
 }
@@ -319,13 +320,23 @@ std::string ArkJSValue::GetJsonString(const shared_ptr<JsRuntime>& runtime)
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
     auto stringify = panda::JSON::Stringify(pandaRuntime->GetEcmaVm(), GetValue(pandaRuntime));
-    if (stringify.CheckException()) {
+    if (CheckException(pandaRuntime, stringify)) {
         return "";
     }
     auto valueStr = panda::Local<panda::StringRef>(stringify);
-    if (valueStr.CheckException()) {
+    if (CheckException(pandaRuntime, valueStr)) {
         return "";
     }
     return valueStr->ToString();
+}
+
+bool ArkJSValue::CheckException(const shared_ptr<ArkJSRuntime> &runtime) const
+{
+    return value_.IsEmpty() || runtime->HasPendingException();
+}
+
+bool ArkJSValue::CheckException(const shared_ptr<ArkJSRuntime> &runtime, const Local<JSValueRef> &value) const
+{
+    return value.IsEmpty() || runtime->HasPendingException();
 }
 }  // namespace OHOS::Ace::Framework

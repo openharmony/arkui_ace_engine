@@ -80,7 +80,7 @@ panda::Local<panda::JSValueRef> toJsiValueWithVM(const EcmaVM* vm, T val)
         return panda::StringRef::NewFromUtf8(vm, val);
     }
 
-    return panda::JSValueRef::Exception(vm);
+    return panda::JSValueRef::Undefined(vm);
 }
 
 template<typename T>
