@@ -399,7 +399,7 @@ void ListLayoutAlgorithm::CalculateLanes(const LayoutConstraintF& layoutConstrai
         //      1.1: use [lanes_] set by user if [lanes_] is set
         //      1.2: set [lanes_] to 1 if [lanes_] is not set
         if (!minLaneLength_.has_value() || !maxLaneLength_.has_value()) {
-            if (!lanes.has_value() || lanes_.value() <= 0) {
+            if (!lanes_.has_value() || lanes_.value() <= 0) {
                 lanes_ = 1;
             }
             maxLaneLength_ = GetCrossAxisSize(layoutParamMaxSize, axis) / lanes_.value();
