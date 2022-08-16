@@ -33,6 +33,7 @@ constexpr int32_t AXIS_PAN_FINGERS = 1;
 void PanRecognizer::OnAccepted()
 {
     SendCallbackMsg(onActionStart_);
+    SendCallbackMsg(onActionUpdate_);
 
     if (pendingEnd_) {
         LOGD("pan gesture recognizer has pending end event when waiting to be accepted");
