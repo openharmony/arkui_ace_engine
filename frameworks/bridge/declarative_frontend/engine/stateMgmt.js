@@ -289,7 +289,7 @@ class SubscribableHandler {
         });
     }
     get(target, property) {
-        console.error(`SubscribableHandler: get '${property.toString()}'.`);
+        console.debug(`SubscribableHandler: get '${property.toString()}'.`);
         return (property === SubscribableHandler.IS_OBSERVED_OBJECT) ? true :
             (property === SubscribableHandler.RAW_OBJECT) ? target : target[property];
     }
