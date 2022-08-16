@@ -307,13 +307,17 @@ bool EventManager::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<Foc
         return false;
     }
     LOGI("Focus on tab index node(%{public}d)", curTabFocusedIndex_);
-    auto defaultFocusNode = nodeNeedToFocus->GetChildDefaultFoucsNode(false);
-    if (defaultFocusNode) {
-        if (!defaultFocusNode->IsFocusableWholePath()) {
-            LOGW("node(%{public}d) is not focusable", curTabFocusedIndex_);
-            return false;
+    auto scopeNeedToFoucs = AceType::DynamicCast<FocusGroup>(nodeNeedToFocus);
+    if (scopeNeedToFoucs && !scopeNeedToFoucs->IsGroupDefaultFocused()) {
+        auto defaultFocusNode = nodeNeedToFocus->GetChildDefaultFoucsNode(false);
+        if (defaultFocusNode) {
+            if (!defaultFocusNode->IsFocusableWholePath()) {
+                LOGW("node(%{public}d) is not focusable", curTabFocusedIndex_);
+                return false;
+            }
+            scopeNeedToFoucs->SetIsGroupDefaultFocused(true);
+            return defaultFocusNode->RequestFocusImmediately();
         }
-        return defaultFocusNode->RequestFocusImmediately();
     }
     if (!nodeNeedToFocus->IsFocusableWholePath()) {
         LOGW("node(%{public}d) is not focusable", curTabFocusedIndex_);

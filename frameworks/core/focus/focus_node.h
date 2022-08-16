@@ -339,6 +339,15 @@ public:
 
     void RefreshParentFocusable(bool focusable) override;
 
+    void SetIsGroupDefaultFocused(bool isGroupDefaultFocused)
+    {
+        isGroupDefaultFocused_ = isGroupDefaultFocused;
+    }
+    bool IsGroupDefaultFocused() const
+    {
+        return isGroupDefaultFocused_;
+    }
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
     void OnFocus() override;
@@ -355,6 +364,7 @@ protected:
 
 private:
     bool CalculatePosition();
+    bool isGroupDefaultFocused_ { false };
 };
 
 } // namespace OHOS::Ace

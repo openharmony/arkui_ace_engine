@@ -27,6 +27,7 @@
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
+#include "core/common/text_field_manager.h"
 #include "core/components/box/render_box_base.h"
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
@@ -697,10 +698,29 @@ void RosenRenderTextField::ComputeOffsetAfterLayout()
         .width = caretRect_.Width(),
         .height = caretRect_.Height()
     };
-    MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
-    auto value = GetEditingValue();
-    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
-        StringUtils::Str8ToStr16(value.text), value.selection.GetStart(), value.selection.GetEnd());
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("context is nullptr");
+        return;
+    }
+    auto manager = context->GetTextFieldManager();
+    if (!manager) {
+        LOGE("manager is nullptr");
+        return;
+    }
+    auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
+    if (!textFieldManager) {
+        LOGE("textFieldmanager is nullptr");
+        return;
+    }
+    auto weakFocusedTextField = textFieldManager->GetOnFocusTextField();
+    auto focusedTextField = weakFocusedTextField.Upgrade();
+    if (focusedTextField && focusedTextField == AceType::Claim(this)) {
+        MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
+        auto value = GetEditingValue();
+        MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+            StringUtils::Str8ToStr16(value.text), value.selection.GetStart(), value.selection.GetEnd());
+    }
 #endif
 }
 
