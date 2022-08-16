@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_v2/list/list_component.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -58,11 +59,6 @@ public:
     {
         return endIndex_.value_or(0);
     }
-    
-    const PositionMap& GetItemPosition() const
-    {
-        return itemPosition_;
-    }
 
     void SetSpaceWidth(float spaceWidth)
     {
@@ -84,16 +80,30 @@ public:
         return isInitialized_;
     }
 
+    void SetLanes(int32_t lanes)
+    {
+        lanes_ = lanes;
+    }
+
+    std::optional<int32_t> GetLanes() const
+    {
+        return lanes_;
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-private:
     void LayoutForward(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis, float mainSize);
     void LayoutBackward(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis, float mainSize);
 
+    void LayoutForwardForLaneList(
+        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis, float mainSize);
+    void LayoutBackwardForLaneList(
+        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis, float mainSize);
+private:
     std::pair<int32_t, float> LayoutOrRecycleCachedItems(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
 
@@ -102,6 +112,10 @@ private:
 
     std::pair<int32_t, float> RequestNewItemsBackward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
+
+    void CalculateLanes(const LayoutConstraintF& layoutConstraint, Axis axis);
+    void ModifyLaneLength(const LayoutConstraintF& layoutConstraint, Axis axis);
+    float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
 
     PositionMap itemPosition_;
     float currentOffset_ = 0.0f;
@@ -115,6 +129,11 @@ private:
     float spaceWidth_ = 0.0f;
 
     bool isInitialized_ = false;
+
+    std::optional<int32_t> lanes_;
+    std::optional<float> minLaneLength_;
+    std::optional<float> maxLaneLength_;
+    V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::CENTER;
 };
 } // namespace OHOS::Ace::NG
 

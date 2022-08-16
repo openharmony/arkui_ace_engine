@@ -38,6 +38,10 @@ public:
         value->propSpace_ = CloneSpace();
         value->propInitialIndex_ = CloneInitialIndex();
         value->propListDirection_ = CloneListDirection();
+        value->propLanes_ = CloneLanes();
+        value->propLaneMinLength_ = CloneLaneMinLength();
+        value->propLaneMaxLength_ = CloneLaneMaxLength();
+        value->propListItemAlign_ = CloneListItemAlign();
         return value;
     }
 
@@ -47,11 +51,19 @@ public:
         ResetSpace();
         ResetInitialIndex();
         ResetListDirection();
+        ResetLanes();
+        ResetLaneMinLength();
+        ResetLaneMaxLength();
+        ResetListItemAlign();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InitialIndex, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListDirection, Axis, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Lanes, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMinLength, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMaxLength, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListItemAlign, V2::ListItemAlign, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

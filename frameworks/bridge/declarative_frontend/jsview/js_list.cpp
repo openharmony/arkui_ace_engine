@@ -174,6 +174,10 @@ void JSList::SetLanes(const JSCallbackInfo& info)
     int32_t laneNum = 1;
     if (ParseJsInteger<int32_t>(info[0], laneNum)) {
         // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ListView::SetLanes(laneNum);
+            return;
+        }
         listComponent->SetLanes(laneNum);
         return;
     }
@@ -189,6 +193,11 @@ void JSList::SetLanes(const JSCallbackInfo& info)
     Dimension maxLengthValue;
     if (!ParseJsDimensionVp(minLengthParam, minLengthValue) || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
         LOGW("minLength param or maxLength param is invalid");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ListView::SetLaneMinLength(minLengthValue);
+        NG::ListView::SetLaneMaxLength(maxLengthValue);
         return;
     }
     listComponent->SetLaneConstrain(minLengthValue, maxLengthValue);
