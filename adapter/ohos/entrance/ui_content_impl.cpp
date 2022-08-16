@@ -309,6 +309,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     if (SystemProperties::GetRosenBackendEnabled()) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
         rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+        rsUiDirector->SetCacheDir(context->GetCacheDir());
         rsUiDirector->Init();
     }
 
