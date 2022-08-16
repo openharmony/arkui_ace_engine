@@ -288,8 +288,9 @@ int32_t UiServiceDialogImpl::CancelDialog(int32_t id)
     }
     auto disableCallback = [ this ] () {
         LOGI("stop uidialog");
-        eventRunner_.reset();
+        eventRunner_->Stop();
         eventHandler_.reset();
+        eventRunner_.reset();
     };
 
     auto func = [ uidialog = uidialog_, id, disableCallback ] () {
