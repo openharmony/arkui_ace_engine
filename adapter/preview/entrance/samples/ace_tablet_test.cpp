@@ -29,7 +29,6 @@ constexpr int32_t GET_INSPECTOR_TREE_TIMES = 12;
 constexpr int32_t GET_INSPECTOR_TREE_INTERVAL = 5000;
 constexpr char FILE_NAME[] = "InspectorTree.txt";
 constexpr char ACE_VERSION_2[] = "2.0";
-constexpr char ACE_VERSION_PU[] = "PU";
 constexpr char MODEL_STAGE[] = "stage";
 constexpr char MAX_ARGS_COUNT = 2;
 
@@ -82,9 +81,6 @@ int main(int argc, const char* argv[])
             args.aceVersion = OHOS::Ace::Platform::AceVersion::ACE_2_0;
             args.projectModel = OHOS::Ace::Platform::ProjectModel::STAGE;
             args.pageProfile = pageProfile;
-        } else if (!std::strcmp(argv[1], ACE_VERSION_PU)) {
-            args.assetPath = assetPathEts;
-            args.aceVersion = OHOS::Ace::Platform::AceVersion::ACE_Partial_Update;
         }
     }
 
