@@ -49,7 +49,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LinearLayoutAttribute, CrossAxisAlign, FlexAlign, PROPERTY_UPDATE_LAYOUT);
 
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LinearLayoutAttribute, Space, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LinearLayoutAttribute, Space, Dimension, PROPERTY_UPDATE_MEASURE);
 
     bool IsVertical() const
     {
