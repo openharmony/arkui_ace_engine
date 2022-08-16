@@ -92,6 +92,8 @@ protected:
     float rotateDegree_ = 0.0f;
     double clipWidth_ = 0.0;
     double lineHeight_ = 0.0;
+    std::optional<double> startHandleHeight_;
+    std::optional<double> endHandleHeight_;
 
     // Mark startHandle and endHandle index
     int32_t startIndex_ = 0;
