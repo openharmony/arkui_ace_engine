@@ -27,7 +27,7 @@ class RenderGridRow : public RenderNode {
 
 struct NewLineOffset {
     bool isValid = false;
-    int32_t newLineCount = false;
+    int32_t newLineCount = 0;
     int32_t offset = 0;
 };
 

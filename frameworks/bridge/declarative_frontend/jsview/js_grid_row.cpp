@@ -47,42 +47,85 @@ void InheritGridRowOption(const RefPtr<V2::GridContainerSize>& gridContainerSize
     gridContainerSize->xxl = containerSizeArray[5].value();
 }
 
-void InheritGridRowGutterOption(const RefPtr<V2::Getter>& getter, bool isHorizontal,
-    std::optional<Dimension> (&GetterSizeArray)[MAX_NUMBER_BREAKPOINT])
+void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
+    std::optional<Dimension> (&gutterSizeArray)[MAX_NUMBER_BREAKPOINT], bool isHorizontal)
 {
-    if (!GetterSizeArray[0].has_value()) {
-        GetterSizeArray[0] = Dimension(0);
+    if (!gutterSizeArray[0].has_value()) {
+        gutterSizeArray[0] = Dimension(0);
     }
     for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; i++) {
-        if (!GetterSizeArray[i].has_value()) {
-            GetterSizeArray[i] = GetterSizeArray[i - 1].value();
+        if (!gutterSizeArray[i].has_value()) {
+            gutterSizeArray[i] = gutterSizeArray[i - 1].value();
         }
     }
-    
     if (isHorizontal) {
-        getter->xXs = GetterSizeArray[0].value();
-        getter->xSm = GetterSizeArray[1].value();
-        getter->xMd = GetterSizeArray[2].value();
-        getter->xLg = GetterSizeArray[3].value();
-        getter->xXl = GetterSizeArray[4].value();
-        getter->xXXl = GetterSizeArray[5].value();
-    } else {
-        getter->yXs = GetterSizeArray[0].value();
-        getter->ySm = GetterSizeArray[1].value();
-        getter->yMd = GetterSizeArray[2].value();
-        getter->yLg = GetterSizeArray[3].value();
-        getter->yXl = GetterSizeArray[4].value();
-        getter->yXXl = GetterSizeArray[5].value();
+        gutter->xXs = gutterSizeArray[0].value();
+        gutter->xSm = gutterSizeArray[1].value();
+        gutter->xMd = gutterSizeArray[2].value();
+        gutter->xLg = gutterSizeArray[3].value();
+        gutter->xXl = gutterSizeArray[4].value();
+        gutter->xXXl = gutterSizeArray[5].value();
+        return;
     }
-    
+    gutter->yXs = gutterSizeArray[0].value();
+    gutter->ySm = gutterSizeArray[1].value();
+    gutter->yMd = gutterSizeArray[2].value();
+    gutter->yLg = gutterSizeArray[3].value();
+    gutter->yXl = gutterSizeArray[4].value();
+    gutter->yXXl = gutterSizeArray[5].value();
+}
+
+void ParseGutterObject(const JSRef<JSVal>& gutterObject, RefPtr<V2::Gutter>& gutter, bool isHorizontal)
+{
+    if (gutterObject->IsObject()) {
+        std::optional<Dimension> gutterOptions[MAX_NUMBER_BREAKPOINT];
+        auto gutterParam = JSRef<JSObject>::Cast(gutterObject);
+        auto xs = gutterParam->GetProperty("xs");
+        Dimension xsDimension;
+        if (JSContainerBase::ParseJsDimensionVp(xs, xsDimension)) {
+            gutterOptions[0] = xsDimension;
+        }
+        auto sm = gutterParam->GetProperty("sm");
+        Dimension smDimension;
+        if (JSContainerBase::ParseJsDimensionVp(sm, smDimension)) {
+            gutterOptions[1] = smDimension;
+        }
+        auto md = gutterParam->GetProperty("md");
+        Dimension mdDimension;
+        if (JSContainerBase::ParseJsDimensionVp(md, mdDimension)) {
+            gutterOptions[2] = mdDimension;
+        }
+        auto lg = gutterParam->GetProperty("lg");
+        Dimension lgDimension;
+        if (JSContainerBase::ParseJsDimensionVp(lg, lgDimension)) {
+            gutterOptions[3] = lgDimension;
+        }
+        auto xl = gutterParam->GetProperty("xl");
+        Dimension xlDimension;
+        if (JSContainerBase::ParseJsDimensionVp(xl, xlDimension)) {
+            gutterOptions[4] = xlDimension;
+        }
+        auto xxl = gutterParam->GetProperty("xxl");
+        Dimension xxlDimension;
+        if (JSContainerBase::ParseJsDimensionVp(xxl, xxlDimension)) {
+            gutterOptions[5] = xxlDimension;
+        }
+        InheritGridRowGutterOption(gutter, gutterOptions, isHorizontal);
+    } else if (gutterObject->IsNumber()) {
+        if (isHorizontal) {
+            gutter->SetXGutter(Dimension(gutterObject->ToNumber<double>()));
+        } else {
+            gutter->SetYGutter(Dimension(gutterObject->ToNumber<double>()));
+        }
+    }
 }
 
 void ParserGutter(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>& gridRow)
 {
     Dimension result;
     if (JSContainerBase::ParseJsDimensionVp(jsValue, result)) {
-        auto gutter = AceType::MakeRefPtr<V2::Getter>(result);
-        gridRow->SetGetter(gutter);
+        auto gutter = AceType::MakeRefPtr<V2::Gutter>(result);
+        gridRow->SetGutter(gutter);
     } else {
         if (!jsValue->IsObject()) {
             return;
@@ -90,82 +133,10 @@ void ParserGutter(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>& gri
         auto paramGutter = JSRef<JSObject>::Cast(jsValue);
         auto xObject = paramGutter->GetProperty("x");
         auto yObject = paramGutter->GetProperty("y");
-        auto gutter = AceType::MakeRefPtr<V2::Getter>();
-        if (xObject->IsObject()) {
-            std::optional<Dimension> gutterOptions[MAX_NUMBER_BREAKPOINT];
-            auto xParamGutter = JSRef<JSObject>::Cast(xObject);
-            auto xs = xParamGutter->GetProperty("xs");
-            Dimension xXsDimension;
-            if (JSContainerBase::ParseJsDimensionVp(xs, xXsDimension)) {
-                gutterOptions[0] = xXsDimension;
-            }
-            auto sm = xParamGutter->GetProperty("sm");
-            Dimension xSmDimension;
-            if (JSContainerBase::ParseJsDimensionVp(sm, xSmDimension)) {
-                gutterOptions[1] = xSmDimension;
-            }
-            auto md = xParamGutter->GetProperty("md");
-            Dimension xMdDimension;
-            if (JSContainerBase::ParseJsDimensionVp(md, xMdDimension)) {
-                gutterOptions[2] = xMdDimension;
-            }
-            auto lg = xParamGutter->GetProperty("lg");
-            Dimension xLgDimension;
-            if (JSContainerBase::ParseJsDimensionVp(lg, xLgDimension)) {
-                gutterOptions[3] = xLgDimension;
-            }
-            auto xl = xParamGutter->GetProperty("xl");
-            Dimension xXlDimension;
-            if (JSContainerBase::ParseJsDimensionVp(xl, xXlDimension)) {
-                gutterOptions[4] = xXlDimension;
-            }
-            auto xxl = xParamGutter->GetProperty("xxl");
-            Dimension xXxlDimension;
-            if (JSContainerBase::ParseJsDimensionVp(xxl, xXxlDimension)) {
-                gutterOptions[5] = xXxlDimension;
-            }
-            InheritGridRowGutterOption(gutter, true, gutterOptions);
-        } else if (xObject->IsNumber()) {
-            gutter->SetXGutter(Dimension(xObject->ToNumber<double>()));
-        }
-        if (yObject->IsObject()) {
-            std::optional<Dimension> gutterOptions[MAX_NUMBER_BREAKPOINT];
-            auto yParamGutter = JSRef<JSObject>::Cast(yObject);
-            auto xs = yParamGutter->GetProperty("xs");
-            Dimension yXsDimension;
-            if (JSContainerBase::ParseJsDimensionVp(xs, yXsDimension)) {
-                gutterOptions[0] = yXsDimension;
-            }
-            auto sm = yParamGutter->GetProperty("sm");
-            Dimension ySmDimension;
-            if (JSContainerBase::ParseJsDimensionVp(sm, ySmDimension)) {
-                gutterOptions[1] = ySmDimension;
-            }
-            auto md = yParamGutter->GetProperty("md");
-            Dimension yMdDimension;
-            if (JSContainerBase::ParseJsDimensionVp(md, yMdDimension)) {
-                gutterOptions[2] = yMdDimension;
-            }
-            auto lg = yParamGutter->GetProperty("lg");
-            Dimension yLgDimension;
-            if (JSContainerBase::ParseJsDimensionVp(lg, yLgDimension)) {
-                gutterOptions[3] = yLgDimension;
-            }
-            auto xl = yParamGutter->GetProperty("xl");
-            Dimension yXlDimension;
-            if (JSContainerBase::ParseJsDimensionVp(xl, yXlDimension)) {
-                gutterOptions[4] = yXlDimension;
-            }
-            auto xxl = yParamGutter->GetProperty("xxl");
-            Dimension yXxlDimension;
-            if (JSContainerBase::ParseJsDimensionVp(xxl, yXxlDimension)) {
-                gutterOptions[5] = yXxlDimension;
-            }
-            InheritGridRowGutterOption(gutter, false, gutterOptions);
-        } else if (yObject->IsNumber()) {
-            gutter->SetYGutter(Dimension(yObject->ToNumber<double>()));
-        }
-        gridRow->SetGetter(gutter);
+        auto gutter = AceType::MakeRefPtr<V2::Gutter>();
+        ParseGutterObject(xObject, gutter, true);
+        ParseGutterObject(yObject, gutter, false);
+        gridRow->SetGutter(gutter);
     }
 }
 
@@ -228,7 +199,6 @@ void ParserBreakpoints(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>
         breakpoint->breakpoints.clear();
         if (array->Length() > MAX_NUMBER_BREAKPOINT - 1) {
             LOGI("The maximum number of breakpoints is %{public}zu", MAX_NUMBER_BREAKPOINT);
-            breakpoint->breakpoints = { "320vp", "600vp", "840vp" };
             gridRow->SetBreakPoints(breakpoint);
             return;
         }
@@ -240,7 +210,6 @@ void ParserBreakpoints(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent>
                 JSContainerBase::ParseJsDimensionVp(threshold, valueDimension);
                 if (GreatNotEqual(width, valueDimension.Value())) {
                     LOGI("Array data must be sorted in ascending order");
-                    breakpoint->breakpoints = { "320vp", "600vp", "840vp" };
                     gridRow->SetBreakPoints(breakpoint);
                     return;
                 }
@@ -265,6 +234,7 @@ void JSGridRow::JSBind(BindingTarget globalObj)
 {
     JSClass<JSGridRow>::Declare("GridRow");
     JSClass<JSGridRow>::StaticMethod("create", &JSGridRow::Create, MethodOptions::NONE);
+    JSClass<JSGridRow>::StaticMethod("height", &JSGridRow::Height, MethodOptions::NONE);
     JSClass<JSGridRow>::StaticMethod("columns", &JSGridRow::Columns, MethodOptions::NONE);
     JSClass<JSGridRow>::StaticMethod("gutter", &JSGridRow::Gutter, MethodOptions::NONE);
     JSClass<JSGridRow>::StaticMethod("breakpoints", &JSGridRow::Breakpoints, MethodOptions::NONE);
@@ -272,6 +242,20 @@ void JSGridRow::JSBind(BindingTarget globalObj)
     JSClass<JSGridRow>::StaticMethod("onBreakpointChange", &JSGridRow::JsBreakpointEvent, MethodOptions::NONE);
     JSClass<JSGridRow>::Inherit<JSContainerBase>();
     JSClass<JSGridRow>::Bind<>(globalObj);
+}
+
+void JSGridRow::Height(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    JSViewAbstract::JsHeight(info[0]);
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<V2::GridRowComponent>(component);
+    if (grid) {
+        grid->SetHasContainerHeight(true);
+    }
 }
 
 void JSGridRow::Create(const JSCallbackInfo& info)

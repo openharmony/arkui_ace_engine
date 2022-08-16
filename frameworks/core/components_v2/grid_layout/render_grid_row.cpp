@@ -98,12 +98,12 @@ void RenderGridRow::PerformLayout()
         component->FirebreakPointEvent(sizeTypeString);
         originSizeType_ = sizeType;
     }
-    auto getter = GridContainerUtils::ProcessGetter(sizeType, component->GetGetter());
-    auto getterInDouble = std::make_pair<double, double>(NormalizeToPx(getter.first), NormalizeToPx(getter.second));
+    auto gutter = GridContainerUtils::ProcessGutter(sizeType, component->GetGutter());
+    auto gutterInDouble = std::make_pair<double, double>(NormalizeToPx(gutter.first), NormalizeToPx(gutter.second));
     int32_t columnNum = GridContainerUtils::ProcessColumn(sizeType, component->GetTotalCol());
-    double columnUnitWidth = GridContainerUtils::ProcessColumnWidth(getterInDouble, columnNum, maxSize);
-    LayoutEachChild(columnUnitWidth, maxSize.Height(), getterInDouble.first, sizeType, columnNum);
-    int offset = 0;
+    double columnUnitWidth = GridContainerUtils::ProcessColumnWidth(gutterInDouble, columnNum, maxSize);
+    LayoutEachChild(columnUnitWidth, maxSize.Height(), gutterInDouble.first, sizeType, columnNum);
+    int32_t offset = 0;
     Offset rowPosition;
     double currentRowHeight = 0.0;
     double totalHeight = 0.0;
@@ -125,35 +125,36 @@ void RenderGridRow::PerformLayout()
             continue;
         }
         if (newLineOffset.newLineCount > 0) {
-            totalHeight += currentRowHeight * newLineOffset.newLineCount + getterInDouble.second;
+            totalHeight += currentRowHeight * newLineOffset.newLineCount + gutterInDouble.second;
             rowPosition.SetY(
-                rowPosition.GetY() + currentRowHeight * newLineOffset.newLineCount + getterInDouble.second);
+                rowPosition.GetY() + currentRowHeight * newLineOffset.newLineCount + gutterInDouble.second);
             offset = newLineOffset.offset;
-            currentRowHeight = gridColChild->GetLayoutSize().Height();
+            currentRowHeight = gridColToNodeMap[gridColChild]->GetLayoutSize().Height();
             lastLength = maxSize.Width();
         } else {
-            currentRowHeight = std::max(currentRowHeight, gridColChild->GetLayoutSize().Height());
+            currentRowHeight = std::max(currentRowHeight, gridColToNodeMap[gridColChild]->GetLayoutSize().Height());
         }
         Offset position;
         if (component->GetDirection() == V2::GridRowDirection::RowReverse) {
             double childSpanPlusOffsetWidth = 0.0;
-            if (newLineOffset.newLineCount > 0){
+            if (newLineOffset.newLineCount > 0) {
                 childSpanPlusOffsetWidth = ((currentChildSpan + newLineOffset.offset) * columnUnitWidth +
-                    ((currentChildSpan + newLineOffset.offset) - 1) * getterInDouble.first);
+                    ((currentChildSpan + newLineOffset.offset) - 1) * gutterInDouble.first);
                 position.SetX(lastLength - childSpanPlusOffsetWidth);
             } else {
-                childSpanPlusOffsetWidth = ((currentChildSpan + offset) * columnUnitWidth +
-                    ((currentChildSpan + offset) - 1) * getterInDouble.first);
-                offset += GetRelativeOffset(gridColChild, sizeType);    
+                childSpanPlusOffsetWidth =
+                    ((currentChildSpan + GetRelativeOffset(gridColChild, sizeType)) * columnUnitWidth +
+                    ((currentChildSpan + GetRelativeOffset(gridColChild, sizeType)) - 1) * gutterInDouble.first);
+                offset += GetRelativeOffset(gridColChild, sizeType);
             }
             position.SetX(lastLength - childSpanPlusOffsetWidth);
-            lastLength -= childSpanPlusOffsetWidth + getterInDouble.first;
+            lastLength -= childSpanPlusOffsetWidth + gutterInDouble.first;
         } else if (component->GetDirection() == V2::GridRowDirection::Row) {
             if (newLineOffset.newLineCount > 0) {
-                position.SetX(offset > 0 ? offset * columnUnitWidth + (offset - 1) * getterInDouble.first : 0);
+                position.SetX(offset > 0 ? offset * columnUnitWidth + (offset - 1) * gutterInDouble.first : 0);
             } else {
                 offset += GetRelativeOffset(gridColChild, sizeType);
-                position.SetX(offset * (columnUnitWidth + getterInDouble.first));
+                position.SetX(offset * (columnUnitWidth + gutterInDouble.first));
             }
         }
         position.SetY(rowPosition.GetY());
@@ -161,11 +162,15 @@ void RenderGridRow::PerformLayout()
         offset += currentChildSpan;
     }
     totalHeight += currentRowHeight;
-    SetLayoutSize(Size(maxSize.Width(), std::min(maxSize.Height(), totalHeight)));
+    if (component->HasContainerHeight()) {
+        SetLayoutSize(Size(maxSize.Width(), maxSize.Height()));
+    } else {
+        SetLayoutSize(Size(maxSize.Width(), totalHeight));
+    }
 }
 
 void RenderGridRow::LayoutEachChild(
-    double columnUnitWidth, double childHeightLimit, double xGetter, GridSizeType sizeType, int32_t columnNum)
+    double columnUnitWidth, double childHeightLimit, double xGutter, GridSizeType sizeType, int32_t columnNum)
 {
     auto children = GetChildren();
     std::list<RefPtr<RenderNode>> gridColChildren;
@@ -179,8 +184,8 @@ void RenderGridRow::LayoutEachChild(
         }
         auto span = std::min(gridCol->GetSpan(sizeType), columnNum);
         gridCol->SetSizeType(sizeType);
-        LayoutParam childLayout(Size(columnUnitWidth * span + (span - 1) * xGetter, childHeightLimit),
-            Size(columnUnitWidth * span + (span - 1) * xGetter, 0));
+        LayoutParam childLayout(Size(columnUnitWidth * span + (span - 1) * xGutter, childHeightLimit),
+            Size(columnUnitWidth * span + (span - 1) * xGutter, 0));
         child->Layout(childLayout);
         gridColChildren.emplace_back(gridCol);
         gridColToNodeMap[gridCol] = child;
@@ -223,22 +228,22 @@ void RenderGridRow::CalculateOffsetOfNewline(const RefPtr<RenderNode>& node, int
 {
     auto gridCol = AceType::DynamicCast<RenderGridCol>(node);
     if (!gridCol) {
-        LOGI("Not a grid_col component");
+        LOGE("Not a grid_col component");
         return;
     }
     newLineOffset.isValid = true;
     if (restColumnNum < gridCol->GetOffset(sizeType) + currentChildSpan) {
         newLineOffset.newLineCount = 1;
-        // ex. if there are 7 columns left and chile span is 4 or 8(< or > than restColumnNum), offset is 5, 
-        // child will be set on a new row with offset 0 
+        // ex. if there are 7 columns left and chile span is 4 or 8(< or > than restColumnNum), offset is 5,
+        // child will be set on a new row with offset 0
         if (restColumnNum >= gridCol->GetOffset(sizeType)) {
             newLineOffset.offset = 0;
             return;
         }
         // in this case, child will be set on a new row with offset (child offset - restColumnNum)
         if (restColumnNum < gridCol->GetOffset(sizeType) && restColumnNum > currentChildSpan) {
-            if (ParseNewLineForLargeOffset(
-                    currentChildSpan, gridCol->GetOffset(sizeType), restColumnNum, totalColumnNum, newLineOffset)) {
+            if (ParseNewLineForLargeOffset(currentChildSpan, gridCol->GetOffset(sizeType), restColumnNum,
+                totalColumnNum, newLineOffset)) {
                 return;
             }
             newLineOffset.offset = gridCol->GetOffset(sizeType) - restColumnNum;
@@ -246,8 +251,8 @@ void RenderGridRow::CalculateOffsetOfNewline(const RefPtr<RenderNode>& node, int
         }
         // in this case, empty line(s) will be placed
         if (restColumnNum < gridCol->GetOffset(sizeType) && restColumnNum < currentChildSpan) {
-            if (ParseNewLineForLargeOffset(
-                    currentChildSpan, gridCol->GetOffset(sizeType), restColumnNum, totalColumnNum, newLineOffset)) {
+            if (ParseNewLineForLargeOffset(currentChildSpan, gridCol->GetOffset(sizeType), restColumnNum,
+                totalColumnNum, newLineOffset)) {
                 return;
             }
             newLineOffset.offset = gridCol->GetOffset(sizeType) - restColumnNum;
