@@ -32,11 +32,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderRemoteWindow::ExtractRSNode(const RefP
         return nullptr;
     }
 
-    // update RSNode if surface node changed
     auto surfaceNode = remoteWindowComponent->GetRSSurfaceNode();
-    if (surfaceNode) {
-        surfaceNode->CreateNodeInRenderThread(true);
-    }
     return std::static_pointer_cast<Rosen::RSNode>(surfaceNode);
 }
 } // namespace OHOS::Ace
