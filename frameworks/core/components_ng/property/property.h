@@ -33,6 +33,7 @@ inline constexpr PropertyChangeFlag PROPERTY_UPDATE_LAYOUT = 1 << 1;
 // Affects self position.
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_POSITION = 1 << 2;
 
+// Mark self be measure boundry to remeasure.
 inline constexpr PropertyChangeFlag PROPERTY_REQUEST_NEW_CHILD_NODE = 1 << 3;
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_BY_CHILD_REQUEST = 1 << 4;
 

@@ -29,7 +29,7 @@ bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 
 bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
 {
-    if (!touchEvents_.empty() && !userCallback_) {
+    if (touchEvents_.empty() && !userCallback_) {
         return true;
     }
     TouchEventInfo event("touchEvent");

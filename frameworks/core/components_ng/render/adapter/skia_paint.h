@@ -44,6 +44,8 @@ public:
     void SetStyle(PaintStyle style) override;
     void SetColor(const Color& color) override;
     void SetStrokeWidth(float width) override;
+    void SetAlphaf(float alpha) override;
+    void SetBlendMode(BlendMode blendMode) override;
 
     const SkPaint& GetRawPaint()
     {

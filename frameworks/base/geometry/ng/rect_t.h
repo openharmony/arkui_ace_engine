@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <array>
 
+#include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -118,6 +119,11 @@ public:
     T Height() const
     {
         return height_;
+    }
+
+    T MainSize(Axis axis) const
+    {
+        return axis == Axis::HORIZONTAL ? width_ : height_;
     }
 
     void SetSize(const SizeT<T>& size)

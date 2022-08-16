@@ -22,6 +22,7 @@
 #include <sstream>
 #include <string>
 
+#include "base/geometry/axis.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -46,6 +47,11 @@ public:
     T Height() const
     {
         return height_;
+    }
+
+    T MainSize(Axis axis) const
+    {
+        return axis == Axis::HORIZONTAL ? width_ : height_;
     }
 
     void SetWidth(T width)
