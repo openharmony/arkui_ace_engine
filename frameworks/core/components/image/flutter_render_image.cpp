@@ -588,6 +588,13 @@ void FlutterRenderImage::ApplyBorderRadius(
 void FlutterRenderImage::ApplyColorFilter(flutter::Paint& paint)
 {
 #ifdef USE_SYSTEM_SKIA
+    if (colorfilter_.size() == COLOR_FILTER_MATRIX_SIZE) {
+        float colorfiltermatrix[COLOR_FILTER_MATRIX_SIZE] = {0};
+        std::copy(colorfilter_.begin(), colorfilter_.end(), colorfiltermatrix);
+        paint.paint()->setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(colorfiltermatrix));
+        return;
+    }
+
     if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
         paint.paint()->setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(GRAY_COLOR_MATRIX));
         return;
@@ -599,6 +606,13 @@ void FlutterRenderImage::ApplyColorFilter(flutter::Paint& paint)
     paint.paint()->setColorFilter(SkColorFilter::MakeModeFilter(
         SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
 #else
+    if (colorfilter_.size() == COLOR_FILTER_MATRIX_SIZE) {
+        float colorfiltermatrix[COLOR_FILTER_MATRIX_SIZE] = {0};
+        std::copy(colorfilter_.begin(), colorfilter_.end(), colorfiltermatrix);
+        paint.paint()->setColorFilter(SkColorFilters::Matrix(colorfiltermatrix));
+        return;
+    }
+
     if (imageRenderMode_ == ImageRenderMode::TEMPLATE) {
         paint.paint()->setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
         return;

@@ -398,7 +398,7 @@ protected:
     void* pixmapRawPtr_ = nullptr;
     bool syncMode_ = false;
     Border border_;
-
+    std::vector<float> colorfilter_;
 private:
     void UpdateOverlay();
     void HandleOnCopy();

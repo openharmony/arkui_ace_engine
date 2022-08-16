@@ -56,6 +56,7 @@ public:
     static void OnError(const JSCallbackInfo& args);
     static void OnFinish(const JSCallbackInfo& info);
     static void SetSyncLoad(const JSCallbackInfo& info);
+    static void SetColorFilter(const JSCallbackInfo& info);
 
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
@@ -111,6 +112,28 @@ protected:
     static void SetBottomBorderColor(const Color& color);
     static void SetAutoResize(bool autoResize);
 
+};
+
+class JSColorFilter : public AceType {
+    DECLARE_ACE_TYPE(JSColorFilter, AceType);
+
+public:
+    JSColorFilter() = default;
+    ~JSColorFilter() override = default;
+    static void ConstructorCallback(const JSCallbackInfo& info);
+    static void DestructorCallback(JSColorFilter* obj);
+
+    void SetColorFilterMatrix(const std::vector<float>&& matrix)
+    {
+        colorfiltermatrix_ = std::move(matrix);
+    }
+
+    const std::vector<float>& GetColorFilterMatrix() const
+    {
+        return colorfiltermatrix_;
+    }
+private:
+    std::vector<float> colorfiltermatrix_;
 };
 
 } // namespace OHOS::Ace::Framework

@@ -213,10 +213,27 @@ config("config_render_test") {
   include_dirs = []
 }
 
+ohos_unittest("RenderImageColorFilterTest") {
+  module_out_path = module_output_path
+
+  sources = [
+    "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
+    "render_image_colorfilter_test.cpp",
+  ]
+
+  configs = [ "$ace_root:ace_test_config" ]
+
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
+
+  part_name = ace_engine_part
+}
+
 group("unittest") {
   testonly = true
   deps = [
     #":ImageCreatorTest",
     # ":RenderImageTest",
+    ":RenderImageColorFilterTest",
   ]
 }
