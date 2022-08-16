@@ -44,6 +44,8 @@ public:
 
     void SetIsZawgyiMyanmar(bool isZawgyiMyanmar);
 
+    void UnloadFont();
+
 private:
     flutter::WindowClient* GetFlutterEngineWindowClient();
 
