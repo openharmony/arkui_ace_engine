@@ -63,12 +63,6 @@ void RenderListItem::Update(const RefPtr<Component>& component)
     borderRadius_ = item->GetBorderRadius();
     edgeEffect_ = item->GetEdgeEffect();
 
-    if (item->GetSwiperEndComponent() || item->GetSwiperEndComponent()) {
-        InitDragRecognizer();
-    } else {
-        dragDetector_.Reset();
-        springController_.Reset();
-    }
     theme_ = GetTheme<ListItemTheme>();
     if (!theme_) {
         LOGE("theme is null");
@@ -102,7 +96,7 @@ void RenderListItem::PerfLayoutSwiperMode()
     const auto& layoutParam = GetLayoutParam();
     child_->Layout(layoutParam);
     const auto& childSize = child_->GetLayoutSize();
-    double maxHeight = childSize.Height();
+    double maxMainSize = GetMainSize(childSize);
 
     if (GreatNotEqual(curOffset_, 0.0)) {
         swiperEnd_.Reset();
@@ -113,14 +107,15 @@ void RenderListItem::PerfLayoutSwiperMode()
                 swiperStart->Layout(LayoutParam(layoutParam.GetMaxSize(), Size()));
                 startSize_ = swiperStart->GetLayoutSize();
                 startSize = startSize_;
-            } else if (GreatNotEqual(curOffset_, startSize_.Width())) {
-                Size maxSize(curOffset_, layoutParam.GetMaxSize().Height());
-                swiperStart->Layout(LayoutParam(maxSize, Size(curOffset_, 0.0)));
+            } else if (GreatNotEqual(curOffset_, GetCrossSize(startSize_))) {
+                Size maxSize = MakeValue<Size>(GetMainSize(layoutParam.GetMaxSize()), curOffset_);
+                swiperStart->Layout(LayoutParam(maxSize, MakeValue<Size>(0.0, curOffset_)));
                 startSize = swiperStart->GetLayoutSize();
             }
-            maxHeight = std::max(maxHeight, startSize.Height());
-            double startPos = curOffset_ - startSize.Width();
-            swiperStart->SetPosition(Offset(startPos, (maxHeight - startSize.Height()) / 2)); /* 2:averages */
+            maxMainSize = std::max(maxMainSize, GetMainSize(startSize));
+            double startPos = curOffset_ - GetCrossSize(startSize);
+            /* 2:averages */
+            swiperStart->SetPosition(MakeValue<Offset>((maxMainSize - GetMainSize(startSize)) / 2, startPos));
         }
         swiperStart_ = swiperStart;
     } else {
@@ -132,19 +127,20 @@ void RenderListItem::PerfLayoutSwiperMode()
                 swiperEnd->Layout(LayoutParam(layoutParam.GetMaxSize(), Size()));
                 endSize_ = swiperEnd->GetLayoutSize();
                 endSize = endSize_;
-            } else if (GreatNotEqual(-curOffset_, endSize_.Width())) {
-                Size maxSize(-curOffset_, layoutParam.GetMaxSize().Height());
-                swiperEnd->Layout(LayoutParam(maxSize, Size(-curOffset_, 0.0)));
+            } else if (GreatNotEqual(-curOffset_, GetCrossSize(endSize_))) {
+                Size maxSize = MakeValue<Size>(GetMainSize(layoutParam.GetMaxSize()), -curOffset_);
+                swiperEnd->Layout(LayoutParam(maxSize, MakeValue<Size>(0.0, -curOffset_)));
                 endSize = swiperEnd->GetLayoutSize();
             }
-            maxHeight = std::max(maxHeight, endSize.Height());
-            double startPos = childSize.Width() + curOffset_;
-            swiperEnd->SetPosition(Offset(startPos, (maxHeight - endSize.Height()) / 2)); /* 2:averages */
+            maxMainSize = std::max(maxMainSize, GetMainSize(endSize));
+            double startPos = GetCrossSize(childSize) + curOffset_;
+             /* 2:averages */
+            swiperEnd->SetPosition(MakeValue<Offset>((maxMainSize - GetMainSize(endSize)) / 2, startPos));
         }
         swiperEnd_ = swiperEnd;
     }
-    child_->SetPosition(Offset(curOffset_, (maxHeight - childSize.Height()) / 2)); /* 2:averages */
-    SetLayoutSize(layoutParam.Constrain(Size(childSize.Width(), maxHeight)));
+    child_->SetPosition(MakeValue<Offset>((maxMainSize - GetMainSize(childSize)) / 2, curOffset_)); /* 2:averages */
+    SetLayoutSize(layoutParam.Constrain(MakeValue<Size>(maxMainSize, GetCrossSize(childSize))));
 }
 
 void RenderListItem::PerformLayout()
@@ -269,14 +265,23 @@ void RenderListItem::UpdateTouchRect()
 
 void RenderListItem::InitDragRecognizer()
 {
-    auto weak = AceType::WeakClaim(this);
-    if (!dragDetector_) {
+    if (!springController_) {
+        springController_ = AceType::MakeRefPtr<Animator>(context_);
+    }
+    if (dragDetector_) {
+        return;
+    }
+
+    if (IsVertical()) {
         dragDetector_ = AceType::MakeRefPtr<HorizontalDragRecognizer>();
+    } else {
+        dragDetector_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
     }
     if (!dragDetector_) {
         return;
     }
 
+    auto weak = AceType::WeakClaim(this);
     dragDetector_->SetOnDragStart([weak](const DragStartInfo& info) {
         auto client = weak.Upgrade();
         if (client) {
@@ -297,11 +302,6 @@ void RenderListItem::InitDragRecognizer()
             client->HandleDragEnd(info);
         }
     });
-
-    
-    if (!springController_) {
-        springController_ = AceType::MakeRefPtr<Animator>(context_);
-    }
 }
 
 void RenderListItem::HandleDragStart(const DragStartInfo& info)
@@ -325,14 +325,14 @@ double RenderListItem::CalculateFriction(double gamma)
 double RenderListItem::GetFriction()
 {
     if (GreatNotEqual(curOffset_, 0.0)) {
-        double width =  swiperStart_ ? startSize_.Width() : 0.0;
-        double itemWidth = child_->GetLayoutSize().Width();
+        double width =  swiperStart_ ? GetCrossSize(startSize_) : 0.0;
+        double itemWidth = GetCrossSize(child_->GetLayoutSize());
         if (width < curOffset_) {
             return CalculateFriction((curOffset_ - width) / (itemWidth - width));
         }
     } else if (LessNotEqual(curOffset_, 0.0)) {
-        double width = swiperEnd_ ? endSize_.Width() : 0.0;
-        double itemWidth = child_->GetLayoutSize().Width();
+        double width = swiperEnd_ ? GetCrossSize(endSize_) : 0.0;
+        double itemWidth = GetCrossSize(child_->GetLayoutSize());
         if (width < -curOffset_) {
             return CalculateFriction((-curOffset_ - width) / (itemWidth - width));
         }
@@ -345,10 +345,10 @@ void RenderListItem::UpdatePostion(double delta)
     double offset = curOffset_;
     curOffset_ += delta;
     if (edgeEffect_ == SwipeEdgeEffect::None) {
-        if (swiperStart_ && GreatNotEqual(curOffset_, startSize_.Width())) {
-            curOffset_ = startSize_.Width();
-        } else if (swiperEnd_ && GreatNotEqual(-curOffset_, endSize_.Width())) {
-            curOffset_ = -endSize_.Width();
+        if (swiperStart_ && GreatNotEqual(curOffset_, GetCrossSize(startSize_))) {
+            curOffset_ = GetCrossSize(startSize_);
+        } else if (swiperEnd_ && GreatNotEqual(-curOffset_, GetCrossSize(endSize_))) {
+            curOffset_ = -GetCrossSize(endSize_);
         }
         if (Negative(curOffset_) && !GetSwiperEndRnderNode()) {
             curOffset_ = 0.0;
@@ -413,7 +413,7 @@ void RenderListItem::HandleDragEnd(const DragEndInfo& info)
     bool reachRightSpeed = info.GetMainVelocity() > speedThreshold;
     bool reachLeftSpeed = -info.GetMainVelocity() > speedThreshold;
     if (GreatNotEqual(curOffset_, 0.0) && swiperStart_) {
-        double width = startSize_.Width();
+        double width = GetCrossSize(startSize_);
         if (swipeIndex == ListItemSwipeIndex::ITEM_CHILD && (curOffset_ > width * threshold || reachRightSpeed)) {
             swipeIndex = ListItemSwipeIndex::SWIPER_START;
         } else if (swipeIndex == ListItemSwipeIndex::SWIPER_START &&
@@ -424,7 +424,7 @@ void RenderListItem::HandleDragEnd(const DragEndInfo& info)
         }
         end = width * static_cast<int32_t>(swipeIndex);
     } else if (LessNotEqual(curOffset_, 0.0) && swiperEnd_) {
-        double width = endSize_.Width();
+        double width = GetCrossSize(endSize_);
         if (swipeIndex == ListItemSwipeIndex::ITEM_CHILD && (width * threshold < -curOffset_ || reachLeftSpeed)) {
             swipeIndex = ListItemSwipeIndex::SWIPER_END;
         } else if (swipeIndex == ListItemSwipeIndex::SWIPER_END &&
@@ -445,16 +445,26 @@ void RenderListItem::OnTouchTestHit(
         return;
     }
 
-    RefPtr<RenderNode> parent = GetParent().Upgrade();
-    RefPtr<RenderList> renderList = AceType::DynamicCast<RenderList>(parent);
-    if (!renderList || !renderList->IsVertical()) {
-        return;
+    if (GetSwiperStartRnderNode() || GetSwiperEndRnderNode()) {
+        InitDragRecognizer();
+    } else {
+        dragDetector_.Reset();
+        springController_.Reset();
     }
-
-    if (dragDetector_ && (GetSwiperStartRnderNode() || GetSwiperEndRnderNode())) {
+    if (dragDetector_) {
         dragDetector_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(dragDetector_);
     }
+}
+
+bool RenderListItem::IsVertical() const
+{
+    RefPtr<RenderNode> parent = GetParent().Upgrade();
+    RefPtr<RenderList> renderList = AceType::DynamicCast<RenderList>(parent);
+    if (!renderList) {
+        return true;
+    }
+    return renderList->IsVertical();
 }
 
 } // namespace OHOS::Ace::V2
