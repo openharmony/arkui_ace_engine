@@ -33,23 +33,23 @@ public:
     RefPtr<Element> CreateElement() override;
 
     ACE_DEFINE_COMPONENT_PROP(Want, std::string, "");
-    ACE_DEFINE_COMPONENT_PROP(Width, float, 0.0F);
-    ACE_DEFINE_COMPONENT_PROP(Height, float, 0.0F);
+    ACE_DEFINE_COMPONENT_PROP(Width, Dimension, 0.0_px);
+    ACE_DEFINE_COMPONENT_PROP(Height, Dimension, 0.0_px);
 
-    ACE_DEFINE_COMPONENT_EVENT(onConnected, void());
-    ACE_DEFINE_COMPONENT_EVENT(onDisconnected, void());
+    ACE_DEFINE_COMPONENT_EVENT(OnConnected, void());
+    ACE_DEFINE_COMPONENT_EVENT(OnDisconnected, void());
 
     void FireOnConnected()
     {
-        if (eventonConnected_) {
-            eventonConnected_.get();
+        if (eventOnConnected_) {
+            (*eventOnConnected_)();
         }
     }
 
     void FireOnDisconnected()
     {
-        if (eventonDisconnected_) {
-            eventonDisconnected_.get();
+        if (eventOnDisconnected_) {
+            (*eventOnDisconnected_)();
         }
     }
 };

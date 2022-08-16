@@ -40,7 +40,7 @@ void RenderAbilityComponent::Update(const RefPtr<Component>& component)
     }
     component_ = abilityComponent;
 
-    Size size = Size(abilityComponent->GetWidth(), abilityComponent->GetHeight());
+    Size size = Size(NormalizeToPx(abilityComponent->GetWidth()), NormalizeToPx(abilityComponent->GetHeight()));
     if (currentRect_.GetSize() == size) {
         return;
     }

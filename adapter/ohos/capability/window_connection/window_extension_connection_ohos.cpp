@@ -14,13 +14,17 @@
  */
 #include "window_extension_connection_ohos.h"
 
+#include <functional>
 #include <memory>
 
 #include "common/rs_color.h"
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "element_name.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 
 #include "base/memory/ace_type.h"
+#include "core/common/container_scope.h"
 #include "frameworks/base/json/json_util.h"
 #include "frameworks/core/components_v2/ability_component/render_ability_component.h"
 
@@ -31,7 +35,8 @@
 namespace OHOS::Ace {
 class ConnectionCallback : public Rosen::IWindowExtensionCallback {
 public:
-    explicit ConnectionCallback(WeakPtr<RenderNode> node) : node_(std::move(node)) {}
+    ConnectionCallback(WeakPtr<RenderNode> node, int32_t instanceId)
+        : node_(std::move(node)), instanceId_(instanceId) {}
     ~ConnectionCallback() override = default;
     void OnWindowReady(const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode) override
     {
@@ -43,31 +48,53 @@ public:
         }
         rsSurfaceNode->CreateNodeInRenderThread();
         auto rect = nodeStrong->GetPaintRect();
-        auto offset = rect.GetOffset();
         auto size = rect.GetSize();
         rsSurfaceNode->SetBounds(0, 0, static_cast<float>(size.Width()), static_cast<float>(size.Height()));
+        LOGI("OnWindowReady surface size: %{public}s", size.ToString().c_str());
         rsSurfaceNode->SetBackgroundColor(Color::WHITE.GetValue());
         if (!originNode_) {
             originNode_ = nodeStrong->GetRSNode();
         }
         nodeStrong->SyncRSNode(std::static_pointer_cast<RSNode>(rsSurfaceNode));
         nodeStrong->MarkNeedLayout();
-        auto ability = AceType::DynamicCast<V2::RenderAbilityComponent>(nodeStrong);
-        if (ability) {
-            ability->FireConnect();
-        }
+
+        auto task = [weak = node_, instanceId = instanceId_]() {
+            ContainerScope scope(instanceId);
+            auto node = weak.Upgrade();
+            if (!node) {
+                return;
+            }
+            auto ability = AceType::DynamicCast<V2::RenderAbilityComponent>(node);
+            if (ability) {
+                ability->FireConnect();
+            }
+        };
+        PostTaskToUI(std::move(task));
     }
 
     void OnExtensionDisconnected() override
     {
         LOGI("window extension disconnect");
         auto ability = AceType::DynamicCast<V2::RenderAbilityComponent>(node_.Upgrade());
-        if (ability) {
-            if (originNode_) {
-                ability->SyncRSNode(originNode_);
-            }
-            ability->FireDisconnect();
+        if (!ability) {
+            return;
         }
+        if (originNode_) {
+            ability->SyncRSNode(originNode_);
+        }
+
+        auto task = [weak = node_, instanceId = instanceId_]() {
+            ContainerScope scope(instanceId);
+            auto node = weak.Upgrade();
+            if (!node) {
+                return;
+            }
+            auto ability = AceType::DynamicCast<V2::RenderAbilityComponent>(node);
+            if (ability) {
+                ability->FireDisconnect();
+            }
+        };
+        PostTaskToUI(std::move(task));
     }
 
     void OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event) override {}
@@ -75,8 +102,37 @@ public:
     void OnBackPress() override {}
 
 private:
+    void PostTaskToUI(const std::function<void()>&& task) const
+    {
+        if (!task) {
+            LOGE("task is empty");
+            return;
+        }
+
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        if (!container) {
+            LOGE("container is null");
+            return;
+        }
+
+        auto context = container->GetPipelineContext();
+        if (!context) {
+            LOGE("context is null");
+            return;
+        }
+
+        auto taskExecutor = context->GetTaskExecutor();
+        if (!taskExecutor) {
+            LOGE("task executor is null");
+            return;
+        }
+
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+    }
+
     std::shared_ptr<RSNode> originNode_;
     WeakPtr<RenderNode> node_;
+    int32_t instanceId_ = -1;
 };
 
 void RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
@@ -97,6 +153,7 @@ void WantConverter(const std::string& want, AppExecFwk::ElementName& element)
 void WindowExtensionConnectionAdapterOhos::ConnectExtension(
     const std::string& want, const Rect& rect, WeakPtr<RenderNode> node)
 {
+    LOGI("ConnectExtension rect: %{public}s", rect.ToString().c_str());
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OS_ACCOUNT_EXISTS)
     LOGI("connect to windows extension begin");
     windowExtension_ = std::make_unique<Rosen::WindowExtensionConnection>();
@@ -110,7 +167,13 @@ void WindowExtensionConnectionAdapterOhos::ConnectExtension(
     RectConverter(rect, rosenRect);
     AppExecFwk::ElementName element;
     WantConverter(want, element);
-    sptr<Rosen::IWindowExtensionCallback> callback = new ConnectionCallback(node);
+
+    int32_t instanceId = -1;
+    auto container = Container::Current();
+    if (container) {
+        instanceId = container->GetInstanceId();
+    }
+    sptr<Rosen::IWindowExtensionCallback> callback = new ConnectionCallback(node, instanceId);
     windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), callback);
 #else
     LOGI("unrosen engine doesn't support ability component");
@@ -152,6 +215,7 @@ void WindowExtensionConnectionAdapterOhos::UpdateRect(const Rect& rect)
     if (windowExtension_) {
         Rosen::Rect rosenRect;
         RectConverter(rect, rosenRect);
+        LOGI("UpdateRect rect: %{public}s", rect.ToString().c_str());
         windowExtension_->SetBounds(rosenRect);
     } else {
         LOGI("ability doesn't connect to window extension.cannot update rect region ");
