@@ -25,6 +25,7 @@ class RosenRenderMultiChildScroll : public RenderMultiChildScroll {
 
 public:
     void Paint(RenderContext& context, const Offset& offset) override;
+    void Update(const RefPtr<Component>& component) override;
 };
 
 } // namespace OHOS::Ace

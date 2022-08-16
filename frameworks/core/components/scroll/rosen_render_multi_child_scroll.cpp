@@ -22,6 +22,15 @@
 
 namespace OHOS::Ace {
 
+void RosenRenderMultiChildScroll::Update(const RefPtr<Component>& component)
+{
+    RenderMultiChildScroll::Update(component);
+    auto rsNode = GetRSNode();
+    if (rsNode != nullptr) {
+        rsNode->SetClipToFrame(true);
+    }
+}
+
 void RosenRenderMultiChildScroll::Paint(RenderContext& context, const Offset& offset)
 {
     // child position changed when layout, need layout again
