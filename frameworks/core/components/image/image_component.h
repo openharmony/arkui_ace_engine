@@ -34,6 +34,7 @@
 #include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
+constexpr int32_t COLOR_FILTER_MATRIX_SIZE = 20;
 // A component can show image.
 class ACE_EXPORT ImageComponent : public RenderComponent, public Measurable {
     DECLARE_ACE_TYPE(ImageComponent, RenderComponent, Measurable);
@@ -150,6 +151,18 @@ public:
     const CopyOptions& GetCopyOption() const;
     void SetCopyOption(const CopyOptions& copyOption);
 
+    void SetColorFilterMatrix(const std::vector<float>& colorfilter)
+    {
+        if (colorfilter.size() == COLOR_FILTER_MATRIX_SIZE) {
+            colorfilter_ = colorfilter;
+        }
+    }
+
+    const std::vector<float>& GetColorFilterMatrix() const
+    {
+        return colorfilter_;
+    }
+
 private:
     std::string src_;
     std::string alt_;
@@ -158,6 +171,7 @@ private:
 
     std::optional<Color> color_;
     std::optional<Color> fillColor_; // used for paint svg path.
+    std::vector<float> colorfilter_;
 
     EventMarker loadSuccessEvent_;
     EventMarker loadFailEvent_;
