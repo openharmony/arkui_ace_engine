@@ -498,6 +498,8 @@ void QJSDeclarativeEngine::TimerCallback(const std::string& callbackId, const st
 {
     // string with function source
     LOGD("CallbackId %s", callbackId.c_str());
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    QJSContext::Scope scp(ctx);
 
     if (isInterval) {
         TimerCallJs(callbackId, isInterval);
