@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/js_frontend/engine/jsi/debugger/ws_server.h"
+#include "ws_server.h"
 
 #include <fstream>
 #include <iostream>
 #include <sys/types.h>
 
-#include "base/log/log.h"
+#include "hilog_wrapper.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -27,12 +27,14 @@ void WsServer::RunServer()
 {
     terminateExecution_ = false;
     try {
-        ioContext_ = std::make_unique<boost::asio::io_context>();
-        int appPid = getpid();
         tid_ = pthread_self();
+#ifdef WINDOWS_PLATFORM
+        constexpr int32_t DEFAULT_INSEPTOR_PORT = 9230;
+        CommProtocol::endpoint endPoint(CommProtocol::v4(), DEFAULT_INSEPTOR_PORT);
+#else
+        int appPid = getpid();
         std::string pidStr = std::to_string(appPid);
         std::string instanceIdStr("");
-        auto& connectFlag = connectState_;
         /**
          * The old version of IDE is not compatible with the new images due to the connect server.
          * The First instance will use "pid" instead of "pid + instanceId" to avoid this.
@@ -43,9 +45,12 @@ void WsServer::RunServer()
         }
         std::string sockName = '\0' + pidStr + instanceIdStr + componentName_;
         LOGI("WsServer RunServer: %{public}d%{public}d%{public}s", appPid, instanceId_, componentName_.c_str());
-        localSocket::endpoint endPoint(sockName);
-        localSocket::socket socket(*ioContext_);
-        localSocket::acceptor acceptor(*ioContext_, endPoint);
+        CommProtocol::endpoint endPoint(sockName);
+#endif
+        ioContext_ = std::make_unique<boost::asio::io_context>();
+        CommProtocol::socket socket(*ioContext_);
+        CommProtocol::acceptor acceptor(*ioContext_, endPoint);
+        auto& connectFlag = connectState_;
         acceptor.async_accept(socket, [&connectFlag](const boost::system::error_code& error) {
             if (!error) {
                 connectFlag = true;
@@ -55,8 +60,8 @@ void WsServer::RunServer()
         if (terminateExecution_ || !connectState_) {
             return;
         }
-        webSocket_ = std::unique_ptr<websocket::stream<localSocket::socket>>(
-            std::make_unique<websocket::stream<localSocket::socket>>(std::move(socket)));
+        webSocket_ = std::unique_ptr<websocket::stream<CommProtocol::socket>>(
+            std::make_unique<websocket::stream<CommProtocol::socket>>(std::move(socket)));
         webSocket_->accept();
         while (!terminateExecution_) {
             beast::flat_buffer buffer;
@@ -73,7 +78,7 @@ void WsServer::RunServer()
     } catch (const beast::system_error& se) {
         if (se.code() != websocket::error::closed) {
             webSocket_.reset();
-            LOGE("Error system_error");
+            LOGE("Error system_error, %{public}s", se.what());
         }
     } catch (const std::exception& e) {
         LOGE("Error exception, %{public}s", e.what());
@@ -86,15 +91,19 @@ void WsServer::StopServer()
     terminateExecution_ = true;
     if (!connectState_) {
         ioContext_->stop();
-    } else {
+    } else if (webSocket_ != nullptr) {
         boost::system::error_code error;
         webSocket_->close(websocket::close_code::normal, error);
     }
-    pthread_join(tid_, NULL);
+    pthread_join(tid_, nullptr);
 }
 
 void WsServer::SendReply(const std::string& message) const
 {
+    if (webSocket_ == nullptr) {
+        LOGE("WsServer SendReply websocket has been closed unexpectedly");
+        return;
+    }
     LOGI("WsServer SendReply: %{public}s", message.c_str());
     try {
         boost::beast::multi_buffer buffer;
