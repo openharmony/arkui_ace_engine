@@ -140,6 +140,32 @@ public:
         return getChildCallback_ ? getChildCallback_(ListItemChildType::ITEM_CHILD) : nullptr;
     }
 
+    template<class T>
+    T MakeValue(double mainValue, double crossValue) const
+    {
+        return IsVertical() ? T(crossValue, mainValue) : T(mainValue, crossValue);
+    }
+
+    double GetMainSize(const Size& size) const
+    {
+        return IsVertical() ? size.Height() : size.Width();
+    }
+
+    double GetCrossSize(const Size& size) const
+    {
+        return IsVertical() ? size.Width() : size.Height();
+    }
+
+    double GetMainAxis(const Offset& size) const
+    {
+        return IsVertical() ? size.GetY() : size.GetX();
+    }
+
+    double GetCrossAxis(const Offset& size) const
+    {
+        return IsVertical() ? size.GetX() : size.GetY();
+    }
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -156,6 +182,7 @@ private:
     double GetFriction();
     void UpdatePostion(double delta);
     double CalculateFriction(double gamma);
+    bool IsVertical() const;
 
     RefPtr<ListItemComponent> component_;
     std::function<RefPtr<RenderNode>(ListItemChildType)> getChildCallback_;
