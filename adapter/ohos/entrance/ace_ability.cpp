@@ -250,6 +250,7 @@ void AceAbility::OnStart(const Want& want)
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
         rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+        rsUiDirector->SetCacheDir(abilityContext->GetCacheDir());
         rsUiDirector->Init();
     }
 
