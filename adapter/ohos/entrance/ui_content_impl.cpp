@@ -364,6 +364,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
         info = extensionContext->GetAbilityInfo();
     }
+    AceApplicationInfo::GetInstance().SetAbilityName(info->name);
 
     RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
     bool isModelJson = info != nullptr ? info->isModuleJson : false;

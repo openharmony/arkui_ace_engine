@@ -22,10 +22,10 @@
 #include "display_type.h"
 #include "dm/display_manager.h"
 #include "init_data.h"
+#include "ipc_skeleton.h"
 #include "res_config.h"
 #include "resource_manager.h"
 #include "string_wrapper.h"
-
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
@@ -236,6 +236,8 @@ void AceAbility::OnStart(const Want& want)
         CapabilityRegistry::Register();
         AceApplicationInfo::GetInstance().SetPackageName(abilityContext->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
+        AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
+        AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
         ImageCache::SetImageCacheFilePath(abilityContext->GetCacheDir());
         ImageCache::SetCacheFileInfo();
         AceEngine::InitJsDumpHeadSignal();
@@ -325,6 +327,7 @@ void AceAbility::OnStart(const Want& want)
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePathStr, srcPath);
     bool isArkApp = GetIsArkFromConfig(packagePathStr);
 
+    AceApplicationInfo::GetInstance().SetAbilityName(info->name);
     std::string moduleName = info->moduleName;
     std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
     std::vector<ModuleInfo> moduleList = appInfo->moduleInfos;

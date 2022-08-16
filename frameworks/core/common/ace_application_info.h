@@ -62,6 +62,7 @@ public:
     void SetProcessName(const std::string& processName);
     const std::string& GetProcessName() const;
 
+    void SetAbilityName(const std::string& abilityName_);
     const std::string& GetAbilityName() const;
 
     void SetDataFileDirPath(const std::string& dataDirFilePath)
@@ -164,6 +165,7 @@ protected:
     std::string packageName_;
     std::string processName_;
     std::string dataDirFilePath_;
+    std::string abilityName_;
     int32_t pid_ = 0;
     int32_t uid_ = 0;
     int32_t barrierfreeDuration_ = 0;
