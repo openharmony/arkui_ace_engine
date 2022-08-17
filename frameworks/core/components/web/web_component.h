@@ -47,7 +47,7 @@ enum WebCacheMode {
     USE_CACHE_ONLY
 };
 
-constexpr int default_text_zoom_atio = 100;
+constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
 
 class HitTestResult : public virtual AceType {
     DECLARE_ACE_TYPE(HitTestResult, AceType);
@@ -1124,14 +1124,14 @@ public:
         isBackgroundColor_ = true;
     }
 
-    int32_t GetTextZoomAtio() const
+    int32_t GetTextZoomRatio() const
     {
-        return textZoomAtioNum_;
+        return textZoomRatioNum_;
     }
 
-    void SetTextZoomAtio(int32_t atio)
+    void SetTextZoomRatio(int32_t ratio)
     {
-        textZoomAtioNum_ = atio;
+        textZoomRatioNum_ = ratio;
     }
 
     using OnCommonDialogImpl = std::function<bool(const BaseEventInfo* info)>;
@@ -1348,7 +1348,7 @@ private:
     bool isOverviewModeAccessEnabled_ = true;
     bool isFileFromUrlAccessEnabled_ = false;
     bool isDatabaseAccessEnabled_ = false;
-    int32_t textZoomAtioNum_ = default_text_zoom_atio;
+    int32_t textZoomRatioNum_ = DEFAULT_TEXT_ZOOM_RATIO;
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
     bool isWebDebuggingAccessEnabled_ = false;
     OnMouseCallback onMouseEvent_;

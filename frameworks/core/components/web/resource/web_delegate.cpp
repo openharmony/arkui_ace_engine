@@ -1732,7 +1732,7 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             setting->PutLoadWithOverviewMode(component->GetOverviewModeAccessEnabled());
             setting->PutEnableRawFileAccessFromFileURLs(component->GetFileFromUrlAccessEnabled());
             setting->PutDatabaseAllowed(component->GetDatabaseAccessEnabled());
-            setting->PutZoomingForTextFactor(component->GetTextZoomAtio());
+            setting->PutZoomingForTextFactor(component->GetTextZoomRatio());
             setting->PutWebDebuggingAccess(component->GetWebDebuggingAccessEnabled());
             setting->PutMediaPlayGestureAccess(component->IsMediaPlayGestureAccess());
         },
@@ -2010,18 +2010,18 @@ void WebDelegate::UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled)
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void WebDelegate::UpdateTextZoomAtio(const int32_t& textZoomAtioNum)
+void WebDelegate::UpdateTextZoomRatio(const int32_t& textZoomRatioNum)
 {
     auto context = context_.Upgrade();
     if (!context) {
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), textZoomAtioNum]() {
+        [weak = WeakClaim(this), textZoomRatioNum]() {
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
-                setting->PutZoomingForTextFactor(textZoomAtioNum);
+                setting->PutZoomingForTextFactor(textZoomRatioNum);
             }
         },
         TaskExecutor::TaskType::PLATFORM);

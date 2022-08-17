@@ -78,7 +78,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         delegate_->UpdateOverviewModeEnabled(web->GetOverviewModeAccessEnabled());
         delegate_->UpdateFileFromUrlEnabled(web->GetFileFromUrlAccessEnabled());
         delegate_->UpdateDatabaseEnabled(web->GetDatabaseAccessEnabled());
-        delegate_->UpdateTextZoomAtio(web->GetTextZoomAtio());
+        delegate_->UpdateTextZoomRatio(web->GetTextZoomRatio());
         delegate_->UpdateWebDebuggingAccess(web->GetWebDebuggingAccessEnabled());
         delegate_->UpdateMediaPlayGestureAccess(web->IsMediaPlayGestureAccess());
         auto userAgent = web->GetUserAgent();

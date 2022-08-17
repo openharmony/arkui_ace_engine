@@ -244,7 +244,7 @@ public:
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
-    void UpdateTextZoomAtio(const int32_t& textZoomAtioNum);
+    void UpdateTextZoomRatio(const int32_t& textZoomRatioNum);
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void LoadUrl();
