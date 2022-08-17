@@ -26,6 +26,7 @@
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/grid_layout/grid_layout_component.h"
 #include "core/components/grid_layout/render_grid_layout.h"
+#include "core/components/refresh/render_refresh_adapter_base.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/pipeline/base/render_node.h"
@@ -51,8 +52,8 @@ private:
     int32_t scrollIndex_ = 0;
 };
 
-class RenderGridScroll : public RenderGridLayout {
-    DECLARE_ACE_TYPE(RenderGridScroll, RenderGridLayout);
+class RenderGridScroll : public RenderGridLayout, public RenderRefreshAdapterBase {
+    DECLARE_ACE_TYPE(RenderGridScroll, RenderGridLayout, RenderRefreshAdapterBase);
 
 public:
     using BuildChildByIndex = std::function<bool(int32_t)>;

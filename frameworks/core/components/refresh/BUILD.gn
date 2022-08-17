@@ -21,6 +21,8 @@ build_component("refresh") {
     "refresh_element.cpp",
     "render_refresh.cpp",
     "render_refresh_creator.cpp",
+    "render_refresh_adapter_base.cpp",
+    "render_refresh_adapter_base.h",
   ]
   rosen_sources = [ "rosen_render_refresh.cpp" ]
 }
