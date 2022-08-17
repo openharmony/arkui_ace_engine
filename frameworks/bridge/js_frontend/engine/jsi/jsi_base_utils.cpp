@@ -84,6 +84,8 @@ std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, st
     if (pageMap || appMap) {
         std::string showStack = TranslateStack(rawStack, pageUrl, pageMap, appMap, data);
         summaryBody.append(sourceCodeInfo).append(stackHead).append(showStack);
+        // show raw stack for troubleshooting in the frame
+        LOGI("JS Stack:\n%{public}s", TranslateRawStack(rawStack).c_str());
     } else {
         summaryBody.append("Cannot get SourceMap info, dump raw stack:\n");
         summaryBody.append(stackHead).append(rawStack);
@@ -159,6 +161,27 @@ std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const 
     }
 
     return summaryBody;
+}
+
+std::string JsiBaseUtils::TranslateRawStack(const std::string& rawStackStr)
+{
+    std::string ans;
+    std::string tempStack = rawStackStr;
+
+    // find per line of stack
+    std::vector<std::string> res;
+    ExtractEachInfo(tempStack, res);
+
+    // collect error info first
+    for (uint32_t i = 0; i < res.size(); i++) {
+        std::string temp = res[i];
+        const std::string sourceInfo = GetRelativePath(temp, "/");
+        ans = ans + sourceInfo + "\n";
+    }
+    if (ans.empty()) {
+        return tempStack;
+    }
+    return ans;
 }
 
 std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std::string& pageUrl,
@@ -272,14 +295,14 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
     return sourceInfo;
 }
 
-std::string JsiBaseUtils::GetRelativePath(const std::string& sources)
+std::string JsiBaseUtils::GetRelativePath(const std::string& sources, std::string splitStr)
 {
     std::string temp = sources;
     std::size_t splitPos = std::string::npos;
     const static int pathLevel = 3;
     int i = 0;
     while (i < pathLevel) {
-        splitPos = temp.find_last_of("/\\");
+        splitPos = temp.find_last_of(splitStr);
         if (splitPos != std::string::npos) {
             temp = temp.substr(0, splitPos - 1);
         } else {
