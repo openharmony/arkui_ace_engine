@@ -47,6 +47,7 @@ void ExclusiveRecognizer::OnAccepted(size_t touchId)
             recognizer->SetRefereeState(RefereeState::FAIL);
         }
     }
+    Reset();
 }
 
 void ExclusiveRecognizer::OnRejected(size_t touchId)
@@ -148,7 +149,7 @@ void ExclusiveRecognizer::BatchAdjudicate(
         for (auto& tmpRecognizer : recognizers_) {
             if (tmpRecognizer->GetRefereeState() == RefereeState::BLOCKED &&
                 tmpRecognizer->GetDetectState() == DetectState::DETECTED) {
-                activeRecognizer_ = recognizer;
+                activeRecognizer_ = tmpRecognizer;
                 state_ = DetectState::DETECTED;
                 MultiFingersRecognizer::Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
                 break;
