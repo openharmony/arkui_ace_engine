@@ -202,11 +202,11 @@ HWTEST_F(TextSpanCreatorTest, TextSpanCreator001, TestSize.Level1)
     EXPECT_TRUE(NearEqual(textStyle.GetLineHeight().Value(), LINE_HEIGHT));
     EXPECT_EQ(textStyle.GetTextColor().GetValue(), TEXT_COLOR_VALUE);
 
-    const auto& spanShadow = textStyle.GetShadow();
+    const auto& spanShadow = textStyle.GetTextShadows()[0];
     EXPECT_TRUE(NearEqual(spanShadow.GetOffset().GetX(), OFFSET_DX));
     EXPECT_TRUE(NearEqual(spanShadow.GetOffset().GetY(), OFFSET_DY));
     EXPECT_TRUE(NearEqual(spanShadow.GetBlurRadius(), BLURRADIUS));
-    const auto& spanShadowColor = textStyle.GetShadow().GetColor();
+    const auto& spanShadowColor = textStyle.GetTextShadows()[0].GetColor();
     EXPECT_EQ(spanShadowColor.GetAlpha(), TEXT_COLOR_ALPHA);
     EXPECT_EQ(spanShadowColor.GetRed(), TEXT_COLOR_RED);
     EXPECT_EQ(spanShadowColor.GetGreen(), TEXT_COLOR_GREEN);
@@ -247,11 +247,11 @@ HWTEST_F(TextSpanCreatorTest, TextSpanCreator002, TestSize.Level1)
         EXPECT_TRUE(NearEqual(textStyle.GetLineHeight().Value(), LINE_HEIGHT));
         EXPECT_EQ(textStyle.GetTextColor().GetValue(), TEXT_COLOR_VALUE);
 
-        const auto& spanShadow = textStyle.GetShadow();
+        const auto& spanShadow = textStyle.GetTextShadows()[0];
         EXPECT_TRUE(NearEqual(spanShadow.GetOffset().GetX(), OFFSET_DX));
         EXPECT_TRUE(NearEqual(spanShadow.GetOffset().GetY(), OFFSET_DY));
         EXPECT_TRUE(NearEqual(spanShadow.GetBlurRadius(), BLURRADIUS));
-        const auto& spanShadowColor = textStyle.GetShadow().GetColor();
+        const auto& spanShadowColor = textStyle.GetTextShadows()[0].GetColor();
         EXPECT_EQ(spanShadowColor.GetAlpha(), TEXT_COLOR_ALPHA);
         EXPECT_EQ(spanShadowColor.GetRed(), TEXT_COLOR_RED);
         EXPECT_EQ(spanShadowColor.GetGreen(), TEXT_COLOR_GREEN);

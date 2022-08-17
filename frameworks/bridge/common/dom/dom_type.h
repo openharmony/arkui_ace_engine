@@ -580,6 +580,7 @@ ACE_EXPORT extern const char DOM_WHITE_SPACE_PREWRAP[];
 ACE_EXPORT extern const char DOM_WHITE_SPACE_NOWRAP[];
 ACE_EXPORT extern const char DOM_WHITE_SPACE_PRE[];
 ACE_EXPORT extern const char DOM_WHITE_SPACE_INHERIT[];
+ACE_EXPORT extern const char DOM_TEXT_SHADOW[];
 
 // popup attribute and style constants
 ACE_EXPORT extern const char DOM_TARGET[];

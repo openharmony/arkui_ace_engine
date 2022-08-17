@@ -576,6 +576,7 @@ const char DOM_WHITE_SPACE_PREWRAP[] = "pre-wrap";
 const char DOM_WHITE_SPACE_NOWRAP[] = "nowrap";
 const char DOM_WHITE_SPACE_PRE[] = "pre";
 const char DOM_WHITE_SPACE_INHERIT[] = "inherit";
+const char DOM_TEXT_SHADOW[] = "textShadow";
 
 // popup attribute and style constants
 const char DOM_TARGET[] = "target";
