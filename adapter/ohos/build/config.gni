@@ -75,6 +75,11 @@ multiple_window_support = true
 enable_ability_component = true
 video_components_support = true
 image_components_support = true
+preview_support = false
+
+if (defined(preview_support) && preview_support) {
+  defines += [ "PREVIEW" ]
+}
 
 if (defined(image_components_support) && image_components_support) {
   defines += [ "IMAGE_SUPPORTED" ]
