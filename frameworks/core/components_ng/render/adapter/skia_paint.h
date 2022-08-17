@@ -46,6 +46,7 @@ public:
     void SetStrokeWidth(float width) override;
     void SetAlphaf(float alpha) override;
     void SetBlendMode(BlendMode blendMode) override;
+    void SetStrokeCap(LineCap lineCap) override;
 
     const SkPaint& GetRawPaint()
     {
