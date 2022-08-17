@@ -76,15 +76,15 @@ struct GridSizeInfo : public AceType {
     }
 };
 
-class Getter : public AceType {
-    DECLARE_ACE_TYPE(Getter, AceType);
+class Gutter : public AceType {
+    DECLARE_ACE_TYPE(Gutter, AceType);
 
 public:
-    Getter() = default;
-    explicit Getter(Dimension dimension)
+    Gutter() = default;
+    explicit Gutter(Dimension dimension)
         : xXs(dimension), yXs(dimension), xSm(dimension), ySm(dimension), xMd(dimension), yMd(dimension),
           xLg(dimension), yLg(dimension), xXl(dimension), yXl(dimension), xXXl(dimension), yXXl(dimension) {};
-    Getter(Dimension xDimension, Dimension yDimension)
+    Gutter(Dimension xDimension, Dimension yDimension)
         : xXs(xDimension), yXs(yDimension), xSm(xDimension), ySm(yDimension), xMd(xDimension), yMd(yDimension),
           xLg(xDimension), yLg(yDimension), xXl(xDimension), yXl(yDimension), xXXl(xDimension), yXXl(yDimension) {};
 
@@ -126,7 +126,7 @@ class BreakPoints : public AceType {
 
 public:
     BreakPointsReference reference = BreakPointsReference::WindowSize;
-    std::vector<std::string> breakpoints { "320vp", "600vp", "840vp" };
+    std::vector<std::string> breakpoints { "320vp", "520vp", "840vp" };
 };
 
 } // namespace OHOS::Ace::V2

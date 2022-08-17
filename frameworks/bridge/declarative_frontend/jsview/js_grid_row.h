@@ -29,6 +29,7 @@ public:
     static void Breakpoints(const JSCallbackInfo& info);
     static void Direction(const JSCallbackInfo& info);
     static void JsBreakpointEvent(const JSCallbackInfo& info);
+    static void Height(const JSCallbackInfo& info);
 
 };
 
