@@ -52,8 +52,7 @@ std::string ManifestRouter::GetPagePath(const std::string& uri, const std::strin
     if (uri.rfind(suffix) != std::string::npos) {
         return uri;
     }
-
-    LOGE("[Engine Log] can't find this page %{private}s path", uri.c_str());
+    LOGE("[Engine Log] can't find this page %{public}s path", uri.c_str());
     return "";
 }
 
