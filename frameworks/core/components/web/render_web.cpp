@@ -102,6 +102,11 @@ void RenderWeb::OnMouseEvent(const MouseEvent& event)
         return;
     }
 
+    if (web_ && event.action == MouseAction::RELEASE) {
+        LOGI("mouse event request focus");
+        web_->RequestFocus();
+    }
+
     auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
     delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action);
 }
