@@ -123,6 +123,7 @@ void CustomDialogElement::CloseDialog()
     auto manager = context->GetAccessibilityManager();
     if (manager) {
         auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(GetId()));
+        node->SetZIndexToChild(0);
         manager->ClearNodeRectInfo(node, isPopDialog_);
     }
 #endif
