@@ -30,8 +30,8 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 namespace OHOS::Ace::Framework {
@@ -147,6 +147,19 @@ public:
             LOGW("Dispatcher Upgrade fail when dispatch request message to platform");
             return false;
         }
+    }
+
+    bool InitAceModule(const uint8_t* start, size_t length)
+    {
+        if (!runtime_) {
+            LOGE("jsi runtime is nullptr");
+        }
+        bool result = runtime_->EvaluateJsCode(start, length);
+        if (!result) {
+            LOGE("jsi runtime InitAceModule Evaluate JsCode failed");
+            return false;
+        }
+        return true;
     }
 #endif
 private:
@@ -301,6 +314,7 @@ public:
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
+    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) override;
 #endif
 
 private:
@@ -318,13 +332,13 @@ private:
     void RegisterInitWorkerFunc();
     void RegisterOffWorkerFunc();
     void RegisterAssetFunc();
-    bool ExecuteAbc(const std::string &fileName);
+    bool ExecuteAbc(const std::string& fileName);
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 
     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
 
-    OH_NativeXComponent *nativeXComponent_ = nullptr;
+    OH_NativeXComponent* nativeXComponent_ = nullptr;
 
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;

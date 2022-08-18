@@ -22,6 +22,7 @@ template("ace_base_source_set") {
     defines += invoker.defines
     deps = [
       "$cjson_root:cjson_static",
+      "base64:ace_base_base64_$platform",
       "i18n:ace_base_i18n_$platform",
       "resource:ace_resource",
     ]
