@@ -65,17 +65,6 @@ public:
         useCatchMode_ = useCatchMode;
     }
 
-    void MultiClickReset()
-    {
-        Reset();
-        ParamsReset();
-    }
-
-    void DecCount()
-    {
-        count_--;
-    }
-
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;

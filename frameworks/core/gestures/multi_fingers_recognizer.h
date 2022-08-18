@@ -43,10 +43,9 @@ public:
     virtual void OnAccepted() {}
     virtual void OnRejected() {}
 
-    void ParamsReset()
+    void SetRefereePointer(size_t touchId)
     {
-        refereePointers_.clear();
-        acceptedCount_ = 0;
+        refereePointers_.emplace(touchId);
     }
 
     std::set<size_t> refereePointers_;
