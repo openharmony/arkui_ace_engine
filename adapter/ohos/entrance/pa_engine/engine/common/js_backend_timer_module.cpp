@@ -25,9 +25,13 @@ inline T* ConvertNativeValueTo(NativeValue* value)
     return (value != nullptr) ? static_cast<T*>(value->GetInterface(T::INTERFACE_ID)) : nullptr;
 }
 
-void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name, NativeCallback func)
+void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name,
+    const char* moduleName, NativeCallback func)
 {
-    object.SetProperty(name, engine.CreateFunction(name, strlen(name), func, nullptr));
+    std::string fullName(moduleName);
+    fullName += ".";
+    fullName += name;
+    object.SetProperty(name, engine.CreateFunction(fullName.c_str(), fullName.length(), func, nullptr));
 }
 
 NativeValue* SetCallbackTimer(NativeEngine& engine, NativeCallbackInfo& info, bool isInterval)
@@ -235,9 +239,10 @@ void JsBackendTimerModule::InitTimerModule(NativeEngine* engine, const RefPtr<Ba
         return;
     }
 
-    BindNativeFunction(*engine, *globalObject, "setTimeout", SetTimeout);
-    BindNativeFunction(*engine, *globalObject, "setInterval", SetInterval);
-    BindNativeFunction(*engine, *globalObject, "clearTimeout", ClearTimeoutOrInterval);
-    BindNativeFunction(*engine, *globalObject, "clearInterval", ClearTimeoutOrInterval);
+    const char *moduleName = "JsBackendTimer";
+    BindNativeFunction(*engine, *globalObject, "setTimeout", moduleName, SetTimeout);
+    BindNativeFunction(*engine, *globalObject, "setInterval", moduleName, SetInterval);
+    BindNativeFunction(*engine, *globalObject, "clearTimeout", moduleName, ClearTimeoutOrInterval);
+    BindNativeFunction(*engine, *globalObject, "clearInterval", moduleName, ClearTimeoutOrInterval);
 }
 } // namespace OHOS::Ace
