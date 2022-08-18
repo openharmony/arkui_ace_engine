@@ -1264,9 +1264,18 @@ void AceContainer::SetWindowPos(int32_t left, int32_t top)
 
 void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 {
-    auto taskExec = AceEngine::Get().GetContainer(parentContainerId)->GetTaskExecutor();
+    auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+    if (!parentContainer) {
+        LOGE("Parent container is null, InitializeSubContainer failed.");
+        return;
+    }
+
+    auto taskExec = parentContainer->GetTaskExecutor();
     taskExecutor_ = AceType::DynamicCast<FlutterTaskExecutor>(std::move(taskExec));
-    GetSettings().useUIAsJSThread = true;
+    auto parentSettings = parentContainer->GetSettings();
+    GetSettings().useUIAsJSThread = parentSettings.useUIAsJSThread;
+    GetSettings().usePlatformAsUIThread = parentSettings.usePlatformAsUIThread;
+    GetSettings().usingSharedRuntime = parentSettings.usingSharedRuntime;
 }
 
 void AceContainer::InitWindowCallback()
