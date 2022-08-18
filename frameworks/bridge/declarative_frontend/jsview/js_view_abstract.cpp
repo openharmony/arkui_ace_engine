@@ -1810,6 +1810,33 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
     decoration->SetImage(image);
 }
 
+void JSViewAbstract::ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<MenuComponent> menuComponent)
+{
+    // use another VSP instance while executing the builder function
+    ScopedViewStackProcessor builderViewStackProcessor;
+    {
+        ACE_SCORING_EVENT("contextMenu.builder");
+        builderFunc->Execute();
+    }
+    auto customComponent = ViewStackProcessor::GetInstance()->Finish();
+    if (!customComponent) {
+        LOGE("Custom component is null.");
+        return;
+    }
+
+    // Set the theme
+    auto menuTheme = GetTheme<SelectTheme>();
+    menuComponent->SetTheme(menuTheme);
+    auto optionTheme = GetTheme<SelectTheme>();
+    auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+
+    // Set the custom component
+    optionComponent->SetCustomComponent(customComponent);
+    menuComponent->ClearOptions();
+    menuComponent->AppendOption(optionComponent);
+    LOGI("Context menu is added.");
+}
+
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
@@ -1817,56 +1844,48 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
     if (!menuComponent) {
         return;
     }
-    auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
-    tapGesture->SetOnActionId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](const GestureEvent& info) {
-        auto refPtr = weak.Upgrade();
-        if (!refPtr) {
-            return;
-        }
-        auto showDialog = refPtr->GetTargetCallback();
-        showDialog("BindMenu", info.GetGlobalLocation());
-    });
-    click->SetOnClick(tapGesture);
-    auto menuTheme = GetTheme<SelectTheme>();
-    menuComponent->SetTheme(menuTheme);
-
+    auto weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent);
+    GestureEventFunc eventFunc;
     if (info[0]->IsArray()) {
         auto context = info.GetExecutionContext();
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
-        size_t size = paramArray->Length();
-        for (size_t i = 0; i < size; i++) {
-            std::string value;
-            auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
-            auto menuValue = indexObject->GetProperty("value");
-            auto menuAction = indexObject->GetProperty("action");
-            ParseJsString(menuValue, value);
-            auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(menuAction));
+        eventFunc = [weak, context, paramArray](const GestureEvent& info) {
+            auto menuComponent = weak.Upgrade();
+            if (!menuComponent) {
+                return;
+            }
+            auto menuTheme = GetTheme<SelectTheme>();
+            menuComponent->SetTheme(menuTheme);
+            menuComponent->ClearOptions();
+            size_t size = paramArray->Length();
+            for (size_t i = 0; i < size; i++) {
+                std::string value;
+                auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
+                auto menuValue = indexObject->GetProperty("value");
+                auto menuAction = indexObject->GetProperty("action");
+                ParseJsString(menuValue, value);
+                auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(menuAction));
 
-            auto optionTheme = GetTheme<SelectTheme>();
-            auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
+                auto optionTheme = GetTheme<SelectTheme>();
+                auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+                auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
 
-            optionComponent->SetTextStyle(optionTheme->GetOptionTextStyle());
-            optionComponent->SetTheme(optionTheme);
-            optionComponent->SetText(textComponent);
-            optionComponent->SetValue(value);
-            optionComponent->SetCustomizedCallback([action, context] {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
-                ACE_SCORING_EVENT("menu.action");
-                action->Execute();
-            });
-            menuComponent->AppendOption(optionComponent);
-        }
-    } else {
-        JSRef<JSObject> menuObj;
-        if (info[0]->IsObject()) {
-            menuObj = JSRef<JSObject>::Cast(info[0]);
-        } else {
-            LOGE("No param object.");
-            return;
-        }
-
+                optionComponent->SetTextStyle(optionTheme->GetOptionTextStyle());
+                optionComponent->SetTheme(optionTheme);
+                optionComponent->SetText(textComponent);
+                optionComponent->SetValue(value);
+                optionComponent->SetCustomizedCallback([action, context] {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
+                    ACE_SCORING_EVENT("menu.action");
+                    action->Execute();
+                });
+                menuComponent->AppendOption(optionComponent);
+            }
+            auto showDialog = menuComponent->GetTargetCallback();
+            showDialog("BindMenu", info.GetGlobalLocation());
+        };
+    } else if (info[0]->IsObject()) {
+        JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
         auto builder = menuObj->GetProperty("builder");
         if (!builder->IsFunction()) {
             LOGE("builder param is not a function.");
@@ -1877,24 +1896,24 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             LOGE("builder function is null.");
             return;
         }
-        // use another VSP instance while executing the builder function
-        ScopedViewStackProcessor builderViewStackProcessor;
-        {
-            ACE_SCORING_EVENT("menu.builder");
-            builderFunc->Execute();
-        }
-        auto customComponent = ViewStackProcessor::GetInstance()->Finish();
-        if (!customComponent) {
-            LOGE("Custom component is null.");
-            return;
-        }
 
-        auto optionTheme = GetTheme<SelectTheme>();
-        auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-        optionComponent->SetCustomComponent(customComponent);
-
-        menuComponent->AppendOption(optionComponent);
+        eventFunc = [weak, builderFunc](const GestureEvent& info) {
+            auto menuComponent = weak.Upgrade();
+            if (!menuComponent) {
+                return;
+            }
+            ExecMenuBuilder(builderFunc, menuComponent);
+            auto showDialog = menuComponent->GetTargetCallback();
+            showDialog("BindMenu", info.GetGlobalLocation());
+        };
+    } else {
+        LOGE("No param object.");
+        return;
     }
+    auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
+    tapGesture->SetOnActionId(eventFunc);
+    click->SetOnClick(tapGesture);
 }
 
 void JSViewAbstract::JsPadding(const JSCallbackInfo& info)
@@ -4215,62 +4234,40 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 #endif
 
     // Check the parameters
-    if (info.Length() > 0 && info[0]->IsObject()) {
-        JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
-        auto builder = menuObj->GetProperty("builder");
-        if (!builder->IsFunction()) {
-            LOGE("builder param is not a function.");
-            return;
-        }
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-        if (!builderFunc) {
-            LOGE("builder function is null.");
-            return;
-        }
-
-        // use another VSP instance while executing the builder function
-        ScopedViewStackProcessor builderViewStackProcessor;
-        {
-            ACE_SCORING_EVENT("contextMenu.builder");
-            builderFunc->Execute();
-        }
-        auto customComponent = ViewStackProcessor::GetInstance()->Finish();
-        if (!customComponent) {
-            LOGE("Custom component is null.");
-            return;
-        }
-
-        // Set the theme
-        auto menuTheme = GetTheme<SelectTheme>();
-        menuComponent->SetTheme(menuTheme);
-        auto optionTheme = GetTheme<SelectTheme>();
-        auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-
-        // Set the custom component
-        optionComponent->SetCustomComponent(customComponent);
-        menuComponent->ClearOptions();
-        menuComponent->AppendOption(optionComponent);
-        LOGI("Context menu is added.");
-    } else {
+    if (info.Length() <= 0 || !info[0]->IsObject()) {
         LOGE("Builder param is invalid, not an object.");
         return;
     }
+    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
+    auto builder = menuObj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        LOGE("builder param is not a function.");
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    if (!builderFunc) {
+        LOGE("builder function is null.");
+        return;
+    }
+
     int32_t responseType = static_cast<int32_t>(ResponseType::LONGPRESS);
     if (info.Length() == 2 && info[1]->IsNumber()) {
         responseType = info[1]->ToNumber<int32_t>();
         LOGI("Set the responseType is %d.", responseType);
     }
 
+    auto weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent);
     if (responseType == static_cast<int32_t>(ResponseType::RIGHT_CLICK)) {
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        box->SetOnMouseId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](MouseInfo& info) {
-            auto refPtr = weak.Upgrade();
-            if (!refPtr) {
+        box->SetOnMouseId([weak, builderFunc](MouseInfo& info) {
+            auto menuComponent = weak.Upgrade();
+            if (!menuComponent) {
                 LOGE("Menu component is null.");
                 return;
             }
             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-                auto showMenu = refPtr->GetTargetCallback();
+                ExecMenuBuilder(builderFunc, menuComponent);
+                auto showMenu = menuComponent->GetTargetCallback();
                 info.SetStopPropagation(true);
                 LOGI("Context menu is triggered, type is right click.");
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
@@ -4284,14 +4281,15 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
         RefPtr<Gesture> longGesture = AceType::MakeRefPtr<LongPressGesture>(
             DEFAULT_LONG_PRESS_FINGER, false, DEFAULT_LONG_PRESS_DURATION, false, true);
-        longGesture->SetOnActionId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](const GestureEvent& info) {
-            auto refPtr = weak.Upgrade();
-            if (!refPtr) {
+        longGesture->SetOnActionId([weak, builderFunc](const GestureEvent& info) {
+            auto menuComponent = weak.Upgrade();
+            if (!menuComponent) {
                 LOGE("Menu component is null.");
                 return;
             }
+            ExecMenuBuilder(builderFunc, menuComponent);
             LOGI("Context menu is triggered, type is long press.");
-            auto showMenu = refPtr->GetTargetCallback();
+            auto showMenu = menuComponent->GetTargetCallback();
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
             showMenu("", info.GetScreenLocation());
 #else
