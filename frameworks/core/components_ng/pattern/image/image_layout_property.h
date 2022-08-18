@@ -35,6 +35,7 @@ public:
         auto value = MakeRefPtr<ImageLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propImageSourceInfo_ = CloneImageSourceInfo();
+        value->propImageFit_ = CloneImageFit();
         return value;
     }
 
@@ -42,8 +43,10 @@ public:
     {
         LayoutProperty::Reset();
         ResetImageSourceInfo();
+        ResetImageFit();
     }
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
 
 private:

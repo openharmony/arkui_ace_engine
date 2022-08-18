@@ -15,110 +15,114 @@
 
 #include "core/components_ng/render/image_painter.h"
 
-namespace OHOS::Ace::NG {
+#include "core/pipeline_ng/pipeline_context.h"
 
+namespace OHOS::Ace::NG {
 namespace {
 
-void ApplyContain(
-    const SizeF& imageSize, const SizeF& dstSize, const Alignment& alignment, RectF& srcRect, RectF& dstRect)
+static void ApplyContain(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
-    if (imageSize.IsNonPositive()) {
+    if (rawPicSize.IsNonPositive()) {
         return;
     }
-    if (imageSize.CalcRatio() > dstSize.CalcRatio()) {
-        dstRect.SetSize(imageSize * (dstSize.Width() / imageSize.Width()));
+    if (Size::CalcRatio(srcRect) > Size::CalcRatio(dstRect)) {
+        dstRect.SetSize(rawPicSize * (dstSize.Width() / rawPicSize.Width()));
     } else {
-        dstRect.SetSize(imageSize * (dstSize.Height() / imageSize.Height()));
+        dstRect.SetSize(rawPicSize * (dstSize.Height() / rawPicSize.Height()));
     }
-    dstRect.SetOffset(Alignment::GetAlignPosition(dstSize, dstRect.GetSize(), alignment));
+    dstRect.SetOffset(Alignment::GetAlignPosition(dstSize, dstRect.GetSize(), Alignment::CENTER));
 }
 
-void ApplyCover(
-    const SizeF& imageSize, const SizeF& dstSize, const Alignment& alignment, RectF& srcRect, RectF& dstRect)
+static void ApplyCover(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
-    if (imageSize.CalcRatio() > dstSize.CalcRatio()) {
-        srcRect.SetSize(dstSize * (imageSize.Height() / dstSize.Height()));
+    if (Size::CalcRatio(srcRect) > Size::CalcRatio(dstRect)) {
+        srcRect.SetSize(dstSize * (rawPicSize.Height() / dstSize.Height()));
     } else {
-        srcRect.SetSize(dstSize * (imageSize.Width() / dstSize.Width()));
+        srcRect.SetSize(dstSize * (rawPicSize.Width() / dstSize.Width()));
     }
-    srcRect.SetOffset(Alignment::GetAlignPosition(imageSize, srcRect.GetSize(), alignment));
+    srcRect.SetOffset(Alignment::GetAlignPosition(rawPicSize, srcRect.GetSize(), Alignment::CENTER));
 }
 
-void ApplyFitWidth(
-    const SizeF& imageSize, const SizeF& dstSize, const Alignment& alignment, RectF& srcRect, RectF& dstRect)
+static void ApplyFitWidth(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
-    if (imageSize.CalcRatio() > dstSize.CalcRatio()) {
-        dstRect.SetSize(imageSize * (dstSize.Width() / imageSize.Width()));
-        dstRect.SetOffset(Alignment::GetAlignPosition(dstSize, dstRect.GetSize(), alignment));
+    if (Size::CalcRatio(srcRect) > Size::CalcRatio(dstRect)) {
+        dstRect.SetSize(rawPicSize * (dstSize.Width() / rawPicSize.Width()));
+        dstRect.SetOffset(Alignment::GetAlignPosition(dstSize, dstRect.GetSize(), Alignment::CENTER));
     } else {
-        srcRect.SetSize(dstSize * (imageSize.Width() / dstSize.Width()));
-        srcRect.SetOffset(Alignment::GetAlignPosition(imageSize, srcRect.GetSize(), alignment));
+        srcRect.SetSize(dstSize * (rawPicSize.Width() / dstSize.Width()));
+        srcRect.SetOffset(Alignment::GetAlignPosition(rawPicSize, srcRect.GetSize(), Alignment::CENTER));
     }
 }
 
-void ApplyFitHeight(
-    const SizeF& imageSize, const SizeF& dstSize, const Alignment& alignment, RectF& srcRect, RectF& dstRect)
+static void ApplyFitHeight(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
-    if (imageSize.CalcRatio() > dstSize.CalcRatio()) {
-        srcRect.SetSize(dstSize * (imageSize.Height() / dstSize.Height()));
-        srcRect.SetOffset(Alignment::GetAlignPosition(imageSize, srcRect.GetSize(), alignment));
+    if (Size::CalcRatio(srcRect) > Size::CalcRatio(dstRect)) {
+        srcRect.SetSize(dstSize * (rawPicSize.Height() / dstSize.Height()));
+        srcRect.SetOffset(Alignment::GetAlignPosition(rawPicSize, srcRect.GetSize(), Alignment::CENTER));
     } else {
-        dstRect.SetSize(imageSize * (dstSize.Height() / imageSize.Height()));
-        dstRect.SetOffset(Alignment::GetAlignPosition(dstSize, dstRect.GetSize(), alignment));
+        dstRect.SetSize(rawPicSize * (dstSize.Height() / rawPicSize.Height()));
+        dstRect.SetOffset(Alignment::GetAlignPosition(dstSize, dstRect.GetSize(), Alignment::CENTER));
     }
 }
 
-void ApplyNone(const SizeF& imageSize, const SizeF& dstSize, const Alignment& alignment, RectF& srcRect, RectF& dstRect)
+static void ApplyNone(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
-    SizeF srcSize = SizeF(std::min(dstSize.Width(), imageSize.Width()), std::min(dstSize.Height(), imageSize.Height()));
-    dstRect.SetRect(Alignment::GetAlignPosition(dstSize, srcSize, alignment), srcSize);
-    srcRect.SetRect(Alignment::GetAlignPosition(imageSize, srcSize, alignment), srcSize);
+    SizeF srcSize(std::min(dstSize.Width(), rawPicSize.Width()), std::min(dstSize.Height(), rawPicSize.Height()));
+    dstRect.SetRect(Alignment::GetAlignPosition(dstSize, srcSize, Alignment::CENTER), srcSize);
+    srcRect.SetRect(Alignment::GetAlignPosition(rawPicSize, srcSize, Alignment::CENTER), srcSize);
 }
 
-void ApplyImageFit(const SizeF& imageSize, const SizeF& dstSize, ImageFit imageFit, const Alignment& alignment,
-    RectF& srcRect, RectF& dstRect)
+}
+
+void ImagePainter::DrawImage(
+    const RefPtr<Canvas>& canvas, const OffsetF& offset, const ImagePaintConfig& ImagePaintConfig) const
 {
+    CHECK_NULL_VOID(canvasImage_);
+    auto paint = Paint::Create();
+    paint->SetFilterQuality(FilterQuality::NONE); // TODO: add interpolation, etc
+    canvas->DrawImage(canvasImage_, ImagePaintConfig.srcRect_, ImagePaintConfig.dstRect_, paint);
+}
+
+void ImagePainter::ApplyImageFit(
+    ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    float viewScale = context ? context->GetViewScale() : 1.0;
+    srcRect.SetOffset(OffsetF());
+    srcRect.SetSize(rawPicSize);
+    srcRect.ApplyScale(1.0 / viewScale);
+    dstRect.SetOffset(OffsetF());
+    dstRect.SetSize(dstSize);
     switch (imageFit) {
         case ImageFit::FILL:
             break;
         case ImageFit::NONE:
-            ApplyNone(imageSize, dstSize, alignment, srcRect, dstRect);
+            ApplyNone(rawPicSize, dstSize, srcRect, dstRect);
             break;
         case ImageFit::COVER:
-            ApplyCover(imageSize, dstSize, alignment, srcRect, dstRect);
+            ApplyCover(rawPicSize, dstSize, srcRect, dstRect);
             break;
         case ImageFit::FITWIDTH:
-            ApplyFitWidth(imageSize, dstSize, alignment, srcRect, dstRect);
+            ApplyFitWidth(rawPicSize, dstSize, srcRect, dstRect);
             break;
         case ImageFit::FITHEIGHT:
-            ApplyFitHeight(imageSize, dstSize, alignment, srcRect, dstRect);
+            ApplyFitHeight(rawPicSize, dstSize, srcRect, dstRect);
             break;
         case ImageFit::SCALEDOWN:
-            if (imageSize < dstSize) {
-                ApplyNone(imageSize, dstSize, alignment, srcRect, dstRect);
+            if (srcRect.GetSize() < dstRect.GetSize()) {
+                ApplyNone(rawPicSize, dstSize, srcRect, dstRect);
             } else {
-                ApplyContain(imageSize, dstSize, alignment, srcRect, dstRect);
+                ApplyContain(rawPicSize, dstSize, srcRect, dstRect);
             }
             break;
         case ImageFit::CONTAIN:
+            ApplyContain(rawPicSize, dstSize, srcRect, dstRect);
+            break;
         default:
-            ApplyContain(imageSize, dstSize, alignment, srcRect, dstRect);
+            ApplyContain(rawPicSize, dstSize, srcRect, dstRect);
             break;
     }
-}
-
-} // namespace
-
-void ImagePainter::DrawImage(const RefPtr<Canvas>& canvas, const OffsetF& offset) const
-{
-    CHECK_NULL_VOID(image_);
-    RectF srcRect = RectF(OffsetF(), imageSize_);
-    RectF dstRect = RectF(OffsetF(), dstSize_);
-    ApplyImageFit(imageSize_, dstSize_, imageFit_, alignment_, srcRect, dstRect);
-    dstRect = dstRect + offset;
-    auto paint = Paint::Create();
-    paint->SetFilterQuality(FilterQuality::NONE);
-    canvas->DrawImage(image_, srcRect, dstRect, paint);
+    srcRect.ApplyScale(viewScale);
 }
 
 } // namespace OHOS::Ace::NG

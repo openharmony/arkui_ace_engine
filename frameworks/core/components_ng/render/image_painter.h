@@ -22,28 +22,26 @@
 
 namespace OHOS::Ace::NG {
 
+struct ImagePaintConfig {
+    ImagePaintConfig(const RectF& srcRect, const RectF& dstRect) : srcRect_(srcRect), dstRect_(dstRect) {}
+    ~ImagePaintConfig() = default;
+
+    RectF srcRect_;
+    RectF dstRect_;
+};
+
 class ImagePainter {
 public:
-    ImagePainter(RefPtr<CanvasImage> image, const SizeF& imageSize, const SizeF& dstSize)
-        : image_(std::move(image)), imageSize_(imageSize), dstSize_(dstSize)
-    {}
-    ImagePainter(RefPtr<CanvasImage> image, ImageFit imageFit, const SizeF& imageSize, const SizeF& dstSize)
-        : image_(std::move(image)), imageFit_(imageFit), imageSize_(imageSize), dstSize_(dstSize)
-    {}
-    ImagePainter(RefPtr<CanvasImage> image, ImageFit imageFit, const Alignment& alignment, const SizeF& imageSize,
-        const SizeF& dstSize)
-        : image_(std::move(image)), imageFit_(imageFit), alignment_(alignment), imageSize_(imageSize), dstSize_(dstSize)
-    {}
+    ImagePainter(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
     ~ImagePainter() = default;
 
-    void DrawImage(const RefPtr<Canvas>& canvas, const OffsetF& offset) const;
+    void DrawImage(const RefPtr<Canvas>& canvas, const OffsetF& offset, const ImagePaintConfig& ImagePaintConfig) const;
+
+    static void ApplyImageFit(
+        ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect);
 
 private:
-    RefPtr<CanvasImage> image_;
-    ImageFit imageFit_ = ImageFit::COVER;
-    Alignment alignment_ = Alignment::CENTER;
-    SizeF imageSize_;
-    SizeF dstSize_;
+    RefPtr<CanvasImage> canvasImage_;
 };
 
 } // namespace OHOS::Ace::NG

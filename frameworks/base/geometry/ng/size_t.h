@@ -125,6 +125,11 @@ public:
         return Negative(width_) && Negative(height_);
     }
 
+    bool IsPositive() const
+    {
+        return Positive(width_) && Positive(height_);
+    }
+
     bool IsNonPositive() const
     {
         return NonPositive(width_) && NonPositive(height_);

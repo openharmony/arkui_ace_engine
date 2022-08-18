@@ -13,23 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_DATA_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_DATA_H
+
+#include <vector>
 
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
 
-// CanvasImage is interface for drawing image.
-class CanvasImage : public virtual AceType {
-    DECLARE_ACE_TYPE(CanvasImage, AceType)
-
+class ImageData : public AceType {
+    DECLARE_ACE_TYPE(ImageData, AceType);
 public:
-    static RefPtr<CanvasImage> Create(void* rawImage);
-    static RefPtr<CanvasImage> Create();
-    virtual int32_t GetWidth() const = 0;
-    virtual int32_t GetHeight() const = 0;
+    static RefPtr<ImageData> MakeFromDataWithCopy(const void* data, size_t length);
+    static RefPtr<ImageData> MakeFromDataWrapper(void* dataWrapper);
+    virtual size_t GetSize() const = 0;
+    virtual const void* GetData() const = 0;
 };
-} // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H
+} // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_DATA_H

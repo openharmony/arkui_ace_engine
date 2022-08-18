@@ -119,6 +119,14 @@ struct LayoutConstraintT {
             .append("]");
         return str;
     }
+
+    SizeF Constrain(SizeF size) const
+    {
+        SizeF constrainSize;
+        constrainSize.SetWidth(std::clamp(size.Width(), minSize.Width(), maxSize.Width()));
+        constrainSize.SetHeight(std::clamp(size.Height(), minSize.Height(), maxSize.Height()));
+        return constrainSize;
+    }
 };
 
 using LayoutConstraintF = LayoutConstraintT<float>;
