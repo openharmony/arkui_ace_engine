@@ -93,6 +93,7 @@ public:
     virtual void SetStrokeWidth(float width) = 0;
     virtual void SetAlphaf(float alpha) = 0;
     virtual void SetBlendMode(BlendMode blendMode) = 0;
+    virtual void SetStrokeCap(LineCap lineCap) = 0;
 };
 } // namespace OHOS::Ace::NG
 

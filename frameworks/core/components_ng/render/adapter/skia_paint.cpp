@@ -99,4 +99,18 @@ void SkiaPaint::SetBlendMode(BlendMode blendMode)
     rawPaint_.setBlendMode(ToSkBlendMode(blendMode));
 }
 
+void SkiaPaint::SetStrokeCap(LineCap lineCap)
+{
+    switch (lineCap) {
+        case LineCap::SQUARE:
+            rawPaint_.setStrokeCap(SkPaint::Cap::kSquare_Cap);
+            break;
+        case LineCap::ROUND:
+            rawPaint_.setStrokeCap(SkPaint::Cap::kRound_Cap);
+            break;
+        default:
+            LOGI("LineCap is an illegal value");
+            break;
+    }
+}
 } // namespace OHOS::Ace::NG
