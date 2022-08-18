@@ -13,5 +13,5 @@
 
 group("property_unittest") {
   testonly = true
-  deps = []
+  deps = [ "list:list_property_test" ]
 }
