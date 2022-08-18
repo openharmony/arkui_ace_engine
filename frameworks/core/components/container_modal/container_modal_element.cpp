@@ -441,7 +441,7 @@ void ContainerModalElement::ChangeFloatingTitleIcon(bool isFocus)
         rowElement->SetUpdateComponent(titleChildrenRow);
     }
     if (splitButton) {
-        splitButton->SetHidden(windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN);
+        splitButton->SetHidden(windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     }
 }
 
