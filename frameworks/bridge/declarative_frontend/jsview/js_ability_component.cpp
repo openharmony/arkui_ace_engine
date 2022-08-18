@@ -92,12 +92,12 @@ void JSAbilityComponent::JsOnDestroy(const JSCallbackInfo& info)
 
 void JSAbilityComponent::JsOnConnect(const JSCallbackInfo& info)
 {
-    JSViewBindEvent(&V2::AbilityComponent::SetonConnected, info);
+    JSViewBindEvent(&V2::AbilityComponent::SetOnConnected, info);
 }
 
 void JSAbilityComponent::JsOnDisconnect(const JSCallbackInfo& info)
 {
-    JSViewBindEvent(&V2::AbilityComponent::SetonDisconnected, info);
+    JSViewBindEvent(&V2::AbilityComponent::SetOnDisconnected, info);
 }
 
 void JSAbilityComponent::JsOnAbilityCreated(const JSCallbackInfo& info)
@@ -124,7 +124,7 @@ void JSAbilityComponent::Width(const JSCallbackInfo& info)
         if (!ParseJsDimensionVp(info[0], value)) {
             return;
         }
-        component->SetWidth(static_cast<float>(value.ConvertToVp()));
+        component->SetWidth(value);
     }
 }
 
@@ -137,7 +137,7 @@ void JSAbilityComponent::Height(const JSCallbackInfo& info)
         if (!ParseJsDimensionVp(info[0], value)) {
             return;
         }
-        component->SetHeight(static_cast<float>(value.ConvertToVp()));
+        component->SetHeight(value);
     }
 }
 
