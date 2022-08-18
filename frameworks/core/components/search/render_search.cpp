@@ -309,7 +309,8 @@ bool RenderSearch::HandleEnterEvent()
         focusRender_ = SearchNodeType::NONE;
         MarkNeedRender();
         return true;
-    } else if (focusRender_ == SearchNodeType::BUTTON) {
+    }
+    if (focusRender_ == SearchNodeType::BUTTON) {
         std::string searchKey = textEditController_->GetText();
         FireSubmitEvent(searchKey);
         focusRender_ = SearchNodeType::NONE;
