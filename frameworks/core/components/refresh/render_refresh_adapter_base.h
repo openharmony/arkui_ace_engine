@@ -22,14 +22,14 @@
 
 namespace OHOS::Ace {
 
-class RenderRefreshAdapterBase: public virtual AceType{
+class RenderRefreshAdapterBase: public virtual AceType {
     DECLARE_ACE_TYPE(RenderRefreshAdapterBase, AceType)
+
 public:
     virtual bool HandleRefreshEffect(const double& delta, int32_t source, double currentOffset);
     virtual void FindRefreshParent(const WeakPtr<RenderNode>& node);
     virtual void InitializeScrollable(RefPtr<Scrollable>& scrollable);
 protected:
-
     WeakPtr<RenderRefresh> refreshParent_;
 private:
     bool inLinkRefresh_ = false;
