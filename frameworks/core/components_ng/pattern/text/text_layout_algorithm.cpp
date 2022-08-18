@@ -23,17 +23,14 @@
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 TextLayoutAlgorithm::TextLayoutAlgorithm() = default;
 
-void TextLayoutAlgorithm::OnReset()
-{
-    CHECK_NULL_VOID(paragraph_);
-    paragraph_->Reset();
-}
+void TextLayoutAlgorithm::OnReset() {}
 
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
@@ -67,18 +64,22 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 bool TextLayoutAlgorithm::CreateParagraph(
     const TextStyle& textStyle, const RefPtr<PipelineContext>& context, std::string content)
 {
-    ParagraphStyle paraStyle = { .direction = GetTextDirection(content),
-        .align = textStyle.GetTextAlign(),
-        .maxLines = textStyle.GetMaxLines(),
-        .fontLocale = Localization::GetInstance()->GetFontLocale(),
-        .wordBreak = textStyle.GetWordBreak() };
+    RSParagraphStyle paraStyle;
+    paraStyle.textDirection_ = ToRSTextDirection(GetTextDirection(content));
+    paraStyle.textAlign_ = ToRSTextAlign(textStyle.GetTextAlign());
+    paraStyle.maxLines_ = textStyle.GetMaxLines();
+    paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+    paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
 
-    paragraph_ = Paragraph::Create(context, paraStyle, FontCollection::Current());
-    CHECK_NULL_RETURN(paragraph_, false);
-    paragraph_->PushStyle(textStyle);
+    std::unique_ptr<RSParagraphBuilder> builder =
+        RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance());
+    builder->PushStyle(ToRSTextStyle(context, textStyle));
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    paragraph_->AddText(StringUtils::Str8ToStr16(content));
-    paragraph_->Build();
+    builder->AddText(StringUtils::Str8ToStr16(content));
+    builder->Pop();
+
+    auto paragraph = builder->Build();
+    paragraph_.reset(paragraph.release());
     return true;
 }
 
@@ -101,10 +102,11 @@ TextDirection TextLayoutAlgorithm::GetTextDirection(const std::string& content)
 double TextLayoutAlgorithm::GetTextWidth() const
 {
     CHECK_NULL_RETURN(paragraph_, 0.0);
-    return paragraph_->GetTextWidth();
+    // TODO: need check Line count
+    return paragraph_->GetLongestLine();
 }
 
-const RefPtr<Paragraph>& TextLayoutAlgorithm::GetTxtParagraph()
+const std::shared_ptr<RSParagraph>& TextLayoutAlgorithm::GetParagraph()
 {
     return paragraph_;
 }

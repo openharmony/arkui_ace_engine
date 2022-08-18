@@ -22,6 +22,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -40,14 +41,14 @@ public:
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
-    const RefPtr<Paragraph>& GetTxtParagraph();
+    const std::shared_ptr<RSParagraph>& GetParagraph();
 
 private:
     bool CreateParagraph(const TextStyle& textStyle, const RefPtr<PipelineContext>& context, std::string content);
     TextDirection GetTextDirection(const std::string& content);
     double GetTextWidth() const;
 
-    RefPtr<Paragraph> paragraph_;
+    std::shared_ptr<RSParagraph> paragraph_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };

@@ -28,8 +28,9 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ImagePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ImagePaintMethod, NodePaintMethod)
 public:
-    ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, const ImagePaintConfig& ImagePaintConfig) :
-        canvasImage_(canvasImage), imagePaintConfig_(ImagePaintConfig) {}
+    ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, const ImagePaintConfig& ImagePaintConfig)
+        : canvasImage_(canvasImage), imagePaintConfig_(ImagePaintConfig)
+    {}
     ~ImagePaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
@@ -38,8 +39,8 @@ public:
 
         auto offset = paintWrapper->GetContentOffset();
         ImagePainter imagePainter(canvasImage_);
-        return [imagePainter, offset, ImagePaintConfig = imagePaintConfig_] (const RefPtr<Canvas>& canvas)
-            { imagePainter.DrawImage(canvas, offset, ImagePaintConfig); };
+        return [imagePainter, offset, ImagePaintConfig = imagePaintConfig_](
+                   RSCanvas& canvas) { imagePainter.DrawImage(canvas, offset, ImagePaintConfig); };
     }
 
 private:

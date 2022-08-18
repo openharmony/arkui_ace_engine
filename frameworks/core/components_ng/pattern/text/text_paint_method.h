@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -27,7 +28,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TextPaintMethod, NodePaintMethod)
 public:
-    explicit TextPaintMethod(const RefPtr<Paragraph>& paragraph) : paragraph_(paragraph) {}
+    explicit TextPaintMethod(const std::shared_ptr<RSParagraph>& paragraph) : paragraph_(paragraph) {}
     ~TextPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
@@ -35,11 +36,11 @@ public:
         CHECK_NULL_RETURN(paragraph_, nullptr);
         auto offset = paintWrapper->GetContentOffset();
         return [paragraph = paragraph_, offset](
-                   const RefPtr<Canvas>& canvas) { paragraph->Paint(canvas, offset.GetX(), offset.GetY()); };
+                   RSCanvas& canvas) { paragraph->Paint(&canvas, offset.GetX(), offset.GetY()); };
     }
 
 private:
-    RefPtr<Paragraph> paragraph_;
+    std::shared_ptr<RSParagraph> paragraph_;
 };
 
 } // namespace OHOS::Ace::NG

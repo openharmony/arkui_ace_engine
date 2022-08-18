@@ -30,6 +30,7 @@
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;

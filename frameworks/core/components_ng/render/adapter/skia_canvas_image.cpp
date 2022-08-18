@@ -16,6 +16,7 @@
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
@@ -54,6 +55,14 @@ int32_t SkiaCanvasImage::GetHeight() const
 #else
     return image_->height();
 #endif
+}
+
+void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect)
+{
+    auto image = GetCanvasImage();
+    RSImage rsImage(&image);
+    RSSamplingOptions options;
+    canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
 }
 
 } // namespace OHOS::Ace::NG

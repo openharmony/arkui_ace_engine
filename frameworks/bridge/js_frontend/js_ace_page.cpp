@@ -19,8 +19,22 @@
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
 #include "core/components/page/page_component.h"
 #include "core/components/page_transition/page_transition_component.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::Framework {
+
+#ifdef NG_BUILD
+JsAcePage::JsAcePage(int32_t pageId, const std::string& url) : AcePage(pageId), url_(url) {}
+#else
+JsAcePage::JsAcePage(int32_t pageId, const RefPtr<DOMDocument>& document, const std::string& url,
+    const WeakPtr<StageElement>& container)
+    : AcePage(pageId), domDoc_(document), url_(url), container_(container),
+      radioGroups_(std::make_shared<JsPageRadioGroups>())
+{
+    ACE_DCHECK(domDoc_);
+}
+#endif
 
 JsAcePage::~JsAcePage()
 {
@@ -396,6 +410,11 @@ std::string JsAcePage::GetNodeEventAction(int32_t nodeId, const std::string& act
     // in error case just use empty string.
     std::unique_lock<std::mutex> lock(eventMutex_);
     return nodeEvent_[nodeId][actionType];
+}
+
+void JsAcePage::SetRootNode(const RefPtr<NG::UINode>& node)
+{
+    pageRootNode_ = node;
 }
 
 #ifndef NG_BUILD

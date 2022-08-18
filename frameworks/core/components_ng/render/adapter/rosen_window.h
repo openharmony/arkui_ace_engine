@@ -20,6 +20,7 @@
 #include "vsync_receiver.h"
 #include "wm/window.h"
 
+#include "base/thread/task_executor.h"
 #include "core/common/window.h"
 
 namespace OHOS::Ace::NG {

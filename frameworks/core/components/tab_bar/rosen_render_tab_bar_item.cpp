@@ -62,9 +62,9 @@ void RosenRenderTabBarItem::RenderTabBarItemBoundary(RenderContext& context, con
             return;
         }
         rsNode->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE,
-            [offset, layoutSize = Size(width, height)](SkCanvas* canvas) {
-                DebugBoundaryPainter::PaintDebugBoundary(canvas, offset, layoutSize);
-                DebugBoundaryPainter::PaintDebugCorner(canvas, offset, layoutSize);
+            [offset, layoutSize = Size(width, height)](std::shared_ptr<SkCanvas> canvas) {
+                DebugBoundaryPainter::PaintDebugBoundary(canvas.get(), offset, layoutSize);
+                DebugBoundaryPainter::PaintDebugCorner(canvas.get(), offset, layoutSize);
             });
     }
 }

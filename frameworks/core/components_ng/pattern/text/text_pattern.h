@@ -59,7 +59,7 @@ public:
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
-    RefPtr<Paragraph> paragraph_;
+    std::shared_ptr<RSParagraph> paragraph_;
 };
 } // namespace OHOS::Ace::NG
 

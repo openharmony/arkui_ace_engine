@@ -15,14 +15,15 @@
 
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 
-#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
 
 CanvasDrawFunction SwiperPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
-    auto paintFunc = [weak = WeakClaim(this), paintWrapper](const RefPtr<Canvas>& canvas) {
+    auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto swiper = weak.Upgrade();
         if (swiper) {
             swiper->PaintFade(canvas, paintWrapper);
@@ -32,7 +33,7 @@ CanvasDrawFunction SwiperPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
     return paintFunc;
 }
 
-void SwiperPaintMethod::PaintFade(const RefPtr<Canvas>& canvas, PaintWrapper* paintWrapper) const
+void SwiperPaintMethod::PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
     if (NearZero(mainDelta_)) {
         return;
@@ -92,15 +93,15 @@ void SwiperPaintMethod::PaintFade(const RefPtr<Canvas>& canvas, PaintWrapper* pa
         }
     }
 
-    Offset center = Offset(centerX, centerY);
-    RefPtr<Paint> painter = Paint::Create();
-    painter->SetColor(paintProperty->GetFadeColor().value_or(Color::GRAY));
-    painter->SetAlphaf(FADE_ALPHA);
-    painter->SetBlendMode(BlendMode::SRC_OVER);
+    RSBrush brush;
+    brush.SetColor(ToRSColor(paintProperty->GetFadeColor().value_or(Color::GRAY)));
+    brush.SetAlphaF(FADE_ALPHA);
+    brush.SetBlendMode(RSBlendMode::SRC_OVER);
+    canvas.AttachBrush(brush);
     if (isVertical) {
-        canvas->DrawCircle(center.GetX(), center.GetY() + fadeTranslate, radius, painter);
+        canvas.DrawCircle({ centerX, centerY + fadeTranslate }, radius);
     } else {
-        canvas->DrawCircle(center.GetX() + fadeTranslate, center.GetY(), radius, painter);
+        canvas.DrawCircle({ centerX + fadeTranslate, centerY }, radius);
     }
 }
 

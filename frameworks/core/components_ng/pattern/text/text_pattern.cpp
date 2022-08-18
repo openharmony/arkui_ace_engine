@@ -30,7 +30,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, b
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textLayoutAlgorithm, false);
-    paragraph_ = textLayoutAlgorithm->GetTxtParagraph();
+    paragraph_ = textLayoutAlgorithm->GetParagraph();
     return true;
 }
 } // namespace OHOS::Ace::NG
