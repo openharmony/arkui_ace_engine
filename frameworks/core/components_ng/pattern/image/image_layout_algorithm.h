@@ -18,6 +18,7 @@
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/image/image_object.h"
 
 namespace OHOS::Ace::NG {
@@ -26,47 +27,22 @@ class ACE_EXPORT ImageLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(ImageLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    ImageLayoutAlgorithm(ImageObjSuccessCallback successCallback, UploadSuccessCallback uploadSuccessCallback,
-        FailedCallback failedCallback, OnPostBackgroundTask onBackgroundTaskPostCallback)
-        : successCallback_(std::move(successCallback)), uploadSuccessCallback_(std::move(uploadSuccessCallback)),
-          failedCallback_(std::move(failedCallback)),
-          onBackgroundTaskPostCallback_(std::move(onBackgroundTaskPostCallback))
-    {}
+    ImageLayoutAlgorithm(const RefPtr<ImageLoadingContext>& loadingCtx) : loadingCtx_(loadingCtx) {}
 
     ~ImageLayoutAlgorithm() override = default;
 
     void OnReset() override
     {
-        successCallback_ = nullptr;
-        uploadSuccessCallback_ = nullptr;
-        failedCallback_ = nullptr;
-        onBackgroundTaskPostCallback_ = nullptr;
-        imageObject_.Reset();
-    }
-
-    void SetImageObject(const RefPtr<ImageObject>& imageObject)
-    {
-        imageObject_ = imageObject;
+        loadingCtx_ = nullptr;
     }
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
-    const RefPtr<ImageObject>& GetImageObject() const
-    {
-        return imageObject_;
-    }
+    void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    static SizeF ProcessContentSize(const LayoutConstraintF& contentConstraint, const RefPtr<ImageObject>& imageObject);
-
-    ImageObjSuccessCallback successCallback_;
-    UploadSuccessCallback uploadSuccessCallback_;
-    FailedCallback failedCallback_;
-    OnPostBackgroundTask onBackgroundTaskPostCallback_;
-
-    RefPtr<ImageObject> imageObject_;
-
+    RefPtr<ImageLoadingContext> loadingCtx_;
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
