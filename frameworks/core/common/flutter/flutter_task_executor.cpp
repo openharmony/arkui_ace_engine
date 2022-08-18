@@ -184,8 +184,11 @@ void FlutterTaskExecutor::InitOtherThreads(const flutter::TaskRunners& taskRunne
 bool FlutterTaskExecutor::OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const
 {
     int32_t currentId = Container::CurrentId();
-    auto traceIdFunc = [this, type]() {
-        this->taskIdTable_[static_cast<uint32_t>(type)]++;
+    auto traceIdFunc = [weak = WeakClaim(const_cast<FlutterTaskExecutor*>(this)), type]() {
+        auto sp = weak.Upgrade();
+        if (sp) {
+            sp->taskIdTable_[static_cast<uint32_t>(type)]++;
+        }
     };
     TaskExecutor::Task wrappedTask =
         currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc)) : std::move(task);
