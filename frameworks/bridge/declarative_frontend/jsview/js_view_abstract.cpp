@@ -75,6 +75,7 @@ constexpr double HALF_DIMENSION = 50.0;
 constexpr double ROUND_UNIT = 360.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
+constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -164,6 +165,26 @@ void ParseJsTranslate(
     }
 }
 
+void GetDefaultRotateVector(double& dx, double& dy, double& dz)
+{
+    dx = 0.0;
+    dy = 0.0;
+    dz = 0.0;
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("pipelineContext is null!");
+        return;
+    }
+    if (pipelineContext->GetMinPlatformVersion() >= MIN_ROTATE_VECTOR_Z) {
+        dz = 1.0;
+    }
+}
+
 void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy, float& dz, Dimension& centerX,
     Dimension& centerY, std::optional<float>& angle)
 {
@@ -171,6 +192,7 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy
     double dxVal = 0.0;
     double dyVal = 0.0;
     double dzVal = 0.0;
+    GetDefaultRotateVector(dxVal, dyVal, dzVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("x"), dxVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("y"), dyVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("z"), dzVal);
