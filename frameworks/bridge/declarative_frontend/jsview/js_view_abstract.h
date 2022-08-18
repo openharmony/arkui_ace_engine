@@ -133,6 +133,7 @@ public:
     static void JsUseSizeType(const JSCallbackInfo& Info);
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
+    static void JsOnHover(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
