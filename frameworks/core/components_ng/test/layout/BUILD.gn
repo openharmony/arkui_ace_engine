@@ -13,5 +13,5 @@
 
 group("layout_unittest") {
   testonly = true
-  deps = []
+  deps = [ "list:list_layout_test" ]
 }
