@@ -23,6 +23,7 @@ constexpr uint32_t RES_TYPE_CLICK_RECOGNIZE = 9;
 constexpr uint32_t RES_TYPE_PUSH_PAGE       = 10;
 constexpr uint32_t RES_TYPE_SLIDE           = 11;
 constexpr uint32_t RES_TYPE_POP_PAGE        = 28;
+constexpr uint32_t RES_TYPE_WEB_GESTURE     = 29;
 constexpr int32_t TOUCH_EVENT               = 1;
 constexpr int32_t CLICK_EVENT               = 2;
 constexpr int32_t SLIDE_OFF_EVENT = 0;
@@ -41,6 +42,7 @@ constexpr char POP_PAGE[] = "pop_page";
 constexpr char SLIDE_ON[] = "slide_on";
 constexpr char SLIDE_OFF[] = "slide_off";
 constexpr char TOUCH[] = "touch";
+constexpr char WEB_GESTURE[] = "web_gesture";
 
 void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& payload)
 {
@@ -78,6 +80,8 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
         } else if (strcmp(name, POP_PAGE) == 0) {
             LoadAceApplicationContext(payload);
             reportDataFunc_(RES_TYPE_POP_PAGE, POP_PAGE_EVENT, payload);
+        } else if (strcmp(name, WEB_GESTURE) == 0) {
+            reportDataFunc_(RES_TYPE_WEB_GESTURE, 0, payload);
         }
     }
 }

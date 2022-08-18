@@ -21,6 +21,7 @@
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "base/ressched/ressched_report.h"
 #include "core/common/container.h"
 #include "core/components/web/web_event.h"
 #include "core/event/ace_event_helper.h"
@@ -2631,6 +2632,7 @@ void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const doub
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
+        ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
         nweb_->OnTouchPress(id, x, y);
     }
 }
@@ -2639,6 +2641,7 @@ void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
+        ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
         nweb_->OnTouchRelease(id, x, y);
     }
 }
