@@ -190,7 +190,6 @@ shared_ptr<JsValue> PageGetParams(const shared_ptr<JsRuntime>& runtime, const sh
 }
 
 void InitRouterModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& moduleObj)
-
 {
     moduleObj->SetProperty(runtime, ROUTE_PAGE_PUSH, runtime->NewFunction(PagePush));
     moduleObj->SetProperty(runtime, ROUTE_PAGE_REPLACE, runtime->NewFunction(PageReplace));
@@ -199,6 +198,19 @@ void InitRouterModule(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>&
     moduleObj->SetProperty(runtime, ROUTE_PAGE_GET_LENGTH, runtime->NewFunction(PageGetLength));
     moduleObj->SetProperty(runtime, ROUTE_PAGE_GET_STATE, runtime->NewFunction(PageGetState));
     moduleObj->SetProperty(runtime, ROUTE_PAGE_GET_PARAMS, runtime->NewFunction(PageGetParams));
+
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime, "requireNapi");
+    if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime)) {
+        LOGW("requireNapi func not found");
+        return;
+    }
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewString("router") };
+    shared_ptr<JsValue> napiObj = requireNapiFunc->Call(runtime, global, argv, argv.size());
+    moduleObj->SetProperty(runtime,
+        ROUTE_ENABLE_ALERT_BEFORE_BACK_PAGE, napiObj->GetProperty(runtime, ROUTE_ENABLE_ALERT_BEFORE_BACK_PAGE));
+    moduleObj->SetProperty(runtime,
+        ROUTE_DISABLE_ALERT_BEFORE_BACK_PAGE, napiObj->GetProperty(runtime, ROUTE_DISABLE_ALERT_BEFORE_BACK_PAGE));
 }
 
 } // namespace OHOS::Ace::Framework

@@ -28,6 +28,7 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 
 namespace OHOS::Ace::Framework {
+enum class AlertState { USER_CANCEL = 0, USER_CONFIRM, RECOVERY };
 
 class JsAcePage;
 
