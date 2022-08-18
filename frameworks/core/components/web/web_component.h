@@ -26,6 +26,7 @@
 #include "core/components/web/resource/web_javascript_value.h"
 #include "core/components/web/web_event.h"
 #include "core/components_v2/common/common_def.h"
+#include "core/event/key_event.h"
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/element.h"
 
@@ -33,6 +34,7 @@ namespace OHOS::Ace {
 
 class WebDelegate;
 using OnMouseCallback = std::function<void(MouseInfo& info)>;
+using OnKeyEventCallback = std::function<void(KeyEventInfo& keyEventInfo)>;
 
 enum MixedModeContent {
     MIXED_CONTENT_ALWAYS_ALLOW = 0,
@@ -1295,6 +1297,16 @@ public:
         return onMouseEvent_;
     }
 
+    void SetOnKeyEventCallback(const OnKeyEventCallback& onKeyEventId)
+    {
+        onKeyEvent_ = onKeyEventId;
+    }
+
+    OnKeyEventCallback GetOnKeyEventCallback() const
+    {
+        return onKeyEvent_;
+    }
+
     void SetSearchResultReceiveEventId(const EventMarker& searchResultReceiveEventId)
     {
         declaration_->SetSearchResultReceiveEventId(searchResultReceiveEventId);
@@ -1352,6 +1364,7 @@ private:
     WebCacheMode cacheMode_ = WebCacheMode::DEFAULT;
     bool isWebDebuggingAccessEnabled_ = false;
     OnMouseCallback onMouseEvent_;
+    OnKeyEventCallback onKeyEvent_;
     float initialScale_;
     bool isInitialScaleSet_ = false;
     int32_t backgroundColor_;
