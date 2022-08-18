@@ -23,6 +23,7 @@
 #include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/container.h"
+#include "core/components/web/render_web.h"
 #include "core/components/web/web_event.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
@@ -30,6 +31,7 @@
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
 #include "nweb_adapter_helper.h"
+#include "nweb_handler.h"
 #include "web_javascript_execute_callback.h"
 #include "web_javascript_result_callback.h"
 #endif
@@ -408,6 +410,11 @@ void WebDelegate::UnregisterEvent()
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_PAGEERROR));
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_ROUTERPUSH));
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_ONMESSAGE));
+}
+
+void WebDelegate::SetRenderWeb(const WeakPtr<RenderWeb>& renderWeb)
+{
+    renderWeb_ = renderWeb;
 }
 
 void WebDelegate::CreatePlatformResource(
@@ -2699,6 +2706,38 @@ void WebDelegate::OnBlur()
         nweb_->OnBlur();
     }
 }
+
+bool WebDelegate::RunQuickMenu(
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
+{
+    auto renderWeb = renderWeb_.Upgrade();
+    if (!renderWeb || !params || !callback) {
+        return false;
+    }
+
+    return renderWeb->RunQuickMenu(params, callback);
+}
+
+void WebDelegate::OnQuickMenuDismissed()
+{
+    auto renderWeb = renderWeb_.Upgrade();
+    if (renderWeb) {
+        renderWeb->OnQuickMenuDismissed();
+    }
+}
+
+void WebDelegate::OnTouchSelectionChanged(
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
+{
+    auto renderWeb = renderWeb_.Upgrade();
+    if (renderWeb) {
+        renderWeb->OnTouchSelectionChanged(
+            insertHandle, startSelectionHandle, endSelectionHandle);
+    }
+}
 #endif
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const
@@ -2762,5 +2801,4 @@ void WebDelegate::SetComponent(const RefPtr<WebComponent>& component)
 {
     webComponent_ = component;
 }
-
 } // namespace OHOS::Ace

@@ -29,6 +29,7 @@
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #ifdef OHOS_STANDARD_SYSTEM
+#include "nweb_handler.h"
 #include "nweb_helper.h"
 #include "nweb_hit_testresult.h"
 #include "window.h"
@@ -188,6 +189,7 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebAccessRequest> request_;
 };
 
+class RenderWeb;
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -211,6 +213,8 @@ public:
     {
         ACE_DCHECK(!type.empty());
     }
+
+    void SetRenderWeb(const WeakPtr<RenderWeb>& renderWeb);
 
     void CreatePlatformResource(const Size& size, const Offset& position,
         const WeakPtr<PipelineContext>& context);
@@ -263,6 +267,13 @@ public:
     void OnFocus();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
+    bool RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
+                      std::shared_ptr<NWeb::NWebQuickMenuCallback> callback);
+    void OnQuickMenuDismissed();
+    void OnTouchSelectionChanged(
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -361,6 +372,7 @@ private:
 #endif
 
     WeakPtr<WebComponent> webComponent_;
+    WeakPtr<RenderWeb> renderWeb_;
     std::list<CreatedCallback> createdCallbacks_;
     std::list<ReleasedCallback> releasedCallbacks_;
     EventCallback onPageStarted_;
