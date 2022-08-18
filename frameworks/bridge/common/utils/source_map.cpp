@@ -172,6 +172,11 @@ void RevSourceMap::Init(const std::string& sourceMap)
         }
     }
 
+    if (mappings_.empty()) {
+        LOGE("decode sourcemap fail, mapping: %{public}s", sourceMap.c_str());
+        return;
+    }
+
     // transform to vector for mapping easily
     mappings_ = HandleMappings(mappings_[0]);
 
