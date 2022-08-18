@@ -21,15 +21,23 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
+void SwiperLayoutAlgorithm::UpdateChildConstraint(const SizeF& selfIdealSize, LayoutConstraintF& layoutConstraint, 
+    const RefPtr<SwiperLayoutProperty>& layoutProperty)
+{
+    layoutConstraint.parentIdealSize = selfIdealSize;
+    layoutConstraint.selfIdealSize->Reset();
+    layoutConstraint.UpdateSelfIdealSizeWithCheck(SizeF(100.0, -1));
+}
+
 void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     preEndIndex_ = 0;
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
@@ -37,10 +45,17 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto idealSize = CreateIdealSize(swiperLayoutProperty->GetLayoutConstraint().value(), axis,
         swiperLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
-    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(idealSize);
 
     // Measure children.
     auto layoutConstraint = swiperLayoutProperty->CreateChildConstraint();
+    UpdateChildConstraint(idealSize, layoutConstraint.value(), swiperLayoutProperty);
+    LOGE("CCCC UpdateChildConstraint max: %{public}s, min: %{public}s, selfIdeaSize: %{public}s, parentIdeaSize: %{public}s",
+        layoutConstraint->maxSize.ToString().c_str(), layoutConstraint->minSize.ToString().c_str(),
+        layoutConstraint->selfIdealSize->ToString().c_str(), layoutConstraint->parentIdealSize->ToString().c_str());
+
     auto currentIndex = preStartIndex_ - 1;
     auto totalCount = layoutWrapper->GetTotalChildCount();
     do {
@@ -62,9 +77,11 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto childrenSize = layoutWrapper->GetTotalChildCount();
 
@@ -82,10 +99,11 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
 
         auto offset = OffsetF(0.0, 0.0);
+        auto itemWidth = (axis == Axis::HORIZONTAL ? (size.Width() / displayCount) : (size.Height() / displayCount));
         if (axis == Axis::HORIZONTAL) {
-            offset += OffsetF(size.Width() * (loopIndex - currentIndex_) + currentOffset_, 0.0f);
+            offset += OffsetF((loopIndex - currentIndex_) * itemWidth + currentOffset_, 0.0f);
         } else if (axis == Axis::VERTICAL) {
-            offset += OffsetF(0.0f, size.Height() * (loopIndex - currentIndex_) + currentOffset_);
+            offset += OffsetF(0.0f, (loopIndex - currentIndex_) * itemWidth + currentOffset_);
         } else {
             LOGW("axis [%{public}d] is not supported yet", axis);
         }

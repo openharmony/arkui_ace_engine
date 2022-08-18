@@ -46,6 +46,8 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
     const auto& parentIdeaSize = layoutConstraint->parentIdealSize;
+    LOGE("CCCC PerformMeasureSelf selfIdelSize: %{public}s, parentIdeaSize: %{public}s, maxSize: %{public}s",
+        layoutConstraint->selfIdealSize->ToString().c_str(), parentIdeaSize->ToString().c_str(), maxSize.ToString().c_str());
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingPropertyF();
     auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
     SizeF frameSize = { -1, -1 };
@@ -55,6 +57,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             const auto& selfIdeaSize = layoutConstraint->selfIdealSize.value();
             frameSize.UpdateSizeWithCheck(selfIdeaSize);
             if (frameSize.IsNonNegative()) {
+                LOGE("CCCC break1 selfIdeaSize: %{public}s", selfIdeaSize.ToString().c_str());
                 break;
             }
         }
@@ -62,6 +65,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         if (measureType == MeasureType::MATCH_PARENT && parentIdeaSize.has_value()) {
             frameSize.UpdateIllegalSizeWithCheck(*parentIdeaSize);
             if (frameSize.IsNonNegative()) {
+                LOGE("CCCC break2");
                 break;
             }
         }
@@ -72,6 +76,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             auto contentSize = content->GetRect().GetSize();
             AddPaddingToSize(padding, contentSize);
             frameSize.UpdateIllegalSizeWithCheck(contentSize);
+            LOGE("CCCC break3");
         } else {
             // use the max child size.
             auto childFrame = SizeF(-1, -1);
@@ -82,8 +87,10 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             childFrame.Constrain(minSize, maxSize);
             AddPaddingToSize(padding, childFrame);
             frameSize.UpdateIllegalSizeWithCheck(childFrame);
+            LOGE("CCCC break4");
         }
         frameSize.UpdateIllegalSizeWithCheck({ 0.0f, 0.0f });
+        LOGE("CCCC break5");
     } while (false);
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);

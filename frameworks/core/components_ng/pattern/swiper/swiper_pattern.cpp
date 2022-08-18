@@ -73,9 +73,17 @@ void SwiperPattern::OnModifyDone()
     } else {
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);
     }
-    InitPanEvent(gestureHub);
-    InitTouchEvent(gestureHub);
+
+
     InitAutoPlay();
+    InitTouchEvent(gestureHub);
+    if (IsDisableSwipe()) {
+        if (panEvent_) {
+            gestureHub->RemovePanEvent(panEvent_);
+        }
+        return;
+    }
+    InitPanEvent(gestureHub);
 }
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -547,6 +555,13 @@ EdgeEffect SwiperPattern::GetEdgeEffect() const
     auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(swiperPaintProperty, EdgeEffect::SPRING);
     return swiperPaintProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+}
+
+bool SwiperPattern::IsDisableSwipe() const
+{
+    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, false);
+    return swiperPaintProperty->GetDisableSwipe().value_or(false);
 }
 
 } // namespace OHOS::Ace::NG

@@ -140,11 +140,12 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
         if (size.has_value()) {
             geometryNode_->SetContentSize(size.value());
+            LOGE("CCCC contentSize: %{public}s", size->ToString().c_str());
         }
     }
 
     layoutAlgorithm_->Measure(this);
-    LOGD("on Measure Done: %{public}s, Size: %{public}s", GetHostTag().c_str(),
+    LOGE("CCCC on Measure Done: %{public}s, Size: %{public}s", GetHostTag().c_str(),
         geometryNode_->GetFrameSize().ToString().c_str());
 }
 

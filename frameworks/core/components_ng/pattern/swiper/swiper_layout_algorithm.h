@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -62,6 +63,9 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void UpdateChildConstraint(const SizeF& selfIdealSize, LayoutConstraintF& layoutConstraint,
+        const RefPtr<SwiperLayoutProperty>& layoutProperty);
+
     int32_t currentIndex_ = 0;
     int32_t preStartIndex_ = 0;
     int32_t preEndIndex_ = 0;

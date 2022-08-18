@@ -107,6 +107,7 @@ private:
     EdgeEffect GetEdgeEffect() const;
     bool IsAutoPlay() const;
     bool IsLoop() const;
+    bool IsDisableSwipe() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
