@@ -62,6 +62,7 @@ public:
     }
 
     void HandleMouseHoverEvent(MouseState mouseState) override;
+    void UpdateTouchRect() override;
 
 protected:
     void OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result) override;

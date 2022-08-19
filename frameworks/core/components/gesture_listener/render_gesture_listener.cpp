@@ -15,6 +15,7 @@
 
 #include "core/components/gesture_listener/render_gesture_listener.h"
 
+#include "base/geometry/rect.h"
 #include "core/components/box/render_box.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
 #include "core/components/root/render_root.h"
@@ -343,6 +344,20 @@ void RenderGestureListener::SetOnPinchCancelCallback(const GestureEventNoParamet
         pinchRecognizer_->SetOnActionCancel(onPinchCancel);
     } else {
         LOGE("fail to set pinch cancel callback due to callback is nullptr");
+    }
+}
+
+void RenderGestureListener::UpdateTouchRect()
+{
+    const auto& children = GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        for (auto& rect : child->GetTouchRectList()) {
+            // unified coordinate system
+            Rect newRect = rect;
+            newRect.SetOffset(rect.GetOffset() + GetPaintRect().GetOffset());
+            touchRectList_.emplace_back(newRect);
+        }
     }
 }
 
