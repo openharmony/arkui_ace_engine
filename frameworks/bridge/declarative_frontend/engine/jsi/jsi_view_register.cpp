@@ -156,7 +156,7 @@
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/core/common/container.h"
 #include "frameworks/core/components_v2/inspector/inspector.h"
-#if defined(PREVIEW_COMPONENT_MOCK)
+#if defined(PREVIEW)
 #include "frameworks/bridge/declarative_frontend/jsview/js_previewer_mock.h"
 #endif
 
@@ -1051,7 +1051,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "FlowItem", JSWaterFlowItem::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
-#ifdef PREVIEW_COMPONENT_MOCK
+#ifdef PREVIEW
     { "FormComponent", JSForm::JSBind },
     { "XComponent", JSXComponent::JSBind },
     { "XComponentController", JSXComponentController::JSBind },
