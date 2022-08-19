@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,13 +22,13 @@
 
 namespace OHOS::Ace {
 
-class RenderRefreshAdapterBase: public virtual AceType {
-    DECLARE_ACE_TYPE(RenderRefreshAdapterBase, AceType)
+class RenderRefreshTarget: public virtual AceType {
+    DECLARE_ACE_TYPE(RenderRefreshTarget, AceType)
 
 public:
-    virtual bool HandleRefreshEffect(const double& delta, int32_t source, double currentOffset);
+    virtual bool HandleRefreshEffect(double delta, int32_t source, double currentOffset);
     virtual void FindRefreshParent(const WeakPtr<RenderNode>& node);
-    virtual void InitializeScrollable(RefPtr<Scrollable>& scrollable);
+    virtual void InitializeScrollable(const RefPtr<Scrollable>& scrollable);
 protected:
     WeakPtr<RenderRefresh> refreshParent_;
 private:

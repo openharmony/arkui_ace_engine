@@ -52,8 +52,8 @@ private:
     int32_t scrollIndex_ = 0;
 };
 
-class RenderGridScroll : public RenderGridLayout, public RenderRefreshAdapterBase {
-    DECLARE_ACE_TYPE(RenderGridScroll, RenderGridLayout, RenderRefreshAdapterBase);
+class RenderGridScroll : public RenderGridLayout, public RenderRefreshTarget {
+    DECLARE_ACE_TYPE(RenderGridScroll, RenderGridLayout, RenderRefreshTarget);
 
 public:
     using BuildChildByIndex = std::function<bool(int32_t)>;

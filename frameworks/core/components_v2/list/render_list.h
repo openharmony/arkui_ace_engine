@@ -59,8 +59,8 @@ public:
     virtual size_t FindPreviousStickyListItem(size_t index) = 0;
 };
 
-class RenderList : public RenderNode, public RenderRefreshAdapterBase {
-    DECLARE_ACE_TYPE(V2::RenderList, RenderNode, RenderRefreshAdapterBase);
+class RenderList : public RenderNode, public RenderRefreshTarget {
+    DECLARE_ACE_TYPE(V2::RenderList, RenderNode, RenderRefreshTarget);
 
 public:
     using ScrollEventBack = std::function<void(void)>;

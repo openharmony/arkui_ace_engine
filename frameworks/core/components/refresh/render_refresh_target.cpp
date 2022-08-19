@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace {
 
-void RenderRefreshAdapterBase::FindRefreshParent(const WeakPtr<RenderNode>& node)
+void RenderRefreshTarget::FindRefreshParent(const WeakPtr<RenderNode>& node)
 {
     auto childNode = node.Upgrade();
     if (!childNode) {
@@ -34,7 +34,7 @@ void RenderRefreshAdapterBase::FindRefreshParent(const WeakPtr<RenderNode>& node
     }
 }
 
-bool RenderRefreshAdapterBase::HandleRefreshEffect(const double& delta, int32_t source, double currentOffset)
+bool RenderRefreshTarget::HandleRefreshEffect(double delta, int32_t source, double currentOffset)
 {
     auto refresh = refreshParent_.Upgrade();
     if (!refresh) {
@@ -51,7 +51,7 @@ bool RenderRefreshAdapterBase::HandleRefreshEffect(const double& delta, int32_t 
     return false;
 }
 
-void RenderRefreshAdapterBase::InitializeScrollable(RefPtr<Scrollable>& scrollable)
+void RenderRefreshTarget::InitializeScrollable(const RefPtr<Scrollable>& scrollable)
 {
     if (!scrollable) {
         return;

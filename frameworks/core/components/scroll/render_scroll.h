@@ -40,8 +40,8 @@ enum class ScrollType {
     SCROLL_TOP,
 };
 
-class RenderScroll : public RenderNode, public RenderRefreshAdapterBase {
-    DECLARE_ACE_TYPE(RenderScroll, RenderNode, RenderRefreshAdapterBase)
+class RenderScroll : public RenderNode, public RenderRefreshTarget {
+    DECLARE_ACE_TYPE(RenderScroll, RenderNode, RenderRefreshTarget)
 
 public:
     ~RenderScroll() override;
