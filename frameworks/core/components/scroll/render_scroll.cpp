@@ -190,6 +190,9 @@ bool RenderScroll::UpdateOffset(Offset& delta, int32_t source)
     if (delta.IsZero()) {
         return false;
     }
+    if (IsAtTop() && HandleRefreshEffect(-delta.GetY(), source, currentOffset_.GetY())) {
+        return true;
+    }
     if (!ScrollPageCheck(delta, source)) {
         return false;
     }
@@ -198,17 +201,10 @@ bool RenderScroll::UpdateOffset(Offset& delta, int32_t source)
             return false;
         }
     }
-
     if (scrollBar_ && scrollBar_->NeedScrollBar()) {
         scrollBar_->SetOutBoundary(std::abs(scrollBarOutBoundaryExtent_));
         scrollBar_->SetActive(SCROLL_FROM_CHILD != source);
     }
-
-    // handle refresh with list
-    if (!HandleRefreshEffect(delta, source)) {
-        return false;
-    }
-
     currentOffset_ += delta;
     currentDeltaInMain_ += GetMainOffset(delta);
     // handle edge effect
@@ -251,25 +247,6 @@ bool RenderScroll::UpdateOffset(Offset& delta, int32_t source)
     correctedDelta_ = correctedDelta;
     MarkNeedLayout(true);
     return next;
-}
-
-bool RenderScroll::HandleRefreshEffect(Offset& delta, int32_t source)
-{
-    // return true means scroll will update offset
-    auto refresh = refreshParent_.Upgrade();
-    if (!refresh || axis_ == Axis::HORIZONTAL) {
-        LOGD("not support refresh");
-        return true;
-    }
-
-    if ((LessOrEqual(currentOffset_.GetY(), 0.0) && source == SCROLL_FROM_UPDATE) || inLinkRefresh_) {
-        refresh->UpdateScrollableOffset(-delta.GetY());
-        inLinkRefresh_ = true;
-    }
-    if (refresh->GetStatus() != RefreshStatus::INACTIVE) {
-        return false;
-    }
-    return true;
 }
 
 void RenderScroll::HandleScrollEffect()
@@ -552,29 +529,6 @@ void RenderScroll::ResetScrollEventCallBack()
                 std::make_shared<ScrollEventInfo>(ScrollEvent::SCROLL_TOUCHUP, 0.0, 0.0, -1));
         }
     });
-
-    scrollable_->SetDragEndCallback([weakScroll = AceType::WeakClaim(this)]() {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            auto refresh = scroll->refreshParent_.Upgrade();
-            if (refresh && scroll->inLinkRefresh_) {
-                refresh->HandleDragEnd();
-                scroll->inLinkRefresh_ = false;
-            }
-        }
-    });
-
-    scrollable_->SetDragCancel([weakScroll = AceType::WeakClaim(this)]() {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            auto refresh = scroll->refreshParent_.Upgrade();
-            if (refresh && scroll->inLinkRefresh_) {
-                refresh->HandleDragCancel();
-                scroll->inLinkRefresh_ = false;
-            }
-        }
-    });
-
     if (positionController_) {
         positionController_->SetMiddle();
         double mainOffset = GetMainOffset(currentOffset_);
@@ -672,6 +626,7 @@ void RenderScroll::ResetScrollable()
             scroll->MarkNeedLayout(true);
         }
     });
+    InitializeScrollable(scrollable_);
 
     currentBottomOffset_ = Offset::Zero();
     currentOffset_ = Offset::Zero();

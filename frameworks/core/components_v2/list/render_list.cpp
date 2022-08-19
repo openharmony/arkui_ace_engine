@@ -176,15 +176,7 @@ void RenderList::Update(const RefPtr<Component>& component)
     if (onItemDragStart_) {
         CreateDragDropRecognizer();
     }
-    auto parent = GetParent().Upgrade();
-    while (parent) {
-        auto refresh = AceType::DynamicCast<RenderRefresh>(parent);
-        if (refresh) {
-            refreshParent_ = AceType::WeakClaim(AceType::RawPtr(refresh));
-            break;
-        }
-        parent = parent->GetParent().Upgrade();
-    }
+    FindRefreshParent(AceType::WeakClaim(this));
 
     isMultiSelectable_ = component_->GetMultiSelectable();
     hasHeight_ = component_->GetHasHeight();
@@ -258,27 +250,7 @@ void RenderList::InitScrollable(Axis axis)
         list->listEventFlags_[ListEvents::SCROLL_STOP] = true;
         list->HandleListEvent();
     });
-    scrollable_->SetDragEndCallback([weakScroll = AceType::WeakClaim(this)]() {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            auto refresh = scroll->refreshParent_.Upgrade();
-            if (refresh && scroll->inLinkRefresh_) {
-                refresh->HandleDragEnd();
-                scroll->inLinkRefresh_ = false;
-            }
-        }
-    });
-
-    scrollable_->SetDragCancel([weakScroll = AceType::WeakClaim(this)]() {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            auto refresh = scroll->refreshParent_.Upgrade();
-            if (refresh && scroll->inLinkRefresh_) {
-                refresh->HandleDragCancel();
-                scroll->inLinkRefresh_ = false;
-            }
-        }
-    });
+    InitializeScrollable(scrollable_);
     scrollable_->SetOnScrollBegin(component_->GetOnScrollBegin());
     if (vertical_) {
         scrollable_->InitRelatedParent(GetParent());
@@ -1110,7 +1082,7 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
     if (scrollBar_ && scrollBar_->NeedScrollBar()) {
         scrollBar_->SetActive(SCROLL_FROM_CHILD != source);
     }
-    if (reachStart_ && HandleRefreshEffect(offset, source)) {
+    if (reachStart_ && HandleRefreshEffect(offset, source, currentOffset_)) {
         return false;
     }
     if (reachStart_ && reachEnd_) {
@@ -1152,24 +1124,6 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
     }
     MarkNeedLayout(true);
     return true;
-}
-
-bool RenderList::HandleRefreshEffect(double& delta, int32_t source)
-{
-    auto refresh = refreshParent_.Upgrade();
-    if (!refresh) {
-        LOGD("not support refresh");
-        return false;
-    }
-
-    if ((LessOrEqual(currentOffset_, 0.0) && source == SCROLL_FROM_UPDATE) || inLinkRefresh_) {
-        refresh->UpdateScrollableOffset(delta);
-        inLinkRefresh_ = true;
-    }
-    if (refresh->GetStatus() != RefreshStatus::INACTIVE) {
-        return true;
-    }
-    return false;
 }
 
 bool RenderList::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
