@@ -32,8 +32,9 @@ ReportDataFunc ACE_EXPORT LoadReportDataFunc();
 class ACE_EXPORT ResSchedReport final {
 public:
     static ResSchedReport& GetInstance();
-    void ResSchedDataReport(const char* name);
-    void ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param);
+    void ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param = {});
+    void ResSchedDataReport(uint32_t resType, int32_t value = 0,
+        const std::unordered_map<std::string, std::string>& payload = {});
     void MarkNeedUpdate();
     void DispatchTouchEventStart(const TouchType& touchType);
     void DispatchTouchEventEnd();
@@ -43,8 +44,19 @@ private:
     ~ResSchedReport() {}
     ReportDataFunc reportDataFunc_ = nullptr;
     bool isInTouchDownUp_ = false;
+};
 
-    void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& payload);
+class ACE_EXPORT ResSchedReportScope final {
+public:
+    ACE_DISALLOW_COPY_AND_MOVE(ResSchedReportScope);
+
+    explicit ResSchedReportScope(const std::string& name,
+        const std::unordered_map<std::string, std::string>& param = {});
+    ~ResSchedReportScope();
+
+private:
+    std::string name_;
+    std::unordered_map<std::string, std::string> payload_;
 };
 } // namespace OHOS::Ace
 
