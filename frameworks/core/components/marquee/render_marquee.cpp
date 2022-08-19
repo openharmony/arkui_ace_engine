@@ -193,6 +193,9 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
     GetMarqueeCallback(component);
     value_ = marquee->GetValue();
     start_ = marquee->GetPlayerStatus();
+    if (start_) {
+        startAfterLayout_ = true;
+    }
     textStyle_ = marquee->GetTextStyle();
     auto context = GetContext().Upgrade();
     if (!context) {
