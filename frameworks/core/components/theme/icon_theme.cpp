@@ -31,6 +31,7 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, "container_modal_window_minimize" },
     { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER, "container_modal_window_recover" },
     { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, "container_modal_window_split_left" },
+    { InternalResource::ResourceId::CLOSE_SVG, "close" },
     { InternalResource::ResourceId::CORRECT_SVG, "correct" },
     { InternalResource::ResourceId::DOWN_ARROW_SVG, "down_arrow" },
     { InternalResource::ResourceId::FA_BLACK_CLOCK_WIDGET_HOUR, "fa_black_clock_widget_hour" },
