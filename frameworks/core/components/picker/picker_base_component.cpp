@@ -517,6 +517,14 @@ void PickerBaseComponent::ClearAccessibilityNodes()
     for (const auto& column : columns_) {
         column->SetNodeId(-1); // reset id.
     }
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    if (accessibilityManager) {
+        auto node = accessibilityManager->GetAccessibilityNodeById(GetPickerBaseId());
+        if (node) {
+            node->SetZIndexToChild(0);
+        }
+    }
+#endif
 }
 
 RefPtr<Component> PickerBaseComponent::GenerateAccessibilityComposed(

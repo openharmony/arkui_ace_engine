@@ -109,6 +109,19 @@ bool PopupElement::CancelPopup(const ComposeId& id)
             accessibilityManager->RemoveAccessibilityNodeById(StringUtils::StringToInt(popup_->GetId()));
         }
     }
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    if (context) {
+        auto manager = context->GetAccessibilityManager();
+        if (manager) {
+            auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(popup_->GetId()));
+            if (!node) {
+                return true;
+            }
+            node->SetZIndexToChild(0);
+            manager->ClearNodeRectInfo(node, true);
+        }
+    }
+#endif
     return true;
 }
 
