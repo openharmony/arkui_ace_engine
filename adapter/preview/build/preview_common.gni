@@ -27,7 +27,7 @@ enable_rosen_backend = false
 enable_standard_input = false
 video_components_support = false
 web_components_support = false
-no_support_component_mock = true
+preview_support = true
 defines = []
 
 if (defined(web_components_support) && web_components_support) {
@@ -58,6 +58,6 @@ if (defined(enable_ability_component) && enable_ability_component) {
   defines += [ "ABILITY_COMPONENT_SUPPORTED" ]
 }
 
-if (defined(no_support_component_mock) && no_support_component_mock) {
-  defines += [ "PREVIEW_COMPONENT_MOCK" ]
+if (defined(preview_support) && preview_support) {
+  defines += [ "PREVIEW" ]
 }
