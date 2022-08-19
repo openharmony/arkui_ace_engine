@@ -38,7 +38,7 @@ class ACE_EXPORT GridRowComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(GridRowComponent, ComponentGroup);
 
 public:
-    RefPtr<ColumnInfo> GetTotalCol() const
+    const RefPtr<ColumnInfo>& GetTotalCol() const
     {
         return totalCol_;
     }
@@ -48,7 +48,7 @@ public:
         totalCol_ = cols;
     }
 
-    RefPtr<BreakPoints> GetBreakPoints() const
+    const RefPtr<BreakPoints>& GetBreakPoints() const
     {
         return breakPoints_;
     }
@@ -58,7 +58,7 @@ public:
         breakPoints_ = breakpoints;
     }
 
-    RefPtr<Gutter> GetGutter() const
+    const RefPtr<Gutter>& GetGutter() const
     {
         return gutter_;
     }
