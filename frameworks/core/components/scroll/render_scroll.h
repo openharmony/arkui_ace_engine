@@ -22,7 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "core/animation/curve.h"
 #include "core/components/common/properties/scroll_bar.h"
-#include "core/components/refresh/render_refresh_adapter_base.h"
+#include "core/components/refresh/render_refresh_target.h"
 #include "core/components/scroll/scroll_bar_controller.h"
 #include "core/components/scroll/scroll_component.h"
 #include "core/components/scroll/scroll_edge_effect.h"

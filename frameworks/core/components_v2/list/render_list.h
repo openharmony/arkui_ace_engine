@@ -23,7 +23,7 @@
 #include "core/animation/bilateral_spring_adapter.h"
 #include "core/animation/simple_spring_chain.h"
 #include "core/components/positioned/positioned_component.h"
-#include "core/components/refresh/render_refresh_adapter_base.h"
+#include "core/components/refresh/render_refresh_target.h"
 #include "core/components/scroll/scroll_edge_effect.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_v2/list/list_component.h"

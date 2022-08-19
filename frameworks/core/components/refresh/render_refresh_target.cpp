@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/refresh/render_refresh_adapter_base.h"
+#include "core/components/refresh/render_refresh_target.h"
 
 namespace OHOS::Ace {
 
