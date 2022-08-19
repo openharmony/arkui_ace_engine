@@ -77,6 +77,7 @@ void RenderSingleChildScroll::Update(const RefPtr<Component>& component)
             ResetEdgeEffect();
         }
     }
+    FindRefreshParent(AceType::WeakClaim(this));
 }
 
 LayoutParam RenderSingleChildScroll::MakeInnerLayoutParam() const

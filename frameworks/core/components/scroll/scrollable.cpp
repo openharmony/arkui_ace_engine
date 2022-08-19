@@ -131,7 +131,10 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     });
     panRecognizer_->SetOnActionCancel([weakScroll = AceType::WeakClaim(this)]() {
         auto scroll = weakScroll.Upgrade();
-        if (scroll && scroll->dragCancelCallback_) {
+        if (!scroll) {
+            return;
+        }
+        if (scroll->dragCancelCallback_) {
             scroll->dragCancelCallback_();
         }
     });

@@ -54,8 +54,6 @@ void RenderGridScroll::Update(const RefPtr<Component>& component)
     if (!NeedUpdate(component)) {
         return;
     }
-
-    LOGD("RenderGridScroll::Update");
     useScrollable_ = SCROLLABLE::NO_SCROLL;
     mainSize_ = &rowSize_;
     crossSize_ = &colSize_;
@@ -66,6 +64,7 @@ void RenderGridScroll::Update(const RefPtr<Component>& component)
     startRankItemIndex_ = 0;
     currentItemIndex_ = 0;
     RenderGridLayout::Update(component);
+    FindRefreshParent(AceType::WeakClaim(this));
     InitScrollBar(component);
     TakeBoundary();
     const RefPtr<GridLayoutComponent> grid = AceType::DynamicCast<GridLayoutComponent>(component);
@@ -151,6 +150,7 @@ void RenderGridScroll::CreateScrollable()
             }
         }
     });
+    InitializeScrollable(scrollable_);
     scrollable_->Initialize(context_);
 }
 
@@ -166,7 +166,9 @@ bool RenderGridScroll::UpdateScrollPosition(double offset, int32_t source)
     if (scrollBar_ && scrollBar_->NeedScrollBar()) {
         scrollBar_->SetActive(SCROLL_FROM_CHILD != source);
     }
-
+    if (reachHead_ && HandleRefreshEffect(offset, source, currentOffset_)) {
+        return false;
+    }
     if (reachHead_ && reachTail_) {
         return false;
     }

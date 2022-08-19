@@ -23,13 +23,13 @@
 #include "core/animation/bilateral_spring_adapter.h"
 #include "core/animation/simple_spring_chain.h"
 #include "core/components/positioned/positioned_component.h"
+#include "core/components/refresh/render_refresh_target.h"
 #include "core/components/scroll/scroll_edge_effect.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/render_list_item.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
-#include "core/components/refresh/render_refresh.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -59,8 +59,8 @@ public:
     virtual size_t FindPreviousStickyListItem(size_t index) = 0;
 };
 
-class RenderList : public RenderNode {
-    DECLARE_ACE_TYPE(V2::RenderList, RenderNode);
+class RenderList : public RenderNode, public RenderRefreshTarget {
+    DECLARE_ACE_TYPE(V2::RenderList, RenderNode, RenderRefreshTarget);
 
 public:
     using ScrollEventBack = std::function<void(void)>;
@@ -417,7 +417,6 @@ protected:
     double prevOffset_ = 0.0;
     double prevMainPos_ = 0.0;
     double estimatedHeight_ = 0.0;
-    WeakPtr<RenderRefresh> refreshParent_;
 
 private:
     int32_t lanes_ = -1;
@@ -477,7 +476,6 @@ private:
 
     void ApplyRestoreInfo();
     void InitScrollable(Axis axis);
-    bool HandleRefreshEffect(double& delta, int32_t source);
 
     bool hasDragItem_ = false;
     std::map<ListEvents, bool> listEventFlags_;
