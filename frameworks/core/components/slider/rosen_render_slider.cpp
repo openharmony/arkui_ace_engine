@@ -364,10 +364,10 @@ void RosenRenderSlider::PaintTrackFocus(RenderContext& context, const Offset& of
     SkRRect rRect;
     rRect.setRectXY(SkRect::MakeIWH(trackFocusWidth, trackFocusHeight), trackFocusRadius, trackFocusRadius);
     if (direction_ == Axis::VERTICAL) {
-        rRect.offset(offset.GetX() + track->GetTrackThickness() * HALF - NormalizeToPx(FOCUS_PADDING +
-            FOCUS_BORDER_WIDTH * HALF), offset.GetY() + NormalizeToPx(FOCUS_BORDER_WIDTH * HALF * HALF));
+        rRect.offset(track->GetTrackThickness() * HALF - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF),
+            NormalizeToPx(FOCUS_BORDER_WIDTH * HALF * HALF));
     } else {
-        rRect.offset(offset.GetX() + NormalizeToPx(FOCUS_BORDER_WIDTH * HALF * HALF), offset.GetY() +
+        rRect.offset(NormalizeToPx(FOCUS_BORDER_WIDTH * HALF * HALF),
             track->GetTrackThickness() * HALF - NormalizeToPx(FOCUS_PADDING + FOCUS_BORDER_WIDTH * HALF));
     }
     canvas->drawRRect(rRect, paint);
