@@ -59,6 +59,7 @@ void OptionComponent::InitTheme(const RefPtr<ThemeManager>& themeManager)
 bool OptionComponent::Initialize(const RefPtr<AccessibilityManager>& manager)
 {
     if (customComponent_) {
+        ClearChildren();
         AppendChild(customComponent_);
         return true;
     }
