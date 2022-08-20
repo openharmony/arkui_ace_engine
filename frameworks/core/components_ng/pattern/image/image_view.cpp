@@ -25,11 +25,11 @@ void ImageView::Create(const std::string& src)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ImageSourceInfo imageSourceInfo(src);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        V2::IMAGE_ETS_TAG, nodeId, [imageSourceInfo]() { return AceType::MakeRefPtr<ImagePattern>(imageSourceInfo); });
     stack->Push(frameNode);
 
-    ImageSourceInfo imageSourceInfo(src);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
 }
 

@@ -31,4 +31,29 @@ RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
 #endif
 }
 
+void SkiaCanvasImage::ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage)
+{
+#ifndef NG_BUILD
+    image_->set_image(std::move(newSkGpuObjSkImage));
+#endif
+}
+
+int32_t SkiaCanvasImage::GetWidth() const
+{
+#ifdef NG_BUILD
+    return 0;
+#else
+    return image_->width();
+#endif
+}
+
+int32_t SkiaCanvasImage::GetHeight() const
+{
+#ifdef NG_BUILD
+    return 0;
+#else
+    return image_->height();
+#endif
+}
+
 } // namespace OHOS::Ace::NG

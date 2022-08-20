@@ -380,19 +380,20 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
 {
     layoutProperty_->UpdatePropertyChangeFlag(extraFlag);
     paintProperty_->UpdatePropertyChangeFlag(extraFlag);
-    auto flag = layoutProperty_->GetPropertyChangeFlag() | paintProperty_->GetPropertyChangeFlag();
-    if (CheckNoChanged(flag)) {
+    auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
+    auto paintFlag = paintProperty_->GetPropertyChangeFlag();
+    if (CheckNoChanged(layoutFlag | paintFlag)) {
         return;
     }
     auto context = GetContext();
     CHECK_NULL_VOID(context);
 
-    if (CheckNeedRequestMeasureAndLayout(flag)) {
+    if (CheckNeedRequestMeasureAndLayout(layoutFlag)) {
         if (isLayoutDirtyMarked_) {
             return;
         }
         isLayoutDirtyMarked_ = true;
-        if (!isMeasureBoundary && CheckNeedRequestParent(flag)) {
+        if (!isMeasureBoundary && CheckNeedRequestParent(layoutFlag)) {
             auto parent = GetAncestorNodeOfFrame();
             if (parent) {
                 parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);

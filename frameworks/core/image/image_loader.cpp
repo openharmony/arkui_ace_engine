@@ -135,6 +135,13 @@ sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
     return nullptr;
 }
 
+RefPtr<NG::ImageData> ImageLoader::GetImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
+{
+    sk_sp<SkData> skData = LoadImageData(imageSourceInfo, context);
+    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skData));
+}
+
 sk_sp<SkData> FileImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {

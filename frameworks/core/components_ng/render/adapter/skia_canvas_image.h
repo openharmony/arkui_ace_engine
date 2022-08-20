@@ -46,6 +46,9 @@ public:
 #endif
         return nullptr;
     }
+    void ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage);
+    int32_t GetWidth() const override;
+    int32_t GetHeight() const override;
 
 private:
     // TODO: should not deps on flutter.
