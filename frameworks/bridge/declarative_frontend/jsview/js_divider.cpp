@@ -16,11 +16,17 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 
 #include "core/components/box/box_component.h"
+#include "core/components_ng/pattern/divider/divider_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 void JSDivider::Create()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::DividerView::Create();
+        return;
+    }
+
     RefPtr<Component> dividerComponent = AceType::MakeRefPtr<OHOS::Ace::DividerComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(dividerComponent);
     ViewStackProcessor::GetInstance()->Push(dividerComponent);
@@ -28,6 +34,11 @@ void JSDivider::Create()
 
 void JSDivider::SetVertical(bool isVertical)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::DividerView::Vertical(isVertical);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
     if (component) {
@@ -44,8 +55,6 @@ void JSDivider::SetVertical(bool isVertical)
 
 void JSDivider::SetLineCap(int lineCap)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
     auto lineCapStyle = LineCap::BUTT;
 
     if (static_cast<int>(LineCap::SQUARE) == lineCap) {
@@ -56,6 +65,13 @@ void JSDivider::SetLineCap(int lineCap)
         // default linecap of divider
         lineCapStyle = LineCap::BUTT;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::DividerView::LineCap(lineCapStyle);
+        return;
+    }
+
+    auto *stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
     if (component) {
         component->SetLineCap(lineCapStyle);
     }
@@ -71,6 +87,11 @@ void JSDivider::SetDividerColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], dividerColor)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::DividerView::DividerColor(dividerColor);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
     if (component) {
@@ -88,6 +109,11 @@ void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], strokeWidth)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::DividerView::StrokeWidth(strokeWidth);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::DividerComponent>(stack->GetMainComponent());
     if (component) {

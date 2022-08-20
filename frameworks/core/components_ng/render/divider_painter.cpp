@@ -22,18 +22,14 @@ void DividerPainter::DrawLine(const RefPtr<Canvas>& canvas, const OffsetF& offse
     paint->EnableAntiAlias();
     paint->SetStyle(PaintStyle::STROKE);
     paint->SetStrokeWidth(constrainStrokeWidth_);
-    if (lineCap_.has_value()) {
-        paint->SetStrokeCap(lineCap_.value());
-    }
-    if (dividerColor_.has_value()) {
-        paint->SetColor(dividerColor_.value());
-    }
+    paint->SetStrokeCap(lineCap_.value_or(LineCap::SQUARE));
+    paint->SetColor(dividerColor_.value_or(Color::BLACK));
 
-    auto startPointX = offset.GetX() + constrainStrokeWidth_ / 2;
-    auto startPointY = offset.GetY() + constrainStrokeWidth_ / 2;
+    auto startPointX = offset.GetX();
+    auto startPointY = offset.GetY();
     PointF start = PointF(startPointX, startPointY);
-    PointF end = vertical_ ?
-        PointF(startPointX, startPointY + dividerLength_) : PointF(startPointX + dividerLength_, startPointY);
+    PointF end = vertical_ ? PointF(startPointX, startPointY + dividerLength_)
+                           : PointF(startPointX + dividerLength_, startPointY);
     canvas->DrawLine(start, end, paint);
 }
 } // namespace OHOS::Ace::NG

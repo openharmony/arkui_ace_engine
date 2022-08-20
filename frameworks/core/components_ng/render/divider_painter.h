@@ -21,30 +21,30 @@
 namespace OHOS::Ace::NG {
 class DividerPainter {
 public:
-    DividerPainter(double constrainStrokeWidth, double dividerLength, bool vertical,
-        std::optional<Color> dividerColor, std::optional<LineCap> lineCap)
+    DividerPainter(float constrainStrokeWidth, float dividerLength, bool vertical, std::optional<Color> dividerColor,
+        std::optional<LineCap> lineCap)
         : constrainStrokeWidth_(constrainStrokeWidth), dividerLength_(dividerLength), vertical_(vertical),
-        dividerColor_(dividerColor), lineCap_(lineCap)
+          dividerColor_(dividerColor), lineCap_(lineCap)
     {}
-    DividerPainter(double constrainStrokeWidth, double dividerLength, bool vertical)
+    DividerPainter(float constrainStrokeWidth, float dividerLength, bool vertical)
         : constrainStrokeWidth_(constrainStrokeWidth), dividerLength_(dividerLength), vertical_(vertical),
-        dividerColor_(std::nullopt), lineCap_(LineCap::SQUARE)
+          dividerColor_(std::nullopt), lineCap_(LineCap::SQUARE)
     {}
-    DividerPainter(double constrainStrokeWidth, double dividerLength)
+    DividerPainter(float constrainStrokeWidth, float dividerLength)
         : constrainStrokeWidth_(constrainStrokeWidth), dividerLength_(dividerLength), vertical_(false),
-        dividerColor_(std::nullopt), lineCap_(LineCap::SQUARE)
+          dividerColor_(std::nullopt), lineCap_(LineCap::SQUARE)
     {}
     ~DividerPainter() = default;
 
     void DrawLine(const RefPtr<Canvas>& canvas, const OffsetF& offset) const;
 
 private:
-    double constrainStrokeWidth_;
-    double dividerLength_;
+    float constrainStrokeWidth_ = 0.0f;
+    float dividerLength_ = 0.0f;
     bool vertical_;
 
     std::optional<Color> dividerColor_;
     std::optional<LineCap> lineCap_;
 };
-}
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DIVIDER_PAINTER_H
