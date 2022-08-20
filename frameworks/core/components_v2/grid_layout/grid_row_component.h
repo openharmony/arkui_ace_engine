@@ -38,7 +38,7 @@ class ACE_EXPORT GridRowComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(GridRowComponent, ComponentGroup);
 
 public:
-    RefPtr<ColumnInfo> GetTotalCol() const
+    const RefPtr<ColumnInfo>& GetTotalCol() const
     {
         return totalCol_;
     }
@@ -48,7 +48,7 @@ public:
         totalCol_ = cols;
     }
 
-    RefPtr<BreakPoints> GetBreakPoints() const
+    const RefPtr<BreakPoints>& GetBreakPoints() const
     {
         return breakPoints_;
     }
@@ -58,14 +58,24 @@ public:
         breakPoints_ = breakpoints;
     }
 
-    RefPtr<Getter> GetGetter() const
+    const RefPtr<Gutter>& GetGutter() const
     {
-        return getter_;
+        return gutter_;
     }
 
-    void SetGetter(const RefPtr<Getter>& getter)
+    void SetGutter(const RefPtr<Gutter>& gutter)
     {
-        getter_ = getter;
+        gutter_ = gutter;
+    }
+
+    void SetHasContainerHeight(bool hasContainerHeight)
+    {
+        hasContainerHeight_ = hasContainerHeight;
+    }
+
+    bool HasContainerHeight()
+    {
+        return hasContainerHeight_;
     }
 
     RefPtr<Element> CreateElement() override;
@@ -94,8 +104,9 @@ public:
 private:
     RefPtr<ColumnInfo> totalCol_ = AceType::MakeRefPtr<ColumnInfo>();
     RefPtr<BreakPoints> breakPoints_ = AceType::MakeRefPtr<BreakPoints>();
-    RefPtr<Getter> getter_ = AceType::MakeRefPtr<Getter>();
+    RefPtr<Gutter> gutter_ = AceType::MakeRefPtr<Gutter>();
     GridRowDirection direction_ = GridRowDirection::Row;
+    bool hasContainerHeight_ = false;
 };
 
 } // namespace OHOS::Ace::V2

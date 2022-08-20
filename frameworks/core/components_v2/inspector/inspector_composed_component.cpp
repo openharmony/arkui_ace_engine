@@ -37,9 +37,11 @@
 #include "core/components_v2/inspector/divider_composed_element.h"
 #include "core/components_v2/inspector/flex_composed_element.h"
 #include "core/components_v2/inspector/gauge_composed_element.h"
+#include "core/components_v2/inspector/grid_col_composed_element.h"
 #include "core/components_v2/inspector/grid_composed_element.h"
 #include "core/components_v2/inspector/grid_container_composed_element.h"
 #include "core/components_v2/inspector/grid_item_composed_element.h"
+#include "core/components_v2/inspector/grid_row_composed_element.h"
 #include "core/components_v2/inspector/hyperlink_composed_element.h"
 #include "core/components_v2/inspector/image_animator_composed_element.h"
 #include "core/components_v2/inspector/image_composed_element.h"
@@ -180,6 +182,10 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { GAUGE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::GaugeComposedElement>(id); } },
     { GRIDCONTAINER_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::GridContainerComposedElement>(id); } },
+    { GRID_COL_COMPONENT_TAG,
+    [](const std::string& id) { return AceType::MakeRefPtr<V2::GridColComposedElement>(id); } },
+    { GRID_ROW_COMPONENT_TAG,
+    [](const std::string& id) { return AceType::MakeRefPtr<V2::GridRowComposedElement>(id); } },
     { MENU_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::MenuComposedElement>(id); } },
     { TEXTAREA_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TextareaComposedElement>(id); } },
@@ -277,6 +283,8 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { TIME_PICKER_COMPONENT_TAG, TIME_PICKER_ETS_TAG },
     { RADIO_COMPONENT_TAG, RADIO_ETS_TAG },
     { GRIDCONTAINER_COMPONENT_TAG, GRIDCONTAINER_ETS_TAG },
+    { GRID_COL_COMPONENT_TAG, GRID_COL_ETS_TAG },
+    { GRID_ROW_COMPONENT_TAG, GRID_ROW_ETS_TAG },
     { INDEXER_COMPONENT_TAG, INDEXER_ETS_TAG },
     { MENU_COMPONENT_TAG, MENU_ETS_TAG },
     { MENU_TAG, MENU_ETS_TAG },
