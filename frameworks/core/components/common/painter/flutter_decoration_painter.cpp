@@ -49,8 +49,6 @@ constexpr float LEFT_START = 135.0f;
 constexpr float LEFT_END = 180.0f;
 constexpr float SWEEP_ANGLE = 45.0f;
 constexpr float EXTEND = 1024.0f;
-constexpr float BRIGHT_DARK = 230.0f;
-constexpr float BRIGHT_LIGHT = 45.0f;
 constexpr uint32_t COLOR_MASK = 0xff000000;
 
 class GradientShader {
@@ -1340,17 +1338,16 @@ void FlutterDecorationPainter::PaintGrayScale(const flutter::RRect& outerRRect, 
             canvas->clipRRect(outerRRect.sk_rrect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-#ifdef USE_SYSTEM_SKIA
             float matrix[20] = { 0 };
             matrix[0] = matrix[5] = matrix[10] = 0.2126f * scale;
             matrix[1] = matrix[6] = matrix[11] = 0.7152f * scale;
             matrix[2] = matrix[7] = matrix[12] = 0.0722f * scale;
             matrix[18] = 1.0f * scale;
-
+#ifdef USE_SYSTEM_SKIA
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
@@ -1362,35 +1359,29 @@ void FlutterDecorationPainter::PaintBrightness(const flutter::RRect& outerRRect,
     const Dimension& brightness, const Color& color)
 {
     double bright = brightness.Value();
-    if (GreatNotEqual(bright, 0.0)) {
-        if (canvas) {
-            SkAutoCanvasRestore acr(canvas, true);
-            canvas->clipRRect(outerRRect.sk_rrect, true);
-            SkPaint paint;
-            paint.setAntiAlias(true);
-            float matrix[20] = { 0 };
-
-            if (bright < 0.0) {
-                return;
-            } else if (bright > 20.0) {
-                bright = 20.0;
-            }
-            if (bright <= 1.0) {
-                bright = BRIGHT_DARK * (bright - 1);
-            } else {
-                bright = BRIGHT_LIGHT * bright;
-            }
-            matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
-            matrix[4] = matrix[9] = matrix[14] = bright;
+    // brightness range (0, 2), 1 is normal brightness
+    // skip painting when brightness is 1
+    if (NearEqual(bright, 1.0)) {
+        return;
+    }
+    if (canvas) {
+        SkAutoCanvasRestore acr(canvas, true);
+        canvas->clipRRect(outerRRect.sk_rrect, true);
+        SkPaint paint;
+        paint.setAntiAlias(true);
+        float matrix[20] = { 0 };
+        // brightness range in Skia: (-1, 1), convert from range (0, 2)
+        bright--;
+        matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
+        matrix[4] = matrix[9] = matrix[14] = bright;
 #ifdef USE_SYSTEM_SKIA
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
+        auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
+        paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+        paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
-            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
-            canvas->saveLayer(slr);
-        }
+        SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+        canvas->saveLayer(slr);
     }
 }
 
@@ -1398,25 +1389,27 @@ void FlutterDecorationPainter::PaintContrast(const flutter::RRect& outerRRect, S
     const Dimension& contrast, const Color& color)
 {
     double contrasts = contrast.Value();
-    if (GreatNotEqual(contrasts, 0.0)) {
-        if (canvas) {
-            SkAutoCanvasRestore acr(canvas, true);
-            canvas->clipRRect(outerRRect.sk_rrect, true);
-            SkPaint paint;
-            paint.setAntiAlias(true);
+    // skip painting if contrast is normal
+    if (NearEqual(contrasts, 1.0)) {
+        return;
+    }
+    if (canvas) {
+        SkAutoCanvasRestore acr(canvas, true);
+        canvas->clipRRect(outerRRect.sk_rrect, true);
+        SkPaint paint;
+        paint.setAntiAlias(true);
+        float matrix[20] = { 0 };
+        matrix[0] = matrix[6] = matrix[12] = contrasts;
+        matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts) / 255;
+        matrix[18] = 1.0f;
 #ifdef USE_SYSTEM_SKIA
-            float matrix[20] = { 0 };
-            matrix[0] = matrix[6] = matrix[12] = contrasts;
-            matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts);
-            matrix[18] = 1.0f;
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
+        auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
+        paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+        paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
-            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
-            canvas->saveLayer(slr);
-        }
+        SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+        canvas->saveLayer(slr);
     }
 }
 
@@ -1434,7 +1427,9 @@ void FlutterDecorationPainter::PaintColorBlend(const flutter::RRect& outerRRect,
                 SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
                 SkBlendMode::kPlus));
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Blend(
+                SkColorSetARGB(colorBlend.GetAlpha(), colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue()),
+                SkBlendMode::kPlus));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
@@ -1485,7 +1480,6 @@ void FlutterDecorationPainter::PaintSepia(const flutter::RRect& outerRRect, SkCa
             canvas->clipRRect(outerRRect.sk_rrect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-#ifdef USE_SYSTEM_SKIA
             float matrix[20] = { 0 };
             matrix[0] = 0.393f * sepias;
             matrix[1] = 0.769f * sepias;
@@ -1499,10 +1493,11 @@ void FlutterDecorationPainter::PaintSepia(const flutter::RRect& outerRRect, SkCa
             matrix[11] = 0.534f * sepias;
             matrix[12] = 0.131f * sepias;
             matrix[18] = 1.0f * sepias;
+#ifdef USE_SYSTEM_SKIA
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
@@ -1514,26 +1509,28 @@ void FlutterDecorationPainter::PaintInvert(const flutter::RRect& outerRRect, SkC
     const Dimension& invert, const Color& color)
 {
     double inverts = invert.Value();
+    // normal invert = 0, no effect
     if (GreatNotEqual(inverts, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
             canvas->clipRRect(outerRRect.sk_rrect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-#ifdef USE_SYSTEM_SKIA
             float matrix[20] = { 0 };
             if (inverts > 1.0) {
                 inverts = 1.0;
             }
-            matrix[0] = matrix[6] = matrix[12] = -1.2f * inverts;
-            matrix[3] = matrix[8] = matrix[13] = 1.2f * inverts;
-            matrix[4] = matrix[9] = matrix[14] = 1.2f * inverts;
-            matrix[18] = 1.2f * inverts;
-            LOGD("start set invert: %f", inverts);
+            // complete color invert when dstRGB = 1 - srcRGB
+            // map (0, 1) to (1, -1)
+            matrix[0] = matrix[6] = matrix[12] = 1.0 - 2.0 * inverts;
+            matrix[18] = 1.0f;
+            // inverts = 0.5 -> RGB = (0.5, 0.5, 0.5) -> image completely gray
+            matrix[4] = matrix[9] = matrix[14] = inverts;
+#ifdef USE_SYSTEM_SKIA
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
@@ -1559,16 +1556,19 @@ void FlutterDecorationPainter::PaintHueRotate(const flutter::RRect& outerRRect, 
             float N = (hueRotates - 120 * type) / 120;
             switch (type) {
                 case 0:
+                    // color change = R->G, G->B, B->R
                     matrix[2] = matrix[5] = matrix[11] = N;
                     matrix[0] = matrix[6] = matrix[12] = 1 - N;
                     matrix[18] = 1.0f;
                     break;
                 case 1:
+                    // compare to original: R->B, G->R, B->G
                     matrix[1] = matrix[7] = matrix[10] = N;
                     matrix[2] = matrix[5] = matrix[11] = 1 - N;
                     matrix[18] = 1.0f;
                     break;
                 case 2:
+                    // back to normal color
                     matrix[0] = matrix[6] = matrix[12] = N;
                     matrix[1] = matrix[7] = matrix[10] = 1 - N;
                     matrix[18] = 1.0f;
@@ -1578,7 +1578,7 @@ void FlutterDecorationPainter::PaintHueRotate(const flutter::RRect& outerRRect, 
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);

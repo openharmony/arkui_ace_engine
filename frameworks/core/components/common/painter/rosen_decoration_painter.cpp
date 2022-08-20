@@ -1313,25 +1313,29 @@ void RosenDecorationPainter::PaintBrightness(
     const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& brightness, const Color& color)
 {
     double bright = brightness.Value();
-    if (GreatNotEqual(bright, 0.0)) {
-        if (canvas) {
-            SkAutoCanvasRestore acr(canvas, true);
-            canvas->clipRRect(outerRRect, true);
-            SkPaint paint;
-            paint.setAntiAlias(true);
-            float matrix[20] = { 0 };
-            bright = bright - 1;
-            matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
-            matrix[4] = matrix[9] = matrix[14] = bright;
+    // brightness range = (0, 2)
+    // skip painting when brightness is normal
+    if (NearEqual(bright, 1.0)) {
+        return;
+    }
+    if (canvas) {
+        SkAutoCanvasRestore acr(canvas, true);
+        canvas->clipRRect(outerRRect, true);
+        SkPaint paint;
+        paint.setAntiAlias(true);
+        float matrix[20] = { 0 };
+        // shift brightness to (-1, 1)
+        bright = bright - 1;
+        matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
+        matrix[4] = matrix[9] = matrix[14] = bright;
 #ifdef USE_SYSTEM_SKIA
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
+        auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
+        paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Matrix(matrix));
+        paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
-            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
-            canvas->saveLayer(slr);
-        }
+        SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+        canvas->saveLayer(slr);
     }
 }
 
@@ -1339,25 +1343,27 @@ void RosenDecorationPainter::PaintContrast(
     const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& contrast, const Color& color)
 {
     double contrasts = contrast.Value();
-    if (GreatNotEqual(contrasts, 0.0)) {
-        if (canvas) {
-            SkAutoCanvasRestore acr(canvas, true);
-            canvas->clipRRect(outerRRect, true);
-            SkPaint paint;
-            paint.setAntiAlias(true);
-            float matrix[20] = { 0 };
-            matrix[0] = matrix[6] = matrix[12] = contrasts;
-            matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts) / 255;
-            matrix[18] = 1.0f;
+    // skip painting if contrast is normal
+    if (NearEqual(contrasts, 1.0)) {
+        return;
+    }
+    if (canvas) {
+        SkAutoCanvasRestore acr(canvas, true);
+        canvas->clipRRect(outerRRect, true);
+        SkPaint paint;
+        paint.setAntiAlias(true);
+        float matrix[20] = { 0 };
+        matrix[0] = matrix[6] = matrix[12] = contrasts;
+        matrix[4] = matrix[9] = matrix[14] = 128 * (1 - contrasts) / 255;
+        matrix[18] = 1.0f;
 #ifdef USE_SYSTEM_SKIA
-            auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
-            paint.setColorFilter(filter);
+        auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
+        paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Matrix(matrix));
+        paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
-            SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
-            canvas->saveLayer(slr);
-        }
+        SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
+        canvas->saveLayer(slr);
     }
 }
 
@@ -1467,9 +1473,12 @@ void RosenDecorationPainter::PaintInvert(
             if (inverts > 1.0) {
                 inverts = 1.0;
             }
-            matrix[0] = matrix[6] = matrix[12] = -1.0f * inverts;
+            // complete color invert when dstRGB = 1 - srcRGB
+            // map (0, 1) to (1, -1)
+            matrix[0] = matrix[6] = matrix[12] = 1.0 - 2.0 * inverts;
             matrix[18] = 1.0f;
-            matrix[4] = matrix[9] = matrix[14] = 1.0f;
+            // inverts = 0.5 -> RGB = (0.5, 0.5, 0.5) -> image completely gray
+            matrix[4] = matrix[9] = matrix[14] = inverts;
 #ifdef USE_SYSTEM_SKIA
             LOGD("start set invert: %f", inverts);
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
@@ -1501,16 +1510,19 @@ void RosenDecorationPainter::PaintHueRotate(
             float N = (hueRotates - 120 * type) / 120;
             switch (type) {
                 case 0:
+                    // color change = R->G, G->B, B->R
                     matrix[2] = matrix[5] = matrix[11] = N;
                     matrix[0] = matrix[6] = matrix[12] = 1 - N;
                     matrix[18] = 1.0f;
                     break;
                 case 1:
+                    // compare to original: R->B, G->R, B->G
                     matrix[1] = matrix[7] = matrix[10] = N;
                     matrix[2] = matrix[5] = matrix[11] = 1 - N;
                     matrix[18] = 1.0f;
                     break;
                 case 2:
+                    // back to normal color
                     matrix[0] = matrix[6] = matrix[12] = N;
                     matrix[1] = matrix[7] = matrix[10] = 1 - N;
                     matrix[18] = 1.0f;
