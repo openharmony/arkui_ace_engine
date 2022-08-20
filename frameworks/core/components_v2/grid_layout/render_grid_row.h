@@ -48,11 +48,20 @@ public:
     inline int32_t GetRelativeOffset(const RefPtr<RenderNode>& node, GridSizeType sizeType) const;
     inline int32_t GetGridColSpan(const RefPtr<RenderNode>& node, GridSizeType sizeType) const;
     void FindGridColChild(RefPtr<RenderNode>& node) const;
+    GridSizeType GetCurrentSizeType()
+    {
+        return currentSizeType_;
+    }
+
+    GridRowDirection GetDirection() const;
+    RefPtr<BreakPoints> GetBreakPoints() const;
+    int32_t GetTotalCol() const;
+    std::pair<double, double> GetGutter() const;
 
 private:
     RefPtr<Component> gridRowComponent_;
     std::list<RefPtr<RenderNode>> gridColChildren_;
-    GridSizeType originSizeType_ = GridSizeType::UNDEFINED;
+    GridSizeType currentSizeType_ = GridSizeType::UNDEFINED;
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_RENDER_GRID_ROW_H

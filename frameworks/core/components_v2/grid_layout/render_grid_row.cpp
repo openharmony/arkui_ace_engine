@@ -79,6 +79,44 @@ void RenderGridRow::Update(const RefPtr<Component>& component)
     gridRowComponent_ = component;
 }
 
+GridRowDirection RenderGridRow::GetDirection() const
+{
+    auto component = AceType::DynamicCast<GridRowComponent>(gridRowComponent_);
+    if (!component) {
+        return GridRowDirection::Row;
+    }
+    return component->GetDirection();
+}
+
+RefPtr<BreakPoints> RenderGridRow::GetBreakPoints() const
+{
+    auto component = AceType::DynamicCast<GridRowComponent>(gridRowComponent_);
+    if (!component) {
+        return nullptr;
+    }
+    return component->GetBreakPoints();
+}
+
+int32_t RenderGridRow::GetTotalCol() const
+{
+    auto component = AceType::DynamicCast<GridRowComponent>(gridRowComponent_);
+    if (!component) {
+        return 0;
+    }
+    auto totalColumn = GridContainerUtils::ProcessColumn(currentSizeType_, component->GetTotalCol());
+    return totalColumn;
+}
+
+std::pair<double, double> RenderGridRow::GetGutter() const
+{
+    auto component = AceType::DynamicCast<GridRowComponent>(gridRowComponent_);
+    if (!component) {
+        return std::make_pair<double, double>(0.0, 0.0);
+    }
+    auto gutter = GridContainerUtils::ProcessGutter(currentSizeType_, component->GetGutter());
+    return std::make_pair<double, double>(NormalizeToPx(gutter.first), NormalizeToPx(gutter.second));
+}
+
 void RenderGridRow::PerformLayout()
 {
     auto maxSize = GetLayoutParam().GetMaxSize();
@@ -93,10 +131,10 @@ void RenderGridRow::PerformLayout()
         return;
     }
     auto sizeType = GridContainerUtils::ProcessGridSizeType(component->GetBreakPoints(), maxSize, context);
-    if (originSizeType_ != sizeType) {
+    if (currentSizeType_ != sizeType) {
         auto sizeTypeString = ConvertSizeTypeToString(sizeType);
         component->FirebreakPointEvent(sizeTypeString);
-        originSizeType_ = sizeType;
+        currentSizeType_ = sizeType;
     }
     auto gutter = GridContainerUtils::ProcessGutter(sizeType, component->GetGutter());
     auto gutterInDouble = std::make_pair<double, double>(NormalizeToPx(gutter.first), NormalizeToPx(gutter.second));

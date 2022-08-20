@@ -839,8 +839,8 @@ var BlurStyle;
 
 var BreakpointsReference;
 (function (BreakpointsReference) {
-  BreakpointsReference[BreakpointsReference["ComponentSize"] = 0] = "ComponentSize";
-  BreakpointsReference[BreakpointsReference["WindowSize"] = 1] = "WindowSize";
+  BreakpointsReference[BreakpointsReference["WindowSize"] = 0] = "WindowSize";
+  BreakpointsReference[BreakpointsReference["ComponentSize"] = 1] = "ComponentSize";
 })(BreakpointsReference || (BreakpointsReference = {}));
 
 var GridRowDirection;

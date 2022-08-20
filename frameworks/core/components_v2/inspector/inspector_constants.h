@@ -289,6 +289,14 @@ ACE_EXPORT extern const char GAUGE_ETS_TAG[];
 ACE_EXPORT extern const char GRIDCONTAINER_COMPONENT_TAG[];
 ACE_EXPORT extern const char GRIDCONTAINER_ETS_TAG[];
 
+// gridCol
+ACE_EXPORT extern const char GRID_COL_COMPONENT_TAG[];
+ACE_EXPORT extern const char GRID_COL_ETS_TAG[];
+
+// gridRow
+ACE_EXPORT extern const char GRID_ROW_COMPONENT_TAG[];
+ACE_EXPORT extern const char GRID_ROW_ETS_TAG[];
+
 // menu
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[];
 ACE_EXPORT extern const char MENU_TAG[];
