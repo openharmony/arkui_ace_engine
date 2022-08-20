@@ -1139,12 +1139,12 @@ private:
     // shadow vector is empty
     std::vector<Shadow> shadows_;
     Dimension grayScale_;
-    // Brightness
-    Dimension brightness_;
+    // Brightness (1.0 as default), range = (0, 2)
+    Dimension brightness_ = 1.0_px;
     // hueRotate
     float hueRotate_ = 0.0f;
-    // Contrast
-    Dimension contrast_;
+    // Contrast (1.0 as default), complete gray at 0
+    Dimension contrast_ = 1.0_px;
     // Saturate
     Dimension saturate_ = 1.0_px;
     // Sepia
