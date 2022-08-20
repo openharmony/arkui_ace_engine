@@ -168,7 +168,7 @@ void PipelineContext::SetupRootElement()
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>(), Claim(this));
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
-    rootNode_->GetRenderContext()->UpdateBgColor(Color::WHITE);
+    rootNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;

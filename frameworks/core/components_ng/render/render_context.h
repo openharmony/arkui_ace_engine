@@ -16,11 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
-#include <memory>
+#include <string>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/render_property.h"
 
 namespace OHOS::Ace::NG {
 class GeometryNode;
@@ -51,14 +54,12 @@ public:
 
     virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}
 
-    virtual void InitContext(bool isRoot = false) {}
+    virtual void InitContext(bool isRoot) {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
 
-    virtual void SetDrawContentAtLast(bool usedrawContentLastOrder) {}
-
-    virtual void UpdateBgColor(const Color& value) {}
+    virtual void SetDrawContentAtLast(bool useDrawContentLastOrder) {}
 
     virtual void SetClipToFrame(bool useClip) {}
 
@@ -73,11 +74,18 @@ public:
         }
     }
 
+    ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundColor, Color);
+
 protected:
     RenderContext() = default;
 
+    virtual void OnBackgroundColorUpdate(const Color& value) {}
+
 private:
     std::function<void()> requestFrame_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };
 } // namespace OHOS::Ace::NG
 
