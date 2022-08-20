@@ -426,8 +426,6 @@ void ListLayoutManager::PerformLayout()
     double curAnimateMainSize = curMainSize + GetItemAnimationValue(itemIndex);
     LayoutParam innerLayout = MakeInnerLayoutParam(crossAxisAlign_);
     auto itemChild = renderList_.GetChildByIndex(itemIndex);
-    LOGD("PerformLayout1 curAnimateMainSize:%{public}lf, tail:%{public}lf, chainOffset_:%{public}lf",
-        curAnimateMainSize, tail_, chainOffset_);
     while (!itemChild && curAnimateMainSize < tail_ - chainOffset_ && CheckItemPosition(itemIndex)) {
         itemChild = renderList_.GetChildByIndex(itemIndex);
         curMainSize = GetItemPosition(itemIndex);
