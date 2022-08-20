@@ -30,6 +30,7 @@ namespace OHOS::Ace::NG {
 
 void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     preEndIndex_ = 0;
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
@@ -37,7 +38,9 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto idealSize = CreateIdealSize(swiperLayoutProperty->GetLayoutConstraint().value(), axis,
         swiperLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
-    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(idealSize);
 
     // Measure children.
     auto layoutConstraint = swiperLayoutProperty->CreateChildConstraint();
@@ -62,16 +65,18 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto childrenSize = layoutWrapper->GetTotalChildCount();
 
     auto parentOffset =
         layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
 
-    // layout chilren.
+    // layout children.
     for (auto index = startIndex_.value(); index <= endIndex_.value(); ++index) {
         // When enable loop, adjust offset.
         auto loopIndex = index;
@@ -82,10 +87,11 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
 
         auto offset = OffsetF(0.0, 0.0);
+        auto itemWidth = (axis == Axis::HORIZONTAL ? (size.Width() / displayCount) : (size.Height() / displayCount));
         if (axis == Axis::HORIZONTAL) {
-            offset += OffsetF(size.Width() * (loopIndex - currentIndex_) + currentOffset_, 0.0f);
+            offset += OffsetF((loopIndex - currentIndex_) * itemWidth + currentOffset_, 0.0f);
         } else if (axis == Axis::VERTICAL) {
-            offset += OffsetF(0.0f, size.Height() * (loopIndex - currentIndex_) + currentOffset_);
+            offset += OffsetF(0.0f, (loopIndex - currentIndex_) * itemWidth + currentOffset_);
         } else {
             LOGW("axis [%{public}d] is not supported yet", axis);
         }

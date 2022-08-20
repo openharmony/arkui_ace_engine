@@ -2752,9 +2752,8 @@ bool RenderSwiper::IsAnimatorStopped() const
 
 void RenderSwiper::FireSwiperControllerFinishEvent()
 {
-    if (swiper_ && swiper_->GetSwiperController() && !swiper_->GetSwiperController()->GetFinishCallback().IsEmpty()) {
-        auto finishEvent = AceAsyncEvent<void()>::Create(swiper_->GetSwiperController()->GetFinishCallback(), context_);
-        finishEvent();
+    if (swiper_ && swiper_->GetSwiperController() && swiper_->GetSwiperController()->GetFinishCallback()) {
+        swiper_->GetSwiperController()->GetFinishCallback()();
     }
 }
 

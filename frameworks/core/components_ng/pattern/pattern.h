@@ -160,6 +160,14 @@ public:
         return DynamicCast<T>(host->GetPaintProperty<T>());
     }
 
+    template<typename T>
+    RefPtr<T> GetEventHub() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        return DynamicCast<T>(host->GetEventHub<T>());
+    }
+
     virtual void OnInActive() {}
     virtual void OnActive() {}
 

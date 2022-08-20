@@ -20,10 +20,8 @@
 
 namespace OHOS::Ace {
 
+using CommonFunc = std::function<void()>;
 using SwipeToImpl = std::function<void(const int32_t, bool)>;
-using ShowPrevImpl = std::function<void()>;
-using ShowNextImpl = std::function<void()>;
-using FinishAnimationImpl = std::function<void()>;
 
 class SwiperController : public virtual AceType {
     DECLARE_ACE_TYPE(SwiperController, AceType);
@@ -48,7 +46,7 @@ public:
         }
     }
 
-    void SetShowPrevImpl(const ShowPrevImpl& showPrevImpl)
+    void SetShowPrevImpl(const CommonFunc& showPrevImpl)
     {
         showPrevImpl_ = showPrevImpl;
     }
@@ -60,7 +58,7 @@ public:
         }
     }
 
-    void SetShowNextImpl(const ShowNextImpl& showNextImpl)
+    void SetShowNextImpl(const CommonFunc& showNextImpl)
     {
         showNextImpl_ = showNextImpl;
     }
@@ -72,27 +70,27 @@ public:
         }
     }
 
-    void SetFinishImpl(const FinishAnimationImpl& finishImpl)
+    void SetFinishImpl(const CommonFunc& finishImpl)
     {
         finishImpl_ = finishImpl;
     }
 
-    void SetFinishCallback(const EventMarker& marker)
+    void SetFinishCallback(const CommonFunc& onFinish)
     {
-        finishCallback_ = marker;
+        finishCallback_ = onFinish;
     }
 
-    const EventMarker& GetFinishCallback() const
+    const CommonFunc& GetFinishCallback() const
     {
         return finishCallback_;
     }
 
 private:
     SwipeToImpl swipeToImpl_;
-    ShowPrevImpl showPrevImpl_;
-    ShowNextImpl showNextImpl_;
-    FinishAnimationImpl finishImpl_;
-    EventMarker finishCallback_;
+    CommonFunc showPrevImpl_;
+    CommonFunc showNextImpl_;
+    CommonFunc finishImpl_;
+    CommonFunc finishCallback_;
 };
 
 } // namespace OHOS::Ace

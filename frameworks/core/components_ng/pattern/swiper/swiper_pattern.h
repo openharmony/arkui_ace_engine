@@ -19,7 +19,9 @@
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/swiper/swiper_controller.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
@@ -32,7 +34,7 @@ class SwiperPattern : public Pattern {
     DECLARE_ACE_TYPE(SwiperPattern, Pattern);
 
 public:
-    SwiperPattern() = default;
+    SwiperPattern();
     ~SwiperPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -65,6 +67,16 @@ public:
         return nullptr;
     }
 
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<SwiperEventHub>();
+    }
+
+    RefPtr<SwiperController> GetSwiperController() const
+    {
+        return swiperController_;
+    }
+
     void UpdateCurrentOffset(float offset);
 
 private:
@@ -81,6 +93,9 @@ private:
     // Init auto play, show next item in duration time when auto play.
     void InitAutoPlay();
 
+    // Init controller of swiper, controller support showNext, showPrevious and finishAnimation interface.
+    void InitSwiperController();
+
     void HandleDragStart();
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity);
@@ -89,15 +104,23 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
 
-    void PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex);
+    void PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false);
     void PlaySpringAnimation(double dragVelocity);
     void PlayFadeAnimation();
 
+    // Implement of swiper controller
+    void ShowNext();
+    void ShowPrevious();
+    void FinishAnimation();
+    void StopTranslateAnimation();
+
     // Timer tick callback, duration is in millisecond.
     void Tick(uint64_t duration);
+    void StopAutoPlay();
     void StartAutoPlay();
     bool IsOutOfBoundary(double mainOffset) const;
     float MainSize() const;
+    void FireChangeEvent() const;
 
     Axis GetDirection() const;
     int32_t CurrentIndex() const;
@@ -107,6 +130,7 @@ private:
     EdgeEffect GetEdgeEffect() const;
     bool IsAutoPlay() const;
     bool IsLoop() const;
+    bool IsDisableSwipe() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -121,6 +145,8 @@ private:
     RefPtr<Animator> fadeController_;
 
     RefPtr<Scheduler> scheduler_;
+
+    RefPtr<SwiperController> swiperController_;
 
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
