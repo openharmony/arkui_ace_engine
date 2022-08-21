@@ -46,7 +46,7 @@ RefPtr<UINode> ViewStackProcessor::GetMainElementNode() const
     return elementsStack_.top();
 }
 
-void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool isCustomView)
+void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView*/)
 {
     if (ShouldPopImmediately()) {
         Pop();

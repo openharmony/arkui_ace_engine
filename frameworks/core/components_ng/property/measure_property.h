@@ -23,6 +23,7 @@
 #include <sstream>
 #include <string>
 
+#include "base/utils/utils.h"
 #include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace::NG {
@@ -195,26 +196,78 @@ struct PaddingPropertyT {
         return (left == value.left) && (right == value.right) && (top == value.top) && (bottom == value.bottom);
     }
 
+    bool operator!=(const PaddingPropertyT& value) const
+    {
+        return !(*this == value);
+    }
+
     bool UpdateWithCheck(const PaddingPropertyT& value)
     {
-        bool isModified = false;
-        if (value.left.has_value() && (left != value.left)) {
+        if (*this != value) {
             left = value.left;
-            isModified = true;
-        }
-        if (value.right.has_value() && (right != value.right)) {
             right = value.right;
-            isModified = true;
-        }
-        if (value.top.has_value() && (top != value.top)) {
             top = value.top;
-            isModified = true;
-        }
-        if (value.bottom.has_value() && (bottom != value.bottom)) {
             bottom = value.bottom;
-            isModified = true;
+            return true;
         }
-        return isModified;
+        return false;
+    }
+
+    std::string ToString() const
+    {
+        std::string str;
+        str.append("left: [").append(left.has_value() ? left->ToString() : "NA").append("]");
+        str.append("right: [").append(right.has_value() ? right->ToString() : "NA").append("]");
+        str.append("top: [").append(top.has_value() ? top->ToString() : "NA").append("]");
+        str.append("bottom: [").append(bottom.has_value() ? bottom->ToString() : "NA").append("]");
+        return str;
+    }
+};
+
+template<>
+struct PaddingPropertyT<float> {
+    std::optional<float> left;
+    std::optional<float> right;
+    std::optional<float> top;
+    std::optional<float> bottom;
+
+    bool operator==(const PaddingPropertyT<float>& value) const
+    {
+        if (left.has_value() ^ value.left.has_value()) {
+            return false;
+        }
+        if (!NearEqual(left.value_or(0), value.left.value_or(0))) {
+            return false;
+        }
+        if (right.has_value() ^ value.right.has_value()) {
+            return false;
+        }
+        if (!NearEqual(right.value_or(0), value.right.value_or(0))) {
+            return false;
+        }
+        if (top.has_value() ^ value.top.has_value()) {
+            return false;
+        }
+        if (!NearEqual(top.value_or(0), value.top.value_or(0))) {
+            return false;
+        }
+        if (bottom.has_value() ^ value.bottom.has_value()) {
+            return false;
+        }
+        if (!NearEqual(bottom.value_or(0), value.bottom.value_or(0))) {
+            return false;
+        }
+        return true;
+    }
+
+    std::string ToString() const
+    {
+        std::string str;
+        str.append("left: [").append(left.has_value() ? std::to_string(left.value()) : "NA").append("]");
+        str.append("right: [").append(right.has_value() ? std::to_string(right.value()) : "NA").append("]");
+        str.append("top: [").append(top.has_value() ? std::to_string(top.value()) : "NA").append("]");
+        str.append("bottom: [").append(bottom.has_value() ? std::to_string(bottom.value()) : "NA").append("]");
+        return str;
     }
 };
 

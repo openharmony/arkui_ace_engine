@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/magic_layout_property.h"
@@ -129,7 +130,7 @@ public:
         }
     }
 
-    void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint, bool updateFlag = false);
+    void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
     void UpdateSelfIdealSize(const SizeF& value)
     {
@@ -182,6 +183,8 @@ private:
     std::unique_ptr<MagicItemProperty> magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;
     std::optional<MeasureType> measureType_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
 } // namespace OHOS::Ace::NG
 

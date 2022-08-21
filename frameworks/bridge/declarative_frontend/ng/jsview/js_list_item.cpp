@@ -22,7 +22,25 @@ namespace OHOS::Ace::Framework {
 
 void JSListItem::Create(const JSCallbackInfo& args)
 {
-    NG::ListItemView::Create();
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGW("Expected deep render function parameter");
+        NG::ListItemView::Create();
+        return;
+    }
+    RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
+    auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(), jsDeepRenderFunc = std::move(jsDeepRender)](
+                                      int32_t nodeId) {
+        ACE_SCOPED_TRACE("JSListItem::ExecuteDeepRender");
+        LOGD("ListItem elmtId %{public}d DeepRender JS function execution start ....", nodeId);
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+        JSRef<JSVal> jsParams[2];
+        jsParams[0] = JSRef<JSVal>::Make(ToJSValue(nodeId));
+        jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
+        jsDeepRenderFunc->ExecuteJS(2, jsParams);
+    }; // listItemDeepRenderFunc lambda
+
+    NG::ListItemView::Create(std::move(listItemDeepRenderFunc));
+    args.ReturnSelf();
 }
 
 void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args) {}

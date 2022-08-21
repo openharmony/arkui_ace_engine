@@ -51,7 +51,7 @@ class ACE_EXPORT FrameNode : public UINode {
 public:
     // create a new child element with new element tree.
     static RefPtr<FrameNode> CreateFrameNodeWithTree(
-        const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, const RefPtr<PipelineContext>& context);
+        const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern);
 
     static RefPtr<FrameNode> GetOrCreateFrameNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
@@ -135,7 +135,7 @@ public:
         return layoutProperty_;
     }
 
-    void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
+    static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     bool TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,

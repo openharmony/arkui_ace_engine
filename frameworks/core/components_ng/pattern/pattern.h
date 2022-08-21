@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -103,7 +104,8 @@ public:
     }
 
     // Called on main thread to check if need rerender of the content.
-    virtual bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+    virtual bool OnDirtyLayoutWrapperSwap(
+        const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
     {
         return false;
     }
@@ -171,11 +173,19 @@ public:
     virtual void OnInActive() {}
     virtual void OnActive() {}
 
+    // Called before frameNode CreateLayoutWrapper.
+    virtual void BeforeCreateLayoutWrapper() {}
+    // Called before frameNode CreatePaintWrapper.
+    virtual void BeforeCreatePaintWrapper() {}
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode() {}
 
+private:
     WeakPtr<FrameNode> frameNode_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(Pattern);
 };
 } // namespace OHOS::Ace::NG
 

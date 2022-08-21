@@ -26,14 +26,14 @@ namespace OHOS::Ace::NG {
 
 void ListPattern::OnAttachToFrameNode()
 {
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
 void ListPattern::OnModifyDone()
 {
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
@@ -77,7 +77,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, b
 void ListPattern::UpdateCurrentOffset(float offset)
 {
     currentOffset_ = currentOffset_ - offset;
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_REQUEST_NEW_CHILD_NODE);
 }
