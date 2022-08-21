@@ -14,6 +14,7 @@
  */
 
 #include <utility>
+
 #include "flutter/fml/memory/ref_counted.h"
 #ifdef NG_BUILD
 #include "ace_shell/shell/common/window_manager.h"
@@ -69,7 +70,8 @@ static sk_sp<SkImage> ApplySizeToSkImage(
         return rawImage;
     }
 #ifdef NG_BUILD
-    if (!rawImage->scalePixels(scaledBitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear), SkImage::kDisallow_CachingHint)) {
+    if (!rawImage->scalePixels(
+            scaledBitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear), SkImage::kDisallow_CachingHint)) {
 #else
     if (!rawImage->scalePixels(scaledBitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint)) {
 #endif

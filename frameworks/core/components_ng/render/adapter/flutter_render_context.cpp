@@ -74,7 +74,7 @@ void FlutterRenderContext::SyncGeometryProperties(GeometryNode* geometryNode)
     flutterNode_->SetFrameRect(frameRect);
 }
 
-void FlutterRenderContext::UpdateBgColor(const Color& value)
+void FlutterRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
     LOGD("UpdateBgColor color:%s", value.ColorToString().c_str());
     if (!flutterNode_) {
