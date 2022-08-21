@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEST_UNITTEST_FLEX_FLEX_TEST_UTILS_H
 
 #include "core/components/box/render_box.h"
+#include "core/components/button/render_button.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/flex/render_flex_item.h"
@@ -92,6 +93,20 @@ protected:
     Size Measure() override;
 };
 
+class MockRenderButton final : public RenderButton {
+    DECLARE_ACE_TYPE(MockRenderButton, RenderButton);
+
+public:
+    MockRenderButton() = default;
+    ~MockRenderButton() override = default;
+
+protected:
+    Size Measure() override
+    {
+        return Size();
+    }
+};
+
 class FlexTestUtils {
 public:
     static RefPtr<RenderRoot> CreateRenderRoot();
@@ -102,6 +117,7 @@ public:
     static RefPtr<RenderFlexItem> CreateMagicNode(double aspectRatio, double flexWeight, int32_t displayIndex,
         const LayoutParam& constraints, const RefPtr<PipelineContext>& context);
     static RefPtr<MockRenderText> CreateRenderText(double fontSize);
+    static RefPtr<RenderButton> CreateRenderButton(double width, double height);
 };
 
 } // namespace OHOS::Ace
