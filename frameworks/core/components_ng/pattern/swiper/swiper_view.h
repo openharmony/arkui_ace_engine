@@ -23,12 +23,13 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
+#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT SwiperView {
 public:
-    static void Create();
+    static RefPtr<SwiperController> Create();
     static void SetDirection(Axis axis);
     static void SetIndex(uint32_t index);
     static void SetAutoPlay(bool autoPlay);
@@ -44,6 +45,7 @@ public:
     static void SetShowIndicator(bool showIndicator);
     static void SetItemSpace(const Dimension& itemSpace);
     static void SetCachedCount(int32_t cachedCount);
+    static void SetOnChange(ChangeEvent&& onChange);
 };
 
 } // namespace OHOS::Ace::NG

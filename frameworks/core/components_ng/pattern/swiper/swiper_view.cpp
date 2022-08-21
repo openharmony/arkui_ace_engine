@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/swiper/swiper_view.h"
 
+#include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -22,13 +23,15 @@
 
 namespace OHOS::Ace::NG {
 
-void SwiperView::Create()
+RefPtr<SwiperController> SwiperView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    return pattern ? pattern->GetSwiperController() : nullptr;
 }
 
 void SwiperView::SetDirection(Axis axis)
@@ -104,6 +107,15 @@ void SwiperView::SetEdgeEffect(EdgeEffect edgeEffect)
 void SwiperView::SetCurve(const RefPtr<Curve>& curve)
 {
     ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, Curve, curve);
+}
+
+void SwiperView::SetOnChange(ChangeEvent&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
 }
 
 } // namespace OHOS::Ace::NG

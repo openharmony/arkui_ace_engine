@@ -16,7 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H
 
-#include "core/components/swiper/swiper_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
@@ -27,7 +26,7 @@ public:
     static void Create(const JSCallbackInfo& info);
 
 protected:
-    static void SetAutoplay(bool autoPlay);
+    static void SetAutoPlay(bool autoPlay);
     static void SetDigital(bool digitalIndicator);
     static void SetDuration(int32_t duration);
     static void SetIndex(int32_t index);

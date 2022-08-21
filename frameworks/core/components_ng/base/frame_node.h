@@ -102,6 +102,12 @@ public:
     const RefPtr<Pattern>& GetPattern() const;
 
     template<typename T>
+    RefPtr<T> GetPattern() const
+    {
+        return DynamicCast<T>(pattern_);
+    }
+
+    template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {
         return DynamicCast<T>(layoutProperty_);
