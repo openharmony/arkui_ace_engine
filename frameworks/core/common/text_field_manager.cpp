@@ -76,6 +76,7 @@ bool TextFieldManager::UpdatePanelForVirtualKeyboard(double offsetY, double full
     if (!onFocusTextField) {
         return false;
     }
+#ifndef NG_BUILD
     auto slidingPanelParent = onFocusTextField->GetSlidingPanelAncest();
     if (!slidingPanelParent) {
         return false;
@@ -89,6 +90,7 @@ bool TextFieldManager::UpdatePanelForVirtualKeyboard(double offsetY, double full
             onFocusTextField->GetGlobalOffset().GetY() - fullHeight;
     }
     slidingPanelParent->LiftPanelForVirtualKeyboard(offsetY);
+#endif
     return true;
 }
 
@@ -98,11 +100,13 @@ bool TextFieldManager::ResetSlidingPanelParentHeight()
     if (!onFocusTextField) {
         return false;
     }
+#ifndef NG_BUILD
     auto slidingPanelParent = onFocusTextField->GetSlidingPanelAncest();
     if (!slidingPanelParent) {
         return false;
     }
     slidingPanelParent->UpdatePanelHeightByCurrentMode();
+#endif
     return true;
 }
 
