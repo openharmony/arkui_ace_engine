@@ -38,7 +38,7 @@ public:
         auto offset = paintWrapper->GetContentOffset();
         lineCap_ = lineCap_ == LineCap::BUTT ? LineCap::SQUARE : lineCap_;
         DividerPainter dividerPainter(constrainStrokeWidth_, dividerLength_, vertical_, dividerColor_, lineCap_);
-        return [dividerPainter, offset](const RefPtr<Canvas>& canvas) { dividerPainter.DrawLine(canvas, offset); };
+        return [dividerPainter, offset](RSCanvas& canvas) { dividerPainter.DrawLine(canvas, offset); };
     }
 
 private:

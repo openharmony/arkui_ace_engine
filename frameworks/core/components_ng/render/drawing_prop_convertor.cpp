@@ -17,6 +17,38 @@
 
 namespace OHOS::Ace {
 
+RSColor ToRSColor(const Color& color)
+{
+    return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
+}
+
+RSRect ToRSRect(const NG::RectF& rect)
+{
+    return RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
+}
+
+RSPoint ToRSPonit(const NG::PointF& point)
+{
+    return RSPoint(point.GetX(), point.GetY());
+}
+
+RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap)
+{
+    RSPen::CapStyle capStyle;
+    switch (lineCap) {
+        case LineCap::SQUARE:
+            capStyle = RSPen::CapStyle::SQUARE_CAP;
+            break;
+        case LineCap::ROUND:
+            capStyle = RSPen::CapStyle::ROUND_CAP;
+            break;
+        default:
+            capStyle = RSPen::CapStyle::FLAT_CAP;
+            break;
+    }
+    return capStyle;
+}
+
 rosen::TextDirection ToRSTextDirection(const TextDirection& txtDir)
 {
     rosen::TextDirection rsTxtDir = rosen::TextDirection::LTR;
@@ -38,16 +70,6 @@ rosen::WordBreakType ToRSWordBreakType(const WordBreak& wordBreak)
 {
     // should keep enum same with rosen.
     return static_cast<rosen::WordBreakType>(wordBreak);
-}
-
-RSColor ToRSColor(const Color& color)
-{
-    return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
-}
-
-RSRect ToRSRect(const NG::RectF& rect)
-{
-    return RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
 }
 
 rosen::TextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle)

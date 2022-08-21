@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DIVIDER_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DIVIDER_PAINTER_H
 
-#include "core/components_ng/render/canvas.h"
+#include "base/geometry/ng/point_t.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 class DividerPainter {
@@ -36,7 +39,7 @@ public:
     {}
     ~DividerPainter() = default;
 
-    void DrawLine(const RefPtr<Canvas>& canvas, const OffsetF& offset) const;
+    void DrawLine(RSCanvas& canvas, const OffsetF& offset) const;
 
 private:
     float constrainStrokeWidth_ = 0.0f;

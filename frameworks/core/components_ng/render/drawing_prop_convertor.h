@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_H
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/ng/point_t.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/drawing.h"
@@ -26,6 +27,8 @@ namespace OHOS::Ace {
 
 RSColor ToRSColor(const Color& color);
 RSRect ToRSRect(const NG::RectF& rect);
+RSPoint ToRSPonit(const NG::PointF& point);
+RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
 
 rosen::TextDirection ToRSTextDirection(const TextDirection& txtDir);
 rosen::TextAlign ToRSTextAlign(const TextAlign& align);
