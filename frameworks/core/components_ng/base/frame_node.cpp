@@ -49,7 +49,7 @@ FrameNode::~FrameNode()
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, const RefPtr<PipelineContext>& context)
+    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
 {
     auto newChild = CreateFrameNode(tag, nodeId, pattern, true);
     newChild->SetDepth(1);
@@ -272,6 +272,7 @@ void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapperOnCreate()
 {
+    pattern_->BeforeCreateLayoutWrapper();
     isLayoutDirtyMarked_ = false;
     auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
     layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
@@ -285,6 +286,7 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapperOnCreate()
 
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
+    pattern_->BeforeCreateLayoutWrapper();
     isLayoutDirtyMarked_ = false;
     auto flag = layoutProperty_->GetPropertyChangeFlag();
     auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
@@ -324,6 +326,7 @@ void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, boo
 
 RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
 {
+    pattern_->BeforeCreatePaintWrapper();
     isRenderDirtyMarked_ = false;
     auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
     paintWrapper->SetNodePaintMethod(pattern_->CreateNodePaintMethod());

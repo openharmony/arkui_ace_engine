@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
 void PagePattern::OnAttachToFrameNode()
 {
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     if (!host) {
         LOGE("fail to update measure type due to host is null");
         return;

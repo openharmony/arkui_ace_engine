@@ -58,7 +58,7 @@ SwiperPattern::SwiperPattern()
 
 void SwiperPattern::OnAttachToFrameNode()
 {
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
 }
@@ -238,8 +238,8 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             distance = static_cast<float>(context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP)));
         }
     }
-    panEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
-        std::move(actionEndTask), std::move(actionCancelTask));
+    panEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
 }
 
@@ -299,8 +299,8 @@ void SwiperPattern::Tick(uint64_t duration)
                 scheduler_->Stop();
             }
         } else {
-            PlayTranslateAnimation(0, -MainSize(),
-                (currentIndex_ + 1) % static_cast<int32_t>(host->GetChildren().size()));
+            PlayTranslateAnimation(
+                0, -MainSize(), (currentIndex_ + 1) % static_cast<int32_t>(host->GetChildren().size()));
         }
         elapsedTime_ = 0;
     }
@@ -458,8 +458,8 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
 
 void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay)
 {
-    LOGI("Play translate animation startPos: %{public}lf, endPos: %{public}lf, nextIndex: %{public}d",
-        startPos, endPos, nextIndex);
+    LOGI("Play translate animation startPos: %{public}lf, endPos: %{public}lf, nextIndex: %{public}d", startPos, endPos,
+        nextIndex);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto curve = GetCurve();
@@ -521,19 +521,18 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     constexpr float SPRING_SCROLL_STIFFNESS = 100.0f;
     constexpr float SPRING_SCROLL_DAMPING = 15.55635f;
     const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
-    AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
+        AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
     ExtentPair extentPair = ExtentPair(0.0, 0.0);
     float friction = CalculateFriction(std::abs(currentOffset_) / MainSize());
-    auto scrollMotion = AceType::MakeRefPtr<ScrollMotion>(currentOffset_, dragVelocity * friction, extentPair,
-        extentPair, DEFAULT_OVER_SPRING_PROPERTY);
+    auto scrollMotion = AceType::MakeRefPtr<ScrollMotion>(
+        currentOffset_, dragVelocity * friction, extentPair, extentPair, DEFAULT_OVER_SPRING_PROPERTY);
     scrollMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {
         auto swiper = weak.Upgrade();
         if (swiper) {
             swiper->UpdateCurrentOffset(static_cast<float>(position) - swiper->currentOffset_);
         }
     });
-    springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {
-    });
+    springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {});
     springController_->PlayMotion(scrollMotion);
 }
 
@@ -562,8 +561,7 @@ void SwiperPattern::PlayFadeAnimation()
         }
     }));
 
-    fadeController_->AddStopListener([weak]() {
-    });
+    fadeController_->AddStopListener([weak]() {});
     constexpr float FADE_DURATION = 500.0f;
     fadeController_->SetDuration(FADE_DURATION);
     fadeController_->AddInterpolator(translate);

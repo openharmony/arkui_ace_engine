@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/list/list_item_view.h"
 
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -23,12 +25,28 @@
 
 namespace OHOS::Ace::NG {
 
+void ListItemView::Create(std::function<void(int32_t)>&& deepRenderFunc)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
+        CHECK_NULL_RETURN(deepRenderFunc, nullptr);
+        deepRenderFunc(nodeId);
+        return ViewStackProcessor::GetInstance()->Finish();
+    };
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, nodeId, [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
+            return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder);
+        });
+    stack->Push(frameNode);
+}
+
 void ListItemView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::LIST_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListItemPattern>(); });
+        V2::LIST_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr); });
     stack->Push(frameNode);
 }
 

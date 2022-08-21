@@ -165,7 +165,7 @@ void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
     rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>(), Claim(this));
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
     rootNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);

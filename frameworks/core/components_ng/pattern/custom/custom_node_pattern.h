@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_CUSTOM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_CUSTOM_PATTERN_H
 
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -48,6 +49,8 @@ public:
 private:
     RenderFunction renderFunction_;
     bool isBuildDone_ = false;
+
+    ACE_DISALLOW_COPY_AND_MOVE(CustomNodePattern);
 };
 } // namespace OHOS::Ace::NG
 

@@ -73,7 +73,7 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
 }
 
-void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint, bool updateFlag)
+void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     layoutConstraint_ = parentConstraint;
     if (calcLayoutConstraint_) {

@@ -83,7 +83,7 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
 
 void ImagePattern::OnImageLoadSuccess()
 {
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     lastCanvasImage_ = loadingCtx_->GetCanvasImage();
     lastSrcRect_ = loadingCtx_->GetSrcRect();
@@ -95,7 +95,7 @@ void ImagePattern::OnImageLoadSuccess()
 
 void ImagePattern::CacheImageObject()
 {
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
@@ -104,7 +104,7 @@ void ImagePattern::CacheImageObject()
 
 void ImagePattern::OnImageDataReady()
 {
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     if (!geometryNode->GetContent()) {

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_BOX_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_BOX_LAYOUT_ALGORITHM_H
 
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -36,6 +37,9 @@ public:
 
     // Called to perform layout render node.
     static void PerformLayout(LayoutWrapper* layoutWrapper);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(BoxLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
 

@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/macros.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -169,6 +170,8 @@ private:
     int32_t currentChildCount_ = 0;
     bool skipMeasureContent_ = false;
     bool isActive_ = false;
+
+    ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };
 } // namespace OHOS::Ace::NG
 
