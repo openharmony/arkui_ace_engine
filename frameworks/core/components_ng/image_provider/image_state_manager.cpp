@@ -100,6 +100,7 @@ void ImageStateManager::HandleCommandByCanvasImageMakingState(ImageLoadingComman
 void ImageStateManager::HandleCommandByLoadSuccessState(ImageLoadingCommand command)
 {
     switch (command) {
+        CASE_OF_STATE_TRANSITION(MAKE_CANVAS_IMAGE, CANVAS_IMAGE_MAKING, CanvasImageMaking);
         DEFAULT_CASE_OF_STATE_TRANSITION();
     }
 }

@@ -36,6 +36,7 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propImageSourceInfo_ = CloneImageSourceInfo();
         value->propImageFit_ = CloneImageFit();
+        value->propAutoResize_ = CloneAutoResize();
         return value;
     }
 
@@ -44,10 +45,12 @@ public:
         LayoutProperty::Reset();
         ResetImageSourceInfo();
         ResetImageFit();
+        ResetAutoResize();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoResize, bool, PROPERTY_UPDATE_LAYOUT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutProperty);

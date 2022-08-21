@@ -99,6 +99,13 @@ EnterStateTask ImageLoadingContext::CreateOnMakeCanvasImageTask()
                 imageLoadingContext->GetSourceInfo().ToString().c_str());
             return;
         }
+
+        // only update params when it actually do [MakeCanvasImage]
+        if (imageLoadingContext->updateParamsCallback_) {
+            imageLoadingContext->updateParamsCallback_();
+            imageLoadingContext->updateParamsCallback_ = nullptr;
+        }
+
         // step1: do first [ApplyImageFit] to calculate the srcRect based on original image size
         ImagePainter::ApplyImageFit(imageLoadingContext->imageFit_, imageLoadingContext->GetImageSize(),
             imageLoadingContext->dstSize_, imageLoadingContext->srcRect_, imageLoadingContext->dstRect_);
@@ -126,6 +133,7 @@ EnterStateTask ImageLoadingContext::CreateOnLoadSuccessTask()
         auto imageLoadingContext = weakCtx.Upgrade();
         CHECK_NULL_VOID(imageLoadingContext);
         imageLoadingContext->loadNotifier_.loadSuccessNotifyTask_(imageLoadingContext->GetSourceInfo());
+        imageLoadingContext->imageObj_->ClearData();
     };
     return task;
 }
@@ -221,10 +229,18 @@ void ImageLoadingContext::LoadImageData()
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);
 }
 
-void ImageLoadingContext::MakeCanvasImage(const SizeF& dstSize, ImageFit imageFit)
+void ImageLoadingContext::MakeCanvasImage(const SizeF& dstSize, bool needResize, ImageFit imageFit)
 {
-    dstSize_ = dstSize;
-    imageFit_ = imageFit;
+    // Because calling of this interface does not guarantee the excution of [MakeCanvasImage], so in order to avoid
+    // updating params before they are not actually used, caputure the params in a function. This funtion will only run
+    // when it actually do [MakeCanvasImage], i.e. doing the update in [OnMakeCanvasImageTask]
+    updateParamsCallback_ = [wp = WeakClaim(this), dstSize, needResize, imageFit]() {
+        auto loadingCtx = wp.Upgrade();
+        CHECK_NULL_VOID(loadingCtx);
+        loadingCtx->dstSize_ = dstSize;
+        loadingCtx->imageFit_ = imageFit;
+        loadingCtx->needResize_ = needResize;
+    };
     // send command to [StateManager] and waiting the callback from it to determine next step
     stateManager_->HandleCommand(ImageLoadingCommand::MAKE_CANVAS_IMAGE);
 }
@@ -247,6 +263,21 @@ void ImageLoadingContext::SetImageFit(ImageFit imageFit)
 const ImageSourceInfo& ImageLoadingContext::GetSourceInfo() const
 {
     return sourceInfo_;
+}
+
+void ImageLoadingContext::SetNeedResize(bool needResize)
+{
+    needResize_ = needResize;
+}
+
+const SizeF& ImageLoadingContext::GetDstSize() const
+{
+    return dstSize_;
+}
+
+bool ImageLoadingContext::GetNeedResize() const
+{
+    return needResize_;
 }
 
 } // namespace OHOS::Ace::NG

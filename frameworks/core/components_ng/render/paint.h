@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/render/color_filter.h"
 
 #define PI_NUM 3.1415926f
 
@@ -94,6 +95,7 @@ public:
     virtual void SetAlphaf(float alpha) = 0;
     virtual void SetBlendMode(BlendMode blendMode) = 0;
     virtual void SetStrokeCap(LineCap lineCap) = 0;
+    virtual void SetColorFilter(const RefPtr<ColorFilter>& colorFilter) = 0;
 };
 } // namespace OHOS::Ace::NG
 

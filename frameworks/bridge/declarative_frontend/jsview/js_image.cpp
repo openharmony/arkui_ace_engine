@@ -28,6 +28,14 @@
 
 namespace OHOS::Ace::Framework {
 
+#define SET_PROP_FOR_NG(propName, propType, propValue)                      \
+    do {                                                                    \
+        if (Container::IsCurrentUseNewPipeline()) {                         \
+            NG::ImageView::Set##propName(static_cast<propType>(propValue)); \
+            return;                                                         \
+        }                                                                   \
+    } while (0);
+
 JSRef<JSVal> LoadImageSuccEventToJSValue(const LoadImageSuccessEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -68,6 +76,7 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
 
 void JSImage::SetObjectFit(int32_t value)
 {
+    SET_PROP_FOR_NG(ObjectFit, ImageFit, value);
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
         image->SetImageFit(static_cast<ImageFit>(value));
@@ -346,12 +355,14 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
 void JSImage::SetImageRenderMode(int32_t imageRenderMode)
 {
+    SET_PROP_FOR_NG(ImageRenderMode, ImageRenderMode, imageRenderMode);
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     image->SetImageRenderMode(static_cast<ImageRenderMode>(imageRenderMode));
 }
 
 void JSImage::SetImageInterpolation(int32_t imageInterpolation)
 {
+    SET_PROP_FOR_NG(ImageInterpolation, ImageInterpolation, imageInterpolation);
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     image->SetImageInterpolation(static_cast<ImageInterpolation>(imageInterpolation));
 }
@@ -384,6 +395,7 @@ void JSImage::JsOpacity(const JSCallbackInfo& info)
 
 void JSImage::SetAutoResize(bool autoResize)
 {
+    SET_PROP_FOR_NG(AutoResize, bool, autoResize);
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
         image->SetAutoResize(autoResize);

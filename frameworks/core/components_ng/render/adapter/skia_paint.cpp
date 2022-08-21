@@ -15,6 +15,8 @@
 
 #include "core/components_ng/render/adapter/skia_paint.h"
 
+#include "core/components_ng/render/adapter/skia_color_filter.h"
+
 namespace OHOS::Ace::NG {
 
 #ifndef NG_BUILD
@@ -61,7 +63,7 @@ void SkiaPaint::SetFilterQuality(FilterQuality quality)
             options_ = SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f });
             break;
         case FilterQuality::MEDIUM:
-            options_ =  SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
+            options_ = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kLinear);
             break;
         case FilterQuality::LOW:
             options_ = SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone);
@@ -113,4 +115,12 @@ void SkiaPaint::SetStrokeCap(LineCap lineCap)
             break;
     }
 }
+
+void SkiaPaint::SetColorFilter(const RefPtr<ColorFilter>& colorFilter)
+{
+    auto skiaColorFilter = DynamicCast<SkiaColorFilter>(colorFilter);
+    CHECK_NULL_VOID(skiaColorFilter);
+    rawPaint_.setColorFilter(skiaColorFilter->GetSkColorFilter());
+}
+
 } // namespace OHOS::Ace::NG

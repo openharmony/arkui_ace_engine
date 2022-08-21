@@ -122,7 +122,10 @@ void ImagePattern::OnImageLoadFail()
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
     CHECK_NULL_RETURN(lastCanvasImage_, nullptr);
+    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(imageRenderProperty, nullptr);
     ImagePaintConfig imagePaintConfig(lastSrcRect_, lastDstRect_);
+    imagePaintConfig.renderMode_ = imageRenderProperty->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
     return MakeRefPtr<ImagePaintMethod>(lastCanvasImage_, imagePaintConfig);
 }
 

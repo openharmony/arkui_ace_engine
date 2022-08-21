@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-static void ApplyContain(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
+void ApplyContain(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
     if (rawPicSize.IsNonPositive()) {
         return;
@@ -33,7 +33,7 @@ static void ApplyContain(const SizeF& rawPicSize, const SizeF& dstSize, RectF& s
     dstRect.SetOffset(Alignment::GetAlignPosition(dstSize, dstRect.GetSize(), Alignment::CENTER));
 }
 
-static void ApplyCover(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
+void ApplyCover(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
     if (Size::CalcRatio(srcRect) > Size::CalcRatio(dstRect)) {
         srcRect.SetSize(dstSize * (rawPicSize.Height() / dstSize.Height()));
@@ -43,7 +43,7 @@ static void ApplyCover(const SizeF& rawPicSize, const SizeF& dstSize, RectF& src
     srcRect.SetOffset(Alignment::GetAlignPosition(rawPicSize, srcRect.GetSize(), Alignment::CENTER));
 }
 
-static void ApplyFitWidth(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
+void ApplyFitWidth(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
     if (Size::CalcRatio(srcRect) > Size::CalcRatio(dstRect)) {
         dstRect.SetSize(rawPicSize * (dstSize.Width() / rawPicSize.Width()));
@@ -54,7 +54,7 @@ static void ApplyFitWidth(const SizeF& rawPicSize, const SizeF& dstSize, RectF& 
     }
 }
 
-static void ApplyFitHeight(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
+void ApplyFitHeight(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
     if (Size::CalcRatio(srcRect) > Size::CalcRatio(dstRect)) {
         srcRect.SetSize(dstSize * (rawPicSize.Height() / dstSize.Height()));
@@ -65,22 +65,40 @@ static void ApplyFitHeight(const SizeF& rawPicSize, const SizeF& dstSize, RectF&
     }
 }
 
-static void ApplyNone(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
+void ApplyNone(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
     SizeF srcSize(std::min(dstSize.Width(), rawPicSize.Width()), std::min(dstSize.Height(), rawPicSize.Height()));
     dstRect.SetRect(Alignment::GetAlignPosition(dstSize, srcSize, Alignment::CENTER), srcSize);
     srcRect.SetRect(Alignment::GetAlignPosition(rawPicSize, srcSize, Alignment::CENTER), srcSize);
 }
 
-}
+// The [GRAY_COLOR_MATRIX] is of dimension [4 x 5], which transforms a RGB source color (R, G, B, A) to the
+// destination color (R', G', B', A').
+//
+// A classic color image to grayscale conversion formula is [Gray = R * 0.3 + G * 0.59 + B * 0.11].
+// Hence we get the following conversion:
+//
+// | M11 M12 M13 M14 M15 |   | R |   | R' |
+// | M21 M22 M23 M24 M25 |   | G |   | G' |
+// | M31 M32 M33 M34 M35 | x | B | = | B' |
+// | M41 M42 M43 M44 M45 |   | A |   | A' |
+//                           | 1 |
+const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0,    0,  // red
+                                      0.30f, 0.59f, 0.11f, 0,    0,  // green
+                                      0.30f, 0.59f, 0.11f, 0,    0,  // blue
+                                      0,     0,     0,     1.0f, 0}; // alpha transparency
+} // namespace
 
 void ImagePainter::DrawImage(
-    const RefPtr<Canvas>& canvas, const OffsetF& offset, const ImagePaintConfig& ImagePaintConfig) const
+    const RefPtr<Canvas>& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const
 {
     CHECK_NULL_VOID(canvasImage_);
     auto paint = Paint::Create();
-    paint->SetFilterQuality(FilterQuality::NONE); // TODO: add interpolation, etc
-    canvas->DrawImage(canvasImage_, ImagePaintConfig.srcRect_, ImagePaintConfig.dstRect_, paint);
+    paint->SetFilterQuality(FilterQuality::NONE);
+    if (ImageRenderMode::TEMPLATE == imagePaintConfig.renderMode_) {
+        paint->SetColorFilter(ColorFilter::MakeFromMatrix(GRAY_COLOR_MATRIX));
+    }
+    canvas->DrawImage(canvasImage_, imagePaintConfig.srcRect_, imagePaintConfig.dstRect_, paint);
 }
 
 void ImagePainter::ApplyImageFit(
@@ -116,8 +134,6 @@ void ImagePainter::ApplyImageFit(
             }
             break;
         case ImageFit::CONTAIN:
-            ApplyContain(rawPicSize, dstSize, srcRect, dstRect);
-            break;
         default:
             ApplyContain(rawPicSize, dstSize, srcRect, dstRect);
             break;
