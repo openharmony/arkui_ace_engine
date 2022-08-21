@@ -55,6 +55,12 @@ T ConvertIntToEnum(int32_t index, const T (&values)[N], T defaultValue)
     return defaultValue;
 }
 
+template<typename T>
+constexpr T Infinity()
+{
+    return static_cast<const T>(1000000.0);
+}
+
 inline bool NearEqual(const double left, const double right, const double epsilon)
 {
     return (std::abs(left - right) <= epsilon);
