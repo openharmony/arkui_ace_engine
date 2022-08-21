@@ -157,6 +157,9 @@ void SwiperPattern::StopTranslateAnimation()
 
 void SwiperPattern::InitSwiperController()
 {
+    if (swiperController_->HasInitialized()) {
+        return;
+    }
     swiperController_->SetShowNextImpl([weak = WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {

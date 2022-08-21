@@ -85,6 +85,11 @@ public:
         return finishCallback_;
     }
 
+    bool HasInitialized() const
+    {
+        return showPrevImpl_ && showNextImpl_ && finishImpl_ && finishCallback_;
+    }
+
 private:
     SwipeToImpl swipeToImpl_;
     CommonFunc showPrevImpl_;
