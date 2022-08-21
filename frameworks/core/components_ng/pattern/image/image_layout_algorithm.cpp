@@ -76,8 +76,18 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     const auto& imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(imageLayoutProperty);
-    loadingCtx_->MakeCanvasImage(layoutWrapper->GetGeometryNode()->GetContentSize(),
-        imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER));
+    const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
+    bool incomingNeedResize = imageLayoutProperty->GetAutoResize().value_or(true);
+    ImageFit incommingImageFit = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
+    bool needMakeCanvasImage = incomingNeedResize != loadingCtx_->GetNeedResize() ||
+                               dstSize != loadingCtx_->GetDstSize() || incommingImageFit != loadingCtx_->GetImageFit();
+    // do [MakeCanvasImage] only when:
+    // 1. [autoResize] changes
+    // 2. component size (aka [dstSize] here) changes.
+    // 3. [ImageFit] changes
+    if (needMakeCanvasImage) {
+        loadingCtx_->MakeCanvasImage(dstSize, incomingNeedResize, incommingImageFit);
+    }
 }
 
 } // namespace OHOS::Ace::NG

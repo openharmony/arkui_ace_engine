@@ -18,6 +18,7 @@ build_component_ng("render_ng") {
   sources = [
     "adapter/skia_canvas.cpp",
     "adapter/skia_canvas_image.cpp",
+    "adapter/skia_color_filter.cpp",
     "adapter/skia_paint.cpp",
     "adapter/txt_font_collection.cpp",
     "adapter/txt_paragraph.cpp",

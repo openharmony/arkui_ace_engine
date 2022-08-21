@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_LOADING_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_LOADING_CONTEXT_H
 
+#include "base/geometry/ng/size_t.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/image_provider/image_provider.h"
@@ -32,7 +33,7 @@ class ImageLoadingContext : public AceType {
 public:
     // Create an empty ImageObject and initialize state machine when the constructor is called
     ImageLoadingContext(const ImageSourceInfo& sourceInfo, const LoadNotifier& loadNotifier);
-    ~ImageLoadingContext() = default;
+    ~ImageLoadingContext() override = default;
 
     static SizeF CalculateResizeTarget(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize);
 
@@ -40,7 +41,7 @@ public:
 
     /* interfaces to drive image loading */
     void LoadImageData();
-    void MakeCanvasImage(const SizeF& dstSize, ImageFit imageFit = ImageFit::COVER);
+    void MakeCanvasImage(const SizeF& dstSize, bool needResize,  ImageFit imageFit = ImageFit::COVER);
 
     /* interfaces to get properties */
     SizeF GetImageSize() const;
@@ -49,9 +50,12 @@ public:
     ImageFit GetImageFit() const;
     RefPtr<CanvasImage> GetCanvasImage() const;
     const ImageSourceInfo& GetSourceInfo() const;
+    const SizeF& GetDstSize() const;
+    bool GetNeedResize() const;
 
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
+    void SetNeedResize(bool needResize);
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult, loadResultNotifierName)                                         \
@@ -98,6 +102,7 @@ private:
     SizeF dstSize_;
     bool needResize_ = true;
     ImageFit imageFit_ = ImageFit::COVER;
+    std::function<void()> updateParamsCallback_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_RENDER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_RENDER_PROPERTY_H
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -31,16 +32,19 @@ public:
     {
         auto renderProperty = MakeRefPtr<ImageRenderProperty>();
         renderProperty->UpdatePaintProperty(this);
-        renderProperty->propAutoResize_ = CloneAutoResize();
+        renderProperty->propImageRenderMode_ = CloneImageRenderMode();
+        renderProperty->propImageInterpolation_ = CloneImageInterpolation();
         return renderProperty;
     }
 
     void Reset() override
     {
-        propAutoResize_.reset();
+        propImageRenderMode_.reset();
+        propImageInterpolation_.reset();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoResize, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageRenderMode, ImageRenderMode, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageInterpolation, ImageInterpolation, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

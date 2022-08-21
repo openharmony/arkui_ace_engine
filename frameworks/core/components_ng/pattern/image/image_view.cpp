@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/image/image_view.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -29,8 +30,27 @@ void ImageView::Create(const std::string& src)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, [imageSourceInfo]() { return AceType::MakeRefPtr<ImagePattern>(imageSourceInfo); });
     stack->Push(frameNode);
-
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
+}
+
+void ImageView::SetObjectFit(ImageFit imageFit)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, imageFit);
+}
+
+void ImageView::SetAutoResize(bool autoResize)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize);
+}
+
+void ImageView::SetImageRenderMode(ImageRenderMode imageRenderMode)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, imageRenderMode);
+}
+
+void ImageView::SetImageInterpolation(ImageInterpolation imageInterpolation)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, imageInterpolation);
 }
 
 } // namespace OHOS::Ace::NG

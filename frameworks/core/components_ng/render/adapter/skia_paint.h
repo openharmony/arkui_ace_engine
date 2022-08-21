@@ -47,6 +47,7 @@ public:
     void SetAlphaf(float alpha) override;
     void SetBlendMode(BlendMode blendMode) override;
     void SetStrokeCap(LineCap lineCap) override;
+    void SetColorFilter(const RefPtr<ColorFilter>& colorFilter) override;
 
     const SkPaint& GetRawPaint()
     {

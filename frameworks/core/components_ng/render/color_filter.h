@@ -13,23 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_COLOR_FILTER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_COLOR_FILTER_H
 
-#include <string>
-
-#include "base/utils/macros.h"
-#include "core/components/common/layout/constants.h"
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ImageView {
+
+class ColorFilter : public virtual AceType {
+    DECLARE_ACE_TYPE(NG::ColorFilter, AceType)
+
 public:
-    static void Create(const std::string& src);
-    static void SetObjectFit(ImageFit imageFit);
-    static void SetAutoResize(bool autoResize);
-    static void SetImageRenderMode(ImageRenderMode imageRenderMode);
-    static void SetImageInterpolation(ImageInterpolation imageInterpolation);
+    static RefPtr<ColorFilter> MakeFromMatrix(const float rowMajor[20]);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_COLOR_FILTER_H
