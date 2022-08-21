@@ -39,7 +39,7 @@ void ViewAbstract::SetHeight(const CalcLength& height)
 
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
-    ACE_UPDATE_RENDER_CONTEXT(BgColor, color);
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
 }
 
 void ViewAbstract::SetLayoutWeight(int32_t value)

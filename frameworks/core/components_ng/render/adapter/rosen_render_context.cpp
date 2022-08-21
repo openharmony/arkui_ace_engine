@@ -86,7 +86,7 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* geometryNode)
     rsNode_->SetFrame(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
 }
 
-void RosenRenderContext::UpdateBgColor(const Color& value)
+void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
     if (!rsNode_) {
         return;

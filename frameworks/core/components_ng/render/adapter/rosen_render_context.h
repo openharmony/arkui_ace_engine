@@ -21,6 +21,7 @@
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -30,13 +31,11 @@ public:
     RosenRenderContext() = default;
     ~RosenRenderContext() override;
 
-    void InitContext(bool isRoot = false) override;
+    void InitContext(bool isRoot) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
-
-    void UpdateBgColor(const Color& value) override;
 
     RefPtr<Canvas> GetCanvas() override;
     void Restore() override;
@@ -76,12 +75,16 @@ public:
     void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) override;
 
 private:
+    void OnBackgroundColorUpdate(const Color& value) override;
+
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
     RefPtr<Canvas> recordingCanvas_;
     RefPtr<Canvas> rosenCanvas_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };
 } // namespace OHOS::Ace::NG
 
