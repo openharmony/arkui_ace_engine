@@ -15,7 +15,12 @@
 
 #include <utility>
 #include "flutter/fml/memory/ref_counted.h"
+#ifdef NG_BUILD
+#include "ace_shell/shell/common/window_manager.h"
+#include "flutter/lib/ui/io_manager.h"
+#else
 #include "flutter/lib/ui/painting/image.h"
+#endif
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 
@@ -27,6 +32,10 @@
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
+#ifdef NG_BUILD
+#include "core/components_ng/render/adapter/flutter_canvas_image.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -59,7 +68,11 @@ static sk_sp<SkImage> ApplySizeToSkImage(
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
         return rawImage;
     }
+#ifdef NG_BUILD
+    if (!rawImage->scalePixels(scaledBitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear), SkImage::kDisallow_CachingHint)) {
+#else
     if (!rawImage->scalePixels(scaledBitmap.pixmap(), kLow_SkFilterQuality, SkImage::kDisallow_CachingHint)) {
+#endif
         LOGE("Could not scale pixels srcKey: %{private}s, destination size: [%{public}d x"
              " %{public}d], raw image size: [%{public}d x %{public}d]",
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
@@ -190,9 +203,17 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, cons
         // upload to gpu for render
         auto image = ResizeSkImage(rawImage, obj->GetSourceInfo().GetSrc(), resizeTarget, false);
         flutter::SkiaGPUObject<SkImage> skiaGpuObjSkImage({ image, flutterRenderTaskHolder->unrefQueue });
+#ifdef NG_BUILD
+        auto canvasImage = CanvasImage::Create();
+        auto flutterImage = AceType::DynamicCast<NG::FlutterCanvasImage>(canvasImage);
+        if (flutterImage) {
+            flutterImage->SetImage(std::move(skiaGpuObjSkImage));
+        }
+#else
         auto flutterCanvasImage = flutter::CanvasImage::Create();
         flutterCanvasImage->set_image(std::move(skiaGpuObjSkImage));
         auto canvasImage = CanvasImage::Create(&flutterCanvasImage);
+#endif
         auto uploadTask = [objWp, loadCallbacks](RefPtr<CanvasImage> canvasImage) {
             // when upload success, update canvas image to ImageObject and trigger loadSuccessCallback_
             auto obj = objWp.Upgrade();
@@ -217,10 +238,15 @@ RefPtr<RenderTaskHolder> ImageProvider::CreateRenderTaskHolder()
         LOGE("RenderTaskHolder must be initialized on UI thread, please check.");
         return nullptr;
     }
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_RETURN(currentDartState, nullptr);
-    return MakeRefPtr<FlutterRenderTaskHolder>(currentDartState->GetSkiaUnrefQueue(), currentDartState->GetIOManager(),
-        currentDartState->GetTaskRunners().GetIOTaskRunner());
+#ifdef NG_BUILD
+    int32_t id = Container::CurrentId();
+    auto currentState = flutter::ace::WindowManager::GetWindow(id);
+#else
+    auto currentState = flutter::UIDartState::Current();
+#endif
+    CHECK_NULL_RETURN(currentState, nullptr);
+    return MakeRefPtr<FlutterRenderTaskHolder>(currentState->GetSkiaUnrefQueue(), currentState->GetIOManager(),
+        currentState->GetTaskRunners().GetIOTaskRunner());
 }
 
 void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
@@ -270,7 +296,11 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
             return;
         }
         auto textureImage =
+#ifdef NG_BUILD
+            SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, true);
+#else
             SkImage::MakeCrossContextFromPixmap(resContext.get(), pixmap, true, pixmap.colorSpace(), true);
+#endif
         if (textureImage) {
             skiaCanvasImage->ReplaceSkImage({ textureImage, flutterRenderTaskHolder->unrefQueue });
         }

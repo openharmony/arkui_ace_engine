@@ -529,7 +529,7 @@ static JSValue RequestFocus(JSContext* ctx, JSValueConst new_target, int argc, J
     if (!container) {
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
         return JS_ThrowSyntaxError(ctx, "pipeline is null");
     }

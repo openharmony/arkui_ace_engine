@@ -151,6 +151,8 @@ public:
 
     virtual void RequestFullWindow(int32_t duration) {}
 
+    virtual bool RequestFocus(const std::string& targetNodeId) { return false; }
+
     // Called by AceAbility and UiContent.
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const;
 
