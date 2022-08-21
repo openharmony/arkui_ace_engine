@@ -126,10 +126,14 @@ bool DOMChart::SetSpecializedStyle(const std::pair<std::string, std::string>& st
     static const LinearMapNode<void (*)(const std::string&, DOMChart&)> chartStylesOperators[] = {
         { DOM_BACKGROUND_COLOR,
             [](const std::string& val, DOMChart& chart) {
-                if (chart.chartType_ == ChartType::LINE || (chart.chartType_ == ChartType::BAR)) {
-                    auto boxComponent = chart.GetBoxComponent();
-                    if (boxComponent) {
-                        boxComponent->SetColor(chart.ParseColor(val));
+                if (chart.chartType_ == ChartType::LINE || (chart.chartType_ == ChartType::BAR) ||
+                    (chart.chartType_ == ChartType::GAUGE)) {
+                    auto declaration = chart.GetDeclaration();
+                    if (declaration) {
+                        auto backgroundColor = chart.ParseColor(val);
+                        declaration->GetBackDecoration()->SetBackgroundColor(backgroundColor);
+                        declaration->SetHasBackGroundColor(true);
+                        declaration->SetHasDecorationStyle(true);
                         return;
                     }
                 }
