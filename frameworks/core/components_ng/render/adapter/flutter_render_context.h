@@ -38,8 +38,6 @@ public:
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
-    void UpdateBgColor(const Color& value) override;
-
     RefPtr<Canvas> GetCanvas() override;
     void Restore() override;
 
@@ -69,6 +67,9 @@ public:
     {
         return flutterNode_;
     }
+
+protected:
+    void OnBackgroundColorUpdate(const Color& value) override;
 
 private:
     bool isRoot_ = false;
