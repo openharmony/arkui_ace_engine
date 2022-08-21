@@ -108,7 +108,7 @@ void RenderSideBarContainerTest::TearDown()
  * @tc.name: RenderSideBarTestUpdate01
  * @tc.desc: Verify the Update Interface of RenderSideBarContainer work correctly with sidebarcontainer component.
  * @tc.type: FUNC
- * @tc.require: I5JQ4S
+ * @tc.require: issueI5JQ4S
 */
 HWTEST_F(RenderSideBarContainerTest, RenderSideBarTestUpdate01, TestSize.Level1)
 {
@@ -132,7 +132,7 @@ HWTEST_F(RenderSideBarContainerTest, RenderSideBarTestUpdate01, TestSize.Level1)
  * @tc.name: RenderSideBarPositionTest01
  * @tc.desc: Verify the sidebarcontainer component with embed sidebarcontainertype and end sidebarposition works fine.
  * @tc.type: FUNC
- * @tc.require: I5JQ4S
+ * @tc.require: issueI5JQ4S
  */
 HWTEST_F(RenderSideBarContainerTest, RenderSideBarPositionTest01, TestSize.Level1)
 {
@@ -173,7 +173,7 @@ HWTEST_F(RenderSideBarContainerTest, RenderSideBarPositionTest01, TestSize.Level
  * @tc.name: RenderSideBarPositionTest02
  * @tc.desc: Verify the sidebarcontainer component with embed sidebarcontainertype and start sidebarposition works fine.
  * @tc.type: FUNC
- * @tc.require: I5JQ4S
+ * @tc.require: issueI5JQ4S
  */
 HWTEST_F(RenderSideBarContainerTest, RenderSideBarPositionTest02, TestSize.Level1)
 {
@@ -224,7 +224,7 @@ HWTEST_F(RenderSideBarContainerTest, RenderSideBarPositionTest02, TestSize.Level
  * @tc.name: RenderSideBarPositionTest03
  * @tc.desc: Verify the sidebarcontainer component with overlay sidebarcontainertype and end sidebarposition works fine.
  * @tc.type: FUNC
- * @tc.require: I5JQ4S
+ * @tc.require: issueI5JQ4S
  */
 HWTEST_F(RenderSideBarContainerTest, RenderSideBarPositionTest03, TestSize.Level1)
 {
@@ -273,7 +273,7 @@ HWTEST_F(RenderSideBarContainerTest, RenderSideBarPositionTest03, TestSize.Level
  * @tc.name: RenderSideBarTouchTest01
  * @tc.desc: Verify the TouchTest Interface of RenderSideBarContainer work correctly.
  * @tc.type: FUNC
- * @tc.require: I5JQ4S
+ * @tc.require: issueI5JQ4S
  */
 HWTEST_F(RenderSideBarContainerTest, RenderSideBarTouchTest01, TestSize.Level1)
 {
