@@ -49,12 +49,12 @@ template("ace_capability_ohos_source_set") {
         "ability_runtime:abilitykit_native",
         "ability_runtime:runtime",
         "bundle_framework:appexecfwk_base",
+        "c_utils:utils",
         "eventhandler:libeventhandler",
         "graphic_standard:surface",
         "hiviewdfx_hilog_native:libhilog",
         "input:libmmi-client",
         "ipc:ipc_core",
-        "utils_base:utils",
         "window_manager:libwindow_extension_client",
       ]
       deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]

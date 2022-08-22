@@ -22,7 +22,7 @@ template("napi_device_static") {
     cflags_cc += invoker.cflags_cc
 
     include_dirs = [
-      "//utils/native/base/include",
+      "//commonlibrary/c_utils/base/include",
       "//foundation/arkui",
       "$ace_root",
       "$ace_root/frameworks",

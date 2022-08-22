@@ -77,7 +77,6 @@ ohos_unittest("RatingComponentTest") {
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$cjson_root:cjson_static",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   if (!is_standard_system) {
@@ -92,13 +91,15 @@ ohos_unittest("RatingComponentTest") {
         [ "//base/global/resource_management/frameworks/resmgr:global_resmgr" ]
   }
 
+  external_deps += [ "c_utils:utils" ]
+
   part_name = ace_engine_part
 }
 
 config("config_render_rating_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$ace_root",
   ]
 }

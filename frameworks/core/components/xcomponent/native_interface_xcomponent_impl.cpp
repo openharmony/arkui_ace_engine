@@ -15,7 +15,7 @@
 
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
 
-#include "utils/native/base/include/securec.h"
+#include "commonlibrary/c_utils/base/include/securec.h"
 
 int32_t OH_NativeXComponent::GetXComponentId(char* id, uint64_t* size)
 {

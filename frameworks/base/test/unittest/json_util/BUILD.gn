@@ -33,8 +33,9 @@ ohos_unittest("JsonUtilsTest") {
   deps = [
     "$ace_root/frameworks/base:ace_base_ohos",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
+
+  external_deps = [ "c_utils:utils" ]
 
   part_name = ace_engine_part
 }
@@ -42,7 +43,7 @@ ohos_unittest("JsonUtilsTest") {
 config("config_json_creator_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$ace_root",
   ]
 }
