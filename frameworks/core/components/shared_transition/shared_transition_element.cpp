@@ -169,6 +169,8 @@ bool SharedTransitionElement::AboardShuttle(Offset& ticket)
         LOGE("Aboard Shuttle Element failed. passenger element is null.");
         return false;
     }
+    // update the ticket(initial offset of the sharedTransition element) earlier
+    ticket = renderBox->GetOffsetToStage();
     // passenger goes out and comes to the shuttle port
     // check first child not null when check passenger. no need check again here.
     GetFirstChild()->UpdateChild(passengerElement_, nullptr);
@@ -181,7 +183,6 @@ bool SharedTransitionElement::AboardShuttle(Offset& ticket)
     placeHolder->SetWidth(paintRect.Width());
     // check first child not null when check passenger. no need check again here.
     GetFirstChild()->UpdateChild(nullptr, placeHolder);
-    ticket = renderBox->GetOffsetToStage();
     return true;
 }
 
