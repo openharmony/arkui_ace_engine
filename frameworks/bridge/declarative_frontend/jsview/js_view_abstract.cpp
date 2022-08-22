@@ -4141,14 +4141,18 @@ void JSViewAbstract::JsKey(const std::string& key)
         component->SetInspectorKey(key);
     }
 
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    if (flexItem) {
-        flexItem->SetInspectorKey(key);
+    if (!AceType::InstanceOf<TextSpanComponent>(ViewStackProcessor::GetInstance()->GetMainComponent())) {
+        auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+        if (flexItem) {
+            flexItem->SetInspectorKey(key);
+        }
     }
 
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-    if (focusableComponent) {
-        focusableComponent->SetInspectorKey(key);
+    if (!AceType::InstanceOf<TextSpanComponent>(ViewStackProcessor::GetInstance()->GetMainComponent())) {
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        if (focusableComponent) {
+            focusableComponent->SetInspectorKey(key);
+        }
     }
 }
 
