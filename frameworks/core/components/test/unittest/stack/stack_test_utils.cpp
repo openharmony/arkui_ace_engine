@@ -15,17 +15,20 @@
 
 #include "core/components/test/unittest/stack/stack_test_utils.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/stack/stack_component.h"
 
 namespace OHOS::Ace {
 
-RefPtr<RenderStack> StackTestUtils::CreateRenderStack(const Alignment& alignment, Overflow overflow, StackFit stackFit)
+RefPtr<RenderStack> StackTestUtils::CreateRenderStack(const Alignment& alignment, Overflow overflow,
+    StackFit stackFit, HitTestMode hitTestMode)
 {
     RefPtr<RenderStack> stack = AceType::MakeRefPtr<MockRenderStack>();
     std::list<RefPtr<Component>> children;
     RefPtr<StackComponent> stackComponent =
         AceType::MakeRefPtr<StackComponent>(alignment, stackFit, overflow, children);
+    stackComponent->SetHitTestMode(hitTestMode);
     stack->Update(stackComponent);
     return stack;
 }
