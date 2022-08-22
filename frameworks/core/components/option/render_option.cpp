@@ -568,7 +568,7 @@ void RenderOption::Update(const RefPtr<Component>& component)
 void RenderOption::OnPaintFinish()
 {
     Size size = GetLayoutSize();
-    Offset offset = GetGlobalOffset();
+    Offset offset = GetGlobalOffsetExternal();
     bool isSelected = false;
     if (data_) {
         isSelected = data_->GetSelected();
