@@ -3876,10 +3876,6 @@ void JSViewAbstract::JsSaturate(const JSCallbackInfo& info)
         return;
     }
 
-    if (value.Value() == 0) {
-        value.SetValue(EPSILON);
-    }
-
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
