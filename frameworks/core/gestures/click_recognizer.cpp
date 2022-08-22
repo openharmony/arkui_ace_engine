@@ -230,7 +230,7 @@ void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleOverdueDeadline()
 {
-    if (pointsCount_ < fingers_) {
+    if (pointsCount_ < fingers_ || tappedCount_ < count_) {
         LOGD("the state is not detecting for accept multi-finger tap gesture");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }

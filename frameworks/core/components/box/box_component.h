@@ -189,17 +189,12 @@ public:
 
     void AddGesture(GesturePriority priority, RefPtr<Gesture> gesture)
     {
-        if (gesturePriority_ != priority || gestureHierarchy_.empty()) {
-            gestureHierarchy_.emplace_back(priority, std::vector<RefPtr<Gesture>>());
-            gesturePriority_ = priority;
-        }
-
-        gestureHierarchy_.back().second.push_back(std::move(gesture));
+        gestures_[static_cast<int32_t>(priority)] = gesture;
     }
 
-    const std::vector<std::pair<GesturePriority, std::vector<RefPtr<Gesture>>>>& GetGestureHierarchy() const
+    const std::array<RefPtr<Gesture>, 3>& GetGestures() const
     {
-        return gestureHierarchy_;
+        return gestures_;
     }
 
     const EventMarker& GetOnDomDragEnter() const
@@ -377,11 +372,7 @@ private:
     OnTouchEventCallback onTouchDownId_;
     RefPtr<Gesture> onClickId_;
     RefPtr<Gesture> onLongPressId_;
-    RefPtr<Gesture> onDoubleClickId_;
-    GesturePriority gesturePriority_ = GesturePriority::Low;
-    RefPtr<Gesture> capturingGesture_;
-    std::vector<RefPtr<Gesture>> gestures_;
-    std::vector<std::pair<GesturePriority, std::vector<RefPtr<Gesture>>>> gestureHierarchy_;
+    std::array<RefPtr<Gesture>, 3> gestures_;
     EventMarker onDomDragEnterId_;
     EventMarker onDomDragOverId_;
     EventMarker onDomDragLeaveId_;

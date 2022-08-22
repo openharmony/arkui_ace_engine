@@ -43,6 +43,11 @@ public:
     virtual void OnAccepted() {}
     virtual void OnRejected() {}
 
+    void SetRefereePointer(size_t touchId)
+    {
+        refereePointers_.emplace(touchId);
+    }
+
     std::set<size_t> refereePointers_;
 
     void SetFingerList(const std::map<int32_t, TouchEvent> touchPoints, const Offset& coordinateOffset,

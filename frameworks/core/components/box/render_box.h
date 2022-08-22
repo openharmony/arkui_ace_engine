@@ -187,14 +187,8 @@ public:
     bool HandleMouseEvent(const MouseEvent& event) override;
     void HandleMouseHoverEvent(MouseState mouseState) override;
 
-    bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
-        TouchTestResult& result) override;
-
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
-
-    void OnTouchTestHierarchy(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
-        const std::vector<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& result);
 
     void AddRecognizerToResult(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result);
@@ -222,9 +216,7 @@ protected:
 
     Offset GetBorderOffset() const override;
     Radius GetBorderRadius() const override;
-    void UpdateGestureRecognizer(const std::vector<RefPtr<Gesture>>& gestures);
-    void UpdateGestureRecognizerHierarchy(const std::vector<std::pair<GesturePriority,
-            std::vector<RefPtr<Gesture>>>>& gestures);
+    void UpdateGestureRecognizer(const std::array<RefPtr<Gesture>, MAX_GESTURE_SIZE>& gestures);
     bool ExistGestureRecognizer();
 
     // Remember clear all below members in ClearRenderObject().
@@ -261,11 +253,12 @@ private:
     void SetAccessibilityFocusImpl();
     void SetAccessibilityClickImpl();
 
-    std::vector<RefPtr<GestureRecognizer>> recognizers_;
-    std::vector<std::pair<GesturePriority, std::vector<RefPtr<GestureRecognizer>>>> recognizerHierarchy_;
+    // 0 - low priority gesture, 1 - high priority gesture, 2 - parallel priority gesture
+    std::array<RefPtr<GestureRecognizer>, MAX_GESTURE_SIZE> recognizers_;
 
     RefPtr<GestureRecognizer> onClick_;
     RefPtr<GestureRecognizer> onLongPress_;
+    RefPtr<GestureRecognizer> parallelRecognizer_;
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_;
     OnHoverCallback onHover_;
