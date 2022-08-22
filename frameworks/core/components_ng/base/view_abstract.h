@@ -32,6 +32,8 @@ public:
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
     static void SetLayoutWeight(int32_t value);
+    static void SetBorderRadius(const BorderRadiusProperty& value);
+    static void SetBorderRadius(const Dimension& value);
 
     // event
     static void SetOnClick(GestureEventFunc&& clickEventFunc);

@@ -16,12 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
-#include <string>
-
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/property/property.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 
@@ -60,6 +58,14 @@ public:
     virtual void StopRecordingIfNeeded() {}
 
     virtual void SetDrawContentAtLast(bool useDrawContentLastOrder) {}
+
+    virtual void ResetBlendBgColor() {}
+
+    virtual void BlendBgColor(const Color& color) {}
+
+    virtual void UpdateBorderRadius(const BorderRadiusProperty& value) {}
+
+    virtual const std::unique_ptr<BorderRadiusProperty>& GetBorderRadius() = 0;
 
     virtual void SetClipToFrame(bool useClip) {}
 

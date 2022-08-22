@@ -271,10 +271,56 @@ struct PaddingPropertyT<float> {
     }
 };
 
+template<typename T>
+struct BorderRadiusPropertyT {
+    std::optional<T> radiusTopLeft;
+    std::optional<T> radiusTopRight;
+    std::optional<T> radiusBottomLeft;
+    std::optional<T> radiusBottomRight;
+
+    void SetRadius(const T& borderRadius)
+    {
+        radiusTopLeft = borderRadius;
+        radiusTopRight = borderRadius;
+        radiusBottomLeft = borderRadius;
+        radiusBottomRight = borderRadius;
+    }
+
+    bool operator==(const BorderRadiusPropertyT& value) const
+    {
+        return (radiusTopLeft == value.radiusTopLeft) && (radiusTopRight == value.radiusTopRight) &&
+               (radiusBottomLeft == value.radiusBottomLeft) && (radiusBottomRight == value.radiusBottomRight);
+    }
+
+    bool UpdateWithCheck(const BorderRadiusPropertyT& value)
+    {
+        bool isModified = false;
+        if (value.radiusTopLeft.has_value() && (radiusTopLeft != value.radiusTopLeft)) {
+            radiusTopLeft = value.radiusTopLeft;
+            isModified = true;
+        }
+        if (value.radiusTopRight.has_value() && (radiusTopRight != value.radiusTopRight)) {
+            radiusTopRight = value.radiusTopRight;
+            isModified = true;
+        }
+        if (value.radiusBottomLeft.has_value() && (radiusBottomLeft != value.radiusBottomLeft)) {
+            radiusBottomLeft = value.radiusBottomLeft;
+            isModified = true;
+        }
+        if (value.radiusBottomRight.has_value() && (radiusBottomRight != value.radiusBottomRight)) {
+            radiusBottomRight = value.radiusBottomRight;
+            isModified = true;
+        }
+        return isModified;
+    }
+};
+
 using PaddingProperty = PaddingPropertyT<CalcLength>;
 using MarginProperty = PaddingProperty;
+using BorderRadiusProperty = BorderRadiusPropertyT<Dimension>;
 using PaddingPropertyF = PaddingPropertyT<float>;
 using MarginPropertyF = PaddingPropertyT<float>;
+using BorderRadiusPropertyF = BorderRadiusPropertyT<float>;
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_PROPERTIES_H
