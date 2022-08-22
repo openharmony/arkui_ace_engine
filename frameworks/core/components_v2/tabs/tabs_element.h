@@ -15,13 +15,26 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_TABS_TABS_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_TABS_TABS_ELEMENT_H
 
-#include "core/components_v2/tabs/tabs_component.h"
+#include <vector>
+
+#include "core/components/tab_bar/tab_bar_element.h"
 #include "core/pipeline/base/component_group_element.h"
 
 namespace OHOS::Ace::V2 {
 
 class TabsElement : public ComponentGroupElement {
     DECLARE_ACE_TYPE(TabsElement, ComponentGroupElement);
+public:
+    void PerformBuild() override;
+    void AddPendingTabBarItem(const RefPtr<TabBarItemComponent>& item)
+    {
+        tabBarPendingItems_.push_back(item);
+    }
+
+private:
+    // In case TabBar is at the end position, we create TabBarItems before
+    // TabBar itself and have to store them here till TabBar created.
+    std::vector<RefPtr<TabBarItemComponent>> tabBarPendingItems_;
 };
 
 } // namespace OHOS::Ace::V2

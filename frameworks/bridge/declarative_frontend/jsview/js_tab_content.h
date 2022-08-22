@@ -49,7 +49,7 @@ protected:
     }
 
 private:
-    static RefPtr<Component> ProcessTabBarBuilderFunction(
+    static RefPtr<Component> ProcessTabBarBuilderFunction(const JSCallbackInfo& info,
         RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc);
     static RefPtr<Component> ProcessTabBarTextIconPair(
         RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSVal> text, JSRef<JSVal> icon);

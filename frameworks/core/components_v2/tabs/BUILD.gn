@@ -20,5 +20,6 @@ build_component("tabs_v2") {
     "tab_content_item_element.cpp",
     "tab_content_proxy_element.cpp",
     "tabs_component.cpp",
+    "tabs_element.cpp",
   ]
 }

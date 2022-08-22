@@ -74,23 +74,6 @@ public:
         return indicator_ ? 1 : 0;
     }
 
-    bool IsActive(const RefPtr<RenderNode>& child) const
-    {
-        const auto& kids = GetChildren();
-        auto pos = std::find(kids.begin(), kids.end(), child);
-        if (pos != std::end(kids)) {
-            auto idx = std::distance(kids.begin(), pos);
-            if (indicator_) {
-                idx--;
-            }
-            if (idx == index_) {
-                LOGD("found active item at %{public}d", static_cast<int>(idx));
-                return true;
-            }
-        }
-        return false;
-    }
-
     // Update current focused index before removing of the child
     // We can not use lifecycle callback OnChildRemoved here
     // Since it is invoked only after RenderNode removed
