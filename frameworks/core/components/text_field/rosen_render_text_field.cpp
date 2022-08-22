@@ -513,19 +513,8 @@ Size RosenRenderTextField::Measure()
     // Get height of text
     auto paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     if (paragraphTxt != nullptr) {
-        auto textHeight = paragraphTxt->GetHeight();
-        auto textLines = paragraphTxt->GetLineCount();
-        auto layoutParamChanged = lastLayoutParam_.value() == GetLayoutParam();
-        if (layoutParamChanged) {
-            lastLayoutParam_ = std::make_optional(GetLayoutParam());
-        }
-        bool needNotifyChangeEvent = !isValueFromFront_ || layoutParamChanged;
-        // If height or lines is changed, make needNotifyChangeEvent_ true to notify change event.
-        if (needNotifyChangeEvent && (!NearEqual(textHeight_, textHeight) || textLines_ != textLines)) {
-            needNotifyChangeEvent_ = true;
-        }
-        textHeight_ = textHeight;
-        textLines_ = textLines;
+        textHeight_ = paragraphTxt->GetHeight();
+        textLines_ = paragraphTxt->GetLineCount();
     } else {
         textHeight_ = 0.0;
         textLines_ = 0;
