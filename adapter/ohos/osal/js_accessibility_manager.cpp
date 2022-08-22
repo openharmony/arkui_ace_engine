@@ -44,11 +44,13 @@ const char ACCESSIBILITY_CLEAR_FOCUS_EVENT[] = "accessibilityclearfocus";
 const char TEXT_CHANGE_EVENT[] = "textchange";
 const char PAGE_CHANGE_EVENT[] = "pagechange";
 const char SCROLL_END_EVENT[] = "scrollend";
+const char SCROLL_START_EVENT [] = "scrollstart";
 const char MOUSE_HOVER_ENTER[] = "mousehoverenter";
 const char MOUSE_HOVER_EXIT[] = "mousehoverexit";
 const char IMPORTANT_YES[] = "yes";
 const char IMPORTANT_NO[] = "no";
 const char IMPORTANT_NO_HIDE_DES[] = "no-hide-descendants";
+const char LIST_TAG[] = "List";
 constexpr int32_t INVALID_PARENT_ID = -2100000;
 constexpr int32_t DEFAULT_PARENT_ID = 2100000;
 constexpr int32_t ROOT_STACK_BASE = 1100000;
@@ -83,6 +85,7 @@ Accessibility::EventType ConvertStrToEventType(const std::string& type)
         { MOUSE_HOVER_EXIT, Accessibility::EventType::TYPE_VIEW_HOVER_EXIT_EVENT },
         { PAGE_CHANGE_EVENT, Accessibility::EventType::TYPE_PAGE_STATE_UPDATE },
         { SCROLL_END_EVENT, Accessibility::EventType::TYPE_VIEW_SCROLLED_EVENT },
+        { SCROLL_START_EVENT, Accessibility::EventType::TYPE_VIEW_SCROLLED_EVENT },
         { DOM_SELECTED, Accessibility::EventType::TYPE_VIEW_SELECTED_EVENT },
         { TEXT_CHANGE_EVENT, Accessibility::EventType::TYPE_VIEW_TEXT_UPDATE_EVENT },
         { DOM_TOUCH_END, Accessibility::EventType::TYPE_TOUCH_END },
@@ -224,6 +227,11 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     nodeInfo.SetGridItem(gridItemInfo);
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
+    if (node->GetTag() == LIST_TAG) {
+        nodeInfo.SetItemCounts(node->GetListItemCounts());
+        nodeInfo.SetBeginIndex(node->GetListBeginIndex());
+        nodeInfo.SetEndIndex(node->GetListEndIndex());
+    }
     if (node->GetIsPassword()) {
         std::string strStar(node->GetText().size(), '*');
         nodeInfo.SetContent(strStar);
@@ -554,6 +562,11 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(const AccessibilityEvent
     eventInfo.SetComponentType(node->GetTag());
     eventInfo.SetCurrentIndex(static_cast<int>(accessibilityEvent.currentItemIndex));
     eventInfo.SetItemCounts(static_cast<int>(accessibilityEvent.itemCount));
+    if (node->GetTag() == LIST_TAG) {
+        eventInfo.SetItemCounts(node->GetListItemCounts());
+        eventInfo.SetBeginIndex(node->GetListBeginIndex());
+        eventInfo.SetEndIndex(node->GetListEndIndex());
+    }
     eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
     eventInfo.SetPageId(node->GetPageId());
     eventInfo.AddContent(node->GetText());
