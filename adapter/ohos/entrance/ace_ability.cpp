@@ -332,7 +332,7 @@ void AceAbility::OnStart(const Want& want)
         auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
     } else {
-        auto assetBasePathStr = { "assets/js/" + srcPath + "/" };
+        auto assetBasePathStr = { "assets/js/" + srcPath + "/", std::string("assets/js/share/") };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
     }
     std::string nativeLibraryPath = appInfo->nativeLibraryPath;
