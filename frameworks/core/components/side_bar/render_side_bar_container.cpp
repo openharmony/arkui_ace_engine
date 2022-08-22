@@ -46,11 +46,6 @@ constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 
 } // namespace
 
-RefPtr<RenderNode> RenderSideBarContainer::Create()
-{
-    return AceType::MakeRefPtr<RenderSideBarContainer>();
-}
-
 void RenderSideBarContainer::CorrectWidth(const Dimension& width, const Dimension& minWidth, const Dimension& maxWidth)
 {
     if (ConvertWidthToVp(minWidth) > ConvertWidthToVp(maxWidth)) {
