@@ -808,24 +808,21 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
             LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
             return;
         }
-        if (argsPtrItem->Contains("x") || argsPtrItem->Contains("y") || argsPtrItem->Contains("z")) {
-            // default: dx, dy, dz (0.0, 0.0, 0.0)
-            float dx = 0.0f;
-            float dy = 0.0f;
-            float dz = 0.0f;
-            // default centerX, centerY 50% 50%;
-            Dimension centerX = 0.5_pct;
-            Dimension centerY = 0.5_pct;
-            std::optional<float> angle;
-            ParseJsRotate(argsPtrItem, dx, dy, dz, centerX, centerY, angle);
-            if (angle) {
-                transform->Rotate(dx, dy, dz, angle.value(), option);
-                transform->SetOriginDimension(DimensionOffset(centerX, centerY));
-            } else {
-                LOGE("Js JsRotate failed, not specify angle");
-            }
-            return;
+        float dx = 0.0f;
+        float dy = 0.0f;
+        float dz = 0.0f;
+        // default centerX, centerY 50% 50%;
+        Dimension centerX = 0.5_pct;
+        Dimension centerY = 0.5_pct;
+        std::optional<float> angle;
+        ParseJsRotate(argsPtrItem, dx, dy, dz, centerX, centerY, angle);
+        if (angle) {
+            transform->Rotate(dx, dy, dz, angle.value(), option);
+            transform->SetOriginDimension(DimensionOffset(centerX, centerY));
+        } else {
+            LOGE("Js JsRotate failed, not specify angle");
         }
+        return;
     }
     double rotateZ;
     if (ParseJsDouble(info[0], rotateZ)) {
