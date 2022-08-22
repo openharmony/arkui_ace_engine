@@ -18,13 +18,22 @@
 
 #include "base/memory/ace_type.h"
 
+namespace OHOS::Rosen::Drawing {
+class Canvas;
+class RectF;
+}
 namespace OHOS::Ace::NG {
+
+using RSCanvas = Rosen::Drawing::Canvas;
+using RSRect = Rosen::Drawing::RectF;
 
 // CanvasImage is interface for drawing image.
 class CanvasImage : public virtual AceType {
     DECLARE_ACE_TYPE(CanvasImage, AceType)
 
 public:
+    virtual void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) = 0;
+
     static RefPtr<CanvasImage> Create(void* rawImage);
     static RefPtr<CanvasImage> Create();
     virtual int32_t GetWidth() const = 0;

@@ -19,8 +19,6 @@
 #include <list>
 #include <string>
 
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/pipeline/base/composed_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -29,6 +27,11 @@
 namespace OHOS::Ace {
 
 class ComposedElement;
+
+namespace NG {
+class CustomNode;
+class UINode;
+}
 
 } // namespace OHOS::Ace
 

@@ -18,7 +18,6 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {

@@ -15,9 +15,11 @@
 
 #include "core/components_ng/render/image_painter.h"
 
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
 namespace {
 
 void ApplyContain(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
@@ -89,16 +91,19 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0,    0,  // red
                                       0,     0,     0,     1.0f, 0}; // alpha transparency
 } // namespace
 
-void ImagePainter::DrawImage(
-    const RefPtr<Canvas>& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const
+void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const
 {
     CHECK_NULL_VOID(canvasImage_);
-    auto paint = Paint::Create();
-    paint->SetFilterQuality(FilterQuality::NONE);
+    RSBrush brush;
+    RSFilter filter;
     if (ImageRenderMode::TEMPLATE == imagePaintConfig.renderMode_) {
-        paint->SetColorFilter(ColorFilter::MakeFromMatrix(GRAY_COLOR_MATRIX));
+        RSColorMatrix grayMatrix;
+        grayMatrix.SetArray(GRAY_COLOR_MATRIX);
+        filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(grayMatrix));
+        brush.SetFilter(filter);
     }
-    canvas->DrawImage(canvasImage_, imagePaintConfig.srcRect_, imagePaintConfig.dstRect_, paint);
+    canvas.AttachBrush(brush);
+    canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_));
 }
 
 void ImagePainter::ApplyImageFit(

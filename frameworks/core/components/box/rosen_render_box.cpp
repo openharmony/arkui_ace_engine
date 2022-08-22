@@ -345,12 +345,12 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             return;
         }
         rsnode->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE,
-            [size = GetLayoutSize(), margin = GetMargin()](SkCanvas* canvas) {
-                SkAutoCanvasRestore acr(canvas, true);
+            [size = GetLayoutSize(), margin = GetMargin()](std::shared_ptr<SkCanvas> canvas) {
+                SkAutoCanvasRestore acr(canvas.get(), true);
                 auto overlayOffset = Offset(EXTRA_WIDTH, EXTRA_WIDTH) - margin.GetOffset();
-                DebugBoundaryPainter::PaintDebugBoundary(canvas, overlayOffset, size);
-                DebugBoundaryPainter::PaintDebugCorner(canvas, overlayOffset, size);
-                DebugBoundaryPainter::PaintDebugMargin(canvas, overlayOffset, size, margin);
+                DebugBoundaryPainter::PaintDebugBoundary(canvas.get(), overlayOffset, size);
+                DebugBoundaryPainter::PaintDebugCorner(canvas.get(), overlayOffset, size);
+                DebugBoundaryPainter::PaintDebugMargin(canvas.get(), overlayOffset, size, margin);
             });
     }
     if (isAccessibilityFocus_) {

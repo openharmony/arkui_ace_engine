@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/test/json/json_ace_page.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 

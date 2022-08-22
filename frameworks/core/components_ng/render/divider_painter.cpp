@@ -15,21 +15,23 @@
 
 #include "core/components_ng/render/divider_painter.h"
 
+#include "core/components_ng/render/drawing_prop_convertor.h"
+
 namespace OHOS::Ace::NG {
-void DividerPainter::DrawLine(const RefPtr<Canvas>& canvas, const OffsetF& offset) const
+void DividerPainter::DrawLine(RSCanvas& canvas, const OffsetF& offset) const
 {
-    auto paint = Paint::Create();
-    paint->EnableAntiAlias();
-    paint->SetStyle(PaintStyle::STROKE);
-    paint->SetStrokeWidth(constrainStrokeWidth_);
-    paint->SetStrokeCap(lineCap_.value_or(LineCap::SQUARE));
-    paint->SetColor(dividerColor_.value_or(Color::BLACK));
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetWidth(constrainStrokeWidth_);
+    pen.SetCapStyle(ToRSCapStyle(lineCap_.value_or(LineCap::SQUARE)));
+    pen.SetColor(ToRSColor(dividerColor_.value_or(Color::BLACK)));
+    canvas.AttachPen(pen);
 
     auto startPointX = offset.GetX();
     auto startPointY = offset.GetY();
     PointF start = PointF(startPointX, startPointY);
     PointF end = vertical_ ? PointF(startPointX, startPointY + dividerLength_)
                            : PointF(startPointX + dividerLength_, startPointY);
-    canvas->DrawLine(start, end, paint);
+    canvas.DrawLine(ToRSPonit(start) , ToRSPonit(end));
 }
 } // namespace OHOS::Ace::NG

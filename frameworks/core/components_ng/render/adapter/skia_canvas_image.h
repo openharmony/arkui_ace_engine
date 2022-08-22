@@ -51,6 +51,8 @@ public:
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
 
+    void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override;
+
 private:
     // TODO: should not deps on flutter.
 #ifndef NG_BUILD

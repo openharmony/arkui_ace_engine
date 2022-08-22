@@ -25,10 +25,16 @@
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 
+namespace OHOS::Rosen::Drawing {
+class Canvas;
+}
 namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
+
+using RSCanvas = Rosen::Drawing::Canvas;
+using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 
 // RenderContext is used for render node to paint.
 class RenderContext : public virtual AceType {

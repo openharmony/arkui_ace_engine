@@ -23,6 +23,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 RosenRenderContext::~RosenRenderContext()
@@ -99,20 +100,21 @@ void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDr
 {
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(contentDraw);
-    rsNode_->DrawOnNode(Rosen::RSModifierType::CONTENT_STYLE, [contentDraw = std::move(contentDraw)](SkCanvas* canvas) {
-        auto canvasWrapper = MakeRefPtr<SkiaCanvas>(canvas);
-        contentDraw(canvasWrapper);
-    });
+    rsNode_->DrawOnNode(
+        Rosen::RSModifierType::CONTENT_STYLE, [contentDraw = std::move(contentDraw)](std::shared_ptr<SkCanvas> canvas) {
+            RSCanvas rsCanvas(&canvas);
+            contentDraw(rsCanvas);
+        });
 }
 
 void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)
 {
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(foregroundDraw);
-    rsNode_->DrawOnNode(
-        Rosen::RSModifierType::FOREGROUND_STYLE, [foregroundDraw = std::move(foregroundDraw)](SkCanvas* canvas) {
-            auto canvasWrapper = MakeRefPtr<SkiaCanvas>(canvas);
-            foregroundDraw(canvasWrapper);
+    rsNode_->DrawOnNode(Rosen::RSModifierType::FOREGROUND_STYLE,
+        [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<SkCanvas> canvas) {
+            RSCanvas rsCanvas(&canvas);
+            foregroundDraw(rsCanvas);
         });
 }
 
@@ -120,10 +122,11 @@ void RosenRenderContext::FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDr
 {
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(overlayDraw);
-    rsNode_->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE, [overlayDraw = std::move(overlayDraw)](SkCanvas* canvas) {
-        auto canvasWrapper = MakeRefPtr<SkiaCanvas>(canvas);
-        overlayDraw(canvasWrapper);
-    });
+    rsNode_->DrawOnNode(
+        Rosen::RSModifierType::OVERLAY_STYLE, [overlayDraw = std::move(overlayDraw)](std::shared_ptr<SkCanvas> canvas) {
+            RSCanvas rsCanvas(&canvas);
+            overlayDraw(rsCanvas);
+        });
 }
 
 RefPtr<Canvas> RosenRenderContext::GetCanvas()

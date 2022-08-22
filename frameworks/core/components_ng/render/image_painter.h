@@ -19,6 +19,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,7 +37,7 @@ public:
     ImagePainter(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
     ~ImagePainter() = default;
 
-    void DrawImage(const RefPtr<Canvas>& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const;
+    void DrawImage(RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const;
 
     static void ApplyImageFit(
         ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect);
