@@ -39,6 +39,7 @@ void MediaQueryTest::TearDown() {}
  * @tc.name: MediaQueryTest001
  * @tc.desc: Verify that media query condition can match right result.
  * @tc.type: FUNC
+ * @tc.require: issueI5MWTB
  */
 HWTEST_F(MediaQueryTest, MediaQueryTest001, TestSize.Level1)
 {
@@ -55,6 +56,7 @@ HWTEST_F(MediaQueryTest, MediaQueryTest001, TestSize.Level1)
         { "(max-width: )", false },
         { "(min-width: 1000)", true },
         { "(width < 2000)", true },
+        { "(width < 2000vp)", true },
         { "(width << 2000)", false },
         { "(1000 < width)", true },
         { "(1000 < width < 2000)", true },
