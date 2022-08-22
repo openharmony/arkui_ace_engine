@@ -98,7 +98,10 @@ void ButtonElement::OnFocus()
     }
     button_->HandleFocusEvent(true);
     button_->PlayFocusAnimation(true);
-    button_->ChangeStatus(RenderStatus::FOCUS);
+    auto context = context_.Upgrade();
+    if (context && context->GetIsTabKeyPressed()) {
+        button_->ChangeStatus(RenderStatus::FOCUS);
+    }
 }
 
 void ButtonElement::OnClick()
@@ -134,11 +137,13 @@ void ButtonElement::OnBlur()
     }
     button_->HandleFocusEvent(false);
     button_->PlayFocusAnimation(false);
-    button_->ChangeStatus(RenderStatus::BLUR);
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("Pipeline context is nullptr");
         return;
+    }
+    if (context->GetIsTabKeyPressed()) {
+        button_->ChangeStatus(RenderStatus::BLUR);
     }
     context->CancelFocusAnimation();
     context->CancelShadow();

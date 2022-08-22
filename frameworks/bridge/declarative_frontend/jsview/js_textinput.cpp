@@ -170,8 +170,11 @@ void JSTextInput::Create(const JSCallbackInfo& info)
     }
     JSTextField::UpdateDecoration(boxComponent, textInputComponent, boxBorder, theme);
 
+    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusNode(true);
+
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGW("text-input create error, info is non-valid");
+        LOGI("TextInput create without argument");
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -193,10 +196,8 @@ void JSTextInput::Create(const JSCallbackInfo& info)
             jsController->SetController(textInputComponent->GetTextFieldController());
         }
     } else {
-        LOGI("controller is nullptr");
+        LOGI("controller do not configured");
     }
-    JSInteractableView::SetFocusable(true);
-    JSInteractableView::SetFocusNode(true);
 }
 
 void JSTextInputController::JSBind(BindingTarget globalObj)

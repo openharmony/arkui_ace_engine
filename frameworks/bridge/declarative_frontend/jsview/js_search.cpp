@@ -251,16 +251,6 @@ void JSSearch::JSBind(BindingTarget globalObj)
 
 void JSSearch::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
-
-    if (!info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to be an object");
-        return;
-    }
-
     auto searchComponent = AceType::MakeRefPtr<OHOS::Ace::SearchComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(searchComponent);
     ViewStackProcessor::GetInstance()->Push(searchComponent);
@@ -272,6 +262,13 @@ void JSSearch::Create(const JSCallbackInfo& info)
     InitializeComponent(searchComponent, textFieldComponent, searchTheme, textFieldTheme);
     PrepareSpecializedComponent(searchComponent, textFieldComponent);
 
+    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusNode(true);
+
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGI("Search create without argument");
+        return;
+    }
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto value = param->GetProperty("value");
     if (!value->IsUndefined() && value->IsString()) {
@@ -291,8 +288,6 @@ void JSSearch::Create(const JSCallbackInfo& info)
         if (jsController) {
             jsController->SetController(textFieldComponent->GetTextFieldController());
         }
-    } else {
-        LOGI("controller is nullptr");
     }
 
     auto icon = param->GetProperty("icon");
