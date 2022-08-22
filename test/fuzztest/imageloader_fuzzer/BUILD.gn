@@ -65,9 +65,8 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
 group("fuzztest") {
   testonly = true
   deps = []
-  deps += [
-    # deps file
-    ":ImageLoaderFuzzTest",
-  ]
+  if (!is_asan) {
+    deps += [ ":ImageLoaderFuzzTest" ]
+  }
 }
 ###############################################################################

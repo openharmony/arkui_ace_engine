@@ -76,9 +76,10 @@ config("config_json_creator_test") {
 group("unittest") {
   testonly = true
   deps = []
-
-  deps += [
-    ":FlexCreatorTest",
-    #":RenderFlexTest",
-  ]
+  if (!is_asan) {
+    deps += [
+      ":FlexCreatorTest",
+      #":RenderFlexTest",
+    ]
+  }
 }
