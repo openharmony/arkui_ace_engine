@@ -249,6 +249,9 @@ void JSButton::CreateWithChild(const JSCallbackInfo& info)
         auto obj = JSRef<JSObject>::Cast(info[0]);
         SetTypeAndStateEffect(obj, buttonComponent);
     }
+    if ((info.Length() > 1) && info[1]->IsObject()) {
+        SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]), buttonComponent);
+    }
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
     JSInteractableView::SetFocusable(true);
     JSInteractableView::SetFocusNode(true);
