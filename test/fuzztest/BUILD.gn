@@ -16,8 +16,10 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 group("fuzztest") {
   testonly = true
 
-  deps = [
-    "imageloader_fuzzer:ImageLoaderFuzzTest",
-    "uiservice_fuzzer:UiServiceFuzzTest",
-  ]
+  if (!is_asan) {
+    deps = [
+      "imageloader_fuzzer:ImageLoaderFuzzTest",
+      "uiservice_fuzzer:UiServiceFuzzTest",
+    ]
+  }
 }

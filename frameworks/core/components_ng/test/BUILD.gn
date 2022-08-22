@@ -11,16 +11,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
 group("unittest") {
   testonly = true
-
-  deps = [
-    "base:base_unittest",
-    "event:event_unittest",
-    "layout:layout_unittest",
-    "pattern:pattern_unittest",
-    "property:property_unittest",
-    "render:render_unittest",
-    "syntax:syntax_unittest",
-  ]
+  deps = []
+  if (!is_asan) {
+    deps = [
+      "base:base_unittest",
+      "event:event_unittest",
+      "layout:layout_unittest",
+      "pattern:pattern_unittest",
+      "property:property_unittest",
+      "render:render_unittest",
+      "syntax:syntax_unittest",
+    ]
+  }
 }

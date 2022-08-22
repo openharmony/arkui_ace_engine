@@ -236,8 +236,10 @@ group("unittest") {
     #":PluginElementTest",
     ":PluginManagerDelegateTest",
     ":PluginManagerResourceTest",
-    ":PluginSubContainerTest",
     ":PluginWindowTest",
     ":RenderPluginTest",
   ]
+  if (!is_asan) {
+    deps += [ ":PluginSubContainerTest" ]
+  }
 }

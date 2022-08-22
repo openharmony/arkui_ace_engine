@@ -16,6 +16,7 @@ import("//build/test.gni")
 group("unittest") {
   testonly = true
   deps = []
-
-  deps += [ "unittest:unittest" ]
+  if (!is_asan) {
+    deps += [ "unittest:unittest" ]
+  }
 }
