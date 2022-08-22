@@ -62,6 +62,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
     }
 
     onMouse_ = web->GetOnMouseEventCallback();
+    onKeyEvent_ = web->GetOnKeyEventCallback();
 
     web_ = web;
     if (delegate_) {
@@ -102,6 +103,11 @@ void RenderWeb::OnMouseEvent(const MouseEvent& event)
         return;
     }
 
+    if (web_ && event.action == MouseAction::RELEASE) {
+        LOGI("mouse event request focus");
+        web_->RequestFocus();
+    }
+
     auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
     delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action);
 }
@@ -132,6 +138,16 @@ bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
         info.IsStopPropagation());
     onMouse_(info);
     return info.IsStopPropagation();
+}
+
+void RenderWeb::HandleKeyEvent(const KeyEvent& keyEvent)
+{
+    if (!onKeyEvent_) {
+        LOGW("RenderWeb::HandleKeyEvent, key event callback is null");
+        return;
+    }
+    KeyEventInfo info(keyEvent);
+    onKeyEvent_(info);
 }
 
 void RenderWeb::PerformLayout()

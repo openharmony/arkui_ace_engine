@@ -23,6 +23,7 @@
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
 
@@ -1008,7 +1009,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccessEnabled);
     JSClass<JSWeb>::StaticMethod("initialScale", &JSWeb::InitialScale);
     JSClass<JSWeb>::StaticMethod("backgroundColor", &JSWeb::BackgroundColor);
-    JSClass<JSWeb>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSWeb>::StaticMethod("onKeyEvent", &JSWeb::OnKeyEvent);
     JSClass<JSWeb>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSWeb>::StaticMethod("onMouse", &JSWeb::OnMouse);
     JSClass<JSWeb>::StaticMethod("onResourceLoad", &JSWeb::OnResourceLoad);
@@ -1448,6 +1449,26 @@ void JSWeb::MediaPlayGestureAccess(bool isNeedGestureAccess)
         return;
     }
     webComponent->SetMediaPlayGestureAccess(isNeedGestureAccess);
+}
+
+void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnKeyEvent");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
+    RefPtr<JsKeyFunction> jsOnKeyEventFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto onKeyEventId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyEventFunc)](
+                            KeyEventInfo& keyEventInfo) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onKeyEvent");
+        func->Execute(keyEventInfo);
+    };
+
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnKeyEventCallback(onKeyEventId);
 }
 
 JSRef<JSVal> ReceivedErrorEventToJSValue(const ReceivedErrorEvent& eventInfo)

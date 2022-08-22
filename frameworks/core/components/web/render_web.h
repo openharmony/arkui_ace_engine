@@ -48,6 +48,7 @@ public:
     void OnAttachContext() override;
     void OnMouseEvent(const MouseEvent& event);
     bool HandleMouseEvent(const MouseEvent& event) override;
+    void HandleKeyEvent(const KeyEvent& keyEvent);
 
 #ifdef OHOS_STANDARD_SYSTEM
     void OnAppShow() override
@@ -99,6 +100,7 @@ private:
         TouchTestResult& result) override;
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
     OnMouseCallback onMouse_;
+    OnKeyEventCallback onKeyEvent_;
 #endif
 
     Offset position_;

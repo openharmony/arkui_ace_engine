@@ -86,7 +86,10 @@ bool WebElement::OnKeyEvent(const KeyEvent& keyEvent)
         LOGE("Delegate is nullptr.");
         return false;
     }
-    return renderWeb->GetDelegate()->OnKeyEvent(static_cast<int32_t>(keyEvent.code),
+    bool ret = renderWeb->GetDelegate()->OnKeyEvent(static_cast<int32_t>(keyEvent.code),
         static_cast<int32_t>(keyEvent.action));
+
+    renderWeb->HandleKeyEvent(keyEvent);
+    return ret;
 }
 } // namespace OHOS::Ace
