@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_LAYOUT_CONSTRAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_LAYOUT_CONSTRAINT_H
 
-#include <limits>
 #include <optional>
 #include <string>
 
@@ -28,7 +27,7 @@ template<typename T>
 struct LayoutConstraintT {
     ScaleProperty scaleProperty;
     SizeT<T> minSize { 0, 0 };
-    SizeT<T> maxSize { std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity() };
+    SizeT<T> maxSize { Infinity<T>(), Infinity<T>() };
     std::optional<SizeT<T>> parentIdealSize;
     std::optional<SizeT<T>> selfIdealSize;
 
@@ -36,7 +35,7 @@ struct LayoutConstraintT {
     {
         scaleProperty.Reset();
         minSize = { 0, 0 };
-        maxSize = { std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity() };
+        maxSize = { Infinity<T>(), Infinity<T>() };
         parentIdealSize.reset();
         selfIdealSize.reset();
     }

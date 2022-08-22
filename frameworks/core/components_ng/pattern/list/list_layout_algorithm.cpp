@@ -36,17 +36,17 @@ void UpdateListItemConstraint(Axis axis, const SizeF& selfIdealSize, LayoutConst
 {
     contentConstraint.parentIdealSize = selfIdealSize;
     if (axis == Axis::VERTICAL) {
-        contentConstraint.maxSize.SetHeight(std::numeric_limits<float>::infinity());
+        contentConstraint.maxSize.SetHeight(Infinity<float>());
         auto width = selfIdealSize.Width();
-        if (width == std::numeric_limits<float>::infinity()) {
+        if (GreatOrEqual(width, Infinity<float>())) {
             contentConstraint.maxSize.SetWidth(width);
             contentConstraint.minSize.SetWidth(width);
         }
         return;
     }
-    contentConstraint.maxSize.SetWidth(std::numeric_limits<float>::infinity());
+    contentConstraint.maxSize.SetWidth(Infinity<float>());
     auto height = selfIdealSize.Height();
-    if (height == std::numeric_limits<float>::infinity()) {
+    if (GreatOrEqual(height, Infinity<float>())) {
         contentConstraint.maxSize.SetHeight(height);
         contentConstraint.minSize.SetHeight(height);
     }
@@ -68,7 +68,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto idealSize =
         CreateIdealSize(listLayoutProperty->GetLayoutConstraint().value(), axis, listLayoutProperty->GetMeasureType());
-    if (GetMainAxisSize(idealSize, axis) == std::numeric_limits<float>::infinity()) {
+    if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
         LOGE("the list is infinity, error");
         return;
     }
