@@ -1389,7 +1389,7 @@ void RosenDecorationPainter::PaintSaturate(
     const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& saturate, const Color& color)
 {
     double saturates = saturate.Value();
-    if (GreatNotEqual(saturates, 0.0)) {
+    if (!NearEqual(saturates, 1.0) && GreatOrEqual(saturates, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
             canvas->clipRRect(outerRRect, true);

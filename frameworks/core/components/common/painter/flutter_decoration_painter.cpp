@@ -1446,13 +1446,12 @@ void FlutterDecorationPainter::PaintSaturate(const flutter::RRect& outerRRect, S
     const Dimension& saturate, const Color& color)
 {
     double saturates = saturate.Value();
-    if (GreatNotEqual(saturates, 0.0)) {
+    if (!NearEqual(saturates, 1.0) && GreatOrEqual(saturates, 0.0)) {
         if (canvas) {
             SkAutoCanvasRestore acr(canvas, true);
             canvas->clipRRect(outerRRect.sk_rrect, true);
             SkPaint paint;
             paint.setAntiAlias(true);
-#ifdef USE_SYSTEM_SKIA
             float matrix[20] = { 0 };
             matrix[0] = 0.3086f * (1 - saturates) + saturates;
             matrix[1] = matrix[11] = 0.6094f * (1 - saturates);
@@ -1461,10 +1460,11 @@ void FlutterDecorationPainter::PaintSaturate(const flutter::RRect& outerRRect, S
             matrix[6] = 0.6094f * (1 - saturates) + saturates;
             matrix[12] = 0.0820f * (1 - saturates) + saturates;
             matrix[18] = 1.0f;
+#ifdef USE_SYSTEM_SKIA
             auto filter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix);
             paint.setColorFilter(filter);
 #else
-            paint.setColorFilter(SkColorFilters::Blend(color.GetValue(), SkBlendMode::kDstOver));
+            paint.setColorFilter(SkColorFilters::Matrix(matrix));
 #endif
             SkCanvas::SaveLayerRec slr(nullptr, &paint, SkCanvas::kInitWithPrevious_SaveLayerFlag);
             canvas->saveLayer(slr);
