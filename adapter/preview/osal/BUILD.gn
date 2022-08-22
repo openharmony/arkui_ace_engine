@@ -19,18 +19,18 @@ template("utilsecurec_source") {
   ohos_source_set(target_name) {
     part_name = ace_engine_part
     defines += invoker.defines
-    sources = [ "//utils/native/base/src/securec/vsnprintf_s_p.c" ]
+    sources = [ "//commonlibrary/c_utils/base/src/securec/vsnprintf_s_p.c" ]
     if (platform == "windows") {
       sources += [
-        "//utils/native/base/src/securec/memset_s.c",
-        "//utils/native/base/src/securec/securecutil.c",
-        "//utils/native/base/src/securec/secureinput_w.c",
-        "//utils/native/base/src/securec/secureprintoutput_a.c",
-        "//utils/native/base/src/securec/secureprintoutput_w.c",
+        "//commonlibrary/c_utils/base/src/securec/memset_s.c",
+        "//commonlibrary/c_utils/base/src/securec/securecutil.c",
+        "//commonlibrary/c_utils/base/src/securec/secureinput_w.c",
+        "//commonlibrary/c_utils/base/src/securec/secureprintoutput_a.c",
+        "//commonlibrary/c_utils/base/src/securec/secureprintoutput_w.c",
       ]
       cflags = [ "-Wno-inconsistent-dllimport" ]
     }
-    configs = [ "//utils/native/base:utils_config" ]
+    configs = [ "//commonlibrary/c_utils/base:utils_config" ]
   }
 }
 
@@ -71,7 +71,7 @@ template("ace_osal_preview_source_set") {
         "resource_adapter_impl_standard.cpp",
         "resource_convertor.cpp",
       ]
-      include_dirs = [ "//utils/native/base/include" ]
+      include_dirs = [ "//commonlibrary/c_utils/base/include" ]
       defines += [ "OHOS_STANDARD_SYSTEM" ]
       if (platform == "windows") {
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
@@ -81,7 +81,7 @@ template("ace_osal_preview_source_set") {
     } else {
       sources += [ "resource_adapter_impl.cpp" ]
       include_dirs = [
-        "//utils/native/base/include",
+        "//commonlibrary/c_utils/base/include",
         "//prebuilts/ace-toolkit/preview/rich/include/resmgr/resourcemanager/include",
       ]
       if (platform == "windows") {

@@ -86,7 +86,7 @@ ohos_unittest("ListElementTest") {
 config("config_tabbar_element_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$ace_root",
   ]
 }

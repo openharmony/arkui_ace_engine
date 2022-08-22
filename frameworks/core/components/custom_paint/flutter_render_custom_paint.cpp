@@ -17,6 +17,7 @@
 
 #include <cmath>
 
+#include "commonlibrary/c_utils/base/include/securec.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
@@ -44,7 +45,6 @@
 #include "core/components/font/flutter_font_collection.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/flutter_render_context.h"
-#include "utils/native/base/include/securec.h"
 
 namespace OHOS::Ace {
 namespace {

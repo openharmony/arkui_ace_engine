@@ -37,9 +37,9 @@ ohos_shared_library("plugincomponent") {
     "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
     "$ace_root/build:libace",
     "$ace_root/build:libace_engine_declarative",
+    "//commonlibrary/c_utils/base:utils",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//foundation/arkui/napi/:ace_napi",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [

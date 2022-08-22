@@ -39,7 +39,7 @@ template("ace_osal_ohos_source_set") {
       configs = [ "$ace_root:ace_config" ]
     }
     include_dirs = [
-      "//utils/native/base/include",
+      "//commonlibrary/c_utils/base/include",
       "//foundation/window/window_manager/interfaces/innerkits",
     ]
 

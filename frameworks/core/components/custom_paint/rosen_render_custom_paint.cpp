@@ -17,6 +17,7 @@
 
 #include <cmath>
 
+#include "commonlibrary/c_utils/base/include/securec.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
@@ -35,7 +36,6 @@
 #include "third_party/skia/include/encode/SkWebpEncoder.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 #include "third_party/skia/include/utils/SkParsePath.h"
-#include "utils/native/base/include/securec.h"
 
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"

@@ -80,7 +80,6 @@ ohos_unittest("FocusTest") {
   deps = [
     "$cjson_root:cjson_static",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
@@ -88,6 +87,7 @@ ohos_unittest("FocusTest") {
   } else {
     external_deps = [ "hilog:libhilog" ]
   }
+  external_deps += [ "c_utils:utils" ]
 
   part_name = ace_engine_part
 }

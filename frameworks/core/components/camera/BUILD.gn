@@ -33,7 +33,7 @@ config("standard_camera_config") {
     "//foundation/multimedia/camera_standard/services/camera_service/binder/client/include",
     "//foundation/multimedia/camera_standard/services/camera_service/binder/server/include",
     "//foundation/multimedia/camera_standard/services/camera_service/include",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
 }
 
@@ -51,10 +51,10 @@ build_component("camera") {
     deps = [
       "//foundation/graphic/graphic_2d:libsurface",
       "//foundation/multimedia/camera_standard/frameworks/native/camera:camera_framework",
-      "//utils/native/base:utils",
     ]
 
     external_deps = [
+      "c_utils:utils",
       "ipc:ipc_core",
       "multimedia_player_framework:media_client",
     ]

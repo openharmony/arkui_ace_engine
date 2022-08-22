@@ -19,7 +19,7 @@ module_output_path = "ui_service/ui_service"
 ohos_unittest("ui_service_stub_test") {
   module_out_path = module_output_path
 
-  include_dirs = [ "//utils/native/base/include" ]
+  include_dirs = [ "//commonlibrary/c_utils/base/include" ]
 
   sources = [ "ui_service_stub_test.cpp" ]
 
@@ -33,12 +33,12 @@ ohos_unittest("ui_service_stub_test") {
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",

@@ -53,7 +53,7 @@ ohos_unittest("RenderSvgTest") {
 config("config_render_svg_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$ace_root",
   ]
 }

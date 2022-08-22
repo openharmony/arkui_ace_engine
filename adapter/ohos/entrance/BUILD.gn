@@ -62,11 +62,11 @@ template("ace_ohos_standard_source_set") {
     include_dirs = [
       "$ability_runtime_inner_api_path/runtime/include/",
       "$ability_runtime_napi_path/featureAbility",
+      "//commonlibrary/c_utils/base/include",
       "//foundation/arkui/napi/interfaces/kits",
       "//foundation/arkui/napi/native_engine",
       "//foundation/window/window_manager/interfaces/innerkits",
       "//third_party/node/src",
-      "//utils/native/base/include",
     ]
 
     deps = [
