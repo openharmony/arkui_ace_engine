@@ -333,6 +333,9 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
 #else
     settings.enable_software_rendering = true;
 #endif
+#ifdef ENABLE_ROSEN_BACKEND
+    settings.use_system_render_thread = SystemProperties::GetRosenBackendEnabled();
+#endif
     settings.platform_as_ui_thread = usePlatformThread;
     settings.use_current_event_runner = useCurrentEventRunner;
     LOGD("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
