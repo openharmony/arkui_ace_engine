@@ -125,17 +125,17 @@ public:
         getChildCallback_ = std::move(callback);
     }
 
-    RefPtr<RenderNode> GetSwiperStartRnderNode() const
+    RefPtr<RenderNode> GetSwiperStartRenderNode() const
     {
         return getChildCallback_ ? getChildCallback_(ListItemChildType::SWIPER_START) : nullptr;
     }
 
-    RefPtr<RenderNode> GetSwiperEndRnderNode() const
+    RefPtr<RenderNode> GetSwiperEndRenderNode() const
     {
         return getChildCallback_ ? getChildCallback_(ListItemChildType::SWIPER_END) : nullptr;
     }
 
-    RefPtr<RenderNode> GetItemChildRnderNode() const
+    RefPtr<RenderNode> GetItemChildRenderNode() const
     {
         return getChildCallback_ ? getChildCallback_(ListItemChildType::ITEM_CHILD) : nullptr;
     }
