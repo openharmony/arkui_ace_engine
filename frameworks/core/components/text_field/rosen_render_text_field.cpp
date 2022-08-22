@@ -141,7 +141,7 @@ void RosenRenderTextField::PaintCaret(SkCanvas& canvas, const Rect& caretRect)
         cursorColor = style_.GetTextColor();
     }
     paint.setColor(Constants::ConvertSkColor(cursorColor));
-
+    paint.setAntiAlias(true);
     if (NearZero(cursorRadius_.Value())) {
         canvas.drawRect(
             SkRect::MakeLTRB(caretRect.Left(), caretRect.Top(), caretRect.Right(), caretRect.Bottom()), paint);
