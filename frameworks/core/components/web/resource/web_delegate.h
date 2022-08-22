@@ -157,7 +157,6 @@ public:
     void CopyImage() const override;
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;
-    const int32_t MENU_ID_IMAGE_COPY = 221;
 };
 
 class WebGeolocationOhos : public WebGeolocation {

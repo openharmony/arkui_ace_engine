@@ -346,7 +346,7 @@ void ContextMenuResultOhos::Cancel() const
 void ContextMenuResultOhos::CopyImage() const
 {
     if (callback_) {
-        callback_->Continue(MENU_ID_IMAGE_COPY, EF_NONE);
+        callback_->Continue(CI_IMAGE_COPY, EF_NONE);
     }
 }
 
