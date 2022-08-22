@@ -388,7 +388,7 @@ public:
     static JSRef<JSObject> NewInstance();
 
 private:
-    static std::string jsName;
+    static thread_local std::string jsName;
     /*  OPTIMIZE(cvetan): Functions can be stored at compile-time with an additional index as a template parameter, for
         example:
 
@@ -397,10 +397,10 @@ private:
 
         But only if current approach proves to be a bottleneck.
     */
-    static std::unordered_map<int, IFunctionBinding*> functions_;
-    static std::unordered_map<int, IFunctionBinding*> getFunctions_;
-    static std::unordered_map<int, IFunctionBinding*> setFunctions_;
-    static int nextFreeId_;
+    static thread_local std::unordered_map<int, std::unique_ptr<IFunctionBinding>> functions_;
+    static thread_local std::unordered_map<int, std::unique_ptr<IFunctionBinding>> getFunctions_;
+    static thread_local std::unordered_map<int, std::unique_ptr<IFunctionBinding>> setFunctions_;
+    static thread_local int nextFreeId_;
 };
 
 }; // namespace OHOS::Ace::Framework

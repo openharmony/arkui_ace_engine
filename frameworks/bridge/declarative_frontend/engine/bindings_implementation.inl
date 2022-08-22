@@ -18,15 +18,15 @@
 namespace OHOS::Ace::Framework {
 
 template<typename T, template<typename> typename ImplDetail>
-std::unordered_map<int, IFunctionBinding*> JSClassImpl<T, ImplDetail>::functions_;
+thread_local std::unordered_map<int, std::unique_ptr<IFunctionBinding>> JSClassImpl<T, ImplDetail>::functions_;
 template<typename T, template<typename> typename ImplDetail>
-std::unordered_map<int, IFunctionBinding*> JSClassImpl<T, ImplDetail>::getFunctions_;
+thread_local std::unordered_map<int, std::unique_ptr<IFunctionBinding>> JSClassImpl<T, ImplDetail>::getFunctions_;
 template<typename T, template<typename> typename ImplDetail>
-std::unordered_map<int, IFunctionBinding*> JSClassImpl<T, ImplDetail>::setFunctions_;
+thread_local std::unordered_map<int, std::unique_ptr<IFunctionBinding>> JSClassImpl<T, ImplDetail>::setFunctions_;
 template<typename T, template<typename> typename ImplDetail>
-int JSClassImpl<T, ImplDetail>::nextFreeId_ = 0;
+thread_local int JSClassImpl<T, ImplDetail>::nextFreeId_ = 0;
 template<typename T, template<typename> typename ImplDetail>
-std::string JSClassImpl<T, ImplDetail>::jsName;
+thread_local std::string JSClassImpl<T, ImplDetail>::jsName;
 
 template<typename C, template<typename> typename ImplDetail>
 void JSClassImpl<C, ImplDetail>::Declare(const char* name)
@@ -189,19 +189,19 @@ void JSClassImpl<C, ImplDetail>::Inherit()
 template<typename C, template<typename> typename ImplDetail>
 IFunctionBinding* JSClassImpl<C, ImplDetail>::GetFunctionBinding(int id)
 {
-    return functions_[id];
+    return functions_[id].get();
 }
 
 template<typename C, template<typename> typename ImplDetail>
 IFunctionBinding* JSClassImpl<C, ImplDetail>::GetGetFunctionBinding(int id)
 {
-    return getFunctions_[id];
+    return getFunctions_[id].get();
 }
 
 template<typename C, template<typename> typename ImplDetail>
 IFunctionBinding* JSClassImpl<C, ImplDetail>::GetSetFunctionBinding(int id)
 {
-    return setFunctions_[id];
+    return setFunctions_[id].get();
 }
 
 template<typename C, template<typename> typename ImplDetail>
