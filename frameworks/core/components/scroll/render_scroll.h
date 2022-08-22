@@ -22,7 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "core/animation/curve.h"
 #include "core/components/common/properties/scroll_bar.h"
-#include "core/components/refresh/render_refresh.h"
+#include "core/components/refresh/render_refresh_target.h"
 #include "core/components/scroll/scroll_bar_controller.h"
 #include "core/components/scroll/scroll_component.h"
 #include "core/components/scroll/scroll_edge_effect.h"
@@ -40,8 +40,8 @@ enum class ScrollType {
     SCROLL_TOP,
 };
 
-class RenderScroll : public RenderNode {
-    DECLARE_ACE_TYPE(RenderScroll, RenderNode)
+class RenderScroll : public RenderNode, public RenderRefreshTarget {
+    DECLARE_ACE_TYPE(RenderScroll, RenderNode, RenderRefreshTarget)
 
 public:
     ~RenderScroll() override;
@@ -271,7 +271,6 @@ private:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     void HandleScrollPosition(double scrollX, double scrollY, int32_t scrollState) const;
     void SetEdgeEffectAttribute();
-    bool HandleRefreshEffect(Offset& delta, int32_t source);
     void ResetScrollEventCallBack();
     void HandleScrollEffect();
     void SetBarCallBack(bool isVertical);
