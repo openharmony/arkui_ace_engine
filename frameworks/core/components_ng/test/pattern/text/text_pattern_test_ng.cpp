@@ -63,47 +63,61 @@ class TextPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
+    void SetUp() override;
+    void TearDown() override;
 
 protected:
-    RefPtr<FrameNode> CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty);
+    static RefPtr<FrameNode> CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty);
 };
 
 void TextPatternTestNg::SetUpTestCase() {}
 void TextPatternTestNg::TearDownTestCase() {}
 void TextPatternTestNg::SetUp() {}
 void TextPatternTestNg::TearDown() {}
+
 RefPtr<FrameNode> TextPatternTestNg::CreateTextParagraph(
     const std::string& createValue, const TestProperty& testProperty)
 {
     TextView::Create(createValue);
-    if (testProperty.fontSizeValue.has_value())
-        TextView::FontSize(testProperty.fontSizeValue.value());
-    if (testProperty.textColorValue.has_value())
-        TextView::TextColor(testProperty.textColorValue.value());
-    if (testProperty.italicFontStyleValue.has_value())
-        TextView::ItalicFontStyle(testProperty.italicFontStyleValue.value());
-    if (testProperty.fontWeightValue.has_value())
-        TextView::FontWeight(testProperty.fontWeightValue.value());
-    if (testProperty.fontFamilyValue.has_value())
-        TextView::FontFamily(testProperty.fontFamilyValue.value());
-    if (testProperty.textAlignValue.has_value())
-        TextView::TextAlign(testProperty.textAlignValue.value());
-    if (testProperty.textOverflowValue.has_value())
-        TextView::TextOverflow(testProperty.textOverflowValue.value());
-    if (testProperty.maxLinesValue.has_value())
-        TextView::MaxLines(testProperty.maxLinesValue.value());
-    if (testProperty.lineHeightValue.has_value())
-        TextView::LineHeight(testProperty.lineHeightValue.value());
-    if (testProperty.textDecorationValue.has_value())
-        TextView::TextDecoration(testProperty.textDecorationValue.value());
-    if (testProperty.textDecorationColorValue.has_value())
-        TextView::TextDecorationColor(testProperty.textDecorationColorValue.value());
-    if (testProperty.baselineOffsetValue.has_value())
-        TextView::BaselineOffset(testProperty.baselineOffsetValue.value());
-    if (testProperty.textCaseValue.has_value())
-        TextView::TextCase(testProperty.textCaseValue.value());
+    if (testProperty.fontSizeValue.has_value()) {
+        TextView::SetFontSize(testProperty.fontSizeValue.value());
+    }
+    if (testProperty.textColorValue.has_value()) {
+        TextView::SetTextColor(testProperty.textColorValue.value());
+    }
+    if (testProperty.italicFontStyleValue.has_value()) {
+        TextView::SetItalicFontStyle(testProperty.italicFontStyleValue.value());
+    }
+    if (testProperty.fontWeightValue.has_value()) {
+        TextView::SetFontWeight(testProperty.fontWeightValue.value());
+    }
+    if (testProperty.fontFamilyValue.has_value()) {
+        TextView::SetFontFamily(testProperty.fontFamilyValue.value());
+    }
+    if (testProperty.textAlignValue.has_value()) {
+        TextView::SetTextAlign(testProperty.textAlignValue.value());
+    }
+    if (testProperty.textOverflowValue.has_value()) {
+        TextView::SetTextOverflow(testProperty.textOverflowValue.value());
+    }
+    if (testProperty.maxLinesValue.has_value()) {
+        TextView::SetMaxLines(testProperty.maxLinesValue.value());
+    }
+    if (testProperty.lineHeightValue.has_value()) {
+        TextView::SetLineHeight(testProperty.lineHeightValue.value());
+    }
+    if (testProperty.textDecorationValue.has_value()) {
+        TextView::SetTextDecoration(testProperty.textDecorationValue.value());
+    }
+    if (testProperty.textDecorationColorValue.has_value()) {
+        TextView::SetTextDecorationColor(testProperty.textDecorationColorValue.value());
+    }
+    if (testProperty.baselineOffsetValue.has_value()) {
+        TextView::SetBaselineOffset(testProperty.baselineOffsetValue.value());
+    }
+    if (testProperty.textCaseValue.has_value()) {
+        TextView::SetTextCase(testProperty.textCaseValue.value());
+    }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
     return AceType::DynamicCast<FrameNode>(element);
@@ -113,7 +127,6 @@ RefPtr<FrameNode> TextPatternTestNg::CreateTextParagraph(
  * @tc.name: TextFrameNodeCreator001
  * @tc.desc: Test all the properties of text.
  * @tc.type: FUNC
- * @tc.author: yangweitao
  */
 HWTEST_F(TextPatternTestNg, TextFrameNodeCreator001, TestSize.Level1)
 {

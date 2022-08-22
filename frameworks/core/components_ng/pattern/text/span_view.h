@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_VIEW_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_VIEW_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_VIEW_H
 
 #include <string>
 
@@ -22,9 +22,10 @@
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT TextView {
+class ACE_EXPORT SpanView {
 public:
     static void Create(const std::string& content);
     static void SetFontSize(const Dimension& value);
@@ -32,15 +33,11 @@ public:
     static void SetItalicFontStyle(const ItalicFontStyle& value);
     static void SetFontWeight(const FontWeight& value);
     static void SetFontFamily(const std::vector<std::string>& value);
-    static void SetTextAlign(const TextAlign& value);
-    static void SetTextOverflow(const TextOverflow& value);
-    static void SetMaxLines(const uint32_t& value);
-    static void SetLineHeight(const Dimension& value);
     static void SetTextDecoration(const TextDecoration& value);
     static void SetTextDecorationColor(const Color& value);
-    static void SetBaselineOffset(const Dimension& value);
     static void SetTextCase(const TextCase& value);
+    static void SetOnClick(GestureEventFunc&& onClick);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_VIEW_H

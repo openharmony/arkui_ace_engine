@@ -151,6 +151,14 @@ void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
     }
 }
 
+void UINode::MarkNeedFlushDirty(PropertyChangeFlag extraFlag)
+{
+    auto parent = parent_.Upgrade();
+    if (parent) {
+        parent->MarkDirtyNode(extraFlag);
+    }
+}
+
 void UINode::MarkNeedSyncRenderTree()
 {
     auto parent = parent_.Upgrade();

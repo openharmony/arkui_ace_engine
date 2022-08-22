@@ -46,6 +46,7 @@ public:
 
     // interfaces for build text paragraph
     virtual void PushStyle(const TextStyle& style) = 0;
+    virtual void PopStyle() = 0;
     virtual void AddText(const std::u16string& text) = 0;
     virtual void Build() = 0;
     virtual void Reset() = 0;
