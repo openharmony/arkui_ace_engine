@@ -99,7 +99,7 @@ HWTEST_F(UIServiceMgrStubTest, UIServiceMgrStubTest_RegisterCallBack_0100, TestS
         return;
     }
 
-    Want want;
+    AAFwk::Want want;
     data.WriteParcelable(&want);
     if (uiService == nullptr) {
         HILOG_ERROR("register observer fail, uiService is nullptr");
@@ -144,7 +144,7 @@ HWTEST_F(UIServiceMgrStubTest, UIServiceMgrStubTest_UnregisterCallBack_0100, Tes
         GTEST_LOG_(ERROR) << "WriteInterfaceToken(data) retval is false end";
         return;
     }
-    Want want;
+    AAFwk::Want want;
     data.WriteParcelable(&want);
     if (uiService == nullptr) {
         HILOG_ERROR("register observer fail, uiService is nullptr");
@@ -188,7 +188,7 @@ HWTEST_F(UIServiceMgrStubTest, UIServiceMgrStubTest_Push_0100, TestSize.Level1)
         GTEST_LOG_(ERROR) << "WriteInterfaceToken(data) retval is false end";
         return;
     }
-    Want want;
+    AAFwk::Want want;
     const std::string name = "name";
     const std::string jsonPath = "jsonPath";
     const std::string dataStr = "data";
@@ -246,7 +246,7 @@ HWTEST_F(UIServiceMgrStubTest, UIServiceMgrStubTest_Request_0100, TestSize.Level
         GTEST_LOG_(ERROR) << "WriteInterfaceToken(data) retval is false end";
         return;
     }
-    Want want;
+    AAFwk::Want want;
     const std::string name = "name";
     const std::string dataStr = "data";
     data.WriteParcelable(&want);
@@ -293,7 +293,7 @@ HWTEST_F(UIServiceMgrStubTest, UIServiceMgrStubTest_ReturnRequest_0100, TestSize
         GTEST_LOG_(ERROR) << "WriteInterfaceToken(data) retval is false end";
         return;
     }
-    Want want;
+    AAFwk::Want want;
     const std::string source = "source";
     const std::string dataStr = "data";
     const std::string extraData = "extraData";
