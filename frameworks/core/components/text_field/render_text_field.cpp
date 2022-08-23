@@ -1012,12 +1012,17 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
         }
+        auto inputMethod = MiscServices::InputMethodController::GetInstance();
+        if (!inputMethod) {
+            LOGE("Request open soft keyboard failed because input method is null.");
+            return false;
+        }
         auto context = context_.Upgrade();
         if (context) {
             LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
-            MiscServices::InputMethodController::GetInstance()->SetCallingWindow(context->GetWindowId());
+            inputMethod->SetCallingWindow(context->GetWindowId());
         }
-        MiscServices::InputMethodController::GetInstance()->Attach(textChangeListener_);
+        inputMethod->Attach(textChangeListener_);
 #else
         if (!HasConnection()) {
             AttachIme();
@@ -1054,15 +1059,20 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
         if (!textFieldController_) {
             StopTwinkling();
         }
-        if (HasConnection()) {
-            LOGI("Request close soft keyboard");
+        LOGI("Request close soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
-            MiscServices::InputMethodController::GetInstance()->HideTextInput();
+        auto inputMethod = MiscServices::InputMethodController::GetInstance();
+        if (!inputMethod) {
+            LOGE("Request close soft keyboard failed because input method is null.");
+            return false;
+        }
+        inputMethod->HideTextInput();
 #else
+        if (HasConnection()) {
             connection_->Close(GetInstanceId());
             connection_ = nullptr;
-#endif
         }
+#endif
 
         if (onKeyboardClose_) {
             onKeyboardClose_(forceClose);
