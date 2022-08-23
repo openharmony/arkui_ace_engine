@@ -88,6 +88,11 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
 {
     LOGD("show ActionSheet");
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
     if (!args[0]->IsObject()) {
         LOGE("args is not an object, can't show ActionSheet.");
         return;

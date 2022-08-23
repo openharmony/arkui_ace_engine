@@ -85,6 +85,12 @@ void ParseButtonObj(
 void JSAlertDialog::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
+    
     DialogProperties properties { .type = DialogType::ALERT_DIALOG };
     if (args[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(args[0]);

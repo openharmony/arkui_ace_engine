@@ -83,6 +83,11 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 {
     LOGD("JSAnimation");
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have 1 object argument.");
         return;
@@ -129,6 +134,11 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
     if (info.Length() < 2) {
         LOGE("The arg is wrong, it is supposed to have two arguments.");
         return;
