@@ -69,6 +69,9 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     paraStyle.maxLines_ = textStyle.GetMaxLines();
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
+    if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
+        paraStyle.ellipsis_ = RSParagraphStyle::ELLIPSIS;
+    }
 
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance());
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));

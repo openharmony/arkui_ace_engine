@@ -24,6 +24,17 @@
 #include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace::NG {
+void TextPattern::OnModifyDone()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    bool shouldClipToContent = textLayoutProperty->GetTextOverflow().value_or(TextOverflow::NONE) == TextOverflow::CLIP;
+    host->GetRenderContext()->SetClipToFrame(shouldClipToContent);
+}
+
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
 {
     if (skipMeasure || dirty->SkipMeasureContent()) {
