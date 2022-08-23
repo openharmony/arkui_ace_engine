@@ -105,7 +105,7 @@ HWTEST_F(ThemeManagerTest, GlobalTheme001, TestSize.Level1)
  * @tc.name: GlobalTheme002
  * @tc.desc: Test global theme contains all components' theme.
  * @tc.type: FUNC
- * @tc.require: issueI5IZVY
+ * @tc.require: issueI5IY7K
  */
 HWTEST_F(ThemeManagerTest, GlobalTheme002, TestSize.Level1)
 {
