@@ -116,6 +116,13 @@ public:
         return sideBarPosition_;
     }
 
+    const std::vector<Rect>& GetTouchRectList() override
+    {
+        touchRectList_.clear();
+        touchRectList_.emplace_back(GetPaintRect());
+        return touchRectList_;
+    }
+
 private:
     void DoSideBarAnimation();
     void SetChildrenStatus() override;
