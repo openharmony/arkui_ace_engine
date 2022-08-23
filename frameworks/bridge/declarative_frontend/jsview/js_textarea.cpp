@@ -155,8 +155,11 @@ void JSTextArea::Create(const JSCallbackInfo& info)
     }
     JSTextField::UpdateDecoration(boxComponent, textAreaComponent, boxBorder, theme);
 
+    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusNode(true);
+
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("textarea create error, info is non-valid");
+        LOGI("TextArea create without argument");
         return;
     }
 
@@ -175,8 +178,6 @@ void JSTextArea::Create(const JSCallbackInfo& info)
         if (jsController) {
             jsController->SetController(textAreaComponent->GetTextFieldController());
         }
-    } else {
-        LOGI("controller is nullptr");
     }
 }
 
