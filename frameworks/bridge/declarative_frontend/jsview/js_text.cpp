@@ -86,7 +86,7 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::FontSize(fontSize);
+        NG::TextView::SetFontSize(fontSize);
         return;
     }
     auto component = GetComponent();
@@ -97,13 +97,13 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetFontSize(fontSize);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetFontWeight(const std::string& value)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::FontWeight(ConvertStrToFontWeight(value));
+        NG::TextView::SetFontWeight(ConvertStrToFontWeight(value));
         return;
     }
 
@@ -115,7 +115,7 @@ void JSText::SetFontWeight(const std::string& value)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetTextColor(const JSCallbackInfo& info)
@@ -129,7 +129,7 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::TextColor(textColor);
+        NG::TextView::SetTextColor(textColor);
         return;
     }
     auto component = GetComponent();
@@ -140,7 +140,7 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetTextColor(textColor);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetTextOverflow(const JSCallbackInfo& info)
@@ -162,7 +162,7 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
             break;
         }
         if (Container::IsCurrentUseNewPipeline()) {
-            NG::TextView::TextOverflow(TEXT_OVERFLOWS[overflow]);
+            NG::TextView::SetTextOverflow(TEXT_OVERFLOWS[overflow]);
             break;
         }
         auto component = GetComponent();
@@ -172,16 +172,16 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
         }
         auto textStyle = component->GetTextStyle();
         textStyle.SetTextOverflow(TEXT_OVERFLOWS[overflow]);
-        component->SetTextStyle(std::move(textStyle));
+        component->SetTextStyle(textStyle);
     } while (false);
-    
+
     info.SetReturnValue(info.This());
 }
 
 void JSText::SetMaxLines(int32_t value)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::MaxLines(value);
+        NG::TextView::SetMaxLines(value);
         return;
     }
     auto component = GetComponent();
@@ -192,18 +192,18 @@ void JSText::SetMaxLines(int32_t value)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetMaxLines(value);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
         LOGE("Text fontStyle(%{public}d) illegal value", value);
-        return ;
+        return;
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::ItalicFontStyle(FONT_STYLES[value]);
+        NG::TextView::SetItalicFontStyle(FONT_STYLES[value]);
         return;
     }
 
@@ -215,7 +215,7 @@ void JSText::SetFontStyle(int32_t value)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetFontStyle(FONT_STYLES[value]);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetTextAlign(int32_t value)
@@ -225,7 +225,7 @@ void JSText::SetTextAlign(int32_t value)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::TextAlign(TEXT_ALIGNS[value]);
+        NG::TextView::SetTextAlign(TEXT_ALIGNS[value]);
         return;
     }
     auto component = GetComponent();
@@ -236,7 +236,7 @@ void JSText::SetTextAlign(int32_t value)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetTextAlign(TEXT_ALIGNS[value]);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetAlign(int32_t value)
@@ -269,7 +269,7 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::LineHeight(value);
+        NG::TextView::SetLineHeight(value);
         return;
     }
     auto component = GetComponent();
@@ -280,7 +280,7 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetLineHeight(value);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetFontFamily(const JSCallbackInfo& info)
@@ -295,7 +295,7 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::FontFamily(fontFamilies);
+        NG::TextView::SetFontFamily(fontFamilies);
         return;
     }
     auto component = GetComponent();
@@ -306,7 +306,7 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetFontFamilies(fontFamilies);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetMinFontSize(const JSCallbackInfo& info)
@@ -327,7 +327,7 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetAdaptMinFontSize(fontSize);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetMaxFontSize(const JSCallbackInfo& info)
@@ -348,7 +348,7 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetAdaptMaxFontSize(fontSize);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetLetterSpacing(const JSCallbackInfo& info)
@@ -369,7 +369,7 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetLetterSpacing(value);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetTextCase(int32_t value)
@@ -379,7 +379,7 @@ void JSText::SetTextCase(int32_t value)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::TextCase(TEXT_CASES[value]);
+        NG::TextView::SetTextCase(TEXT_CASES[value]);
         return;
     }
     auto component = GetComponent();
@@ -390,7 +390,7 @@ void JSText::SetTextCase(int32_t value)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetTextCase(TEXT_CASES[value]);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetBaselineOffset(const JSCallbackInfo& info)
@@ -404,7 +404,7 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::BaselineOffset(value);
+        NG::TextView::SetBaselineOffset(value);
         return;
     }
     auto component = GetComponent();
@@ -415,7 +415,7 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetBaselineOffset(value);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 }
 
 void JSText::SetDecoration(const JSCallbackInfo& info)
@@ -429,31 +429,39 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
         JSRef<JSVal> typeValue = obj->GetProperty("type");
         JSRef<JSVal> colorValue = obj->GetProperty("color");
 
+        std::optional<TextDecoration> textDecoration;
+        if (typeValue->IsNumber()) {
+            textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+        }
+        std::optional<Color> colorVal;
+        Color result;
+        if (ParseJsColor(colorValue, result)) {
+            colorVal = result;
+        }
+
         if (Container::IsCurrentUseNewPipeline()) {
-            if (typeValue->IsNumber()) {
-                NG::TextView::TextDecoration(TextDecoration(typeValue->ToNumber<int32_t>()));
+            if (textDecoration) {
+                NG::TextView::SetTextDecoration(textDecoration.value());
             }
-            Color colorVal;
-            if (ParseJsColor(colorValue, colorVal)) {
-                NG::TextView::TextDecorationColor(colorVal);
+            if (colorVal) {
+                NG::TextView::SetTextDecorationColor(colorVal.value());
             }
             break;
         }
-        
+
         auto component = GetComponent();
         if (!component) {
             LOGE("component is not valid");
             break;
         }
         auto textStyle = component->GetTextStyle();
-        if (typeValue->IsNumber()) {
-            textStyle.SetTextDecoration(TextDecoration(typeValue->ToNumber<int32_t>()));
+        if (textDecoration) {
+            textStyle.SetTextDecoration(textDecoration.value());
         }
-        Color colorVal;
-        if (ParseJsColor(colorValue, colorVal)) {
-            textStyle.SetTextDecorationColor(colorVal);
+        if (colorVal) {
+            textStyle.SetTextDecorationColor(colorVal.value());
         }
-        component->SetTextStyle(std::move(textStyle));
+        component->SetTextStyle(textStyle);
     } while (false);
     info.SetReturnValue(info.This());
 }
@@ -472,7 +480,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 LOGD("About to call onclick method on js");
-                auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+                const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
                 auto newInfo = *clickInfo;
                 if (impl) {
                     impl->UpdateEventInfo(newInfo);
@@ -575,12 +583,12 @@ void JSText::Create(const JSCallbackInfo& info)
     auto textStyle = textComponent->GetTextStyle();
     textStyle.SetAllowScale(false);
     textStyle.SetFontSize(DEFAULT_FONT_SIZE);
-    textComponent->SetTextStyle(std::move(textStyle));
+    textComponent->SetTextStyle(textStyle);
 }
 
 RefPtr<TextComponentV2> JSText::GetComponent()
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     if (!stack) {
         return nullptr;
     }

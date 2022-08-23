@@ -44,7 +44,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto themeManager = pipeline->GetThemeManager();
     TextStyle textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(),
         textLayoutProperty->GetTextLineStyle(), themeManager ? themeManager->GetTheme<TextTheme>() : nullptr);
-    if (!CreateParagraph(textStyle, pipeline, textLayoutProperty->GetContent().value_or(""))) {
+    if (!CreateParagraph(textStyle, textLayoutProperty->GetContent().value_or(""))) {
         return std::nullopt;
     }
     if (contentConstraint.selfIdealSize.has_value() && NonNegative(contentConstraint.selfIdealSize->Width())) {
@@ -61,8 +61,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     return SizeF(static_cast<float>(GetTextWidth()), heightFinal);
 }
 
-bool TextLayoutAlgorithm::CreateParagraph(
-    const TextStyle& textStyle, const RefPtr<PipelineContext>& context, std::string content)
+bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content)
 {
     RSParagraphStyle paraStyle;
     paraStyle.textDirection_ = ToRSTextDirection(GetTextDirection(content));
@@ -71,11 +70,20 @@ bool TextLayoutAlgorithm::CreateParagraph(
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
 
-    std::unique_ptr<RSParagraphBuilder> builder =
-        RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance());
-    builder->PushStyle(ToRSTextStyle(context, textStyle));
-    StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    builder->AddText(StringUtils::Str8ToStr16(content));
+    auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance());
+    builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
+
+    if (spanItemChildren_.empty()) {
+        StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
+        builder->AddText(StringUtils::Str8ToStr16(content));
+    } else {
+        // When child nodes exist, the original text content is hidden.
+        for (const auto& child : spanItemChildren_) {
+            if (child) {
+                child->UpdateParagraph(builder.get());
+            }
+        }
+    }
     builder->Pop();
 
     auto paragraph = builder->Build();

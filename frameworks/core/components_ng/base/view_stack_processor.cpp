@@ -105,7 +105,10 @@ void ViewStackProcessor::PopContainer()
         return;
     }
 
-    while (top->IsAtomicNode()) {
+    while (top && (top->IsAtomicNode())) {
+        if (elementsStack_.size() == 1) {
+            return;
+        }
         Pop();
         top = GetMainElementNode();
     }

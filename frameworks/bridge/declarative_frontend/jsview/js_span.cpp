@@ -15,13 +15,16 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 
+#include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
+#include "core/common/container.h"
 #include "core/components/declaration/span/span_declaration.h"
+#include "core/components_ng/pattern/text/span_view.h"
 #include "core/event/ace_event_handler.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -45,6 +48,12 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SpanView::SetFontSize(fontSize);
+        return;
+    }
+
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
@@ -53,7 +62,7 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetFontSize(fontSize);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 
     auto declaration = component->GetDeclaration();
     if (declaration) {
@@ -63,6 +72,11 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
 
 void JSSpan::SetFontWeight(const std::string& value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SpanView::SetFontWeight(ConvertStrToFontWeight(value));
+        return;
+    }
+
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
@@ -71,7 +85,7 @@ void JSSpan::SetFontWeight(const std::string& value)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 
     auto declaration = component->GetDeclaration();
     if (declaration) {
@@ -89,6 +103,12 @@ void JSSpan::SetTextColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], textColor)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SpanView::SetTextColor(textColor);
+        return;
+    }
+
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
@@ -97,7 +117,7 @@ void JSSpan::SetTextColor(const JSCallbackInfo& info)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetTextColor(textColor);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 
     auto declaration = component->GetDeclaration();
     if (declaration) {
@@ -107,23 +127,29 @@ void JSSpan::SetTextColor(const JSCallbackInfo& info)
 
 void JSSpan::SetFontStyle(int32_t value)
 {
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
     if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
+        auto style = FONT_STYLES[value];
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::SpanView::SetItalicFontStyle(style);
+            return;
+        }
+
+        auto component = GetComponent();
+        if (!component) {
+            LOGE("component is not valid");
+            return;
+        }
         auto textStyle = component->GetTextStyle();
-        textStyle.SetFontStyle(FONT_STYLES[value]);
-        component->SetTextStyle(std::move(textStyle));
+        textStyle.SetFontStyle(style);
+        component->SetTextStyle(textStyle);
 
         auto declaration = component->GetDeclaration();
         if (declaration) {
             declaration->SetHasSetFontStyle(true);
         }
     } else {
-        LOGE("Text fontStyle(%d) illegal value", value);
+        LOGE("Text fontStyle(%{public}d) illegal value", value);
     }
 }
 
@@ -138,6 +164,12 @@ void JSSpan::SetFontFamily(const JSCallbackInfo& info)
         LOGE("Parse FontFamilies failed");
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SpanView::SetFontFamily(fontFamilies);
+        return;
+    }
+
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
@@ -146,7 +178,7 @@ void JSSpan::SetFontFamily(const JSCallbackInfo& info)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetFontFamilies(fontFamilies);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 
     auto declaration = component->GetDeclaration();
     if (declaration) {
@@ -164,6 +196,9 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
+
+    // TODO: Add support for NG.
+
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
@@ -172,7 +207,7 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
 
     auto textStyle = component->GetTextStyle();
     textStyle.SetLetterSpacing(value);
-    component->SetTextStyle(std::move(textStyle));
+    component->SetTextStyle(textStyle);
 
     auto declaration = component->GetDeclaration();
     if (declaration) {
@@ -182,16 +217,22 @@ void JSSpan::SetLetterSpacing(const JSCallbackInfo& info)
 
 void JSSpan::SetTextCase(int32_t value)
 {
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
     if (value >= 0 && value < static_cast<int32_t>(TEXT_CASES.size())) {
+        auto textCase = TEXT_CASES[value];
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::SpanView::SetTextCase(textCase);
+            return;
+        }
+
+        auto component = GetComponent();
+        if (!component) {
+            LOGE("component is not valid");
+            return;
+        }
         auto textStyle = component->GetTextStyle();
-        textStyle.SetTextCase(TEXT_CASES[value]);
-        component->SetTextStyle(std::move(textStyle));
+        textStyle.SetTextCase(textCase);
+        component->SetTextStyle(textStyle);
 
         auto declaration = component->GetDeclaration();
         if (declaration) {
@@ -204,30 +245,49 @@ void JSSpan::SetTextCase(int32_t value)
 
 void JSSpan::SetDecoration(const JSCallbackInfo& info)
 {
-    if (info[0]->IsObject()) {
-        auto component = GetComponent();
-        if (component) {
-            auto textStyle = component->GetTextStyle();
-
-            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-            JSRef<JSVal> typeValue = obj->GetProperty("type");
-            JSRef<JSVal> colorValue = obj->GetProperty("color");
-
-            if (typeValue->IsNumber()) {
-                textStyle.SetTextDecoration(TextDecoration(typeValue->ToNumber<int32_t>()));
-            }
-            Color colorVal;
-            if (ParseJsColor(colorValue, colorVal)) {
-                textStyle.SetTextDecorationColor(colorVal);
-            }
-            component->SetTextStyle(std::move(textStyle));
-
-            auto declaration = component->GetDeclaration();
-            if (declaration) {
-                declaration->SetHasSetTextDecoration(true);
-            }
+    do {
+        if (!info[0]->IsObject()) {
+            LOGE("info[0] not is Object");
+            break;
         }
-    }
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> typeValue = obj->GetProperty("type");
+        JSRef<JSVal> colorValue = obj->GetProperty("color");
+
+        std::optional<TextDecoration> textDecoration;
+        if (typeValue->IsNumber()) {
+            textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());
+        }
+        std::optional<Color> colorVal;
+        Color result;
+        if (ParseJsColor(colorValue, result)) {
+            colorVal = result;
+        }
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (textDecoration) {
+                NG::SpanView::SetTextDecoration(textDecoration.value());
+            }
+            if (colorVal) {
+                NG::SpanView::SetTextDecorationColor(colorVal.value());
+            }
+            break;
+        }
+
+        auto component = GetComponent();
+        if (!component) {
+            LOGE("component is not valid");
+            break;
+        }
+        auto textStyle = component->GetTextStyle();
+        if (textDecoration) {
+            textStyle.SetTextDecoration(textDecoration.value());
+        }
+        if (colorVal) {
+            textStyle.SetTextDecorationColor(colorVal.value());
+        }
+        component->SetTextStyle(textStyle);
+    } while (false);
     info.SetReturnValue(info.This());
 }
 
@@ -245,7 +305,7 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
             [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 LOGD("About to call onclick method on js");
-                auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+                const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
                 auto newInfo = *clickInfo;
                 if (impl) {
                     impl->UpdateEventInfo(newInfo);
@@ -264,7 +324,7 @@ void JSSpan::JsRemoteMessage(const JSCallbackInfo& info)
 {
     EventMarker remoteMessageEventId;
     JSInteractableView::JsRemoteMessage(info, remoteMessageEventId);
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto textSpanComponent = AceType::DynamicCast<TextSpanComponent>(stack->GetMainComponent());
     textSpanComponent->SetRemoteMessageEventId(remoteMessageEventId);
 }
@@ -300,6 +360,11 @@ void JSSpan::Create(const JSCallbackInfo& info)
         ParseJsString(info[0], label);
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SpanView::Create(label);
+        return;
+    }
+
     auto spanComponent = AceType::MakeRefPtr<OHOS::Ace::TextSpanComponent>(label);
     ViewStackProcessor::GetInstance()->ClaimElementId(spanComponent);
     ViewStackProcessor::GetInstance()->Push(spanComponent);
@@ -307,12 +372,12 @@ void JSSpan::Create(const JSCallbackInfo& info)
     // Init text style, allowScale is not supported in declarative.
     auto textStyle = spanComponent->GetTextStyle();
     textStyle.SetAllowScale(false);
-    spanComponent->SetTextStyle(std::move(textStyle));
+    spanComponent->SetTextStyle(textStyle);
 }
 
 RefPtr<TextSpanComponent> JSSpan::GetComponent()
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     if (!stack) {
         return nullptr;
     }

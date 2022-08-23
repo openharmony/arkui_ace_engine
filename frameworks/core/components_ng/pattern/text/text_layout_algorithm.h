@@ -17,12 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_H
 
 #include <string>
+#include <utility>
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -34,6 +36,10 @@ class ACE_EXPORT TextLayoutAlgorithm : public BoxLayoutAlgorithm {
 public:
     TextLayoutAlgorithm();
 
+    explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spanItemChildren)
+        : spanItemChildren_(std::move(spanItemChildren))
+    {}
+
     ~TextLayoutAlgorithm() override = default;
 
     void OnReset() override;
@@ -44,10 +50,11 @@ public:
     const std::shared_ptr<RSParagraph>& GetParagraph();
 
 private:
-    bool CreateParagraph(const TextStyle& textStyle, const RefPtr<PipelineContext>& context, std::string content);
-    TextDirection GetTextDirection(const std::string& content);
+    bool CreateParagraph(const TextStyle& textStyle, std::string content);
+    static TextDirection GetTextDirection(const std::string& content);
     double GetTextWidth() const;
 
+    std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::shared_ptr<RSParagraph> paragraph_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);

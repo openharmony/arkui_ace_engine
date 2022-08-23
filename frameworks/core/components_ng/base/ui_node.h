@@ -138,6 +138,8 @@ public:
 
     virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
+    void MarkNeedFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+
     virtual void FlushUpdateAndMarkDirty()
     {
         for (const auto& child : children_) {
