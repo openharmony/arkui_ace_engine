@@ -458,6 +458,7 @@ protected:
     // One line TextField is more common in usual cases.
     uint32_t maxLines_ = 1;
     size_t textLines_ = 0;
+    size_t textLinesLast_ = 0;
     int32_t cursorPositionForShow_ = 0;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
     DirectionStatus directionStatus_ = DirectionStatus::LEFT_LEFT;
@@ -481,6 +482,7 @@ protected:
     bool isCallbackCalled_ = false; // Whether custom font is loaded.
     bool isOverlayShowed_ = false;  // Whether overlay has showed.
     double textHeight_ = 0.0;       // Height of text.
+    double textHeightLast_ = 0.0;
     double iconSize_ = 0.0;
     double iconHotZoneSize_ = 0.0;
     double extendHeight_ = 0.0;
