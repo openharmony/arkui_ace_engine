@@ -323,6 +323,31 @@ void RenderTextField::OnPaintFinish()
     UpdateOverlay();
     InitAccessibilityEventListener();
     UpdateAccessibilityPosition();
+    auto layoutParamChanged = lastLayoutParam_.value() == GetLayoutParam();
+    if (layoutParamChanged) {
+        lastLayoutParam_ = std::make_optional(GetLayoutParam());
+    }
+    bool needNotifyChangeEvent = !isValueFromFront_ || layoutParamChanged;
+    // If height or lines is changed, make needNotifyChangeEvent_ true to notify change event.
+    if (needNotifyChangeEvent && (!NearEqual(textHeight_, textHeightLast_) || textLines_ != textLinesLast_)) {
+        needNotifyChangeEvent_ = true;
+        textHeightLast_ = textHeight_;
+        textLinesLast_ = textLines_;
+    }
+    if (needNotifyChangeEvent_ && (onTextChangeEvent_ || onValueChangeEvent_ || onChange_)) {
+        needNotifyChangeEvent_ = false;
+        if (onValueChangeEvent_) {
+            onValueChangeEvent_(GetEditingValue().text);
+        }
+        if (onTextChangeEvent_) {
+            auto jsonResult = JsonUtil::Create(true);
+            jsonResult->Put("text", GetEditingValue().text.c_str());
+            jsonResult->Put("value", GetEditingValue().text.c_str());
+            jsonResult->Put("lines", textLines_);
+            jsonResult->Put("height", textHeight_);
+            onTextChangeEvent_(std::string(R"("change",)").append(jsonResult->ToString()));
+        }
+    }
 }
 
 void RenderTextField::PerformLayout()
@@ -376,20 +401,6 @@ void RenderTextField::PerformLayout()
     }
     if (renderHideIcon_) {
         renderHideIcon_->Layout(layoutParam);
-    }
-    if (needNotifyChangeEvent_ && (onTextChangeEvent_ || onValueChangeEvent_ || onChange_)) {
-        needNotifyChangeEvent_ = false;
-        if (onValueChangeEvent_) {
-            onValueChangeEvent_(GetEditingValue().text);
-        }
-        if (onTextChangeEvent_) {
-            auto jsonResult = JsonUtil::Create(true);
-            jsonResult->Put("text", GetEditingValue().text.c_str());
-            jsonResult->Put("value", GetEditingValue().text.c_str());
-            jsonResult->Put("lines", textLines_);
-            jsonResult->Put("height", textHeight_);
-            onTextChangeEvent_(std::string(R"("change",)").append(jsonResult->ToString()));
-        }
     }
 
     HandleDeviceOrientationChange();
