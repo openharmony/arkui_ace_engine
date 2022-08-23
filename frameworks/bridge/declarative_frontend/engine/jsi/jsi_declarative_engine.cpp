@@ -1271,9 +1271,10 @@ void JsiDeclarativeEngine::DestroyPageInstance(int32_t pageId)
 void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 {
     LOGI("JsiDeclarativeEngine DestroyApplication, packageName %{public}s", packageName.c_str());
-    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-
-    CallAppFunc("onDestroy");
+    if (engineInstance_) {
+        shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+        CallAppFunc("onDestroy");
+    }
 }
 
 void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
