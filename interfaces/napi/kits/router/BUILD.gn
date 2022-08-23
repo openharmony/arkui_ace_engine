@@ -36,6 +36,12 @@ template("napi_router_static") {
       "//third_party/libuv:uv",
     ]
 
+    # Use static libuv for cross build
+    if (is_cross_platform_build) {
+      deps -= [ "//third_party/libuv:uv" ]
+      deps += [ "//third_party/libuv:uv_static" ]
+    }
+
     if (defined(config.libace_target)) {
       deps += [ config.libace_target ]
     }
