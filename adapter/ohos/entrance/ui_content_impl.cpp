@@ -191,7 +191,18 @@ public:
     void OnTouchOutside() const
     {
         LOGI("window is touching outside. instance id is %{public}d", instanceId_);
-        SubwindowManager::GetInstance()->ClearMenu();
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        if (!container) {
+            LOGE("OnTouchOutside: container may be destroyed.");
+            return;
+        }
+        auto taskExecutor = container->GetTaskExecutor();
+        if (!taskExecutor) {
+            LOGE("OnTouchOutside: taskExecutor is null.");
+            return;
+        }
+
+        taskExecutor->PostTask([] { SubwindowManager::GetInstance()->ClearMenu(); }, TaskExecutor::TaskType::UI);
     }
 
 private:
