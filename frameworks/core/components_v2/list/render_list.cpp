@@ -256,6 +256,7 @@ void RenderList::InitScrollable(Axis axis)
         scrollable_->InitRelatedParent(GetParent());
     }
     scrollable_->Initialize(context_);
+    scrollable_->SetNodeId(GetAccessibilityNodeId());
 }
 
 void RenderList::InitScrollBarProxy()
@@ -681,6 +682,7 @@ void RenderList::PerformLayout()
     HandleListEvent();
     prevOffset_ = currentOffset_;
     prevMainPos_ = curMainPos;
+    UpdateAccessibilityScrollAttr();
 }
 
 #define CASE_OF_LIST_EVENT_WITH_NO_PARAM(eventNumber, callback)        \
@@ -2000,6 +2002,16 @@ void RenderList::UpdateAccessibilityAttr()
             list->ModifyActionScroll();
         }
     };
+}
+
+void RenderList::UpdateAccessibilityScrollAttr()
+{
+    auto accessibilityNode = GetAccessibilityNode().Upgrade();
+    if (accessibilityNode) {
+        accessibilityNode->SetListBeginIndex(firstDisplayIndex_);
+        accessibilityNode->SetListEndIndex(lastDisplayIndex_);
+        accessibilityNode->SetListItemCounts(items_.size());
+    }
 }
 
 bool RenderList::ActionByScroll(bool forward, ScrollEventBack scrollEventBack)

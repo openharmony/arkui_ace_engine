@@ -647,6 +647,36 @@ public:
         return clipFlag_;
     }
 
+    size_t GetListBeginIndex() const
+    {
+        return listBeginIndex_;
+    }
+
+    void SetListBeginIndex(const size_t& index)
+    {
+        listBeginIndex_ = index;
+    }
+
+    size_t GetListEndIndex() const
+    {
+        return listEndIndex_;
+    }
+
+    void SetListEndIndex(const size_t& index)
+    {
+        listEndIndex_ = index;
+    }
+
+    size_t GetListItemCounts() const
+    {
+        return listItemCounts_;
+    }
+
+    void SetListItemCounts(const size_t& index)
+    {
+        listItemCounts_ = index;
+    }
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     // used for inspector node in PC preview
     bool GetClearRectInfoFlag() const
@@ -820,6 +850,9 @@ private:
     void SetOperableInfo();
 
     // node attr need to barrierfree
+    size_t listBeginIndex_ = -1;
+    size_t listEndIndex_ = -1;
+    size_t listItemCounts_ = 0;
     size_t maxTextLength_ = 0;
     int32_t textSelectionStart_ = 0;
     int32_t textSelectionEnd_ = 0;
