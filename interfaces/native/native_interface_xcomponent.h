@@ -37,6 +37,7 @@
 #define _NATIVE_INTERFACE_XCOMPONENT_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +58,7 @@ enum {
     OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER = -2,
 };
 
-enum OH_NativeXComponent_TouchEventType {
+typedef enum {
     /** Trigger a touch event when a finger is pressed. */
     OH_NATIVEXCOMPONENT_DOWN = 0,
     /** Trigger a touch event when a finger is lifted. */
@@ -68,7 +69,7 @@ enum OH_NativeXComponent_TouchEventType {
     OH_NATIVEXCOMPONENT_CANCEL,
     /** Invalid touch type. */
     OH_NATIVEXCOMPONENT_UNKNOWN,
-};
+} OH_NativeXComponent_TouchEventType;
 
 /**
  * @brief Represents the mouse event action.
@@ -76,12 +77,12 @@ enum OH_NativeXComponent_TouchEventType {
  * @since 9
  * @version 1.0
  */
-enum OH_NativeXComponent_MouseEventAction {
+typedef enum {
     OH_NATIVEXCOMPONENT_MOUSE_NONE = 0,
     OH_NATIVEXCOMPONENT_MOUSE_PRESS,
     OH_NATIVEXCOMPONENT_MOUSE_RELEASE,
     OH_NATIVEXCOMPONENT_MOUSE_MOVE,
-};
+} OH_NativeXComponent_MouseEventAction;
 
 /**
  * @brief Represents the mouse event button.
@@ -89,69 +90,69 @@ enum OH_NativeXComponent_MouseEventAction {
  * @since 9
  * @version 1.0
  */
-enum OH_NativeXComponent_MouseEventButton {
+typedef enum {
     OH_NATIVEXCOMPONENT_NONE_BUTTON = 0,
     OH_NATIVEXCOMPONENT_LEFT_BUTTON = 0x01,
     OH_NATIVEXCOMPONENT_RIGHT_BUTTON = 0x02,
     OH_NATIVEXCOMPONENT_MIDDLE_BUTTON = 0x04,
     OH_NATIVEXCOMPONENT_BACK_BUTTON = 0x08,
     OH_NATIVEXCOMPONENT_FORWARD_BUTTON = 0x10,
-};
+} OH_NativeXComponent_MouseEventButton;
 
 #define OH_NATIVE_XCOMPONENT_OBJ ("__NATIVE_XCOMPONENT_OBJ__")
 const uint32_t OH_XCOMPONENT_ID_LEN_MAX = 128;
 const uint32_t OH_MAX_TOUCH_POINTS_NUMBER = 10;
 
-struct OH_NativeXComponent_TouchPoint {
+typedef struct {
     /** Unique identifier of a finger. */
-    int32_t id = 0;
+    int32_t id;
     /** X coordinate of the touch point relative to the left edge of the screen. */
-    float screenX = 0.0;
+    float screenX;
     /** Y coordinate of the touch point relative to the upper edge of the screen. */
-    float screenY = 0.0;
+    float screenY;
     /** X coordinate of the touch point relative to the left edge of the element to touch. */
-    float x = 0.0;
+    float x;
     /** Y coordinate of the touch point relative to the upper edge of the element to touch. */
-    float y = 0.0;
+    float y;
     /** Touch type of the touch event. */
-    OH_NativeXComponent_TouchEventType type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
+    OH_NativeXComponent_TouchEventType type;
     /** Contact area between the finger pad and the screen. */
-    double size = 0.0;
+    double size;
     /** Pressure of the current touch event. */
-    float force = 0.0;
+    float force;
     /** Timestamp of the current touch event. */
-    int64_t timeStamp = 0;
+    int64_t timeStamp;
     /** Whether the current point is pressed. */
-    bool isPressed = false;
-};
+    bool isPressed;
+} OH_NativeXComponent_TouchPoint;
 
 // Represents the touch point information.
-struct OH_NativeXComponent_TouchEvent {
+typedef struct {
     /** Unique identifier of a finger. */
-    int32_t id = 0;
+    int32_t id;
     /** X coordinate of the touch point relative to the left edge of the screen. */
-    float screenX = 0.0;
+    float screenX;
     /** Y coordinate of the touch point relative to the upper edge of the screen. */
-    float screenY = 0.0;
+    float screenY;
     /** X coordinate of the touch point relative to the left edge of the element to touch. */
-    float x = 0.0;
+    float x;
     /** Y coordinate of the touch point relative to the upper edge of the element to touch. */
-    float y = 0.0;
+    float y;
     /** Touch type of the touch event. */
-    OH_NativeXComponent_TouchEventType type = OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
+    OH_NativeXComponent_TouchEventType type;
     /** Contact area between the finger pad and the screen. */
-    double size = 0.0;
+    double size;
     /** Pressure of the current touch event. */
-    float force = 0.0;
+    float force;
     /** ID of the device where the current touch event is generated. */
-    int64_t deviceId = 0;
+    int64_t deviceId;
     /** Timestamp of the current touch event. */
-    int64_t timeStamp = 0;
+    int64_t timeStamp;
     /** Array of the current touch points. */
     OH_NativeXComponent_TouchPoint touchPoints[OH_MAX_TOUCH_POINTS_NUMBER];
     /** Number of current touch points. */
-    uint32_t numPoints = 0;
-};
+    uint32_t numPoints;
+} OH_NativeXComponent_TouchEvent;
 
 /**
  * @brief Represents the mouse event information.
@@ -159,22 +160,22 @@ struct OH_NativeXComponent_TouchEvent {
  * @since 9
  * @version 1.0
  */
-struct OH_NativeXComponent_MouseEvent {
+typedef struct {
     /** X coordinate of the mouse point relative to the left edge of the element to mouse. */
-    float x = 0.0;
+    float x;
     /** Y coordinate of the mouse point relative to the upper edge of the element to mouse. */
-    float y = 0.0;
+    float y;
     /** X coordinate of the mouse point relative to the left edge of the screen. */
-    float screenX = 0.0;
+    float screenX;
     /** Y coordinate of the mouse point relative to the upper edge of the screen. */
-    float screenY = 0.0;
+    float screenY;
     /** Timestamp of the current mouse event. */
-    int64_t timestamp = 0;
+    int64_t timestamp;
     /** Mouse event action. */
-    OH_NativeXComponent_MouseEventAction action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_NONE;
+    OH_NativeXComponent_MouseEventAction action;
     /** Mouse event button. */
-    OH_NativeXComponent_MouseEventButton button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_NONE_BUTTON;
-};
+    OH_NativeXComponent_MouseEventButton button;
+} OH_NativeXComponent_MouseEvent;
 
 /**
  * @brief Provides an encapsulated <b>OH_NativeXComponent</b> instance.
@@ -211,7 +212,7 @@ typedef struct OH_NativeXComponent_MouseEvent_Callback {
     /** Called when a mouse event is triggered. */
     void (*DispatchMouseEvent)(OH_NativeXComponent* component, void* window);
     /** Called when a hover event is triggered. */
-    void (*DispatchHoverEvent)(OH_NativeXComponent* component, bool& isHover);
+    void (*DispatchHoverEvent)(OH_NativeXComponent* component, bool isHover);
 } OH_NativeXComponent_MouseEvent_Callback;
 
 /**
