@@ -79,6 +79,6 @@ group("unittest") {
   testonly = true
   deps = [
     # ":DisplayCreatorTest",
-    # ":RenderDisplayTest",
+    ":RenderDisplayTest",
   ]
 }
