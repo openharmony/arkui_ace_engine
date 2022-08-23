@@ -85,12 +85,18 @@ std::string ImageComposedElement::GetSrc() const
 std::string ImageComposedElement::GetAlt() const
 {
     auto renderImage = GetRenderImage();
+    if (!renderImage) {
+        return "";
+    }
     return renderImage ? renderImage->GetImageAlt() : "";
 }
 
 std::string ImageComposedElement::GetObjectFit() const
 {
     auto renderImage = GetRenderImage();
+    if (!renderImage) {
+        return "ImageFit.Cover";
+    }
     auto imageFit =
         renderImage ? renderImage->GetImageFit() : ImageFit::COVER;
     std::string result = "";
@@ -119,6 +125,9 @@ std::string ImageComposedElement::GetObjectFit() const
 std::string ImageComposedElement::GetObjectRepeat() const
 {
     auto renderImage = GetRenderImage();
+    if (!renderImage) {
+        return "NoRepeat";
+    }
     auto imageRepeat = renderImage ? renderImage->GetImageRepeat() : ImageRepeat::NOREPEAT;
     std::string result = "";
     switch (imageRepeat) {
@@ -143,6 +152,9 @@ std::string ImageComposedElement::GetObjectRepeat() const
 std::string ImageComposedElement::GetInterpolation() const
 {
     auto renderImage = GetRenderImage();
+    if (!renderImage) {
+        return "ImageInterpolation.None";
+    }
     auto imageInterpolation =
         renderImage ? renderImage->GetImageInterpolation() : ImageInterpolation::NONE;
     return ConvertWrapImageInterpolationToString(imageInterpolation);
@@ -151,6 +163,9 @@ std::string ImageComposedElement::GetInterpolation() const
 std::string ImageComposedElement::GetRenderMode() const
 {
     auto renderImage = GetRenderImage();
+    if (!renderImage) {
+        return "ImageRenderMode.Original";
+    }
     auto imageRenderMode =
         renderImage ? renderImage->GetImageRenderMode() : ImageRenderMode::ORIGINAL;
     return ConvertWrapImageRenderModeToString(imageRenderMode);
@@ -159,6 +174,9 @@ std::string ImageComposedElement::GetRenderMode() const
 std::string ImageComposedElement::GetSourceSize() const
 {
     auto renderImage = GetRenderImage();
+    if (!renderImage) {
+        return "";
+    }
     auto imageSourceSize = renderImage ? renderImage->GetImageSourceSize() : Size();
     return imageSourceSize.ToString();
 }
@@ -174,6 +192,10 @@ std::string ImageComposedElement::GetSyncLoad() const
 
 std::string ImageComposedElement::GetBorderStyle() const
 {
+    auto renderImage = GetRenderImage();
+    if (!renderImage) {
+        return "";
+    }
     auto border = GetRenderImage()->GetImageComponentBorder();
     int32_t style = static_cast<int32_t>(border.Left().GetBorderStyle());
     return BORDER_STYLE[style];
@@ -181,18 +203,30 @@ std::string ImageComposedElement::GetBorderStyle() const
 
 std::string ImageComposedElement::GetBorderWidth() const
 {
+    auto renderImage = GetRenderImage();
+    if (!renderImage) {
+        return "";
+    }
     auto border = GetRenderImage()->GetImageComponentBorder();
     return border.Left().GetWidth().ToString();
 }
 
 std::string ImageComposedElement::GetBorderColor() const
 {
+    auto renderImage = GetRenderImage();
+    if (!renderImage) {
+        return "";
+    }
     auto border = GetRenderImage()->GetImageComponentBorder();
     return border.Left().GetColor().ColorToString();
 }
 
 std::string ImageComposedElement::GetBorderRadius() const
 {
+    auto renderImage = GetRenderImage();
+    if (!renderImage) {
+        return "";
+    }
     auto radius = GetRenderImage()->GetImageComponentBorder().TopLeftRadius().GetX();
     if (radius.Value() == 0.0) {
         return "0.0vp";
