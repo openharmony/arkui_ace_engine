@@ -15,7 +15,6 @@
 
 abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T> {
 
-  private markDependentElementsIsPending: boolean = false;
   private dependentElementIds_: Set<number> = new Set<number>();
 
   constructor(subscribingView: IPropertySubscriber, viewName: PropertyInfo) {
@@ -23,11 +22,23 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
   }
 
   protected notifyHasChanged(newValue: T) {
-    super.notifyHasChanged(newValue);
-
-    // for properties owned by a View"
-    // markDependentElementsDirty needs to be executed
-    this.markDependentElementsIsPending = true;
+    console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
+    var registry: IPropertySubscriberLookup = SubscriberManager.Get();
+    this.subscribers_.forEach((subscribedId) => {
+      var subscriber: IPropertySubscriber = registry!.get(subscribedId)
+      if (subscriber) {
+        if ('hasChanged' in subscriber) {
+          (subscriber as ISinglePropertyChangeSubscriber<T>).hasChanged(newValue);
+        }
+        if ('viewPropertyHasChanged' in subscriber) {
+          (subscriber as ViewPU).viewPropertyHasChanged(this.info_, this.dependentElementIds_);
+        } else if ('propertyHasChanged' in subscriber) {
+          (subscriber as IMultiPropertiesChangeSubscriber).propertyHasChanged(this.info_);
+        }
+      } else {
+        console.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+      }
+    });
   }
 
   protected notifyPropertyRead() {
@@ -35,9 +46,12 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
     this.recordDependentUpdate();
   }
 
-
-
-  // FIXME unification: method needed, what callses to create here?
+  public markDependentElementsDirty(view: ViewPU) {
+    // TODO ace-ets2bundle, framework, compilated apps need to update together
+    // this function will be removed after a short transiition periode
+    console.error(`markDependentElementsDirty no longer supported. 
+        Please update your ace-ets2bundle and recompile your application!`);
+  }
 
   /**
    * factory function for concrete 'object' or 'simple' ObservedProperty object
@@ -70,20 +84,7 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
     this.dependentElementIds_.add(elmtId);
   }
 
-  public markDependentElementsDirty(view: ViewPU) {
-    if (!this.markDependentElementsIsPending) {
-      return;
-    }
-    if (this.dependentElementIds_.size > 0) {
-      console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']:markDependentElementsDirty`);
-      this.dependentElementIds_.forEach(elmtId => {
-        view.markElemenDirtyById(elmtId)
-        console.debug(`   - elmtId ${elmtId}.`);
-      });
-    }
-    this.markDependentElementsIsPending = false;
-  }
-
+  
   public purgeDependencyOnElmtId(rmElmtId: number): void {
     console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']:purgeDependencyOnElmtId ${rmElmtId}`);
     this.dependentElementIds_.delete(rmElmtId);
