@@ -28,6 +28,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SetLunar(bool isLunar);
     static void OnChange(const JSCallbackInfo& info);
+    static void PickerBackgroundColor(const JSCallbackInfo& info);
     // keep compatible, need remove after
     static void UseMilitaryTime(bool isUseMilitaryTime);
 
