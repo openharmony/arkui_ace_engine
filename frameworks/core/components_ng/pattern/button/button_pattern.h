@@ -20,20 +20,17 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_paint_method.h"
-#include "core/components_ng/pattern/button/button_paint_property.h"
-#include "core/components_ng/pattern/button/button_position_property.h"
 #include "core/components_ng/pattern/pattern.h"
+
 namespace OHOS::Ace::NG {
 class ButtonPattern : public Pattern {
     DECLARE_ACE_TYPE(ButtonPattern, Pattern);
 
 public:
     ButtonPattern() = default;
-
-    explicit ButtonPattern(const std::string& label) : label_(label) {}
 
     ~ButtonPattern() override = default;
 
@@ -42,9 +39,9 @@ public:
         return false;
     }
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    RefPtr<EventHub> CreateEventHub() override
     {
-        return MakeRefPtr<ButtonLayoutProperty>();
+        return MakeRefPtr<ButtonEventHub>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -52,30 +49,17 @@ public:
         return MakeRefPtr<ButtonLayoutAlgorithm>();
     }
 
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<ButtonPaintProperty>();
-    }
-
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        return MakeRefPtr<ButtonPaintMethod>();
-    }
-
     void OnModifyDone() override;
 
 private:
-    WeakPtr<FrameNode> frameNode_;
-    std::optional<std::string> label_;
-    ButtonType GetButtonType() const;
-    std::unique_ptr<ButtonPositionProperty> buttonPositionProperty_;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
-
     void OnTouchDown();
     void OnTouchUp();
 
     RefPtr<TouchEventImpl> touchListener_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
 };
 } // namespace OHOS::Ace::NG
 

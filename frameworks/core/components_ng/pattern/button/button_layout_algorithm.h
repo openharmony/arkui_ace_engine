@@ -21,21 +21,18 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
-using RenderFunction = std::function<RefPtr<UINode>()>;
-
-// TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ButtonLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(ButtonLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    ButtonLayoutAlgorithm() {}
+    ButtonLayoutAlgorithm() = default;
 
     ~ButtonLayoutAlgorithm() override = default;
 
     void OnReset() override {}
 
 private:
-    std::optional<std::string> label_;
+    ACE_DISALLOW_COPY_AND_MOVE(ButtonLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
 

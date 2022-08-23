@@ -46,7 +46,7 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::FontSize(fontSize);
+        NG::ButtonView::SetFontSize(fontSize);
         return;
     }
     auto textComponent = GetTextComponent();
@@ -70,7 +70,7 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
 void JSButton::SetFontWeight(std::string value)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::FontWeight(ConvertStrToFontWeight(value));
+        NG::ButtonView::SetFontWeight(ConvertStrToFontWeight(value));
         return;
     }
     auto textComponent = GetTextComponent();
@@ -89,7 +89,7 @@ void JSButton::SetFontStyle(int32_t value)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::ItalicFontStyle(fontStyles[value]);
+        NG::ButtonView::SetItalicFontStyle(fontStyles[value]);
         return;
     }
     auto textComponent = GetTextComponent();
@@ -112,7 +112,7 @@ void JSButton::SetFontFamily(const JSCallbackInfo& info)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::FontFamily(fontFamilies);
+        NG::ButtonView::SetFontFamily(fontFamilies);
         return;
     }
     auto textComponent = GetTextComponent();
@@ -134,7 +134,7 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::TextColor(textColor);
+        NG::ButtonView::SetTextColor(textColor);
         return;
     }
     auto textComponent = GetTextComponent();
@@ -167,7 +167,7 @@ void JSButton::SetType(int value)
     if ((ButtonType)value == ButtonType::CAPSULE || (ButtonType)value == ButtonType::CIRCLE ||
         (ButtonType)value == ButtonType::ARC || (ButtonType)value == ButtonType::NORMAL) {
         if (Container::IsCurrentUseNewPipeline()) {
-            NG::ButtonView::Type(static_cast<ButtonType>(value));
+            NG::ButtonView::SetType(static_cast<ButtonType>(value));
             return;
         }
         auto stack = ViewStackProcessor::GetInstance();
@@ -183,7 +183,7 @@ void JSButton::SetType(int value)
 void JSButton::SetStateEffect(bool stateEffect)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::StateEffect(stateEffect);
+        NG::ButtonView::SetStateEffect(stateEffect);
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
@@ -245,12 +245,12 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     if (ParseJsString(info[0], label)) {
         labelSet = true;
         if (Container::IsCurrentUseNewPipeline()) {
-            NG::ButtonView::CreateLabel(label);
+            NG::ButtonView::CreateWithLabel(label);
             if (!labelSet && info[0]->IsObject()) {
-                SetNGTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
+                SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
             }
             if ((info.Length() > 1) && info[1]->IsObject()) {
-                SetNGTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
+                SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
             }
             return;
         }
@@ -286,10 +286,10 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::CreateChild();
+        NG::ButtonView::Create();
         if (info[0]->IsObject()) {
             auto obj = JSRef<JSObject>::Cast(info[0]);
-            SetNGTypeAndStateEffect(obj);
+            SetTypeAndStateEffect(obj);
         }
         return;
     }
@@ -325,16 +325,16 @@ void JSButton::SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonCompone
     buttonComponent->SetHoverColor(buttonTheme->GetHoverColor());
 }
 
-void JSButton::SetNGTypeAndStateEffect(const JSRef<JSObject>& obj)
+void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj)
 {
     auto type = obj->GetProperty("type");
     if (type->IsNumber()) {
-        auto buttonType = (ButtonType)type->ToNumber<int32_t>();
-        NG::ButtonView::Type(buttonType);
+        auto buttonType = static_cast<ButtonType>(type->ToNumber<int32_t>());
+        NG::ButtonView::SetType(buttonType);
     }
     auto stateEffect = obj->GetProperty("stateEffect");
     if (stateEffect->IsBoolean()) {
-        NG::ButtonView::StateEffect(stateEffect->ToBoolean());
+        NG::ButtonView::SetStateEffect(stateEffect->ToBoolean());
     }
 }
 

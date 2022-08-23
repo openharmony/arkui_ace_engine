@@ -21,7 +21,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_paint_property.h"
 #include "core/components_ng/pattern/button/button_view.h"
 
 using namespace testing;
@@ -49,11 +48,11 @@ protected:
 RefPtr<FrameNode> ButtonPatternTestNg::CreateLabelButtonParagraph(
     const std::string& createValue, const TestProperty& testProperty)
 {
-    ButtonView::CreateLabel(createValue);
+    ButtonView::CreateWithLabel(createValue);
     if (testProperty.typeValue.has_value())
-        ButtonView::Type(testProperty.typeValue.value());
+        ButtonView::SetType(testProperty.typeValue.value());
     if (testProperty.stateEffectValue.has_value())
-        ButtonView::StateEffect(testProperty.stateEffectValue.value());
+        ButtonView::SetStateEffect(testProperty.stateEffectValue.value());
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
     return AceType::DynamicCast<FrameNode>(element);

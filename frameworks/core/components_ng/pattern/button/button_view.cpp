@@ -18,8 +18,8 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_paint_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -28,26 +28,31 @@
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-void ButtonView::CreateLabel(const std::string& label)
+void ButtonView::CreateWithLabel(const std::string& label)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, nodeId, [label]() { return AceType::MakeRefPtr<ButtonPattern>(label); });
+        V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
         auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+        CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(label);
         frameNode->AddChild(textNode);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+        ACE_DCHECK(textChild);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+        ACE_DCHECK(textLayoutProperty);
         textLayoutProperty->UpdateContent(label);
     }
     stack->Push(frameNode);
 }
 
-void ButtonView::CreateChild()
+void ButtonView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -56,63 +61,82 @@ void ButtonView::CreateChild()
     stack->Push(frameNode);
 }
 
-void ButtonView::Type(ButtonType buttonType)
+void ButtonView::SetType(ButtonType buttonType)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, buttonType);
 }
 
-void ButtonView::StateEffect(bool stateEffect)
+void ButtonView::SetStateEffect(bool stateEffect)
 {
-    ACE_UPDATE_PAINT_PROPERTY(ButtonPaintProperty, StateEffect, stateEffect);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    buttonEventHub->SetStateEffect(stateEffect);
 }
 
-void ButtonView::FontSize(const Dimension& fontSize)
+void ButtonView::SetFontSize(const Dimension& fontSize)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (!frameNode->GetChildren().empty()) {
-        auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-        auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-        textLayoutProperty->UpdateFontSize(fontSize);
+    if (frameNode->GetChildren().empty()) {
+        return;
     }
+    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ACE_DCHECK(textChild);
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    ACE_DCHECK(textLayoutProperty);
+    textLayoutProperty->UpdateFontSize(fontSize);
 }
 
-void ButtonView::FontWeight(Ace::FontWeight fontWeight)
+void ButtonView::SetFontWeight(Ace::FontWeight fontWeight)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (!frameNode->GetChildren().empty()) {
-        auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-        auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-        textLayoutProperty->UpdateFontWeight(fontWeight);
+    if (frameNode->GetChildren().empty()) {
+        return;
     }
+    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ACE_DCHECK(textChild);
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    ACE_DCHECK(textLayoutProperty);
+    textLayoutProperty->UpdateFontWeight(fontWeight);
 }
 
-void ButtonView::ItalicFontStyle(Ace::FontStyle fontStyle)
+void ButtonView::SetItalicFontStyle(Ace::FontStyle fontStyle)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (!frameNode->GetChildren().empty()) {
-        auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-        auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-        textLayoutProperty->UpdateItalicFontStyle(fontStyle);
+    if (frameNode->GetChildren().empty()) {
+        return;
     }
+    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ACE_DCHECK(textChild);
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    ACE_DCHECK(textLayoutProperty);
+    textLayoutProperty->UpdateItalicFontStyle(fontStyle);
 }
 
-void ButtonView::FontFamily(const std::vector<std::string>& fontFamilies)
+void ButtonView::SetFontFamily(const std::vector<std::string>& fontFamilies)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (!frameNode->GetChildren().empty()) {
-        auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-        auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-        textLayoutProperty->UpdateFontFamily(fontFamilies);
+    if (frameNode->GetChildren().empty()) {
+        return;
     }
+    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ACE_DCHECK(textChild);
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    ACE_DCHECK(textLayoutProperty);
+    textLayoutProperty->UpdateFontFamily(fontFamilies);
 }
 
-void ButtonView::TextColor(const Color& textColor)
+void ButtonView::SetTextColor(const Color& textColor)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    if (!frameNode->GetChildren().empty()) {
-        auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-        auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-        textLayoutProperty->UpdateTextColor(textColor);
+    if (frameNode->GetChildren().empty()) {
+        return;
     }
+    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ACE_DCHECK(textChild);
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    ACE_DCHECK(textLayoutProperty);
+    textLayoutProperty->UpdateTextColor(textColor);
 }
 } // namespace OHOS::Ace::NG

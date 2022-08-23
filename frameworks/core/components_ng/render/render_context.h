@@ -63,10 +63,6 @@ public:
 
     virtual void BlendBgColor(const Color& color) {}
 
-    virtual void UpdateBorderRadius(const BorderRadiusProperty& value) {}
-
-    virtual const std::unique_ptr<BorderRadiusProperty>& GetBorderRadius() = 0;
-
     virtual void SetClipToFrame(bool useClip) {}
 
     virtual RefPtr<Canvas> GetCanvas() = 0;
@@ -82,14 +78,18 @@ public:
 
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundColor, Color);
+    // TODO
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BorderRadius, BorderRadiusProperty);
 
 protected:
     RenderContext() = default;
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
+    virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
 
 private:
     std::function<void()> requestFrame_;
+    BorderRadiusProperty borderRadius_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };

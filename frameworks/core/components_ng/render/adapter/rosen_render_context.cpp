@@ -91,40 +91,35 @@ void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
     if (!rsNode_) {
         return;
     }
-    bgColor_ = value;
     rsNode_->SetBackgroundColor(value.GetValue());
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RenderContext::UpdateBorderRadius(value);
+    Rosen::Vector4f cornerRadius;
+    cornerRadius.SetValues(value.radiusTopLeft->Value(), value.radiusTopRight->Value(), value.radiusBottomLeft->Value(),
+        value.radiusBottomRight->Value());
+    rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
 }
 
 void RosenRenderContext::ResetBlendBgColor()
 {
     CHECK_NULL_VOID(rsNode_);
-    if (bgColor_) {
-        rsNode_->SetBackgroundColor(bgColor_->GetValue());
-        RequestNextFrame();
-    }
+    CHECK_NULL_VOID(bgColor_);
+    rsNode_->SetBackgroundColor(bgColor_->GetValue());
+    RequestNextFrame();
 }
 
 void RosenRenderContext::BlendBgColor(const Color& color)
 {
     CHECK_NULL_VOID(rsNode_);
+    bgColor_ = GetBackgroundColor();
     auto blendColor = bgColor_.value_or(Color::TRANSPARENT).BlendColor(color);
     rsNode_->SetBackgroundColor(blendColor.GetValue());
-    RequestNextFrame();
-}
-
-void RosenRenderContext::UpdateBorderRadius(const BorderRadiusProperty& value)
-{
-    if (!rsNode_) {
-        return;
-    }
-    if (!borderRadius_) {
-        borderRadius_ = std::make_unique<BorderRadiusProperty>(value);
-    }
-    Rosen::Vector4f cornerRadius;
-    cornerRadius.SetValues(value.radiusTopLeft->Value(), value.radiusTopRight->Value(), value.radiusBottomLeft->Value(),
-        value.radiusBottomRight->Value());
-    rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
 }
 

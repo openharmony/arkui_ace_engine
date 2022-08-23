@@ -22,19 +22,20 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ButtonView {
 public:
-    static void CreateLabel(const std::string& label);
-    static void CreateChild();
-    static void Type(ButtonType buttonType);
-    static void StateEffect(bool stateEffect);
-    static void FontSize(const Dimension& fontSize);
-    static void FontWeight(Ace::FontWeight fontWeight);
-    static void ItalicFontStyle(Ace::FontStyle fontStyle);
-    static void FontFamily(const std::vector<std::string>& fontFamilies);
-    static void TextColor(const Color& textColor);
+    static void CreateWithLabel(const std::string& label);
+    static void Create();
+    static void SetType(ButtonType buttonType);
+    static void SetStateEffect(bool stateEffect);
+    static void SetFontSize(const Dimension& fontSize);
+    static void SetFontWeight(Ace::FontWeight fontWeight);
+    static void SetItalicFontStyle(Ace::FontStyle fontStyle);
+    static void SetFontFamily(const std::vector<std::string>& fontFamilies);
+    static void SetTextColor(const Color& textColor);
 };
 } // namespace OHOS::Ace::NG
 
