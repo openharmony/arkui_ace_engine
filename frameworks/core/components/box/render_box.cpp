@@ -27,6 +27,7 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components/box/box_component.h"
 #include "core/components/box/box_component_helper.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/root/root_element.h"
 #include "core/components/text_field/render_text_field.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
@@ -290,7 +291,16 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
     }
 
     GestureEvent newInfo = info;
-    newInfo.SetGlobalPoint(startPoint_);
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+        pipelineContext->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
+    Point newPoint;
+    if (isContainerModal) {
+        newPoint.SetX(startPoint_.GetX() - CONTAINER_BORDER_WIDTH.ConvertToPx() - CONTENT_PADDING.ConvertToPx());
+        newPoint.SetY(startPoint_.GetY() - CONTAINER_TITLE_HEIGHT.ConvertToPx());
+    } else {
+        newPoint = startPoint_;
+    }
+    newInfo.SetGlobalPoint(newPoint);
     auto dragItemInfo = GenerateDragItemInfo(pipelineContext, newInfo);
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (dragItemInfo.pixelMap) {

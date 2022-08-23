@@ -25,12 +25,6 @@ void MultiFingersRecognizer::OnAccepted(size_t touchId)
         return;
     }
 
-    if (AceType::InstanceOf<PinchRecognizer>(this)) {
-        OnAccepted();
-        refereePointers_.clear();
-        return;
-    }
-
     acceptedCount_++;
 
     if (refereePointers_.size() == acceptedCount_) {
