@@ -107,6 +107,7 @@ void ThemeConstantsTest::TearDown() {}
  * @tc.name: PlatformConstants001
  * @tc.desc: Test get default theme at phone.
  * @tc.type: FUNC
+ * @tc.require: issueI5IY7K
  */
 HWTEST_F(ThemeConstantsTest, PlatformConstants001, TestSize.Level1)
 {
@@ -129,6 +130,7 @@ HWTEST_F(ThemeConstantsTest, PlatformConstants001, TestSize.Level1)
  * @tc.name: PlatformConstants002
  * @tc.desc: Test get default theme at tv.
  * @tc.type: FUNC
+ * @tc.require: issueI5IY7K
  */
 HWTEST_F(ThemeConstantsTest, PlatformConstants002, TestSize.Level1)
 {
@@ -151,6 +153,7 @@ HWTEST_F(ThemeConstantsTest, PlatformConstants002, TestSize.Level1)
  * @tc.name: PlatformConstants003
  * @tc.desc: Test get default theme at other platform.
  * @tc.type: FUNC
+ * @tc.require: issueI5IY7K
  */
 HWTEST_F(ThemeConstantsTest, PlatformConstants003, TestSize.Level1)
 {
@@ -172,6 +175,7 @@ HWTEST_F(ThemeConstantsTest, PlatformConstants003, TestSize.Level1)
  * @tc.name: ConstantsDefine001
  * @tc.desc: Test get value with key corresponding with correct value type.
  * @tc.type: FUNC
+ * @tc.require: issueI5IY7K
  */
 HWTEST_F(ThemeConstantsTest, ConstantsDefine001, TestSize.Level1)
 {
@@ -196,6 +200,7 @@ HWTEST_F(ThemeConstantsTest, ConstantsDefine001, TestSize.Level1)
  * @tc.name: ConstantsDefine002
  * @tc.desc: Test get value with key corresponding with incorrect value type.
  * @tc.type: FUNC
+ * @tc.require: issueI5IY7K
  */
 HWTEST_F(ThemeConstantsTest, ConstantsDefine002, TestSize.Level1)
 {
@@ -214,6 +219,7 @@ HWTEST_F(ThemeConstantsTest, ConstantsDefine002, TestSize.Level1)
  * @tc.name: ParseStyle001
  * @tc.desc: Parse user input custom style config.
  * @tc.type: FUNC
+ * @tc.require: issueI5IY7K
  */
 HWTEST_F(ThemeConstantsTest, ParseStyle001, TestSize.Level1)
 {
