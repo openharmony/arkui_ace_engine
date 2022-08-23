@@ -70,20 +70,41 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
     if (reportDataFunc_ == nullptr) {
         reportDataFunc_ = LoadReportDataFunc();
     }
-    if (reportDataFunc_ != nullptr) {
-        if (strcmp(name, CLICK) == 0) {
-            reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, CLICK_EVENT, payload);
-        } else if (strcmp(name, SLIDE_ON) == 0) {
-            reportDataFunc_(RES_TYPE_SLIDE, SLIDE_ON_EVENT, payload);
-        } else if (strcmp(name, SLIDE_OFF) == 0) {
-            reportDataFunc_(RES_TYPE_SLIDE, SLIDE_OFF_EVENT, payload);
-        } else if (strcmp(name, POP_PAGE) == 0) {
-            LoadAceApplicationContext(payload);
-            reportDataFunc_(RES_TYPE_POP_PAGE, POP_PAGE_EVENT, payload);
-        } else if (strcmp(name, WEB_GESTURE) == 0) {
-            reportDataFunc_(RES_TYPE_WEB_GESTURE, 0, payload);
-        }
+    static std::unordered_map<std::string, std::function<void(std::unordered_map<std::string, std::string>&)>>
+        functionMap = {
+            { CLICK,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, CLICK_EVENT, payload);
+                }
+            },
+            { SLIDE_ON,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_SLIDE, SLIDE_ON_EVENT, payload);
+                }
+            },
+            { SLIDE_OFF,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_SLIDE, SLIDE_OFF_EVENT, payload);
+                }
+            },
+            { POP_PAGE,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_POP_PAGE, POP_PAGE_EVENT, payload);
+                }
+            },
+            { WEB_GESTURE,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_WEB_GESTURE, 0, payload);
+                }
+            },
+        };
+    auto it = functionMap.find(name);
+    if (it == functionMap.end()) {
+        LOGE("ResSchedDataReport the name not found: %{public}s", name);
+        return;
     }
+    it->second(payload);
 }
 
 void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
