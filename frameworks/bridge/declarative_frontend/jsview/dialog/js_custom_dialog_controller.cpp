@@ -314,6 +314,12 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 {
     LOGD("JSCustomDialogController(JsOpenDialog)");
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
+
     // Cannot reuse component because might depend on state
     if (customDialog_) {
         customDialog_ = nullptr;
@@ -341,6 +347,11 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
     LOGD("JSCustomDialogController(JsCloseDialog)");
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
     CloseDialog();
 }
 
