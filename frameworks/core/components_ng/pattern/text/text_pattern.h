@@ -58,6 +58,8 @@ public:
         return false;
     }
 
+    void OnModifyDone() override;
+
     void BeforeCreateLayoutWrapper() override;
 
     void AddChildSpanItem(const RefPtr<SpanNode>& child)
