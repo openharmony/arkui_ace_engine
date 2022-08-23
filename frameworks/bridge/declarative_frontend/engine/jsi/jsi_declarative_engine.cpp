@@ -19,6 +19,7 @@
 
 #include "scope_manager/native_scope_manager.h"
 
+#include "base/base64/base64_util.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -40,6 +41,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_api_perf.h"
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
@@ -199,7 +201,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    if (!isModulePreloaded_  || !usingSharedRuntime_ || IsPlugin()) {
+    if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin()) {
         InitGlobalObjectTemplate();
     }
 
@@ -1022,6 +1024,22 @@ void JsiDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::s
     std::static_pointer_cast<ArkJSRuntime>(runtime)->SetPreviewFlag(true);
     std::static_pointer_cast<ArkJSRuntime>(runtime)->SetRequiredComponent(componentName);
     engineInstance_->GetDelegate()->Replace(url, "");
+}
+
+RefPtr<Component> JsiDeclarativeEngine::GetNewComponentWithJsCode(const std::string& jsCode)
+{
+    std::string dest;
+    if (!Base64Util::Decode(jsCode, dest)) {
+        return nullptr;
+    }
+
+    ViewStackProcessor::GetInstance()->ClearStack();
+    bool result = engineInstance_->InitAceModule((uint8_t*)dest.data(), dest.size());
+    if (!result) {
+        return nullptr;
+    }
+    auto component = ViewStackProcessor::GetInstance()->GetNewComponent();
+    return component;
 }
 #endif
 
