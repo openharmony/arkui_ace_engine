@@ -16,6 +16,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 
 #include "base/log/event_report.h"
+#include "base/log/exception_handler.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
@@ -304,6 +305,7 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
     std::string summaryBody = GenerateSummaryBody(error, runtime);
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
     EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), "", summaryBody);
+    ExceptionHandler::HandleJsException(summaryBody);
 }
 
 std::string ParseLogContent(const std::vector<std::string>& params)
