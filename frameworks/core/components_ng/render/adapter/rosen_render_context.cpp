@@ -68,12 +68,13 @@ void RosenRenderContext::InitContext(bool isRoot)
 {
     if (!rsNode_) {
         if (isRoot) {
-            LOGE("create RSRootNode");
+            LOGI("create RSRootNode");
             rsNode_ = Rosen::RSRootNode::Create();
         } else {
             rsNode_ = Rosen::RSCanvasNode::Create();
         }
     }
+    rsNode_->SetBounds(0, 0, 0, 0);
     rsNode_->SetFrame(0, 0, 0, 0);
     rsNode_->SetPivot(0.0F, 0.0F);
 }
@@ -84,6 +85,7 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* geometryNode)
         return;
     }
     const auto& frameRect = geometryNode->GetFrame().GetRect();
+    rsNode_->SetBounds(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
     rsNode_->SetFrame(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
 }
 
