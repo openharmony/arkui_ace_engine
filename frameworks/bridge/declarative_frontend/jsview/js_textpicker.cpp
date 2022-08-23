@@ -49,9 +49,6 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
 
 void JSTextPicker::Create(const JSCallbackInfo& info)
 {
-    std::string value = "0";
-    uint32_t selected = 0;
-
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("TextPicker create error, info is non-valid");
         return;
@@ -59,6 +56,7 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto getSelected = paramObject->GetProperty("selected");
+    auto getValue = paramObject->GetProperty("value");
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     std::vector<std::string> getRangeVector;
     if (!ParseJsStrArray(getRange, getRangeVector)) {
@@ -66,8 +64,13 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         return;
     }
 
-    if (!ParseJsInteger(getSelected, selected)) {
-        LOGE("parse selected value failed");
+    std::string value = "";
+    uint32_t selected = 0;
+    if (!ParseJsInteger(getSelected, selected) && ParseJsString(getValue, value)) {
+        auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
+        if (valueIterator != getRangeVector.end()) {
+            selected = std::distance(getRangeVector.begin(), valueIterator);
+        }
     }
 
     if (selected < 0 || selected >= getRangeVector.size()) {
@@ -233,9 +236,14 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
         return;
     }
 
+    std::string value = "";
     uint32_t selected = 0;
-    if (!JSViewAbstract::ParseJsInteger(getSelected, selected)) {
-        LOGE("parse selected value failed");
+    auto getValue = paramObj->GetProperty("value");
+    if (!JSViewAbstract::ParseJsInteger(getSelected, selected) && JSViewAbstract::ParseJsString(getValue, value)) {
+        auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
+        if (valueIterator != getRangeVector.end()) {
+            selected = std::distance(getRangeVector.begin(), valueIterator);
+        }
     }
 
     if (selected < 0 || selected >= getRangeVector.size()) {
