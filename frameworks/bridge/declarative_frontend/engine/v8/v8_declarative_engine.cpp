@@ -51,8 +51,6 @@
 
 extern const char _binary_stateMgmt_js_start[];
 extern const char _binary_stateMgmt_js_end[];
-extern const char _binary_stateMgmtPU_js_start[];
-extern const char _binary_stateMgmtPU_js_end[];
 extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsEnumStyle_js_end[];
 
@@ -508,13 +506,8 @@ void V8DeclarativeEngineInstance::InitJSContext()
     InitJsNativeModuleObject(localContext);
     InitJsExportsUtilObject(localContext);
 
-    if (Container::IsCurrentUsePartialUpdate()) {
-        LOGE("Loading State Mgmt JS lib for Partial Update");
-        InitAceModules(_binary_stateMgmtPU_js_start, _binary_stateMgmtPU_js_end, isolate_.Get());
-    } else {
-        LOGE("Loading State Mgmt JS lib for full update");
-        InitAceModules(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end, isolate_.Get());
-    }
+    LOGE("Loading State Mgmt JS lib for full and partial update combined");
+    InitAceModules(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end, isolate_.Get());
 
     InitAceModules(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end, isolate_.Get());
 

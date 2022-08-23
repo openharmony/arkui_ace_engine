@@ -43,9 +43,13 @@ static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc,
     JSValue jsView = JS_DupValue(ctx, argv[0]);
 
     JSView* view = static_cast<JSView*>(UnwrapAny(jsView));
-    if (!view) {
+    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return JS_ThrowReferenceError(ctx, "loadDocument: argument provided is not a View!");
     }
+
+    Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
+    LOGD("Loading page root component: Setting pipeline to use %{public}s.",
+        view->isFullUpdate() ? "Full Update" : "Partial Update");
 
     auto page = QJSDeclarativeEngineInstance::GetRunningPage(ctx);
     LOGD("Load Document setting root view");

@@ -35,7 +35,6 @@ constexpr uint32_t THEME_ID_DARK = 117440516;
 enum class AceVersion {
     ACE_1_0,
     ACE_2_0,
-    ACE_Partial_Update
 };
 
 enum class ProjectModel {

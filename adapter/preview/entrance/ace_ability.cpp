@@ -109,7 +109,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     } else if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
         LOGI("CreateContainer with JS frontend");
         AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS, runArgs_);
-    } else if (runArgs_.aceVersion == AceVersion::ACE_2_0 || runArgs_.aceVersion == AceVersion::ACE_Partial_Update) {
+    } else if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
         LOGI("CreateContainer with JSDECLARATIVE frontend");
         AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS, runArgs_);
     } else {
@@ -192,10 +192,7 @@ void AceAbility::InitEnv()
         runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
     auto view = new FlutterAceView(ACE_INSTANCE_ID);
-    if (runArgs_.aceVersion == AceVersion::ACE_Partial_Update) {
-        container->SetPartialUpdateOn();
-    }
-    if (runArgs_.aceVersion == AceVersion::ACE_2_0 || runArgs_.aceVersion == AceVersion::ACE_Partial_Update) {
+    if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
         AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
         AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
     } else {

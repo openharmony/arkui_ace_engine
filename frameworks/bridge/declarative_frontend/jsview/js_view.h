@@ -129,6 +129,11 @@ public:
         LOGE("Internal error. Not implemented");
     };
 
+    virtual bool isFullUpdate() const
+    {
+        return true;
+    }
+
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
@@ -322,6 +327,11 @@ public:
     bool JsElementIdExists(int32_t elmtId);
 
     void JSGetProxiedItemRenderState(const JSCallbackInfo& info);
+
+    bool isFullUpdate() const override
+    {
+        return false;
+    }
 
 private:
     void MarkNeedUpdate() override;

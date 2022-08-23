@@ -42,18 +42,15 @@
 #endif
 
 extern const char _binary_stateMgmt_js_start[];
-extern const char _binary_stateMgmtPU_js_start[];
 extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsMockSystemPlugin_js_start[];
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM) || defined(IOS_PLATFORM)
 extern const char* _binary_stateMgmt_js_end;
-extern const char* _binary_stateMgmtPU_js_end;
 extern const char* _binary_jsEnumStyle_js_end;
 extern const char* _binary_jsMockSystemPlugin_js_end;
 #else
 extern const char _binary_stateMgmt_js_end[];
-extern const char _binary_stateMgmtPU_js_end[];
 extern const char _binary_jsEnumStyle_js_end[];
 extern const char _binary_jsMockSystemPlugin_js_end[];
 #endif
@@ -455,12 +452,8 @@ bool QJSDeclarativeEngineInstance::InitJSEnv(JSRuntime* runtime, JSContext* cont
         return false;
     }
 
-    std::string jsProxy;
-    if (Container::IsCurrentUsePartialUpdate()) {
-        jsProxy = std::string(_binary_stateMgmtPU_js_start, _binary_stateMgmtPU_js_end - _binary_stateMgmtPU_js_start);
-    } else {
-        jsProxy = std::string(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end - _binary_stateMgmt_js_start);
-    }
+    std::string jsProxy = std::string(_binary_stateMgmt_js_start,
+        _binary_stateMgmt_js_end - _binary_stateMgmt_js_start);
 
     // make jsProxy end of '\0'
     std::string jsEnum(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end - _binary_jsEnumStyle_js_start);
