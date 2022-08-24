@@ -34,6 +34,19 @@ struct CallbackContext {
 
     napi_value infoList = nullptr;
     bool status = 0;
+
+    ~CallbackContext()
+    {
+        if (sucCallbackRef) {
+            napi_delete_reference(env, sucCallbackRef);
+        }
+        if (failCallbackRef) {
+            napi_delete_reference(env, failCallbackRef);
+        }
+        if (cmpCallbackRef) {
+            napi_delete_reference(env, cmpCallbackRef);
+        }
+    }
 };
 
 static napi_value JSGetInfo(napi_env env, napi_callback_info info)
@@ -116,7 +129,6 @@ static napi_value JSGetInfo(napi_env env, napi_callback_info info)
                 napi_get_reference_value(env, asyncContext->sucCallbackRef, &callback);
                 napi_value ret;
                 napi_call_function(env, nullptr, callback, 2, result, &ret);
-                napi_delete_reference(env, asyncContext->sucCallbackRef);
             } else if (!asyncContext->status && asyncContext->failCallbackRef) {
                 napi_create_int32(env, 200, &code);
                 result[1] = code;
@@ -124,14 +136,12 @@ static napi_value JSGetInfo(napi_env env, napi_callback_info info)
                 napi_get_reference_value(env, asyncContext->failCallbackRef, &callback);
                 napi_value ret;
                 napi_call_function(env, nullptr, callback, 2, result, &ret);
-                napi_delete_reference(env, asyncContext->failCallbackRef);
             }
             if (asyncContext->cmpCallbackRef) {
                 napi_value callback = nullptr;
                 napi_get_reference_value(env, asyncContext->cmpCallbackRef, &callback);
                 napi_value ret;
                 napi_call_function(env, nullptr, callback, 0, nullptr, &ret);
-                napi_delete_reference(env, asyncContext->cmpCallbackRef);
             }
             napi_delete_async_work(env, asyncContext->work);
             delete asyncContext;
@@ -144,7 +154,7 @@ static napi_value JSGetInfo(napi_env env, napi_callback_info info)
 
 static napi_value DeviceExport(napi_env env, napi_value exports)
 {
-    static napi_property_descriptor desc[] = {
+    napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("getInfo", JSGetInfo),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));

@@ -503,7 +503,7 @@ static napi_value RouterExport(napi_env env, napi_value exports)
     napi_create_uint32(env, SINGLE, &prop);
     napi_set_named_property(env, routerMode, "Single", prop);
 
-    static napi_property_descriptor routerDesc[] = {
+    napi_property_descriptor routerDesc[] = {
         DECLARE_NAPI_FUNCTION("push", JSRouterPush),
         DECLARE_NAPI_FUNCTION("replace", JSRouterReplace),
         DECLARE_NAPI_FUNCTION("back", JSRouterBack),
