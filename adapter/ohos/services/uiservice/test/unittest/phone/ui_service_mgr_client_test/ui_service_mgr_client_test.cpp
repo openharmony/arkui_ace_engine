@@ -45,13 +45,11 @@ void UIServiceMgrClientTest::SetUp()
 void UIServiceMgrClientTest::TearDown()
 {}
 
-/*
- * Feature: UIServiceMgrClient.
- * Function: The RegisterCallBack function of uimgrservice was called.
- * SubFunction: uimgrservice::RegisterCallBack is called.
- * FunctionPoints: NA.
- * EnvConditions: NA.
- * CaseDescription: NA.
+/**
+ * @tc.name: UIServiceMgrClient_RegisterCallBack_0100
+ * @tc.desc: Verify that the UIServiceMgrClient RegisterCallBack is normal.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIServiceMgrClientTest, UIServiceMgrClient_RegisterCallBack_0100, TestSize.Level1)
 {
@@ -65,19 +63,18 @@ HWTEST_F(UIServiceMgrClientTest, UIServiceMgrClient_RegisterCallBack_0100, TestS
     EXPECT_CALL(*((MockUIMgrService *)(UIServiceMgrClient::GetInstance()->remoteObject_).GetRefPtr()),
         RegisterCallBackCall(testing::_, testing::_))
         .Times(1);
-    Want want;
+    AAFwk::Want want;
     MockUIServiceMgrClient::GetInstance()->RegisterCallBack(want, uiServiceProxy);
 
     testing::Mock::AllowLeak(UIServiceMgrClient::GetInstance()->remoteObject_);
     GTEST_LOG_(INFO) << "UIServiceMgrClientTest_UIServiceMgrClient_RegisterCallBack_0100 end";
 }
-/*
- * Feature: UIServiceMgrClient.
- * Function: The unregisterCallBack function of uimgrservice was called.
- * SubFunction: uimgrservice::UnregisterObserve is called.
- * FunctionPoints: NA.
- * EnvConditions: NA.
- * CaseDescription: NA.
+
+/**
+ * @tc.name: UIServiceMgrClient_UnregisterCallBack_0100
+ * @tc.desc: Verify that the UIServiceMgrClient UnregisterCallBack is normal.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIServiceMgrClientTest, UIServiceMgrClient_UnregisterCallBack_0100, TestSize.Level1)
 {
@@ -86,20 +83,18 @@ HWTEST_F(UIServiceMgrClientTest, UIServiceMgrClient_UnregisterCallBack_0100, Tes
     EXPECT_CALL(*((MockUIMgrService *)(UIServiceMgrClient::GetInstance()->remoteObject_).GetRefPtr()),
         UnregisterCallBackCall(testing::_))
         .Times(1);
-    Want want;
+    AAFwk::Want want;
     MockUIServiceMgrClient::GetInstance()->UnregisterCallBack(want);
 
     testing::Mock::AllowLeak(UIServiceMgrClient::GetInstance()->remoteObject_);
     GTEST_LOG_(INFO) << "UIServiceMgrClientTest_UIServiceMgrClient_UnregisterCallBack_0100 end";
 }
 
-/*
- * Feature: UIServiceMgrClient.
- * Function: The Push function of uimgrservice was called.
- * SubFunction: uimgrservice::Push is called.
- * FunctionPoints: NA.
- * EnvConditions: NA.
- * CaseDescription: NA.
+/**
+ * @tc.name: UIServiceMgrClient_Push_0100
+ * @tc.desc: Verify that the UIServiceMgrClient Push is normal.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIServiceMgrClientTest, UIServiceMgrClient_Push_0100, TestSize.Level1)
 {
@@ -111,7 +106,7 @@ HWTEST_F(UIServiceMgrClientTest, UIServiceMgrClient_Push_0100, TestSize.Level1)
         PushCall(testing::_, testing::_, testing::_, testing::_, testing::_))
         .Times(1);
 
-    Want want;
+    AAFwk::Want want;
     const std::string name = "name";
     const std::string jsonPath = "jsonPath";
     const std::string data = "data";
@@ -121,13 +116,11 @@ HWTEST_F(UIServiceMgrClientTest, UIServiceMgrClient_Push_0100, TestSize.Level1)
     GTEST_LOG_(INFO) << "UIServiceMgrClientTest_UIServiceMgrClient_Push_0100 end";
 }
 
-/*
- * Feature: UIServiceMgrClient.
- * Function: The Request function of uimgrservice was called.
- * SubFunction: uimgrservice::Request is called.
- * FunctionPoints: NA.
- * EnvConditions: NA.
- * CaseDescription: NA.
+/**
+ * @tc.name: UIServiceMgrClient_Request_0100
+ * @tc.desc: Verify that the UIServiceMgrClient Request is normal.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIServiceMgrClientTest, UIServiceMgrClient_Request_0100, TestSize.Level1)
 {
@@ -139,20 +132,19 @@ HWTEST_F(UIServiceMgrClientTest, UIServiceMgrClient_Request_0100, TestSize.Level
         RequestCall(testing::_, testing::_, testing::_))
         .Times(1);
 
-    Want want;
+    AAFwk::Want want;
     const std::string name = "name";
     const std::string data = "data";
     MockUIServiceMgrClient::GetInstance()->Request(want, name, data);
     testing::Mock::AllowLeak(UIServiceMgrClient::GetInstance()->remoteObject_);
     GTEST_LOG_(INFO) << "UIServiceMgrClientTest_UIServiceMgrClient_Request_0100 end";
 }
-/*
- * Feature: UIServiceMgrClient.
- * Function: The ReturnRequest function of uimgrservice was called.
- * SubFunction: uimgrservice::ReturnRequest is called.
- * FunctionPoints: NA.
- * EnvConditions: NA.
- * CaseDescription: NA.
+
+/**
+ * @tc.name: UIServiceMgrClient_ReturnRequest_0100
+ * @tc.desc: Verify that the UIServiceMgrClient ReturnRequest is normal.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIServiceMgrClientTest, UIServiceMgrClient_ReturnRequest_0100, TestSize.Level1)
 {
@@ -164,7 +156,7 @@ HWTEST_F(UIServiceMgrClientTest, UIServiceMgrClient_ReturnRequest_0100, TestSize
         ReturnRequestCall(testing::_, testing::_, testing::_, testing::_))
         .Times(1);
 
-    Want want;
+    AAFwk::Want want;
     const std::string source = "source";
     const std::string data = "data";
     const std::string extraData = "extraData";
