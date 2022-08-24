@@ -17,7 +17,5 @@ group("unittest") {
   testonly = true
   deps = []
 
-  deps += [
-    #"unittest/context:unittest"
-  ]
+  deps += [ "unittest/context:unittest" ]
 }

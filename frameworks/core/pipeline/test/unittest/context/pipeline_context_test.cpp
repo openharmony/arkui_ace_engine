@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/task_runner.h"
 
@@ -38,17 +40,13 @@ namespace {
 
 constexpr int32_t TEST_LOGIC_WIDTH = 750;
 constexpr int32_t CUSTOM_DESIGN_WIDTH = 800;
-constexpr int32_t TEST_LOGIC_HEIGHT = 1300;
 constexpr int32_t TEST_SURFACE_WIDTH = 1080;
 constexpr int32_t TEST_SURFACE_HEIGHT = 1920;
-constexpr double LOCATION_X = 900.0;
-constexpr double LOCATION_Y = 500.0;
-constexpr double LOGIC_LOCATION_X = LOCATION_X * TEST_LOGIC_WIDTH / TEST_SURFACE_WIDTH;
-constexpr double LOGIC_LOCATION_Y = LOCATION_Y * TEST_LOGIC_WIDTH / TEST_SURFACE_WIDTH;
 constexpr double TEST_DENSITY = 1.6;
-constexpr double COMPARE_PRECISION = 0.001;
 constexpr int32_t SURFACE_WIDTH = 1080;
 constexpr int32_t SURFACE_HEIGHT = 2244;
+constexpr int32_t BEFORE_NEXTFRAME_VALUE = 0;
+constexpr int32_t AFTER_NEXTFRAME_VALUE = 1;
 uint64_t g_runningNano = 0;
 const std::string LABEL = "task executor test";
 const std::string THREADFIRST = "thread_1";
@@ -75,38 +73,6 @@ RefPtr<PipelineContext> ConstructContextForJs(
     context->SetupRootElement();
     return context;
 }
-
-void TestTouchEventConvert(const RefPtr<PipelineContext>& context, double expectX, double expectY)
-{
-    // Create box and touch listener.
-    auto box = AceType::MakeRefPtr<BoxComponent>();
-    box->SetWidth(TEST_LOGIC_WIDTH);
-    box->SetHeight(TEST_LOGIC_HEIGHT);
-    auto touchListener = AceType::MakeRefPtr<TouchListenerComponent>(box);
-    auto marker = BackEndEventManager<void(const TouchEventInfo&)>::GetInstance().GetAvailableMarker();
-    Offset location;
-    auto callback = [&location](const TouchEventInfo& info) {
-        if (!info.GetTouches().empty()) {
-            location = info.GetTouches().front().GetGlobalLocation();
-        }
-    };
-    BackEndEventManager<void(const TouchEventInfo&)>::GetInstance().BindBackendEvent(marker, callback);
-    touchListener->SetOnTouchDownId(marker);
-    auto page = AceType::MakeRefPtr<PageComponent>(0, "", touchListener);
-    context->PushPage(page);
-    context->OnVsyncEvent(0, 0);
-    context->OnSurfaceDensityChanged(TEST_DENSITY);
-    context->OnSurfaceChanged(TEST_SURFACE_WIDTH, TEST_SURFACE_HEIGHT);
-
-    // Mock touch down event
-    TouchEvent point {
-        .x = LOCATION_X, .y = LOCATION_Y, .type = TouchType::DOWN, .time = std::chrono::high_resolution_clock::now()
-    };
-    context->OnTouchEvent(point);
-    ASSERT_TRUE(NearEqual(location.GetX(), expectX, COMPARE_PRECISION));
-    ASSERT_TRUE(NearEqual(location.GetY(), expectY, COMPARE_PRECISION));
-}
-
 } // namespace
 
 class MockFrontend : public Frontend {
@@ -260,28 +226,6 @@ void PipelineContextTest::InitTaskExecutor()
 }
 
 /**
- * @tc.name: EventPixelConvert001
- * @tc.desc: Verify the logical pixel event conversion mechanism.
- * @tc.type: FUNC
- * @tc.require: AR000DACKI
- * @tc.author: yanshuifeng
- */
-HWTEST_F(PipelineContextTest, EventPixelConvert001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create and initialize pipeline context.
-     */
-    auto frontend = AceType::MakeRefPtr<MockFrontend>();
-    auto context = ConstructContext(frontend);
-
-    /**
-     * @tc.steps: step2. send touch down event.
-     * @tc.expected: step2. receive touch down callback and touch point result is right.
-     */
-    TestTouchEventConvert(context, LOGIC_LOCATION_X, LOGIC_LOCATION_Y);
-}
-
-/**
  * @tc.name: RenderConvert001
  * @tc.desc: Verify the logical pixel rendering conversion mechanism.
  * @tc.type: FUNC
@@ -332,31 +276,6 @@ HWTEST_F(PipelineContextTest, DesignWidthScale001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DesignWidthEventConvert001
- * @tc.desc: Design width can control event convert scale.
- * @tc.type: FUNC
- * @tc.require: AR000DSSAT
- * @tc.author: liruokun
- */
-HWTEST_F(PipelineContextTest, DesignWidthEventConvert001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create and initialize pipeline context. Set design width 750.
-     */
-    auto frontend = AceType::MakeRefPtr<MockFrontend>();
-    frontend->SetDesignWidth(CUSTOM_DESIGN_WIDTH);
-    auto context = ConstructContext(frontend);
-
-    /**
-     * @tc.steps: step2. Mock send touch down event.
-     * @tc.expected: step2. Receive touch down successfully and get correct touch position.
-     */
-    double expectX = LOCATION_X * CUSTOM_DESIGN_WIDTH / TEST_SURFACE_WIDTH;
-    double expectY = LOCATION_Y * CUSTOM_DESIGN_WIDTH / TEST_SURFACE_WIDTH;
-    TestTouchEventConvert(context, expectX, expectY);
-}
-
-/**
  * @tc.name: AutoDesignWidthScale001
  * @tc.desc: Auto design width can control render scale.
  * @tc.type: FUNC
@@ -380,31 +299,6 @@ HWTEST_F(PipelineContextTest, AutoDesignWidthScale001, TestSize.Level1)
     context->OnSurfaceChanged(TEST_SURFACE_WIDTH, TEST_SURFACE_HEIGHT);
     ASSERT_TRUE(NearEqual(context->GetDipScale(), 1.0));
     ASSERT_TRUE(NearEqual(context->GetViewScale(), TEST_DENSITY));
-}
-
-/**
- * @tc.name: AutoDesignWidthEventConvert001
- * @tc.desc: Auto design width can control event convert scale.
- * @tc.type: FUNC
- * @tc.require: AR000DSSAT
- * @tc.author: liruokun
- */
-HWTEST_F(PipelineContextTest, AutoDesignWidthEventConvert001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create and initialize pipeline context. Set auto design width.
-     */
-    auto frontend = AceType::MakeRefPtr<MockFrontend>();
-    frontend->SetAutoDesignWidth(true);
-    auto context = ConstructContext(frontend);
-
-    /**
-     * @tc.steps: step2. Mock send touch down event.
-     * @tc.expected: step2. Receive touch down successfully and get correct touch position.
-     */
-    double expectX = LOCATION_X / TEST_DENSITY;
-    double expectY = LOCATION_Y / TEST_DENSITY;
-    TestTouchEventConvert(context, expectX, expectY);
 }
 
 /**
@@ -434,6 +328,126 @@ HWTEST_F(PipelineContextTest, RequestAnimationFrame001, TestSize.Level1)
     auto&& callback = [context]() { ASSERT_TRUE(g_runningNano == context->GetTimeFromExternalTimer()); };
     context->SetAnimationCallback(callback);
     context->OnVsyncEvent(1, 0);
+}
+
+/**
+ * @tc.name: SetNextFrameLayoutCallback001
+ * @tc.desc: Call SetNextFrameLayoutCallback first and then set ForeGroundCalled to true.
+ * NextFrameLayoutCallback should be called.
+ * @tc.type: FUNC
+ * @tc.require: issueI5H6CS
+ */
+HWTEST_F(PipelineContextTest, SetNextFrameLayoutCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and initialize pipeline context. create the callback.
+     */
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto context = ConstructContext(frontend);
+    int32_t value = BEFORE_NEXTFRAME_VALUE;
+    auto callback = [&value]() { value = AFTER_NEXTFRAME_VALUE; };
+
+    /**
+     * @tc.steps: step2. set nextFrameLayoutCallback and then set foregroundCalled true.
+     */
+    context->SetNextFrameLayoutCallback(std::move(callback));
+    context->SetForegroundCalled(true);
+
+    /**
+     * @tc.steps: step3. try call the callback in pipeline and check value.
+     */
+    context->TryCallNextFrameLayoutCallback();
+    ASSERT_TRUE(value == AFTER_NEXTFRAME_VALUE);
+}
+
+/**
+ * @tc.name: SetNextFrameLayoutCallback002
+ * @tc.desc: Call SetNextFrameLayoutCallback first and then set ForeGroundCalled to false.
+ * NextFrameLayoutCallback should not be called.
+ * @tc.type: FUNC
+ * @tc.require: issueI5H6CS
+ */
+HWTEST_F(PipelineContextTest, SetNextFrameLayoutCallback002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and initialize pipeline context. create the callback.
+     */
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto context = ConstructContext(frontend);
+    int32_t value = BEFORE_NEXTFRAME_VALUE;
+    auto callback = [&value]() { value = AFTER_NEXTFRAME_VALUE; };
+
+    /**
+     * @tc.steps: step2. set nextFrameLayoutCallback and then set foregroundCalled false.
+     */
+    context->SetNextFrameLayoutCallback(std::move(callback));
+    context->SetForegroundCalled(false);
+
+    /**
+     * @tc.steps: step3. try call the callback in pipeline and check value.
+     */
+    context->TryCallNextFrameLayoutCallback();
+    ASSERT_TRUE(value == BEFORE_NEXTFRAME_VALUE);
+}
+
+/**
+ * @tc.name: SetNextFrameLayoutCallback003
+ * @tc.desc: Set ForeGroundCalled to true and then call SetNextFrameLayoutCallback.
+ * NextFrameLayoutCallback should be called.
+ * @tc.type: FUNC
+ * @tc.require: issueI5H6CS
+ */
+HWTEST_F(PipelineContextTest, SetNextFrameLayoutCallback003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and initialize pipeline context. create the callback.
+     */
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto context = ConstructContext(frontend);
+    int32_t value = BEFORE_NEXTFRAME_VALUE;
+    auto callback = [&value]() { value = AFTER_NEXTFRAME_VALUE; };
+
+    /**
+     * @tc.steps: step2. set foregroundCalled true and then set nextFrameLayoutCallback.
+     */
+    context->SetForegroundCalled(true);
+    context->SetNextFrameLayoutCallback(std::move(callback));
+
+    /**
+     * @tc.steps: step3. try call the callback in pipeline and check value.
+     */
+    context->TryCallNextFrameLayoutCallback();
+    ASSERT_TRUE(value == AFTER_NEXTFRAME_VALUE);
+}
+
+/**
+ * @tc.name: SetNextFrameLayoutCallback004
+ * @tc.desc: Set ForeGroundCalled to false first and then call SetNextFrameLayoutCallback.
+ * NextFrameLayoutCallback should not be called.
+ * @tc.type: FUNC
+ * @tc.require: issueI5H6CS
+ */
+HWTEST_F(PipelineContextTest, SetNextFrameLayoutCallback004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and initialize pipeline context. create the callback.
+     */
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto context = ConstructContext(frontend);
+    int32_t value = BEFORE_NEXTFRAME_VALUE;
+    auto callback = [&value]() { value = AFTER_NEXTFRAME_VALUE; };
+
+    /**
+     * @tc.steps: step2. set foregroundCalled false and then set nextFrameLayoutCallback.
+     */
+    context->SetForegroundCalled(false);
+    context->SetNextFrameLayoutCallback(std::move(callback));
+
+    /**
+     * @tc.steps: step3. try call the callback in pipeline and check value.
+     */
+    context->TryCallNextFrameLayoutCallback();
+    ASSERT_TRUE(value == BEFORE_NEXTFRAME_VALUE);
 }
 
 } // namespace OHOS::Ace

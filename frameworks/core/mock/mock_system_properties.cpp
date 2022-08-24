@@ -18,14 +18,15 @@
 namespace OHOS::Ace {
 
 DeviceType SystemProperties::deviceType_ = DeviceType::UNKNOWN;
-
+bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
 bool SystemProperties::windowAnimationEnabled_ = true;
+double SystemProperties::resolution_ = 0.0;
 
 float SystemProperties::GetFontWeightScale()
 {
     // Default value of font weight scale is 1.0.
-    return 1.0;
+    return 1.0f;
 }
 
 DeviceType SystemProperties::GetDeviceType()
