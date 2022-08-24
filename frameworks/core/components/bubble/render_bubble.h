@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "include/core/SkPath.h"
+#include "third_party/skia/include/core/SkPath.h"
+
 #include "base/geometry/dimension.h"
 #include "core/components/bubble/bubble_component.h"
 #include "core/components/common/properties/edge.h"
@@ -50,6 +51,7 @@ public:
     bool PopBubble();
     void FirePopEvent();
     bool HandleMouseEvent(const MouseEvent& event) override;
+    double GetArrowOffset(const Placement& placement);
 
 protected:
     enum class ErrorPositionType {
@@ -72,7 +74,6 @@ protected:
     ErrorPositionType GetErrorPositionType(const Offset& childOffset, const Size& childSize);
     void UpdateAccessibilityInfo(Size size, Offset offset);
     void InitAccessibilityEventListener();
-    double GetArrowOffset(const Placement& placement);
     void BuildCornerPath(SkPath& path, Placement placement, double radius);
     void BuildTopLinePath(SkPath& path, double arrowOffset, double radius);
     void BuildRightLinePath(SkPath& path, double arrowOffset, double radius);

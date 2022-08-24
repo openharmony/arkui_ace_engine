@@ -21,6 +21,22 @@
 namespace OHOS::Ace {
 
 RefPtr<MockRenderBubble> DialogTestUtils::CreateRenderBubble(
+    const Placement placement, const Offset& offset, const Size& size, const std::optional<Dimension>& arrowOffset)
+{
+    RefPtr<MockRenderBubble> renderBubble = AceType::MakeRefPtr<MockRenderBubble>();
+    RefPtr<TextComponent> text = AceType::MakeRefPtr<TextComponent>("HiAce");
+    RefPtr<BubbleComponent> bubbleComponent = AceType::MakeRefPtr<BubbleComponent>(text);
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetArrowOffset(arrowOffset);
+    bubbleComponent->SetPopupParam(popupParam);
+    renderBubble->Update(bubbleComponent);
+    renderBubble->SetTargetOffset(offset);
+    renderBubble->SetTargetSize(size);
+    renderBubble->SetPlacement(placement);
+    return renderBubble;
+}
+
+RefPtr<MockRenderBubble> DialogTestUtils::CreateRenderBubble(
     const Placement placement, const Offset& offset, const Size& size)
 {
     RefPtr<MockRenderBubble> renderBubble = AceType::MakeRefPtr<MockRenderBubble>();
