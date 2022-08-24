@@ -836,11 +836,10 @@ void AceContainer::LoadDocument(const std::string& url, const std::string& compo
         LOGE("jsEngine is null, AceContainer::LoadDocument failed");
         return;
     }
-    std::string dstUrl = url + COMPONENT_PREVIEW + componentName;
     taskExecutor_->PostTask(
-        [front = frontend, componentName, dstUrl, jsEngine]() {
-            front->SetPagePath(dstUrl);
-            jsEngine->ReplaceJSContent(dstUrl, componentName);
+        [front = frontend, componentName, url, jsEngine]() {
+            front->SetPagePath(url);
+            jsEngine->ReplaceJSContent(url, componentName);
         },
         TaskExecutor::TaskType::JS);
 }

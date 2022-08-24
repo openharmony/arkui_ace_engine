@@ -34,15 +34,6 @@
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
 
 namespace OHOS::Ace::Framework {
-namespace {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-const char COMPONENT_PREVIEW[] = "_preview_";
-const char COMPONENT_PREVIEW_LOAD_DOCUMENT[] = "loadDocument";
-const char COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW[] = "loadDocument(new";
-const char LEFT_PARENTHESIS[] = "(";
-constexpr int32_t LOAD_DOCUMENT_STR_LENGTH = 16;
-#endif
-} // namespace
 
 QJSDeclarativeEngine::~QJSDeclarativeEngine()
 {
@@ -218,28 +209,11 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     }
 
     std::string jsContent;
-
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (!engineInstance_->GetDelegate()->GetAssetContent(url, jsContent)) {
         LOGE("js file load failed!");
         return;
     }
-#else
-    std::string::size_type posPreview = url.find(COMPONENT_PREVIEW);
-    if (posPreview != std::string::npos) {
-        std::string::size_type pos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT);
-        if (pos != std::string::npos) {
-            LOGE("js file do not have loadDocument,");
-            jsContent = preContent_;
-        }
-    } else {
-        if (!engineInstance_->GetDelegate()->GetAssetContent(url, jsContent)) {
-            LOGE("js file load failed!");
-            return;
-        }
-    }
-    preContent_ = jsContent;
-#endif
+
     if (jsContent.empty()) {
         LOGE("js file load failed! url=[%{public}s]", url.c_str());
         return;
@@ -260,32 +234,13 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
 void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::string componentName)
 {
     // replace the component name in the last loadDocument from current js content.
-    std::string::size_type loadDocumentPos = 0;
-    std::string::size_type  lastLoadDocumentPos = 0;
-    while ((loadDocumentPos = preContent_.find(COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW, loadDocumentPos))
-           != std::string::npos) {
-        lastLoadDocumentPos = loadDocumentPos;
-        loadDocumentPos++;
-    }
-
-    std::string::size_type position = lastLoadDocumentPos + LOAD_DOCUMENT_STR_LENGTH;
-    std::string::size_type finalPostion = 0;
-    while ((position = preContent_.find(LEFT_PARENTHESIS, position)) != std::string::npos) {
-        if (position > loadDocumentPos + LOAD_DOCUMENT_STR_LENGTH) {
-            finalPostion = position;
-            break;
-        }
-        position++;
-    }
-    std::string dstReplaceStr = COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW;
-    dstReplaceStr += " " + componentName;
-    preContent_.replace(lastLoadDocumentPos, finalPostion - lastLoadDocumentPos, dstReplaceStr);
-
     auto* instance = static_cast<QJSDeclarativeEngineInstance*>(JS_GetContextOpaque(engineInstance_->GetQJSContext()));
     if (instance == nullptr) {
         LOGE("Can not cast Context to QJSDeclarativeEngineInstance object.");
         return;
     }
+    instance->SetPreviewFlag(true);
+    instance->SetRequiredComponent(componentName);
 
     instance->GetDelegate()->Replace(url, "");
 }

@@ -251,7 +251,6 @@ panda::Local<panda::JSValueRef> JsGetPreviewComponentFlag(panda::JsiRuntimeCallI
     if (!isComponentPreview) {
         return panda::JSValueRef::False(vm);
     }
-    arkRuntime->SetPreviewFlag(false);
     return panda::JSValueRef::True(vm);
 }
 
