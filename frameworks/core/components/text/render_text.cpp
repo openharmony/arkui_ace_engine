@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components/text_field/render_text_field.h"
@@ -956,7 +957,18 @@ void RenderText::PanOnActionStart(const GestureEvent& info)
         return;
     }
 
-    auto dragItemInfo = GenerateDragItemInfo(pipelineContext, info);
+    GestureEvent newInfo = info;
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+        pipelineContext->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
+    Point newPoint;
+    if (isContainerModal) {
+        newPoint.SetX(startPoint_.GetX() - CONTAINER_BORDER_WIDTH.ConvertToPx() - CONTENT_PADDING.ConvertToPx());
+        newPoint.SetY(startPoint_.GetY() - CONTAINER_TITLE_HEIGHT.ConvertToPx());
+    } else {
+        newPoint = startPoint_;
+    }
+    newInfo.SetGlobalPoint(newPoint);
+    auto dragItemInfo = GenerateDragItemInfo(pipelineContext, newInfo);
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (!dragItemInfo.pixelMap && !dragItemInfo.customComponent) {
         auto initRenderNode = AceType::Claim(this);
