@@ -1716,11 +1716,6 @@ void RenderGridLayout::PerformLayoutForEditGrid()
             LOGD("%{public}d %{public}d %{public}d %{public}d", rowIndex, colIndex, itemRowSpan, itemColSpan);
         }
     }
-    auto hiddenItem = draggingItemRenderNode_.Upgrade();
-    if (hiddenItem) {
-        hiddenItem->SetVisible(false);
-        DisableChild(hiddenItem, draggingItemIndex_);
-    }
 }
 
 void RenderGridLayout::PerformLayoutForStaticGrid()
