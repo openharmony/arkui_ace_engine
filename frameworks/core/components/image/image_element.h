@@ -26,6 +26,7 @@ class ImageElement : public RenderElement, public FocusNode {
     DECLARE_ACE_TYPE(ImageElement, RenderElement, FocusNode);
 
 public:
+    void Update() override;
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
 
 protected:

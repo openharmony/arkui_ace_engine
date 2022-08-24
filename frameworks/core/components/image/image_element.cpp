@@ -19,6 +19,16 @@
 
 namespace OHOS::Ace {
 
+void ImageElement::Update()
+{
+    RenderElement::Update();
+
+    auto imageComponent = AceType::DynamicCast<ImageComponent>(component_);
+    if (imageComponent) {
+        SetFocusable(imageComponent->GetFocusable());
+    }
+}
+
 bool ImageElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
     if (FocusNode::OnKeyEvent(keyEvent)) {

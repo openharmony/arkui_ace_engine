@@ -163,6 +163,16 @@ public:
         return colorfilter_;
     }
 
+    bool GetFocusable() const
+    {
+        return focusable_;
+    }
+
+    void SetFocusable(bool focusable)
+    {
+        focusable_ = focusable;
+    }
+
 private:
     std::string src_;
     std::string alt_;
@@ -183,6 +193,7 @@ private:
     bool matchTextDirection_ = false;
     bool useSkiaSvg_ = true;
     bool autoResize_ = true;
+    bool focusable_ = true;
 
     ImageFit imageFit_ = ImageFit::COVER;
     // set default value to [ImageInterpolation::LOW] to keep consistent for the old frontend

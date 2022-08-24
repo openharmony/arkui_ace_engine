@@ -144,6 +144,7 @@ RefPtr<Component> ContainerModalComponent::BuildControlButton(
     auto image = AceType::MakeRefPtr<ImageComponent>(icon);
     image->SetWidth(TITLE_ICON_SIZE);
     image->SetHeight(TITLE_ICON_SIZE);
+    image->SetFocusable(false);
     std::list<RefPtr<Component>> btnChildren;
     btnChildren.emplace_back(image);
 
@@ -218,6 +219,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
         titleIcon_ = AceType::MakeRefPtr<ImageComponent>();
         titleIcon_->SetWidth(TITLE_ICON_SIZE);
         titleIcon_->SetHeight(TITLE_ICON_SIZE);
+        titleIcon_->SetFocusable(false);
     }
 
     // title text
