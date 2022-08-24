@@ -49,6 +49,11 @@ public:
         return MakeRefPtr<ButtonLayoutAlgorithm>();
     }
 
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<ButtonLayoutProperty>();
+    }
+
     void OnModifyDone() override;
 
 private:
