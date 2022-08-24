@@ -155,6 +155,11 @@ void JSTextPickerDialog::JSBind(BindingTarget globalObj)
 void JSTextPickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("TextPicker create error, info is non-valid");
         return;
