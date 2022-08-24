@@ -715,7 +715,6 @@ void JsiDeclarativeEngine::Destroy()
 {
     LOGI("JsiDeclarativeEngine Destroy");
     CHECK_RUN_ON(JS);
-    XComponentClient::GetInstance().SetJSValCallToNull();
 
 #ifdef USE_ARK_ENGINE
     JSLocalStorage::RemoveStorage(instanceId_);
@@ -1119,6 +1118,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(componentId);
         XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
+        XComponentClient::GetInstance().DeleteFromJsValMapById(componentId);
         return;
     }
     InitXComponent(componentId);
@@ -1184,18 +1184,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
 
     auto objContext = JsiObject(objXComp);
     JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
-    RefPtr<JSXComponentController> controller = OHOS::Ace::Framework::XComponentClient::GetInstance().
-        GetControllerFromJSXComponentControllersMap(componentId);
-    auto weakController = AceType::WeakClaim(AceType::RawPtr(controller));
-    auto getJSValCallback = [obj, weakController](JSRef<JSVal>& jsVal) {
-        jsVal = obj;
-        auto jsXComponentController = weakController.Upgrade();
-        if (jsXComponentController) {
-            jsXComponentController->SetXComponentContext(obj);
-        }
-        return true;
-    };
-    XComponentClient::GetInstance().RegisterJSValCallback(getJSValCallback);
+    XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
 
     auto task = [weak = WeakClaim(this), xcomponent]() {
         auto pool = xcomponent->GetTaskPool();
