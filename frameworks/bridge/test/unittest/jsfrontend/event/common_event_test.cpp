@@ -114,6 +114,7 @@ void CommonEventTest::TearDown() {}
  * @tc.name: DomCommonEventTest001
  * @tc.desc: Test add touch events to dom swiper successfully.
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ5Y
  */
 HWTEST_F(CommonEventTest, DomCommonEventTest001, TestSize.Level1)
 {
@@ -143,6 +144,7 @@ HWTEST_F(CommonEventTest, DomCommonEventTest001, TestSize.Level1)
  * @tc.name: DomCommonEventTest002
  * @tc.desc: Test add click and longpress event to dom text successfully.
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ39
  */
 HWTEST_F(CommonEventTest, DomCommonEventTest002, TestSize.Level1)
 {
@@ -168,6 +170,7 @@ HWTEST_F(CommonEventTest, DomCommonEventTest002, TestSize.Level1)
  * @tc.name: DomCommonEventTest003
  * @tc.desc: Test add touch events and click/longpress event to dom text successfully.
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ54
  */
 HWTEST_F(CommonEventTest, DomCommonEventTest003, TestSize.Level1)
 {
@@ -204,6 +207,7 @@ HWTEST_F(CommonEventTest, DomCommonEventTest003, TestSize.Level1)
  * @tc.name: DomCommonEventTest004
  * @tc.desc: Test private change event and common gesture event to dom rating successfully.
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ2T
  */
 HWTEST_F(CommonEventTest, DomCommonEventTest004, TestSize.Level1)
 {
