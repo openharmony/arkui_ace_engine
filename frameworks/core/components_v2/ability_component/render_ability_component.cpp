@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_v2/ability_component/ability_component.h"
 
 namespace OHOS::Ace::V2 {
@@ -24,11 +25,6 @@ namespace OHOS::Ace::V2 {
 RenderAbilityComponent::~RenderAbilityComponent()
 {
     adapter_->RemoveExtension();
-}
-
-RefPtr<RenderNode> RenderAbilityComponent::Create()
-{
-    return AceType::MakeRefPtr<RenderAbilityComponent>();
 }
 
 void RenderAbilityComponent::Update(const RefPtr<Component>& component)
@@ -64,15 +60,20 @@ void RenderAbilityComponent::Paint(RenderContext& context, const Offset& offset)
         return;
     }
 
-    auto container = Container::Current();
-    auto parentWindowRect = Rect();
-    if (container) {
-        auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
-        if (context) {
-            parentWindowRect = context->GetCurrentWindowRect();
-        }
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        return;
     }
-    currentRect_.SetOffset(globalOffset + parentWindowRect.GetOffset());
+
+    auto parentWindowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    Offset containerModalOffset;
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+        pipelineContext->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
+    if (isContainerModal) {
+        containerModalOffset = Offset((NormalizeToPx(CONTAINER_BORDER_WIDTH) + NormalizeToPx(CONTENT_PADDING)),
+            NormalizeToPx(CONTAINER_TITLE_HEIGHT));
+    }
+    currentRect_.SetOffset(globalOffset + parentWindowOffset + containerModalOffset);
     if (hasConnectionToAbility_) {
         adapter_->UpdateRect(currentRect_);
         return;
