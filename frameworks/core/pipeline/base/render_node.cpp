@@ -57,7 +57,10 @@ constexpr float PRESS_KEYFRAME_END = 1.0f;
 struct ZIndexComparator {
     bool operator()(const RefPtr<RenderNode>& left, const RefPtr<RenderNode>& right) const
     {
-        return (left->GetZIndex() < right->GetZIndex());
+        if (left && right) {
+            return (left->GetZIndex() < right->GetZIndex());
+        }
+        return false;
     }
 };
 
