@@ -41,6 +41,7 @@ struct PositionInfo {
 
 using ActionClickImpl = std::function<void()>;
 using ActionLongClickImpl = std::function<void()>;
+using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = std::function<bool()>;
 using ActionScrollBackwardImpl = std::function<bool()>;
 using ActionFocusImpl = std::function<void()>;
@@ -67,6 +68,8 @@ public:
     bool ActionClick();
     void SetActionLongClickImpl(const ActionLongClickImpl& actionLongClickImpl);
     bool ActionLongClick();
+    void SetActionSetTextImpl(const ActionSetTextImpl& actionSetTextImpl);
+    bool ActionSetText(const std::string& text);
     void SetActionScrollForward(const ActionScrollForwardImpl& actionScrollForwardImpl);
     bool ActionScrollForward();
     void SetActionScrollBackward(const ActionScrollBackwardImpl& actionScrollBackwardImpl);
@@ -156,6 +159,11 @@ public:
     const EventMarker& GetLongPressEventMarker() const
     {
         return onLongPressId_;
+    }
+
+    const EventMarker& GetSetTextEventMarker() const
+    {
+        return onSetTextId_;
     }
 
     const EventMarker& GetFocusEventMarker() const
@@ -799,9 +807,11 @@ protected:
     ActionFocusImpl actionFocusImpl_;
     ActionUpdateIdsImpl actionUpdateIdsImpl_;
     ActionAccessibilityFocusImpl actionAccessibilityFocusIdsImpl_;
+    ActionSetTextImpl actionSetTextImpl_;
     EventMarker onAccessibilityEventId_;
     EventMarker onClickId_;
     EventMarker onLongPressId_;
+    EventMarker onSetTextId_;
     EventMarker onFocusId_;
     EventMarker onBlurId_;
     FocusChangeCallback focusChangeEventId_;

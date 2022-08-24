@@ -134,6 +134,20 @@ bool AccessibilityNode::ActionLongClick()
     return false;
 }
 
+void AccessibilityNode::SetActionSetTextImpl(const ActionSetTextImpl& actionSetTextImpl)
+{
+    actionSetTextImpl_ = actionSetTextImpl;
+}
+
+bool AccessibilityNode::ActionSetText(const std::string& text)
+{
+    if (actionSetTextImpl_) {
+        actionSetTextImpl_(text);
+        return true;
+    }
+    return false;
+}
+
 void AccessibilityNode::SetActionScrollForward(const ActionScrollForwardImpl& actionScrollForwardImpl)
 {
     actionScrollForwardImpl_ = actionScrollForwardImpl;
@@ -415,6 +429,7 @@ std::unordered_set<AceAction> AccessibilityNode::GetSupportAction(uint64_t enabl
         AceAction::ACTION_LONG_CLICK, AceAction::ACTION_SCROLL_FORWARD, AceAction::ACTION_SCROLL_BACKWARD,
         AceAction::ACTION_FOCUS, AceAction::ACTION_ACCESSIBILITY_FOCUS, AceAction::ACTION_CLEAR_ACCESSIBILITY_FOCUS,
         AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY, AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY,
+        AceAction::ACTION_SET_TEXT,
     };
 
     std::unordered_set<AceAction> supportActions;
