@@ -45,6 +45,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, b
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textLayoutAlgorithm, false);
     paragraph_ = textLayoutAlgorithm->GetParagraph();
+    baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     return true;
 }
 

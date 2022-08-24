@@ -40,7 +40,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TextPaintMethod>(paragraph_);
+        return MakeRefPtr<TextPaintMethod>(paragraph_, baselineOffset_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -72,6 +72,7 @@ private:
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::shared_ptr<RSParagraph> paragraph_;
+    float baselineOffset_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_PAINT_METHOD_H
 
+#include <utility>
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
@@ -28,19 +30,25 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TextPaintMethod, NodePaintMethod)
 public:
-    explicit TextPaintMethod(const std::shared_ptr<RSParagraph>& paragraph) : paragraph_(paragraph) {}
+    TextPaintMethod(std::shared_ptr<RSParagraph>  paragraph, float baselineOffset)
+        : paragraph_(std::move(paragraph)), baselineOffset_(baselineOffset)
+    {}
     ~TextPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(paragraph_, nullptr);
         auto offset = paintWrapper->GetContentOffset();
-        return [paragraph = paragraph_, offset](
-                   RSCanvas& canvas) { paragraph->Paint(&canvas, offset.GetX(), offset.GetY()); };
+        auto paintOffset = offset - OffsetF(0.0, baselineOffset_);
+        return [paragraph = paragraph_, paintOffset](
+                   RSCanvas& canvas) { paragraph->Paint(&canvas, paintOffset.GetX(), paintOffset.GetY()); };
     }
 
 private:
     std::shared_ptr<RSParagraph> paragraph_;
+    float baselineOffset_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(TextPaintMethod);
 };
 
 } // namespace OHOS::Ace::NG
