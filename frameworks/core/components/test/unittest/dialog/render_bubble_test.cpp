@@ -44,10 +44,10 @@ const Offset POSITION_VALUE_LEFT = Offset(92, 250);
 const Offset POSITION_VALUE_RIGHT = Offset(408, 250);
 const Offset POSITION_VALUE_TOP = Offset(250, 84);
 const Offset POSITION_VALUE_BOTTOM = Offset(250, 416);
-const Offset POSITION_VALUE_TOP_LEFT = Offset(100, 100);
-const Offset POSITION_VALUE_TOP_RIGHT = Offset(400, 100);
-const Offset POSITION_VALUE_BOTTOM_LEFT = Offset(100, 400);
-const Offset POSITION_VALUE_BOTTOM_RIGHT = Offset(400, 400);
+const Offset POSITION_VALUE_TOP_LEFT = Offset(200, 84);
+const Offset POSITION_VALUE_TOP_RIGHT = Offset(300, 92);
+const Offset POSITION_VALUE_BOTTOM_LEFT = Offset(200, 408);
+const Offset POSITION_VALUE_BOTTOM_RIGHT = Offset(300, 408);
 const Offset POSITION_VALUE_DEFAULT = Offset(200, 200);
 const Offset POSITION_BOTTOM_ERROR_LEFT = Offset(300, 516);
 const Offset POSITION_BOTTOM_ERROR_RIGHT = Offset(674, 416);
@@ -441,6 +441,66 @@ HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout011, TestSize.Level1)
     ASSERT_TRUE(child != nullptr);
     EXPECT_EQ(child->GetLayoutSize(), LAYOUT_SIZE_MAX);
     EXPECT_EQ(child->GetPosition(), POSITION_ERROR_FULLSCREEN);
+}
+
+/**
+ * @tc.name: RenderBubblePerformLayout012
+ * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with arrowoffset when placement is top.
+ * @tc.type: FUNC
+ * @tc.require: issueI5JQ5P
+ */
+HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct RenderBubble and RenderBox.
+     */
+    auto mockContext = DisplayTestUtils::GetMockContext();
+    RefPtr<RenderRoot> root = DisplayTestUtils::CreateRenderRoot();
+    RefPtr<MockRenderBubble> bubble =
+        DialogTestUtils::CreateRenderBubble(Placement::TOP, Offset(200, 200), Size(200, 200),
+            Dimension(-10, DimensionUnit::PERCENT));
+    bubble->Attach(mockContext);
+    RefPtr<RenderBox> box = DisplayTestUtils::CreateRenderBox(BOX_SIZE_MIN, BOX_SIZE_MIN);
+    box->Attach(mockContext);
+    bubble->AddChild(box);
+    root->AddChild(bubble);
+
+    /**
+     * @tc.steps: step2. call the PerformLayout interface of RenderRoot.
+     * @tc.expected: step2. arrowoffset of bubble is correct.
+     */
+    root->PerformLayout();
+    EXPECT_EQ(bubble->GetArrowOffset(Placement::TOP), 0);
+}
+
+/**
+ * @tc.name: RenderBubblePerformLayout013
+ * @tc.desc: Verify PerformLayout interface of RenderBubble works correctly with arrowoffset when placement is left.
+ * @tc.type: FUNC
+ * @tc.require: issueI5JQ5P
+ */
+HWTEST_F(RenderBubbleTest, RenderBubblePerformLayout013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct RenderBubble and RenderBox.
+     */
+    auto mockContext = DisplayTestUtils::GetMockContext();
+    RefPtr<RenderRoot> root = DisplayTestUtils::CreateRenderRoot();
+    RefPtr<MockRenderBubble> bubble =
+        DialogTestUtils::CreateRenderBubble(Placement::LEFT, Offset(200, 200), Size(200, 200),
+            Dimension(200, DimensionUnit::PERCENT));
+    bubble->Attach(mockContext);
+    RefPtr<RenderBox> box = DisplayTestUtils::CreateRenderBox(BOX_SIZE_MIN, BOX_SIZE_MIN);
+    box->Attach(mockContext);
+    bubble->AddChild(box);
+    root->AddChild(bubble);
+
+    /**
+     * @tc.steps: step2. call the PerformLayout interface of RenderRoot.
+     * @tc.expected: step2. arrowoffset of bubble is correct.
+     */
+    root->PerformLayout();
+    EXPECT_EQ(bubble->GetArrowOffset(Placement::LEFT), 68);
 }
 
 } // namespace OHOS::Ace
