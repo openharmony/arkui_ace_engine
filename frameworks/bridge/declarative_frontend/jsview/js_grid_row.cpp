@@ -184,6 +184,9 @@ void ParserColumns(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent> gri
 
 void ParserBreakpoints(const JSRef<JSVal>& jsValue, RefPtr<V2::GridRowComponent> gridRow)
 {
+    if (!jsValue->IsObject()) {
+        return;
+    }
     auto breakpoints = JSRef<JSObject>::Cast(jsValue);
     auto value = breakpoints->GetProperty("value");
     auto reference = breakpoints->GetProperty("reference");
