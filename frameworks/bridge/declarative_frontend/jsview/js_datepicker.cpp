@@ -317,6 +317,11 @@ void JSDatePickerDialog::JSBind(BindingTarget globalObj)
 void JSDatePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("DatePicker Show dialog error, info is non-valid");
         return;
@@ -546,6 +551,11 @@ void JSTimePickerDialog::JSBind(BindingTarget globalObj)
 void JSTimePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
     if (info.Length() < 1 || !info[0]->IsObject()) {
         LOGE("DatePicker Show dialog error, info is non-valid");
         return;
