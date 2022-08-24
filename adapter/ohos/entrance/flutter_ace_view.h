@@ -43,6 +43,7 @@ public:
     static void SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window);
     static void SurfaceChanged(FlutterAceView* view, int32_t width, int32_t height, int32_t orientation,
         WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED);
+    static void SurfacePositionChanged(FlutterAceView* view, int32_t posX, int32_t posY);
     static void SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics);
 
     static void DispatchTouchEvent(FlutterAceView* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -86,6 +87,11 @@ public:
     void RegisterViewChangeCallback(ViewChangeCallback&& callback) override
     {
         viewChangeCallback_ = std::move(callback);
+    }
+
+    void RegisterViewPositionChangeCallback(ViewPositionChangeCallback&& callback) override
+    {
+        viewPositionChangeCallback_ = std::move(callback);
     }
 
     void RegisterDensityChangeCallback(DensityChangeCallback&& callback) override
@@ -138,6 +144,20 @@ private:
         height_ = height;
     }
 
+    void NotifySurfacePositionChanged(int32_t posX, int32_t posY)
+    {
+        if (posX_ == posX && posY_ == posY) {
+            LOGI("surface position not changed");
+            return;
+        }
+        if (viewPositionChangeCallback_) {
+            viewPositionChangeCallback_(posX, posY);
+        }
+        posX_ = posX;
+        posY_ = posY;
+    }
+
+
     void NotifyDensityChanged(double density) const
     {
         if (densityChangeCallback_) {
@@ -168,6 +188,7 @@ private:
     AxisEventCallback axisEventCallback_;
     RotationEventCallBack rotationEventCallBack_;
     ViewChangeCallback viewChangeCallback_;
+    ViewPositionChangeCallback viewPositionChangeCallback_;
     DensityChangeCallback densityChangeCallback_;
     SystemBarHeightChangeCallback systemBarHeightChangeCallback_;
     SurfaceDestroyCallback surfaceDestroyCallback_;
