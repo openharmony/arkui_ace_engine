@@ -683,6 +683,7 @@ void RenderList::PerformLayout()
     prevOffset_ = currentOffset_;
     prevMainPos_ = curMainPos;
     UpdateAccessibilityScrollAttr();
+    UpdateAccessibilityVisible();
 }
 
 #define CASE_OF_LIST_EVENT_WITH_NO_PARAM(eventNumber, callback)        \
@@ -2011,6 +2012,39 @@ void RenderList::UpdateAccessibilityScrollAttr()
         accessibilityNode->SetListBeginIndex(firstDisplayIndex_);
         accessibilityNode->SetListEndIndex(lastDisplayIndex_);
         accessibilityNode->SetListItemCounts(items_.size());
+    }
+}
+
+void RenderList::UpdateAccessibilityVisible()
+{
+    auto accessibilityNode = GetAccessibilityNode().Upgrade();
+    if (!accessibilityNode) {
+        return;
+    }
+    Offset globalOffset = GetGlobalOffset();
+    Rect listItemRect;
+    Rect viewPortRect = Rect(globalOffset, GetLayoutSize());
+    for (const auto& listItem : items_) {
+        if (!listItem || listItem->GetChildren().empty()) {
+            continue;
+        }
+        auto node = listItem->GetAccessibilityNode().Upgrade();
+        if (!node) {
+            continue;
+        }
+        bool visible = GetVisible();
+        if (visible) {
+            listItemRect.SetSize(listItem->GetLayoutSize());
+            listItemRect.SetOffset(globalOffset + listItem->GetPosition());
+            visible = listItemRect.IsIntersectWith(viewPortRect);
+        }
+        listItem->SetAccessibilityVisible(visible);
+        if (visible) {
+            Rect clampRect = listItemRect.Constrain(viewPortRect);
+            listItem->SetAccessibilityRect(clampRect);
+        } else {
+            listItem->NotifyPaintFinish();
+        }
     }
 }
 

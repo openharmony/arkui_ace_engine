@@ -272,6 +272,7 @@ public:
 protected:
     void UpdateAccessibilityAttr();
     void UpdateAccessibilityScrollAttr();
+    void UpdateAccessibilityVisible();
     bool HandleActionScroll(bool forward);
     LayoutParam MakeInnerLayout();
     Size SetItemsPosition(double mainSize, const LayoutParam& layoutParam);
