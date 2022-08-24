@@ -27,6 +27,7 @@
 #include "core/components/stack/stack_element.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/list_scroll_bar_controller.h"
+#include "core/components_v2/list/render_list_item_group.h"
 #include "core/event/axis_event.h"
 #include "core/gestures/long_press_recognizer.h"
 #include "core/gestures/pan_recognizer.h"
@@ -182,6 +183,7 @@ void RenderList::Update(const RefPtr<Component>& component)
     hasHeight_ = component_->GetHasHeight();
     hasWidth_ = component_->GetHasWidth();
     isLaneList_ = (component_->GetLanes() != -1) || (component_->GetLaneConstrain() != std::nullopt);
+    sticky_ = component_->GetSticky();
     MarkNeedLayout();
 }
 
@@ -446,18 +448,19 @@ void RenderList::CalculateLanes()
     }
 }
 
-void RenderList::RequestNewItemsAtEndForLaneList(double& curMainPos, double mainSize, const LayoutParam& innerLayout)
+void RenderList::RequestNewItemsAtEndForLaneList(double& curMainPos, double mainSize)
 {
     int newItemCntInLine = 0;
     double lineMainSize = 0;
     for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
         bool breakWhenRequestNewItem = false;
+        RefPtr<RenderListItemGroup> itemGroup;
         do {
             if (GreatOrEqual(curMainPos, endMainPos_)) {
                 breakWhenRequestNewItem = true;
                 break;
             }
-            auto child = RequestAndLayoutNewItem(newIndex, innerLayout);
+            auto child = RequestAndLayoutNewItem(newIndex, curMainPos);
             if (!child) {
                 startIndex_ = std::min(startIndex_, TotalCount());
                 breakWhenRequestNewItem = true;
@@ -466,16 +469,26 @@ void RenderList::RequestNewItemsAtEndForLaneList(double& curMainPos, double main
             if (GreatOrEqual(curMainPos, mainSize)) {
                 ++endCachedCount_;
             }
+            itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup) {
+                break;
+            }
             lineMainSize = std::max(lineMainSize, GetMainSize(child->GetLayoutSize()));
             ++newItemCntInLine;
         } while (0);
         bool singleLaneDoneAddItem = (lanes_ == 1) && !breakWhenRequestNewItem;
         bool multiLaneDoneSupplyOneLine = (lanes_ > 1) && (newItemCntInLine == lanes_);
-        bool multiLaneStartSupplyLine = breakWhenRequestNewItem && (newItemCntInLine >= 1);
+        bool multiLaneStartSupplyLine = (itemGroup || breakWhenRequestNewItem) && (newItemCntInLine >= 1);
         if (singleLaneDoneAddItem || multiLaneDoneSupplyOneLine || multiLaneStartSupplyLine) {
             curMainPos += lineMainSize + spaceWidth_;
             newItemCntInLine = 0;
             lineMainSize = 0;
+        }
+        if (itemGroup) {
+            double size = GetMainSize(itemGroup->GetLayoutSize());
+            if (GreatNotEqual(size, 0.0)) {
+                curMainPos += size + spaceWidth_;
+            }
         }
         if (breakWhenRequestNewItem) {
             break;
@@ -483,7 +496,7 @@ void RenderList::RequestNewItemsAtEndForLaneList(double& curMainPos, double main
     }
 }
 
-void RenderList::RequestNewItemsAtEnd(double& curMainPos, double mainSize, const LayoutParam& innerLayout)
+void RenderList::RequestNewItemsAtEnd(double& curMainPos, double mainSize)
 {
     for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
         if (cachedCount_ != 0) {
@@ -495,13 +508,18 @@ void RenderList::RequestNewItemsAtEnd(double& curMainPos, double mainSize, const
                 break;
             }
         }
-        auto child = RequestAndLayoutNewItem(newIndex, innerLayout);
+        auto child = RequestAndLayoutNewItem(newIndex, curMainPos);
         if (!child) {
             startIndex_ = std::min(startIndex_, TotalCount());
             break;
         }
         if (GreatOrEqual(curMainPos, mainSize)) {
-            ++endCachedCount_;
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup) {
+                endCachedCount_ += itemGroup->GetCurrEndCacheCount();
+            } else {
+                ++endCachedCount_;
+            }
         }
         curMainPos += GetMainSize(child->GetLayoutSize()) + spaceWidth_;
     }
@@ -511,18 +529,19 @@ void RenderList::RequestNewItemsAtEnd(double& curMainPos, double mainSize, const
     }
 }
 
-void RenderList::RequestNewItemsAtStartForLaneList(const LayoutParam& innerLayout)
+void RenderList::RequestNewItemsAtStartForLaneList()
 {
     int newItemCntInLine = 0;
     double lineMainSize = 0;
     for (; startIndex_ > 0; --startIndex_) {
         bool breakWhenRequestNewItem = false;
+        RefPtr<RenderListItemGroup> itemGroup;
         do {
             if (LessOrEqual(currentOffset_, startMainPos_)) {
                 breakWhenRequestNewItem = true;
                 break;
             }
-            auto child = RequestAndLayoutNewItem(startIndex_ - 1, innerLayout);
+            auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_, false);
             if (!child) {
                 breakWhenRequestNewItem = true;
                 break;
@@ -533,17 +552,28 @@ void RenderList::RequestNewItemsAtStartForLaneList(const LayoutParam& innerLayou
             if (LessOrEqual(currentOffset_, 0.0)) {
                 ++startCachedCount_;
             }
+            itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup) {
+                break;
+            }
             lineMainSize = std::max(lineMainSize, GetMainSize(child->GetLayoutSize()));
             ++newItemCntInLine;
         } while (0);
         bool singleLaneDoneAddItem = (lanes_ == 1) && !breakWhenRequestNewItem;
         bool multiLaneDoneSupplyOneLine = (lanes_ > 1) && (newItemCntInLine == lanes_);
-        bool multiLaneStartSupplyLine = breakWhenRequestNewItem && (newItemCntInLine >= 1);
+        bool multiLaneStartSupplyLine = (itemGroup || breakWhenRequestNewItem) && (newItemCntInLine >= 1);
         if (singleLaneDoneAddItem || multiLaneDoneSupplyOneLine || multiLaneStartSupplyLine) {
             currentOffset_ -= lineMainSize + spaceWidth_;
             startIndexOffset_ -= lineMainSize + spaceWidth_;
             newItemCntInLine = 0;
             lineMainSize = 0;
+        }
+        if (itemGroup) {
+            double size = GetMainSize(itemGroup->GetLayoutSize());
+            if (GreatNotEqual(size, 0.0)) {
+                currentOffset_ -= size + spaceWidth_;
+                startIndexOffset_ -= size + spaceWidth_;
+            }
         }
         if (breakWhenRequestNewItem) {
             break;
@@ -551,7 +581,7 @@ void RenderList::RequestNewItemsAtStartForLaneList(const LayoutParam& innerLayou
     }
 }
 
-void RenderList::RequestNewItemsAtStart(const LayoutParam& innerLayout)
+void RenderList::RequestNewItemsAtStart()
 {
     for (; startIndex_ > 0; --startIndex_) {
         if (cachedCount_ != 0) {
@@ -563,7 +593,7 @@ void RenderList::RequestNewItemsAtStart(const LayoutParam& innerLayout)
                 break;
             }
         }
-        auto child = RequestAndLayoutNewItem(startIndex_ - 1, innerLayout);
+        auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_, false);
         if (!child) {
             break;
         }
@@ -571,7 +601,12 @@ void RenderList::RequestNewItemsAtStart(const LayoutParam& innerLayout)
             continue;
         }
         if (LessOrEqual(currentOffset_, 0.0)) {
-            ++startCachedCount_;
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup) {
+                startCachedCount_ += itemGroup->GetCurrStartCacheCount();
+            } else {
+                ++startCachedCount_;
+            }
         }
         currentOffset_ -= GetMainSize(child->GetLayoutSize()) + spaceWidth_;
         startIndexOffset_ -= GetMainSize(child->GetLayoutSize()) + spaceWidth_;
@@ -590,19 +625,19 @@ void RenderList::PerformLayout()
     if (isLaneList_) {
         CalculateLanes();
     }
-    const auto innerLayout = MakeInnerLayout();
+
     double curMainPos = 0.0;
     if (isLaneList_) {
-        curMainPos = LayoutOrRecycleCurrentItemsForLaneList(innerLayout, mainSize);
+        curMainPos = LayoutOrRecycleCurrentItemsForLaneList(mainSize);
     } else {
-        curMainPos = LayoutOrRecycleCurrentItems(innerLayout, mainSize);
+        curMainPos = LayoutOrRecycleCurrentItems(mainSize);
     }
 
     // Try to request new items at end if needed
     if (isLaneList_) {
-        RequestNewItemsAtEndForLaneList(curMainPos, mainSize, innerLayout);
+        RequestNewItemsAtEndForLaneList(curMainPos, mainSize);
     } else {
-        RequestNewItemsAtEnd(curMainPos, mainSize, innerLayout);
+        RequestNewItemsAtEnd(curMainPos, mainSize);
     }
 
     if (selectedItem_ && selectedItemIndex_ < startIndex_) {
@@ -623,9 +658,9 @@ void RenderList::PerformLayout()
 
     // Try to request new items at start if needed
     if (isLaneList_) {
-        RequestNewItemsAtStartForLaneList(innerLayout);
+        RequestNewItemsAtStartForLaneList();
     } else {
-        RequestNewItemsAtStart(innerLayout);
+        RequestNewItemsAtStart();
     }
 
     // Check if reach the start of list
@@ -634,9 +669,9 @@ void RenderList::PerformLayout()
         curMainPos -= currentOffset_;
         currentOffset_ = 0;
         if (isLaneList_) {
-            RequestNewItemsAtEndForLaneList(curMainPos, mainSize, innerLayout);
+            RequestNewItemsAtEndForLaneList(curMainPos, mainSize);
         } else {
-            RequestNewItemsAtEnd(curMainPos, mainSize, innerLayout);
+            RequestNewItemsAtEnd(curMainPos, mainSize);
         }
     }
 
@@ -658,9 +693,9 @@ void RenderList::PerformLayout()
     // Set position for each child
     Size layoutSize;
     if (isLaneList_) {
-        layoutSize = SetItemsPositionForLaneList(mainSize, innerLayout);
+        layoutSize = SetItemsPositionForLaneList(mainSize);
     } else {
-        layoutSize = SetItemsPosition(mainSize, innerLayout);
+        layoutSize = SetItemsPosition(mainSize);
     }
 
     // Set layout size of list component itself
@@ -723,7 +758,7 @@ double RenderList::CalculateLaneCrossOffset(double crossSize, double childCrossS
     }
 }
 
-Size RenderList::SetItemsPositionForLaneList(double mainSize, const LayoutParam& layoutParam)
+Size RenderList::SetItemsPositionForLaneList(double mainSize)
 {
     double crossSize = fixedCrossSize_ ? GetCrossSize(GetLayoutParam().GetMaxSize()) : 0.0;
     if (items_.empty()) {
@@ -747,14 +782,19 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize, const LayoutParam&
         double childCrossSize = 0.0;
         std::vector<RefPtr<RenderListItem>> itemSet;
         // start set child position in a row
-        for (int32_t i = 0; i < lanes_; i++) {
+        int32_t rowIndex;
+        for (rowIndex = 0; rowIndex < lanes_; rowIndex++) {
             child = *iter;
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup && rowIndex > 0) {
+                break;
+            }
             double singleChildSize = GetMainSize(child->GetLayoutSize());
             childCrossSize += GetCrossSize(child->GetLayoutSize());
             childMainSize = std::max(childMainSize, singleChildSize); // get max item height in a row as row height
             // store items in a row, set position of each item after done getting [childMainSize]
             itemSet.emplace_back(child);
-            if ((++iter) == items_.end()) {
+            if ((++iter) == items_.end() || itemGroup) {
                 break;
             }
         }
@@ -767,7 +807,7 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize, const LayoutParam&
         // set item position for one row
         for (size_t i = 0; i < itemSet.size(); i++) {
             auto position = offset + MakeValue<Offset>(0.0, childCrossSize / itemSet.size() * i);
-            itemSet[i]->SetPosition(position);
+            SetChildPosition(itemSet[i], position);
         }
 
         if (lanes_ == 1) {
@@ -843,7 +883,7 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize, const LayoutParam&
     }
 
     if (lanes_ == 1) {
-        UpdateStickyListItem(newStickyItem, newStickyIndex, nextStickyItem, layoutParam);
+        UpdateStickyListItem(newStickyItem, newStickyIndex, nextStickyItem);
         if (currentStickyItem_) {
             const auto& stickyItemLayoutSize = currentStickyItem_->GetLayoutSize();
             const double mainStickySize = GetMainSize(stickyItemLayoutSize) + spaceWidth_;
@@ -862,7 +902,7 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize, const LayoutParam&
     return MakeValue<Size>(mainSize, crossSize);
 }
 
-Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutParam)
+Size RenderList::SetItemsPosition(double mainSize)
 {
     double crossSize = fixedCrossSize_ ? GetCrossSize(GetLayoutParam().GetMaxSize()) : 0.0;
     if (items_.empty()) {
@@ -914,7 +954,7 @@ Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutPara
             offset += MakeValue<Offset>(-GetChainDelta(index), 0.0);
         }
 
-        child->SetPosition(offset);
+        SetChildPosition(child, offset);
         // Disable sticky mode while expand all items
         if (fixedMainSize_ && child->GetSticky() != StickyMode::NONE) {
             if (LessOrEqual(curMainPos, 0.0)) {
@@ -958,7 +998,7 @@ Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutPara
         return MakeValue<Size>(curMainPos - spaceWidth_, crossSize);
     }
 
-    UpdateStickyListItem(newStickyItem, newStickyIndex, nextStickyItem, layoutParam);
+    UpdateStickyListItem(newStickyItem, newStickyIndex, nextStickyItem);
     if (currentStickyItem_) {
         const auto& stickyItemLayoutSize = currentStickyItem_->GetLayoutSize();
         const double mainStickySize = GetMainSize(stickyItemLayoutSize) + spaceWidth_;
@@ -977,7 +1017,7 @@ Size RenderList::SetItemsPosition(double mainSize, const LayoutParam& layoutPara
 }
 
 void RenderList::UpdateStickyListItem(const RefPtr<RenderListItem>& newStickyItem, size_t newStickyItemIndex,
-    const RefPtr<RenderListItem>& nextStickyItem, const LayoutParam& layoutParam)
+    const RefPtr<RenderListItem>& nextStickyItem)
 {
     if (newStickyItem) {
         if (newStickyItem == currentStickyItem_) {
@@ -994,12 +1034,12 @@ void RenderList::UpdateStickyListItem(const RefPtr<RenderListItem>& newStickyIte
     }
 
     if (nextStickyItem && nextStickyItem == currentStickyItem_) {
-        ApplyPreviousStickyListItem(currentStickyIndex_ - 1, true, layoutParam);
+        ApplyPreviousStickyListItem(currentStickyIndex_ - 1, true);
         return;
     }
 
     if (currentStickyIndex_ == INITIAL_CHILD_INDEX && startIndex_ > 0) {
-        ApplyPreviousStickyListItem(startIndex_ - 1, true, layoutParam);
+        ApplyPreviousStickyListItem(startIndex_ - 1, true);
     }
 }
 
@@ -1007,23 +1047,27 @@ LayoutParam RenderList::MakeInnerLayout()
 {
     Size maxSize;
     Size minSize;
-    if (isLaneList_) {
-        if (vertical_) {
-            maxSize =
-                Size(std::min(GetLayoutParam().GetMaxSize().Width() / lanes_, maxLaneLength_), Size::INFINITE_SIZE);
-            minSize = Size(GetLayoutParam().GetMinSize().Width(), 0.0);
-        } else {
-            maxSize =
-                Size(Size::INFINITE_SIZE, std::min(GetLayoutParam().GetMaxSize().Height() / lanes_, maxLaneLength_));
-            minSize = Size(0.0, GetLayoutParam().GetMinSize().Height());
-        }
-        return LayoutParam(maxSize, minSize);
-    }
     if (vertical_) {
         maxSize = Size(GetLayoutParam().GetMaxSize().Width(), Size::INFINITE_SIZE);
         minSize = Size(GetLayoutParam().GetMinSize().Width(), 0.0);
     } else {
         maxSize = Size(Size::INFINITE_SIZE, GetLayoutParam().GetMaxSize().Height());
+        minSize = Size(0.0, GetLayoutParam().GetMinSize().Height());
+    }
+    return LayoutParam(maxSize, minSize);
+}
+
+LayoutParam RenderList::MakeInnerLayoutForLane()
+{
+    Size maxSize;
+    Size minSize;
+    if (vertical_) {
+        maxSize =
+            Size(std::min(GetLayoutParam().GetMaxSize().Width() / lanes_, maxLaneLength_), Size::INFINITE_SIZE);
+        minSize = Size(GetLayoutParam().GetMinSize().Width(), 0.0);
+    } else {
+        maxSize =
+            Size(Size::INFINITE_SIZE, std::min(GetLayoutParam().GetMaxSize().Height() / lanes_, maxLaneLength_));
         minSize = Size(0.0, GetLayoutParam().GetMinSize().Height());
     }
     return LayoutParam(maxSize, minSize);
@@ -1037,11 +1081,10 @@ bool RenderList::GetCurMainPosAndMainSize(double& curMainPos, double& mainSize)
         LOGW("Cannot layout using invalid view port");
         return false;
     }
-    const auto innerLayout = MakeInnerLayout();
     if (isLaneList_) {
-        curMainPos = LayoutOrRecycleCurrentItemsForLaneList(innerLayout, mainSize);
+        curMainPos = LayoutOrRecycleCurrentItemsForLaneList(mainSize);
     } else {
-        curMainPos = LayoutOrRecycleCurrentItems(innerLayout, mainSize);
+        curMainPos = LayoutOrRecycleCurrentItems(mainSize);
     }
     // Try to request new items at end if needed
     for (size_t newIndex = startIndex_ + items_.size();; ++newIndex) {
@@ -1054,7 +1097,7 @@ bool RenderList::GetCurMainPosAndMainSize(double& curMainPos, double& mainSize)
                 break;
             }
         }
-        auto child = RequestAndLayoutNewItem(newIndex, innerLayout);
+        auto child = RequestAndLayoutNewItem(newIndex, curMainPos);
         if (!child) {
             startIndex_ = std::min(startIndex_, TotalCount());
             break;
@@ -1203,6 +1246,7 @@ double RenderList::ApplyLayoutParam()
     }
 
     fixedMainSize_ = fixedMainSizeByLayoutParam_;
+    mainSize_ = maxMainSize;
     return maxMainSize;
 }
 
@@ -1238,10 +1282,10 @@ ItemPositionState RenderList::GetItemPositionState(double curMainPos, double las
         }                                                                                    \
     } while (0);
 
-double RenderList::LayoutOrRecycleCurrentItemsForLaneList(const LayoutParam& layoutParam, double mainSize)
+double RenderList::LayoutOrRecycleCurrentItemsForLaneList(double mainSize)
 {
     if (currentStickyItem_) {
-        currentStickyItem_->Layout(layoutParam);
+        LayoutChild(currentStickyItem_);
     }
 
     double curMainPos = currentOffset_;
@@ -1254,13 +1298,30 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(const LayoutParam& lay
         itemsInOneRow.clear();
         for (int32_t i = 0; i < lanes_; i++) {
             RefPtr<RenderListItem> child = *(it);
-            child->Layout(layoutParam);
-            double childMainSize = GetMainSize(child->GetLayoutSize());
-            mainSize = std::max(mainSize, childMainSize);
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup && i > 0) {
+                break;
+            }
+            if (child->IsForwardLayout()) {
+                LayoutChild(child, curMainPos);
+                double childMainSize = GetMainSize(child->GetLayoutSize());
+                mainSize = std::max(mainSize, childMainSize);
+            } else {
+                double childMainSize = GetMainSize(child->GetLayoutSize());
+                mainSize = std::max(mainSize, childMainSize);
+                LayoutChild(child, curMainPos + mainSize, false);
+                double newChildMainSizee = GetMainSize(child->GetLayoutSize());
+                currentOffset_ -= (newChildMainSizee - childMainSize);
+                startIndexOffset_ -= (newChildMainSizee - childMainSize);
+            }
             itemsInOneRow.emplace_back(child);
             ++curIndex;
-            if (++it == items_.end()) {
-                // reach end of [items_]
+            ++it;
+            if (itemGroup) {
+                break;
+            }
+            // reach end of [items_]
+            if (it == items_.end()) {
                 lackItemCount = lanes_ - i;
                 break;
             }
@@ -1290,9 +1351,12 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(const LayoutParam& lay
                 }
                 size_t target = lackItemCount + items_.size() + startIndex_;
                 for (size_t newIndex = startIndex_ + items_.size(); newIndex < target; newIndex++) {
-                    auto child = RequestAndLayoutNewItem(newIndex, layoutParam);
+                    auto child = RequestAndLayoutNewItem(newIndex, curMainPos);
                     if (!child) {
                         startIndex_ = std::min(startIndex_, TotalCount());
+                        break;
+                    }
+                    if (AceType::DynamicCast<RenderListItemGroup>(child)) {
                         break;
                     }
                 }
@@ -1312,95 +1376,139 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(const LayoutParam& lay
     return curMainPos;
 }
 
-double RenderList::LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, double mainSize)
+void RenderList::BackwardLayoutForCache(size_t& backwardLayoutIndex, double& backwardLayoutOffset)
 {
-    if (currentStickyItem_) {
-        currentStickyItem_->Layout(layoutParam);
+    auto rit = items_.rend();
+    std::advance(rit, (startIndex_ - backwardLayoutIndex));
+    while (backwardLayoutIndex > startIndex_ && rit != items_.rend()) {
+        const auto& child = *(rit++);
+        if (!child->IsForwardLayout()) {
+            LayoutChild(child, backwardLayoutOffset - spaceWidth_, false);
+        }
+        if (LessOrEqual(backwardLayoutOffset, 0.0)) {
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup) {
+                startCachedCount_ += itemGroup->GetCurrStartCacheCount();
+            } else {
+                startCachedCount_++;
+            }
+        }
+        double childSize = GetMainSize(child->GetLayoutSize());
+        backwardLayoutOffset -= childSize + spaceWidth_;
+        backwardLayoutIndex--;
+        if (startCachedCount_ >= cachedCount_) {
+            break;
+        }
     }
+}
 
+double RenderList::LayoutOrRecycleCurrentItemsForCache(double mainSize)
+{
     double curMainPos = currentOffset_;
     size_t curIndex = startIndex_;
-    if (cachedCount_ != 0) {
-        startCachedCount_ = 0;
-        endCachedCount_ = 0;
-        bool recycleAll = false;
-        if (GreatOrEqual(curMainPos, mainSize)) {
-            recycleAll = true;
-        }
-        for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
-            const auto& child = *(it);
-            if (recycleAll || endCachedCount_ >= cachedCount_) {
-                if (currentStickyItem_ != child && selectedItem_ != child) {
-                    // Recycle list items out of view port
-                    RecycleListItem(curIndex);
-                }
-                it = items_.erase(it);
-                continue;
-            }
-
-            if (GreatOrEqual(curMainPos, mainSize)) {
-                ++endCachedCount_;
-            }
-
-            child->Layout(layoutParam);
-            double childMainSize = GetMainSize(child->GetLayoutSize());
-            curMainPos += childMainSize + spaceWidth_;
-
-            if (LessOrEqual(curMainPos, 0.0)) {
-                ++startCachedCount_;
-            }
-            ++it;
-        }
-
-        double curMainPosForRecycle = currentOffset_;
-        curIndex = startIndex_;
-        for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
-            if (startCachedCount_ > cachedCount_) {
-                const auto& child = *(it);
-                double childSize = GetMainSize(child->GetLayoutSize());
-                curMainPosForRecycle += childSize + spaceWidth_;
-                startIndexOffset_ += curMainPosForRecycle - currentOffset_;
-                currentOffset_ = curMainPosForRecycle;
-                startIndex_ = curIndex + 1;
-
-                if (currentStickyItem_ != child && selectedItem_ != child) {
-                    // Recycle list items out of view port
-                    RecycleListItem(curIndex);
-                }
-                it = items_.erase(it);
-                --startCachedCount_;
-            } else {
-                break;
-            }
-        }
-    } else {
-        for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
-            const auto& child = *(it);
-            if (LessOrEqual(curMainPos, endMainPos_)) {
-                child->Layout(layoutParam);
-                double childSize = GetMainSize(child->GetLayoutSize());
-                curMainPos += childSize + spaceWidth_;
-                if (GreatOrEqual(curMainPos, startMainPos_)) {
-                    ++it;
-                    continue;
-                }
-                startIndexOffset_ += curMainPos - currentOffset_;
-                currentOffset_ = curMainPos;
-                startIndex_ = curIndex + 1;
-            }
-
+    size_t backwardLayoutIndex = startIndex_;
+    double backwardLayoutOffset = currentOffset_;
+    startCachedCount_ = 0;
+    endCachedCount_ = 0;
+    bool recycleAll = false;
+    if (GreatOrEqual(curMainPos, mainSize)) {
+        recycleAll = true;
+    }
+    for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
+        const auto& child = *(it);
+        if (recycleAll || endCachedCount_ >= cachedCount_) {
             if (currentStickyItem_ != child && selectedItem_ != child) {
                 // Recycle list items out of view port
                 RecycleListItem(curIndex);
             }
             it = items_.erase(it);
+            continue;
         }
+
+        if (GreatOrEqual(curMainPos, mainSize)) {
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            endCachedCount_ += itemGroup ? itemGroup->GetCurrEndCacheCount() : 1;
+        }
+
+        if (child->IsForwardLayout()) {
+            LayoutChild(child, curMainPos);
+        }
+        double childSize = GetMainSize(child->GetLayoutSize());
+        curMainPos += childSize + spaceWidth_;
+
+        if (LessOrEqual(curMainPos, 0.0) || !child->IsForwardLayout()) {
+            backwardLayoutIndex = curIndex + 1;
+            backwardLayoutOffset = curMainPos;
+        }
+        ++it;
+    }
+
+    if (backwardLayoutIndex > startIndex_) {
+        BackwardLayoutForCache(backwardLayoutIndex, backwardLayoutOffset);
+    }
+
+    curIndex = startIndex_;
+    for (auto it = items_.begin(); it != items_.end() && curIndex < backwardLayoutIndex; ++curIndex) {
+        const auto& child = *(it);
+        if (currentStickyItem_ != child && selectedItem_ != child) {
+            // Recycle list items out of view port
+            RecycleListItem(curIndex);
+        }
+        it = items_.erase(it);
+    }
+    startIndex_ = backwardLayoutIndex;
+    startIndexOffset_ += backwardLayoutOffset - currentOffset_;
+    currentOffset_ = backwardLayoutOffset;
+    return curMainPos;
+}
+
+double RenderList::LayoutOrRecycleCurrentItems(double mainSize)
+{
+    if (currentStickyItem_) {
+        LayoutChild(currentStickyItem_);
+    }
+
+    if (cachedCount_ != 0) {
+        return LayoutOrRecycleCurrentItemsForCache(mainSize);
+    }
+
+    double curMainPos = currentOffset_;
+    size_t curIndex = startIndex_;
+    for (auto it = items_.begin(); it != items_.end(); ++curIndex) {
+        const auto& child = *(it);
+        if (LessOrEqual(curMainPos, endMainPos_)) {
+            if (child->IsForwardLayout()) {
+                LayoutChild(child, curMainPos);
+                double childSize = GetMainSize(child->GetLayoutSize());
+                curMainPos += childSize + spaceWidth_;
+            } else {
+                double oldChildSize = GetMainSize(child->GetLayoutSize());
+                LayoutChild(child, curMainPos + oldChildSize, false);
+                curMainPos += oldChildSize + spaceWidth_;
+                double childSize = GetMainSize(child->GetLayoutSize());
+                currentOffset_ -= (childSize - oldChildSize);
+                startIndexOffset_ -= (childSize - oldChildSize);
+            }
+            if (GreatOrEqual(curMainPos, startMainPos_)) {
+                ++it;
+                continue;
+            }
+            startIndexOffset_ += curMainPos - currentOffset_;
+            currentOffset_ = curMainPos;
+            startIndex_ = curIndex + 1;
+        }
+
+        if (currentStickyItem_ != child && selectedItem_ != child) {
+            // Recycle list items out of view port
+            RecycleListItem(curIndex);
+        }
+        it = items_.erase(it);
     }
 
     return curMainPos;
 }
 
-RefPtr<RenderListItem> RenderList::RequestAndLayoutNewItem(size_t index, const LayoutParam& layoutParam)
+RefPtr<RenderListItem> RenderList::RequestAndLayoutNewItem(size_t index, double currMainPos, bool forward)
 {
     RefPtr<RenderListItem> newChild;
     if (index == currentStickyIndex_ && currentStickyItem_) {
@@ -1412,8 +1520,8 @@ RefPtr<RenderListItem> RenderList::RequestAndLayoutNewItem(size_t index, const L
         }
         if (newChild) {
             ACE_SCOPED_TRACE("RenderList:MeasureListItem");
-            AddChild(newChild);
-            newChild->Layout(layoutParam);
+            AddChildItem(newChild);
+            LayoutChild(newChild, currMainPos, forward);
         }
     }
 
@@ -1529,7 +1637,7 @@ void RenderList::RemoveAllItems()
     isActionByScroll_ = false;
 }
 
-void RenderList::ApplyPreviousStickyListItem(size_t index, bool needLayout, const LayoutParam& layoutParam)
+void RenderList::ApplyPreviousStickyListItem(size_t index, bool needLayout)
 {
     size_t newIndex = FindPreviousStickyListItem(index);
     if (newIndex == ListItemGenerator::INVALID_INDEX) {
@@ -1541,9 +1649,9 @@ void RenderList::ApplyPreviousStickyListItem(size_t index, bool needLayout, cons
     currentStickyIndex_ = newIndex;
     currentStickyItem_ = RequestListItem(currentStickyIndex_);
     if (currentStickyIndex_ < startIndex_) {
-        AddChild(currentStickyItem_);
+        AddChildItem(currentStickyItem_);
         if (needLayout) {
-            currentStickyItem_->Layout(layoutParam);
+            LayoutChild(currentStickyItem_);
         }
     }
 }
@@ -2811,6 +2919,68 @@ void RenderList::ApplyRestoreInfo()
     }
     startIndex_ = static_cast<size_t>(StringUtils::StringToInt(GetRestoreInfo()));
     SetRestoreInfo("");
+}
+
+void RenderList::LayoutChild(RefPtr<RenderNode> child, double referencePos, bool forward)
+{
+    auto innerLayout = MakeInnerLayout();
+    auto renderNode = child;
+    RefPtr<RenderListItemGroup> listItemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+    if (listItemGroup) {
+        renderNode = listItemGroup->GetRenderNode();
+        ListItemLayoutParam param = {
+            .startCacheCount = cachedCount_ > 0 ? cachedCount_ - startCachedCount_ : 0,
+            .endCacheCount = cachedCount_ > 0 ? cachedCount_ - endCachedCount_ : 0,
+            .startMainPos = (cachedCount_ == 0 || isLaneList_) ? startMainPos_ : 0,
+            .endMainPos = (cachedCount_ == 0 || isLaneList_) ? endMainPos_ : mainSize_,
+            .listMainSize = mainSize_,
+            .referencePos = referencePos,
+            .forwardLayout = forward,
+            .sticky = sticky_,
+            .lanes = isLaneList_ ? lanes_ : 1
+        };
+        listItemGroup->SetItemGroupLayoutParam(param);
+        listItemGroup->SetNeedLayout(true);
+        renderNode->SetNeedLayout(true);
+    } else if (isLaneList_) {
+        innerLayout = MakeInnerLayoutForLane();
+    }
+    if (renderNode) {
+        renderNode->Layout(innerLayout);
+    }
+}
+
+void RenderList::PaintChild(const RefPtr<RenderNode>& child, RenderContext& context, const Offset& offset)
+{
+    RefPtr<RenderListItemGroup> listItemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+    if (listItemGroup) {
+        auto renderNode = listItemGroup->GetRenderNode();
+        RenderNode::PaintChild(renderNode, context, offset);
+    } else {
+        RenderNode::PaintChild(child, context, offset);
+    }
+}
+
+void RenderList::SetChildPosition(RefPtr<RenderNode> child, const Offset& offset)
+{
+    auto renderNode = child;
+    RefPtr<RenderListItemGroup> listItemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+    if (listItemGroup) {
+        renderNode = listItemGroup->GetRenderNode();
+    }
+    if (renderNode) {
+        renderNode->SetPosition(offset);
+    }
+}
+
+void RenderList::AddChildItem(RefPtr<RenderNode> child)
+{
+    auto renderNode = child;
+    RefPtr<RenderListItemGroup> listItemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+    if (listItemGroup) {
+        renderNode = listItemGroup->GetRenderNode();
+    }
+    AddChild(renderNode);
 }
 
 } // namespace OHOS::Ace::V2

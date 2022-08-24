@@ -171,6 +171,8 @@ const char LIST_POSITION[] = "listPosition";
 // list item constants
 const char LIST_ITEM_NAME[] = "ListItem";
 const char LIST_ITEM_TYPE[] = "itemType";
+// list item group constants
+const char LIST_ITEM_GROUP_NAME[] = "ListItemGroup";
 // edge effect
 const char EDGE_EFFECT[] = "edgeEffect";
 const char FADE_COLOR[] = "fadeColor";

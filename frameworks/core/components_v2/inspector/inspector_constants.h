@@ -131,6 +131,10 @@ ACE_EXPORT extern const char LIST_ETS_TAG[];
 ACE_EXPORT extern const char LIST_ITEM_COMPONENT_TAG[];
 ACE_EXPORT extern const char LIST_ITEM_ETS_TAG[];
 
+// list-item
+ACE_EXPORT extern const char LIST_ITEM_GROUP_COMPONENT_TAG[];
+ACE_EXPORT extern const char LIST_ITEM_GROUP_ETS_TAG[];
+
 // navigator
 ACE_EXPORT extern const char NAVIGATOR_COMPONENT_TAG[];
 ACE_EXPORT extern const char NAVIGATOR_ETS_TAG[];

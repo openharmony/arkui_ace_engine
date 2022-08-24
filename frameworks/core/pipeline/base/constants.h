@@ -174,6 +174,8 @@ extern const char LIST_POSITION[];
 // list item constants
 extern const char LIST_ITEM_NAME[];
 extern const char LIST_ITEM_TYPE[];
+// list item group constants
+extern const char LIST_ITEM_GROUP_NAME[];
 // edge effect
 extern const char EDGE_EFFECT[];
 extern const char FADE_COLOR[];

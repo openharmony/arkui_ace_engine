@@ -19,7 +19,9 @@
 #include "base/utils/macros.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/render_list.h"
+#include "core/components_v2/list/render_list_item_group.h"
 #include "core/pipeline/base/composed_component.h"
+#include "core/components/box/render_box.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -55,7 +57,20 @@ void ListElement::Apply(const RefPtr<Element>& child)
 RefPtr<RenderListItem> ListElement::RequestListItem(size_t index)
 {
     auto element = GetElementByIndex(index);
-    return element ? AceType::DynamicCast<RenderListItem>(element->GetRenderNode()) : nullptr;
+    if (!element) {
+        return nullptr;
+    }
+    auto renderNode = element->GetRenderNode();
+    // for list item group
+    if (AceType::DynamicCast<RenderBox>(renderNode)) {
+        auto child = renderNode->GetFirstChild();
+        auto renderListItemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+        if (renderListItemGroup) {
+            renderListItemGroup->SetRenderBox(AceType::WeakClaim(AceType::RawPtr(renderNode)));
+            renderNode = renderListItemGroup;
+        }
+    }
+    return AceType::DynamicCast<RenderListItem>(renderNode);
 }
 
 RefPtr<Element> ListElement::GetListItemBySlot(size_t index)

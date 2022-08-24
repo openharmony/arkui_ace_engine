@@ -64,8 +64,6 @@ public:
     ACE_DEFINE_COMPONENT_PROP(BorderRadius, Dimension, 0.0_vp);
     ACE_DEFINE_COMPONENT_PROP(EdgeEffect, SwipeEdgeEffect, SwipeEdgeEffect::Spring);
 
-    static RefPtr<ListItemComponent> FindListItem(const RefPtr<Component>& component);
-
     uint32_t Compare(const RefPtr<Component>& component) const override;
 
     bool GetSelectable() const

@@ -52,6 +52,8 @@ uint32_t ListComponent::Compare(const RefPtr<Component>& component) const
         UpdateRenderType::NONE : UpdateRenderType::LAYOUT);
     updateType |= static_cast<uint32_t>(list->GetItemDivider()->endMargin == itemDivider_->endMargin ?
         UpdateRenderType::NONE : UpdateRenderType::LAYOUT);
+    updateType |= static_cast<uint32_t>(list->GetSticky() == GetSticky() ?
+        UpdateRenderType::NONE : UpdateRenderType::LAYOUT);
     if (updateType == static_cast<uint32_t>(UpdateRenderType::LAYOUT)) {
         return updateType;
     }
