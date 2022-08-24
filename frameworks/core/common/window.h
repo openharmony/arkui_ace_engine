@@ -46,7 +46,7 @@ public:
 
     virtual void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) {}
 
-    virtual void RecordFrameTime(uint64_t timeStamp, const std::string name) {}
+    virtual void RecordFrameTime(uint64_t timeStamp, const std::string& name) {}
 
     virtual void FlushTasks() {}
 

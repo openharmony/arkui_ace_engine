@@ -16,6 +16,8 @@
 #include <cstdint>
 
 #include "base/log/log.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"

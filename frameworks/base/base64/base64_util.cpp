@@ -15,12 +15,29 @@
 
 #include "base/base64/base64_util.h"
 
+#include "include/core/SkData.h"
 #include "include/utils/SkBase64.h"
 
 namespace OHOS::Ace {
 
 bool Base64Util::Decode(const std::string& src, std::string& dst)
 {
+#ifdef NG_BUILD
+    size_t outputLen = 0;
+    SkBase64::Error error = SkBase64::Decode(src.data(), src.size(), nullptr, &outputLen);
+    if (error != SkBase64::Error::kNoError) {
+        return false;
+    }
+
+    sk_sp<SkData> resData = SkData::MakeUninitialized(outputLen);
+    void* output = resData->writable_data();
+    error = SkBase64::Decode(src.data(), src.size(), output, &outputLen);
+    if (error != SkBase64::Error::kNoError) {
+        return false;
+    }
+    dst.assign(static_cast<const char*>(resData->data()), resData->size());
+    return true;
+#else
     SkBase64 base64Decoder;
     SkBase64::Error error = base64Decoder.decode(src.data(), src.size());
     if (error != SkBase64::kNoError) {
@@ -35,6 +52,7 @@ bool Base64Util::Decode(const std::string& src, std::string& dst)
     delete[] base64Data;
     base64Data = nullptr;
     return true;
+#endif
 }
 
 } // namespace OHOS::Ace
