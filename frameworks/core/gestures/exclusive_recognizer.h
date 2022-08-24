@@ -50,6 +50,8 @@ public:
     void OnRejected(size_t touchId) override;
     void OnPending(size_t touchId) override;
     bool HandleEvent(const TouchEvent& point) override;
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};

@@ -360,6 +360,8 @@ public:
     {
         return true;
     }
+    virtual void OnFlushTouchEventsBegin() {}
+    virtual void OnFlushTouchEventsEnd() {}
 
     void SetTouchRestrict(const TouchRestrict& touchRestrict)
     {

@@ -131,6 +131,20 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
     return true;
 }
 
+void SequencedRecognizer::OnFlushTouchEventsBegin()
+{
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnFlushTouchEventsBegin();
+    }
+}
+
+void SequencedRecognizer::OnFlushTouchEventsEnd()
+{
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnFlushTouchEventsEnd();
+    }
+}
+
 void SequencedRecognizer::BatchAdjudicate(
     const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
 {

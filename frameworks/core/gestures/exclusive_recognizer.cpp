@@ -20,9 +20,8 @@
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "core/gestures/click_recognizer.h"
 #include "core/gestures/gesture_referee.h"
-#include "core/gestures/pan_recognizer.h"
-#include "core/gestures/pinch_recognizer.h"
 
 namespace OHOS::Ace {
 
@@ -51,11 +50,9 @@ void ExclusiveRecognizer::OnAccepted(size_t touchId)
         }
     }
 
-    if (AceType::InstanceOf<PanRecognizer>(activeRecognizer_) ||
-        AceType::InstanceOf<PinchRecognizer>(activeRecognizer_)) {
-        return;
+    if (AceType::InstanceOf<ClickRecognizer>(activeRecognizer_)) {
+        Reset();
     }
-    Reset();
 }
 
 void ExclusiveRecognizer::OnRejected(size_t touchId)
@@ -119,6 +116,20 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
     }
 
     return true;
+}
+
+void ExclusiveRecognizer::OnFlushTouchEventsBegin()
+{
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnFlushTouchEventsBegin();
+    }
+}
+
+void ExclusiveRecognizer::OnFlushTouchEventsEnd()
+{
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnFlushTouchEventsEnd();
+    }
 }
 
 void ExclusiveRecognizer::BatchAdjudicate(
