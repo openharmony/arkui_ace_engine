@@ -366,10 +366,10 @@ bool FindAccessibilityFocus(const RefPtr<AccessibilityNode>& node, RefPtr<Access
 bool FindInputFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>& resultNode)
 {
     LOGI("FindFocus nodeId(%{public}d focus(%{public}d))", node->GetNodeId(), node->GetFocusedState());
-    if (!node->GetFocusedState() && !node->IsRootNode()) {
+    if (!node->GetFocusedState() && (node->GetParentId() != -1)) {
         return false;
     }
-    if (node->GetFocusableState()) {
+    if (node->GetFocusedState()) {
         resultNode = node;
         LOGI("FindFocus nodeId:%{public}d", resultNode->GetNodeId());
     }
@@ -380,7 +380,7 @@ bool FindInputFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityN
             }
         }
     }
-    if (node->GetFocusableState()) {
+    if (node->GetFocusedState()) {
         return true;
     }
 
