@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,28 @@
  * limitations under the License.
  */
 
-#include "core/components/container_modal/container_modal_component.h"
-#include "core/components/container_modal/container_modal_element.h"
+#include "frameworks/base/log/trace_id.h"
 
 namespace OHOS::Ace {
+class MockTraceIdImpl : public TraceId {
+public:
+    MockTraceIdImpl()
+    {
+    }
 
-RefPtr<Component> ContainerModalComponent::Create(const WeakPtr<PipelineContext>& context,
-    const RefPtr<Component>& child)
+    ~MockTraceIdImpl() = default;
+
+    void SetTraceId() override
+    {
+    }
+
+    void ClearTraceId() override
+    {
+    }
+};
+
+TraceId* TraceId::CreateTraceId()
 {
-    return nullptr;
+    return new MockTraceIdImpl();
 }
-
-RefPtr<OverlayElement> ContainerModalElement::GetOverlayElement() const
-{
-    return nullptr;
-}
-
-RefPtr<StageElement> ContainerModalElement::GetStageElement() const
-{
-    return nullptr;
-}
-
 } // namespace OHOS::Ace
