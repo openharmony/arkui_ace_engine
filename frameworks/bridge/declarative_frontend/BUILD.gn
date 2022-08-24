@@ -285,8 +285,7 @@ template("declarative_js_engine") {
       sources += [ "jsview/js_plugin.cpp" ]
     }
 
-    if (defined(config.no_support_component_mock) &&
-        config.no_support_component_mock) {
+    if (defined(config.preview_support) && config.preview_support) {
       sources += [ "jsview/js_previewer_mock.cpp" ]
     }
 
