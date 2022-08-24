@@ -56,6 +56,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     double baselineOffset = 0.0F;
     textStyle.GetBaselineOffset().NormalizeToPx(
         pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), height, baselineOffset);
+    baselineOffset_ = baselineOffset;
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
     return SizeF(static_cast<float>(GetTextWidth()), heightFinal);
@@ -120,6 +121,11 @@ double TextLayoutAlgorithm::GetTextWidth() const
 const std::shared_ptr<RSParagraph>& TextLayoutAlgorithm::GetParagraph()
 {
     return paragraph_;
+}
+
+float TextLayoutAlgorithm::GetBaselineOffset() const
+{
+    return baselineOffset_;
 }
 
 } // namespace OHOS::Ace::NG

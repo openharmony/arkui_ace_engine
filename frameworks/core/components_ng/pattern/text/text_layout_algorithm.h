@@ -48,6 +48,7 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
     const std::shared_ptr<RSParagraph>& GetParagraph();
+    float GetBaselineOffset() const;
 
 private:
     bool CreateParagraph(const TextStyle& textStyle, std::string content);
@@ -56,6 +57,7 @@ private:
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::shared_ptr<RSParagraph> paragraph_;
+    float baselineOffset_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };
