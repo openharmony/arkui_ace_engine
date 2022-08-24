@@ -18,5 +18,12 @@ build_component("ability_v2") {
   sources = [
     "ability_component.cpp",
     "render_ability_component.cpp",
+    "render_ability_component_creator.cpp",
   ]
+
+  rosen_sources = [ "rosen_render_ability_component.cpp" ]
+
+  if (is_standard_system && !use_mingw_win && !use_mac) {
+    deps = [ "//foundation/graphic/graphic_2d:libsurface" ]
+  }
 }

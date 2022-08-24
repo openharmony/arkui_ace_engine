@@ -644,6 +644,16 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
 
+    auto&& viewPositionChangeCallback = [context = pipelineContext_, id = instanceId_](
+        int32_t posX, int32_t posY) {
+        ContainerScope scope(id);
+        ACE_SCOPED_TRACE("ViewPositionChangeCallback(%d, %d)", posX, posY);
+        context->GetTaskExecutor()->PostTask(
+            [context, posX, posY]() { context->OnSurfacePositionChanged(posX, posY); },
+            TaskExecutor::TaskType::UI);
+    };
+    aceView_->RegisterViewPositionChangeCallback(viewPositionChangeCallback);
+
     auto&& densityChangeCallback = [context = pipelineContext_, id = instanceId_](double density) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);

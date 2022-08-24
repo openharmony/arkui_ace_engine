@@ -60,6 +60,9 @@ public:
     using ViewChangeCallback = std::function<void(int32_t width, int32_t height, WindowSizeChangeReason type)>;
     virtual void RegisterViewChangeCallback(ViewChangeCallback&& callback) = 0;
 
+    using ViewPositionChangeCallback = std::function<void(int32_t posX, int32_t posY)>;
+    virtual void RegisterViewPositionChangeCallback(ViewPositionChangeCallback&& callback) = 0;
+
     using DensityChangeCallback = std::function<void(double density)>;
     virtual void RegisterDensityChangeCallback(DensityChangeCallback&& callback) = 0;
 
@@ -160,6 +163,16 @@ public:
         return height_;
     }
 
+    int32_t GetPosX() const
+    {
+        return posX_;
+    }
+
+    int32_t GetPosY() const
+    {
+        return posY_;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     std::chrono::time_point<std::chrono::high_resolution_clock> firstUpdateBegin_;
@@ -167,6 +180,8 @@ protected:
     bool firstUpdating_ = false;
     int32_t width_ = 0;
     int32_t height_ = 0;
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
 
 private:
     std::mutex backgroundColorMutex_;

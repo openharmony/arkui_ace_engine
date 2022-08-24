@@ -2201,6 +2201,15 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 #endif
 }
 
+void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY)
+{
+    for (auto&& [id, callback] : surfacePositionChangedCallbackMap_) {
+        if (callback) {
+            callback(posX, posY);
+        }
+    }
+}
+
 void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
