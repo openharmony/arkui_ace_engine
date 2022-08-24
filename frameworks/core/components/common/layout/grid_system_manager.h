@@ -75,6 +75,11 @@ public:
         return dipScale_;
     }
 
+    double GetViewScale() const
+    {
+        return viewScale_;
+    }
+
     GridSizeType GetCurrentSize() const
     {
         return currentSize_;
