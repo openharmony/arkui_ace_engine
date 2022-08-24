@@ -603,6 +603,18 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
         }
     }
 
+    // Adjust layout param in TextComponent
+    auto isTextComponent = AceType::InstanceOf<TextComponent>(mainComponent);
+    if (isTextComponent) {
+        auto iter = wrappingComponentsMap.find("box");
+        if (iter != wrappingComponentsMap.end()) {
+            auto boxComponent = AceType::DynamicCast<BoxComponent>(wrappingComponentsMap["box"]);
+            if (boxComponent) {
+                boxComponent->SetDeliverMinToChild(false);
+            }
+        }
+    }
+
     if (wrappingComponentsMap.find("shared_transition") != wrappingComponentsMap.end() &&
         wrappingComponentsMap.find("display") != wrappingComponentsMap.end()) {
         auto sharedTransitionComponent =
