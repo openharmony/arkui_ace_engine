@@ -24,6 +24,7 @@ thread_local int32_t ContainerScope::currentId_ = 0;
 thread_local int32_t ContainerScope::currentId_ = -1;
 #endif
 std::function<void(int32_t)> ContainerScope::updateScopeNotify_;
+std::shared_mutex ContainerScope::scopeLock_;
 
 int32_t ContainerScope::CurrentId()
 {
@@ -33,6 +34,7 @@ int32_t ContainerScope::CurrentId()
 void ContainerScope::UpdateCurrent(int32_t id)
 {
     currentId_ = id;
+    std::shared_lock<std::shared_mutex> readLock(scopeLock_);
     if (updateScopeNotify_) {
         updateScopeNotify_(id);
     }
@@ -40,6 +42,7 @@ void ContainerScope::UpdateCurrent(int32_t id)
 
 void ContainerScope::SetScopeNotify(std::function<void(int32_t)>&& notify)
 {
+    std::unique_lock<std::shared_mutex> writeLock(scopeLock_);
     updateScopeNotify_ = std::move(notify);
 }
 

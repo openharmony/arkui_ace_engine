@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_SCOPE_H
 
 #include <functional>
+#include <shared_mutex>
 #include <stdint.h>
 
 #include "base/utils/macros.h"
@@ -47,6 +48,7 @@ private:
     static thread_local int32_t currentId_;
     int32_t restoreId_ = -1;
     static std::function<void(int32_t)> updateScopeNotify_;
+    static std::shared_mutex scopeLock_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContainerScope);
 };
