@@ -16,12 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
-#include <string>
-
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/property/property.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 
@@ -67,6 +65,10 @@ public:
 
     virtual void SetDrawContentAtLast(bool useDrawContentLastOrder) {}
 
+    virtual void ResetBlendBgColor() {}
+
+    virtual void BlendBgColor(const Color& color) {}
+
     virtual void SetClipToFrame(bool useClip) {}
 
     virtual RefPtr<Canvas> GetCanvas() = 0;
@@ -82,14 +84,18 @@ public:
 
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundColor, Color);
+    // TODO
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BorderRadius, BorderRadiusProperty);
 
 protected:
     RenderContext() = default;
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
+    virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
 
 private:
     std::function<void()> requestFrame_;
+    BorderRadiusProperty borderRadius_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };

@@ -59,6 +59,18 @@ void ViewAbstract::SetPadding(const PaddingProperty& value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, value);
 }
 
+void ViewAbstract::SetBorderRadius(const Dimension& value)
+{
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(value);
+    ACE_UPDATE_RENDER_CONTEXT(BorderRadius, borderRadius);
+}
+
+void ViewAbstract::SetBorderRadius(const BorderRadiusProperty& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BorderRadius, value);
+}
+
 void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();

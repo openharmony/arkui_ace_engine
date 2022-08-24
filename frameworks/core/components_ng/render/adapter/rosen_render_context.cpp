@@ -98,6 +98,34 @@ void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RenderContext::UpdateBorderRadius(value);
+    Rosen::Vector4f cornerRadius;
+    cornerRadius.SetValues(value.radiusTopLeft->Value(), value.radiusTopRight->Value(), value.radiusBottomLeft->Value(),
+        value.radiusBottomRight->Value());
+    rsNode_->SetCornerRadius(cornerRadius);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::ResetBlendBgColor()
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(bgColor_);
+    rsNode_->SetBackgroundColor(bgColor_->GetValue());
+    RequestNextFrame();
+}
+
+void RosenRenderContext::BlendBgColor(const Color& color)
+{
+    CHECK_NULL_VOID(rsNode_);
+    bgColor_ = GetBackgroundColor();
+    auto blendColor = bgColor_.value_or(Color::TRANSPARENT).BlendColor(color);
+    rsNode_->SetBackgroundColor(blendColor.GetValue());
+    RequestNextFrame();
+}
+
 void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDraw)
 {
     CHECK_NULL_VOID(rsNode_);

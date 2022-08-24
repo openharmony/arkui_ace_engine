@@ -29,6 +29,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_abstract.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -2498,6 +2499,28 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decorati
         radiusBottomRight = borderRadius;
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::BorderRadiusProperty borderRadius;
+            Dimension topLeft;
+            if (ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
+                borderRadius.radiusTopLeft = topLeft;
+            }
+            Dimension topRight;
+            if (ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
+                borderRadius.radiusTopRight = topRight;
+            }
+            Dimension bottomLeft;
+            if (ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
+                borderRadius.radiusBottomLeft = bottomLeft;
+            }
+            Dimension bottomRight;
+            if (ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
+                borderRadius.radiusBottomRight = bottomRight;
+            }
+            NG::ViewAbstract::SetBorderRadius(borderRadius);
+            return;
+        }
+
         auto valueTopLeft = object->GetProperty("topLeft");
         if (!valueTopLeft->IsUndefined()) {
             ParseJsDimensionVp(valueTopLeft, radiusTopLeft);
@@ -2519,6 +2542,12 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decorati
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        Dimension borderRadiusSize;
+        if (ParseJsDimensionVp(args, borderRadiusSize)) {
+            NG::ViewAbstract::SetBorderRadius(borderRadiusSize);
+        }
+    }
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {

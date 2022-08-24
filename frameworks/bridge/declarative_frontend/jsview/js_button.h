@@ -54,6 +54,7 @@ public:
 private:
     static void SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonComponent);
     static void SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<ButtonComponent>& buttonComponent);
+    static void SetTypeAndStateEffect(const JSRef<JSObject>& obj);
     static Dimension GetSizeValue(const JSCallbackInfo& info);
     static RefPtr<TextComponent> GetTextComponent();
     static void ResetButtonHeight();

@@ -16,6 +16,8 @@ import(
 
 build_component_ng("pattern_ng") {
   sources = [
+    "button/button_pattern.cpp",
+    "button/button_view.cpp",
     "custom/custom_node.cpp",
     "custom/custom_node_layout_algorithm.cpp",
     "custom/custom_node_pattern.cpp",
