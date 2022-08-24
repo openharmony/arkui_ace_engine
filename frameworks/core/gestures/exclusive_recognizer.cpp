@@ -19,7 +19,10 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
 #include "core/gestures/gesture_referee.h"
+#include "core/gestures/pan_recognizer.h"
+#include "core/gestures/pinch_recognizer.h"
 
 namespace OHOS::Ace {
 
@@ -46,6 +49,11 @@ void ExclusiveRecognizer::OnAccepted(size_t touchId)
             recognizer->OnRejected(touchId);
             recognizer->SetRefereeState(RefereeState::FAIL);
         }
+    }
+
+    if (AceType::InstanceOf<PanRecognizer>(activeRecognizer_) ||
+        AceType::InstanceOf<PinchRecognizer>(activeRecognizer_)) {
+        return;
     }
     Reset();
 }
