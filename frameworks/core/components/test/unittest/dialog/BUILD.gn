@@ -67,9 +67,9 @@ ohos_unittest("RenderDialogTest") {
   ]
 
   deps = [
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components/test:json",
-    "$ace_flutter_engine_root/skia:ace_skia_ohos",
   ]
 
   part_name = ace_engine_part
