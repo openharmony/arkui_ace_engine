@@ -265,6 +265,7 @@ void AnimationDomTest::TearDown() {}
  * @tc.name: AnimationDomTest001
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
+ * @tc.require: issueI5IYA3
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest001, TestSize.Level1)
 {
@@ -292,6 +293,7 @@ HWTEST_F(AnimationDomTest, AnimationDomTest001, TestSize.Level1)
  * @tc.name: AnimationDomTest002
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
+ * @tc.require: issueI5IZTL
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest002, TestSize.Level1)
 {
@@ -321,6 +323,7 @@ HWTEST_F(AnimationDomTest, AnimationDomTest002, TestSize.Level1)
  * @tc.name: AnimationDomTest003
  * @tc.desc: Animation JS api parse
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ36
  */
 HWTEST_F(AnimationDomTest, AnimationDomTest003, TestSize.Level1)
 {
