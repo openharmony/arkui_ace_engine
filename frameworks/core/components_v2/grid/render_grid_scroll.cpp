@@ -34,6 +34,7 @@ namespace {
 const char UNIT_PERCENT[] = "%";
 const char UNIT_RATIO[] = "fr";
 constexpr int32_t TIME_THRESHOLD = 3 * 1000000; // 3 millisecond
+constexpr int32_t MICROSEC_TO_NANOSEC = 1000;
 
 } // namespace
 
@@ -1563,6 +1564,7 @@ void RenderGridScroll::OnPaintFinish()
 
 void RenderGridScroll::OnPredictLayout(int64_t deadline)
 {
+    auto startTime = GetSysTimestamp(); // unit: ns
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -1592,7 +1594,7 @@ void RenderGridScroll::OnPredictLayout(int64_t deadline)
                     }
                 }
                 // Stop predictLayout less than 3 milliseconds before the next vsync arrives.
-                if (GetSysTimestamp() + TIME_THRESHOLD > deadline) {
+                if (GetSysTimestamp() - startTime + TIME_THRESHOLD > deadline * MICROSEC_TO_NANOSEC) {
                     MarkNeedPredictLayout();
                     return;
                 }
