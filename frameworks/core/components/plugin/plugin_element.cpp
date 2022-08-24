@@ -79,11 +79,15 @@ void PluginElement::Update()
             pluginInfo_.width = info.width;
             pluginInfo_.height = info.height;
             GetRenderNode()->Update(component_);
-            pluginSubContainer_->SetPluginComponent(component_);
-            pluginSubContainer_->UpdateRootElementSize();
-            pluginSubContainer_->UpdateSurfaceSize();
+            if (pluginSubContainer_) {
+                pluginSubContainer_->SetPluginComponent(component_);
+                pluginSubContainer_->UpdateRootElementSize();
+                pluginSubContainer_->UpdateSurfaceSize();
+            }
         }
-        pluginSubContainer_->UpdatePlugin(plugin->GetData());
+        if (pluginSubContainer_) {
+            pluginSubContainer_->UpdatePlugin(plugin->GetData());
+        }
         return;
     }
 
@@ -98,6 +102,9 @@ void PluginElement::Update()
 
 void PluginElement::PerformBuild()
 {
+    if (!pluginSubContainer_) {
+        return;
+    }
     pluginSubContainer_->SetPluginElement(AceType::WeakClaim(this));
 }
 
