@@ -51,7 +51,7 @@ void RenderSelectPopup::OnPaintFinish()
     }
     auto node = selectPopup_->GetNode();
     auto viewScale = pipeline->GetViewScale();
-    auto leftTop = renderPositioned_->GetGlobalOffset();
+    auto leftTop = renderPositioned_->GetGlobalOffsetExternal();
     node->SetLeft(leftTop.GetX() * viewScale);
     node->SetTop(leftTop.GetY() * viewScale);
     auto size = renderPositioned_->GetLayoutSize();
