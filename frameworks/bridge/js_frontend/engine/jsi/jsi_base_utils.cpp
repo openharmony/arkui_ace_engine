@@ -92,7 +92,28 @@ std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, st
         summaryBody.append(stackHead).append(rawStack);
     }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string summaryBodyInsertedWithTagStr = "[Engine Log]";
+    size_t lastPosOfNextLine = -1;
+    size_t currPosOfNextLine = 0;
+    while (true) {
+        lastPosOfNextLine++; // Become the next position at which we start to find the target charactor.
+        currPosOfNextLine = summaryBody.find_first_of("\n", lastPosOfNextLine);
+        if (currPosOfNextLine == -1) {
+            break;
+        }
+        summaryBodyInsertedWithTagStr
+            .append(summaryBody.substr(lastPosOfNextLine, (currPosOfNextLine - lastPosOfNextLine) + 1))
+            .append("[Engine Log]");
+        lastPosOfNextLine = currPosOfNextLine;
+    }
+    summaryBodyInsertedWithTagStr
+        .append(summaryBody.substr(lastPosOfNextLine, summaryBody.length() - lastPosOfNextLine))
+        .append("\n");
+    return summaryBodyInsertedWithTagStr;
+#else
     return summaryBody;
+#endif
 }
 
 ErrorPos JsiBaseUtils::GetErrorPos(const std::string& rawStack)
