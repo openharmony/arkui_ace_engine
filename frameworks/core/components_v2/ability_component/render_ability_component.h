@@ -64,10 +64,13 @@ public:
         }
     }
 
+    void ConnectOrUpdateExtension();
+
 private:
     Rect currentRect_;
     bool needLayout_ = false;
     bool hasConnectionToAbility_ = false;
+    int32_t callbackId_ = 0;
 
     RefPtr<WindowExtensionConnectionAdapter> adapter_;
     RefPtr<V2::AbilityComponent> component_;

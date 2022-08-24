@@ -25,6 +25,12 @@ namespace OHOS::Ace::V2 {
 RenderAbilityComponent::~RenderAbilityComponent()
 {
     adapter_->RemoveExtension();
+
+    auto context = context_.Upgrade();
+    if (!context || callbackId_ <= 0) {
+        return;
+    }
+    context->UnregisterSurfacePositionChangedCallback(callbackId_);
 }
 
 void RenderAbilityComponent::Update(const RefPtr<Component>& component)
@@ -42,6 +48,17 @@ void RenderAbilityComponent::Update(const RefPtr<Component>& component)
     }
     currentRect_.SetSize(size);
     needLayout_ = true;
+
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    callbackId_ = context->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t posX, int32_t posY) {
+        auto client = weak.Upgrade();
+        if (client) {
+            client->ConnectOrUpdateExtension();
+        }
+    });
 }
 
 void RenderAbilityComponent::PerformLayout()
@@ -54,6 +71,11 @@ void RenderAbilityComponent::PerformLayout()
 }
 
 void RenderAbilityComponent::Paint(RenderContext& context, const Offset& offset)
+{
+    ConnectOrUpdateExtension();
+}
+
+void RenderAbilityComponent::ConnectOrUpdateExtension()
 {
     Offset globalOffset = GetGlobalOffset();
     if (currentRect_.GetOffset() == globalOffset && !needLayout_ && hasConnectionToAbility_) {
@@ -81,4 +103,5 @@ void RenderAbilityComponent::Paint(RenderContext& context, const Offset& offset)
     adapter_ = WindowExtensionConnectionProxy::CreateAdapter();
     adapter_->ConnectExtension(component_->GetWant(), currentRect_, AceType::Claim(this));
 }
+
 } // namespace OHOS::Ace::V2

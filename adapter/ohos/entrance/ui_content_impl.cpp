@@ -788,6 +788,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
             Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
                 static_cast<WindowSizeChangeReason>(reason));
+            Platform::FlutterAceView::SurfacePositionChanged(aceView, config.Left(), config.Top());
         }, TaskExecutor::TaskType::PLATFORM);
 }
 
