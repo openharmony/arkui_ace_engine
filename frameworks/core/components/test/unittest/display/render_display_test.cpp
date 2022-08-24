@@ -15,11 +15,11 @@
 
 #include "gtest/gtest.h"
 
-#include "adapter/aosp/entrance/java/jni/jni_environment.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/size.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/test/unittest/display/display_test_utils.h"
 #include "core/components/text/text_component.h"
 
@@ -27,21 +27,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
-
-Platform::JniEnvironment::JniEnvironment() {}
-
-Platform::JniEnvironment::~JniEnvironment() = default;
-
-std::shared_ptr<JNIEnv> Platform::JniEnvironment::GetJniEnv(JNIEnv* jniEnv) const
-{
-    return nullptr;
-}
-
-Platform::JniEnvironment& Platform::JniEnvironment::GetInstance()
-{
-    static Platform::JniEnvironment jniEnvironment;
-    return jniEnvironment;
-}
 
 namespace {
 
@@ -53,6 +38,7 @@ const double BOX_HEIGHT = 200;
 const Size LAYOUT_SIZE = Size(100, 200);
 const Size LAYOUT_SIZE_MIN = Size(0, 0);
 const Offset OFFSET_VALUE = Offset(0, 0);
+const Color BACKGROUND_MASK = Color::FromString("#9932CC");
 
 }
 
@@ -347,4 +333,28 @@ HWTEST_F(RenderDisplayTest, RenderDisplayPerformLayout005, TestSize.Level1)
     EXPECT_EQ(box->GetPosition(), OFFSET_VALUE);
 }
 
+/**
+ * @tc.name: RenderDisplayBackgroundMask001
+ * @tc.desc: Verify background mask interface of RenderDisplay works correctly.
+ * @tc.type: FUNC
+ * @tc.require: issueI5JQ4X
+ */
+HWTEST_F(RenderDisplayTest, RenderDisplayBackgroundMask001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderDisplayTest RenderDisplayBackgroundMask001 start";
+    /**
+     * @tc.steps: step1. construct display component.
+     */
+    RefPtr<DisplayComponent> display = AceType::MakeRefPtr<DisplayComponent>();
+    display->SetBackgroundMask(BACKGROUND_MASK);
+    /**
+    * @tc.steps: step2. update RenderDisplay.
+    * @tc.expected: step2. RenderDisplay should have background mask and value is correct.
+    */
+    RefPtr<MockRenderDisplay> renderDisplay = AceType::MakeRefPtr<MockRenderDisplay>();
+    renderDisplay->Update(display);
+    EXPECT_TRUE(renderDisplay->HasBackgroundMask());
+    EXPECT_EQ(renderDisplay->GetBackgroundMask().GetValue(), BACKGROUND_MASK.GetValue());
+    GTEST_LOG_(INFO) << "RenderDisplayTest RenderDisplayBackgroundMask001 end";
+}
 } // namespace OHOS::Ace

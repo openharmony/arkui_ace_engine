@@ -336,6 +336,15 @@ public:
     void OnEditChange(bool isInEditStatus);
     void GetFieldAndOverlayTouchRect(std::vector<Rect>& resRectList);
 
+    void SetInputStyle(InputStyle style)
+    {
+        inputStyle_ = style;
+    }
+
+    InputStyle GetInputStyle()
+    {
+        return inputStyle_;
+    }
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
