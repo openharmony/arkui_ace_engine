@@ -136,6 +136,16 @@ public:
 
     void UpdatePanelHeightByCurrentMode();
 
+    const std::function<void(int32_t)>& GetOnHeightChange() const
+    {
+        return onHeightChange_;
+    }
+
+    void SetOnHeightChange(std::function<void(int32_t)>& onHeightChange)
+    {
+        onHeightChange_ = onHeightChange;
+    }
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
