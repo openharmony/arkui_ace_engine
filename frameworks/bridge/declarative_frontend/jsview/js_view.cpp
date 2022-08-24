@@ -415,8 +415,9 @@ std::string JSViewFullUpdate::AddChildById(const std::string& viewId, const JSRe
         if (!result.second) {
             jsView = result.first->second->Unwrap<JSView>();
             result.first->second = obj;
+        } else {
+            lazyItemGroups_[lazyItemGroupId_].emplace_back(id);
         }
-        lazyItemGroups_[lazyItemGroupId_].emplace_back(id);
     } else {
         auto result = customViewChildren_.try_emplace(id, obj);
         if (!result.second) {
@@ -446,11 +447,13 @@ void JSViewFullUpdate::RemoveChildGroupById(const std::string& viewId)
     for (auto&& item : iter->second) {
         auto removeView = customViewChildrenWithLazy_.find(item);
         if (removeView != customViewChildrenWithLazy_.end()) {
-            auto* view = removeView->second->Unwrap<JSView>();
-            if (view != nullptr) {
-                view->Destroy(this);
+            if (!removeView->second.IsEmpty()) {
+                auto* view = removeView->second->Unwrap<JSView>();
+                if (view != nullptr) {
+                    view->Destroy(this);
+                }
+                removeView->second.Reset();
             }
-            removeView->second.Reset();
             removedViewIds.emplace_back(item);
         }
     }
