@@ -35,7 +35,7 @@ group("unittest") {
     "grid:unittest",
     "grid_layout:unittest",
 
-    #"image:unittest",
+    "image:unittest",
     #"image_animator:unittest",
     "indexer:unittest",
     "list:unittest",

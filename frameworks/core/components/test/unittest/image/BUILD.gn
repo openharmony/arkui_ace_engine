@@ -14,7 +14,11 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-module_output_path = "ace_engine_full/graphicalbasicability/image"
+if (is_standard_system) {
+  module_output_path = "ace_engine/graphicalbasicability/image"
+} else {
+  module_output_path = "ace_engine_full/graphicalbasicability/image"
+}
 
 ohos_unittest("ImageCreatorTest") {
   module_out_path = module_output_path
@@ -229,11 +233,28 @@ ohos_unittest("RenderImageColorFilterTest") {
   part_name = ace_engine_part
 }
 
+ohos_unittest("RenderImageCopyTest") {
+  module_out_path = module_output_path
+
+  sources = [
+    "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
+    "render_image_copy_test.cpp",
+  ]
+
+  configs = [ "$ace_root:ace_test_config" ]
+
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
+
+  part_name = ace_engine_part
+}
+
 group("unittest") {
   testonly = true
   deps = [
     #":ImageCreatorTest",
     # ":RenderImageTest",
     ":RenderImageColorFilterTest",
+    ":RenderImageCopyTest",
   ]
 }
