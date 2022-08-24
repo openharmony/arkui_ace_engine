@@ -33,23 +33,19 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(dividerLayoutParagraph, std::nullopt);
 
     Dimension strokeWidth = dividerLayoutParagraph->GetStrokeWidth().value_or(Dimension(0));
-    constrainStrokeWidth_ = Positive(strokeWidth.ConvertToPx()) ? strokeWidth.ConvertToPx() : 0.0;
+    constrainStrokeWidth_ = Positive(strokeWidth.ConvertToPx()) ? static_cast<float>(strokeWidth.ConvertToPx()) : 0.0f;
     if (dividerLayoutParagraph->HasVertical()) {
         vertical_ = dividerLayoutParagraph->GetVerticalValue();
     }
     SizeF constrainSize;
     if (!vertical_) {
-        dividerLength_ =
-            contentConstraint.selfIdealSize.has_value() && NonNegative(contentConstraint.selfIdealSize->Width())
-                ? contentConstraint.selfIdealSize->Width()
-                : contentConstraint.maxSize.Width();
+        dividerLength_ = (contentConstraint.selfIdealSize.Width()) ? contentConstraint.selfIdealSize.Width().value()
+                                                                   : contentConstraint.maxSize.Width();
         constrainSize = SizeF(dividerLength_, constrainStrokeWidth_);
         constrainSize.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     } else {
-        dividerLength_ =
-            contentConstraint.selfIdealSize.has_value() && NonNegative(contentConstraint.selfIdealSize->Height())
-                ? contentConstraint.selfIdealSize->Height()
-                : contentConstraint.maxSize.Height();
+        dividerLength_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()
+                                                                    : contentConstraint.maxSize.Height();
         constrainSize = SizeF(constrainStrokeWidth_, dividerLength_);
         constrainSize.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     }

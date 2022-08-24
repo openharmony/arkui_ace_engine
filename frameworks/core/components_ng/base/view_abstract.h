@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 

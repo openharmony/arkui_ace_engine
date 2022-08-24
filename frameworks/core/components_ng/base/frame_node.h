@@ -155,8 +155,8 @@ private:
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
 
-    std::optional<LayoutConstraintF> GetLayoutConstraint() const;
-    std::optional<OffsetF> GetParentGlobalOffset() const;
+    LayoutConstraintF GetLayoutConstraint() const;
+    OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
 

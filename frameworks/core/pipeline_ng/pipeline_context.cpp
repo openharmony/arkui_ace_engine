@@ -57,6 +57,20 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
+float PipelineContext::GetCurrentRootWidth()
+{
+    auto context = GetCurrentContext();
+    CHECK_NULL_RETURN(context, 0.0f);
+    return static_cast<float>(context->rootWidth_);
+}
+
+float PipelineContext::GetCurrentRootHeight()
+{
+    auto context = GetCurrentContext();
+    CHECK_NULL_RETURN(context, 0.0f);
+    return static_cast<float>(context->rootHeight_);
+}
+
 void PipelineContext::AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);

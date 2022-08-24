@@ -19,10 +19,12 @@
 #include <memory>
 #include <optional>
 
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/magic_layout_property.h"
@@ -137,32 +139,19 @@ public:
         if (!layoutConstraint_.has_value()) {
             layoutConstraint_ = LayoutConstraintF();
         }
-        if (layoutConstraint_->UpdateSelfIdealSizeWithCheck(value)) {
+        if (layoutConstraint_->UpdateSelfIdealSizeWithCheck(OptionalSizeF(value))) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }
 
     void UpdateContentConstraint();
 
-    std::optional<LayoutConstraintF> CreateChildConstraint() const
-    {
-        auto layoutConstraint = contentConstraint_;
-        if (layoutConstraint.has_value()) {
-            if (layoutConstraint->selfIdealSize.has_value()) {
-                layoutConstraint->parentIdealSize = layoutConstraint->selfIdealSize;
-            }
-            // for child constraint, reset parent selfIdealSize.
-            layoutConstraint->selfIdealSize.reset();
-        }
-        return layoutConstraint;
-    }
+    LayoutConstraintF CreateChildConstraint() const;
 
     LayoutConstraintF CreateContentConstraint() const
     {
         auto layoutConstraint = contentConstraint_.value_or(LayoutConstraintF());
-        if (layoutConstraint.selfIdealSize) {
-            layoutConstraint.maxSize.UpdateSizeWhenSmaller(layoutConstraint.selfIdealSize.value());
-        }
+        layoutConstraint.maxSize.UpdateSizeWhenSmaller(layoutConstraint.selfIdealSize.ConvertToSizeT());
         return layoutConstraint;
     }
 

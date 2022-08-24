@@ -15,6 +15,8 @@
 
 #include "core/components_ng/base/view_abstract.h"
 
+#include <optional>
+
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
@@ -25,7 +27,7 @@ void ViewAbstract::SetWidth(const CalcLength& width)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateCalcSelfIdealSize(CalcSize(width, CalcLength(-1.0f)));
+    layoutProperty->UpdateCalcSelfIdealSize(CalcSize(width, std::nullopt));
 }
 
 void ViewAbstract::SetHeight(const CalcLength& height)
@@ -34,7 +36,7 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateCalcSelfIdealSize(CalcSize(CalcLength(-1.0f), height));
+    layoutProperty->UpdateCalcSelfIdealSize(CalcSize(std::nullopt, height));
 }
 
 void ViewAbstract::SetBackgroundColor(const Color& color)

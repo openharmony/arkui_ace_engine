@@ -18,9 +18,11 @@
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
@@ -101,10 +103,11 @@ void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
     CHECK_NULL_VOID(rsNode_);
-    RenderContext::UpdateBorderRadius(value);
     Rosen::Vector4f cornerRadius;
-    cornerRadius.SetValues(value.radiusTopLeft->Value(), value.radiusTopRight->Value(), value.radiusBottomLeft->Value(),
-        value.radiusBottomRight->Value());
+    cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
     rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
 }
@@ -186,7 +189,7 @@ void RosenRenderContext::Restore()
     }
 }
 
-void RosenRenderContext::RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::RebuildFrame(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
 {
     ReCreateRsNodeTree(children);
 }

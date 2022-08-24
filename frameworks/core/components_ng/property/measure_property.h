@@ -22,14 +22,18 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include "base/utils/utils.h"
 #include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace::NG {
+
 enum class MeasureType {
     MATCH_PARENT,
     MATCH_CONTENT,
+    MATCH_PARENT_CROSS_AXIS,
+    MATCH_PARENT_MAIN_AXIS,
 };
 
 class CalcSize {
@@ -37,29 +41,32 @@ public:
     CalcSize() = default;
     ~CalcSize() = default;
     CalcSize(const CalcLength& width, const CalcLength& height) : width_(width), height_(height) {}
+    CalcSize(std::optional<CalcLength> width, std::optional<CalcLength> height)
+        : width_(std::move(width)), height_(std::move(height))
+    {}
 
     void Reset()
     {
-        width_.Reset();
-        height_.Reset();
+        width_.reset();
+        height_.reset();
     }
 
-    const CalcLength& Width() const
+    const std::optional<CalcLength>& Width() const
     {
         return width_;
     }
 
-    const CalcLength& Height() const
+    const std::optional<CalcLength>& Height() const
     {
         return height_;
     }
 
-    void SetWidth(const CalcLength& width)
+    void SetWidth(const std::optional<CalcLength>& width)
     {
         width_ = width;
     }
 
-    void SetHeight(const CalcLength& height)
+    void SetHeight(const std::optional<CalcLength>& height)
     {
         height_ = height;
     }
@@ -80,16 +87,16 @@ public:
         return !operator==(Size);
     }
 
-    bool UpdateSizeWithCheck(const CalcSize& Size)
+    bool UpdateSizeWithCheck(const CalcSize& size)
     {
-        if ((width_ == Size.width_) && ((height_ == Size.height_))) {
+        if ((width_ == size.width_) && ((height_ == size.height_))) {
             return false;
         }
-        if (Size.width_.IsValid()) {
-            width_ = Size.width_;
+        if (size.width_) {
+            width_ = size.width_;
         }
-        if (Size.height_.IsValid()) {
-            height_ = Size.height_;
+        if (size.height_) {
+            height_ = size.height_;
         }
         return true;
     }
@@ -99,17 +106,17 @@ public:
         static const int32_t precision = 2;
         std::stringstream ss;
         ss << "[" << std::fixed << std::setprecision(precision);
-        ss << width_.ToString();
+        ss << (width_ ? width_->ToString() : "NA");
         ss << " x ";
-        ss << height_.ToString();
+        ss << (height_ ? height_->ToString() : "NA");
         ss << "]";
         std::string output = ss.str();
         return output;
     }
 
 private:
-    CalcLength width_ { -1 };
-    CalcLength height_ { -1 };
+    std::optional<CalcLength> width_;
+    std::optional<CalcLength> height_;
 };
 
 struct MeasureProperty {
@@ -271,111 +278,10 @@ struct PaddingPropertyT<float> {
     }
 };
 
-template<typename T>
-struct BorderRadiusPropertyT {
-    std::optional<T> radiusTopLeft;
-    std::optional<T> radiusTopRight;
-    std::optional<T> radiusBottomLeft;
-    std::optional<T> radiusBottomRight;
-
-    void SetRadius(const T& borderRadius)
-    {
-        radiusTopLeft = borderRadius;
-        radiusTopRight = borderRadius;
-        radiusBottomLeft = borderRadius;
-        radiusBottomRight = borderRadius;
-    }
-
-    bool operator==(const BorderRadiusPropertyT& value) const
-    {
-        return (radiusTopLeft == value.radiusTopLeft) && (radiusTopRight == value.radiusTopRight) &&
-               (radiusBottomLeft == value.radiusBottomLeft) && (radiusBottomRight == value.radiusBottomRight);
-    }
-
-    bool UpdateWithCheck(const BorderRadiusPropertyT& value)
-    {
-        bool isModified = false;
-        if (value.radiusTopLeft.has_value() && (radiusTopLeft != value.radiusTopLeft)) {
-            radiusTopLeft = value.radiusTopLeft;
-            isModified = true;
-        }
-        if (value.radiusTopRight.has_value() && (radiusTopRight != value.radiusTopRight)) {
-            radiusTopRight = value.radiusTopRight;
-            isModified = true;
-        }
-        if (value.radiusBottomLeft.has_value() && (radiusBottomLeft != value.radiusBottomLeft)) {
-            radiusBottomLeft = value.radiusBottomLeft;
-            isModified = true;
-        }
-        if (value.radiusBottomRight.has_value() && (radiusBottomRight != value.radiusBottomRight)) {
-            radiusBottomRight = value.radiusBottomRight;
-            isModified = true;
-        }
-        return isModified;
-    }
-};
-
-template<>
-struct BorderRadiusPropertyT<float> {
-    std::optional<float> radiusTopLeft;
-    std::optional<float> radiusTopRight;
-    std::optional<float> radiusBottomLeft;
-    std::optional<float> radiusBottomRight;
-
-    bool operator==(const BorderRadiusPropertyT<float>& value) const
-    {
-        if (radiusTopLeft.has_value() ^ value.radiusTopLeft.has_value()) {
-            return false;
-        }
-        if (!NearEqual(radiusTopLeft.value_or(0), value.radiusTopLeft.value_or(0))) {
-            return false;
-        }
-        if (radiusTopRight.has_value() ^ value.radiusTopRight.has_value()) {
-            return false;
-        }
-        if (!NearEqual(radiusTopRight.value_or(0), value.radiusTopRight.value_or(0))) {
-            return false;
-        }
-        if (radiusBottomLeft.has_value() ^ value.radiusBottomLeft.has_value()) {
-            return false;
-        }
-        if (!NearEqual(radiusBottomLeft.value_or(0), value.radiusBottomLeft.value_or(0))) {
-            return false;
-        }
-        if (radiusBottomRight.has_value() ^ value.radiusBottomRight.has_value()) {
-            return false;
-        }
-        if (!NearEqual(radiusBottomRight.value_or(0), value.radiusBottomRight.value_or(0))) {
-            return false;
-        }
-        return true;
-    }
-
-    std::string ToString() const
-    {
-        std::string str;
-        str.append("radiusTopLeft: [")
-            .append(radiusTopLeft.has_value() ? std::to_string(radiusTopLeft.value()) : "NA")
-            .append("]");
-        str.append("radiusTopRight: [")
-            .append(radiusTopRight.has_value() ? std::to_string(radiusTopRight.value()) : "NA")
-            .append("]");
-        str.append("radiusBottomLeft: [")
-            .append(radiusBottomLeft.has_value() ? std::to_string(radiusBottomLeft.value()) : "NA")
-            .append("]");
-        str.append("radiusBottomRight: [")
-            .append(radiusBottomRight.has_value() ? std::to_string(radiusBottomRight.value()) : "NA")
-            .append("]");
-        return str;
-    }
-};
-
 using PaddingProperty = PaddingPropertyT<CalcLength>;
 using MarginProperty = PaddingProperty;
-using BorderRadiusProperty = BorderRadiusPropertyT<Dimension>;
 using PaddingPropertyF = PaddingPropertyT<float>;
 using MarginPropertyF = PaddingPropertyT<float>;
-using BorderRadiusPropertyF = BorderRadiusPropertyT<float>;
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_PROPERTIES_H

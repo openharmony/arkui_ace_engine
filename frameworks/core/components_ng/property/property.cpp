@@ -39,7 +39,8 @@ bool CheckNeedRequestParent(PropertyChangeFlag propertyChangeFlag)
 bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag)
 {
     return ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
-           ((propertyChangeFlag & PROPERTY_UPDATE_BY_CHILD_REQUEST) == PROPERTY_UPDATE_BY_CHILD_REQUEST);
+           ((propertyChangeFlag & PROPERTY_UPDATE_BY_CHILD_REQUEST) == PROPERTY_UPDATE_BY_CHILD_REQUEST) ||
+           ((propertyChangeFlag & PROPERTY_REQUEST_NEW_CHILD_NODE) == PROPERTY_REQUEST_NEW_CHILD_NODE);
 }
 
 bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag)

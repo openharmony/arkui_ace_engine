@@ -57,6 +57,8 @@ public:
         const RefPtr<Frontend>& frontend, int32_t instanceId);
     ~PipelineBase() override;
 
+    static RefPtr<PipelineBase> GetCurrentContext();
+
     virtual void SetupRootElement() = 0;
 
     virtual uint64_t GetTimeFromExternalTimer();
@@ -153,7 +155,10 @@ public:
 
     virtual void RequestFullWindow(int32_t duration) {}
 
-    virtual bool RequestFocus(const std::string& targetNodeId) { return false; }
+    virtual bool RequestFocus(const std::string& targetNodeId)
+    {
+        return false;
+    }
 
     // Called by AceAbility and UiContent.
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const;
@@ -458,15 +463,9 @@ public:
 
     void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    virtual void FlushReload()
-    {
-        return;
-    }
+    virtual void FlushReload() {}
 
-    virtual void FlushReloadTransition()
-    {
-        return;
-    }
+    virtual void FlushReloadTransition() {}
 
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
