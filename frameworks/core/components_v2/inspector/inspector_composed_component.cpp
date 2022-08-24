@@ -49,6 +49,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/list_composed_element.h"
 #include "core/components_v2/inspector/list_item_composed_element.h"
+#include "core/components_v2/inspector/list_item_group_composed_element.h"
 #include "core/components_v2/inspector/loading_progress_composed_element.h"
 #include "core/components_v2/inspector/marquee_composed_element.h"
 #include "core/components_v2/inspector/menu_composed_element.h"
@@ -123,6 +124,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { LIST_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ListComposedElement>(id); } },
     { LIST_ITEM_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ListItemComposedElement>(id); } },
+    { LIST_ITEM_GROUP_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::ListItemGroupComposedElement>(id); } },
     { NAVIGATOR_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigatorComposedElement>(id); } },
     { PANEL_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::PanelComposedElement>(id); } },
@@ -245,6 +248,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { GRID_ITEM_COMPONENT_TAG, GRID_ITEM_ETS_TAG },
     { LIST_COMPONENT_TAG, LIST_ETS_TAG },
     { LIST_ITEM_COMPONENT_TAG, LIST_ITEM_ETS_TAG },
+    { LIST_ITEM_GROUP_COMPONENT_TAG, LIST_ITEM_GROUP_ETS_TAG },
     { NAVIGATOR_COMPONENT_TAG, NAVIGATOR_ETS_TAG },
     { PANEL_COMPONENT_TAG, PANEL_ETS_TAG },
     { PATTERN_LOCK_COMPONENT_TAG, PATTERN_LOCK_ETS_TAG },

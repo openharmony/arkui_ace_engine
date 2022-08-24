@@ -203,6 +203,11 @@ void JSList::SetLanes(const JSCallbackInfo& info)
     listComponent->SetLaneConstrain(minLengthValue, maxLengthValue);
 }
 
+void JSList::SetSticky(int32_t sticky)
+{
+    JSViewSetProperty(&V2::ListComponent::SetSticky, static_cast<V2::StickyStyle>(sticky));
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -220,6 +225,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("multiSelectable", &JSList::SetMultiSelectable);
     JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
+    JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
 
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);

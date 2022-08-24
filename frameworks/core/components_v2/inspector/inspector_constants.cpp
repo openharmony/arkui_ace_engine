@@ -126,6 +126,10 @@ const char LIST_ETS_TAG[] = "List";
 const char LIST_ITEM_COMPONENT_TAG[] = "V2::ListItemComponent";
 const char LIST_ITEM_ETS_TAG[] = "ListItem";
 
+// list-item-group
+const char LIST_ITEM_GROUP_COMPONENT_TAG[] = "V2::ListItemGroupComponent";
+const char LIST_ITEM_GROUP_ETS_TAG[] = "ListItemGroup";
+
 // navigator
 const char NAVIGATOR_COMPONENT_TAG[] = "NavigatorComponent";
 const char NAVIGATOR_ETS_TAG[] = "Navigator";

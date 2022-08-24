@@ -28,6 +28,7 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/render_list_item.h"
+#include "core/components_v2/list/list_item_generator.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -49,16 +50,6 @@ enum class ItemPositionState {
     BEHIND_VIEWPORT,
 };
 
-class ListItemGenerator : virtual public Referenced {
-public:
-    static constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
-
-    virtual RefPtr<RenderListItem> RequestListItem(size_t index) = 0;
-    virtual void RecycleListItem(size_t index) = 0;
-    virtual size_t TotalCount() = 0;
-    virtual size_t FindPreviousStickyListItem(size_t index) = 0;
-};
-
 class RenderList : public RenderNode, public RenderRefreshTarget {
     DECLARE_ACE_TYPE(V2::RenderList, RenderNode, RenderRefreshTarget);
 
@@ -72,6 +63,8 @@ public:
     void Update(const RefPtr<Component>& component) override;
 
     void PerformLayout() override;
+
+    void PaintChild(const RefPtr<RenderNode>& child, RenderContext& context, const Offset& offset) override;
 
     void OnPaintFinish() override;
 
@@ -274,8 +267,9 @@ protected:
     void UpdateAccessibilityScrollAttr();
     bool HandleActionScroll(bool forward);
     LayoutParam MakeInnerLayout();
-    Size SetItemsPosition(double mainSize, const LayoutParam& layoutParam);
-    Size SetItemsPositionForLaneList(double mainSize, const LayoutParam& layoutParam);
+    LayoutParam MakeInnerLayoutForLane();
+    Size SetItemsPosition(double mainSize);
+    Size SetItemsPositionForLaneList(double mainSize);
     bool UpdateScrollPosition(double offset, int32_t source);
 
     bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
@@ -284,9 +278,11 @@ protected:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
     double ApplyLayoutParam();
-    double LayoutOrRecycleCurrentItems(const LayoutParam& layoutParam, double mainSize);
-    double LayoutOrRecycleCurrentItemsForLaneList(const LayoutParam& layoutParam, double mainSize);
-    RefPtr<RenderListItem> RequestAndLayoutNewItem(size_t index, const LayoutParam& layoutParam);
+    double LayoutOrRecycleCurrentItems(double mainSize);
+    void BackwardLayoutForCache(size_t& backwardLayoutIndex, double& backwardLayoutOffset);
+    double LayoutOrRecycleCurrentItemsForCache(double mainSize);
+    double LayoutOrRecycleCurrentItemsForLaneList(double mainSize);
+    RefPtr<RenderListItem> RequestAndLayoutNewItem(size_t index, double currMainPos, bool forward = true);
 
     RefPtr<RenderListItem> RequestListItem(size_t index);
     void RecycleListItem(size_t index);
@@ -301,10 +297,9 @@ protected:
     void OnSelectedItemStopMoving(bool canceled);
 
     void UpdateStickyListItem(const RefPtr<RenderListItem>& newStickyItem, size_t newStickyItemIndex,
-        const RefPtr<RenderListItem>& nextStickyItem, const LayoutParam& layoutParam);
+        const RefPtr<RenderListItem>& nextStickyItem);
 
-    void ApplyPreviousStickyListItem(
-        size_t index, bool forceLayout = false, const LayoutParam& layoutParam = LayoutParam());
+    void ApplyPreviousStickyListItem(size_t index, bool forceLayout = false);
 
     double GetCurrentPosition() const;
     void AdjustOffset(Offset& delta, int32_t source);
@@ -337,10 +332,10 @@ protected:
     ItemPositionState GetItemPositionState(double curMainPos, double lastItemMainSize);
     double GetLaneLengthInPx(const Dimension& length);
     double CalculateLaneCrossOffset(double crossSize, double childCrossSize);
-    void RequestNewItemsAtEnd(double& curMainPos, double mainSize, const LayoutParam& innerLayout);
-    void RequestNewItemsAtEndForLaneList(double& curMainPos, double mainSize, const LayoutParam& innerLayout);
-    void RequestNewItemsAtStart(const LayoutParam& innerLayout);
-    void RequestNewItemsAtStartForLaneList(const LayoutParam& innerLayout);
+    void RequestNewItemsAtEnd(double& curMainPos, double mainSize);
+    void RequestNewItemsAtEndForLaneList(double& curMainPos, double mainSize);
+    void RequestNewItemsAtStart();
+    void RequestNewItemsAtStartForLaneList();
 
     RefPtr<ListComponent> component_;
 
@@ -357,6 +352,7 @@ protected:
     double startMainPos_ = 0.0;
     double endMainPos_ = 0.0;
     double currentOffset_ = 0.0;
+    double mainSize_ = 0.0;
     double mainScrollExtent_ = 0.0;
 
     bool useEstimateCurrentOffset_ = false;
@@ -431,11 +427,15 @@ private:
     void InitScrollBarProxy();
     void InitScrollBar();
     void SetScrollBarCallback();
+    void LayoutChild(RefPtr<RenderNode> child, double referencePos = 0.0, bool forward = true);
+    static void SetChildPosition(RefPtr<RenderNode> child, const Offset& offset);
+    void AddChildItem(RefPtr<RenderNode> child);
     Dimension listSpace_;
     double realMainSize_ = 0.0; // Real size of main axis.
     size_t startCachedCount_ = 0;
     size_t endCachedCount_ = 0;
     size_t cachedCount_ = 0;
+    StickyStyle sticky_ = StickyStyle::NONE;
 
     void CreateDragDropRecognizer();
     RefPtr<RenderListItem> FindCurrentListItem(const Point& point);

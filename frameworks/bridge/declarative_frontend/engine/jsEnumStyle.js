@@ -475,6 +475,13 @@ var Sticky;
   Sticky[Sticky["Opacity"] = 2] = "Opacity";
 })(Sticky || (Sticky = {}));
 
+var StickyStyle;
+(function (StickyStyle) {
+  StickyStyle[StickyStyle["None"] = 0] = "None";
+  StickyStyle[StickyStyle["Header"] = 1] = "Header";
+  StickyStyle[StickyStyle["Footer"] = 2] = "Footer";
+})(StickyStyle || (StickyStyle = {}));
+
 var Week;
 (function (Week) {
   Week["Mon"] = 0b0000001;

@@ -52,6 +52,11 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
     void UpdateTouchRect() override;
 
+    virtual bool IsForwardLayout() const
+    {
+        return true;
+    }
+
     bool IsDeletable() const
     {
         return component_ ? (component_->GetEditMode() & EditMode::DELETABLE) != 0 : false;

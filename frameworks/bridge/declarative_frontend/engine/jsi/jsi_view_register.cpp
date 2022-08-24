@@ -81,6 +81,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_list_item_group.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
@@ -928,6 +929,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LazyForEach", JSLazyForEach::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },
+    { "ListItemGroup", JSListItemGroup::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
