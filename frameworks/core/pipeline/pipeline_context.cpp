@@ -1670,19 +1670,30 @@ void PipelineContext::FlushTouchEvents()
         return;
     }
     {
+        eventManager_->FlushTouchEventsBegin(touchEvents_);
         std::unordered_set<int32_t> moveEventIds;
         decltype(touchEvents_) touchEvents(std::move(touchEvents_));
         if (touchEvents.empty()) {
             return;
         }
+        std::list<TouchEvent> touchPoints;
         for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
             auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
             auto result = moveEventIds.emplace(scalePoint.id);
             if (result.second) {
-                ResSchedReport::GetInstance().DispatchTouchEventStart(scalePoint.type);
-                eventManager_->DispatchTouchEvent(scalePoint);
-                ResSchedReport::GetInstance().DispatchTouchEventEnd();
+                touchPoints.emplace_front(scalePoint);
             }
+        }
+
+        auto maxSize = touchPoints.size();
+        for (auto iter = touchPoints.rbegin(); iter != touchPoints.rend(); ++iter) {
+            maxSize--;
+            if (maxSize == 0) {
+                eventManager_->FlushTouchEventsEnd(touchPoints);
+            }
+            ResSchedReport::GetInstance().DispatchTouchEventStart((*iter).type);
+            eventManager_->DispatchTouchEvent(*iter);
+            ResSchedReport::GetInstance().DispatchTouchEventEnd();
         }
     }
 }
