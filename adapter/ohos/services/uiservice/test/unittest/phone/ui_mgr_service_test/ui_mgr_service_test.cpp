@@ -43,13 +43,11 @@ void UIMgrServiceTest::SetUp()
 void UIMgrServiceTest::TearDown()
 {}
 
-/*
- * Feature: UIMgrService
- * Function: QueryServiceState
- * SubFunction: NA
- * FunctionPoints: UIMgrService QueryServiceState
- * EnvConditions: NA
- * CaseDescription: Verify that the UIMgrService could query service state.
+/**
+ * @tc.name: UIMgrServiceTest_QueryServiceState_0100
+ * @tc.desc: Verify that the UIMgrService could query service state.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_QueryServiceState_0100, TestSize.Level1)
 {
@@ -62,13 +60,11 @@ HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_QueryServiceState_0100, TestSize.Lev
     GTEST_LOG_(INFO) << "UIMgrServiceTest_QueryServiceState_0100 end";
 }
 
-/*
- * Feature: UIMgrService
- * Function: GetEventHandler
- * SubFunction: NA
- * FunctionPoints: UIMgrService GetEventHandler
- * EnvConditions: NA
- * CaseDescription: Verify that the UIMgrService could get eventHandler.
+/**
+ * @tc.name: UIMgrServiceTest_GetEventHandler_0100
+ * @tc.desc: Verify that the UIMgrService could get eventHandler.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_GetEventHandler_0100, TestSize.Level1)
 {
@@ -82,13 +78,11 @@ HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_GetEventHandler_0100, TestSize.Level
     GTEST_LOG_(INFO) << "UIMgrServiceTest_GetEventHandler_0100 end";
 }
 
-/*
- * Feature: UIMgrService
- * Function: OnStart
- * SubFunction: NA
- * FunctionPoints: UIMgrService OnStart
- * EnvConditions: NA
- * CaseDescription: Verify that the UIMgrService OnStart is normal.
+/**
+ * @tc.name: UIMgrServiceTest_OnStart_0100
+ * @tc.desc: Verify that the UIMgrService OnStart is normal.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_OnStart_0100, TestSize.Level1)
 {
@@ -103,13 +97,11 @@ HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_OnStart_0100, TestSize.Level1)
     GTEST_LOG_(INFO) << "UIMgrServiceTest_OnStart_0100 end";
 }
 
-/*
- * Feature: UIMgrService
- * Function: RegisterCallBack
- * SubFunction: NA
- * FunctionPoints: UIMgrService RegisterCallBack
- * EnvConditions: NA
- * CaseDescription: Verify that the UIMgrService RegisterCallBack is normal.
+/**
+ * @tc.name: UIMgrServiceTest_RegisterCallBack_0100
+ * @tc.desc: Verify that the UIMgrService RegisterCallBack is normal.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_RegisterCallBack_0100, TestSize.Level1)
 {
@@ -117,46 +109,42 @@ HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_RegisterCallBack_0100, TestSize.Leve
     const int testVal = static_cast<int>(NO_ERROR);
     const sptr<MockUIServiceStub> uiService(new (std::nothrow) MockUIServiceStub());
     auto uiMgrService = DelayedSingleton<UIMgrService>::GetInstance();
-    Want want;
+    AAFwk::Want want;
     EXPECT_EQ(testVal, uiMgrService->RegisterCallBack(want, uiService));
 
     testing::Mock::AllowLeak(uiService);
     GTEST_LOG_(INFO) << "UIMgrServiceTest_RegisterCallBack_0100 end";
 }
 
-/*
- * Feature: UIMgrService
- * Function: UnregisterCallBack
- * SubFunction: NA
- * FunctionPoints: UIMgrService UnregisterCallBack
- * EnvConditions: NA
- * CaseDescription: Verify that the UIMgrService UnregisterCallBack is normal.
+/**
+ * @tc.name: UIMgrServiceTest_UnregisterCallBack_0100
+ * @tc.desc: Verify that the UIMgrService UnregisterCallBack is normal.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_UnregisterCallBack_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UIMgrServiceTest_UnregisterCallBack_0100 start";
     const int testVal = static_cast<int>(NO_ERROR);
     auto uiMgrService = DelayedSingleton<UIMgrService>::GetInstance();
-    Want want;
+    AAFwk::Want want;
     EXPECT_EQ(testVal, uiMgrService->UnregisterCallBack(want));
 
     GTEST_LOG_(INFO) << "UIMgrServiceTest_UnregisterCallBack_0100 end";
 }
 
-/*
- * Feature: UIMgrService
- * Function: Push
- * SubFunction: NA
- * FunctionPoints: UIMgrService Push
- * EnvConditions: NA
- * CaseDescription: Verify that the UIMgrService Push is normal.
+/**
+ * @tc.name: UIMgrServiceTest_Push_0100
+ * @tc.desc: Verify that the UIMgrService Push is normal.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_Push_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UIMgrServiceTest_Push_0100 start";
     const int testVal = static_cast<int>(NO_ERROR);
     auto uiMgrService = DelayedSingleton<UIMgrService>::GetInstance();
-    Want want;
+    AAFwk::Want want;
     const std::string name = "name";
     const std::string jsonPath = "jsonPath";
     const std::string data = "data";
@@ -166,40 +154,37 @@ HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_Push_0100, TestSize.Level1)
     GTEST_LOG_(INFO) << "UIMgrServiceTest_Push_0100 end";
 }
 
-/*
- * Feature: UIMgrService
- * Function: Request
- * SubFunction: NA
- * FunctionPoints: UIMgrService Request
- * EnvConditions: NA
- * CaseDescription: Verify that the UIMgrService Request is normal.
+/**
+ * @tc.name: UIMgrServiceTest_Request_0100
+ * @tc.desc: Verify that the UIMgrService Request is normal.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_Request_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UIMgrServiceTest_Request_0100 start";
     const int testVal = static_cast<int>(NO_ERROR);
     auto uiMgrService = DelayedSingleton<UIMgrService>::GetInstance();
-    Want want;
+    AAFwk::Want want;
     const std::string name = "name";
     const std::string data = "data";
     EXPECT_EQ(testVal, uiMgrService->Request(want, name, data));
 
     GTEST_LOG_(INFO) << "UIMgrServiceTest_Request_0100 end";
 }
-/*
- * Feature: UIMgrService
- * Function: ReturnRequest
- * SubFunction: NA
- * FunctionPoints: UIMgrService ReturnRequest
- * EnvConditions: NA
- * CaseDescription: Verify that the UIMgrService ReturnRequest is normal.
+
+/**
+ * @tc.name: UIMgrServiceTest_ReturnRequest_0100
+ * @tc.desc: Verify that the UIMgrService ReturnRequest is normal.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_ReturnRequest_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "UIMgrServiceTest_ReturnRequest_0100 start";
     const int testVal = static_cast<int>(NO_ERROR);
     auto uiMgrService = DelayedSingleton<UIMgrService>::GetInstance();
-    Want want;
+    AAFwk::Want want;
     const std::string source = "source";
     const std::string data = "data";
     const std::string extraData = "extraData";
@@ -208,13 +193,11 @@ HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_ReturnRequest_0100, TestSize.Level1)
     GTEST_LOG_(INFO) << "UIMgrServiceTest_ReturnRequest_0100 end";
 }
 
-/*
- * Feature: UIMgrService
- * Function: OnStop
- * SubFunction: NA
- * FunctionPoints: UIMgrService OnStop
- * EnvConditions: NA
- * CaseDescription: Verify that the UIMgrService OnStop is normal.
+/**
+ * @tc.name: UIMgrServiceTest_OnStop_0100
+ * @tc.desc: Verify that the UIMgrService OnStop is normal.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZU9
  */
 HWTEST_F(UIMgrServiceTest, UIMgrServiceTest_OnStop_0100, TestSize.Level1)
 {

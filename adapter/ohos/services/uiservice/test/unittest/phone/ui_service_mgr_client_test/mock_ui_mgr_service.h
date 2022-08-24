@@ -20,7 +20,10 @@
 #include <gmock/gmock.h>
 #define protected public
 #define private public
+#include "ui_mgr_service.h"
 #include "ui_service_mgr_stub.h"
+#include "event_handler.h"
+#include "event_runner.h"
 
 namespace OHOS {
 namespace Ace {
@@ -37,6 +40,25 @@ public:
         const std::string& data));
     MOCK_METHOD4(ReturnRequestCall, void(const AAFwk::Want& want, const std::string& source,
         const std::string& data,  const std::string& extraData));
+
+    MOCK_METHOD9(ShowDialog, int(const std::string& name,
+        const std::string& params,
+        uint32_t windowType,
+        int x,
+        int y,
+        int width,
+        int height,
+        const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
+        int* id));
+
+    MOCK_METHOD1(CancelDialog, int(int id));
+
+    MOCK_METHOD2(UpdateDialog, int(int id, const std::string& data));
+
+    MOCK_METHOD2(AttachToUiService, int32_t(const sptr<IRemoteObject>& dialog, int32_t pid));
+
+    MOCK_METHOD3(RemoteDialogCallback, int32_t(int32_t id, const std::string& event, const std::string& params));
+
     int RegisterCallBack(const AAFwk::Want& want,  const sptr<IUIService>& uiService)
     {
         RegisterCallBackCall(want, uiService);
@@ -91,7 +113,7 @@ public:
      * GetEventHandler, get the dataobs manager service's handler.
      * @return Returns EventHandler ptr.
      */
-    std::shared_ptr<EventHandler> GetEventHandler()
+    std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler()
     {
         return handler_;
     }
@@ -113,8 +135,8 @@ private:
         return true;
     }
 
-    std::shared_ptr<EventRunner> eventLoop_;
-    std::shared_ptr<EventHandler> handler_;
+    std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
+    std::shared_ptr<AppExecFwk::EventHandler> handler_;
     UIServiceRunningState state_;
 };
 }  // namespace Ace

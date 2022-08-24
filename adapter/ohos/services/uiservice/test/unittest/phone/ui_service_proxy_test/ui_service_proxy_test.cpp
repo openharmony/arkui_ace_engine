@@ -55,7 +55,7 @@ HWTEST_F(UIServiceProxyTest, UIServiceProxy_OnPushCallBack_001, TestSize.Level1)
 
     sptr<UIServiceProxy> proxy(new UIServiceProxy(mockUIServiceStub));
 
-    Want want;
+    AAFwk::Want want;
     const std::string name = "name";
     const std::string jsonPath = "jsonPath";
     const std::string data = "data";
@@ -81,7 +81,7 @@ HWTEST_F(UIServiceProxyTest, UIServiceProxy_OnRequestCallBack_001, TestSize.Leve
 
     sptr<UIServiceProxy> proxy(new UIServiceProxy(mockUIServiceStub));
 
-    Want want;
+    AAFwk::Want want;
     const std::string name = "name";
     const std::string data  = "data";
     EXPECT_CALL(*mockUIServiceStub, OnRequestCallBack(_, _, _)).Times(1);
@@ -106,7 +106,7 @@ HWTEST_F(UIServiceProxyTest, UIServiceProxy_OnReturnRequest_001, TestSize.Level1
 
     sptr<UIServiceProxy> proxy(new UIServiceProxy(mockUIServiceStub));
 
-    Want want;
+    AAFwk::Want want;
     const std::string source = "source";
     const std::string data  = "data";
     const std::string extraData  = "extraData";
