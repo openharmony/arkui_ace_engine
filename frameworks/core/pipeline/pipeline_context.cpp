@@ -550,14 +550,19 @@ void PipelineContext::FlushLayout()
 
     CreateGeometryTransition();
     FlushGeometryProperties();
+    TryCallNextFrameLayoutCallback();
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushLayout();
+    }
+}
 
+void PipelineContext::TryCallNextFrameLayoutCallback()
+{
     if (isForegroundCalled_ && nextFrameLayoutCallback_) {
         isForegroundCalled_ = false;
         nextFrameLayoutCallback_();
+        LOGI("nextFrameLayoutCallback called");
         nextFrameLayoutCallback_ = nullptr;
-    }
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().EndFlushLayout();
     }
 }
 

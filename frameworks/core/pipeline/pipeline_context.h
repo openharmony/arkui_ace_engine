@@ -1127,6 +1127,7 @@ private:
     void CreateTouchEventOnZoom(const AxisEvent& event);
     void HandleVisibleAreaChangeEvent();
     void FlushTouchEvents();
+    void TryCallNextFrameLayoutCallback();
 
     template<typename T>
     struct NodeCompare {
