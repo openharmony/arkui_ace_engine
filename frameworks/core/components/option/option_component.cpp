@@ -39,8 +39,10 @@ constexpr double MIN_TEXT_SIZE_PHONE = 9.0;
 
 OptionComponent::OptionComponent(const RefPtr<SelectTheme>& theme)
 {
-    theme_ = theme->clone();
-    theme_->SetFontWeight(FontWeight::W400);
+    if (theme) {
+        theme_ = theme->clone();
+        theme_->SetFontWeight(FontWeight::W400);
+    }
 }
 
 void OptionComponent::InitTheme(const RefPtr<ThemeManager>& themeManager)
