@@ -1262,7 +1262,7 @@ std::string AceContainer::GetContentInfo(int32_t instanceId)
 
 void AceContainer::SetWindowPos(int32_t left, int32_t top)
 {
-    if (!frontend_) {
+    if (!frontend_ || IsSubContainer()) {
         return;
     }
     auto accessibilityManager = frontend_->GetAccessibilityManager();
