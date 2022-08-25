@@ -333,6 +333,7 @@ void RenderSlider::Initialize()
         if (slider) {
             slider->isPress_ = false;
             slider->MarkNeedLayout();
+            slider->FireMoveEndEvent();
         }
     });
 }
@@ -461,7 +462,6 @@ void RenderSlider::HandleClick(const Offset& clickPosition)
     }
     insideBlockRegion_ = false;
     FireMovingEvent(SliderEvent::CLICK);
-    FireMoveEndEvent();
 }
 
 void RenderSlider::HandleDragStart(const Offset& startPoint)
@@ -516,7 +516,6 @@ void RenderSlider::HandleDragEnd()
         UpdateTouchRegion();
     }
     FireMovingEvent(SliderEvent::MOVE_END);
-    FireMoveEndEvent();
 
     insideBlockRegion_ = false;
     blockActive_ = false;
