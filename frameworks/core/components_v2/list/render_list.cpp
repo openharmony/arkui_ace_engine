@@ -2936,6 +2936,7 @@ void RenderList::LayoutChild(RefPtr<RenderNode> child, double referencePos, bool
             .listMainSize = mainSize_,
             .referencePos = referencePos,
             .forwardLayout = forward,
+            .isVertical = vertical_,
             .sticky = sticky_,
             .lanes = isLaneList_ ? lanes_ : 1
         };

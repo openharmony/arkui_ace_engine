@@ -369,6 +369,7 @@ void RenderListItemGroup::SetItemGroupLayoutParam(const ListItemLayoutParam &par
     startCacheCount_ = param.startCacheCount;
     endCacheCount_ = param.endCacheCount;
     listMainSize_ = param.listMainSize;
+    vertical_ = param.isVertical;
     stickHeader_ = static_cast<bool>(param.sticky & StickyStyle::HEADER);
     stickFooter_ = static_cast<bool>(param.sticky & StickyStyle::FOOTER);
     lanes_ = param.lanes;
