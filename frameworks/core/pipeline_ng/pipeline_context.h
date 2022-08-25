@@ -136,6 +136,8 @@ public:
         SetRootSize(density_, width, height);
     }
 
+    void OnSurfacePositionChanged(int32_t posX, int32_t posY) override {}
+
     void OnSurfaceDensityChanged(double density) override;
 
     void OnSystemBarHeightChanged(double statusBar, double navigationBar) override {}

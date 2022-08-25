@@ -111,6 +111,8 @@ public:
     using TimeProvider = std::function<int64_t(void)>;
     using SurfaceChangedCallbackMap =
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
+    using SurfacePositionChangedCallbackMap =
+        std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using PostRTTaskCallback = std::function<void(std::function<void()>&&)>;
     using WindowFocusChangedCallbackMap = std::unordered_map<int32_t, std::function<void(bool)>>;
 
@@ -262,6 +264,8 @@ public:
 
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
+
+    void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
     void WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
 
@@ -713,6 +717,20 @@ public:
     void UnregisterSurfaceChangedCallback(int32_t callbackId)
     {
         surfaceChangedCallbackMap_.erase(callbackId);
+    }
+
+    int32_t RegisterSurfacePositionChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
+    {
+        if (callback) {
+            surfacePositionChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterSurfacePositionChangedCallback(int32_t callbackId)
+    {
+        surfacePositionChangedCallbackMap_.erase(callbackId);
     }
     void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
@@ -1257,6 +1275,7 @@ private:
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
+    SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
     WindowFocusChangedCallbackMap windowFocusChangedCallbackMap_;
 
     std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;

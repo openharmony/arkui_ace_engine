@@ -396,6 +396,13 @@ void FlutterAceView::SurfaceChanged(
     LOGD("<<< FlutterAceView::SurfaceChanged, end");
 }
 
+void FlutterAceView::SurfacePositionChanged(FlutterAceView* view, int32_t posX, int32_t posY)
+{
+    if (view != nullptr) {
+        view->NotifySurfacePositionChanged(posX, posY);
+    }
+}
+
 void FlutterAceView::SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics)
 {
     if (view) {

@@ -133,6 +133,8 @@ public:
     virtual void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) = 0;
 
+    virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
+
     virtual void OnSurfaceDensityChanged(double density) = 0;
 
     virtual void OnSystemBarHeightChanged(double statusBar, double navigationBar) = 0;
