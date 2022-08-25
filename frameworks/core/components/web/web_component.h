@@ -790,14 +790,19 @@ public:
         return declaration_->GetPageFinishedEventId();
     }
 
-    void SetProgressChangeEventId(const EventMarker& progressChangeEventId)
+    using OnProgressChangeImpl = std::function<void(const BaseEventInfo* info)>;
+    void OnProgressChange(const BaseEventInfo* info) const
     {
-        declaration_->SetProgressChangeEventId(progressChangeEventId);
+        if (onProgressChangeImpl_) {
+            onProgressChangeImpl_(info);
+        }
     }
-
-    const EventMarker& GetProgressChangeEventId() const
+    void SetProgressChangeImpl(OnProgressChangeImpl && onProgressChangeImpl)
     {
-        return declaration_->GetProgressChangeEventId();
+        if (onProgressChangeImpl == nullptr) {
+            return;
+        }
+        onProgressChangeImpl_ = std::move(onProgressChangeImpl);
     }
 
     void SetTitleReceiveEventId(const EventMarker& titleReceiveEventId)
@@ -1344,6 +1349,7 @@ private:
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
     OnContextMenuImpl onContextMenuImpl_;
     OnInterceptRequestImpl onInterceptRequestImpl_ = nullptr;
+    OnProgressChangeImpl onProgressChangeImpl_ = nullptr;
 
     std::string type_;
     bool isJsEnabled_ = true;

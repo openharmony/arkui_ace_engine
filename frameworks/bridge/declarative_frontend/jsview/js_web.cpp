@@ -1309,19 +1309,18 @@ void JSWeb::OnPageFinish(const JSCallbackInfo& args)
 
 void JSWeb::OnProgressChange(const JSCallbackInfo& args)
 {
-    if (!args[0]->IsFunction()) {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebProgressChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebProgressChangeEventToJSValue);
-    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
-        (const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
-            func->Execute(*eventInfo);
-        });
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)] (const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
+        func->Execute(*eventInfo);
+    };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    webComponent->SetProgressChangeEventId(eventMarker);
+    webComponent->SetProgressChangeImpl(std::move(jsCallback));
 }
 
 void JSWeb::OnTitleReceive(const JSCallbackInfo& args)

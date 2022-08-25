@@ -1219,8 +1219,6 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
             webCom->GetPageFinishedEventId(), pipelineContext);
         onPageStartedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webCom->GetPageStartedEventId(), pipelineContext);
-        onProgressChangeV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webCom->GetProgressChangeEventId(), pipelineContext);
         onTitleReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webCom->GetTitleReceiveEventId(), pipelineContext);
         onGeolocationHideV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
@@ -2370,10 +2368,12 @@ void WebDelegate::OnPageFinished(const std::string& param)
 
 void WebDelegate::OnProgressChanged(int param)
 {
-    // ace 2.0
-    if (onProgressChangeV2_) {
-        onProgressChangeV2_(std::make_shared<LoadWebProgressChangeEvent>(param));
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return;
     }
+    auto paramin = std::make_shared<LoadWebProgressChangeEvent>(param);
+    webCom->OnProgressChange(paramin.get());
 }
 
 void WebDelegate::OnReceivedTitle(const std::string& param)
