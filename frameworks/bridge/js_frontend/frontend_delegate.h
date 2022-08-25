@@ -29,6 +29,7 @@
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 namespace OHOS::Ace::Framework {
+enum class AlertState { USER_CANCEL = 0, USER_CONFIRM, RECOVERY };
 
 // A virtual interface which must be implemented as a backing for
 // FrontendDelegateImpl instances.

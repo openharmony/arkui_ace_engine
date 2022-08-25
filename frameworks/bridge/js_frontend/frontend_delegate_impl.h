@@ -66,7 +66,7 @@ struct PageInfo {
     int32_t pageId = -1;
     std::string url;
     bool isRestore = false;
-    bool isAlertBeforeBackPage = false;
+    std::function<void(int32_t)> alertCallback;
     DialogProperties dialogProperties;
 };
 
@@ -419,6 +419,8 @@ private:
     void ParseManifest();
 
     void BackImplement(const std::string& uri);
+
+    void ClearAlertCallback(PageInfo pageInfo);
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;

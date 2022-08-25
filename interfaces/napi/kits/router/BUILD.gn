@@ -25,6 +25,7 @@ config("router_config") {
 ohos_shared_library("router") {
   include_dirs = [
     "//foundation/ace",
+    "//third_party/libuv/include",
     "$ace_root",
     "$ace_root/frameworks",
     "$root_out_dir/ace/framework",
@@ -35,6 +36,7 @@ ohos_shared_library("router") {
   deps = [
     "$ace_root/build:libace",
     "//foundation/ace/napi/:ace_napi",
+    "//third_party/libuv:uv",
   ]
 
   if (use_mingw_win) {

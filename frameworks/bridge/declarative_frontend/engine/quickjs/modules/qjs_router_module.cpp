@@ -239,5 +239,20 @@ void InitRouterModule(JSContext* ctx, JSValue& moduleObj)
         ctx, moduleObj, ROUTE_PAGE_GET_PARAMS, JS_NewCFunction(ctx, PageGetParams, ROUTE_PAGE_GET_PARAMS, 0));
     JS_SetPropertyStr(
         ctx, moduleObj, ROUTE_POSTPONE, JS_NewCFunction(ctx, PostponePageTransition, ROUTE_POSTPONE, 0));
+
+    JSValue globalObj = JS_GetGlobalObject(ctx);
+    JSValue requireNapiFunc = JS_GetPropertyStr(ctx, globalObj, "requireNapi");
+    if (!JS_IsFunction(ctx, requireNapiFunc)) {
+        JS_FreeValue(ctx, globalObj);
+        return;
+    }
+    JSValueConst argv[] = { JS_NewString(ctx, "router") };
+    JSValue retVal = JS_Call(ctx, requireNapiFunc, globalObj, countof(argv), argv);
+    JS_SetPropertyStr(ctx, moduleObj,
+        ROUTE_ENABLE_ALERT_BEFORE_BACK_PAGE, JS_GetPropertyStr(ctx, retVal, ROUTE_ENABLE_ALERT_BEFORE_BACK_PAGE));
+    JS_SetPropertyStr(ctx, moduleObj,
+        ROUTE_DISABLE_ALERT_BEFORE_BACK_PAGE, JS_GetPropertyStr(ctx, retVal, ROUTE_DISABLE_ALERT_BEFORE_BACK_PAGE));
+    JS_FreeValue(ctx, retVal);
+    JS_FreeValue(ctx, globalObj);
 }
 } // namespace OHOS::Ace::Framework
