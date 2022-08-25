@@ -35,6 +35,7 @@ struct ListItemLayoutParam {
     double listMainSize;
     double referencePos;
     bool forwardLayout;
+    bool isVertical;
     StickyStyle sticky;
     int32_t lanes;
 };
