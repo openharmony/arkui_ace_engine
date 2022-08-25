@@ -59,6 +59,11 @@ void JSSelect::Create(const JSCallbackInfo& info)
             }
 
             auto optionTheme = GetTheme<SelectTheme>();
+            if (!optionTheme) {
+                LOGE("JSSelect: Get option theme is null.");
+                continue;
+            }
+
             auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
             auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
             auto iconComponent = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(icon);

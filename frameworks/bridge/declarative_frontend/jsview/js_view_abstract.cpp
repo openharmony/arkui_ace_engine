@@ -1855,7 +1855,10 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
                 return;
             }
             auto menuTheme = GetTheme<SelectTheme>();
-            menuComponent->SetTheme(menuTheme);
+            if (menuTheme) {
+                menuComponent->SetTheme(menuTheme);
+            }
+
             menuComponent->ClearOptions();
             size_t size = paramArray->Length();
             for (size_t i = 0; i < size; i++) {
@@ -1867,6 +1870,10 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
                 auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(menuAction));
 
                 auto optionTheme = GetTheme<SelectTheme>();
+                if (!optionTheme) {
+                    continue;
+                }
+
                 auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
                 auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
 

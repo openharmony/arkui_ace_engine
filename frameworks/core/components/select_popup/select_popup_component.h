@@ -237,7 +237,9 @@ public:
 
     void SetTheme(const RefPtr<SelectTheme>& theme)
     {
-        theme_ = theme->clone();
+        if (theme) {
+            theme_ = theme->clone();
+        }
     }
 
     const RefPtr<SelectTheme>& GetTheme() const

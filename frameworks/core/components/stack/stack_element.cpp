@@ -355,8 +355,8 @@ void StackElement::PerformPopPopup(const ComposeId& id)
         auto child = DynamicCast<TweenElement>(*iter);
         if (child && child->GetId() == id) {
             auto themeManager = GetThemeManager();
-            if (!themeManager) {
-                LOGE("themeManager is null!");
+            if (!themeManager || !themeManager->GetTheme<PopupTheme>()) {
+                LOGE("themeManager or get theme is null!");
                 return;
             }
 
