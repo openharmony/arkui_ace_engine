@@ -162,24 +162,12 @@
 
 namespace OHOS::Ace::Framework {
 
-static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+static void UpdateRootComponent(JSContext* ctx, JSValueConst jsView)
 {
-    LOGD("Load Document");
-
-    if ((argc != 1) || (!JS_IsObject(argv[0]))) {
-        return JS_ThrowSyntaxError(ctx, "loadDocument expects a single object as parameter");
-    }
-
-    QJSHandleScope sc(ctx);
-    QJSContext::Scope scope(ctx);
-
-    // JS_DupValue on arg[0]. And release when done. Otherwise it will get GC-d as soon as this function exits.
-    // Store jsView in page, so when page is unloaded a call to JS_FreeValue is made to release it
-    JSValue jsView = JS_DupValue(ctx, argv[0]);
-
     JSView* view = static_cast<JSView*>(UnwrapAny(jsView));
     if (!view) {
-        return JS_ThrowReferenceError(ctx, "loadDocument: argument provided is not a View!");
+        LOGE("Argument provided is not a View!");
+        return;
     }
 
     auto page = QJSDeclarativeEngineInstance::GetRunningPage(ctx);
@@ -205,6 +193,102 @@ static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc,
             view->ExecuteUpdateWithValueParams(params);
         }
     });
+}
+
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+static JSValue JsPreviewComponent(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    LOGD("PreviewerComponent start");
+    if (ctx == nullptr) {
+        LOGE("ctx is nullptr. Failed!");
+        return JS_UNDEFINED;
+    }
+    auto* instance = QJSDeclarativeEngineInstance::UnWrapEngineInstance(ctx);
+    if (!instance) {
+        LOGE("QJS context has no ref to engine instance. Failed!");
+        return JS_UNDEFINED;
+    }
+    std::string requiredComponentName = instance->GetRequiredComponent();
+    JSValue obj = instance->GetPreviewComponent(requiredComponentName);
+    if (JS_IsUndefined(obj)) {
+        LOGE("Get PreviewComponent object from map failed");
+    } else {
+        UpdateRootComponent(ctx, obj);
+    }
+    return JS_UNDEFINED;
+}
+
+static JSValue JsGetPreviewComponentFlag(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    LOGD("Get PreviewComponentFlag start");
+    if (ctx == nullptr) {
+        LOGE("ctx is nullptr. Failed!");
+        return JS_UNDEFINED;
+    }
+    auto* instance = QJSDeclarativeEngineInstance::UnWrapEngineInstance(ctx);
+    if (!instance) {
+        LOGE("QJS context has no ref to engine instance. Failed!");
+        return JS_UNDEFINED;
+    }
+    bool isComponentPreview = instance->GetPreviewFlag();
+    return JS_NewBool(ctx, isComponentPreview);
+}
+
+static JSValue JsStorePreviewComponents(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    LOGD("Store PreviewerComponents start");
+    if (argc < 3) {
+        return JS_ThrowSyntaxError(ctx, "storePreviewComponents requires at least three arguments.");
+    }
+    if (!JS_IsNumber(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "parameter action must be number");
+    }
+    if (ctx == nullptr) {
+        LOGE("ctx is nullptr. Failed!");
+        return JS_UNDEFINED;
+    }
+    int32_t numOfComponent = 0;
+    if (JS_ToInt32(ctx, &numOfComponent, argv[0]) < 0) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, must be uint32 value");
+    }
+    if (numOfComponent*2 != argc-1) {
+        return JS_ThrowSyntaxError(ctx, "The number of components is wrong.");
+    }
+    auto* instance = QJSDeclarativeEngineInstance::UnWrapEngineInstance(ctx);
+    if (!instance) {
+        LOGE("QJS context has no ref to engine instance. Failed!");
+        return JS_UNDEFINED;
+    }
+    for (int32_t index = 1; index <= numOfComponent; index++) {
+        if (!JS_IsString(argv[2*index-1]) || JS_IsUndefined(argv[2*index])) {
+            LOGE("The %{private}d component passed by StorePreviewComponents has wrong type", index);
+            return JS_UNDEFINED;
+        }
+        ScopedString componentName(ctx, argv[2*index-1]);
+        std::string name = componentName.get();
+        JSValue jsView = JS_DupValue(ctx, argv[2*index]);
+        instance->AddPreviewComponent(name, jsView);
+    }
+    return JS_UNDEFINED;
+}
+#endif
+
+static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    LOGD("Load Document");
+
+    if ((argc != 1) || (!JS_IsObject(argv[0]))) {
+        return JS_ThrowSyntaxError(ctx, "loadDocument expects a single object as parameter");
+    }
+
+    QJSHandleScope sc(ctx);
+    QJSContext::Scope scope(ctx);
+
+    // JS_DupValue on arg[0]. And release when done. Otherwise it will get GC-d as soon as this function exits.
+    // Store jsView in page, so when page is unloaded a call to JS_FreeValue is made to release it
+    JSValue jsView = JS_DupValue(ctx, argv[0]);
+
+    UpdateRootComponent(ctx, jsView);
 
     return JS_UNDEFINED;
 }
@@ -812,6 +896,11 @@ void JsRegisterViews(BindingTarget globalObj)
 {
     JSContext* ctx = QJSContext::Current();
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    QJSUtils::DefineGlobalFunction(ctx, JsPreviewComponent, "previewComponent", 0);
+    QJSUtils::DefineGlobalFunction(ctx, JsGetPreviewComponentFlag, "getPreviewComponentFlag", 0);
+    QJSUtils::DefineGlobalFunction(ctx, JsStorePreviewComponents, "storePreviewComponents", 3);
+#endif
     QJSUtils::DefineGlobalFunction(ctx, JsLoadDocument, "loadDocument", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorTree, "getInspectorTree", 0);
     QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorByKey, "getInspectorByKey", 1);
