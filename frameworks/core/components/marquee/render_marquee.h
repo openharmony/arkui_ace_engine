@@ -91,6 +91,7 @@ private:
     RefPtr<CurveAnimation<double>> translate_;
     Offset childPosition_ = Offset::ErrorOffset();
 
+    bool needAnimation_ = true;
     bool startAfterLayout_ = true;
     bool startAfterShowed_ = false;
     bool playerFinishControl_ = false;
