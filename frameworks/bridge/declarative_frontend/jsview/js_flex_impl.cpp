@@ -17,6 +17,7 @@
 
 #include "core/components/flex/flex_component_v2.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/flex/flex_view.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -45,6 +46,10 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
     std::list<RefPtr<Component>> children;
     if (info.Length() < 1) {
         LOGI("No input args, use default row setting");
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
+            return;
+        }
         RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(FlexDirection::ROW,
             FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         row->SetInspectorTag("FlexComponentV2");
@@ -54,6 +59,10 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
     }
     if (!info[0]->IsObject()) {
         LOGW("arg is not a object, use default row setting");
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
+            return;
+        }
         RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(FlexDirection::ROW,
             FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         row->SetInspectorTag("FlexComponentV2");
@@ -74,6 +83,9 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
     } else {
         mainComponent = CreateFlexComponent(info);
     }
+    if (!mainComponent) {
+        return;
+    }
     ViewStackProcessor::GetInstance()->ClaimElementId(mainComponent);
     ViewStackProcessor::GetInstance()->Push(mainComponent);
 }
@@ -82,11 +94,19 @@ RefPtr<FlexComponent> JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info
 {
     std::list<RefPtr<Component>> children;
     if (info.Length() < 1) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
+            return nullptr;
+        }
         RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(FlexDirection::ROW,
             FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         return row;
     }
     if (!info[0]->IsObject()) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
+            return nullptr;
+        }
         RefPtr<FlexComponentV2> row = AceType::MakeRefPtr<OHOS::Ace::FlexComponentV2>(FlexDirection::ROW,
             FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
         return row;
@@ -95,24 +115,46 @@ RefPtr<FlexComponent> JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info
     JSRef<JSVal> directionVal = obj->GetProperty("direction");
     JSRef<JSVal> justifyVal = obj->GetProperty("justifyContent");
     JSRef<JSVal> alignItemVal = obj->GetProperty("alignItems");
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
+        if (directionVal->IsNumber()) {
+            auto direction = directionVal->ToNumber<int32_t>();
+            if (direction >= 0 && direction <= DIRECTION_MAX_VALUE) {
+                NG::FlexView::Direction(static_cast<FlexDirection>(direction));
+            }
+        }
+        if (justifyVal->IsNumber()) {
+            auto mainAlign = justifyVal->ToNumber<int32_t>();
+            if (mainAlign >= 0 && mainAlign <= MAIN_ALIGN_MAX_VALUE) {
+                NG::FlexView::MainAxisAlign(static_cast<FlexAlign>(mainAlign));
+            }
+        }
+        if (alignItemVal->IsNumber()) {
+            auto crossAlign = alignItemVal->ToNumber<int32_t>();
+            if (crossAlign >= 0 && crossAlign <= CROSS_ALIGN_MAX_VALUE) {
+                NG::FlexView::CrossAxisAlign(static_cast<FlexAlign>(crossAlign));
+            }
+        }
+        return nullptr;
+    }
     auto flex =
         AceType::MakeRefPtr<FlexComponentV2>(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH, children);
     if (directionVal->IsNumber()) {
         auto direction = directionVal->ToNumber<int32_t>();
         if (direction >= 0 && direction <= DIRECTION_MAX_VALUE) {
-            flex->SetDirection((FlexDirection)direction);
+            flex->SetDirection(static_cast<FlexDirection>(direction));
         }
     }
     if (justifyVal->IsNumber()) {
         auto mainAlign = justifyVal->ToNumber<int32_t>();
         if (mainAlign >= 0 && mainAlign <= MAIN_ALIGN_MAX_VALUE) {
-            flex->SetMainAxisAlign((FlexAlign)mainAlign);
+            flex->SetMainAxisAlign(static_cast<FlexAlign>(mainAlign));
         }
     }
     if (alignItemVal->IsNumber()) {
         auto crossAlign = alignItemVal->ToNumber<int32_t>();
         if (crossAlign >= 0 && crossAlign <= CROSS_ALIGN_MAX_VALUE) {
-            flex->SetCrossAxisAlign((FlexAlign)crossAlign);
+            flex->SetCrossAxisAlign(static_cast<FlexAlign>(crossAlign));
         }
     }
     return flex;
@@ -179,6 +221,9 @@ void JSFlexImpl::JsFlexWidth(const JSCallbackInfo& info)
 void JSFlexImpl::JsFlexWidth(const JSRef<JSVal>& jsValue)
 {
     JSViewAbstract::JsWidth(jsValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto widthVal = box->GetWidth();
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -210,6 +255,9 @@ void JSFlexImpl::JsFlexHeight(const JSCallbackInfo& info)
 void JSFlexImpl::JsFlexHeight(const JSRef<JSVal>& jsValue)
 {
     JSViewAbstract::JsHeight(jsValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     auto heightVal = box->GetHeight();
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();

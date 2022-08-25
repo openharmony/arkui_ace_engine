@@ -32,6 +32,8 @@ build_component_ng("pattern_ng") {
     "linear_layout/linear_layout_algorithm.cpp",
     "linear_layout/linear_layout_utils.cpp",
     "linear_layout/row_view.cpp",
+    "flex/flex_layout_algorithm.cpp",
+    "flex/flex_view.cpp",
     "list/list_item_view.cpp",
     "list/list_layout_algorithm.cpp",
     "list/list_paint_method.cpp",

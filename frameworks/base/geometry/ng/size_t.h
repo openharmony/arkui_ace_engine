@@ -215,6 +215,11 @@ public:
         }
     }
 
+    bool IsValid() const
+    {
+        return width_ > 0.0 && height_ > 0.0;
+    }
+
     SizeT operator*(double value) const
     {
         return SizeT(width_ * value, height_ * value);
