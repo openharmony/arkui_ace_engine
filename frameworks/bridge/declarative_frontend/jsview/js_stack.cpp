@@ -159,31 +159,6 @@ void JSStack::SetSize(const JSCallbackInfo& info)
     SetHeight(sizeObj->GetProperty("height"));
 }
 
-void JSStack::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSStack>::Declare("Stack");
-
-    MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSStack>::StaticMethod("create", &JSStack::Create, opt);
-    JSClass<JSStack>::StaticMethod("stackFit", &JSStack::SetStackFit, opt);
-    JSClass<JSStack>::StaticMethod("overflow", &JSStack::SetOverflow, opt);
-    JSClass<JSStack>::StaticMethod("alignContent", &JSStack::SetAlignment, opt);
-    JSClass<JSStack>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSStack>::StaticMethod("width", SetWidth);
-    JSClass<JSStack>::StaticMethod("height", SetHeight);
-    JSClass<JSStack>::StaticMethod("size", SetSize);
-    JSClass<JSStack>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSStack>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSStack>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSStack>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
-    JSClass<JSStack>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
-    JSClass<JSStack>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSStack>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-    JSClass<JSStack>::Inherit<JSContainerBase>();
-    JSClass<JSStack>::Inherit<JSViewAbstract>();
-    JSClass<JSStack>::Bind<>(globalObj);
-}
-
 void JSStack::Create(const JSCallbackInfo& info)
 {
     Alignment alignment = Alignment::CENTER;
