@@ -13,7 +13,7 @@ console
  = head:"console" dot:(_ "." _) func:func _ { return head + '.' + func }
 
 skipConsole
- = console:console "(" c:(!")" c:logChar { return c; })* ")"_";"? { return `/* ${console}(${c.join("")}); */`}
+ = console:console "(" c:(!")" c:logChar { return c; })* ")" ";"? { return ``}
 
 logChar
  = "(" c:logChar* ")" { return `(${c.join("")})`; }
