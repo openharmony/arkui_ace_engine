@@ -31,7 +31,6 @@ constexpr int32_t AXIS_PINCH_FINGERS = 2;
 void PinchRecognizer::OnAccepted()
 {
     SendCallbackMsg(onActionStart_);
-    SendCallbackMsg(onActionUpdate_);
 
     if (pendingEnd_) {
         SendCallbackMsg(onActionEnd_);
@@ -143,8 +142,20 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         }
     } else if (state_ == DetectState::DETECTED && refereeState_ == RefereeState::SUCCEED) {
         scale_ = currentDev_ / initialDev_;
-        SendCallbackMsg(onActionUpdate_);
+        if (isFlushTouchEventsEnd_) {
+            SendCallbackMsg(onActionUpdate_);
+        }
     }
+}
+
+void PinchRecognizer::OnFlushTouchEventsBegin()
+{
+    isFlushTouchEventsEnd_ = false;
+}
+
+void PinchRecognizer::OnFlushTouchEventsEnd()
+{
+    isFlushTouchEventsEnd_ = true;
 }
 
 void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)

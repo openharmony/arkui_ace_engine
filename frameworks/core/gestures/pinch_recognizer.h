@@ -51,6 +51,8 @@ private:
     void Reset();
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     Offset ComputePinchCenter();
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
 
     double distance_ = 0.0;
     double initialDev_ = 0.0;
@@ -61,6 +63,7 @@ private:
     std::map<int32_t, TouchEvent> touchPoints_;
     bool pendingEnd_ = false;
     bool pendingCancel_ = false;
+    bool isFlushTouchEventsEnd_ = false;
 };
 
 } // namespace OHOS::Ace
