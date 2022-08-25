@@ -56,7 +56,6 @@ const char UNICODE_SETTING_TAG[] = "unicodeSetting";
 const char LOCALE_DIR_LTR[] = "ltr";
 const char LOCALE_DIR_RTL[] = "rtl";
 const char LOCALE_KEY[] = "locale";
-const char COMPONENT_PREVIEW[] = "_preview_";
 } // namespace
 
 std::once_flag AceContainer::onceFlag_;
