@@ -67,8 +67,11 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
 {
     std::unordered_map<std::string, std::string> payload = param;
     payload[NAME] = name;
-    if (reportDataFunc_ == nullptr) {
+    if (!reportDataFunc_) {
         reportDataFunc_ = LoadReportDataFunc();
+    }
+    if (!reportDataFunc_) {
+        return;
     }
     static std::unordered_map<std::string, std::function<void(std::unordered_map<std::string, std::string>&)>>
         functionMap = {

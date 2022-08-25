@@ -227,8 +227,6 @@ void JSViewPartialUpdate::JsFinishUpdateFunc(int32_t elmtId)
     NG::ViewStackProcessor::GetInstance()->FlushRerenderTask();
 }
 
-void JSViewPartialUpdate::ComponentToElementLocalizedUpdate(const UpdateFuncResult& updateFuncResult)
-{
-}
+void JSViewPartialUpdate::ComponentToElementLocalizedUpdate(const UpdateFuncResult& updateFuncResult) {}
 
 } // namespace OHOS::Ace::Framework

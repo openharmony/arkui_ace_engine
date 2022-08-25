@@ -1279,7 +1279,7 @@ void JSViewAbstract::JSBind()
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
 
-    // staticmethods
+    // static methods
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSViewAbstract>::StaticMethod("pop", &JSViewAbstract::Pop, opt);
 
