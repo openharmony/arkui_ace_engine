@@ -56,7 +56,9 @@ void RenderMarquee::Start()
         // Start first loop
         currentLoop_ = 1;
         UpdateAnimation();
-        controller_->Play();
+        if (needAnimation_) {
+            controller_->Play();
+        }
     } else {
         LOGD("Animation already started.");
     }
@@ -112,6 +114,12 @@ void RenderMarquee::UpdateAnimation()
     }
     // "scrollAmount_" won't be zero, since it's initialized at Update().
     int32_t duration = static_cast<int32_t>(std::abs(to - from) * DEFAULT_MARQUEE_SCROLL_DELAY / scrollAmount_);
+    if (duration <= 0) {
+        needAnimation_ = false;
+        LOGI("Animation duration is negative, don't need animation.");
+        return;
+    }
+    needAnimation_ = true;
     if (translate_) {
         controller_->RemoveInterpolator(translate_);
     }
@@ -178,7 +186,9 @@ void RenderMarquee::OnAnimationStop()
     }
     if (continueAnimation) {
         UpdateAnimation();
-        controller_->Play();
+        if (needAnimation_) {
+            controller_->Play();
+        }
     }
 }
 
