@@ -51,6 +51,7 @@ group("unittest") {
     "shadow:unittest",
     "side_bar:unittest",
     "slider:unittest",
+    "sliding_panel:unittest",
     "stack:unittest",
     "stage:unittest",
     "svg:unittest",

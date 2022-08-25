@@ -52,6 +52,10 @@ const double SHADOW_RADIUS = 10.0;
 const Offset SHADOW_OFFSET = Offset(1.0, 1.0);
 const Border BACK_BORDER = Border(BorderEdge(Color(0xff000000), Dimension(1.0, DimensionUnit::PX), BorderStyle::NONE));
 
+const Dimension BORDER_RADIUS_1 = Dimension(1.0);
+const Dimension BORDER_RADIUS_2 = Dimension(2.0);
+const Dimension BORDER_RADIUS_3 = Dimension(3.0);
+const Dimension BORDER_RADIUS_4 = Dimension(4.0);
 } // namespace
 
 class RenderBoxTest : public testing::Test {
@@ -2497,6 +2501,42 @@ HWTEST_F(RenderBoxTest, RenderBoxScrollpageChangeTest002, TestSize.Level1)
     renderBox->Update(boxComponent);
     renderRoot->PerformLayout();
     ASSERT_TRUE(NearEqual(renderBox->GetLayoutSize().Height(), BOX_HEIGHT));
+}
+
+
+/**
+ * @tc.name: RenderBox0010
+ * @tc.desc: Test setting borders separately to sliding panel.
+ * @tc.type: FUNC
+ * @tc.require: issueI5IZZ7
+ */
+HWTEST_F(RenderBoxTest, RenderBoxTest0010, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderBoxTest RenderBoxTest0010 start";
+    /**
+     * @tc.steps: step1. Build a box component and set borders to it.
+     */
+    RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<BoxComponent>();
+    auto decoration = AceType::MakeRefPtr<Decoration>();
+    boxComponent->SetBackDecoration(decoration);
+    auto border = decoration->GetBorder();
+    border.SetTopLeftRadius(Radius(BORDER_RADIUS_1));
+    border.SetTopRightRadius(Radius(BORDER_RADIUS_2));
+    border.SetBottomLeftRadius(Radius(BORDER_RADIUS_3));
+    border.SetBottomRightRadius(Radius(BORDER_RADIUS_4));
+    decoration->SetBorder(border);
+    /**
+     * @tc.steps: step2. Swipe to changes component index.
+     * @tc.expected: step2. Event listener the index changes.
+     */
+    RefPtr<MockRenderBox> renderBox = AceType::MakeRefPtr<MockRenderBox>();
+    renderBox->Update(boxComponent);
+    auto backDecorationBorder = renderBox->GetBackDecoration()->GetBorder();
+    EXPECT_TRUE(backDecorationBorder.TopLeftRadius() == Radius(BORDER_RADIUS_1));
+    EXPECT_TRUE(backDecorationBorder.TopRightRadius() == Radius(BORDER_RADIUS_2));
+    EXPECT_TRUE(backDecorationBorder.BottomLeftRadius() == Radius(BORDER_RADIUS_3));
+    EXPECT_TRUE(backDecorationBorder.BottomRightRadius() == Radius(BORDER_RADIUS_4));
+    GTEST_LOG_(INFO) << "RenderBoxTest RenderBoxTest0010 stop";
 }
 
 } // namespace OHOS::Ace
