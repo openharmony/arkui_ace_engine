@@ -209,10 +209,17 @@ void RenderXComponent::Paint(RenderContext& context, const Offset& offset)
 
         NativeXComponentOffset(position_.GetX(), position_.GetY());
 
+        // The first time enter the Paint(), drawSize is (0, 0)
+        // If the width or height equal to zero, it will not
+        if (NearEqual(drawSize_.Width(), 0) || NearEqual(drawSize_.Height(), 0)) {
+            RenderNode::Paint(context, offset);
+            return;
+        }
+
         if (xcomponentSizeInitEvent_ && (!drawSize_.IsHeightInfinite())) {
             xcomponentSizeInitEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
+            isXComponentInit = true;
         }
-        isXComponentInit = true;
     } else {
         if ((!NearEqual(prePosition_.GetX(), position_.GetX())) ||
             (!NearEqual(prePosition_.GetY(), position_.GetY()))) {
