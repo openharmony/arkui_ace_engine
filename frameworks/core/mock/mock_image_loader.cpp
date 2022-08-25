@@ -16,9 +16,9 @@
 #include "core/image/image_loader.h"
 
 namespace OHOS::Ace {
-
+class PipelineContext;
 sk_sp<SkData> FileImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineContext> context)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
     return nullptr;
 }
