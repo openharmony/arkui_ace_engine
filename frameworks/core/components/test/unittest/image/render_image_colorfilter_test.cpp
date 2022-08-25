@@ -173,7 +173,7 @@ HWTEST_F(RenderImageColorFilterTest, colorfilter003, TestSize.Level1)
  * @tc.name: colorfilter004
  * @tc.desc: Verify that renderimage cannot obtain abnormal matrix data
  * @tc.type: FUNC
- * @tc.require: issueI5NC61
+ * @tc.require: issueI5MX66
  */
 HWTEST_F(RenderImageColorFilterTest, colorfilter004, TestSize.Level1)
 {
@@ -195,7 +195,7 @@ HWTEST_F(RenderImageColorFilterTest, colorfilter004, TestSize.Level1)
  * @tc.name: colorfilter005
  * @tc.desc: Verify that renderimage cannot obtain abnormal matrix data
  * @tc.type: FUNC
- * @tc.require: issueI5NC61
+ * @tc.require: issueI5MX66
  */
 HWTEST_F(RenderImageColorFilterTest, colorfilter005, TestSize.Level1)
 {
