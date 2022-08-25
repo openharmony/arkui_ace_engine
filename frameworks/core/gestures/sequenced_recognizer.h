@@ -43,6 +43,8 @@ public:
     void OnRejected() override;
     bool HandleEvent(const TouchEvent& point) override;
     void OnPending(size_t touchId) override;
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};

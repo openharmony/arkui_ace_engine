@@ -170,6 +170,30 @@ void EventManager::TouchTest(
     renderNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_);
 }
 
+void EventManager::FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents)
+{
+    for (auto iter = touchEvents.begin(); iter != touchEvents.end(); ++iter) {
+        const auto result = touchTestResults_.find((*iter).id);
+        if (result != touchTestResults_.end()) {
+            for (auto entry = result->second.rbegin(); entry != result->second.rend(); ++entry) {
+                (*entry)->OnFlushTouchEventsBegin();
+            }
+        }
+    }
+}
+
+void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
+{
+    for (auto iter = touchEvents.begin(); iter != touchEvents.end(); ++iter) {
+        const auto result = touchTestResults_.find((*iter).id);
+        if (result != touchTestResults_.end()) {
+            for (auto entry = result->second.rbegin(); entry != result->second.rend(); ++entry) {
+                (*entry)->OnFlushTouchEventsEnd();
+            }
+        }
+    }
+}
+
 bool EventManager::DispatchTouchEvent(const TouchEvent& point)
 {
     ContainerScope scope(instanceId_);

@@ -101,6 +101,20 @@ bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
     return true;
 }
 
+void ParallelRecognizer::OnFlushTouchEventsBegin()
+{
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnFlushTouchEventsBegin();
+    }
+}
+
+void ParallelRecognizer::OnFlushTouchEventsEnd()
+{
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnFlushTouchEventsEnd();
+    }
+}
+
 bool ParallelRecognizer::IsRecognizeEnd(const RefPtr<GestureRecognizer>& recognizer)
 {
     DetectState currState = recognizer->GetDetectState();

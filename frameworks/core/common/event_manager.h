@@ -69,6 +69,8 @@ public:
 
     bool DispatchTouchEvent(const TouchEvent& point);
     bool DispatchTouchEvent(const AxisEvent& event);
+    void FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents);
+    void FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents);
 
     // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
     // platform will handle it.
