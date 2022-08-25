@@ -951,7 +951,8 @@ Size RenderList::SetItemsPosition(double mainSize)
             }
         }
 
-        auto offset = MakeValue<Offset>(curMainPos, 0.0);
+        auto offsetCross = CalculateLaneCrossOffset(crossSize, GetCrossSize(childLayoutSize));
+        auto offset = MakeValue<Offset>(curMainPos, offsetCross);
         if (chainAnimation_) {
             offset += MakeValue<Offset>(-GetChainDelta(index), 0.0);
         }
