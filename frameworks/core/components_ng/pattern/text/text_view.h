@@ -40,6 +40,7 @@ public:
     static void SetTextDecorationColor(const Color& value);
     static void SetBaselineOffset(const Dimension& value);
     static void SetTextCase(const TextCase& value);
+    static void SetLetterSpacing(const Dimension& value);
 };
 } // namespace OHOS::Ace::NG
 

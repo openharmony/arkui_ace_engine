@@ -361,6 +361,10 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::SetLetterSpacing(value);
+        return;
+    }
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");

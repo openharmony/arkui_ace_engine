@@ -98,4 +98,9 @@ void TextView::SetTextCase(const Ace::TextCase& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value);
 }
 
+void TextView::SetLetterSpacing(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, value);
+}
+
 } // namespace OHOS::Ace::NG
