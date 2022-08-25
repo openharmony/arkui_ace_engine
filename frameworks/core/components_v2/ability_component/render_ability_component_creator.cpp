@@ -23,10 +23,10 @@ RefPtr<RenderNode> RenderAbilityComponent::Create()
 #ifdef ENABLE_ROSEN_BACKEND
         return AceType::MakeRefPtr<RosenRenderAbilityComponent>();
 #else
-        return nullptr;
+        return AceType::MakeRefPtr<RenderAbilityComponent>();
 #endif
     } else {
-        return nullptr;
+        return AceType::MakeRefPtr<RenderAbilityComponent>();
     }
 }
 
