@@ -58,6 +58,7 @@ void GridContainerInfo::BuildColumnWidth(double width)
     }
     containerWidth_ = width;
     double dipScale = GridSystemManager::GetInstance().GetDipScale();
+    double viewScale = GridSystemManager::GetInstance().GetViewScale();
     // if not define the prop, use system grid define
     int32_t columns = GetValue(columns_, systemGridInfo.columns, UNDEFINED_INT);
     if (columns == 0) {
@@ -68,7 +69,7 @@ void GridContainerInfo::BuildColumnWidth(double width)
     double marginRight = GetValue(marginRight_, systemGridInfo.margin, UNDEFINED_DIMENSION).ConvertToPx(dipScale);
     double padding = paddingLeft_.ConvertToPx(dipScale) + paddingRight_.ConvertToPx(dipScale);
 
-    columnWidth_ = (width - marginLeft - marginRight - padding - (columns - 1) * gutterWidth) / columns;
+    columnWidth_ = ((width - marginLeft - marginRight - padding - (columns - 1) * gutterWidth) / columns) / viewScale;
     LOGI("width = %{public}f, columns: %{public}d columnWidth: %{public}f gutterWidth: %{public}f marginLeft: "
          "%{public}f marginRight: %{public}f padding: %{public}f",
         width, columns, columnWidth_, gutterWidth, marginLeft, marginRight, padding);
