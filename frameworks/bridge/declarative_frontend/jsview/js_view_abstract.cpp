@@ -2700,11 +2700,17 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
         LOGW("resId is not number");
         return false;
     }
-
     auto themeConstants = GetThemeConstants(jsObj);
     if (!themeConstants) {
         LOGE("themeConstants is nullptr");
         return false;
+    }
+    JSRef<JSVal> type = jsObj->GetProperty("type");
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::STRING)) {
+        auto value = themeConstants->GetString(resId->ToNumber<uint32_t>());
+        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        return true;
     }
     result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
     return true;
