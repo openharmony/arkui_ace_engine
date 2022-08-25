@@ -109,6 +109,8 @@ template("build_component_ng") {
       include_dirs = [
         "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
         "//commonlibrary/c_utils/base/include",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
       ]
@@ -118,8 +120,6 @@ template("build_component_ng") {
       } else {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
       }
-
-      configs += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/ui:rosen_text_ui_config" ]
 
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {

@@ -126,7 +126,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
     }
 }
 
-void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string name)
+void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
 {
     LOGD("Rosenwindow RecordFrameTime");
     rsUIDirector_->SetTimeStamp(timeStamp, name);
