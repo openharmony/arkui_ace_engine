@@ -1392,6 +1392,10 @@ bool PipelineContext::PopPageStackOverlay()
         return true;
     }
 
+    if (pageStack->PopDialogIfExist()) {
+        return true;
+    }
+
     pageStack->PopComponent();
     return true;
 }
