@@ -28,11 +28,6 @@ config("standard_camera_config") {
     "//drivers/peripheral/codec/interfaces/include",
     "//drivers/peripheral/display/interfaces/include",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//foundation/multimedia/camera_standard/interfaces/inner_api/native/camera/include",
-    "//foundation/multimedia/camera_standard/services/camera_service/binder/base/include",
-    "//foundation/multimedia/camera_standard/services/camera_service/binder/client/include",
-    "//foundation/multimedia/camera_standard/services/camera_service/binder/server/include",
-    "//foundation/multimedia/camera_standard/services/camera_service/include",
     "//commonlibrary/c_utils/base/include",
   ]
 }
@@ -48,14 +43,12 @@ build_component("camera") {
 
     sources += [ "standard_system/camera.cpp" ]
 
-    deps = [
-      "//foundation/graphic/graphic_2d:libsurface",
-      "//foundation/multimedia/camera_standard/frameworks/native/camera:camera_framework",
-    ]
+    deps = [ "//foundation/graphic/graphic_2d:libsurface" ]
 
     external_deps = [
       "c_utils:utils",
       "ipc:ipc_core",
+      "multimedia_camera_framework:camera_framework",
       "multimedia_player_framework:media_client",
     ]
   } else {
