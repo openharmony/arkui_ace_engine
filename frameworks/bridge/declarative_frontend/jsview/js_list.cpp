@@ -208,54 +208,6 @@ void JSList::SetSticky(int32_t sticky)
     JSViewSetProperty(&V2::ListComponent::SetSticky, static_cast<V2::StickyStyle>(sticky));
 }
 
-void JSList::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSList>::Declare("List");
-    JSClass<JSList>::StaticMethod("create", &JSList::Create);
-
-    JSClass<JSList>::StaticMethod("width", &JSList::JsWidth);
-    JSClass<JSList>::StaticMethod("height", &JSList::JsHeight);
-    JSClass<JSList>::StaticMethod("listDirection", &JSList::SetDirection);
-    JSClass<JSList>::StaticMethod("scrollBar", &JSList::SetScrollBar);
-    JSClass<JSList>::StaticMethod("edgeEffect", &JSList::SetEdgeEffect);
-    JSClass<JSList>::StaticMethod("divider", &JSList::SetDivider);
-    JSClass<JSList>::StaticMethod("editMode", &JSList::SetEditMode);
-    JSClass<JSList>::StaticMethod("cachedCount", &JSList::SetCachedCount);
-    JSClass<JSList>::StaticMethod("chainAnimation", &JSList::SetChainAnimation);
-    JSClass<JSList>::StaticMethod("multiSelectable", &JSList::SetMultiSelectable);
-    JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
-    JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
-    JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
-
-    JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
-    JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
-    JSClass<JSList>::StaticMethod("onReachEnd", &JSList::ReachEndCallback);
-    JSClass<JSList>::StaticMethod("onScrollStop", &JSList::ScrollStopCallback);
-    JSClass<JSList>::StaticMethod("onItemDelete", &JSList::ItemDeleteCallback);
-    JSClass<JSList>::StaticMethod("onItemMove", &JSList::ItemMoveCallback);
-    JSClass<JSList>::StaticMethod("onScrollIndex", &JSList::ScrollIndexCallback);
-    JSClass<JSList>::StaticMethod("onScrollBegin", &JSList::ScrollBeginCallback);
-
-    JSClass<JSList>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSList>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSList>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
-    JSClass<JSList>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSList>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSList>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
-    JSClass<JSList>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-
-    JSClass<JSList>::StaticMethod("onItemDragStart", &JSList::ItemDragStartCallback);
-    JSClass<JSList>::StaticMethod("onItemDragEnter", &JSList::ItemDragEnterCallback);
-    JSClass<JSList>::StaticMethod("onItemDragMove", &JSList::ItemDragMoveCallback);
-    JSClass<JSList>::StaticMethod("onItemDragLeave", &JSList::ItemDragLeaveCallback);
-    JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
-    JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-
-    JSClass<JSList>::Inherit<JSContainerBase>();
-    JSClass<JSList>::Inherit<JSViewAbstract>();
-    JSClass<JSList>::Bind(globalObj);
-}
-
 void JSList::SetDivider(const JSCallbackInfo& args)
 {
     do {
