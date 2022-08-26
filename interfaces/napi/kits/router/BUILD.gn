@@ -44,6 +44,7 @@ ohos_shared_library("router") {
     deps += [ "$ace_root/adapter/preview/build:libace_engine_windows" ]
     configs = [ ":router_config" ]
     defines = [
+      "NOGDI",
       "_USE_MATH_DEFINES",
       "WINDOWS_PLATFORM",
     ]
