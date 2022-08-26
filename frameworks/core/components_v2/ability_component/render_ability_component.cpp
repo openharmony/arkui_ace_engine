@@ -40,29 +40,34 @@ void RenderAbilityComponent::Update(const RefPtr<Component>& component)
         LOGE("[abilityComponent] Update Get component failed");
         return;
     }
-    component_ = abilityComponent;
-
-    Size size = Size(NormalizeToPx(abilityComponent->GetWidth()), NormalizeToPx(abilityComponent->GetHeight()));
-    if (currentRect_.GetSize() == size) {
-        return;
-    }
-    currentRect_.SetSize(size);
-    needLayout_ = true;
 
     auto context = context_.Upgrade();
-    if (!context) {
+    if (context && callbackId_ <= 0) {
+        callbackId_ =
+            context->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t posX, int32_t posY) {
+                auto client = weak.Upgrade();
+                if (client) {
+                    client->ConnectOrUpdateExtension();
+                }
+            });
+    }
+
+    component_ = abilityComponent;
+    auto width = abilityComponent->GetWidth();
+    auto height = abilityComponent->GetHeight();
+    if (width == width_ && height == height_) {
+        LOGI("size not change.");
         return;
     }
-    callbackId_ = context->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t posX, int32_t posY) {
-        auto client = weak.Upgrade();
-        if (client) {
-            client->ConnectOrUpdateExtension();
-        }
-    });
+    width_ = width;
+    height_ = height;
+    needLayout_ = true;
 }
 
 void RenderAbilityComponent::PerformLayout()
 {
+    Size size = Size(NormalizePercentToPx(width_, false), NormalizePercentToPx(height_, true));
+    currentRect_.SetSize(size);
     if (currentRect_.GetSize().IsEmpty()) {
         currentRect_.SetSize(GetLayoutParam().GetMaxSize());
     }
