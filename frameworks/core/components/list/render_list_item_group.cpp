@@ -32,6 +32,8 @@ constexpr float POSITION_ANIMATION_COLLAPSE_TIME = 0.333f;
 constexpr float OPACITY_ANIMATION_EXPAND_TIME = 0.4f;
 constexpr float OPACITY_ANIMATION_COLLAPSE_TIME = 0.5f;
 constexpr float ROTATE_ANGLE = 180.0f;
+constexpr float ROTATE_ROW_ANGLE = 90.0f;
+constexpr float ROTATE_ROW_REVERSE_ANGLE = 270.0f;
 constexpr float ROTATE_ANIMATION_EXPAND_TIME = 0.8f;
 constexpr float ROTATE_ANIMATION_COLLAPSE_TIME = 0.667f;
 const char LIST_ITEM_GROUP_EVENT_GROUPCLICK[] = "groupclick";
@@ -75,12 +77,27 @@ void RenderListItemGroup::FireExpandEvent()
     }
 }
 
+double RenderListItemGroup::GetRotateAngle(bool expand)
+{
+    double rotateAngle = 0.0;
+    if (direction_ == FlexDirection::COLUMN) {
+        rotateAngle = expand_ ? ROTATE_ANGLE : 0.0;
+    } else if (direction_ == FlexDirection::COLUMN_REVERSE) {
+        rotateAngle = expand_ ? 0.0 : ROTATE_ANGLE;
+    } else if (direction_ == FlexDirection::ROW) {
+        rotateAngle = expand_ ? ROTATE_ROW_REVERSE_ANGLE : ROTATE_ROW_ANGLE;
+    } else {
+        rotateAngle = expand_ ? ROTATE_ROW_ANGLE : ROTATE_ROW_REVERSE_ANGLE;
+    }
+    return rotateAngle;
+}
+
 LayoutParam RenderListItemGroup::MakeInnerLayoutParam() const
 {
     LayoutParam innerLayout;
     Size maxSize;
 
-    if (direction_ == FlexDirection::ROW) {
+    if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
         maxSize = Size(Size::INFINITE_SIZE, GetLayoutParam().GetMaxSize().Height());
     } else {
         maxSize = Size(GetLayoutParam().GetMaxSize().Width(), Size::INFINITE_SIZE);
@@ -104,7 +121,7 @@ void RenderListItemGroup::AddArrowImage(double mainSize)
         Size primarySize = primary_->GetLayoutSize();
         double offsetX = 0.0;
         if (rightToLeft_) {
-            if (direction_ == FlexDirection::COLUMN) {
+            if (direction_ == FlexDirection::COLUMN || direction_ == FlexDirection::COLUMN_REVERSE) {
                 offsetX = NormalizeToPx(MARGIN_RIGHT_WIDTH);
             } else {
                 offsetX = std::max(
@@ -126,9 +143,14 @@ void RenderListItemGroup::AddArrowImage(double mainSize)
         } else {
             offsetY = std::max((primarySize.Height() - width) * FACTOR_HALF, 0.0);
         }
+        LOGD("RenderListItemGroup::AddArrowImage:offsetX: %{public}lf, offsetY: %{public}lf, mainSize: "
+             "%{public}lf,primarySizeW: %{public}lf,primarySizeH: %{public}lf",
+            offsetX, offsetY, mainSize, primarySize.Width(), primarySize.Height());
         arrowImage_->SetPosition(Offset(offsetX, offsetY));
-        double rotateAngle = expand_ ? ROTATE_ANGLE : 0.0;
+        double rotateAngle = GetRotateAngle(expand_);
         arrowImage_->SetRotate(rotateAngle);
+        // arrow need rendered after setRotate
+        arrowImage_->MarkNeedRender();
     }
 }
 
@@ -217,7 +239,8 @@ void RenderListItemGroup::LayoutExpandableList(double mainSize)
             break;
         }
         child->SetVisible(true);
-        if (rightToLeft_ && direction_ == FlexDirection::ROW) {
+        if ((rightToLeft_ && direction_ == FlexDirection::ROW) || direction_ == FlexDirection::ROW_REVERSE ||
+            direction_ == FlexDirection::COLUMN_REVERSE) {
             child->SetPosition(MakeValue<Offset>(curSize, 0.0));
         } else {
             child->SetPosition(MakeValue<Offset>(mainSize - curSize - childSize, 0.0));
@@ -288,7 +311,8 @@ void RenderListItemGroup::PerformLayout()
     }
     AddArrowImage(mainSize);
 
-    if (rightToLeft_ && direction_ == FlexDirection::ROW) {
+    if ((rightToLeft_ && direction_ == FlexDirection::ROW) || direction_ == FlexDirection::ROW_REVERSE ||
+        direction_ == FlexDirection::COLUMN_REVERSE) {
         primary_->SetPosition(Offset(mainSize - GetMainSize(primary_->GetLayoutSize()), 0.0));
     } else {
         primary_->SetPosition(Offset::Zero());
@@ -518,7 +542,7 @@ void RenderListItemGroup::InitialImage()
     InternalResource::ResourceId resourceId = SystemProperties::GetDeviceType() == DeviceType::WATCH
                                                   ? InternalResource::ResourceId::WATCH_DOWN_ARROW_SVG
                                                   : InternalResource::ResourceId::DOWN_ARROW_SVG;
-    double rotateAngle = expand_ ? ROTATE_ANGLE : 0.0;
+    double rotateAngle = GetRotateAngle(expand_);
     auto imageComponent = AceType::MakeRefPtr<ImageComponent>(resourceId);
     imageComponent->SetWidth(imageSize_);
     imageComponent->SetHeight(imageSize_);
@@ -532,7 +556,7 @@ void RenderListItemGroup::InitialImage()
 void RenderListItemGroup::ChangeDirection(FlexDirection direction)
 {
     if (direction_ != direction) {
-        LOGD("direction has change, reset item group layoutSize and primary position");
+        LOGD("direction has change, reset item group layoutSize and primary position direction:%{public}d", direction);
         direction_ = direction;
         expand_ = false;
         UpdateExpandStatusInList();
@@ -554,6 +578,7 @@ void RenderListItemGroup::UpdateExpandStatusInList()
     while (parentNode) {
         RefPtr<RenderList> listNode = AceType::DynamicCast<RenderList>(parentNode);
         if (listNode) {
+            LOGD("UpdateExpandStatusInList, expand_:%{public}d", expand_);
             listNode->SetGroupState(GetIndex(), expand_);
             break;
         }

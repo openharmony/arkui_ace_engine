@@ -161,6 +161,8 @@ ACE_EXPORT extern const char DOM_BOX_SHADOW_SPREAD[];
 ACE_EXPORT extern const char DOM_BOX_SHADOW_COLOR[];
 ACE_EXPORT extern const char DOM_FLEX_DIRECTION[];
 ACE_EXPORT extern const char DOM_FLEX_ROW[];
+ACE_EXPORT extern const char DOM_FLEX_COLUMN_REVERSE[];
+ACE_EXPORT extern const char DOM_FLEX_ROW_REVERSE[];
 ACE_EXPORT extern const char DOM_FLEX_COLUMN[];
 ACE_EXPORT extern const char DOM_FLEX[];
 ACE_EXPORT extern const char DOM_FLEX_GROW[];

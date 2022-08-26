@@ -75,7 +75,8 @@ public:
 
     double GetMainSize(const Size& size) const
     {
-        return direction_ == FlexDirection::ROW ? size.Width() : size.Height();
+        return (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? size.Width()
+                                                                                              : size.Height();
     }
 
     bool IsExpanded();
@@ -91,12 +92,15 @@ private:
     template<typename T>
     T MakeValue(double mainValue, double crossValue) const
     {
-        return direction_ == FlexDirection::ROW ? T(mainValue, crossValue) : T(crossValue, mainValue);
+        return (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)
+                   ? T(mainValue, crossValue)
+                   : T(crossValue, mainValue);
     }
 
     double GetCrossSize(const Size& size) const
     {
-        return direction_ == FlexDirection::ROW ? size.Height() : size.Width();
+        return (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? size.Height()
+                                                                                              : size.Width();
     }
 
     void PerformLayout() override;
@@ -120,6 +124,7 @@ private:
     void ResetChildVisibleState();
     void UpdateGroupComponentStatus(bool expand);
     void FireExpandEvent();
+    double GetRotateAngle(bool expand);
     void InitAccessibilityEventListener();
 
     RebuildFunc rebuild_;

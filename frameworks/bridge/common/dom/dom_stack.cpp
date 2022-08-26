@@ -69,11 +69,15 @@ bool DOMStack::GetAxisOffset(const std::pair<std::string, std::string>& style)
             } },
         { DOM_FLEX_DIRECTION,
             [](const std::string& val, DOMStack& stack) {
-              if (val == DOM_FLEX_COLUMN) {
-                  stack.direction_ = FlexDirection::COLUMN;
-              } else {
-                  stack.direction_ = FlexDirection::ROW;
-              }
+                if (val == DOM_FLEX_COLUMN) {
+                    stack.direction_ = FlexDirection::COLUMN;
+                } else if (val == DOM_FLEX_COLUMN_REVERSE) {
+                    stack.direction_ = FlexDirection::COLUMN_REVERSE;
+                } else if (val == DOM_FLEX_ROW_REVERSE) {
+                    stack.direction_ = FlexDirection::ROW_REVERSE;
+                } else {
+                    stack.direction_ = FlexDirection::ROW;
+                }
             } },
         { DOM_JUSTIFY_CONTENT,
             [](const std::string& val, DOMStack& stack) {

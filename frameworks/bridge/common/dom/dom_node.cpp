@@ -1420,10 +1420,12 @@ void DOMNode::UpdateFlexItemComponent()
         (parentNode->GetTag() == DOM_NODE_TAG_DIV || parentNode->GetTag() == DOM_NODE_TAG_GRID_COLUMN)) {
         auto parent = AceType::DynamicCast<DOMDiv>(parentNode);
         // Stretch flag means that if the child's main size is determined, it can not be stretched.
-        if ((parent->GetFlexDirection() == FlexDirection::ROW && (GreatOrEqual(GetHeight().Value(), 0.0) ||
-            GetHeight().Unit() == DimensionUnit::CALC)) ||
-            (parent->GetFlexDirection() == FlexDirection::COLUMN && (GreatOrEqual(GetWidth().Value(), 0.0) ||
-            GetWidth().Unit() == DimensionUnit::CALC))) {
+        if (((parent->GetFlexDirection() == FlexDirection::ROW ||
+                 parent->GetFlexDirection() == FlexDirection::ROW_REVERSE) &&
+                 (GreatOrEqual(GetHeight().Value(), 0.0) || GetHeight().Unit() == DimensionUnit::CALC)) ||
+            ((parent->GetFlexDirection() == FlexDirection::COLUMN ||
+                 parent->GetFlexDirection() == FlexDirection::COLUMN_REVERSE) &&
+                 (GreatOrEqual(GetWidth().Value(), 0.0) || GetWidth().Unit() == DimensionUnit::CALC))) {
             flexItemComponent_->SetStretchFlag(false);
         } else {
             flexItemComponent_->SetStretchFlag(true);

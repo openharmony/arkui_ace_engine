@@ -253,9 +253,22 @@ void RenderMultiChildScroll::Update(const RefPtr<Component>& component)
         }
     }
 
-    auto axis = listComponent->GetDirection() == FlexDirection::COLUMN ? Axis::VERTICAL : Axis::HORIZONTAL;
+    bool directionFlag = false;
+    LOGI("RenderMultiChildScroll Update:GetDirection(): %{public}d, listComponent->GetDirection() is: %{public}d",
+        GetDirection(), listComponent->GetDirection());
+    if (GetDirection() != listComponent->GetDirection()) {
+        SetDirection(listComponent->GetDirection());
+        directionFlag = true;
+    }
+
+    auto axis = (GetDirection() == FlexDirection::COLUMN || GetDirection() == FlexDirection::COLUMN_REVERSE)
+                    ? Axis::VERTICAL
+                    : Axis::HORIZONTAL;
     if (axis_ != axis) {
         axis_ = axis;
+        directionFlag = true;
+    }
+    if (directionFlag) {
         ResetScrollable();
     }
 
@@ -361,7 +374,10 @@ void RenderMultiChildScroll::OnPredictLayout(int64_t deadline)
         double mainExtent = GetMainSize(viewPort_);
         double layoutHead = 0.0;
         double layoutTail = mainExtent;
-        if (IsRowReverse()) {
+        LOGD("RenderMultiChildScroll OnPredictLayout:cacheExtent_: %{public}lf, mainOffset is: %{public}lf, layoutTail "
+             "is: %{public}lf",
+            cacheExtent_, mainOffset, layoutTail);
+        if (IsRowReverse() || IsColReverse()) {
             layoutHead = layoutHead - cacheExtent_ + mainOffset;
             layoutTail = layoutTail + cacheExtent_ + mainOffset;
         } else {
@@ -410,7 +426,11 @@ bool RenderMultiChildScroll::LayoutChild(
 
     double layoutHead = 0.0;
     double layoutTail = mainExtent;
-    if (IsRowReverse()) {
+
+    LOGD("RenderMultiChildScroll ayoutChild:cacheExtent_: %{public}lf, mainOffset is: %{public}lf, layoutTail is: "
+         "%{public}lf",
+        cacheExtent_, mainOffset, layoutTail);
+    if (IsRowReverse() || IsColReverse()) {
         layoutHead = layoutHead - cacheExtent_ + mainOffset;
         layoutTail = layoutTail + cacheExtent_ + mainOffset;
     } else {
@@ -959,7 +979,7 @@ bool RenderMultiChildScroll::IsOutOfBottomBoundary()
              "mainScrollExtent_: %{public}.3lf, ReachMaxCount: %{public}d",
             GetMainOffset(currentOffset_), tailOffset, GetMainSize(viewPort_), mainScrollExtent_, ReachMaxCount());
     }
-    if (IsRowReverse()) {
+    if (IsRowReverse() || IsColReverse()) {
         return headOffset <= (GetMainSize(viewPort_) - tailOffset) && ReachMaxCount();
     } else {
         return headOffset >= (tailOffset - GetMainSize(viewPort_)) && ReachMaxCount();
@@ -976,7 +996,7 @@ bool RenderMultiChildScroll::IsOutOfTopBoundary()
         LOGD("IsOutOfTopBoundary. offset_: %{public}.3lf, headOffset: %{public}.3lf", GetMainOffset(currentOffset_),
             headOffset);
     }
-    if (IsRowReverse()) {
+    if (IsRowReverse() || IsColReverse()) {
         return headOffset >= 0.0;
     } else {
         return headOffset <= 0.0;

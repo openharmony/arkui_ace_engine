@@ -139,14 +139,19 @@ void GridLayoutManager::SetChildPosition(
         if (rightToLeft_) {
             crossAxis = crossSize_ - crossAxis - gridLen_ * columnSpan;
         }
+        if (IsColReverse()) {
+            mainSize = mainSize_ - renderList_.GetMainSize(child->GetLayoutSize()) - mainSize;
+        }
         child->SetPosition(Offset(crossAxis, mainSize) + position_);
     } else {
-        if (rightToLeft_) {
+        if (rightToLeft_ || IsRowReverse()) {
             mainSize = mainSize_ - renderList_.GetMainSize(child->GetLayoutSize()) - mainSize;
         }
         child->SetPosition(Offset(mainSize, crossAxis) + position_);
     }
-    LOGD("Child:%{public}lf %{public}lf %{public}s", crossAxis, mainSize, position_.ToString().c_str());
+    LOGD("GridLayoutManager Child:%{public}d %{public}d %{public}lf %{public}lf %{public}lf %{public}lf",
+        child->GetDisplayIndex(), columnSpan, crossAxis, mainSize, mainSize_,
+        renderList_.GetMainSize(child->GetLayoutSize()));
 }
 
 void GridLayoutManager::CalculateCachedRange(

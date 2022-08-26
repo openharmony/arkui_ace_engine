@@ -123,7 +123,13 @@ public:
 
     bool IsRowReverse() const
     {
-        return rightToLeft_ && direction_ == FlexDirection::ROW;
+        return (rightToLeft_ && direction_ == FlexDirection::ROW)
+         || (!rightToLeft_ && direction_ == FlexDirection::ROW_REVERSE);
+    }
+
+    bool IsColReverse() const
+    {
+        return direction_ == FlexDirection::COLUMN_REVERSE;
     }
 
     int32_t GetItemGrid(int32_t index) const
