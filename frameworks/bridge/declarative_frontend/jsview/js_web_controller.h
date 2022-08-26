@@ -90,7 +90,6 @@ protected:
 private:
     using ObjectClassMap  = std::map<std::string, JSRef<JSObject>>;
     ObjectClassMap objectorMap_;
-    bool jsRegisterCallBackInit_ = false;
     int32_t instanceId_ = -1;
     std::unordered_map<std::string, std::vector<std::string>> methods_;
     RefPtr<WebController> webController_;
