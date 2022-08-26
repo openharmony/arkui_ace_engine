@@ -46,7 +46,7 @@ class SynchedPropertySimpleTwoWayPU<T> extends ObservedPropertySimpleAbstractPU<
   }
 
   public getUnmonitored(): T {
-    // console.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored`)
+    console.debug(`SynchedPropertySimpleTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored`);
     return this.source_.getUnmonitored();
   }
 

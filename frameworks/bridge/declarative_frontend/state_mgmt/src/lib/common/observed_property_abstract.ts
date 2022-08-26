@@ -80,7 +80,6 @@ abstract class ObservedPropertyAbstract<T>  {
   }
 
   protected notifyHasChanged(newValue: T) {
-    //console.debug(`ObservedPropertyAbstract[${this.id()}, '${this.info() || "unknown"}']: notifyHasChanged to newValue '${JSON.stringify(newValue)}', notifying.`)
     console.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
     var registry: IPropertySubscriberLookup = SubscriberManager.Get();
     this.subscribers_.forEach((subscribedId) => {
