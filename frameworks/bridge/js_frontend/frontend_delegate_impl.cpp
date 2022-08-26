@@ -598,11 +598,6 @@ void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& pa
         return;
     }
 
-    auto pipelineContext = pipelineContextHolder_.Get();
-    if (pipelineContext) {
-        pipelineContext->NotifyDestroyEventDismiss();
-    }
-
     std::string pagePath = manifestParser_->GetRouter()->GetPagePath(uri);
     LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
@@ -615,9 +610,6 @@ void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& pa
 void FrontendDelegateImpl::Back(const std::string& uri, const std::string& params)
 {
     auto pipelineContext = pipelineContextHolder_.Get();
-    if (pipelineContext) {
-        pipelineContext->NotifyDestroyEventDismiss();
-    }
     {
         std::lock_guard<std::mutex> lock(mutex_);
         auto& currentPage = pageRouteStack_.back();

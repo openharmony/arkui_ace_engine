@@ -579,7 +579,6 @@ void AceContainer::InitializeCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess]() {
                 context->OnTouchEvent(event);
-                context->NotifyDispatchTouchEventDismiss(event);
                 if (markProcess) {
                     markProcess();
                 }

@@ -21,6 +21,11 @@ RenderXComponent::RenderXComponent()
     Initialize();
 }
 
+RenderXComponent::~RenderXComponent()
+{
+    NativeXComponentDestroy();
+}
+
 void RenderXComponent::Initialize()
 {
     auto wp = AceType::WeakClaim(this);
@@ -203,7 +208,7 @@ void RenderXComponent::PerformLayout()
 void RenderXComponent::Paint(RenderContext& context, const Offset& offset)
 {
     position_ = GetGlobalOffset();
-    if (!isXComponentInit) {
+    if (!isSurfaceInit_) {
         prePosition_ = position_;
         preDrawSize_ = drawSize_;
 
@@ -218,7 +223,7 @@ void RenderXComponent::Paint(RenderContext& context, const Offset& offset)
 
         if (xcomponentSizeInitEvent_ && (!drawSize_.IsHeightInfinite())) {
             xcomponentSizeInitEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
-            isXComponentInit = true;
+            isSurfaceInit_ = true;
         }
     } else {
         if ((!NearEqual(prePosition_.GetX(), position_.GetX())) ||
@@ -309,6 +314,11 @@ void RenderXComponent::NativeXComponentChange()
 
 void RenderXComponent::NativeXComponentDestroy()
 {
+    if (!isSurfaceInit_) {
+        return;
+    }
+    isSurfaceInit_ = false;
+
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("NativeXComponentDestroy context null");
