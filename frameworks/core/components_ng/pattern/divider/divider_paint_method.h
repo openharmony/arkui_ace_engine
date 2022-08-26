@@ -35,6 +35,7 @@ public:
         const auto& dividerRenderParagraph = dividerRenderProperty->GetDividerRenderParagraph();
         CHECK_NULL_RETURN(dividerRenderParagraph, nullptr);
         dividerColor_ = dividerRenderParagraph->GetDividerColor();
+        lineCap_ = dividerRenderParagraph->GetLineCap();
         auto offset = paintWrapper->GetContentOffset();
         lineCap_ = lineCap_ == LineCap::BUTT ? LineCap::SQUARE : lineCap_;
         DividerPainter dividerPainter(constrainStrokeWidth_, dividerLength_, vertical_, dividerColor_, lineCap_);
