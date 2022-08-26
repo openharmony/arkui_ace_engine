@@ -35,7 +35,7 @@ ohos_unittest("button_pattern_test_ng") {
 config("config_button_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base:utils_config",
     "$ace_root",
     "$ace_root/frameworks",
   ]
