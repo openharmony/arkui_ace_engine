@@ -18,6 +18,8 @@
 #include "app_mgr_client.h"
 #include "application_data_manager.h"
 
+#include "core/common/ace_application_info.h"
+
 namespace OHOS::Ace {
 static void KillApplicationByUid()
 {
