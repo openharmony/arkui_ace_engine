@@ -34,7 +34,7 @@ public:
     static RefPtr<RenderNode> Create();
 
     RenderXComponent();
-    ~RenderXComponent() override = default;
+    ~RenderXComponent();
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
@@ -97,7 +97,7 @@ protected:
     Offset prePosition_;
     Size preDrawSize_;
     int64_t textureId_ = -1;
-    bool isXComponentInit = false;
+    bool isSurfaceInit_ = false;
     bool positionChange_ = false;
     bool sizeChange_ = false;
     std::string id_;
