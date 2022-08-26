@@ -890,12 +890,12 @@ void JSWebController::GetDefaultUserAgent(const JSCallbackInfo& args)
 
 void JSWebController::SetJavascriptCallBackImpl()
 {
-    if (!webController_ || jsRegisterCallBackInit_) {
+    if (!webController_) {
+        LOGE("webController_ is null");
         return;
     }
 
     LOGI("JSWebController set webview javascript CallBack");
-    jsRegisterCallBackInit_ = true;
     WebController::JavaScriptCallBackImpl callback =
         [weak = WeakClaim(this)](
         const std::string& objectName, const std::string& objectMethod,
