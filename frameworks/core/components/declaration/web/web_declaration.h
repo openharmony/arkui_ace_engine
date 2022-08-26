@@ -30,7 +30,6 @@ struct WebAttribute : Attribute {
 struct WebEvent : Event {
     EventMarker pageStartEventId;
     EventMarker pageFinishEventId;
-    EventMarker progressChangeEventId;
     EventMarker titleReceiveEventId;
     EventMarker geolocationHideEventId;
     EventMarker geolocationShowEventId;
@@ -108,18 +107,6 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.pageFinishEventId;
-    }
-
-    void SetProgressChangeEventId(const EventMarker& progressChangeEventId)
-    {
-        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
-        event.progressChangeEventId = progressChangeEventId;
-    }
-
-    const EventMarker& GetProgressChangeEventId() const
-    {
-        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
-        return event.progressChangeEventId;
     }
 
     void SetTitleReceiveEventId(const EventMarker& titleReceiveEventId)
