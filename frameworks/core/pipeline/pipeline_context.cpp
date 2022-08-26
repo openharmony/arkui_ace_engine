@@ -2513,7 +2513,6 @@ void PipelineContext::Destroy()
     window_->Destroy();
     touchPluginPipelineContext_.clear();
     webPaintCallback_.clear();
-    windowFocusChangedCallbackMap_.clear();
     rectCallbackList_.clear();
     LOGI("PipelineContext::Destroy end.");
 }
@@ -2887,12 +2886,6 @@ void PipelineContext::RootLostFocus() const
 
 void PipelineContext::WindowFocus(bool isFocus)
 {
-    for (const auto& [id, callback] : windowFocusChangedCallbackMap_) {
-        if (callback) {
-            callback(isFocus);
-        }
-    }
-
     if (!isFocus) {
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
