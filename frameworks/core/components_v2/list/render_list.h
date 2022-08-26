@@ -265,6 +265,7 @@ public:
 protected:
     void UpdateAccessibilityAttr();
     void UpdateAccessibilityScrollAttr();
+    void UpdateAccessibilityVisible();
     bool HandleActionScroll(bool forward);
     LayoutParam MakeInnerLayout();
     LayoutParam MakeInnerLayoutForLane();
