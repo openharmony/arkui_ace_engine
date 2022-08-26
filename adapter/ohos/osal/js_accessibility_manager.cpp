@@ -150,7 +150,7 @@ int32_t ConvertToCardAccessibilityId(int32_t nodeId, int32_t cardId, int32_t roo
 void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, AccessibilityElementInfo& nodeInfo,
     const RefPtr<JsAccessibilityManager>& manager, int windowId, NodeId rootId)
 {
-    LOGI("UpdateAccessibilityNodeInfo nodeId:%{public}d", node->GetNodeId());
+    LOGD("nodeId:%{public}d", node->GetNodeId());
     int leftTopX = static_cast<int>(node->GetLeft()) + manager->GetWindowLeft();
     int leftTopY = static_cast<int>(node->GetTop()) + manager->GetWindowTop();
     int rightBottomX = leftTopX + static_cast<int>(node->GetWidth());
@@ -829,9 +829,7 @@ RefPtr<AccessibilityNodeManager> AccessibilityNodeManager::Create()
 void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessibilityId(const int32_t elementId,
     const int32_t requestId, AccessibilityElementOperatorCallback& callback, const int32_t mode)
 {
-    LOGI("JsAccessibilityManager::SearchElementInfoByAccessibilityId elementId(%{public}d) requestId(%{public}d) "
-         "mode(%{public}d)",
-        elementId, requestId, mode);
+    LOGI("elementId(%{public}d) requestId(%{public}d) mode(%{public}d)", elementId, requestId, mode);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     if (!jsAccessibilityManager) {
         LOGW("SetSearchElementInfoByAccessibilityIdResult elementId(%{public}d) requestId(%{public}d)", elementId,
