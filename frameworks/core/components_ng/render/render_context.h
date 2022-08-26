@@ -19,7 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 
@@ -84,7 +84,7 @@ public:
 
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundColor, Color);
-    // TODO
+    // TODO Add BorderRadius in group.
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BorderRadius, BorderRadiusProperty);
 
 protected:

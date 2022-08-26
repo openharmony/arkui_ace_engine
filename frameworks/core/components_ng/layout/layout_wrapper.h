@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_LAYOUT_WRAPPER_H
 
 #include <map>
+#include <optional>
 #include <string>
 
 #include "base/geometry/offset.h"
@@ -35,6 +36,7 @@
 #include "core/components_ng/property/magic_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/position_property.h"
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -146,9 +148,11 @@ public:
         return taskThread;
     }
 
-    bool SkipMeasureContent() const
+    bool SkipMeasureContent() const;
+
+    bool IsContraintNoChanged() const
     {
-        return skipMeasureContent_;
+        return isContraintNoChanged_;
     }
 
     // dirty layoutBox mount to host and switch layoutBox.
@@ -168,7 +172,7 @@ private:
     RefPtr<LayoutWrapperBuilder> layoutWrapperBuilder_;
 
     int32_t currentChildCount_ = 0;
-    bool skipMeasureContent_ = false;
+    bool isContraintNoChanged_ = false;
     bool isActive_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);

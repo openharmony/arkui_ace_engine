@@ -20,6 +20,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/common/font_manager.h"
 #include "core/common/frontend.h"
 #include "core/common/manager_interface.h"
@@ -56,6 +57,13 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
 PipelineBase::~PipelineBase()
 {
     LOG_DESTROY();
+}
+
+RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
+{
+    auto currentContainer = Container::Current();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    return currentContainer->GetPipelineContext();
 }
 
 uint64_t PipelineBase::GetTimeFromExternalTimer()

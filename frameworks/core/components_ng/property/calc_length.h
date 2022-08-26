@@ -17,13 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_CALC_LENGTH_H
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 struct ScaleProperty {
-    double vpScale { 0.0 };
-    double fpScale { 0.0 };
-    double lpxScale { 0.0 };
+    float vpScale = 0.0f;
+    float fpScale = 0.0f;
+    float lpxScale = 0.0f;
 
     void Reset()
     {
@@ -34,23 +35,22 @@ struct ScaleProperty {
 
     bool operator==(const ScaleProperty& scaleProperty) const
     {
-        return (vpScale == scaleProperty.vpScale) && (fpScale == scaleProperty.fpScale) &&
-               (lpxScale == scaleProperty.lpxScale);
+        return NearEqual(vpScale, scaleProperty.vpScale) && NearEqual(fpScale, scaleProperty.fpScale) &&
+               NearEqual(lpxScale, scaleProperty.lpxScale);
     }
 
     bool operator!=(const ScaleProperty& scaleProperty) const
     {
         return !(*this == scaleProperty);
     }
+
+    static ScaleProperty CreateScaleProperty();
 };
 
 class CalcLength {
 public:
     CalcLength() = default;
-    explicit CalcLength(const std::string& value)
-    {
-        calcValue_ = value;
-    }
+    explicit CalcLength(const std::string& value) : calcValue_(value) {}
     ~CalcLength() = default;
 
     explicit CalcLength(double value, DimensionUnit unit = DimensionUnit::PX) : dimension_(value, unit) {};

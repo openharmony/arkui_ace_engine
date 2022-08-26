@@ -41,6 +41,10 @@ public:
 
     static RefPtr<PipelineContext> GetCurrentContext();
 
+    static float GetCurrentRootWidth();
+
+    static float GetCurrentRootHeight();
+
     void SetupRootElement() override;
 
     bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,

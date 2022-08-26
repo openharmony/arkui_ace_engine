@@ -222,26 +222,23 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     return UITask(std::move(task), wrapper->CanRunOnWhichThread());
 }
 
-std::optional<LayoutConstraintF> FrameNode::GetLayoutConstraint() const
+LayoutConstraintF FrameNode::GetLayoutConstraint() const
 {
-    auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, std::nullopt);
-    ScaleProperty scaleProperty = { pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale() };
     if (geometryNode_->GetParentLayoutConstraint().has_value()) {
-        LayoutConstraintF LayoutConstraint = geometryNode_->GetParentLayoutConstraint().value();
-        LayoutConstraint.scaleProperty = scaleProperty;
-        return LayoutConstraint;
+        return geometryNode_->GetParentLayoutConstraint().value();
     }
     LayoutConstraintF LayoutConstraint;
-    LayoutConstraint.scaleProperty = scaleProperty;
+    LayoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    LayoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
+    LayoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
     return LayoutConstraint;
 }
 
-std::optional<OffsetF> FrameNode::GetParentGlobalOffset() const
+OffsetF FrameNode::GetParentGlobalOffset() const
 {
     auto parent = GetAncestorNodeOfFrame();
     if (!parent) {
-        return std::nullopt;
+        return { 0.0f, 0.0f };
     }
     return parent->geometryNode_->GetParentGlobalOffset();
 }

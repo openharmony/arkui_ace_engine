@@ -16,8 +16,22 @@
 #include "core/components_ng/property/calc_length.h"
 
 #include "base/utils/string_expression.h"
+#include "base/utils/utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+ScaleProperty ScaleProperty::CreateScaleProperty()
+{
+    ScaleProperty scaleProperty;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, scaleProperty);
+    scaleProperty.fpScale = pipeline->GetFontScale();
+    scaleProperty.vpScale = static_cast<float>(pipeline->GetDipScale());
+    scaleProperty.lpxScale = static_cast<float>(pipeline->GetLogicScale());
+    return scaleProperty;
+}
+
 bool CalcLength::NormalizeToPx(
     double vpScale, double fpScale, double lpxScale, double parentLength, double& result) const
 {
@@ -33,4 +47,5 @@ bool CalcLength::NormalizeToPx(
     }
     return dimension_.NormalizeToPx(vpScale, fpScale, lpxScale, parentLength, result);
 }
+
 } // namespace OHOS::Ace::NG

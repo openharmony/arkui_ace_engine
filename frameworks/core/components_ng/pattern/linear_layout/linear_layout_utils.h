@@ -16,12 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_LINEAR_LAYOUT_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_LINEAR_LAYOUT_UTILS_H
 
+#include "base/geometry/ng/size_t.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
 // used for linear measure and layout
 struct LinearMeasureProperty {
-    SizeF realSize;
+    OptionalSizeF realSize;
     float crossSize = 0.0f;
     float allocatedSize = 0.0f;
     std::list<RefPtr<LayoutWrapper>> relativeNodes;

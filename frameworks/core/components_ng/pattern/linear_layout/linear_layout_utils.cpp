@@ -16,8 +16,10 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 
 #include <cstdint>
+#include <optional>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -27,7 +29,7 @@ namespace OHOS::Ace::NG {
 namespace {
 float GetMainSize(LayoutWrapper* layoutWrapper, bool isVertical)
 {
-    float size;
+    float size = 0.0f;
     if (!isVertical) {
         size = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
     } else {
@@ -38,7 +40,7 @@ float GetMainSize(LayoutWrapper* layoutWrapper, bool isVertical)
 
 float GetCrossSize(LayoutWrapper* layoutWrapper, bool isVertical)
 {
-    float size;
+    float size = 0.0f;
     if (!isVertical) {
         size = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
     } else {
@@ -55,16 +57,13 @@ float GetMainSize(const SizeF& size, bool isVertical)
     return size.Height();
 }
 
-void SetIdealMainSize(std::optional<LayoutConstraintF>& origin, float value, bool isVertical)
+void SetIdealMainSize(LayoutConstraintF& origin, float value, bool isVertical)
 {
-    if (!origin.has_value()) {
-        return;
-    }
-    origin->selfIdealSize.reset();
+    origin.selfIdealSize.Reset();
     if (!isVertical) {
-        origin->UpdateSelfIdealSizeWithCheck(SizeF(value, -1));
+        origin.UpdateSelfIdealSizeWithCheck({ value, std::nullopt });
     } else {
-        origin->UpdateSelfIdealSizeWithCheck(SizeF(-1, value));
+        origin.UpdateSelfIdealSizeWithCheck({ std::nullopt, value });
     }
 }
 
@@ -118,27 +117,24 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
     const auto& parentIdeaSize = layoutConstraint->parentIdealSize;
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingPropertyF();
     auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
-    SizeF idealSize = { -1, -1 };
+    OptionalSizeF realSize;
     LinearMeasureProperty linearMeasureProperty;
     do {
         // Use idea size first if it is valid.
-        if (layoutConstraint->selfIdealSize.has_value()) {
-            const auto& selfIdeaSize = layoutConstraint->selfIdealSize.value();
-            idealSize.UpdateSizeWithCheck(selfIdeaSize);
-            if (idealSize.IsNonNegative()) {
-                break;
-            }
+        realSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
+        if (realSize.IsValid()) {
+            break;
         }
 
-        if (measureType == MeasureType::MATCH_PARENT && parentIdeaSize.has_value()) {
-            idealSize.UpdateIllegalSizeWithCheck(*parentIdeaSize);
-            if (idealSize.IsNonNegative()) {
-                break;
-            }
+        if (measureType == MeasureType::MATCH_PARENT) {
+            realSize.UpdateIllegalSizeWithCheck(parentIdeaSize);
         }
     } while (false);
-    linearMeasureProperty.realSize = idealSize;
-    idealSize.UpdateIllegalSizeWithCheck(maxSize);
+    linearMeasureProperty.realSize = realSize;
+
+    // Get Max Size for children.
+    realSize.UpdateIllegalSizeWithCheck(maxSize);
+    auto idealSize = realSize.ConvertToSizeT();
     MinusPaddingToSize(padding, idealSize);
 
     auto linearLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -188,7 +184,7 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
     auto childTotalSize = CreateSize(linearMeasureProperty.allocatedSize, linearMeasureProperty.crossSize, isVertical);
     linearMeasureProperty.realSize.UpdateIllegalSizeWithCheck(ConstrainSize(childTotalSize, minSize, maxSize));
 
-    layoutWrapper->GetGeometryNode()->SetFrameSize((linearMeasureProperty.realSize));
+    layoutWrapper->GetGeometryNode()->SetFrameSize((linearMeasureProperty.realSize.ConvertToSizeT()));
 }
 
 void LinearLayoutUtils::Layout(LayoutWrapper* layoutWrapper, bool isVertical, FlexAlign flexAlign)

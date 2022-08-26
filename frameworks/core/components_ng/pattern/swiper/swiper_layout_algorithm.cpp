@@ -36,8 +36,13 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(swiperLayoutProperty);
 
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
-    auto idealSize = CreateIdealSize(swiperLayoutProperty->GetLayoutConstraint().value(), axis,
-        swiperLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
+    const auto& constraint = swiperLayoutProperty->GetLayoutConstraint();
+    if (!constraint) {
+        LOGE("fail to measure swiper due to layoutConstraint is nullptr");
+        return;
+    }
+    auto idealSize = CreateIdealSize(
+        constraint.value(), axis, swiperLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(idealSize);

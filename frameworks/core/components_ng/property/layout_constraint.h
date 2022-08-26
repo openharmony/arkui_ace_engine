@@ -25,19 +25,21 @@
 namespace OHOS::Ace::NG {
 template<typename T>
 struct LayoutConstraintT {
-    ScaleProperty scaleProperty;
+    ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty();
     SizeT<T> minSize { 0, 0 };
     SizeT<T> maxSize { Infinity<T>(), Infinity<T>() };
-    std::optional<SizeT<T>> parentIdealSize;
-    std::optional<SizeT<T>> selfIdealSize;
+    SizeT<T> percentReference { 0, 0 };
+    OptionalSize<T> parentIdealSize;
+    OptionalSize<T> selfIdealSize;
 
     void Reset()
     {
         scaleProperty.Reset();
         minSize = { 0, 0 };
         maxSize = { Infinity<T>(), Infinity<T>() };
-        parentIdealSize.reset();
-        selfIdealSize.reset();
+        percentReference = { 0, 0 };
+        parentIdealSize.Reset();
+        selfIdealSize.Reset();
     }
 
     void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
@@ -45,17 +47,14 @@ struct LayoutConstraintT {
     {
         minSize.MinusPadding(left, right, top, bottom);
         maxSize.MinusPadding(left, right, top, bottom);
-        if (parentIdealSize.has_value()) {
-            parentIdealSize.value().MinusPadding(left, right, top, bottom);
-        }
-        if (selfIdealSize.has_value()) {
-            selfIdealSize.value().MinusPadding(left, right, top, bottom);
-        }
+        parentIdealSize.MinusPadding(left, right, top, bottom);
+        selfIdealSize.MinusPadding(left, right, top, bottom);
     }
 
     bool operator==(const LayoutConstraintT& layoutConstraint) const
     {
-        return (minSize == layoutConstraint.minSize) && (maxSize == layoutConstraint.maxSize) &&
+        return (scaleProperty == layoutConstraint.scaleProperty) && (minSize == layoutConstraint.minSize) &&
+               (maxSize == layoutConstraint.maxSize) && (percentReference == layoutConstraint.percentReference) &&
                (parentIdealSize == layoutConstraint.parentIdealSize) &&
                (selfIdealSize == layoutConstraint.selfIdealSize);
     }
@@ -65,28 +64,20 @@ struct LayoutConstraintT {
         return !(*this == layoutConstraint);
     }
 
-    bool UpdateSelfIdealSizeWithCheck(const SizeT<T>& size)
+    bool UpdateSelfIdealSizeWithCheck(const OptionalSize<T>& size)
     {
         if (selfIdealSize == size) {
             return false;
         }
-        if (selfIdealSize.has_value()) {
-            return selfIdealSize->UpdateSizeWithCheck(size);
-        }
-        selfIdealSize = size;
-        return true;
+        return selfIdealSize.UpdateSizeWithCheck(size);
     }
 
-    bool UpdateParentIdealSizeWithCheck(const SizeT<T>& size)
+    bool UpdateParentIdealSizeWithCheck(const OptionalSize<T>&& size)
     {
         if (parentIdealSize == size) {
             return false;
         }
-        if (parentIdealSize.has_value()) {
-            return parentIdealSize->UpdateSizeWithCheck(size);
-        }
-        parentIdealSize = size;
-        return true;
+        return parentIdealSize.UpdateSizeWithCheck(size);
     }
 
     bool UpdateMaxSizeWithCheck(const SizeT<T>& size)
@@ -105,21 +96,27 @@ struct LayoutConstraintT {
         return minSize.UpdateSizeWhenLarger(size);
     }
 
+    bool UpdatePercentReference(const SizeT<T>& size)
+    {
+        if (percentReference == size) {
+            return false;
+        }
+        percentReference.SetSizeT(size);
+        return true;
+    }
+
     std::string ToString() const
     {
         std::string str;
         str.append("minSize: [").append(minSize.ToString()).append("]");
         str.append("maxSize: [").append(maxSize.ToString()).append("]");
-        str.append("parentIdealSize: [")
-            .append(parentIdealSize.has_value() ? parentIdealSize.value().ToString() : "NA")
-            .append("]");
-        str.append("selfIdealSize: [")
-            .append(selfIdealSize.has_value() ? selfIdealSize.value().ToString() : "NA")
-            .append("]");
+        str.append("percentReference: [").append(percentReference.ToString()).append("]");
+        str.append("parentIdealSize: [").append(parentIdealSize.ToString()).append("]");
+        str.append("selfIdealSize: [").append(selfIdealSize.ToString()).append("]");
         return str;
     }
 
-    SizeF Constrain(SizeF size) const
+    SizeF Constrain(const SizeF& size) const
     {
         SizeF constrainSize;
         constrainSize.SetWidth(std::clamp(size.Width(), minSize.Width(), maxSize.Width()));

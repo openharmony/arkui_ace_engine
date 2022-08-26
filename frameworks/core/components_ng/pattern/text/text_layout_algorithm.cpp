@@ -47,16 +47,16 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (!CreateParagraph(textStyle, textLayoutProperty->GetContent().value_or(""))) {
         return std::nullopt;
     }
-    if (contentConstraint.selfIdealSize.has_value() && NonNegative(contentConstraint.selfIdealSize->Width())) {
-        paragraph_->Layout(contentConstraint.selfIdealSize->Width());
+    if (contentConstraint.selfIdealSize.Width()) {
+        paragraph_->Layout(contentConstraint.selfIdealSize.Width().value());
     } else {
         paragraph_->Layout(contentConstraint.maxSize.Width());
     }
     auto height = static_cast<float>(paragraph_->GetHeight());
-    double baselineOffset = 0.0F;
+    double baselineOffset = 0.0;
     textStyle.GetBaselineOffset().NormalizeToPx(
         pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), height, baselineOffset);
-    baselineOffset_ = baselineOffset;
+    baselineOffset_ = static_cast<float>(baselineOffset);
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
     return SizeF(static_cast<float>(GetTextWidth()), heightFinal);
