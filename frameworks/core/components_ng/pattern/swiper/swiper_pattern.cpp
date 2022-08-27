@@ -202,7 +202,7 @@ void SwiperPattern::Tick(uint64_t duration)
     CHECK_NULL_VOID(host);
 
     elapsedTime_ += duration;
-    if (elapsedTime_ >= GetInterval()) {
+    if (elapsedTime_ >= static_cast<uint64_t>(GetInterval())) {
         if (currentIndex_ >= static_cast<int32_t>(host->GetChildren().size()) - 1 && !IsLoop()) {
             LOGD("already last one, stop auto play because not loop");
             if (scheduler_) {
