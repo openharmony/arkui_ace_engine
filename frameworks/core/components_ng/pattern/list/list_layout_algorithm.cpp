@@ -325,7 +325,10 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
 {
-    float delta = crossSize - childCrossSize;
+    if (!lanes_.has_value() || lanes_.value() <= 0) {
+        return 0.0f;
+    }
+    float delta = (crossSize - childCrossSize) / lanes_.value();
     if (LessOrEqual(delta, 0)) {
         return 0.0f;
     }
