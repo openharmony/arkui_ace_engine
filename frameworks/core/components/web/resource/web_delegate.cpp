@@ -1252,6 +1252,8 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
             webCom->GetPermissionRequestEventId(), pipelineContext);
         onSearchResultReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webCom->GetSearchResultReceiveEventId(), pipelineContext);
+        onScrollV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webCom->GetScrollId(), pipelineContext);
     }
 }
 
@@ -2626,6 +2628,13 @@ void WebDelegate::OnScaleChange(float oldScaleFactor, float newScaleFactor)
     }
 }
 
+void WebDelegate::OnScroll(double xOffset, double yOffset)
+{
+    if (onScrollV2_) {
+        onScrollV2_(std::make_shared<OnScrollEvent>(xOffset, yOffset));
+    }
+}
+
 void WebDelegate::OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting)
 {
     if (onSearchResultReceiveV2_) {
@@ -2684,10 +2693,10 @@ bool WebDelegate::OnKeyEvent(int32_t keyCode, int32_t keyAction)
     return false;
 }
 
-void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action)
+void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count)
 {
     if (nweb_) {
-        nweb_->SendMouseEvent(x, y, static_cast<int>(button), static_cast<int>(action));
+        nweb_->SendMouseEvent(x, y, static_cast<int>(button), static_cast<int>(action), count);
     }
 }
 
