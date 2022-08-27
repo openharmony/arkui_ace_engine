@@ -15,39 +15,16 @@
 
 #include "base/log/exception_handler.h"
 
-#include "app_mgr_client.h"
 #include "application_data_manager.h"
 
-#include "core/common/ace_application_info.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
-static void KillApplicationByUid()
-{
-    auto appMgrClient = std::make_unique<AppExecFwk::AppMgrClient>();
-    if (appMgrClient == nullptr) {
-        LOGE("failed to get appMgrClient");
-        return;
-    }
-    auto result = appMgrClient->ConnectAppMgrService();
-    if (result != AppExecFwk::AppMgrResultCode::RESULT_OK) {
-        LOGE("failed to ConnectAppMgrService %{public}d", result);
-        return;
-    }
-    auto bundleName = AceApplicationInfo::GetInstance().GetPackageName();
-    auto uid = AceApplicationInfo::GetInstance().GetUid();
-    LOGI("kill running application, app name is %{public}s, uid is %{public}d", bundleName.c_str(), uid);
-    auto ret = appMgrClient->KillApplicationByUid(bundleName, uid);
-    if (ret != AppExecFwk::AppMgrResultCode::RESULT_OK) {
-        LOGE("Fail to kill application by uid. %{public}d", ret);
-        return;
-    }
-}
-
 void ExceptionHandler::HandleJsException(const std::string& exceptionMsg)
 {
     auto hasErrorObserver = AppExecFwk::ApplicationDataManager::GetInstance().NotifyUnhandledException(exceptionMsg);
     if (!hasErrorObserver) {
-        KillApplicationByUid();
+        LOGI("no developer callback for js exception");
     }
 }
 } // namespace OHOS::Ace
