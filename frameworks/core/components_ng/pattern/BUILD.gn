@@ -38,7 +38,6 @@ build_component_ng("pattern_ng") {
     "page/page_pattern.cpp",
     "stack/stack_view.cpp",
     "stage/stage_manager.cpp",
-    "stage/stage_pattern.cpp",
     "swiper/swiper_layout_algorithm.cpp",
     "swiper/swiper_paint_method.cpp",
     "swiper/swiper_pattern.cpp",
