@@ -153,7 +153,6 @@ private:
     std::string currentPosText_;
     TextDirection textDirection_ = TextDirection::LTR;
     float speed_ = -1.0f;
-    int32_t focusChangeCallbackId_ = 0;
 
     EventMarker shieldId_; // Shield the event on the control bar.
     EventMarker startBtnClickId_;
