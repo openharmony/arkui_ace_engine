@@ -32,6 +32,7 @@ public:
 
 protected:
     struct ContextJdwpSimulator {
+        int cfd;
         uv_pipe_t pipe;
         uv_tcp_t newFd;
         bool hasNewFd;
@@ -46,6 +47,7 @@ private:
     };
     void *MallocContext();
     static void ConnectJdwp(uv_connect_t *connection, int status);
+    static void ConnectJpid(void *param);
     static void FinishWriteCallback(uv_write_t *req, int status);
 #ifndef JS_JDWP_CONNECT
     static void ReceiveNewFd(uv_stream_t *q, ssize_t nread, const uv_buf_t *buf);
@@ -53,6 +55,7 @@ private:
 #endif // JS_JDWP_CONNECT
     static RetErrCode SendToStream(uv_stream_t *handleStream, const uint8_t *buf, const int bufLen,
                                    const void *finishCallback);
+    static void SendToJpid(int fd, const uint8_t *buf, const int bufLen);
     bool exit_ = false;
     HCtxJdwpSimulator ctxPoint_;
     string pkgName_;
