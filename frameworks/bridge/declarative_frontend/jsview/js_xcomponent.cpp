@@ -81,8 +81,9 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
         LOGE("JSXComponent::JsOnLoad xcomponentComponent is null.");
         return;
     }
+    auto xcomponentId = xcomponentComponent->GetId();
 
-    std::vector<std::string> keys = {"load"};
+    std::vector<std::string> keys = { "load", xcomponentId };
     xcomponentComponent->SetXComponentInitEventId(GetEventMarker(args, keys));
 }
 
