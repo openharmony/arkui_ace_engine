@@ -92,6 +92,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         if (web->GetIsInitialScaleSet()) {
             delegate_->UpdateInitialScale(web->GetInitialScale());
         }
+        delegate_->SetRenderWeb(AceType::WeakClaim(this));
     }
     MarkNeedLayout();
 }
@@ -166,25 +167,51 @@ void RenderWeb::PerformLayout()
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
+void RenderWeb::OnAppShow()
+{
+    RenderNode::OnAppShow();
+    if (delegate_) {
+        delegate_->ShowWebView();
+    }
+}
+
+void RenderWeb::OnAppHide()
+{
+    RenderNode::OnAppHide();
+    if (delegate_) {
+        delegate_->HideWebView();
+    }
+}
+
+void RenderWeb::OnPositionChanged()
+{
+    PopTextOverlay();
+}
+
+void RenderWeb::OnSizeChanged()
+{
+    PopTextOverlay();
+}
+
 void RenderWeb::Initialize()
 {
     touchRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
     touchRecognizer_->SetOnTouchDown([weakItem = AceType::WeakClaim(this)](const TouchEventInfo& info) {
         auto item = weakItem.Upgrade();
         if (item) {
-            item->HandleTouchDown(info);
+            item->HandleTouchDown(info, false);
         }
     });
     touchRecognizer_->SetOnTouchUp([weakItem = AceType::WeakClaim(this)](const TouchEventInfo& info) {
         auto item = weakItem.Upgrade();
         if (item) {
-            item->HandleTouchUp(info);
+            item->HandleTouchUp(info, false);
         }
     });
     touchRecognizer_->SetOnTouchMove([weakItem = AceType::WeakClaim(this)](const TouchEventInfo& info) {
         auto item = weakItem.Upgrade();
         if (item) {
-            item->HandleTouchMove(info);
+            item->HandleTouchMove(info, false);
         }
     });
     touchRecognizer_->SetOnTouchCancel([weakItem = AceType::WeakClaim(this)](const TouchEventInfo& info) {
@@ -195,7 +222,7 @@ void RenderWeb::Initialize()
     });
 }
 
-void RenderWeb::HandleTouchDown(const TouchEventInfo& info)
+void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
     if (!delegate_) {
         LOGE("Touch down delegate_ is nullptr");
@@ -207,6 +234,10 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info)
         return;
     }
     for (auto& touchPoint : touchInfos) {
+        if (fromOverlay) {
+            touchPoint.x -= GetGlobalOffset().GetX();
+            touchPoint.y -= GetGlobalOffset().GetY();
+        }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
     }
     // clear the recording position, for not move content when virtual keyboard popup when web get focused.
@@ -216,7 +247,7 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info)
     }
 }
 
-void RenderWeb::HandleTouchUp(const TouchEventInfo& info)
+void RenderWeb::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     if (!delegate_) {
         LOGE("Touch up delegate_ is nullptr");
@@ -228,6 +259,10 @@ void RenderWeb::HandleTouchUp(const TouchEventInfo& info)
         return;
     }
     for (auto& touchPoint : touchInfos) {
+        if (fromOverlay) {
+            touchPoint.x -= GetGlobalOffset().GetX();
+            touchPoint.y -= GetGlobalOffset().GetY();
+        }
         delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y);
     }
     if (web_ && !touchInfos.empty()) {
@@ -235,7 +270,7 @@ void RenderWeb::HandleTouchUp(const TouchEventInfo& info)
     }
 }
 
-void RenderWeb::HandleTouchMove(const TouchEventInfo& info)
+void RenderWeb::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 {
     if (!delegate_) {
         LOGE("Touch move delegate_ is nullptr");
@@ -247,6 +282,10 @@ void RenderWeb::HandleTouchMove(const TouchEventInfo& info)
         return;
     }
     for (auto& touchPoint : touchInfos) {
+        if (fromOverlay) {
+            touchPoint.x -= GetGlobalOffset().GetX();
+            touchPoint.y -= GetGlobalOffset().GetY();
+        }
         delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y);
     }
 }
@@ -310,6 +349,12 @@ bool RenderWeb::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>&
     return true;
 }
 
+void RenderWeb::SetUpdateHandlePosition(
+    const std::function<void(const OverlayShowOption&, float, float)>& updateHandlePosition)
+{
+    updateHandlePosition_ = updateHandlePosition;
+}
+
 void RenderWeb::OnTouchTestHit(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
     TouchTestResult& result)
 {
@@ -344,6 +389,333 @@ void RenderWeb::HandleAxisEvent(const AxisEvent& event)
 WeakPtr<RenderNode> RenderWeb::CheckAxisNode()
 {
     return AceType::WeakClaim<RenderNode>(this);
+}
+
+void RenderWeb::PushTextOverlayToStack()
+{
+    if (!textOverlay_) {
+        LOGE("TextOverlay is null");
+        return;
+    }
+
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Context is nullptr");
+        return;
+    }
+    auto lastStack = context->GetLastStack();
+    if (!lastStack) {
+        LOGE("LastStack is null");
+        return;
+    }
+    lastStack->PushComponent(textOverlay_, false);
+    stackElement_ = WeakClaim(RawPtr(lastStack));
+}
+
+bool RenderWeb::TextOverlayMenuShouldShow() const
+{
+    return showTextOveralyMenu_;
+}
+
+bool RenderWeb::GetShowStartTouchHandle() const
+{
+    return showStartTouchHandle_;
+}
+
+bool RenderWeb::GetShowEndTouchHandle() const
+{
+    return showEndTouchHandle_;
+}
+
+bool RenderWeb::RunQuickMenu(
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
+{
+    auto context = context_.Upgrade();
+    if (!context || !params || !callback) {
+        return false;
+    }
+
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle =
+        params->GetTouchHandleState(OHOS::NWeb::NWebTouchHandleState::TouchHandleType::INSERT_HANDLE);
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle =
+        params->GetTouchHandleState(OHOS::NWeb::NWebTouchHandleState::TouchHandleType::SELECTION_BEGIN_HANDLE);
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle =
+        params->GetTouchHandleState(OHOS::NWeb::NWebTouchHandleState::TouchHandleType::SELECTION_END_HANDLE);
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertTouchHandle,
+                                                           beginTouchHandle,
+                                                           endTouchHandle);
+    
+    if (textOverlay_ || overlayType == INVALID_OVERLAY) {
+        PopTextOverlay();
+    }
+    textOverlay_ = CreateTextOverlay(insertTouchHandle, beginTouchHandle, endTouchHandle);
+    if (!textOverlay_) {
+        return false;
+    }
+
+    showTextOveralyMenu_ = true;
+    showStartTouchHandle_ = (overlayType == INSERT_OVERLAY) ?
+        IsTouchHandleShow(insertTouchHandle) : IsTouchHandleShow(beginTouchHandle);
+    showEndTouchHandle_ = (overlayType == INSERT_OVERLAY) ?
+        IsTouchHandleShow(insertTouchHandle) : IsTouchHandleShow(endTouchHandle);
+
+    RegisterTextOverlayCallback(params->GetEditStateFlags(), callback);
+    PushTextOverlayToStack();
+    return true;
+}
+
+void RenderWeb::OnQuickMenuDismissed()
+{
+    PopTextOverlay();
+}
+
+void RenderWeb::PopTextOverlay()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    if (!textOverlay_) {
+        LOGE("no need to hide web overlay");
+        return;
+    }
+
+    const auto& stackElement = stackElement_.Upgrade();
+    if (stackElement) {
+        stackElement->PopTextOverlay();
+    }
+
+    textOverlay_ = nullptr;
+    showTextOveralyMenu_ = false;
+    showStartTouchHandle_ = false;
+    showEndTouchHandle_ = false;
+}
+
+void RenderWeb::RegisterTextOverlayCallback(int32_t flags,
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
+{
+    if (!callback || !textOverlay_) {
+        return;
+    }
+
+    if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) {
+        textOverlay_->SetOnCut([weak = AceType::WeakClaim(this), callback] {
+            if (callback) {
+                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT,
+                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            }
+        });
+    }
+    if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY) {
+        textOverlay_->SetOnCopy([weak = AceType::WeakClaim(this), callback] {
+            if (callback) {
+                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY,
+                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            }
+        });
+    }
+    if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE) {
+        textOverlay_->SetOnPaste([weak = AceType::WeakClaim(this), callback] {
+            if (callback) {
+                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_PASTE,
+                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            }
+        });
+    }
+    if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL) {
+        textOverlay_->SetOnCopyAll(
+            [weak = AceType::WeakClaim(this), callback]
+            (const std::function<void(const Offset&, const Offset&)>& temp) {
+                callback->Continue(OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL,
+                    OHOS::NWeb::MenuEventFlags::EF_LEFT_MOUSE_BUTTON);
+            });
+    }
+}
+
+
+bool RenderWeb::IsTouchHandleValid(
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
+{
+    return (handle != nullptr) && (handle->IsEnable());
+}
+
+bool RenderWeb::IsTouchHandleShow(
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
+{
+    if (handle->GetAlpha() > 0 &&
+        handle->GetY() >= handle->GetEdgeHeight()) {
+        return true;
+    }
+    return false;
+}
+
+WebOverlayType RenderWeb::GetTouchHandleOverlayType(
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
+{
+    if (IsTouchHandleValid(insertHandle) &&
+        !IsTouchHandleValid(startSelectionHandle) &&
+        !IsTouchHandleValid(endSelectionHandle)) {
+        return INSERT_OVERLAY;
+    }
+
+    if (!IsTouchHandleValid(insertHandle) &&
+        IsTouchHandleValid(startSelectionHandle) &&
+        IsTouchHandleValid(endSelectionHandle)) {
+        return SELECTION_OVERLAY;
+    }
+
+    return INVALID_OVERLAY;
+}
+
+RefPtr<TextOverlayComponent> RenderWeb::CreateTextOverlay(
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return nullptr;
+    }
+
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle,
+                                                           startSelectionHandle,
+                                                           endSelectionHandle);
+    if (overlayType == INVALID_OVERLAY) {
+        return nullptr;
+    }
+
+    RefPtr<TextOverlayComponent> textOverlay =
+        AceType::MakeRefPtr<TextOverlayComponent>(context->GetThemeManager(), context->GetAccessibilityManager());
+    if (!textOverlay) {
+        LOGE("textOverlay_ not null or is showing");
+        return nullptr;
+    }
+
+    Offset renderWebOffset = GetGlobalOffset();
+    Size renderWebSize = GetLayoutSize();
+    Offset startOffset;
+    Offset endOffset;
+    float startEdgeHeight;
+    float endEdgeHeight;
+    if (overlayType == INSERT_OVERLAY) {
+        startOffset = NormalizeTouchHandleOffset(insertHandle->GetX()+1, insertHandle->GetY());
+        endOffset = startOffset;
+        startEdgeHeight = insertHandle->GetEdgeHeight();
+        endEdgeHeight = startEdgeHeight;
+    } else {
+        startOffset = NormalizeTouchHandleOffset(startSelectionHandle->GetX(), startSelectionHandle->GetY());
+        endOffset = NormalizeTouchHandleOffset(endSelectionHandle->GetX(), endSelectionHandle->GetY());
+        startEdgeHeight = startSelectionHandle->GetEdgeHeight();
+        endEdgeHeight = endSelectionHandle->GetEdgeHeight();
+    }
+    textOverlay->SetWeakWeb(WeakClaim(this));
+    textOverlay->SetIsSingleHandle(false);
+    Rect clipRect(renderWebOffset.GetX(), renderWebOffset.GetY(),
+                  renderWebSize.Width(), renderWebSize.Height());
+    textOverlay->SetLineHeight(startEdgeHeight);
+    textOverlay->SetStartHandleHeight(startEdgeHeight);
+    textOverlay->SetEndHandleHeight(endEdgeHeight);
+    textOverlay->SetClipRect(clipRect);
+    textOverlay->SetNeedCilpRect(false);
+    textOverlay->SetStartHandleOffset(startOffset);
+    textOverlay->SetEndHandleOffset(endOffset);
+    textOverlay->SetTextDirection(TextDirection::LTR);
+    textOverlay->SetRealTextDirection(TextDirection::LTR);
+    textOverlay->SetContext(context_);
+    textOverlay->SetIsUsingMouse(false);
+    return textOverlay;
+}
+
+Offset RenderWeb::NormalizeTouchHandleOffset(float x, float y)
+{
+    Offset renderWebOffset = GetGlobalOffset();
+    Size renderWebSize = GetLayoutSize();
+    float resultX;
+    float resultY;
+    if (x < 0) {
+        resultX = x;
+    } else if (x > renderWebSize.Width()) {
+        resultX = renderWebOffset.GetX() + renderWebSize.Width();
+    } else {
+        resultX = x + renderWebOffset.GetX();
+    }
+
+    if (y < 0) {
+        resultY = renderWebOffset.GetY();
+    } else if (y > renderWebSize.Height()) {
+        resultY = renderWebOffset.GetY() + renderWebSize.Height();
+    } else {
+        resultY = y + renderWebOffset.GetY();
+    }
+    return {resultX, resultY};
+}
+
+void RenderWeb::OnTouchSelectionChanged(
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle,
+                                                           startSelectionHandle,
+                                                           endSelectionHandle);
+    if (overlayType == INVALID_OVERLAY) {
+        PopTextOverlay();
+        return;
+    }
+
+    if (!textOverlay_) {
+        if (overlayType == INSERT_OVERLAY) {
+            showTextOveralyMenu_ = false;
+            showStartTouchHandle_ = IsTouchHandleShow(insertHandle);
+            showEndTouchHandle_ = IsTouchHandleShow(insertHandle);
+            textOverlay_ = CreateTextOverlay(insertHandle, startSelectionHandle, endSelectionHandle);
+            PushTextOverlayToStack();
+        }
+        return;
+    }
+
+    if (overlayType == INSERT_OVERLAY) {
+        showStartTouchHandle_ = IsTouchHandleShow(insertHandle);
+        showEndTouchHandle_ = IsTouchHandleShow(insertHandle);
+        textOverlay_->SetStartHandleHeight(insertHandle->GetEdgeHeight());
+        showTextOveralyMenu_ = false;
+        OverlayShowOption option {
+            .showMenu = showTextOveralyMenu_,
+            .isSingleHandle = true,
+            .startHandleOffset = NormalizeTouchHandleOffset(insertHandle->GetX() + 1, insertHandle->GetY()),
+            .endHandleOffset = NormalizeTouchHandleOffset(insertHandle->GetX() + 1, insertHandle->GetY()),
+            .showStartHandle = showStartTouchHandle_,
+            .showEndHandle = showEndTouchHandle_,
+        };
+        if (updateHandlePosition_) {
+            updateHandlePosition_(option, insertHandle->GetEdgeHeight(), insertHandle->GetEdgeHeight());
+        }
+    } else {
+        showStartTouchHandle_ = IsTouchHandleShow(startSelectionHandle);
+        showEndTouchHandle_ = IsTouchHandleShow(endSelectionHandle);
+        textOverlay_->SetStartHandleHeight(startSelectionHandle->GetEdgeHeight());
+        textOverlay_->SetEndHandleHeight(endSelectionHandle->GetEdgeHeight());
+        OverlayShowOption option {
+            .showMenu = true,
+            .isSingleHandle = false,
+            .startHandleOffset = NormalizeTouchHandleOffset(startSelectionHandle->GetX(), startSelectionHandle->GetY()),
+            .endHandleOffset = NormalizeTouchHandleOffset(endSelectionHandle->GetX(), endSelectionHandle->GetY()),
+            .showStartHandle = showStartTouchHandle_,
+            .showEndHandle = showEndTouchHandle_,
+        };
+        if (updateHandlePosition_) {
+            updateHandlePosition_(option, startSelectionHandle->GetEdgeHeight(), endSelectionHandle->GetEdgeHeight());
+        }
+    }
 }
 #endif
 } // namespace OHOS::Ace

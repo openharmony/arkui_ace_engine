@@ -42,7 +42,7 @@ constexpr double FIXED_OFFSET = 18.0;
 
 void FlutterRenderTextOverlay::Paint(RenderContext& context, const Offset& offset)
 {
-    if (!showOption_.showStartHandle && !showOption_.showEndHandle) {
+    if (!showOption_.showStartHandle && !showOption_.showEndHandle && !isUsedByWeb_) {
         return;
     }
 

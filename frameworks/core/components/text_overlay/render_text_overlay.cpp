@@ -19,6 +19,9 @@
 #include "core/animation/scheduler.h"
 #include "core/components/focus_collaboration/render_focus_collaboration.h"
 #include "core/components/stack/stack_element.h"
+#ifdef WEB_SUPPORTED
+#include "core/components/web/render_web.h"
+#endif
 
 namespace OHOS::Ace {
 namespace {
@@ -166,6 +169,9 @@ void RenderTextOverlay::Update(const RefPtr<Component>& component)
     UpdateWeakTextField(overlay);
     UpdateWeakText(overlay);
     UpdateWeakImage(overlay);
+#ifdef WEB_SUPPORTED
+    UpdateWeakWeb(overlay);
+#endif
     MarkNeedLayout();
 }
 
@@ -503,6 +509,85 @@ void RenderTextOverlay::UpdateWeakImage(const RefPtr<TextOverlayComponent>& over
     renderImage->SetUpdateHandlePosition(callback);
 }
 
+#ifdef WEB_SUPPORTED
+void RenderTextOverlay::UpdateWeakWeb(const RefPtr<TextOverlayComponent>& overlay)
+{
+    if (!overlay) {
+        return;
+    }
+    weakWeb_ = overlay->GetWeakWeb();
+    auto web = weakWeb_.Upgrade();
+    if (!touchDetector_ || !web) {
+        return;
+    }
+    isUsedByWeb_ = true;
+    auto callback = [weak = WeakClaim(this)](const OverlayShowOption& option,
+        float startHeight, float endHeight) {
+        auto overlay = weak.Upgrade();
+        if (!overlay) {
+            return;
+        }
+        overlay->startHandleOffset_ = option.startHandleOffset;
+        overlay->endHandleOffset_ = option.endHandleOffset;
+        overlay->isSingleHandle_ = option.isSingleHandle;
+        overlay->showOption_.showMenu = option.showMenu;
+        overlay->showOption_.showStartHandle = option.showStartHandle;
+        overlay->showOption_.showEndHandle = option.showEndHandle;
+        overlay->startHandleHeight_ = startHeight;
+        overlay->endHandleHeight_ = endHeight;
+        overlay->lineHeight_ = startHeight;
+        overlay->MarkNeedLayout();
+    };
+    web->SetUpdateHandlePosition(callback);
+    showOption_.showMenu = web->TextOverlayMenuShouldShow();
+    showOption_.showStartHandle = web->GetShowStartTouchHandle();
+    showOption_.showEndHandle = web->GetShowEndTouchHandle();
+
+    clickDetector_->SetOnClick([weak = AceType::WeakClaim(this)](const ClickInfo& clickInfo) {});
+    touchDetector_->SetOnTouchDown([weak = AceType::WeakClaim(this), weakWeb = weakWeb_](const TouchEventInfo& info) {
+        auto overlay = weak.Upgrade();
+        if (overlay) {
+            overlay->showMagnifier_ = true;
+            auto startOffset = info.GetTouches().front().GetLocalLocation();
+            if (overlay->startHandleRegion_.ContainsInRegion(startOffset.GetX(), startOffset.GetY())) {
+                overlay->isTouchStartDrag_ = true;
+                overlay->isTouchEndDrag_ = false;
+            } else {
+                overlay->isTouchStartDrag_ = false;
+                overlay->isTouchEndDrag_ =
+                    overlay->endHandleRegion_.ContainsInRegion(startOffset.GetX(), startOffset.GetY());
+            }
+            auto web = weakWeb.Upgrade();
+            if (web) {
+                web->HandleTouchDown(info, true);
+            }
+        }
+    });
+
+    touchDetector_->SetOnTouchMove([weak = AceType::WeakClaim(this), weakWeb = weakWeb_](const TouchEventInfo& info) {
+        auto overlay = weak.Upgrade();
+        if (overlay) {
+            auto web = weakWeb.Upgrade();
+            if (web) {
+                web->HandleTouchMove(info, true);
+            }
+        }
+    });
+
+    touchDetector_->SetOnTouchUp([weak = AceType::WeakClaim(this), weakWeb = weakWeb_](const TouchEventInfo& info) {
+        auto overlay = weak.Upgrade();
+        if (overlay) {
+            overlay->showMagnifier_ = false;
+            auto web = weakWeb.Upgrade();
+            if (web) {
+                web->HandleTouchUp(info, true);
+            }
+            overlay->MarkNeedLayout();
+        }
+    });
+}
+#endif
+
 void RenderTextOverlay::PerformLayout()
 {
     double handleRadius = NormalizeToPx(handleRadius_);
@@ -616,7 +701,6 @@ Offset RenderTextOverlay::ComputeChildPosition(const RefPtr<RenderNode>& child)
             endHandleOffset.SetX(clipRect_.Right());
         }
     }
-
     // Calculate the spacing with text and handle, menu is fixed up the handle and text.
     double menuSpacingWithText = NormalizeToPx(menuSpacingWithText_);
     double menuSpacingWithHandle = NormalizeToPx(menuSpacingWithHandle_);

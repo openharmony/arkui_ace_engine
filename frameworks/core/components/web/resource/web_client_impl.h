@@ -115,6 +115,13 @@ public:
     void OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request) override;
     bool RunContextMenu(std::shared_ptr<NWeb::NWebContextMenuParams> params,
         std::shared_ptr<NWeb::NWebContextMenuCallback> callback) override;
+    bool RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
+                      std::shared_ptr<NWeb::NWebQuickMenuCallback> callback) override;
+    void OnQuickMenuDismissed() override;
+    void OnTouchSelectionChanged(
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

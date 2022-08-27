@@ -73,6 +73,7 @@ void WebElement::OnBlur()
         return;
     }
     renderWeb->GetDelegate()->OnBlur();
+    renderWeb->OnQuickMenuDismissed();
     FocusNode::OnBlur();
 }
 

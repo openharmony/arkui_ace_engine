@@ -437,4 +437,57 @@ bool WebClientImpl::RunContextMenu(
     LOGI("OnContextMenuEventShow result:%{public}d", jsResult);
     return jsResult;
 }
+
+bool WebClientImpl::RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
+                                 std::shared_ptr<NWeb::NWebQuickMenuCallback> callback)
+{
+    if (!params || !callback) {
+        return false;
+    }
+    ContainerScope scope(instanceId_);
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+    return delegate->RunQuickMenu(params, callback);
+}
+
+void WebClientImpl::OnQuickMenuDismissed()
+{
+    ContainerScope scope(instanceId_);
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return;
+    }
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnQuickMenuDismissed();
+}
+
+void WebClientImpl::OnTouchSelectionChanged(
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
+{
+    ContainerScope scope(instanceId_);
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return;
+    }
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnTouchSelectionChanged(
+        insertHandle, startSelectionHandle, endSelectionHandle);
+}
 } // namespace OHOS::Ace

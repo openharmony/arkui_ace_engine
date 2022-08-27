@@ -731,6 +731,18 @@ const WeakPtr<RenderImage>& TextOverlayComponent::GetWeakImage() const
     return weakImage_;
 }
 
+#ifdef WEB_SUPPORTED
+void TextOverlayComponent::SetWeakWeb(const WeakPtr<RenderWeb>& weakWeb)
+{
+    weakWeb_ = weakWeb;
+}
+
+const WeakPtr<RenderWeb>& TextOverlayComponent::GetWeakWeb() const
+{
+    return weakWeb_;
+}
+#endif
+
 void TextOverlayComponent::SetRealTextDirection(TextDirection realTextDirection)
 {
     realTextDirection_ = realTextDirection;

@@ -40,9 +40,10 @@ constexpr double FIXED_OFFSET = 18.0;
 
 } // namespace
 
+class RenderWeb;
 void RosenRenderTextOverlay::Paint(RenderContext& context, const Offset& offset)
 {
-    if (!showOption_.showStartHandle && !showOption_.showEndHandle) {
+    if (!showOption_.showStartHandle && !showOption_.showEndHandle && !isUsedByWeb_) {
         return;
     }
 
