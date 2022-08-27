@@ -61,7 +61,7 @@ bool PopupElement::ShowPopup()
         return false;
     }
 
-    if (!GetThemeManager()) {
+    if (!GetThemeManager() || !GetThemeManager()->GetTheme<PopupTheme>()) {
         return false;
     }
 
