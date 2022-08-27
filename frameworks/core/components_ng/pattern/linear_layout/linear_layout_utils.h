@@ -31,7 +31,7 @@ struct LinearMeasureProperty {
     float space = 0.0f;
 };
 
-struct LayoutConditions{
+struct LayoutConditions {
     LayoutWrapper* layoutWrapper;
     bool isVertical;
     FlexAlign crossAlign;
