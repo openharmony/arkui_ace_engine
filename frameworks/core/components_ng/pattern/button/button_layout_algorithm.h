@@ -29,9 +29,15 @@ public:
 
     ~ButtonLayoutAlgorithm() override = default;
 
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
     void OnReset() override {}
 
 private:
+    static void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
+    static void UpdateFrameSizeUsingChild(LayoutWrapper* layoutWrapper, SizeF& frameSize);
+    static void MeasureCircleButton(LayoutWrapper* layoutWrapper);
+
     ACE_DISALLOW_COPY_AND_MOVE(ButtonLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
