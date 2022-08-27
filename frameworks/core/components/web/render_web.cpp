@@ -21,6 +21,7 @@
 
 #include "base/log/log.h"
 #include "core/common/manager_interface.h"
+#include "core/components/positioned/positioned_component.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/event/ace_events.h"
 #include "core/event/ace_event_helper.h"
@@ -98,6 +99,11 @@ void RenderWeb::Update(const RefPtr<Component>& component)
             delegate_->UpdateInitialScale(web->GetInitialScale());
         }
         delegate_->SetRenderWeb(AceType::WeakClaim(this));
+        onDragStart_ = web->GetOnDragStartId();
+        onDragEnter_ = web->GetOnDragEnterId();
+        onDragMove_ = web->GetOnDragMoveId();
+        onDragLeave_ = web->GetOnDragLeaveId();
+        onDrop_ = web->GetOnDropId();
     }
     MarkNeedLayout();
 }
@@ -286,6 +292,10 @@ void RenderWeb::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 
 void RenderWeb::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 {
+    if (isDragging_) {
+        return;
+    }
+
     if (!delegate_) {
         LOGE("Touch move delegate_ is nullptr");
         return;
@@ -383,6 +393,12 @@ void RenderWeb::SetUpdateHandlePosition(
 void RenderWeb::OnTouchTestHit(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
     TouchTestResult& result)
 {
+    if (dragDropGesture_) {
+        dragDropGesture_->SetCoordinateOffset(coordinateOffset);
+        result.emplace_back(dragDropGesture_);
+        MarkIsNotSiblingAddRecognizerToResult(true);
+    }
+
     if (doubleClickRecognizer_ && touchRestrict.sourceType == SourceType::MOUSE) {
         doubleClickRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(doubleClickRecognizer_);
@@ -475,7 +491,7 @@ bool RenderWeb::RunQuickMenu(
     WebOverlayType overlayType = GetTouchHandleOverlayType(insertTouchHandle,
                                                            beginTouchHandle,
                                                            endTouchHandle);
-    
+
     if (textOverlay_ || overlayType == INVALID_OVERLAY) {
         PopTextOverlay();
     }
@@ -746,6 +762,268 @@ void RenderWeb::OnTouchSelectionChanged(
             updateHandlePosition_(option, startSelectionHandle->GetEdgeHeight(), endSelectionHandle->GetEdgeHeight());
         }
     }
+}
+
+DragItemInfo RenderWeb::GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info)
+{
+    DragItemInfo itemInfo;
+    if (delegate_) {
+        itemInfo.pixelMap =  delegate_->GetDragPixelMap();
+    }
+
+    if (itemInfo.pixelMap) {
+        LOGI("get w3c drag info");
+        isW3cDragEvent_ = true;
+        return itemInfo;
+    }
+
+    if (onDragStart_) {
+        LOGI("user has set onDragStart");
+        isW3cDragEvent_ = false;
+        RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+        event->SetX(context->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+        event->SetY(context->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+        selectedItemSize_ = GetLayoutSize();
+        auto extraParams = JsonUtil::Create(true);
+        return onDragStart_(event, extraParams->ToString());
+    }
+
+    return itemInfo;
+}
+
+void RenderWeb::OnDragWindowStartEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info,
+    const DragItemInfo& dragItemInfo)
+{
+    LOGI("create drag window");
+    auto rect = pipelineContext->GetCurrentWindowRect();
+    int32_t globalX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
+    int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+    dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW", globalX + rect.Left(), globalY + rect.Top(),
+        dragItemInfo.pixelMap->GetWidth(), dragItemInfo.pixelMap->GetHeight());
+    dragWindow_->SetOffset(rect.Left(), rect.Top());
+    dragWindow_->DrawPixelMap(dragItemInfo.pixelMap);
+    if (isW3cDragEvent_ && delegate_) {
+        LOGI("w3c drag start");
+        auto viewScale = pipelineContext->GetViewScale();
+        int32_t localX = static_cast<int32_t>(globalX - GetCoordinatePoint().GetX());
+        int32_t localY = static_cast<int32_t>(globalY - GetCoordinatePoint().GetY());
+        delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_ENTER);
+    }
+}
+
+void RenderWeb::PanOnActionStart(const GestureEvent& info)
+{
+    LOGI("web drag action start");
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+    isDragging_ = true;
+    GestureEvent newInfo = info;
+    newInfo.SetGlobalPoint(startPoint_);
+    auto dragItemInfo = GenerateDragItemInfo(pipelineContext, newInfo);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (dragItemInfo.pixelMap) {
+        auto initRenderNode = AceType::Claim(this);
+        isDragDropNode_  = true;
+        pipelineContext->SetInitRenderNode(initRenderNode);
+        AddDataToClipboard(pipelineContext, dragItemInfo.extraInfo, "", "");
+        if (!dragWindow_) {
+            OnDragWindowStartEvent(pipelineContext, info, dragItemInfo);
+        }
+        return;
+    }
+#endif
+    if (!dragItemInfo.customComponent) {
+        LOGW("the drag custom component is null");
+        isDragging_ = false;
+        return;
+    }
+
+    hasDragItem_ = true;
+    auto positionedComponent = AceType::MakeRefPtr<PositionedComponent>(dragItemInfo.customComponent);
+    positionedComponent->SetTop(Dimension(GetGlobalOffset().GetY()));
+    positionedComponent->SetLeft(Dimension(GetGlobalOffset().GetX()));
+    SetLocalPoint(info.GetGlobalPoint() - GetGlobalOffset());
+    auto updatePosition = [renderBox = AceType::Claim(this)](
+                                const std::function<void(const Dimension&, const Dimension&)>& func) {
+        if (!renderBox) {
+            return;
+        }
+        renderBox->SetUpdateBuilderFuncId(func);
+    };
+    positionedComponent->SetUpdatePositionFuncId(updatePosition);
+    auto stackElement = pipelineContext->GetLastStack();
+    stackElement->PushComponent(positionedComponent);
+}
+
+void RenderWeb::OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info)
+{
+    int32_t globalX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
+    int32_t globalY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+    LOGD("drag window position update, x = %{public}d, y = %{public}d", globalX, globalY);
+    dragWindow_->MoveTo(globalX, globalY);
+    if (isW3cDragEvent_ && delegate_) {
+        LOGD("w3c drag update");
+        auto viewScale = pipelineContext->GetViewScale();
+        int32_t localX = static_cast<int32_t>(globalX - GetCoordinatePoint().GetX());
+        int32_t localY = static_cast<int32_t>(globalY - GetCoordinatePoint().GetY());
+        delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_OVER);
+    }
+}
+
+void RenderWeb::PanOnActionUpdate(const GestureEvent& info)
+{
+    LOGD("web drag action update");
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (isDragDropNode_  && dragWindow_) {
+        OnDragWindowMoveEvent(pipelineContext, info);
+        return;
+    }
+#endif
+
+    RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+    event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+    event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+    Offset offset = info.GetGlobalPoint() - GetLocalPoint();
+    if (GetUpdateBuilderFuncId()) {
+        GetUpdateBuilderFuncId()(Dimension(offset.GetX()), Dimension(offset.GetY()));
+    }
+
+    auto extraParams = JsonUtil::Create(true);
+    auto targetDragDropNode = FindDragDropNode(pipelineContext, info);
+    auto preDragDropNode = GetPreDragDropNode();
+    if (preDragDropNode == targetDragDropNode) {
+        if (targetDragDropNode && targetDragDropNode->GetOnDragMove()) {
+            (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
+        }
+        return;
+    }
+    if (preDragDropNode && preDragDropNode->GetOnDragLeave()) {
+        (preDragDropNode->GetOnDragLeave())(event, extraParams->ToString());
+    }
+    if (targetDragDropNode && targetDragDropNode->GetOnDragEnter()) {
+        (targetDragDropNode->GetOnDragEnter())(event, extraParams->ToString());
+    }
+    SetPreDragDropNode(targetDragDropNode);
+}
+
+void RenderWeb::OnDragWindowDropEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info)
+{
+    if (GetOnDrop()) {
+        RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+        RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+        event->SetPasteData(pasteData);
+        event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+        event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+        auto extraParams = JsonUtil::Create(true);
+        (GetOnDrop())(event, extraParams->ToString());
+        pipelineContext->SetInitRenderNode(nullptr);
+    }
+
+    if (isW3cDragEvent_ && delegate_) {
+        LOGI("w3c drag end");
+        auto viewScale = pipelineContext->GetViewScale();
+        int32_t localX = static_cast<int32_t>(info.GetGlobalPoint().GetX() - GetCoordinatePoint().GetX());
+        int32_t localY = static_cast<int32_t>(info.GetGlobalPoint().GetY() - GetCoordinatePoint().GetY());
+        delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_DROP);
+        delegate_->HandleDragEvent(localX * viewScale, localY * viewScale, DragAction::DRAG_END);
+    }
+}
+
+void RenderWeb::PanOnActionEnd(const GestureEvent& info)
+{
+    LOGI("web drag action end");
+    isDragging_ = false;
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (isDragDropNode_) {
+        isDragDropNode_  = false;
+        RestoreCilpboardData(pipelineContext);
+        OnDragWindowDropEvent(pipelineContext, info);
+    }
+
+    if (dragWindow_) {
+        dragWindow_->Destroy();
+        dragWindow_ = nullptr;
+        return;
+    }
+#endif
+
+    RefPtr<DragEvent> event = AceType::MakeRefPtr<DragEvent>();
+    RefPtr<PasteData> pasteData = AceType::MakeRefPtr<PasteData>();
+    event->SetPasteData(pasteData);
+    event->SetX(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
+    event->SetY(pipelineContext->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
+
+    Offset offset = info.GetGlobalPoint() - GetLocalPoint();
+    if (GetUpdateBuilderFuncId()) {
+        GetUpdateBuilderFuncId()(Dimension(offset.GetX()), Dimension(offset.GetY()));
+    }
+    if (hasDragItem_) {
+        auto stackElement = pipelineContext->GetLastStack();
+        stackElement->PopComponent();
+    }
+    hasDragItem_ = false;
+
+    ACE_DCHECK(GetPreDragDropNode() == FindTargetRenderNode<DragDropEvent>(pipelineContext, info));
+    auto targetDragDropNode = GetPreDragDropNode();
+    if (!targetDragDropNode) {
+        return;
+    }
+    if (targetDragDropNode->GetOnDrop()) {
+        auto extraParams = JsonUtil::Create(true);
+        (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
+    }
+    SetPreDragDropNode(nullptr);
+}
+
+void RenderWeb::PanOnActionCancel()
+{
+    LOGI("drag cancel");
+    isDragging_ = false;
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        LOGE("Context is null.");
+        return;
+    }
+
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    if (isDragDropNode_) {
+        RestoreCilpboardData(pipelineContext);
+        isDragDropNode_ = false;
+        if (isW3cDragEvent_ && delegate_) {
+            LOGI("w3c drag cancel");
+            delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
+        }
+    }
+
+    if (dragWindow_) {
+        dragWindow_->Destroy();
+        dragWindow_ = nullptr;
+    }
+#endif
+
+    if (hasDragItem_) {
+        auto stackElement = pipelineContext->GetLastStack();
+        stackElement->PopComponent();
+        hasDragItem_ = false;
+    }
+    SetPreDragDropNode(nullptr);
 }
 #endif
 } // namespace OHOS::Ace

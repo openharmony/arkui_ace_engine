@@ -47,8 +47,8 @@ enum WebOverlayType {
 #endif
 }
 
-class RenderWeb : public RenderNode {
-    DECLARE_ACE_TYPE(RenderWeb, RenderNode);
+class RenderWeb : public RenderNode, public DragDropEvent {
+    DECLARE_ACE_TYPE(RenderWeb, RenderNode, DragDropEvent);
 
 public:
     static RefPtr<RenderNode> Create();
@@ -73,7 +73,7 @@ public:
     void HandleTouchMove(const TouchEventInfo& info, bool fromOverlay);
     void HandleTouchCancel(const TouchEventInfo& info);
     void HandleDoubleClick(const ClickInfo& info);
-    
+
     // Related to text overlay
     void SetUpdateHandlePosition(
         const std::function<void(const OverlayShowOption&, float, float)>& updateHandlePosition);
@@ -104,6 +104,12 @@ public:
     bool IsAxisScrollable(AxisDirection direction) override;
     WeakPtr<RenderNode> CheckAxisNode() override;
 
+    void PanOnActionStart(const GestureEvent& info) override;
+    void PanOnActionUpdate(const GestureEvent& info) override;
+    void PanOnActionEnd(const GestureEvent& info) override;
+    void PanOnActionCancel() override;
+    DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
+
 protected:
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebComponent> web_;
@@ -131,6 +137,10 @@ private:
     Offset NormalizeTouchHandleOffset(float x, float y);
     void RegisterTextOverlayCallback(
         int32_t flags, std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
+    void OnDragWindowStartEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info,
+        const DragItemInfo& dragItemInfo);
+    void OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
+    void OnDragWindowDropEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
 
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
     RefPtr<ClickRecognizer> doubleClickRecognizer_ = nullptr;
@@ -143,6 +153,8 @@ private:
     bool showTextOveralyMenu_ = false;
     bool showStartTouchHandle_ = false;
     bool showEndTouchHandle_ = false;
+    bool isDragging_ = false;
+    bool isW3cDragEvent_ = false;
 #endif
 
     Offset position_;

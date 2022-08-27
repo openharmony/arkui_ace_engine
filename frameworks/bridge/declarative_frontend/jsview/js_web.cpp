@@ -23,9 +23,11 @@
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -1022,6 +1024,11 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onContextMenuShow", &JSWeb::OnContextMenuShow);
     JSClass<JSWeb>::StaticMethod("onSearchResultReceive", &JSWeb::OnSearchResultReceive);
     JSClass<JSWeb>::StaticMethod("mediaPlayGestureAccess", &JSWeb::MediaPlayGestureAccess);
+    JSClass<JSWeb>::StaticMethod("onDragStart", &JSWeb::JsOnDragStart);
+    JSClass<JSWeb>::StaticMethod("onDragEnter", &JSWeb::JsOnDragEnter);
+    JSClass<JSWeb>::StaticMethod("onDragMove", &JSWeb::JsOnDragMove);
+    JSClass<JSWeb>::StaticMethod("onDragLeave", &JSWeb::JsOnDragLeave);
+    JSClass<JSWeb>::StaticMethod("onDrop", &JSWeb::JsOnDrop);
     JSClass<JSWeb>::StaticMethod("onScroll", &JSWeb::OnScroll);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
@@ -2162,5 +2169,102 @@ void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetSearchResultReceiveEventId(eventMarker);
+}
+
+void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
+        DragItemInfo itemInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
+
+        auto ret = func->Execute(info, extraParams);
+        if (!ret->IsObject()) {
+            LOGE("builder param is not an object.");
+            return itemInfo;
+        }
+        auto component = ParseDragItemComponent(ret);
+        if (component) {
+            LOGI("use custom builder param.");
+            itemInfo.customComponent = component;
+            return itemInfo;
+        }
+
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        auto pixmap = builderObj->GetProperty("pixelMap");
+        itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
+#endif
+        auto extraInfo = builderObj->GetProperty("extraInfo");
+        ParseJsString(extraInfo, itemInfo.extraInfo);
+        component = ParseDragItemComponent(builderObj->GetProperty("builder"));
+        itemInfo.customComponent = component;
+        return itemInfo;
+    };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (webComponent) {
+        webComponent->SetOnDragStartId(onDragStartId);
+    }
+}
+
+void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragEnter");
+        func->Execute(info, extraParams);
+    };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (webComponent) {
+        webComponent->SetOnDragEnterId(onDragEnterId);
+    }
+}
+
+void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+                            const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragMove");
+        func->Execute(info, extraParams);
+    };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (webComponent) {
+        webComponent->SetOnDragMoveId(onDragMoveId);
+    }
+}
+
+void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragLeave");
+        func->Execute(info, extraParams);
+    };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (webComponent) {
+        webComponent->SetOnDragLeaveId(onDragLeaveId);
+    }
+}
+
+void JSWeb::JsOnDrop(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+                        const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDrop");
+        func->Execute(info, extraParams);
+    };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (webComponent) {
+        webComponent->SetOnDropId(onDropId);
+    }
 }
 } // namespace OHOS::Ace::Framework
