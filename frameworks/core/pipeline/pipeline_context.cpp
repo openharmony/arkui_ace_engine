@@ -1702,9 +1702,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
     }
     rootElement_->HandleSpecifiedKey(event);
-    if (event.code == KeyCode::KEY_BACK) {
-        NotifyDestroyEventDismiss();
-    }
+
     SetShortcutKey(event);
 
     pressedKeyCodes = event.pressedCodes;
@@ -2477,26 +2475,6 @@ void PipelineContext::NotifyIsPagePathInvalidDismiss(bool isPageInvalid) const
     for (auto& iterPathInvalidHandler : isPagePathInvalidEventHandler_) {
         if (iterPathInvalidHandler) {
             iterPathInvalidHandler(isPageInvalid);
-        }
-    }
-}
-
-void PipelineContext::NotifyDestroyEventDismiss() const
-{
-    CHECK_RUN_ON(UI);
-    for (auto& iterDestroyEventHandler : destroyEventHandler_) {
-        if (iterDestroyEventHandler) {
-            iterDestroyEventHandler();
-        }
-    }
-}
-
-void PipelineContext::NotifyDispatchTouchEventDismiss(const TouchEvent& event) const
-{
-    CHECK_RUN_ON(UI);
-    for (auto& iterDispatchTouchEventHandler : dispatchTouchEventHandler_) {
-        if (iterDispatchTouchEventHandler) {
-            iterDispatchTouchEventHandler(event);
         }
     }
 }

@@ -391,20 +391,6 @@ public:
     }
     void NotifyIsPagePathInvalidDismiss(bool isPageInvalid) const;
 
-    using DestroyEventHandler = std::function<void()>;
-    void SetDestroyHandler(DestroyEventHandler&& listener)
-    {
-        destroyEventHandler_.push_back(std::move(listener));
-    }
-    void NotifyDestroyEventDismiss() const;
-
-    using DispatchTouchEventHandler = std::function<void(const TouchEvent& event)>;
-    void SetDispatchTouchEventHandler(DispatchTouchEventHandler&& listener)
-    {
-        dispatchTouchEventHandler_.push_back(std::move(listener));
-    }
-    void NotifyDispatchTouchEventDismiss(const TouchEvent& event) const;
-
     using WebPaintCallback = std::function<void()>;
     void SetWebPaintCallback(WebPaintCallback&& listener)
     {
@@ -1472,8 +1458,6 @@ private:
     RouterBackEventHandler routerBackEventHandler_;
     std::list<PopPageSuccessEventHandler> popPageSuccessEventHandler_;
     std::list<IsPagePathInvalidEventHandler> isPagePathInvalidEventHandler_;
-    std::list<DestroyEventHandler> destroyEventHandler_;
-    std::list<DispatchTouchEventHandler> dispatchTouchEventHandler_;
     std::list<WebPaintCallback> webPaintCallback_;
 
     RefPtr<ManagerInterface> textFieldManager_;

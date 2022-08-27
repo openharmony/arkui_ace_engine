@@ -549,7 +549,6 @@ void AceContainer::InitializeCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event]() {
                 context->OnTouchEvent(event);
-                context->NotifyDispatchTouchEventDismiss(event);
             },
             TaskExecutor::TaskType::UI);
     };
