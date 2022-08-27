@@ -39,6 +39,70 @@ namespace {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 
+void AnimateToForStageMode(const RefPtr<PipelineContext>& pipelineContext, AnimationOption& option,
+    const JSCallbackInfo& info, std::function<void()>& onFinishEvent)
+{
+    auto triggerId = Container::CurrentId();
+    AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
+        auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        if (!context) {
+            // pa container do not have pipeline context.
+            return;
+        }
+        if (!container->GetSettings().usingSharedRuntime) {
+            return;
+        }
+        auto frontendType = context->GetFrontendType();
+        if (frontendType != FrontendType::DECLARATIVE_JS && frontendType != FrontendType::JS_PLUGIN) {
+            LOGW("Not compatible frontType(%{public}d) for declarative. containerId: %{public}d", frontendType,
+                container->GetInstanceId());
+        }
+        ContainerScope scope(container->GetInstanceId());
+        context->FlushBuild();
+        if (context->GetInstanceId() == triggerId) {
+            return;
+        }
+        context->PrepareOpenImplicitAnimation();
+    });
+    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
+    // Execute the function.
+    JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
+    jsAnimateToFunc->Call(info[1]);
+    AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
+        auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        if (!context) {
+            // pa container do not have pipeline context.
+            return;
+        }
+        if (!container->GetSettings().usingSharedRuntime) {
+            return;
+        }
+        auto frontendType = context->GetFrontendType();
+        if (frontendType != FrontendType::DECLARATIVE_JS && frontendType != FrontendType::JS_PLUGIN) {
+            LOGW("Not compatible frontType(%{public}d) for declarative. containerId: %{public}d", frontendType,
+                container->GetInstanceId());
+        }
+        ContainerScope scope(container->GetInstanceId());
+        context->FlushBuild();
+        if (context->GetInstanceId() == triggerId) {
+            return;
+        }
+        context->PrepareCloseImplicitAnimation();
+    });
+    pipelineContext->CloseImplicitAnimation();
+}
+
+void AnimateToForFaMode(const RefPtr<PipelineContext>& pipelineContext, AnimationOption& option,
+    const JSCallbackInfo& info, std::function<void()>& onFinishEvent)
+{
+    pipelineContext->FlushBuild();
+    pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
+    JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
+    jsAnimateToFunc->Call(info[1]);
+    pipelineContext->FlushBuild();
+    pipelineContext->CloseImplicitAnimation();
+}
+
 } // namespace
 
 const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonValue>& animationArgs)
@@ -171,52 +235,18 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         LOGE("pipelineContext is null!");
         return;
     }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
 
     AnimationOption option = CreateAnimation(animationArgs);
     if (SystemProperties::GetRosenBackendEnabled()) {
-        LOGD("RSAnimationInfo: Begin JSAnimateTo");
-        auto triggerId = Container::CurrentId();
-        AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
-            auto context = container->GetPipelineContext();
-            if (!context) {
-                // pa container do not have pipeline context.
-                return;
-            }
-            auto frontendType = context->GetFrontendType();
-            if (frontendType != FrontendType::DECLARATIVE_JS && frontendType != FrontendType::JS_PLUGIN) {
-                LOGW("Not compatible frontType(%{public}d) for declarative. containerId: %{public}d", frontendType,
-                    container->GetInstanceId());
-            }
-            ContainerScope scope(container->GetInstanceId());
-            context->FlushBuild();
-            if (context->GetInstanceId() == triggerId) {
-                return;
-            }
-            context->PrepareOpenImplicitAnimation();
-        });
-        pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
-        // Execute the function.
-        JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
-        jsAnimateToFunc->Call(info[1]);
-        AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
-            auto context = container->GetPipelineContext();
-            if (!context) {
-                // pa container do not have pipeline context.
-                return;
-            }
-            auto frontendType = context->GetFrontendType();
-            if (frontendType != FrontendType::DECLARATIVE_JS && frontendType != FrontendType::JS_PLUGIN) {
-                LOGW("Not compatible frontType(%{public}d) for declarative. containerId: %{public}d", frontendType,
-                    container->GetInstanceId());
-            }
-            ContainerScope scope(container->GetInstanceId());
-            context->FlushBuild();
-            if (context->GetInstanceId() == triggerId) {
-                return;
-            }
-            context->PrepareCloseImplicitAnimation();
-        });
-        pipelineContext->CloseImplicitAnimation();
+        bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
+        LOGD("RSAnimationInfo: Begin JSAnimateTo, usingSharedRuntime: %{public}d", usingSharedRuntime);
+        if (usingSharedRuntime) {
+            AnimateToForStageMode(pipelineContext, option, info, onFinishEvent);
+        } else {
+            AnimateToForFaMode(pipelineContext, option, info, onFinishEvent);
+        }
         LOGD("RSAnimationInfo: End JSAnimateTo");
     } else {
         pipelineContext->FlushBuild();
