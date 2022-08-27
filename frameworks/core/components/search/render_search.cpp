@@ -315,8 +315,7 @@ bool RenderSearch::HandleEnterEvent()
         focusRender_ = SearchNodeType::NONE;
         MarkNeedRender();
         return true;
-    }
-    if (focusRender_ == SearchNodeType::BUTTON) {
+    } else if (focusRender_ == SearchNodeType::BUTTON) {
         std::string searchKey = textEditController_->GetText();
         FireSubmitEvent(searchKey);
         focusRender_ = SearchNodeType::NONE;
@@ -411,9 +410,9 @@ bool RenderSearch::TouchTest(const Point& globalPoint, const Point& parentLocalP
         OnTouchTestHit(coordinateOffset, touchRestrict, result);
         return true;
     }
-    if (GetPaintRect().IsInRegion(parentLocalPoint)) {
+    if (GetPaintRect().IsInRegion(pointWithoutMargin)) {
         // Calculates the local point location in this node.
-        const auto localPoint = parentLocalPoint - GetPaintRect().GetOffset();
+        const auto localPoint = pointWithoutMargin - GetPaintRect().GetOffset();
         bool dispatchSuccess = false;
         for (auto iter = GetChildren().rbegin(); iter != GetChildren().rend(); ++iter) {
             auto& child = *iter;
