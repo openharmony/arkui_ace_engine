@@ -458,11 +458,11 @@ public:
     bool UpdateSizeWithCheck(const OptionalSize& size)
     {
         bool isModified = false;
-        if (NonNegative(size.width_.value_or(0)) && (width_ != size.width_)) {
+        if (size.width_ && (width_ != size.width_)) {
             width_ = size.width_;
             isModified = true;
         }
-        if (NonNegative(size.width_.value_or(0)) && (height_ != size.height_)) {
+        if (size.height_ && (height_ != size.height_)) {
             height_ = size.height_;
             isModified = true;
         }
