@@ -630,6 +630,11 @@ void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
     const RefPtr<TextFieldComponent>& component, const Border& boxBorder,
     const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)
 {
+    if (!textFieldTheme) {
+        LOGE("UpdateDecoration: textFieldTheme is null.");
+        return;
+    }
+
     RefPtr<Decoration> decoration = component->GetDecoration();
     RefPtr<Decoration> boxDecoration = boxComponent->GetBackDecoration();
     if (!decoration) {
