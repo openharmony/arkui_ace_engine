@@ -39,7 +39,6 @@ constexpr int32_t TEXT_FIELD_STYLE_TEXT_BASE_LINE = 1;
 constexpr int32_t TEXT_FIELD_STYLE_TEXT_BASE_LINE_DEFAULT = 0;
 constexpr int32_t TEXT_FIELD_STYLE_TEXT_DECORATION = 1;
 constexpr int32_t TEXT_FIELD_STYLE_TEXT_DECORATION_DEFAULT = 0;
-constexpr uint32_t TEXT_FIELD_STYLE_COLOR_VALUE_DEFAULT = 4278190080;
 constexpr Dimension TEXT_FIELD_STYLE_WORD_SPACING = 10.0_px;
 constexpr Dimension TEXT_FIELD_STYLE_WORD_SPACING_DEFAULT = 0.0_px;
 constexpr Dimension TEXT_FIELD_STYLE_LETTER_SPACING = 10.0_px;
@@ -199,8 +198,6 @@ HWTEST_F(TextFieldStyleCreatorTest, TextFieldStyleCreator002, TestSize.Level1)
     EXPECT_EQ(textStyle.GetLetterSpacing().Unit(), TEXT_FIELD_STYLE_LETTER_SPACING_DEFAULT.Unit());
     EXPECT_TRUE(NearEqual(textStyle.GetLetterSpacing().Value(), TEXT_FIELD_STYLE_LETTER_SPACING_DEFAULT.Value()));
     EXPECT_TRUE(NearEqual(textStyle.GetLineHeight().Value(), TEXT_FIELD_STYLE_LINE_HEIGHT_DEFAULT));
-    const auto& textShadowColor = textStyle.GetTextShadows()[0].GetColor().GetValue();
-    EXPECT_EQ(static_cast<uint32_t>(textShadowColor), TEXT_FIELD_STYLE_COLOR_VALUE_DEFAULT);
 }
 
 } // namespace OHOS::Ace
