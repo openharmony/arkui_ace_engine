@@ -16,6 +16,7 @@
 #include "core/components/button/button_element.h"
 
 #include "core/event/key_event.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace {
 
@@ -70,6 +71,11 @@ void ButtonElement::LocalizedUpdate()
 {
     Update();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(component_);
+
+    if (Container::IsCurrentUsePartialUpdate() && buttonComponent->GetHasCustomChild()) {
+        // in partial update code path a custom child updates independently
+        return;
+    }
     ComponentGroupElement::UpdateChildrenForDeclarative(buttonComponent->GetChildren());
 }
 

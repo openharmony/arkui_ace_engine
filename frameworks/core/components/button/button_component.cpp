@@ -68,6 +68,7 @@ RefPtr<ButtonComponent> ButtonBuilder::Build(const RefPtr<ThemeManager>& themeMa
     std::list<RefPtr<Component>> buttonChildren;
     buttonChildren.emplace_back(padding);
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
+    buttonComponent->SetHasCustomChild(false);
     auto buttonTheme = AceType::DynamicCast<ButtonTheme>(themeManager->GetTheme(ButtonTheme::TypeId()));
     if (!buttonTheme) {
         return buttonComponent;
