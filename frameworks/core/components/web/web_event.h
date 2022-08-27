@@ -745,6 +745,28 @@ private:
     float newScale_ = 0.0f;
 };
 
+class ACE_EXPORT OnScrollEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(OnScrollEvent, BaseEventInfo);
+
+public:
+    OnScrollEvent(double xOffset, double yOffset) : BaseEventInfo
+        ("OnScrollEvent"), xOffset_(xOffset), yOffset_(yOffset) {}
+    ~OnScrollEvent() = default;
+
+    float GetX() const
+    {
+        return xOffset_;
+    }
+
+    float GetY() const
+    {
+        return yOffset_;
+    }
+private:
+    double xOffset_ = 0.0f;
+    double yOffset_ = 0.0f;
+};
+
 class WebContextMenuParam : public AceType {
     DECLARE_ACE_TYPE(WebContextMenuParam, AceType)
 

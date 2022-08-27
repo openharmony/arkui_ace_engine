@@ -263,7 +263,7 @@ public:
     void HandleTouchCancel();
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
-    void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action);
+    void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
     void OnFocus();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
@@ -304,6 +304,7 @@ public:
     bool OnHandleInterceptUrlLoading(const std::string& url);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);
+    void OnScroll(double xOffset, double yOffset);
     bool LoadDataWithRichText();
     void OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting);
 
@@ -405,6 +406,7 @@ private:
     EventCallbackV2 onRenderExitedV2_;
     EventCallbackV2 onResourceLoadV2_;
     EventCallbackV2 onScaleChangeV2_;
+    EventCallbackV2 onScrollV2_;
     EventCallbackV2 onPermissionRequestV2_;
     EventCallbackV2 onSearchResultReceiveV2_;
 

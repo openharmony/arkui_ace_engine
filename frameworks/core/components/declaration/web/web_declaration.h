@@ -44,6 +44,7 @@ struct WebEvent : Event {
     EventMarker scaleChangeId;
     EventMarker permissionRequestId;
     EventMarker searchResultReceiveEventId;
+    EventMarker scrollId;
 };
 
 struct WebMethod : Method {
@@ -251,6 +252,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.scaleChangeId;
+    }
+
+    void SetScrollId(const EventMarker& scrollId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.scrollId = scrollId;
+    }
+
+    const EventMarker& GetScrollId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.scrollId;
     }
 
     void SetPermissionRequestEventId(const EventMarker& permissionRequestId)

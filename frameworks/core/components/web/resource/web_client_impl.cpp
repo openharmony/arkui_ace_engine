@@ -375,6 +375,16 @@ void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)
     delegate->OnScaleChange(oldScaleFactor, newScaleFactor);
 }
 
+void WebClientImpl::OnScroll(double xOffset, double yOffset)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnScroll(xOffset, yOffset);
+}
+
 bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthResult> result, const std::string &host,
     const std::string &realm)
 {
