@@ -185,7 +185,7 @@ bool RenderGridScroll::UpdateScrollPosition(double offset, int32_t source)
         reachHead_ = false;
     }
 
-    currentOffset_ += Round(offset);
+    currentOffset_ += offset;
     MarkNeedLayout(true);
     return true;
 }
