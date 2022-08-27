@@ -87,6 +87,13 @@ public:
     }
 
     void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
+
+    void InitializeModuleSearcher(const std::string& bundleName, const std::string& assetPath)
+    {
+        if (jsEngine_) {
+            jsEngine_->InitializeModuleSearcher(bundleName, assetPath);
+        }
+    }
 #endif
     void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
     void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
