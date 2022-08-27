@@ -36,8 +36,8 @@ struct LayoutConditions {
     bool isVertical = true;
     FlexAlign crossAlign = FlexAlign::FLEX_START;
     FlexAlign mainAlign = FlexAlign::FLEX_START;
-    SizeF size{ 0.0f, 0.0f };
-    OffsetF paddingOffset{ 0.0f, 0.0f };
+    SizeF size { 0.0f, 0.0f };
+    OffsetF paddingOffset { 0.0f, 0.0f };
     float space = 0.0f;
 };
 
