@@ -32,13 +32,13 @@ struct LinearMeasureProperty {
 };
 
 struct LayoutConditions {
-    LayoutWrapper* layoutWrapper;
-    bool isVertical;
-    FlexAlign crossAlign;
-    FlexAlign mainAlign;
-    SizeF size;
-    OffsetF paddingOffset;
-    float space;
+    LayoutWrapper* layoutWrapper = nullptr;
+    bool isVertical = true;
+    FlexAlign crossAlign = FlexAlign::FLEX_START;
+    FlexAlign mainAlign = FlexAlign::FLEX_START;
+    SizeF size{ 0.0f, 0.0f };
+    OffsetF paddingOffset{ 0.0f, 0.0f };
+    float space = 0.0f;
 };
 
 // BoxLayout is the class for box type measure, layout.
