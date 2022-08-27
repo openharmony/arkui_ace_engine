@@ -68,9 +68,9 @@ AppSpawnMsg* UIMgrService::MakeAppSpawnMsg(const std::string& name, int32_t id)
         HILOG_ERROR("Ace uiservice failed to memset!");
         return nullptr;
     }
-    HILOG_ERROR("Ace uid is %{public}d", getuid());
     msg->uid = getuid();
     msg->gid = getgid();
+    msg->accessTokenId = IPCSkeleton::GetCallingTokenID();
     std::string proccessName = name + std::to_string(id);
     if (strcpy_s(msg->processName, sizeof(msg->processName), proccessName.c_str()) != EOK) {
         HILOG_ERROR("failed to copy proccess name!");
