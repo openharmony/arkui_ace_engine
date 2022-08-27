@@ -28,6 +28,7 @@ class ACE_EXPORT ColumnView {
 public:
     static void Create(const std::optional<Dimension>& space);
     static void AlignItems(FlexAlign flexAlign);
+    static void JustifyContent(FlexAlign flexAlign);
 };
 } // namespace OHOS::Ace::NG
 

@@ -43,4 +43,9 @@ void RowView::AlignItems(FlexAlign flexAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign);
 }
+
+void RowView::JustifyContent(FlexAlign flexAlign)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign);
+}
 } // namespace OHOS::Ace::NG
