@@ -1568,6 +1568,10 @@ RefPtr<RenderListItem> RenderList::RequestListItem(size_t index)
         newItem->SetVisible(true);
     }
 
+    if (newItem->GetHidden()) {
+        newItem->SetHidden(false);
+    }
+
     return newItem;
 }
 
