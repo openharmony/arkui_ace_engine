@@ -61,7 +61,7 @@ void FlutterRenderContext::StopRecordingIfNeeded()
     }
 }
 
-void FlutterRenderContext::InitContext(bool isRoot)
+void FlutterRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName)
 {
     LOGD("InitContext root:%d", isRoot);
     flutterNode_ = std::make_shared<FlutterNode>(isRoot);

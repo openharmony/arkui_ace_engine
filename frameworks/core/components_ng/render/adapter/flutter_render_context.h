@@ -32,7 +32,7 @@ public:
     FlutterRenderContext() = default;
     ~FlutterRenderContext() override;
 
-    void InitContext(bool isRoot) override;
+    void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
