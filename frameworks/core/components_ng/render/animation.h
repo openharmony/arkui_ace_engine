@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/page/page_pattern.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_H
 
-namespace OHOS::Ace::NG {
-void PagePattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    if (!host) {
-        LOGE("fail to update measure type due to host is null");
-        return;
-    }
-    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-}
-} // namespace OHOS::Ace::NG
+#include "render_service_client/core/animation/rs_transition.h"
+
+namespace OHOS::Ace {
+
+using RSTransitionEffect = Rosen::RSTransitionEffect;
+
+} // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_H

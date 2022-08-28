@@ -219,6 +219,38 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     }
 }
 
+bool PipelineContext::OnBackPressed()
+{
+    LOGD("OnBackPressed");
+    CHECK_RUN_ON(PLATFORM);
+    auto frontend = weakFrontend_.Upgrade();
+    if (!frontend) {
+        // return back.
+        return false;
+    }
+
+    auto result = false;
+    taskExecutor_->PostSyncTask(
+        [weakFrontend = weakFrontend_, weakPipelineContext = WeakClaim(this), &result]() {
+            auto frontend = weakFrontend.Upgrade();
+            if (!frontend) {
+                LOGW("frontend is nullptr");
+                result = false;
+                return;
+            }
+            result = frontend->OnBackPressed();
+        },
+        TaskExecutor::TaskType::JS);
+
+    if (result) {
+        // user accept
+        LOGI("CallRouterBackToPopPage(): frontend accept");
+        return true;
+    }
+    LOGI("CallRouterBackToPopPage(): return platform consumed");
+    return false;
+}
+
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);

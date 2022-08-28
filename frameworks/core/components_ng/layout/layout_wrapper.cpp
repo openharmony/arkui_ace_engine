@@ -226,14 +226,14 @@ void LayoutWrapper::MountToHostOnMainThread()
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
-    for (const auto& [index, wrapper] : pendingRender_) {
+    for (const auto& [index, wrapper] : children_) {
         if (wrapper) {
             wrapper->SwapDirtyLayoutWrapperOnMainThread();
         }
     }
 
     if (layoutWrapperBuilder_) {
-        layoutWrapperBuilder_->UpdateBuildCacheOnMainThread();
+        layoutWrapperBuilder_->SwapDirtyAndUpdateBuildCache();
     }
 
     auto host = hostNode_.Upgrade();

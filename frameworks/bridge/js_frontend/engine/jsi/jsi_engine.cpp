@@ -28,6 +28,7 @@
 #include "base/utils/time_util.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
+#include "bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"

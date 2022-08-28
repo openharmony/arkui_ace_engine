@@ -27,7 +27,7 @@ LazyLayoutWrapperBuilder::LazyLayoutWrapperBuilder(
     : builder_(builder), host_(host)
 {}
 
-void LazyLayoutWrapperBuilder::UpdateBuildCacheOnMainThread()
+void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
 {
     ACE_FUNCTION_TRACE();
     auto host = host_.Upgrade();
@@ -36,6 +36,7 @@ void LazyLayoutWrapperBuilder::UpdateBuildCacheOnMainThread()
     for (const auto& child : buildItems_) {
         if (child.second->IsActive()) {
             items.emplace(child.first);
+            child.second->SwapDirtyLayoutWrapperOnMainThread();
         }
     }
     host->UpdateCachedItems(items);

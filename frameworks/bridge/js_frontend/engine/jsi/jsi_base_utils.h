@@ -19,14 +19,14 @@
 #include "frameworks/base/log/ace_trace.h"
 #include "frameworks/base/log/event_report.h"
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
+#include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
 
 namespace OHOS::Ace::Framework {
 using ErrorPos = std::pair<uint32_t, uint32_t>;
-int32_t GetLineOffset(const AceType *data);
-RefPtr<JsAcePage> GetRunningPage(const AceType *data);
+int32_t GetLineOffset(const AceType* data);
+RefPtr<JsAcePage> GetRunningPage(const AceType* data);
 NativeValue* AppDebugLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info);
 NativeValue* AppInfoLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info);
 NativeValue* AppWarnLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info);
@@ -64,17 +64,18 @@ public:
         const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
 
 private:
-    static std::string GenerateSummaryBody(std::shared_ptr<JsValue> error, std::shared_ptr<JsRuntime> runtime);
+    static std::string GenerateSummaryBody(
+        const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime);
     static ErrorPos GetErrorPos(const std::string& rawStack);
-    static std::string GetSourceCodeInfo(std::shared_ptr<JsRuntime> runtime,
-        const shared_ptr<JsValue>& errorFunc, ErrorPos pos);
+    static std::string GetSourceCodeInfo(
+        std::shared_ptr<JsRuntime> runtime, const shared_ptr<JsValue>& errorFunc, ErrorPos pos);
     static std::string TranslateRawStack(const std::string& rawStackStr);
     static std::string TranslateStack(const std::string& stackStr, const std::string& pageUrl,
-        const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, const AceType *data = nullptr);
+        const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, const AceType* data = nullptr);
     static void ExtractEachInfo(const std::string& tempStack, std::vector<std::string>& res);
     static void GetPosInfo(const std::string& temp, int32_t start, std::string& line, std::string& column);
     static std::string GetSourceInfo(const std::string& line, const std::string& column,
-        const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType *data);
+        const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data);
     static std::string GetRelativePath(const std::string& sources, std::string splitStr = "/\\");
 };
 } // namespace OHOS::Ace::Framework

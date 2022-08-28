@@ -152,8 +152,10 @@ public:
 
     bool CallRouterBackToPopPage() override
     {
-        return false;
+        return OnBackPressed();
     }
+
+    bool OnBackPressed();
 
     void AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode);
 
