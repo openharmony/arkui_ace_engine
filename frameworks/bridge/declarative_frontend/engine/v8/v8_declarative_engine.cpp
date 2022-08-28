@@ -1047,7 +1047,6 @@ V8DeclarativeEngine::~V8DeclarativeEngine()
         }
     }
     LOG_DESTROY();
-    XComponentClient::GetInstance().SetJSValCallToNull();
     if (nativeEngine_ != nullptr) {
 #if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         nativeEngine_->CancelCheckUVLoop();
@@ -1790,6 +1789,7 @@ void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, cons
         XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(componentId);
         XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
+        XComponentClient::GetInstance().DeleteFromJsValMapById(componentId);
         return;
     }
     InitXComponent();
@@ -1832,18 +1832,7 @@ void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, cons
     renderContextXComp_.Reset(isolateXComp_, renderContext);
     auto objContext = V8Object(renderContext);
     JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
-    RefPtr<JSXComponentController> controller = OHOS::Ace::Framework::XComponentClient::GetInstance().
-        GetControllerFromJSXComponentControllersMap(componentId);
-    auto weakController = AceType::WeakClaim(AceType::RawPtr(controller));
-    auto getJSValCallback = [obj, weakController](JSRef<JSVal>& jsVal) {
-        jsVal = obj;
-        auto jsXComponentController = weakController.Upgrade();
-        if (jsXComponentController) {
-            jsXComponentController->SetXComponentContext(obj);
-        }
-        return true;
-    };
-    XComponentClient::GetInstance().RegisterJSValCallback(getJSValCallback);
+    XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
     auto delegate =
         static_cast<RefPtr<FrontendDelegate>*>(isolateXComp_->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
     v8::TryCatch tryCatch(isolateXComp_);
