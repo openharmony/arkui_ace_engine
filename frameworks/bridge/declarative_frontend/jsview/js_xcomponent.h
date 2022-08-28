@@ -38,11 +38,6 @@ public:
         return instance;
     }
 
-    void RegisterJSValCallback(GetJSValCallback&& callback)
-    {
-        getJSValCallback_ = callback;
-    }
-
     RefPtr<XComponentComponent> GetXComponentFromXcomponentsMap(const std::string& xcomponentId)
     {
         auto iter = xcomponentsMap_.find(xcomponentId);
@@ -125,27 +120,41 @@ public:
         nativeXcomponentsMap_.erase(it);
     }
 
-    void SetJSValCallToNull()
+    void AddJsValToJsValMap(const std::string& xcomponentId, const JSRef<JSVal>& jsVal)
     {
-        getJSValCallback_ = nullptr;
+        auto result = jsValMap_.try_emplace(xcomponentId, jsVal);
+        if (!result.second) {
+            result.first->second = jsVal;
+        }
     }
 
-    bool GetJSVal(JSRef<JSVal>& param)
+    void DeleteFromJsValMapById(const std::string& xcomponentId)
     {
-        if (getJSValCallback_) {
-            return getJSValCallback_(param);
-        } else {
-            return false;
+        auto it = jsValMap_.find(xcomponentId);
+        if (it == jsValMap_.end()) {
+            return;
         }
+        jsValMap_.erase(it);
+    }
+
+    bool GetJSVal(const std::string& xcomponentId, JSRef<JSVal>& jsVal)
+    {
+        auto iter = jsValMap_.find(xcomponentId);
+        if (iter != jsValMap_.end()) {
+            jsVal = iter->second;
+            jsValMap_.erase(iter);
+            return true;
+        }
+        return false;
     }
 
 private:
     XComponentClient() = default;
-    GetJSValCallback getJSValCallback_ = nullptr;
     std::unordered_map<std::string, WeakPtr<XComponentComponent>> xcomponentsMap_;
     std::unordered_map<std::string, RefPtr<JSXComponentController>> jsXComponentControllersMap_;
     std::unordered_map<std::string, std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, OH_NativeXComponent*>>
         nativeXcomponentsMap_;
+    std::unordered_map<std::string, JSRef<JSVal>> jsValMap_;
 };
 
 class ACE_EXPORT JSXComponent : public JSContainerBase {
