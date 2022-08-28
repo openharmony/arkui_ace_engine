@@ -225,6 +225,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     // title text
     if (!titleLabel_) {
         titleLabel_ = AceType::MakeRefPtr<TextComponent>("");
+        titleId_ = V2::InspectorComposedComponent::GenerateId();
     }
     TextStyle style;
     style.SetFontSize(TITLE_TEXT_FONT_SIZE);
@@ -290,7 +291,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     titleChildren.emplace_back(SetPadding(titleIcon_, TITLE_PADDING_START, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     if (isDeclarative_) {
         titleChildren.emplace_back(AceType::MakeRefPtr<V2::InspectorComposedComponent>(
-            V2::InspectorComposedComponent::GenerateId(), V2::TEXT_COMPONENT_TAG, titleLabel_));
+            titleId_, V2::TEXT_COMPONENT_TAG, titleLabel_));
     } else {
         titleChildren.emplace_back(AceType::MakeRefPtr<ComposedComponent>(
             isFloating ? std::to_string(FLOATING_TITLE_LABEL) : std::to_string(TITLE_LABEL), DOM_NODE_TAG_TEXT,
