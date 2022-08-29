@@ -324,7 +324,11 @@ void InspectorComposedElement::Update()
 
 bool InspectorComposedElement::CanUpdate(const RefPtr<Component>& newComponent)
 {
-    return Element::CanUpdate(newComponent);
+    auto component = AceType::DynamicCast<InspectorComposedComponent>(newComponent);
+    if (!component) {
+        return false;
+    }
+    return GetInspectorTag() == component->GetName();
 }
 
 void InspectorComposedElement::AddComposedComponentId()
