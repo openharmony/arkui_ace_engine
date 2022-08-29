@@ -2705,6 +2705,7 @@ void PipelineContext::OnHide()
 #ifdef ENABLE_ROSEN_BACKEND
             if (context->rsUIDirector_) {
                 context->rsUIDirector_->GoBackground();
+                context->rsUIDirector_->SendMessages();
             }
 #endif
             context->NotifyPopupDismiss();
