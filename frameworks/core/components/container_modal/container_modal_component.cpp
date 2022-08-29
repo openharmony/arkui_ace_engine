@@ -291,10 +291,8 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     if (isDeclarative_) {
         auto inspectorTitle = AceType::MakeRefPtr<V2::InspectorComposedComponent>(
             V2::InspectorComposedComponent::GenerateId(), V2::TEXT_COMPONENT_TAG, titleLabel_);
-        auto paddingTitle = AceType::MakeRefPtr<PaddingComponent>();
-        paddingTitle->SetChild(inspectorTitle);
-        paddingTitle->SetFlexWeight(1.0);
-        titleChildren.emplace_back(paddingTitle);
+        inspectorTitle->MarkNeedUpdate();
+        titleChildren.emplace_back(inspectorTitle);
     } else {
         titleChildren.emplace_back(AceType::MakeRefPtr<ComposedComponent>(
             isFloating ? std::to_string(FLOATING_TITLE_LABEL) : std::to_string(TITLE_LABEL), DOM_NODE_TAG_TEXT,
