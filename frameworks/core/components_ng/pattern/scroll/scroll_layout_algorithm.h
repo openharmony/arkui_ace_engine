@@ -26,7 +26,6 @@
 
 namespace OHOS::Ace::NG {
 
-// TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ScrollLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ScrollLayoutAlgorithm, LayoutAlgorithm);
 

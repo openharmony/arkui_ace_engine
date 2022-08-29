@@ -41,7 +41,7 @@ void ScrollPattern::OnModifyDone()
 
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     if (axis_ == axis && scrollableEvent_) {
-        LOGE("Direction not changed, need't resister scroll event again.");
+        LOGD("Direction not changed, need't resister scroll event again.");
         return;
     }
 
@@ -86,7 +86,7 @@ void ScrollPattern::UpdateCurrentOffset(float offset)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     currentOffset_ = currentOffset_ + offset;
-    host->MarkDirtyNode(PROPERTY_REQUEST_NEW_CHILD_NODE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 } // namespace OHOS::Ace::NG
