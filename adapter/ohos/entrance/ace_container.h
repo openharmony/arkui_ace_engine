@@ -146,6 +146,13 @@ public:
         resourceInfo_.SetPackagePath(packagePath);
     }
 
+    std::string GetHapPath() const
+    {
+        return resourceInfo_.GetHapPath();
+    }
+
+    void SetHapPath(const std::string& hapPath);
+
     void Dispatch(
         const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const override;
 

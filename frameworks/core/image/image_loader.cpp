@@ -41,6 +41,7 @@ constexpr size_t INTERNAL_FILE_HEAD_LENGTH = 15; // 15 is the size of "internal:
 const std::regex MEDIA_RES_ID_REGEX(R"(^resource://\w+/([0-9]+)\.\w+$)", std::regex::icase);
 const std::regex MEDIA_APP_RES_PATH_REGEX(R"(^resource://RAWFILE/(.*)$)");
 const std::regex MEDIA_APP_RES_ID_REGEX(R"(^resource://.*/([0-9]+)\.\w+$)", std::regex::icase);
+const std::regex MEDIA_RES_NAME_REGEX(R"(^resource://.*/(\w+)\.\w+$)", std::regex::icase);
 constexpr uint32_t MEDIA_RESOURCE_MATCH_SIZE = 2;
 
 #ifdef WINDOWS_PLATFORM
@@ -371,8 +372,7 @@ std::string_view Base64ImageLoader::GetBase64ImageCode(const std::string& uri)
     return code;
 }
 
-bool ResourceImageLoader::GetResourceId(const std::string& uri, const RefPtr<ThemeConstants>& themeConstants,
-    uint32_t& resId) const
+bool ResourceImageLoader::GetResourceId(const std::string& uri, uint32_t& resId) const
 {
     std::smatch matches;
     if (std::regex_match(uri, matches, MEDIA_RES_ID_REGEX) && matches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
@@ -389,12 +389,22 @@ bool ResourceImageLoader::GetResourceId(const std::string& uri, const RefPtr<The
     return false;
 }
 
-bool ResourceImageLoader::GetResourceId(const std::string& uri, const RefPtr<ThemeConstants>& themeConstants,
-    std::string& path) const
+bool ResourceImageLoader::GetResourceId(const std::string& uri, std::string& path) const
 {
     std::smatch matches;
     if (std::regex_match(uri, matches, MEDIA_APP_RES_PATH_REGEX) && matches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
         path = matches[1].str();
+        return true;
+    }
+
+    return false;
+}
+
+bool ResourceImageLoader::GetResourceName(const std::string& uri, std::string& resName) const
+{
+    std::smatch matches;
+    if (std::regex_match(uri, matches, MEDIA_RES_NAME_REGEX) && matches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
+        resName = matches[1].str();
         return true;
     }
 
@@ -420,28 +430,36 @@ sk_sp<SkData> ResourceImageLoader::LoadImageData(
         LOGE("get theme constants failed");
         return nullptr;
     }
-    uint32_t resId = 0;
-    std::string path;
-    std::ostringstream osstream;
-    if (GetResourceId(uri, themeConstants, resId)) {
-        auto ret = themeConstants->GetMediaResource(resId, osstream);
-        if (!ret) {
-            LOGE("get resId image from resource manager failed");
-            return nullptr;
-        }
-    } else if (GetResourceId(uri, themeConstants, path)) {
-        auto ret = themeConstants->GetMediaResource(path, osstream);
-        if (!ret) {
-            LOGE("get path image from resource manager failed");
-            return nullptr;
-        }
-    } else {
-        LOGE("get image resource id failed");
-        return nullptr;
-    }
 
-    const auto& mediaRes = osstream.str();
-    return SkData::MakeWithCopy(mediaRes.c_str(), mediaRes.size());
+    std::unique_ptr<uint8_t[]> data;
+    size_t dataLen = 0;
+    std::string rawFile;
+    if (GetResourceId(uri, rawFile)) {
+        // must fit raw file firstly, as file name may contains number
+        if (!themeConstants->GetRawFileData(rawFile, dataLen, data)) {
+            LOGE("get image data by name failed, uri:%{private}s, rawFile:%{public}s", uri.c_str(), rawFile.c_str());
+            return nullptr;
+        }
+        return SkData::MakeWithCopy(data.get(), dataLen);
+    }
+    uint32_t resId = 0;
+    if (GetResourceId(uri, resId)) {
+        if (!themeConstants->GetMediaData(resId, dataLen, data)) {
+            LOGE("get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(), resId);
+            return nullptr;
+        }
+        return SkData::MakeWithCopy(data.get(), dataLen);
+    }
+    std::string resName;
+    if (GetResourceName(uri, resName)) {
+        if (!themeConstants->GetMediaData(resName, dataLen, data)) {
+            LOGE("get image data by name failed, uri:%{private}s, resName:%{public}s", uri.c_str(), resName.c_str());
+            return nullptr;
+        }
+        return SkData::MakeWithCopy(data.get(), dataLen);
+    }
+    LOGE("load image data failed, as uri is invalid:%{private}s", uri.c_str());
+    return nullptr;
 }
 
 } // namespace OHOS::Ace

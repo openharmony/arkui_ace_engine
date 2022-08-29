@@ -850,6 +850,14 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
     return context->CallRouterBackToPopPage();
 }
 
+void AceContainer::SetHapPath(const std::string& hapPath)
+{
+    resourceInfo_.SetHapPath(hapPath);
+    if (!hapPath.empty()) {
+        SystemProperties::SetUnZipHap(false);
+    }
+}
+
 void AceContainer::Dispatch(
     const std::string& group, std::vector<uint8_t>&& data, int32_t id, bool replyToComponent) const
 {

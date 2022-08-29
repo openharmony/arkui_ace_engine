@@ -97,6 +97,7 @@ void SubwindowOhos::InitContainer()
     container->SetAssetManager(parentContainer->GetAssetManager());
     container->SetResourceConfiguration(parentContainer->GetResourceConfiguration());
     container->SetPackagePathStr(parentContainer->GetPackagePathStr());
+    container->SetHapPath(parentContainer->GetHapPath());
     container->SetIsSubContainer(true);
     container->InitializeSubContainer(parentContainerId_);
     ViewportConfig config;

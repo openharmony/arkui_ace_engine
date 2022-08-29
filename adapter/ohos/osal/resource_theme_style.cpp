@@ -23,6 +23,7 @@ constexpr char COLOR_VALUE_PREFIX[] = "$color:";
 constexpr char MEDIA_VALUE_PREFIX[] = "/";
 constexpr char REF_ATTR_VALUE_KEY_WORD[] = "?theme:";
 constexpr char RES_PATH_TAG[] = "file:///";
+constexpr char RES_TAG[] = "resource:///";
 // resource manager hap for system resource
 constexpr char RES_HAP_PREFIX[] = "ohos.global.systemres";
 // resource manager hap absolute path, as resource manager api don't return
@@ -73,12 +74,7 @@ void ResourceThemeStyle::ParseContent()
             // color
             attributes_[attrName] = { .type = ThemeConstantsType::COLOR, .value = Color::FromString(attrValue) };
         } else if (attrValue.find(MEDIA_VALUE_PREFIX) != std::string::npos) {
-            std::string mediaPath = RES_PATH_TAG;
-            if (attrValue.find(RES_HAP_PREFIX) == std::string::npos) {
-                mediaPath.append(RES_HAP_PATH);
-            }
-            mediaPath += attrValue;
-            attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = mediaPath };
+            OnParseResourceMedia(attrName, attrValue);
         } else if (stringAttrs.find(attrName) != stringAttrs.end()) {
             // string
             attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = attrValue };
@@ -97,7 +93,11 @@ void ResourceThemeStyle::ParseContent()
         }
     }
     LOGD("theme attribute size:%{public}zu", attributes_.size());
+    OnParseStyle();
+}
 
+void ResourceThemeStyle::OnParseStyle()
+{
     for (auto& [patternName, patternMap]: patternAttrs_) {
         auto patternStyle = AceType::MakeRefPtr<ResourceThemeStyle>(resAdapter_);
         patternStyle->SetName(patternName);
@@ -107,5 +107,26 @@ void ResourceThemeStyle::ParseContent()
         attributes_[patternName] = { .type = ThemeConstantsType::PATTERN,
             .value = RefPtr<ThemeStyle>(std::move(patternStyle)) };
     }
+}
+
+void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const std::string& attrValue)
+{
+    std::string mediaPath;
+    if (SystemProperties::GetUnZipHap()) {
+        mediaPath = RES_PATH_TAG;
+        if (attrValue.find(RES_HAP_PREFIX) == std::string::npos) {
+            mediaPath.append(RES_HAP_PATH);
+        }
+        mediaPath += attrValue;
+    } else {
+        // hap is not unzip, should use resource name to read file
+        auto pos = attrValue.find_last_of(MEDIA_VALUE_PREFIX);
+        if (pos == std::string::npos) {
+            LOGW("resource media invalid:[%{public}s, %{public}s]", attrName.c_str(), attrValue.c_str());
+            return;
+        }
+        mediaPath = std::string(RES_TAG) + attrValue.substr(pos + 1);
+    }
+    attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = mediaPath };
 }
 } // namespace OHOS::Ace

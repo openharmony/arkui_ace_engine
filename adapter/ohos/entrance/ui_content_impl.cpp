@@ -383,6 +383,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     std::string moduleName = info != nullptr ? info->moduleName : "";
     auto appInfo = context->GetApplicationInfo();
     auto bundleName = info != nullptr ? info->bundleName : "";
+    std::string moduleHapPath = info != nullptr ? info->hapPath : "";
     std::string resPath;
     std::string pageProfile;
     LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
@@ -464,6 +465,18 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             flutterAssetManager->SetLibPath(libPath);
         }
     }
+    std::string hapPath; // hap path in sandbox
+    if (!moduleHapPath.empty()) {
+        if (moduleHapPath.find(ABS_BUNDLE_CODE_PATH) == std::string::npos) {
+            hapPath = moduleHapPath;
+        } else {
+            auto pos = moduleHapPath.find_last_of('/');
+            if (pos != std::string::npos) {
+                hapPath = LOCAL_BUNDLE_CODE_PATH + moduleHapPath.substr(pos + 1);
+                LOGI("In Stage mode, hapPath:%{private}s", hapPath.c_str());
+            }
+        }
+    }
 
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
     PluginManager::GetInstance().SetAceAbility(nullptr, pluginUtils);
@@ -530,6 +543,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
+    container->SetHapPath(hapPath);
     container->SetAssetManager(flutterAssetManager);
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
