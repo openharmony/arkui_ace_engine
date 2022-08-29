@@ -925,6 +925,16 @@ public:
         return declaration_->GetScaleChangeId();
     }
 
+    void SetScrollId(const EventMarker& scrollId)
+    {
+        declaration_->SetScrollId(scrollId);
+    }
+
+    const EventMarker& GetScrollId() const
+    {
+        return declaration_->GetScrollId();
+    }
+
     void SetPermissionRequestEventId(const EventMarker& permissionRequestEventId)
     {
         declaration_->SetPermissionRequestEventId(permissionRequestEventId);

@@ -79,6 +79,7 @@ private:
     WeakPtr<PipelineContext> context_;
     RefPtr<ImageComponent> titleIcon_;
     RefPtr<TextComponent> titleLabel_;
+    std::string titleId_;
     bool isDeclarative_ = true;
     bool hideSplit_ = false;
     bool hideMaximize_ = false;

@@ -33,10 +33,7 @@ static void KillApplicationByUid()
         LOGE("failed to ConnectAppMgrService %{public}d", result);
         return;
     }
-    auto bundleName = AceApplicationInfo::GetInstance().GetPackageName();
-    auto uid = AceApplicationInfo::GetInstance().GetUid();
-    LOGI("kill running application, app name is %{public}s, uid is %{public}d", bundleName.c_str(), uid);
-    auto ret = appMgrClient->KillApplicationByUid(bundleName, uid);
+    auto ret = appMgrClient->KillApplicationSelf();
     if (ret != AppExecFwk::AppMgrResultCode::RESULT_OK) {
         LOGE("Fail to kill application by uid. %{public}d", ret);
         return;

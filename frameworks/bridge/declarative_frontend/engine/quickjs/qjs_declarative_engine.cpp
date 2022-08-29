@@ -579,6 +579,7 @@ void QJSDeclarativeEngine::FireExternalEvent(
         XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(componentId);
         XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
+        XComponentClient::GetInstance().DeleteFromJsValMapById(componentId);
         return;
     }
     std::tie(nativeXComponentImpl_, nativeXComponent_) =
@@ -628,18 +629,7 @@ void QJSDeclarativeEngine::FireExternalEvent(
         OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_));
 
     JSRef<JSObject> obj = JSRef<JSObject>::Make(renderContext);
-    RefPtr<JSXComponentController> controller = OHOS::Ace::Framework::XComponentClient::GetInstance().
-        GetControllerFromJSXComponentControllersMap(componentId);
-    auto weakController = AceType::WeakClaim(AceType::RawPtr(controller));
-    auto getJSValCallback = [obj, weakController](JSRef<JSVal>& jsVal) {
-        jsVal = obj;
-        auto jsXComponentController = weakController.Upgrade();
-        if (jsXComponentController) {
-            jsXComponentController->SetXComponentContext(obj);
-        }
-        return true;
-    };
-    XComponentClient::GetInstance().RegisterJSValCallback(getJSValCallback);
+    XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
 
     auto task = [weak = WeakClaim(this), xcomponent]() {
         auto pool = xcomponent->GetTaskPool();

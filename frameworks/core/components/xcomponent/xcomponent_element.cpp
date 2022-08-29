@@ -355,8 +355,7 @@ void XComponentElement::OnXComponentSizeInit(int64_t textureId, int32_t textureW
         }
     }
 
-    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
-                                                         TaskExecutor::TaskType::PLATFORM);
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
         auto xcomponentElement = weak.Upgrade();
         if (xcomponentElement) {

@@ -45,10 +45,11 @@ bool ButtonPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(dirty, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE) {
+    if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE ||
+        buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
         Dimension radius(dirty->GetGeometryNode()->GetFrameSize().Height() / 2.0f);
         BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-        // TODO
+        // TODO Dynamic and new borderarradius 
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     return false;

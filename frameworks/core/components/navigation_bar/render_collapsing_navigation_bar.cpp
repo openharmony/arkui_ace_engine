@@ -99,6 +99,9 @@ void RenderCollapsingNavigationBar::Update(const RefPtr<Component>& component)
 
 void RenderCollapsingNavigationBar::PerformLayout()
 {
+    if (!GetLayoutParam().IsValid()) {
+        return;
+    }
     auto layoutParam = GetLayoutParam();
     SetLayoutSize(layoutParam.GetMaxSize());
     scrollableHeight_ = GetLayoutSize().Height() - NormalizeToPx(minHeight_);

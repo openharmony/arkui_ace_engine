@@ -72,6 +72,7 @@ public:
     void HandleTouchUp(const TouchEventInfo& info, bool fromOverlay);
     void HandleTouchMove(const TouchEventInfo& info, bool fromOverlay);
     void HandleTouchCancel(const TouchEventInfo& info);
+    void HandleDoubleClick(const ClickInfo& info);
     
     // Related to text overlay
     void SetUpdateHandlePosition(
@@ -132,6 +133,7 @@ private:
         int32_t flags, std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
 
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
+    RefPtr<ClickRecognizer> doubleClickRecognizer_ = nullptr;
     OnMouseCallback onMouse_;
     OnKeyEventCallback onKeyEvent_;
     RefPtr<TextOverlayComponent> textOverlay_;

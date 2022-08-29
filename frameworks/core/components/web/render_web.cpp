@@ -27,6 +27,11 @@
 
 namespace OHOS::Ace {
 
+constexpr int32_t DOUBLE_CLICK_FINGERS = 1;
+constexpr int32_t DOUBLE_CLICK_COUNTS = 2;
+constexpr int32_t SINGLE_CLICK_NUM = 1;
+constexpr int32_t DOUBLE_CLICK_NUM = 2;
+
 RenderWeb::RenderWeb() : RenderNode(true)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -110,7 +115,7 @@ void RenderWeb::OnMouseEvent(const MouseEvent& event)
     }
 
     auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action);
+    delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action, SINGLE_CLICK_NUM);
 }
 
 bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
@@ -220,6 +225,15 @@ void RenderWeb::Initialize()
             item->HandleTouchCancel(info);
         }
     });
+    doubleClickRecognizer_ =
+        AceType::MakeRefPtr<ClickRecognizer>(context_, DOUBLE_CLICK_FINGERS, DOUBLE_CLICK_COUNTS);
+    doubleClickRecognizer_->SetOnClick([weakItem = AceType::WeakClaim(this)](const ClickInfo& info) {
+        auto item = weakItem.Upgrade();
+        if (item) {
+            item->HandleDoubleClick(info);
+        }
+    });
+    doubleClickRecognizer_->SetPriority(GesturePriority::High);
 }
 
 void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
@@ -299,6 +313,17 @@ void RenderWeb::HandleTouchCancel(const TouchEventInfo& info)
     delegate_->HandleTouchCancel();
 }
 
+void RenderWeb::HandleDoubleClick(const ClickInfo& info)
+{
+    auto localLocation = info.GetLocalLocation();
+    if (!delegate_) {
+        LOGE("Touch cancel delegate_ is nullptr");
+        return;
+    }
+    delegate_->OnMouseEvent(info.GetLocalLocation().GetX(),
+        info.GetLocalLocation().GetY(), MouseButton::LEFT_BUTTON, MouseAction::PRESS, DOUBLE_CLICK_NUM);
+}
+
 bool RenderWeb::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos, const TouchType& touchType)
 {
     auto context = context_.Upgrade();
@@ -358,6 +383,11 @@ void RenderWeb::SetUpdateHandlePosition(
 void RenderWeb::OnTouchTestHit(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
     TouchTestResult& result)
 {
+    if (doubleClickRecognizer_ && touchRestrict.sourceType == SourceType::MOUSE) {
+        doubleClickRecognizer_->SetCoordinateOffset(coordinateOffset);
+        result.emplace_back(doubleClickRecognizer_);
+    }
+
     if (!touchRecognizer_) {
         LOGE("TouchTestHit touchRecognizer_ is nullptr");
         return;
