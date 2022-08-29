@@ -16,6 +16,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/base/group_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -91,6 +92,11 @@ void ViewStackProcessor::Pop()
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     if (frameNode) {
         frameNode->MarkModifyDone();
+    }
+    if (AceType::InstanceOf<GroupNode>(frameNode)) {
+        auto groupNode = AceType::DynamicCast<GroupNode>(frameNode);
+        groupNode->AddChildToGroup(element);
+        return;
     }
     element->MountToParent(GetMainElementNode());
     LOGD("ViewStackProcessor Pop size %{public}zu", elementsStack_.size());
