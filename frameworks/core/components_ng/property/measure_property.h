@@ -24,6 +24,7 @@
 #include <string>
 #include <utility>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/property/calc_length.h"
 
@@ -275,6 +276,26 @@ struct PaddingPropertyT<float> {
         str.append("top: [").append(top.has_value() ? std::to_string(top.value()) : "NA").append("]");
         str.append("bottom: [").append(bottom.has_value() ? std::to_string(bottom.value()) : "NA").append("]");
         return str;
+    }
+
+    float Width() const
+    {
+        return left.value_or(0.0f) + right.value_or(0.0f);
+    }
+
+    float Height() const
+    {
+        return top.value_or(0.0f) + bottom.value_or(0.0f);
+    }
+
+    SizeF Size() const
+    {
+        return SizeF(Width(), Height());
+    }
+
+    OffsetF Offset() const
+    {
+        return OffsetF(left.value_or(0.0f), top.value_or(0.0f));
     }
 };
 
