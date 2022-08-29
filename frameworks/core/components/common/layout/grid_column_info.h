@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_GRID_COLUMN_INFO_H
 
 #include "core/components/common/layout/grid_container_info.h"
+#include "core/components/common/layout/screen_system_manager.h"
 
 namespace OHOS::Ace {
 
@@ -35,59 +36,50 @@ public:
         }
         void SetXsSizeColumn(uint32_t xsSizeColumn, const Dimension& offset = UNDEFINED_DIMENSION)
         {
-            columnInfo_->xsSizeColumn_ = xsSizeColumn;
-            columnInfo_->xsSizeOffset_ = offset;
+            columnInfo_->columns_[ScreenSizeType::XS] = xsSizeColumn;
+            columnInfo_->dimOffsets_[ScreenSizeType::XS] = offset;
         }
 
         void SetSmSizeColumn(uint32_t smSizeColumn, const Dimension& offset = UNDEFINED_DIMENSION)
         {
-            columnInfo_->smSizeColumn_ = smSizeColumn;
-            columnInfo_->smSizeOffset_ = offset;
+            columnInfo_->columns_[ScreenSizeType::SM] = smSizeColumn;
+            columnInfo_->dimOffsets_[ScreenSizeType::SM] = offset;
         }
 
         void SetMdSizeColumn(uint32_t mdSizeColumn, const Dimension& offset = UNDEFINED_DIMENSION)
         {
-            columnInfo_->mdSizeColumn_ = mdSizeColumn;
-            columnInfo_->mdSizeOffset_ = offset;
+            columnInfo_->columns_[ScreenSizeType::MD] = mdSizeColumn;
+            columnInfo_->dimOffsets_[ScreenSizeType::MD] = offset;
         }
 
         void SetLgSizeColumn(uint32_t lgSizeColumn, const Dimension& offset = UNDEFINED_DIMENSION)
         {
-            columnInfo_->lgSizeColumn_ = lgSizeColumn;
-            columnInfo_->lgSizeOffset_ = offset;
+            columnInfo_->columns_[ScreenSizeType::LG] = lgSizeColumn;
+            columnInfo_->dimOffsets_[ScreenSizeType::LG] = offset;
         }
 
         void SetSizeColumn(GridSizeType type, uint32_t column, const Dimension& offset = UNDEFINED_DIMENSION)
         {
-            if (type == GridSizeType::XS) {
-                SetXsSizeColumn(column, offset);
-            } else if (type == GridSizeType::SM) {
-                SetSmSizeColumn(column, offset);
-            } else if (type == GridSizeType::MD) {
-                SetMdSizeColumn(column, offset);
-            } else if (type == GridSizeType::LG) {
-                SetLgSizeColumn(column, offset);
-            } else if (type == GridSizeType::UNDEFINED) {
-                SetColumns(column);
-            }
+            columnInfo_->columns_[type] = column;
+            columnInfo_->dimOffsets_[type] = offset;
         }
 
         void SetSmSizeMaxColumn(uint32_t smSizeMaxColumn)
         {
-            columnInfo_->smSizeMaxColumn_ = smSizeMaxColumn;
+            columnInfo_->maxColumns_[ScreenSizeType::SM]  = smSizeMaxColumn;
         }
         void SetMdSizeMaxColumn(uint32_t mdSizeMaxColumn)
         {
-            columnInfo_->mdSizeMaxColumn_ = mdSizeMaxColumn;
+            columnInfo_->maxColumns_[ScreenSizeType::MD]  = mdSizeMaxColumn;
         }
         void SetLgSizeMaxColumn(uint32_t lgSizeMaxColumn)
         {
-            columnInfo_->lgSizeMaxColumn_ = lgSizeMaxColumn;
+            columnInfo_->maxColumns_[ScreenSizeType::LG] = lgSizeMaxColumn;
         }
 
         void SetColumns(uint32_t columns)
         {
-            columnInfo_->columns_ = columns;
+            columnInfo_->columns_[ScreenSizeType::UNDEFINED] = columns;
         }
 
         void ACE_EXPORT SetOffset(int32_t offset, GridSizeType type = GridSizeType::UNDEFINED);
@@ -117,51 +109,31 @@ public:
     }
     uint32_t GetColumns() const
     {
-        return columns_;
+        return columns_[ScreenSizeType::UNDEFINED];
     }
     int32_t GetOffset(GridSizeType type) const
     {
-        return offsets_[static_cast<const int32_t>(type)];
+        return offsets_[type];
     }
     uint32_t GetColumns(GridSizeType type) const
     {
-        switch (type) {
-            case GridSizeType::UNDEFINED:
-                return columns_;
-            case GridSizeType::XS:
-                return xsSizeColumn_;
-            case GridSizeType::SM:
-                return smSizeColumn_;
-            case GridSizeType::MD:
-                return mdSizeColumn_;
-            case GridSizeType::LG:
-                return lgSizeColumn_;
-            default:
-                return DEFAULT_GRID_COLUMN_SPAN;
-        }
+        return isValid(type) ? columns_[type] : DEFAULT_GRID_COLUMN_SPAN;
     }
 
 private:
-    GridColumnInfo() = default;
+    static constexpr int32_t INVALID_OFFSET = -1;
 
-    uint32_t xsSizeColumn_ = 0;
-    uint32_t smSizeColumn_ = 0;
-    uint32_t mdSizeColumn_ = 0;
-    uint32_t lgSizeColumn_ = 0;
+    GridColumnInfo()
+    {
+        // default column and offset which no define column of the size
+        columns_[ScreenSizeType::UNDEFINED] = DEFAULT_GRID_COLUMN_SPAN;
+    }
 
-    Dimension xsSizeOffset_ = UNDEFINED_DIMENSION;
-    Dimension smSizeOffset_ = UNDEFINED_DIMENSION;
-    Dimension mdSizeOffset_ = UNDEFINED_DIMENSION;
-    Dimension lgSizeOffset_ = UNDEFINED_DIMENSION;
-
-    uint32_t smSizeMaxColumn_ = 0;
-    uint32_t mdSizeMaxColumn_ = 0;
-    uint32_t lgSizeMaxColumn_ = 0;
-
-    // default column and offset which no define column of the size
-    uint32_t columns_ = DEFAULT_GRID_COLUMN_SPAN;
     bool hasColumnOffset_ = false;
-    int32_t offsets_[static_cast<const int32_t>(GridSizeType::XL)] = { 0 };
+    ArrayByScreenType<int32_t> columns_ {0};
+    ArrayByScreenType<int32_t> maxColumns_ {0};
+    ArrayByScreenType<Dimension> dimOffsets_ {UNDEFINED_DIMENSION};
+    ArrayByScreenType<int32_t> offsets_ {INVALID_OFFSET};
     // parent container grid infos
     RefPtr<GridContainerInfo> parent_;
 };
