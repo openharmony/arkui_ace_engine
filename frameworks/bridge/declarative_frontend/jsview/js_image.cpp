@@ -393,6 +393,27 @@ void JSImage::JsOpacity(const JSCallbackInfo& info)
     }
 }
 
+void JSImage::JsBlur(const JSCallbackInfo& info)
+{
+// only flutter runs special image blur
+#ifdef ENABLE_ROSEN_BACKEND
+    JSViewAbstract::JsBlur(info);
+#else
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    auto mainComp = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto image = AceType::DynamicCast<ImageComponent>(mainComp);
+    if (image) {
+        double blur = 0.0;
+        if (ParseJsDouble(info[0], blur)) {
+            image->SetBlur(blur);
+        }
+    }
+#endif
+}
+
 void JSImage::SetAutoResize(bool autoResize)
 {
     SET_PROP_FOR_NG(AutoResize, bool, autoResize);
@@ -509,6 +530,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
+    JSClass<JSImage>::StaticMethod("blur", &JSImage::JsBlur);
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
     JSClass<JSImage>::Inherit<JSViewAbstract>();
     JSClass<JSImage>::Bind<>(globalObj);
