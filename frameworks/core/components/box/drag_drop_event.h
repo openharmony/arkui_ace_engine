@@ -111,6 +111,7 @@ public:
         const std::string& selectedText, const std::string& imageSrc);
     void MergeClipboardData(const RefPtr<PipelineContext>& context, const std::string& newData);
     void RestoreCilpboardData(const RefPtr<PipelineContext>& context);
+    Point UpdatePoint(const RefPtr<PipelineContext>& context, const Point& prePoint);
 
 protected:
     RefPtr<GestureRecognizer> dragDropGesture_;
