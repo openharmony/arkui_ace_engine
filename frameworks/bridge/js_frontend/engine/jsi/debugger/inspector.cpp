@@ -230,7 +230,6 @@ void Inspector::OnMessage(std::string&& msg)
 bool StartDebug(const std::string& componentName, void* vm, bool isDebugMode, int32_t instanceId,
     const DebuggerPostTask& debuggerPostTask)
 {
-    LOGI("StartDebug: %{private}s", componentName.c_str());
     g_vm = vm;
     if (!LoadArkDebuggerLibrary()) {
         return false;
@@ -250,7 +249,6 @@ bool StartDebug(const std::string& componentName, void* vm, bool isDebugMode, in
     if (isDebugMode) {
         g_waitForDebugger(vm);
     }
-    LOGI("StartDebug Continue");
     return true;
 }
 
