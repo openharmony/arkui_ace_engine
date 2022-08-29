@@ -1165,33 +1165,50 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
         return;
     }
 
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
 
     JSRef<JSVal> minWidthValue = sizeObj->GetProperty("minWidth");
     Dimension minWidth;
+    JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
+    Dimension maxWidth;
+    JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
+    Dimension minHeight;
+    JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
+    Dimension maxHeight;
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (ParseJsDimensionVp(minWidthValue, minWidth)) {
+            NG::ViewAbstract::SetMinWidth(NG::CalcLength(minWidth));
+        }
+        if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
+            NG::ViewAbstract::SetMaxWidth(NG::CalcLength(maxWidth));
+        }
+        if (ParseJsDimensionVp(minHeightValue, minHeight)) {
+            NG::ViewAbstract::SetMinHeight(NG::CalcLength(minHeight));
+        }
+        if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
+            NG::ViewAbstract::SetMaxHeight(NG::CalcLength(maxHeight));
+        }
+        return;
+    }
+
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+
     if (ParseJsDimensionVp(minWidthValue, minWidth)) {
         box->SetMinWidth(minWidth);
         flexItem->SetMinWidth(minWidth);
     }
 
-    JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
-    Dimension maxWidth;
     if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
         box->SetMaxWidth(maxWidth);
         flexItem->SetMaxWidth(maxWidth);
     }
 
-    JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
-    Dimension minHeight;
     if (ParseJsDimensionVp(minHeightValue, minHeight)) {
         box->SetMinHeight(minHeight);
         flexItem->SetMinHeight(minHeight);
     }
 
-    JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
-    Dimension maxHeight;
     if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
         box->SetMaxHeight(maxHeight);
         flexItem->SetMaxHeight(maxHeight);

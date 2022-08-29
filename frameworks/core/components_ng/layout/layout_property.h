@@ -132,6 +132,26 @@ public:
         }
     }
 
+    void UpdateCalcMinSize(const CalcSize& value)
+    {
+        if (!calcLayoutConstraint_) {
+            calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+        }
+        if (calcLayoutConstraint_->UpdateMinSizeWithCheck(value)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateCalcMaxSize(const CalcSize& value)
+    {
+        if (!calcLayoutConstraint_) {
+            calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+        }
+        if (calcLayoutConstraint_->UpdateMaxSizeWithCheck(value)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
     void UpdateSelfIdealSize(const SizeF& value)

@@ -39,6 +39,42 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     layoutProperty->UpdateCalcSelfIdealSize(CalcSize(std::nullopt, height));
 }
 
+void ViewAbstract::SetMinWidth(const CalcLength& width)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMinSize(CalcSize(width, std::nullopt));
+}
+
+void ViewAbstract::SetMinHeight(const CalcLength& height)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, height));
+}
+
+void ViewAbstract::SetMaxWidth(const CalcLength& width)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMaxSize(CalcSize(width, std::nullopt));
+}
+
+void ViewAbstract::SetMaxHeight(const CalcLength& height)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
+}
+
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
