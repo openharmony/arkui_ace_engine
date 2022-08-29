@@ -2018,7 +2018,7 @@ void RenderTextField::HandleOnCut()
     }
     if (copyOption_ != CopyOptions::None) {
         LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
-        clipboard_->SetData(GetEditingValue().GetSelectedText());
+        clipboard_->SetData(GetEditingValue().GetSelectedText(), copyOption_);
     }
     if (onCut_) {
         onCut_(GetEditingValue().GetSelectedText());
@@ -2043,7 +2043,7 @@ void RenderTextField::HandleOnCopy()
     }
     if (copyOption_ != CopyOptions::None) {
         LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
-        clipboard_->SetData(GetEditingValue().GetSelectedText());
+        clipboard_->SetData(GetEditingValue().GetSelectedText(), copyOption_);
     }
     if (onCopy_) {
         onCopy_(GetEditingValue().GetSelectedText());

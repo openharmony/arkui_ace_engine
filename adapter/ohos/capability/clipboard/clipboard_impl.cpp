@@ -27,17 +27,38 @@ std::string g_clipboard;
 RefPtr<PixelMap> g_pixmap;
 }
 #endif
-void ClipboardImpl::SetData(const std::string& data)
+MiscServices::ShareOption TransitionCopyOption(CopyOptions copyOption)
+{
+    auto shareOption = MiscServices::ShareOption::InApp;
+    switch (copyOption) {
+        case CopyOptions::InApp:
+            shareOption = MiscServices::ShareOption::InApp;
+            break;
+        case CopyOptions::Local:
+            shareOption = MiscServices::ShareOption::LocalDevice;
+            break;
+        case CopyOptions::Distributed:
+            shareOption = MiscServices::ShareOption::CrossDevice;
+            break;
+        default:
+            break;
+    }
+    return shareOption;
+}
+
+void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
+    auto shareOption = TransitionCopyOption(copyOption);
     if (taskExecutor_) {
         taskExecutor_->PostTask(
-            [data]() {
+            [data, shareOption]() {
                 auto pasteData = OHOS::MiscServices::PasteboardClient::GetInstance()->CreatePlainTextData(data);
                 if (!pasteData) {
                     LOGE("create SystemKeyboardData fail from MiscServices");
                     return;
                 }
+                pasteData->SetShareOption(shareOption);
                 OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
             },
             TaskExecutor::TaskType::PLATFORM);
@@ -48,12 +69,13 @@ void ClipboardImpl::SetData(const std::string& data)
 #endif
 }
 
-void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap)
+void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
+    auto shareOption = TransitionCopyOption(copyOption);
     if (taskExecutor_) {
         taskExecutor_->PostTask(
-            [pixmap]() {
+            [pixmap, shareOption]() {
                 if (!pixmap) {
                     LOGE("pixmap is nullptr");
                     return;
@@ -68,6 +90,7 @@ void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap)
                     LOGE("create SystemKeyboardData fail from MiscServices");
                     return;
                 }
+                pasteData->SetShareOption(shareOption);
                 LOGI("Set pixmap to system clipboard");
                 OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
             },
