@@ -31,6 +31,16 @@ struct LinearMeasureProperty {
     float space = 0.0f;
 };
 
+struct LayoutConditions {
+    LayoutWrapper* layoutWrapper = nullptr;
+    bool isVertical = true;
+    FlexAlign crossAlign = FlexAlign::FLEX_START;
+    FlexAlign mainAlign = FlexAlign::FLEX_START;
+    SizeF size { 0.0f, 0.0f };
+    OffsetF paddingOffset { 0.0f, 0.0f };
+    float space = 0.0f;
+};
+
 // BoxLayout is the class for box type measure, layout.
 class LinearLayoutUtils {
 public:
@@ -41,7 +51,9 @@ public:
     static void Measure(LayoutWrapper* layoutWrapper, bool isVertical);
 
     // Called to perform layout render node.
-    static void Layout(LayoutWrapper* layoutWrapper, bool isVertical, FlexAlign flexAlign);
+    static void Layout(LayoutWrapper* layoutWrapper, bool isVertical, FlexAlign crossAlign, FlexAlign mainAlign);
+
+    static void LayoutCondition(LayoutConditions& layoutConditions);
 };
 } // namespace OHOS::Ace::NG
 
