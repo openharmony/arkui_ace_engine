@@ -38,6 +38,14 @@ void ScrollPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+
+    auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
+    if (axis_ == axis && scrollableEvent_) {
+        LOGE("Direction not changed, need't resister scroll event again.");
+        return;
+    }
+
+    axis_ = axis;
     auto task = [weak = WeakClaim(this)](double offset, int32_t source) {
         if (source != SCROLL_FROM_START) {
             auto pattern = weak.Upgrade();
@@ -55,7 +63,7 @@ void ScrollPattern::OnModifyDone()
     if (scrollableEvent_) {
         gestureHub->RemoveScrollableEvent(scrollableEvent_);
     }
-    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(layoutProperty->GetAxis().value_or(Axis::VERTICAL));
+    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
     scrollableEvent_->SetScrollPositionCallback(std::move(task));
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }

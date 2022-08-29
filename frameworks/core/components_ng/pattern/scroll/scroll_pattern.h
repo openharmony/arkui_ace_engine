@@ -54,7 +54,8 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     RefPtr<ScrollableEvent> scrollableEvent_;
-    float currentOffset_ = 0.0;
+    Axis axis_ = Axis::VERTICAL;
+    float currentOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

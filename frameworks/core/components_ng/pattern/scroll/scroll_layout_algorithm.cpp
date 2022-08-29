@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
+
 #include <algorithm>
 
 #include "base/geometry/axis.h"
@@ -49,24 +50,25 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(constraint.value(), axis, layoutProperty->GetMeasureType(), true);
-    if (GetMainAxisSize(idealSize, axis) == Infinity<float>()) {
+    if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
         LOGE("the scroll is infinity, error");
         return;
     }
 
-    // calculate child layout constraint.
+    // Calculate child layout constraint.
+    auto padding = layoutProperty->CreatePaddingPropertyF();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    UpdateChildConstraint(axis, idealSize, childLayoutConstraint);
+    UpdateChildConstraint(axis, idealSize - padding.Size(), childLayoutConstraint);
 
+    // Measure child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     if (!childWrapper) {
+        LOGI("There is no child.");
         return;
     }
-    {
-        ACE_SCOPED_TRACE("ScrollLayoutAlgorithm::Measure child");
-        childWrapper->Measure(childLayoutConstraint);
-    }
+    childWrapper->Measure(childLayoutConstraint);
 
+    // Use child size when self idea size of scroll is not setted.
     auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
     if (!constraint->selfIdealSize.Width().has_value()) {
         idealSize.SetWidth(childSize.Width());
@@ -88,28 +90,21 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto size = geometryNode->GetFrameSize();
-    auto padding = layoutProperty->CreatePaddingPropertyF();
-    MinusPaddingToSize(padding, size);
-    auto left = padding.left.value_or(0.0f);
-    auto top = padding.top.value_or(0.0f);
-    auto paddingOffset = OffsetF(left, top);
-
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-
-    // layout child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(childWrapper);
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
-    auto childSize = childGeometryNode->GetFrameSize();
 
+    auto parentOffset =
+        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    auto size = geometryNode->GetFrameSize();
+    auto padding = layoutProperty->CreatePaddingPropertyF();
+    MinusPaddingToSize(padding, size);
+    auto childSize = childGeometryNode->GetFrameSize();
     auto scrollableDistance = GetMainAxisSize(childSize, axis) - GetMainAxisSize(size, axis);
     currentOffset_ = std::clamp(currentOffset_, -scrollableDistance, 0.0f);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
-    auto offset = paddingOffset + currentOffset;
-    childGeometryNode->SetFrameOffset(offset);
+    childGeometryNode->SetFrameOffset(padding.Offset() + currentOffset);
     childWrapper->Layout(parentOffset);
 }
 

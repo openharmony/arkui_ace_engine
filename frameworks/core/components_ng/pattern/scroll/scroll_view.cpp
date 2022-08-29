@@ -36,5 +36,4 @@ void ScrollView::SetAxis(Axis axis)
     ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis);
 }
 
-
 } // namespace OHOS::Ace::NG
