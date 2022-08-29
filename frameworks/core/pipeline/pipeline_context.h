@@ -1223,6 +1223,7 @@ private:
     bool isFlushingAnimation_ = false;
     bool isMoving_ = false;
     std::atomic<bool> onShow_ = true;
+    std::atomic<bool> onFocus_ = true;
     bool isKeyEvent_ = false;
     bool needWindowBlurRegionRefresh_ = false;
     bool isJsPlugin_ = false;

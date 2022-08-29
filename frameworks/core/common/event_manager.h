@@ -29,9 +29,6 @@
 
 namespace OHOS::Ace {
 
-constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
-constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
-
 namespace NG {
 class FrameNode;
 }
@@ -75,6 +72,8 @@ public:
     // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
     // platform will handle it.
     bool DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode);
+    bool DispatchTabIndexEvent(
+        const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage);
 
     // Distribute the rotation event to the corresponding render tree or requested render node. If the render is not
     // processed, return false and the platform will handle it.
@@ -101,26 +100,12 @@ public:
     }
     void HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager);
 
-    std::list<std::pair<int32_t, WeakPtr<FocusNode>>>& GetTabIndexNodes()
-    {
-        return tabIndexNodes_;
-    }
-
-    void SetTabIndexNodes(std::list<std::pair<int32_t, WeakPtr<FocusNode>>>& tabIndexNodes)
-    {
-        tabIndexNodes_ = std::move(tabIndexNodes);
-    }
-
-    void SetIsTabNodesCollected(bool isTabNodesCollected)
-    {
-        isTabNodesCollected_ = isTabNodesCollected;
-    }
-
     void CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode);
 
     void AdjustTabIndexNodes();
 
-    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusNode>& focusNode);
+    bool HandleFocusByTabIndex(
+        const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage);
 
     void HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList);
 
@@ -133,10 +118,6 @@ private:
     WeakPtr<RenderNode> mouseHoverNodePre_;
     WeakPtr<RenderNode> mouseHoverNode_;
     WeakPtr<RenderNode> axisNode_;
-    bool isTabNodesCollected_ = false;
-    int32_t curTabFocusedIndex_ = DEFAULT_TAB_FOCUSED_INDEX;
-    std::list<std::pair<int32_t, WeakPtr<FocusNode>>> tabIndexNodes_;
-    WeakPtr<FocusNode> firstZeroNode_;
     int32_t instanceId_ = 0;
     bool inSelectedRect_ = false;
 };
