@@ -291,15 +291,7 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
     }
 
     GestureEvent newInfo = info;
-    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-        pipelineContext->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
-    Point newPoint;
-    if (isContainerModal) {
-        newPoint.SetX(startPoint_.GetX() - CONTAINER_BORDER_WIDTH.ConvertToPx() - CONTENT_PADDING.ConvertToPx());
-        newPoint.SetY(startPoint_.GetY() - CONTAINER_TITLE_HEIGHT.ConvertToPx());
-    } else {
-        newPoint = startPoint_;
-    }
+    Point newPoint = UpdatePoint(pipelineContext, startPoint_);
     newInfo.SetGlobalPoint(newPoint);
     auto dragItemInfo = GenerateDragItemInfo(pipelineContext, newInfo);
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
@@ -372,19 +364,18 @@ void RenderBox::PanOnActionUpdate(const GestureEvent& info)
     auto extraParams = JsonUtil::Create(true);
     auto targetDragDropNode = FindDragDropNode(pipelineContext, info);
     auto preDragDropNode = GetPreDragDropNode();
+    GestureEvent newInfo = info;
+    Point newPoint = UpdatePoint(pipelineContext, info.GetGlobalPoint());
+    newInfo.SetGlobalPoint(newPoint);
+    SetInsertIndex(targetDragDropNode, newInfo);
+    if (targetDragDropNode != initialDragDropNode_) {
+        extraParams->Put("selectedIndex", DEFAULT_INDEX_VALUE);
+    } else {
+        extraParams->Put("selectedIndex", selectedIndex_);
+    }
+    extraParams->Put("insertIndex", insertIndex_);
     if (preDragDropNode == targetDragDropNode) {
         if (targetDragDropNode && targetDragDropNode->GetOnDragMove()) {
-            SetInsertIndex(targetDragDropNode, info);
-            if (insertIndex_ != DEFAULT_INDEX) {
-                (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
-                return;
-            }
-            if (targetDragDropNode != initialDragDropNode_) {
-                extraParams->Put("selectedIndex", -1);
-            } else {
-                extraParams->Put("selectedIndex", selectedIndex_);
-            }
-            extraParams->Put("insertIndex", insertIndex_);
             (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
         }
         return;
@@ -454,14 +445,17 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
     }
     if (targetDragDropNode->GetOnDrop()) {
         auto extraParams = JsonUtil::Create(true);
-        SetInsertIndex(targetDragDropNode, info);
-        if (insertIndex_ == DEFAULT_INDEX) {
+        GestureEvent newInfo = info;
+        Point newPoint = UpdatePoint(pipelineContext, info.GetGlobalPoint());
+        newInfo.SetGlobalPoint(newPoint);
+        SetInsertIndex(targetDragDropNode, newInfo);
+        if (insertIndex_ == DEFAULT_INDEX_VALUE) {
             (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
             SetPreDragDropNode(nullptr);
             return;
         }
         if (targetDragDropNode != initialDragDropNode_) {
-            extraParams->Put("selectedIndex", -1);
+            extraParams->Put("selectedIndex", DEFAULT_INDEX_VALUE);
         } else {
             extraParams->Put("selectedIndex", selectedIndex_);
         }
@@ -511,6 +505,7 @@ void RenderBox::SetInsertIndex(const RefPtr<DragDropEvent>& targetDragDropNode, 
 {
     auto renderNode = AceType::DynamicCast<RenderNode>(targetDragDropNode);
     if (!renderNode) {
+        insertIndex_ = DEFAULT_INDEX_VALUE;
         return;
     }
     auto renderList = renderNode->FindTargetRenderNode<V2::RenderList>(context_.Upgrade(), info);

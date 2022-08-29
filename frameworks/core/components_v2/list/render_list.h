@@ -246,7 +246,7 @@ public:
 
     size_t CalculateSelectedIndex(
         const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size& selectedItemSize);
-    size_t CalculateInsertIndex(
+    int32_t CalculateInsertIndex(
         const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size selectedItemSize);
 
     void HandleAxisEvent(const AxisEvent& event) override;
