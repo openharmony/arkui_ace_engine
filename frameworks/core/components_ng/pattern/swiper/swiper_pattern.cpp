@@ -72,7 +72,7 @@ void SwiperPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
-    auto childrenSize = static_cast<int32_t>(host->GetChildren().size());
+    auto childrenSize = TotalCount();
     if (CurrentIndex() >= 0 && CurrentIndex() < childrenSize) {
         currentIndex_ = CurrentIndex();
     } else {
@@ -112,11 +112,28 @@ void SwiperPattern::FireChangeEvent() const
     swiperEventHub->FireChangeEvent(currentIndex_);
 }
 
+void SwiperPattern::SwipeTo(int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetIndex = std::clamp(index, 0, TotalCount() - 1);
+    if (currentIndex_ == targetIndex) {
+        LOGD("Target index is same with current index.");
+        return;
+    }
+
+    StopAutoPlay();
+    StopTranslateAnimation();
+    targetIndex_ = targetIndex;
+    auto translateOffset = targetIndex_.value() > currentIndex_ ? -MainSize() : MainSize();
+    PlayTranslateAnimation(0, translateOffset, targetIndex_.value(), true);
+}
+
 void SwiperPattern::ShowNext()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto childrenSize = static_cast<int32_t>(host->GetChildren().size());
+    auto childrenSize = TotalCount();
     if (currentIndex_ >= childrenSize - 1 && !IsLoop()) {
         LOGW("already last one, can't show next");
         return;
@@ -130,7 +147,7 @@ void SwiperPattern::ShowPrevious()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto childrenSize = static_cast<int32_t>(host->GetChildren().size());
+    auto childrenSize = TotalCount();
     if (currentIndex_ <= 0 && !IsLoop()) {
         LOGW("already first one, can't show previous");
         return;
@@ -160,6 +177,14 @@ void SwiperPattern::InitSwiperController()
     if (swiperController_->HasInitialized()) {
         return;
     }
+
+    swiperController_->SetSwipeToImpl([weak = WeakClaim(this)](int32_t index, bool reverse) {
+        auto swiper = weak.Upgrade();
+        if (swiper) {
+            swiper->SwipeTo(index);
+        }
+    });
+
     swiperController_->SetShowNextImpl([weak = WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
@@ -291,16 +316,16 @@ void SwiperPattern::Tick(uint64_t duration)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
+    auto childrenSize = TotalCount();
     elapsedTime_ += duration;
     if (elapsedTime_ >= static_cast<uint64_t>(GetInterval())) {
-        if (currentIndex_ >= static_cast<int32_t>(host->GetChildren().size()) - 1 && !IsLoop()) {
+        if (currentIndex_ >= childrenSize - 1 && !IsLoop()) {
             LOGD("already last one, stop auto play because not loop");
             if (scheduler_) {
                 scheduler_->Stop();
             }
         } else {
-            PlayTranslateAnimation(
-                0, -MainSize(), (currentIndex_ + 1) % static_cast<int32_t>(host->GetChildren().size()));
+            PlayTranslateAnimation(0, -MainSize(), (currentIndex_ + 1) % childrenSize);
         }
         elapsedTime_ = 0;
     }
@@ -322,7 +347,7 @@ void SwiperPattern::StartAutoPlay()
     if (!scheduler_ || !IsAutoPlay()) {
         return;
     }
-    bool reachEnd = currentIndex_ >= static_cast<int32_t>(host->GetChildren().size()) - 1 && !IsLoop();
+    bool reachEnd = currentIndex_ >= TotalCount() - 1 && !IsLoop();
     if (reachEnd && scheduler_->IsActive()) {
         scheduler_->Stop();
     } else {
@@ -444,7 +469,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     }
 
     // Adjust next item index when loop and index is out of range.
-    auto childrenSize = static_cast<int32_t>(host->GetChildren().size());
+    auto childrenSize = TotalCount();
     if (IsLoop()) {
         if (nextIndex < 0) {
             nextIndex = childrenSize + nextIndex;
@@ -492,6 +517,7 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
         swiper->currentOffset_ = 0.0;
+        swiper->targetIndex_.reset();
         if (swiper->currentIndex_ != nextIndex) {
             swiper->currentIndex_ = nextIndex;
             swiper->FireChangeEvent();
@@ -578,9 +604,8 @@ bool SwiperPattern::IsOutOfBoundary(double mainOffset) const
     }
 
     mainOffset = std::fmod(currentOffset_, MainSize());
-    auto childrenSize = static_cast<int32_t>(host->GetChildren().size());
     auto isOutOfStart = currentIndex_ == 0 && GreatOrEqual(mainOffset, 0.0);
-    auto isOutOfEnd = currentIndex_ == childrenSize - 1 && LessOrEqual(mainOffset, 0.0);
+    auto isOutOfEnd = currentIndex_ == TotalCount() - 1 && LessOrEqual(mainOffset, 0.0);
     return isOutOfStart || isOutOfEnd;
 }
 
@@ -656,6 +681,13 @@ bool SwiperPattern::IsDisableSwipe() const
     auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(swiperPaintProperty, false);
     return swiperPaintProperty->GetDisableSwipe().value_or(false);
+}
+
+int32_t SwiperPattern::TotalCount() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    return static_cast<int32_t>(host->GetChildren().size());
 }
 
 } // namespace OHOS::Ace::NG
