@@ -142,7 +142,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     }
     layoutProperty_->UpdateContentConstraint();
 
-    LOGE("Measure: %{public}s, Constraint: %{public}s", GetHostTag().c_str(),
+    LOGD("Measure: %{public}s, Constraint: %{public}s", GetHostTag().c_str(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
 
     if (isContraintNoChanged_ && !CheckMeasureFlag(layoutProperty_->GetPropertyChangeFlag())) {
