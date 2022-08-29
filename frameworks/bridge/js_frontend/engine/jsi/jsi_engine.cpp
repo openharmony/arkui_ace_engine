@@ -3152,7 +3152,6 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 
 void JsiEngine::SetPostTask(NativeEngine* nativeEngine)
 {
-    LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
     auto&& postTask = [weakDelegate, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
