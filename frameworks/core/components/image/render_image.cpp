@@ -329,20 +329,20 @@ void RenderImage::HandleOnCopy()
     auto type = sourceInfo_.GetSrcType();
     switch (type) {
         case SrcType::PIXMAP: {
-            clipboard_->SetPixelMapData(sourceInfo_.GetPixmap());
+            clipboard_->SetPixelMapData(sourceInfo_.GetPixmap(), copyOption_);
             break;
         }
         case SrcType::BASE64: {
-            clipboard_->SetData(sourceInfo_.GetSrc());
+            clipboard_->SetData(sourceInfo_.GetSrc(), copyOption_);
             break;
         }
         case SrcType::DATA_ABILITY_DECODED:
         case SrcType::DATA_ABILITY: {
-            clipboard_->SetData(sourceInfo_.GetSrc());
+            clipboard_->SetData(sourceInfo_.GetSrc(), copyOption_);
             break;
         }
         default: {
-            clipboard_->SetPixelMapData(renderImage->GetPixmapFromSkImage());
+            clipboard_->SetPixelMapData(renderImage->GetPixmapFromSkImage(), copyOption_);
             break;
         }
     }

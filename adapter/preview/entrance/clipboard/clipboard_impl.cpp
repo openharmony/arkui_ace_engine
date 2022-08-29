@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::Platform {
 
-void ClipboardImpl::SetData(const std::string& data)
+void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption)
 {
     if (!taskExecutor_ || !callbackSetClipboardData_) {
         LOGE("Failed to set the data to clipboard.");
@@ -43,7 +43,7 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
         TaskExecutor::TaskType::UI);
 }
 
-void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap)
+void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption)
 {
     if (!taskExecutor_ || !callbackSetClipboardPixmapData_) {
         LOGE("Failed to set the pixmap data to clipboard.");

@@ -649,7 +649,7 @@ void RenderText::HandleOnCopy()
     if (textValue_.GetSelectedText().empty()) {
         return;
     }
-    clipboard_->SetData(textValue_.GetSelectedText());
+    clipboard_->SetData(textValue_.GetSelectedText(), copyOption_);
 
     auto textOverlayManager = GetTextOverlayManager(context_);
     if (textOverlayManager) {
