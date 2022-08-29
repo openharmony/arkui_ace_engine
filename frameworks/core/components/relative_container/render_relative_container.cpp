@@ -393,7 +393,6 @@ void RenderRelativeContainer::PerformLayout()
                 }
             }
         }
-        LOGI("Component %{public}s set offsetX %{public}f, offsetY %{public}f", nodeName.c_str(), offsetX, offsetY);
         flexItem->SetPosition(Offset(offsetX, offsetY));
     }
 }
