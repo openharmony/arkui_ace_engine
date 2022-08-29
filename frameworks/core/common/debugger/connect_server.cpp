@@ -67,6 +67,11 @@ void ConnectServer::StopServer()
 void ConnectServer::SendMessage(const std::string& message) const
 {
     try {
+        if (webSocket_ == nullptr) {
+            LOGE("Error Excpetion: SendMessage Failed");
+            return;
+        }
+        LOGI("ConnectServer SendMessage: %{public}s", message.c_str());
         boost::beast::multi_buffer buffer;
         boost::beast::ostream(buffer) << message;
 
