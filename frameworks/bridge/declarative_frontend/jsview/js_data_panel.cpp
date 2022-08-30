@@ -69,7 +69,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
         auto item = values->GetArrayItem(i);
         if (!item || !item->IsNumber()) {
             LOGE("JSDataPanel::Create value is not number");
-            return;
+            continue;
         }
         auto value = item->GetDouble();
         if (LessOrEqual(value, 0.0)) {
