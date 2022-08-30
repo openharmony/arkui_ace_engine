@@ -348,7 +348,7 @@ void RenderListItemGroup::PerformLayout()
     double footerSize = footer_ && reachEnd ? GetMainSize(footer_->GetLayoutSize()) : 0.0;
     if (forwardLayout_ && LessNotEqual(startIndexOffset_ - headerSize, forwardReferencePos_)) {
         startIndexOffset_ = forwardReferencePos_ + headerSize;
-        curMainPos += forwardReferencePos_ - (startIndexOffset_ - headerSize);
+        curMainPos += headerSize;
     }
     if (!forwardLayout_ && GreatNotEqual(curMainPos + footerSize, backwardReferencePos_)) {
         startIndexOffset_ -= curMainPos + footerSize - backwardReferencePos_;
