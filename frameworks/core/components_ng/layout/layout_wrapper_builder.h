@@ -59,7 +59,7 @@ public:
     }
 
     void SwapDirtyChildrenOnMainThread();
-    virtual void UpdateBuildCacheOnMainThread() {}
+    virtual void SwapDirtyAndUpdateBuildCache() {}
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;

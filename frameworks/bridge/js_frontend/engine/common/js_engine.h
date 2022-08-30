@@ -63,7 +63,7 @@ class JsEngine : public AceType {
 
 public:
     JsEngine() = default;
-    virtual ~JsEngine() = default;
+    ~JsEngine() override = default;
 
     void RegisterSingleComponent(std::string& command, const std::string& componentName, const std::string& methods);
 
@@ -81,6 +81,18 @@ public:
 
     // Load script in JS engine, and execute in corresponding context.
     virtual void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) = 0;
+
+    // Load the app.js file of the FA model in NG structure..
+    virtual bool LoadFaAppSource()
+    {
+        return false;
+    }
+
+    // Load the je file of the page in NG structure..
+    virtual bool LoadPageSource(const std::string& /*url*/)
+    {
+        return false;
+    }
 
     // Update running page
     virtual void UpdateRunningPage(const RefPtr<JsAcePage>& page) = 0;
@@ -100,8 +112,7 @@ public:
     virtual void FireSyncEvent(const std::string& eventId, const std::string& param) = 0;
 
     // Fire external event on JS thread
-    virtual void FireExternalEvent(
-        const std::string& componentId, const uint32_t nodeId, const bool isDestroy = false) = 0;
+    virtual void FireExternalEvent(const std::string& componentId, uint32_t nodeId, bool isDestroy = false) = 0;
 
     // Timer callback on JS
     virtual void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) = 0;
@@ -232,7 +243,7 @@ public:
 
     void ACE_EXPORT RegisterMediaUpdateCallback(std::function<void(JsEngine*)> cb)
     {
-        mediaUpdateCallback_ = cb;
+        mediaUpdateCallback_ = std::move(cb);
     }
 
     void ACE_EXPORT UnregisterMediaUpdateCallback()
@@ -258,10 +269,7 @@ public:
     }
 #endif
 
-    virtual void FlushReload()
-    {
-        return;
-    }
+    virtual void FlushReload() {}
 
 protected:
     NativeEngine* nativeEngine_ = nullptr;

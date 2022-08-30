@@ -21,7 +21,9 @@
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
+#include "bridge/declarative_frontend/ng/page_router_manager.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
@@ -63,16 +65,13 @@ public:
         const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
         const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
         const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
-        const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack,
-        const OnNewWantCallBack& onNewWantCallBack,
+        const OnRestoreAbilityStateCallBack& onRestoreAbilityStateCallBack, const OnNewWantCallBack& onNewWantCallBack,
         const OnActiveCallBack& onActiveCallBack, const OnInactiveCallBack& onInactiveCallBack,
         const OnMemoryLevelCallBack& onMemoryLevelCallBack,
         const OnStartContinuationCallBack& onStartContinuationCallBack,
         const OnCompleteContinuationCallBack& onCompleteContinuationCallBack,
-        const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack,
-        const OnSaveDataCallBack& onSaveDataCallBack,
-        const OnRestoreDataCallBack& onRestoreDataCallBack,
-        const ExternalEventCallback& externalEventCallback);
+        const OnRemoteTerminatedCallBack& onRemoteTerminatedCallBack, const OnSaveDataCallBack& onSaveDataCallBack,
+        const OnRestoreDataCallBack& onRestoreDataCallBack, const ExternalEventCallback& externalEventCallback);
     ~FrontendDelegateDeclarative() override;
 
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
@@ -100,7 +99,7 @@ public:
     void OnSuspended();
     bool OnStartContinuation();
     void OnCompleteContinuation(int32_t code);
-    void OnMemoryLevel(const int32_t level);
+    void OnMemoryLevel(int32_t level);
     void OnSaveData(std::string& data);
     void GetPluginsUsed(std::string& data);
     bool OnRestoreData(const std::string& data);
@@ -113,8 +112,8 @@ public:
     void OnApplicationDestroy(const std::string& packageName);
     void UpdateApplicationState(const std::string& packageName, Frontend::State state);
     void OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data);
-    void NotifyAppStorage(const WeakPtr<Framework::JsEngine>& jsEngineWeak,
-        const std::string& key, const std::string& value);
+    void NotifyAppStorage(
+        const WeakPtr<Framework::JsEngine>& jsEngineWeak, const std::string& key, const std::string& value);
 
     // distribute
     std::string RestoreRouterStack(const std::string& contentInfo) override;
@@ -135,8 +134,7 @@ public:
     bool FireSyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
     void FireSyncEvent(
         const std::string& eventId, const std::string& param, const std::string& jsonArgs, std::string& result);
-    void FireExternalEvent(
-        const std::string& eventId, const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
+    void FireExternalEvent(const std::string& eventId, const std::string& componentId, uint32_t nodeId, bool isDestroy);
 
     // FrontendDelegate overrides.
     void Push(const PageTarget& target, const std::string& params);
@@ -254,14 +252,29 @@ public:
     RefPtr<JsAcePage> GetPage(int32_t pageId) const override;
 
     void RebuildAllPages();
+
+    std::string GetCurrentPageUrl();
+
+    // Get the currently running JS page information in NG structure.
+    RefPtr<RevSourceMap> GetCurrentPageSourceMap();
+
+    // Get the currently running JS page information in NG structure.
+    RefPtr<RevSourceMap> GetFaAppSourceMap();
+
+    void InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback);
+
+    const RefPtr<NG::PageRouterManager>& GetPageRouterManager() const
+    {
+        return pageRouterManager_;
+    }
+
 private:
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);
 
-    void LoadPage(int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params,
-        bool isRestore = false);
-    void OnPageReady(
-        const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage, bool isRestore);
+    void LoadPage(
+        int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params, bool isRestore = false);
+    void OnPageReady(const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage, bool isRestore);
     void FlushPageCommand(
         const RefPtr<Framework::JsAcePage>& page, const std::string& url, bool isMainPage, bool isRestore);
     void AddPageLocked(const RefPtr<JsAcePage>& page);
@@ -279,8 +292,7 @@ private:
 
     void PopPageTransitionListener(const TransitionEvent& event, int32_t destroyPageId);
 
-    void PopToPageTransitionListener(
-        const TransitionEvent& event, const std::string& url, int32_t pageId);
+    void PopToPageTransitionListener(const TransitionEvent& event, const std::string& url, int32_t pageId);
 
     void RestorePageTransitionListener(
         const TransitionEvent& event, const std::string& url, const RefPtr<JsAcePage>& page);
@@ -382,6 +394,9 @@ private:
 
     std::queue<RouterTask> routerQueue_;
     mutable std::mutex routerQueueMutex_;
+
+    RefPtr<RevSourceMap> appSourceMap_;
+    RefPtr<NG::PageRouterManager> pageRouterManager_;
 };
 
 } // namespace OHOS::Ace::Framework

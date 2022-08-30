@@ -1026,6 +1026,48 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     }
 }
 
+// Load the app.js file of the FA model in NG structure.
+bool JsiDeclarativeEngine::LoadFaAppSource()
+{
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadFaAppSource");
+    if (!ExecuteAbc("commons.abc")) {
+        return false;
+    }
+    if (!ExecuteAbc("vendors.abc")) {
+        return false;
+    }
+    if (!ExecuteAbc("app.abc")) {
+        LOGW("ExecuteJsBin \"app.js\" failed.");
+    } else {
+        CallAppFunc("onCreate");
+    }
+    return true;
+}
+
+// Load the js file of the page in NG structure..
+bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
+{
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
+    LOGI("JsiDeclarativeEngine LoadJs %{private}s page", url.c_str());
+    ACE_DCHECK(engineInstance_);
+
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto delegate = engineInstance_->GetDelegate();
+
+    // get js bundle content
+    shared_ptr<JsValue> jsCode = runtime->NewUndefined();
+    shared_ptr<JsValue> jsAppCode = runtime->NewUndefined();
+    const char js_ext[] = ".js";
+    const char bin_ext[] = ".abc";
+    auto pos = url.rfind(js_ext);
+    if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
+        std::string urlName = url.substr(0, pos) + bin_ext;
+        return ExecuteAbc(urlName);
+    }
+    LOGE("fail to find page file");
+    return false;
+}
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 void JsiDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::string componentName)
 {

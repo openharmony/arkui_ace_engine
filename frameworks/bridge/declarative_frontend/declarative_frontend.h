@@ -20,11 +20,14 @@
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/noncopyable.h"
 #include "base/utils/string_utils.h"
+#include "bridge/declarative_frontend/ng/page_router_manager.h"
 #include "core/common/ace_page.h"
 #include "core/common/container.h"
 #include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
@@ -37,7 +40,7 @@ namespace OHOS::Ace {
 // - Load pages of a JS app, and parse the manifest.json before loading main page.
 // - Maintain the page stack of JS app by FrontendDelegateDeclarative.
 // - Lifecycle of JS app (also AceActivity).
-class DeclarativeFrontend : public Frontend {
+class ACE_EXPORT DeclarativeFrontend : public Frontend {
     DECLARE_ACE_TYPE(DeclarativeFrontend, Frontend);
 
 public:
@@ -61,16 +64,25 @@ public:
     // Js frontend manages all pages self.
     void AddPage(const RefPtr<AcePage>& page) override {};
 
-    RefPtr<AcePage> GetPage(int32_t pageId) const override
+    RefPtr<AcePage> GetPage(int32_t /*pageId*/) const override
     {
         return nullptr;
     };
 
+    std::string GetCurrentPageUrl() const override;
+
+    // Get the currently running JS page information in NG structure.
+    RefPtr<Framework::RevSourceMap> GetCurrentPageSourceMap() const override;
+
+    // Get the currently running JS page information in NG structure.
+    RefPtr<Framework::RevSourceMap> GetFaAppSourceMap() const override;
+
+    RefPtr<NG::PageRouterManager> GetPageRouterManager() const;
+
     void SendCallbackMessage(const std::string& callbackId, const std::string& data) const override;
     // platform channel.
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const override;
-    void TransferComponentResponseData(int32_t callbackId, int32_t code,
-        std::vector<uint8_t>&& data) const override;
+    void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override;
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     void SetPagePath(const std::string& pagePath)
@@ -222,6 +234,8 @@ private:
     std::string pageProfile_;
     bool foregroundFrontend_ = false;
     bool isSubWindow_ = false;
+
+    ACE_DISALLOW_COPY_AND_MOVE(DeclarativeFrontend);
 };
 
 class DeclarativeEventHandler : public AceEventHandler {

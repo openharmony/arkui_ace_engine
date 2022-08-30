@@ -267,7 +267,12 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
         return true;
     }
     ContainerScope scope(instanceId);
-    auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto baseContext = container->GetPipelineContext();
+    auto contextNG = DynamicCast<NG::PipelineContext>(baseContext);
+    if (contextNG) {
+        return contextNG->OnBackPressed();
+    }
+    auto context = DynamicCast<PipelineContext>(baseContext);
     if (!context) {
         return false;
     }
