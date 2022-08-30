@@ -72,6 +72,21 @@ if (is_standard_system) {
     module_install_name = ""
   }
 
+  ohos_copy("copy_distributeddata_library") {
+    if (use_mac || use_mingw_win) {
+      out_path = get_label_info(
+              "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/jskits/distributeddata:distributeddata",
+              "root_out_dir")
+      deps = [ "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/jskits/distributeddata:distributeddata" ]
+      sources = [ "${out_path}/distributeddatamgr/kv_store/libdistributeddata${dylib_suffix}" ]
+
+      outputs = [ target_out_dir +
+                  "/previewer/common/bin/module/data/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/previewer/common/bin/module/data/"
+      module_install_name = ""
+    }
+  }
+
   # All dynamic libraries to be copied to the path "/previewer/common/bin/",
   # which are related to the previewer, can be added to this script.
   ohos_copy("copy_preview_shared_library") {
@@ -141,6 +156,26 @@ if (is_standard_system) {
     curl_path = get_label_info("//third_party/curl:curl_shared", "root_out_dir")
     deps += [ "//third_party/curl:curl_shared" ]
     sources += [ curl_path + "/thirdparty/curl/libcurl_shared${dylib_suffix}" ]
+
+    if (use_mac || use_mingw_win) {
+      # add kvfdb
+      out_path = get_label_info(
+              "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/innerkits/distributeddata:distributeddata_inner_mock",
+              "root_out_dir")
+      deps += [ "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/innerkits/distributeddata:distributeddata_inner_mock" ]
+      sources += [ "${out_path}/distributeddatamgr/kv_store/libdistributeddata_inner_mock${dylib_suffix}" ]
+      out_path = get_label_info(
+              "//foundation/distributeddatamgr/kv_store/kvstoremock/distributeddb:distributeddb_mock",
+              "root_out_dir")
+      deps += [ "//foundation/distributeddatamgr/kv_store/kvstoremock/distributeddb:distributeddb_mock" ]
+      sources += [ "${out_path}/distributeddatamgr/kv_store/libdistributeddb_mock${dylib_suffix}" ]
+
+      #add shared_libz
+      out_path =
+          get_label_info("//third_party/zlib:shared_libz", "root_out_dir")
+      deps += [ "//third_party/zlib:shared_libz" ]
+      sources += [ "${out_path}/thirdparty/zlib/libshared_libz${dylib_suffix}" ]
+    }
 
     # Add dynamic library "libsec_shared"
     sec_path =
