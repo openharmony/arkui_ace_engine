@@ -36,6 +36,7 @@ build_component_ng("pattern_ng") {
     "list/list_layout_algorithm.cpp",
     "list/list_pattern.cpp",
     "list/list_view.cpp",
+    "overlay/overlay_manager.cpp",
     "page/page_pattern.cpp",
     "stack/stack_view.cpp",
     "stage/stage_manager.cpp",

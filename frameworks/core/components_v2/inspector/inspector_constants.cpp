@@ -60,6 +60,8 @@ const char JS_LAZY_FOR_EACH_ETS_TAG[] = "LazyForEach";
 const char JS_FOR_EACH_ETS_TAG[] = "ForEach";
 // js if lese node
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
+// toast view
+const char TOAST_ETS_TAG[] = "Toast";
 
 // column
 const char COLUMN_COMPONENT_TAG[] = "ColumnComponent";
