@@ -11,8 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/test.gni")
+
 group("unittest") {
   testonly = true
-
-  deps = [ "list:list_v2_test" ]
+  deps = []
+  if (!is_asan) {
+    deps += [ "list:list_v2_test" ]
+  }
 }

@@ -260,6 +260,7 @@ ohos_unittest("PipelineContextTest") {
 group("unittest") {
   testonly = true
   deps = []
-
-  deps += [ ":PipelineContextTest" ]
+  if (!is_asan) {
+    deps += [ ":PipelineContextTest" ]
+  }
 }
