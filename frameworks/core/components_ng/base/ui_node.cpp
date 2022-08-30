@@ -222,4 +222,18 @@ bool UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint
     return preventBubbling;
 }
 
+int32_t UINode::FrameCount() const
+{
+    return TotalChildCount();
+}
+
+int32_t UINode::TotalChildCount() const
+{
+    int32_t count = 0;
+    for (const auto& child : GetChildren()) {
+        count += child->FrameCount();
+    }
+    return count;
+}
+
 } // namespace OHOS::Ace::NG

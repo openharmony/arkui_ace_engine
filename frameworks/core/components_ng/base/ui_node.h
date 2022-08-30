@@ -42,6 +42,8 @@ public:
     // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
     virtual bool IsAtomicNode() const = 0;
 
+    virtual int32_t FrameCount() const;
+
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT);
     void RemoveChild(const RefPtr<UINode>& child);
@@ -50,6 +52,8 @@ public:
 
     void AttachToMainTree();
     void DetachFromMainTree();
+
+    int32_t TotalChildCount() const;
 
     const std::list<RefPtr<UINode>>& GetChildren() const
     {

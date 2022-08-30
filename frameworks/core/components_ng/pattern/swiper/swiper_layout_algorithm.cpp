@@ -82,6 +82,9 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto parentOffset =
         layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
 
+    // Effect when difference between current index and target index is greater than 1.
+    // eg. Current index is 0, call swipeTo method to jump to index 2,
+    // change item's position only 0 and 2, ignore others.
     if (targetIndex_.has_value() && std::abs(targetIndex_.value() - currentIndex_) > 1) {
         auto currentOffset = axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0.0f) : OffsetF(0.0f, currentOffset_);
         // Layout current item.

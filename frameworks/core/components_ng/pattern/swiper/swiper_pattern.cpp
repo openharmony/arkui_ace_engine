@@ -125,6 +125,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     StopAutoPlay();
     StopTranslateAnimation();
     targetIndex_ = targetIndex;
+    // TODO Adapt displayCount.
     auto translateOffset = targetIndex_.value() > currentIndex_ ? -MainSize() : MainSize();
     PlayTranslateAnimation(0, translateOffset, targetIndex_.value(), true);
 }
@@ -687,7 +688,7 @@ int32_t SwiperPattern::TotalCount() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0);
-    return static_cast<int32_t>(host->GetChildren().size());
+    return host->TotalChildCount();
 }
 
 } // namespace OHOS::Ace::NG
