@@ -31,7 +31,7 @@ class ComposedElement;
 namespace NG {
 class CustomNode;
 class UINode;
-}
+} // namespace NG
 
 } // namespace OHOS::Ace
 
@@ -112,22 +112,10 @@ public:
     }
 
     // Used by full update variant only from js_lazy_foreach.cpp
-    virtual void RemoveChildGroupById(const std::string& viewId)
-    {
-        LOGE("Internal error. Not implemented");
-    };
-    virtual void MarkLazyForEachProcess(const std::string& groudId)
-    {
-        LOGE("Internal error. Not implemented");
-    };
-    virtual void ResetLazyForEachProcess()
-    {
-        LOGE("Internal error. Not implemented");
-    };
-    virtual void ExecuteUpdateWithValueParams(const std::string& jsonData)
-    {
-        LOGE("Internal error. Not implemented");
-    };
+    virtual void RemoveChildGroupById(const std::string& viewId) {}
+    virtual void MarkLazyForEachProcess(const std::string& groudId) {}
+    virtual void ResetLazyForEachProcess() {}
+    virtual void ExecuteUpdateWithValueParams(const std::string& jsonData) {}
 
     virtual bool isFullUpdate() const
     {
