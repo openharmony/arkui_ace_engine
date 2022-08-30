@@ -23,18 +23,6 @@
 #include <ui/rs_surface_node.h>
 #endif
 
-//
-
-
-
-
-
-
-
-
-
-//
-
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
