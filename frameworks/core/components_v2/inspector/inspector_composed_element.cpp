@@ -397,7 +397,7 @@ RefPtr<AccessibilityNode> InspectorComposedElement::GetAccessibilityNode() const
         LOGW("get AccessibilityManager failed");
         return nullptr;
     }
-    return accessibilityManager->GetAccessibilityNodeById(std::stoi(id_));
+    return accessibilityManager->GetAccessibilityNodeById(StringUtils::StringToInt(id_));
 }
 
 RefPtr<RenderBox> InspectorComposedElement::GetRenderBox() const
