@@ -75,11 +75,6 @@ public:
         return spaceWidth_;
     }
 
-    bool GetVertical() const
-    {
-        return vertical_;
-    }
-
     void SetIsInitialized(bool isInitialized)
     {
         isInitialized_ = isInitialized;
@@ -88,11 +83,6 @@ public:
     bool GetIsInitialized() const
     {
         return isInitialized_;
-    }
-
-    const V2::ItemDivider& GetDivider() const
-    {
-        return divider_;
     }
 
     void SetLanes(int32_t lanes)

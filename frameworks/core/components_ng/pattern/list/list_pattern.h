@@ -33,10 +33,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto divider = host->GetLayoutProperty()->GetDivider().value();
-        auto axis = host->GetLayoutProperty()->GetListDirection().value_or(Axis::VERTICAL);
+        auto listLayoutProperty = GetHost()->GetLayoutProperty<ListLayoutProperty>();
+        auto divider = listLayoutProperty->GetDivider().value();
+        auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
         auto vertical = axis == Axis::VERTICAL ? true : false; 
         return MakeRefPtr<ListPaintMethod>(divider, startIndex_, endIndex_,
             vertical, std::move(itemPosition_));
