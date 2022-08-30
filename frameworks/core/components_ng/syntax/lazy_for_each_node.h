@@ -41,6 +41,11 @@ public:
         return false;
     }
 
+    int32_t FrameCount() const override
+    {
+        return builder_ ? builder_->GetTotalCount() : 0;
+    }
+
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
 
     void UpdateCachedItems(const std::unordered_set<int32_t>& activeIndexes);

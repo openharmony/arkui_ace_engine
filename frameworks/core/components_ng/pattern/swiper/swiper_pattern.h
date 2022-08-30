@@ -59,6 +59,8 @@ public:
         auto layoutAlgorithm = MakeRefPtr<SwiperLayoutAlgorithm>(currentIndex_, startIndex_, endIndex_);
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetTargetIndex(targetIndex_);
+        layoutAlgorithm->SetTotalCount(TotalCount());
+        layoutAlgorithm->SetPreItemRange(preItemRange_);
         return layoutAlgorithm;
     }
 
@@ -125,9 +127,11 @@ private:
     bool IsOutOfBoundary(double mainOffset) const;
     float MainSize() const;
     void FireChangeEvent() const;
+    void CalculateCacheRange();
 
     Axis GetDirection() const;
     int32_t CurrentIndex() const;
+    int32_t GetDisplayCount()const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
@@ -157,6 +161,7 @@ private:
     int32_t endIndex_ = 0;
     int32_t currentIndex_ = 0;
     std::optional<int32_t> targetIndex_;
+    std::set<int32_t> preItemRange_;
 
     float currentOffset_ = 0.0f;
 
