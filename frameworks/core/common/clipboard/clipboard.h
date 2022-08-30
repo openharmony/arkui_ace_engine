@@ -19,7 +19,7 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/task_executor.h"
-#include "core/components/text_overlay/text_overlay_manager.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
 
