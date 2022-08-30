@@ -34,6 +34,7 @@ build_component_ng("pattern_ng") {
     "linear_layout/row_view.cpp",
     "list/list_item_view.cpp",
     "list/list_layout_algorithm.cpp",
+    "list/list_paint_method.cpp",
     "list/list_pattern.cpp",
     "list/list_view.cpp",
     "page/page_pattern.cpp",

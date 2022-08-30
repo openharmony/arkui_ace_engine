@@ -34,4 +34,16 @@ void DividerPainter::DrawLine(RSCanvas& canvas, const OffsetF& offset) const
                            : PointF(startPointX + dividerLength_, startPointY);
     canvas.DrawLine(ToRSPonit(start) , ToRSPonit(end));
 }
+
+void DividerPainter::DrawListLines(RSCanvas& canvas, const int32_t startIndex, const int32_t endIndex,
+    const ListLayoutAlgorithm::PositionMap& itemPosition) const
+{
+    for (int32_t lineIndex = startIndex; lineIndex < endIndex; lineIndex++) {
+        if (vertical_) {
+            DrawLine(canvas, OffsetF(itemPosition.at(lineIndex).first, 0));
+        } else {
+            DrawLine(canvas, OffsetF(0, itemPosition.at(lineIndex).first));
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

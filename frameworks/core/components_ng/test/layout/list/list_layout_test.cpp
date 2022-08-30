@@ -15,11 +15,11 @@
 
 #define private public
 
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_view.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/base/geometry/ng/size_t.h"
@@ -76,7 +76,7 @@ HWTEST_F(ListLayoutTest, ListLayoutTest001, TestSize.Level1)
      * @tc.expected: layout should be correct
      */
     for (int32_t i = 0; i < TEST_SPACE_PX_COUNT; i++) {
-        auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+        auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
         ViewStackProcessor::GetInstance()->Push(frameNode);
 
         RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -87,7 +87,7 @@ HWTEST_F(ListLayoutTest, ListLayoutTest001, TestSize.Level1)
         LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
         for (int32_t j = START_INDEX; j < END_INDEX; j++) {
             auto childFrameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0,
-                AceType::MakeRefPtr<ListPattern>());
+                AceType::MakeRefPtr<Pattern>());
             ViewStackProcessor::GetInstance()->Push(childFrameNode);
             RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
             childGeometryNode->SetFrameSize(
@@ -144,7 +144,7 @@ HWTEST_F(ListLayoutTest, ListLayoutTest002, TestSize.Level1)
      * @tc.expected: layout should be correct
      */
     for (int32_t i = 0; i < TEST_SPACE_PX_COUNT; i++) {
-        auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+        auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
         ViewStackProcessor::GetInstance()->Push(frameNode);
 
         RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -155,7 +155,7 @@ HWTEST_F(ListLayoutTest, ListLayoutTest002, TestSize.Level1)
         LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
         for (int32_t j = START_INDEX; j < END_INDEX; j++) {
             auto childFrameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0,
-                AceType::MakeRefPtr<ListPattern>());
+                AceType::MakeRefPtr<Pattern>());
             ViewStackProcessor::GetInstance()->Push(childFrameNode);
             RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
             childGeometryNode->SetFrameSize(
@@ -206,7 +206,7 @@ HWTEST_F(ListLayoutTest, ListLayoutTest003, TestSize.Level1)
      * @tc.steps: step5. call Measure function to measure and compare result
      * @tc.expected: layout should be correct
      */
-    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -216,7 +216,7 @@ HWTEST_F(ListLayoutTest, ListLayoutTest003, TestSize.Level1)
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
     for (int32_t j = START_INDEX; j < END_INDEX; j++) {
         auto childFrameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0,
-            AceType::MakeRefPtr<ListPattern>());
+            AceType::MakeRefPtr<Pattern>());
         ViewStackProcessor::GetInstance()->Push(childFrameNode);
         RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
         childGeometryNode->SetFrameSize(
