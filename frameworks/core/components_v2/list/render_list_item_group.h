@@ -126,6 +126,7 @@ public:
     size_t TotalCount();
     RefPtr<RenderNode> GetRenderNode();
     void SetItemGroupLayoutParam(const ListItemLayoutParam &param);
+    void SetChainOffset(double offset);
     void SetRenderBox(const WeakPtr<RenderNode>& renderBox)
     {
         renderBox_ = renderBox;
@@ -181,8 +182,10 @@ private:
     ListItemAlign align_;
 
     // layout status
-    int32_t startIndex_ = -1;
+    bool isInitialized_ = false;
+    size_t startIndex_ = 0;
     double startIndexOffset_ = 0.0;
+    double endIndexOffset_ = 0.0;
     size_t currStartCacheCount_ = 0;
     size_t currEndCacheCount_ = 0;
 
