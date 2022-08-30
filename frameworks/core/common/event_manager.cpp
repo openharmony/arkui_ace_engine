@@ -245,123 +245,25 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
     return true;
 }
 
-void EventManager::CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode)
+bool EventManager::DispatchTabIndexEvent(
+    const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage)
 {
-    if (!rootNode) {
-        LOGE("param is null.");
-        return;
+    CHECK_NULL_RETURN(focusNode, false);
+    CHECK_NULL_RETURN(curPage, false);
+    LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
+        event.action, event.repeatTime);
+    if (focusNode->HandleFocusByTabIndex(event, curPage)) {
+        LOGI("Tab index focus system handled this event");
+        return true;
     }
-    RefPtr<FocusGroup> rootScope = AceType::DynamicCast<FocusGroup>(rootNode);
-    if (rootScope && rootScope->IsFocusable()) {
-        auto children = rootScope->GetChildrenList();
-        if (children.size() == 1 && !AceType::DynamicCast<FocusGroup>(children.front())) {
-            if (rootScope->GetTabIndex() > 0) {
-                tabIndexNodes_.emplace_back(rootScope->GetTabIndex(), WeakClaim(AceType::RawPtr(rootScope)));
-            }
-            return;
-        }
-        for (auto& child : children) {
-            CollectTabIndexNodes(child);
-        }
-    }
-    if (rootNode->IsFocusable() && rootNode->GetTabIndex() > 0) {
-        tabIndexNodes_.emplace_back(rootNode->GetTabIndex(), WeakClaim(AceType::RawPtr(rootNode)));
-    }
-}
-
-void EventManager::AdjustTabIndexNodes()
-{
-    tabIndexNodes_.sort([](std::pair<int32_t, WeakPtr<FocusNode>>& a, std::pair<int32_t, WeakPtr<FocusNode>>& b) {
-        return a.first < b.first;
-    });
-    curTabFocusedIndex_ = NONE_TAB_FOCUSED_INDEX;
-    int32_t i = 0;
-    for (auto& wpNode : tabIndexNodes_) {
-        auto node = wpNode.second.Upgrade();
-        if (node && node->IsCurrentFocus()) {
-            curTabFocusedIndex_ = i;
-            break;
-        }
-        ++i;
-    }
-    if (!isTabNodesCollected_) {
-        isTabNodesCollected_ = true;
-        curTabFocusedIndex_ = DEFAULT_TAB_FOCUSED_INDEX;
-    }
-}
-
-bool EventManager::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
-{
-    if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
-        return false;
-    }
-    tabIndexNodes_.clear();
-    CollectTabIndexNodes(focusNode);
-    AdjustTabIndexNodes();
-    if ((curTabFocusedIndex_ < 0 || curTabFocusedIndex_ >= static_cast<int32_t>(tabIndexNodes_.size())) &&
-        curTabFocusedIndex_ != DEFAULT_TAB_FOCUSED_INDEX) {
-        LOGI("Not focusing on any tab index node. Use default focus system.");
-        return false;
-    }
-    if (curTabFocusedIndex_ == DEFAULT_TAB_FOCUSED_INDEX) {
-        curTabFocusedIndex_ = 0;
-    } else {
-        if (event.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB }) ||
-            event.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_TAB })) {
-            LOGI("RequestNextFocus by 'SHIFT-TAB'");
-            --curTabFocusedIndex_;
-        } else {
-            LOGI("RequestNextFocus by 'TAB'");
-            ++curTabFocusedIndex_;
-        }
-    }
-    if (curTabFocusedIndex_ < 0 || curTabFocusedIndex_ >= static_cast<int32_t>(tabIndexNodes_.size())) {
-        LOGI("Focus from tab index node to normal node. Use default focus system.");
-        return false;
-    }
-    auto iter = tabIndexNodes_.begin();
-    std::advance(iter, curTabFocusedIndex_);
-    if (iter == tabIndexNodes_.end()) {
-        LOGE("Tab index node is not found");
-        return false;
-    }
-    auto nodeNeedToFocus = (*iter).second.Upgrade();
-    if (!nodeNeedToFocus) {
-        LOGE("Tab index node is null");
-        return false;
-    }
-    LOGI("Focus on tab index node(%{public}d)", curTabFocusedIndex_);
-    auto scopeNeedToFoucs = AceType::DynamicCast<FocusGroup>(nodeNeedToFocus);
-    if (scopeNeedToFoucs && !scopeNeedToFoucs->IsGroupDefaultFocused()) {
-        auto defaultFocusNode = nodeNeedToFocus->GetChildDefaultFoucsNode(false);
-        if (defaultFocusNode) {
-            if (!defaultFocusNode->IsFocusableWholePath()) {
-                LOGW("node(%{public}d) is not focusable", curTabFocusedIndex_);
-                return false;
-            }
-            scopeNeedToFoucs->SetIsGroupDefaultFocused(true);
-            return defaultFocusNode->RequestFocusImmediately();
-        }
-    }
-    if (!nodeNeedToFocus->IsFocusableWholePath()) {
-        LOGW("node(%{public}d) is not focusable", curTabFocusedIndex_);
-        return false;
-    }
-    return nodeNeedToFocus->RequestFocusImmediately();
+    return false;
 }
 
 bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
 {
-    if (!focusNode) {
-        LOGW("focusNode is null.");
-        return false;
-    }
+    CHECK_NULL_RETURN(focusNode, false);
     LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
         event.action, event.repeatTime);
-    if (HandleFocusByTabIndex(event, focusNode)) {
-        LOGI("Tab index focus system handled this event");
-        return true;
-    }
     if (focusNode->HandleKeyEvent(event)) {
         LOGI("Default focus system handled this event");
         return true;
