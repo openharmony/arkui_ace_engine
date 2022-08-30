@@ -33,7 +33,11 @@ namespace OHOS::Ace::Framework {
 void JSForEach::Create(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUsePartialUpdate()) {
-        CreateForPartialUpdate();
+        if (Container::IsCurrentUseNewPipeline()) {
+            CreateForPartialUpdateNG();
+        } else {
+            CreateForPartialUpdate();
+        }
         return;
     }
 
@@ -90,6 +94,12 @@ void JSForEach::CreateForPartialUpdate()
     ViewStackProcessor::GetInstance()->Push(forEachComponent);
 }
 
+void JSForEach::CreateForPartialUpdateNG()
+{
+    // create ForEachComponent and push to stack
+    NG::ForEach::Create();
+}
+
 void JSForEach::Pop()
 {
     if (Container::IsCurrentUseNewPipeline()) {
@@ -119,8 +129,13 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
         return;
     }
 
-    const int32_t elmtId = info[0]->ToNumber<int32_t>();
-    std::list<std::string> cppList = OHOS::Ace::V2::ForEachElementLookup::GetIdArray(elmtId);
+    const auto elmtId = info[0]->ToNumber<int32_t>();
+    std::list<std::string> cppList;
+    if (Container::IsCurrentUseNewPipeline()) {
+        cppList = NG::ForEach::GetCurrentIdList(elmtId);
+    } else {
+        cppList = OHOS::Ace::V2::ForEachElementLookup::GetIdArray(elmtId);
+    }
 
     size_t index = 0;
     for (const auto& id : cppList) {
@@ -143,9 +158,6 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
         return;
     }
 
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<PartUpd::ForEachComponent>(stack->GetMainComponent());
-
     JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[1]);
     std::list<std::string> newIdArr;
 
@@ -156,6 +168,13 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
         newIdArr.insert(newIdArr.end(), value);
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ForEach::SetNewIds(std::move(newIdArr));
+        return;
+    }
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<PartUpd::ForEachComponent>(stack->GetMainComponent());
     component->SetIdArray(newIdArr);
 
     // re-render case
@@ -182,6 +201,10 @@ void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
     }
 
     const auto id = info[0]->ToString();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ForEach::CreateNewChildStart(id);
+        return;
+    }
 
     LOGD("Start create child with array id %{public}s.", id.c_str());
     auto* stack = ViewStackProcessor::GetInstance();
@@ -201,6 +224,11 @@ void JSForEach::CreateNewChildFinish(const JSCallbackInfo& info)
     }
 
     const auto id = info[0]->ToString();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ForEach::CreateNewChildFinish(id);
+        return;
+    }
+
     LOGD("Finish create child with array id %{public}s.", id.c_str());
     auto* stack = ViewStackProcessor::GetInstance();
     stack->PopKey();

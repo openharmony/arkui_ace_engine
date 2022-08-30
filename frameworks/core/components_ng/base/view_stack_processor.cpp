@@ -19,6 +19,7 @@
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -87,18 +88,14 @@ void ViewStackProcessor::Pop()
         return;
     }
 
-    auto element = elementsStack_.top();
-    elementsStack_.pop();
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    if (frameNode) {
-        frameNode->MarkModifyDone();
-    }
-    if (AceType::InstanceOf<GroupNode>(frameNode)) {
-        auto groupNode = AceType::DynamicCast<GroupNode>(frameNode);
-        groupNode->AddChildToGroup(element);
+    auto currentNode = Finish();
+    auto parent = GetMainElementNode();
+    if (AceType::InstanceOf<GroupNode>(parent)) {
+        auto groupNode = AceType::DynamicCast<GroupNode>(parent);
+        groupNode->AddChildToGroup(currentNode);
         return;
     }
-    element->MountToParent(GetMainElementNode());
+    currentNode->MountToParent(parent);
     LOGD("ViewStackProcessor Pop size %{public}zu", elementsStack_.size());
 }
 
@@ -133,11 +130,10 @@ RefPtr<UINode> ViewStackProcessor::Finish()
     if (frameNode) {
         frameNode->MarkModifyDone();
     }
-    if (!elementsStack_.empty()) {
-        LOGE("the elementsStack size is not right");
-        do {
-            elementsStack_.pop();
-        } while (!elementsStack_.empty());
+    // ForEach Partial Update Path.
+    if (AceType::InstanceOf<ForEachNode>(element)) {
+        auto forEachNode = AceType::DynamicCast<ForEachNode>(element);
+        forEachNode->CompareAndUpdateChildren();
     }
     return element;
 }

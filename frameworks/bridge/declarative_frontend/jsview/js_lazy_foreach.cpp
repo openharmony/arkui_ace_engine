@@ -484,6 +484,7 @@ private:
 
 class JSLazyForEachBuilder : public NG::LazyForEachBuilder, public JSLazyForEachActuator {
     DECLARE_ACE_TYPE(JSLazyForEachBuilder, NG::LazyForEachBuilder, JSLazyForEachActuator);
+
 public:
     JSLazyForEachBuilder() = default;
     ~JSLazyForEachBuilder() override = default;
@@ -559,8 +560,14 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
         LOGE("Invalid arguments for LazyForEach");
         return;
     }
+    std::string viewId;
 
-    std::string viewId = ViewStackProcessor::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
+    if (Container::IsCurrentUseNewPipeline()) {
+        viewId = NG::ViewStackProcessor::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
+    } else {
+        viewId = ViewStackProcessor::GetInstance()->ProcessViewId(params[PARAM_VIEW_ID]->ToString());
+    }
+
     JSRef<JSObject> parentViewObj = JSRef<JSObject>::Cast(params[PARAM_PARENT_VIEW]);
     JSRef<JSObject> dataSourceObj = JSRef<JSObject>::Cast(params[PARAM_DATA_SOURCE]);
     JSRef<JSFunc> itemGenerator = JSRef<JSFunc>::Cast(params[PARAM_ITEM_GENERATOR]);

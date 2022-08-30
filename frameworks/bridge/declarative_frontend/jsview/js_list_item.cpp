@@ -108,23 +108,31 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
 
 void JSListItem::CreateForNGPartialUpdate(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
+    if (args.Length() < 2 || !args[0]->IsFunction()) {
         LOGE("Expected deep render function parameter");
         return;
     }
-    RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
-    auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(), jsDeepRenderFunc = std::move(jsDeepRender)](
-                                      int32_t nodeId) {
-        ACE_SCOPED_TRACE("JSListItem::ExecuteDeepRender");
-        LOGD("ListItem elmtId %{public}d DeepRender JS function execution start ....", nodeId);
-        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-        JSRef<JSVal> jsParams[2];
-        jsParams[0] = JSRef<JSVal>::Make(ToJSValue(nodeId));
-        jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
-        jsDeepRenderFunc->ExecuteJS(2, jsParams);
-    }; // listItemDeepRenderFunc lambda
-
-    NG::ListItemView::Create(std::move(listItemDeepRenderFunc));
+    if (!args[1]->IsBoolean()) {
+        LOGE("Expected isLazy parameter");
+        return;
+    }
+    const bool isLazy = args[1]->ToBoolean();
+    if (!isLazy) {
+        NG::ListItemView::Create();
+    } else {
+        RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
+        auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
+                                          jsDeepRenderFunc = std::move(jsDeepRender)](int32_t nodeId) {
+            ACE_SCOPED_TRACE("JSListItem::ExecuteDeepRender");
+            LOGD("ListItem elmtId %{public}d DeepRender JS function execution start ....", nodeId);
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            JSRef<JSVal> jsParams[2];
+            jsParams[0] = JSRef<JSVal>::Make(ToJSValue(nodeId));
+            jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
+            jsDeepRenderFunc->ExecuteJS(2, jsParams);
+        }; // listItemDeepRenderFunc lambda
+        NG::ListItemView::Create(std::move(listItemDeepRenderFunc));
+    }
     args.ReturnSelf();
 }
 

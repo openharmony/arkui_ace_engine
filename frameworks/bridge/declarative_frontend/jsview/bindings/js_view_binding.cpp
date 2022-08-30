@@ -236,12 +236,12 @@ void JSViewFullUpdate::ChildAccessedById(const std::string& viewId)
     lastAccessedViewIds_.emplace(viewId);
 }
 
-JSViewPartialUpdate::JSViewPartialUpdate(JSRef<JSObject> jsViewObject)
+JSViewPartialUpdate::JSViewPartialUpdate(JSRef<JSObject> jsObject)
 {
-    jsViewFunction_ = AceType::MakeRefPtr<ViewFunctions>(jsViewObject);
+    jsViewFunction_ = AceType::MakeRefPtr<ViewFunctions>(jsObject);
     LOGD("JSViewPartialUpdate constructor");
     // keep the reference to the JS View object to prevent GC
-    jsViewObject_ = jsViewObject;
+    jsViewObject_ = jsObject;
 }
 
 JSViewPartialUpdate::~JSViewPartialUpdate()
