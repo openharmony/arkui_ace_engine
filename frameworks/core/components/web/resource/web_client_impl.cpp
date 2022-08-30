@@ -412,6 +412,33 @@ bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthRe
     return jsResult;
 }
 
+bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
+    OHOS::NWeb::SslError error)
+{
+    LOGI("OnSslErrorRequestByJS");
+    ContainerScope scope(instanceId_);
+
+    bool jsResult = false;
+    auto param = std::make_shared<WebSslErrorEvent>(AceType::MakeRefPtr<SslErrorResultOhos>(result), static_cast<int32_t>(error));
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+    task->PostSyncTask([webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnSslErrorRequest(param.get());
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+
+    LOGI("OnSslErrorRequestByJS result:%{public}d", jsResult);
+    return jsResult;
+}
+
 void WebClientImpl::OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request)
 {
     LOGI("OnPermissionRequest");

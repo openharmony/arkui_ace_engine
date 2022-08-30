@@ -23,6 +23,18 @@
 #include <ui/rs_surface_node.h>
 #endif
 
+//
+
+
+
+
+
+
+
+
+
+//
+
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
@@ -100,6 +112,19 @@ public:
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebJSHttpAuthResult> result_;
+};
+
+class SslErrorResultOhos : public SslErrorResult {
+    DECLARE_ACE_TYPE(SslErrorResultOhos, SslErrorResult)
+
+public:
+    SslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result) : result_(result) {}
+
+    void HandleConfirm() override;
+    void HandleCancel() override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result_;
 };
 
 class FileSelectorParamOhos : public WebFileSelectorParam {
@@ -291,6 +316,7 @@ public:
     void OnRequestFocus();
     bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType);
     bool OnHttpAuthRequest(const BaseEventInfo* info);
+    bool OnSslErrorRequest(const BaseEventInfo* info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);
@@ -358,6 +384,7 @@ private:
     void Backward();
     void Forward();
     void ClearHistory();
+    void ClearSslCache();
     bool AccessStep(int32_t step);
     void BackOrForward(int32_t step);
     bool AccessBackward();

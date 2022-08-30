@@ -68,6 +68,7 @@ public:
     void AccessBackward(const JSCallbackInfo& args);
     void AccessForward(const JSCallbackInfo& args);
     void ClearHistory(const JSCallbackInfo& args);
+    void ClearSslCache(const JSCallbackInfo& args);
 
     const RefPtr<WebController>& GetController() const
     {

@@ -459,6 +459,7 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("accessForward", &JSWebController::AccessForward);
     JSClass<JSWebController>::CustomMethod("accessBackward", &JSWebController::AccessBackward);
     JSClass<JSWebController>::CustomMethod("clearHistory", &JSWebController::ClearHistory);
+    JSClass<JSWebController>::CustomMethod("clearSslCache", &JSWebController::ClearSslCache);
     JSClass<JSWebController>::CustomMethod("getCookieManager", &JSWebController::GetCookieManager);
     JSClass<JSWebController>::CustomMethod("getHitTestValue", &JSWebController::GetHitTestValue);
     JSClass<JSWebController>::CustomMethod("backOrForward", &JSWebController::BackOrForward);
@@ -746,6 +747,15 @@ void JSWebController::AccessForward(const JSCallbackInfo& args)
 void JSWebController::ClearHistory(const JSCallbackInfo& args)
 {
     LOGI("JSWebController clear navigation history.");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        webController_->ClearHistory();
+    }
+}
+
+void JSWebController::ClearSslCache(const JSCallbackInfo& args)
+{
+    LOGE("zhangbing JSWebController clear ssl cache.");
     ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->ClearHistory();

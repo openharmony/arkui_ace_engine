@@ -175,6 +175,8 @@ public:
     using BackwardImpl = std::function<void()>;
     using ForwardImpl = std::function<void()>;
     using ClearHistoryImpl = std::function<void()>;
+    using ClearSslCacheImpl = std::function<void()>;
+
     void LoadUrl(std::string url, std::map<std::string, std::string>& httpHeaders) const
     {
         if (loadUrlImpl_) {
@@ -234,6 +236,14 @@ public:
         LOGI("Start clear navigation history");
         if (clearHistoryImpl_) {
             clearHistoryImpl_();
+        }
+    }
+
+    void clearSslCache()
+    {
+        LOGI("Start clear ssl cache");
+        if (clearSslCacheImpl_) {
+            clearSslCacheImpl_();
         }
     }
 
@@ -690,6 +700,7 @@ private:
     BackwardImpl backwardImpl_;
     ForwardImpl forwardimpl_;
     ClearHistoryImpl clearHistoryImpl_;
+    ClearSslCacheImpl clearSslCacheImpl_;
 
     ExecuteTypeScriptImpl executeTypeScriptImpl_;
     OnInactiveImpl onInactiveImpl_;
@@ -1206,6 +1217,22 @@ public:
         onHttpAuthRequestImpl_ = std::move(onHttpAuthRequestImpl);
     }
 
+    using OnSslErrorRequestImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnSslErrorRequest(const BaseEventInfo* info) const
+    {
+        if (onSslErrorRequestImpl_) {
+            return onSslErrorRequestImpl_(info);
+        }
+        return false;
+    }
+    void SetOnSslErrorRequestImpl(OnSslErrorRequestImpl && onSslErrorRequestImpl)
+    {
+        if (onSslErrorRequestImpl == nullptr) {
+            return;
+        }
+        onSslErrorRequestImpl_ = std::move(onSslErrorRequestImpl);
+    }
+
     void RequestFocus();
 
     using OnConsoleImpl = std::function<bool(const BaseEventInfo* info)>;
@@ -1357,6 +1384,7 @@ private:
     OnFileSelectorShowImpl onFileSelectorShowImpl_;
     OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
+    OnSslErrorRequestImpl onSslErrorRequestImpl_;
     OnContextMenuImpl onContextMenuImpl_;
     OnInterceptRequestImpl onInterceptRequestImpl_ = nullptr;
     OnProgressChangeImpl onProgressChangeImpl_ = nullptr;

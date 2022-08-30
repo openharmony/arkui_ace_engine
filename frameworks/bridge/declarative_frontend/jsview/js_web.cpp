@@ -160,6 +160,52 @@ private:
     RefPtr<AuthResult> result_;
 };
 
+class JSWebSslError : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebSslError>::Declare("WebSslErrorResult");
+        JSClass<JSWebSslError>::CustomMethod("handleConfirm", &JSWebSslError::HandleConfirm);
+        JSClass<JSWebSslError>::CustomMethod("handleCancel", &JSWebSslError::HandleCancel);
+        JSClass<JSWebSslError>::Bind(globalObj, &JSWebSslError::Constructor, &JSWebSslError::Destructor);
+    }
+
+    void SetResult(const RefPtr<SslErrorResult>& result)
+    {
+        result_ = result;
+    }
+
+    void HandleConfirm(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->HandleConfirm();
+        }
+    }
+
+    void HandleCancel(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->HandleCancel();
+        }
+    }
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebSslError = Referenced::MakeRefPtr<JSWebSslError>();
+        jsWebSslError->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebSslError));
+    }
+
+    static void Destructor(JSWebSslError* jsWebSslError)
+    {
+        if (jsWebSslError != nullptr) {
+            jsWebSslError->DecRefCount();
+        }
+    }
+
+    RefPtr<SslErrorResult> result_;
+};
+
 class JSWebConsoleLog : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -1018,6 +1064,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("tableData", &JSWeb::TableData);
     JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::OnFileSelectorShowAbandoned);
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::OnHttpAuthRequest);
+    JSClass<JSWeb>::StaticMethod("onSslErrorEventReceive", &JSWeb::OnSslErrorRequest);
     JSClass<JSWeb>::StaticMethod("onPermissionRequest", &JSWeb::OnPermissionRequest);
     JSClass<JSWeb>::StaticMethod("onContextMenuShow", &JSWeb::OnContextMenuShow);
     JSClass<JSWeb>::StaticMethod("onSearchResultReceive", &JSWeb::OnSearchResultReceive);
@@ -1150,6 +1197,21 @@ JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("host", eventInfo.GetHost());
     obj->SetProperty("realm", eventInfo.GetRealm());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> resultObj = JSClass<JSWebSslError>::NewInstance();
+    auto jsWebSslError = Referenced::Claim(resultObj->Unwrap<JSWebSslError>());
+    if (!jsWebSslError) {
+        LOGE("jsWebSslError is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
+    jsWebSslError->SetResult(eventInfo.GetResult());
+    obj->SetPropertyObject("handler", resultObj);
+    obj->SetProperty("error", eventInfo.GetError());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -1438,6 +1500,36 @@ void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
         };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetOnHttpAuthRequestImpl(std::move(jsCallback));
+}
+
+void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("param is invalid.");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebSslErrorEvent, 1>>(JSRef<JSFunc>::Cast(args[0]),
+                                                                            WebSslErrorEventToJSValue);
+    auto jsCallback = [func = std::move(jsFunc)]
+        (const BaseEventInfo* info) -> bool {
+            ACE_SCORING_EVENT("OnSslErrorRequest CallBack");
+            if (func == nullptr) {
+                LOGW("function is null");
+                return false;
+            }
+            auto eventInfo = TypeInfoHelper::DynamicCast<WebSslErrorEvent>(info);
+            if (eventInfo == nullptr) {
+                LOGW("eventInfo is null");
+                return false;
+            }
+            JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
+            if (result->IsBoolean()) {
+                return result->ToBoolean();
+            }
+            return false;
+        };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnSslErrorRequestImpl(std::move(jsCallback));
 }
 
 void JSWeb::MediaPlayGestureAccess(bool isNeedGestureAccess)
