@@ -32,11 +32,12 @@ class ACE_EXPORT SwiperLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     SwiperLayoutAlgorithm(int32_t currentIndex, int32_t startIndex, int32_t endIndex) :
-        currentIndex_(currentIndex), preStartIndex_(startIndex), preEndIndex_(endIndex) {}
-
+        currentIndex_(currentIndex), startIndex_(startIndex), endIndex_(endIndex) {}
     ~SwiperLayoutAlgorithm() override = default;
 
     void OnReset() override {}
+    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Layout(LayoutWrapper* layoutWrapper) override;
 
     void SetCurrentOffset(float offset)
     {
@@ -48,19 +49,14 @@ public:
         return currentOffset_;
     }
 
-    int32_t GetStartIndex() const
-    {
-        return startIndex_.value_or(0);
-    }
-
-    int32_t GetEndIndex() const
-    {
-        return endIndex_.value_or(0);
-    }
-
     void SetTargetIndex(std::optional<int32_t> targetIndex)
     {
         targetIndex_ = targetIndex;
+    }
+
+    void SetTotalCount(int32_t totalCount)
+    {
+        totalCount_ = totalCount;
     }
 
     void ResetTargetIndex()
@@ -68,18 +64,28 @@ public:
         targetIndex_.reset();
     }
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
+    const std::set<int32_t>& GetItemRange()
+    {
+        return itemRange_;
+    }
 
-    void Layout(LayoutWrapper* layoutWrapper) override;
+    void SetPreItemRange(const std::set<int32_t>& preItemRange)
+    {
+        preItemRange_ = preItemRange;
+    }
 
 private:
+    void InitItemRange();
+
     int32_t currentIndex_ = 0;
+    int32_t startIndex_;
+    int32_t endIndex_;
     std::optional<int32_t> targetIndex_;
-    int32_t preStartIndex_ = 0;
-    int32_t preEndIndex_ = 0;
-    std::optional<int32_t> startIndex_;
-    std::optional<int32_t> endIndex_;
     float currentOffset_ = 0.0f;
+    int32_t totalCount_ = 0;
+    std::set<int32_t> itemRange_;
+    std::set<int32_t> preItemRange_;
+    std::vector<int32_t> inActiveItems_;
 };
 } // namespace OHOS::Ace::NG
 
