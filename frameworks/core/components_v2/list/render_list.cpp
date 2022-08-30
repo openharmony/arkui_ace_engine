@@ -2458,7 +2458,7 @@ size_t RenderList::CalculateSelectedIndex(
     return DEFAULT_INDEX;
 }
 
-size_t RenderList::CalculateInsertIndex(
+int32_t RenderList::CalculateInsertIndex(
     const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size selectedItemSize)
 {
     if (targetRenderlist->TotalCount() == 0) {
@@ -2483,16 +2483,16 @@ size_t RenderList::CalculateInsertIndex(
             return 0;
         }
         if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem)) > -1) {
-            return targetRenderlist->GetIndexByListItem(listItem) + 1;
+            return static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem)) + 1;
         }
-        return DEFAULT_INDEX;
+        return DEFAULT_INDEX_VALUE;
     }
 
     if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem)) > -1) {
-        return targetRenderlist->GetIndexByListItem(listItem);
+        return static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem));
     }
 
-    return DEFAULT_INDEX;
+    return DEFAULT_INDEX_VALUE;
 }
 
 bool RenderList::IsAxisScrollable(AxisDirection direction)

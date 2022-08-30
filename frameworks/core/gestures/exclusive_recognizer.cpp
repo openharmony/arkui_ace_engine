@@ -19,6 +19,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
+#include "core/gestures/click_recognizer.h"
 #include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
@@ -47,7 +48,9 @@ void ExclusiveRecognizer::OnAccepted(size_t touchId)
             recognizer->SetRefereeState(RefereeState::FAIL);
         }
     }
-    Reset();
+    if (AceType::InstanceOf<ClickRecognizer>(activeRecognizer_)) {
+        Reset();
+    }
 }
 
 void ExclusiveRecognizer::OnRejected(size_t touchId)

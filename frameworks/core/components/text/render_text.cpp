@@ -955,7 +955,10 @@ void RenderText::PanOnActionStart(const GestureEvent& info)
         return;
     }
 
-    auto dragItemInfo = GenerateDragItemInfo(pipelineContext, info);
+    GestureEvent newInfo = info;
+    Point newPoint = UpdatePoint(pipelineContext, startPoint_);
+    newInfo.SetGlobalPoint(newPoint);
+    auto dragItemInfo = GenerateDragItemInfo(pipelineContext, newInfo);
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
     if (!dragItemInfo.pixelMap && !dragItemInfo.customComponent) {
         auto initRenderNode = AceType::Claim(this);
