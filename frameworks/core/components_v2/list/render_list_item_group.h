@@ -38,6 +38,7 @@ struct ListItemLayoutParam {
     bool isVertical;
     StickyStyle sticky;
     int32_t lanes;
+    ListItemAlign align;
 };
 
 class RenderListItemGroup : public RenderListItem {
@@ -151,6 +152,7 @@ private:
     void RequestNewItemsAtEnd(double& curMainPos);
     void RequestNewItemsAtStart();
     void SetItemsPostion();
+    double CalculateCrossOffset(double crossSize, double childCrossSize);
 
     WeakPtr<ListItemGenerator> itemGenerator_;
     RefPtr<ListItemGroupComponent> component_;
@@ -176,6 +178,7 @@ private:
     size_t endCacheCount_ = 0;
     int32_t lanes_ = 1;
     bool vertical_ = true;
+    ListItemAlign align_;
 
     // layout status
     int32_t startIndex_ = -1;

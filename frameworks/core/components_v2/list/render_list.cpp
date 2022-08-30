@@ -1006,10 +1006,11 @@ Size RenderList::SetItemsPosition(double mainSize)
     if (currentStickyItem_) {
         const auto& stickyItemLayoutSize = currentStickyItem_->GetLayoutSize();
         const double mainStickySize = GetMainSize(stickyItemLayoutSize) + spaceWidth_;
+        auto offsetCross = CalculateLaneCrossOffset(crossSize, GetCrossSize(currentStickyItem_->GetLayoutSize()));
         if (nextStickyItem && LessNotEqual(nextStickyMainAxis, mainStickySize)) {
-            currentStickyItem_->SetPosition(MakeValue<Offset>(nextStickyMainAxis - mainStickySize, 0.0));
+            currentStickyItem_->SetPosition(MakeValue<Offset>(nextStickyMainAxis - mainStickySize, offsetCross));
         } else {
-            currentStickyItem_->SetPosition(MakeValue<Offset>(0.0, 0.0));
+            currentStickyItem_->SetPosition(MakeValue<Offset>(0.0, offsetCross));
         }
 
         if (!fixedCrossSize_) {
@@ -2985,7 +2986,8 @@ void RenderList::LayoutChild(RefPtr<RenderNode> child, double referencePos, bool
             .forwardLayout = forward,
             .isVertical = vertical_,
             .sticky = sticky_,
-            .lanes = isLaneList_ ? lanes_ : 1
+            .lanes = isLaneList_ ? lanes_ : 1,
+            .align = component_->GetAlignListItemAlign(),
         };
         listItemGroup->SetItemGroupLayoutParam(param);
         listItemGroup->SetNeedLayout(true);
