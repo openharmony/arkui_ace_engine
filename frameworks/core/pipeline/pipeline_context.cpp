@@ -2101,6 +2101,11 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
         }
         case WindowSizeChangeReason::DRAG_START: {
             isDragStart_ = true;
+#ifdef ENABLE_ROSEN_BACKEND
+            if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+                rsUIDirector_->SetAppFreeze(true);
+            }
+#endif
             BlurWindowWithDrag(true);
             NotifyWebPaint();
             break;
@@ -2114,6 +2119,11 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
         case WindowSizeChangeReason::DRAG_END: {
             isDragStart_ = false;
             isFirstDrag_ = true;
+#ifdef ENABLE_ROSEN_BACKEND
+            if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+                rsUIDirector_->SetAppFreeze(false);
+            }
+#endif
             BlurWindowWithDrag(false);
             SetRootSizeWithWidthHeight(width, height);
             NotifyWebPaint();
