@@ -39,7 +39,7 @@ public:
     void SendMessage(const std::string& message) const;
 
 private:
-    volatile bool terminateExecution_ = false;
+    std::atomic<bool> terminateExecution_ = false;
     std::string bundleName_;
     std::function<void(std::string)> wsOnMessage_;
     std::unique_ptr<websocket::stream<localSocket::socket>> webSocket_ = nullptr;
