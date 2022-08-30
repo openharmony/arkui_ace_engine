@@ -90,17 +90,21 @@ bool DOMMarquee::SetSpecializedStyle(const std::pair<std::string, std::string>& 
 {
     static const LinearMapNode<void (*)(TextStyle&, const std::string&, const DOMMarquee&)> textStyleOperators[] = {
         { DOM_TEXT_ALLOW_SCALE, [](TextStyle& textStyle, const std::string& val,
-                                const DOMMarquee&) { textStyle.SetAllowScale(StringToBool(val)); } },
+                                    const DOMMarquee&) { textStyle.SetAllowScale(StringToBool(val)); } },
         { DOM_MARQUEE_COLOR, [](TextStyle& textStyle, const std::string& val,
-                             const DOMMarquee& node) { textStyle.SetTextColor(node.ParseColor(val)); } },
+                                 const DOMMarquee& node) { textStyle.SetTextColor(node.ParseColor(val)); } },
         { DOM_MARQUEE_FONT_FAMILY,
             [](TextStyle& textStyle, const std::string& val, const DOMMarquee& node) {
                 textStyle.SetFontFamilies(node.ParseFontFamilies(val));
             } },
         { DOM_MARQUEE_FONT_SIZE, [](TextStyle& textStyle, const std::string& val,
-                                 const DOMMarquee& node) { textStyle.SetFontSize(node.ParseDimension(val)); } },
+                                     const DOMMarquee& node) { textStyle.SetFontSize(node.ParseDimension(val)); } },
         { DOM_MARQUEE_FONT_WEIGHT, [](TextStyle& textStyle, const std::string& val,
-                                   const DOMMarquee&) { textStyle.SetFontWeight(ConvertStrToFontWeight(val)); } },
+                                       const DOMMarquee&) { textStyle.SetFontWeight(ConvertStrToFontWeight(val)); } },
+        { DOM_MARQUEE_TEXT_ALIGN,
+            [](TextStyle& textStyle, const std::string& val, const DOMMarquee&) {
+                textStyle.SetTextAlign(ConvertStrToTextAlign(val));
+            } },
     };
     auto operatorIter = BinarySearchFindIndex(textStyleOperators, ArraySize(textStyleOperators), style.first.c_str());
     if (operatorIter != -1) {
