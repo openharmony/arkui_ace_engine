@@ -103,6 +103,8 @@ void LayoutProperty::CheckSelfIdealSize()
     if (measureType_ == MeasureType::MATCH_PARENT) {
         layoutConstraint_->UpdateSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
     }
+    layoutConstraint_->selfIdealSize.UpdateSizeWhenLarger(layoutConstraint_->minSize);
+    layoutConstraint_->selfIdealSize.UpdateSizeWhenSmaller(layoutConstraint_->maxSize);
 }
 
 LayoutConstraintF LayoutProperty::CreateChildConstraint() const

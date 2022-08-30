@@ -506,14 +506,14 @@ public:
     bool UpdateSizeWhenLarger(const SizeT<T>& size)
     {
         bool isModified = false;
-        if (NonNegative(size.Width())) {
+        if (NonNegative(size.Width()) && width_) {
             auto temp = width_.value_or(0) > size.Width() ? width_ : size.Width();
             if (width_ != temp) {
                 isModified = true;
             }
             width_ = temp;
         }
-        if (NonNegative(size.Height())) {
+        if (NonNegative(size.Height()) && height_) {
             auto temp = height_.value_or(0) > size.Height() ? height_ : size.Height();
             if (height_ != temp) {
                 isModified = true;
