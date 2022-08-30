@@ -16,6 +16,9 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
 #include <unistd.h>
+#ifdef WINDOWS_PLATFORM
+#include <algorithm>
+#endif
 
 #include "scope_manager/native_scope_manager.h"
 
@@ -51,6 +54,11 @@
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
 extern const char _binary_jsMockSystemPlugin_abc_end[];
+#if defined(WINDOWS_PLATFORM)
+constexpr char SEPERATOR[] = "\\";
+#else
+constexpr char SEPERATOR[] = "/";
+#endif
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_stateMgmt_abc_end[];
@@ -937,7 +945,7 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
         LOGD("GetAssetContent \"%{public}s\" failed.", fileName.c_str());
         return true;
     }
-    if (!runtime->EvaluateJsCode(content.data(), content.size())) {
+    if (!runtime->EvaluateJsCode(content.data(), content.size(), fileName)) {
         LOGE("EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
         return false;
     }
@@ -993,9 +1001,28 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
                 CallAppFunc("onCreate");
             }
         }
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         if (!ExecuteAbc(urlName)) {
             return;
         }
+#else
+        std::vector<uint8_t> content;
+        if (!delegate->GetAssetContent(urlName, content)) {
+            LOGD("GetAssetContent \"%{public}s\" failed.", urlName.c_str());
+            return true;
+        }
+        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+        arkRuntime->SetPathResolveCallback(bundleName_, assetPath_);
+#ifdef WINDOWS_PLATFORM
+        replace(urlName.begin(), urlName.end(), '/', '\\');
+#endif
+        urlName = assetPath_ + SEPERATOR + urlName;
+        if (!runtime->EvaluateJsCode(content.data(), content.size(), urlName)) {
+            LOGE("EvaluateJsCode \"%{public}s\" failed.", urlName.c_str());
+            return false;
+        }
+        return true;
+#endif
     }
 }
 

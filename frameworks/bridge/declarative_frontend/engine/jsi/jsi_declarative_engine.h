@@ -315,6 +315,12 @@ public:
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) override;
+
+    void InitializeModuleSearcher(const std::string& bundleName, const std::string assetPath) override
+    {
+        bundleName_ = bundleName;
+        assetPath_ = assetPath;
+    }
 #endif
 
 private:
@@ -343,6 +349,10 @@ private:
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
     shared_ptr<JsValue> renderContext_;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string assetPath_;
+    std::string bundleName_;
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };

@@ -199,8 +199,8 @@ void AceAbility::InitEnv()
         AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
         AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
     }
-    if (runArgs_.projectModel == ProjectModel::STAGE && !runArgs_.formsEnabled) {
-        container->SetStageAppConfig();
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        container->ParseStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
     }
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);

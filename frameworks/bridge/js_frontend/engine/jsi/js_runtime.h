@@ -45,7 +45,7 @@ public:
     // Evaluate a piece of js code, returns true if success.
     // If exception occurs during execution, it is handled inside this interface.
     virtual shared_ptr<JsValue> EvaluateJsCode(const std::string &src) = 0;
-    virtual bool EvaluateJsCode(const uint8_t *buffer, int32_t size) = 0;
+    virtual bool EvaluateJsCode(const uint8_t *buffer, int32_t size, const std::string& filePath = "") = 0;
 
     virtual bool ExecuteJsBin([[maybe_unused]] const std::string &fileName)
     {

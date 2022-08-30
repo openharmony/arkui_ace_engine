@@ -127,6 +127,7 @@ template("declarative_js_engine_ark") {
       ]
     } else {
       deps += [ ":gen_obj_src_abc_mock_system_plugin" ]
+      sources += [ "utils/jsi_module_searcher.cpp" ]
     }
 
     # if napi support

@@ -251,6 +251,11 @@ public:
         LOGE("V8 does not support replaceJSContent");
         return;
     }
+
+    virtual void InitializeModuleSearcher(const std::string& bundleName, const std::string assetPath)
+    {
+        LOGE("V8 and QuickJs does not support InitializeModuleSearcher");
+    }
 #endif
 
     virtual void FlushReload()
