@@ -68,6 +68,11 @@ public:
 
     ~FrameNode() override;
 
+    int32_t FrameCount() const override
+    {
+        return 1;
+    }
+
     void InitializePatternAndContext();
 
     void MarkModifyDone();

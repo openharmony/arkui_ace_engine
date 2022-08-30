@@ -77,9 +77,34 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto childrenSize = layoutWrapper->GetTotalChildCount();
+    auto itemWidth = (axis == Axis::HORIZONTAL ? (size.Width() / displayCount) : (size.Height() / displayCount));
 
     auto parentOffset =
         layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
+
+    // Effect when difference between current index and target index is greater than 1.
+    // eg. Current index is 0, call swipeTo method to jump to index 2,
+    // change item's position only 0 and 2, ignore others.
+    if (targetIndex_.has_value() && std::abs(targetIndex_.value() - currentIndex_) > 1) {
+        auto currentOffset = axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0.0f) : OffsetF(0.0f, currentOffset_);
+        // Layout current item.
+        auto currentWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex_);
+        if (currentWrapper && currentWrapper->GetGeometryNode()) {
+            currentWrapper->GetGeometryNode()->SetFrameOffset(currentOffset);
+            currentWrapper->Layout(parentOffset);
+        }
+
+        // Layout target item.
+        auto targetMainOffset = targetIndex_ > currentIndex_ ? itemWidth : -itemWidth;
+        auto targetOffset =
+            axis == Axis::HORIZONTAL ? OffsetF(targetMainOffset, 0.0f) : OffsetF(0.0f, targetMainOffset);
+        auto targetWrapper = layoutWrapper->GetOrCreateChildByIndex(targetIndex_.value());
+        if (targetWrapper && targetWrapper->GetGeometryNode()) {
+            targetWrapper->GetGeometryNode()->SetFrameOffset(currentOffset + targetOffset);
+            targetWrapper->Layout(parentOffset);
+        }
+        return;
+    }
 
     // layout children.
     for (auto index = startIndex_.value(); index <= endIndex_.value(); ++index) {
@@ -92,7 +117,6 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
 
         auto offset = OffsetF(0.0, 0.0);
-        auto itemWidth = (axis == Axis::HORIZONTAL ? (size.Width() / displayCount) : (size.Height() / displayCount));
         if (axis == Axis::HORIZONTAL) {
             offset += OffsetF((loopIndex - currentIndex_) * itemWidth + currentOffset_, 0.0f);
         } else if (axis == Axis::VERTICAL) {

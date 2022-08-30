@@ -18,6 +18,7 @@
 
 #include <map>
 #include <cstdint>
+#include <optional>
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
@@ -57,12 +58,23 @@ public:
         return endIndex_.value_or(0);
     }
 
+    void SetTargetIndex(std::optional<int32_t> targetIndex)
+    {
+        targetIndex_ = targetIndex;
+    }
+
+    void ResetTargetIndex()
+    {
+        targetIndex_.reset();
+    }
+
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
     int32_t currentIndex_ = 0;
+    std::optional<int32_t> targetIndex_;
     int32_t preStartIndex_ = 0;
     int32_t preEndIndex_ = 0;
     std::optional<int32_t> startIndex_;
