@@ -26,6 +26,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void CreateForPartialUpdate();
+    static void CreateForPartialUpdateNG();
     static void Pop();
     static void GetIdArray(const JSCallbackInfo& info);
     static void SetIdArray(const JSCallbackInfo& info);

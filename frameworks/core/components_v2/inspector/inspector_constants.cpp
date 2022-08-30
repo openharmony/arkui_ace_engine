@@ -14,6 +14,7 @@
  */
 
 #include "core/components_v2/inspector/inspector_constants.h"
+
 #include "core/components/shape/shape_component.h"
 
 namespace OHOS::Ace::V2 {
@@ -58,6 +59,8 @@ const char JS_VIEW_ETS_TAG[] = "JsView";
 const char JS_LAZY_FOR_EACH_ETS_TAG[] = "LazyForEach";
 // js lazy foreach node
 const char JS_FOR_EACH_ETS_TAG[] = "ForEach";
+// js lazy foreach node
+const char JS_SYNTAX_ITEM_ETS_TAG[] = "SyntaxItem";
 // js if lese node
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
 

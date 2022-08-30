@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <list>
 #include <string>
 #include <vector>
 
@@ -32,6 +33,17 @@ struct ForEachFunc {
 class ACE_EXPORT ForEach {
 public:
     static void Create(const ForEachFunc& ForEachFunc);
+
+    static const std::list<std::string>& GetCurrentIdList(int32_t nodeId);
+
+    static void SetNewIds(std::list<std::string>&& newIds);
+
+    // Partial Update path.
+    static void Create();
+
+    static void CreateNewChildStart(const std::string& id);
+
+    static void CreateNewChildFinish(const std::string& id);
 };
 } // namespace OHOS::Ace::NG
 
