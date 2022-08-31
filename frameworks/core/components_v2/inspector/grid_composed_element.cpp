@@ -18,7 +18,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/grid_layout/render_grid_layout.h"
-#include "core/components_v2/grid/grid_element.h"
+#include "core/components_v2/grid/render_grid_scroll.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
@@ -100,26 +100,36 @@ std::string GridComposedElement::GetRowsTemplate() const
 
 std::string GridComposedElement::GetColumnsGap() const
 {
-    auto node = GetInspectorNode(GridLayoutElement::TypeId());
-    if (!node) {
+    auto gridLayoutNode = GetInspectorNode(GridLayoutElement::TypeId());
+    auto gridNode = GetInspectorNode(V2::GridElement::TypeId());
+    if (!gridNode && !gridLayoutNode) {
         return "0";
     }
-    auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
+    auto renderGrip = AceType::DynamicCast<RenderGridLayout>(gridLayoutNode);
+    auto renderScroll = AceType::DynamicCast<V2::RenderGridScroll>(gridNode);
     if (renderGrip) {
         return renderGrip->GetColumns().ToString().c_str();
+    }
+    if (renderScroll) {
+        return renderScroll->GetColumns().ToString().c_str();
     }
     return "0";
 }
 
 std::string GridComposedElement::GetRowsGap() const
 {
-    auto node = GetInspectorNode(GridLayoutElement::TypeId());
-    if (!node) {
+    auto gridLayoutNode = GetInspectorNode(GridLayoutElement::TypeId());
+    auto gridNode = GetInspectorNode(V2::GridElement::TypeId());
+    if (!gridNode && !gridLayoutNode) {
         return "0";
     }
-    auto renderGrip = AceType::DynamicCast<RenderGridLayout>(node);
+    auto renderGrip = AceType::DynamicCast<RenderGridLayout>(gridLayoutNode);
+    auto renderScroll = AceType::DynamicCast<V2::RenderGridScroll>(gridNode);
     if (renderGrip) {
         return renderGrip->GetRows().ToString().c_str();
+    }
+    if (renderScroll) {
+        return renderScroll->GetRows().ToString().c_str();
     }
     return "0";
 }
