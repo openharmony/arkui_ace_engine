@@ -141,8 +141,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     CHECK_NULL_VOID(dirty);
     if (dirty->IsActive()) {
         pattern_->OnActive();
+        isActive_ = true;
     } else {
         pattern_->OnInActive();
+        isActive_ = false;
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
@@ -151,7 +153,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
-    if (needSyncRenderTree_) {
+    if (needSyncRenderTree_ || dirty->IsForceSyncRenderTree()) {
         RebuildRenderContextTree(dirty->GetChildrenInRenderArea());
         needSyncRenderTree_ = false;
     }
@@ -289,9 +291,10 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     auto flag = layoutProperty_->GetPropertyChangeFlag();
     auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
     do {
-        if (CheckMeasureFlag(flag) || CheckRequestNewChildNodeFlag(flag) || forceMeasure) {
+        // when inactive node need to reactive in render tree, need to measure again.
+        if (CheckMeasureFlag(flag) || CheckRequestNewChildNodeFlag(flag) || forceMeasure || !isActive_) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
-            bool forceChildMeasure = CheckMeasureFlag(flag) || forceMeasure;
+            bool forceChildMeasure = CheckMeasureFlag(flag) || forceMeasure || !isActive_;
             UpdateChildrenLayoutWrapper(layoutWrapper, forceChildMeasure, false);
             break;
         }
