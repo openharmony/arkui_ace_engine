@@ -706,7 +706,8 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     }
 
     for (auto&& component : components) {
-        component->SetTouchable(mainComponent->IsTouchable() && mainComponent->GetHitTestMode() != HitTestMode::NONE);
+        component->SetTouchable(mainComponent->IsTouchable() &&
+        mainComponent->GetHitTestMode() != HitTestMode::HTMNONE);
     }
 
     for (auto&& component : components) {

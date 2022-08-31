@@ -1356,7 +1356,7 @@ private:
 
     std::string restoreInfo_;
     bool isNotSiblingAddRecognizerToResult_ = true;
-    HitTestMode hitTestMode_ = HitTestMode::DEFAULT;
+    HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderNode);
 };

@@ -481,12 +481,13 @@ HWTEST_F(RenderStackTest, RenderStackLayout010, TestSize.Level1)
 HWTEST_F(RenderStackTest, RenderStackHitTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. construct the node tree, stack is set HitTestMode::BLOCK.
+     * @tc.steps: step1. construct the node tree, stack is set HitTestMode::HTMBLOCK.
      */
     auto mockContext = MockRenderCommon::GetMockContext();
     RefPtr<RenderRoot> root = FlexTestUtils::CreateRenderRoot();
     RefPtr<RenderStack> stack =
-        StackTestUtils::CreateRenderStack(Alignment::TOP_LEFT, Overflow::CLIP, StackFit::STRETCH, HitTestMode::BLOCK);
+        StackTestUtils::CreateRenderStack(Alignment::TOP_LEFT, Overflow::CLIP,
+            StackFit::STRETCH, HitTestMode::HTMBLOCK);
     root->AddChild(stack);
     auto renderButton = FlexTestUtils::CreateRenderButton(BUTTON_WIDTH_DEFAULT, BUTTON_HEIGHT_DEFAULT);
     renderButton->Attach(mockContext);

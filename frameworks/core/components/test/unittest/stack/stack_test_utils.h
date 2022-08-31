@@ -31,7 +31,7 @@ class MockRenderStack : public RenderStack {
 class StackTestUtils {
 public:
     static RefPtr<RenderStack> CreateRenderStack(const Alignment& alignment, Overflow overflow,
-        StackFit stackFit, HitTestMode hitTestMode = HitTestMode::DEFAULT);
+        StackFit stackFit, HitTestMode hitTestMode = HitTestMode::HTMDEFAULT);
     static RefPtr<RenderPositioned> CreateRenderPositioned(RefPtr<PositionedComponent> positioned);
 };
 

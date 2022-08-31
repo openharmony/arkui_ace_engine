@@ -75,7 +75,7 @@ bool DomGridColumn::SetSpecializedAttr(const std::pair<std::string, std::string>
                 auto& positionStyle =
                     declaration->MaybeResetStyle<CommonPositionStyle>(StyleTag::COMMON_POSITION_STYLE);
                 if (positionStyle.IsValid()) {
-                    positionStyle.position = PositionType::ABSOLUTE;
+                    positionStyle.position = PositionType::PTABSOLUTE;
                     positionStyle.top = Dimension(0.0, DimensionUnit::PX);
                     positionStyle.left = column.ParseDimension(value);
                     declaration->SetHasLeft(true);

@@ -322,7 +322,7 @@ private:
     bool useExternalRSNode_ = false;
     std::string inspectorTag_;
     int32_t restoreId_ = -1;
-    HitTestMode hitTestMode_ = HitTestMode::DEFAULT;
+    HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
 
     ElementIdType elmtId_ = ElementRegister::UndefinedElementId;
 };

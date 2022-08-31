@@ -619,7 +619,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetPosition() const
     auto render = AceType::DynamicCast<RenderFlexItem>(node);
     if (render) {
         PositionType type = render->GetPositionType();
-        if (type == PositionType::ABSOLUTE) {
+        if (type == PositionType::PTABSOLUTE) {
             jsonValue->Put("x", render->GetLeft().ToString().c_str());
             jsonValue->Put("y", render->GetTop().ToString().c_str());
             return jsonValue;
@@ -662,7 +662,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetOffset() const
     auto render = AceType::DynamicCast<RenderFlexItem>(node);
     if (render) {
         PositionType type = render->GetPositionType();
-        if (type == PositionType::OFFSET) {
+        if (type == PositionType::PTOFFSET) {
             jsonValue->Put("x", render->GetLeft().ToString().c_str());
             jsonValue->Put("y", render->GetTop().ToString().c_str());
             return jsonValue;

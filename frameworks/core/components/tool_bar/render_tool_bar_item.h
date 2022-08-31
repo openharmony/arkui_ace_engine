@@ -51,7 +51,7 @@ public:
     void SetFocusEventFlag(bool onFocus)
     {
         onFocus_ = onFocus;
-        if (position_ == PositionType::FIXED) {
+        if (position_ == PositionType::PTFIXED) {
             auto context = context_.Upgrade();
             if (!context) {
                 LOGE("Pipeline context upgrade fail!");
@@ -116,7 +116,7 @@ private:
     TargetMenuCallBack targetMenuCallBack_;
     bool isEndItem_ = false;
     Dimension menuMinWidth_;
-    PositionType position_ { PositionType::RELATIVE };
+    PositionType position_ { PositionType::PTRELATIVE };
     RefPtr<Animator> eventEffectController_;
 };
 
