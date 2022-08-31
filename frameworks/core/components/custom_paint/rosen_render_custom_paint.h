@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace {
 
-#ifdef CANVAS_USE_GPU
+#ifndef UPLOAD_GPU_DISABLED
 class EnvironmentGL;
 #endif
 
@@ -144,7 +144,7 @@ private:
     SkBitmap webglBitmap_;
     std::unique_ptr<SkCanvas> bitmapCanvas_;
     SkCanvas* skCanvas_;
-#ifdef CANVAS_USE_GPU
+#ifndef UPLOAD_GPU_DISABLED
     void InitializeEglContext();
 
     RefPtr<EnvironmentGL> environment_;

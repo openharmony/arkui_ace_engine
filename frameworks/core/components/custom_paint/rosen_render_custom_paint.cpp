@@ -52,7 +52,7 @@
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
-#ifdef CANVAS_USE_GPU
+#ifndef UPLOAD_GPU_DISABLED
 #include "core/common/graphic/environment_gl.h"
 #endif
 
@@ -63,7 +63,7 @@ constexpr double HANGING_PERCENT = 0.8;
 constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr int32_t IMAGE_CACHE_COUNT = 50;
-#ifdef CANVAS_USE_GPU
+#ifndef UPLOAD_GPU_DISABLED
 constexpr int32_t UNREF_OBJECT_DELAY = 100;
 #endif
 
@@ -152,7 +152,7 @@ RosenRenderCustomPaint::RosenRenderCustomPaint()
 
 RosenRenderCustomPaint::~RosenRenderCustomPaint()
 {
-#ifdef CANVAS_USE_GPU
+#ifndef UPLOAD_GPU_DISABLED
     auto pipeline = context_.Upgrade();
     if (!pipeline) {
         return;
@@ -161,7 +161,7 @@ RosenRenderCustomPaint::~RosenRenderCustomPaint()
 #endif
 }
 
-#ifdef CANVAS_USE_GPU
+#ifndef UPLOAD_GPU_DISABLED
 void RosenRenderCustomPaint::InitializeEglContext()
 {
     ACE_SCOPED_TRACE("InitializeEglContext");
@@ -188,7 +188,7 @@ void RosenRenderCustomPaint::InitializeEglContext()
 
 bool RosenRenderCustomPaint::CreateSurface(double viewScale)
 {
-#ifdef CANVAS_USE_GPU
+#ifndef UPLOAD_GPU_DISABLED
     InitializeEglContext();
     if (!environment_) {
         return false;
@@ -265,7 +265,7 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
 
     canvas->save();
     canvas->scale(1.0 / viewScale, 1.0 / viewScale);
-#ifdef CANVAS_USE_GPU
+#ifndef UPLOAD_GPU_DISABLED
     if (surface_) {
         ACE_SCOPED_TRACE("surface draw");
         surface_->flush(SkSurface::BackendSurfaceAccess::kNoAccess, { .fFlags = kSyncCpu_GrFlushFlag });
@@ -327,7 +327,7 @@ std::string RosenRenderCustomPaint::ToDataURL(const std::string& args)
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
     bool isGpuEnable = false;
     bool success = false;
-#ifdef CANVAS_USE_GPU
+#ifndef UPLOAD_GPU_DISABLED
     if (surface_) {
         isGpuEnable = true;
         auto pipeline = context_.Upgrade();
@@ -1610,7 +1610,7 @@ std::unique_ptr<ImageData> RosenRenderCustomPaint::GetImageData(double left, dou
     SkCanvas tempCanvas(tempCache);
     auto srcRect = SkRect::MakeXYWH(scaledLeft, scaledTop, width * viewScale, height * viewScale);
     auto dstRect = SkRect::MakeXYWH(0.0, 0.0, dirtyWidth, dirtyHeight);
-#ifdef CANVAS_USE_GPU
+#ifndef UPLOAD_GPU_DISABLED
     if (surface_) {
         isGpuEnable = true;
         SkBitmap bitmap;
