@@ -41,7 +41,7 @@ public:
     ~DividerPainter() = default;
 
     void DrawLine(RSCanvas& canvas, const OffsetF& offset) const;
-    void DrawListLines(RSCanvas& canvas, const int32_t startIndex, const int32_t endIndex,
+    void DrawListLines(RSCanvas& canvas, int32_t startIndex, int32_t endIndex,
         const ListLayoutAlgorithm::PositionMap& itemPosition) const;
 
 private:

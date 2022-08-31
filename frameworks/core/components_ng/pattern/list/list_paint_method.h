@@ -29,8 +29,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ListPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ListPaintMethod, NodePaintMethod)
 public:
-    ListPaintMethod(const V2::ItemDivider& divider, const int32_t startIndex, const int32_t endIndex,
-        const bool vertical, const ListLayoutAlgorithm::PositionMap& itemPosition) : divider_(divider),
+    ListPaintMethod(const V2::ItemDivider& divider, int32_t startIndex, int32_t endIndex,
+        bool vertical, const ListLayoutAlgorithm::PositionMap& itemPosition) : divider_(divider),
         startIndex_(startIndex), endIndex_(endIndex), vertical_(vertical), itemPosition_(itemPosition) {}
     ~ListPaintMethod() override = default;
 
@@ -41,7 +41,7 @@ private:
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
     bool vertical_ = false;
-    const ListLayoutAlgorithm::PositionMap itemPosition_;
+    ListLayoutAlgorithm::PositionMap itemPosition_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H
