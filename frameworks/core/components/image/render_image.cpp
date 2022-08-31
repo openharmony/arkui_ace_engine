@@ -232,7 +232,7 @@ bool RenderImage::HandleKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if (event.IsCtrlWith(KeyCode::KEY_C) && copyOption_ != CopyOptions::None) {
+    if (event.IsCtrlWith(KeyCode::KEY_C)) {
         HandleOnCopy();
         return true;
     }
