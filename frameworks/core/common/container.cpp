@@ -57,4 +57,10 @@ void Container::UpdateCurrent(int32_t id)
 {
     ContainerScope::UpdateCurrent(id);
 }
+
+void Container::NavigatePage(NG::NavigatorType type, PageTarget& target, const std::string& params) const
+{
+    GetFrontend()->NavigatePage(uint8_t(type), target, params);
+}
+
 } // namespace OHOS::Ace
