@@ -1223,10 +1223,25 @@ void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t 
 {
     LOGD("FrontendDelegateDeclarative ShowToast.");
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    auto pipelineContext = pipelineContextHolder_.Get();
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGI("Toast IsCurrentUseNewPipeline.");
+        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
+        auto stageManager = context ? context->GetStageManager() : nullptr;
+        taskExecutor_->PostTask([durationTime, message, bottom, isRightToLeft, stage = stageManager] {
+            if (stage) {
+                LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
+                stage->ShowToast(message, durationTime, bottom, isRightToLeft);
+            } else {
+                LOGW("No stage to show toast");
+            }
+        }, TaskExecutor::TaskType::UI);
+        return;
+    }
+    auto pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     taskExecutor_->PostTask(
-        [durationTime, message, bottom, isRightToLeft, context = pipelineContext] {
+        [durationTime, message, bottom, isRightToLeft, context = pipeline] {
             ToastComponent::GetInstance().Show(context, message, durationTime, bottom, isRightToLeft);
         },
         TaskExecutor::TaskType::UI);
