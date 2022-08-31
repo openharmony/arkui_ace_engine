@@ -56,7 +56,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // Calculate child layout constraint.
-    auto padding = layoutProperty->CreatePaddingPropertyF();
+    auto padding = layoutProperty->CreatePaddingAndBorder();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateChildConstraint(axis, idealSize - padding.Size(), childLayoutConstraint);
 
@@ -98,7 +98,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto parentOffset =
         layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
     auto size = geometryNode->GetFrameSize();
-    auto padding = layoutProperty->CreatePaddingPropertyF();
+    auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto childSize = childGeometryNode->GetFrameSize();
     auto scrollableDistance = GetMainAxisSize(childSize, axis) - GetMainAxisSize(size, axis);

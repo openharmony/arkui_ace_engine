@@ -27,6 +27,7 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_wrapper.h"
@@ -157,6 +158,9 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     }
     if (geometryNode_->GetFrame().GetRect() != dirty->GetGeometryNode()->GetFrame().GetRect()) {
         renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
+    }
+    if (layoutProperty_->GetBorderWidthProperty()) {
+        renderContext_->UpdateBorderWidth(*layoutProperty_->GetBorderWidthProperty());
     }
     SetGeometryNode(dirty->MoveGeometryNode());
 }

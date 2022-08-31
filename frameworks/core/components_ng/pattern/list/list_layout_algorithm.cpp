@@ -76,7 +76,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
-    MinusPaddingToSize(listLayoutProperty->CreatePaddingPropertyF(), idealSize);
+    MinusPaddingToSize(listLayoutProperty->CreatePaddingAndBorder(), idealSize);
 
     // calculate main size.
     auto mainSize = GetMainAxisSize(idealSize, axis);
@@ -292,7 +292,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(listLayoutProperty);
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingPropertyF();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0.0f);
     auto top = padding.top.value_or(0.0f);

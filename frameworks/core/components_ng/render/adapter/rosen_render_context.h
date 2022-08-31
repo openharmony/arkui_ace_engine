@@ -85,6 +85,9 @@ public:
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
+    void OnBorderColorUpdate(const BorderColorProperty& value) override;
+    void OnBorderWidthUpdate(const BorderWidthProperty& value) override;
+    void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
 
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 

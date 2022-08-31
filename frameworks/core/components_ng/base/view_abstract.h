@@ -39,6 +39,13 @@ public:
     static void SetLayoutWeight(int32_t value);
     static void SetBorderRadius(const BorderRadiusProperty& value);
     static void SetBorderRadius(const Dimension& value);
+    static void SetBorderColor(const Color& value);
+    static void SetBorderColor(const BorderColorProperty& value);
+    static void SetBorderWidth(const Dimension& value);
+    static void SetBorderWidth(const BorderWidthProperty& value);
+    static void SetBorderStyle(const BorderStyle& value);
+    static void SetBorderStyle(const BorderStyleProperty& value);
+
 
     // event
     static void SetOnClick(GestureEventFunc&& clickEventFunc);
