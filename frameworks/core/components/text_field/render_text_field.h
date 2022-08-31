@@ -457,7 +457,7 @@ protected:
     // multiply by [twinklingInterval]. For example, 3 * 500ms = 1500ms.
     int32_t obscureTickPendings_ = 0;
     // What the keyboard should appears.
-    TextInputType keyboard_ = TextInputType::TEXT;
+    TextInputType keyboard_ = TextInputType::UNSPECIFIED;
     // Action when "enter" pressed.
     TextInputAction action_ = TextInputAction::UNSPECIFIED;
     std::string actionLabel_;

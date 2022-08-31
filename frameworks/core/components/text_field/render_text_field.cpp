@@ -204,7 +204,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     if (textField->HasSetResetToStart() && textField->GetUpdateType() == UpdateType::ALL) {
         resetToStart_ = textField->GetResetToStart();
     }
-    if (keyboard_ != textField->GetTextInputType()) {
+    if (keyboard_ != TextInputType::UNSPECIFIED && keyboard_ != textField->GetTextInputType()) {
         auto context = context_.Upgrade();
         if (context && context->GetIsDeclarative()) {
             ClearEditingValue();
@@ -217,7 +217,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
         CloseKeyboard();
     }
 
-    if (action_ != textField->GetAction()) {
+    if (action_ != TextInputAction::UNSPECIFIED && action_ != textField->GetAction()) {
         auto context = context_.Upgrade();
         if (context && context->GetIsDeclarative()) {
             CloseKeyboard();

@@ -21,9 +21,10 @@
 namespace OHOS::Ace {
 
 enum class TextInputType {
-    BEGIN = 0,
+    BEGIN = -1,
     // Default type.
-    TEXT = BEGIN,
+    UNSPECIFIED = BEGIN,
+    TEXT = 0,
     // Specialized [TEXT] which support press Enter key to new line.
     MULTILINE = 1,
     NUMBER = 2,
