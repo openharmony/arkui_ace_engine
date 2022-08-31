@@ -684,7 +684,7 @@ void RosenRenderImage::ApplyBorderRadius(
 
 #ifdef OHOS_PLATFORM
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-    recordingCanvas->ClipAdaptiveRRect(radii_[0].x());
+    recordingCanvas->ClipAdaptiveRRect(radii_);
 #else
     // There are three situations in which we apply border radius to the whole image component:
     // 1. when the image source is a SVG;
@@ -763,13 +763,12 @@ void RosenRenderImage::CanvasDrawImageRect(
         return;
     }
 #ifdef OHOS_PLATFORM
-    float radius = radii_[0].x();
     int fitNum = static_cast<int>(imageFit_);
     int repeatNum = static_cast<int>(imageRepeat_);
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
-        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radius, scale_);
+        Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_);
         recordingCanvas->DrawImageWithParm(image_->image(), rsImageInfo, paint);
         return;
     }
