@@ -19,7 +19,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_view.h"
 
 #include "gtest/gtest.h"
@@ -77,7 +76,7 @@ HWTEST_F(ListPropertyTest, ListLayoutPropertyTest001, TestSize.Level1)
      * @tc.expected: if Dimension is PX, value should not be changed
      */
     for (size_t i = 0; i < TEST_SPACE_PX_COUNT; i++) {
-        auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+        auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
         ViewStackProcessor::GetInstance()->Push(frameNode);
         auto castListLayoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
         if (castListLayoutProperty) {
@@ -105,7 +104,7 @@ HWTEST_F(ListPropertyTest, ListLayoutPropertyTest002, TestSize.Level1)
      * @tc.expected: if initialIndex is number, value should not be changed
      */
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
-        auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+        auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
         ViewStackProcessor::GetInstance()->Push(frameNode);
         auto castListLayoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
         if (castListLayoutProperty) {
@@ -133,7 +132,7 @@ HWTEST_F(ListPropertyTest, ListLayoutPropertyTest003, TestSize.Level1)
      * @tc.expected: if lanes is number, value should not be changed
      */
     for (int32_t index = 0; index < LANES_COUNT; index++) {
-        auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+        auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
         ViewStackProcessor::GetInstance()->Push(frameNode);
         auto castListLayoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
         if (castListLayoutProperty) {

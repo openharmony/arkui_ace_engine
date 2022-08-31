@@ -227,6 +227,36 @@ void JSList::SetSticky(int32_t sticky)
 
 void JSList::SetDivider(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        do {
+            if (args.Length() < 1 || !args[0]->IsObject()) {
+                LOGW("Invalid params");
+                break;
+            }
+
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+            Dimension strokeWidth;
+            if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) && strokeWidth.IsValid()) {
+                LOGW("Invalid strokeWidth of divider");
+                break;
+            }
+
+            V2::ItemDivider divider;
+            divider.strokeWidth = strokeWidth;
+            if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+                // Failed to get color from param, using default color defined in theme
+                RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
+                if (listTheme) {
+                    divider.color = listTheme->GetDividerColor();
+                }
+            }
+            ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin);
+            ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
+
+            NG::ListView::SetDivider(divider);
+        } while (0);
+        return;
+    }
     do {
         if (args.Length() < 1 || !args[0]->IsObject()) {
             LOGW("Invalid params");

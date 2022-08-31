@@ -87,6 +87,14 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
     spaceWidth_ = ConvertToPx(space, listLayoutProperty->GetLayoutConstraint()->scaleProperty, mainSize).value_or(0);
+    if (listLayoutProperty->GetDivider().has_value()) {
+        auto divider = listLayoutProperty->GetDivider().value();
+        std::optional<float> dividerSpace = ConvertToPx(divider.strokeWidth,
+            listLayoutProperty->GetLayoutConstraint()->scaleProperty, mainSize);
+        if (dividerSpace.has_value()) {
+            spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
+        }
+    }
 
     // calculate child layout constraint.
     auto contentLayoutConstraint = listLayoutProperty->CreateChildConstraint();

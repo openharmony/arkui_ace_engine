@@ -19,6 +19,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
+#include "core/components_ng/pattern/list/list_paint_method.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -29,6 +30,16 @@ class ListPattern : public Pattern {
 public:
     ListPattern() = default;
     ~ListPattern() override = default;
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        auto listLayoutProperty = GetHost()->GetLayoutProperty<ListLayoutProperty>();
+        auto divider = listLayoutProperty->GetDivider().value();
+        auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+        auto vertical = axis == Axis::VERTICAL ? true : false; 
+        return MakeRefPtr<ListPaintMethod>(divider, startIndex_, endIndex_,
+            vertical, std::move(itemPosition_));
+    }
 
     bool IsAtomicNode() const override 
     {
@@ -61,6 +72,8 @@ private:
     int32_t endIndex_ = 0;
     bool isInitialized_ = false;
     float currentOffset_ = 0.0;
+
+    ListLayoutAlgorithm::PositionMap itemPosition_;
 };
 } // namespace OHOS::Ace::NG
 
