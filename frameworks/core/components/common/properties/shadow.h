@@ -23,6 +23,7 @@ namespace OHOS::Ace {
 
 constexpr float LIGHT_HEIGHT = 600.0f; // System recommended value.
 constexpr float LIGHT_RADIUS = 800.0f; // System recommended value.
+constexpr float DEFAULT_ELEVATION = 5.0f;
 
 // A style class indicates the way to render shadow effect
 class Shadow final {
@@ -173,7 +174,7 @@ public:
 private:
     float lightHeight_ = LIGHT_HEIGHT;
     float lightRadius_ = LIGHT_RADIUS;
-    float elevation_ = 0.0f; // The default scope:0.0 ~ LIGHT_HEIGHT.
+    float elevation_ = DEFAULT_ELEVATION; // Rosen always needs a non-zero elevation.
     double blurRadius_ = 0.0;
     double spreadRadius_ = 0.0;
     Offset offset_;
