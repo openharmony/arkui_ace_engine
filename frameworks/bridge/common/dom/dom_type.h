@@ -755,6 +755,7 @@ ACE_EXPORT extern const char DOM_MARQUEE_COLOR[];
 ACE_EXPORT extern const char DOM_MARQUEE_FONT_SIZE[];
 ACE_EXPORT extern const char DOM_MARQUEE_FONT_WEIGHT[];
 ACE_EXPORT extern const char DOM_MARQUEE_FONT_FAMILY[];
+ACE_EXPORT extern const char DOM_MARQUEE_TEXT_ALIGN[];
 ACE_EXPORT extern const char DOM_MARQUEE_EVENT_BOUNCE[];
 ACE_EXPORT extern const char DOM_MARQUEE_EVENT_FINISH[];
 ACE_EXPORT extern const char DOM_MARQUEE_EVENT_START[];
