@@ -156,7 +156,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
-#if defined(PREVIEW_COMPONENT_MOCK)
+#if defined(PREVIEW)
 #include "frameworks/bridge/declarative_frontend/jsview/js_previewer_mock.h"
 #endif
 
@@ -1083,7 +1083,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JsDragFunction::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);
-#ifdef PREVIEW_COMPONENT_MOCK
+#ifdef PREVIEW
     JSForm::JSBind(globalObj);
     JSXComponent::JSBind(globalObj);
     JSXComponentController::JSBind(globalObj);
