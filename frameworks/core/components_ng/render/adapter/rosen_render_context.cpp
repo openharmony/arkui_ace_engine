@@ -112,6 +112,37 @@ void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnBorderColorUpdate(const BorderColorProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBorderColor(value.leftColor.value_or(Color::BLACK).GetValue(),
+        value.topColor.value_or(Color::BLACK).GetValue(), value.rightColor.value_or(Color::BLACK).GetValue(),
+        value.bottomColor.value_or(Color::BLACK).GetValue());
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBorderWidthUpdate(const BorderWidthProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector4f cornerBorderWidth;
+    cornerBorderWidth.SetValues(static_cast<float>(value.leftDimen.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.rightDimen.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.topDimen.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.bottomDimen.value_or(Dimension()).ConvertToPx()));
+    rsNode_->SetBorderWidth(cornerBorderWidth);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBorderStyleUpdate(const BorderStyleProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBorderStyle(static_cast<uint32_t>(value.styleLeft.value_or(BorderStyle::SOLID)),
+        static_cast<uint32_t>(value.styleTop.value_or(BorderStyle::SOLID)),
+        static_cast<uint32_t>(value.styleRight.value_or(BorderStyle::SOLID)),
+        static_cast<uint32_t>(value.styleBottom.value_or(BorderStyle::SOLID)));
+    RequestNextFrame();
+}
+
 void RosenRenderContext::ResetBlendBgColor()
 {
     CHECK_NULL_VOID(rsNode_);
