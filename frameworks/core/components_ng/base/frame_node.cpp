@@ -23,6 +23,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -440,29 +441,41 @@ bool FrameNode::IsAtomicNode() const
     return pattern_->IsAtomicNode();
 }
 
-bool FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,
-    TouchTestResult& result)
+HitTestMode FrameNode::GetHitTestMode() const
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    return gestureHub ? gestureHub->GetHitTestMode() : HitTestMode::DEFAULT;
+}
+
+HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
     const auto& rect = geometryNode_->GetFrame().GetRect();
     LOGD("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
 
     if (!rect.IsInRegion(parentLocalPoint)) {
-        return false;
+        return HitTestResult::OUT_OF_REGION;
     }
 
     bool preventBubbling = false;
-
     // Child nodes are repackaged into gesture groups (parallel gesture groups, exclusive gesture groups, etc.) based on
     // the gesture attributes set by the current parent node (high and low priority, parallel gestures, etc.), the
     // newComingTargets is the template object to collect child nodes gesture and used by gestureHub to pack gesture
     // group.
     TouchTestResult newComingTargets;
     const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
+    // TODO: add hit test mode.
     const auto& children = GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         const auto& child = *iter;
-        if (child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets)) {
+        auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets);
+        if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
+            break;
+        }
+        // In normal process, the node block the brother node.
+        if (childHitResult == HitTestResult::BUBBLING) {
+            // TODO: add hit test mode judge.
             break;
         }
     }
@@ -477,6 +490,9 @@ bool FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPo
         }
     }
     result.splice(result.end(), std::move(newComingTargets));
-    return preventBubbling;
+    if (preventBubbling) {
+        return HitTestResult::STOP_BUBBLING;
+    }
+    return HitTestResult::BUBBLING;
 }
 } // namespace OHOS::Ace::NG
