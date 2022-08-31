@@ -140,6 +140,11 @@ public:
     {
         return Size();
     }
+
+    CopyOptions GetCopyOption()
+    {
+        return copyOption_;
+    }
 };
 
 class RenderTextFieldTest : public testing::Test {
@@ -438,6 +443,31 @@ HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate012, TestSize.Level1)
     renderTextField->Update(textField);
     EXPECT_EQ(renderTextField->GetInputStyle(), InputStyle::DEFAULT);
     GTEST_LOG_(INFO) << "RenderTextFieldTest RenderTextFieldUpdate012 start";
+}
+
+/**
+ * @tc.name: RenderTextFieldUpdate013
+ * @tc.desc: Verify the Update Interface of RenderTextField work correctly with copyOption_.
+ * @tc.type: FUNC
+ * @tc.require: issueI5NYZF
+ */
+HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate013, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderTextFieldTest RenderTextFieldUpdate013 start";
+    /**
+     * @tc.steps: step1. construct TextFieldComponent and RenderTextField.
+     */
+    RefPtr<TextFieldComponent> textField = AceType::MakeRefPtr<TextFieldComponent>();
+    textField->SetCopyOption(CopyOptions::InApp);
+    RefPtr<MockRenderTextField> renderTextField = AceType::MakeRefPtr<MockRenderTextField>();
+
+    /**
+     * @tc.steps: step2. call the Update interface of RenderTextField.
+     * @tc.expected: step2. RenderTextField copyOption is set as CopyOptions::InApp.
+     */
+    renderTextField->Update(textField);
+    EXPECT_EQ(renderTextField->GetCopyOption(), CopyOptions::InApp);
+    GTEST_LOG_(INFO) << "RenderTextFieldTest RenderTextFieldUpdate013 start";
 }
 
 } // namespace OHOS::Ace
