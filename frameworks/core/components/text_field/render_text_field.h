@@ -496,6 +496,7 @@ protected:
     int32_t cursorPositionForShow_ = 0;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
     DirectionStatus directionStatus_ = DirectionStatus::LEFT_LEFT;
+    CopyOptions copyOption_ = CopyOptions::Distributed;
 
     bool showPasswordIcon_ = true; // Whether show password icon, effect only type is password.
     bool showCounter_ = false; // Whether show counter, 10/100 means maxlength is 100 and 10 has been inputted.
@@ -609,7 +610,6 @@ private:
     Color hoverColor_;
     TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
-    CopyOptions copyOption_ = CopyOptions::Distributed;
     std::function<void()> onValueChange_;
     std::function<void(bool)> onKeyboardClose_;
     std::function<void(const Rect&)> onClipRectChanged_;
