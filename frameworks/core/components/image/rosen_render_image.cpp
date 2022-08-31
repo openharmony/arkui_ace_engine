@@ -898,9 +898,6 @@ void RosenRenderImage::PaintBgImage(const std::shared_ptr<RSNode>& rsNode)
 
 bool RosenRenderImage::NeedUploadImageObjToGpu()
 {
-    if (sourceInfo_.GetSrcType() == SrcType::MEMORY && imageObj_ != nullptr) {
-        return true;
-    }
     bool sourceChange = sourceInfo_ != curSourceInfo_;
     bool newSourceCallLoadImage = (sourceChange && rawImageSize_.IsValid() && srcRect_.IsValid() &&
                                    (rawImageSizeUpdated_ && imageLoadingStatus_ != ImageLoadingStatus::LOADING) &&
