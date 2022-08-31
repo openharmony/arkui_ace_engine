@@ -14,20 +14,36 @@
  */
 
 #include "core/image/image_source_info.h"
-
 #include <regex>
 
-#include "base/log/log.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace {
 
+const uint32_t FileSuffixLen = 4;
+const uint32_t APngFileSuffixLen = 5;
 bool ImageSourceInfo::IsSVGSource(const std::string& src, InternalResource::ResourceId resourceId)
 {
     // 4 is the length of ".svg".
-    return (src.size() > 4 && src.substr(src.size() - 4) == ".svg") ||
+    return (src.size() > FileSuffixLen && src.substr(src.size() - FileSuffixLen) == ".svg") ||
         (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
             resourceId < InternalResource::ResourceId::SVG_END);
+}
+
+bool ImageSourceInfo::IsPngSource(const std::string& src, InternalResource::ResourceId resourceId)
+{
+    // 4 is the length of ".png" or is .apng
+    if(!src.empty()){
+        std::string head = src.size() > APngFileSuffixLen ? src.substr(src.size() - APngFileSuffixLen, APngFileSuffixLen) :
+                src.size() == 4 ? src.substr(src.size() - FileSuffixLen, FileSuffixLen) : "";
+        std::transform(head.begin(), head.end(), head.begin(), [](unsigned char c) { return std::tolower(c); });
+
+        return (head.size() > FileSuffixLen && head.substr(head.size() - FileSuffixLen) == ".png") ||
+               (head.size() > APngFileSuffixLen && head.substr(head.size() - APngFileSuffixLen) == ".apng");
+    }
+    else if(resourceId < InternalResource::ResourceId::SVG_START)
+        return true;
+    return false;
 }
 
 bool ImageSourceInfo::IsValidBase64Head(const std::string& uri, const std::string& pattern)
@@ -98,6 +114,7 @@ ImageSourceInfo::ImageSourceInfo(
       resourceId_(resourceId),
       pixmap_(pixmap),
       isSvg_(IsSVGSource(src_, resourceId_)),
+      isPng_(IsPngSource(src_, resourceId_)),
       srcType_(ResolveSrcType())
 {
     // count how many source set.

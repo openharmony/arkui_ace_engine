@@ -38,6 +38,8 @@ public:
         bool useSkiaSvg);
 
     ImageObject() = default;
+    ImageObject(ImageSourceInfo source) : imageSource_(source){}
+
     ImageObject(
         ImageSourceInfo source,
         const Size& imageSize,
@@ -54,9 +56,18 @@ public:
         return imageSize_;
     }
 
+    void SetImageSize(Size &size){
+        imageSize_ = size;
+    }
+
     int32_t GetFrameCount()
     {
         return frameCount_;
+    }
+
+    void SetFrameCount(int32_t frameCount)
+    {
+        frameCount_ = frameCount;
     }
 
     bool IsSingleFrame() const
@@ -72,6 +83,11 @@ public:
     bool IsSvg() const
     {
         return isSvg_;
+    }
+
+    bool IsAPng() const
+    {
+        return isApng_;
     }
 
     virtual void UploadToGpuForRender(
@@ -109,6 +125,7 @@ protected:
     Size imageSize_;
     int32_t frameCount_ = 1;
     bool isSvg_ = false;
+    bool isApng_ = false;
 };
 
 #ifndef NG_BUILD

@@ -22,6 +22,13 @@ template("ace_core_source_set") {
     part_name = ace_engine_part
     defines += invoker.defines
 
+    #add png support
+    include_dirs = [
+      "$flutter_root/skia/third_party/libpng",
+      "$flutter_root/skia/third_party/externals/libpng",
+      "$ace_root/third_party/zlib",
+    ]
+
     # add common source file needed by all product platform here
     sources = [
       # accessibility
@@ -170,6 +177,10 @@ template("ace_core_source_set") {
 
       # image
       "image/animated_image_player.cpp",
+      "image/apng_image_animation.cpp",
+      "image/apng_image_decoder.cpp",
+      "image/apng_image_object.cpp",
+      "image/apng_image_player.cpp",
       "image/flutter_image_cache.cpp",
       "image/image_cache.cpp",
       "image/image_loader.cpp",
@@ -397,7 +408,7 @@ template("ace_core_source_set") {
       sources += [ "common/plugin_manager.cpp" ]
       deps += [ "//commonlibrary/c_utils/base:utils" ]
     }
-    include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    include_dirs += [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
     if (!is_wearable_product) {
       deps += [

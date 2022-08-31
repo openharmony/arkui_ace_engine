@@ -545,6 +545,9 @@ void ImageProvider::TryLoadImageInfo(const RefPtr<PipelineBase>& context, const 
 bool ImageProvider::IsWideGamut(const sk_sp<SkColorSpace>& colorSpace)
 {
     skcms_ICCProfile encodedProfile;
+    if(!colorSpace)
+        return false;
+    
     colorSpace->toProfile(&encodedProfile);
     if (!encodedProfile.has_toXYZD50) {
         LOGI("This profile's gamut can not be represented by a 3x3 transform to XYZD50");
