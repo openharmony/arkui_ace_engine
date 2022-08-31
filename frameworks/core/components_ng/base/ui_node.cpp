@@ -208,18 +208,21 @@ RefPtr<PipelineContext> UINode::GetContext()
     return PipelineContext::GetCurrentContext();
 }
 
-bool UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,
-    TouchTestResult& result)
+HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    bool preventBubbling = false;
+    HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
         auto& child = *iter;
-        if (child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result)) {
-            preventBubbling = true;
-            break;
+        auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+        if (hitResult == HitTestResult::STOP_BUBBLING) {
+            return HitTestResult::STOP_BUBBLING;
+        }
+        if (hitResult == HitTestResult::BUBBLING) {
+            hitTestResult = HitTestResult::BUBBLING;
         }
     }
-    return preventBubbling;
+    return hitTestResult;
 }
 
 int32_t UINode::FrameCount() const
