@@ -18,7 +18,7 @@ import(
 config("ohos_text_overlay_web_config") {
   include_dirs = [
     "$ability_runtime_path/interfaces/kits/native/appkit/app",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//foundation/window/window_manager/interfaces/innerkits/wm",
   ]
 }
