@@ -48,7 +48,7 @@ class LocalStorage extends NativeLocalStorage {
    * @param initializingProperties 
    */
   public initializeProps(initializingProperties: Object = {}) {
-    console.log(`${this.constructor.name} initializing with Object: ${JSON.stringify(initializingProperties)} .`)
+    console.debug(`${this.constructor.name} initializing with Object keys: [${Object.keys(initializingProperties)}].`)
     this.storage_.clear();
     Object.keys(initializingProperties).filter((propName) => initializingProperties[propName] != undefined).forEach((propName) =>
       this.addNewPropertyInternal(propName, initializingProperties[propName])

@@ -47,3 +47,9 @@ interface IMultiPropertiesReadSubscriber extends IPropertySubscriber {
   // Note: a Property's PropertyInfo can be undefined.
   propertyRead(info?: PropertyInfo): void;
 }
+
+interface IViewPropertiesChangeSubscriber extends IPropertySubscriber {
+  // ViewPU get informed when View variable has changed
+  // informs the elmtIds that need update upon variable change
+  viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void ;
+}
