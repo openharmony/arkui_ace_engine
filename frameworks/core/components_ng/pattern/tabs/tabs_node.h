@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_GROUP_NODE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_GROUP_NODE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_NODE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_NODE_H
 
-#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/group_node.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT GroupNode : public FrameNode {
-    DECLARE_ACE_TYPE(GroupNode, FrameNode);
+class ACE_EXPORT TabsNode : public GroupNode {
+    DECLARE_ACE_TYPE(TabsNode, GroupNode);
 
 public:
-    GroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false)
-        : FrameNode(tag, nodeId, pattern, isRoot) {}
-    ~GroupNode() override = default;
-    virtual void AddChildToGroup(const RefPtr<UINode>& children) {}
+    TabsNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false)
+        : GroupNode(tag, nodeId, pattern, isRoot) {}
+    ~TabsNode() override = default;
+    void AddChildToGroup(const RefPtr<UINode>& child) override;
 };
 
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_GROUP_NODE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_NODE_H

@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 
 namespace OHOS::Ace::NG {
+
 void LinearLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto linearLayoutProperty = DynamicCast<LinearLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -45,4 +46,5 @@ void LinearLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->Layout(parentOffset);
     }
 }
+
 } // namespace OHOS::Ace::NG
