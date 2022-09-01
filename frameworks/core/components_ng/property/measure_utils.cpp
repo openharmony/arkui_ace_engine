@@ -79,6 +79,22 @@ std::optional<float> ConvertToPx(const Dimension& dimension, const ScaleProperty
     return static_cast<float>(result);
 }
 
+std::optional<float> ConvertToPx(
+    const std::optional<Dimension>& dimension, const ScaleProperty& scaleProperty, float percentReference)
+{
+    if (!dimension) {
+        return std::nullopt;
+    }
+    double result = -1.0;
+    if (!dimension.value().NormalizeToPx(
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
+        LOGE("fail to Convert dimension To Px: %{public}f, %{public}f, %{public}f, %{public}f", scaleProperty.vpScale,
+            scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
+        return std::nullopt;
+    }
+    return static_cast<float>(result);
+}
+
 SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSize)
 {
     float height = std::max(minSize.Height(), size.Height());
@@ -128,6 +144,26 @@ PaddingPropertyF ConvertToPaddingPropertyF(
     auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
     auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
     return PaddingPropertyF { left, right, top, bottom };
+}
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyF(
+    const std::unique_ptr<BorderWidthProperty>& borderWidth, const ScaleProperty& scaleProperty, float percentReference)
+{
+    if (!borderWidth) {
+        return {};
+    }
+    return ConvertToBorderWidthPropertyF(*borderWidth, scaleProperty, percentReference);
+}
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyF(
+    const BorderWidthProperty& borderWidth, const ScaleProperty& scaleProperty, float percentReference)
+{
+    auto left = ConvertToPx(borderWidth.leftDimen, scaleProperty, percentReference);
+    auto right = ConvertToPx(borderWidth.rightDimen, scaleProperty, percentReference);
+    auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
+    auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
+
+    return BorderWidthPropertyF { left, right, top, bottom };
 }
 
 void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize,

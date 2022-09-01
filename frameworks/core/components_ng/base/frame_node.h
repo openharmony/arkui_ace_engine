@@ -28,6 +28,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -143,8 +144,8 @@ public:
     static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
-    bool TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,
-        TouchTestResult& result) override;
+    HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+        const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
     bool IsAtomicNode() const override;
 
@@ -180,6 +181,8 @@ private:
 
     // dump self info.
     void DumpInfo() override;
+
+    HitTestMode GetHitTestMode() const;
 
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 

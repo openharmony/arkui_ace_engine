@@ -100,7 +100,7 @@ void ButtonLayoutAlgorithm::UpdateFrameSizeUsingChild(LayoutWrapper* layoutWrapp
     CHECK_NULL_VOID(layoutConstraint);
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingPropertyF();
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto childFrame = SizeF(-1, -1);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto childSize = child->GetGeometryNode()->GetFrameSize();

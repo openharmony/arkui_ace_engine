@@ -36,7 +36,7 @@ public:
         auto listLayoutProperty = GetHost()->GetLayoutProperty<ListLayoutProperty>();
         auto divider = listLayoutProperty->GetDivider().value();
         auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
-        auto vertical = axis == Axis::VERTICAL ? true : false; 
+        auto vertical = axis == Axis::VERTICAL ? true : false;
         return MakeRefPtr<ListPaintMethod>(divider, startIndex_, endIndex_,
             vertical, std::move(itemPosition_));
     }
