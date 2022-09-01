@@ -1922,6 +1922,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             if (!menuComponent) {
                 return;
             }
+            menuComponent->SetIsCustomMenu(true);
             ExecMenuBuilder(builderFunc, menuComponent);
             auto showDialog = menuComponent->GetTargetCallback();
             showDialog("BindMenu", info.GetGlobalLocation());
