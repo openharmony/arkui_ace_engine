@@ -40,9 +40,9 @@ void DividerPainter::DrawListLines(RSCanvas& canvas, const int32_t startIndex, c
 {
     for (int32_t lineIndex = startIndex; lineIndex < endIndex; lineIndex++) {
         if (vertical_) {
-            DrawLine(canvas, OffsetF(itemPosition.at(lineIndex).first, 0));
+            DrawLine(canvas, OffsetF(itemPosition.at(lineIndex).second, 0));
         } else {
-            DrawLine(canvas, OffsetF(0, itemPosition.at(lineIndex).first));
+            DrawLine(canvas, OffsetF(0, itemPosition.at(lineIndex).second));
         }
     }
 }
