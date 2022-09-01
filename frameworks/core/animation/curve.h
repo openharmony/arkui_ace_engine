@@ -195,6 +195,8 @@ private:
     const StepsCurvePosition position_;
     float fractionMin = 0.0f;
     float fractionMax = 1.0f;
+
+    friend class NativeCurveHelper;
 };
 
 class CustomCurve final : public Curve {
