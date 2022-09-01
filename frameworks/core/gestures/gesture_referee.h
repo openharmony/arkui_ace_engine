@@ -73,7 +73,6 @@ private:
 class GestureReferee : public virtual AceType {
     DECLARE_ACE_TYPE(GestureReferee, AceType);
 public:
-    // static GestureReferee* GetInstance();
     GestureReferee() = default;
     ~GestureReferee() = default;
 
@@ -93,9 +92,6 @@ public:
     void Adjudicate(size_t touchId, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal);
 
 private:
-    // Singleton instance
-    // static thread_local std::unique_ptr<GestureReferee> instance_;
-
     // Stores gesture recognizer collection according to Id.
     std::unordered_map<size_t, GestureScope> gestureScopes_;
 };

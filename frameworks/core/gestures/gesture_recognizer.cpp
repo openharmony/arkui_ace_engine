@@ -33,11 +33,7 @@ RefPtr<GestureReferee> GetCurrentGestureReferee()
     if (!pipelineBase) {
         return nullptr;
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineBase);
-    if (!pipelineContext) {
-        return nullptr;
-    }
-    auto eventManager = pipelineContext->GetEventManager();
+    auto eventManager = pipelineBase->GetEventManager();
     if (!eventManager) {
         return nullptr;
     }

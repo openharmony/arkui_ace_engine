@@ -446,6 +446,16 @@ public:
         return isRightToLeft_;
     }
 
+    void SetEventManager(const RefPtr<EventManager>& eventManager)
+    {
+        eventManager_ = eventManager;
+    }
+
+    RefPtr<EventManager> GetEventManager() const
+    {
+        return eventManager_;
+    }
+
     bool IsRebuildFinished() const
     {
         return isRebuildFinished_;
