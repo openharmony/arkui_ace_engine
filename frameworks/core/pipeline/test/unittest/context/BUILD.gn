@@ -235,6 +235,7 @@ ohos_unittest("PipelineContextTest") {
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$cjson_root:cjson_static",
+    "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -245,7 +246,10 @@ ohos_unittest("PipelineContextTest") {
       "resmgr:resourcemanager",
     ]
   } else {
-    configs += [ "//third_party/curl:curl_config" ]
+    configs += [
+      "$ace_root:ace_test_coverage_config",
+      "//third_party/curl:curl_config",
+    ]
     deps += [ "//third_party/curl:curl" ]
     external_deps = [
       "eventhandler:libeventhandler",
