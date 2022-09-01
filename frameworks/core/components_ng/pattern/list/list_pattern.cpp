@@ -72,7 +72,10 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, b
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
     isInitialized_ = listLayoutAlgorithm->GetIsInitialized();
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
-    return true;
+    if (listLayoutAlgorithm->GetDivider().has_value()) {
+        return true;
+    }
+    return false;
 }
 
 void ListPattern::UpdateCurrentOffset(float offset)
