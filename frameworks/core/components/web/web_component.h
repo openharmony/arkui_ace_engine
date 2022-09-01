@@ -287,9 +287,9 @@ public:
         clearHistoryImpl_ = std::move(clearHistoryImpl);
     }
 
-    void SetClearSslCacheImpl(ClearSslCacheImpl && clearSslCaheImpl)
+    void SetClearSslCacheImpl(ClearSslCacheImpl && clearSslCacheImpl)
     {
-        clearSslCacheImpl_ = std::move(clearSslCaheImpl);
+        clearSslCacheImpl_ = std::move(clearSslCacheImpl);
     }
 
     using ExecuteTypeScriptImpl = std::function<void(std::string, std::function<void(std::string)>&&)>;
