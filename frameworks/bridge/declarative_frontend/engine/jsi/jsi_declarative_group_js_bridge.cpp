@@ -580,7 +580,7 @@ void JsiDeclarativeGroupJsBridge::Destroy()
     moduleCallBackFuncs_.clear();
     runtime_.reset();
 }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void JsiDeclarativeGroupJsBridge::TriggerModuleJsCallbackPreview(
     int32_t callbackId, int32_t code, ResponseData responseData)
 {

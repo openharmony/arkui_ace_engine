@@ -294,7 +294,7 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
     Point newPoint = UpdatePoint(pipelineContext, startPoint_);
     newInfo.SetGlobalPoint(newPoint);
     auto dragItemInfo = GenerateDragItemInfo(pipelineContext, newInfo);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (dragItemInfo.pixelMap) {
         auto initRenderNode = AceType::Claim(this);
         isDragDropNode_  = true;
@@ -336,7 +336,7 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
 
 void RenderBox::PanOnActionUpdate(const GestureEvent& info)
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_  && dragWindow_) {
         int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
         int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
@@ -396,7 +396,7 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
         LOGE("Context is null.");
         return;
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_ ) {
         isDragDropNode_  = false;
         RestoreCilpboardData(pipelineContext);
@@ -473,7 +473,7 @@ void RenderBox::PanOnActionCancel()
         return;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_) {
         RestoreCilpboardData(pipelineContext);
         isDragDropNode_ = false;
@@ -654,7 +654,7 @@ void RenderBox::OnPaintFinish()
         EventReport::SendRenderException(RenderExcepType::VIEW_SCALE_ERR);
         return;
     }
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     Size size = GetPaintSize() * viewScale;
     Offset globalOffset = (GetGlobalOffsetExternal() + margin_.GetOffset()) * viewScale;
     node->SetMarginSize(margin_.GetLayoutSize() * viewScale);
@@ -689,7 +689,7 @@ Offset RenderBox::GetGlobalOffsetExternal() const
     return offset;
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void RenderBox::CalculateScale(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size)
 {
     double scaleFactor = node->GetScale();
@@ -1085,6 +1085,14 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
     info.SetTimeStamp(event.time);
     info.SetDeviceId(event.deviceId);
     info.SetSourceDevice(event.sourceType);
+#ifdef LINUX_PLATFORM
+    LOGI("RenderBox::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
+         "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), "
+         "DeviceId(%{public}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
+        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetLocalLocation().GetX(),
+        info.GetLocalLocation().GetY(), info.GetButton(), info.GetAction(),
+        info.GetDeviceId(), info.GetSourceDevice(), info.IsStopPropagation());
+#else
     LOGI("RenderBox::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
          "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), Time(%{public}lld), "
          "DeviceId(%{public}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
@@ -1092,6 +1100,7 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
         info.GetLocalLocation().GetY(), info.GetButton(), info.GetAction(),
         info.GetTimeStamp().time_since_epoch().count(), info.GetDeviceId(), info.GetSourceDevice(),
         info.IsStopPropagation());
+#endif
     onMouse_(info);
     return info.IsStopPropagation();
 }

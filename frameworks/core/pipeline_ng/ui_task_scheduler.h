@@ -20,6 +20,7 @@
 #include <functional>
 #include <mutex>
 #include <set>
+#include <memory>
 #include <unordered_map>
 
 #include "base/memory/referenced.h"

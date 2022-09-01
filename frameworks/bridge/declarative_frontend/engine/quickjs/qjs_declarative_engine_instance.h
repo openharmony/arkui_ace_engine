@@ -20,7 +20,7 @@
 
 #include "third_party/quickjs/quickjs.h"
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 #include "adapter/preview/osal/request_data.h"
 #endif
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
@@ -108,7 +108,7 @@ public:
     void CallAnimationFinishJs(JSValue animationContext);
     void CallAnimationCancelJs(JSValue animationContext);
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
     {
         auto dispatcher = dispatcher_.Upgrade();

@@ -131,9 +131,9 @@ public:
     static std::string GetImageCacheFilePath(const std::string& url)
     {
         std::shared_lock<std::shared_mutex> lock(cacheFilePathMutex_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         return cacheFilePath_ + "/" + std::to_string(std::hash<std::string> {}(url));
-#elif defined(MAC_PLATFORM)
+#elif defined(MAC_PLATFORM) || defined(LINUX_PLATFORM)
         return "/tmp/" + std::to_string(std::hash<std::string> {}(url));
 #elif defined(WINDOWS_PLATFORM)
         char *pathvar;

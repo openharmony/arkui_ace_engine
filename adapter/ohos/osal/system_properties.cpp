@@ -70,7 +70,7 @@ bool IsSvgTraceEnabled()
 
 bool IsHookModeEnabled()
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     return false;
 #endif
     const int bufferLen = 128;
@@ -85,7 +85,7 @@ bool IsHookModeEnabled()
 
 bool IsRosenBackendEnabled()
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     return false;
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
@@ -106,7 +106,7 @@ bool IsRosenBackendEnabled()
 
 bool IsWindowAnimationEnabled()
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     return false;
 #endif
 #ifdef ENABLE_ROSEN_BACKEND

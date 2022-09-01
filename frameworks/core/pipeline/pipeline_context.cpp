@@ -2164,7 +2164,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (width_ == width && height_ == height && isSurfaceReady_ && type != WindowSizeChangeReason::DRAG_START &&
         type != WindowSizeChangeReason::DRAG_END && !isDensityUpdate_) {
         LOGI("Surface size is same, no need update");

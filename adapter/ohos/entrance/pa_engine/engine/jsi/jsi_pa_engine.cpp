@@ -296,7 +296,7 @@ bool JsiPaEngineInstance::InitJsEnv(bool debuggerMode, const std::unordered_map<
         return false;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     for (const auto& [key, value] : extraNativeObject) {
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
@@ -428,7 +428,7 @@ JsiPaEngine::~JsiPaEngine()
     UnloadLibrary();
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         nativeEngine_->DeleteEngine();
@@ -467,7 +467,7 @@ void JsiPaEngine::RegisterInitWorkerFunc()
 
         instance->RegisterConsoleModule(arkNativeEngine);
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         for (const auto& [key, value] : paEngine->GetExtraNativeObject()) {
             shared_ptr<JsValue> nativeValue = runtime->NewNativePointer(value);
             runtime->GetGlobal()->SetProperty(runtime, key, nativeValue);
@@ -530,7 +530,7 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     });
     JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine_, delegate);
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {

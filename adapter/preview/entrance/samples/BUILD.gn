@@ -36,6 +36,25 @@ config("ace_pc_preview_config") {
   ]
 }
 
+if (use_mac) {
+  platform = "mac"
+} else if (use_linux) {
+  platform = "linux"
+} else {
+  platform = "windows"
+}
+platform_defines = []
+foreach(item, ace_platforms) {
+  if (platform == item.name) {
+    if (defined(item.config)) {
+      platform_config = item.config
+      if (defined(platform_config.defines)) {
+        platform_defines = platform_config.defines
+      }
+    }
+  }
+}
+
 ace_devices = [
   "phone",
   "tv",
@@ -46,7 +65,8 @@ ace_devices = [
 ]
 foreach(device, ace_devices) {
   ohos_executable("ace_${device}_test") {
-    defines = [ "USE_GLFW_WINDOW" ]
+    defines = platform_defines
+    defines += [ "USE_GLFW_WINDOW" ]
     configs = [ ":ace_pc_preview_config" ]
     ohos_test = true
     test_output_dir = "$root_out_dir/common/samples"
@@ -63,10 +83,13 @@ foreach(device, ace_devices) {
     if (use_mac) {
       defines += [ "MAC_PLATFORM" ]
       deps += [ "$ace_root/adapter/preview/build:libace_engine_mac" ]
-    } else {
+    } else if (use_mingw_win) {
       defines += [ "WINDOWS_PLATFORM" ]
       deps += [ "$ace_root/adapter/preview/build:libace_engine_windows" ]
       libs = [ "pthread" ]
+    } else if (use_linux) {
+      defines += [ "LINUX_PLATFORM" ]
+      deps += [ "$ace_root/adapter/preview/build:libace_engine_linux" ]
     }
   }
 }
@@ -74,8 +97,10 @@ foreach(device, ace_devices) {
 # Avoid conditional judgment branches caused by dynamic library suffixes.
 if (use_mac) {
   dylib_suffix = ".dylib"
-} else {
+} else if (use_mingw_win) {
   dylib_suffix = ".dll"
+} else if (use_linux) {
+  dylib_suffix = ".so"
 }
 
 if (is_standard_system) {
@@ -174,7 +199,7 @@ if (is_standard_system) {
         "$ace_root/adapter/preview/build:libace_engine_mac",
         "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
       ]
-    } else {
+    } else if (use_mingw_win) {
       ace_engine_path =
           get_label_info(
               "$ace_root/adapter/preview/build::libace_engine_windows",
@@ -186,6 +211,18 @@ if (is_standard_system) {
       deps += [
         "$ace_root/adapter/preview/build:libace_engine_windows",
         "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
+      ]
+    } else if (use_linux) {
+      ace_engine_path =
+          get_label_info("$ace_root/adapter/preview/build::libace_engine_linux",
+                         "root_out_dir") +
+          "/common/common/libace_engine_linux" + dylib_suffix
+      resource_manager_path = get_label_info(
+                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux",
+                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_linux${dylib_suffix}"
+      deps += [
+        "$ace_root/adapter/preview/build:libace_engine_linux",
+        "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux",
       ]
     }
     sources += [

@@ -33,7 +33,7 @@ constexpr double DEFAULT_PINCH_DISTANCE = 1.0;
 constexpr int32_t BUBBLE_MODE_VERSION = 6;
 
 }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 void RenderGestureListener::SetDragCallBack(RefPtr<FreeDragRecognizer>& recognizer,
     RefPtr<GestureListenerComponent> component)
 {
@@ -174,7 +174,7 @@ void RenderGestureListener::Update(const RefPtr<Component>& component)
     isVisible_ = gestureComponent->IsVisible();
     responseRegion_ = gestureComponent->GetResponseRegion();
     isResponseRegion_ = gestureComponent->IsResponseRegion();
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     SetDragCallBack(freeDragRecognizer_, gestureComponent);
 #else
     SET_DRAG_CALLBACK(freeDragRecognizer_, FreeDrag, gestureComponent);

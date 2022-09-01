@@ -74,7 +74,7 @@ public:
         return inspectorTag_;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void SetDebugLine(const std::string& debugLine)
     {
         debugLine_ = debugLine;
@@ -218,7 +218,7 @@ protected:
     int32_t inspectorId_ = 0;
     int32_t inspectorParentId_ = -1;
     std::string inspectorTag_;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     std::string debugLine_;
 #endif
 };

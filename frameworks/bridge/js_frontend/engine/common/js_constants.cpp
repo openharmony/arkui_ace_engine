@@ -23,7 +23,7 @@ const int32_t JS_CALL_SUCCESS = 0;
 const int32_t MAX_STACK_SIZE = -1;
 
 // for pc preview
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 const char PC_PREVIEW[] = "enable";
 #else
 const char PC_PREVIEW[] = "disable";

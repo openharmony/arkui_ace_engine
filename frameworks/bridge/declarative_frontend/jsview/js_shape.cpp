@@ -39,7 +39,7 @@ void JSShape::InitBox(const JSCallbackInfo& info)
     clipPath->SetGeometryBoxType(GeometryBoxType::BORDER_BOX);
     box->SetClipPath(clipPath);
     if (info.Length() == 1 && info[0]->IsObject()) {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         box->SetPixelMap(CreatePixelMapFromNapiValue(info[0]));
 #endif
     }

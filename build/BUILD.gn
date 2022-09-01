@@ -160,7 +160,7 @@ foreach(item, ace_platforms) {
 
 # Config for reduceing eh_frame section on aosp platform to save rom size.
 config("reduce_eh_frame_config") {
-  if (!use_mingw_win && !use_mac) {
+  if (!use_mingw_win && !use_mac && !use_linux) {
     cflags = [
       "-fno-unwind-tables",
       "-fomit-frame-pointer",

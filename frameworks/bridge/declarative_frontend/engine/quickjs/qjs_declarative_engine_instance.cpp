@@ -37,7 +37,7 @@
 #include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/image/image_cache.h"
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 #include "native_engine/impl/quickjs/quickjs_native_engine.h"
 #endif
 
@@ -45,7 +45,7 @@ extern const char _binary_stateMgmt_js_start[];
 extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsMockSystemPlugin_js_start[];
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM) || defined(IOS_PLATFORM)
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM) || defined(IOS_PLATFORM) || defined(LINUX_PLATFORM)
 extern const char* _binary_stateMgmt_js_end;
 extern const char* _binary_jsEnumStyle_js_end;
 extern const char* _binary_jsMockSystemPlugin_js_end;
@@ -395,7 +395,7 @@ JSContext* InitJSContext(JSContext* ctx1, size_t maxStackSize,
         LOGE("QJS created JS context but failed to init hbs, os, or std module.!");
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     for (const auto& [key, value] : extraNativeObject) {
         auto nativeObjectInfo = std::make_unique<NativeObjectInfo>();
         nativeObjectInfo->nativeObject = value;
@@ -462,7 +462,7 @@ bool QJSDeclarativeEngineInstance::InitJSEnv(JSRuntime* runtime, JSContext* cont
         return false;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     std::string jsMockSystemPlugin(_binary_jsMockSystemPlugin_js_start,
                                    _binary_jsMockSystemPlugin_js_end - _binary_jsMockSystemPlugin_js_start);
     if (!InitAceModules(jsMockSystemPlugin.c_str(), jsMockSystemPlugin.length(), "jsMockSystemPlugin.js")) {

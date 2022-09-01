@@ -32,7 +32,7 @@ const char INSPECTOR_ID[] = "$ID";
 const char INSPECTOR_RECT[] = "$rect";
 const char INSPECTOR_Z_INDEX[] = "$z-index";
 const char INSPECTOR_ATTRS[] = "$attrs";
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 const char INSPECTOR_DEBUGLINE[] = "$debugLine";
 #endif
 
@@ -85,7 +85,7 @@ std::string Inspector::GetInspectorNodeByKey(const RefPtr<PipelineContext>& cont
     jsonNode->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
     jsonNode->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
     jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetRenderRect().ToBounds().c_str());
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     std::string debugLine = inspectorElement->GetDebugLine();
     jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
 #endif
@@ -130,7 +130,7 @@ std::string Inspector::GetInspectorTree(const RefPtr<PipelineContext>& context)
             jsonNode->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
             jsonNode->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
             jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetRenderRect().ToBounds().c_str());
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
             std::string debugLine = inspectorElement->GetDebugLine();
             jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
 #endif

@@ -107,7 +107,7 @@ public:
         return engineInstance_;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
 #endif
 
@@ -122,7 +122,7 @@ private:
     RefPtr<QJSDeclarativeEngineInstance> engineInstance_;
     int32_t instanceId_ = 0;
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     std::string preContent_ = "";
 #endif
 

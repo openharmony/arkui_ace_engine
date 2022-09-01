@@ -677,7 +677,7 @@ public:
         listItemCounts_ = index;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     // used for inspector node in PC preview
     bool GetClearRectInfoFlag() const
     {
@@ -902,7 +902,7 @@ private:
     std::vector<std::pair<std::string, std::string>> attrs_;
     std::vector<std::pair<std::string, std::string>> styles_;
     bool clipFlag_ = false;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     // used for inspector node in PC preview
     bool isClearRectInfo_ = false;
     // focus scale or translateScale for inspector node in PC preview

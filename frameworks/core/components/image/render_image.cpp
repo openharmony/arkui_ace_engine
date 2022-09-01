@@ -947,7 +947,7 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
     Point newPoint = UpdatePoint(pipelineContext, startPoint_);
     newInfo.SetGlobalPoint(newPoint);
     auto dragItemInfo = GenerateDragItemInfo(pipelineContext, newInfo);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (!dragItemInfo.pixelMap && !dragItemInfo.customComponent) {
         auto initRenderNode = AceType::Claim(this);
         isDragDropNode_ = true;
@@ -1009,7 +1009,7 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
 
 void RenderImage::PanOnActionUpdate(const GestureEvent& info)
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_ && dragWindow_) {
         int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
         int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
@@ -1059,7 +1059,7 @@ void RenderImage::PanOnActionEnd(const GestureEvent& info)
         LOGE("Context is null.");
         return;
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_) {
         isDragDropNode_ = false;
         RestoreCilpboardData(pipelineContext);
@@ -1119,7 +1119,7 @@ void RenderImage::PanOnActionCancel()
         return;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_) {
         isDragDropNode_ = false;
         RestoreCilpboardData(pipelineContext);

@@ -31,7 +31,8 @@ ohos_shared_library("ark_debugger") {
     "BOOST_CLANG",
   ]
 
-  if (is_mingw || is_mac) {
+  if (is_mingw || is_mac || is_linux) {
+    defines += [ "PREVIEW" ]
     cflags = [ "-std=c++17" ]
     if (is_mingw) {
       platform = "windows"
@@ -40,10 +41,16 @@ ohos_shared_library("ark_debugger") {
         "-lwsock32",
         "-lws2_32",
       ]
-    } else {
+    } else if (is_mac) {
       platform = "mac"
       defines += [
         "MAC_PLATFORM",
+        "UNIX_PLATFORM",
+      ]
+    } else {
+      platform = "linux"
+      defines += [
+        "LINUX_PLATFORM",
         "UNIX_PLATFORM",
       ]
     }

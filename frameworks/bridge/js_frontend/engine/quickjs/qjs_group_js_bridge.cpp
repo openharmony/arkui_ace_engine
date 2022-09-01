@@ -15,7 +15,7 @@
 
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_group_js_bridge.h"
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 #include "adapter/preview/entrance/ace_container.h"
 #include "core/common/ace_engine.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine_instance.h"
@@ -365,7 +365,7 @@ void QuickJsGroupJsBridge::RemoveRequestIdCallbackIdRelation(int32_t requestId, 
     }
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void QuickJsGroupJsBridge::GetRequestData(JSContext* ctx, JSValueConst valObject, OHOS::Ace::RequestData& requestData)
 {
     JSPropertyEnum* pTab = nullptr;
@@ -765,7 +765,7 @@ void QuickJsGroupJsBridge::TriggerModuleJsCallback(int32_t callbackId, int32_t c
     messageData.clear();
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void QuickJsGroupJsBridge::TriggerModuleJsCallbackPreview(
     int32_t callbackId, int32_t code, OHOS::Ace::ResponseData responseData)
 {

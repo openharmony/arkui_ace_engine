@@ -18,8 +18,8 @@
 
 #include <cstdarg>
 #include <cstdint>
+#include <cstring>
 #include <string>
-
 #include "base/utils/macros.h"
 #include "base/utils/system_properties.h"
 

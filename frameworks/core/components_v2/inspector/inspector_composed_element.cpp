@@ -272,7 +272,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::ToJsonObject() const
 void InspectorComposedElement::Prepare(const WeakPtr<Element>& weakParent)
 {
     accessibilityEnabled_ = false;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     accessibilityEnabled_ = true;
 #else
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || SystemProperties::GetAccessibilityEnabled()) {

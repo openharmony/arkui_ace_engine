@@ -446,7 +446,7 @@ bool QjsPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     bool ret = engineInstance_->InitJsEnv(runtime, context, GetExtraNativeObject());
     JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine_, delegate);
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {
@@ -553,7 +553,7 @@ QjsPaEngine::~QjsPaEngine()
     UnloadLibrary();
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         nativeEngine_->DeleteEngine();

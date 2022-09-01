@@ -29,7 +29,7 @@ constexpr char IMAGE_SRC[] = "src";
 constexpr char IMAGE_WIDTH[] = "width";
 constexpr char IMAGE_HEIGHT[] = "height";
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 constexpr char CANVAS_TYPE_WEBGL[] = "webgl";
 constexpr char CANVAS_TYPE_WEBGL2[] = "webgl2";
 constexpr char CANVAS_WEBGL_SO[] = "webglnapi";
@@ -131,7 +131,7 @@ void PushTaskToPage(JSContext* ctx, JSValueConst value, const std::function<void
     page->PushCommand(command);
 }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 void PushTaskToPageById(JSContext* ctx, NodeId id, const std::function<void(const RefPtr<CanvasTaskPool>&)>& task)
 {
     auto command = Referenced::MakeRefPtr<JsCommandContextOperation>(id, task);
@@ -220,7 +220,7 @@ const JSCFunctionListEntry JS_ANIMATION_FUNCS[] = {
 
 CanvasBridge::~CanvasBridge()
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (webglRenderContext_) {
         delete webglRenderContext_;
         webglRenderContext_ = nullptr;
@@ -235,7 +235,7 @@ CanvasBridge::~CanvasBridge()
 void CanvasBridge::HandleJsContext(JSContext* ctx, NodeId id, const std::string& args, JsEngineInstance* engine)
 {
     LOGD("CanvasBridge::HandleJsContext");
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     std::unique_ptr<JsonValue> argsValue = JsonUtil::ParseJsonString(args);
     if (argsValue && argsValue->IsArray() && argsValue->GetArraySize() > 0) {
         auto typeArg = argsValue->GetArrayItem(0);
@@ -312,7 +312,7 @@ void CanvasBridge::JSHandleWebglContext(
         LOGE("engine is null");
         return;
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     QuickJSNativeEngine* nativeEngine = static_cast<QjsEngineInstance*>(engine)->GetQuickJSNativeEngine();
     if (nativeEngine == nullptr) {
         LOGE("nativeEngine is null");

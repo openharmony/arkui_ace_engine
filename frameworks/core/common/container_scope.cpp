@@ -18,7 +18,7 @@
 namespace OHOS::Ace {
 
 // preview not support multi-instance, always using default instance id 0.
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 thread_local int32_t ContainerScope::currentId_ = 0;
 #else
 thread_local int32_t ContainerScope::currentId_ = -1;

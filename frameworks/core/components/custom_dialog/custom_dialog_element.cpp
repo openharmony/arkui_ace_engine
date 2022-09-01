@@ -86,7 +86,7 @@ void CustomDialogElement::ShowDialog()
     isPopDialog_ = false;
     // use accessibility node already created with dom node in JS app
     baseDialog->SetCustomDialogId(StringUtils::StringToInt(GetId()));
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     auto manager = context->GetAccessibilityManager();
     if (manager) {
         auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(GetId()));
@@ -119,7 +119,7 @@ void CustomDialogElement::CloseDialog()
         lastStack->PopDialog(dialogId_);
     }
     isPopDialog_ = true;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     auto manager = context->GetAccessibilityManager();
     if (manager) {
         auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(GetId()));

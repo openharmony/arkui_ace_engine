@@ -66,7 +66,7 @@ jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
 
 gen_obj("js_proxyclass") {
   input = "engine/stateMgmt.js"
-  if (use_mac || use_mingw_win || target_os == "ios") {
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
     jsproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = jsproxyclass_obj_path
@@ -75,7 +75,7 @@ gen_obj("js_proxyclass") {
 
 gen_obj("js_enum_style") {
   input = "engine/jsEnumStyle.js"
-  if (use_mac || use_mingw_win || target_os == "ios") {
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
     jsenumstyle_obj_path = base_output_path + "/js_enum_style.c"
   }
   output = jsenumstyle_obj_path
@@ -84,7 +84,7 @@ gen_obj("js_enum_style") {
 
 gen_obj("js_mock_system_plugin") {
   input = "$root_out_dir/obj/third_party/jsframework/dist/jsMockSystemPlugin.js"
-  if (use_mac || use_mingw_win || target_os == "ios") {
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
     jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.c"
   }
   output = jsmocksystemplugin_obj_path
@@ -330,12 +330,12 @@ template("declarative_js_engine") {
 
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
-    if (platform == "windows" || platform == "mac") {
+    if (platform == "windows" || platform == "mac" || platform == "linux") {
       deps += [ ":gen_obj_src_js_mock_system_plugin" ]
     } else {
       if (defined(config.plugin_components_support) &&
           config.plugin_components_support) {
-        if (!use_mingw_win && !use_mac) {
+        if (!use_mingw_win && !use_mac && !use_linux) {
           external_deps = [
             "multimedia_image_standard:image",
             "multimedia_image_standard:image_native",

@@ -517,7 +517,7 @@ void PickerBaseComponent::ClearAccessibilityNodes()
     for (const auto& column : columns_) {
         column->SetNodeId(-1); // reset id.
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (accessibilityManager) {
         auto node = accessibilityManager->GetAccessibilityNodeById(GetPickerBaseId());
         if (node) {
@@ -742,7 +742,7 @@ void PickerBaseComponent::Initialize(
     // picker need build rootAccessibilityNode but picker-view don't need.
     if (!rootAccessibility_ && isDialog_) {
         rootAccessibilityId_ = accessibilityManager->GenerateNextAccessibilityId();
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         rootAccessibility_ = accessibilityManager->CreateSpecializedNode(
             "picker-dialog", rootAccessibilityId_, GetPickerBaseId());
 #else

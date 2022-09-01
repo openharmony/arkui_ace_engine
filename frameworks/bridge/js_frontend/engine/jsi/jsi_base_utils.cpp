@@ -26,7 +26,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 const int32_t OFFSET_PREVIEW = 9;
 #endif
 
@@ -332,7 +332,7 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
     if (isAppPage) {
         mapInfo = appMap->Find(StringToInt(line) - offSet, StringToInt(column));
     } else {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         mapInfo = pageMap->Find(StringToInt(line) - offSet + OFFSET_PREVIEW, StringToInt(column));
 #else
         mapInfo = pageMap->Find(StringToInt(line) - offSet, StringToInt(column));

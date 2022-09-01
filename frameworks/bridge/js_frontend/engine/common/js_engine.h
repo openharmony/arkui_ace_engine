@@ -252,11 +252,11 @@ public:
     }
 
     virtual void RunNativeEngineLoop();
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     static PixelMapNapiEntry GetPixelMapNapiEntry();
 #endif
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     virtual void ReplaceJSContent(const std::string& url, const std::string componentName)
     {
         LOGE("V8 does not support replaceJSContent");

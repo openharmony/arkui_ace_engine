@@ -135,7 +135,7 @@ public:
         rootViewMap_.emplace(pageId, value);
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
     {
         auto dispatcher = dispatcher_.Upgrade();
@@ -317,7 +317,7 @@ public:
         return renderContext_;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) override;
 
@@ -354,7 +354,7 @@ private:
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
     shared_ptr<JsValue> renderContext_;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     std::string assetPath_;
     std::string bundleName_;
 #endif

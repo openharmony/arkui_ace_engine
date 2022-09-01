@@ -238,7 +238,11 @@ bool Matrix4::operator==(const Matrix4& matrix) const
 Matrix4 Matrix4::operator*(double num)
 {
     Matrix4 ret(*this);
-    std::for_each_n(&ret.matrix4x4_[0][0], MATRIX_LENGTH, [num](double& v) { v *= num; });
+    auto function = [num](double& v) { v *= num; };
+    auto it = &ret.matrix4x4_[0][0];
+    for (int32_t i = 0; i < MATRIX_LENGTH; ++it, ++i) {
+        function(*it);
+    }
     return ret;
 }
 

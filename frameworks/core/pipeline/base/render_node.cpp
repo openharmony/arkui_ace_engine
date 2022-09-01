@@ -970,7 +970,7 @@ bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
     return true;
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void RenderNode::SetAccessibilityRect(const Rect& rect)
 {
     Rect parentRect = rect;

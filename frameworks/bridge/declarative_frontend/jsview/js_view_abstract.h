@@ -228,7 +228,7 @@ public:
     static void JsFocusOnTouch(const JSCallbackInfo& info);
     static void JsDefaultFocus(const JSCallbackInfo& info);
     static void JsGroupDefaultFocus(const JSCallbackInfo& info);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     static void JsDebugLine(const JSCallbackInfo& info);
 #endif
     static void JsOpacityPassThrough(const JSCallbackInfo& info);

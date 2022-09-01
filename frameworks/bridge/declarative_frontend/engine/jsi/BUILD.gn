@@ -55,7 +55,7 @@ es2abc_gen_abc("gen_js_mock_system_plugin_abc") {
 
 gen_obj("abc_proxyclass") {
   input = base_output_path + "/stateMgmt.abc"
-  if (use_mac || use_mingw_win || use_ios) {
+  if (use_mac || use_mingw_win || use_ios || use_linux) {
     abcproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = abcproxyclass_obj_path
@@ -64,7 +64,7 @@ gen_obj("abc_proxyclass") {
 
 gen_obj("abc_enum_style") {
   input = base_output_path + "/jsEnumStyle.abc"
-  if (use_mac || use_mingw_win) {
+  if (use_mac || use_mingw_win || use_linux) {
     abcenumstyle_obj_path = base_output_path + "/jsEnumStyle.c"
   }
   output = abcenumstyle_obj_path
@@ -73,7 +73,7 @@ gen_obj("abc_enum_style") {
 
 gen_obj("abc_mock_system_plugin") {
   input = base_output_path + "/jsMockSystemPlugin.abc"
-  if (use_mac || use_mingw_win) {
+  if (use_mac || use_mingw_win || use_linux) {
     jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.c"
   }
   output = jsmocksystemplugin_obj_path

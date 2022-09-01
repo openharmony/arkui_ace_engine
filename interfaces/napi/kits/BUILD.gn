@@ -25,6 +25,10 @@ foreach(module, common_napi_libs) {
     ace_napi_lib(module) {
       platform = "windows"
     }
+  } else if (use_linux) {
+    ace_napi_lib(module) {
+      platform = "linux"
+    }
   } else if (!is_cross_platform_build) {
     ace_napi_lib(module) {
       platform = "ohos"

@@ -418,7 +418,7 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
     CreateInspectorComposedComponent(tag);
     CreateScoringComponent(tag);
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&
         !AceType::InstanceOf<TextSpanComponent>(component)) {
         GetBoxComponent();

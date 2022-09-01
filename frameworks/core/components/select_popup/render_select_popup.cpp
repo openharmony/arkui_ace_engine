@@ -57,7 +57,7 @@ void RenderSelectPopup::OnPaintFinish()
     auto size = renderPositioned_->GetLayoutSize();
     node->SetWidth(size.Width() * viewScale);
     node->SetHeight(size.Height() * viewScale);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     auto parentNode = node->GetParentNode();
     if (parentNode && parentNode->GetTag() == "menu") {
         parentNode->SetLeft(leftTop.GetX() * viewScale);

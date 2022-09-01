@@ -86,7 +86,7 @@ void ComponentGroupElement::UpdateChildrenForDeclarative(const std::list<RefPtr<
 {
     int32_t slot = 0;
     int32_t renderSlot = 0;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (newComponents.empty()) {
         auto itChild = children_.begin();
         auto itChildEnd = children_.end();

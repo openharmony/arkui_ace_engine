@@ -51,7 +51,7 @@ public:
         return manifestAppInfo_->GetMinPlatformVersion();
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void SetPagePath(const std::string& pagePath)
     {
         if (manifestRouter_) {

@@ -28,7 +28,7 @@ void WsServer::RunServer()
     terminateExecution_ = false;
     try {
         tid_ = pthread_self();
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         constexpr int32_t DEFAULT_INSEPTOR_PORT = 9230;
         CommProtocol::endpoint endPoint(CommProtocol::v4(), DEFAULT_INSEPTOR_PORT);
 #else

@@ -557,7 +557,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
             imgWidth = jsImage->GetWidth();
             imgHeight = jsImage->GetHeight();
         } else {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
             pixelMap = CreatePixelMapFromNapiValue(info[0]);
 #endif
             if (!pixelMap) {
@@ -1766,6 +1766,7 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
     paintState_.SetTextStyle(style_);
     double width = 0.0;
     double height = 0.0;
+    TextMetrics textMetric;
     double actualBoundingBoxLeft = 0.0;
     double actualBoundingBoxRight = 0.0;
     double actualBoundingBoxAscent = 0.0;
@@ -1782,10 +1783,16 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
         if (isOffscreen_) {
             width = offscreenCanvas_->MeasureText(text, paintState_);
             height = offscreenCanvas_->MeasureTextHeight(text, paintState_);
+            textMetric = offscreenCanvas_->MeasureTextMetrics(text, paintState_);
         } else {
             width = pool_->MeasureText(text, paintState_);
             height = pool_->MeasureTextHeight(text, paintState_);
+            textMetric = pool_->MeasureTextMetrics(text, paintState_);
         }
+        actualBoundingBoxLeft = textMetric.actualBoundingBoxLeft;
+        actualBoundingBoxRight = textMetric.actualBoundingBoxRight;
+        actualBoundingBoxAscent = textMetric.actualBoundingBoxAscent;
+        actualBoundingBoxDescent = textMetric.actualBoundingBoxDescent;
 
         auto retObj = JSRef<JSObject>::New();
         retObj->SetProperty("width", SystemProperties::Px2Vp(width));

@@ -3453,7 +3453,7 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
         }
 
         auto builderObj = JSRef<JSObject>::Cast(ret);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         auto pixmap = builderObj->GetProperty("pixelMap");
         itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
 #endif
@@ -4288,7 +4288,7 @@ void JSViewAbstract::JsRestoreId(int32_t restoreId)
     }
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
@@ -4560,7 +4560,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);

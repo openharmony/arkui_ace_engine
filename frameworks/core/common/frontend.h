@@ -235,7 +235,7 @@ public:
     }
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     virtual void RunNativeEngineLoop() {}
 #endif
 
