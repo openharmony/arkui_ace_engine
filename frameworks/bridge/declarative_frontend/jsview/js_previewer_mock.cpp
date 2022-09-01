@@ -330,6 +330,7 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::StaticMethod("accessForward", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("accessBackward", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("clearHistory", &JSWeb::Mock);
+    JSClass<JSWebController>::StaticMethod("clearSslCache", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("getCookieManager", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("getHitTestValue", &JSWeb::Mock);
     JSClass<JSWebController>::StaticMethod("backOrForward", &JSWeb::Mock);

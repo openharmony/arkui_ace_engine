@@ -758,7 +758,7 @@ void JSWebController::ClearSslCache(const JSCallbackInfo& args)
     LOGE("zhangbing JSWebController clear ssl cache.");
     ContainerScope scope(instanceId_);
     if (webController_) {
-        webController_->ClearHistory();
+        webController_->ClearSslCache();
     }
 }
 

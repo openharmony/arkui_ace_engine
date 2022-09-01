@@ -1366,7 +1366,7 @@ void WebDelegate::SetWebCallBack()
                 }
             });
         });
-        webController->SetClearHistoryImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+        webController->SetClearSslCacheImpl([weak = WeakClaim(this), uiTaskExecutor]() {
             uiTaskExecutor.PostTask([weak]() {
                 auto delegate = weak.Upgrade();
                 if (delegate) {

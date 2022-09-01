@@ -239,7 +239,7 @@ public:
         }
     }
 
-    void clearSslCache()
+    void ClearSslCache()
     {
         LOGI("Start clear ssl cache");
         if (clearSslCacheImpl_) {
@@ -285,6 +285,11 @@ public:
     void SetClearHistoryImpl(ClearHistoryImpl && clearHistoryImpl)
     {
         clearHistoryImpl_ = std::move(clearHistoryImpl);
+    }
+
+    void SetClearSslCacheImpl(ClearSslCacheImpl && clearSslCaheImpl)
+    {
+        clearSslCacheImpl_ = std::move(clearSslCaheImpl);
     }
 
     using ExecuteTypeScriptImpl = std::function<void(std::string, std::function<void(std::string)>&&)>;
