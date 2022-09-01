@@ -112,7 +112,7 @@ public:
         createTime_ = time;
     }
 
-    bool IsFirstUpdate()
+    bool IsFirstUpdate() const
     {
         return firstUpdateData_;
     }
@@ -187,6 +187,11 @@ public:
         useNewPipeline_ = true;
     }
 
+    bool IsUseNewPipeline() const
+    {
+        return useNewPipeline_;
+    }
+
     static bool IsCurrentUseNewPipeline()
     {
         auto container = Current();
@@ -198,20 +203,18 @@ public:
     static bool IsCurrentUsePartialUpdate()
     {
         auto container = Current();
-        return container ? container-> usePartialUpdate_ : false;
+        return container ? container->usePartialUpdate_ : false;
     }
-
 
     static void SetCurrentUsePartialUpdate(bool useIt = false)
     {
         auto container = Current();
-        if (container)
-        {
+        if (container) {
             container->usePartialUpdate_ = useIt;
         }
     }
-    
-    Window* GetWindow()
+
+    Window* GetWindow() const
     {
         auto context = GetPipelineContext();
         return context ? context->GetWindow() : nullptr;

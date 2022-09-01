@@ -67,15 +67,15 @@ ScopedDelegate EngineHelper::GetCurrentDelegate()
 {
     auto engine = GetCurrentEngine();
     if (engine) {
-        return ScopedDelegate(engine->GetFrontend(), Container::CurrentId());
+        return { engine->GetFrontend(), Container::CurrentId() };
     }
     LOGW("Can't find current engine, using active one");
     auto container = Container::GetActive();
     if (!container) {
-        return ScopedDelegate(nullptr, -1);
+        return { nullptr, -1 };
     }
     engine = GetEngine(container->GetInstanceId());
-    return ScopedDelegate(engine ? engine->GetFrontend() : nullptr, container->GetInstanceId());
+    return { engine ? engine->GetFrontend() : nullptr, container->GetInstanceId() };
 }
 
 } // namespace OHOS::Ace

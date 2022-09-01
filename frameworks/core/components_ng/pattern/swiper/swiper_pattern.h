@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 
+#include <optional>
+
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -56,6 +58,9 @@ public:
     {
         auto layoutAlgorithm = MakeRefPtr<SwiperLayoutAlgorithm>(currentIndex_, startIndex_, endIndex_);
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
+        layoutAlgorithm->SetTargetIndex(targetIndex_);
+        layoutAlgorithm->SetTotalCount(TotalCount());
+        layoutAlgorithm->SetPreItemRange(preItemRange_);
         return layoutAlgorithm;
     }
 
@@ -109,6 +114,7 @@ private:
     void PlayFadeAnimation();
 
     // Implement of swiper controller
+    void SwipeTo(int32_t index);
     void ShowNext();
     void ShowPrevious();
     void FinishAnimation();
@@ -121,9 +127,11 @@ private:
     bool IsOutOfBoundary(double mainOffset) const;
     float MainSize() const;
     void FireChangeEvent() const;
+    void CalculateCacheRange();
 
     Axis GetDirection() const;
     int32_t CurrentIndex() const;
+    int32_t GetDisplayCount()const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
@@ -131,6 +139,7 @@ private:
     bool IsAutoPlay() const;
     bool IsLoop() const;
     bool IsDisableSwipe() const;
+    int32_t TotalCount() const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -151,6 +160,8 @@ private:
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
     int32_t currentIndex_ = 0;
+    std::optional<int32_t> targetIndex_;
+    std::set<int32_t> preItemRange_;
 
     float currentOffset_ = 0.0f;
 

@@ -188,7 +188,7 @@ bool CreateStepsCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
 bool CreateSpringMotionCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
     JSValueConst* argv, RefPtr<Curve>& curve)
 {
-    if (!argv || argc > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) {
+    if (!argv || argc > static_cast<int32_t>(RESPONSIVE_SPRING_MOTION_PARAMS_SIZE)) {
         LOGW("SpringMotionCurve: the number of parameters is illegal");
         return false;
     }
@@ -201,7 +201,7 @@ bool CreateSpringMotionCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
     if (argc > 1) {
         JS_ToFloat64(ctx, &dampingRatio, argv[1]);
     }
-    if (argc > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE - 1) {
+    if (argc > static_cast<int32_t>(RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) - 1) {
         JS_ToFloat64(ctx, &blendDuration, argv[RESPONSIVE_SPRING_MOTION_PARAMS_SIZE - 1]);
     }
     curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(static_cast<float>(response), static_cast<float>(dampingRatio),
@@ -212,7 +212,7 @@ bool CreateSpringMotionCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
 bool CreateResponsiveSpringMotionCurve(JSContext* ctx, JSValueConst& value, int32_t argc,
     JSValueConst* argv, RefPtr<Curve>& curve)
 {
-    if (!argv || argc > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) {
+    if (!argv || argc > static_cast<int32_t>(RESPONSIVE_SPRING_MOTION_PARAMS_SIZE)) {
         LOGW("ResponsiveSpringMotionCurve: the number of parameters is illegal");
         return false;
     }
@@ -225,7 +225,7 @@ bool CreateResponsiveSpringMotionCurve(JSContext* ctx, JSValueConst& value, int3
     if (argc > 1) {
         JS_ToFloat64(ctx, &dampingRatio, argv[1]);
     }
-    if (argc > RESPONSIVE_SPRING_MOTION_PARAMS_SIZE - 1) {
+    if (argc > static_cast<int32_t>(RESPONSIVE_SPRING_MOTION_PARAMS_SIZE) - 1) {
         JS_ToFloat64(ctx, &blendDuration, argv[RESPONSIVE_SPRING_MOTION_PARAMS_SIZE - 1]);
     }
     curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(static_cast<float>(response), static_cast<float>(dampingRatio),

@@ -39,6 +39,42 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     layoutProperty->UpdateCalcSelfIdealSize(CalcSize(std::nullopt, height));
 }
 
+void ViewAbstract::SetMinWidth(const CalcLength& width)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMinSize(CalcSize(width, std::nullopt));
+}
+
+void ViewAbstract::SetMinHeight(const CalcLength& height)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, height));
+}
+
+void ViewAbstract::SetMaxWidth(const CalcLength& width)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMaxSize(CalcSize(width, std::nullopt));
+}
+
+void ViewAbstract::SetMaxHeight(const CalcLength& height)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
+}
+
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
@@ -71,6 +107,42 @@ void ViewAbstract::SetBorderRadius(const Dimension& value)
 void ViewAbstract::SetBorderRadius(const BorderRadiusProperty& value)
 {
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, value);
+}
+
+void ViewAbstract::SetBorderColor(const Color& value)
+{
+    BorderColorProperty borderColor;
+    borderColor.SetColor(value);
+    ACE_UPDATE_RENDER_CONTEXT(BorderColor, borderColor);
+}
+
+void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BorderColor, value);
+}
+
+void ViewAbstract::SetBorderWidth(const Dimension& value)
+{
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth);
+}
+
+void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value);
+}
+
+void ViewAbstract::SetBorderStyle(const BorderStyle& value)
+{
+    BorderStyleProperty borderStyle;
+    borderStyle.SetBorderStyle(value);
+    ACE_UPDATE_RENDER_CONTEXT(BorderStyle, borderStyle);
+}
+
+void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BorderStyle, value);
 }
 
 void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)

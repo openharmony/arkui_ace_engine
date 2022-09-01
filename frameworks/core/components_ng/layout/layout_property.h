@@ -25,6 +25,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/magic_layout_property.h"
@@ -65,6 +66,11 @@ public:
         return padding_;
     }
 
+    const std::unique_ptr<BorderWidthProperty>& GetBorderWidthProperty() const
+    {
+        return borderWidth_;
+    }
+
     const std::unique_ptr<PositionProperty>& GetPositionProperty() const
     {
         return positionProperty_;
@@ -86,6 +92,16 @@ public:
             padding_ = std::make_unique<PaddingProperty>();
         }
         if (padding_->UpdateWithCheck(value)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateBorderWidth(const BorderWidthProperty& value)
+    {
+        if (!borderWidth_) {
+            borderWidth_ = std::make_unique<BorderWidthProperty>();
+        }
+        if (borderWidth_->UpdateWithCheck(value)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
         }
     }
@@ -132,6 +148,26 @@ public:
         }
     }
 
+    void UpdateCalcMinSize(const CalcSize& value)
+    {
+        if (!calcLayoutConstraint_) {
+            calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+        }
+        if (calcLayoutConstraint_->UpdateMinSizeWithCheck(value)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateCalcMaxSize(const CalcSize& value)
+    {
+        if (!calcLayoutConstraint_) {
+            calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+        }
+        if (calcLayoutConstraint_->UpdateMaxSizeWithCheck(value)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
     void UpdateSelfIdealSize(const SizeF& value)
@@ -155,7 +191,8 @@ public:
         return layoutConstraint;
     }
 
-    PaddingPropertyF CreatePaddingPropertyF();
+    PaddingPropertyF CreatePaddingWithoutBorder();
+    PaddingPropertyF CreatePaddingAndBorder();
 
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
@@ -169,6 +206,7 @@ private:
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
     std::unique_ptr<PaddingProperty> padding_;
+    std::unique_ptr<BorderWidthProperty> borderWidth_;
     std::unique_ptr<MagicItemProperty> magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;
     std::optional<MeasureType> measureType_;

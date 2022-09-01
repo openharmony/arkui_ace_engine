@@ -307,7 +307,7 @@ void RenderMarquee::PerformLayout()
         childText_->GetLayoutSize().ToString().c_str());
     if (!NeedMarquee()) {
         Stop();
-        childText_->SetPosition(Offset(0.0, 0.0));
+        childText_->SetPosition(GetTextPosition());
         return;
     }
     if (lastLayoutSize_ != childText_->GetLayoutSize() && IsPlayingAnimation(controller_)) {
@@ -378,6 +378,37 @@ bool RenderMarquee::NeedMarquee() const
         return needMarquee;
     }
     return true;
+}
+
+Offset RenderMarquee::GetTextPosition() const
+{
+    if (!childText_) {
+        return Offset(0.0, 0.0);
+    }
+
+    auto textWidth = childText_->GetLayoutSize().Width();
+    auto marqueeWidth = GetLayoutSize().Width();
+    if (GreatOrEqual(textWidth, marqueeWidth)) {
+        return Offset(0.0, 0.0);
+    }
+
+    auto textAlign = textStyle_.GetTextAlign();
+    // adjust START and END
+    if (textAlign == TextAlign::START) {
+        textAlign = RenderNode::GetTextDirection() == TextDirection::LTR ? TextAlign::LEFT : TextAlign::RIGHT;
+    }
+    if (textAlign == TextAlign::END) {
+        textAlign = RenderNode::GetTextDirection() == TextDirection::LTR ? TextAlign::RIGHT : TextAlign::LEFT;
+    }
+
+    const static double HALF_DIVIDE = 2.0;
+    if (textAlign == TextAlign::CENTER) {
+        return Offset((marqueeWidth - textWidth) / HALF_DIVIDE, 0.0);
+    } else if (textAlign == TextAlign::RIGHT) {
+        return Offset(marqueeWidth - textWidth, 0.0);
+    } else {
+        return Offset(0.0, 0.0);
+    }
 }
 
 } // namespace OHOS::Ace

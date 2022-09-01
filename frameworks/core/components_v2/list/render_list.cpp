@@ -543,7 +543,7 @@ void RenderList::RequestNewItemsAtStartForLaneList()
                 breakWhenRequestNewItem = true;
                 break;
             }
-            auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_, false);
+            auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_ - spaceWidth_, false);
             if (!child) {
                 breakWhenRequestNewItem = true;
                 break;
@@ -595,7 +595,7 @@ void RenderList::RequestNewItemsAtStart()
                 break;
             }
         }
-        auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_, false);
+        auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_ - spaceWidth_, false);
         if (!child) {
             break;
         }
@@ -654,7 +654,9 @@ void RenderList::PerformLayout()
         (scrollable_ && scrollable_->IsAnimationNotRunning()) || !scrollEffect_ || autoScrollingForItemMove_;
     if (noEdgeEffect && reachEnd_) {
         // Adjust end of list to match the end of layout
-        currentOffset_ += mainSize - curMainPos;
+        if (LessNotEqual(curMainPos, mainSize)) {
+            AdjustForReachEnd(mainSize);
+        }
         curMainPos = mainSize;
     }
 
@@ -806,7 +808,12 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
         auto offsetCross = CalculateLaneCrossOffset(crossSize, totalLaneCrossSize);
         auto offset = MakeValue<Offset>(curMainPos, offsetCross);
         if (chainAnimation_) {
-            offset += MakeValue<Offset>(-GetChainDelta(index), 0.0);
+            double chainDelta = GetChainDelta(index);
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup) {
+                itemGroup->SetChainOffset(-chainDelta);
+            }
+            offset += MakeValue<Offset>(-chainDelta, 0.0);
         }
         // set item position for one row
         for (size_t i = 0; i < itemSet.size(); i++) {
@@ -956,7 +963,12 @@ Size RenderList::SetItemsPosition(double mainSize)
         auto offsetCross = CalculateLaneCrossOffset(crossSize, GetCrossSize(childLayoutSize));
         auto offset = MakeValue<Offset>(curMainPos, offsetCross);
         if (chainAnimation_) {
-            offset += MakeValue<Offset>(-GetChainDelta(index), 0.0);
+            double chainDelta = GetChainDelta(index);
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup) {
+                itemGroup->SetChainOffset(-chainDelta);
+            }
+            offset += MakeValue<Offset>(-chainDelta, 0.0);
         }
 
         SetChildPosition(child, offset);
@@ -1007,10 +1019,11 @@ Size RenderList::SetItemsPosition(double mainSize)
     if (currentStickyItem_) {
         const auto& stickyItemLayoutSize = currentStickyItem_->GetLayoutSize();
         const double mainStickySize = GetMainSize(stickyItemLayoutSize) + spaceWidth_;
+        auto offsetCross = CalculateLaneCrossOffset(crossSize, GetCrossSize(currentStickyItem_->GetLayoutSize()));
         if (nextStickyItem && LessNotEqual(nextStickyMainAxis, mainStickySize)) {
-            currentStickyItem_->SetPosition(MakeValue<Offset>(nextStickyMainAxis - mainStickySize, 0.0));
+            currentStickyItem_->SetPosition(MakeValue<Offset>(nextStickyMainAxis - mainStickySize, offsetCross));
         } else {
-            currentStickyItem_->SetPosition(MakeValue<Offset>(0.0, 0.0));
+            currentStickyItem_->SetPosition(MakeValue<Offset>(0.0, offsetCross));
         }
 
         if (!fixedCrossSize_) {
@@ -1570,6 +1583,10 @@ RefPtr<RenderListItem> RenderList::RequestListItem(size_t index)
 
     if (!newItem->GetVisible()) {
         newItem->SetVisible(true);
+    }
+
+    if (newItem->GetHidden()) {
+        newItem->SetHidden(false);
     }
 
     return newItem;
@@ -2569,7 +2586,7 @@ size_t RenderList::CalculateSelectedIndex(
     return DEFAULT_INDEX;
 }
 
-size_t RenderList::CalculateInsertIndex(
+int32_t RenderList::CalculateInsertIndex(
     const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size selectedItemSize)
 {
     if (targetRenderlist->TotalCount() == 0) {
@@ -2594,16 +2611,16 @@ size_t RenderList::CalculateInsertIndex(
             return 0;
         }
         if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem)) > -1) {
-            return targetRenderlist->GetIndexByListItem(listItem) + 1;
+            return static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem)) + 1;
         }
-        return DEFAULT_INDEX;
+        return DEFAULT_INDEX_VALUE;
     }
 
     if (static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem)) > -1) {
-        return targetRenderlist->GetIndexByListItem(listItem);
+        return static_cast<int32_t>(targetRenderlist->GetIndexByListItem(listItem));
     }
 
-    return DEFAULT_INDEX;
+    return DEFAULT_INDEX_VALUE;
 }
 
 bool RenderList::IsAxisScrollable(AxisDirection direction)
@@ -2987,7 +3004,8 @@ void RenderList::LayoutChild(RefPtr<RenderNode> child, double referencePos, bool
             .forwardLayout = forward,
             .isVertical = vertical_,
             .sticky = sticky_,
-            .lanes = isLaneList_ ? lanes_ : 1
+            .lanes = isLaneList_ ? lanes_ : 1,
+            .align = component_->GetAlignListItemAlign(),
         };
         listItemGroup->SetItemGroupLayoutParam(param);
         listItemGroup->SetNeedLayout(true);
@@ -3047,8 +3065,35 @@ void RenderList::SizeChangeOffset(double newWindowHeight)
         if (LessOrEqual(offset, 0.0)) {
             // negative offset to scroll down
             currentOffset_ += offset;
+            startIndexOffset_ += offset;
         }
     }
+}
+
+void RenderList::AdjustForReachEnd(double mainSize)
+{
+    double currentOffset = mainSize;
+    for (auto rit = items_.rbegin(); rit != items_.rend(); rit++) {
+        double childMainSize = 0.0;
+        auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(*rit);
+        if (itemGroup) {
+            if (itemGroup->IsForwardLayout()) {
+                double size = GetMainSize(itemGroup->GetLayoutSize());
+                LayoutChild(itemGroup, currentOffset - size, true);
+                childMainSize = GetMainSize(itemGroup->GetLayoutSize());
+            } else {
+                LayoutChild(itemGroup, currentOffset, false);
+                childMainSize = GetMainSize(itemGroup->GetLayoutSize());
+            }
+        } else {
+            childMainSize = GetMainSize((*rit)->GetLayoutSize());
+        }
+        currentOffset -= (childMainSize + spaceWidth_);
+    }
+    if (!items_.empty()) {
+        currentOffset += spaceWidth_;
+    }
+    currentOffset_ = currentOffset;
 }
 
 } // namespace OHOS::Ace::V2

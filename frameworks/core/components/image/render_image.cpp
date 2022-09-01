@@ -329,20 +329,20 @@ void RenderImage::HandleOnCopy()
     auto type = sourceInfo_.GetSrcType();
     switch (type) {
         case SrcType::PIXMAP: {
-            clipboard_->SetPixelMapData(sourceInfo_.GetPixmap());
+            clipboard_->SetPixelMapData(sourceInfo_.GetPixmap(), copyOption_);
             break;
         }
         case SrcType::BASE64: {
-            clipboard_->SetData(sourceInfo_.GetSrc());
+            clipboard_->SetData(sourceInfo_.GetSrc(), copyOption_);
             break;
         }
         case SrcType::DATA_ABILITY_DECODED:
         case SrcType::DATA_ABILITY: {
-            clipboard_->SetData(sourceInfo_.GetSrc());
+            clipboard_->SetData(sourceInfo_.GetSrc(), copyOption_);
             break;
         }
         default: {
-            clipboard_->SetPixelMapData(renderImage->GetPixmapFromSkImage());
+            clipboard_->SetPixelMapData(renderImage->GetPixmapFromSkImage(), copyOption_);
             break;
         }
     }
@@ -944,15 +944,7 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
     }
 
     GestureEvent newInfo = info;
-    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-        pipelineContext->FireWindowGetModeCallBack() == WindowMode::WINDOW_MODE_FLOATING;
-    Point newPoint;
-    if (isContainerModal) {
-        newPoint.SetX(startPoint_.GetX() - CONTAINER_BORDER_WIDTH.ConvertToPx() - CONTENT_PADDING.ConvertToPx());
-        newPoint.SetY(startPoint_.GetY() - CONTAINER_TITLE_HEIGHT.ConvertToPx());
-    } else {
-        newPoint = startPoint_;
-    }
+    Point newPoint = UpdatePoint(pipelineContext, startPoint_);
     newInfo.SetGlobalPoint(newPoint);
     auto dragItemInfo = GenerateDragItemInfo(pipelineContext, newInfo);
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)

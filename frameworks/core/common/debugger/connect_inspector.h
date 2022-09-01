@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DEBUGGER_CONNECT_INSPECTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DEBUGGER_CONNECT_INSPECTOR_H
 
+#include <queue>
 #include <string>
 #include <unordered_map>
 
@@ -50,10 +51,11 @@ public:
     ConnectInspector() = default;
     ~ConnectInspector() = default;
 
-    std::string componentName_ {};
+    std::string componentName_;
     std::unordered_map<int32_t, std::string> infoBuffer_;
     std::unique_ptr<ConnectServer> connectServer_;
-    volatile bool waitingForDebugger_ = true;
+    std::atomic<bool> waitingForDebugger_ = true;
+    std::queue<const std::string> ideMsgQueue_;
 };
 } // namespace OHOS::Ace
 

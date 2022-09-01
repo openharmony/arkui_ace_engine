@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_STAGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_STAGE_PATTERN_H
 
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
@@ -44,10 +45,10 @@ public:
     }
 
 private:
-    void OnAttachToFrameNode() override;
-
     int32_t currentPageIndex_ = 0;
     friend class StageManager;
+
+    ACE_DISALLOW_COPY_AND_MOVE(StagePattern);
 };
 } // namespace OHOS::Ace::NG
 

@@ -69,6 +69,11 @@ public:
         inspectorTag_ = inspectorTag;
     }
 
+    const std::string& GetInspectorTag()
+    {
+        return inspectorTag_;
+    }
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     void SetDebugLine(const std::string& debugLine)
     {

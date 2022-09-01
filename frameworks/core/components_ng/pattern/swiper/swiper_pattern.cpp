@@ -28,6 +28,7 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -72,13 +73,14 @@ void SwiperPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
-    auto childrenSize = static_cast<int32_t>(host->GetChildren().size());
+    auto childrenSize = TotalCount();
     if (CurrentIndex() >= 0 && CurrentIndex() < childrenSize) {
         currentIndex_ = CurrentIndex();
     } else {
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);
     }
 
+    CalculateCacheRange();
     InitAutoPlay();
     InitSwiperController();
     InitTouchEvent(gestureHub);
@@ -96,13 +98,44 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (skipMeasure && skipLayout) {
         return false;
     }
+
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto swiperLayoutAlgorithm = DynamicCast<SwiperLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
-    startIndex_ = swiperLayoutAlgorithm->GetStartIndex();
-    endIndex_ = swiperLayoutAlgorithm->GetEndIndex();
+    preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
     return false;
+}
+
+void SwiperPattern::CalculateCacheRange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = host->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    auto displayCount = GetDisplayCount();
+    auto cacheCount = layoutProperty->GetCachedCount().value_or(1);
+    auto loadCount = cacheCount * 2 + displayCount;
+    auto totalCount = TotalCount();
+    if (loadCount >= totalCount) { // Load all items.
+        startIndex_ = 0;
+        endIndex_ = totalCount - 1;
+        LOGI("Load all items, range [%{public}d - %{public}d]", startIndex_, endIndex_);
+        return;
+    }
+
+    if (!IsLoop()) {
+        startIndex_ = std::max(currentIndex_ - cacheCount, 0);
+        endIndex_ = std::min(currentIndex_ + displayCount + cacheCount - 1, totalCount - 1);
+    } else {
+        startIndex_ = (totalCount + currentIndex_ - cacheCount) % totalCount;
+        endIndex_ = (currentIndex_ + cacheCount) % totalCount;
+    }
+
+    LOGI("Cache range [%{public}d - %{public}d], totalCount: %{public}d", startIndex_, endIndex_, totalCount);
 }
 
 void SwiperPattern::FireChangeEvent() const
@@ -112,11 +145,29 @@ void SwiperPattern::FireChangeEvent() const
     swiperEventHub->FireChangeEvent(currentIndex_);
 }
 
+void SwiperPattern::SwipeTo(int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetIndex = std::clamp(index, 0, TotalCount() - 1);
+    if (currentIndex_ == targetIndex) {
+        LOGD("Target index is same with current index.");
+        return;
+    }
+
+    StopAutoPlay();
+    StopTranslateAnimation();
+    targetIndex_ = targetIndex;
+    // TODO Adapt displayCount.
+    auto translateOffset = targetIndex_.value() > currentIndex_ ? -MainSize() : MainSize();
+    PlayTranslateAnimation(0, translateOffset, targetIndex_.value(), true);
+}
+
 void SwiperPattern::ShowNext()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto childrenSize = static_cast<int32_t>(host->GetChildren().size());
+    auto childrenSize = TotalCount();
     if (currentIndex_ >= childrenSize - 1 && !IsLoop()) {
         LOGW("already last one, can't show next");
         return;
@@ -130,7 +181,7 @@ void SwiperPattern::ShowPrevious()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto childrenSize = static_cast<int32_t>(host->GetChildren().size());
+    auto childrenSize = TotalCount();
     if (currentIndex_ <= 0 && !IsLoop()) {
         LOGW("already first one, can't show previous");
         return;
@@ -160,6 +211,14 @@ void SwiperPattern::InitSwiperController()
     if (swiperController_->HasInitialized()) {
         return;
     }
+
+    swiperController_->SetSwipeToImpl([weak = WeakClaim(this)](int32_t index, bool reverse) {
+        auto swiper = weak.Upgrade();
+        if (swiper) {
+            swiper->SwipeTo(index);
+        }
+    });
+
     swiperController_->SetShowNextImpl([weak = WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         if (swiper) {
@@ -291,16 +350,16 @@ void SwiperPattern::Tick(uint64_t duration)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
+    auto childrenSize = TotalCount();
     elapsedTime_ += duration;
-    if (elapsedTime_ >= GetInterval()) {
-        if (currentIndex_ >= static_cast<int32_t>(host->GetChildren().size()) - 1 && !IsLoop()) {
+    if (elapsedTime_ >= static_cast<uint64_t>(GetInterval())) {
+        if (currentIndex_ >= childrenSize - 1 && !IsLoop()) {
             LOGD("already last one, stop auto play because not loop");
             if (scheduler_) {
                 scheduler_->Stop();
             }
         } else {
-            PlayTranslateAnimation(
-                0, -MainSize(), (currentIndex_ + 1) % static_cast<int32_t>(host->GetChildren().size()));
+            PlayTranslateAnimation(0, -MainSize(), (currentIndex_ + 1) % childrenSize);
         }
         elapsedTime_ = 0;
     }
@@ -322,7 +381,7 @@ void SwiperPattern::StartAutoPlay()
     if (!scheduler_ || !IsAutoPlay()) {
         return;
     }
-    bool reachEnd = currentIndex_ >= static_cast<int32_t>(host->GetChildren().size()) - 1 && !IsLoop();
+    bool reachEnd = currentIndex_ >= TotalCount() - 1 && !IsLoop();
     if (reachEnd && scheduler_->IsActive()) {
         scheduler_->Stop();
     } else {
@@ -444,7 +503,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     }
 
     // Adjust next item index when loop and index is out of range.
-    auto childrenSize = static_cast<int32_t>(host->GetChildren().size());
+    auto childrenSize = TotalCount();
     if (IsLoop()) {
         if (nextIndex < 0) {
             nextIndex = childrenSize + nextIndex;
@@ -492,9 +551,11 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
         swiper->currentOffset_ = 0.0;
+        swiper->targetIndex_.reset();
         if (swiper->currentIndex_ != nextIndex) {
             swiper->currentIndex_ = nextIndex;
             swiper->FireChangeEvent();
+            swiper->CalculateCacheRange();
         }
         if (restartAutoPlay) {
             swiper->StartAutoPlay();
@@ -578,9 +639,8 @@ bool SwiperPattern::IsOutOfBoundary(double mainOffset) const
     }
 
     mainOffset = std::fmod(currentOffset_, MainSize());
-    auto childrenSize = static_cast<int32_t>(host->GetChildren().size());
     auto isOutOfStart = currentIndex_ == 0 && GreatOrEqual(mainOffset, 0.0);
-    auto isOutOfEnd = currentIndex_ == childrenSize - 1 && LessOrEqual(mainOffset, 0.0);
+    auto isOutOfEnd = currentIndex_ == TotalCount() - 1 && LessOrEqual(mainOffset, 0.0);
     return isOutOfStart || isOutOfEnd;
 }
 
@@ -605,6 +665,13 @@ int32_t SwiperPattern::CurrentIndex() const
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, 0);
     return swiperLayoutProperty->GetIndex().value_or(0);
+}
+
+int32_t SwiperPattern::GetDisplayCount() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, 1);
+    return swiperLayoutProperty->GetDisplayCount().value_or(1);
 }
 
 bool SwiperPattern::IsAutoPlay() const
@@ -656,6 +723,13 @@ bool SwiperPattern::IsDisableSwipe() const
     auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(swiperPaintProperty, false);
     return swiperPaintProperty->GetDisableSwipe().value_or(false);
+}
+
+int32_t SwiperPattern::TotalCount() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    return host->TotalChildCount();
 }
 
 } // namespace OHOS::Ace::NG

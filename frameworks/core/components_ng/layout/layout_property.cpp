@@ -29,6 +29,7 @@ void LayoutProperty::Reset()
     layoutConstraint_.reset();
     calcLayoutConstraint_.reset();
     padding_.reset();
+    borderWidth_.reset();
     magicItemProperty_.reset();
     positionProperty_.reset();
     measureType_.reset();
@@ -50,6 +51,9 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     }
     if (layoutProperty->padding_) {
         padding_ = std::make_unique<PaddingProperty>(*layoutProperty->padding_);
+    }
+    if (layoutProperty->borderWidth_) {
+        borderWidth_ = std::make_unique<BorderWidthProperty>(*layoutProperty->borderWidth_);
     }
     if (layoutProperty->magicItemProperty_) {
         magicItemProperty_ = std::make_unique<MagicItemProperty>(*layoutProperty->magicItemProperty_);
@@ -103,6 +107,8 @@ void LayoutProperty::CheckSelfIdealSize()
     if (measureType_ == MeasureType::MATCH_PARENT) {
         layoutConstraint_->UpdateSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
     }
+    layoutConstraint_->selfIdealSize.UpdateSizeWhenLarger(layoutConstraint_->minSize);
+    layoutConstraint_->selfIdealSize.UpdateSizeWhenSmaller(layoutConstraint_->maxSize);
 }
 
 LayoutConstraintF LayoutProperty::CreateChildConstraint() const
@@ -146,9 +152,39 @@ void LayoutProperty::UpdateContentConstraint()
             *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
         contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
     }
+    if (borderWidth_) {
+        auto borderWidthF = ConvertToBorderWidthPropertyF(
+            *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
+        contentConstraint_->MinusPadding(
+            borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+    }
 }
 
-PaddingPropertyF LayoutProperty::CreatePaddingPropertyF()
+PaddingPropertyF LayoutProperty::CreatePaddingAndBorder()
+{
+    if (layoutConstraint_.has_value()) {
+        auto padding = ConvertToPaddingPropertyF(
+            padding_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
+        auto borderWidth = ConvertToBorderWidthPropertyF(
+            borderWidth_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
+
+        return PaddingPropertyF { padding.left.value_or(0) + borderWidth.leftDimen.value_or(0),
+            padding.right.value_or(0) + borderWidth.rightDimen.value_or(0),
+            padding.top.value_or(0) + borderWidth.topDimen.value_or(0),
+            padding.bottom.value_or(0) + borderWidth.bottomDimen.value_or(0) };
+    }
+    auto padding = ConvertToPaddingPropertyF(
+        padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+    auto borderWidth = ConvertToBorderWidthPropertyF(
+        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+
+    return PaddingPropertyF { padding.left.value_or(0) + borderWidth.leftDimen.value_or(0),
+        padding.right.value_or(0) + borderWidth.rightDimen.value_or(0),
+        padding.top.value_or(0) + borderWidth.topDimen.value_or(0),
+        padding.bottom.value_or(0) + borderWidth.bottomDimen.value_or(0) };
+}
+
+PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
 {
     if (layoutConstraint_.has_value()) {
         return ConvertToPaddingPropertyF(

@@ -165,6 +165,32 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        int32_t laneNum = 1;
+        if (ParseJsInteger<int32_t>(info[0], laneNum)) {
+            // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
+            NG::ListView::SetLanes(laneNum);
+            return;
+        }
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        auto minLengthParam = jsObj->GetProperty("minLength");
+        auto maxLengthParam = jsObj->GetProperty("maxLength");
+        if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
+            LOGW("minLength and maxLength are not both set");
+            return;
+        }
+        Dimension minLengthValue;
+        Dimension maxLengthValue;
+        if (!ParseJsDimensionVp(minLengthParam, minLengthValue) || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
+            LOGW("minLength param or maxLength param is invalid");
+            return;
+        }
+        NG::ListView::SetLaneMinLength(minLengthValue);
+        NG::ListView::SetLaneMaxLength(maxLengthValue);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto listComponent = AceType::DynamicCast<V2::ListComponent>(component);
     if (!listComponent) {
@@ -174,10 +200,6 @@ void JSList::SetLanes(const JSCallbackInfo& info)
     int32_t laneNum = 1;
     if (ParseJsInteger<int32_t>(info[0], laneNum)) {
         // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ListView::SetLanes(laneNum);
-            return;
-        }
         listComponent->SetLanes(laneNum);
         return;
     }
@@ -195,11 +217,6 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         LOGW("minLength param or maxLength param is invalid");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ListView::SetLaneMinLength(minLengthValue);
-        NG::ListView::SetLaneMaxLength(maxLengthValue);
-        return;
-    }
     listComponent->SetLaneConstrain(minLengthValue, maxLengthValue);
 }
 
@@ -210,6 +227,36 @@ void JSList::SetSticky(int32_t sticky)
 
 void JSList::SetDivider(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        do {
+            if (args.Length() < 1 || !args[0]->IsObject()) {
+                LOGW("Invalid params");
+                break;
+            }
+
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+            Dimension strokeWidth;
+            if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) && strokeWidth.IsValid()) {
+                LOGW("Invalid strokeWidth of divider");
+                break;
+            }
+
+            V2::ItemDivider divider;
+            divider.strokeWidth = strokeWidth;
+            if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+                // Failed to get color from param, using default color defined in theme
+                RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
+                if (listTheme) {
+                    divider.color = listTheme->GetDividerColor();
+                }
+            }
+            ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin);
+            ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
+
+            NG::ListView::SetDivider(divider);
+        } while (0);
+        return;
+    }
     do {
         if (args.Length() < 1 || !args[0]->IsObject()) {
             LOGW("Invalid params");

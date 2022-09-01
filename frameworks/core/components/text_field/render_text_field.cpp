@@ -204,6 +204,9 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     if (textField->HasSetResetToStart() && textField->GetUpdateType() == UpdateType::ALL) {
         resetToStart_ = textField->GetResetToStart();
     }
+    if (keyboard_ != TextInputType::UNSPECIFIED && keyboard_ != textField->GetTextInputType()) {
+        CloseKeyboard();
+    }
     if (keyboard_ != textField->GetTextInputType()) {
         auto context = context_.Upgrade();
         if (context && context->GetIsDeclarative()) {
@@ -214,17 +217,16 @@ void RenderTextField::Update(const RefPtr<Component>& component)
             }
         }
         keyboard_ = textField->GetTextInputType();
-        CloseKeyboard();
     }
 
-    if (action_ != textField->GetAction()) {
+    if (action_ != TextInputAction::UNSPECIFIED && action_ != textField->GetAction()) {
         auto context = context_.Upgrade();
         if (context && context->GetIsDeclarative()) {
             CloseKeyboard();
-            action_ = textField->GetAction();
-        } else {
-            action_ = textField->GetAction();
         }
+    }
+    if (action_ != textField->GetAction()) {
+        action_ = textField->GetAction();
     }
 
     actionLabel_ = textField->GetActionLabel();
@@ -2018,7 +2020,7 @@ void RenderTextField::HandleOnCut()
     }
     if (copyOption_ != CopyOptions::None) {
         LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
-        clipboard_->SetData(GetEditingValue().GetSelectedText());
+        clipboard_->SetData(GetEditingValue().GetSelectedText(), copyOption_);
     }
     if (onCut_) {
         onCut_(GetEditingValue().GetSelectedText());
@@ -2043,7 +2045,7 @@ void RenderTextField::HandleOnCopy()
     }
     if (copyOption_ != CopyOptions::None) {
         LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
-        clipboard_->SetData(GetEditingValue().GetSelectedText());
+        clipboard_->SetData(GetEditingValue().GetSelectedText(), copyOption_);
     }
     if (onCopy_) {
         onCopy_(GetEditingValue().GetSelectedText());

@@ -34,6 +34,7 @@ template("declarative_frontend") {
       sources = [
         "declarative_frontend.cpp",
         "frontend_delegate_declarative.cpp",
+        "ng/page_router_manager.cpp",
       ]
     }
 

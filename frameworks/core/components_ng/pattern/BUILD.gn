@@ -16,6 +16,7 @@ import(
 
 build_component_ng("pattern_ng") {
   sources = [
+    "button/button_layout_algorithm.cpp",
     "button/button_pattern.cpp",
     "button/button_view.cpp",
     "custom/custom_node.cpp",
@@ -33,12 +34,16 @@ build_component_ng("pattern_ng") {
     "linear_layout/row_view.cpp",
     "list/list_item_view.cpp",
     "list/list_layout_algorithm.cpp",
+    "list/list_paint_method.cpp",
     "list/list_pattern.cpp",
     "list/list_view.cpp",
-    "page/page_pattern.cpp",
+    "overlay/overlay_manager.cpp",
+    "scroll/scroll_layout_algorithm.cpp",
+    "scroll/scroll_pattern.cpp",
+    "scroll/scroll_view.cpp",
     "stack/stack_view.cpp",
+    "stage/page_pattern.cpp",
     "stage/stage_manager.cpp",
-    "stage/stage_pattern.cpp",
     "swiper/swiper_layout_algorithm.cpp",
     "swiper/swiper_paint_method.cpp",
     "swiper/swiper_pattern.cpp",

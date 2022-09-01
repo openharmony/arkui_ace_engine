@@ -18,6 +18,7 @@
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
 #include "core/gestures/gesture_referee.h"
+#include "base/ressched/ressched_report.h"
 
 namespace OHOS::Ace {
 
@@ -30,6 +31,7 @@ constexpr int32_t AXIS_PINCH_FINGERS = 2;
 
 void PinchRecognizer::OnAccepted()
 {
+    ResSchedReport::GetInstance().ResSchedDataReport("click");
     SendCallbackMsg(onActionStart_);
 
     if (pendingEnd_) {

@@ -29,7 +29,7 @@ public:
     LazyLayoutWrapperBuilder(const RefPtr<LazyForEachBuilder>& builder, const WeakPtr<LazyForEachNode>& host);
     ~LazyLayoutWrapperBuilder() override = default;
 
-    void UpdateBuildCacheOnMainThread() override;
+    void SwapDirtyAndUpdateBuildCache() override;
 
 protected:
     int32_t OnGetTotalCount() override;

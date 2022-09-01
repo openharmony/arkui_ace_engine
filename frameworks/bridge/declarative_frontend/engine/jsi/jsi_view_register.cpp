@@ -15,6 +15,8 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "base/utils/utils.h"
+#include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "core/components_ng/base/ui_node.h"
@@ -170,6 +172,21 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     JSView* view = static_cast<JSView*>(obj->GetNativePointerField(0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         LOGE("loadDocument: argument provided is not a View!");
+        return;
+    }
+
+    auto container = Container::Current();
+    if (container && container->IsUseNewPipeline()) {
+        Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
+        auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
+        CHECK_NULL_VOID(frontEnd);
+        auto pageRouterManager = frontEnd->GetPageRouterManager();
+        CHECK_NULL_VOID(pageRouterManager);
+        auto pageNode = pageRouterManager->GetCurrentPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pageRootNode = view->CreateUINode();
+        CHECK_NULL_VOID(pageRootNode);
+        pageRootNode->MountToParent(pageNode);
         return;
     }
 

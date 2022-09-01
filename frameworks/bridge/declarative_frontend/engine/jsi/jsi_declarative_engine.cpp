@@ -16,6 +16,9 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
 #include <unistd.h>
+#ifdef WINDOWS_PLATFORM
+#include <algorithm>
+#endif
 
 #include "scope_manager/native_scope_manager.h"
 
@@ -51,6 +54,11 @@
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
 extern const char _binary_jsMockSystemPlugin_abc_end[];
+#if defined(WINDOWS_PLATFORM)
+constexpr char SEPERATOR[] = "\\";
+#else
+constexpr char SEPERATOR[] = "/";
+#endif
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_stateMgmt_abc_end[];
@@ -703,7 +711,6 @@ void JsiDeclarativeEngine::Destroy()
 {
     LOGI("JsiDeclarativeEngine Destroy");
     CHECK_RUN_ON(JS);
-    XComponentClient::GetInstance().SetJSValCallToNull();
 
 #ifdef USE_ARK_ENGINE
     JSLocalStorage::RemoveStorage(instanceId_);
@@ -938,7 +945,7 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
         LOGD("GetAssetContent \"%{public}s\" failed.", fileName.c_str());
         return true;
     }
-    if (!runtime->EvaluateJsCode(content.data(), content.size())) {
+    if (!runtime->EvaluateJsCode(content.data(), content.size(), fileName)) {
         LOGE("EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
         return false;
     }
@@ -994,10 +1001,70 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
                 CallAppFunc("onCreate");
             }
         }
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
         if (!ExecuteAbc(urlName)) {
             return;
         }
+#else
+        std::vector<uint8_t> content;
+        if (!delegate->GetAssetContent(urlName, content)) {
+            LOGD("GetAssetContent \"%{public}s\" failed.", urlName.c_str());
+        }
+        if (!assetPath_.empty()) {
+            auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+            arkRuntime->SetPathResolveCallback(bundleName_, assetPath_);
+        }
+#ifdef WINDOWS_PLATFORM
+        replace(urlName.begin(), urlName.end(), '/', '\\');
+#endif
+        urlName = assetPath_ + SEPERATOR + urlName;
+        if (!runtime->EvaluateJsCode(content.data(), content.size(), urlName)) {
+            LOGE("EvaluateJsCode \"%{public}s\" failed.", urlName.c_str());
+        }
+#endif
     }
+}
+
+// Load the app.js file of the FA model in NG structure.
+bool JsiDeclarativeEngine::LoadFaAppSource()
+{
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadFaAppSource");
+    if (!ExecuteAbc("commons.abc")) {
+        return false;
+    }
+    if (!ExecuteAbc("vendors.abc")) {
+        return false;
+    }
+    if (!ExecuteAbc("app.abc")) {
+        LOGW("ExecuteJsBin \"app.js\" failed.");
+    } else {
+        CallAppFunc("onCreate");
+    }
+    return true;
+}
+
+// Load the js file of the page in NG structure..
+bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
+{
+    ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
+    LOGI("JsiDeclarativeEngine LoadJs %{private}s page", url.c_str());
+    ACE_DCHECK(engineInstance_);
+
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto delegate = engineInstance_->GetDelegate();
+
+    // get js bundle content
+    shared_ptr<JsValue> jsCode = runtime->NewUndefined();
+    shared_ptr<JsValue> jsAppCode = runtime->NewUndefined();
+    const char js_ext[] = ".js";
+    const char bin_ext[] = ".abc";
+    auto pos = url.rfind(js_ext);
+    if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
+        std::string urlName = url.substr(0, pos) + bin_ext;
+        return ExecuteAbc(urlName);
+    }
+    LOGE("fail to find page file");
+    return false;
 }
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
@@ -1107,6 +1174,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(componentId);
         XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
+        XComponentClient::GetInstance().DeleteFromJsValMapById(componentId);
         return;
     }
     InitXComponent(componentId);
@@ -1171,18 +1239,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
 
     auto objContext = JsiObject(objXComp);
     JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
-    RefPtr<JSXComponentController> controller = OHOS::Ace::Framework::XComponentClient::GetInstance().
-        GetControllerFromJSXComponentControllersMap(componentId);
-    auto weakController = AceType::WeakClaim(AceType::RawPtr(controller));
-    auto getJSValCallback = [obj, weakController](JSRef<JSVal>& jsVal) {
-        jsVal = obj;
-        auto jsXComponentController = weakController.Upgrade();
-        if (jsXComponentController) {
-            jsXComponentController->SetXComponentContext(obj);
-        }
-        return true;
-    };
-    XComponentClient::GetInstance().RegisterJSValCallback(getJSValCallback);
+    XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
 
     auto task = [weak = WeakClaim(this), xcomponent]() {
         auto pool = xcomponent->GetTaskPool();

@@ -39,8 +39,7 @@ namespace OHOS::Ace::Framework {
 class JsiDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
     DECLARE_ACE_TYPE(JsiDeclarativeEngineInstance, AceType)
 public:
-    JsiDeclarativeEngineInstance(const RefPtr<FrontendDelegate>& delegate) : frontendDelegate_(delegate)
-    {}
+    explicit JsiDeclarativeEngineInstance(const RefPtr<FrontendDelegate>& delegate) : frontendDelegate_(delegate) {}
     ~JsiDeclarativeEngineInstance() override;
 
     void FlushCommandBuffer(void* context, const std::string& command) override;
@@ -217,6 +216,12 @@ public:
     // Load and initialize a JS bundle into the JS Framework
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
 
+    // Load the app.js file of the FA model in NG structure..
+    bool LoadFaAppSource() override;
+
+    // Load the je file of the page in NG structure..
+    bool LoadPageSource(const std::string& url) override;
+
     // Update running page
     void UpdateRunningPage(const RefPtr<JsAcePage>& page) override;
 
@@ -234,7 +239,7 @@ public:
     // Fire SyncEvent on JS
     void FireSyncEvent(const std::string& eventId, const std::string& param) override;
 
-    void FireExternalEvent(const std::string& componentId, const uint32_t nodeId, const bool isDestroy) override;
+    void FireExternalEvent(const std::string& componentId, uint32_t nodeId, bool isDestroy) override;
 
     // Timer callback
     void TimerCallback(const std::string& callbackId, const std::string& delay, bool isInterval) override;
@@ -293,7 +298,7 @@ public:
         return engineInstance_;
     }
 
-    virtual void FlushReload() override
+    void FlushReload() override
     {
         if (engineInstance_) {
             engineInstance_->FlushReload();
@@ -315,6 +320,12 @@ public:
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) override;
+
+    void InitializeModuleSearcher(const std::string& bundleName, const std::string assetPath) override
+    {
+        bundleName_ = bundleName;
+        assetPath_ = assetPath;
+    }
 #endif
 
 private:
@@ -343,6 +354,10 @@ private:
     int32_t instanceId_ = 0;
     void* runtime_ = nullptr;
     shared_ptr<JsValue> renderContext_;
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string assetPath_;
+    std::string bundleName_;
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };

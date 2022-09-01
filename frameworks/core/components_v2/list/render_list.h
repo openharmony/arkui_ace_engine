@@ -246,7 +246,7 @@ public:
 
     size_t CalculateSelectedIndex(
         const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size& selectedItemSize);
-    size_t CalculateInsertIndex(
+    int32_t CalculateInsertIndex(
         const RefPtr<RenderList> targetRenderlist, const GestureEvent& info, Size selectedItemSize);
 
     void HandleAxisEvent(const AxisEvent& event) override;
@@ -431,6 +431,7 @@ private:
     void LayoutChild(RefPtr<RenderNode> child, double referencePos = 0.0, bool forward = true);
     static void SetChildPosition(RefPtr<RenderNode> child, const Offset& offset);
     void AddChildItem(RefPtr<RenderNode> child);
+    void AdjustForReachEnd(double mainSize);
     Dimension listSpace_;
     double realMainSize_ = 0.0; // Real size of main axis.
     size_t startCachedCount_ = 0;

@@ -301,7 +301,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/text:ace_core_components_text_$platform",
       "$ace_root/frameworks/core/components/text_clock:ace_core_components_text_clock_$platform",
       "$ace_root/frameworks/core/components/text_field:ace_core_components_text_field_$platform",
-      "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_$platform",
       "$ace_root/frameworks/core/components/text_span:ace_core_components_text_span_$platform",
       "$ace_root/frameworks/core/components/texttimer:ace_core_components_texttimer_$platform",
       "$ace_root/frameworks/core/components/texttimer:ace_core_components_texttimer_$platform",
@@ -358,7 +357,12 @@ template("ace_core_source_set") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      deps += [ "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform" ]
+      deps += [
+        "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_for_web_$platform",
+        "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
+      ]
+    } else {
+      deps += [ "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_$platform" ]
     }
 
     # xcomponent components supports phone, TV and wearable except PC Preview

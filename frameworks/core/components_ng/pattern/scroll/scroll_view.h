@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/stage/stage_pattern.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_VIEW_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_VIEW_H
 
-#include "base/log/log.h"
+#include "base/geometry/axis.h"
+#include "base/utils/macros.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
-void StagePattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    if (!host) {
-        LOGE("fail to update measure type due to host is null");
-        return;
-    }
-    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-}
+
+class ACE_EXPORT ScrollView {
+public:
+    static void Create();
+    static void SetAxis(Axis axis);
+};
+
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_VIEW_H

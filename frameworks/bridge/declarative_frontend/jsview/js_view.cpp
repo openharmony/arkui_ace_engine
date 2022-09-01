@@ -392,7 +392,12 @@ void JSViewFullUpdate::CleanUpAbandonedChild()
 
 JSRef<JSObject> JSViewFullUpdate::GetChildById(const std::string& viewId)
 {
-    auto id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    std::string id;
+    if (Container::IsCurrentUseNewPipeline()) {
+        id = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    } else {
+        id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    }
     auto found = customViewChildren_.find(id);
     if (found != customViewChildren_.end()) {
         ChildAccessedById(id);
@@ -407,7 +412,12 @@ JSRef<JSObject> JSViewFullUpdate::GetChildById(const std::string& viewId)
 
 std::string JSViewFullUpdate::AddChildById(const std::string& viewId, const JSRef<JSObject>& obj)
 {
-    auto id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    std::string id;
+    if (Container::IsCurrentUsePartialUpdate()) {
+        id = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    } else {
+        id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    }
     JSView* jsView = nullptr;
     if (isLazyForEachProcessed_) {
         auto result = customViewChildrenWithLazy_.try_emplace(id, obj);

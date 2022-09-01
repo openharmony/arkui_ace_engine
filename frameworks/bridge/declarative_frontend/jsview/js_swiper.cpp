@@ -637,9 +637,10 @@ void JSSwiper::SetSize(const JSCallbackInfo& info)
 void JSSwiperController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSwiperController>::Declare("SwiperController");
+    JSClass<JSSwiperController>::CustomMethod("swipeTo", &JSSwiperController::SwipeTo);
     JSClass<JSSwiperController>::CustomMethod("showNext", &JSSwiperController::ShowNext);
-    JSClass<JSSwiperController>::CustomMethod("finishAnimation", &JSSwiperController::FinishAnimation);
     JSClass<JSSwiperController>::CustomMethod("showPrevious", &JSSwiperController::ShowPrevious);
+    JSClass<JSSwiperController>::CustomMethod("finishAnimation", &JSSwiperController::FinishAnimation);
     JSClass<JSSwiperController>::Bind(globalObj, JSSwiperController::Constructor, JSSwiperController::Destructor);
 }
 

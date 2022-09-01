@@ -18,6 +18,7 @@
 
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 #include <unordered_map>
+#include "frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.h"
 #endif
 #include <memory>
 
@@ -64,7 +65,7 @@ public:
     void Reset() override;
     void SetLogPrint(LOG_PRINT out) override;
     shared_ptr<JsValue> EvaluateJsCode(const std::string& src) override;
-    bool EvaluateJsCode(const uint8_t* buffer, int32_t size) override;
+    bool EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath = "") override;
     bool ExecuteJsBin(const std::string& fileName) override;
     shared_ptr<JsValue> GetGlobal() override;
     void RunGC() override;
@@ -130,6 +131,11 @@ public:
         }
         panda::Global<panda::ObjectRef> undefined(vm, panda::JSValueRef::Undefined(vm));
         return undefined;
+    }
+
+    void SetPathResolveCallback(const std::string& bundleName, const std::string& assetPath)
+    {
+        panda::JSNApi::SetHostResolvePathTracker(vm_, JsiModuleSearcher(bundleName, assetPath));
     }
 #endif
 

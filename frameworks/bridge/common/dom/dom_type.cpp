@@ -751,6 +751,7 @@ const char DOM_MARQUEE_COLOR[] = "color";
 const char DOM_MARQUEE_FONT_SIZE[] = "fontSize";
 const char DOM_MARQUEE_FONT_WEIGHT[] = "fontWeight";
 const char DOM_MARQUEE_FONT_FAMILY[] = "fontFamily";
+const char DOM_MARQUEE_TEXT_ALIGN[] = "textAlign";
 const char DOM_MARQUEE_EVENT_BOUNCE[] = "bounce";
 const char DOM_MARQUEE_EVENT_FINISH[] = "finish";
 const char DOM_MARQUEE_EVENT_START[] = "start";

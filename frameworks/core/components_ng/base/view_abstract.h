@@ -29,12 +29,23 @@ class ACE_EXPORT ViewAbstract {
 public:
     static void SetWidth(const CalcLength& width);
     static void SetHeight(const CalcLength& height);
+    static void SetMinWidth(const CalcLength& minWidth);
+    static void SetMinHeight(const CalcLength& minHeight);
+    static void SetMaxWidth(const CalcLength& maxWidth);
+    static void SetMaxHeight(const CalcLength& maxHeight);
     static void SetBackgroundColor(const Color& color);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
     static void SetLayoutWeight(int32_t value);
     static void SetBorderRadius(const BorderRadiusProperty& value);
     static void SetBorderRadius(const Dimension& value);
+    static void SetBorderColor(const Color& value);
+    static void SetBorderColor(const BorderColorProperty& value);
+    static void SetBorderWidth(const Dimension& value);
+    static void SetBorderWidth(const BorderWidthProperty& value);
+    static void SetBorderStyle(const BorderStyle& value);
+    static void SetBorderStyle(const BorderStyleProperty& value);
+
 
     // event
     static void SetOnClick(GestureEventFunc&& clickEventFunc);

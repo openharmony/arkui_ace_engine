@@ -80,7 +80,7 @@ RefPtr<RenderNode> RenderListItemGroup::RequestListItemHeader()
     header_ =  generator ? generator->RequestListItemHeader() : RefPtr<RenderNode>();
     if (header_) {
         AddChild(header_);
-        header_->Layout(MakeInnerLayout());
+        header_->Layout(GetLayoutParam());
     }
     return header_;
 }
@@ -91,7 +91,7 @@ RefPtr<RenderNode> RenderListItemGroup::RequestListItemFooter()
     footer_ = generator ? generator->RequestListItemFooter() : RefPtr<RenderNode>();
     if (footer_) {
         AddChild(footer_);
-        footer_->Layout(MakeInnerLayout());
+        footer_->Layout(GetLayoutParam());
     }
     return footer_;
 }
@@ -247,7 +247,11 @@ void RenderListItemGroup::RequestNewItemsAtStart()
         if (LessOrEqual(startIndexOffset_, startMainPos_)) {
             currStartCacheCount_++;
         }
-        startIndexOffset_ -= rowSize + spaceWidth_;
+        if (startIndex_ >= TotalCount()) {
+            startIndexOffset_ -= rowSize;
+        } else {
+            startIndexOffset_ -= rowSize + spaceWidth_;
+        }
         startIndex_ -= idx;
         if (idx < lanes_) {
             break;
@@ -255,10 +259,28 @@ void RenderListItemGroup::RequestNewItemsAtStart()
     }
 }
 
+double RenderListItemGroup::CalculateCrossOffset(double crossSize, double childCrossSize)
+{
+    double delta = crossSize - childCrossSize;
+    switch (align_) {
+        case ListItemAlign::START:
+            return 0.0;
+        case ListItemAlign::CENTER:
+            return delta / 2; /* 2 average */
+        case ListItemAlign::END:
+            return delta;
+        default:
+            LOGW("Invalid ListItemAlign: %{public}d", align_);
+            return 0.0;
+    }
+}
+
 void RenderListItemGroup::SetItemsPostion()
 {
-    double layoutPos = forwardLayout_ ? (startIndexOffset_ - forwardReferencePos_) : spaceWidth_;
+    double crossSize = GetCrossSize(GetLayoutParam().GetMaxSize());
+    double layoutPos = forwardLayout_ ? (startIndexOffset_ - forwardReferencePos_) : 0.0;
     if (header_) {
+        double crossOffset = CalculateCrossOffset(crossSize, GetCrossSize(header_->GetLayoutSize()));
         double headerSize = GetMainSize(header_->GetLayoutSize());
         if (stickHeader_ && Negative(forwardReferencePos_)) {
             double headerPos = backwardReferencePos_ - headerSize;
@@ -266,9 +288,9 @@ void RenderListItemGroup::SetItemsPostion()
                 headerPos -= GetMainSize(footer_->GetLayoutSize());
             }
             headerPos = std::min(0.0, headerPos);
-            header_->SetPosition(MakeValue<Offset>(headerPos - forwardReferencePos_, 0.0));
+            header_->SetPosition(MakeValue<Offset>(headerPos - forwardReferencePos_, crossOffset));
         } else {
-            auto offset = MakeValue<Offset>(layoutPos - headerSize, 0.0);
+            auto offset = MakeValue<Offset>(layoutPos - headerSize, crossOffset);
             header_->SetPosition(offset);
         }
     }
@@ -279,7 +301,8 @@ void RenderListItemGroup::SetItemsPostion()
             auto child = *(it++);
             double childSize = GetMainSize(child->GetLayoutSize());
             rowSize = std::max(childSize, rowSize);
-            auto offset = MakeValue<Offset>(layoutPos, i * laneCrossSize);
+            double crossOffset = CalculateCrossOffset(laneCrossSize, GetCrossSize(child->GetLayoutSize()));
+            auto offset = MakeValue<Offset>(layoutPos, i * laneCrossSize + crossOffset);
             child->SetPosition(offset);
         }
         layoutPos += (rowSize + spaceWidth_);
@@ -287,7 +310,9 @@ void RenderListItemGroup::SetItemsPostion()
     if (!items_.empty()) {
         layoutPos -= spaceWidth_;
     }
+    endIndexOffset_ = layoutPos;
     if (footer_) {
+        double crossOffset = CalculateCrossOffset(crossSize, GetCrossSize(footer_->GetLayoutSize()));
         if (stickFooter_ && GreatNotEqual(backwardReferencePos_, listMainSize_)) {
             double footerSize = GetMainSize(footer_->GetLayoutSize());
             double footerPos = forwardReferencePos_;
@@ -295,9 +320,9 @@ void RenderListItemGroup::SetItemsPostion()
                 footerPos += GetMainSize(header_->GetLayoutSize());
             }
             footerPos = std::max(footerPos, listMainSize_ - footerSize);
-            footer_->SetPosition(MakeValue<Offset>(footerPos - forwardReferencePos_, 0.0));
+            footer_->SetPosition(MakeValue<Offset>(footerPos - forwardReferencePos_, crossOffset));
         } else {
-            auto offset = MakeValue<Offset>(layoutPos, 0.0);
+            auto offset = MakeValue<Offset>(layoutPos, crossOffset);
             footer_->SetPosition(offset);
         }
     }
@@ -316,7 +341,7 @@ void RenderListItemGroup::PerformLayout()
         RemoveChild(header_);
         header_ = nullptr;
     }
-    
+
     if ((stickFooter_ || reachEnd) && !footer_) {
         RequestListItemFooter();
     } else if (!stickFooter_ && !reachEnd && footer_) {
@@ -328,7 +353,7 @@ void RenderListItemGroup::PerformLayout()
     double footerSize = footer_ && reachEnd ? GetMainSize(footer_->GetLayoutSize()) : 0.0;
     if (forwardLayout_ && LessNotEqual(startIndexOffset_ - headerSize, forwardReferencePos_)) {
         startIndexOffset_ = forwardReferencePos_ + headerSize;
-        curMainPos += forwardReferencePos_ - (startIndexOffset_ - headerSize);
+        curMainPos += headerSize;
     }
     if (!forwardLayout_ && GreatNotEqual(curMainPos + footerSize, backwardReferencePos_)) {
         startIndexOffset_ -= curMainPos + footerSize - backwardReferencePos_;
@@ -370,10 +395,12 @@ void RenderListItemGroup::SetItemGroupLayoutParam(const ListItemLayoutParam &par
     endCacheCount_ = param.endCacheCount;
     listMainSize_ = param.listMainSize;
     vertical_ = param.isVertical;
+    align_ = param.align;
     stickHeader_ = static_cast<bool>(param.sticky & StickyStyle::HEADER);
     stickFooter_ = static_cast<bool>(param.sticky & StickyStyle::FOOTER);
     lanes_ = param.lanes;
-    if (startIndex_ < 0) {
+    if (!isInitialized_) {
+        isInitialized_ = true;
         startIndex_ = param.forwardLayout ? 0 : static_cast<int32_t>(TotalCount());
         startIndexOffset_ = param.referencePos;
         forwardReferencePos_ = param.referencePos;
@@ -387,6 +414,45 @@ void RenderListItemGroup::SetItemGroupLayoutParam(const ListItemLayoutParam &par
         backwardReferencePos_ = param.referencePos;
     }
     forwardLayout_ = param.forwardLayout;
+}
+
+void RenderListItemGroup::SetChainOffset(double offset)
+{
+    if (NearZero(offset)) {
+        return;
+    }
+
+    if (header_ && stickHeader_) {
+        double layoutPos = forwardLayout_ ? (startIndexOffset_ - forwardReferencePos_) : spaceWidth_;
+        double crossOffset = GetCrossAxis(header_->GetPosition());
+        double headerSize = GetMainSize(header_->GetLayoutSize());
+        if (Negative(forwardReferencePos_ + offset)) {
+            double headerPos = backwardReferencePos_ + offset - headerSize;
+            if (footer_) {
+                headerPos -= GetMainSize(footer_->GetLayoutSize());
+            }
+            headerPos = std::min(0.0, headerPos);
+            header_->SetPosition(MakeValue<Offset>(headerPos - (forwardReferencePos_ + offset), crossOffset));
+        } else {
+            auto offset = MakeValue<Offset>(layoutPos - headerSize, crossOffset);
+            header_->SetPosition(offset);
+        }
+    }
+    if (footer_ && stickFooter_) {
+        double crossOffset = GetCrossAxis(footer_->GetPosition());
+        if (GreatNotEqual(backwardReferencePos_ + offset, listMainSize_)) {
+            double footerSize = GetMainSize(footer_->GetLayoutSize());
+            double footerPos = forwardReferencePos_ + offset;
+            if (header_) {
+                footerPos += GetMainSize(header_->GetLayoutSize());
+            }
+            footerPos = std::max(footerPos, listMainSize_ - footerSize);
+            footer_->SetPosition(MakeValue<Offset>(footerPos - (forwardReferencePos_ + offset), crossOffset));
+        } else {
+            auto offset = MakeValue<Offset>(endIndexOffset_, crossOffset);
+            footer_->SetPosition(offset);
+        }
+    }
 }
 
 void RenderListItemGroup::Paint(RenderContext& context, const Offset& offset)

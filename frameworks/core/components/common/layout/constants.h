@@ -517,6 +517,13 @@ enum class HitTestMode {
     NONE
 };
 
+enum class CopyOptions {
+    None = 0,
+    InApp,
+    Local,
+    Distributed,
+};
+
 inline constexpr uint32_t STATE_NORMAL = 0;
 inline constexpr uint32_t STATE_PRESSED = 1;
 inline constexpr uint32_t STATE_FOCUS = 1 << 1;

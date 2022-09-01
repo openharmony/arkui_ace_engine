@@ -16,21 +16,26 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_PAGE_ROUTER_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_PAGE_ROUTER_MANAGER_H
 
-#include <future>
-#include <mutex>
+#include <cstdint>
+#include <stack>
 #include <string>
-#include <unordered_map>
-#include <vector>
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
-#include "core/components/page/page_target.h"
+#include "base/utils/noncopyable.h"
+#include "bridge/declarative_frontend/ng/entry_page_info.h"
+#include "core/components_ng/base/frame_node.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
-#include "frameworks/bridge/js_frontend/js_ace_page.h"
 
-namespace OHOS::Ace {
+namespace OHOS::Ace::NG {
 
-using LoadJsCallback = std::function<void(const std::string&, const RefPtr<Framework::JsAcePage>&, bool isMainPage)>;
+using LoadPageCallback = std::function<bool(const std::string&)>;
+
+enum class RouterMode {
+    STANDARD = 0,
+    SINGLE,
+};
 
 enum class RouterAction {
     DEFAULT = 0,
@@ -40,24 +45,22 @@ enum class RouterAction {
     CLEAR,
 };
 
-struct RouterTask {
-    RouterAction action = RouterAction::PUSH;
-    PageTarget target = PageTarget("");
-    std::string params;
+struct RouterPageInfo {
+    std::string url;
+    RouterMode routerMode = RouterMode::STANDARD;
+    std::string path;
 };
 
-struct PageInfo {
-    int32_t pageId = -1;
-    std::string url;
-    bool isRestore = false;
-    bool isAlertBeforeBackPage = false;
-    DialogProperties dialogProperties;
+struct RouterTask {
+    RouterAction action = RouterAction::PUSH;
+    RouterPageInfo routerPageInfo;
+    std::string params;
 };
 
 class PageRouterManager : public AceType {
 public:
-    explicit PageRouterManager(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor) {}
-    ~PageRouterManager() override {}
+    PageRouterManager() = default;
+    ~PageRouterManager() override = default;
 
     void RunPage(const std::string& url, const std::string& params);
 
@@ -66,64 +69,68 @@ public:
         manifestParser_ = manifestParser;
     }
 
-    void SetLoadJsCallback(LoadJsCallback&& callback)
+    void SetLoadJsCallback(LoadPageCallback&& callback)
     {
         loadJs_ = std::move(callback);
     }
 
+    void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback);
+
+    void DisableAlertBeforeBackPage();
+
     // router operation
-    void Push(const PageTarget& target, const std::string& params);
-    void Replace(const PageTarget& target, const std::string& params);
-    void BackWithTarget(const PageTarget& target, const std::string& params);
-    void Clear();
-    int32_t GetStackSize() const;
-    void GetState(int32_t& index, std::string& name, std::string& path);
-    std::string GetParams();
-    RefPtr<Framework::JsAcePage> GetPage(int32_t pageId) const;
-    int32_t GetRunningPageId() const;
+    void Push(const RouterPageInfo& target, const std::string& params);
+    bool Pop();
+    void Replace(const RouterPageInfo& target, const std::string& params) {}
+    void BackWithTarget(const RouterPageInfo& target, const std::string& params);
+    void Clear() {}
+    int32_t GetStackSize() const
+    {
+        return 0;
+    }
+    void GetState(int32_t& index, std::string& name, std::string& path) {}
+    std::string GetParams() const
+    {
+        return "";
+    }
+
+    RefPtr<FrameNode> GetCurrentPageNode() const
+    {
+        if (pageRouterStack_.empty()) {
+            LOGE("fail to get current page node due to page is null");
+            return nullptr;
+        }
+        return pageRouterStack_.top().Upgrade();
+    }
+
+    std::string GetCurrentPageUrl();
+
+    // Get the currently running JS page information in NG structure.
+    RefPtr<Framework::RevSourceMap> GetCurrentPageSourceMap(const RefPtr<AssetManager>& assetManager);
 
 private:
     // page id manage
     int32_t GenerateNextPageId();
-    void RecyclePageId(int32_t pageId);
 
-    // router tasks
-    void AddRouterTask(const RouterTask& task);
-    void ProcessRouterTask();
-    void StartPush(const PageTarget& target, const std::string& params);
-    void StartReplace(const PageTarget& target, const std::string& params);
-    void StartBack(const PageTarget& target, const std::string& params);
-    void BackCheckAlert(const PageTarget& target, const std::string& params);
-    void ClearInvisiblePages();
+    void StartPush(const RouterPageInfo& target, const std::string& params);
+    void StartBack(const RouterPageInfo& target, const std::string& params);
+    void BackCheckAlert(const RouterPageInfo& target, const std::string& params);
 
     // page operations
-    void LoadPage(
-        int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params, bool isRestore = false);
-    void LoadReplacePage(int32_t pageId, const PageTarget& url, const std::string& params);
-    void ReplacePage(const RefPtr<Framework::JsAcePage>& page, const std::string& url);
+    void LoadPage(int32_t pageId, const RouterPageInfo& target, const std::string& params, bool isRestore = false);
     void PopPage();
-    void PopToPage(const std::string& url);
-    int32_t GetPageIdByUrl(const std::string& url, bool& isRestore);
 
-    void OnPageReady(const RefPtr<Framework::JsAcePage>& page, bool isMainPage, bool isRestore);
+    static bool OnPageReady(const RefPtr<FrameNode>& pageNode);
+    static bool OnPopPage();
 
-    bool isRouteStackFull_ = false;
-    bool isStagingPageExist_ = false;
-    int32_t pageId_ = -1;
-    RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<Framework::ManifestParser> manifestParser_;
+    LoadPageCallback loadJs_;
+    int32_t pageId_ = 0;
+    std::stack<WeakPtr<FrameNode>> pageRouterStack_;
 
-    LoadJsCallback loadJs_;
-
-    std::unordered_map<int32_t, RefPtr<Framework::JsAcePage>> pageMap_;
-    std::unordered_map<int32_t, std::string> pageParamMap_;
-    std::atomic<uint64_t> pageIdPool_ = 0;
-    std::queue<RouterTask> routerQueue_;
-    std::vector<PageInfo> pageRouterStack_;
-    mutable std::mutex mutex_;
-    mutable std::mutex routerQueueMutex_;
+    ACE_DISALLOW_COPY_AND_MOVE(PageRouterManager);
 };
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_PAGE_ROUTER_MANAGER_H

@@ -84,7 +84,14 @@ void JsFunction::Execute(const std::vector<std::string>& keys, const std::string
 void JsFunction::ExecuteNew(const std::vector<std::string>& keys, const std::string& param)
 {
     JSRef<JSVal> jsVal;
-    XComponentClient::GetInstance().GetJSVal(jsVal);
+    if (keys.size() > 1) {
+        auto result = XComponentClient::GetInstance().GetJSVal(keys[1], jsVal);
+        RefPtr<JSXComponentController> controller =
+            XComponentClient::GetInstance().GetControllerFromJSXComponentControllersMap(keys[1]);
+        if (result && controller) {
+            controller->SetXComponentContext(jsVal);
+        }
+    }
     JsFunction::ExecuteJS(1, &jsVal);
 }
 

@@ -20,6 +20,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
@@ -51,6 +52,12 @@ PaddingPropertyF ConvertToPaddingPropertyF(const std::unique_ptr<PaddingProperty
 
 PaddingPropertyF ConvertToPaddingPropertyF(
     const PaddingProperty& padding, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyF(const std::unique_ptr<BorderWidthProperty>& borderWidth,
+    const ScaleProperty& scaleProperty, float percentReference = -1.0f);
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyF(
+    const BorderWidthProperty& borderWidth, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
 
 void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize,
     PaddingPropertyF& paddingValue);

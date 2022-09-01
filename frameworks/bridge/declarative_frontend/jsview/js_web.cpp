@@ -1022,6 +1022,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onContextMenuShow", &JSWeb::OnContextMenuShow);
     JSClass<JSWeb>::StaticMethod("onSearchResultReceive", &JSWeb::OnSearchResultReceive);
     JSClass<JSWeb>::StaticMethod("mediaPlayGestureAccess", &JSWeb::MediaPlayGestureAccess);
+    JSClass<JSWeb>::StaticMethod("onScroll", &JSWeb::OnScroll);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2044,6 +2045,32 @@ void JSWeb::OnScaleChange(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetScaleChangeId(eventMarker);
+}
+
+JSRef<JSVal> ScrollEventToJSValue(const OnScrollEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("xOffset", eventInfo.GetX());
+    obj->SetProperty("yOffset", eventInfo.GetY());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnScroll(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<OnScrollEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ScrollEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<OnScrollEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetScrollId(eventMarker);
 }
 
 JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& eventInfo)

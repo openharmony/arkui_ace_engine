@@ -31,6 +31,7 @@ public:
     static void SetInitialIndex(const int32_t& initialIndex);
     static void SetListDirection(Axis axis);
     static void SetEdgeEffect(EdgeEffect edgeEffect);
+    static void SetDivider(const V2::ItemDivider& divider);
     static void SetLanes(int32_t lanes);
     static void SetLaneMinLength(const Dimension& laneMinLength);
     static void SetLaneMaxLength(const Dimension& laneMaxLength);

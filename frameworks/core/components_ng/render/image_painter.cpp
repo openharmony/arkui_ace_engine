@@ -102,8 +102,11 @@ void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const Imag
         filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(grayMatrix));
         brush.SetFilter(filter);
     }
+    canvas.Save();
+    canvas.Translate(offset.GetX(), offset.GetY());
     canvas.AttachBrush(brush);
     canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_));
+    canvas.Restore();
 }
 
 void ImagePainter::ApplyImageFit(

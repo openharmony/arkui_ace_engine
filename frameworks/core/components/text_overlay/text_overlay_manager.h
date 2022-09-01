@@ -39,13 +39,6 @@ class PipelineContext;
 class TextOverlayComponent;
 class TextOverlayManager;
 
-enum class CopyOptions {
-    None = 0,
-    InApp,
-    Local,
-    Distributed,
-};
-
 enum class CursorPositionType {
     NONE = 0,
     END,      // end of paragraph

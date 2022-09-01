@@ -1165,33 +1165,50 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
         return;
     }
 
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
 
     JSRef<JSVal> minWidthValue = sizeObj->GetProperty("minWidth");
     Dimension minWidth;
+    JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
+    Dimension maxWidth;
+    JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
+    Dimension minHeight;
+    JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
+    Dimension maxHeight;
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (ParseJsDimensionVp(minWidthValue, minWidth)) {
+            NG::ViewAbstract::SetMinWidth(NG::CalcLength(minWidth));
+        }
+        if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
+            NG::ViewAbstract::SetMaxWidth(NG::CalcLength(maxWidth));
+        }
+        if (ParseJsDimensionVp(minHeightValue, minHeight)) {
+            NG::ViewAbstract::SetMinHeight(NG::CalcLength(minHeight));
+        }
+        if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
+            NG::ViewAbstract::SetMaxHeight(NG::CalcLength(maxHeight));
+        }
+        return;
+    }
+
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+
     if (ParseJsDimensionVp(minWidthValue, minWidth)) {
         box->SetMinWidth(minWidth);
         flexItem->SetMinWidth(minWidth);
     }
 
-    JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
-    Dimension maxWidth;
     if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
         box->SetMaxWidth(maxWidth);
         flexItem->SetMaxWidth(maxWidth);
     }
 
-    JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
-    Dimension minHeight;
     if (ParseJsDimensionVp(minHeightValue, minHeight)) {
         box->SetMinHeight(minHeight);
         flexItem->SetMinHeight(minHeight);
     }
 
-    JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
-    Dimension maxHeight;
     if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
         box->SetMaxHeight(maxHeight);
         flexItem->SetMaxHeight(maxHeight);
@@ -2072,7 +2089,7 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoratio
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
-    if (!decoration) {
+    if (!decoration && !Container::IsCurrentUseNewPipeline()) {
         decoration = GetBackDecoration();
     }
     Dimension leftDimen = BoxComponentHelper::GetBorderLeftWidth(decoration);
@@ -2087,6 +2104,24 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoratio
         bottomDimen = borderWidth;
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::BorderWidthProperty borderWidthProperty;
+            if (ParseJsDimensionVp(object->GetProperty("left"), leftDimen)) {
+                borderWidthProperty.leftDimen = leftDimen;
+            }
+            if (ParseJsDimensionVp(object->GetProperty("right"), rightDimen)) {
+                borderWidthProperty.rightDimen = rightDimen;
+            }
+            if (ParseJsDimensionVp(object->GetProperty("top"), topDimen)) {
+                borderWidthProperty.topDimen = topDimen;
+            }
+            if (ParseJsDimensionVp(object->GetProperty("bottom"), bottomDimen)) {
+                borderWidthProperty.bottomDimen = bottomDimen;
+            }
+            NG::ViewAbstract::SetBorderWidth(borderWidthProperty);
+            return;
+        }
+
         auto valueLeft = object->GetProperty("left");
         if (!valueLeft->IsUndefined()) {
             ParseJsDimensionVp(valueLeft, leftDimen);
@@ -2108,6 +2143,12 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoratio
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        Dimension borderWidth;
+        if (ParseJsDimensionVp(args, borderWidth)) {
+            NG::ViewAbstract::SetBorderWidth(borderWidth);
+        }
+    }
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
@@ -2417,7 +2458,7 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
-    if (!decoration) {
+    if (!decoration && !Container::IsCurrentUseNewPipeline()) {
         decoration = GetBackDecoration();
     }
     Color leftColor = BoxComponentHelper::GetBorderColorTop(decoration);
@@ -2432,6 +2473,24 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
         bottomColor = borderColor;
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::BorderColorProperty borderColorProperty;
+            if (ParseJsColor(object->GetProperty("left"), leftColor)) {
+                borderColorProperty.leftColor = leftColor;
+            }
+            if (ParseJsColor(object->GetProperty("right"), rightColor)) {
+                borderColorProperty.rightColor = rightColor;
+            }
+            if (ParseJsColor(object->GetProperty("top"), topColor)) {
+                borderColorProperty.topColor = topColor;
+            }
+            if (ParseJsColor(object->GetProperty("bottom"), bottomColor)) {
+                borderColorProperty.bottomColor = bottomColor;
+            }
+            NG::ViewAbstract::SetBorderColor(borderColorProperty);
+            return;
+        }
+
         auto valueLeft = object->GetProperty("left");
         if (!valueLeft->IsUndefined()) {
             ParseJsColor(valueLeft, leftColor);
@@ -2453,6 +2512,12 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        Color borderColor;
+        if (ParseJsColor(args, borderColor)) {
+            NG::ViewAbstract::SetBorderColor(borderColor);
+        }
+    }
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
@@ -2491,7 +2556,7 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decorati
         return;
     }
     RefPtr<Decoration> tarDecoration = decoration;
-    if (!tarDecoration) {
+    if (!tarDecoration && !Container::IsCurrentUseNewPipeline()) {
         tarDecoration = GetBackDecoration();
     }
     Dimension radiusTopLeft = BoxComponentHelper::GetBorderRadiusTopLeft(tarDecoration).GetX();
@@ -2507,24 +2572,24 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decorati
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         if (Container::IsCurrentUseNewPipeline()) {
-            NG::BorderRadiusProperty borderRadius;
+            NG::BorderRadiusProperty borderRadiusProperty;
             Dimension topLeft;
             if (ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
-                borderRadius.radiusTopLeft = topLeft;
+                borderRadiusProperty.radiusTopLeft = topLeft;
             }
             Dimension topRight;
             if (ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
-                borderRadius.radiusTopRight = topRight;
+                borderRadiusProperty.radiusTopRight = topRight;
             }
             Dimension bottomLeft;
             if (ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
-                borderRadius.radiusBottomLeft = bottomLeft;
+                borderRadiusProperty.radiusBottomLeft = bottomLeft;
             }
             Dimension bottomRight;
             if (ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
-                borderRadius.radiusBottomRight = bottomRight;
+                borderRadiusProperty.radiusBottomRight = bottomRight;
             }
-            NG::ViewAbstract::SetBorderRadius(borderRadius);
+            NG::ViewAbstract::SetBorderRadius(borderRadiusProperty);
             return;
         }
 
@@ -2596,7 +2661,7 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoratio
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
-    if (!decoration) {
+    if (!decoration && !Container::IsCurrentUseNewPipeline()) {
         decoration = GetBackDecoration();
     }
     BorderStyle styleLeft = BoxComponentHelper::GetBorderStyleLeft(decoration);
@@ -2605,6 +2670,28 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoratio
     BorderStyle styleBottom = BoxComponentHelper::GetBorderStyleBottom(decoration);
     if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::BorderStyleProperty borderStyleProperty;
+            auto leftValue = object->GetProperty("left");
+            if (!leftValue->IsUndefined() && leftValue->IsNumber()) {
+                borderStyleProperty.styleLeft = static_cast<BorderStyle>(leftValue->ToNumber<int32_t>());
+            }
+            auto rightValue = object->GetProperty("right");
+            if (!rightValue->IsUndefined() && rightValue->IsNumber()) {
+                borderStyleProperty.styleRight = static_cast<BorderStyle>(rightValue->ToNumber<int32_t>());
+            }
+            auto topValue = object->GetProperty("top");
+            if (!topValue->IsUndefined() && topValue->IsNumber()) {
+                borderStyleProperty.styleTop = static_cast<BorderStyle>(topValue->ToNumber<int32_t>());
+            }
+            auto bottomValue = object->GetProperty("bottom");
+            if (!bottomValue->IsUndefined() && bottomValue->IsNumber()) {
+                borderStyleProperty.styleBottom = static_cast<BorderStyle>(bottomValue->ToNumber<int32_t>());
+            }
+            NG::ViewAbstract::SetBorderStyle(borderStyleProperty);
+            return;
+        }
+
         auto leftValue = object->GetProperty("left");
         if (!leftValue->IsUndefined() && leftValue->IsNumber()) {
             styleLeft = static_cast<BorderStyle>(leftValue->ToNumber<int32_t>());
@@ -2629,6 +2716,10 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoratio
         styleBottom = borderStyle;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto borderStyle = static_cast<BorderStyle>(args->ToNumber<int32_t>());
+        NG::ViewAbstract::SetBorderStyle(borderStyle);
+    }
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
