@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <optional>
+
 #include "gtest/gtest.h"
 
 #include "base/memory/ace_type.h"
@@ -41,6 +43,8 @@ const Ace::TextDecoration TEXT_DECORATION_VALUE = Ace::TextDecoration::INHERIT;
 const Color TEXT_DECORATION_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Dimension BASELINE_OFFSET_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
+const Dimension ADAPT_MIN_FONT_SIZE_VALUE = Dimension(50, DimensionUnit::PX);
+const Dimension ADAPT_MAX_FONT_SIZE_VALUE = Dimension(200, DimensionUnit::PX);
 } // namespace
 
 struct TestProperty {
@@ -57,6 +61,8 @@ struct TestProperty {
     std::optional<Color> textDecorationColorValue = std::nullopt;
     std::optional<Dimension> baselineOffsetValue = std::nullopt;
     std::optional<Ace::TextCase> textCaseValue = std::nullopt;
+    std::optional<Dimension> adaptMinFontSize = std::nullopt;
+    std::optional<Dimension> adaptMaxFontSize = std::nullopt;
 };
 
 class TextPatternTestNg : public testing::Test {
@@ -118,6 +124,12 @@ RefPtr<FrameNode> TextPatternTestNg::CreateTextParagraph(
     if (testProperty.textCaseValue.has_value()) {
         TextView::SetTextCase(testProperty.textCaseValue.value());
     }
+    if (testProperty.adaptMinFontSize.has_value()) {
+        TextView::SetAdaptMinFontSize(testProperty.adaptMinFontSize.value());
+    }
+    if (testProperty.adaptMaxFontSize.has_value()) {
+        TextView::SetAdaptMaxFontSize(testProperty.adaptMaxFontSize.value());
+    }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
     return AceType::DynamicCast<FrameNode>(element);
@@ -144,6 +156,8 @@ HWTEST_F(TextPatternTestNg, TextFrameNodeCreator001, TestSize.Level1)
     testProperty.textDecorationColorValue = std::make_optional(TEXT_DECORATION_COLOR_VALUE);
     testProperty.baselineOffsetValue = std::make_optional(BASELINE_OFFSET_VALUE);
     testProperty.textCaseValue = std::make_optional(TEXT_CASE_VALUE);
+    testProperty.adaptMinFontSize = std::make_optional(ADAPT_MIN_FONT_SIZE_VALUE);
+    testProperty.adaptMaxFontSize = std::make_optional(ADAPT_MAX_FONT_SIZE_VALUE);
 
     RefPtr<FrameNode> frameNode = CreateTextParagraph(CREATE_VALUE, testProperty);
     EXPECT_EQ(frameNode == nullptr, false);
@@ -170,5 +184,9 @@ HWTEST_F(TextPatternTestNg, TextFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(textStyle.GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(textStyle.GetBaselineOffset(), BASELINE_OFFSET_VALUE);
     EXPECT_EQ(textStyle.GetTextCase(), TEXT_CASE_VALUE);
+    EXPECT_EQ(textStyle.GetAdaptMinFontSize(), ADAPT_MIN_FONT_SIZE_VALUE);
+    EXPECT_EQ(textStyle.GetAdaptMaxFontSize(), ADAPT_MAX_FONT_SIZE_VALUE);
+    EXPECT_EQ(textStyle.GetAdaptTextSize(),
+        testProperty.adaptMinFontSize.has_value() || testProperty.adaptMaxFontSize.has_value());
 }
 } // namespace OHOS::Ace::NG

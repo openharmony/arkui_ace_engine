@@ -319,6 +319,10 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::SetAdaptMinFontSize(fontSize);
+        return;
+    }
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
@@ -338,6 +342,10 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
     }
     Dimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextView::SetAdaptMaxFontSize(fontSize);
         return;
     }
     auto component = GetComponent();
