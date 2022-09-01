@@ -963,10 +963,8 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         ACE_DCHECK(!engineInstance_->GetRunningPage());
         engineInstance_->SetRunningPage(page);
     }
-
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-
     // get source map
     std::string jsSourceMap;
     if (delegate->GetAssetContent(url + ".map", jsSourceMap)) {
@@ -983,6 +981,9 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
         std::string urlName = url.substr(0, pos) + bin_ext;
         if (isMainPage) {
+            if (LoadJsWithModule(urlName)) {
+                return;
+            }
             if (!ExecuteAbc("commons.abc")) {
                 return;
             }
@@ -1023,6 +1024,19 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         }
 #endif
     }
+}
+
+bool JsiDeclarativeEngine::LoadJsWithModule(const std::string& urlName)
+{
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto vm = const_cast<EcmaVM *>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
+    if (!JSNApi::IsBundle(vm)) {
+        if (!runtime->ExecuteJsBin(urlName)) {
+            LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
+        }
+        return true;
+    }
+    return false;
 }
 
 // Load the app.js file of the FA model in NG structure.
