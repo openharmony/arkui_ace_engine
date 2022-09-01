@@ -16,10 +16,35 @@
 #include "core/gestures/gesture_recognizer.h"
 
 #include "base/log/log.h"
+#include "core/common/container.h"
 #include "core/event/axis_event.h"
 #include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
+namespace {
+
+RefPtr<GestureReferee> GetCurrentGestureReferee()
+{
+    auto container = Container::Current();
+    if (!container) {
+        return nullptr;
+    }
+    auto pipelineBase = container->GetPipelineContext();
+    if (!pipelineBase) {
+        return nullptr;
+    }
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineBase);
+    if (!pipelineContext) {
+        return nullptr;
+    }
+    auto eventManager = pipelineContext->GetEventManager();
+    if (!eventManager) {
+        return nullptr;
+    }
+    return eventManager->GetGestureReferee();
+}
+
+}
 
 bool GestureRecognizer::HandleEvent(const TouchEvent& point)
 {
@@ -73,8 +98,10 @@ void GestureRecognizer::AddToReferee(size_t touchId, const RefPtr<GestureRecogni
         gestureGroup->AddToReferee(touchId, recognizer);
         return;
     }
-
-    GestureReferee::GetInstance()->AddGestureRecognizer(touchId, recognizer);
+    auto referee = GetCurrentGestureReferee();
+    if (referee) {
+        referee->AddGestureRecognizer(touchId, recognizer);
+    }
 }
 
 void GestureRecognizer::DelFromReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer)
@@ -84,8 +111,10 @@ void GestureRecognizer::DelFromReferee(size_t touchId, const RefPtr<GestureRecog
         gestureGroup->DelFromReferee(touchId, recognizer);
         return;
     }
-
-    GestureReferee::GetInstance()->DelGestureRecognizer(touchId, recognizer);
+    auto referee = GetCurrentGestureReferee();
+    if (referee) {
+        referee->DelGestureRecognizer(touchId, recognizer);
+    }
 }
 
 void GestureRecognizer::BatchAdjudicate(
@@ -98,9 +127,14 @@ void GestureRecognizer::BatchAdjudicate(
     }
 
     std::set<size_t> copyIds = touchIds;
+    auto referee = GetCurrentGestureReferee();
+    if (!referee) {
+        LOGW("No GestureReferee in GestureRecoginer.");
+        return;
+    }
     for (auto pointerId : copyIds) {
         LOGD("Adjudicate gesture recognizer, touch id %{public}zu, disposal %{public}d", pointerId, disposal);
-        GestureReferee::GetInstance()->Adjudicate(pointerId, recognizer, disposal);
+        referee->Adjudicate(pointerId, recognizer, disposal);
     }
 }
 } // namespace OHOS::Ace

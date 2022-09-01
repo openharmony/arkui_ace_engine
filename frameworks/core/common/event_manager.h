@@ -26,6 +26,7 @@
 #include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
 #include "core/focus/focus_node.h"
+#include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
 
@@ -53,7 +54,10 @@ struct RectCallback final {
 };
 
 class EventManager : public virtual AceType {
+    DECLARE_ACE_TYPE(EventManager, AceType);
 public:
+    EventManager();
+    ~EventManager() override = default;
     // After the touch down event is triggered, the touch test is performed to collect the corresponding
     // touch event target list.
     void TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
@@ -109,6 +113,11 @@ public:
 
     void HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList);
 
+    RefPtr<GestureReferee> GetGestureReferee()
+    {
+        return referee_;
+    }
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
@@ -120,6 +129,7 @@ private:
     WeakPtr<RenderNode> axisNode_;
     int32_t instanceId_ = 0;
     bool inSelectedRect_ = false;
+    RefPtr<GestureReferee> referee_;
 };
 
 } // namespace OHOS::Ace

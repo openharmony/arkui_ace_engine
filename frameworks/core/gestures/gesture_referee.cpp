@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace {
 
-thread_local std::unique_ptr<GestureReferee> GestureReferee::instance_ = nullptr;
+// thread_local std::unique_ptr<GestureReferee> GestureReferee::instance_ = nullptr;
 
 void GestureScope::AddMember(const RefPtr<GestureRecognizer>& recognizer)
 {
@@ -422,12 +422,12 @@ void GestureReferee::Adjudicate(size_t touchId, const RefPtr<GestureRecognizer>&
     }
 }
 
-GestureReferee* GestureReferee::GetInstance()
-{
-    if (!instance_) {
-        instance_.reset(new GestureReferee);
-    }
-    return instance_.get();
-}
+// GestureReferee* GestureReferee::GetInstance()
+// {
+//     if (!instance_) {
+//         instance_.reset(new GestureReferee);
+//     }
+//     return instance_.get();
+// }
 
 } // namespace OHOS::Ace

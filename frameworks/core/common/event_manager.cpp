@@ -37,7 +37,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNo
         return;
     }
     // first clean.
-    GestureReferee::GetInstance()->CleanGestureScope(touchPoint.id);
+    referee_->CleanGestureScope(touchPoint.id);
     // collect
     TouchTestResult hitTestResult;
     const Point point { touchPoint.x, touchPoint.y, touchPoint.sourceType };
@@ -68,7 +68,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         return;
     }
     // first clean.
-    GestureReferee::GetInstance()->CleanGestureScope(touchPoint.id);
+    referee_->CleanGestureScope(touchPoint.id);
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
@@ -219,7 +219,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
         }
 
         if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
-            GestureReferee::GetInstance()->CleanGestureScope(point.id);
+            referee_->CleanGestureScope(point.id);
             touchTestResults_.erase(point.id);
         }
 
@@ -411,6 +411,12 @@ void EventManager::ClearResults()
 {
     touchTestResults_.clear();
     mouseTestResults_.clear();
+}
+
+EventManager::EventManager()
+{
+    LOGI("EventManger Constructor.");
+    referee_ = AceType::MakeRefPtr<GestureReferee>();
 }
 
 } // namespace OHOS::Ace
