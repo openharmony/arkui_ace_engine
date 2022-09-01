@@ -121,6 +121,17 @@ public:
     }
 };
 
+class JSWebSslError : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebSslError>::Declare("WebSslErrorResult");
+        JSClass<JSWebSslError>::StaticMethod("handleConfirm", &JSWeb::Mock);
+        JSClass<JSWebSslError>::StaticMethod("handleCancel", &JSWeb::Mock);
+        JSClass<JSWebSslError>::Bind(globalObj);
+    }
+};
+
 class JSWebConsoleLog : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -271,6 +282,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("tableData", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::Mock);
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::Mock);
+    JSClass<JSWeb>::StaticMethod("onSslErrorEventReceive", &JSWeb::Mock);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
 
@@ -283,6 +295,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSFileSelectorParam::JSBind(globalObj);
     JSFileSelectorResult::JSBind(globalObj);
     JSWebHttpAuth::JSBind(globalObj);
+    JSWebSslError::JSBind(globalObj);
 }
 
 class JSWebCookie : public Referenced {
