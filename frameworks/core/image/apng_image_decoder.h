@@ -23,7 +23,6 @@
 #include "third_party/skia/include/core/SkImage.h"
 
 namespace OHOS::Ace {
-
 /*
  PNG  spec: http://www.libpng.org/pub/png/spec/1.2/PNG-Structure.html
  APNG spec: https://wiki.mozilla.org/APNG_Specification
@@ -63,7 +62,8 @@ namespace OHOS::Ace {
  num frames     (4) number of frames
  num plays      (4) number of times to loop, 0 indicates infinite looping
  
- fcTL (Frame Control) required, must appear before the 'IDAT' or 'fdAT' chunks of the frame to which it applies, 26 bytes
+ fcTL (Frame Control) required, must appear before the 'IDAT' or 'fdAT'
+ chunks of the frame to which it applies, 26 bytes
  sequence number   (4) sequence number of the animation chunk, starting from 0
  width             (4) width of the following frame
  height            (4) height of the following frame
@@ -71,7 +71,8 @@ namespace OHOS::Ace {
  y offset          (4) y position at which to render the following frame
  delay num         (2) frame delay fraction numerator
  delay den         (2) frame delay fraction denominator
- dispose op        (1) type of frame area disposal to be done after rendering this frame (0:none, 1:background 2:previous)
+ dispose op        (1) type of frame area disposal to be done after rendering this frame
+                       (0:none, 1:background 2:previous)
  blend op          (1) type of frame area rendering for this frame (0:source, 1:over)
  
  fdAT (Frame Data) required
@@ -143,7 +144,8 @@ typedef struct {
 } PngChunkIHDR;
 
 /**
- * fcTL (Frame Control) required, must appear before the 'IDAT' or 'fdAT' chunks of the frame to which it applies, 26 bytes
+ * fcTL (Frame Control) required, must appear before the 'IDAT' or 'fdAT'
+ * chunks of the frame to which it applies, 26 bytes
  * sequence number   (4) sequence number of the animation chunk, starting from 0
  * width             (4) width of the following frame
  * height            (4) height of the following frame
@@ -151,7 +153,8 @@ typedef struct {
  * y offset          (4) y position at which to render the following frame
  * delay num         (2) frame delay fraction numerator
  * delay den         (2) frame delay fraction denominator
- * dispose op        (1) type of frame area disposal to be done after rendering this frame (0:none, 1:background 2:previous)
+ * dispose op        (1) type of frame area disposal to be done after rendering this frame
+ *                       (0:none, 1:background 2:previous)
  * blend op          (1) type of frame area rendering for this frame (0:source, 1:over)
  **/
 typedef struct {
@@ -209,7 +212,7 @@ typedef struct {
     uint32_t apngSharedInsertIndex;  ///< shared chunk insert index
     bool apngFirstFrameIsCover;     ///< the first frame is same as png (cover)
 } PngInfo;
-    
+
 class PNGImageDecoder : public virtual AceType {
     DECLARE_ACE_TYPE(PNGImageDecoder, AceType);
 
@@ -256,4 +259,4 @@ private:
 };
 } // namespace OHOS::Ace
 
-#endif //MINIXGROUP_PNG_IMAGE_DECODER_H
+#endif // MINIXGROUP_PNG_IMAGE_DECODER_H

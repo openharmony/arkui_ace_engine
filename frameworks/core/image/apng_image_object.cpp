@@ -17,15 +17,14 @@
 #include "core/image/apng_image_decoder.h"
 
 namespace OHOS::Ace {
-
 void ApngImageObject::UploadToGpuForRender(
-        const WeakPtr<PipelineBase>& context,
-        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-        const UploadSuccessCallback& successCallback,
-        const FailedCallback& failedCallback,
-        const Size& imageSize,
-        bool forceResize,
-        bool syncMode)
+    const WeakPtr<PipelineBase>& context,
+    const RefPtr<FlutterRenderTaskHolder> &renderTaskHolder,
+    const UploadSuccessCallback &successCallback,
+    const FailedCallback &failedCallback,
+    const Size &imageSize,
+    bool forceResize,
+    bool syncMode)
 {
     const float SizeOffset = 0.5;
 
@@ -61,9 +60,9 @@ void ApngImageObject::UploadToGpuForRender(
 
 bool ApngImageObject::IsApng()
 {
-    if(skData_ && apngDecoder_)
+    if (skData_ && apngDecoder_) {
         return apngDecoder_->isApng();
+    }
     return false;
 }
-
 } // namespace OHOS::Ace

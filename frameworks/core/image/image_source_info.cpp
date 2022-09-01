@@ -34,8 +34,8 @@ bool ImageSourceInfo::IsPngSource(const std::string& src, InternalResource::Reso
 {
     // 4 is the length of ".png" or is .apng
     if(!src.empty()){
-        std::string head = src.size() > APngFileSuffixLen ? src.substr(src.size() - APngFileSuffixLen, APngFileSuffixLen) :
-                src.size() == 4 ? src.substr(src.size() - FileSuffixLen, FileSuffixLen) : "";
+        std::string head = src.size() > APngFileSuffixLen ? src.substr(src.size() - APngFileSuffixLen,
+            APngFileSuffixLen) : src.size() == 4 ? src.substr(src.size() - FileSuffixLen, FileSuffixLen) : "";
         std::transform(head.begin(), head.end(), head.begin(), [](unsigned char c) { return std::tolower(c); });
 
         return (head.size() > FileSuffixLen && head.substr(head.size() - FileSuffixLen) == ".png") ||

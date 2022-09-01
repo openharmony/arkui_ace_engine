@@ -408,7 +408,8 @@ template("ace_core_source_set") {
       sources += [ "common/plugin_manager.cpp" ]
       deps += [ "//commonlibrary/c_utils/base:utils" ]
     }
-    include_dirs += [ "//foundation/window/window_manager/interfaces/innerkits" ]
+    include_dirs +=
+        [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
     if (!is_wearable_product) {
       deps += [

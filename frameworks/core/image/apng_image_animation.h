@@ -20,14 +20,14 @@
 
 namespace OHOS::Ace {
 
-
 class APngImageAnimation : public Animation<int32_t> {
 public:
     APngImageAnimation() = default;
+
     ~APngImageAnimation() override = default;
 
     // add picture. duration in normalized time.
-    bool AddPicture(float duration, const int32_t& pictureInfo);
+    bool AddPicture(float duration, const int32_t &pictureInfo);
 
     void ClearPictures()
     {
@@ -35,7 +35,7 @@ public:
         pictures_.clear();
     }
 
-    const int32_t& GetValue() const override
+    const int32_t &GetValue() const override
     {
         return currentPicture_->GetPictureInfo();
     }
@@ -56,7 +56,7 @@ public:
             return;
         }
 
-        for (const auto& picture : pictures_) {
+        for (const auto &picture : pictures_) {
             picture->UpdateDurationWithScale(this->duration_);
         }
 
@@ -65,7 +65,7 @@ public:
     }
 
 
-    void UpdateAndNotifyPicture(const RefPtr<PictureFrame<int32_t>>& picture);
+    void UpdateAndNotifyPicture(const RefPtr<PictureFrame<int32_t>> &picture);
 
     /**
      * 使用时间戳，保证帧序的统一
@@ -85,4 +85,4 @@ private:
 } // namespace OHOS::Ace
 
 
-#endif //MINIXGROUP_APNG_IMAGE_ANIMATION_H
+#endif // MINIXGROUP_APNG_IMAGE_ANIMATION_H

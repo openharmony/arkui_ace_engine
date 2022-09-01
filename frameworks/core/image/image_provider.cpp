@@ -545,7 +545,7 @@ void ImageProvider::TryLoadImageInfo(const RefPtr<PipelineBase>& context, const 
 bool ImageProvider::IsWideGamut(const sk_sp<SkColorSpace>& colorSpace)
 {
     skcms_ICCProfile encodedProfile;
-    if(!colorSpace)
+    if (!colorSpace)
         return false;
     
     colorSpace->toProfile(&encodedProfile);

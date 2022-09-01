@@ -232,7 +232,6 @@ bool StaticImageObject::CancelBackgroundTasks()
     return uploadForPaintTask_ ? uploadForPaintTask_.Cancel(false) : false;
 }
 
-const float SizeOffset = 0.5;
 void AnimatedImageObject::UploadToGpuForRender(
     const WeakPtr<PipelineBase>& context,
     const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
@@ -242,6 +241,7 @@ void AnimatedImageObject::UploadToGpuForRender(
     bool forceResize,
     bool syncMode)
 {
+    const float SizeOffset = 0.5;
     if (!animatedPlayer_ && skData_) {
         auto codec = SkCodec::MakeFromData(skData_);
         int32_t dstWidth = -1;

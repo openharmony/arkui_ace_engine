@@ -20,32 +20,34 @@
 #include "core/image/apng_image_player.h"
 
 namespace OHOS::Ace {
-class ApngImageObject : public ImageObject{
-    DECLARE_ACE_TYPE(ApngImageObject, ImageObject);
+class ApngImageObject : public ImageObject {
+DECLARE_ACE_TYPE(ApngImageObject, ImageObject);
 public:
     using CancelableTask = CancelableCallback<void()>;
+
     ApngImageObject(
-         ImageSourceInfo source,
-         const Size& imageSize,
-         int32_t frameCount,
-         const sk_sp<SkData>& data,
-         const RefPtr<PNGImageDecoder> &decoder)
-         : ImageObject(source, imageSize, frameCount), skData_(data)
+        ImageSourceInfo source,
+        const Size &imageSize,
+        int32_t frameCount,
+        const sk_sp<SkData> &data,
+        const RefPtr<PNGImageDecoder> &decoder)
+        : ImageObject(source, imageSize, frameCount), skData_(data)
     {
         skData_ = data;
         apngDecoder_ = decoder;
     }
 
     void UploadToGpuForRender(
-            const WeakPtr<PipelineBase>& context,
-            const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-            const UploadSuccessCallback& successCallback,
-            const FailedCallback& failedCallback,
-            const Size& imageSize,
-            bool forceResize,
-            bool syncMode = false) override;
+        const WeakPtr<PipelineBase>& context,
+        const RefPtr<FlutterRenderTaskHolder> &renderTaskHolder,
+        const UploadSuccessCallback &successCallback,
+        const FailedCallback &failedCallback,
+        const Size &imageSize,
+        bool forceResize,
+        bool syncMode = false) override;
 
     bool IsApng();
+
     void Pause() override
     {
         if (animatedPlayer_) {
@@ -80,4 +82,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif //MINIXGROUP_APNG_IMAGE_OBJECT_H
+#endif // MINIXGROUP_APNG_IMAGE_OBJECT_H

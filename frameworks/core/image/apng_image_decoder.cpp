@@ -22,13 +22,14 @@
 #include <cstdio>
 #include <string>
 #include <cmath>
+
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+
 #include <malloc.h>
+
 #endif
 
-
 namespace OHOS::Ace {
-
 const uint32_t PNGSize22 = 22;
 const uint32_t PNGSize24 = 24;
 const uint32_t PNGSize25 = 25;
@@ -56,26 +57,29 @@ const uint32_t Byte24 = 24;
 const uint32_t Byte25 = 25;
 const uint32_t Byte32 = 32;
 
-#define FOUR_CC(c1,c2,c3,c4) (static_cast<uint32_t>(((c4) << Byte24) | ((c3) << Byte16) | ((c2) << Byte8) | (c1)))
-#define TWO_CC(c1,c2) (static_cast<uint16_t>(((c2) << Byte8) | (c1)))
+#define FOUR_CC(c1, c2, c3, c4) (static_cast<uint32_t>(((c4) << Byte24) | ((c3) << Byte16) | ((c2) << Byte8) | (c1)))
+#define TWO_CC(c1, c2) (static_cast<uint16_t>(((c2) << Byte8) | (c1)))
 
-static inline uint16_t swap_endian_uint16(uint16_t value) {
+static inline uint16_t swap_endian_uint16(uint16_t value)
+{
     return
             static_cast<uint16_t>((value & 0x00FF) << Byte8) |
-            static_cast<uint16_t>((value & 0xFF00) >> Byte8) ;
+            static_cast<uint16_t>((value & 0xFF00) >> Byte8);
 }
 
-static inline uint32_t swap_endian_uint32(uint32_t value) {
+static inline uint32_t swap_endian_uint32(uint32_t value)
+{
     return
             static_cast<uint32_t>((value & 0x000000FFU) << Byte24) |
             static_cast<uint32_t>((value & 0x0000FF00U) << Byte8) |
             static_cast<uint32_t>((value & 0x00FF0000U) >> Byte8) |
-            static_cast<uint32_t>((value & 0xFF000000U) >> Byte24) ;
+            static_cast<uint32_t>((value & 0xFF000000U) >> Byte24);
 }
 
-static void png_chunk_IHDR_read(PngChunkIHDR *IHDR, const uint8_t *data) {
-    IHDR->width = swap_endian_uint32(*((uint32_t *)(data)));
-    IHDR->height = swap_endian_uint32(*((uint32_t *)(data + PNGHeadHeight)));
+static void png_chunk_IHDR_read(PngChunkIHDR *IHDR, const uint8_t *data)
+{
+    IHDR->width = swap_endian_uint32(*((uint32_t *) (data)));
+    IHDR->height = swap_endian_uint32(*((uint32_t *) (data + PNGHeadHeight)));
     IHDR->bitDepth = data[PNGHeadBitDepth];
     IHDR->colorType = data[PNGHeadColorType];
     IHDR->compressionMethod = data[PNGHeadCompMethod];
@@ -83,9 +87,10 @@ static void png_chunk_IHDR_read(PngChunkIHDR *IHDR, const uint8_t *data) {
     IHDR->interlaceMethod = data[PNGHeadInterMethod];
 }
 
-static void png_chunk_IHDR_write(PngChunkIHDR *IHDR, uint8_t *data) {
-    *((uint32_t *)(data)) = swap_endian_uint32(IHDR->width);
-    *((uint32_t *)(data + PNGHeadHeight)) = swap_endian_uint32(IHDR->height);
+static void png_chunk_IHDR_write(PngChunkIHDR *IHDR, uint8_t *data)
+{
+    *((uint32_t *) (data)) = swap_endian_uint32(IHDR->width);
+    *((uint32_t *) (data + PNGHeadHeight)) = swap_endian_uint32(IHDR->height);
     data[PNGHeadBitDepth] = IHDR->bitDepth;
     data[PNGHeadColorType] = IHDR->colorType;
     data[PNGHeadCompMethod] = IHDR->compressionMethod;
@@ -93,35 +98,74 @@ static void png_chunk_IHDR_write(PngChunkIHDR *IHDR, uint8_t *data) {
     data[PNGHeadInterMethod] = IHDR->interlaceMethod;
 }
 
-static void png_chunk_fcTL_read(PngChunkfcTL *fcTL, const uint8_t *data) {
-    fcTL->sequenceNumber = swap_endian_uint32(*((uint32_t *)(data)));
-    fcTL->width = swap_endian_uint32(*((uint32_t *)(data + Byte4)));
-    fcTL->height = swap_endian_uint32(*((uint32_t *)(data + Byte8)));
-    fcTL->xOffset = swap_endian_uint32(*((uint32_t *)(data + Byte12)));
-    fcTL->yOffset = swap_endian_uint32(*((uint32_t *)(data + Byte16)));
-    fcTL->delayNum = swap_endian_uint16(*((uint16_t *)(data + Byte20)));
-    fcTL->delayDen = swap_endian_uint16(*((uint16_t *)(data + PNGSize22)));
+static int png_sig_compare(png_const_bytep sig, size_t start, size_t num_to_check)
+{
+    const png_byte png_signature[8] = {137, 80, 78, 71, 13, 10, 26, 10};
+
+    if (num_to_check > Byte8) {
+        num_to_check = Byte8;
+    } else if (num_to_check < 1) {
+        return (-1);
+    }
+
+    if (start > Byte8 - 1) {
+        return (-1);
+    }
+
+    if (start + num_to_check > Byte8) {
+        num_to_check = Byte8 - start;
+    }
+
+    return ((int) (memcmp(&sig[start], &png_signature[start], num_to_check)));
+}
+
+static void png_chunk_fcTL_read(PngChunkfcTL *fcTL, const uint8_t *data)
+{
+    fcTL->sequenceNumber = swap_endian_uint32(*((uint32_t *) (data)));
+    fcTL->width = swap_endian_uint32(*((uint32_t *) (data + Byte4)));
+    fcTL->height = swap_endian_uint32(*((uint32_t *) (data + Byte8)));
+    fcTL->xOffset = swap_endian_uint32(*((uint32_t *) (data + Byte12)));
+    fcTL->yOffset = swap_endian_uint32(*((uint32_t *) (data + Byte16)));
+    fcTL->delayNum = swap_endian_uint16(*((uint16_t *) (data + Byte20)));
+    fcTL->delayDen = swap_endian_uint16(*((uint16_t *) (data + PNGSize22)));
     fcTL->disposeOp = data[PNGSize24];
     fcTL->blendOp = data[PNGSize25];
 }
 
-static bool png_validate_animation_chunk_order(PngChunkInfo *chunks,  /* input */
-                                                  uint32_t chunkNum,         /* input */
-                                                  uint32_t *first_idat_index, /* output */
-                                                  bool *first_frame_is_cover  /* output */) {
+/**
+* validate frame chunk order
+* @param chunks : input
+* @param chunkNum : chunkNum
+* @param first_idat_index : output
+* @param first_frame_is_cover : output
+* @return
+*/
+static bool png_validate_animation_chunk_order(PngChunkInfo *chunks,
+                                               uint32_t chunkNum,
+                                               uint32_t *first_idat_index,
+                                               bool *first_frame_is_cover)
+{
     /*
      PNG at least contains 3 chunks: IHDR, IDAT, IEND.
      `IHDR` must appear first.
      `IDAT` must appear consecutively.
      `IEND` must appear end.
-     
+
      APNG must contains one `acTL` and at least one 'fcTL' and `fdAT`.
      `fdAT` must appear consecutively.
      `fcTL` must appear before `IDAT` or `fdAT`.
      */
-    if (chunkNum <= Byte2) return false;
-    if (chunks->fourcc != FOUR_CC('I', 'H', 'D', 'R')) return false;
-    if ((chunks + chunkNum - 1)->fourcc != FOUR_CC('I', 'E', 'N', 'D')) return false;
+    if (chunkNum <= Byte2) {
+        return false;
+    }
+
+    if (chunks->fourcc != FOUR_CC('I', 'H', 'D', 'R')) {
+        return false;
+    }
+
+    if ((chunks + chunkNum - 1)->fourcc != FOUR_CC('I', 'E', 'N', 'D')) {
+        return false;
+    }
 
     uint32_t prev_fourcc = 0;
     uint32_t IHDR_num = 0;
@@ -133,27 +177,40 @@ static bool png_validate_animation_chunk_order(PngChunkInfo *chunks,  /* input *
     for (uint32_t i = 0; i < chunkNum; i++) {
         PngChunkInfo *chunk = chunks + i;
         switch (chunk->fourcc) {
-            case FOUR_CC('I', 'H', 'D', 'R'): {  // png header
-                if (i != 0) return false;
-                if (IHDR_num > 0) return false;
+            case FOUR_CC('I', 'H', 'D', 'R'): {
+                if (i != 0) {
+                    return false;
+                }
+                if (IHDR_num > 0) {
+                    return false;
+                }
                 IHDR_num++;
-            } break;
-            case FOUR_CC('I', 'D', 'A', 'T'): {  // png data
+                break;
+            }
+            case FOUR_CC('I', 'D', 'A', 'T'): {
                 if (prev_fourcc != FOUR_CC('I', 'D', 'A', 'T')) {
-                    if (IDAT_num == 0)
+                    if (IDAT_num == 0) {
                         first_IDAT = i;
-                    else
+                    } else {
                         return false;
+                    }
                 }
 
                 IDAT_num++;
-            } break;
-            case FOUR_CC('a', 'c', 'T', 'L'): {  // apng control
-                if (acTL_num > 0) return false;
+                break;
+            }
+            case FOUR_CC('a', 'c', 'T', 'L'): {
+                if (acTL_num > 0) {
+                    return false;
+                }
+
                 acTL_num++;
-            } break;
-            case FOUR_CC('f', 'c', 'T', 'L'): {  // apng frame control
-                if (i + 1 == chunkNum) return false;
+                break;
+            }
+            case FOUR_CC('f', 'c', 'T', 'L'): {
+                if (i + 1 == chunkNum) {
+                    return false;
+                }
                 if ((chunk + 1)->fourcc != FOUR_CC('f', 'd', 'A', 'T') &&
                     (chunk + 1)->fourcc != FOUR_CC('I', 'D', 'A', 'T')) {
                     return false;
@@ -166,30 +223,48 @@ static bool png_validate_animation_chunk_order(PngChunkInfo *chunks,  /* input *
                 }
 
                 fcTL_num++;
-            } break;
-            case FOUR_CC('f', 'd', 'A', 'T'): {  // apng data
-                if (prev_fourcc != FOUR_CC('f', 'd', 'A', 'T') && prev_fourcc != FOUR_CC('f', 'c', 'T', 'L')) {
+                break;
+            }
+            case FOUR_CC('f', 'd', 'A', 'T'): {
+                if (prev_fourcc != FOUR_CC('f', 'd', 'A', 'T') &&
+                    prev_fourcc != FOUR_CC('f', 'c', 'T', 'L')) {
                     return false;
                 }
-            } break;
+                break;
+            }
         }
         prev_fourcc = chunk->fourcc;
     }
 
-    if (IHDR_num != 1) return false;
-    if (IDAT_num == 0) return false;
-    if (acTL_num != 1) return false;
-    if (fcTL_num < acTL_num) return false;
+    if (IHDR_num != 1) {
+        return false;
+    }
+    if (IDAT_num == 0) {
+        return false;
+    }
+    if (acTL_num != 1) {
+        return false;
+    }
+    if (fcTL_num < acTL_num) {
+        return false;
+    }
     *first_idat_index = first_IDAT;
     *first_frame_is_cover = first_frame_cover;
     return true;
 }
 
-static void png_info_release(PngInfo *info) {
+static void png_info_release(PngInfo *info)
+{
     if (info) {
-        if (info->chunks) free(info->chunks);
-        if (info->apngFrames) free(info->apngFrames);
-        if (info->apngSharedChunkIndexs) free(info->apngSharedChunkIndexs);
+        if (info->chunks) {
+            free(info->chunks);
+        }
+        if (info->apngFrames) {
+            free(info->apngFrames);
+        }
+        if (info->apngSharedChunkIndexs) {
+            free(info->apngSharedChunkIndexs);
+        }
         free(info);
     }
 }
@@ -202,17 +277,24 @@ Create a png info from a png file. See struct PngInfo for more information.
 @return A png info object, you may call png_info_release() to release it.
 Returns NULL if an error occurs.
 */
-static PngInfo *png_info_create(const uint8_t *data, uint32_t length) {
-    if (!data || length < Byte32){
+static PngInfo *png_info_create(const uint8_t *data, uint32_t length)
+{
+    if (!data || length < Byte32) {
         return nullptr;
     }
 
-    if (*((uint32_t *)data) != FOUR_CC(0x89, 0x50, 0x4E, 0x47)) return nullptr;
-    if (*((uint32_t *)(data + PngFOURCCLen)) != FOUR_CC(0x0D, 0x0A, 0x1A, 0x0A)) return nullptr;
+    const uint32_t *u32Data = reinterpret_cast<const uint32_t *>(data);
+    if ((*u32Data) != FOUR_CC(0x89, 0x50, 0x4E, 0x47)) {
+        return nullptr;
+    }
+
+    if (*(u32Data + PngFOURCCLen) != FOUR_CC(0x0D, 0x0A, 0x1A, 0x0A)) {
+        return nullptr;
+    }
 
     uint32_t chunk_realloc_num = 16;
-    PngChunkInfo *chunks = (PngChunkInfo *)malloc(sizeof(PngChunkInfo) * chunk_realloc_num);
-    if (!chunks){
+    PngChunkInfo *chunks = (PngChunkInfo *) malloc(sizeof(PngChunkInfo) * chunk_realloc_num);
+    if (!chunks) {
         return nullptr;
     }
 
@@ -227,7 +309,8 @@ static PngInfo *png_info_create(const uint8_t *data, uint32_t length) {
     bool apng_chunk_error = false;
     do {
         if (chunkNum >= chunk_capacity) {
-            PngChunkInfo *new_chunks = (PngChunkInfo *)realloc(chunks, sizeof(PngChunkInfo) * (chunk_capacity + chunk_realloc_num));
+            PngChunkInfo *new_chunks = (PngChunkInfo *) realloc(chunks, sizeof(PngChunkInfo) *
+                                                                        (chunk_capacity + chunk_realloc_num));
             if (!new_chunks) {
                 free(chunks);
                 return nullptr;
@@ -240,30 +323,32 @@ static PngInfo *png_info_create(const uint8_t *data, uint32_t length) {
         PngChunkInfo *chunk = chunks + chunkNum;
         const uint8_t *chunk_data = data + offset;
         chunk->offset = offset;
-        chunk->length = swap_endian_uint32(*((uint32_t *)chunk_data));
-        if ((uint64_t)chunk->offset + (uint64_t)chunk->length + Byte12 > length) {
+        chunk->length = swap_endian_uint32(*((uint32_t *) chunk_data));
+        if ((uint64_t) chunk->offset + (uint64_t) chunk->length + Byte12 > length) {
             free(chunks);
             return nullptr;
         }
 
-        chunk->fourcc = *((uint32_t *)(chunk_data + PngFOURCCLen));
-        if ((uint64_t)chunk->offset + PngFOURCCLen + chunk->length + PngFOURCCLen > (uint64_t)length){
+        chunk->fourcc = *((uint32_t *) (chunk_data + PngFOURCCLen));
+        if ((uint64_t) chunk->offset + PngFOURCCLen + chunk->length + PngFOURCCLen > (uint64_t) length) {
             break;
         }
 
-        chunk->crc32 = swap_endian_uint32(*((uint32_t *)(chunk_data + PngHeadLength + chunk->length)));
+        chunk->crc32 = swap_endian_uint32(*((uint32_t *) (chunk_data + PngHeadLength + chunk->length)));
         chunkNum++;
         offset += Byte12 + chunk->length;
 
         switch (chunk->fourcc) {
             case FOUR_CC('a', 'c', 'T', 'L') : {
                 if (chunk->length == PngHeadLength) {
-                    apng_frame_number = swap_endian_uint32(*((uint32_t *)(chunk_data + PngHeadLength)));
-                    apngLoopNum = swap_endian_uint32(*((uint32_t *)(chunk_data + Byte12)));
+                    apng_frame_number = swap_endian_uint32(*((uint32_t *) (chunk_data + PngHeadLength)));
+                    apngLoopNum = swap_endian_uint32(*((uint32_t *) (chunk_data + Byte12)));
                 } else {
                     apng_chunk_error = true;
                 }
-            } break;
+
+                break;
+            }
             case FOUR_CC('f', 'c', 'T', 'L') :
             case FOUR_CC('f', 'd', 'A', 'T') : {
                 if (chunk->fourcc == FOUR_CC('f', 'c', 'T', 'L')) {
@@ -275,7 +360,7 @@ static PngInfo *png_info_create(const uint8_t *data, uint32_t length) {
                 }
 
                 if (chunk->length > PngFOURCCLen) {
-                    uint32_t sequence = swap_endian_uint32(*((uint32_t *)(chunk_data + PngHeadLength)));
+                    uint32_t sequence = swap_endian_uint32(*((uint32_t *) (chunk_data + PngHeadLength)));
                     if (apng_sequence_index + 1 == sequence) {
                         apng_sequence_index++;
                     } else {
@@ -284,10 +369,13 @@ static PngInfo *png_info_create(const uint8_t *data, uint32_t length) {
                 } else {
                     apng_chunk_error = true;
                 }
-            } break;
+
+                break;
+            }
             case FOUR_CC('I', 'E', 'N', 'D') : {
                 offset = length; // end, break do-while loop
-            } break;
+                break;
+            }
         }
     } while (offset + Byte12 <= length);
 
@@ -299,7 +387,7 @@ static PngInfo *png_info_create(const uint8_t *data, uint32_t length) {
     }
 
     // png info
-    PngInfo *info = (PngInfo *)calloc(1, sizeof(PngInfo));
+    PngInfo *info = (PngInfo *) calloc(1, sizeof(PngInfo));
     if (!info) {
         free(chunks);
         return nullptr;
@@ -313,7 +401,8 @@ static PngInfo *png_info_create(const uint8_t *data, uint32_t length) {
     if (!apng_chunk_error && apng_frame_number == apng_frame_index && apng_frame_number >= 1) {
         bool first_frame_is_cover = false;
         uint32_t first_IDAT_index = 0;
-        if (!png_validate_animation_chunk_order(info->chunks, info->chunkNum, &first_IDAT_index, &first_frame_is_cover)) {
+        if (!png_validate_animation_chunk_order(info->chunks, info->chunkNum, &first_IDAT_index,
+                                                &first_frame_is_cover)) {
             return info; // ignore apng chunk
         }
 
@@ -321,13 +410,13 @@ static PngInfo *png_info_create(const uint8_t *data, uint32_t length) {
         info->apngFrameNum = apng_frame_number;
         info->apngFirstFrameIsCover = first_frame_is_cover;
         info->apngSharedInsertIndex = first_IDAT_index;
-        info->apngFrames = (PngFrameInfo *)calloc(apng_frame_number, sizeof(PngFrameInfo));
+        info->apngFrames = (PngFrameInfo *) calloc(apng_frame_number, sizeof(PngFrameInfo));
         if (!info->apngFrames) {
             png_info_release(info);
             return nullptr;
         }
 
-        info->apngSharedChunkIndexs = (uint32_t *)calloc(info->chunkNum, sizeof(uint32_t));
+        info->apngSharedChunkIndexs = (uint32_t *) calloc(info->chunkNum, sizeof(uint32_t));
         if (!info->apngSharedChunkIndexs) {
             png_info_release(info);
             return nullptr;
@@ -348,26 +437,32 @@ static PngInfo *png_info_create(const uint8_t *data, uint32_t length) {
                         frame->chunkNum++;
                         frame->chunkSize += chunk->length + Byte12;
                     }
-                } break;
+
+                    break;
+                }
                 case FOUR_CC('a', 'c', 'T', 'L'): {
-                } break;
+                    break;
+                }
                 case FOUR_CC('f', 'c', 'T', 'L'): {
                     frame_index++;
                     PngFrameInfo *frame = info->apngFrames + frame_index;
                     frame->chunkIndex = i + 1;
                     png_chunk_fcTL_read(&frame->frameControl, data + chunk->offset + PngHeadLength);
-                } break;
+                    break;
+                }
                 case FOUR_CC('f', 'd', 'A', 'T'): {
                     PngFrameInfo *frame = info->apngFrames + frame_index;
                     frame->chunkNum++;
                     frame->chunkSize += chunk->length + Byte12;
-                } break;
+                    break;
+                }
                 default: {
                     *shared_chunk_index = i;
                     shared_chunk_index++;
                     info->apngSharedChunkSize += chunk->length + Byte12;
                     info->apngSharedChunkNum++;
-                } break;
+                    break;
+                }
             }
         }
     }
@@ -386,11 +481,15 @@ Copy a png frame data from an apng file.
 Returns NULL if an error occurs.
 */
 static uint8_t *png_copy_frame_data_at_index(const uint8_t *data,
-                                                const PngInfo *info,
-                                                const uint32_t index,
-                                                uint32_t *size) {
-    if (index >= info->apngFrameNum) return nullptr;
-    if(!data){
+                                             const PngInfo *info,
+                                             const uint32_t index,
+                                             uint32_t *size)
+{
+    if (index >= info->apngFrameNum) {
+        return nullptr;
+    }
+
+    if (!data) {
         return nullptr;
     }
 
@@ -400,8 +499,8 @@ static uint8_t *png_copy_frame_data_at_index(const uint8_t *data,
         frame_remux_size -= frame_info->chunkNum * Byte4; // remove fdAT sequence number
     }
 
-    uint8_t *frame_data = (uint8_t *)malloc(frame_remux_size);
-    if (!frame_data){
+    uint8_t *frame_data = (uint8_t *) malloc(frame_remux_size);
+    if (!frame_data) {
         return nullptr;
     }
 
@@ -415,19 +514,26 @@ static uint8_t *png_copy_frame_data_at_index(const uint8_t *data,
         uint32_t shared_chunk_index = info->apngSharedChunkIndexs[i];
         PngChunkInfo *shared_chunk_info = info->chunks + shared_chunk_index;
 
-        if (shared_chunk_index >= info->apngSharedInsertIndex && !inserted) { // replace IDAT with fdAT
+        // replace IDAT with fdAT
+        if (shared_chunk_index >= info->apngSharedInsertIndex && !inserted) {
             inserted = true;
             for (uint32_t c = 0; c < frame_info->chunkNum; c++) {
                 PngChunkInfo *insert_chunk_info = info->chunks + frame_info->chunkIndex + c;
                 if (insert_chunk_info->fourcc == FOUR_CC('f', 'd', 'A', 'T')) {
-                    *((uint32_t *)(frame_data + data_offset)) = swap_endian_uint32(insert_chunk_info->length - PngFOURCCLen);
-                    *((uint32_t *)(frame_data + data_offset + PngFOURCCLen)) = FOUR_CC('I', 'D', 'A', 'T');
-                    memcpy(frame_data + data_offset + PngHeadLength, data + insert_chunk_info->offset + Byte12, insert_chunk_info->length - PngFOURCCLen);
-                    uint32_t crc = (uint32_t)crc32(0, frame_data + data_offset + PngFOURCCLen, insert_chunk_info->length);
-                    *((uint32_t *)(frame_data + data_offset + insert_chunk_info->length + PngFOURCCLen)) = swap_endian_uint32(crc);
+                    *((uint32_t *) (frame_data + data_offset)) = swap_endian_uint32(
+                        insert_chunk_info->length - PngFOURCCLen);
+                    *((uint32_t *) (frame_data + data_offset + PngFOURCCLen)) = FOUR_CC('I', 'D', 'A', 'T');
+                    memcpy(frame_data + data_offset + PngHeadLength, data + insert_chunk_info->offset + Byte12,
+                        insert_chunk_info->length - PngFOURCCLen);
+                    uint32_t crc = (uint32_t) crc32(0,
+                                                    frame_data + data_offset + PngFOURCCLen,
+                                                    insert_chunk_info->length);
+                    *((uint32_t *) (frame_data + data_offset + insert_chunk_info->length + PngFOURCCLen)) =
+                        swap_endian_uint32(crc);
                     data_offset += insert_chunk_info->length + PngHeadLength;
                 } else { // IDAT
-                    memcpy(frame_data + data_offset, data + insert_chunk_info->offset, insert_chunk_info->length + Byte12);
+                    memcpy(frame_data + data_offset, data + insert_chunk_info->offset,
+                        insert_chunk_info->length + Byte12);
                     data_offset += insert_chunk_info->length + Byte12;
                 }
             }
@@ -440,7 +546,7 @@ static uint8_t *png_copy_frame_data_at_index(const uint8_t *data,
             IHDR.width = frame_info->frameControl.width;
             IHDR.height = frame_info->frameControl.height;
             png_chunk_IHDR_write(&IHDR, tmp + PngHeadLength);
-            *((uint32_t *)(tmp + Byte21)) = swap_endian_uint32((uint32_t)crc32(0, tmp + PngFOURCCLen, Byte17));
+            *((uint32_t *) (tmp + Byte21)) = swap_endian_uint32((uint32_t) crc32(0, tmp + PngFOURCCLen, Byte17));
             memcpy(frame_data + data_offset, tmp, Byte25);
             data_offset += Byte25;
         } else {
@@ -452,39 +558,38 @@ static uint8_t *png_copy_frame_data_at_index(const uint8_t *data,
     return frame_data;
 }
 
-PNGImageDecoder::PNGImageDecoder(const sk_sp<SkData> &data):data_(data)
+PNGImageDecoder::PNGImageDecoder(const sk_sp<SkData> &data) : data_(data)
 {
-
 }
 
 PNGImageDecoder::~PNGImageDecoder()
 {
-    if(pngInfo_){
+    if (pngInfo_) {
         free(pngInfo_);
     }
 }
 
-bool PNGImageDecoder::IsApngSource(const std::string& src)
+bool PNGImageDecoder::IsApngSource(const std::string &src)
 {
     const uint32_t FileSuffixLen = 4;
     const uint32_t APngFileSuffixLen = 5;
     // 4 is the length of ".svg". or apng
     return (src.size() > FileSuffixLen && src.substr(src.size() - FileSuffixLen) == ".png") ||
-            (src.size() > APngFileSuffixLen && src.substr(src.size() - APngFileSuffixLen) == ".apng");
+           (src.size() > APngFileSuffixLen && src.substr(src.size() - APngFileSuffixLen) == ".apng");
 }
 
 /**
- * With image header judge whether is a apng file
- * use for split png and apng file
- * @return
- */
+* With image header judge whether is a apng file
+* use for split png and apng file
+* @return
+*/
 bool PNGImageDecoder::isApng()
 {
-    if(!data_){
+    if (!data_) {
         return false;
     }
 
-    if(dataCheck_) {
+    if (dataCheck_) {
         return isApng_;
     }
 
@@ -494,22 +599,22 @@ bool PNGImageDecoder::isApng()
     uint32_t length = data_->size();
     png_byte buffer[headSize] = {0};
 
-    if(!byteDatas || length <= 0){
+    if (!byteDatas || length <= 0) {
         return false;
     }
 
     memcpy(buffer, byteDatas, headSize);
 
     //check if is not png image
-    if (png_sig_cmp((png_bytep) buffer, (png_size_t)0, headSize)) {
+    if (png_sig_compare((png_bytep) buffer, (png_size_t) 0, headSize)) {
         LOGE("<<< not a png format");
         return false;
     }
 
     //check if is apng
     uint32_t chunk_realloc_num = 16;
-    PngChunkInfo *chunks = (PngChunkInfo *)malloc(sizeof(PngChunkInfo) * chunk_realloc_num);
-    if (!chunks){
+    PngChunkInfo *chunks = (PngChunkInfo *) malloc(sizeof(PngChunkInfo) * chunk_realloc_num);
+    if (!chunks) {
         return false;
     }
 
@@ -525,7 +630,8 @@ bool PNGImageDecoder::isApng()
     //loop get all chunk headers
     do {
         if (chunkNum >= chunk_capacity) {
-            PngChunkInfo *new_chunks = (PngChunkInfo *)realloc(chunks, sizeof(PngChunkInfo) * (chunk_capacity + chunk_realloc_num));
+            PngChunkInfo *new_chunks = (PngChunkInfo *) realloc(chunks, sizeof(PngChunkInfo) *
+                                                                        (chunk_capacity + chunk_realloc_num));
             if (!new_chunks) {
                 free(chunks);
                 return false;
@@ -538,30 +644,32 @@ bool PNGImageDecoder::isApng()
         PngChunkInfo *chunk = chunks + chunkNum;
         const uint8_t *chunk_data = byteDatas + offset;
         chunk->offset = offset;
-        chunk->length = swap_endian_uint32(*((uint32_t *)chunk_data));
-        if ((uint64_t)chunk->offset + (uint64_t)chunk->length + Byte12 > length) {
+        chunk->length = swap_endian_uint32(*((uint32_t *) chunk_data));
+        if ((uint64_t) chunk->offset + (uint64_t) chunk->length + Byte12 > length) {
             free(chunks);
             return false;
         }
 
-        chunk->fourcc = *((uint32_t *)(chunk_data + PngFOURCCLen));
-        if ((uint64_t)chunk->offset + PngFOURCCLen + chunk->length + PngFOURCCLen > (uint64_t)length){
+        chunk->fourcc = *((uint32_t *) (chunk_data + PngFOURCCLen));
+        if ((uint64_t) chunk->offset + PngFOURCCLen + chunk->length + PngFOURCCLen > (uint64_t) length) {
             break;
         }
 
-        chunk->crc32 = swap_endian_uint32(*((uint32_t *)(chunk_data + PngHeadLength + chunk->length)));
+        chunk->crc32 = swap_endian_uint32(*((uint32_t *) (chunk_data + PngHeadLength + chunk->length)));
         chunkNum++;
         offset += Byte12 + chunk->length;
 
         switch (chunk->fourcc) {
             case FOUR_CC('a', 'c', 'T', 'L') : {
                 if (chunk->length == PngHeadLength) {
-                    apng_frame_number = swap_endian_uint32(*((uint32_t *)(chunk_data + PngHeadLength)));
-                    apngLoopNum = swap_endian_uint32(*((uint32_t *)(chunk_data + Byte12)));
+                    apng_frame_number = swap_endian_uint32(*((uint32_t *) (chunk_data + PngHeadLength)));
+                    apngLoopNum = swap_endian_uint32(*((uint32_t *) (chunk_data + Byte12)));
                 } else {
                     apng_chunk_error = true;
                 }
-            } break;
+
+                break;
+            }
             case FOUR_CC('f', 'c', 'T', 'L') :
             case FOUR_CC('f', 'd', 'A', 'T') : {
                 if (chunk->fourcc == FOUR_CC('f', 'c', 'T', 'L')) {
@@ -572,7 +680,7 @@ bool PNGImageDecoder::isApng()
                     }
                 }
                 if (chunk->length > Byte25) {
-                    uint32_t sequence = swap_endian_uint32(*((uint32_t *)(chunk_data + PngHeadLength)));
+                    uint32_t sequence = swap_endian_uint32(*((uint32_t *) (chunk_data + PngHeadLength)));
                     if (apng_sequence_index + 1 == sequence) {
                         apng_sequence_index++;
                     } else {
@@ -581,16 +689,19 @@ bool PNGImageDecoder::isApng()
                 } else {
                     apng_chunk_error = true;
                 }
-            } break;
+
+                break;
+            }
             case FOUR_CC('I', 'E', 'N', 'D') : {
                 offset = length; // end, break do-while loop
-            } break;
+                break;
+            }
         }
     } while (offset + Byte12 <= length);
 
     free(chunks);
 
-    if(!apng_chunk_error && apng_frame_number > 1){
+    if (!apng_chunk_error && apng_frame_number > 1) {
         isApng_ = true;
         return true;
     }
@@ -600,19 +711,23 @@ bool PNGImageDecoder::isApng()
 }
 
 /**
- * Get apng header info and all frames information
- * @return
- */
+* Get apng header info and all frames information
+* @return
+*/
 PngInfo *PNGImageDecoder::GetApngInfo()
 {
-    if(!data_) return nullptr;
-    if(!data_->bytes() || data_->size() <= 0) return nullptr;
+    if (!data_) {
+        return nullptr;
+    }
+    if (!data_->bytes() || data_->size() <= 0) {
+        return nullptr;
+    }
 
-    if(pngInfo_){
+    if (pngInfo_) {
         return pngInfo_;
     }
 
-    auto pngInfo = png_info_create(data_->bytes(), (uint32_t)data_->size());
+    auto pngInfo = png_info_create(data_->bytes(), (uint32_t) data_->size());
     pngInfo_ = pngInfo;
     return pngInfo;
 }
@@ -625,11 +740,11 @@ bool PNGImageDecoder::DecodeImage()
 Size PNGImageDecoder::GetImageSize()
 {
     Size imageSize;
-    if(!pngInfo_){
+    if (!pngInfo_) {
         DecodeImage();
     }
 
-    if(pngInfo_){
+    if (pngInfo_) {
         imageSize.SetWidth(pngInfo_->header.width);
         imageSize.SetHeight(pngInfo_->header.height);
     }
@@ -639,11 +754,11 @@ Size PNGImageDecoder::GetImageSize()
 
 uint32_t PNGImageDecoder::GetFrameCount()
 {
-    if(!pngInfo_){
+    if (!pngInfo_) {
         DecodeImage();
     }
 
-    if(pngInfo_){
+    if (pngInfo_) {
         return pngInfo_->apngFrameNum;
     }
 
@@ -651,41 +766,41 @@ uint32_t PNGImageDecoder::GetFrameCount()
 }
 
 /**
- * Get frame image data
- * when render this image need to get this data to decode to raw image data
- * i: undecoded image data
- * @param index
- * @param size : return data size
- * @return
- */
+* Get frame image data
+* when render this image need to get this data to decode to raw image data
+* i: undecoded image data
+* @param index
+* @param size : return data size
+* @return
+*/
 uint8_t *PNGImageDecoder::GetFrameData(uint32_t index, uint32_t *size, bool oldWay)
 {
-    if(!data_ || !pngInfo_ || index >= pngInfo_->apngFrameNum)
+    if (!data_ || !pngInfo_ || index >= pngInfo_->apngFrameNum) {
         return nullptr;
+    }
 
-    PngFrameInfo  *frameInfo = pngInfo_->apngFrames + index;
-    if(!frameInfo){
+    PngFrameInfo *frameInfo = pngInfo_->apngFrames + index;
+    if (!frameInfo) {
         return nullptr;
     }
 
     uint32_t frameRemuxSize = PngHeadLength + pngInfo_->apngSharedChunkSize + frameInfo->chunkSize;
 
-    if(!(pngInfo_->apngFirstFrameIsCover && index == 0))
-    {
+    if (!(pngInfo_->apngFirstFrameIsCover && index == 0)) {
         frameRemuxSize -= frameInfo->chunkNum * Byte4; // remove fdAT sequence number
     }
 
     const uint8_t *data = data_->bytes();
-    if(!data){
+    if (!data) {
         return nullptr;
     }
 
-    if(oldWay){
+    if (oldWay) {
         return png_copy_frame_data_at_index(data, pngInfo_, index, size);
     }
 
-    uint8_t *frameData = (uint8_t *)malloc(frameRemuxSize);
-    if(!frameData){
+    uint8_t *frameData = (uint8_t *) malloc(frameRemuxSize);
+    if (!frameData) {
         return nullptr;
     }
 
@@ -699,7 +814,7 @@ uint8_t *PNGImageDecoder::GetFrameData(uint32_t index, uint32_t *size, bool oldW
     for (uint32_t i = 0; i < pngInfo_->apngSharedChunkNum; i++) {
         uint32_t sharedChunkIndex = pngInfo_->apngSharedChunkIndexs[i];
         PngChunkInfo *sharedChunkInfo = pngInfo_->chunks + sharedChunkIndex;
-        if(!sharedChunkInfo){
+        if (!sharedChunkInfo) {
             free(frameData);
             return nullptr;
         }
@@ -709,14 +824,19 @@ uint8_t *PNGImageDecoder::GetFrameData(uint32_t index, uint32_t *size, bool oldW
             for (uint32_t c = 0; c < frameInfo->chunkNum; c++) {
                 PngChunkInfo *insertChunkInfo = pngInfo_->chunks + frameInfo->chunkIndex + c;
                 if (insertChunkInfo->fourcc == FOUR_CC('f', 'd', 'A', 'T')) {
-                    *((uint32_t *)(frameData + dataOffset)) = swap_endian_uint32(insertChunkInfo->length - PngFOURCCLen);
-                    *((uint32_t *)(frameData + dataOffset + PngFOURCCLen)) = FOUR_CC('I', 'D', 'A', 'T');
-                    memcpy(frameData + dataOffset + PngHeadLength, data + insertChunkInfo->offset + Byte12, insertChunkInfo->length - PngFOURCCLen);
-                    uint32_t crc = (uint32_t)crc32(0, frameData + dataOffset + PngFOURCCLen, insertChunkInfo->length);
-                    *((uint32_t *)(frameData + dataOffset + insertChunkInfo->length + PngFOURCCLen)) = swap_endian_uint32(crc);
+                    *((uint32_t *) (frameData + dataOffset)) = swap_endian_uint32(
+                            insertChunkInfo->length - PngFOURCCLen);
+                    *((uint32_t *) (frameData + dataOffset + PngFOURCCLen)) = FOUR_CC('I', 'D', 'A', 'T');
+                    memcpy(frameData + dataOffset + PngHeadLength, data + insertChunkInfo->offset + Byte12,
+                           insertChunkInfo->length - PngFOURCCLen);
+                    uint32_t crc = (uint32_t) crc32(0, frameData + dataOffset + PngFOURCCLen,
+                                                    insertChunkInfo->length);
+                    *((uint32_t *) (frameData + dataOffset + insertChunkInfo->length +
+                                    PngFOURCCLen)) = swap_endian_uint32(crc);
                     dataOffset += insertChunkInfo->length + PngHeadLength;
                 } else { // IDAT
-                    memcpy(frameData + dataOffset, data + insertChunkInfo->offset, insertChunkInfo->length + Byte12);
+                    memcpy(frameData + dataOffset, data + insertChunkInfo->offset,
+                           insertChunkInfo->length + Byte12);
                     dataOffset += insertChunkInfo->length + Byte12;
                 }
             }
@@ -729,7 +849,7 @@ uint8_t *PNGImageDecoder::GetFrameData(uint32_t index, uint32_t *size, bool oldW
             IHDR.width = frameInfo->frameControl.width;
             IHDR.height = frameInfo->frameControl.height;
             png_chunk_IHDR_write(&IHDR, tmp + PngHeadLength);
-            *((uint32_t *)(tmp + Byte21)) = swap_endian_uint32((uint32_t)crc32(0, tmp + PngFOURCCLen, Byte17));
+            *((uint32_t *) (tmp + Byte21)) = swap_endian_uint32((uint32_t) crc32(0, tmp + PngFOURCCLen, Byte17));
             memcpy(frameData + dataOffset, tmp, Byte25);
             dataOffset += Byte25;
         } else {
@@ -740,5 +860,4 @@ uint8_t *PNGImageDecoder::GetFrameData(uint32_t index, uint32_t *size, bool oldW
 
     return frameData;
 }
-
 } // namespace OHOS::Ace

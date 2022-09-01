@@ -16,7 +16,6 @@
 #ifndef MINIXGROUP_APNG_IMAGE_PLAYER_H
 #define MINIXGROUP_APNG_IMAGE_PLAYER_H
 
-
 #include <unordered_map>
 
 #include "flutter/fml/memory/ref_counted.h"
@@ -37,7 +36,6 @@ Dispose method specifies how the area used by the current frame is to be treated
 before rendering the next frame on the canvas.
 */
 typedef enum {
-
     /**
      No disposal is done on this frame before rendering the next; the contents
      of the canvas are left as is.
@@ -62,7 +60,6 @@ Blend operation specifies how transparent pixels of the current frame are
 blended with those of the previous canvas.
 */
 typedef enum {
-
     /**
      All color components of the frame, including alpha, overwrite the current
      contents of the frame's canvas region.
@@ -90,36 +87,35 @@ typedef struct {
     bool isFullSize;          ///< Whether frame fill the canvas.
     uint32_t blendFromIndex;  ///< Blend from frame index to current frame.
     sk_sp<SkImage> image;
-}APngAnimatedFrameInfo;
+} APngAnimatedFrameInfo;
 
 
 class APngImagePlayer : public virtual AceType {
-    DECLARE_ACE_TYPE(APngImagePlayer, AceType);
+DECLARE_ACE_TYPE(APngImagePlayer, AceType);
 
 public:
     APngImagePlayer(
-            ImageSourceInfo source,
-            UploadSuccessCallback successCallback,
+        ImageSourceInfo source,
+        UploadSuccessCallback successCallback,
             const WeakPtr<PipelineBase>& weakContext,
-            const fml::WeakPtr<flutter::IOManager>& ioManager,
-            const fml::RefPtr<flutter::SkiaUnrefQueue>& gpuQueue,
-            const RefPtr<PNGImageDecoder> &decoder,
-            int32_t dstWidth = -1,
-            int32_t dstHeight = -1);
+        const fml::WeakPtr<flutter::IOManager> &ioManager,
+        const fml::RefPtr<flutter::SkiaUnrefQueue> &gpuQueue,
+        const RefPtr<PNGImageDecoder> &decoder,
+        int32_t dstWidth = -1,
+        int32_t dstHeight = -1);
 
     ~APngImagePlayer() override;
 
     void Pause();
+
     void Resume();
-    void RenderFrame(const int32_t& index);
+
+    void RenderFrame(const int32_t &index);
 
     /**
      * Use for draw each frame image in self
      **/
-    void Paint(const flutter::Paint& paint,
-               const Offset& offset,
-               const ScopedCanvas& canvas,
-               const Rect& paintRect);
+    void Paint(const flutter::Paint &paint, const Offset &offset, const ScopedCanvas &canvas, const Rect &paintRect);
 
     void SetTargetSize(int32_t width, int32_t height)
     {
@@ -172,19 +168,22 @@ private:
      * Decode frame image data to SKImage
      * Before decode frame need decode frame header before
      **/
-    APngAnimatedFrameInfo * DecodeFrameImage(const int32_t& index);
+    APngAnimatedFrameInfo *DecodeFrameImage(const int32_t &index);
 
     /**
      * Copy bitmap to a dst bitmap
      **/
-    static bool CopyTo(SkBitmap* dst, const SkBitmap& src);
+    static bool CopyTo(SkBitmap *dst, const SkBitmap &src);
+
     float DelayToSeconds(uint16_t num, uint16_t den);
+
     SkCanvas *CreateBlendCanvas();
 
     /**
      * Get frame image with index or frameinfo
      **/
     sk_sp<SkImage> GetImage(const int32_t &index, bool extendToCanvas);
+
     sk_sp<SkImage> GetImage(const APngAnimatedFrameInfo *frameInfo);
 
     /**
@@ -203,10 +202,11 @@ private:
      * Debug function
      * */
     void DrawTest();
+
     void DrawTestBorder(SkRect &rect);
 };
 
 } // namespace OHOS::Ace
 
 
-#endif //MINIXGROUP_APNG_IMAGE_PLAYER_H
+#endif // MINIXGROUP_APNG_IMAGE_PLAYER_H
