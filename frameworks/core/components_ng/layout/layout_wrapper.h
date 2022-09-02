@@ -160,6 +160,16 @@ public:
     void MountToHostOnMainThread();
     void SwapDirtyLayoutWrapperOnMainThread();
 
+    bool IsForceSyncRenderTree() const
+    {
+        return needForceSyncRenderTree_;
+    }
+
+    void SetForceSyncRenderTree()
+    {
+        needForceSyncRenderTree_ = true;
+    }
+
 private:
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     // The Wrapper Created by LazyForEach stores in the LayoutWrapperBuilder object.
@@ -174,6 +184,7 @@ private:
     int32_t currentChildCount_ = 0;
     bool isContraintNoChanged_ = false;
     bool isActive_ = false;
+    bool needForceSyncRenderTree_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };
