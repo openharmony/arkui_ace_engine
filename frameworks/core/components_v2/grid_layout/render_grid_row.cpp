@@ -189,7 +189,7 @@ void RenderGridRow::PerformLayout()
             lastLength -= childSpanPlusOffsetWidth + gutterInDouble.first;
         } else if (component->GetDirection() == V2::GridRowDirection::Row) {
             if (newLineOffset.newLineCount > 0) {
-                position.SetX(offset > 0 ? offset * columnUnitWidth + (offset - 1) * gutterInDouble.first : 0);
+                position.SetX(offset > 0 ? offset * columnUnitWidth + offset * gutterInDouble.first : 0);
             } else {
                 offset += GetRelativeOffset(gridColChild, sizeType);
                 position.SetX(offset * (columnUnitWidth + gutterInDouble.first));
