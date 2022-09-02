@@ -25,9 +25,13 @@ bool ProgressPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto progressLayoutAlgorithm = DynamicCast<ProgressLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(progressLayoutAlgorithm, false);
-    constrainSize = progressLayoutAlgorithm->GetConstrainSize();
     value_=progressLayoutAlgorithm->GetValue();
     maxValue_=progressLayoutAlgorithm->GetMaxValue();
+    color_ = progressLayoutAlgorithm->GetColor();
+    progressType_ = progressLayoutAlgorithm->GetType();
+    strokeWidth_ = progressLayoutAlgorithm->GetStrokeWidth();
+    scaleCount_ = progressLayoutAlgorithm->GetScaleCount();
+    scaleWidth_ = progressLayoutAlgorithm->GetScaleWidth();
     return true;
 }
 

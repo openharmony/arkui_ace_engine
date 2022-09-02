@@ -33,6 +33,7 @@ void ProgressView::Create(double min, double value, double cachedValue, double m
 
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Value, value);
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, MaxValue, max);
+    ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type);
 }
 
 void ProgressView::SetValue(const double& value)
@@ -50,4 +51,18 @@ void ProgressView::SetColor(const Color& value)
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Color, value);
 }
 
+void ProgressView::SetStrokeWidth(const double& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, StrokeWidth, value);
+}
+
+void ProgressView::SetScaleCount(const int32_t& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, ScaleCount, value);
+}
+
+void ProgressView::SetScaleWidth(const double& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, ScaleWidth, value);
+}
 } // namespace OHOS::Ace::NG

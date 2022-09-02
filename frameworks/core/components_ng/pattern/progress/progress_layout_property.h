@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_LAYOUT_PROPERTY_H
 
+#include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
+#include "core/components/progress/progress_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/property/property.h"
@@ -35,6 +37,7 @@ public:
         auto value = MakeRefPtr<ProgressLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propProgressDate_ = CloneProgressDate();
+        value->propProgressStyle_ = CloneProgressStyle();
         return value;
     }
 
@@ -42,12 +45,19 @@ public:
     {
         LayoutProperty::Reset();
         ResetProgressDate();
+        ResetProgressStyle();
     }
 
     ACE_DEFINE_PROPERTY_GROUP(ProgressDate, ProgressDate);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressDate, MaxValue, double, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressDate, Value, double, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressDate, Color, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_GROUP(ProgressStyle, ProgressStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressStyle, Color, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressStyle, Type, ProgressType, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressStyle, StrokeWidth, double, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressStyle, ScaleCount, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressStyle, ScaleWidth, double, PROPERTY_UPDATE_MEASURE);
+    
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ProgressLayoutProperty);

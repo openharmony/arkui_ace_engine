@@ -49,6 +49,7 @@ build_component_ng("pattern_ng") {
     "list/list_view.cpp",
     "overlay/overlay_manager.cpp",
     "progress/progress_layout_algorithm.cpp",
+    "progress/progress_paint_method.cpp",
     "progress/progress_pattern.cpp",
     "progress/progress_view.cpp",
     "rating/rating_layout_algorithm.cpp",

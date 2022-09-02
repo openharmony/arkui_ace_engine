@@ -21,11 +21,30 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+
+enum class ProgressType {
+    LINEAR = 1,
+    RING = 2,
+    SCALE = 3,
+    CIRCLE = 4,
+    GAUGE = 5,
+    ARC = 6,
+    MOON = 7,
+    BUBBLE = 8,
+    CAPSULE = 9,
+};
+
 struct ProgressDate {
-    //ACE_DEFINE_PROPERTY_GROUP_ITEM(LineHeight, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxValue, double);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Value, double);
+};
+
+struct ProgressStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Color, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Type, ProgressType);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, double);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScaleCount, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScaleWidth, double);
 };
 
 // ProgressDate CreateProgressDateUsingTheme(const std::unique_ptr<ProgressDate>& progressDate,

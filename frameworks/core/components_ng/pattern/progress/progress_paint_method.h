@@ -16,10 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PROGRESS_PROGRESS_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PROGRESS_PROGRESS_PAINT_METHOD_H
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/progress/progress_date.h"
+#include "core/components_ng/pattern/progress/progress_view.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/node_paint_method.h"
@@ -28,46 +33,43 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ProgressPaintMethod, NodePaintMethod)
 public:
-    explicit ProgressPaintMethod(double maxValue, double value, std::optional<SizeF> constrainSize)
-        : maxValue_(maxValue), value_(value), constrainSize_(constrainSize)
-    {}
+    explicit ProgressPaintMethod(double maxValue, double value, Color color, ProgressType progressType,
+        double strokeWidth, double scaleWidth, int32_t scaleCount)
+        : maxValue_(maxValue), value_(value), color_(color), strokeWidth_(strokeWidth), scaleWidth_(scaleWidth),
+          scaleCount_(scaleCount), progressType_(progressType)
+    {
+        LOGI("scalecount: %d",scaleCount);
+    }
     ~ProgressPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
-        CHECK_NULL_RETURN(maxValue_, nullptr);
-        CHECK_NULL_RETURN(value_, nullptr);
         auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
         auto offset = paintWrapper->GetContentOffset();
-        offset = offset+OffsetT<float>(0,constrainSize_->Height()/2);
-        // auto paint = Paint::Create();
-        PointF start = PointF(offset.GetX()+value_, offset.GetY()+5);
-        PointF end = PointF(offset.GetX() + frameSize.Width()-value_, offset.GetY()+5);
-        PointF end2 = PointF(offset.GetX() + frameSize.Width()*value_/maxValue_, offset.GetY()+5);
-        LOGI("print_progress:  frameSize.Width():%{public}f frameSize.Height():%{public}f value:%{public}f", frameSize.Width(),
-            frameSize.Height(), value_);
-        LOGI("print_progress:  constrainSize_.Width():%{public}f frameSize.Height():%{public}f", constrainSize_->Width(),
-            constrainSize_->Height());
-        LOGI("print_progress:  offset.GetX():%{public}f offset.GetY():%{public}f", offset.GetX(),
-            offset.GetY());
-        return [frameSize, start, end, end2](RSCanvas& canvas) {
-            RSPen pen;
-            pen.SetAntiAlias(true);
-            pen.SetWidth(10);
-            pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
-            pen.SetColor(ToRSColor((Color::GRAY)));
-            canvas.AttachPen(pen);
-            canvas.DrawLine(ToRSPonit(end2), ToRSPonit(end));
-            pen.SetColor(ToRSColor((Color::RED)));
-            canvas.AttachPen(pen);
-            canvas.DrawLine(ToRSPonit(start), ToRSPonit(end2));
-        };
+        if (progressType_ == ProgressType::LINEAR) {
+            return [frameSize, offset, this](RSCanvas& canvas) { PaintLinear(canvas, offset, frameSize); };
+        }
+        if (progressType_ == ProgressType::RING) {
+            return [frameSize, offset, this](RSCanvas& canvas) { PaintRing(canvas, offset, frameSize); };
+        }
+        if (progressType_ == ProgressType::SCALE) {
+            return [frameSize, offset, this](RSCanvas& canvas) { PaintScaleRing(canvas, offset, frameSize); };
+        }
+        return [frameSize, offset, this](RSCanvas& canvas) { PaintLinear(canvas, offset, frameSize); };
     }
 
+    void PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
+    void PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
+    void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
+
 private:
-    float maxValue_;
-    float value_;
-    std::optional<SizeF> constrainSize_;
+    double maxValue_ ;
+    double value_ ;
+    Color color_;
+    double strokeWidth_;
+    double scaleWidth_;
+    int32_t scaleCount_;
+    ProgressType progressType_;
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPaintMethod);
 };
 

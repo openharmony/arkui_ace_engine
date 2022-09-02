@@ -26,25 +26,15 @@
 
 namespace OHOS::Ace::NG {
 
-enum class ProgressType {
-    LINEAR = 1,
-    RING = 2,
-    SCALE = 3,
-    CIRCLE = 4,
-    GAUGE = 5,
-    ARC = 6,
-    MOON = 7,
-    BUBBLE = 8,
-    CAPSULE = 9,
-};
-
-
 class ACE_EXPORT ProgressView{
 public:
     static void Create(double min, double value, double cachedValue, double max,ProgressType type);
     static void SetValue(const double& value);
     static void SetMaxValue(const double& value);
     static void SetColor(const Color& value);
+    static void SetStrokeWidth(const double& value);
+    static void SetScaleCount(const int32_t& value);
+    static void SetScaleWidth(const double& value);
 };
 } // namespace OHOS::Ace::NG
 

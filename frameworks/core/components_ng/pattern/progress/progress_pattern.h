@@ -21,10 +21,12 @@
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
+#include "core/components_ng/pattern/progress/progress_view.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -39,34 +41,31 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        LOGI("progress: CreateNodePaintMethod");
-        return MakeRefPtr<ProgressPaintMethod>(maxValue_, value_, constrainSize);
+        return MakeRefPtr<ProgressPaintMethod>(
+            maxValue_, value_, color_, progressType_, strokeWidth_, scaleWidth_, scaleCount_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
-        LOGI("progress: CreateLayoutProperty");
         return MakeRefPtr<ProgressLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        LOGI("progress: CreateLayoutAlgorithm");
         return MakeRefPtr<ProgressLayoutAlgorithm>();
-    }
-
-    bool IsAtomicNode() const override
-    {
-        return false;
     }
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void OnAttachToFrameNode() override;
 
-    std::optional<SizeF> constrainSize;
-    double maxValue_ ;
-    double value_ ;
+    double maxValue_;
+    double value_;
+    Color color_;
+    double strokeWidth_;
+    double scaleWidth_;
+    int32_t scaleCount_;
+    ProgressType progressType_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };

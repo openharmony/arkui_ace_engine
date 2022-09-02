@@ -18,8 +18,10 @@
 
 #include <string>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
@@ -39,19 +41,27 @@ public:
     
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
-    
-    std::optional<SizeF> GetConstrainSize() const;
-
-
 
     double GetMaxValue() const;
     double GetValue() const;
+    Color GetColor() const;
+    ProgressType GetType() const;
+    double GetStrokeWidth() const;
+    int32_t GetScaleCount() const;
+    double GetScaleWidth() const;
+    
+    
+
 
 private:
 
-    std::optional<SizeF> constrainSize_;
     double maxValue_;
     double value_;
+    Color color_;
+    ProgressType type_;
+    int32_t scaleCount_;
+    double strokeWidth_;
+    double scaleWidth_;
     ACE_DISALLOW_COPY_AND_MOVE(ProgressLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
