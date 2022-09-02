@@ -1881,6 +1881,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
         optionComponent->SetCustomComponent(customComponent);
 
         menuComponent->AppendOption(optionComponent);
+        menuComponent->SetIsCustomMenu(true);
     }
 }
 
