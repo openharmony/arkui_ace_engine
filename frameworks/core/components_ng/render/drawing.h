@@ -36,6 +36,8 @@ using RSRect = Rosen::Drawing::RectF;
 using RSPoint = Rosen::Drawing::PointF;
 using RSBlendMode = Rosen::Drawing::BlendMode;
 using RSSamplingOptions = Rosen::Drawing::SamplingOptions;
+using RSRoundRect = Rosen::Drawing::RoundRect;
+using RSPath = Rosen::Drawing::Path;
 
 using RSParagraph = rosen::Typography;
 using RSParagraphBuilder = rosen::TypographyCreate;
