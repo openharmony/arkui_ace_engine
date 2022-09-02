@@ -43,6 +43,12 @@ public:
     RenderWeb();
     ~RenderWeb() override = default;
 
+    enum class VkState {
+        VK_NONE,
+        VK_SHOW,
+        VK_HIDE
+    };
+
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void OnAttachContext() override;
@@ -80,11 +86,21 @@ public:
     void HandleAxisEvent(const AxisEvent& event) override;
     bool IsAxisScrollable(AxisDirection direction) override;
     WeakPtr<RenderNode> CheckAxisNode() override;
+    
+    void SetWebIsFocus(bool isFocus)
+    {
+        isFocus_ = isFocus;
+    }
 
+    bool GetWebIsFocus() const
+    {
+        return isFocus_;
+    }
 protected:
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebComponent> web_;
     Size drawSize_;
+    Size drawSizeCache_;
     bool isUrlLoaded_ = false;
 
 private:
@@ -100,8 +116,15 @@ private:
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
     OnMouseCallback onMouse_;
 #endif
-
+    void RegistVirtualKeyBoardListener();
+    bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
+    void SetRootView(int32_t width, int32_t height, int32_t offset);
     Offset position_;
+    Offset webPoint_;
+    Offset globlePointPosition_;
+    bool needUpdateWeb_ = true;
+    bool isFocus_ = false;
+    VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
 };
 
 } // namespace OHOS::Ace
