@@ -18,10 +18,12 @@
 #include "base/geometry/axis.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/bilateral_spring_node.h"
 #include "core/common/text_field_manager.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/scroll/scroll_spring_effect.h"
@@ -2634,6 +2636,23 @@ void RenderList::HandleAxisEvent(const AxisEvent& event) {}
 bool RenderList::HandleMouseEvent(const MouseEvent& event)
 {
     if (!isMultiSelectable_) {
+        return false;
+    }
+    scrollable_->MarkAvailable(false);
+
+    if (event.button == MouseButton::LEFT_BUTTON) {
+        if (event.action == MouseAction::PRESS) {
+            Point mousePoint(event.GetOffset().GetX(), event.GetOffset().GetY());
+            auto listItem = FindChildNodeOfClass<RenderListItem>(mousePoint, mousePoint);
+            if (listItem && listItem->IsDragStart()) {
+                forbidMultiSelect_ = true;
+            }
+        } else if (event.action == MouseAction::RELEASE) {
+            forbidMultiSelect_ = false;
+        }
+    }
+
+    if (forbidMultiSelect_) {
         return false;
     }
 
