@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATOR_NAVIGATOR_VIEW_H
 
 #include <string>
+
 #include "navigator_event_hub.h"
+
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/event/ace_event_handler.h"

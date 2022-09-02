@@ -20,12 +20,7 @@
 
 namespace OHOS::Ace::NG {
 
-enum class NavigatorType {
-    DEFAULT = 0,
-    PUSH,
-    REPLACE,
-    BACK
-};
+enum class NavigatorType { DEFAULT = 0, PUSH, REPLACE, BACK };
 
 class NavigatorEventHub : public EventHub {
     DECLARE_ACE_TYPE(NavigatorEventHub, EventHub)

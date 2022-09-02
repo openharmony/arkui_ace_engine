@@ -15,6 +15,4 @@
 
 #include "navigator_layout_algorithm.h"
 
-namespace OHOS::Ace::NG {
-
-} // namespace OHOS::Ace::NG
+namespace OHOS::Ace::NG {} // namespace OHOS::Ace::NG

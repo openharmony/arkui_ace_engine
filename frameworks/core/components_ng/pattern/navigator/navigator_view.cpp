@@ -26,8 +26,8 @@ void NavigatorView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::NAVIGATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigatorPattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::NAVIGATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigatorPattern>(); });
     stack->Push(frameNode);
 }
 

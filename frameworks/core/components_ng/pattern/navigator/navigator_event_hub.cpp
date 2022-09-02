@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "navigator_event_hub.h"
+
 #include "core/common/container.h"
 #include "core/components/page/page_target.h"
-#include "navigator_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,7 +29,7 @@ void NavigatorEventHub::OnClick()
 void NavigatorEventHub::NavigatePage()
 {
     auto container = Ace::Container::Current();
-    auto target =  Ace::PageTarget(url_, nullptr);
+    auto target = Ace::PageTarget(url_, nullptr);
     container->NavigatePage(type_, target, params_);
 }
-} // namespace OHOS::ACE::NG
+} // namespace OHOS::Ace::NG

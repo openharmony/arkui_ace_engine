@@ -16,12 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATOR_NAVIGATOR_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATOR_NAVIGATOR_PATTERN_H
 
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "navigator_event_hub.h"
 #include "navigator_layout_algorithm.h"
 #include "navigator_layout_property.h"
 
+#include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,7 +29,7 @@ class NavigatorPattern : public Pattern {
     DECLARE_ACE_TYPE(NavigatorPattern, Pattern);
 
 public:
-    bool IsAtomicNode() const override 
+    bool IsAtomicNode() const override
     {
         return false;
     }
@@ -52,7 +52,6 @@ public:
     void OnModifyDone() override;
 
 private:
-    // WeakPtr<StageElement>& targetContainer_;
     // in target container
     bool useSubStage_ = false;
 
