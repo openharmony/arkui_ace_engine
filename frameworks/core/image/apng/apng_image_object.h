@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef MINIXGROUP_APNG_IMAGE_OBJECT_H
-#define MINIXGROUP_APNG_IMAGE_OBJECT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_APNG_APNG_IMAGE_OBJECT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_APNG_APNG_IMAGE_OBJECT_H
 
 #include "core/image/image_object.h"
-#include "core/image/apng_image_player.h"
+#include "apng_image_player.h"
 
 namespace OHOS::Ace {
 class ApngImageObject : public ImageObject {
@@ -38,7 +38,7 @@ public:
     }
 
     void UploadToGpuForRender(
-        const WeakPtr<PipelineBase>& context,
+        const WeakPtr<PipelineBase> &context,
         const RefPtr<FlutterRenderTaskHolder> &renderTaskHolder,
         const UploadSuccessCallback &successCallback,
         const FailedCallback &failedCallback,
@@ -82,4 +82,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // MINIXGROUP_APNG_IMAGE_OBJECT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_APNG_APNG_IMAGE_OBJECT_H

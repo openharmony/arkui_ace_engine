@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef MINIXGROUP_APNG_IMAGE_ANIMATION_H
-#define MINIXGROUP_APNG_IMAGE_ANIMATION_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_APNG_APNG_IMAGE_ANIMATION_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_APNG_APNG_IMAGE_ANIMATION_H
 
 #include "core/animation/picture_animation.h"
 
@@ -68,7 +68,7 @@ public:
     void UpdateAndNotifyPicture(const RefPtr<PictureFrame<int32_t>> &picture);
 
     /**
-     * 使用时间戳，保证帧序的统一
+     * Use timestamp in order get the true sequence
      * @param normalized
      * @param revserse
      */
@@ -85,4 +85,4 @@ private:
 } // namespace OHOS::Ace
 
 
-#endif // MINIXGROUP_APNG_IMAGE_ANIMATION_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_APNG_APNG_IMAGE_ANIMATION_H

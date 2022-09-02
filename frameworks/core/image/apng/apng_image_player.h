@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef MINIXGROUP_APNG_IMAGE_PLAYER_H
-#define MINIXGROUP_APNG_IMAGE_PLAYER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_APNG_APNG_IMAGE_PLAYER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_APNG_APNG_IMAGE_PLAYER_H
 
 #include <unordered_map>
 
@@ -23,10 +23,10 @@
 
 #include "base/memory/ace_type.h"
 #include "core/animation/animator.h"
-#include "core/image/apng_image_animation.h"
+#include "apng_image_animation.h"
 #include "core/image/image_source_info.h"
 #include "core/image/image_provider.h"
-#include "core/image/apng_image_decoder.h"
+#include "apng_image_decoder.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 
 namespace OHOS::Ace {
@@ -97,7 +97,7 @@ public:
     APngImagePlayer(
         ImageSourceInfo source,
         UploadSuccessCallback successCallback,
-            const WeakPtr<PipelineBase>& weakContext,
+        const WeakPtr<PipelineBase> &weakContext,
         const fml::WeakPtr<flutter::IOManager> &ioManager,
         const fml::RefPtr<flutter::SkiaUnrefQueue> &gpuQueue,
         const RefPtr<PNGImageDecoder> &decoder,
@@ -209,4 +209,4 @@ private:
 } // namespace OHOS::Ace
 
 
-#endif // MINIXGROUP_APNG_IMAGE_PLAYER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_APNG_APNG_IMAGE_PLAYER_H

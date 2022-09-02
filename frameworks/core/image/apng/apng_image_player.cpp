@@ -13,23 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/image/apng_image_player.h"
-
-#include "third_party/skia/include/codec/SkCodecAnimation.h"
-#include "third_party/skia/include/core/SkPixelRef.h"
-
-#include "base/log/log.h"
-#include "core/components/image/flutter_render_image.h"
-#include "core/image/image_provider.h"
+#include "core/image/apng/apng_image_player.h"
 
 #include <cstdlib>
 #include <cstdio>
+#include "base/log/log.h"
+#include "core/components/image/flutter_render_image.h"
+#include "core/image/image_provider.h"
+#include "third_party/skia/include/codec/SkCodecAnimation.h"
+#include "third_party/skia/include/core/SkPixelRef.h"
 
 namespace OHOS::Ace {
 APngImagePlayer::APngImagePlayer(
     ImageSourceInfo source,
     UploadSuccessCallback successCallback,
-    const WeakPtr<PipelineBase>& weakContext,
+    const WeakPtr<PipelineBase> &weakContext,
     const fml::WeakPtr<flutter::IOManager> &ioManager,
     const fml::RefPtr<flutter::SkiaUnrefQueue> &gpuQueue,
     const RefPtr<PNGImageDecoder> &decoder,
@@ -41,13 +39,13 @@ APngImagePlayer::APngImagePlayer(
     LOGD("animated image frameCount_ : %{public}d, repetitionCount_ : %{public}d", frameCount_, repetitionCount_);
     auto context = context_.Upgrade();
     if (context) {
-        //decode apng
+        // decode apng
         if (!apngDecoder_ || !apngDecoder_->isApng()) {
             LOGE("APNG Image Player png decoder error!");
             return;
         }
 
-        //get apng all frames, before use decoder need Use GetAllFrames before
+        // get apng all frames, before use decoder need Use GetAllFrames before
         frameCount_ = apngDecoder_->GetFrameCount();
         if (!GetApngAllFrames()) {
             return;

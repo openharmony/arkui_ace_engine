@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/image/apng_image_decoder.h"
-#include "base/utils/string_utils.h"
-#include "png.h"
-#include "zlib.h"
-
+#include "core/image/apng/apng_image_decoder.h"
 #include <cstdlib>
 #include <cstdio>
 #include <string>
 #include <cmath>
+#include "png.h"
+#include "zlib.h"
+#include "base/utils/string_utils.h"
 
 #if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
-
 #include <malloc.h>
-
 #endif
 
 namespace OHOS::Ace {
@@ -283,18 +280,15 @@ static PngInfo *png_info_create(const uint8_t *data, uint32_t length)
         return nullptr;
     }
 
-    const uint32_t *u32Data = reinterpret_cast<const uint32_t *>(data);
-    if ((*u32Data) != FOUR_CC(0x89, 0x50, 0x4E, 0x47)) {
-        return nullptr;
-    }
-
-    if (*(u32Data + PngFOURCCLen) != FOUR_CC(0x0D, 0x0A, 0x1A, 0x0A)) {
+    if(png_sig_compare((png_const_bytep)data, 0, PngHeadLength)){
+        LOGE("image not a apng file");
         return nullptr;
     }
 
     uint32_t chunk_realloc_num = 16;
     PngChunkInfo *chunks = (PngChunkInfo *) malloc(sizeof(PngChunkInfo) * chunk_realloc_num);
     if (!chunks) {
+        LOGE("malloc memory failed!");
         return nullptr;
     }
 
@@ -605,13 +599,13 @@ bool PNGImageDecoder::isApng()
 
     memcpy(buffer, byteDatas, headSize);
 
-    //check if is not png image
+    // check if is not png image
     if (png_sig_compare((png_bytep) buffer, (png_size_t) 0, headSize)) {
         LOGE("<<< not a png format");
         return false;
     }
 
-    //check if is apng
+    // check if is apng
     uint32_t chunk_realloc_num = 16;
     PngChunkInfo *chunks = (PngChunkInfo *) malloc(sizeof(PngChunkInfo) * chunk_realloc_num);
     if (!chunks) {
@@ -627,7 +621,7 @@ bool PNGImageDecoder::isApng()
     int32_t apng_frame_number = -1;
     bool apng_chunk_error = false;
 
-    //loop get all chunk headers
+    // loop get all chunk headers
     do {
         if (chunkNum >= chunk_capacity) {
             PngChunkInfo *new_chunks = (PngChunkInfo *) realloc(chunks, sizeof(PngChunkInfo) *
@@ -787,7 +781,8 @@ uint8_t *PNGImageDecoder::GetFrameData(uint32_t index, uint32_t *size, bool oldW
     uint32_t frameRemuxSize = PngHeadLength + pngInfo_->apngSharedChunkSize + frameInfo->chunkSize;
 
     if (!(pngInfo_->apngFirstFrameIsCover && index == 0)) {
-        frameRemuxSize -= frameInfo->chunkNum * Byte4; // remove fdAT sequence number
+        // remove fdAT sequence number
+        frameRemuxSize -= frameInfo->chunkNum * Byte4;
     }
 
     const uint8_t *data = data_->bytes();
@@ -808,7 +803,8 @@ uint8_t *PNGImageDecoder::GetFrameData(uint32_t index, uint32_t *size, bool oldW
 
     uint32_t dataOffset = 0;
     bool inserted = false;
-    memcpy(frameData, data, PngHeadLength); // PNG File Header
+    // PNG File Header
+    memcpy(frameData, data, PngHeadLength);
     dataOffset += PngHeadLength;
 
     for (uint32_t i = 0; i < pngInfo_->apngSharedChunkNum; i++) {
@@ -819,7 +815,8 @@ uint8_t *PNGImageDecoder::GetFrameData(uint32_t index, uint32_t *size, bool oldW
             return nullptr;
         }
 
-        if (sharedChunkIndex >= pngInfo_->apngSharedInsertIndex && !inserted) { // replace IDAT with fdAT
+        // replace IDAT with fdAT
+        if (sharedChunkIndex >= pngInfo_->apngSharedInsertIndex && !inserted) {
             inserted = true;
             for (uint32_t c = 0; c < frameInfo->chunkNum; c++) {
                 PngChunkInfo *insertChunkInfo = pngInfo_->chunks + frameInfo->chunkIndex + c;

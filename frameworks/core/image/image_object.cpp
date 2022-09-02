@@ -26,8 +26,10 @@
 #include "core/components_ng/render/canvas_image.h"
 #endif
 
-#include "core/image/apng_image_decoder.h"
-#include "core/image/apng_image_object.h"
+#ifdef APNG_IMAGE_SUPPORT
+#include "core/image/apng/apng_image_decoder.h"
+#include "core/image/apng/apng_image_object.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -70,6 +72,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
     }
 
     //if is png or apng check
+#ifdef APNG_IMAGE_SUPPORT
     if(source.isPng())
     {
         auto apngDecoder = AceType::MakeRefPtr<PNGImageDecoder>(skData);
@@ -83,6 +86,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
             return MakeRefPtr<ApngImageObject>(source, imageSize, frameCount, skData, apngDecoder);
         }
     }
+#endif
 
     // build normal pixel image object.
     auto codec = SkCodec::MakeFromData(skData);

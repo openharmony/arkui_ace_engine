@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef MINIXGROUP_PNG_IMAGE_DECODER_H
-#define MINIXGROUP_PNG_IMAGE_DECODER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_APNG_PNG_IMAGE_DECODER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_APNG_PNG_IMAGE_DECODER_H
 
 #include "base/geometry/size.h"
 #include "base/memory/ace_type.h"
@@ -259,4 +259,4 @@ private:
 };
 } // namespace OHOS::Ace
 
-#endif // MINIXGROUP_PNG_IMAGE_DECODER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_PNG_IMAGE_DECODER_H

@@ -13,11 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/image/apng_image_animation.h"
-
-
+#include "core/image/apng/apng_image_animation.h"
 namespace OHOS::Ace {
-
 /**
  * add image to list
  * only key index and duration
@@ -25,7 +22,7 @@ namespace OHOS::Ace {
  * @param pictureInfo
  * @return
  */
-bool APngImageAnimation::AddPicture(float duration, const int32_t& pictureInfo)
+bool APngImageAnimation::AddPicture(float duration, const int32_t &pictureInfo)
 {
     if (pictures_.empty()) {
         this->duration_ = 0.0f;
@@ -38,10 +35,10 @@ bool APngImageAnimation::AddPicture(float duration, const int32_t& pictureInfo)
 }
 
 /**
- * 发送通知
+ * Send notify to listener
  * @param picture
  */
-void APngImageAnimation::UpdateAndNotifyPicture(const RefPtr<PictureFrame<int32_t>>& picture)
+void APngImageAnimation::UpdateAndNotifyPicture(const RefPtr<PictureFrame<int32_t>> &picture)
 {
     if (!picture) {
         LOGE("update picture is null.");
@@ -55,7 +52,7 @@ void APngImageAnimation::UpdateAndNotifyPicture(const RefPtr<PictureFrame<int32_
 }
 
 /**
- * 使用时间戳，保证帧序的统一
+ * Use timestamp in order get the true sequence
  * @param normalized
  * @param revserse
  */
@@ -67,23 +64,23 @@ void APngImageAnimation::OnNormalizedTimestampChanged(float normalized, bool rev
         return;
     }
 
-    if(currentIndex_ == pictures_.size() - 1){
+    if (currentIndex_ == pictures_.size() - 1) {
         currentIndex_ = -1;
     }
 
     uint32_t index = 0;
-    if(currentIndex_ >= 0){
+    if (currentIndex_ >= 0) {
         index = currentIndex_ + 1;
     }
 
-    if(index >= pictures_.size()){
+    if (index >= pictures_.size()) {
         index = 0;
     }
 
     auto picture = pictures_[index];
     float duration = picture->GetDuration();
 
-    if(totalTime_ - lastFrameTime_ < duration){
+    if (totalTime_ - lastFrameTime_ < duration) {
         return;
     }
 
@@ -91,5 +88,4 @@ void APngImageAnimation::OnNormalizedTimestampChanged(float normalized, bool rev
     currentIndex_ = index;
     lastFrameTime_ = totalTime_;
 }
-
 } // namespace OHOS::Ace

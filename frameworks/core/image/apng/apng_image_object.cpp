@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/image/apng_image_object.h"
-#include "core/image/apng_image_decoder.h"
+#include "core/image/apng/apng_image_object.h"
+#include "core/image/apng/apng_image_decoder.h"
 
 namespace OHOS::Ace {
 void ApngImageObject::UploadToGpuForRender(
-    const WeakPtr<PipelineBase>& context,
+    const WeakPtr<PipelineBase> &context,
     const RefPtr<FlutterRenderTaskHolder> &renderTaskHolder,
     const UploadSuccessCallback &successCallback,
     const FailedCallback &failedCallback,
