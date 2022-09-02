@@ -91,7 +91,9 @@ void RenderGridLayout::Update(const RefPtr<Component>& component)
     rowsArgs_ = grid->GetRowsArgs();
     userColGap_ = grid->GetColumnGap();
     userRowGap_ = grid->GetRowGap();
-    rightToLeft_ = grid->GetRightToLeft();
+    if (TextDirection::RTL == grid->GetTextDirection()) {
+        rightToLeft_ = true;
+    }
     scrollBarWidth_ = grid->GetScrollBarWidth();
     scrollBarColor_ = grid->GetScrollBarColor();
     displayMode_ = grid->GetScrollBar();

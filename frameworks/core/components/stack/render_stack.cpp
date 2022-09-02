@@ -32,6 +32,7 @@ void RenderStack::Update(const RefPtr<Component>& component)
     fit_ = stack->GetStackFit();
     overflow_ = stack->GetOverflow();
     mainStackSize_ = stack->GetMainStackSize();
+    SetTextDirection(stack->GetTextDirection());
     MarkNeedLayout();
 }
 
@@ -228,7 +229,21 @@ LayoutParam RenderStack::MakePositionedInnerLayoutParam(
 
 Offset RenderStack::GetNonPositionedChildOffset(const Size& childSize)
 {
-    return Alignment::GetAlignPosition(GetLayoutSize(), childSize, align_);
+    Offset offset(0.0f, 0.0f);
+    double coefficients = 1.0f;
+    Size size = GetLayoutSize();
+
+    if (IsRightToLeft()) {
+        coefficients = -1.0f;
+    }
+
+    if (GreatOrEqual(size.Width(), childSize.Width())) {
+        offset.SetX((1.0 + coefficients * align_.GetHorizontal()) * (size.Width() - childSize.Width()) / 2.0);
+    }
+    if (GreatOrEqual(size.Height(), childSize.Height())) {
+        offset.SetY((1.0 + align_.GetVertical()) * (size.Height() - childSize.Height()) / 2.0);
+    }
+    return offset;
 }
 
 Offset RenderStack::GetPositionedChildOffset(const RefPtr<RenderPositioned>& item)
