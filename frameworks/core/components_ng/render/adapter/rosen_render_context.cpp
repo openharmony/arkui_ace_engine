@@ -26,6 +26,7 @@
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
 
 namespace OHOS::Ace::NG {
 RosenRenderContext::~RosenRenderContext()
@@ -66,10 +67,13 @@ void RosenRenderContext::StopRecordingIfNeeded()
     }
 }
 
-void RosenRenderContext::InitContext(bool isRoot)
+void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName)
 {
     if (!rsNode_) {
-        if (isRoot) {
+        if (surfaceName.has_value()) {
+            struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceName.value() };
+            rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+        } else if (isRoot) {
             LOGI("create RSRootNode");
             rsNode_ = Rosen::RSRootNode::Create();
         } else {
@@ -87,7 +91,13 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* geometryNode)
         return;
     }
     const auto& frameRect = geometryNode->GetFrame().GetRect();
-    rsNode_->SetBounds(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
+    if (rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE) {
+        const auto& contentRect = geometryNode->GetContent()->GetRect();
+        rsNode_->SetBounds(frameRect.GetX() + contentRect.GetX(), frameRect.GetY() + contentRect.GetY(),
+            contentRect.Width(), contentRect.Height());
+    } else {
+        rsNode_->SetBounds(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
+    }
     rsNode_->SetFrame(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
 }
 
@@ -109,6 +119,37 @@ void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
         static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()),
         static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
     rsNode_->SetCornerRadius(cornerRadius);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBorderColorUpdate(const BorderColorProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBorderColor(value.leftColor.value_or(Color::BLACK).GetValue(),
+        value.topColor.value_or(Color::BLACK).GetValue(), value.rightColor.value_or(Color::BLACK).GetValue(),
+        value.bottomColor.value_or(Color::BLACK).GetValue());
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBorderWidthUpdate(const BorderWidthProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector4f cornerBorderWidth;
+    cornerBorderWidth.SetValues(static_cast<float>(value.leftDimen.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.rightDimen.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.topDimen.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.bottomDimen.value_or(Dimension()).ConvertToPx()));
+    rsNode_->SetBorderWidth(cornerBorderWidth);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBorderStyleUpdate(const BorderStyleProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBorderStyle(static_cast<uint32_t>(value.styleLeft.value_or(BorderStyle::SOLID)),
+        static_cast<uint32_t>(value.styleTop.value_or(BorderStyle::SOLID)),
+        static_cast<uint32_t>(value.styleRight.value_or(BorderStyle::SOLID)),
+        static_cast<uint32_t>(value.styleBottom.value_or(BorderStyle::SOLID)));
     RequestNextFrame();
 }
 

@@ -27,6 +27,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 // Pattern is the base class for different measure, layout and paint behavior.
@@ -44,10 +45,15 @@ public:
         return true;
     }
 
+    virtual std::optional<std::string> SurfaceNodeName() const
+    {
+        return std::nullopt;
+    }
+
     void DetachFromFrameNode()
     {
-        frameNode_.Reset();
         OnDetachFromFrameNode();
+        frameNode_.Reset();
     }
 
     void AttachToFrameNode(const WeakPtr<FrameNode>& frameNode)
@@ -58,6 +64,10 @@ public:
         frameNode_ = frameNode;
         OnAttachToFrameNode();
     }
+
+    virtual void OnLayoutChange(
+        bool frameSizeChange, bool frameOffsetChange, bool contentSizeChange, bool contentOffsetChange)
+    {}
 
     virtual RefPtr<PaintProperty> CreatePaintProperty()
     {

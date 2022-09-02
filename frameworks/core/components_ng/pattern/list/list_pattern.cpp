@@ -71,6 +71,15 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, b
     startIndex_ = listLayoutAlgorithm->GetStartIndex();
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
     isInitialized_ = listLayoutAlgorithm->GetIsInitialized();
+    itemPosition_ = listLayoutAlgorithm->GetItemPosition();
+    auto host = GetHost();
+    if (host == nullptr) {
+        return false;
+    }
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    if (listLayoutProperty && listLayoutProperty->GetDivider().has_value()) {
+        return true;
+    }
     return false;
 }
 

@@ -542,7 +542,7 @@ void RenderList::RequestNewItemsAtStartForLaneList()
                 breakWhenRequestNewItem = true;
                 break;
             }
-            auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_, false);
+            auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_ - spaceWidth_, false);
             if (!child) {
                 breakWhenRequestNewItem = true;
                 break;
@@ -594,7 +594,7 @@ void RenderList::RequestNewItemsAtStart()
                 break;
             }
         }
-        auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_, false);
+        auto child = RequestAndLayoutNewItem(startIndex_ - 1, currentOffset_ - spaceWidth_, false);
         if (!child) {
             break;
         }
@@ -653,7 +653,9 @@ void RenderList::PerformLayout()
         (scrollable_ && scrollable_->IsAnimationNotRunning()) || !scrollEffect_ || autoScrollingForItemMove_;
     if (noEdgeEffect && reachEnd_) {
         // Adjust end of list to match the end of layout
-        currentOffset_ += mainSize - curMainPos;
+        if (LessNotEqual(curMainPos, mainSize)) {
+            AdjustForReachEnd(mainSize);
+        }
         curMainPos = mainSize;
     }
 
@@ -805,7 +807,12 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
         auto offsetCross = CalculateLaneCrossOffset(crossSize, totalLaneCrossSize);
         auto offset = MakeValue<Offset>(curMainPos, offsetCross);
         if (chainAnimation_) {
-            offset += MakeValue<Offset>(-GetChainDelta(index), 0.0);
+            double chainDelta = GetChainDelta(index);
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup) {
+                itemGroup->SetChainOffset(-chainDelta);
+            }
+            offset += MakeValue<Offset>(-chainDelta, 0.0);
         }
         // set item position for one row
         for (size_t i = 0; i < itemSet.size(); i++) {
@@ -955,7 +962,12 @@ Size RenderList::SetItemsPosition(double mainSize)
         auto offsetCross = CalculateLaneCrossOffset(crossSize, GetCrossSize(childLayoutSize));
         auto offset = MakeValue<Offset>(curMainPos, offsetCross);
         if (chainAnimation_) {
-            offset += MakeValue<Offset>(-GetChainDelta(index), 0.0);
+            double chainDelta = GetChainDelta(index);
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup) {
+                itemGroup->SetChainOffset(-chainDelta);
+            }
+            offset += MakeValue<Offset>(-chainDelta, 0.0);
         }
 
         SetChildPosition(child, offset);
@@ -1569,6 +1581,10 @@ RefPtr<RenderListItem> RenderList::RequestListItem(size_t index)
 
     if (!newItem->GetVisible()) {
         newItem->SetVisible(true);
+    }
+
+    if (newItem->GetHidden()) {
+        newItem->SetHidden(false);
     }
 
     return newItem;
@@ -3031,6 +3047,32 @@ void RenderList::AddChildItem(RefPtr<RenderNode> child)
         renderNode = listItemGroup->GetRenderNode();
     }
     AddChild(renderNode);
+}
+
+void RenderList::AdjustForReachEnd(double mainSize)
+{
+    double currentOffset = mainSize;
+    for (auto rit = items_.rbegin(); rit != items_.rend(); rit++) {
+        double childMainSize = 0.0;
+        auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(*rit);
+        if (itemGroup) {
+            if (itemGroup->IsForwardLayout()) {
+                double size = GetMainSize(itemGroup->GetLayoutSize());
+                LayoutChild(itemGroup, currentOffset - size, true);
+                childMainSize = GetMainSize(itemGroup->GetLayoutSize());
+            } else {
+                LayoutChild(itemGroup, currentOffset, false);
+                childMainSize = GetMainSize(itemGroup->GetLayoutSize());
+            }
+        } else {
+            childMainSize = GetMainSize((*rit)->GetLayoutSize());
+        }
+        currentOffset -= (childMainSize + spaceWidth_);
+    }
+    if (!items_.empty()) {
+        currentOffset += spaceWidth_;
+    }
+    currentOffset_ = currentOffset;
 }
 
 } // namespace OHOS::Ace::V2

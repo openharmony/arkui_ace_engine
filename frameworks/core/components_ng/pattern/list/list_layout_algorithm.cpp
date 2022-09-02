@@ -23,6 +23,7 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/layout_param.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
@@ -76,7 +77,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
-    MinusPaddingToSize(listLayoutProperty->CreatePaddingPropertyF(), idealSize);
+    MinusPaddingToSize(listLayoutProperty->CreatePaddingAndBorder(), idealSize);
 
     // calculate main size.
     auto mainSize = GetMainAxisSize(idealSize, axis);
@@ -87,6 +88,14 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
     spaceWidth_ = ConvertToPx(space, listLayoutProperty->GetLayoutConstraint()->scaleProperty, mainSize).value_or(0);
+    if (listLayoutProperty->GetDivider().has_value()) {
+        auto divider = listLayoutProperty->GetDivider().value();
+        std::optional<float> dividerSpace =
+            ConvertToPx(divider.strokeWidth, listLayoutProperty->GetLayoutConstraint()->scaleProperty, mainSize);
+        if (dividerSpace.has_value()) {
+            spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
+        }
+    }
 
     // calculate child layout constraint.
     auto contentLayoutConstraint = listLayoutProperty->CreateChildConstraint();
@@ -122,6 +131,12 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     LOGD("new start index is %{public}d, new end index is %{public}d, offset is %{public}f", startIndex_.value(),
         endIndex_.value(), currentOffset_);
+
+    // TODO: need to find better way to sync render tree.
+    // if index changed, need mark frame node to force sync render tree.
+    if ((preStartIndex_ != startIndex_.value()) || (preEndIndex_ != endIndex_.value())) {
+        layoutWrapper->SetForceSyncRenderTree();
+    }
 }
 
 void ListLayoutAlgorithm::LayoutForward(
@@ -163,10 +178,11 @@ void ListLayoutAlgorithm::LayoutForward(
             }
         }
         itemPosition_[currentIndex] = { currentStartPos, currentEndPos };
-        if ((currentIndex >= 0) && (currentIndex < static_cast<int32_t>(itemPosition_.size()) - 1)) {
+        if (currentIndex >= 0) {
             currentEndPos = currentEndPos + spaceWidth_;
         }
     } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize));
+    currentEndPos = currentEndPos - spaceWidth_;
 
     startIndex_ = newStartIndex.value_or(preStartIndex_);
     endIndex_ = currentIndex;
@@ -244,7 +260,7 @@ void ListLayoutAlgorithm::LayoutBackward(
             }
         }
         itemPosition_[currentIndex] = { currentStartPos, currentEndPos };
-        if ((currentIndex > 0) && (currentIndex <= static_cast<int32_t>(itemPosition_.size()) - 1)) {
+        if (currentIndex > 0) {
             currentStartPos = currentStartPos - spaceWidth_;
         }
     } while (GreatNotEqual(currentStartPos, startMainPos_ - cacheSize));
@@ -283,7 +299,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(listLayoutProperty);
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingPropertyF();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0.0f);
     auto top = padding.top.value_or(0.0f);
@@ -293,7 +309,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
 
     // layout items.
-    for (auto index = startIndex_.value(); index <= endIndex_.value(); ++index) {
+    for (auto index = startIndex_.value_or(preStartIndex_); index <= endIndex_.value_or(preEndIndex_); ++index) {
         auto offset = paddingOffset;
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!wrapper) {
@@ -312,10 +328,14 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                          OffsetF(0, size.Width() / lanes_.value() * laneIndex) + OffsetF(0, laneCrossOffset);
             }
         } else {
+            lanes_ = 1;
+            float crossSize = GetCrossAxisSize(size, axis);
+            float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetFrameSize(), axis);
+            float laneCrossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
             if (axis == Axis::VERTICAL) {
-                offset = offset + OffsetF(0, itemPosition_[index].first - currentOffset_);
+                offset = offset + OffsetF(0, itemPosition_[index].first - currentOffset_) + OffsetF(laneCrossOffset, 0);
             } else {
-                offset = offset + OffsetF(itemPosition_[index].first - currentOffset_, 0);
+                offset = offset + OffsetF(itemPosition_[index].first - currentOffset_, 0) + OffsetF(0, laneCrossOffset);
             }
         }
         wrapper->GetGeometryNode()->SetFrameOffset(offset);

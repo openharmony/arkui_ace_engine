@@ -22,8 +22,8 @@
 
 namespace OHOS::Ace::NG {
 class FrameNode;
-class FrameNode;
 class StagePattern;
+class OverlayManager;
 
 // StageManager is the base class for root render node to perform page switch.
 class ACE_EXPORT StageManager : public virtual AceType {
@@ -36,9 +36,13 @@ public:
     bool PushPage(const RefPtr<FrameNode>& node);
     bool PopPage();
 
+    void ShowToast(const std::string& message, int32_t duration,
+        const std::string& bottom, bool isRightToLeft);
+
 private:
     RefPtr<FrameNode> rootNode_;
     RefPtr<StagePattern> stagePattern_;
+    RefPtr<OverlayManager> overlayManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
 };

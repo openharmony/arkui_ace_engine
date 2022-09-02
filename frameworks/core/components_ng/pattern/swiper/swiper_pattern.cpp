@@ -28,6 +28,7 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -79,6 +80,7 @@ void SwiperPattern::OnModifyDone()
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);
     }
 
+    CalculateCacheRange();
     InitAutoPlay();
     InitSwiperController();
     InitTouchEvent(gestureHub);
@@ -96,13 +98,44 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (skipMeasure && skipLayout) {
         return false;
     }
+
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto swiperLayoutAlgorithm = DynamicCast<SwiperLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
-    startIndex_ = swiperLayoutAlgorithm->GetStartIndex();
-    endIndex_ = swiperLayoutAlgorithm->GetEndIndex();
+    preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
     return false;
+}
+
+void SwiperPattern::CalculateCacheRange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = host->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    auto displayCount = GetDisplayCount();
+    auto cacheCount = layoutProperty->GetCachedCount().value_or(1);
+    auto loadCount = cacheCount * 2 + displayCount;
+    auto totalCount = TotalCount();
+    if (loadCount >= totalCount) { // Load all items.
+        startIndex_ = 0;
+        endIndex_ = totalCount - 1;
+        LOGI("Load all items, range [%{public}d - %{public}d]", startIndex_, endIndex_);
+        return;
+    }
+
+    if (!IsLoop()) {
+        startIndex_ = std::max(currentIndex_ - cacheCount, 0);
+        endIndex_ = std::min(currentIndex_ + displayCount + cacheCount - 1, totalCount - 1);
+    } else {
+        startIndex_ = (totalCount + currentIndex_ - cacheCount) % totalCount;
+        endIndex_ = (currentIndex_ + cacheCount) % totalCount;
+    }
+
+    LOGI("Cache range [%{public}d - %{public}d], totalCount: %{public}d", startIndex_, endIndex_, totalCount);
 }
 
 void SwiperPattern::FireChangeEvent() const
@@ -522,6 +555,7 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
         if (swiper->currentIndex_ != nextIndex) {
             swiper->currentIndex_ = nextIndex;
             swiper->FireChangeEvent();
+            swiper->CalculateCacheRange();
         }
         if (restartAutoPlay) {
             swiper->StartAutoPlay();
@@ -631,6 +665,13 @@ int32_t SwiperPattern::CurrentIndex() const
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, 0);
     return swiperLayoutProperty->GetIndex().value_or(0);
+}
+
+int32_t SwiperPattern::GetDisplayCount() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, 1);
+    return swiperLayoutProperty->GetDisplayCount().value_or(1);
 }
 
 bool SwiperPattern::IsAutoPlay() const

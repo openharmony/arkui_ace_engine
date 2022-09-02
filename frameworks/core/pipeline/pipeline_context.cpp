@@ -182,7 +182,9 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushRender();
     FlushRenderFinish();
     FlushWindowBlur();
-    FlushFocus();
+    if (onShow_ && onFocus_) {
+        FlushFocus();
+    }
     FireVisibleChangeEvent();
     ProcessPostFlush();
     ClearDeactivateElements();
@@ -268,29 +270,23 @@ void PipelineContext::FlushFocus()
     if (!focusNode) {
         dirtyFocusNode_.Reset();
     } else {
-        if (isTabKeyPressed_) {
-            focusNode->RequestFocusImmediately();
-            dirtyFocusNode_.Reset();
-            dirtyFocusScope_.Reset();
-            return;
-        }
+        focusNode->RequestFocusImmediately();
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        return;
     }
     auto focusScope = dirtyFocusScope_.Upgrade();
     if (!focusScope) {
         dirtyFocusScope_.Reset();
     } else {
-        if (isTabKeyPressed_) {
-            focusScope->RequestFocusImmediately();
-            dirtyFocusNode_.Reset();
-            dirtyFocusScope_.Reset();
-            return;
-        }
+        focusScope->RequestFocusImmediately();
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        return;
     }
-    if (isTabKeyPressed_) {
-        if (!RequestDefaultFocus()) {
-            if (rootElement_ && !rootElement_->IsCurrentFocus()) {
-                rootElement_->RequestFocusImmediately();
-            }
+    if (!RequestDefaultFocus()) {
+        if (rootElement_ && !rootElement_->IsCurrentFocus()) {
+            rootElement_->RequestFocusImmediately();
         }
     }
 
@@ -1749,10 +1745,11 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN && !isTabKeyPressed_) {
         isTabKeyPressed_ = true;
-        FlushFocus();
-        return true;
     }
-    return eventManager_->DispatchKeyEvent(event, rootElement_);
+    if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, GetLastPage())) {
+        return eventManager_->DispatchKeyEvent(event, rootElement_);
+    }
+    return true;
 }
 
 bool PipelineContext::RequestDefaultFocus()
@@ -1763,7 +1760,7 @@ bool PipelineContext::RequestDefaultFocus()
         return false;
     }
     curPageElement->SetIsFocused(true);
-    auto defaultFocusNode = curPageElement->GetChildDefaultFoucsNode();
+    auto defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
     CHECK_NULL_RETURN(defaultFocusNode, false);
     if (!defaultFocusNode->IsFocusableWholePath()) {
         return false;
@@ -2776,8 +2773,6 @@ void PipelineContext::RefreshRootBgColor() const
 void PipelineContext::OnPageShow()
 {
     CHECK_RUN_ON(UI);
-    isTabKeyPressed_ = false;
-    eventManager_->SetIsTabNodesCollected(false);
     if (onPageShowCallBack_) {
         onPageShowCallBack_();
     }
@@ -2894,6 +2889,7 @@ void PipelineContext::RootLostFocus() const
 
 void PipelineContext::WindowFocus(bool isFocus)
 {
+    onFocus_ = isFocus;
     if (!isFocus) {
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());

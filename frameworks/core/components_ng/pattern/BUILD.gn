@@ -34,8 +34,10 @@ build_component_ng("pattern_ng") {
     "linear_layout/row_view.cpp",
     "list/list_item_view.cpp",
     "list/list_layout_algorithm.cpp",
+    "list/list_paint_method.cpp",
     "list/list_pattern.cpp",
     "list/list_view.cpp",
+    "overlay/overlay_manager.cpp",
     "scroll/scroll_layout_algorithm.cpp",
     "scroll/scroll_pattern.cpp",
     "scroll/scroll_view.cpp",
@@ -52,5 +54,8 @@ build_component_ng("pattern_ng") {
     "text/text_pattern.cpp",
     "text/text_styles.cpp",
     "text/text_view.cpp",
+    "xcomponent/xcomponent_layout_algorithm.cpp",
+    "xcomponent/xcomponent_pattern.cpp",
+    "xcomponent/xcomponent_view.cpp",
   ]
 }

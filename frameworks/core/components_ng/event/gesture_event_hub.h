@@ -19,12 +19,48 @@
 #include <list>
 
 #include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
+
+enum class HitTestMode {
+    /**
+     *  Both self and children respond to the hit test for touch events,
+     *  but block hit test of the other nodes which is masked by this node.
+     */
+    DEFAULT = 0,
+
+    /**
+     * Self respond to the hit test for touch events,
+     * but block hit test of children and other nodes which is masked by this node.
+     */
+    BLOCK,
+
+    /**
+     * Self and child respond to the hit test for touch events,
+     * and allow hit test of other nodes which is masked by this node.
+     */
+    TRANSPARENT,
+
+    /**
+     * Self not respond to the hit test for touch events,
+     * but children respond to the hit test for touch events.
+     */
+    NONE
+};
+
+enum class HitTestResult {
+    // The touch point is located outside the current component area;
+    OUT_OF_REGION,
+    // node consumption events and prevent bubbling;
+    STOP_BUBBLING,
+    // node process events and bubble;
+    BUBBLING,
+};
 
 class EventHub;
 
@@ -142,6 +178,16 @@ public:
 
     void OnContextAttached() {}
 
+    HitTestMode GetHitTestMode() const
+    {
+        return hitTestMode_;
+    }
+
+    void SetHitTestMode(HitTestMode hitTestMode)
+    {
+        hitTestMode_ = hitTestMode;
+    }
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult);
@@ -157,6 +203,7 @@ private:
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<Gesture>> gestures_;
     std::list<RefPtr<GestureRecognizer>> gestureHierarchy_;
+    HitTestMode hitTestMode_ = HitTestMode::DEFAULT;
     bool recreateGesture_ = true;
 };
 

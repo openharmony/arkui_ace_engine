@@ -266,6 +266,17 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         Component::MergeRSNode(padding, textComponent);
         buttonChildren.emplace_back(padding);
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ButtonView::Create();
+        if (!labelSet && info[0]->IsObject()) {
+            SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
+        }
+        if ((info.Length() > 1) && info[1]->IsObject()) {
+            SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
+        }
+        return;
+    }
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
     ViewStackProcessor::GetInstance()->ClaimElementId(buttonComponent);
     buttonComponent->SetHasCustomChild(false);

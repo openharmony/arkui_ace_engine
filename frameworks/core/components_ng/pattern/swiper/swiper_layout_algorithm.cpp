@@ -20,6 +20,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -28,10 +29,48 @@
 
 namespace OHOS::Ace::NG {
 
+void SwiperLayoutAlgorithm::InitItemRange()
+{
+    ACE_SCOPED_TRACE("SwiperLayoutAlgorithm::InitItemRange");
+    itemRange_.clear();
+    if (startIndex_ <= endIndex_) {
+        for (auto index = startIndex_; index <= endIndex_; ++index) {
+            itemRange_.insert(index);
+        }
+    } else {
+        for (auto index = startIndex_; index < totalCount_; ++index) {
+            itemRange_.insert(index);
+        }
+        for (auto index = 0; index <= endIndex_; ++index) {
+            itemRange_.insert(index);
+        }
+    }
+
+    if (targetIndex_.has_value() && (targetIndex_.value() < startIndex_ || targetIndex_.value() > endIndex_)) {
+        itemRange_.insert(targetIndex_.value());
+    }
+
+    if (preItemRange_.empty()) {
+        return;
+    }
+
+    // inActiveItems collect items which exist in preItemRange_, but not exist in itemRange_,
+    // need remove these items from wrapper.
+    inActiveItems_.clear();
+
+    // Collect the same item in itemRange_ and preItemRange_.
+    std::vector<int32_t> intersection;
+    set_intersection(itemRange_.begin(), itemRange_.end(), preItemRange_.begin(), preItemRange_.end(),
+        inserter(intersection, intersection.begin()));
+
+    // Collect difference items between preItemRange_ and intersection.
+    set_difference(preItemRange_.begin(), preItemRange_.end(), intersection.begin(), intersection.end(),
+        inserter(inActiveItems_, inActiveItems_.begin()));
+}
+
 void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    preEndIndex_ = 0;
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
 
@@ -47,25 +86,29 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(idealSize);
 
+    InitItemRange();
+
     // Measure children.
     auto layoutConstraint = swiperLayoutProperty->CreateChildConstraint();
-    auto currentIndex = preStartIndex_ - 1;
-    auto totalCount = layoutWrapper->GetTotalChildCount();
-    do {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(++currentIndex);
+    for (const auto& index : itemRange_) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!wrapper) {
-            LOGE("the start %{public}d index wrapper is null", currentIndex);
+            LOGE("Item %{public}d wrapper is null", index);
             break;
         }
+        wrapper->Measure(layoutConstraint);
+    }
 
-        {
-            ACE_SCOPED_TRACE("SwiperLayoutAlgorithm::Measure child");
-            wrapper->Measure(layoutConstraint);
-        }
-    } while (currentIndex < totalCount);
+    // TODO: need to find better way to sync render tree.
+    // if index changed, need mark frame node to force sync render tree.
+    if (!inActiveItems_.empty()) {
+        layoutWrapper->SetForceSyncRenderTree();
+    }
 
-    startIndex_ = 0;
-    endIndex_ = totalCount - 1;
+    // Mark inactive in wrapper.
+    for (const auto& index : inActiveItems_) {
+        layoutWrapper->RemoveChildInRenderTree(index);
+    }
 }
 
 void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -95,7 +138,7 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
 
         // Layout target item.
-        auto targetMainOffset = targetIndex_ > currentIndex_ ? itemWidth : -itemWidth;
+        auto targetMainOffset = targetIndex_.value() > currentIndex_ ? itemWidth : -itemWidth;
         auto targetOffset =
             axis == Axis::HORIZONTAL ? OffsetF(targetMainOffset, 0.0f) : OffsetF(0.0f, targetMainOffset);
         auto targetWrapper = layoutWrapper->GetOrCreateChildByIndex(targetIndex_.value());
@@ -106,8 +149,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    // layout children.
-    for (auto index = startIndex_.value(); index <= endIndex_.value(); ++index) {
+    // Layout children.
+    for (const auto& index : itemRange_) {
         // When enable loop, adjust offset.
         auto loopIndex = index;
         if (currentIndex_ == 0 && GreatNotEqual(currentOffset_, 0.0) && index == childrenSize - 1) {

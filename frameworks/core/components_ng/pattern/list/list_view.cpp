@@ -51,6 +51,11 @@ void ListView::SetEdgeEffect(EdgeEffect edgeEffect)
     // TODO: add impl.
 }
 
+void ListView::SetDivider(const V2::ItemDivider& divider)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider);
+}
+
 void ListView::SetLanes(int32_t lanes)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Lanes, lanes);

@@ -38,6 +38,7 @@ public:
         value->propSpace_ = CloneSpace();
         value->propInitialIndex_ = CloneInitialIndex();
         value->propListDirection_ = CloneListDirection();
+        value->propDivider_ = CloneDivider();
         value->propLanes_ = CloneLanes();
         value->propLaneMinLength_ = CloneLaneMinLength();
         value->propLaneMaxLength_ = CloneLaneMaxLength();
@@ -51,6 +52,7 @@ public:
         ResetSpace();
         ResetInitialIndex();
         ResetListDirection();
+        ResetDivider();
         ResetLanes();
         ResetLaneMinLength();
         ResetLaneMaxLength();
@@ -60,6 +62,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InitialIndex, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListDirection, Axis, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Lanes, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMinLength, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMaxLength, Dimension, PROPERTY_UPDATE_MEASURE);

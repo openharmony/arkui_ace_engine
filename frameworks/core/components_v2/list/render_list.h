@@ -431,6 +431,7 @@ private:
     void LayoutChild(RefPtr<RenderNode> child, double referencePos = 0.0, bool forward = true);
     static void SetChildPosition(RefPtr<RenderNode> child, const Offset& offset);
     void AddChildItem(RefPtr<RenderNode> child);
+    void AdjustForReachEnd(double mainSize);
     Dimension listSpace_;
     double realMainSize_ = 0.0; // Real size of main axis.
     size_t startCachedCount_ = 0;

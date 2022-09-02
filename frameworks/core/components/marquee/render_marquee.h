@@ -89,6 +89,7 @@ private:
     void OnAnimationStart();
     void OnAnimationStop();
     bool NeedMarquee() const;
+    Offset GetTextPosition() const;
 
     RefPtr<RenderNode> childText_;
     RefPtr<Animator> controller_;

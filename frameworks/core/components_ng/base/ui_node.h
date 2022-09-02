@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/event/touch_event.h"
 
@@ -130,8 +131,7 @@ public:
         hostPageId_ = id;
     }
 
-    // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
-    virtual bool TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result);
 
     // In the request to re-layout the scene, needs to obtain the changed state of the child node for the creation of
