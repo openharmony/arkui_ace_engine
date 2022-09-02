@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/arkui/ace_engine/adapter/ohos/build/config.gni")
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components/components.gni")
 
@@ -48,9 +47,6 @@ build_component("text_overlay_for_web") {
 
   rosen_sources = [ "rosen_render_text_overlay.cpp" ]
 
-  if (defined(web_components_support) && web_components_support &&
-      is_standard_system) {
-    configs = [ ":ohos_text_overlay_web_config" ]
-    external_deps = [ "webview:libnweb" ]
-  }
+  standard_web_configs = [ ":ohos_text_overlay_web_config" ]
+  standard_web_deps = [ "webview:libnweb" ]
 }

@@ -22,12 +22,13 @@
 #include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
-#include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 class NativeEngine;
 class NativeReference;
 
 namespace OHOS::Ace::Framework {
+
+class JsAcePage;
 using PixelMapNapiEntry = void* (*)(void*, void*);
 struct JsModule {
     const std::string moduleName;
