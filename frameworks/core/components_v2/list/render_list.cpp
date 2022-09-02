@@ -21,6 +21,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/bilateral_spring_node.h"
+#include "core/common/text_field_manager.h"
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/scroll/scroll_spring_effect.h"
@@ -1256,6 +1257,7 @@ double RenderList::ApplyLayoutParam()
             startMainPos_ = (1.0 - VIEW_PORT_SCALE) / 2 * maxMainSize;
             endMainPos_ = startMainPos_ + (maxMainSize * VIEW_PORT_SCALE);
             fixedMainSizeByLayoutParam_ = NearEqual(maxMainSize, GetMainSize(GetLayoutParam().GetMinSize()));
+            SizeChangeOffset(maxMainSize);
         }
 
         fixedCrossSize_ = !NearEqual(GetCrossSize(maxLayoutSize), Size::INFINITE_SIZE);
@@ -3047,6 +3049,25 @@ void RenderList::AddChildItem(RefPtr<RenderNode> child)
         renderNode = listItemGroup->GetRenderNode();
     }
     AddChild(renderNode);
+}
+
+void RenderList::SizeChangeOffset(double newWindowHeight)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    auto textFieldManager = AceType::DynamicCast<TextFieldManager>(context->GetTextFieldManager());
+    // only need to offset vertical lists
+    if (textFieldManager && vertical_) {
+        auto position = textFieldManager->GetClickPosition().GetY();
+        double offset = newWindowHeight - position;
+        if (LessOrEqual(offset, 0.0)) {
+            // negative offset to scroll down
+            currentOffset_ += offset;
+            startIndexOffset_ += offset;
+        }
+    }
 }
 
 void RenderList::AdjustForReachEnd(double mainSize)
