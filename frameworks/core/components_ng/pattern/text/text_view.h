@@ -41,6 +41,8 @@ public:
     static void SetBaselineOffset(const Dimension& value);
     static void SetTextCase(const TextCase& value);
     static void SetLetterSpacing(const Dimension& value);
+    static void SetAdaptMinFontSize(const Dimension& value);
+    static void SetAdaptMaxFontSize(const Dimension& value);
 };
 } // namespace OHOS::Ace::NG
 
