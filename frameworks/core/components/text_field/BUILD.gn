@@ -28,7 +28,6 @@ build_component("text_field") {
 
   standard_input_sources = [ "on_text_changed_listener_impl.cpp" ]
   standard_input_deps = [
-    "imf:inputmethod_ability",
     "imf:inputmethod_client",
   ]
 }
