@@ -488,9 +488,7 @@ void RenderList::RequestNewItemsAtEndForLaneList(double& curMainPos, double main
         }
         if (itemGroup) {
             double size = GetMainSize(itemGroup->GetLayoutSize());
-            if (GreatNotEqual(size, 0.0)) {
-                curMainPos += size + spaceWidth_;
-            }
+            curMainPos += size + spaceWidth_;
         }
         if (breakWhenRequestNewItem) {
             break;
@@ -572,10 +570,8 @@ void RenderList::RequestNewItemsAtStartForLaneList()
         }
         if (itemGroup) {
             double size = GetMainSize(itemGroup->GetLayoutSize());
-            if (GreatNotEqual(size, 0.0)) {
-                currentOffset_ -= size + spaceWidth_;
-                startIndexOffset_ -= size + spaceWidth_;
-            }
+            currentOffset_ -= size + spaceWidth_;
+            startIndexOffset_ -= size + spaceWidth_;
         }
         if (breakWhenRequestNewItem) {
             break;
@@ -646,7 +642,9 @@ void RenderList::PerformLayout()
         curMainPos += GetMainSize(selectedItem_->GetLayoutSize()) + spaceWidth_;
     }
 
-    curMainPos -= spaceWidth_;
+    if (startIndex_ + items_.size() >= TotalCount()) {
+        curMainPos -= spaceWidth_;
+    }
 
     // Check if reach the end of list
     reachEnd_ = LessOrEqual(curMainPos, mainSize);
@@ -1310,8 +1308,8 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(double mainSize)
     double curMainPos = currentOffset_;
     size_t curIndex = startIndex_ - 1;
     std::vector<RefPtr<RenderListItem>> itemsInOneRow;
-    int32_t lackItemCount = 0;
     for (auto it = items_.begin(); it != items_.end();) {
+        int32_t lackItemCount = 0;
         // 1. layout children in a row
         double mainSize = 0.0;
         itemsInOneRow.clear();
@@ -1341,7 +1339,7 @@ double RenderList::LayoutOrRecycleCurrentItemsForLaneList(double mainSize)
             }
             // reach end of [items_]
             if (it == items_.end()) {
-                lackItemCount = lanes_ - i;
+                lackItemCount = lanes_ - i - 1;
                 break;
             }
         }
@@ -2995,8 +2993,8 @@ void RenderList::LayoutChild(RefPtr<RenderNode> child, double referencePos, bool
     if (listItemGroup) {
         renderNode = listItemGroup->GetRenderNode();
         ListItemLayoutParam param = {
-            .startCacheCount = cachedCount_ > 0 ? cachedCount_ - startCachedCount_ : 0,
-            .endCacheCount = cachedCount_ > 0 ? cachedCount_ - endCachedCount_ : 0,
+            .startCacheCount = (cachedCount_ > 0 && !isLaneList_) ? cachedCount_ - startCachedCount_ : 0,
+            .endCacheCount = (cachedCount_ > 0 && !isLaneList_) ? cachedCount_ - endCachedCount_ : 0,
             .startMainPos = (cachedCount_ == 0 || isLaneList_) ? startMainPos_ : 0,
             .endMainPos = (cachedCount_ == 0 || isLaneList_) ? endMainPos_ : mainSize_,
             .listMainSize = mainSize_,
