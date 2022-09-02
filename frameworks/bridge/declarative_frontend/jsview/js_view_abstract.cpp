@@ -1276,7 +1276,7 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
         auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
         flexItemComponent->SetLeft(x);
         flexItemComponent->SetTop(y);
-        flexItemComponent->SetPositionType(PositionType::ABSOLUTE);
+        flexItemComponent->SetPositionType(PositionType::PTABSOLUTE);
     }
 }
 
@@ -1299,7 +1299,7 @@ void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
         auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
         flexItemComponent->SetLeft(x);
         flexItemComponent->SetTop(y);
-        flexItemComponent->SetPositionType(PositionType::OFFSET);
+        flexItemComponent->SetPositionType(PositionType::PTOFFSET);
     }
 }
 
@@ -5199,7 +5199,7 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
         return;
     }
 
-    HitTestMode hitTestMode = HitTestMode::DEFAULT;
+    HitTestMode hitTestMode = HitTestMode::HTMDEFAULT;
     if (info[0]->IsNumber()) {
         hitTestMode = static_cast<HitTestMode>(info[0]->ToNumber<int32_t>());
     }

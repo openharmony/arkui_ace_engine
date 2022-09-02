@@ -72,7 +72,7 @@ void RenderFlexItem::PerformLayout()
     }
     auto offset = gridColumnInfo_->GetOffset();
     if (offset != UNDEFINED_DIMENSION) {
-        positionParam_.type = PositionType::SEMI_RELATIVE;
+        positionParam_.type = PositionType::PTSEMI_RELATIVE;
         std::pair<AnimatableDimension, bool>& edge =
             (GetTextDirection() == TextDirection::RTL) ? positionParam_.right : positionParam_.left;
         edge.first = offset;
