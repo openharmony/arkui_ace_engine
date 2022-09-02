@@ -27,6 +27,7 @@ build_component_ng("render_ng") {
     "image_painter.cpp",
     "paint_wrapper.cpp",
     "render_context_creator.cpp",
+    "render_surface_creator.cpp",
   ]
 
   if (enable_ng_build) {
@@ -34,12 +35,14 @@ build_component_ng("render_ng") {
       "adapter/flutter_canvas_image.cpp",
       "adapter/flutter_node.cpp",
       "adapter/flutter_render_context.cpp",
+      "adapter/flutter_render_surface.cpp",
       "adapter/flutter_window.cpp",
     ]
   }
 
   rosen_sources = [
     "adapter/rosen_render_context.cpp",
+    "adapter/rosen_render_surface.cpp",
     "adapter/rosen_window.cpp",
   ]
 }

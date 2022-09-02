@@ -45,10 +45,15 @@ public:
         return true;
     }
 
+    virtual std::optional<std::string> SurfaceNodeName() const
+    {
+        return std::nullopt;
+    }
+
     void DetachFromFrameNode()
     {
-        frameNode_.Reset();
         OnDetachFromFrameNode();
+        frameNode_.Reset();
     }
 
     void AttachToFrameNode(const WeakPtr<FrameNode>& frameNode)
@@ -59,6 +64,10 @@ public:
         frameNode_ = frameNode;
         OnAttachToFrameNode();
     }
+
+    virtual void OnLayoutChange(
+        bool frameSizeChange, bool frameOffsetChange, bool contentSizeChange, bool contentOffsetChange)
+    {}
 
     virtual RefPtr<PaintProperty> CreatePaintProperty()
     {
