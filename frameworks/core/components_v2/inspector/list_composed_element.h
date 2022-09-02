@@ -40,6 +40,7 @@ public:
     std::string GetChainAnimation() const;
     std::string GetRestoreId() const;
     std::string GetMultiSelectable() const;
+    std::string GetScrollBar() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

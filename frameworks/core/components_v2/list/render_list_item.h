@@ -105,7 +105,7 @@ private:
 
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     OnSelectFunc onSelectId_;
-    bool selectable_ = false;
+    bool selectable_ = true;
     bool isSelected_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderListItem);

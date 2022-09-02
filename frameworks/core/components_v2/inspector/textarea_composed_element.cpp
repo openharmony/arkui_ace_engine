@@ -211,6 +211,15 @@ std::string TextareaComposedElement::GetTextFontFamily() const
     return ConvertFontFamily(fontFamily);
 }
 
+std::string TextareaComposedElement::GetHeight() const
+{
+    auto render = GetRenderTextField();
+    if (render) {
+        return render->GetDimensionHeight().ToString();
+    }
+    return "";
+}
+
 RefPtr<RenderTextField> TextareaComposedElement::GetRenderTextField() const
 {
     auto node = GetInspectorNode(TextFieldElement::TypeId());

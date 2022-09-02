@@ -108,7 +108,7 @@ private:
     int32_t rowSpan_ = 1;
     bool forceRebuild_ = false;
     OnSelectFunc onSelectId_;
-    bool selectable_ = false;
+    bool selectable_ = true;
 };
 
 } // namespace OHOS::Ace
