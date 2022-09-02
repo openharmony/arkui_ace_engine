@@ -175,6 +175,21 @@ private:
     double MinorAxisDistance(Rect nodeRect, Rect itemRect, const int direction);
     double GetWeightedDistanceFor(double majorAxisDistance, double minorAxisDistance);
 
+    void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
+        const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);
+
+    void SetSearchElementInfoByTextResult(Accessibility::AccessibilityElementOperatorCallback& callback,
+        const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);
+
+    void SetFindFocusedElementInfoResult(Accessibility::AccessibilityElementOperatorCallback& callback,
+        const Accessibility::AccessibilityElementInfo& info, const int32_t requestId);
+
+    void SetFocusMoveSearchResult(Accessibility::AccessibilityElementOperatorCallback& callback,
+        const Accessibility::AccessibilityElementInfo& info, const int32_t requestId);
+
+    void SetExecuteActionResult(
+        Accessibility::AccessibilityElementOperatorCallback& callback, const bool succeeded, const int32_t requestId);
+
     std::string callbackKey_;
     int windowId_ = 0;
     bool isReg_ = false;
