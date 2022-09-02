@@ -96,7 +96,7 @@ template("ace_ohos_standard_source_set") {
       "ability_runtime:ability_manager",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
-      "data_share:datashare_abilitykit",
+      "data_share:datashare_consumer",
       "eventhandler:libeventhandler",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
