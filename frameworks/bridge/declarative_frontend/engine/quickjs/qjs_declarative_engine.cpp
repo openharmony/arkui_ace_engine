@@ -256,6 +256,74 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     js_std_loop(engineInstance_->GetQJSContext());
 }
 
+bool QJSDeclarativeEngine::LoadPageSource(const std::string& url)
+{
+    LOGI("QJSDeclarativeEngine LoadPageSource");
+    ACE_SCOPED_TRACE("QJSDeclarativeEngine::LoadJS");
+    ACE_DCHECK(engineInstance_);
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    JS_SetContextOpaque(ctx, reinterpret_cast<void*>(AceType::RawPtr(engineInstance_)));
+
+    std::string jsContent;
+    if (!engineInstance_->GetDelegate()->GetAssetContent(url, jsContent)) {
+        LOGE("js file load failed!");
+        return false;
+    }
+
+    if (jsContent.empty()) {
+        LOGE("js file load failed! url=[%{public}s]", url.c_str());
+        return false;
+    }
+
+    JSValue compiled = engineInstance_->CompileSource(GetInstanceName(), url, jsContent.c_str(), jsContent.size());
+    if (JS_IsException(compiled)) {
+        LOGE("js compilation failed url=[%{public}s]", url.c_str());
+        return false;
+    }
+    engineInstance_->ExecuteDocumentJS(compiled);
+    js_std_loop(engineInstance_->GetQJSContext());
+    return true;
+}
+
+bool QJSDeclarativeEngine::LoadFaAppSource()
+{
+    LOGI("QJSDeclarativeEngine LoadFaAppSource");
+    ACE_SCOPED_TRACE("QJSDeclarativeEngine::LoadJS");
+    ACE_DCHECK(engineInstance_);
+    JSContext* ctx = engineInstance_->GetQJSContext();
+    std::string commonsJsContent;
+    if (engineInstance_->GetDelegate()->GetAssetContent("commons.js", commonsJsContent)) {
+        auto commonsJsResult = QJSDeclarativeEngineInstance::EvalBuf(
+            ctx, commonsJsContent.c_str(), commonsJsContent.length(), "commons.js", JS_EVAL_TYPE_GLOBAL);
+        if (commonsJsResult == -1) {
+            LOGE("fail to execute load commonsjs script");
+            return false;
+        }
+    }
+    std::string vendorsJsContent;
+    if (engineInstance_->GetDelegate()->GetAssetContent("vendors.js", vendorsJsContent)) {
+        auto vendorsJsResult = QJSDeclarativeEngineInstance::EvalBuf(
+            ctx, vendorsJsContent.c_str(), vendorsJsContent.length(), "vendors.js", JS_EVAL_TYPE_GLOBAL);
+        if (vendorsJsResult == -1) {
+            LOGE("fail to execute load vendorsjs script");
+            return false;
+        }
+    }
+    std::string appjsContent;
+    if (!engineInstance_->GetDelegate()->GetAssetContent("app.js", appjsContent)) {
+        LOGE("js file load failed!");
+    }
+
+    auto result = QJSDeclarativeEngineInstance::EvalBuf(
+        ctx, appjsContent.c_str(), appjsContent.length(), "app.js", JS_EVAL_TYPE_GLOBAL);
+    if (result == -1) {
+        LOGE("failed to execute Loadjs script");
+    } else {
+        CallAppFunc("onCreate", 0, nullptr);
+    }
+    return true;
+}
+
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
 void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::string componentName)
 {

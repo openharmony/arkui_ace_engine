@@ -24,8 +24,8 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -62,10 +62,13 @@ void FrontendDelegateDeclarativeNG::RunPage(
     } else {
         mainPagePath = manifestParser_->GetRouter()->GetEntry();
     }
-    pageRouterManager_->SetManifestParser(manifestParser_);
-    pageRouterManager_->RunPage(mainPagePath, params);
     taskExecutor_->PostTask(
-        [manifestParser = manifestParser_, delegate = Claim(this)]() {
+        [manifestParser = manifestParser_, delegate = Claim(this),
+            weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params]() {
+            auto pageRouterManager = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->SetManifestParser(manifestParser);
+            pageRouterManager->RunPage(url, params);
             auto pipeline = delegate->GetPipelineContext();
             // TODO: get platform version from context, and should stored in AceApplicationInfo.
             if (manifestParser->GetMinPlatformVersion() > 0) {
@@ -78,32 +81,35 @@ void FrontendDelegateDeclarativeNG::RunPage(
 void FrontendDelegateDeclarativeNG::Push(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(PageTarget(uri), params);
+    pageRouterManager_->Push({ uri }, params);
+    OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(PageTarget(uri, RouterMode(routerMode)), params);
+    // TODO: router mode support
+    pageRouterManager_->Push({ uri }, params);
 }
 
 void FrontendDelegateDeclarativeNG::Replace(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(PageTarget(uri), params);
+    pageRouterManager_->Replace({ uri }, params);
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceWithMode(
     const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(PageTarget(uri, RouterMode(routerMode)), params);
+    // TODO: router mode support
+    pageRouterManager_->Replace({ uri }, params);
 }
 
 void FrontendDelegateDeclarativeNG::Back(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->BackWithTarget(PageTarget(uri), params);
+    pageRouterManager_->BackWithTarget({ uri }, params);
 }
 
 void FrontendDelegateDeclarativeNG::Clear()
@@ -133,31 +139,11 @@ std::string FrontendDelegateDeclarativeNG::GetParams()
 void FrontendDelegateDeclarativeNG::NavigatePage(uint8_t type, const PageTarget& target, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    switch (static_cast<RouterAction>(type)) {
-        case RouterAction::PUSH:
-            pageRouterManager_->Push(target, params);
-            break;
-        case RouterAction::REPLACE:
-            pageRouterManager_->Replace(target, params);
-            break;
-        case RouterAction::BACK:
-            pageRouterManager_->BackWithTarget(target, params);
-            break;
-        default:
-            LOGE("Navigator type is invalid!");
-    }
 }
 
 RefPtr<JsAcePage> FrontendDelegateDeclarativeNG::GetPage(int32_t pageId) const
 {
-    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
-    return pageRouterManager_->GetPage(pageId);
-}
-
-int32_t FrontendDelegateDeclarativeNG::GetRunningPageId() const
-{
-    CHECK_NULL_RETURN(pageRouterManager_, -1);
-    return pageRouterManager_->GetRunningPageId();
+    return nullptr;
 }
 
 void FrontendDelegateDeclarativeNG::PostJsTask(std::function<void()>&& task)
@@ -236,21 +222,15 @@ RefPtr<PipelineBase> FrontendDelegateDeclarativeNG::GetPipelineContext()
 
 bool FrontendDelegateDeclarativeNG::OnPageBackPress()
 {
-    auto result = false;
-    taskExecutor_->PostSyncTask(
-        [weak = AceType::WeakClaim(this), &result] {
-            auto delegate = weak.Upgrade();
-            if (!delegate) {
-                return;
-            }
-            auto pageId = delegate->GetRunningPageId();
-            auto page = delegate->GetPage(pageId);
-            if (page) {
-                result = page->FireDeclarativeOnBackPressCallback();
-            }
-        },
-        TaskExecutor::TaskType::JS);
-    return result;
+    CHECK_NULL_RETURN(pageRouterManager_, false);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_RETURN(pageNode, false);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    if (pagePattern->OnBackPressed()) {
+        return true;
+    }
+    return pageRouterManager_->Pop();
 }
 
 } // namespace OHOS::Ace::Framework

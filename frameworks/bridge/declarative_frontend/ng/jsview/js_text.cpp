@@ -96,6 +96,8 @@ void JSText::SetFontStyle(int32_t value)
 
 void JSText::SetTextAlign(int32_t value) {}
 
+void JSText::SetAlign(int32_t value) {}
+
 void JSText::SetLineHeight(const JSCallbackInfo& info) {}
 
 void JSText::SetFontFamily(const JSCallbackInfo& info)

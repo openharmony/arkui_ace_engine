@@ -330,7 +330,7 @@ bool QJSDeclarativeEngineInstance::ExecuteDocumentJS(JSValue jsCode)
         LOGD("Failed executing JS!");
         auto page = GetRunningPage(ctx);
         QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_,
-            page->GetUrl().c_str(), page, true);
+            page ? page->GetUrl().c_str() : "unknown", page, true);
         return false;
     }
     js_std_loop(ctx);
