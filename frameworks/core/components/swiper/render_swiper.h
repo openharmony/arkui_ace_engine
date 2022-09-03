@@ -231,7 +231,7 @@ public:
     void StopZoomDotAnimation();
     void StartDragRetractionAnimation(); // on handle drag end
     void StopDragRetractionAnimation();
-    void FinishAllSwipeAnimation(bool useFinish = false);
+    void FinishAllSwipeAnimation(bool useFinish = false, bool surfaceChanged = false);
     bool IsZoomAnimationStopped();
     bool IsZoomOutAnimationStopped();
     bool IsZoomOutDotAnimationStopped();
@@ -461,6 +461,7 @@ private:
     void SetSwiperHidden(int32_t forwardNum, int32_t backNum);
     void SetSwiperEffect(double dragOffset);
     void SwipeTo(int32_t index, bool reverse);
+    void OnSurfaceChanged();
     int32_t GetPrevIndex() const;
     int32_t GetNextIndex() const;
     int32_t GetPrevIndex(int32_t index) const;
@@ -542,6 +543,7 @@ private:
     bool disableSwipe_ = false;
     bool disableRotation_ = false;
     bool catchMode_ = true;
+    bool needRestore_ = false;
     Dimension itemSpace_;
     int32_t index_ = 0;
     int32_t swipeToIndex_ = -1;
@@ -597,6 +599,7 @@ private:
     int32_t cacheStart_ = 0;
     int32_t cacheEnd_ = 0;
     int32_t lazyLoadCacheSize_ = 5; // default lazy load cache number: 5
+    int32_t callbackId_ = 0;
     double dragOffset_ = 0.0;
     int32_t nextIndex_ = 0;
 
