@@ -97,24 +97,31 @@ void RosenRenderList::Paint(RenderContext& context, const Offset& offset)
         paint.setStyle(SkPaint::Style::kStroke_Style);
         paint.setStrokeWidth(strokeWidth);
         bool isFirstIndex = (startIndex_ == 0);
+        double lastMainAxis = INFINITY;
 
         for (const auto& child : items_) {
             if (child == selectedItem_) {
                 continue;
             }
 
+            double mainAxis = GetMainAxis(child->GetPosition());
             if (isFirstIndex) {
+                lastMainAxis = mainAxis;
                 isFirstIndex = false;
                 continue;
             }
 
-            double mainAxis = GetMainAxis(child->GetPosition());
             if (GreatOrEqual(mainAxis - topOffset, mainSize)) {
                 break;
             }
             if (LessOrEqual(mainAxis - bottomOffset, 0.0)) {
                 continue;
             }
+            if (NearEqual(lastMainAxis, mainAxis)) {
+                continue;
+            }
+            lastMainAxis = mainAxis;
+
             mainAxis -= halfSpaceWidth;
             DrawDividerOnNode(rsNode, paint, vertical_, startCrossAxis, mainAxis, endCrossAxis);
         }

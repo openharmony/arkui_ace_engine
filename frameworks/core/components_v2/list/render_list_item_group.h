@@ -102,7 +102,7 @@ public:
         return vertical_;
     }
 
-    int32_t GetStartIndex() const
+    size_t GetStartIndex() const
     {
         return startIndex_;
     }
@@ -164,8 +164,8 @@ private:
 
     // param for frontend
     Dimension listSpace_;
-    bool stickHeader_ = false;
-    bool stickFooter_ = false;
+    bool stickyHeader_ = false;
+    bool stickyFooter_ = false;
     WeakPtr<RenderNode> renderBox_;
 
     // layout param
@@ -177,9 +177,9 @@ private:
     double listMainSize_ = 0.0;
     size_t startCacheCount_ = 0;
     size_t endCacheCount_ = 0;
-    int32_t lanes_ = 1;
+    size_t lanes_ = 1;
     bool vertical_ = true;
-    ListItemAlign align_;
+    ListItemAlign align_ = V2::ListItemAlign::START;
 
     // layout status
     bool isInitialized_ = false;

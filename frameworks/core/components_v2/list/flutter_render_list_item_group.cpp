@@ -48,6 +48,7 @@ void FlutterRenderListItemGroup::PaintDivider(RenderContext& context)
         paint.setStyle(SkPaint::Style::kStroke_Style);
         paint.setStrokeWidth(strokeWidth);
         bool isFirstItem = (GetStartIndex() == 0);
+        double lastMainAxis = INFINITY;
 
         for (const auto& child : GetItems()) {
             double mainAxis = GetMainAxis(child->GetPosition());
@@ -55,12 +56,18 @@ void FlutterRenderListItemGroup::PaintDivider(RenderContext& context)
                 break;
             }
             if (isFirstItem) {
+                lastMainAxis = mainAxis;
                 isFirstItem = false;
                 continue;
             }
             if (LessOrEqual(mainAxis - bottomOffset, 0.0)) {
                 continue;
             }
+            if (NearEqual(mainAxis, lastMainAxis)) {
+                continue;
+            }
+            lastMainAxis = mainAxis;
+
             mainAxis -= halfSpaceWidth;
             mainAxis += mainOffset;
             if (IsVertical()) {
