@@ -70,11 +70,11 @@ void ImageObject::ClearData()
     data_ = nullptr;
 }
 
-void StaticImageObject::MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget)
+void StaticImageObject::MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize)
 {
     auto renderTaskHolder = ImageProvider::CreateRenderTaskHolder();
     CHECK_NULL_VOID(renderTaskHolder);
-    ImageProvider::MakeCanvasImage(WeakClaim(this), loadCallbacks, resizeTarget, renderTaskHolder);
+    ImageProvider::MakeCanvasImage(WeakClaim(this), loadCallbacks, resizeTarget, renderTaskHolder, forceResize);
 }
 
 } // namespace OHOS::Ace::NG

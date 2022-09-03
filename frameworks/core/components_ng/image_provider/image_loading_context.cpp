@@ -114,7 +114,8 @@ EnterStateTask ImageLoadingContext::CreateOnMakeCanvasImageTask()
         auto resizeTarget = imageLoadingContext->GetImageSize();
         if (imageLoadingContext->needResize_) {
             resizeTarget = ImageLoadingContext::CalculateResizeTarget(imageLoadingContext->srcRect_.GetSize(),
-                imageLoadingContext->dstRect_.GetSize(), imageLoadingContext->GetImageSize());
+                imageLoadingContext->dstRect_.GetSize(),
+                imageLoadingContext->GetSourceSize().value_or(imageLoadingContext->GetImageSize()));
         }
 
         // step3: do second [ApplyImageFit] to calculate real srcRect used for paint based on resized image size
@@ -122,7 +123,8 @@ EnterStateTask ImageLoadingContext::CreateOnMakeCanvasImageTask()
             imageLoadingContext->srcRect_, imageLoadingContext->dstRect_);
 
         // step4: [MakeCanvasImage] according to [resizeTarget]
-        imageLoadingContext->imageObj_->MakeCanvasImage(imageLoadingContext->loadCallbacks_, resizeTarget);
+        imageLoadingContext->imageObj_->MakeCanvasImage(imageLoadingContext->loadCallbacks_, resizeTarget,
+            imageLoadingContext->GetSourceSize().has_value());
     };
     return task;
 }
@@ -229,17 +231,19 @@ void ImageLoadingContext::LoadImageData()
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);
 }
 
-void ImageLoadingContext::MakeCanvasImage(const SizeF& dstSize, bool needResize, ImageFit imageFit)
+void ImageLoadingContext::MakeCanvasImage(const SizeF& dstSize, bool needResize, ImageFit imageFit,
+    const std::optional<std::pair<Dimension, Dimension>>& sourceSize)
 {
     // Because calling of this interface does not guarantee the excution of [MakeCanvasImage], so in order to avoid
     // updating params before they are not actually used, caputure the params in a function. This funtion will only run
     // when it actually do [MakeCanvasImage], i.e. doing the update in [OnMakeCanvasImageTask]
-    updateParamsCallback_ = [wp = WeakClaim(this), dstSize, needResize, imageFit]() {
+    updateParamsCallback_ = [wp = WeakClaim(this), dstSize, needResize, imageFit, sourceSize]() {
         auto loadingCtx = wp.Upgrade();
         CHECK_NULL_VOID(loadingCtx);
         loadingCtx->dstSize_ = dstSize;
         loadingCtx->imageFit_ = imageFit;
         loadingCtx->needResize_ = needResize;
+        loadingCtx->SetSourceSize(sourceSize);
     };
     // send command to [StateManager] and waiting the callback from it to determine next step
     stateManager_->HandleCommand(ImageLoadingCommand::MAKE_CANVAS_IMAGE);
@@ -278,6 +282,23 @@ const SizeF& ImageLoadingContext::GetDstSize() const
 bool ImageLoadingContext::GetNeedResize() const
 {
     return needResize_;
+}
+
+void ImageLoadingContext::SetSourceSize(const std::optional<std::pair<Dimension, Dimension>>& sourceSize)
+{
+    if (sourceSize.has_value()) {
+        sourceSizePtr_ = std::make_unique<std::pair<Dimension, Dimension>>(sourceSize.value());
+    }
+}
+
+std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
+{
+    if (sourceSizePtr_ == nullptr) {
+        return std::nullopt;
+    }
+    return std::optional<SizeF>(SizeF(
+        static_cast<float>(sourceSizePtr_->first.ConvertToPx()),
+        static_cast<float>(sourceSizePtr_->second.ConvertToPx())));
 }
 
 } // namespace OHOS::Ace::NG

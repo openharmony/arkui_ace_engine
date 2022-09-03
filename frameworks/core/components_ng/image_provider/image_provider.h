@@ -107,7 +107,7 @@ public:
     static RefPtr<RenderTaskHolder> CreateRenderTaskHolder();
     static void CreateImageObject(const ImageSourceInfo& sourceInfo, const LoadCallbacks& loadCallbacks);
     static void MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
-        const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder);
+        const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize = false);
     static void UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
         std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder);
 

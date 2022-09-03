@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
@@ -48,6 +49,11 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_);
+    }
+
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<ImageEventHub>();
     }
 
     // Called on main thread to check if need rerender of the content.
