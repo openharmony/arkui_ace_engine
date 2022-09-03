@@ -103,4 +103,14 @@ void TextView::SetLetterSpacing(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, value);
 }
 
+void TextView::SetAdaptMinFontSize(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMinFontSize, value);
+}
+
+void TextView::SetAdaptMaxFontSize(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value);
+}
+
 } // namespace OHOS::Ace::NG

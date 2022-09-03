@@ -309,7 +309,7 @@ void JsCommandDomElementCreator::MountDomNode(
             useProxyNode = true;
             isIgnored = true;
         }
-    } else if (node->GetPosition() == PositionType::FIXED) {
+    } else if (node->GetPosition() == PositionType::PTFIXED) {
         const auto& rootStack = domDocument->GetRootStackComponent();
         if (rootStack) {
             rootStack->AppendChild(node->GetRootComponent());

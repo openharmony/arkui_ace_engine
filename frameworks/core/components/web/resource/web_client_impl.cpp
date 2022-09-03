@@ -500,4 +500,14 @@ void WebClientImpl::OnTouchSelectionChanged(
     delegate->OnTouchSelectionChanged(
         insertHandle, startSelectionHandle, endSelectionHandle);
 }
+
+bool WebClientImpl::OnDragAndDropData(const void* data, size_t len, const NWeb::ImageOptions& opt)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+    return delegate->OnDragAndDropData(data, len, opt.width, opt.height);
+}
 } // namespace OHOS::Ace

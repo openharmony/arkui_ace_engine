@@ -31,7 +31,6 @@
 #endif
 #include "core/components/page/page_target.h"
 #include "core/components/page_transition/page_transition_component.h"
-#include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/utils/source_map.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/base_animation_bridge.h"
@@ -48,6 +47,7 @@ class UINode;
 namespace OHOS::Ace::Framework {
 
 #ifndef NG_BUILD
+class DOMDocument;
 using JsPageRadioGroups = std::unordered_map<std::string, RadioGroupComponent<std::string>>;
 #endif
 

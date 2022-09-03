@@ -61,6 +61,7 @@ void RosenRenderWeb::OnAttachContext()
         return;
     }
     if (delegate_) {
+        CreateDragDropRecognizer(context_);
         auto surface = GetSurface();
         delegate_->InitOHOSWeb(context_, surface);
     }

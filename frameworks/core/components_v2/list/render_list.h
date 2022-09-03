@@ -480,6 +480,9 @@ private:
     void ApplyRestoreInfo();
     void InitScrollable(Axis axis);
 
+    // when window size change, add offset to keep clicked textfield in display area
+    void SizeChangeOffset(double newWindowHeight);
+
     bool hasDragItem_ = false;
     std::map<ListEvents, bool> listEventFlags_;
 
