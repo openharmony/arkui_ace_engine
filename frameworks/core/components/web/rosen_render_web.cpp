@@ -78,6 +78,7 @@ void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
         drawSize_ = Size(1.0, 1.0);
     } else {
         drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height());
+        drawSizeCache_ = drawSize_;
     }
     if (drawSize_.Width() == Size::INFINITE_SIZE || drawSize_.Height() == Size::INFINITE_SIZE ||
         drawSize_.Width() == 0 || drawSize_.Height() == 0) {

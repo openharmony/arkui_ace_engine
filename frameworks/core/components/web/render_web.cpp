@@ -32,6 +32,9 @@ constexpr int32_t DOUBLE_CLICK_FINGERS = 1;
 constexpr int32_t DOUBLE_CLICK_COUNTS = 2;
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
+constexpr int32_t DEFAULT_POINT_X = 0;
+constexpr int32_t DEFAULT_POINT_Y = 50;
+constexpr int32_t DEFAULT_NUMS_ONE = 1;
 
 RenderWeb::RenderWeb() : RenderNode(true)
 {
@@ -50,6 +53,7 @@ void RenderWeb::OnAttachContext()
     if (delegate_) {
         // web component is displayed in full screen by default.
         drawSize_ = Size(pipelineContext->GetRootWidth(), pipelineContext->GetRootHeight());
+        drawSizeCache_ = drawSize_;
         position_ = Offset(0, 0);
 #ifdef OHOS_STANDARD_SYSTEM
         delegate_->InitOHOSWeb(context_);
@@ -57,6 +61,26 @@ void RenderWeb::OnAttachContext()
         delegate_->CreatePlatformResource(drawSize_, position_, context_);
 #endif
     }
+}
+
+void RenderWeb::RegistVirtualKeyBoardListener()
+{
+    if (!needUpdateWeb_) {
+        return;
+    }
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        return;
+    }
+    pipelineContext->SetVirtualKeyBoardCallback(
+        [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard) {
+            auto renderWeb = weak.Upgrade();
+            if (renderWeb) {
+                return renderWeb->ProcessVirtualKeyBoard(width, height, keyboard);
+            }
+            return false;
+        });
+    needUpdateWeb_ = false;
 }
 
 void RenderWeb::Update(const RefPtr<Component>& component)
@@ -69,7 +93,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
 
     onMouse_ = web->GetOnMouseEventCallback();
     onKeyEvent_ = web->GetOnKeyEventCallback();
-
+    RegistVirtualKeyBoardListener();
     web_ = web;
     if (delegate_) {
         delegate_->SetComponent(web);
@@ -108,6 +132,58 @@ void RenderWeb::Update(const RefPtr<Component>& component)
     MarkNeedLayout();
 }
 
+bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
+{
+    double offsetFix = (height - globlePointPosition_.GetY()) > 100.0 ?
+        keyboard - (height - globlePointPosition_.GetY()) / 2.0 : keyboard;
+    LOGI("Web ProcessVirtualKeyBoard width=%{public}d height=%{public}d keyboard=%{public}f offsetFix=%{public}f",
+        width, height, keyboard, offsetFix);
+    if (globlePointPosition_.GetY() <= (height - keyboard) || offsetFix <= 0.0) {
+        offsetFix = 0.0;
+    }
+    if (delegate_) {
+        if (!isFocus_) {
+            if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
+                drawSize_.SetSize(drawSizeCache_);
+                delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+                SyncGeometryProperties();
+                SetRootView(width, height, 0);
+                isVirtualKeyBoardShow_ = VkState::VK_HIDE;
+            }
+            return false;
+        }
+        if (NearZero(keyboard)) {
+            drawSize_.SetSize(drawSizeCache_);
+            delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+            SyncGeometryProperties();
+            SetRootView(width, height, 0);
+            isVirtualKeyBoardShow_ = VkState::VK_HIDE;
+        } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+            drawSizeCache_.SetSize(drawSize_);
+            if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint().GetY() + offsetFix)) {
+                SetRootView(width, height, -offsetFix);
+                isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+                return true;
+            }
+            drawSize_.SetHeight(height - keyboard - GetCoordinatePoint().GetY() + offsetFix);
+            delegate_->Resize(drawSize_.Width(), drawSize_.Height());
+            SyncGeometryProperties();
+            SetRootView(width, height, (NearZero(offsetFix)) ? DEFAULT_NUMS_ONE : -offsetFix);
+            isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+        }
+    }
+    return true;
+}
+
+void RenderWeb::SetRootView(int32_t width, int32_t height, int32_t offset)
+{
+    auto pipelineContext = context_.Upgrade();
+    if (!pipelineContext) {
+        return;
+    }
+    pipelineContext->SetRootRect(width, height, offset);
+}
+
 void RenderWeb::OnMouseEvent(const MouseEvent& event)
 {
     if (!delegate_) {
@@ -122,6 +198,17 @@ void RenderWeb::OnMouseEvent(const MouseEvent& event)
 
     auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
     delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action, SINGLE_CLICK_NUM);
+
+    // clear the recording position, for not move content when virtual keyboard popup when web get focused.
+    if (GetCoordinatePoint().GetY() > 0) {
+        webPoint_ = Offset(DEFAULT_POINT_X, DEFAULT_POINT_Y) +
+            Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
+    }
+    auto context = GetContext().Upgrade();
+    if (context && context->GetTextFieldManager()) {
+        context->GetTextFieldManager()->SetClickPosition(Offset());
+        globlePointPosition_ = localLocation + webPoint_;
+    }
 }
 
 bool RenderWeb::HandleMouseEvent(const MouseEvent& event)
@@ -248,6 +335,7 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         LOGE("Touch down delegate_ is nullptr");
         return;
     }
+    Offset touchOffset = Offset(0, 0);
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos, TouchType::DOWN)) {
         LOGE("Touch down error");
@@ -258,12 +346,18 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= GetGlobalOffset().GetX();
             touchPoint.y -= GetGlobalOffset().GetY();
         }
+        touchOffset = Offset(touchPoint.x, touchPoint.y);
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
     }
     // clear the recording position, for not move content when virtual keyboard popup when web get focused.
+    if (GetCoordinatePoint().GetY() > 0) {
+        webPoint_ = Offset(DEFAULT_POINT_X, DEFAULT_POINT_Y) +
+            Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
+    }
     auto context = GetContext().Upgrade();
     if (context && context->GetTextFieldManager()) {
         context->GetTextFieldManager()->SetClickPosition(Offset());
+        globlePointPosition_ = touchOffset + webPoint_;
     }
 }
 
