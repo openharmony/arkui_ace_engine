@@ -23,6 +23,7 @@
 #include <ui/rs_surface_node.h>
 #endif
 
+#include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
@@ -189,6 +190,16 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebAccessRequest> request_;
 };
 
+enum class DragAction {
+    DRAG_START = 0,
+    DRAG_ENTER,
+    DRAG_LEAVE,
+    DRAG_OVER,
+    DRAG_DROP,
+    DRAG_END,
+    DRAG_CANCEL,
+};
+
 class RenderWeb;
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
@@ -274,6 +285,8 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
+    void HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction);
+    RefPtr<PixelMap> GetDragPixelMap();
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -307,6 +320,7 @@ public:
     void OnScroll(double xOffset, double yOffset);
     bool LoadDataWithRichText();
     void OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting);
+    bool OnDragAndDropData(const void* data, size_t len, int width, int height);
 
 private:
     void InitWebEvent();
@@ -412,7 +426,8 @@ private:
 
     std::string bundlePath_;
     std::string bundleDataPath_;
-
+    RefPtr<PixelMap> pixelMap_ = nullptr;
+    bool isRefreshPixelMap_ = false;
 #endif
 };
 
