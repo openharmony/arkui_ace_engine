@@ -87,6 +87,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     taskScheduler_.AddDirtyLayoutNode(dirty);
+    ForceLayoutForImplicitAnimation();
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }

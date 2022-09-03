@@ -48,29 +48,10 @@ public:
 
     void SetupRootElement() override;
 
-    bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr) override
-    {
-        return false;
-    }
-
     void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback) override
     {}
 
     void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback) override {}
-
-    void PrepareOpenImplicitAnimation() override {}
-
-    void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallBack = nullptr) override
-    {}
-
-    void PrepareCloseImplicitAnimation() override {}
-
-    bool CloseImplicitAnimation() override
-    {
-        return false;
-    }
 
     // add schedule task and return the unique mark id.
     uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) override;
@@ -177,6 +158,11 @@ protected:
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
+
+    void FlushUITasks() override
+    {
+        taskScheduler_.FlushTask();
+    }
 
 private:
     void FlushTouchEvents();

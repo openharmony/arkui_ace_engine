@@ -27,6 +27,7 @@
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components/custom_paint/render_custom_paint.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
 
 namespace OHOS::Ace {
@@ -358,6 +359,94 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
         return true;
     }
     return OnDumpInfo(params);
+}
+
+void PipelineBase::ForceLayoutForImplicitAnimation()
+{
+    if (!pendingImplicitLayout_.empty()) {
+        pendingImplicitLayout_.top() = true;
+    }
+}
+
+bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
+{
+    if (!propertyCallback) {
+        LOGE("failed to create animation, property callback is null!");
+        return false;
+    }
+
+    OpenImplicitAnimation(option, curve, finishCallback);
+    propertyCallback();
+    return CloseImplicitAnimation();
+}
+
+void PipelineBase::PrepareOpenImplicitAnimation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        LOGE("rosen backend is disabled");
+        return;
+    }
+
+    // initialize false for implicit animation layout pending flag
+    pendingImplicitLayout_.push(false);
+    FlushUITasks();
+#endif
+}
+
+void PipelineBase::PrepareCloseImplicitAnimation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (!SystemProperties::GetRosenBackendEnabled()) {
+        LOGE("rosen backend is disabled!");
+        return;
+    }
+
+    if (pendingImplicitLayout_.empty()) {
+        LOGE("close implicit animation failed, need to open implicit animation first!");
+        return;
+    }
+
+    // layout the views immediately to animate all related views, if layout updates are pending in the animation closure
+    if (pendingImplicitLayout_.top()) {
+        FlushUITasks();
+    }
+    pendingImplicitLayout_.pop();
+#endif
+}
+
+void PipelineBase::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    PrepareOpenImplicitAnimation();
+
+    auto wrapFinishCallback = [weak = AceType::WeakClaim(this), finishCallback]() {
+        auto context = weak.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [finishCallback]() {
+                if (finishCallback) {
+                    finishCallback();
+                }
+            },
+            TaskExecutor::TaskType::UI);
+    };
+    AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback);
+#endif
+}
+
+bool PipelineBase::CloseImplicitAnimation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    PrepareCloseImplicitAnimation();
+    return AnimationUtils::CloseImplicitAnimation();
+#else
+    return false;
+#endif
 }
 
 } // namespace OHOS::Ace
