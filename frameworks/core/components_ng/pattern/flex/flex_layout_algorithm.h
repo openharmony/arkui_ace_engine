@@ -1,9 +1,20 @@
-//
-// Created by 陆泽辉 on 2022/8/8.
-//
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-#ifndef ARKUI_ACE_ENGINE_FLEX_LAYOUT_ALGORITHM_H
-#define ARKUI_ACE_ENGINE_FLEX_LAYOUT_ALGORITHM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_LAYOUT_ALGORITHM_H
 
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components/common/layout/constants.h"
@@ -76,23 +87,23 @@ private:
     LayoutConstraintF MakeLayoutConstraint(float mainFlexExtent, const LayoutConstraintF& constraint, bool isStretch, bool supportZero = false) const;
     LayoutConstraintF MakeLayoutConstraintWithLimit(float minMainLimit, float maxMainLimit, bool isStretch) const;
     float GetStretchCrossLimit() const;
+    OptionalSizeF GetCalcSize(float mainSize, float crossSize);
 
-    SizeF realSize_;
-    float mainSize_ = 0.0;
-    float crossSize_ = 0.0;
-    float allocatedSize_ = 0.0;
-    float space_ = 0.0;
+    OptionalSizeF realSize_;
+    float mainSize_ = 0.0f;
+    float crossSize_ = 0.0f;
+    float selfIdealCrossSize_ = -1.0f;
+    float allocatedSize_ = 0.0f;
+    float space_ = 0.0f;
     bool isCrossInfinite_ = false;
-    bool useViewPort_ = false;
     bool stretchToParent_ = false;
-    float totalFlexWeight_ = 0.0;
+    float totalFlexWeight_ = 0.0f;
     int32_t maxDisplayPriority_ = 0;
     int32_t validSizeCount_ = 0;
     FlexAlign crossAxisAlign_ = FlexAlign::FLEX_START;
     FlexAlign mainAxisAlign_ = FlexAlign::FLEX_START;
 
     RefPtr<LayoutWrapper> layoutWrapper_;
-    std::list<RefPtr<LayoutWrapper>> relativeNodes_;
     std::list<RefPtr<LayoutWrapper>> weightNodes_;
     std::set<RefPtr<LayoutWrapper>> infinityLayoutNodes_;
     std::map<int32_t, std::list<MagicLayoutNode>> magicNodes_;
@@ -100,8 +111,9 @@ private:
     FlexLayoutMode layoutMode_ = FlexLayoutMode::FLEX_ITEM_MODE;
     FlexDirection direction_ = FlexDirection::ROW;
     friend class LinearLayoutUtils;
+
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // ARKUI_ACE_ENGINE_FLEX_LAYOUT_ALGORITHM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_LAYOUT_ALGORITHM_H

@@ -202,22 +202,17 @@ public:
     void Constrain(const SizeT& minSize, const SizeT& maxSize)
     {
         if (NonNegative(minSize.width_)) {
-            width_ = width_ > minSize.width_ ? width_ : minSize.width_;
+            width_ = width_ > minSize.Width() ? width_ : minSize.Width();
         }
         if (NonNegative(minSize.height_)) {
-            height_ = height_ > minSize.height_ ? height_ : minSize.height_;
+            height_ = height_ > minSize.Height() ? height_ : minSize.Height();
         }
         if (NonNegative(maxSize.width_)) {
-            width_ = width_ < maxSize.width_ ? width_ : maxSize.width_;
+            width_ = width_ < maxSize.Width() ? width_ : maxSize.Width();
         }
         if (NonNegative(maxSize.height_)) {
-            height_ = height_ < maxSize.height_ ? height_ : maxSize.height_;
+            height_ = height_ < maxSize.Height() ? height_ : maxSize.Height();
         }
-    }
-
-    bool IsValid() const
-    {
-        return width_ > 0.0 && height_ > 0.0;
     }
 
     SizeT operator*(double value) const
@@ -560,7 +555,7 @@ public:
             width_ = width_.value_or(0) < maxSize.Width() ? width_ : maxSize.Width();
         }
         if (NonNegative(maxSize.Height())) {
-            height_ = height_.value_or(0) < maxSize.height_ ? Height() : maxSize.Height();
+            height_ = height_.value_or(0) < maxSize.Height() ? Height() : maxSize.Height();
         }
     }
 

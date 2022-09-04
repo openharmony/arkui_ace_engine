@@ -493,6 +493,102 @@ static napi_value JSRouterGetParams(napi_env env, napi_callback_info info)
     return result;
 }
 
+static napi_value JSTestSyncFunc(napi_env env, napi_callback_info info) {
+    size_t argc = 2;
+    napi_value args[2] = { nullptr };
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+
+    napi_valuetype valuetype0;
+    napi_typeof(env, args[0], &valuetype0);
+
+    napi_valuetype valuetype1;
+    napi_typeof(env, args[1], &valuetype1);
+
+    NAPI_ASSERT(env, valuetype0 == napi_number && valuetype1 == napi_number, "Wrong argument type. Numbers expected");
+
+    double value0;
+    double value1;
+    napi_get_value_double(env, args[0], &value0);
+    napi_get_value_double(env, args[1], &value1);
+
+    napi_value sum;
+    napi_create_double(env, value0 + value1, &sum);
+    return sum;
+}
+
+struct AsyncCallbackInfo {
+    napi_env env = nullptr;
+    napi_async_work work = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_ref callbackRef = nullptr;
+    double value0;
+    double value1;
+    double sum;
+};
+
+static napi_value JSTestAsyncFunc(napi_env env, napi_callback_info info) {
+    size_t argc = 3;
+    napi_value args[3] = { 0 };
+    napi_value thisArg = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, &argc, args, &thisArg, &data);
+    
+    auto asyncContext = new AsyncCallbackInfo();
+    asyncContext->env = env;
+
+    napi_valuetype valuetype0;
+    napi_typeof(env, args[0], &valuetype0);
+
+    napi_valuetype valuetype1;
+    napi_typeof(env, args[1], &valuetype1);
+
+    NAPI_ASSERT(env, valuetype0 == napi_number && valuetype1 == napi_number, "Wrong argument type. Numbers expected");
+    napi_get_value_double(env, args[0], &asyncContext->value0);
+    napi_get_value_double(env, args[1], &asyncContext->value1);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_utf8(env, "JSTestAsyncFunc", NAPI_AUTO_LENGTH, &resourceName);
+
+    napi_value result = nullptr;
+    if (argc == 3) {
+        napi_valuetype valuetype2;
+        napi_typeof(env, args[2], &valuetype2);
+        NAPI_ASSERT(env, valuetype2 == napi_function, "Wrong argument type. Numbers expected");
+        napi_create_reference(env, args[2], 1, &asyncContext->callbackRef);
+    } else {
+        napi_create_promise(env, &asyncContext->deferred, &result);
+    }
+    napi_create_async_work(env, nullptr, resourceName, [](napi_env env, void* data) {
+        /**
+         * 非js线程，用于处理异步计算；
+         */
+        AsyncCallbackInfo* asyncContext = (AsyncCallbackInfo*)data;
+        double value0 = asyncContext->value0;
+        double value1 = asyncContext->value1;
+        asyncContext->sum = value0 + value1;
+    }, [](napi_env env, napi_status status, void* data) {
+        /**
+         * js线程，用于返回异步计算结果；
+         */
+        AsyncCallbackInfo* asyncContext = (AsyncCallbackInfo*)data;
+        napi_value argv = nullptr;
+        napi_create_double(env, asyncContext->sum, &argv);
+        if (asyncContext->callbackRef) {
+            napi_value callback = nullptr;
+            napi_value callbackResult = nullptr;
+            napi_get_reference_value(env, asyncContext->callbackRef, &callback);
+            napi_call_function(env, nullptr, callback, 1, &argv, &callbackResult);
+            napi_delete_reference(env, asyncContext->callbackRef);
+            delete asyncContext;
+        } else if (asyncContext->deferred) {
+            napi_resolve_deferred(env, asyncContext->deferred, argv);
+        }
+        napi_delete_async_work(env, asyncContext->work);
+    }, (void*)asyncContext, &asyncContext->work);
+    napi_queue_async_work(env, asyncContext->work);
+    return result;
+}
+
 static napi_value RouterExport(napi_env env, napi_value exports)
 {
     napi_value routerMode = nullptr;
@@ -513,6 +609,8 @@ static napi_value RouterExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("enableAlertBeforeBackPage", JSRouterEnableAlertBeforeBackPage),
         DECLARE_NAPI_FUNCTION("disableAlertBeforeBackPage", JSRouterDisableAlertBeforeBackPage),
         DECLARE_NAPI_FUNCTION("getParams", JSRouterGetParams),
+        DECLARE_NAPI_FUNCTION("testSyncFunc", JSTestSyncFunc),
+        DECLARE_NAPI_FUNCTION("testAsyncFunc", JSTestAsyncFunc),
         DECLARE_NAPI_PROPERTY("RouterMode", routerMode),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(routerDesc) / sizeof(routerDesc[0]), routerDesc));

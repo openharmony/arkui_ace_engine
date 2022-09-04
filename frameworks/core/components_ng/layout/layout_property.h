@@ -82,7 +82,8 @@ public:
         return calcLayoutConstraint_;
     }
 
-    const std::unique_ptr<FlexItemProperty>& GetFlexItemProperty() const {
+    const std::unique_ptr<FlexItemProperty>& GetFlexItemProperty() const
+    {
         return flexItemProperty_;
     }
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const

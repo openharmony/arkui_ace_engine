@@ -1621,7 +1621,6 @@ void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
         return;
     }
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-//    auto alignVal = info[0]->ToNumber<int32_t>();
 
     if (alignVal >= 0 && alignVal <= MAX_ALIGN_VALUE) {
         flexItem->SetAlignSelf((FlexAlign)alignVal);

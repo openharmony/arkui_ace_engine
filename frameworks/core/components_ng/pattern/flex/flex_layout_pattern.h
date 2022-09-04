@@ -1,9 +1,20 @@
-//
-// Created by 陆泽辉 on 2022/8/8.
-//
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-#ifndef ARKUI_ACE_ENGINE_FLEX_LAYOUT_PATTERN_H
-#define ARKUI_ACE_ENGINE_FLEX_LAYOUT_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_LAYOUT_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_LAYOUT_PATTERN_H
 
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
@@ -13,18 +24,21 @@ namespace OHOS::Ace::NG {
 class FlexLayoutPattern : public Pattern {
     
 public:
-    explicit FlexLayoutPattern() = default;
+    FlexLayoutPattern() = default;
     ~FlexLayoutPattern() override = default;
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override {
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
         return MakeRefPtr<FlexLayoutProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override {
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
         return MakeRefPtr<FlexLayoutAlgorithm>();
     }
 
-    bool IsAtomicNode() const override {
+    bool IsAtomicNode() const override
+    {
         return false;
     }
 
@@ -33,4 +47,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // ARKUI_ACE_ENGINE_FLEX_LAYOUT_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_LAYOUT_PATTERN_H
