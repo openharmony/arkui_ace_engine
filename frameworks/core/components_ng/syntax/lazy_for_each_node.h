@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_LAZY_FOR_EACH_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_LAZY_FOR_EACH_NODE_H
 
+#include <stdint.h>
+#include <string>
 #include <unordered_set>
+#include <utility>
 
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
@@ -48,9 +51,12 @@ public:
 
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
 
-    void UpdateCachedItems(const std::unordered_set<int32_t>& activeIndexes);
+    void UpdateCachedItems(std::list<int32_t>& newIndexes);
 
 private:
+    // Saves a list of component keys after the most recent layout update was completed.
+    std::list<int32_t> indexes_;
+
     RefPtr<LazyForEachBuilder> builder_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachNode);

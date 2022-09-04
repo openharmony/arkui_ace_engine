@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H
 
 #include <cstdint>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 #include "base/utils/macros.h"
 
@@ -55,6 +55,8 @@ ACE_EXPORT extern const char ATTRS_COMMON_ZINDEX[];
 
 // root view
 ACE_EXPORT extern const char ROOT_ETS_TAG[];
+// stage view
+ACE_EXPORT extern const char STAGE_ETS_TAG[];
 // page view
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
 // js custom view
@@ -212,7 +214,6 @@ ACE_EXPORT extern const char TOGGLE_ETS_TAG[];
 // scroll
 ACE_EXPORT extern const char SCROLL_COMPONENT_TAG[];
 ACE_EXPORT extern const char SCROLL_ETS_TAG[];
-
 
 // calendar
 ACE_EXPORT extern const char CALENDAR_COMPONENT_TAG[];

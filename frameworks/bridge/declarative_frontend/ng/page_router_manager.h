@@ -17,8 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_PAGE_ROUTER_MANAGER_H
 
 #include <cstdint>
-#include <stack>
+#include <list>
 #include <string>
+#include <utility>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -79,20 +80,16 @@ public:
     void DisableAlertBeforeBackPage();
 
     // router operation
-    void Push(const RouterPageInfo& target, const std::string& params);
+    void Push(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
     bool Pop();
-    void Replace(const RouterPageInfo& target, const std::string& params) {}
+    void Replace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
     void BackWithTarget(const RouterPageInfo& target, const std::string& params);
-    void Clear() {}
-    int32_t GetStackSize() const
-    {
-        return 0;
-    }
-    void GetState(int32_t& index, std::string& name, std::string& path) {}
-    std::string GetParams() const
-    {
-        return "";
-    }
+    void Clear();
+    int32_t GetStackSize() const;
+
+    void GetState(int32_t& index, std::string& name, std::string& path);
+
+    std::string GetParams() const;
 
     RefPtr<FrameNode> GetCurrentPageNode() const
     {
@@ -100,7 +97,7 @@ public:
             LOGE("fail to get current page node due to page is null");
             return nullptr;
         }
-        return pageRouterStack_.top().Upgrade();
+        return pageRouterStack_.back().Upgrade();
     }
 
     std::string GetCurrentPageUrl();
@@ -112,21 +109,29 @@ private:
     // page id manage
     int32_t GenerateNextPageId();
 
-    void StartPush(const RouterPageInfo& target, const std::string& params);
+    std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url);
+
+    void StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
     void StartBack(const RouterPageInfo& target, const std::string& params);
+    void StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD);
     void BackCheckAlert(const RouterPageInfo& target, const std::string& params);
 
     // page operations
-    void LoadPage(int32_t pageId, const RouterPageInfo& target, const std::string& params, bool isRestore = false);
-    void PopPage();
+    void LoadPage(int32_t pageId, const RouterPageInfo& target, const std::string& params, bool isRestore = false,
+        bool needHideLast = true);
+    void MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, bool needHideLast);
+    void PopPage(const std::string& params, bool needShowNext);
+    void PopPageToIndex(int32_t index, const std::string& params, bool needShowNext);
 
-    static bool OnPageReady(const RefPtr<FrameNode>& pageNode);
-    static bool OnPopPage();
+    static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast);
+    static bool OnPopPage(bool needShowNext);
+    static bool OnPopPageToIndex(int32_t index, bool needShowNext);
+    static bool OnCleanPageStack();
 
     RefPtr<Framework::ManifestParser> manifestParser_;
     LoadPageCallback loadJs_;
     int32_t pageId_ = 0;
-    std::stack<WeakPtr<FrameNode>> pageRouterStack_;
+    std::list<WeakPtr<FrameNode>> pageRouterStack_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PageRouterManager);
 };

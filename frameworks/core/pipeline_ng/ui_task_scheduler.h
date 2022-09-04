@@ -67,9 +67,8 @@ private:
 
 class ACE_EXPORT UITaskScheduler final {
 public:
+    UITaskScheduler() = default;
     ~UITaskScheduler() = default;
-
-    static UITaskScheduler* GetInstance();
 
     // Called on Main Thread.
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
@@ -79,46 +78,37 @@ public:
     void FlushRenderTask(bool forceUseMainThread = false);
     void FlushTask();
 
-    void UpdateCurrentRootId(uint32_t id)
-    {
-        currentRootId_ = id;
-    }
-
     void UpdateCurrentPageId(uint32_t id)
     {
         currentPageId_ = id;
     }
 
 private:
-    UITaskScheduler() = default;
-
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight)
         {
-            if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
+            auto left = nodeLeft.Upgrade();
+            auto right = nodeRight.Upgrade();
+            if (!left || !right) {
+                return false;
+            }
+            if (left->GetDepth() < right->GetDepth()) {
                 return true;
             }
-            if (nodeLeft->GetDepth() == nodeRight->GetDepth()) {
-                return nodeLeft < nodeRight;
+            if (left->GetDepth() == right->GetDepth()) {
+                return left < right;
             }
             return false;
         }
     };
 
-    using PageDirtySet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
+    using PageDirtySet = std::set<WeakPtr<FrameNode>, NodeCompare<WeakPtr<FrameNode>>>;
     using RootDirtyMap = std::unordered_map<uint32_t, PageDirtySet>;
 
-    std::unordered_map<uint32_t, RootDirtyMap> dirtyLayoutNodes_;
+    RootDirtyMap dirtyLayoutNodes_;
+    RootDirtyMap dirtyRenderNodes_;
 
-    std::unordered_map<uint32_t, RootDirtyMap> dirtyRenderNodes_;
-
-    // Singleton instance
-    static std::unique_ptr<UITaskScheduler> instance_;
-
-    static std::mutex mutex_;
-
-    uint32_t currentRootId_ = 0;
     uint32_t currentPageId_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(UITaskScheduler);

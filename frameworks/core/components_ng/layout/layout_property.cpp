@@ -107,8 +107,17 @@ void LayoutProperty::CheckSelfIdealSize()
     if (measureType_ == MeasureType::MATCH_PARENT) {
         layoutConstraint_->UpdateSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
     }
-    layoutConstraint_->selfIdealSize.UpdateSizeWhenLarger(layoutConstraint_->minSize);
-    layoutConstraint_->selfIdealSize.UpdateSizeWhenSmaller(layoutConstraint_->maxSize);
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    if (calcLayoutConstraint_->minSize.has_value()) {
+        layoutConstraint_->selfIdealSize.UpdateSizeWhenLarger(ConvertToSize(calcLayoutConstraint_->minSize.value(),
+            layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+    }
+    if (calcLayoutConstraint_->maxSize.has_value()) {
+        layoutConstraint_->selfIdealSize.UpdateSizeWhenSmaller(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
+            layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+    }
 }
 
 LayoutConstraintF LayoutProperty::CreateChildConstraint() const

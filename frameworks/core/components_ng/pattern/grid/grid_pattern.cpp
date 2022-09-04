@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -75,7 +76,7 @@ bool GridPattern::UpdateScrollPosition(float offset, int32_t source)
         gridLayoutInfo_.reachStart_ = false;
     }
     gridLayoutInfo_.currentOffset_ += offset;
-    host->MarkDirtyNode(PROPERTY_REQUEST_NEW_CHILD_NODE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
 

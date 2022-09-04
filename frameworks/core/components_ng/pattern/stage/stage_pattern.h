@@ -29,11 +29,6 @@ public:
     StagePattern() = default;
     ~StagePattern() override = default;
 
-    bool IsRootPattern() const override
-    {
-        return true;
-    }
-
     bool IsMeasureBoundary() const override
     {
         return true;
@@ -42,6 +37,14 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    void OnAttachToFrameNode() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     }
 
 private:

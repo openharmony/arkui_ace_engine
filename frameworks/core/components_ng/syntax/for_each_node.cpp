@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 void MakeNodeMapById(const std::list<RefPtr<UINode>>& nodes, const std::list<std::string>& ids,
-    std::map<std::string, Ace::RefPtr<UINode>>& result)
+    std::map<std::string, RefPtr<UINode>>& result)
 {
     ACE_DCHECK(ids.size() == nodes.size());
     auto idsIter = ids.begin();
@@ -73,7 +73,7 @@ void ForEachNode::CompareAndUpdateChildren()
 
     // create map id -> Node
     // old children
-    std::map<std::string, Ace::RefPtr<UINode>> oldNodeByIdMap;
+    std::map<std::string, RefPtr<UINode>> oldNodeByIdMap;
     MakeNodeMapById(tempChildren_, tempIds_, oldNodeByIdMap);
 
     int additionalChildIndex = 0;

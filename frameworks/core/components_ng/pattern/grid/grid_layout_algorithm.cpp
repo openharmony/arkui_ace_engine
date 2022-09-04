@@ -48,7 +48,6 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float crossSize = GetCrossAxisSize(idealSize, axis);
     FillGridViewportAndMeasureChildren(mainSize, crossSize, gridLayoutProperty, layoutWrapper);
     StripItemsOutOfViewport();
-    layoutWrapper->SetForceSyncRenderTree();
 }
 
 void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
