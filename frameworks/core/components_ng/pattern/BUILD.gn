@@ -25,6 +25,8 @@ build_component_ng("pattern_ng") {
     "divider/divider_layout_algorithm.cpp",
     "divider/divider_pattern.cpp",
     "divider/divider_view.cpp",
+    "flex/flex_layout_algorithm.cpp",
+    "flex/flex_view.cpp",
     "image/image_layout_algorithm.cpp",
     "image/image_pattern.cpp",
     "image/image_view.cpp",

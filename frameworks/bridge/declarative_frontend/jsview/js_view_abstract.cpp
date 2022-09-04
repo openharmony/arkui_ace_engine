@@ -1615,8 +1615,12 @@ void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsAlignSelf", info, checkList)) {
         return;
     }
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     auto alignVal = info[0]->ToNumber<int32_t>();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetAlignSelf(alignVal);
+        return;
+    }
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
 
     if (alignVal >= 0 && alignVal <= MAX_ALIGN_VALUE) {
         flexItem->SetAlignSelf((FlexAlign)alignVal);
