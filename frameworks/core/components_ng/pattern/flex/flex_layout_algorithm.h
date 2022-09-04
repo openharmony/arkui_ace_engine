@@ -47,9 +47,9 @@ struct MagicLayoutNode {
 
 
 struct BaselineProperties {
-    float maxBaselineDistance = 0.0;
-    float maxDistanceAboveBaseline = 0.0;
-    float maxDistanceBelowBaseline = 0.0;
+    float maxBaselineDistance = 0.0f;
+    float maxDistanceAboveBaseline = 0.0f;
+    float maxDistanceBelowBaseline = 0.0f;
 };
 
 class ACE_EXPORT FlexLayoutAlgorithm : public LayoutAlgorithm {
