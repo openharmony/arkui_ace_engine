@@ -74,6 +74,7 @@ void ImageStateManager::HandleCommandByUnloadedState(ImageLoadingCommand command
 void ImageStateManager::HandleCommandByDataLoadingState(ImageLoadingCommand command)
 {
     switch (command) {
+        CASE_OF_STATE_TRANSITION(MAKE_CANVAS_IMAGE_FAIL, LOAD_FAIL, LoadFail);
         CASE_OF_STATE_TRANSITION(LOAD_DATA_SUCCESS, DATA_READY, DataReady);
         CASE_OF_STATE_TRANSITION(LOAD_DATA_FAIL, LOAD_FAIL, LoadFail);
         DEFAULT_CASE_OF_STATE_TRANSITION();

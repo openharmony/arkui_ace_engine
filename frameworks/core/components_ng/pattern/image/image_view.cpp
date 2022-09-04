@@ -53,4 +53,32 @@ void ImageView::SetImageInterpolation(ImageInterpolation imageInterpolation)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, imageInterpolation);
 }
 
+void ImageView::SetImageRepeat(ImageRepeat imageRepeat)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat);
+}
+
+void ImageView::SetImageSourceSize(const std::pair<Dimension, Dimension>& sourceSize)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize);
+}
+
+void ImageView::SetOnError(ErrorEvent&& onError)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnError(std::move(onError));
+}
+
+void ImageView::SetOnComplete(CompleteEvent&& onComplete)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(onComplete));
+}
+
 } // namespace OHOS::Ace::NG

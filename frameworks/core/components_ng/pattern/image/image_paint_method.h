@@ -36,11 +36,17 @@ public:
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(canvasImage_, nullptr);
-
         auto offset = paintWrapper->GetContentOffset();
+        auto contentSize = paintWrapper->GetContentSize();
         ImagePainter imagePainter(canvasImage_);
-        return [imagePainter, offset, ImagePaintConfig = imagePaintConfig_](
-                   RSCanvas& canvas) { imagePainter.DrawImage(canvas, offset, ImagePaintConfig); };
+        return [imagePainter, offset, ImagePaintConfig = imagePaintConfig_, contentSize](RSCanvas& canvas) {
+            if (ImagePaintConfig.imageRepeat_ == ImageRepeat::NOREPEAT) {
+                imagePainter.DrawImage(canvas, offset, ImagePaintConfig);
+                return;
+            }
+            imagePainter.DrawImageWithRepeat(canvas, ImagePaintConfig,
+                RectF(offset.GetX(), offset.GetY(), contentSize.Width(), contentSize.Height()));
+        };
     }
 
 private:

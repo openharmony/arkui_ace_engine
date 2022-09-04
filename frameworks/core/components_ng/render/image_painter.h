@@ -30,14 +30,18 @@ struct ImagePaintConfig {
     RectF srcRect_;
     RectF dstRect_;
     ImageRenderMode renderMode_ = ImageRenderMode::ORIGINAL;
+    ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
+    ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
 };
 
 class ImagePainter {
 public:
-    ImagePainter(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
+    explicit ImagePainter(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
     ~ImagePainter() = default;
 
     void DrawImage(RSCanvas& canvas, const OffsetF& offset, const ImagePaintConfig& imagePaintConfig) const;
+
+    void DrawImageWithRepeat(RSCanvas& canvas, const ImagePaintConfig& ImagePaintConfig, const RectF& rect) const;
 
     static void ApplyImageFit(
         ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect);
