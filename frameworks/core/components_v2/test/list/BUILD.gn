@@ -17,7 +17,10 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 ohos_unittest("list_v2_test") {
   module_out_path = "$test_output_path/list"
 
-  sources = [ "list_item_test.cpp" ]
+  sources = [
+    "list_item_group_test.cpp",
+    "list_item_test.cpp",
+  ]
 
   include_dirs = [
     "$ace_root",
