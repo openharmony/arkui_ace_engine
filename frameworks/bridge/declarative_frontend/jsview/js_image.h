@@ -69,6 +69,7 @@ public:
     static void SetBottomBorderWidth(const Dimension& value);
     static void SetBorderRadius(const Dimension& value);
     static void JsOpacity(const JSCallbackInfo& info);
+    static void JsBlur(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
