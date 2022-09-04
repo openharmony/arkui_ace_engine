@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_item.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/pattern/grid/grid_item_view.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_mouse_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/pipeline/base/element_register.h"
@@ -24,6 +25,10 @@ namespace OHOS::Ace::Framework {
 
 void JSGridItem::Create(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::GridItemView::Create();
+        return;
+    }
     auto container = Container::Current();
     if (!container) {
         LOGE("fail to get container");
