@@ -23,8 +23,18 @@
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
+#include <chrono>
+#include<queue>
+
 namespace OHOS::Ace {
 namespace {
+
+struct MouseClickInfo {
+    double x = -1;
+    double y = -1;
+    TimeStamp start;
+};
+
 #ifdef OHOS_STANDARD_SYSTEM
 struct TouchInfo {
     double x = -1;
@@ -67,6 +77,8 @@ public:
     void OnAttachContext() override;
     void OnMouseEvent(const MouseEvent& event);
     bool HandleMouseEvent(const MouseEvent& event) override;
+    void SendDoubleClickEvent(const MouseClickInfo& info);
+    bool HandleDoubleClickEvent(const MouseEvent& event);
     void HandleKeyEvent(const KeyEvent& keyEvent);
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -78,7 +90,6 @@ public:
     void HandleTouchUp(const TouchEventInfo& info, bool fromOverlay);
     void HandleTouchMove(const TouchEventInfo& info, bool fromOverlay);
     void HandleTouchCancel(const TouchEventInfo& info);
-    void HandleDoubleClick(const ClickInfo& info);
 
     // Related to text overlay
     void SetUpdateHandlePosition(
@@ -159,7 +170,6 @@ private:
     void OnDragWindowDropEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
 
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
-    RefPtr<ClickRecognizer> doubleClickRecognizer_ = nullptr;
     OnMouseCallback onMouse_;
     OnKeyEventCallback onKeyEvent_;
     RefPtr<TextOverlayComponent> textOverlay_;
@@ -181,6 +191,7 @@ private:
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
+    std::queue<MouseClickInfo> doubleClickQueue_;
 };
 
 } // namespace OHOS::Ace
