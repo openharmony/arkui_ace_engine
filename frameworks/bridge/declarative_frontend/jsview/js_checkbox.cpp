@@ -14,16 +14,39 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_checkbox.h"
+#include <optional>
+#include <string>
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/checkable/checkable_component.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/checkbox/checkbox_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSCheckbox::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto checkboxName = std::optional<std::string>();
+        auto checkboxGroup = std::optional<std::string>();
+        if ((info.Length() >= 1) && info[0]->IsObject()) {
+            auto paramObject = JSRef<JSObject>::Cast(info[0]);
+            auto name = paramObject->GetProperty("name");
+            auto group = paramObject->GetProperty("group");
+            if (name->IsString()) {
+                checkboxName = name->ToString();
+            }
+            if (group->IsString()) {
+                checkboxGroup = group->ToString();
+            }
+        }
+        NG::CheckBoxView::Create(checkboxName, checkboxGroup);
+        return;
+    }
+
     RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
     auto checkboxComponent = AceType::MakeRefPtr<OHOS::Ace::CheckboxComponent>(checkBoxTheme);
     if ((info.Length() >= 1) && info[0]->IsObject()) {
@@ -87,6 +110,10 @@ void JSCheckbox::SetSelect(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments, arg is not a bool");
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::CheckBoxView::SetSelect(info[0]->ToBoolean());
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
     checkboxComponent->SetValue(info[0]->ToBoolean());
@@ -94,6 +121,20 @@ void JSCheckbox::SetSelect(const JSCallbackInfo& info)
 
 void JSCheckbox::SetOnChange(const JSCallbackInfo& args)
 {
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool select) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("CheckBox.onChange");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(select));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::CheckBoxView::SetOnChange(std::move(onChange));
+        return;
+    }
     if (!JSViewBindEvent(&CheckboxComponent::SetOnChange, args)) {
         LOGW("Failed to bind event");
     }
@@ -116,6 +157,12 @@ void JSCheckbox::JsWidth(const JSRef<JSVal>& jsValue)
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetWidth(NG::CalcLength(value));
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     Dimension padding;
     auto box = stack->GetBoxComponent();
@@ -143,6 +190,12 @@ void JSCheckbox::JsHeight(const JSRef<JSVal>& jsValue)
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetHeight(NG::CalcLength(value));
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto box = stack->GetBoxComponent();
     Dimension padding;
@@ -181,6 +234,12 @@ void JSCheckbox::SelectedColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], selectedColor)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::CheckBoxView::SetSelectedColor(selectedColor);
+        return;
+    }
+
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto checkable = AceType::DynamicCast<CheckboxComponent>(mainComponent);
     if (checkable) {
@@ -197,6 +256,15 @@ void JSCheckbox::JsPadding(const JSCallbackInfo& info)
     }
     if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
         LOGE("arg is not a string, number or object.");
+        return;
+    }
+
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetPadding(NG::CalcLength(value));
         return;
     }
 
