@@ -17,7 +17,9 @@
 
 #include <cstdint>
 
+#include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
@@ -249,6 +251,48 @@ void JSListItem::JsBorderRadius(const JSCallbackInfo& info)
     JSViewSetProperty(&V2::ListItemComponent::SetBorderRadius, borderRadius);
 }
 
+void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
+        DragItemInfo itemInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
+
+        auto ret = func->Execute(info, extraParams);
+        if (!ret->IsObject()) {
+            LOGE("builder param is not an object.");
+            return itemInfo;
+        }
+        auto component = ParseDragItemComponent(ret);
+        if (component) {
+            LOGI("use custom builder param.");
+            itemInfo.customComponent = component;
+            return itemInfo;
+        }
+
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+#if !defined(PREVIEW)
+        auto pixmap = builderObj->GetProperty("pixelMap");
+        itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
+#endif
+        auto extraInfo = builderObj->GetProperty("extraInfo");
+        ParseJsString(extraInfo, itemInfo.extraInfo);
+        component = ParseDragItemComponent(builderObj->GetProperty("builder"));
+        itemInfo.customComponent = component;
+        return itemInfo;
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragStartId(onDragStartId);
+
+    auto listItem = AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!listItem) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListItemComponent>());
+        return;
+    }
+    listItem->MarkIsDragStart(true);
+}
+
 void JSListItem::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListItem>::Declare("ListItem");
@@ -269,6 +313,7 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSListItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSListItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSListItem>::StaticMethod("onDragStart", &JSListItem::JsOnDragStart);
 
     JSClass<JSListItem>::Inherit<JSContainerBase>();
     JSClass<JSListItem>::Inherit<JSViewAbstract>();
