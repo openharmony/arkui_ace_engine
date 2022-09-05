@@ -92,10 +92,7 @@ template("declarative_js_engine_ark") {
       defines += [ "APP_USE_ARM" ]
     }
 
-    configs = [
-      "$ace_root:ace_config",
-      "$ark_runtime_path/libpandabase:arkbase_public_config",
-    ]
+    configs = [ "$ace_root:ace_config" ]
 
     public_configs = [ "//arkcompiler/ets_runtime:ark_jsruntime_public_config" ]
 
@@ -118,16 +115,17 @@ template("declarative_js_engine_ark") {
 
     deps = [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
 
-    if (!defined(config.build_for_preview) || !config.build_for_preview) {
+    if (defined(config.build_for_preview) && config.build_for_preview) {
+      deps += [ ":gen_obj_src_abc_mock_system_plugin" ]
+      sources += [ "utils/jsi_module_searcher.cpp" ]
+    } else if (!defined(config.build_for_android) ||
+               !config.build_for_android) {
       sources += [
         "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp",
         "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_value.cpp",
         "$ace_root/frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.cpp",
         "jsi_declarative_utils.cpp",
       ]
-    } else {
-      deps += [ ":gen_obj_src_abc_mock_system_plugin" ]
-      sources += [ "utils/jsi_module_searcher.cpp" ]
     }
 
     # if napi support

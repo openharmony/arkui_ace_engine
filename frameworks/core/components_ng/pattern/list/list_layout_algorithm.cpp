@@ -131,12 +131,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     LOGD("new start index is %{public}d, new end index is %{public}d, offset is %{public}f", startIndex_.value(),
         endIndex_.value(), currentOffset_);
-
-    // TODO: need to find better way to sync render tree.
-    // if index changed, need mark frame node to force sync render tree.
-    if ((preStartIndex_ != startIndex_.value()) || (preEndIndex_ != endIndex_.value())) {
-        layoutWrapper->SetForceSyncRenderTree();
-    }
 }
 
 void ListLayoutAlgorithm::LayoutForward(

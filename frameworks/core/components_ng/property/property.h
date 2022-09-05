@@ -34,8 +34,10 @@ inline constexpr PropertyChangeFlag PROPERTY_UPDATE_LAYOUT = 1 << 1;
 // Affects self position.
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_POSITION = 1 << 2;
 
-// Mark self be measure boundry to remeasure.
-inline constexpr PropertyChangeFlag PROPERTY_REQUEST_NEW_CHILD_NODE = 1 << 3;
+// Mark self be measure boundary to remeasure.
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF = 1 << 3;
+
+// Mark self measure due to child size may change.
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_BY_CHILD_REQUEST = 1 << 4;
 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER = 1 << 5;
@@ -47,7 +49,7 @@ bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNeedRequestMeasureAndLayout(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckNeedRequestParent(PropertyChangeFlag propertyChangeFlag);
+bool CheckNeedRequestParentMeasure(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
@@ -55,7 +57,7 @@ bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckPositionFlag(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckRequestNewChildNodeFlag(PropertyChangeFlag propertyChangeFlag);
+bool CheckMeasureSelfFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckUpdateByChildRequest(PropertyChangeFlag propertyChangeFlag);
 

@@ -37,6 +37,12 @@ public:
     void LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) override;
 
+    // Load the je file of the page in NG structure..
+    bool LoadPageSource(const std::string& url) override;
+
+    // Load the app.js file of the FA model in NG structure..
+    bool LoadFaAppSource() override;
+
     // Update running page
     void UpdateRunningPage(const RefPtr<JsAcePage>& page) override;
 

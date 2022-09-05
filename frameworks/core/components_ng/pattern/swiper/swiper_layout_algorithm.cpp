@@ -99,12 +99,6 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         wrapper->Measure(layoutConstraint);
     }
 
-    // TODO: need to find better way to sync render tree.
-    // if index changed, need mark frame node to force sync render tree.
-    if (!inActiveItems_.empty()) {
-        layoutWrapper->SetForceSyncRenderTree();
-    }
-
     // Mark inactive in wrapper.
     for (const auto& index : inActiveItems_) {
         layoutWrapper->RemoveChildInRenderTree(index);

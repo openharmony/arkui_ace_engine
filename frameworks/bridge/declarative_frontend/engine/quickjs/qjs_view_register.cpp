@@ -19,6 +19,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 #include "bridge/common/accessibility/accessibility_node_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -55,6 +56,9 @@ static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc,
     LOGD("Load Document setting root view");
     CreatePageRoot(page, view);
     // We are done, tell to the JSAgePage
+    if (!page) {
+        return JS_UNDEFINED;
+    }
     page->SetPageCreated();
     page->SetDeclarativeOnPageAppearCallback([view]() { view->FireOnShow(); });
     page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });

@@ -77,10 +77,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, b
         return false;
     }
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    if (listLayoutProperty && listLayoutProperty->GetDivider().has_value()) {
-        return true;
-    }
-    return false;
+    return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
 }
 
 void ListPattern::UpdateCurrentOffset(float offset)
@@ -88,7 +85,7 @@ void ListPattern::UpdateCurrentOffset(float offset)
     currentOffset_ = currentOffset_ - offset;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_REQUEST_NEW_CHILD_NODE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 } // namespace OHOS::Ace::NG

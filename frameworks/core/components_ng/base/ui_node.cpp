@@ -19,6 +19,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -47,6 +48,9 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
     it = children_.begin();
     std::advance(it, slot);
     children_.insert(it, child);
+
+    child->SetParent(Claim(this));
+    child->SetDepth(GetDepth() + 1);
     if (onMainTree_) {
         child->AttachToMainTree();
     }
@@ -68,11 +72,8 @@ void UINode::RemoveChild(const RefPtr<UINode>& child)
 
 void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
 {
-    SetParent(parent);
-    SetDepth(parent != nullptr ? parent->GetDepth() + 1 : 1);
-    if (parent) {
-        parent->AddChild(AceType::Claim(this), slot);
-    }
+    CHECK_NULL_VOID(parent);
+    parent->AddChild(AceType::Claim(this), slot);
 }
 
 void UINode::AttachToMainTree()
@@ -200,6 +201,13 @@ void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool f
 {
     for (const auto& child : children_) {
         child->AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
+    }
+}
+
+void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
+{
+    for (const auto& child : children_) {
+        child->OnGenerateOneDepthVisibleFrame(visibleList);
     }
 }
 

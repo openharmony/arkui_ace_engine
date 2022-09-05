@@ -31,21 +31,29 @@ class ACE_EXPORT PageInfo : public AceType {
 public:
     PageInfo() = default;
     ~PageInfo() override = default;
-    PageInfo(int32_t pageId, std::string url) : pageId_(pageId), url_(std::move(url)) {}
+    PageInfo(int32_t pageId, std::string url, std::string path)
+        : pageId_(pageId), url_(std::move(url)), path_(std::move(path))
+    {}
 
     int32_t GetPageId() const
     {
         return pageId_;
     }
 
-    std::string GetPageUrl() const
+    const std::string& GetPageUrl() const
     {
         return url_;
+    }
+
+    const std::string& GetPagePath() const
+    {
+        return path_;
     }
 
 private:
     int32_t pageId_ = 0;
     std::string url_;
+    std::string path_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PageInfo);
 };

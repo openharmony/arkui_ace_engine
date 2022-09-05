@@ -30,8 +30,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT EntryPageInfo : public PageInfo {
     DECLARE_ACE_TYPE(EntryPageInfo, PageInfo)
 public:
-    EntryPageInfo(int32_t pageId, const std::string& url, std::string params)
-        : PageInfo(pageId, url), params_(std::move(params))
+    EntryPageInfo(int32_t pageId, const std::string& url, const std::string& path, std::string params)
+        : PageInfo(pageId, url, path), params_(std::move(params))
     {}
     ~EntryPageInfo() override = default;
 
@@ -40,14 +40,11 @@ public:
         return params_;
     }
 
-    void SetPagePath(const std::string& pagePath)
+    std::string ReplacePageParams(const std::string& param)
     {
-        pagePath_ = pagePath;
-    }
-
-    const std::string& GetPagePath() const
-    {
-        return pagePath_;
+        std::string old(std::move(params_));
+        params_ = param;
+        return old;
     }
 
     void SetPageMap(const RefPtr<Framework::RevSourceMap>& pageMap)
@@ -61,7 +58,6 @@ public:
     }
 
 private:
-    std::string pagePath_;
     std::string params_;
     RefPtr<Framework::RevSourceMap> pageMap_;
 

@@ -516,6 +516,7 @@ template("ace_core_ng_source_set") {
       "gestures/timeout_gesture.cpp",
 
       # pipeline
+      "pipeline/base/constants.cpp",
       "pipeline/base/element_register.cpp",
       "pipeline/base/related_node.cpp",
       "pipeline/pipeline_base.cpp",

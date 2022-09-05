@@ -15,12 +15,32 @@
 
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
+#include <cstdint>
+#include <type_traits>
+#include <utility>
+
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void MakeNodeMapById(const std::list<RefPtr<UINode>>& nodes, const std::list<int32_t>& indexes,
+    std::map<int32_t, RefPtr<UINode>>& result)
+{
+    ACE_DCHECK(ids.size() == nodes.size());
+    auto idsIter = indexes.begin();
+    auto nodeIter = nodes.begin();
+    while (idsIter != indexes.end()) {
+        result.emplace(*idsIter, *nodeIter);
+        ++idsIter;
+        ++nodeIter;
+    }
+}
+} // namespace
 
 RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
     int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
@@ -55,18 +75,47 @@ void LazyForEachNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& paren
     parent->SetLayoutWrapperBuilder(lazyLayoutWrapperBuilder);
 }
 
-void LazyForEachNode::UpdateCachedItems(const std::unordered_set<int32_t>& activeIndexes)
+void LazyForEachNode::UpdateCachedItems(std::list<int32_t>& newIndexes)
 {
-    children_.clear();
+    ACE_FUNCTION_TRACE();
+    std::list<RefPtr<UINode>> oldChildren;
+    std::swap(oldChildren, children_);
     auto& cachedItems = builder_->ModifyCacheItems();
-    for (auto iter = cachedItems.begin(); iter != cachedItems.end();) {
-        if (activeIndexes.count(iter->first) > 0) {
-            AddChild(iter->second.second);
-            ++iter;
+
+    // create map id -> Node
+    // old children
+    std::map<int32_t, RefPtr<UINode>> oldNodeByIdMap;
+    MakeNodeMapById(oldChildren, indexes_, oldNodeByIdMap);
+
+    // result of id gen function of most re-recent render
+    // create a map for quicker find/search
+    std::unordered_set<int32_t> newIndexSet(newIndexes.begin(), newIndexes.end());
+
+    // result of id gen function of previous render/re-render
+    // create a map for quicker find/search
+    std::unordered_set<int32_t> oldIndexSet(indexes_.begin(), indexes_.end());
+
+    for (const auto& newIndex : newIndexes) {
+        if (oldIndexSet.find(newIndex) == oldIndexSet.end()) {
+            // found a newly added ID
+            // insert new child item.
+            // Call AddChild to execute AttachToMainTree of new child.
+            AddChild(cachedItems[newIndex].second);
         } else {
-            iter = cachedItems.erase(iter);
+            // the ID was used before, only need to update the child position.
+            children_.emplace_back(oldNodeByIdMap[newIndex]);
+            oldIndexSet.erase(newIndex);
         }
     }
+
+    // the remain oldIndexSet is not used and need to remove.
+    for (const auto& index : oldIndexSet) {
+        cachedItems.erase(index);
+    }
+
+    // final swap old and new index.
+    std::swap(indexes_, newIndexes);
+
     LOGD("cachedItems size is %{public}d", static_cast<int32_t>(cachedItems.size()));
 }
 

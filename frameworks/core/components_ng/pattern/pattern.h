@@ -27,7 +27,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 // Pattern is the base class for different measure, layout and paint behavior.

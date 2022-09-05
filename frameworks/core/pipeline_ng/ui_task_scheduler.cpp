@@ -22,21 +22,6 @@
 
 namespace OHOS::Ace::NG {
 
-std::unique_ptr<UITaskScheduler> UITaskScheduler::instance_ = nullptr;
-
-std::mutex UITaskScheduler::mutex_ = std::mutex();
-
-UITaskScheduler* UITaskScheduler::GetInstance()
-{
-    if (!instance_) {
-        std::lock_guard<std::mutex> lockGuard(mutex_);
-        if (!instance_) {
-            instance_.reset(new UITaskScheduler);
-        }
-    }
-    return instance_.get();
-}
-
 void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
@@ -44,7 +29,7 @@ void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
         LOGW("dirty is null");
         return;
     }
-    dirtyLayoutNodes_[dirty->GetRootId()][dirty->GetPageId()].emplace(dirty);
+    dirtyLayoutNodes_[dirty->GetPageId()].emplace(dirty);
 }
 
 void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
@@ -54,7 +39,7 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
         LOGW("dirty is null");
         return;
     }
-    dirtyRenderNodes_[dirty->GetRootId()][dirty->GetPageId()].emplace(dirty);
+    dirtyRenderNodes_[dirty->GetPageId()].emplace(dirty);
 }
 
 void UITaskScheduler::FlushLayoutTask(bool onCreate, bool forceUseMainThread)
@@ -63,16 +48,18 @@ void UITaskScheduler::FlushLayoutTask(bool onCreate, bool forceUseMainThread)
     ACE_FUNCTION_TRACE();
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     // Priority task creation
-    for (auto&& rootNodes : dirtyLayoutNodes) {
-        for (auto&& pageNodes : rootNodes.second) {
-            for (auto&& node : pageNodes.second) {
-                auto task = node->CreateLayoutTask(onCreate, forceUseMainThread);
-                if (task) {
-                    if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
-                        (*task)();
-                    } else {
-                        LOGW("need to use multithread feature");
-                    }
+    for (auto&& pageNodes : dirtyLayoutNodes) {
+        for (auto&& weak : pageNodes.second) {
+            auto node = weak.Upgrade();
+            if (!node) {
+                continue;
+            }
+            auto task = node->CreateLayoutTask(onCreate, forceUseMainThread);
+            if (task) {
+                if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
+                    (*task)();
+                } else {
+                    LOGW("need to use multithread feature");
                 }
             }
         }
@@ -85,16 +72,18 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     ACE_FUNCTION_TRACE();
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
-    for (auto&& rootNodes : dirtyRenderNodes) {
-        for (auto&& pageNodes : rootNodes.second) {
-            for (auto&& node : pageNodes.second) {
-                auto task = node->CreateRenderTask(forceUseMainThread);
-                if (task) {
-                    if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
-                        (*task)();
-                    } else {
-                        LOGW("need to use multithread feature");
-                    }
+    for (auto&& pageNodes : dirtyRenderNodes) {
+        for (auto&& weak : pageNodes.second) {
+            auto node = weak.Upgrade();
+            if (!node) {
+                continue;
+            }
+            auto task = node->CreateRenderTask(forceUseMainThread);
+            if (task) {
+                if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
+                    (*task)();
+                } else {
+                    LOGW("need to use multithread feature");
                 }
             }
         }

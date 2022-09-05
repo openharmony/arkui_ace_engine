@@ -43,7 +43,7 @@ bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, 
     LOGI("Ark: create jsvm");
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
-#if !defined(PREVIEW)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
     option.SetArkProperties(SystemProperties::GetArkProperties());
     option.SetGcThreadNum(SystemProperties::GetGcThreadNum());
     option.SetLongPauseTime(SystemProperties::GetLongPauseTime());
@@ -76,7 +76,7 @@ void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
         if (!usingExistVM_) {
-#if !defined(PREVIEW)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
             JSNApi::StopDebugger(vm_);
 #endif
             JSNApi::DestroyJSVM(vm_);
@@ -115,7 +115,7 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string& fileName)
 {
     JSExecutionScope executionScope(vm_);
     if (!libPath_.empty()) {
-#if !defined(PREVIEW)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
         JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_,
             debuggerPostTask_);
 #endif

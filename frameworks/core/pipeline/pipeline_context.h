@@ -847,16 +847,6 @@ public:
 
     void SetShortcutKey(const KeyEvent& event);
 
-    void SetEventManager(const RefPtr<EventManager>& eventManager)
-    {
-        eventManager_ = eventManager;
-    }
-
-    RefPtr<EventManager> GetEventManager() const
-    {
-        return eventManager_;
-    }
-
     void SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager)
     {
         textOverlayManager_ = textOverlayManager;

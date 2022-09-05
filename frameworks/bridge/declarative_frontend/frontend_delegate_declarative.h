@@ -140,18 +140,20 @@ public:
     void Push(const PageTarget& target, const std::string& params);
     void Replace(const PageTarget& target, const std::string& params);
     void BackWithTarget(const PageTarget& target, const std::string& params);
+
     void Push(const std::string& uri, const std::string& params) override;
     void PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
     void Replace(const std::string& uri, const std::string& params) override;
     void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
     void Back(const std::string& uri, const std::string& params) override;
-    void PostponePageTransition() override;
-    void LaunchPageTransition() override;
     void Clear() override;
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
-    size_t GetComponentsCount() override;
     std::string GetParams() override;
+
+    void PostponePageTransition() override;
+    void LaunchPageTransition() override;
+    size_t GetComponentsCount() override;
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override;
 
     void PostJsTask(std::function<void()>&& task) override;

@@ -31,6 +31,8 @@
 #include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -84,7 +86,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    UITaskScheduler::GetInstance()->AddDirtyLayoutNode(dirty);
+    taskScheduler_.AddDirtyLayoutNode(dirty);
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -93,7 +95,7 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    UITaskScheduler::GetInstance()->AddDirtyRenderNode(dirty);
+    taskScheduler_.AddDirtyRenderNode(dirty);
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -171,7 +173,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 {
     FlushDirtyNodeUpdate();
     FlushTouchEvents();
-    UITaskScheduler::GetInstance()->FlushTask();
+    taskScheduler_.FlushTask();
     FlushMessages();
 }
 
@@ -179,7 +181,7 @@ void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
     rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
     rootNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
@@ -189,14 +191,24 @@ void PipelineContext::SetupRootElement()
     layoutConstraint.maxSize = idealSize;
     rootNode_->UpdateLayoutConstraint(layoutConstraint);
     window_->SetRootFrameNode(rootNode_);
-    stageManager_ = MakeRefPtr<StageManager>(rootNode_);
     rootNode_->AttachToMainTree();
+
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+    stageNode->MountToParent(rootNode_);
+    stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     LOGI("SetupRootElement success!");
 }
 
-RefPtr<StageManager> PipelineContext::GetStageManager()
+const RefPtr<StageManager>& PipelineContext::GetStageManager()
 {
     return stageManager_;
+}
+
+const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
+{
+    return overlayManager_;
 }
 
 void PipelineContext::SetRootRect(double width, double height, double offset)

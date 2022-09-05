@@ -48,6 +48,19 @@ void JSRow::SetAlignItems(int32_t value)
     }
 }
 
+void JSRow::SetJustifyContent(int32_t value)
+{
+    if ((value == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
+        (value == static_cast<int32_t>(FlexAlign::FLEX_END)) || (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
+        (value == static_cast<int32_t>(FlexAlign::SPACE_BETWEEN)) ||
+        (value == static_cast<int32_t>(FlexAlign::SPACE_AROUND)) ||
+        (value == static_cast<int32_t>(FlexAlign::SPACE_EVENLY))) {
+        NG::RowView::JustifyContent(static_cast<FlexAlign>(value));
+    } else {
+        LOGE("invalid value for justifyContent");
+    }
+}
+
 // TODO: VerticalAlignDeclaration is not used, remove later
 void VerticalAlignDeclaration::ConstructorCallback(const JSCallbackInfo& args) {}
 

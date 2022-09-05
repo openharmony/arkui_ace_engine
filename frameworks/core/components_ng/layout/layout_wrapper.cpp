@@ -16,6 +16,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 
 #include "base/log/ace_trace.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -30,11 +31,10 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
         LOGI("index is of out boundary, total count: %{public}d, target index: %{public}d", currentChildCount_, index);
         return nullptr;
     }
-    auto iter = children_.find(index);
-    if (iter != children_.end()) {
+    auto iter = childrenMap_.find(index);
+    if (iter != childrenMap_.end()) {
         if (addToRenderTree) {
             iter->second->isActive_ = true;
-            pendingRender_.emplace(index, iter->second);
         }
         return iter->second;
     }
@@ -43,18 +43,13 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
     CHECK_NULL_RETURN(wrapper, nullptr);
     if (addToRenderTree) {
         wrapper->isActive_ = true;
-        pendingRender_.emplace(index, wrapper);
     }
     return wrapper;
 }
 
 std::list<RefPtr<LayoutWrapper>> LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)
 {
-    std::list<RefPtr<LayoutWrapper>> childLayoutWrappers;
-    for (const auto& [index, wrapper] : children_) {
-        wrapper->isActive_ = true;
-        childLayoutWrappers.emplace_back(wrapper);
-    }
+    std::list<RefPtr<LayoutWrapper>> childLayoutWrappers = children_;
     if (layoutWrapperBuilder_) {
         auto buildItems = layoutWrapperBuilder_->ExpandAllChildWrappers();
         auto index = layoutWrapperBuilder_->GetStartIndex();
@@ -63,10 +58,10 @@ std::list<RefPtr<LayoutWrapper>> LayoutWrapper::GetAllChildrenWithBuild(bool add
         childLayoutWrappers.splice(insertIter, buildItems);
     }
     if (addToRenderTree) {
-        int32_t index = 0;
         for (const auto& child : childLayoutWrappers) {
-            child->isActive_ = true;
-            pendingRender_.emplace(index++, child);
+            if (!child->isActive_) {
+                child->isActive_ = true;
+            }
         }
     }
     return childLayoutWrappers;
@@ -74,25 +69,15 @@ std::list<RefPtr<LayoutWrapper>> LayoutWrapper::GetAllChildrenWithBuild(bool add
 
 void LayoutWrapper::RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper)
 {
-    auto iter = std::find_if(
-        pendingRender_.begin(), pendingRender_.end(), [wrapper](const auto& value) { return value.second == wrapper; });
-    if (iter == pendingRender_.end()) {
-        LOGW("can not find current wrapper in pending render map");
-        return;
-    }
-    iter->second->isActive_ = false;
-    pendingRender_.erase(iter);
+    CHECK_NULL_VOID(wrapper);
+    wrapper->isActive_ = false;
 }
 
 void LayoutWrapper::RemoveChildInRenderTree(int32_t index)
 {
-    auto iter = pendingRender_.find(index);
-    if (iter == pendingRender_.end()) {
-        LOGW("can not find current wrapper in pending render map");
-        return;
-    }
-    iter->second->isActive_ = false;
-    pendingRender_.erase(iter);
+    auto wrapper = GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(wrapper);
+    wrapper->isActive_ = false;
 }
 
 void LayoutWrapper::ResetHostNode()
@@ -204,21 +189,6 @@ bool LayoutWrapper::SkipMeasureContent() const
     return isContraintNoChanged_;
 }
 
-std::list<RefPtr<FrameNode>> LayoutWrapper::GetChildrenInRenderArea() const
-{
-    std::list<RefPtr<FrameNode>> frameNodes;
-    for (const auto& [index, wrapper] : pendingRender_) {
-        if (!wrapper) {
-            continue;
-        }
-        auto host = wrapper->GetHostNode();
-        if (host) {
-            frameNodes.emplace_back(host);
-        }
-    }
-    return frameNodes;
-}
-
 void LayoutWrapper::MountToHostOnMainThread()
 {
     SwapDirtyLayoutWrapperOnMainThread();
@@ -226,9 +196,9 @@ void LayoutWrapper::MountToHostOnMainThread()
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
-    for (const auto& [index, wrapper] : children_) {
-        if (wrapper) {
-            wrapper->SwapDirtyLayoutWrapperOnMainThread();
+    for (const auto& child : children_) {
+        if (child) {
+            child->SwapDirtyLayoutWrapperOnMainThread();
         }
     }
 
