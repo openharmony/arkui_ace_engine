@@ -285,8 +285,16 @@ void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& 
     if (hitTestResult.empty()) {
         LOGD("mouse hover test result is empty");
     }
-    mouseHoverTestResultsPre_ = std::move(mouseHoverTestResults_);
-    mouseHoverTestResults_ = std::move(hitTestResult);
+    if (event.action == MouseAction::WINDOW_LEAVE) {
+        mouseHoverTestResultsPre_ = std::move(mouseHoverTestResults_);
+        mouseHoverTestResults_.clear();
+    } else if (event.action == MouseAction::WINDOW_ENTER) {
+        mouseHoverTestResultsPre_.clear();
+        mouseHoverTestResults_ = std::move(hitTestResult);
+    }  else {
+        mouseHoverTestResultsPre_ = std::move(mouseHoverTestResults_);
+        mouseHoverTestResults_ = std::move(hitTestResult);
+    }
     mouseHoverNodePre_ = mouseHoverNode_;
     mouseHoverNode_ = hoverNode;
     LOGI("MouseDetect hit test last/new result size = %{public}zu/%{public}zu", mouseHoverTestResultsPre_.size(),
@@ -312,28 +320,17 @@ bool EventManager::DispatchMouseEvent(const MouseEvent& event)
     return false;
 }
 
-bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
+void EventManager::DispatchMouseHoverAnimation(const MouseEvent& event)
 {
     auto hoverNodeCur = mouseHoverNode_.Upgrade();
     auto hoverNodePre = mouseHoverNodePre_.Upgrade();
     if (event.action == MouseAction::PRESS) {
         if (hoverNodeCur) {
             hoverNodeCur->AnimateMouseHoverExit();
-            hoverNodeCur->OnMouseClickDownAnimation();
         }
     } else if (event.action == MouseAction::RELEASE) {
         if (hoverNodeCur) {
-            hoverNodeCur->OnMouseClickUpAnimation();
             hoverNodeCur->AnimateMouseHoverEnter();
-        }
-    } else if (event.button != MouseButton::NONE_BUTTON && event.action == MouseAction::MOVE) {
-        if (hoverNodeCur != hoverNodePre) {
-            if (hoverNodePre) {
-                hoverNodePre->OnMouseClickUpAnimation();
-            }
-            if (hoverNodeCur) {
-                hoverNodeCur->OnMouseClickDownAnimation();
-            }
         }
     } else if (event.button == MouseButton::NONE_BUTTON && event.action == MouseAction::MOVE) {
         if (hoverNodeCur != hoverNodePre) {
@@ -344,7 +341,19 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
                 hoverNodePre->AnimateMouseHoverExit();
             }
         }
+    } else if (event.action == MouseAction::WINDOW_ENTER) {
+        if (hoverNodeCur) {
+            hoverNodeCur->AnimateMouseHoverEnter();
+        }
+    } else if (event.action == MouseAction::WINDOW_LEAVE) {
+        if (hoverNodeCur) {
+            hoverNodeCur->AnimateMouseHoverExit();
+        }
     }
+}
+
+bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
+{
     for (const auto& wp : mouseHoverTestResultsPre_) {
         // get all previous hover nodes while it's not in current hover nodes. Those nodes exit hover
         auto it = std::find(mouseHoverTestResults_.begin(), mouseHoverTestResults_.end(), wp);
