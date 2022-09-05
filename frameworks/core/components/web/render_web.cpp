@@ -28,14 +28,12 @@
 
 namespace OHOS::Ace {
 
-constexpr int32_t DOUBLE_CLICK_FINGERS = 1;
-constexpr int32_t DOUBLE_CLICK_COUNTS = 2;
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
 constexpr int32_t DEFAULT_POINT_X = 0;
 constexpr int32_t DEFAULT_POINT_Y = 50;
 constexpr int32_t DEFAULT_NUMS_ONE = 1;
-
+constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5f;
 RenderWeb::RenderWeb() : RenderNode(true)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -184,6 +182,46 @@ void RenderWeb::SetRootView(int32_t width, int32_t height, int32_t offset)
     pipelineContext->SetRootRect(width, height, offset);
 }
 
+void RenderWeb::SendDoubleClickEvent(const MouseClickInfo& info)
+{
+    if (!delegate_) {
+        LOGE("Touch cancel delegate_ is nullptr");
+        return;
+    }
+    delegate_->OnMouseEvent(info.x,
+        info.y, MouseButton::LEFT_BUTTON, MouseAction::PRESS, DOUBLE_CLICK_NUM);
+}
+
+bool RenderWeb::HandleDoubleClickEvent(const MouseEvent& event)
+{
+    if (event.button != MouseButton::LEFT_BUTTON || event.action != MouseAction::PRESS) {
+        return false;
+    }
+    auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
+    MouseClickInfo info;
+    info.x = localLocation.GetX();
+    info.y = localLocation.GetY();
+    info.start = event.time;
+    if (doubleClickQueue_.empty()) {
+        doubleClickQueue_.push(info);
+        return false;
+    }
+    std::chrono::duration<float> timeout_ = info.start - doubleClickQueue_.back().start;
+    if (timeout_.count() < DEFAULT_DBCLICK_INTERVAL) {
+        SendDoubleClickEvent(info);
+        std::queue<MouseClickInfo> empty;
+        swap(empty, doubleClickQueue_);
+        return true;
+    }
+    if (doubleClickQueue_.size() == 1) {
+        doubleClickQueue_.push(info);
+        return false;
+    }
+    doubleClickQueue_.pop();
+    doubleClickQueue_.push(info);
+    return false;
+}
+
 void RenderWeb::OnMouseEvent(const MouseEvent& event)
 {
     if (!delegate_) {
@@ -197,7 +235,9 @@ void RenderWeb::OnMouseEvent(const MouseEvent& event)
     }
 
     auto localLocation = event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-    delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action, SINGLE_CLICK_NUM);
+    if (!HandleDoubleClickEvent(event)) { 
+        delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), event.button, event.action, SINGLE_CLICK_NUM);
+    }
 
     // clear the recording position, for not move content when virtual keyboard popup when web get focused.
     if (GetCoordinatePoint().GetY() > 0) {
@@ -318,15 +358,6 @@ void RenderWeb::Initialize()
             item->HandleTouchCancel(info);
         }
     });
-    doubleClickRecognizer_ =
-        AceType::MakeRefPtr<ClickRecognizer>(context_, DOUBLE_CLICK_FINGERS, DOUBLE_CLICK_COUNTS);
-    doubleClickRecognizer_->SetOnClick([weakItem = AceType::WeakClaim(this)](const ClickInfo& info) {
-        auto item = weakItem.Upgrade();
-        if (item) {
-            item->HandleDoubleClick(info);
-        }
-    });
-    doubleClickRecognizer_->SetPriority(GesturePriority::High);
 }
 
 void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
@@ -417,17 +448,6 @@ void RenderWeb::HandleTouchCancel(const TouchEventInfo& info)
     delegate_->HandleTouchCancel();
 }
 
-void RenderWeb::HandleDoubleClick(const ClickInfo& info)
-{
-    auto localLocation = info.GetLocalLocation();
-    if (!delegate_) {
-        LOGE("Touch cancel delegate_ is nullptr");
-        return;
-    }
-    delegate_->OnMouseEvent(info.GetLocalLocation().GetX(),
-        info.GetLocalLocation().GetY(), MouseButton::LEFT_BUTTON, MouseAction::PRESS, DOUBLE_CLICK_NUM);
-}
-
 bool RenderWeb::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos, const TouchType& touchType)
 {
     auto context = context_.Upgrade();
@@ -491,11 +511,6 @@ void RenderWeb::OnTouchTestHit(const Offset& coordinateOffset, const TouchRestri
         dragDropGesture_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(dragDropGesture_);
         MarkIsNotSiblingAddRecognizerToResult(true);
-    }
-
-    if (doubleClickRecognizer_ && touchRestrict.sourceType == SourceType::MOUSE) {
-        doubleClickRecognizer_->SetCoordinateOffset(coordinateOffset);
-        result.emplace_back(doubleClickRecognizer_);
     }
 
     if (!touchRecognizer_) {
