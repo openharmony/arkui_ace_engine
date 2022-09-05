@@ -35,7 +35,6 @@ build_component_ng("render_ng") {
       "adapter/flutter_canvas_image.cpp",
       "adapter/flutter_node.cpp",
       "adapter/flutter_render_context.cpp",
-      "adapter/flutter_render_surface.cpp",
       "adapter/flutter_window.cpp",
     ]
   }

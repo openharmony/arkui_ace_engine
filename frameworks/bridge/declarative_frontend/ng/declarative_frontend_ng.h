@@ -114,6 +114,8 @@ public:
     void RebuildAllPages() override;
     void NotifyAppStorage(const std::string& key, const std::string& value) override {}
 
+    RefPtr<NG::PageRouterManager> GetPageRouterManager() const;
+
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return nullptr;

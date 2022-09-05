@@ -80,16 +80,15 @@ void DeclarativeFrontendNG::SetAssetManager(const RefPtr<AssetManager>& assetMan
 
 void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor)
 {
-    auto pageRouterManager = AceType::MakeRefPtr<PageRouterManager>(taskExecutor);
-    auto loadCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                            const std::string& url, const RefPtr<Framework::JsAcePage>& jsPage, bool isMainPage) {
+    auto pageRouterManager = AceType::MakeRefPtr<NG::PageRouterManager>();
+    auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
-            return;
+            return false;
         }
-        jsEngine->LoadJs(url, jsPage, isMainPage);
+        return jsEngine->LoadPageSource(url);
     };
-    pageRouterManager->SetLoadJsCallback(std::move(loadCallback));
+    pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
 
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarativeNG>(taskExecutor);
     delegate_->SetPageRouterManager(pageRouterManager);
@@ -98,8 +97,20 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
     }
 }
 
+RefPtr<NG::PageRouterManager> DeclarativeFrontendNG::GetPageRouterManager() const
+{
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    return delegate_->GetPageRouterManager();
+}
+
 void DeclarativeFrontendNG::RunPage(int32_t pageId, const std::string& url, const std::string& params)
 {
+    if (!pageProfile_.empty()) {
+        // In NG structure and fa mode, first load app.js
+        CHECK_NULL_VOID(jsEngine_);
+        jsEngine_->LoadFaAppSource();
+    }
+    // Not use this pageId from backend, manage it in FrontendDelegateDeclarative.
     if (delegate_) {
         delegate_->RunPage(url, params, pageProfile_);
     }

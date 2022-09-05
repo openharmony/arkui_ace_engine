@@ -56,6 +56,8 @@ void JSList::JsHeight(const JSCallbackInfo& info)
     JSViewAbstract::JsHeight(info);
 }
 
+void JSList::SetSticky(int32_t sticky) {}
+
 void JSList::SetListItemAlign(int32_t itemAlignment) {}
 
 void JSList::SetLanes(const JSCallbackInfo& info) {}
