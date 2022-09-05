@@ -21,6 +21,7 @@ build_component("image") {
     "image_animator_element.cpp",
     "image_component.cpp",
     "image_element.cpp",
+    #"image_model_impl.cpp",
     "render_image.cpp",
     "render_image_creator.cpp",
   ]

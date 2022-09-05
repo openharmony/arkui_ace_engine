@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"

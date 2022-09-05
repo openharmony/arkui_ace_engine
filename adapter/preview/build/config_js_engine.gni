@@ -13,5 +13,6 @@
 
 declare_args() {
   # Enable Ark as Previewer JS engine, set it 'false' to use QuickJS instead
-  enable_ark_preview = true
+
+   enable_ark_preview = true
 }

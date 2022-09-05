@@ -19,20 +19,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#if !defined(PREVIEW)
-#include "napi/native_api.h"
-#include "native_engine/native_engine.h"
-#endif
-
-#ifdef USE_QUICKJS_ENGINE
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "third_party/quickjs/quickjs.h"
-#ifdef __cplusplus
-}
-#endif
-#endif
 
 namespace OHOS::Ace::Framework {
 class JSImage : public JSViewAbstract, public JSInteractableView {

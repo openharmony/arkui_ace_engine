@@ -1,0 +1,234 @@
+/*
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_MODEL_IMPL_CPP
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_MODEL_IMPL_CPP
+
+
+#include "core/components/image/image_model_impl.h"
+
+#include "core/components/image/image_component.h"
+#include "core/components/image/image_event.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+
+namespace OHOS::Ace::Framework {
+
+
+void ImageModelImpl::SetAlt(std::string src)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetAlt(src);
+    }
+}
+
+void ImageModelImpl::SetImageFit(int32_t value)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetImageFit(static_cast<ImageFit>(value));
+    }
+}
+
+void ImageModelImpl::SetMatchTextDirection(bool value)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetMatchTextDirection(value);
+    }
+}
+
+void ImageModelImpl::SetFitMaxSize(bool value)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetFitMaxSize(!value);
+    }
+}
+
+void ImageModelImpl::SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback)
+{
+    auto onCompleteEvent = EventMarker([func = std::move(callback)](const BaseEventInfo* info)
+    {
+        auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageSuccessEvent>(info);
+        func(*eventInfo);
+    });
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetLoadSuccessEvent(onCompleteEvent);
+}
+
+void ImageModelImpl::SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback)
+{
+    auto onErrorEvent = EventMarker([func = std::move(callback)](const BaseEventInfo* info)
+    {
+        auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageFailEvent>(info);
+        func(*eventInfo);
+    });
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetLoadFailEvent(onErrorEvent);
+}
+
+void ImageModelImpl::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
+{
+
+    auto onFinishEvent = EventMarker([func = std::move(callback)]()
+    {
+        func();
+    });
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetSvgAnimatorFinishEvent(onFinishEvent);
+}
+
+void ImageModelImpl::Create(std::string src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+{
+    RefPtr<ImageComponent> image = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
+    ViewStackProcessor::GetInstance()->ClaimElementId(image);
+    image->SetUseSkiaSvg(false);
+    ViewStackProcessor::GetInstance()->Push(image);
+    JSInteractableView::SetFocusable(false);
+    JSInteractableView::SetFocusNode(true);
+    if (noPixMap) {
+        return;
+    }
+
+#if defined(IMAGE_SUPPORTED)
+    image->SetPixmap(pixMap);
+#endif
+}
+
+void ImageModelImpl::SetImageSourceSize(std::pair<Dimension, Dimension> size)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetImageSourceSize(size);
+}
+
+void ImageModelImpl::SetImageFill(Color color)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetImageFill(color);
+}
+
+void ImageModelImpl::SetImageInterpolation(ImageInterpolation iterpolation)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetImageInterpolation(iterpolation);
+}
+
+void ImageModelImpl::SetImageRepeat(ImageRepeat imageRepeat)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetImageRepeat(imageRepeat);
+}
+
+void ImageModelImpl::SetImageRenderMode(ImageRenderMode imageRenderMode)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    image->SetImageRenderMode(imageRenderMode);
+}
+
+bool ImageModelImpl::IsSrcSvgImage()
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    return image && image->IsSrcSvgImage();
+}
+
+void ImageModelImpl::SetAutoResize(bool autoResize)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetAutoResize(autoResize);
+    }
+}
+
+void ImageModelImpl::SetSyncMode(bool syncMode)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetSyncMode(syncMode);
+    }
+}
+
+void ImageModelImpl::SetColorFilterMatrix(const std::vector<float>& matrix)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetColorFilterMatrix(matrix);
+    }
+}
+
+void ImageModelImpl::SetOnDragStartId(const OnDragFunc& onDragStartId)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetOnDragStartId(onDragStartId);
+    }
+}
+
+void ImageModelImpl::SetOnDragEnterId(const OnDropFunc&  onDragStartId)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetOnDragEnterId(onDragStartId);
+    }
+}
+
+void ImageModelImpl::SetOnDragLeaveId(const OnDropFunc& onDragStartId)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetOnDragLeaveId(onDragStartId);
+    }
+}
+
+void ImageModelImpl::SetOnDragMoveId(const OnDropFunc& onDragMoveId)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetOnDragMoveId(onDragMoveId);
+    }
+}
+
+void ImageModelImpl::SetOnDropId(const OnDropFunc& onDropId)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetOnDropId(onDropId);
+    }
+}
+
+void ImageModelImpl::SetCopyOption(const CopyOptions& copyOption)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetCopyOption(copyOption);
+    }
+}
+
+bool ImageModelImpl::UpdateDragItemInfo(DragItemInfo& itemInfo)
+{
+    auto component = ViewStackProcessor::GetInstance()->Finish();
+    if (!component) {
+        LOGE("Custom component is null.");
+        return false;
+    }
+    itemInfo.customComponent = component;
+    return true;
+}
+
+} // namespace OHOS::Ace::Framework
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_MODEL_IMPL_CPP

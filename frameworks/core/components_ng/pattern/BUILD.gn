@@ -36,6 +36,7 @@ build_component_ng("pattern_ng") {
     "grid/grid_pattern.cpp",
     "grid/grid_view.cpp",
     "image/image_layout_algorithm.cpp",
+    "image/image_model_ng.cpp",
     "image/image_pattern.cpp",
     "image/image_view.cpp",
     "linear_layout/column_view.cpp",

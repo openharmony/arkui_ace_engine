@@ -22,7 +22,8 @@
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
 #include "core/components/image/image_event.h"
-#include "frameworks/core/components_ng/pattern/image_model.h"
+#include "core/components/image/image_model_impl.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 
@@ -34,9 +35,9 @@ ImageModel* ImageModel::GetInstance()
 {
     if (!instance) {
         if (Container::IsCurrentUseNewPipeline()) {
-            instance.reset(new ImageModelNG());
+            instance.reset(new NG::ImageModelNG());
         } else {
-            instance.reset(new ImageModelOG());
+            instance.reset(new ImageModelImpl());
         }
     }
     return instance.get();
@@ -190,7 +191,13 @@ void JSImage::Create(const JSCallbackInfo& info)
     }
     std::string src;
     auto noPixMap = ParseJsMedia(info[0], src);
-    ImageModel::GetInstance()->Create(src, noPixMap);
+
+    RefPtr<PixelMap> pixMap = nullptr;
+    #if defined(IMAGE_SUPPORTED)
+    pixMap = CreatePixelMapFromNapiValue(info[0]);
+    #endif
+
+    ImageModel::GetInstance()->Create(src, noPixMap, pixMap);
 }
 
 //TODO: move to JSViewAbstract
