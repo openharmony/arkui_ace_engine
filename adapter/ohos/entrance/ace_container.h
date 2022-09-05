@@ -281,13 +281,13 @@ public:
     void UpdateConfiguration(
         const std::string& colorMode, const std::string& inputDevice, const std::string& languageTag);
 
+    void UpdateFrondend(bool needReloadTransition);
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask();
     void InitWindowCallback();
-
-    void UpdateFrondend(bool needReloadTransition);
 
     void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         int32_t windowId, UIEnvCallback callback = nullptr);
