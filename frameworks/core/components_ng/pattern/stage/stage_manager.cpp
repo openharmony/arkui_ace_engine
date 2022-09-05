@@ -72,7 +72,7 @@ bool StageManager::PopPage(bool needShowNext)
         LOGE("fail to pop page due to children is null");
         return false;
     }
-    const auto& pageNode = children.back();
+    auto pageNode = children.back();
     FirePageHide(pageNode);
     stageNode_->RemoveChild(pageNode);
 
@@ -106,7 +106,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext)
     }
 
     for (int32_t current = 0; current < popSize; ++current) {
-        const auto& pageNode = children.back();
+        auto pageNode = children.back();
         FirePageHide(pageNode);
         stageNode_->RemoveChild(pageNode);
     }
@@ -133,8 +133,7 @@ bool StageManager::CleanPageStack()
     }
     auto popSize = static_cast<int32_t>(children.size() - 1);
     for (int32_t count = 1; count <= popSize; ++count) {
-        const auto& pageNode = children.back();
-        FirePageHide(pageNode);
+        auto pageNode = children.back();
         stageNode_->RemoveChild(pageNode);
     }
     const auto& newPageNode = children.back();
@@ -155,13 +154,13 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
         LOGE("child is empty");
         return false;
     }
-    const auto& lastFrontPage = children.front();
-    if (lastFrontPage == node) {
+    const auto& lastPage = children.back();
+    if (lastPage == node) {
         LOGD("page already on the top");
         return true;
     }
     if (needHideLast) {
-        FirePageHide(lastFrontPage);
+        FirePageHide(lastPage);
     }
     node->MovePosition(static_cast<int32_t>(stageNode_->GetChildren().size() - 1));
     FirePageShow(node);

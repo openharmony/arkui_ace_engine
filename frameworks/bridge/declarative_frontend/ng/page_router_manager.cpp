@@ -28,6 +28,7 @@
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -37,15 +38,14 @@ namespace OHOS::Ace::NG {
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
     CHECK_RUN_ON(JS);
-    std::string pagePath;
-    if (!url.empty()) {
-        pagePath = manifestParser_->GetRouter()->GetPagePath(url);
-    } else {
-        pagePath = manifestParser_->GetRouter()->GetEntry();
-    }
-    LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     RouterPageInfo info { url };
-    info.path = pagePath;
+    if (!info.url.empty()) {
+        info.path = manifestParser_->GetRouter()->GetPagePath(url);
+    } else {
+        info.path = manifestParser_->GetRouter()->GetEntry();
+        info.url = manifestParser_->GetRouter()->GetEntry("");
+    }
+    LOGD("router.Push pagePath = %{private}s", info.url.c_str());
     LoadPage(GenerateNextPageId(), info, params);
 }
 
@@ -233,7 +233,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
         auto pageInfo = FindPageInStack(url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, false);
+            MovePageToFront(pageInfo.first, pageInfo.second, params, false);
             return;
         }
     }
@@ -268,7 +268,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
         auto pageInfo = FindPageInStack(url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, false);
+            MovePageToFront(pageInfo.first, pageInfo.second, params, false, true);
             return;
         }
     }
@@ -347,10 +347,25 @@ void PageRouterManager::LoadPage(
     LOGI("PageRouterManager LoadPage[%{public}d]: %{public}s. success", pageId, target.url.c_str());
 }
 
-void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, bool needHideLast)
+void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const std::string& params,
+    bool needHideLast, bool forceShowCurrent)
 {
+    LOGD("MovePageToFront to index: %{public}d", index);
+    // update param first.
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_VOID(pageInfo);
+
     if (index == static_cast<int32_t>(pageRouterStack_.size() - 1)) {
         LOGD("already on the top");
+        if (!params.empty()) {
+            pageInfo->ReplacePageParams(params);
+        }
+        if (forceShowCurrent) {
+            StageManager::FirePageShow(pageNode);
+        }
         return;
     }
     CHECK_NULL_VOID(pageNode);
@@ -362,16 +377,25 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
     auto stageManager = context ? context->GetStageManager() : nullptr;
     CHECK_NULL_VOID(stageManager);
 
-    // push pageNode to top.
-    pageRouterStack_.emplace_back(pageNode);
-    if (!stageManager->MovePageToFront(pageNode, needHideLast)) {
-        LOGE("fail to move page to front");
-        pageRouterStack_.pop_back();
-    }
     // clean pageNode on index position.
     auto iter = pageRouterStack_.begin();
     std::advance(iter, index);
-    pageRouterStack_.erase(iter);
+    auto last = pageRouterStack_.erase(iter);
+    // push pageNode to top.
+    pageRouterStack_.emplace_back(pageNode);
+    std::string tempParam;
+    if (!params.empty()) {
+        tempParam = pageInfo->ReplacePageParams(params);
+    }
+    if (!stageManager->MovePageToFront(pageNode, needHideLast)) {
+        LOGE("fail to move page to front");
+        // restore position and param.
+        pageRouterStack_.pop_back();
+        pageRouterStack_.insert(last, pageNode);
+        if (!tempParam.empty()) {
+            pageInfo->ReplacePageParams(tempParam);
+        }
+    }
 }
 
 void PageRouterManager::PopPage(const std::string& params, bool needShowNext)
@@ -411,6 +435,7 @@ void PageRouterManager::PopPage(const std::string& params, bool needShowNext)
 
 void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params, bool needShowNext)
 {
+    LOGD("PopPageToIndex to index: %{public}d", index);
     std::list<WeakPtr<FrameNode>> temp;
     std::swap(temp, pageRouterStack_);
     auto iter = temp.begin();
