@@ -56,6 +56,12 @@ public:
 
     virtual void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
 
+    virtual void AddFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
+
+    virtual void RemoveFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
+
+    virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
+
     virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}
 
     virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) {}
@@ -101,7 +107,6 @@ protected:
 
 private:
     std::function<void()> requestFrame_;
-    BorderRadiusProperty borderRadius_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };

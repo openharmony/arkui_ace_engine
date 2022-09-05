@@ -394,7 +394,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     currentOffset_ = currentOffset_ + offset;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_REQUEST_NEW_CHILD_NODE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)

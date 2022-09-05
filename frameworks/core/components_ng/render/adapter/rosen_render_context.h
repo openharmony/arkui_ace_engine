@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_CONTEXT_H
 
+#include <cstdint>
 #include <optional>
 
 #include "render_service_client/core/ui/rs_node.h"
@@ -40,6 +41,12 @@ public:
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
+
+    void AddFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
+
+    void RemoveFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
+
+    void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) override;
 
     void ResetBlendBgColor() override;
 

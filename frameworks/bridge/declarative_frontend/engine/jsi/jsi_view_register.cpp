@@ -15,12 +15,14 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -169,7 +171,7 @@ namespace OHOS::Ace::Framework {
 
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
-    JSView* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         LOGE("loadDocument: argument provided is not a View!");
         return;
@@ -187,6 +189,28 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
         auto pageRootNode = view->CreateUINode();
         CHECK_NULL_VOID(pageRootNode);
         pageRootNode->MountToParent(pageNode);
+        // update page life cycle function.
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
+            auto view = weak.Upgrade();
+            if (view) {
+                view->FireOnShow();
+            }
+        });
+        pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
+            auto view = weak.Upgrade();
+            if (view) {
+                view->FireOnHide();
+            }
+        });
+        pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
+            auto view = weak.Upgrade();
+            if (view) {
+                return view->FireOnBackPress();
+            }
+            return false;
+        });
         return;
     }
 
@@ -195,25 +219,19 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     JsiDeclarativeEngineInstance::RootViewHandle(obj);
 
     LOGI("Load Document setting root view, page[%{public}d]", page->GetPageId());
-    if (Container::IsCurrentUseNewPipeline()) {
-        Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
-        auto pageRootNode = view->CreateUINode();
-        page->SetRootNode(pageRootNode);
-    } else {
-        Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
-        LOGD("Loading page root component: Setting pipeline to use %{public}s.",
-            view->isFullUpdate() ? "Full Update" : "Partial Update");
-        auto rootComponent = view->CreateComponent();
-        std::list<RefPtr<Component>> stackChildren;
-        stackChildren.emplace_back(rootComponent);
-        auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(
-            Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, stackChildren);
-        rootStackComponent->SetMainStackSize(MainStackSize::MAX);
-        auto rootComposed = AceType::MakeRefPtr<ComposedComponent>("0", "root");
-        rootComposed->SetChild(rootStackComponent);
-        page->SetRootComponent(rootComposed);
-        page->SetPageTransition(view->BuildPageTransitionComponent());
-    }
+    Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
+    LOGD("Loading page root component: Setting pipeline to use %{public}s.",
+        view->isFullUpdate() ? "Full Update" : "Partial Update");
+    auto rootComponent = view->CreateComponent();
+    std::list<RefPtr<Component>> stackChildren;
+    stackChildren.emplace_back(rootComponent);
+    auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(
+        Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, stackChildren);
+    rootStackComponent->SetMainStackSize(MainStackSize::MAX);
+    auto rootComposed = AceType::MakeRefPtr<ComposedComponent>("0", "root");
+    rootComposed->SetChild(rootStackComponent);
+    page->SetRootComponent(rootComposed);
+    page->SetPageTransition(view->BuildPageTransitionComponent());
 
     // We are done, tell to the JSAgePage
     page->SetPageCreated();

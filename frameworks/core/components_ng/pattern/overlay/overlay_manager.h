@@ -16,8 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 
-#include <vector>
+#include <list>
+
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
@@ -25,6 +28,11 @@ namespace OHOS::Ace::NG {
 struct ToastInfo {
     int32_t toastId = -1;
     RefPtr<FrameNode> toastNode;
+
+    bool operator==(const ToastInfo& value) const
+    {
+        return toastId == value.toastId && toastNode == value.toastNode;
+    }
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -32,16 +40,17 @@ class ACE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
 
 public:
-    OverlayManager() = default;
+    explicit OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode) {}
     ~OverlayManager() override = default;
 
-    void ShowToast(const RefPtr<UINode>& node, int32_t toastId, const std::string& message, const std::string& bottom, 
-        bool isRightToLeft);
+    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
     void PopToast(int32_t toastId);
 
 private:
-    std::vector<NG::ToastInfo> toastStack_;
+    std::list<NG::ToastInfo> toastStack_;
     WeakPtr<UINode> rootNodeWeak_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };
 } // namespace OHOS::Ace::NG
 

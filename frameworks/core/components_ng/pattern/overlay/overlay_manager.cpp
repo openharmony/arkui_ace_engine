@@ -15,26 +15,26 @@
 
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
+#include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
-void OverlayManager::ShowToast(const RefPtr<UINode>& rootNode, int32_t toastId, const std::string& message,
-    const std::string& bottom, bool isRightToLeft)
+void OverlayManager::ShowToast(
+    const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft)
 {
-    if (!rootNode) {
-        LOGE("the root node is nullptr");
-        return;
-    }
-    LOGI("show toast in overlaymanager, id is %{public}d, message is %{public}s", toastId, message.c_str());
-    // save root node to overlaymanager
-    rootNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(rootNode));
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    LOGI("begin to show toast, toast id is %{public}d, message is %{public}s", toastId, message.c_str());
     // make toast node
     auto toastNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, MakeRefPtr<TextPattern>());
     auto layoutProperty = toastNode->GetLayoutProperty<TextLayoutProperty>();
@@ -42,8 +42,7 @@ void OverlayManager::ShowToast(const RefPtr<UINode>& rootNode, int32_t toastId, 
     // update toast props
     layoutProperty->UpdateContent(message);
     auto target = toastNode->GetRenderContext();
-    auto pipeline = toastNode->GetContext();
-    auto themeManager = pipeline->GetThemeManager();
+    auto themeManager = context->GetThemeManager();
     Color toastColor = Color::BLUE;
     if (themeManager) {
         auto toastTheme = themeManager->GetTheme<ToastTheme>();
@@ -59,14 +58,23 @@ void OverlayManager::ShowToast(const RefPtr<UINode>& rootNode, int32_t toastId, 
     toastStack_.emplace_back(info);
     // mount to parent
     toastNode->MountToParent(rootNode);
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    toastNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+
+    context->GetTaskExecutor()->PostDelayedTask(
+        [weak = WeakClaim(this), toastId] {
+            LOGI("begin pop toast, id is %{public}d", toastId);
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->PopToast(toastId);
+        },
+        TaskExecutor::TaskType::UI, duration);
 }
 
 void OverlayManager::PopToast(int32_t toastId)
 {
     RefPtr<UINode> toastUnderPop;
-    auto toastIter = toastStack_.end() - 1;
-    for (; toastIter >= toastStack_.begin(); --toastIter) {
+    auto toastIter = toastStack_.rbegin();
+    for (; toastIter != toastStack_.rend(); ++toastIter) {
         if (toastIter->toastId == toastId) {
             toastUnderPop = toastIter->toastNode;
             break;
@@ -82,9 +90,9 @@ void OverlayManager::PopToast(int32_t toastId)
         return;
     }
     LOGI("begin to pop toast, id is %{public}d", toastId);
-    toastStack_.erase(toastIter);
+    toastStack_.remove(*toastIter);
     rootNode->RemoveChild(toastUnderPop);
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 } // namespace OHOS::Ace::NG

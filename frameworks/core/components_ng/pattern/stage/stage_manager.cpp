@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
+#include <cstdint>
+
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -28,72 +30,163 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-StageManager::StageManager(const RefPtr<FrameNode>& root) : rootNode_(root)
+StageManager::StageManager(const RefPtr<FrameNode>& stage) : stageNode_(stage)
 {
-    stagePattern_ = DynamicCast<StagePattern>(rootNode_->GetPattern());
-    overlayManager_ = MakeRefPtr<OverlayManager>();
+    stagePattern_ = DynamicCast<StagePattern>(stageNode_->GetPattern());
 }
 
-bool StageManager::PushPage(const RefPtr<FrameNode>& node)
+bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast)
 {
-    CHECK_NULL_RETURN(rootNode_, false);
+    CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
 
-    node->MountToParent(rootNode_);
+    const auto& children = stageNode_->GetChildren();
+    if (!children.empty() && needHideLast) {
+        FirePageHide(children.back());
+    }
+
+    node->MountToParent(stageNode_);
+    FirePageShow(node);
+
     auto pagePattern = node->GetPattern<PagePattern>();
-    pagePattern->OnShow();
     CHECK_NULL_RETURN(pagePattern, false);
     stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
 
     // flush layout task.
-    if (rootNode_->GetGeometryNode()->GetFrameSize() == SizeF(0.0f, 0.0f)) {
+    if (stageNode_->GetGeometryNode()->GetFrameSize() == SizeF(0.0f, 0.0f)) {
         // in first load case, wait for window size.
         LOGI("waiting for window size");
         return true;
     }
-    rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return true;
 }
 
-bool StageManager::PopPage()
+bool StageManager::PopPage(bool needShowNext)
 {
-    CHECK_NULL_RETURN(rootNode_, false);
-    const auto& children = rootNode_->GetChildren();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    CHECK_NULL_RETURN(stageNode_, false);
+    const auto& children = stageNode_->GetChildren();
     if (children.empty()) {
         LOGE("fail to pop page due to children is null");
         return false;
     }
-    auto pageNode = DynamicCast<FrameNode>(children.back());
-    CHECK_NULL_RETURN(pageNode, false);
-    auto pagePattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pagePattern, false);
-    pagePattern->OnHide();
-    rootNode_->RemoveChild(pageNode);
-    rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    const auto& pageNode = children.back();
+    FirePageHide(pageNode);
+    stageNode_->RemoveChild(pageNode);
+
+    if (needShowNext) {
+        const auto& newPageNode = children.back();
+        FirePageShow(newPageNode);
+    }
+    stageNode_->RebuildRenderContextTree();
+    pipeline->RequestFrame();
     return true;
 }
 
-void StageManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    bool isRightToLeft)
+bool StageManager::PopPageToIndex(int32_t index, bool needShowNext)
 {
-    auto context = NG::PipelineContext::GetCurrentContext();
-    if (!context) {
-        LOGE("No pipeline context");
-        return;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    CHECK_NULL_RETURN(stageNode_, false);
+    const auto& children = stageNode_->GetChildren();
+    if (children.empty()) {
+        LOGE("fail to pop page due to children is null");
+        return false;
     }
-    if (overlayManager_) {
-        auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
-        LOGI("begin to show toast, toast id is %{public}d, message is %{public}s", toastId, message.c_str());
-        overlayManager_->ShowToast(rootNode_, toastId, message, bottom, isRightToLeft);
-        context->GetTaskExecutor()->PostDelayedTask([overlayManager = overlayManager_, toastId] {
-            LOGI("begin pop toast, id is %{public}d", toastId);
-            if (!overlayManager) {
-                LOGE("No Overlay manager");
-                return;
-            }
-            overlayManager->PopToast(toastId);
-        }, TaskExecutor::TaskType::UI, duration);
+    int32_t popSize = static_cast<int32_t>(children.size()) - index - 1;
+    if (popSize < 0) {
+        LOGE("fail to pop page due to index is out of range");
+        return false;
     }
+    if (popSize == 0) {
+        LOGD("already here");
+        return true;
+    }
+
+    for (int32_t current = 0; current < popSize; ++current) {
+        const auto& pageNode = children.back();
+        FirePageHide(pageNode);
+        stageNode_->RemoveChild(pageNode);
+    }
+
+    if (needShowNext) {
+        const auto& newPageNode = children.back();
+        FirePageShow(newPageNode);
+    }
+
+    stageNode_->RebuildRenderContextTree();
+    pipeline->RequestFrame();
+    return true;
+}
+
+bool StageManager::CleanPageStack()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    CHECK_NULL_RETURN(stageNode_, false);
+    const auto& children = stageNode_->GetChildren();
+    if (children.size() <= 1) {
+        LOGE("fail to clean page stack due to children size is illegal");
+        return false;
+    }
+    auto popSize = static_cast<int32_t>(children.size() - 1);
+    for (int32_t count = 1; count <= popSize; ++count) {
+        const auto& pageNode = children.back();
+        FirePageHide(pageNode);
+        stageNode_->RemoveChild(pageNode);
+    }
+    const auto& newPageNode = children.back();
+    FirePageShow(newPageNode);
+
+    stageNode_->RebuildRenderContextTree();
+    pipeline->RequestFrame();
+    return true;
+}
+
+bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    CHECK_NULL_RETURN(stageNode_, false);
+    const auto& children = stageNode_->GetChildren();
+    if (children.empty()) {
+        LOGE("child is empty");
+        return false;
+    }
+    const auto& lastFrontPage = children.front();
+    if (lastFrontPage == node) {
+        LOGD("page already on the top");
+        return true;
+    }
+    if (needHideLast) {
+        FirePageHide(lastFrontPage);
+    }
+    node->MovePosition(static_cast<int32_t>(stageNode_->GetChildren().size() - 1));
+    FirePageShow(node);
+
+    stageNode_->RebuildRenderContextTree();
+    pipeline->RequestFrame();
+    return true;
+}
+
+void StageManager::FirePageHide(const RefPtr<UINode>& node)
+{
+    auto pageNode = DynamicCast<FrameNode>(node);
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnHide();
+}
+
+void StageManager::FirePageShow(const RefPtr<UINode>& node)
+{
+    auto pageNode = DynamicCast<FrameNode>(node);
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnShow();
 }
 
 } // namespace OHOS::Ace::NG

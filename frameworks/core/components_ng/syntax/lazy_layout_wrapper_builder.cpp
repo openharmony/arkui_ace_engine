@@ -15,6 +15,8 @@
 
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 
+#include <list>
+
 #include "base/log/ace_trace.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -29,17 +31,16 @@ LazyLayoutWrapperBuilder::LazyLayoutWrapperBuilder(
 
 void LazyLayoutWrapperBuilder::SwapDirtyAndUpdateBuildCache()
 {
-    ACE_FUNCTION_TRACE();
     auto host = host_.Upgrade();
     CHECK_NULL_VOID(host);
-    std::unordered_set<int32_t> items;
+    std::list<int32_t> indexes;
     for (const auto& child : buildItems_) {
         if (child.second->IsActive()) {
-            items.emplace(child.first);
             child.second->SwapDirtyLayoutWrapperOnMainThread();
+            indexes.emplace_back(child.first);
         }
     }
-    host->UpdateCachedItems(items);
+    host->UpdateCachedItems(indexes);
 }
 
 int32_t LazyLayoutWrapperBuilder::OnGetTotalCount()

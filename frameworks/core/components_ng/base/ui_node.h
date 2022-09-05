@@ -61,6 +61,8 @@ public:
         return children_;
     }
 
+    void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
+
     RefPtr<UINode> GetParent() const
     {
         return parent_.Upgrade();
@@ -157,6 +159,13 @@ protected:
     virtual void OnChildRemoved(const RefPtr<UINode>& child) {}
 
     virtual void MarkNeedSyncRenderTree();
+
+    virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
+    {
+        for (const auto& child : children_) {
+            child->OnGenerateOneDepthVisibleFrame(visibleList);
+        }
+    }
 
     virtual void OnContextAttached() {}
     // dump self info.

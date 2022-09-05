@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_STAGE_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_STAGE_MANAGER_H
 
+#include <cstdint>
+
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/base/ui_node.h"
 
@@ -30,19 +33,22 @@ class ACE_EXPORT StageManager : public virtual AceType {
     DECLARE_ACE_TYPE(StageManager, AceType);
 
 public:
-    explicit StageManager(const RefPtr<FrameNode>& root);
+    explicit StageManager(const RefPtr<FrameNode>& stage);
     ~StageManager() override = default;
 
-    bool PushPage(const RefPtr<FrameNode>& node);
-    bool PopPage();
+    bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true);
+    bool PopPage(bool needShowNext = true);
+    bool PopPageToIndex(int32_t index, bool needShowNext = true);
+    bool CleanPageStack();
 
-    void ShowToast(const std::string& message, int32_t duration,
-        const std::string& bottom, bool isRightToLeft);
+    bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true);
 
 private:
-    RefPtr<FrameNode> rootNode_;
+    static void FirePageHide(const RefPtr<UINode>& node);
+    static void FirePageShow(const RefPtr<UINode>& node);
+
+    RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;
-    RefPtr<OverlayManager> overlayManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
 };

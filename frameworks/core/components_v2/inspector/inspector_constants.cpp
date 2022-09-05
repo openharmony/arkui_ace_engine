@@ -51,6 +51,8 @@ const char ATTRS_COMMON_ZINDEX[] = "zIndex";
 
 // root view
 const char ROOT_ETS_TAG[] = "root";
+// stage view
+const char STAGE_ETS_TAG[] = "stage";
 // page view
 const char PAGE_ETS_TAG[] = "page";
 // js custom view

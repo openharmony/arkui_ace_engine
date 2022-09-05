@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
@@ -167,7 +168,9 @@ public:
 
     void SetRootRect(double width, double height, double offset) override;
 
-    RefPtr<StageManager> GetStageManager();
+    const RefPtr<StageManager>& GetStageManager();
+
+    const RefPtr<OverlayManager>& GetOverlayManager();
 
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
@@ -206,12 +209,15 @@ private:
         }
     };
 
+    UITaskScheduler taskScheduler_;
+
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
     std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
     std::list<TouchEvent> touchEvents_;
 
-    RefPtr<FrameNode> rootNode_ = nullptr;
-    RefPtr<StageManager> stageManager_ = nullptr;
+    RefPtr<FrameNode> rootNode_;
+    RefPtr<StageManager> stageManager_;
+    RefPtr<OverlayManager> overlayManager_;
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);

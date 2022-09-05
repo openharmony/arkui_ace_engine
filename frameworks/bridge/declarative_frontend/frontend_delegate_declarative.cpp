@@ -37,6 +37,7 @@
 #include "core/common/thread_checker.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -796,17 +797,33 @@ void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string
 
 void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->Push({ uri }, params, static_cast<NG::RouterMode>(routerMode));
+        OnMediaQueryUpdate();
+        return;
+    }
     Push(PageTarget(uri, static_cast<RouterMode>(routerMode)), params);
 }
 
 void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::string& params)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->Replace({ uri }, params);
+        return;
+    }
     Replace(PageTarget(uri), params);
 }
 
 void FrontendDelegateDeclarative::ReplaceWithMode(
     const std::string& uri, const std::string& params, uint32_t routerMode)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->Replace({ uri }, params, static_cast<NG::RouterMode>(routerMode));
+        return;
+    }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params);
 }
 
@@ -823,6 +840,11 @@ void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string
 
 void FrontendDelegateDeclarative::Clear()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->Clear();
+        return;
+    }
     {
         std::lock_guard<std::mutex> lock(routerQueueMutex_);
         if (!routerQueue_.empty()) {
@@ -836,12 +858,22 @@ void FrontendDelegateDeclarative::Clear()
 
 int32_t FrontendDelegateDeclarative::GetStackSize() const
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_RETURN(pageRouterManager_, 0);
+        return pageRouterManager_->GetStackSize();
+    }
     std::lock_guard<std::mutex> lock(mutex_);
     return static_cast<int32_t>(pageRouteStack_.size());
 }
 
 void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, std::string& path)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        pageRouterManager_->GetState(index, name, path);
+        return;
+    }
+
     std::string url;
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -864,6 +896,10 @@ void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, st
 
 std::string FrontendDelegateDeclarative::GetParams()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_RETURN(pageRouterManager_, "");
+        return pageRouterManager_->GetParams();
+    }
     if (pageParamMap_.find(pageId_) != pageParamMap_.end()) {
         return pageParamMap_.find(pageId_)->second;
     }
@@ -1228,15 +1264,15 @@ void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t 
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Toast IsCurrentUseNewPipeline.");
         auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
-        auto stageManager = context ? context->GetStageManager() : nullptr;
-        taskExecutor_->PostTask([durationTime, message, bottom, isRightToLeft, stage = stageManager] {
-            if (stage) {
+        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+        taskExecutor_->PostTask(
+            [durationTime, message, bottom, isRightToLeft, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
                 LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
-                stage->ShowToast(message, durationTime, bottom, isRightToLeft);
-            } else {
-                LOGW("No stage to show toast");
-            }
-        }, TaskExecutor::TaskType::UI);
+                overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft);
+            },
+            TaskExecutor::TaskType::UI);
         return;
     }
     auto pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());

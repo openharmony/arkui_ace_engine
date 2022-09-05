@@ -15,9 +15,12 @@
 
 #include "core/components_ng/base/frame_node.h"
 
+#include <list>
+
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
@@ -140,13 +143,31 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     ACE_FUNCTION_TRACE();
     LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
     CHECK_NULL_VOID(dirty);
-    if (dirty->IsActive()) {
+
+    // active change flag judge.
+    bool activeChanged = false;
+    if (dirty->IsActive() && !isActive_) {
         pattern_->OnActive();
         isActive_ = true;
-    } else {
+        activeChanged = true;
+    }
+    if (!dirty->IsActive() && isActive_) {
         pattern_->OnInActive();
         isActive_ = false;
+        activeChanged = true;
     }
+    if (activeChanged && !dirty->IsRootMeasureNode()) {
+        auto parent = GetAncestorNodeOfFrame();
+        if (parent) {
+            parent->MarkNeedSyncRenderTree();
+        }
+    }
+    if (!isActive_) {
+        LOGD("current node is inactive, don't need to render");
+        return;
+    }
+
+    // check if need to paint content.
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(
@@ -154,10 +175,11 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
-    if (needSyncRenderTree_ || dirty->IsForceSyncRenderTree()) {
-        RebuildRenderContextTree(dirty->GetChildrenInRenderArea());
-        needSyncRenderTree_ = false;
-    }
+
+    // rebuild child render node.
+    RebuildRenderContextTree();
+
+    // update layout size.
     bool frameSizeChange = geometryNode_->GetFrameSize() != dirty->GetGeometryNode()->GetFrameSize();
     bool frameOffsetChange = geometryNode_->GetFrameOffset() != dirty->GetGeometryNode()->GetFrameOffset();
     bool contentSizeChange = geometryNode_->GetContentSize() != dirty->GetGeometryNode()->GetContentSize();
@@ -170,6 +192,9 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     }
     SetGeometryNode(dirty->MoveGeometryNode());
     pattern_->OnLayoutChange(frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange);
+
+    // clean layout flag.
+    layoutProperty_->CleanDirty();
 }
 
 void FrameNode::SetGeometryNode(RefPtr<GeometryNode>&& node)
@@ -192,6 +217,8 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool onCreate, bool forceUseMa
     }
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), offset = GetParentGlobalOffset(),
                     forceUseMainThread]() {
+        layoutWrapper->SetActive();
+        layoutWrapper->SetRootMeasureNode();
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Measure");
             layoutWrapper->Measure(layoutConstraint);
@@ -224,9 +251,10 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     }
     ACE_SCOPED_TRACE("CreateRenderTask:PrepareTask");
     auto wrapper = CreatePaintWrapper();
-    auto task = [wrapper]() {
+    auto task = [wrapper, paintProperty = paintProperty_]() {
         ACE_SCOPED_TRACE("FrameNode::RenderTask");
         wrapper->FlushRender();
+        paintProperty->CleanDirty();
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
         return UITask(std::move(task), MAIN_TASK);
@@ -241,8 +269,12 @@ LayoutConstraintF FrameNode::GetLayoutConstraint() const
     }
     LayoutConstraintF LayoutConstraint;
     LayoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
-    LayoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
-    LayoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
+    auto rootWidth = PipelineContext::GetCurrentRootWidth();
+    auto rootHeight = PipelineContext::GetCurrentRootHeight();
+    LayoutConstraint.percentReference.SetWidth(rootWidth);
+    LayoutConstraint.percentReference.SetHeight(rootHeight);
+    LayoutConstraint.maxSize.SetHeight(rootWidth);
+    LayoutConstraint.maxSize.SetHeight(rootHeight);
     return LayoutConstraint;
 }
 
@@ -289,7 +321,6 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapperOnCreate()
     for (const auto& child : children) {
         child->AdjustLayoutWrapperTree(layoutWrapper, true, true);
     }
-    layoutProperty_->CleanDirty();
     return layoutWrapper;
 }
 
@@ -301,9 +332,9 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
     do {
         // when inactive node need to reactive in render tree, need to measure again.
-        if (CheckMeasureFlag(flag) || CheckRequestNewChildNodeFlag(flag) || forceMeasure || !isActive_) {
+        if (CheckMeasureFlag(flag) || CheckMeasureSelfFlag(flag) || forceMeasure) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
-            bool forceChildMeasure = CheckMeasureFlag(flag) || forceMeasure || !isActive_;
+            bool forceChildMeasure = CheckMeasureFlag(flag) || forceMeasure;
             UpdateChildrenLayoutWrapper(layoutWrapper, forceChildMeasure, false);
             break;
         }
@@ -315,7 +346,6 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
         }
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
     } while (false);
-    layoutProperty_->CleanDirty();
     return layoutWrapper;
 }
 
@@ -340,7 +370,6 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
     isRenderDirtyMarked_ = false;
     auto paintWrapper = MakeRefPtr<PaintWrapper>(renderContext_, geometryNode_->Clone(), paintProperty_->Clone());
     paintWrapper->SetNodePaintMethod(pattern_->CreateNodePaintMethod());
-    paintProperty_->CleanDirty();
     return paintWrapper;
 }
 
@@ -356,10 +385,17 @@ void FrameNode::UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstrai
     layoutProperty_->UpdateCalcLayoutProperty(calcLayoutConstraint);
 }
 
-void FrameNode::RebuildRenderContextTree(const std::list<RefPtr<FrameNode>>& children)
+void FrameNode::RebuildRenderContextTree()
 {
-    LOGD("%{public}s rebuild render context tree", GetTag().c_str());
+    if (!needSyncRenderTree_) {
+        return;
+    }
+    std::list<RefPtr<FrameNode>> children;
+    GenerateOneDepthVisibleFrame(children);
+    LOGD("%{public}s rebuild render context tree, child: %{public}d", GetTag().c_str(),
+        static_cast<int32_t>(children.size()));
     renderContext_->RebuildFrame(this, children);
+    needSyncRenderTree_ = false;
 }
 
 void FrameNode::MarkModifyDone()
@@ -406,7 +442,7 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
             return;
         }
         isLayoutDirtyMarked_ = true;
-        if (!isMeasureBoundary && CheckNeedRequestParent(layoutFlag)) {
+        if (!isMeasureBoundary && CheckNeedRequestParentMeasure(layoutFlag)) {
             auto parent = GetAncestorNodeOfFrame();
             if (parent) {
                 parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -430,6 +466,13 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
     auto parent = GetAncestorNodeOfFrame();
     if (parent) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST);
+    }
+}
+
+void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
+{
+    if (isActive_) {
+        visibleList.emplace_back(Claim(this));
     }
 }
 

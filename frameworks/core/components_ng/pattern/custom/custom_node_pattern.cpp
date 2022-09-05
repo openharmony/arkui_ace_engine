@@ -26,7 +26,10 @@ bool CustomNodePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(host, false);
     auto customNodeLayoutAlgorithm =
         DynamicCast<CustomNodeLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(customNodeLayoutAlgorithm, false);
+    if (!customNodeLayoutAlgorithm) {
+        // second measure.
+        return false;
+    }
     auto uiNode = customNodeLayoutAlgorithm->MoveBuildItem();
     if (uiNode) {
         uiNode->MountToParent(host);

@@ -80,6 +80,9 @@ public:
 
     void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
+    void MarkDirtyNode(
+        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+
     void FlushUpdateAndMarkDirty() override;
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
@@ -154,11 +157,10 @@ public:
         needSyncRenderTree_ = true;
     }
 
+    void RebuildRenderContextTree();
+
 private:
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
-
-    void MarkDirtyNode(
-        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
@@ -171,7 +173,7 @@ private:
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
 
-    void RebuildRenderContextTree(const std::list<RefPtr<FrameNode>>& children);
+    void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();

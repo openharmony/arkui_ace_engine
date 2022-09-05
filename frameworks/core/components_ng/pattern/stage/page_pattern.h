@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_PATTERN_H
 
+#include <functional>
 #include <stdint.h>
 #include <string>
 
@@ -49,20 +50,51 @@ public:
         return pageInfo_;
     }
 
-    void OnShow() {}
+    void OnShow()
+    {
+        if (onPageShow_) {
+            onPageShow_();
+        }
+    }
 
-    void OnHide() {}
+    void OnHide()
+    {
+        if (onPageHide_) {
+            onPageHide_();
+        }
+    }
 
     bool OnBackPressed() const
     {
-        // TODO: add page life cycle.
+        if (OnBackPressed_) {
+            return OnBackPressed_();
+        }
         return false;
+    }
+
+    void SetOnPageShow(std::function<void()>&& onPageShow)
+    {
+        onPageShow_ = std::move(onPageShow);
+    }
+
+    void SetOnPageHide(std::function<void()>&& onPageHide)
+    {
+        onPageHide_ = std::move(onPageHide);
+    }
+
+    void SetOnBackPressed(std::function<bool()>&& OnBackPressed)
+    {
+        OnBackPressed_ = std::move(OnBackPressed);
     }
 
 private:
     void OnAttachToFrameNode() override;
 
     RefPtr<PageInfo> pageInfo_;
+
+    std::function<void()> onPageShow_;
+    std::function<void()> onPageHide_;
+    std::function<bool()> OnBackPressed_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

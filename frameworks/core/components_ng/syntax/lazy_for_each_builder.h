@@ -16,9 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOREACH_LAZY_FOR_EACH_BUILDER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOREACH_LAZY_FOR_EACH_BUILDER_H
 
+#include <cstdint>
 #include <map>
+#include <string>
+#include <utility>
 
 #include "base/log/ace_trace.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 
@@ -45,7 +49,7 @@ public:
             ACE_SCOPED_TRACE("Builder:BuildLazyItem");
             auto itemInfo = OnGetChildByIndex(index);
             CHECK_NULL_RETURN(itemInfo.second, nullptr);
-            cachedItems_.emplace(index, itemInfo);
+            cachedItems_.try_emplace(index, itemInfo);
             return itemInfo.second;
         }
     }
@@ -75,9 +79,10 @@ protected:
     virtual std::pair<std::string, RefPtr<UINode>> OnGetChildByIndex(int32_t index) = 0;
 
 private:
-    // TODO: add remove functions.
     // [index : [key, UINode]]
     std::map<int32_t, std::pair<std::string, RefPtr<UINode>>> cachedItems_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };
 } // namespace OHOS::Ace::NG
 

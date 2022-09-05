@@ -15,8 +15,11 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
+#include <cstdint>
+
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
@@ -26,7 +29,6 @@
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
-#include "render_service_client/core/ui/rs_surface_node.h"
 
 namespace OHOS::Ace::NG {
 RosenRenderContext::~RosenRenderContext()
@@ -237,9 +239,12 @@ void RosenRenderContext::RebuildFrame(FrameNode* /*self*/, const std::list<RefPt
 
 void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
 {
+    CHECK_NULL_VOID(rsNode_);
     rsNode_->ClearChildren();
     for (const auto& child : children) {
-        ACE_DCHECK(child);
+        if (!child) {
+            continue;
+        }
         auto rosenRenderContext = DynamicCast<RosenRenderContext>(child->renderContext_);
         if (!rosenRenderContext) {
             continue;
@@ -250,4 +255,53 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
         }
     }
 }
+
+void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
+{
+    CHECK_NULL_VOID(rsNode_);
+    for (const auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        auto rosenRenderContext = DynamicCast<RosenRenderContext>(child->renderContext_);
+        if (!rosenRenderContext) {
+            continue;
+        }
+        auto rsnode = rosenRenderContext->GetRSNode();
+        if (rsnode) {
+            rsNode_->AddChild(rsnode, -1);
+        }
+    }
+}
+
+void RosenRenderContext::RemoveFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
+{
+    CHECK_NULL_VOID(rsNode_);
+    for (const auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        auto rosenRenderContext = DynamicCast<RosenRenderContext>(child->renderContext_);
+        if (!rosenRenderContext) {
+            continue;
+        }
+        auto rsnode = rosenRenderContext->GetRSNode();
+        if (rsnode) {
+            rsNode_->RemoveChild(rsnode);
+        }
+    }
+}
+
+void RosenRenderContext::MoveFrame(FrameNode* /*self*/, const RefPtr<FrameNode>& child, int32_t index)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(child);
+    auto rosenRenderContext = DynamicCast<RosenRenderContext>(child->renderContext_);
+    CHECK_NULL_VOID(rosenRenderContext);
+    auto rsnode = rosenRenderContext->GetRSNode();
+    if (rsnode) {
+        rsNode_->MoveChild(rsnode, index);
+    }
+}
+
 } // namespace OHOS::Ace::NG
