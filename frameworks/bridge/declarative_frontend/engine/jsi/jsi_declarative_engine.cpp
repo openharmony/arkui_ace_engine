@@ -551,6 +551,7 @@ void JsiDeclarativeEngineInstance::FlushReload()
             jsView->MarkNeedUpdate();
         }
     }
+    LOGI("JSI engine finished flush reload");
 }
 
 std::unique_ptr<JsonValue> JsiDeclarativeEngineInstance::GetI18nStringResource(
