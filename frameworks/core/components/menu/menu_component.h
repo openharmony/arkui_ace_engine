@@ -159,6 +159,13 @@ public:
         return isContextMenu_;
     }
 
+    void SetIsCustomMenu(bool isCustomMenu)
+    {
+        if (popup_) {
+            popup_->SetIsCustomMenu(isCustomMenu);
+        }
+    }
+
 private:
     RefPtr<SelectPopupComponent> popup_ = AceType::MakeRefPtr<SelectPopupComponent>();
     std::function<void(const ComposeId&, const Offset&)> targetCallback_;

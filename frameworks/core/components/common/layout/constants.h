@@ -171,11 +171,11 @@ enum class MainSwiperSize {
 };
 
 enum class PositionType {
-    RELATIVE = 0,
-    FIXED,
-    ABSOLUTE,
-    OFFSET, // percentage layout based on RELATIVE
-    SEMI_RELATIVE, // absolute offset based on RELATIVE
+    PTRELATIVE = 0,
+    PTFIXED,
+    PTABSOLUTE,
+    PTOFFSET, // percentage layout based on RELATIVE
+    PTSEMI_RELATIVE, // absolute offset based on RELATIVE
 };
 
 enum class TextAlign {
@@ -496,25 +496,25 @@ enum class HitTestMode {
      *  Both self and children respond to the hit test for touch events,
      *  but block hit test of the other nodes which is masked by this node.
      */
-    DEFAULT = 0,
+    HTMDEFAULT = 0,
 
     /**
      * Self respond to the hit test for touch events,
      * but block hit test of children and other nodes which is masked by this node.
      */
-    BLOCK,
+    HTMBLOCK,
 
     /**
      * Self and child respond to the hit test for touch events,
      * and allow hit test of other nodes which is masked by this node.
      */
-    TRANSPARENT,
+    HTMTRANSPARENT,
 
     /**
      * Self not respond to the hit test for touch events,
      * but children respond to the hit test for touch events.
      */
-    NONE
+    HTMNONE
 };
 
 enum class CopyOptions {

@@ -50,6 +50,8 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
+#include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 #if defined(PREVIEW)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
@@ -963,10 +965,8 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         ACE_DCHECK(!engineInstance_->GetRunningPage());
         engineInstance_->SetRunningPage(page);
     }
-
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-
     // get source map
     std::string jsSourceMap;
     if (delegate->GetAssetContent(url + ".map", jsSourceMap)) {
@@ -983,6 +983,9 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     if (pos != std::string::npos && pos == url.length() - (sizeof(js_ext) - 1)) {
         std::string urlName = url.substr(0, pos) + bin_ext;
         if (isMainPage) {
+            if (LoadJsWithModule(urlName)) {
+                return;
+            }
             if (!ExecuteAbc("commons.abc")) {
                 return;
             }
@@ -1023,6 +1026,19 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
         }
 #endif
     }
+}
+
+bool JsiDeclarativeEngine::LoadJsWithModule(const std::string& urlName)
+{
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto vm = const_cast<EcmaVM *>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
+    if (!JSNApi::IsBundle(vm)) {
+        if (!runtime->ExecuteJsBin(urlName)) {
+            LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
+        }
+        return true;
+    }
+    return false;
 }
 
 // Load the app.js file of the FA model in NG structure.
@@ -1170,6 +1186,79 @@ void JsiDeclarativeEngine::FireExternalEvent(
     const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_RUN_ON(JS);
+    if (Container::IsCurrentUseNewPipeline()) {
+        InitXComponent(componentId);
+        auto xcFrameNode = NG::FrameNode::GetFrameNode(V2::XCOMPONENT_ETS_TAG, static_cast<int32_t>(nodeId));
+        if (!xcFrameNode) {
+            LOGE("FireExternalEvent xcFrameNode is null.");
+            return;
+        }
+        auto xcPattern = DynamicCast<NG::XComponentPattern>(xcFrameNode->GetPattern());
+
+        void* nativeWindow = nullptr;
+
+        nativeWindow = xcPattern->GetNativeWindow();
+
+        if (!nativeWindow) {
+            LOGE("FireExternalEvent nativeWindow invalid");
+            return;
+        }
+        nativeXComponentImpl_->SetSurface(nativeWindow);
+        nativeXComponentImpl_->SetXComponentId(componentId);
+
+        auto* arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
+        if (arkNativeEngine == nullptr) {
+            LOGE("FireExternalEvent arkNativeEngine is nullptr");
+            return;
+        }
+
+        std::string arguments;
+        auto arkObjectRef = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName(), true, arguments,
+            OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_));
+
+        auto runtime = engineInstance_->GetJsRuntime();
+        shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+        if (arkObjectRef.IsEmpty() || pandaRuntime->HasPendingException()) {
+            LOGE("LoadModuleByName failed.");
+            return;
+        }
+
+        renderContext_ = runtime->NewObject();
+        auto renderContext = std::static_pointer_cast<ArkJSValue>(renderContext_);
+        LocalScope scope(pandaRuntime->GetEcmaVm());
+        Local<ObjectRef> objXComp = arkObjectRef->ToObject(pandaRuntime->GetEcmaVm());
+        if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
+            LOGE("Get local object failed.");
+            return;
+        }
+        renderContext->SetValue(pandaRuntime, objXComp);
+
+        auto objContext = JsiObject(objXComp);
+        JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
+        OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
+
+        auto task = [weak = WeakClaim(this), weakPattern = AceType::WeakClaim(AceType::RawPtr(xcPattern))]() {
+            auto pattern = weakPattern.Upgrade();
+            if (!pattern) {
+                return;
+            }
+            auto bridge = weak.Upgrade();
+            if (bridge) {
+#ifdef XCOMPONENT_SUPPORTED
+                pattern->NativeXComponentInit(
+                    bridge->nativeXComponent_, AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
+#endif
+            }
+        };
+
+        auto delegate = engineInstance_->GetDelegate();
+        if (!delegate) {
+            LOGE("Delegate is null");
+            return;
+        }
+        delegate->PostSyncTaskToPage(task);
+        return;
+    }
     if (isDestroy) {
         XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(componentId);

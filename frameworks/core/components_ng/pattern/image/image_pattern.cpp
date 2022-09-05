@@ -85,6 +85,15 @@ void ImagePattern::OnImageLoadSuccess()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto imageEventHub = GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    LoadImageSuccessEvent loadImageSuccessEvent_(
+        loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 1);
+    imageEventHub->FireCompleteEvent(std::move(loadImageSuccessEvent_));
+
     lastCanvasImage_ = loadingCtx_->GetCanvasImage();
     lastSrcRect_ = loadingCtx_->GetSrcRect();
     lastDstRect_ = loadingCtx_->GetDstRect();
@@ -107,6 +116,14 @@ void ImagePattern::OnImageDataReady()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto imageEventHub = GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    LoadImageSuccessEvent loadImageSuccessEvent_(
+        loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 0);
+    imageEventHub->FireCompleteEvent(std::move(loadImageSuccessEvent_));
+
     if (!geometryNode->GetContent()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
@@ -116,7 +133,15 @@ void ImagePattern::OnImageDataReady()
 
 void ImagePattern::OnImageLoadFail()
 {
-    // TODO: fire load fail event
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    auto imageEventHub = GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    LoadImageFailEvent loadImageFailEvent_(
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), "");
+    // TODO: remove errorMsg in fail event
+    imageEventHub->FireErrorEvent(std::move(loadImageFailEvent_));
 }
 
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
@@ -126,6 +151,9 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(imageRenderProperty, nullptr);
     ImagePaintConfig imagePaintConfig(lastSrcRect_, lastDstRect_);
     imagePaintConfig.renderMode_ = imageRenderProperty->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
+    imagePaintConfig.imageInterpolation_ =
+        imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE);
+    imagePaintConfig.imageRepeat_ = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NOREPEAT);
     return MakeRefPtr<ImagePaintMethod>(lastCanvasImage_, imagePaintConfig);
 }
 

@@ -109,3 +109,10 @@ config("ace_test_config") {
   cflags_cc += [ "-fvisibility-inlines-hidden" ]
   ldflags = [ "-Wl,-gc-sections" ]
 }
+
+config("ace_test_coverage_config") {
+  if (ace_engine_feature_enable_coverage) {
+    cflags = [ "--coverage" ]
+    ldflags = [ "--coverage" ]
+  }
+}

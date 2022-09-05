@@ -1276,7 +1276,7 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
         auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
         flexItemComponent->SetLeft(x);
         flexItemComponent->SetTop(y);
-        flexItemComponent->SetPositionType(PositionType::ABSOLUTE);
+        flexItemComponent->SetPositionType(PositionType::PTABSOLUTE);
     }
 }
 
@@ -1299,7 +1299,7 @@ void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
         auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
         flexItemComponent->SetLeft(x);
         flexItemComponent->SetTop(y);
-        flexItemComponent->SetPositionType(PositionType::OFFSET);
+        flexItemComponent->SetPositionType(PositionType::PTOFFSET);
     }
 }
 
@@ -1615,8 +1615,12 @@ void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsAlignSelf", info, checkList)) {
         return;
     }
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     auto alignVal = info[0]->ToNumber<int32_t>();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetAlignSelf(alignVal);
+        return;
+    }
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
 
     if (alignVal >= 0 && alignVal <= MAX_ALIGN_VALUE) {
         flexItem->SetAlignSelf((FlexAlign)alignVal);
@@ -1946,6 +1950,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             if (!menuComponent) {
                 return;
             }
+            menuComponent->SetIsCustomMenu(true);
             ExecMenuBuilder(builderFunc, menuComponent);
             auto showDialog = menuComponent->GetTargetCallback();
             showDialog("BindMenu", info.GetGlobalLocation());
@@ -5198,7 +5203,7 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
         return;
     }
 
-    HitTestMode hitTestMode = HitTestMode::DEFAULT;
+    HitTestMode hitTestMode = HitTestMode::HTMDEFAULT;
     if (info[0]->IsNumber()) {
         hitTestMode = static_cast<HitTestMode>(info[0]->ToNumber<int32_t>());
     }

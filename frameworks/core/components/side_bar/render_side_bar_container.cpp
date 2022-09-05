@@ -381,7 +381,7 @@ void RenderSideBarContainer::PlaceChildren()
     for (const auto& item : GetChildren()) {
         auto positionedItem = AceType::DynamicCast<RenderPositioned>(item);
         if (!positionedItem) {
-            if (item->GetPositionType() == PositionType::ABSOLUTE) {
+            if (item->GetPositionType() == PositionType::PTABSOLUTE) {
                 auto itemOffset = PositionLayoutUtils::GetAbsoluteOffset(Claim(this), item);
                 item->SetAbsolutePosition(itemOffset);
                 continue;

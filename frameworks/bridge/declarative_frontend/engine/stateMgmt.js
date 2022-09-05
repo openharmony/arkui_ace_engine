@@ -2264,20 +2264,39 @@ class View extends NativeViewFullUpdate {
 class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     constructor(subscribingView, viewName) {
         super(subscribingView, viewName);
-        this.markDependentElementsIsPending = false;
         this.dependentElementIds_ = new Set();
     }
     notifyHasChanged(newValue) {
-        super.notifyHasChanged(newValue);
-        // for properties owned by a View"
-        // markDependentElementsDirty needs to be executed
-        this.markDependentElementsIsPending = true;
+        
+        var registry = SubscriberManager.Get();
+        this.subscribers_.forEach((subscribedId) => {
+            var subscriber = registry.get(subscribedId);
+            if (subscriber) {
+                if ('hasChanged' in subscriber) {
+                    subscriber.hasChanged(newValue);
+                }
+                if ('viewPropertyHasChanged' in subscriber) {
+                    subscriber.viewPropertyHasChanged(this.info_, this.dependentElementIds_);
+                }
+                else if ('propertyHasChanged' in subscriber) {
+                    subscriber.propertyHasChanged(this.info_);
+                }
+            }
+            else {
+                console.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+            }
+        });
     }
     notifyPropertyRead() {
         super.notifyPropertyRead();
         this.recordDependentUpdate();
     }
-    // FIXME unification: method needed, what callses to create here?
+    markDependentElementsDirty(view) {
+        // TODO ace-ets2bundle, framework, compilated apps need to update together
+        // this function will be removed after a short transiition periode
+        console.error(`markDependentElementsDirty no longer supported. 
+        Please update your ace-ets2bundle and recompile your application!`);
+    }
     /**
      * factory function for concrete 'object' or 'simple' ObservedProperty object
      * depending if value is Class object
@@ -2304,19 +2323,6 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         }
         
         this.dependentElementIds_.add(elmtId);
-    }
-    markDependentElementsDirty(view) {
-        if (!this.markDependentElementsIsPending) {
-            return;
-        }
-        if (this.dependentElementIds_.size > 0) {
-            
-            this.dependentElementIds_.forEach(elmtId => {
-                view.markElemenDirtyById(elmtId);
-                
-            });
-        }
-        this.markDependentElementsIsPending = false;
     }
     purgeDependencyOnElmtId(rmElmtId) {
         
@@ -2851,7 +2857,8 @@ class ViewPU extends NativeViewPartialUpdate {
     constructor(parent, localStorage) {
         super();
         this.watchedProps = new Map();
-        // elmtIds of components/elements with this custom component that need partial update
+        // Set of dependent elmtIds that need partial update
+        // during next re-render
         this.dirtDescendantElementIds_ = new Set();
         // registry of update functions
         // the key is the elementId of the Component/Element that's the result of this function
@@ -2907,18 +2914,26 @@ class ViewPU extends NativeViewPartialUpdate {
         this.initialRender();
     }
     // implements IMultiPropertiesChangeSubscriber
-    propertyHasChanged(info) {
-        if (info) {
+    viewPropertyHasChanged(varName, dependentElmtIds) {
+        
+        this.syncInstanceId();
+        let cb = this.watchedProps.get(varName);
+        if (cb) {
             
-            this.syncInstanceId();
-            this.markNeedUpdate();
-            let cb = this.watchedProps.get(info);
-            if (cb) {
-                
-                cb.call(this, info);
+            cb.call(this, varName);
+        }
+        if (dependentElmtIds.size) {
+            if (!this.dirtDescendantElementIds_.size) {
+                // mark Composedelement dirty when first elmtIds are added
+                // do not need to do this every time
+                this.markNeedUpdate();
             }
-            this.restoreInstanceId();
-        } // if info avail.
+            
+            const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
+            this.dirtDescendantElementIds_ = union;
+            
+        }
+        this.restoreInstanceId();
     }
     /**
      * Function to be called from the constructor of the sub component
@@ -2971,7 +2986,10 @@ class ViewPU extends NativeViewPartialUpdate {
      * @param elmtId
      */
     markElemenDirtyById(elmtId) {
-        this.dirtDescendantElementIds_.add(elmtId); // add to set of dirty element ids if not already included
+        // TODO ace-ets2bundle, framework, compilated apps need to update together
+        // this function will be removed after a short transiition periode
+        console.error(`markElemenDirtyById no longer supported. 
+        Please update your ace-ets2bundle and recompile your application!`);
     }
     /**
      * For each recorded dirty Element in this custom component

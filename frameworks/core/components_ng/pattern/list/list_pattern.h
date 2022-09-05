@@ -34,8 +34,9 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         auto listLayoutProperty = GetHost()->GetLayoutProperty<ListLayoutProperty>();
-        auto divider = listLayoutProperty->GetDivider().value();
-        auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+        V2::ItemDivider itemDivider;
+        auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
+        auto axis = listLayoutProperty->GetListDirection().value_or(Axis::HORIZONTAL);
         auto vertical = axis == Axis::VERTICAL ? true : false;
         return MakeRefPtr<ListPaintMethod>(divider, startIndex_, endIndex_,
             vertical, std::move(itemPosition_));

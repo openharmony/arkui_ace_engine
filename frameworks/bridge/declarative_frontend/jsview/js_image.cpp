@@ -242,6 +242,18 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto jsLoadSuccFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageSuccessEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageSuccEventToJSValue);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto onComplete = [execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)](
+                                  const LoadImageSuccessEvent& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("Image.onComplete");
+                func->Execute(info);
+            };
+            NG::ImageView::SetOnComplete(std::move(onComplete));
+            return;
+        }
+
         auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         image->SetLoadSuccessEvent(EventMarker(
             [execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)](const BaseEventInfo* info) {
@@ -261,6 +273,15 @@ void JSImage::OnError(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto jsLoadFailFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageFailEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageFailEventToJSValue);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto onError = [execCtx = args.GetExecutionContext(), func = std::move(jsLoadFailFunc)](const LoadImageFailEvent& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("Image.onError");
+                func->Execute(info);
+            };
+            NG::ImageView::SetOnError(std::move(onError));
+            return;
+        }
         auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         image->SetLoadFailEvent(EventMarker(
             [execCtx = args.GetExecutionContext(), func = std::move(jsLoadFailFunc)](const BaseEventInfo* info) {
@@ -334,6 +355,11 @@ void JSImage::JsBorderRadius(const JSCallbackInfo& info)
 
 void JSImage::SetSourceSize(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        std::pair<Dimension, Dimension> sourceSize = JSViewAbstract::ParseSize(info);
+        NG::ImageView::SetImageSourceSize(sourceSize);
+        return;
+    }
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     image->SetImageSourceSize(JSViewAbstract::ParseSize(info));
 }
@@ -369,6 +395,7 @@ void JSImage::SetImageInterpolation(int32_t imageInterpolation)
 
 void JSImage::SetImageRepeat(int32_t imageRepeat)
 {
+    SET_PROP_FOR_NG(ImageRepeat, ImageRepeat, imageRepeat);
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     image->SetImageRepeat(static_cast<ImageRepeat>(imageRepeat));
 }
@@ -391,6 +418,27 @@ void JSImage::JsOpacity(const JSCallbackInfo& info)
     } else {
         JSViewAbstract::JsOpacityPassThrough(info);
     }
+}
+
+void JSImage::JsBlur(const JSCallbackInfo& info)
+{
+// only flutter runs special image blur
+#ifdef ENABLE_ROSEN_BACKEND
+    JSViewAbstract::JsBlur(info);
+#else
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    auto mainComp = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto image = AceType::DynamicCast<ImageComponent>(mainComp);
+    if (image) {
+        double blur = 0.0;
+        if (ParseJsDouble(info[0], blur)) {
+            image->SetBlur(blur);
+        }
+    }
+#endif
 }
 
 void JSImage::SetAutoResize(bool autoResize)
@@ -509,6 +557,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
+    JSClass<JSImage>::StaticMethod("blur", &JSImage::JsBlur);
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
     JSClass<JSImage>::Inherit<JSViewAbstract>();
     JSClass<JSImage>::Bind<>(globalObj);

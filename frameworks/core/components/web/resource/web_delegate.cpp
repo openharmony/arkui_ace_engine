@@ -90,7 +90,7 @@ void WebMessagePortOhos::Close()
         return;
     }
     delegate->ClosePort(handle_);
-    
+
 }
 
 void WebMessagePortOhos::PostMessage(std::string& data)
@@ -2643,6 +2643,28 @@ void WebDelegate::OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatc
     }
 }
 
+bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int height)
+{
+    LOGI("store pixel map, len = %{public}zu, width = %{public}d, height = %{public}d", len, width, height);
+    pixelMap_ = PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height);
+    if (pixelMap_ == nullptr) {
+        LOGE("convert drag image to pixel map failed");
+        return false;
+    }
+    isRefreshPixelMap_ = true;
+    return true;
+}
+
+RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
+{
+    if (isRefreshPixelMap_) {
+        isRefreshPixelMap_ = false;
+        return pixelMap_;
+    }
+
+    return nullptr;
+}
+
 #ifdef OHOS_STANDARD_SYSTEM
 void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y)
 {
@@ -2745,6 +2767,17 @@ void WebDelegate::OnTouchSelectionChanged(
     if (renderWeb) {
         renderWeb->OnTouchSelectionChanged(
             insertHandle, startSelectionHandle, endSelectionHandle);
+    }
+}
+
+void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction)
+{
+    if (nweb_) {
+        OHOS::NWeb::DragEvent dragEvent;
+        dragEvent.x = x;
+        dragEvent.y = y;
+        dragEvent.action = static_cast<OHOS::NWeb::DragAction>(dragAction);
+        nweb_->SendDragEvent(dragEvent);
     }
 }
 #endif

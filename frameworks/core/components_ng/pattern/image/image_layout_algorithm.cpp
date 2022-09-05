@@ -79,6 +79,7 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     bool incomingNeedResize = imageLayoutProperty->GetAutoResize().value_or(true);
     ImageFit incomingImageFit = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
+    const std::optional<std::pair<Dimension, Dimension>>& sourceSize = imageLayoutProperty->GetSourceSize();
     bool needMakeCanvasImage = incomingNeedResize != loadingCtx_->GetNeedResize() ||
                                dstSize != loadingCtx_->GetDstSize() || incomingImageFit != loadingCtx_->GetImageFit();
     // do [MakeCanvasImage] only when:
@@ -86,7 +87,7 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // 2. component size (aka [dstSize] here) changes.
     // 3. [ImageFit] changes
     if (needMakeCanvasImage) {
-        loadingCtx_->MakeCanvasImage(dstSize, incomingNeedResize, incomingImageFit);
+        loadingCtx_->MakeCanvasImage(dstSize, incomingNeedResize, incomingImageFit, sourceSize);
     }
 }
 

@@ -52,6 +52,11 @@ public:
 
 private:
     bool CreateParagraph(const TextStyle& textStyle, std::string content);
+    bool CreateParagraphAndLayout(
+        const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
+    bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
+        const RefPtr<PipelineContext>& pipeline);
+    bool DidExceedMaxLines(const LayoutConstraintF& contentConstraint);
     static TextDirection GetTextDirection(const std::string& content);
     double GetTextWidth() const;
 

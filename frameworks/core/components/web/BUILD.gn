@@ -20,6 +20,9 @@ if (is_standard_system) {
       "$ability_runtime_path/interfaces/kits/native/appkit/app",
       "//commonlibrary/c_utils/base/include",
       "//foundation/window/window_manager/interfaces/innerkits/wm",
+      "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+      "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
+      "//foundation/multimedia/image_standard/interfaces/innerkits/include",
     ]
   }
 }

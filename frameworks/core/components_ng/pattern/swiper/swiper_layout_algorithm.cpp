@@ -20,6 +20,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -45,8 +46,7 @@ void SwiperLayoutAlgorithm::InitItemRange()
         }
     }
 
-    if (targetIndex_.has_value() &&
-        (targetIndex_.value() < startIndex_ || targetIndex_.value() > endIndex_)) {
+    if (targetIndex_.has_value() && (targetIndex_.value() < startIndex_ || targetIndex_.value() > endIndex_)) {
         itemRange_.insert(targetIndex_.value());
     }
 
@@ -97,6 +97,12 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             break;
         }
         wrapper->Measure(layoutConstraint);
+    }
+
+    // TODO: need to find better way to sync render tree.
+    // if index changed, need mark frame node to force sync render tree.
+    if (!inActiveItems_.empty()) {
+        layoutWrapper->SetForceSyncRenderTree();
     }
 
     // Mark inactive in wrapper.

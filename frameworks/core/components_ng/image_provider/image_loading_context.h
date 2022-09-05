@@ -41,7 +41,8 @@ public:
 
     /* interfaces to drive image loading */
     void LoadImageData();
-    void MakeCanvasImage(const SizeF& dstSize, bool needResize,  ImageFit imageFit = ImageFit::COVER);
+    void MakeCanvasImage(const SizeF& dstSize, bool needResize,  ImageFit imageFit = ImageFit::COVER,
+        const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
 
     /* interfaces to get properties */
     SizeF GetImageSize() const;
@@ -52,10 +53,12 @@ public:
     const ImageSourceInfo& GetSourceInfo() const;
     const SizeF& GetDstSize() const;
     bool GetNeedResize() const;
+    std::optional<SizeF> GetSourceSize() const;
 
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
     void SetNeedResize(bool needResize);
+    void SetSourceSize(const std::optional<std::pair<Dimension, Dimension>>& sourceSize = std::nullopt);
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult, loadResultNotifierName)                                         \
@@ -102,6 +105,7 @@ private:
     SizeF dstSize_;
     bool needResize_ = true;
     ImageFit imageFit_ = ImageFit::COVER;
+    std::unique_ptr<std::pair<Dimension, Dimension>> sourceSizePtr_ = nullptr;
     std::function<void()> updateParamsCallback_ = nullptr;
 };
 

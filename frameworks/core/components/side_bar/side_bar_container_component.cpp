@@ -99,7 +99,7 @@ void SideBarContainerComponent::Build()
     RefPtr<DisplayComponent> displayBtn = AceType::MakeRefPtr<DisplayComponent>(btnbox);
     displayBtn->SetLeft(Dimension(declaration_->GetLeft(), DimensionUnit::VP));
     displayBtn->SetTop(Dimension(declaration_->GetTop(), DimensionUnit::VP));
-    displayBtn->SetPositionType(PositionType::ABSOLUTE);
+    displayBtn->SetPositionType(PositionType::PTABSOLUTE);
     if (!GetShowControlButton()) {
         displayBtn->SetVisible(VisibleType::GONE);
     } else {

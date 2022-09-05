@@ -1393,8 +1393,8 @@ void Declaration::SetCurrentStyle(const std::pair<std::string, std::string>& sty
                 if (positionStyle.IsValid() && !value.empty()) {
                     positionStyle.position =
                         value == DOM_POSITION_FIXED
-                            ? PositionType::FIXED
-                            : value == DOM_POSITION_ABSOLUTE ? PositionType::ABSOLUTE : PositionType::RELATIVE;
+                            ? PositionType::PTFIXED
+                            : value == DOM_POSITION_ABSOLUTE ? PositionType::PTABSOLUTE : PositionType::PTRELATIVE;
                     declaration.hasPositionStyle_ = true;
                 }
             } },

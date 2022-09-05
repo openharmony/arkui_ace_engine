@@ -69,6 +69,7 @@ void RenderImage::Update(const RefPtr<Component>& component)
     currentDstRect_ = dstRect_;
     currentDstRectList_ = rectList_;
     colorfilter_ = image->GetColorFilterMatrix();
+    blurRadius_ = image->GetBlurRadius();
     width_ = image->GetWidth();
     syncMode_ = image->GetSyncMode();
     height_ = image->GetHeight();

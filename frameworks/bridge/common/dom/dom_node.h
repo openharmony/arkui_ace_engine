@@ -614,7 +614,7 @@ public:
 
     PositionType GetPosition() const
     {
-        PositionType position = PositionType::RELATIVE;
+        PositionType position = PositionType::PTRELATIVE;
         if (declaration_) {
             auto& positionStyle =
                 static_cast<CommonPositionStyle&>(declaration_->GetStyle(StyleTag::COMMON_POSITION_STYLE));

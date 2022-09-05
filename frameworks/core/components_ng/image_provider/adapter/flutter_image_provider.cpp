@@ -152,9 +152,9 @@ RefPtr<ImageEncodedInfo> ImageEncodedInfo::CreateImageEncodedInfo(const RefPtr<N
 }
 
 void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, const LoadCallbacks& loadCallbacks,
-    const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder)
+    const SizeF& resizeTarget, const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize)
 {
-    auto canvasImageMakingTask = [objWp = imageObjWp, loadCallbacks, resizeTarget, renderTaskHolder] {
+    auto canvasImageMakingTask = [objWp = imageObjWp, loadCallbacks, resizeTarget, renderTaskHolder, forceResize] {
         auto obj = objWp.Upgrade();
         CHECK_NULL_VOID(obj);
         CHECK_NULL_VOID(renderTaskHolder);
@@ -203,7 +203,7 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, cons
             return;
         }
         // upload to gpu for render
-        auto image = ResizeSkImage(rawImage, obj->GetSourceInfo().GetSrc(), resizeTarget, false);
+        auto image = ResizeSkImage(rawImage, obj->GetSourceInfo().GetSrc(), resizeTarget, forceResize);
         flutter::SkiaGPUObject<SkImage> skiaGpuObjSkImage({ image, flutterRenderTaskHolder->unrefQueue });
 #ifdef NG_BUILD
         auto canvasImage = CanvasImage::Create();

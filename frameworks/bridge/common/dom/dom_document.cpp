@@ -347,7 +347,7 @@ void DOMDocument::RemoveNodes(const RefPtr<DOMNode>& node, bool scheduleUpdate)
         }
     }
     // Fixed positioned node and navigation bar node need to delete the relative proxy node.
-    if (node->GetPosition() == PositionType::FIXED && rootStackComponent_) {
+    if (node->GetPosition() == PositionType::PTFIXED && rootStackComponent_) {
         rootStackComponent_->RemoveChild(node->GetRootComponent());
         auto context = node->GetPipelineContext().Upgrade();
         if (context && scheduleUpdate) {

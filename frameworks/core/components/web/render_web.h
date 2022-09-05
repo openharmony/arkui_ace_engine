@@ -47,14 +47,20 @@ enum WebOverlayType {
 #endif
 }
 
-class RenderWeb : public RenderNode {
-    DECLARE_ACE_TYPE(RenderWeb, RenderNode);
+class RenderWeb : public RenderNode, public DragDropEvent {
+    DECLARE_ACE_TYPE(RenderWeb, RenderNode, DragDropEvent);
 
 public:
     static RefPtr<RenderNode> Create();
 
     RenderWeb();
     ~RenderWeb() override = default;
+
+    enum class VkState {
+        VK_NONE,
+        VK_SHOW,
+        VK_HIDE
+    };
 
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
@@ -73,7 +79,7 @@ public:
     void HandleTouchMove(const TouchEventInfo& info, bool fromOverlay);
     void HandleTouchCancel(const TouchEventInfo& info);
     void HandleDoubleClick(const ClickInfo& info);
-    
+
     // Related to text overlay
     void SetUpdateHandlePosition(
         const std::function<void(const OverlayShowOption&, float, float)>& updateHandlePosition);
@@ -103,11 +109,27 @@ public:
     void HandleAxisEvent(const AxisEvent& event) override;
     bool IsAxisScrollable(AxisDirection direction) override;
     WeakPtr<RenderNode> CheckAxisNode() override;
+    
+    void SetWebIsFocus(bool isFocus)
+    {
+        isFocus_ = isFocus;
+    }
+
+    bool GetWebIsFocus() const
+    {
+        return isFocus_;
+    }
+    void PanOnActionStart(const GestureEvent& info) override;
+    void PanOnActionUpdate(const GestureEvent& info) override;
+    void PanOnActionEnd(const GestureEvent& info) override;
+    void PanOnActionCancel() override;
+    DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
 
 protected:
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebComponent> web_;
     Size drawSize_;
+    Size drawSizeCache_;
     bool isUrlLoaded_ = false;
 
 private:
@@ -131,6 +153,10 @@ private:
     Offset NormalizeTouchHandleOffset(float x, float y);
     void RegisterTextOverlayCallback(
         int32_t flags, std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
+    void OnDragWindowStartEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info,
+        const DragItemInfo& dragItemInfo);
+    void OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
+    void OnDragWindowDropEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
 
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
     RefPtr<ClickRecognizer> doubleClickRecognizer_ = nullptr;
@@ -143,9 +169,18 @@ private:
     bool showTextOveralyMenu_ = false;
     bool showStartTouchHandle_ = false;
     bool showEndTouchHandle_ = false;
+    bool isDragging_ = false;
+    bool isW3cDragEvent_ = false;
 #endif
-
+    void RegistVirtualKeyBoardListener();
+    bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
+    void SetRootView(int32_t width, int32_t height, int32_t offset);
     Offset position_;
+    Offset webPoint_;
+    Offset globlePointPosition_;
+    bool needUpdateWeb_ = true;
+    bool isFocus_ = false;
+    VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
 };
 
 } // namespace OHOS::Ace

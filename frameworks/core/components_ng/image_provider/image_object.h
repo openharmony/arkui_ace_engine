@@ -47,7 +47,7 @@ public:
     void SetData(const RefPtr<ImageData>& data);
     void ClearData();
 
-    virtual void MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget) = 0;
+    virtual void MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize) = 0;
 
 protected:
     ImageSourceInfo sourceInfo_;
@@ -67,7 +67,7 @@ public:
     {}
     ~StaticImageObject() override = default;
 
-    void MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget) override;
+    void MakeCanvasImage(const LoadCallbacks& loadCallbacks, const SizeF& resizeTarget, bool forceResize) override;
 };
 
 } // namespace OHOS::Ace::NG

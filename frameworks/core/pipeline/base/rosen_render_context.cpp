@@ -54,6 +54,7 @@ void RosenRenderContext::Repaint(const RefPtr<RenderNode>& node)
         InitContext(rsNode, node->GetRectWithShadow(), offset);
     }
     node->RenderWithContext(*this, offset);
+    UpdateChildren(rsNode);
     StopRecordingIfNeeded();
 }
 
@@ -78,7 +79,7 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
 
     auto childRSNode = child->GetRSNode();
     if (childRSNode && childRSNode != rsNode_) {
-        rsNode_->AddChild(childRSNode, -1);
+        childNodes_.emplace_back(childRSNode);
         std::string name = AceType::TypeName(child);
         if (name != "RosenRenderForm" && name != "RosenRenderPlugin") {
             if (child->NeedRender()) {
@@ -174,7 +175,7 @@ void RosenRenderContext::InitContext(
     if (rsNode_ == nullptr) {
         return;
     }
-    rsNode_->ClearChildren();
+    childNodes_.clear();
     if (auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>()) {
         rosenCanvas_ = rsCanvasNode->BeginRecording(rsCanvasNode->GetPaintWidth(), rsCanvasNode->GetPaintHeight());
     }
@@ -221,4 +222,20 @@ void RosenRenderContext::Restore()
     }
 }
 
+void RosenRenderContext::UpdateChildren(const std::shared_ptr<RSNode>& rsNode)
+{
+    std::vector<OHOS::Rosen::NodeId> childNodeIds;
+    for (auto& child : childNodes_) {
+        if (auto childNode = child.lock()) {
+            childNodeIds.emplace_back(childNode->GetId());
+        }
+    }
+    if (childNodeIds != rsNode->GetChildIds()) {
+        rsNode->ClearChildren();
+        rsNode->SetChildIds(childNodeIds);
+        for (auto& child : childNodes_) {
+            rsNode->AddChild(child.lock(), -1);
+        }
+    }
+}
 } // namespace OHOS::Ace

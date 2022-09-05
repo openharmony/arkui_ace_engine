@@ -80,6 +80,11 @@ public:
     static void OnSearchResultReceive(const JSCallbackInfo& args);
     static void MediaPlayGestureAccess(bool isNeedGestureAccess);
     static void OnKeyEvent(const JSCallbackInfo& args);
+    static void JsOnDragStart(const JSCallbackInfo& info);
+    static void JsOnDragEnter(const JSCallbackInfo& info);
+    static void JsOnDragMove(const JSCallbackInfo& info);
+    static void JsOnDragLeave(const JSCallbackInfo& info);
+    static void JsOnDrop(const JSCallbackInfo& info);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

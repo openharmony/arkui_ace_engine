@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components/common/painter/flutter_scroll_bar_painter.h"
+#include "core/components_v2/list/render_list_item_group.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 
 namespace OHOS::Ace::V2 {
@@ -72,24 +73,35 @@ void FlutterRenderList::Paint(RenderContext& context, const Offset& offset)
         paint.setStyle(SkPaint::Style::kStroke_Style);
         paint.setStrokeWidth(strokeWidth);
         bool isFirstIndex = (startIndex_ == 0);
+        double lastMainAxis = INFINITY;
 
         for (const auto& child : items_) {
             if (child == selectedItem_) {
                 continue;
             }
 
+            double mainAxis = GetMainAxis(child->GetPosition());
             if (isFirstIndex) {
+                lastMainAxis = mainAxis;
                 isFirstIndex = false;
                 continue;
             }
 
-            double mainAxis = GetMainAxis(child->GetPosition());
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+            if (itemGroup) {
+                mainAxis = GetMainAxis(itemGroup->GetRenderNode()->GetPosition());
+            }
             if (GreatOrEqual(mainAxis - topOffset, mainSize)) {
                 break;
             }
             if (LessOrEqual(mainAxis - bottomOffset, 0.0)) {
                 continue;
             }
+            if (NearEqual(lastMainAxis, mainAxis)) {
+                continue;
+            }
+            lastMainAxis = mainAxis;
+
             mainAxis -= halfSpaceWidth;
             if (vertical_) {
                 skCanvas->drawLine(startCrossAxis, mainAxis, endCrossAxis, mainAxis, paint);

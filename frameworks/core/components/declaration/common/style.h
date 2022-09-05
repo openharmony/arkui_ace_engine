@@ -115,7 +115,7 @@ struct CommonFlexStyle : Style {
 };
 
 struct CommonPositionStyle : Style {
-    PositionType position { PositionType::RELATIVE };
+    PositionType position { PositionType::PTRELATIVE };
     Dimension left;
     Dimension top;
     Dimension right;

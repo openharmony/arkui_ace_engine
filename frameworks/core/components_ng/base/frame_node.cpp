@@ -39,7 +39,7 @@ namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
-    renderContext_->InitContext(IsRootNode());
+    renderContext_->InitContext(IsRootNode(), pattern_->SurfaceNodeName());
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
@@ -142,8 +142,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     CHECK_NULL_VOID(dirty);
     if (dirty->IsActive()) {
         pattern_->OnActive();
+        isActive_ = true;
     } else {
         pattern_->OnInActive();
+        isActive_ = false;
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
@@ -152,17 +154,22 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
-    if (needSyncRenderTree_) {
+    if (needSyncRenderTree_ || dirty->IsForceSyncRenderTree()) {
         RebuildRenderContextTree(dirty->GetChildrenInRenderArea());
         needSyncRenderTree_ = false;
     }
-    if (geometryNode_->GetFrame().GetRect() != dirty->GetGeometryNode()->GetFrame().GetRect()) {
+    bool frameSizeChange = geometryNode_->GetFrameSize() != dirty->GetGeometryNode()->GetFrameSize();
+    bool frameOffsetChange = geometryNode_->GetFrameOffset() != dirty->GetGeometryNode()->GetFrameOffset();
+    bool contentSizeChange = geometryNode_->GetContentSize() != dirty->GetGeometryNode()->GetContentSize();
+    bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
+    if (frameSizeChange || frameOffsetChange) {
         renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
     }
     if (layoutProperty_->GetBorderWidthProperty()) {
         renderContext_->UpdateBorderWidth(*layoutProperty_->GetBorderWidthProperty());
     }
     SetGeometryNode(dirty->MoveGeometryNode());
+    pattern_->OnLayoutChange(frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange);
 }
 
 void FrameNode::SetGeometryNode(RefPtr<GeometryNode>&& node)
@@ -293,9 +300,10 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     auto flag = layoutProperty_->GetPropertyChangeFlag();
     auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
     do {
-        if (CheckMeasureFlag(flag) || CheckRequestNewChildNodeFlag(flag) || forceMeasure) {
+        // when inactive node need to reactive in render tree, need to measure again.
+        if (CheckMeasureFlag(flag) || CheckRequestNewChildNodeFlag(flag) || forceMeasure || !isActive_) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
-            bool forceChildMeasure = CheckMeasureFlag(flag) || forceMeasure;
+            bool forceChildMeasure = CheckMeasureFlag(flag) || forceMeasure || !isActive_;
             UpdateChildrenLayoutWrapper(layoutWrapper, forceChildMeasure, false);
             break;
         }

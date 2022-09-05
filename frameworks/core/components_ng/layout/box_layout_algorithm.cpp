@@ -60,6 +60,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         if (measureType == MeasureType::MATCH_PARENT) {
             frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->parentIdealSize);
             if (frameSize.IsValid()) {
+                frameSize.Constrain(minSize, maxSize);
                 break;
             }
         }

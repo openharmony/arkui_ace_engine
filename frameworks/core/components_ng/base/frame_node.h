@@ -149,6 +149,11 @@ public:
 
     bool IsAtomicNode() const override;
 
+    void MarkNeedSyncRenderTree() override
+    {
+        needSyncRenderTree_ = true;
+    }
+
 private:
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
@@ -165,11 +170,6 @@ private:
     OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
-
-    void MarkNeedSyncRenderTree() override
-    {
-        needSyncRenderTree_ = true;
-    }
 
     void RebuildRenderContextTree(const std::list<RefPtr<FrameNode>>& children);
 
@@ -198,6 +198,8 @@ private:
     bool isRenderDirtyMarked_ = false;
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
+
+    bool isActive_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

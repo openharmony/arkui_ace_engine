@@ -51,6 +51,9 @@ public:
     static void SetOnClick(GestureEventFunc&& clickEventFunc);
     static void SetOnTouch(TouchEventFunc&& touchEventFunc);
 
+    // flex properties
+    static void SetAlignSelf(int32_t value);
+
     static void Pop();
 };
 } // namespace OHOS::Ace::NG

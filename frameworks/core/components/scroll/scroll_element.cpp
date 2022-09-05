@@ -38,8 +38,8 @@ void ScrollElement::OnMount()
 {
     auto context = context_.Upgrade();
     if (context && context->GetTextFieldManager() && context->GetLastPage()) {
-        auto textFeildManager = context->GetTextFieldManager();
-        textFeildManager->SetScrollElement(context->GetLastPage()->GetPageId(), WeakClaim(this));
+        auto textFieldManager = context->GetTextFieldManager();
+        textFieldManager->SetScrollElement(context->GetLastPage()->GetPageId(), WeakClaim(this));
     }
 }
 

@@ -20,6 +20,7 @@
 
 #include "base/geometry/size.h"
 #include "base/utils/utils.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components/declaration/common/declaration.h"
 #include "core/components/declaration/web/web_client.h"
 #include "core/components/declaration/web/web_declaration.h"
@@ -1342,6 +1343,56 @@ public:
         return isNeedGestureAccess_;
     }
 
+    const OnDragFunc& GetOnDragStartId() const
+    {
+        return onDragStartId_;
+    }
+
+    void SetOnDragStartId(const OnDragFunc& onDragStartId)
+    {
+        onDragStartId_ = onDragStartId;
+    }
+
+    const OnDropFunc& GetOnDragEnterId() const
+    {
+        return onDragEnterId_;
+    }
+
+    void SetOnDragEnterId(const OnDropFunc& onDragEnterId)
+    {
+        onDragEnterId_ = onDragEnterId;
+    }
+
+    const OnDropFunc& GetOnDragMoveId() const
+    {
+        return onDragMoveId_;
+    }
+
+    void SetOnDragMoveId(const OnDropFunc& onDragMoveId)
+    {
+        onDragMoveId_ = onDragMoveId;
+    }
+
+    const OnDropFunc& GetOnDragLeaveId() const
+    {
+        return onDragLeaveId_;
+    }
+
+    void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId)
+    {
+        onDragLeaveId_ = onDragLeaveId;
+    }
+
+    const OnDropFunc& GetOnDropId() const
+    {
+        return onDropId_;
+    }
+
+    void SetOnDropId(const OnDropFunc& onDropId)
+    {
+        onDropId_ = onDropId;
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -1386,6 +1437,11 @@ private:
     int32_t backgroundColor_;
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
+    OnDragFunc onDragStartId_;
+    OnDropFunc onDragEnterId_;
+    OnDropFunc onDragMoveId_;
+    OnDropFunc onDragLeaveId_;
+    OnDropFunc onDropId_;
 };
 
 } // namespace OHOS::Ace

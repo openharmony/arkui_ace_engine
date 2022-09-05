@@ -58,7 +58,7 @@ public:
 
     virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}
 
-    virtual void InitContext(bool isRoot) {}
+    virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}

@@ -324,7 +324,7 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
         back->SetBorderRadius(Radius(theme_->GetPopupRRectSize()));
         back->AddShadow(ShadowConfig::DefaultShadowM);
         box->SetBackDecoration(back);
-        box->SetPadding(Edge(IN_OUT_BOX_INTERVAL));
+        box->SetPadding(isCustomMenu_ ? Edge() : Edge(IN_OUT_BOX_INTERVAL));
     }
     box->SetChild(innerBox);
 
