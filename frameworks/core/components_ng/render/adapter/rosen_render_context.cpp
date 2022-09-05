@@ -106,8 +106,8 @@ void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
     Rosen::Vector4f cornerRadius;
     cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPx()),
         static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
+        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()));
     rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
 }
