@@ -1135,6 +1135,10 @@ void RosenRenderImage::UpdateLoadSuccessState()
 {
     LOGD("update success state info: %{public}s", sourceInfo_.ToString().c_str());
     imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
+    if (!imageObj_) {
+        LOGE("image obj is null");
+        return;
+    }
     auto currentFrameCount = imageObj_->GetFrameCount();
     if ((!sourceInfo_.IsSvg() && currentFrameCount == 1) || (currentFrameCount > 1 && curSourceInfo_ != sourceInfo_)) {
         FireLoadEvent(imageSizeForEvent_);
