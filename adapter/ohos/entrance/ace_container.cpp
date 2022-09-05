@@ -1435,4 +1435,16 @@ void AceContainer::UpdateFrondend(bool needReloadTransition)
             }, TaskExecutor::TaskType::UI);
         }, TaskExecutor::TaskType::JS);
 }
+
+extern "C" ACE_EXPORT void OHOS_ACE_HotReloadPage()
+{
+    AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
+        auto ace = AceType::DynamicCast<AceContainer>(container);
+        if (ace) {
+            ace->UpdateFrondend(true);
+        }
+        LOGI("frontend rebuild finished");
+    });
+}
+
 } // namespace OHOS::Ace::Platform
