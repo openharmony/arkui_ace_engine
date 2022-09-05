@@ -104,9 +104,12 @@ void JSPersistent::Get(const JSCallbackInfo& args)
     }
     auto executor = container->GetTaskExecutor();
     std::string value = StorageProxy::GetInstance()->GetStorage(executor)->GetString(key);
-    auto returnValue = JSVal(ToJSValue(value));
-    auto returnPtr = JSRef<JSVal>::Make(returnValue);
-    args.SetReturnValue(returnPtr);
+    if (value.empty()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSVal> ret = obj->ToJsonObject(value.c_str());
+    args.SetReturnValue(ret);
 }
 
 void JSPersistent::Delete(const JSCallbackInfo& args)
