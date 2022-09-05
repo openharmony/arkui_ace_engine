@@ -19,10 +19,7 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
-#include "base/geometry/rect.h"
 #include "base/log/log_wrapper.h"
-#include "core/components/image/image_animator_component.h"
-#include "core/components/progress/progress_theme.h"
 
 namespace OHOS::Ace::NG {
 void ProgressPaintMethod::PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const
@@ -51,7 +48,7 @@ void ProgressPaintMethod::PaintRing(RSCanvas& canvas, const OffsetF& offset, con
 {
     static int32_t totalDegree = 360;
     PointF centerPt = PointF(frameSize.Width() / 2, frameSize.Height() / 2) + offset;
-    rosen::scalar radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2) - strokeWidth_ / 2;
+    double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2) - strokeWidth_ / 2;
     RSPen pen;
     pen.SetAntiAlias(true);
     pen.SetWidth(strokeWidth_);
@@ -71,15 +68,12 @@ void ProgressPaintMethod::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset
 {
     static int32_t totalDegree = 360;
     PointF centerPt = PointF(frameSize.Width() / 2, frameSize.Height() / 2) + offset;
-    rosen::scalar radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2) - strokeWidth_ / 2;
+    double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2) - strokeWidth_ / 2;
     double pathDistance = 2.0 * M_PI * radius / scaleCount_;
-    LOGI("PaintScaleRing: radius:%{public}lf pathDistanc:%{public}lf scaleCount_:%d, strokeWidth_:%{public}lf  "
-         "scaleWidth_:%{public}lf",
-        radius, pathDistance, scaleCount_, strokeWidth_, scaleWidth_);
     RSPen pen;
     Rosen::Drawing::Path path;
     double widthOfLine = std::min(scaleWidth_, pathDistance);
-    path.AddRoundRect({ 0, 0, widthOfLine ,strokeWidth_}, 90, 90, rosen::PathDirection::CW_DIRECTION);
+    path.AddRoundRect({ 0, 0, widthOfLine, strokeWidth_ }, 90, 90, rosen::PathDirection::CW_DIRECTION);
     pen.SetAntiAlias(true);
     pen.SetWidth(scaleWidth_);
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
@@ -95,6 +89,71 @@ void ProgressPaintMethod::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset
     canvas.DrawArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius }, 270,
         angle);
+}
+
+void ProgressPaintMethod::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const
+{
+    static int32_t totalDegree = 1;
+    PointF centerPt = PointF(frameSize.Width() / 2, frameSize.Height() / 2) + offset;
+    double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2);
+    RSBrush brush;
+    brush.SetAlpha(true);
+    brush.SetColor(ToRSColor(Color::GRAY));
+    double angle = (value_ / maxValue_) * totalDegree;
+    Rosen::Drawing::Path path;
+    canvas.AttachBrush(brush);
+    canvas.DrawCircle(ToRSPonit(centerPt), radius);
+    brush.SetColor(ToRSColor((color_)));
+    canvas.AttachBrush(brush);
+    path.AddArc(
+        { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius }, 90,
+        180);
+    if (angle <= 0.5) {
+        double progressOffset = radius - radius * angle / 0.5;
+        path.MoveTo(centerPt.GetX(), centerPt.GetY() - radius);
+        path.AddArc({ centerPt.GetX() - progressOffset, centerPt.GetY() - radius, centerPt.GetX() + progressOffset,
+                        centerPt.GetY() + radius },
+            270, -180);
+        canvas.DrawPath(path);
+    } else {
+        double progressOffset = radius * (angle - 0.5) / 0.5;
+        path.MoveTo(centerPt.GetX(), centerPt.GetY() - radius);
+        path.AddArc({ centerPt.GetX() - progressOffset, centerPt.GetY() - radius, centerPt.GetX() + progressOffset,
+                        centerPt.GetY() + radius },
+            270, 180);
+        canvas.DrawPath(path);
+    }
+}
+
+void ProgressPaintMethod::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const
+{
+    static int32_t totalDegree = 1;
+    double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2);
+    double offsetX = offset.GetX();
+    double offsetY = offset.GetY();
+    double length = (value_ / maxValue_) * totalDegree * frameSize.Width();
+    RSBrush brush;
+    brush.SetAlpha(true);
+    brush.SetColor(ToRSColor(Color::GRAY));
+    Rosen::Drawing::Path path;
+    canvas.AttachBrush(brush);
+    canvas.DrawRoundRect(
+        { { offsetX, offsetY, frameSize.Width() + offsetX, frameSize.Height() + offsetY },
+            radius, radius });
+    brush.SetColor(ToRSColor((color_)));
+    canvas.AttachBrush(brush);
+    path.AddArc({ offsetX, offsetY, 2*radius + offsetX, frameSize.Height() + offsetY }, 90, 180);
+    if (LessNotEqual(length, radius)) {
+        path.AddArc({ offsetX+length, offsetY, 2*radius - length + offsetX, frameSize.Height() + offsetY }, 270, -180);
+    } else if (GreatNotEqual(length, frameSize.Width() - radius)) {
+        path.AddRect({ offsetX + radius, offsetY, frameSize.Width() + offsetX - radius, frameSize.Height() + offsetY });
+        path.AddArc({ offsetX+(frameSize.Width() - radius) * 2.0 - length, offsetY , offsetX+length,
+                        frameSize.Height() + offsetY },
+            270, 180);
+    } else {
+        path.AddRect({ radius + offsetX, offsetY, length + offsetX, frameSize.Height() + offsetY });
+    }
+    canvas.DrawPath(path);
 }
 
 } // namespace OHOS::Ace::NG

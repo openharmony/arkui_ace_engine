@@ -44,7 +44,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(progressDate, std::nullopt);
     value_ = progressDate->GetValue().value_or(0);
     maxValue_ = progressDate->GetMaxValue().value_or(100);
-    color_ = progressStyle->GetColor().value_or(progressTheme?progressTheme->GetProgressColor():Color::BLUE);
+    color_ = progressStyle->GetColor().value_or(progressTheme?progressTheme->GetTrackSelectedColor():Color::BLUE);
     type_ = progressStyle->GetType().value_or(ProgressType::LINEAR);
     strokeWidth_=progressStyle->GetStrokeWidth().value_or(10);
     scaleCount_ = progressStyle->GetScaleCount().value_or(progressTheme?progressTheme->GetScaleNumber():20);
@@ -59,7 +59,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     {   
         height_ = std::min(strokeWidth_*2,height_);
     }
-    if(type_ == ProgressType::RING || type_ == ProgressType::SCALE)
+    if(type_ == ProgressType::RING || type_ == ProgressType::SCALE || type_ ==ProgressType::MOON)
     {
         height_ = std::min(width_,height_);
         width_=height_;

@@ -38,7 +38,6 @@ public:
         : maxValue_(maxValue), value_(value), color_(color), strokeWidth_(strokeWidth), scaleWidth_(scaleWidth),
           scaleCount_(scaleCount), progressType_(progressType)
     {
-        LOGI("scalecount: %d",scaleCount);
     }
     ~ProgressPaintMethod() override = default;
 
@@ -55,12 +54,20 @@ public:
         if (progressType_ == ProgressType::SCALE) {
             return [frameSize, offset, this](RSCanvas& canvas) { PaintScaleRing(canvas, offset, frameSize); };
         }
+        if (progressType_ == ProgressType::MOON) {
+            return [frameSize, offset, this](RSCanvas& canvas) { PaintMoon(canvas, offset, frameSize); };
+        }
+        if (progressType_ == ProgressType::CAPSULE) {
+            return [frameSize, offset, this](RSCanvas& canvas) { PaintCapsule(canvas, offset, frameSize); };
+        }
         return [frameSize, offset, this](RSCanvas& canvas) { PaintLinear(canvas, offset, frameSize); };
     }
 
     void PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
     void PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
     void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
+    void PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
+    void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
 
 private:
     double maxValue_ ;
