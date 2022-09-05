@@ -3807,4 +3807,20 @@ void PipelineContext::SetSinglePageId(int32_t pageId)
     stageElement->SetSinglePageId(pageId);
 }
 
+void PipelineContext::SetAppTitle(const std::string& title)
+{
+    CHECK_NULL_VOID(rootElement_);
+    auto containerModalElement = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+    CHECK_NULL_VOID(containerModalElement);
+    containerModalElement->SetAppTitle(title);
+}
+
+void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
+{
+    CHECK_NULL_VOID(rootElement_);
+    auto containerModalElement = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+    CHECK_NULL_VOID(containerModalElement);
+    containerModalElement->SetAppIcon(icon);
+}
+
 } // namespace OHOS::Ace

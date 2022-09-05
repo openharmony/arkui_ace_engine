@@ -534,4 +534,23 @@ void ContainerModalElement::SetTitleButtonHide(bool hideSplit, bool hideMaximize
     floatingRowElement->SetUpdateComponent(floatingTitleChildrenRow);
 }
 
+void ContainerModalElement::SetAppTitle(const std::string& title)
+{
+    CHECK_NULL_VOID(containerModalComponent_);
+    auto textComponent = containerModalComponent_->GetTitleLabel();
+    CHECK_NULL_VOID(textComponent);
+    textComponent->SetData(title);
+    FlushReload();
+}
+
+void ContainerModalElement::SetAppIcon(const RefPtr<PixelMap>& icon)
+{
+    CHECK_NULL_VOID(containerModalComponent_);
+    auto imageComponent = containerModalComponent_->GetTitleIcon();
+    CHECK_NULL_VOID(imageComponent);
+    imageComponent->SetSrc("");
+    imageComponent->SetPixmap(icon);
+    FlushReload();
+}
+
 } // namespace OHOS::Ace
