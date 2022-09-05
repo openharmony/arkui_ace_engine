@@ -58,14 +58,11 @@ public:
     sk_sp<SkImage> FinishRecordingAsImage();
 
 private:
-    void UpdateChildren(const std::shared_ptr<RSNode>& rsNode);
-
     std::shared_ptr<RSNode> rsNode_ = nullptr;
     SkPictureRecorder* recorder_ = nullptr;
     SkCanvas* recordingCanvas_ = nullptr;
     SkCanvas* rosenCanvas_ = nullptr;
     Rect estimatedRect_;
-    std::vector<std::weak_ptr<RSNode>> childNodes_;
 };
 
 } // namespace OHOS::Ace
