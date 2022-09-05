@@ -126,6 +126,12 @@ RenderSwiper::~RenderSwiper()
     if (autoPlay_ && scheduler_ && scheduler_->IsActive()) {
         scheduler_->Stop();
     }
+
+    auto context = context_.Upgrade();
+    if (!context || callbackId_ <= 0) {
+        return;
+    }
+    context->UnregisterSurfaceChangedCallback(callbackId_);
 }
 
 void RenderSwiper::Update(const RefPtr<Component>& component)
@@ -137,6 +143,17 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     }
     auto context = context_.Upgrade();
     ACE_DCHECK(context);
+
+    if (context && callbackId_ <= 0) {
+        callbackId_ = context->RegisterSurfaceChangedCallback(
+            [weak = WeakClaim(this)](int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight) {
+                auto swiper = weak.Upgrade();
+                if (swiper) {
+                    swiper->OnSurfaceChanged();
+                }
+            });
+    }
+
     if (swiper->GetUpdateType() == UpdateType::STYLE) {
         // only update indicator when update style
         indicator_ = swiper->GetIndicator();
@@ -1092,6 +1109,7 @@ void RenderSwiper::MoveItems(double dragVelocity)
         end = 0.0;
         needRestore = true;
     }
+    needRestore_ = needRestore;
     LOGI("translate animation, currentIndex: %{public}d, fromIndex: %{public}d, toIndex: %{public}d, \
         start: %{public}f, end: %{public}f", currentIndex_, fromIndex, toIndex, start, end);
     translate_ = AceType::MakeRefPtr<CurveAnimation<double>>(start, end, curve_);
@@ -2712,7 +2730,7 @@ void RenderSwiper::StopDragRetractionAnimation()
     }
 }
 
-void RenderSwiper::FinishAllSwipeAnimation(bool useFinish)
+void RenderSwiper::FinishAllSwipeAnimation(bool useFinish, bool surfaceChanged)
 {
     if (useFinish && IsAnimatorStopped()) {
         FireSwiperControllerFinishEvent();
@@ -2729,7 +2747,11 @@ void RenderSwiper::FinishAllSwipeAnimation(bool useFinish)
     StopIndicatorSpringAnimation();
     ResetIndicatorPosition();
 
-    LoadLazyItems((currentIndex_ + 1) % itemCount_ == targetIndex_);
+    if (surfaceChanged) {
+        UpdateChildPosition(0.0, currentIndex_);
+    } else {
+        LoadLazyItems((currentIndex_ + 1) % itemCount_ == targetIndex_);
+    }
     UpdateOneItemOpacity(MAX_OPACITY, currentIndex_);
     UpdateOneItemOpacity(MAX_OPACITY, targetIndex_);
     currentIndex_ = targetIndex_;
@@ -3334,6 +3356,13 @@ void RenderSwiper::OnChildRemoved(const RefPtr<RenderNode>& child)
     }
     ClearItems(nullptr, 0);
     ResetCachedChildren();
+}
+
+void RenderSwiper::OnSurfaceChanged()
+{
+    if(isIndicatorAnimationStart_ && !needRestore_) {
+        FinishAllSwipeAnimation(true, true);
+    }
 }
 
 } // namespace OHOS::Ace
