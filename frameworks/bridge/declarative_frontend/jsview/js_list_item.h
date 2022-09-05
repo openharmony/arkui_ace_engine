@@ -34,7 +34,6 @@ public:
     static void SetSwiperAction(const JSCallbackInfo& args);
     static void SelectCallback(const JSCallbackInfo& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
-    static void JsOnDragStart(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -60,7 +60,6 @@ void RenderListItem::Update(const RefPtr<Component>& component)
 
     onSelectId_ = item->GetOnSelectId();
     selectable_ = item->GetSelectable();
-    isDragStart_ = item->IsDragStart();
     borderRadius_ = item->GetBorderRadius();
     edgeEffect_ = item->GetEdgeEffect();
 

@@ -454,7 +454,6 @@ private:
 
     bool HandleMouseEvent(const MouseEvent& event) override;
     bool isMultiSelectable_ = false;
-    bool forbidMultiSelect_ = false;
     void ClearMultiSelect();
     bool mouseIsHover_ = false;
     bool hasHeight_ = false;
