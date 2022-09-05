@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_IMAGE_MODEL_IMPL_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_IMAGE_MODEL_IMPL_H
 
 #include "core/components_ng/pattern/image/image_model.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace::Framework {
 
 // ImageModel is essentially the same class as ImageView
 // there should be only one left in the final implementation
 
-class  ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
+class ImageModelImpl : public OHOS::Ace::ImageModel {
 public:
     void SetAlt(std::string src) override;
     void SetBlur(double blur) override;
@@ -52,5 +53,5 @@ public:
     bool UpdateDragItemInfo(DragItemInfo& itemInfo) override;
 };
 
-} // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H
+} // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_IMAGE_MODEL_IMPL_H

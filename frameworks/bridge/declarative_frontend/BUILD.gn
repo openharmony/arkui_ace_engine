@@ -250,6 +250,7 @@ template("declarative_js_engine") {
       "jsview/bindings/js_row_binding.cpp",
       "jsview/bindings/js_stack_binding.cpp",
       "jsview/bindings/js_text_binding.cpp",
+
       # Models implemenations for classic fw
       "jsview/models/image_model_impl.cpp",
     ]

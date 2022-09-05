@@ -21,13 +21,13 @@
 
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
+#include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/components/image/image_event.h"
-#include "core/components/image/image_model_impl.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 
-namespace OHOS::Ace::Framework {
+namespace OHOS::Ace {
 
 std::unique_ptr<ImageModel> ImageModel::instance = nullptr;
 
@@ -37,11 +37,15 @@ ImageModel* ImageModel::GetInstance()
         if (Container::IsCurrentUseNewPipeline()) {
             instance.reset(new NG::ImageModelNG());
         } else {
-            instance.reset(new ImageModelImpl());
+            instance.reset(new Framework::ImageModelImpl());
         }
     }
     return instance.get();
 }
+
+}
+
+namespace OHOS::Ace::Framework {
 
 JSRef<JSVal> LoadImageSuccEventToJSValue(const LoadImageSuccessEvent& eventInfo)
 {
@@ -156,9 +160,9 @@ void JSImage::Create(const JSCallbackInfo& info)
     auto noPixMap = ParseJsMedia(info[0], src);
 
     RefPtr<PixelMap> pixMap = nullptr;
-    #if defined(IMAGE_SUPPORTED)
+#if defined(IMAGE_SUPPORTED)
     pixMap = CreatePixelMapFromNapiValue(info[0]);
-    #endif
+#endif
 
     ImageModel::GetInstance()->Create(src, noPixMap, pixMap);
 }
@@ -225,13 +229,9 @@ void JSImage::JsBlur(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    auto mainComp = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto image = AceType::DynamicCast<ImageComponent>(mainComp);
-    if (image) {
-        double blur = 0.0;
-        if (ParseJsDouble(info[0], blur)) {
-            image->SetBlur(blur);
-        }
+    double blur = 0.0;
+    if (ParseJsDouble(info[0], blur)) {
+        ImageModel::GetInstance()->SetBlur(blur);
     }
 #endif
 }

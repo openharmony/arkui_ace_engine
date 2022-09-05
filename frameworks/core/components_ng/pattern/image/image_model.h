@@ -16,11 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_H
 
+#include "base/geometry/dimension.h"
+#include "base/image/pixel_map.h"
+#include "base/memory/referenced.h"
+#include "core/components/box/drag_drop_event.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/image/image_event.h"
-#include "core/components_ng/pattern/image/image_view.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 
-namespace OHOS::Ace::Framework {
+namespace OHOS::Ace {
 
 // ImageModel is essentially the same class as ImageView
 // there should be only one left in the final implementation
@@ -30,6 +34,7 @@ public:
     virtual ~ImageModel() {};
 
     virtual void SetAlt(std::string src) = 0;
+    virtual void SetBlur(double blur) = 0;
     virtual void SetImageFit(int32_t value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;
     virtual void SetFitMaxSize(bool value) = 0;

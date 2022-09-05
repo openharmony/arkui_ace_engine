@@ -18,7 +18,6 @@
 
 #include "core/components_ng/pattern/image/image_model_ng.h"
 
-#include "core/components/image/image_event.h"
 #include "core/components_ng/pattern/image/image_view.h"
 
 namespace OHOS::Ace::NG {
@@ -27,6 +26,10 @@ namespace OHOS::Ace::NG {
     ImageView::Set##propName(static_cast<propType>(propValue));
 
 void ImageModelNG::SetAlt(std::string src)
+{
+}
+
+void ImageModelNG::SetBlur(double blur)
 {
 }
 

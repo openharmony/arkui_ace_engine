@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_MODEL_IMPL_CPP
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_MODEL_IMPL_CPP
-
-
-#include "core/components/image/image_model_impl.h"
+#include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
@@ -34,6 +30,14 @@ void ImageModelImpl::SetAlt(std::string src)
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
         image->SetAlt(src);
+    }
+}
+
+void ImageModelImpl::SetBlur(double blur)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetBlur(blur);
     }
 }
 
@@ -231,4 +235,3 @@ bool ImageModelImpl::UpdateDragItemInfo(DragItemInfo& itemInfo)
 }
 
 } // namespace OHOS::Ace::Framework
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_IMAGE_MODEL_IMPL_CPP
