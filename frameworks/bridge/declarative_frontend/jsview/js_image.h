@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H
 
+//TODO: remove dependancy on ImageComponent, use ImageModel/ImageView instead
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -84,15 +85,7 @@ protected:
      */
     static RefPtr<Decoration> GetFrontDecoration();
     static const Border& GetBorder();
-    static BorderEdge GetLeftBorderEdge();
-    static BorderEdge GetTopBorderEdge();
-    static BorderEdge GetRightBorderEdge();
-    static BorderEdge GetBottomBorderEdge();
     static void SetBorderEdge(const BorderEdge& edge);
-    static void SetLeftBorderEdge(const BorderEdge& edge);
-    static void SetTopBorderEdge(const BorderEdge& edge);
-    static void SetRightBorderEdge(const BorderEdge& edge);
-    static void SetBottomBorderEdge(const BorderEdge& edge);
     static void SetBorder(const Border& border);
     static void SetWidth(const Dimension& width);
     static void SetHeight(const Dimension& height);
@@ -107,10 +100,6 @@ protected:
     static void SetPaddingRight(const std::string& value);
     static void SetPadding(const std::string& value);
     static void SetBackgroundColor(const Color& color);
-    static void SetLeftBorderColor(const Color& color);
-    static void SetTopBorderColor(const Color& color);
-    static void SetRightBorderColor(const Color& color);
-    static void SetBottomBorderColor(const Color& color);
     static void SetAutoResize(bool autoResize);
 
 };
