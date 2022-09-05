@@ -287,6 +287,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     void HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction);
     RefPtr<PixelMap> GetDragPixelMap();
+    std::string GetUrl();
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);

@@ -678,6 +678,20 @@ public:
         declaration_->webMethod.Reload();
     }
 
+    using GetUrlImpl = std::function<std::string()>;
+    std::string GetUrl()
+    {
+        if (getUrlImpl_) {
+            return getUrlImpl_();
+        }
+        return "";
+    }
+
+    void SetGetUrlImpl(GetUrlImpl && getUrlImpl)
+    {
+        getUrlImpl_ = std::move(getUrlImpl);
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     WebCookie* cookieManager_ = nullptr;
@@ -721,6 +735,7 @@ private:
     SearchAllAsyncImpl searchAllAsyncImpl_;
     ClearMatchesImpl clearMatchesImpl_;
     SearchNextImpl searchNextImpl_;
+    GetUrlImpl getUrlImpl_;
 };
 
 // A component can show HTML5 webpages.
