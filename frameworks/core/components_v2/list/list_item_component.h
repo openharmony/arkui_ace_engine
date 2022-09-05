@@ -133,22 +133,11 @@ public:
         return isLazyCreating_;
     }
 
-    bool IsDragStart() const
-    {
-        return isDragStart_;
-    }
-
-    void MarkIsDragStart(bool isDragStart)
-    {
-        isDragStart_ = isDragStart;
-    }
-
 private:
     OnSelectFunc onSelectId_;
     DeepRenderFunc deepRenderFunc_ = nullptr;
     bool isLazyCreating_ = false;
     bool selectable_ = true;
-    bool isDragStart_ = false;
     RefPtr<Component> swiperStartComponent_;
     RefPtr<Component> swiperEndComponent_;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemComponent);
