@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/render_context.h"
@@ -159,7 +160,14 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
     }
     if (layoutProperty_->GetBorderWidthProperty()) {
-        renderContext_->UpdateBorderWidth(*layoutProperty_->GetBorderWidthProperty());
+        if (layoutProperty_->GetLayoutConstraint().has_value()) {
+            renderContext_->UpdateBorderWidth(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+                ScaleProperty::CreateScaleProperty(),
+                layoutProperty_->GetLayoutConstraint()->percentReference.Width()));
+        } else {
+            renderContext_->UpdateBorderWidth(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+                ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
+        }
     }
     SetGeometryNode(dirty->MoveGeometryNode());
 }

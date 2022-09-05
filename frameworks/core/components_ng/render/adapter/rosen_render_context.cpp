@@ -106,8 +106,8 @@ void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
     Rosen::Vector4f cornerRadius;
     cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPx()),
         static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()));
+        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
     rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
 }
@@ -121,14 +121,12 @@ void RosenRenderContext::OnBorderColorUpdate(const BorderColorProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnBorderWidthUpdate(const BorderWidthProperty& value)
+void RosenRenderContext::UpdateBorderWidth(const BorderWidthPropertyF& value)
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerBorderWidth;
-    cornerBorderWidth.SetValues(static_cast<float>(value.leftDimen.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.rightDimen.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.topDimen.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.bottomDimen.value_or(Dimension()).ConvertToPx()));
+    cornerBorderWidth.SetValues(value.leftDimen.value_or(0), static_cast<float>(value.topDimen.value_or(0)),
+        static_cast<float>(value.rightDimen.value_or(0)), static_cast<float>(value.bottomDimen.value_or(0)));
     rsNode_->SetBorderWidth(cornerBorderWidth);
     RequestNextFrame();
 }
@@ -146,16 +144,14 @@ void RosenRenderContext::OnBorderStyleUpdate(const BorderStyleProperty& value)
 void RosenRenderContext::ResetBlendBgColor()
 {
     CHECK_NULL_VOID(rsNode_);
-    CHECK_NULL_VOID(bgColor_);
-    rsNode_->SetBackgroundColor(bgColor_->GetValue());
+    rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
     RequestNextFrame();
 }
 
 void RosenRenderContext::BlendBgColor(const Color& color)
 {
     CHECK_NULL_VOID(rsNode_);
-    bgColor_ = GetBackgroundColor();
-    auto blendColor = bgColor_.value_or(Color::TRANSPARENT).BlendColor(color);
+    auto blendColor = GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(color);
     rsNode_->SetBackgroundColor(blendColor.GetValue());
     RequestNextFrame();
 }
