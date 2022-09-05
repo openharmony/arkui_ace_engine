@@ -61,12 +61,11 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
 void UINode::RemoveChild(const RefPtr<UINode>& child)
 {
     CHECK_NULL_VOID(child);
-
-    children_.remove(child);
     if (onMainTree_) {
         child->DetachFromMainTree();
     }
     OnChildRemoved(child);
+    children_.remove(child);
     MarkNeedSyncRenderTree();
 }
 
@@ -113,6 +112,7 @@ void UINode::MovePosition(int32_t slot)
         std::advance(it, slot);
         if ((it != children.end()) && (*it == this)) {
             // Already at the right place
+            LOGD("Already at the right place");
             return;
         }
 
@@ -120,7 +120,6 @@ void UINode::MovePosition(int32_t slot)
         if (itSelf != children.end()) {
             children.erase(itSelf);
         } else {
-            LOGW("Should NOT be here");
             children.remove(self);
             ++it;
         }
@@ -128,7 +127,7 @@ void UINode::MovePosition(int32_t slot)
         children.remove(self);
     }
     children.insert(it, self);
-    MarkNeedSyncRenderTree();
+    parentNode->MarkNeedSyncRenderTree();
 }
 
 void UINode::UpdateLayoutPropertyFlag()

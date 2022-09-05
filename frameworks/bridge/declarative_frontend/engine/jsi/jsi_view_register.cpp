@@ -192,7 +192,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
         // update page life cycle function.
         auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
         CHECK_NULL_VOID(pagePattern);
-        pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
+        pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
             auto view = weak.Upgrade();
             if (view) {
                 view->FireOnShow();
@@ -204,7 +204,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
                 view->FireOnHide();
             }
         });
-        pagePattern->SetOnPageHide([weak = Referenced::WeakClaim(view)]() {
+        pagePattern->SetOnBackPressed([weak = Referenced::WeakClaim(view)]() {
             auto view = weak.Upgrade();
             if (view) {
                 return view->FireOnBackPress();

@@ -43,10 +43,10 @@ public:
 
     bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true);
 
-private:
     static void FirePageHide(const RefPtr<UINode>& node);
     static void FirePageShow(const RefPtr<UINode>& node);
 
+private:
     RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;
 
