@@ -355,6 +355,16 @@ void JSCanvasRenderer::JsGetLineCap(const JSCallbackInfo& info)
     return;
 }
 
+void JSCanvasRenderer::JsGetLineDash(const JSCallbackInfo& info)
+{
+    auto lineDash = pool_->GetLineDash();
+    JSRef<JSObject> lineDashObj = JSRef<JSObject>::New();
+    for (int i = 0; i < lineDash.size(); i++) {
+        lineDashObj->SetProperty<double>(std::to_string(i).c_str(), lineDash[i]);
+    }
+    info.SetReturnValue(lineDashObj);
+}
+
 void JSCanvasRenderer::JsGetLineJoin(const JSCallbackInfo& info)
 {
     return;
