@@ -2623,6 +2623,7 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decorati
         Dimension borderRadiusSize;
         if (ParseJsDimensionVp(args, borderRadiusSize)) {
             NG::ViewAbstract::SetBorderRadius(borderRadiusSize);
+            return;
         }
     }
     auto stack = ViewStackProcessor::GetInstance();
