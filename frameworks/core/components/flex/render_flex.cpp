@@ -557,6 +557,12 @@ void RenderFlex::PerformLayoutInItemMode()
         mainAxisSize = MainAxisSize::MIN;
     }
     LayoutAbsoluteChildren();
+    if (needRelayoutCross_) {
+        crossSize_ = 0.0;
+        for (const auto& item : relativeNodes_) {
+            crossSize_ = std::max(crossSize_, GetCrossSize(item));
+        }
+    }
     // get layout size and set positions
     DetermineSelfSize(mainAxisSize, useViewPort);
     DetermineItemsPosition(baselineProperties);
@@ -599,6 +605,9 @@ void RenderFlex::ResizeItems(const FlexItemProperties& flexItemProps, BaselinePr
         getFlex = [](const RefPtr<RenderFlexItem>& item) { return item->GetFlexShrink(); };
         spacePerFlex = NearZero(flexItemProps.totalShrink) ? 0.0 : remainSpace / flexItemProps.totalShrink;
         lastChild = flexItemProps.lastShrinkChild;
+    }
+    if (!NearZero(spacePerFlex)) {
+        needRelayoutCross_ = true;
     }
     // In second layout, do not need to check the size validity, they are all checked.
     for (const auto& item : relativeNodes_) {
@@ -911,6 +920,7 @@ void RenderFlex::InitFlexProperties()
     layoutMode_ = FlexLayoutMode::FLEX_WEIGHT_MODE;
     totalFlexWeight_ = 0.0;
     maxDisplayIndex_ = 0;
+    needRelayoutCross_ = false;
     if (direction_ == FlexDirection::ROW) {
         isMainInfinite_ = GetLayoutParam().GetMaxSize().IsWidthInfinite();
         isCrossInfinite_ = GetLayoutParam().GetMaxSize().IsHeightInfinite();

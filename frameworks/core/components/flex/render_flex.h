@@ -243,6 +243,7 @@ private:
     int32_t maxDisplayIndex_ = 0;
     bool useOldLayoutVersion_ = false;
     bool isDeclarative_ = false;
+    bool needRelayoutCross_ = false;
 
     AlignDeclarationPtr alignPtr_ = nullptr;
 };
