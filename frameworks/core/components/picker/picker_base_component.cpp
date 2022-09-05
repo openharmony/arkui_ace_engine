@@ -419,7 +419,7 @@ void PickerBaseComponent::InitializeTitle(std::list<RefPtr<Component>>& outChild
         LOGE("theme is null.");
         return;
     }
-    if (isDialog_ && hasTitle_) {
+    if ((isDialog_ || isCreateDialogComponent_) && hasTitle_) {
         auto triangle = AceType::MakeRefPtr<TriangleComponent>();
         triangle->SetPadding(8.0_vp); // all padding
         triangle->SetWidth(25.0_vp); // left padding + it width + right padding = 8dp + 9dp + 8dp
