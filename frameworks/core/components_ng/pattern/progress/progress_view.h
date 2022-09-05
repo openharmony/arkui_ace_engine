@@ -31,6 +31,7 @@ public:
     static void Create(double min, double value, double cachedValue, double max,ProgressType type);
     static void SetValue(const double& value);
     static void SetMaxValue(const double& value);
+   // static void SetCachedValue(const double& value);
     static void SetColor(const Color& value);
     static void SetStrokeWidth(const double& value);
     static void SetScaleCount(const int32_t& value);

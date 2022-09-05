@@ -131,27 +131,60 @@ void ProgressPaintMethod::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, 
     double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2);
     double offsetX = offset.GetX();
     double offsetY = offset.GetY();
-    double length = (value_ / maxValue_) * totalDegree * frameSize.Width();
+    double progressWidth = (value_ / maxValue_) * totalDegree * frameSize.Width();
     RSBrush brush;
     brush.SetAlpha(true);
     brush.SetColor(ToRSColor(Color::GRAY));
     Rosen::Drawing::Path path;
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(
-        { { offsetX, offsetY, frameSize.Width() + offsetX, frameSize.Height() + offsetY },
-            radius, radius });
+        { { offsetX, offsetY, frameSize.Width() + offsetX, frameSize.Height() + offsetY }, radius, radius });
     brush.SetColor(ToRSColor((color_)));
     canvas.AttachBrush(brush);
-    path.AddArc({ offsetX, offsetY, 2*radius + offsetX, frameSize.Height() + offsetY }, 90, 180);
-    if (LessNotEqual(length, radius)) {
-        path.AddArc({ offsetX+length, offsetY, 2*radius - length + offsetX, frameSize.Height() + offsetY }, 270, -180);
-    } else if (GreatNotEqual(length, frameSize.Width() - radius)) {
+    path.AddArc({ offsetX, offsetY, 2 * radius + offsetX, frameSize.Height() + offsetY }, 90, 180);
+    if (LessNotEqual(progressWidth, radius)) {
+        path.AddArc(
+            { offsetX + progressWidth, offsetY, 2 * radius - progressWidth + offsetX, frameSize.Height() + offsetY },
+            270, -180);
+    } else if (GreatNotEqual(progressWidth, frameSize.Width() - radius)) {
         path.AddRect({ offsetX + radius, offsetY, frameSize.Width() + offsetX - radius, frameSize.Height() + offsetY });
-        path.AddArc({ offsetX+(frameSize.Width() - radius) * 2.0 - length, offsetY , offsetX+length,
+        path.AddArc({ offsetX + (frameSize.Width() - radius) * 2.0 - progressWidth, offsetY, offsetX + progressWidth,
                         frameSize.Height() + offsetY },
             270, 180);
     } else {
-        path.AddRect({ radius + offsetX, offsetY, length + offsetX, frameSize.Height() + offsetY });
+        path.AddRect({ radius + offsetX, offsetY, progressWidth + offsetX, frameSize.Height() + offsetY });
+    }
+    canvas.DrawPath(path);
+}
+
+void ProgressPaintMethod::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const
+{
+    static int32_t totalDegree = 1;
+    double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2);
+    double offsetX = offset.GetX();
+    double offsetY = offset.GetY();
+    double progressWidth = (value_ / maxValue_) * totalDegree * frameSize.Height();
+    RSBrush brush;
+    brush.SetAlpha(true);
+    brush.SetColor(ToRSColor(Color::GRAY));
+    Rosen::Drawing::Path path;
+    canvas.AttachBrush(brush);
+    canvas.DrawRoundRect(
+        { { offsetX, offsetY, frameSize.Width() + offsetX, frameSize.Height() + offsetY }, radius, radius });
+    brush.SetColor(ToRSColor((color_)));
+    canvas.AttachBrush(brush);
+    path.AddArc({ offsetX, offsetY, frameSize.Width() + offsetX, frameSize.Width() + offsetY }, 0, -180);
+    if (LessNotEqual(progressWidth, radius)) {
+        path.AddArc({ offsetX, offsetY + progressWidth, frameSize.Width() + offsetX,
+                        frameSize.Width() - progressWidth + offsetY },
+            180, 180);
+    } else if (GreatNotEqual(progressWidth, frameSize.Height() - radius)) {
+        path.AddRect({ offsetX, offsetY + radius, frameSize.Width() + offsetX, frameSize.Height() - radius + offsetY });
+        path.AddArc({ offsetX, offsetY + (frameSize.Height() - radius) * 2.0 - progressWidth,
+                        frameSize.Width() + offsetX, progressWidth + offsetY },
+            180, -180);
+    } else {
+        path.AddRect({ offsetX, radius + offsetY, offsetX + frameSize.Width(), progressWidth + offsetY });
     }
     canvas.DrawPath(path);
 }

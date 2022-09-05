@@ -37,6 +37,7 @@ enum class ProgressType {
 struct ProgressDate {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxValue, double);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Value, double);
+    //ACE_DEFINE_PROPERTY_GROUP_ITEM(CachedValue, double);
 };
 
 struct ProgressStyle {

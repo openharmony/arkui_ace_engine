@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/progress/progress_pattern.h"
+#include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 bool ProgressPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -27,6 +28,7 @@ bool ProgressPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     CHECK_NULL_RETURN(progressLayoutAlgorithm, false);
     value_=progressLayoutAlgorithm->GetValue();
     maxValue_=progressLayoutAlgorithm->GetMaxValue();
+    //cachedValue_=progressLayoutAlgorithm->GetCachedValue();
     color_ = progressLayoutAlgorithm->GetColor();
     progressType_ = progressLayoutAlgorithm->GetType();
     strokeWidth_ = progressLayoutAlgorithm->GetStrokeWidth();

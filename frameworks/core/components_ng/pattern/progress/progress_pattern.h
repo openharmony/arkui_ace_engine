@@ -61,6 +61,7 @@ private:
 
     double maxValue_;
     double value_;
+  //  double cachedValue_;
     Color color_;
     double strokeWidth_;
     double scaleWidth_;

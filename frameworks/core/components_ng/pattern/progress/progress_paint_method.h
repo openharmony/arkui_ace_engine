@@ -37,8 +37,7 @@ public:
         double strokeWidth, double scaleWidth, int32_t scaleCount)
         : maxValue_(maxValue), value_(value), color_(color), strokeWidth_(strokeWidth), scaleWidth_(scaleWidth),
           scaleCount_(scaleCount), progressType_(progressType)
-    {
-    }
+    {}
     ~ProgressPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
@@ -58,7 +57,10 @@ public:
             return [frameSize, offset, this](RSCanvas& canvas) { PaintMoon(canvas, offset, frameSize); };
         }
         if (progressType_ == ProgressType::CAPSULE) {
-            return [frameSize, offset, this](RSCanvas& canvas) { PaintCapsule(canvas, offset, frameSize); };
+            if (frameSize.Width() >= frameSize.Height()) {
+                return [frameSize, offset, this](RSCanvas& canvas) { PaintCapsule(canvas, offset, frameSize); };
+            }
+            return [frameSize, offset, this](RSCanvas& canvas) { PaintVerticalCapsule(canvas, offset, frameSize); };
         }
         return [frameSize, offset, this](RSCanvas& canvas) { PaintLinear(canvas, offset, frameSize); };
     }
@@ -68,10 +70,11 @@ public:
     void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
     void PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
     void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
+    void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
 
 private:
-    double maxValue_ ;
-    double value_ ;
+    double maxValue_;
+    double value_;
     Color color_;
     double strokeWidth_;
     double scaleWidth_;

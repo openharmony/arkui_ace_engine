@@ -44,6 +44,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(progressDate, std::nullopt);
     value_ = progressDate->GetValue().value_or(0);
     maxValue_ = progressDate->GetMaxValue().value_or(100);
+   // cachedValue_=progressDate->GetCachedValue().value_or(0);
     color_ = progressStyle->GetColor().value_or(progressTheme?progressTheme->GetTrackSelectedColor():Color::BLUE);
     type_ = progressStyle->GetType().value_or(ProgressType::LINEAR);
     strokeWidth_=progressStyle->GetStrokeWidth().value_or(10);
@@ -79,6 +80,11 @@ double ProgressLayoutAlgorithm::GetMaxValue() const
 {
     return maxValue_;
 }
+
+// double ProgressLayoutAlgorithm::GetCachedValue() const
+// {
+//     return cachedValue_;
+// }
 
 Color ProgressLayoutAlgorithm::GetColor() const
 {
