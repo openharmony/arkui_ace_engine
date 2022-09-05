@@ -42,16 +42,6 @@ public:
     static void SetSyncLoad(const JSCallbackInfo& info);
     static void SetColorFilter(const JSCallbackInfo& info);
 
-    static void JsPadding(const JSCallbackInfo& info);
-    static void JsMargin(const JSCallbackInfo& info);
-    static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
-    static void JsBorder(const JSCallbackInfo& info);
-    static void JsBorderRadius(const JSCallbackInfo& info);
-    static void SetLeftBorderWidth(const Dimension& value);
-    static void SetTopBorderWidth(const Dimension& value);
-    static void SetRightBorderWidth(const Dimension& value);
-    static void SetBottomBorderWidth(const Dimension& value);
-    static void SetBorderRadius(const Dimension& value);
     static void JsOpacity(const JSCallbackInfo& info);
     static void JsBlur(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);
@@ -63,26 +53,6 @@ public:
     static void SetCopyOption(const JSCallbackInfo& info);
 
 protected:
-    /**
-     * box properties setter
-     */
-    static RefPtr<Decoration> GetFrontDecoration();
-    static const Border& GetBorder();
-    static void SetBorderEdge(const BorderEdge& edge);
-    static void SetBorder(const Border& border);
-    static void SetWidth(const Dimension& width);
-    static void SetHeight(const Dimension& height);
-    static void SetMarginTop(const std::string& value);
-    static void SetMarginBottom(const std::string& value);
-    static void SetMarginLeft(const std::string& value);
-    static void SetMarginRight(const std::string& value);
-    static void SetMargin(const std::string& value);
-    static void SetPaddingTop(const std::string& value);
-    static void SetPaddingBottom(const std::string& value);
-    static void SetPaddingLeft(const std::string& value);
-    static void SetPaddingRight(const std::string& value);
-    static void SetPadding(const std::string& value);
-    static void SetBackgroundColor(const Color& color);
     static void SetAutoResize(bool autoResize);
 
 };

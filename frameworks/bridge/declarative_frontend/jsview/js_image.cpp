@@ -92,43 +92,6 @@ void JSImage::SetFitOriginalSize(bool value)
     ImageModel::GetInstance()->SetFitMaxSize(value);
 }
 
-// TODO: move to JSViewAbstract
-RefPtr<Decoration> JSImage::GetFrontDecoration()
-{
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto decoration = box->GetFrontDecoration();
-    if (!decoration) {
-        decoration = AceType::MakeRefPtr<Decoration>();
-        box->SetFrontDecoration(decoration);
-    }
-
-    return decoration;
-}
-
-// TODO: move to JSViewAbstract
-const Border& JSImage::GetBorder()
-{
-    return GetFrontDecoration()->GetBorder();
-}
-
-//TODO: move to JSViewAbstract
-void JSImage::SetBorderEdge(const BorderEdge& edge)
-{
-    Border border = GetBorder();
-    border.SetBorderEdge(edge);
-    SetBorder(border);
-}
-
-//TODO: move to JSViewAbstract
-void JSImage::SetBorder(const Border& border)
-{
-    GetFrontDecoration()->SetBorder(border);
-    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (image) {
-        image->SetBorder(border);
-    }
-}
-
 void JSImage::OnComplete(const JSCallbackInfo& args)
 {
     LOGD("JSImage V8OnComplete");
@@ -198,20 +161,6 @@ void JSImage::Create(const JSCallbackInfo& info)
     #endif
 
     ImageModel::GetInstance()->Create(src, noPixMap, pixMap);
-}
-
-//TODO: move to JSViewAbstract
-void JSImage::JsBorder(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsBorder(info);
-    SetBorder(GetBackDecoration()->GetBorder());
-}
-
-//TODO: move to JSViewAbstract
-void JSImage::JsBorderRadius(const JSCallbackInfo& info)
-{
-    JSViewAbstract::JsBorderRadius(info);
-    SetBorder(GetBackDecoration()->GetBorder());
 }
 
 void JSImage::SetSourceSize(const JSCallbackInfo& info)
@@ -366,11 +315,12 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("objectRepeat", &JSImage::SetImageRepeat, opt);
     JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
     JSClass<JSImage>::StaticMethod("colorFilter", &JSImage::SetColorFilter, opt);
+    // Are those needed, we inherit from JSViewAbstract
     JSClass<JSImage>::StaticMethod("borderStyle", &JSViewAbstract::JsBorderStyle);
     JSClass<JSImage>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
-    JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
+    JSClass<JSImage>::StaticMethod("border", &JSViewAbstract::JsBorder);
     JSClass<JSImage>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
-    JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
+    JSClass<JSImage>::StaticMethod("borderRadius", &JSViewAbstract::JsBorderRadius);
     JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
