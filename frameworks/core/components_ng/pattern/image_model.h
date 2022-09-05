@@ -63,9 +63,9 @@ public:
     virtual void SetImageFit(int32_t value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;
     virtual void SetFitMaxSize(bool value) = 0;
-    virtual void SetOnComplete(OHOS::Ace::NG::CompleteEvent&& callback) = 0;
-    virtual void SetOnError(OHOS::Ace::NG::ErrorEvent&& callback) = 0;
-    virtual void SetSvgAnimatorFinishEvent(const OHOS::Ace::EventMarker& callback) = 0;
+    virtual void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) = 0;
+    virtual void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) = 0;
+    virtual void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) = 0;
     virtual void Create(std::string src, bool noPixMap) = 0;
     virtual void SetImageSourceSize(std::pair<Dimension, Dimension> size) = 0;
     virtual void SetImageFill(Color color) = 0;
@@ -85,7 +85,7 @@ public:
     virtual bool UpdateDragItemInfo(DragItemInfo& itemInfo) = 0;
 
 private:
-    static thread_local std::unique_ptr<ImageModel> instance;
+    static std::unique_ptr<ImageModel> instance;
 };
 
 
@@ -126,7 +126,7 @@ public:
         }
     }
 
-    void SetOnComplete(OHOS::Ace::NG::CompleteEvent&& callback) override
+    void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override
     {
         auto onCompleteEvent = EventMarker([func = std::move(callback)](const BaseEventInfo* info)
         {
@@ -137,7 +137,7 @@ public:
         image->SetLoadSuccessEvent(onCompleteEvent);
     }
 
-    void SetOnError(OHOS::Ace::NG::ErrorEvent&& callback) override
+    void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) override
     {
         auto onErrorEvent = EventMarker([func = std::move(callback)](const BaseEventInfo* info)
         {
@@ -148,10 +148,15 @@ public:
         image->SetLoadFailEvent(onErrorEvent);
     }
 
-    void SetSvgAnimatorFinishEvent(const OHOS::Ace::EventMarker& callback) override
+    void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) override
     {
+
+        auto onFinishEvent = EventMarker([func = std::move(callback)]()
+        {
+            func();
+        });
         auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        image->SetSvgAnimatorFinishEvent(callback);
+        image->SetSvgAnimatorFinishEvent(onFinishEvent);
     }
 
     void Create(std::string src, bool noPixMap) override
@@ -311,17 +316,17 @@ public:
     {
     }
 
-    void SetOnComplete(OHOS::Ace::NG::CompleteEvent&& callback) override
+    void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override
     {
         NG::ImageView::SetOnComplete(std::move(callback));
     }
 
-    void SetOnError(OHOS::Ace::NG::ErrorEvent&& callback) override
+    void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) override
     {
         NG::ImageView::SetOnError(std::move(callback));
     }
 
-    void SetSvgAnimatorFinishEvent(const OHOS::Ace::EventMarker& callback) override
+    void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) override
     {
     }
 

@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace::Framework {
 
-thread_local std::unique_ptr<ImageModel> ImageModel::instance = nullptr;
+std::unique_ptr<ImageModel> ImageModel::instance = nullptr;
 
 ImageModel* ImageModel::GetInstance()
 {
@@ -174,12 +174,12 @@ void JSImage::OnFinish(const JSCallbackInfo& info)
         return;
     }
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto eventMarker = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+    auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Image.onFinish");
         func->Execute();
-    });
-    ImageModel::GetInstance()->SetSvgAnimatorFinishEvent(eventMarker);
+    };
+    ImageModel::GetInstance()->SetSvgAnimatorFinishEvent(onFinish);
 }
 
 void JSImage::Create(const JSCallbackInfo& info)
