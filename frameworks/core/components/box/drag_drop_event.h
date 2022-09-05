@@ -49,6 +49,11 @@ public:
     ~DragDropEvent() override = default;
 
     // render
+    const OnDragFunc& GetOnDragStart() const
+    {
+        return onDragStart_;
+    }
+
     const OnDropFunc& GetOnDragEnter() const
     {
         return onDragEnter_;

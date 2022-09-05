@@ -112,6 +112,11 @@ public:
         return isSelected_;
     }
 
+    bool IsDragStart() const
+    {
+        return isDragStart_;
+    }
+
     Dimension GetBorderRadius() const
     {
         return borderRadius_;
@@ -202,6 +207,7 @@ private:
     OnSelectFunc onSelectId_;
     bool selectable_ = true;
     bool isSelected_ = false;
+    bool isDragStart_ = false;
     Dimension borderRadius_;
 
     double curOffset_ = 0.0;
