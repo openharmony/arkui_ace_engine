@@ -255,6 +255,7 @@ public:
 
     int32_t RequestNextFocus(bool vertical, bool reverse);
 
+    // distribute
     std::string ProvideRestoreInfo() override;
 
     void SetFocusIndex(int32_t focusIndex)
@@ -478,7 +479,9 @@ private:
 
     void MultiSelectAllWhenCtrlA();
 
+    // distribute
     void ApplyRestoreInfo();
+
     void InitScrollable(Axis axis);
 
     // when window size change, add offset to keep clicked textfield in display area

@@ -1965,7 +1965,7 @@ void FrontendDelegateDeclarative::RestorePopPage(const RefPtr<JsAcePage>& page, 
 void FrontendDelegateDeclarative::RestorePageTransitionListener(
     const TransitionEvent& event, const std::string& url, const RefPtr<JsAcePage>& page)
 {
-    if (event == TransitionEvent::POP_END) {
+    if (event == TransitionEvent::PUSH_END) {
         LOGI("RestorePageTransitionListener %{public}s", url.c_str());
         OnPopToPageSuccess(url);
         {

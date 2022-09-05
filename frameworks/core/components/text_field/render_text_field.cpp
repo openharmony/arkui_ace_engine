@@ -265,6 +265,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
             controller_->SetText(textField->GetValue(), false);
         }
     }
+    // maybe change text and selection
     ApplyRestoreInfo();
     extend_ = textField->IsExtend();
     softKeyboardEnabled_ = textField->IsSoftKeyboardEnabled();
@@ -2428,13 +2429,14 @@ void RenderTextField::Delete(int32_t start, int32_t end)
 
 std::string RenderTextField::ProvideRestoreInfo()
 {
-    if (!onIsCurrentFocus_ || !onIsCurrentFocus_()) {
-        return "";
-    }
     auto value = GetEditingValue();
     auto jsonObj = JsonUtil::Create(true);
-    jsonObj->Put("start", value.selection.GetStart());
-    jsonObj->Put("end", value.selection.GetEnd());
+    if (controller_) {
+        jsonObj->Put("text", controller_->GetText().c_str());
+    } else {
+        return "";
+    }
+    jsonObj->Put("position", value.selection.baseOffset);
     return jsonObj->ToString();
 }
 
@@ -2448,10 +2450,13 @@ void RenderTextField::ApplyRestoreInfo()
         LOGW("RenderTextField:: restore info is invalid");
         return;
     }
-    auto jsonStart = info->GetValue("start");
-    auto jsonEnd = info->GetValue("end");
-    UpdateSelection(jsonStart->GetInt(), jsonEnd->GetInt());
-    StartTwinkling();
+    auto jsonPosition = info->GetValue("position");
+    auto jsonText = info->GetValue("text");
+    if (!jsonText->GetString().empty() && controller_) {
+        controller_->SetText(jsonText->GetString());
+        UpdateSelection(std::max(jsonPosition->GetInt(), 0));
+        cursorPositionType_ = CursorPositionType::NORMAL;
+    }
     SetRestoreInfo("");
 }
 

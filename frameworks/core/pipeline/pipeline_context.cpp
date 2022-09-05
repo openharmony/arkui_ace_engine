@@ -3789,10 +3789,10 @@ std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
 {
     auto iter = restoreNodeInfo_.find(restoreId);
     if (iter != restoreNodeInfo_.end()) {
-        LOGE("PipelineContext::GetRestoreInfo, id = %{public}d, info = %{public}s", restoreId, iter->second.c_str());
-        return iter->second;
+        std::string restoreNodeInfo = iter->second;
+        restoreNodeInfo_.erase(iter);
+        return restoreNodeInfo;
     }
-    LOGE("PipelineContext::GetRestoreInfo not find, id = %{public}d", restoreId);
     return "";
 }
 
