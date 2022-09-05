@@ -121,14 +121,6 @@ RefPtr<RenderNode> TextFieldElement::CreateRenderNode()
                 }
             }
         });
-
-        renderNode->SetOnIsCurrentFocus([wp = AceType::WeakClaim(this)]() -> bool {
-            auto sp = wp.Upgrade();
-            if (sp) {
-                return sp->IsCurrentFocus();
-            }
-            return false;
-        });
     }
     return node;
 }

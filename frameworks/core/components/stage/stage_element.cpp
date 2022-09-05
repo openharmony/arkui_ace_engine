@@ -553,10 +553,9 @@ void StageElement::PerformPop()
 
 void StageElement::RestorePop()
 {
-    // add page before current page and run pop
-    auto newChild = UpdateChildWithSlot(nullptr, newComponent_, -2, GetRenderSlot());
-    operation_ = StackOperation::POP;
-    PerformPop();
+    operation_ = StackOperation::PUSH_PAGE;
+    UpdateChild(children_.back(), nullptr);
+    PerformPushPage();
 }
 
 void StageElement::PerformReplace()

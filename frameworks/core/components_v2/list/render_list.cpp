@@ -119,6 +119,7 @@ void RenderList::Update(const RefPtr<Component>& component)
         startIndex_ = initialIndex_ > 0 ? initialIndex_ : 0;
         useEstimateCurrentOffset_ = true;
     }
+    // maybe change startIndex
     ApplyRestoreInfo();
 
     const auto& divider = component_->GetItemDivider();
@@ -2973,7 +2974,10 @@ int32_t RenderList::RequestNextFocus(bool vertical, bool reverse)
 
 std::string RenderList::ProvideRestoreInfo()
 {
-    return std::to_string(firstDisplayIndex_);
+    if (firstDisplayIndex_ > 0) {
+        return std::to_string(firstDisplayIndex_);
+    }
+    return "";
 }
 
 void RenderList::ApplyRestoreInfo()

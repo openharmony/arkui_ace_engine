@@ -315,12 +315,9 @@ public:
 
     void UpdateConfiguration();
 #endif
-    std::string ProvideRestoreInfo() override;
 
-    void SetOnIsCurrentFocus(const std::function<bool()>& onIsCurrentFocus)
-    {
-        onIsCurrentFocus_ = onIsCurrentFocus;
-    }
+    // distribute
+    std::string ProvideRestoreInfo() override;
 
     int32_t instanceId_ = -1;
 
@@ -594,6 +591,7 @@ private:
 
     void AttachIme();
 
+    // distribute
     void ApplyRestoreInfo();
 
     int32_t initIndex_ = 0;
@@ -630,7 +628,6 @@ private:
     std::function<void()> onLongPressEvent_;
     std::function<void()> moveNextFocusEvent_;
     std::function<void(bool)> onOverlayFocusChange_;
-    std::function<bool()> onIsCurrentFocus_;
     std::function<void(std::string)> onCopy_;
     std::function<void(std::string)> onCut_;
     std::function<void(std::string)> onPaste_;

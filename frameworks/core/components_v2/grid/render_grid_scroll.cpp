@@ -63,6 +63,8 @@ void RenderGridScroll::Update(const RefPtr<Component>& component)
     mainGap_ = &rowGap_;
     startRankItemIndex_ = 0;
     currentItemIndex_ = 0;
+    // maybe change ItemIndex
+    ApplyRestoreInfo();
     RenderGridLayout::Update(component);
     FindRefreshParent(AceType::WeakClaim(this));
     InitScrollBar(component);
@@ -1615,6 +1617,30 @@ bool RenderGridScroll::IsAxisScrollable(AxisDirection direction)
 
 void RenderGridScroll::HandleAxisEvent(const AxisEvent& event)
 {
+}
+
+std::string RenderGridScroll::ProvideRestoreInfo()
+{
+    int32_t currentItemIndex = 0;
+    auto items = gridMatrix_.find(startIndex_);
+    if (items != gridMatrix_.end() && !items->second.empty()) {
+        currentItemIndex = items->second.begin()->second;
+    }
+
+    if (currentItemIndex > 0) {
+        return std::to_string(currentItemIndex);
+    }
+    return "";
+}
+
+void RenderGridScroll::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    currentItemIndex_ = StringUtils::StringToInt(GetRestoreInfo());
+    startRankItemIndex_ = GetStartingItem(currentItemIndex_);
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace::V2
