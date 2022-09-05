@@ -144,6 +144,9 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
         return;
     }
 
+    displayMode_ = swiper->GetDisplayMode();
+    displayCount_ = swiper->GetDisplayCount();
+    edgeEffect_ = swiper->GetEdgeEffect();
     const auto& swiperController = swiper->GetSwiperController();
     if (swiperController) {
         auto weak = AceType::WeakClaim(this);

@@ -31,7 +31,8 @@ const std::unordered_map<std::string, std::function<std::string(const ListCompos
     { "edgeEffect", [](const ListComposedElement& inspector) { return inspector.GetEdgeEffect(); } },
     { "chainAnimation", [](const ListComposedElement& inspector) { return inspector.GetChainAnimation(); } },
     { "restoreId", [](const ListComposedElement& inspector) { return inspector.GetRestoreId(); } },
-    { "multiSelectable ", [](const ListComposedElement& inspector) { return inspector.GetMultiSelectable(); } }
+    { "multiSelectable ", [](const ListComposedElement& inspector) { return inspector.GetMultiSelectable(); } },
+    { "scrollBar ", [](const ListComposedElement& inspector) { return inspector.GetScrollBar(); } }
 };
 
 const std::unordered_map<std::string, std::function<std::unique_ptr<JsonValue>(const ListComposedElement&)>>
@@ -230,6 +231,32 @@ std::string ListComposedElement::GetChainAnimation() const
         return renderList->GetLinkage() ? "true" : "false";
     }
     return "false";
+}
+
+std::string ListComposedElement::GetScrollBar() const
+{
+    auto node = GetInspectorNode(ListElement::TypeId());
+    if (!node) {
+        return "BarState.Off";
+    }
+    auto renderList = AceType::DynamicCast<RenderList>(node);
+    if (!renderList) {
+        return "BarState.Off";
+    }
+    auto listComponent = AceType::DynamicCast<ListComponent>(renderList->GetComponent());
+    if (!listComponent) {
+        return "BarState.Off";
+    }
+    switch (listComponent->GetScrollBar()) {
+        case DisplayMode::AUTO:
+            return "BarState.Auto";
+        case DisplayMode::ON:
+            return "BarState.On";
+        case DisplayMode::OFF:
+        default:
+            return "BarState.Off";
+    }
+    return "BarState.Off";
 }
 
 void ListComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)

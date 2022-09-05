@@ -179,6 +179,11 @@ public:
         return height_.Value();
     }
 
+    const Dimension& GetDimensionHeight() const
+    {
+        return height_;
+    }
+
     void SetHeight(double height)
     {
         if (GreatOrEqual(height, 0.0) && !NearEqual(height_.Value(), height)) {
