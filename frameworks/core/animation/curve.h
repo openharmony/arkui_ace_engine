@@ -19,6 +19,9 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#ifdef LINUX_PLATFORM
+#include <functional>
+#endif
 
 namespace OHOS::Ace {
 class NativeCurveHelper;

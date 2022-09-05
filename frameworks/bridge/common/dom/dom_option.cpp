@@ -56,7 +56,7 @@ void DOMOption::ResetInitializedStyle()
 
 bool DOMOption::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (attr.first != DOM_OPTION_CONTENT) {
         attrs_.push_back(attr);
     }
@@ -120,7 +120,7 @@ bool DOMOption::SetSpecializedAttr(const std::pair<std::string, std::string>& at
 
 bool DOMOption::SetSpecializedStyle(const std::pair<std::string, std::string>& style)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     styles_.push_back(style);
 #endif
     if (style.first == DOM_TEXTAREA_COLOR) {
@@ -161,7 +161,7 @@ void DOMOption::PrepareSpecializedComponent()
     selectOptionComponent_->SetTextDirection((IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR));
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void DOMOption::OnSetStyleFinished()
 {
     std::reverse(std::begin(attrs_), std::end(attrs_));

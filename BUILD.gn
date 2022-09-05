@@ -24,7 +24,7 @@ config("ace_config") {
     "//third_party/zlib",
   ]
 
-  if (is_standard_system && !use_mingw_win && !use_mac) {
+  if (is_standard_system && !use_mingw_win && !use_mac && !use_linux) {
     include_dirs += [
       "//base/global/resource_management/frameworks/resmgr/include",
       "//base/global/resource_management/interfaces/inner_api/include",
@@ -59,6 +59,11 @@ config("ace_config") {
     cflags_cc += [ "-std=c++17" ]
     defines += [ "_USE_MATH_DEFINES" ]
   }
+
+  if (use_linux) {
+    cflags_cc += [ "-std=c++17" ]
+    defines += [ "_USE_MATH_DEFINES" ]
+  }
 }
 
 config("ace_test_config") {
@@ -71,7 +76,7 @@ config("ace_test_config") {
   cflags_cc = []
   defines = ace_common_defines
 
-  if (is_standard_system && !use_mingw_win && !use_mac) {
+  if (is_standard_system && !use_mingw_win && !use_mac && !use_linux) {
     include_dirs += [
       "//base/global/resource_management/frameworks/resmgr/include",
       "//base/global/resource_management/interfaces/inner_api/include",

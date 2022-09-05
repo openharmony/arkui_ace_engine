@@ -35,7 +35,7 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 const char COMPONENT_PREVIEW[] = "_preview_";
 const char COMPONENT_PREVIEW_LOAD_DOCUMENT[] = "loadDocument";
 const char COMPONENT_PREVIEW_LOAD_DOCUMENT_NEW[] = "loadDocument(new";
@@ -47,7 +47,7 @@ constexpr int32_t LOAD_DOCUMENT_STR_LENGTH = 16;
 QJSDeclarativeEngine::~QJSDeclarativeEngine()
 {
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         nativeEngine_->DeleteEngine();
@@ -80,7 +80,7 @@ bool QJSDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         return false;
     }
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {
@@ -219,7 +219,7 @@ void QJSDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
 
     std::string jsContent;
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (!engineInstance_->GetDelegate()->GetAssetContent(url, jsContent)) {
         LOGE("js file load failed!");
         return;
@@ -324,7 +324,7 @@ bool QJSDeclarativeEngine::LoadFaAppSource()
     return true;
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void QJSDeclarativeEngine::ReplaceJSContent(const std::string& url, const std::string componentName)
 {
     // replace the component name in the last loadDocument from current js content.

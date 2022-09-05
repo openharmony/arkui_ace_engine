@@ -364,7 +364,7 @@ void FrontendDelegateDeclarative::TransferJsResponseData(
         TaskExecutor::TaskType::JS);
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void FrontendDelegateDeclarative::TransferJsResponseDataPreview(
     int32_t callbackId, int32_t code, ResponseData responseData) const
 {

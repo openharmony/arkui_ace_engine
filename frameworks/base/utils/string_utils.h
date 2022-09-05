@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_STRING_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_STRING_UTILS_H
 
+#include <climits>
 #include <cmath>
 #include <codecvt>
 #include <locale>
 #include <sstream>
 #include <string>
 #include <vector>
+
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/calc_dimension.h"

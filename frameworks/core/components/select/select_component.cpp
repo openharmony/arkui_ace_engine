@@ -44,7 +44,7 @@ void SelectComponent::InitTheme(const RefPtr<ThemeManager>& themeManager)
         return;
     }
     popup_->InitTheme(themeManager);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     popup_->SetSelectPopupId(GetNodeId());
 #endif
     auto selectTheme = themeManager->GetTheme<SelectTheme>();

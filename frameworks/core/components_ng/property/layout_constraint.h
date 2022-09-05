@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_LAYOUT_CONSTRAINT_H
 
 #include <optional>
+#include <algorithm>
 #include <string>
 
 #include "base/geometry/ng/size_t.h"

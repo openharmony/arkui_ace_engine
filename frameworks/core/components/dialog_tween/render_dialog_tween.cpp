@@ -616,7 +616,7 @@ void RenderDialogTween::RemoveAccessibilityNode()
         if (context->GetIsDeclarative()) {
             accessibilityManager->RemoveAccessibilityNodeById(composedId_);
         }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         auto node = accessibilityManager->GetAccessibilityNodeById(customDialogId_);
         accessibilityManager->ClearNodeRectInfo(node, true);
 #endif

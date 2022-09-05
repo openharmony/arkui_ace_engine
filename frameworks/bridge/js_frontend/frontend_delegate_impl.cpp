@@ -279,7 +279,7 @@ void FrontendDelegateImpl::TransferJsResponseData(int32_t callbackId, int32_t co
     }, TaskExecutor::TaskType::JS);
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void FrontendDelegateImpl::TransferJsResponseDataPreview(
     int32_t callbackId, int32_t code, ResponseData responseData) const
 {

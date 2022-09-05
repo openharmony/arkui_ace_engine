@@ -53,7 +53,7 @@ int main(int argc, const char* argv[])
     std::string appResourcesPathStage = "/Volumes/SSD2T/daily-test/preview/js/default_stage";
     std::string systemResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/SystemResources";
     constexpr double density = 2;
-#else
+#elif WINDOWS_PLATFORM
     std::string assetPathJs = "D:\\Workspace\\preview\\js\\default";
     std::string assetPathEts = "D:\\Workspace\\preview\\js\\default_2.0";
     std::string assetPathEtsStage = "D:\\Workspace\\preview\\js\\default_stage\\ets";
@@ -61,6 +61,14 @@ int main(int argc, const char* argv[])
     std::string appResourcesPathStage = "D:\\Workspace\\preview\\js\\default_stage";
     std::string systemResourcesPath = "D:\\Workspace\\preview\\js\\SystemResources\\assets\\entry";
     constexpr double density = 1;
+#else
+    std::string assetPathJs = "/home/ubuntu/demo/preview/js/default";
+    std::string assetPathEts = "/home/ubuntu/demo/preview/js/default_2.0";
+    std::string assetPathEtsStage = "/home/ubuntu/demo/preview/js/default_stage/ets";
+    std::string appResourcesPath = "/home/ubuntu/demo/preview/js/AppResources";
+    std::string appResourcesPathStage = "/home/ubuntu/demo/preview/js/default_stage";
+    std::string systemResourcesPath = "/home/ubuntu/demo/preview/js/SystemResources";
+    constexpr double density = 2;
 #endif
     std::string pageProfile = "main_page";
     OHOS::Ace::Platform::AceRunArgs args = {

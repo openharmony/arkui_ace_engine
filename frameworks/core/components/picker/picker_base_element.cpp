@@ -50,7 +50,7 @@ void PickerBaseElement::PerformBuild()
         } else {
             LOGE("can not get accessibility manager or picker is null.");
         }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         if (accessibilityManager && picker) {
             auto node = accessibilityManager->GetAccessibilityNodeById(picker->GetPickerBaseId());
             auto stack = picker->GetStack();

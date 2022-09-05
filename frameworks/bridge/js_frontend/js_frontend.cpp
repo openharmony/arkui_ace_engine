@@ -530,7 +530,7 @@ void JsFrontend::TransferJsResponseData(int callbackId, int32_t code, std::vecto
     }
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void JsFrontend::TransferJsResponseDataPreview(int callbackId, int32_t code, ResponseData responseData) const
 {
     if (delegate_) {

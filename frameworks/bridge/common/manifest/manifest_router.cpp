@@ -85,7 +85,7 @@ const std::list<std::string>& ManifestRouter::GetPageList()
     return pages_;
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void ManifestRouter::InsertPageList(const std::string& uri)
 {
     pages_.emplace_back(uri);

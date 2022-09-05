@@ -322,7 +322,7 @@ RefPtr<Element> InspectorComposedComponent::CreateElement()
     if (generateFunc != CREATE_ELEMENT_MAP.end()) {
         auto composedElement = generateFunc->second(id_);
         composedElement->SetInspectorTag(GetName());
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         composedElement->SetDebugLine(GetDebugLine());
 #endif
         auto inspectorElement = AceType::DynamicCast<InspectorComposedElement>(composedElement);

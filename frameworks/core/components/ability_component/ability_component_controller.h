@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_ABILITY_COMPONENT_ABILITY_COMPONENT_CONTROLLER_H
 
 #include <string>
+#include <functional>
 
 #include "base/memory/ace_type.h"
 

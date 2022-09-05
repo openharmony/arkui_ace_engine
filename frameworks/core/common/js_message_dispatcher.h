@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_JS_MESSAGE_DISPATCHER_H
 
 #include "base/memory/ace_type.h"
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 #include "adapter/preview/osal/request_data.h"
 #endif
 
@@ -30,7 +30,7 @@ public:
     JsMessageDispatcher() = default;
     ~JsMessageDispatcher() override = default;
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     virtual void CallCurlFunction(const RequestData requestData, int32_t callbackId) const = 0;
 #endif
 

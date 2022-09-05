@@ -24,7 +24,8 @@ source_set("ace_resource") {
     "internal_resource.cpp",
     "shared_image_manager.cpp",
   ]
-  if (current_os == "mac" || current_os == "mingw" || current_os == "ios") {
+  if (current_os == "mac" || current_os == "mingw" || current_os == "ios" ||
+      current_os == "linux") {
     deps = [ ":binary_resource_mac_and_windows" ]
     sources -= [ "internal_resource.cpp" ]
     sources += [ "internal_resource_previewer.cpp" ]

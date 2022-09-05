@@ -70,7 +70,7 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
     bool canChildOverflow = pipelineContext->GetMinPlatformVersion() >= OVERFLOW_PLATFORM_VERSION;
     Rect rect = child->GetTransitionPaintRect() + offset;
     if (!(child->IsPaintOutOfParent() || canChildOverflow) && !estimatedRect_.IsIntersectWith(rect)) {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         child->ClearAccessibilityRect();
 #endif
         return;
@@ -156,7 +156,7 @@ bool RosenRenderContext::IsIntersectWith(const RefPtr<RenderNode>& child, Offset
 
     Rect rect = child->GetTransitionPaintRect() + offset;
     if (!estimatedRect_.IsIntersectWith(rect)) {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         child->ClearAccessibilityRect();
 #endif
         return false;

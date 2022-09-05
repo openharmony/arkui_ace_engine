@@ -406,7 +406,7 @@ void JsCommandCreateDomBody::Execute(const RefPtr<JsAcePage>& page) const
     }
     accessibilityManager->TrySaveTargetAndIdNode(id_, target_, accessibilityNode);
     accessibilityNode->SetAttr(attrs_);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     accessibilityNode->SetStyle(styles_);
 #endif
     accessibilityNode->AddEvent(page->GetPageId(), events_);
@@ -470,7 +470,7 @@ void JsCommandAddDomElement::Execute(const RefPtr<JsAcePage>& page) const
     }
     accessibilityManager->TrySaveTargetAndIdNode(id_, target_, accessibilityNode);
     accessibilityNode->SetAttr(attrs_);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     accessibilityNode->SetStyle(styles_);
     if (!animationStyles_) {
         return;
@@ -627,7 +627,7 @@ void JsCommandUpdateDomElementStyles::Execute(const RefPtr<JsAcePage>& page) con
     node->GenerateComponentNode();
     page->PushDirtyNode(nodeId_);
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     // update accessibility node
     auto accessibilityManager = GetAccessibilityManager(page);
     if (!accessibilityManager) {

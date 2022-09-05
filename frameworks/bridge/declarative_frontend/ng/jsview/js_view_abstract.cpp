@@ -401,7 +401,7 @@ void JSViewAbstract::JsId(const std::string& id)
 
 void JSViewAbstract::JsRestoreId(int32_t restoreId) {}
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info) {}
 #endif
 

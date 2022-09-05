@@ -72,9 +72,9 @@ void RenderTrack::Update(const RefPtr<Component>& component)
             endDegree = endDegree - ONE_CYCLE_ANGLE;
         }
         if (endDegree <= startAngle) {
-            paintData_.sweepDegree = abs(endDegree + ONE_CYCLE_ANGLE - startAngle);
+            paintData_.sweepDegree = std::abs(endDegree + ONE_CYCLE_ANGLE - startAngle);
         } else {
-            paintData_.sweepDegree = abs(endDegree - startAngle);
+            paintData_.sweepDegree = std::abs(endDegree - startAngle);
         }
     } else {
         paintData_.sweepDegree = track->GetSweepDegree();

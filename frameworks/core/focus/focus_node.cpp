@@ -420,11 +420,19 @@ bool FocusNode::OnKeyEvent(const KeyEvent& keyEvent)
         if (!onKeyEventCallback_) {
             return false;
         }
+#ifdef LINUX_PLATFORM
+        LOGI("FocusNode::OnKeyEvent: Do key callback on %{public}s with key event{ Code(%{public}d), "
+             "Action(%{public}d), "
+             "SourceType(%{public}d), DeviceId(%{public}" PRId64 ") }. Return: %{public}d",
+            AceType::TypeName(this), info->GetKeyCode(), info->GetKeyType(), info->GetSourceDevice(),
+            info->GetDeviceId(), info->IsStopPropagation());
+#else
         LOGI("FocusNode::OnKeyEvent: Do key callback on %{public}s with key event{ Code(%{public}d), "
              "Action(%{public}d), "
              "SourceType(%{public}d), DeviceId(%{public}" PRId64 "), Time(%{public}lld) }. Return: %{public}d",
             AceType::TypeName(this), info->GetKeyCode(), info->GetKeyType(), info->GetSourceDevice(),
             info->GetDeviceId(), info->GetTimeStamp().time_since_epoch().count(), info->IsStopPropagation());
+#endif
         onKeyEventCallback_(info);
         return info->IsStopPropagation();
     } else {
@@ -469,12 +477,20 @@ void FocusNode::OnClick(const KeyEvent& event)
             Offset((GetRect().Right() - GetRect().Left()) / 2, (GetRect().Bottom() - GetRect().Top()) / 2));
         info->SetSourceDevice(static_cast<SourceType>(event.sourceType));
         info->SetDeviceId(event.deviceId);
+#ifdef LINUX_PLATFORM
+        LOGI("FocusNode::OnClick: Do click callback on %{public}s with key event{ Global(%{public}f,%{public}f), "
+             "Local(%{public}f,%{public}f), SourceType(%{public}d), DeviceId(%{public}" PRId64 ")}",
+            AceType::TypeName(this), info->GetGlobalLocation().GetX(), info->GetGlobalLocation().GetY(),
+            info->GetLocalLocation().GetX(), info->GetLocalLocation().GetY(), info->GetSourceDevice(),
+            info->GetDeviceId());
+#else
         LOGI("FocusNode::OnClick: Do click callback on %{public}s with key event{ Global(%{public}f,%{public}f), "
              "Local(%{public}f,%{public}f), SourceType(%{public}d), DeviceId(%{public}" PRId64
              "), Time(%{public}lld) }",
             AceType::TypeName(this), info->GetGlobalLocation().GetX(), info->GetGlobalLocation().GetY(),
             info->GetLocalLocation().GetX(), info->GetLocalLocation().GetY(), info->GetSourceDevice(),
             info->GetDeviceId(), info->GetTimeStamp().time_since_epoch().count());
+#endif
         onClickEventCallback_(info);
     }
 }

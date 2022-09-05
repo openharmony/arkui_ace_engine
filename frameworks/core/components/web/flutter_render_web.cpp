@@ -25,7 +25,7 @@ void FlutterRenderWeb::PerformLayout()
 
 void FlutterRenderWeb::DumpTree(int32_t depth) {}
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and defined(OHOS_STANDARD_SYSTEM)
+#if !defined(PREVIEW) and defined(OHOS_STANDARD_SYSTEM)
 void FlutterRenderWeb::OnPaintFinish()
 {
     if (!delegate_) {

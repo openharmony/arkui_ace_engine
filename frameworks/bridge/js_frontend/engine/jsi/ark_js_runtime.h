@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 #include <unordered_map>
 #include "frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.h"
 #endif
@@ -97,7 +97,7 @@ public:
         debuggerPostTask_ = std::move(task);
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void SetPreviewFlag(bool flag)
     {
         isComponentPreview_ = flag;
@@ -149,7 +149,7 @@ private:
     bool usingExistVM_ = false;
     bool isDebugMode_ = true;
     DebuggerPostTask debuggerPostTask_;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     bool isComponentPreview_ = false;
     std::string requiredComponent_ {};
     std::unordered_map<std::string, panda::Global<panda::ObjectRef>> previewComponents_;

@@ -64,13 +64,18 @@ template("preview_entrance_source") {
         include_dirs = [ "//commonlibrary/c_utils/base/include" ]
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac" ]
       }
+
+      if (platform == "linux") {
+        include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+        deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux" ]
+      }
     }
   }
 }
 
 foreach(item, ace_platforms) {
   platform = item.name
-  if (platform == "windows" || platform == "mac") {
+  if (platform == "windows" || platform == "mac" || platform == "linux") {
     preview_entrance_source("ace_preview_entrance_" + item.name) {
       platform = item.name
       defines = []

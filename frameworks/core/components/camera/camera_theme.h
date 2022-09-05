@@ -47,7 +47,7 @@ public:
             }
             theme->bufferSize_ = Size(themeConstants->GetDimension(THEME_CAMERA_BUFFER_WIDTH).Value(),
                 themeConstants->GetDimension(THEME_CAMERA_BUFFER_HEIGHT).Value());
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
             theme->errorTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_VIDEO_TEXT_FONTSIZE));
             theme->errorTextStyle_.SetTextColor(themeConstants->GetColor(THEME_VIDEO_ERROR_TEXT_COLOR));
 #endif
@@ -62,7 +62,7 @@ public:
         return bufferSize_;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     const TextStyle& GetErrorTextStyle() const
     {
         return errorTextStyle_;
@@ -75,7 +75,7 @@ protected:
 private:
     Size bufferSize_;
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     TextStyle errorTextStyle_;
 #endif
 };

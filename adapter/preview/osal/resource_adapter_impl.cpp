@@ -453,7 +453,7 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
         return "";
     }
     auto moduleName = container->GetModuleName();
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     return "resource://RAWFILE/" + moduleName + "/resources/rawfile/" + fileName;
 #else
     return "resource://RAWFILE/assets/" + moduleName + "/resources/rawfile/" + fileName;

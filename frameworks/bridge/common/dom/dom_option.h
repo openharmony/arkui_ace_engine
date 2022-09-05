@@ -44,7 +44,7 @@ public:
 protected:
     bool SetSpecializedAttr(const std::pair<std::string, std::string>& attr) override;
     bool SetSpecializedStyle(const std::pair<std::string, std::string>& style) override;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void OnSetStyleFinished() override;
 #endif
 

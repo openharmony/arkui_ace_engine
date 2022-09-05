@@ -307,7 +307,7 @@ public:
         needNotifyChangeEvent_ = needNotifyChangeEvent;
     }
 
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     void SetInputMethodStatus(bool imeAttached)
     {
         imeAttached_ = imeAttached;
@@ -401,7 +401,7 @@ protected:
 
     bool HasConnection() const
     {
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         return imeAttached_;
 #else
         return connection_;
@@ -659,7 +659,7 @@ private:
     RefPtr<Animator> animator_;
     std::vector<TextEditingValue> operationRecords_;
     std::vector<TextEditingValue> inverseOperationRecords_;
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
 #endif
 

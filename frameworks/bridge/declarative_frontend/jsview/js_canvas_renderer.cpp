@@ -557,7 +557,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
             imgWidth = jsImage->GetWidth();
             imgHeight = jsImage->GetHeight();
         } else {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
             pixelMap = CreatePixelMapFromNapiValue(info[0]);
 #endif
             if (!pixelMap) {

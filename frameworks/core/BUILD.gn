@@ -351,7 +351,7 @@ template("ace_core_source_set") {
     }
 
     if (!use_mingw_win && !use_mac && !is_wearable_product &&
-        !is_standard_system) {
+        !is_standard_system && !use_linux) {
       deps += [ "$ace_root/frameworks/core/components/rich_text:ace_core_components_rich_text_$platform" ]
     }
 
@@ -378,7 +378,7 @@ template("ace_core_source_set") {
 
     if (defined(config.form_components_support) &&
         config.form_components_support) {
-      if (!use_mingw_win && !use_mac) {
+      if (!use_mingw_win && !use_mac && !use_linux) {
         sources += [ "common/form_manager.cpp" ]
         deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
         external_deps = [ "form_fwk:form_manager" ]

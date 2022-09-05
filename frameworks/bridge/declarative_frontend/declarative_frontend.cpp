@@ -617,7 +617,7 @@ void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, s
     }
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void DeclarativeFrontend::TransferJsResponseDataPreview(int callbackId, int32_t code, ResponseData responseData) const
 {
     delegate_->TransferJsResponseDataPreview(callbackId, code, responseData);

@@ -133,7 +133,7 @@ void RenderSlidingPanel::Update(const RefPtr<Component>& component)
 
 void RenderSlidingPanel::OnPaintFinish()
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     auto context = context_.Upgrade();
     if (!context) {
         return;

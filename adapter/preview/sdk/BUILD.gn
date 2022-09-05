@@ -50,8 +50,10 @@ if (is_standard_system) {
   # Avoid conditional judgment branches caused by dynamic library suffixes.
   if (use_mac) {
     dylib_suffix = ".dylib"
-  } else {
+  } else if (use_mingw_win) {
     dylib_suffix = ".dll"
+  } else if (use_linux) {
+    dylib_suffix = ".so"
   }
 
   # All dynamic libraries to be copied to the path "/previewer/common/bin/module/",
@@ -72,8 +74,8 @@ if (is_standard_system) {
     module_install_name = ""
   }
 
-  ohos_copy("copy_distributeddata_library") {
-    if (use_mac || use_mingw_win) {
+  if (use_mac || use_mingw_win) {
+    ohos_copy("copy_distributeddata_library") {
       out_path = get_label_info(
               "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/jskits/distributeddata:distributeddata",
               "root_out_dir")
@@ -149,6 +151,16 @@ if (is_standard_system) {
       ]
       sources += [
         "${hilog_path}/hiviewdfx/hilog_native/libhilog_windows${dylib_suffix}",
+      ]
+    } else if (use_linux) {
+      hilog_path = get_label_info(
+              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_linux",
+              "root_out_dir")
+      deps += [
+        "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_linux",
+      ]
+      sources += [
+        "${hilog_path}/hiviewdfx/hilog_native/libhilog_linux${dylib_suffix}",
       ]
     }
 
@@ -238,7 +250,7 @@ if (is_standard_system) {
         "$ace_root/adapter/preview/build:libace_engine_mac",
         "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
       ]
-    } else {
+    } else if (use_mingw_win) {
       ace_engine_path =
           get_label_info(
               "$ace_root/adapter/preview/build::libace_engine_windows",
@@ -250,6 +262,18 @@ if (is_standard_system) {
       deps += [
         "$ace_root/adapter/preview/build:libace_engine_windows",
         "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
+      ]
+    } else if (use_linux) {
+      ace_engine_path =
+          get_label_info("$ace_root/adapter/preview/build::libace_engine_linux",
+                         "root_out_dir") +
+          "/common/common/libace_engine_linux${dylib_suffix}"
+      resource_manager_path = get_label_info(
+                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux",
+                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_linux${dylib_suffix}"
+      deps += [
+        "$ace_root/adapter/preview/build:libace_engine_linux",
+        "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux",
       ]
     }
 
@@ -274,8 +298,8 @@ if (is_standard_system) {
     module_install_name = ""
   }
 
-  ohos_copy("copy_distributeddatamgr_library") {
-    if (use_mac || use_mingw_win) {
+  if (use_mac || use_mingw_win) {
+    ohos_copy("copy_distributeddatamgr_library") {
       #preferences
       out_path = get_label_info(
               "//foundation/distributeddatamgr/preferences/frameworks/js/napi:preferences",

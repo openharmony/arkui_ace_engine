@@ -90,7 +90,7 @@ void RenderHyperlink::OnTouchTestHit(
 
 void RenderHyperlink::JumpToAddress()
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the Hyperlink in the Previewer. "
          "Perform this operation on the emulator or a real device instead.");
     return;

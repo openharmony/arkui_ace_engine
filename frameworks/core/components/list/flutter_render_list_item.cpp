@@ -90,7 +90,7 @@ void FlutterRenderListItem::Paint(RenderContext& context, const Offset& offset)
 
 void FlutterRenderListItem::OnPaintFinish()
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     auto accessibilityNode = GetAccessibilityNode().Upgrade();
     if (!accessibilityNode) {
         LOGE("FlutterRenderListItem::accessibilityNode is null");

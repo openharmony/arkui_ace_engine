@@ -78,6 +78,8 @@ template("ace_osal_preview_source_set") {
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win(${current_toolchain})" ]
       } else if (platform == "mac") {
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac(${current_toolchain})" ]
+      } else if (platform == "linux") {
+        deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux(${current_toolchain})" ]
       }
     } else {
       sources += [ "resource_adapter_impl.cpp" ]
@@ -90,6 +92,8 @@ template("ace_osal_preview_source_set") {
         libs = [ "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libresourcemanager_win.lib" ]
       } else if (platform == "mac") {
         libs = [ "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libresourcemanager_mac.dylib" ]
+      } else if (platform == "linux") {
+        libs = [ "//prebuilts/ace-toolkit/preview/rich/lib/linux/tv/libresourcemanager_linux.so" ]
       }
     }
 
@@ -102,7 +106,7 @@ template("ace_osal_preview_source_set") {
 
 foreach(item, ace_platforms) {
   platform = item.name
-  if (platform == "windows" || platform == "mac") {
+  if (platform == "windows" || platform == "mac" || platform == "linux") {
     utilsecurec_source("utilsecurec_source_" + item.name) {
       platform = item.name
       defines = []

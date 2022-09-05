@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
 
@@ -27,7 +27,7 @@
 namespace OHOS::Ace {
 namespace {
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 using ThumbnaiNapiEntry = void* (*)(const char*, void*);
 ThumbnaiNapiEntry GetThumbnailNapiEntry()
 {
@@ -66,7 +66,7 @@ DataAbilityHelperStandard::DataAbilityHelperStandard(const std::shared_ptr<OHOS:
     useStageModel_ = useStageModel;
     if (useStageModel) {
         runtimeContext_ = runtimeContext;
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         dataAbilityThumbnailQueryImpl_ =
             [runtimeContextWp = runtimeContext_] (const std::string& uri) -> std::unique_ptr<Media::PixelMap> {
             ThumbnaiNapiEntry thumbnailNapiEntry = GetThumbnailNapiEntry();

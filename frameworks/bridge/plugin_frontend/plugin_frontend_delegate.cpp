@@ -316,7 +316,7 @@ void PluginFrontendDelegate::TransferJsResponseData(
         TaskExecutor::TaskType::JS);
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void PluginFrontendDelegate::TransferJsResponseDataPreview(
     int32_t callbackId, int32_t code, ResponseData responseData) const
 {

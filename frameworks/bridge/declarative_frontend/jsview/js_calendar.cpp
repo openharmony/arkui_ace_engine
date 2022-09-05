@@ -86,7 +86,7 @@ void JSCalendar::SetCalendarData(
         return;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (obj->IsUndefined()) {
         LOGE("obj is undefined");
         return;
