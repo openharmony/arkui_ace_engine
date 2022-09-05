@@ -52,7 +52,7 @@ namespace OHOS::Ace::Framework {
 
 
 // ImageModel is essentially the same class as ImageView
-// there should be one left in the final implementation
+// there should be only one left in the final implementation
 
 class ImageModel {
 public:
@@ -82,10 +82,14 @@ public:
     virtual void SetOnDragMoveId(const OnDropFunc& onDragMoveId) = 0;
     virtual void SetOnDropId(const OnDropFunc& onDropId) = 0;
     virtual void SetCopyOption(const CopyOptions& copyOption) = 0;
+    virtual bool UpdateDragItemInfo(DragItemInfo& itemInfo) = 0;
 
 private:
     static thread_local std::unique_ptr<ImageModel> instance;
 };
+
+
+// Implemenations should be moved to separate files
 
 class ImageModelOG : public ImageModel{
 public:
@@ -274,6 +278,18 @@ public:
             image->SetCopyOption(copyOption);
         }
     }
+
+    bool UpdateDragItemInfo(DragItemInfo& itemInfo) override
+    {
+        auto component = ViewStackProcessor::GetInstance()->Finish();
+        if (!component) {
+            LOGE("Custom component is null.");
+            return false;
+        }
+        itemInfo.customComponent = component;
+        return true;
+    }
+
 };
 
 class ImageModelNG : public ImageModel{
@@ -378,6 +394,11 @@ public:
 
     void SetCopyOption(const CopyOptions& copyOption) override
     {
+    }
+
+    bool UpdateDragItemInfo(DragItemInfo& itemInfo) override
+    {
+        return false;
     }
 };
 

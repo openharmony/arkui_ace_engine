@@ -21,11 +21,10 @@
 
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
-#include "core/components_ng/pattern/image/image_view.h"
+#include "core/components/image/image_event.h"
 #include "frameworks/core/components_ng/pattern/image_model.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
-//#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -410,12 +409,9 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
             return itemInfo;
         }
 
-        //TODO: remove dependency of Component from JSImage
-        // Support NG with API wrapper
-        auto component = ParseDragItemComponent(ret);
-        if (component) {
+        ParseDragItem(ret);
+        if (ImageModel::GetInstance()->UpdateDragItemInfo(itemInfo)) {
             LOGI("use custom builder param.");
-            itemInfo.customComponent = component;
             return itemInfo;
         }
 
@@ -426,8 +422,8 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 #endif
         auto extraInfo = builderObj->GetProperty("extraInfo");
         ParseJsString(extraInfo, itemInfo.extraInfo);
-        component = ParseDragItemComponent(builderObj->GetProperty("builder"));
-        itemInfo.customComponent = component;
+        ParseDragItem(builderObj->GetProperty("builder"));
+        ImageModel::GetInstance()->UpdateDragItemInfo(itemInfo);
         return itemInfo;
     };
     ImageModel::GetInstance()->SetOnDragStartId(onDragStartId);

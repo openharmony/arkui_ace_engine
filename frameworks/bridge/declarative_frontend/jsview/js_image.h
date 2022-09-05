@@ -16,9 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H
 
-//TODO: remove dependancy on ImageComponent, use ImageModel/ImageView instead
-#include "core/components/image/image_component.h"
-#include "core/components/image/image_event.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
