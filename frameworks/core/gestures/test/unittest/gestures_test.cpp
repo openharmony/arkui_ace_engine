@@ -992,9 +992,10 @@ HWTEST_F(GesturesTest, GestureReferee001, TestSize.Level1)
      * @tc.steps: step2. send accept to gesture arbiter.
      * @tc.expected: step2. receive event callback and check result is right.
      */
-    GestureReferee::GetInstance()->Adjudicate(eventId, clickRecognizerC, GestureDisposal::ACCEPT);
-    GestureReferee::GetInstance()->Adjudicate(eventId, clickRecognizerB, GestureDisposal::ACCEPT);
-    GestureReferee::GetInstance()->Adjudicate(eventId, clickRecognizerA, GestureDisposal::ACCEPT);
+    auto referee = AceType::MakeRefPtr<GestureReferee>();
+    referee->Adjudicate(eventId, clickRecognizerC, GestureDisposal::ACCEPT);
+    referee->Adjudicate(eventId, clickRecognizerB, GestureDisposal::ACCEPT);
+    referee->Adjudicate(eventId, clickRecognizerA, GestureDisposal::ACCEPT);
 
     ASSERT_EQ(refereeResult.GetGestureName(), std::string("clickRecognizerC"));
 }
@@ -1018,13 +1019,14 @@ HWTEST_F(GesturesTest, GestureReferee002, TestSize.Level1)
         [&refereeResult](const ClickInfo& info) { refereeResult.SetGestureName("clickRecognizerA"); });
 
     int32_t eventId = 0;
-    GestureReferee::GetInstance()->AddGestureRecognizer(++eventId, clickRecognizerA);
+    auto referee = AceType::MakeRefPtr<GestureReferee>();
+    referee->AddGestureRecognizer(++eventId, clickRecognizerA);
 
     /**
      * @tc.steps: step2. send accept to gesture arbiter.
      * @tc.expected: step2. receive event callback and check result is right.
      */
-    GestureReferee::GetInstance()->Adjudicate(eventId--, clickRecognizerA, GestureDisposal::REJECT);
+    referee->Adjudicate(eventId--, clickRecognizerA, GestureDisposal::REJECT);
 
     ASSERT_TRUE(refereeResult.GetGestureName().empty());
 }
