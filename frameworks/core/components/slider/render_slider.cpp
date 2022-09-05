@@ -492,15 +492,15 @@ void RenderSlider::RenderBlockPosition(const Offset& touchPosition)
 {
     double diff = 0.0;
     if (direction_ == Axis::VERTICAL) {
-        diff = isReverse_ ?
-            GetLayoutSize().Height() - touchPosition.GetY() : touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP);
+        diff = isReverse_ ? GetLayoutSize().Height() - touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP) :
+            touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP);
     } else {
         if ((GetTextDirection() == TextDirection::LTR &&
             !isReverse_) || (GetTextDirection() == TextDirection::RTL && isReverse_)) {
             diff = touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP);
         } else if ((GetTextDirection() == TextDirection::RTL &&
             !isReverse_) || (GetTextDirection() == TextDirection::LTR && isReverse_)) {
-            diff = GetLayoutSize().Width() - touchPosition.GetX();
+            diff = GetLayoutSize().Width() - touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP);
         }
     }
     if (diff < 0.0) {
@@ -542,15 +542,15 @@ void RenderSlider::UpdateBlockPosition(const Offset& touchPosition, bool isClick
     }
     double diff = 0.0;
     if (direction_ == Axis::VERTICAL) {
-        diff = isReverse_ ?
-            GetLayoutSize().Height() - touchPosition.GetY() : touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP);
+        diff = isReverse_ ? GetLayoutSize().Height() - touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP) :
+            touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP);
     } else {
         if ((GetTextDirection() == TextDirection::LTR &&
             !isReverse_) || (GetTextDirection() == TextDirection::RTL && isReverse_)) {
             diff = touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP);
         } else if ((GetTextDirection() == TextDirection::RTL &&
             !isReverse_) || (GetTextDirection() == TextDirection::LTR && isReverse_)) {
-            diff = GetLayoutSize().Width() - touchPosition.GetX();
+            diff = GetLayoutSize().Width() - touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP);
         }
     }
     double totalRatio = diff / trackLength_;
