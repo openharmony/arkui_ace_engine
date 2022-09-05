@@ -38,6 +38,8 @@ public:
     void Update() override;
     void PerformBuild() override;
     void FlushReload();
+    void SetAppTitle(const std::string& title);
+    void SetAppIcon(const RefPtr<PixelMap>& icon);
 
 private:
     RefPtr<StackElement> GetStackElement() const;
