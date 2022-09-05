@@ -21,12 +21,28 @@
 
 namespace OHOS::Ace::NG {
 
+void GridItemView::Create(std::function<void(int32_t)>&& deepRenderFunc)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
+        CHECK_NULL_RETURN(deepRenderFunc, nullptr);
+        deepRenderFunc(nodeId);
+        return ViewStackProcessor::GetInstance()->Finish();
+    };
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::GRID_ITEM_ETS_TAG, nodeId, [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
+            return AceType::MakeRefPtr<GridItemPattern>(shallowBuilder);
+        });
+    stack->Push(frameNode);
+}
+
 void GridItemView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::GRID_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridItemPattern>(); });
+        V2::GRID_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridItemPattern>(nullptr); });
     stack->Push(frameNode);
 }
 
