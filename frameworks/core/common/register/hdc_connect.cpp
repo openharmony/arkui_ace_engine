@@ -123,7 +123,7 @@ void* HdcConnectRun(void* pkgContent)
         LOGE("jdwp_process signal fail.");
     }
     std::string pkgName = static_cast<ConnectManagement*>(pkgContent)->GetPkgName();
-    clsHdcJdwpSimulator = new (std::nothrow) HdcJdwpSimulator(&loopMain, pkgName);
+    clsHdcJdwpSimulator = new (std::nothrow) HdcJdwpSimulator(pkgName);
     if (!clsHdcJdwpSimulator->Connect()) {
         LOGE("Connect fail.");
         return nullptr;
