@@ -307,6 +307,39 @@ private:
     std::string realm_;
 };
 
+class ACE_EXPORT SslErrorResult : public AceType {
+    DECLARE_ACE_TYPE(SslErrorResult, AceType)
+
+public:
+    SslErrorResult() = default;
+    ~SslErrorResult() = default;
+    virtual void HandleConfirm() = 0;
+    virtual void HandleCancel() = 0;
+};
+
+class ACE_EXPORT WebSslErrorEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebSslErrorEvent, BaseEventInfo);
+
+public:
+    WebSslErrorEvent(const RefPtr<SslErrorResult>& result, int32_t error)
+        : BaseEventInfo("WebSslErrorEvent"), result_(result), error_(error) {}
+    ~WebSslErrorEvent() = default;
+
+    const RefPtr<SslErrorResult>& GetResult() const
+    {
+        return result_;
+    }
+
+    int32_t GetError() const
+    {
+        return error_;
+    }
+
+private:
+    RefPtr<SslErrorResult> result_;
+    int32_t error_;
+};
+
 class ACE_EXPORT WebGeolocation : public AceType {
     DECLARE_ACE_TYPE(WebGeolocation, AceType)
 

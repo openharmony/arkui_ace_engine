@@ -189,6 +189,20 @@ void AuthResultOhos::Cancel()
     }
 }
 
+void SslErrorResultOhos::HandleConfirm()
+{
+    if (result_) {
+        result_->HandleConfirm();
+    }
+}
+
+void SslErrorResultOhos::HandleCancel()
+{
+    if (result_) {
+        result_->HandleCancel();
+    }
+}
+
 std::string FileSelectorParamOhos::GetTitle()
 {
     if (param_) {
@@ -525,6 +539,28 @@ void WebDelegate::ClearHistory()
             }
             if (delegate->nweb_) {
                 delegate->nweb_->DeleteNavigateHistory();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::ClearSslCache()
+{
+    LOGE("WebDelegate ClearSslCache");
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Get context failed, it is null.");
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->ClearSslCache();
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -1327,6 +1363,14 @@ void WebDelegate::SetWebCallBack()
                 auto delegate = weak.Upgrade();
                 if (delegate) {
                     delegate->ClearHistory();
+                }
+            });
+        });
+        webController->SetClearSslCacheImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ClearSslCache();
                 }
             });
         });
@@ -2446,6 +2490,15 @@ bool WebDelegate::OnHttpAuthRequest(const BaseEventInfo* info)
         return false;
     }
     return webCom->OnHttpAuthRequest(info);
+}
+
+bool WebDelegate::OnSslErrorRequest(const BaseEventInfo* info)
+{
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return false;
+    }
+    return webCom->OnSslErrorRequest(info);
 }
 
 void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,

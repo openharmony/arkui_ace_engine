@@ -113,6 +113,8 @@ public:
     void OnScroll(double xOffset, double yOffset) override;
     bool OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthResult> result, const std::string &host,
         const std::string &realm) override;
+    bool OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
+        OHOS::NWeb::SslError error) override;
     void OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request) override;
     bool RunContextMenu(std::shared_ptr<NWeb::NWebContextMenuParams> params,
         std::shared_ptr<NWeb::NWebContextMenuCallback> callback) override;
