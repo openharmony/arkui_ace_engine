@@ -68,6 +68,10 @@ void JSList::SetEditMode(bool editMode)
 
 void JSList::SetCachedCount(int32_t cachedCount)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ListView::SetCachedCount(cachedCount);
+        return;
+    }
     JSViewSetProperty(&V2::ListComponent::SetCachedCount, cachedCount);
 }
 

@@ -43,6 +43,7 @@ public:
         value->propLaneMinLength_ = CloneLaneMinLength();
         value->propLaneMaxLength_ = CloneLaneMaxLength();
         value->propListItemAlign_ = CloneListItemAlign();
+        value->propCachedCount_ = CloneCachedCount();
         return value;
     }
 
@@ -57,6 +58,7 @@ public:
         ResetLaneMinLength();
         ResetLaneMaxLength();
         ResetListItemAlign();
+        ResetCachedCount();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -67,6 +69,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMinLength, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMaxLength, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListItemAlign, V2::ListItemAlign, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

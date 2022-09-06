@@ -75,4 +75,9 @@ void ListView::SetListItemAlign(V2::ListItemAlign listItemAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign);
 }
+
+void ListView::SetCachedCount(const int32_t& cachedCount)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount);
+}
 } // namespace OHOS::Ace::NG
