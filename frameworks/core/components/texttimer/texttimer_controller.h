@@ -62,6 +62,11 @@ public:
         reset_ = reset;
     }
 
+    bool HasInitialized() const
+    {
+        return start_ && pause_ && reset_;
+    }
+    
 private:
     TimerFuncImpl start_;
     TimerFuncImpl pause_;
