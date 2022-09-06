@@ -415,6 +415,7 @@ protected:
     double prevOffset_ = 0.0;
     double prevMainPos_ = 0.0;
     double estimatedHeight_ = 0.0;
+    bool isRightToLeft_ = false;
 
 private:
     int32_t lanes_ = -1;
