@@ -156,7 +156,7 @@ void ListLayoutAlgorithm::LayoutForward(
     auto currentIndex = preStartIndex_ - 1;
     float cacheSize = mainSize * CACHE_SIZE_RADIO;
     if (cachedCount_ > 0) {
-        cachedSize = 0.0f;
+        cacheSize = 0.0f;
     }
     do {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
@@ -188,7 +188,7 @@ void ListLayoutAlgorithm::LayoutForward(
         if (GreatOrEqual(currentStartPos, endMainPos_ + cacheSize)) {
             endCachedCount_++;
         }
-    } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize) || (endCachedCount < cachedCount_));
+    } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize) || (endCachedCount_ < cachedCount_));
     currentEndPos = currentEndPos - spaceWidth_;
 
     startIndex_ = newStartIndex.value_or(preStartIndex_);
