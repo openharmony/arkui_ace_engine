@@ -136,6 +136,12 @@ public:
     void SetPathResolveCallback(const std::string& bundleName, const std::string& assetPath)
     {
         panda::JSNApi::SetHostResolvePathTracker(vm_, JsiModuleSearcher(bundleName, assetPath));
+        panda::JSNApi::SetAssetPath(vm_, assetPath);
+    }
+
+    void SetBundle(bool isBundle)
+    {
+        panda::JSNApi::SetBundle(vm_, isBundle);
     }
 #endif
 

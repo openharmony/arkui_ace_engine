@@ -322,10 +322,11 @@ public:
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode) override;
 
-    void InitializeModuleSearcher(const std::string& bundleName, const std::string assetPath) override
+    void InitializeModuleSearcher(const std::string& bundleName, const std::string assetPath, bool isBundle) override
     {
         bundleName_ = bundleName;
         assetPath_ = assetPath;
+        isBundle_ = isBundle;
     }
 #endif
 
@@ -358,6 +359,7 @@ private:
 #if defined(PREVIEW)
     std::string assetPath_;
     std::string bundleName_;
+    bool isBundle_ = true;
 #endif
 
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);

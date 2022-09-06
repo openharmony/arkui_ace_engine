@@ -108,6 +108,20 @@ StageModuleParser::StageModuleParser()
       stageModuleInfo_(Referenced::MakeRefPtr<StageModuleInfo>())
 {}
 
+void StageModuleInfo::ModuleInfoParse(const std::unique_ptr<JsonValue>& root)
+{
+    if (!root) {
+        LOGE("The information of stage model application is null.");
+        return;
+    }
+    compileMode_ = root->GetString("compileMode");
+}
+
+const std::string& StageModuleInfo::GetCompileMode() const
+{
+    return compileMode_;
+}
+
 void StageModuleParser::Parse(const std::string& contents)
 {
     auto rootJson = JsonUtil::ParseJsonString(contents);
