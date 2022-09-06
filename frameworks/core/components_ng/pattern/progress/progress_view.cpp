@@ -46,11 +46,6 @@ void ProgressView::SetMaxValue(const double& value)
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, MaxValue, value);
 }
 
-// void ProgressView::SetCachedValue(const double& value)
-// {
-//     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, CachedValue, value);
-// }
-
 void ProgressView::SetColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Color, value);

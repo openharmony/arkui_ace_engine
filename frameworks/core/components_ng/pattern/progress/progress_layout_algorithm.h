@@ -44,7 +44,6 @@ public:
 
     double GetMaxValue() const;
     double GetValue() const;
-   // double GetCachedValue() const;
     Color GetColor() const;
     ProgressType GetType() const;
     double GetStrokeWidth() const;
@@ -58,7 +57,6 @@ private:
 
     double maxValue_;
     double value_;
-  //  double cachedValue_;
     Color color_;
     ProgressType type_;
     int32_t scaleCount_;
