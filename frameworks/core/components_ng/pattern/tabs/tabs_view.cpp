@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
+#include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -38,13 +39,11 @@ void TabsView::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto groupNode = GetOrCreateGroupNode(V2::TABS_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        []() { return AceType::MakeRefPtr<TabsPattern>(); });
 
     // Create Swiper node to contain TabContent.
     auto swiperNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    swiperLayoutProperty->UpdateLayoutWeight(3.0); // TODO use tabBarWidth and tabBarHeight.
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateLoop(false);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
@@ -55,13 +54,9 @@ void TabsView::Create()
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(V2::TAB_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         [swiperController]() { return AceType::MakeRefPtr<TabBarPattern>(swiperController); });
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-    tabBarLayoutProperty->UpdateLayoutWeight(1.0);
 
     tabBarNode->MountToParent(groupNode);
-    tabBarNode->MarkModifyDone();
-
     swiperNode->MountToParent(groupNode);
-    swiperNode->MarkModifyDone();
 
     ViewStackProcessor::GetInstance()->Push(groupNode);
 }
@@ -84,7 +79,10 @@ RefPtr<GroupNode> TabsView::GetGroupNode(const std::string& tag, int32_t nodeId)
     return groupNode;
 }
 
-void TabsView::SetTabBarPosition(BarPosition tabBarPosition) {}
+void TabsView::SetTabBarPosition(BarPosition tabBarPosition)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, tabBarPosition);
+}
 
 void TabsView::SetTabBarMode(TabBarMode tabBarMode)
 {
@@ -95,23 +93,39 @@ void TabsView::SetTabBarMode(TabBarMode tabBarMode)
 
 void TabsView::SetTabBarWidth(const Dimension& tabBarWidth)
 {
-    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().front());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateCalcSelfIdealSize(CalcSize(NG::CalcLength(tabBarWidth), std::nullopt));
     tabBarLayoutProperty->UpdateTabBarWidth(tabBarWidth);
 }
 
 void TabsView::SetTabBarHeight(const Dimension& tabBarHeight)
 {
-    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().front());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateCalcSelfIdealSize(CalcSize(std::nullopt, NG::CalcLength(tabBarHeight)));
     tabBarLayoutProperty->UpdateTabBarHeight(tabBarHeight);
 }
 
 void TabsView::SetAxis(Axis axis)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, Axis, axis);
+
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateAxis(axis);
+
+    auto swiperLayoutProperty = GetSwiperLayoutProperty();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateDirection(axis);
 }
 
 void TabsView::SetIndex(int32_t index)
@@ -125,7 +139,7 @@ void TabsView::SetScrollable(bool scrollable)
 {
     auto swiperPaintProperty = GetSwiperPaintProperty();
     CHECK_NULL_VOID(swiperPaintProperty);
-    swiperPaintProperty->UpdateDisableSwipe(scrollable);
+    swiperPaintProperty->UpdateDisableSwipe(!scrollable);
 }
 
 void TabsView::SetAnimationDuration(int32_t duration)
@@ -166,6 +180,30 @@ RefPtr<SwiperPaintProperty> TabsView::GetSwiperPaintProperty()
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
     return swiperPaintProperty;
+}
+
+RefPtr<SwiperController> TabsView::GetSwiperController()
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    return swiperPattern->GetSwiperController();
+}
+
+void TabsView::Pop()
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().front());
+    CHECK_NULL_VOID(tabBarNode);
+    tabBarNode->MarkModifyDone();
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
+    CHECK_NULL_VOID(swiperNode);
+    swiperNode->MarkModifyDone();
 }
 
 RefPtr<GroupNode> TabsView::CreateGroupNode(

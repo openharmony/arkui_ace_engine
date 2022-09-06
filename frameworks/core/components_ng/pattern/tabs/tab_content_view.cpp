@@ -25,6 +25,11 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+
+constexpr char DEFAULT_TAB_BAR_NAME[] = "TabBar";
+
+} // namespace
 
 void TabContentView::Create(std::function<void(int32_t)>&& deepRenderFunc)
 {
@@ -45,6 +50,7 @@ void TabContentView::Create(std::function<void(int32_t)>&& deepRenderFunc)
             return AceType::MakeRefPtr<TabContentPattern>(shallowBuilder);
         });
     stack->Push(frameNode);
+    SetTabBar(DEFAULT_TAB_BAR_NAME, ""); // Set default tab bar.
 }
 
 void TabContentView::Create()
@@ -75,6 +81,8 @@ void TabContentView::Pop()
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateContent(tabBarParam.text);
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textNode->MountToParent(tabBarNode);
     textNode->MarkModifyDone();
 }

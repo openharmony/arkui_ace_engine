@@ -40,6 +40,8 @@ void TabBarPattern::OnModifyDone()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+
+    // Init click event.
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto tabBar = weak.Upgrade();
         if (tabBar) {
@@ -48,6 +50,33 @@ void TabBarPattern::OnModifyDone()
     };
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gestureHub->AddClickEvent(clickEvent);
+
+    // Init scrollable.
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
+    if (axis_ == axis && scrollableEvent_) {
+        LOGD("Direction not changed, need't resister scroll event again.");
+        return;
+    }
+
+    axis_ = axis;
+    auto task = [weak = WeakClaim(this)](double offset, int32_t source) {
+        if (source != SCROLL_FROM_START) {
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->UpdateCurrentOffset(static_cast<float>(offset));
+            }
+        }
+        return true;
+    };
+
+    if (scrollableEvent_) {
+        gestureHub->RemoveScrollableEvent(scrollableEvent_);
+    }
+    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
+    scrollableEvent_->SetScrollPositionCallback(std::move(task));
+    gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
 bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -60,6 +89,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto tabBarLayoutAlgorithm = DynamicCast<TabBarLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(tabBarLayoutAlgorithm, false);
     tabItemOffsets_ = tabBarLayoutAlgorithm->GetTabItemOffset();
+    currentOffset_ = tabBarLayoutAlgorithm->GetCurrentOffset();
     return false;
 }
 
@@ -81,7 +111,8 @@ void TabBarPattern::HandleClick(const GestureEvent& info) const
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto totalCount = host->TotalChildCount();
 
-    auto local = OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()) - scrollableOffset_;
+    OffsetF currentOffset = (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0.0f) : OffsetF(0.0f, currentOffset_));
+    auto local = OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()) - currentOffset;
     if (axis == Axis::VERTICAL) {
         auto clickRange = std::make_pair(tabItemOffsets_[0].GetY(), tabItemOffsets_[tabItemOffsets_.size() - 1].GetY());
         if (LessNotEqual(local.GetY(), clickRange.first) || GreatNotEqual(local.GetY(), clickRange.second)) {
@@ -119,6 +150,14 @@ void TabBarPattern::HandleClick(const GestureEvent& info) const
     if (index >= 0 && index < totalCount && swiperController_) {
         swiperController_->SwipeTo(index);
     }
+}
+
+void TabBarPattern::UpdateCurrentOffset(float offset)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    currentOffset_ = currentOffset_ + offset;
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 } // namespace OHOS::Ace::NG

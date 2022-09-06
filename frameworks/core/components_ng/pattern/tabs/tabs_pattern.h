@@ -13,28 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_BAT_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_BAT_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_PATTERN_H
 
 #include <optional>
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/swiper/swiper_controller.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
-#include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_algorithm.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
-class TabBarPattern : public Pattern {
-    DECLARE_ACE_TYPE(TabBarPattern, Pattern);
+class TabsPattern : public Pattern {
+    DECLARE_ACE_TYPE(TabsPattern, Pattern);
 
 public:
-    explicit TabBarPattern(const RefPtr<SwiperController>& swiperController) : swiperController_(swiperController) {};
-    ~TabBarPattern() override = default;
+    TabsPattern() = default;
+    ~TabsPattern() override = default;
 
     bool IsAtomicNode() const override
     {
@@ -43,34 +42,19 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
-        return MakeRefPtr<TabBarLayoutProperty>();
+        return MakeRefPtr<TabsLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto layoutAlgorithm = MakeRefPtr<TabBarLayoutAlgorithm>();
-        layoutAlgorithm->SetCurrentOffset(currentOffset_);
-        return layoutAlgorithm;
+        return MakeRefPtr<TabsLayoutAlgorithm>();
     }
-
-    void UpdateCurrentOffset(float offset);
 
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
-
-    void HandleClick(const GestureEvent& info) const;
-
-    RefPtr<SwiperController> swiperController_;
-    std::vector<OffsetF> tabItemOffsets_;
-
-    float currentOffset_;
-    Axis axis_ = Axis::HORIZONTAL;
-    RefPtr<ScrollableEvent> scrollableEvent_;
-
-    bool isRTL_ = false; // TODO Adapt RTL.
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_BAT_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_PATTERN_H

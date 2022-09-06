@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -39,9 +40,24 @@ public:
         return tabItemOffset_;
     }
 
+    void SetCurrentOffset(float currentOffset)
+    {
+        currentOffset_ = currentOffset;
+    }
+
+    float GetCurrentOffset() const
+    {
+        return currentOffset_;
+    }
+
 private:
-    Axis axis_ = Axis::HORIZONTAL;
+    Axis GetAxis(LayoutWrapper* layoutWrapper) const;
+    void UpdateChildConstraint(LayoutConstraintF& childConstraint,
+        const RefPtr<TabBarLayoutProperty>& layoutProperty, const SizeF& ideaSize, int32_t childCount, Axis axis);
+
     std::vector<OffsetF> tabItemOffset_;
+    float currentOffset_ = 0.0f;
+    float childrenMainSize_ = 0.0f; // Children total size in main axis.
 };
 } // namespace OHOS::Ace::NG
 

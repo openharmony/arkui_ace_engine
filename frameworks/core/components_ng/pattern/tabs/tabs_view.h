@@ -31,6 +31,7 @@ class SwiperPaintProperty;
 class ACE_EXPORT TabsView {
 public:
     static void Create();
+    static void Pop();
     static void SetIndex(int32_t index);
     static void SetTabBarPosition(BarPosition tabBarPosition);
     static void SetTabBarMode(TabBarMode tabBarMode);
@@ -39,6 +40,8 @@ public:
     static void SetAxis(Axis axis);
     static void SetScrollable(bool scrollable);
     static void SetAnimationDuration(int32_t duration);
+
+    static RefPtr<SwiperController> GetSwiperController();
 
     static RefPtr<GroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);

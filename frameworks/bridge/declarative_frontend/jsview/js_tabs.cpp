@@ -66,7 +66,7 @@ void JSTabs::SetOnChange(const JSCallbackInfo& args)
 void JSTabs::Create(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::TabsView::Create();
+        CreateForNG(info);
         return;
     }
 
@@ -111,9 +111,42 @@ void JSTabs::Create(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(tabsComponent);
 }
 
+void JSTabs::CreateForNG(const JSCallbackInfo& info)
+{
+    NG::TabsView::Create();
+    if (!info[0]->IsObject()) {
+        LOGE("param is not valid.");
+        return;
+    }
+
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    auto val = obj->GetProperty("barPosition");
+    if (val->IsNumber()) {
+        auto barPositionVal = val->ToNumber<int32_t>();
+        if (barPositionVal >= 0 && barPositionVal < static_cast<int32_t>(BAR_POSITIONS.size())) {
+            auto barVal = BAR_POSITIONS[barPositionVal];
+            NG::TabsView::SetTabBarPosition(barVal);
+        }
+    }
+
+    auto controller = obj->GetProperty("controller");
+    if (controller->IsObject()) {
+        auto jsTabsController = JSRef<JSObject>::Cast(controller)->Unwrap<JSTabsController>();
+        if (jsTabsController) {
+            jsTabsController->SetSwiperController(NG::TabsView::GetSwiperController());
+        }
+    }
+
+    auto index = obj->GetProperty("index");
+    if (index->IsNumber()) {
+        NG::TabsView::SetIndex(index->ToNumber<int32_t>());
+    }
+}
+
 void JSTabs::Pop()
 {
     if (Container::IsCurrentUseNewPipeline()) {
+        NG::TabsView::Pop();
         NG::ViewStackProcessor::GetInstance()->PopContainer();
         return;
     }
