@@ -656,7 +656,7 @@ void RenderList::PerformLayout()
     if (noEdgeEffect && reachEnd_) {
         // Adjust end of list to match the end of layout
         if (LessNotEqual(curMainPos, mainSize)) {
-            AdjustForReachEnd(mainSize);
+            AdjustForReachEnd(mainSize, curMainPos);
         }
         curMainPos = mainSize;
     }
@@ -671,7 +671,9 @@ void RenderList::PerformLayout()
     // Check if reach the start of list
     reachStart_ = GreatOrEqual(currentOffset_, 0.0);
     if (noEdgeEffect && reachStart_) {
-        curMainPos -= currentOffset_;
+        if (GreatOrEqual(currentOffset_, 0.0)) {
+            AdjustForReachStart(curMainPos);
+        }
         currentOffset_ = 0;
         if (isLaneList_) {
             RequestNewItemsAtEndForLaneList(curMainPos, mainSize);
@@ -3091,30 +3093,34 @@ void RenderList::SizeChangeOffset(double newWindowHeight)
     }
 }
 
-void RenderList::AdjustForReachEnd(double mainSize)
+void RenderList::AdjustForReachEnd(double mainSize, double curMainPos)
 {
-    double currentOffset = mainSize;
+    double delta = mainSize - curMainPos;
     for (auto rit = items_.rbegin(); rit != items_.rend(); rit++) {
-        double childMainSize = 0.0;
         auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(*rit);
         if (itemGroup) {
-            if (itemGroup->IsForwardLayout()) {
-                double size = GetMainSize(itemGroup->GetLayoutSize());
-                LayoutChild(itemGroup, currentOffset - size, true);
-                childMainSize = GetMainSize(itemGroup->GetLayoutSize());
-            } else {
-                LayoutChild(itemGroup, currentOffset, false);
-                childMainSize = GetMainSize(itemGroup->GetLayoutSize());
-            }
-        } else {
-            childMainSize = GetMainSize((*rit)->GetLayoutSize());
+            double size = GetMainSize(itemGroup->GetLayoutSize());
+            LayoutChild(itemGroup, itemGroup->GetReferencePos() + delta, itemGroup->IsForwardLayout());
+            double newSize = GetMainSize(itemGroup->GetLayoutSize());
+            delta -= (newSize - size);
         }
-        currentOffset -= (childMainSize + spaceWidth_);
     }
-    if (!items_.empty()) {
-        currentOffset += spaceWidth_;
+    currentOffset_ += delta;
+}
+
+void RenderList::AdjustForReachStart(double &curMainPos)
+{
+    double delta = currentOffset_;
+    for (const auto& child : items_) {
+        auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
+        if (itemGroup) {
+            double size = GetMainSize(itemGroup->GetLayoutSize());
+            LayoutChild(itemGroup, itemGroup->GetReferencePos() - delta, itemGroup->IsForwardLayout());
+            double newSize = GetMainSize(itemGroup->GetLayoutSize());
+            delta -= (newSize - size);
+        }
     }
-    currentOffset_ = currentOffset;
+    curMainPos -= delta;
 }
 
 } // namespace OHOS::Ace::V2
