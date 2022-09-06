@@ -73,3 +73,11 @@ build_component_ng("pattern_ng") {
     "xcomponent/xcomponent_view.cpp",
   ]
 }
+
+build_component_ng("pattern_ability_component_ng") {
+  sources = [
+    "ability_component/ability_component_layout_algorithm.cpp",
+    "ability_component/ability_component_pattern.cpp",
+    "ability_component/ability_component_view.cpp",
+  ]
+}

@@ -391,6 +391,10 @@ ACE_EXPORT extern const char RICH_TEXT_ETS_TAG[];
 ACE_EXPORT extern const char XCOMPONENT_TAG[];
 ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[];
 
+// ability_component
+ACE_EXPORT extern const char ABILITY_COMPONENT_TAG[];
+ACE_EXPORT extern const char ABILITY_ETS_TAG[];
+
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

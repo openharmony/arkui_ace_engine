@@ -345,6 +345,11 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
     ]
 
+    if (defined(config.enable_ability_component) &&
+        config.enable_ability_component) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ability_component_ng_$platform" ]
+    }
+
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources += [ "animation/native_curve_helper.cpp" ]
       deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
@@ -614,6 +619,10 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
     ]
 
+    if (defined(config.enable_ability_component) &&
+        config.enable_ability_component) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ability_component_ng_$platform" ]
+    }
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
   }
