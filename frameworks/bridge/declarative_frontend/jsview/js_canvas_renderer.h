@@ -86,6 +86,7 @@ public:
     void JsGetFillStyle(const JSCallbackInfo& info);
     void JsGetStrokeStyle(const JSCallbackInfo& info);
     void JsGetLineCap(const JSCallbackInfo& info);
+    void JsGetLineDash(const JSCallbackInfo& info);
     void JsGetLineJoin(const JSCallbackInfo& info);
     void JsGetMiterLimit(const JSCallbackInfo& info);
     void JsGetLineWidth(const JSCallbackInfo& info);
