@@ -13,25 +13,21 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components/ifelse/if_else_component.h"
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_MODEL_IF_ELSE_IMPL_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_MODEL_IF_ELSE_IMPL_H
 
-#include "frameworks/core/components/ifelse/if_else_element.h"
+#include "core/components_ng/syntax/if_else_model.h"
 
-namespace OHOS::Ace {
+namespace OHOS::Ace::Framework {
 
-RefPtr<Element> IfElseComponent::CreateElement()
-{
-    return AceType::MakeRefPtr<IfElseElement>(GetId());
-}
+class IfElseModelImpl : public IfElseModel {
+public:
+    ~IfElseModelImpl() override = default;
+    void Create() override;
+    void Pop() override;
+    void SetBranchId(int32_t value) override;
+    int32_t GetBranchId() override;
+};
 
-int32_t IfElseComponent::GetBranchId()
-{
-    return branchId_;
-}
-
-void IfElseComponent::SetBranchId(int32_t branchId)
-{
-    branchId_ = branchId;
-}
-
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_MODEL_IF_ELSE_IMPL_H

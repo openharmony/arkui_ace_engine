@@ -29,7 +29,7 @@ public:
     ~IfElseComponent() override = default;
 
     RefPtr<Element> CreateElement() override;
-    int32_t BranchId();
+    int32_t GetBranchId();
     void SetBranchId(int32_t branchId);
 
 private:
