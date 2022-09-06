@@ -274,9 +274,10 @@ Size RenderSlider::Measure()
 
 void RenderSlider::Initialize(const RefPtr<SliderComponent>& sliderComponent)
 {
-    dragDetector_ = AceType::MakeRefPtr<HorizontalDragRecognizer>();
     if (sliderComponent && sliderComponent->GetDirection() == Axis::VERTICAL) {
         dragDetector_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
+    } else {
+        dragDetector_ = AceType::MakeRefPtr<HorizontalDragRecognizer>();
     }
     dragDetector_->SetOnDragStart([weakSlider = AceType::WeakClaim(this)](const DragStartInfo& info) {
         auto slider = weakSlider.Upgrade();
