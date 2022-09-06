@@ -1825,6 +1825,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     }
     eventManager_->MouseTest(scaleEvent, rootElement_->GetRenderNode());
     eventManager_->DispatchMouseEvent(scaleEvent);
+    eventManager_->DispatchMouseHoverAnimation(scaleEvent);
     eventManager_->DispatchMouseHoverEvent(scaleEvent);
     FlushMessages();
 }
