@@ -75,6 +75,8 @@ public:
 
     virtual void BlendBgColor(const Color& color) {}
 
+    virtual void UpdateBorderWidth(const BorderWidthPropertyF& value) {}
+
     virtual void SetClipToFrame(bool useClip) {}
 
     virtual RefPtr<Canvas> GetCanvas() = 0;
@@ -91,10 +93,10 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundColor, Color);
     // TODO Add BorderRadius in group.
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BorderRadius, BorderRadiusProperty);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BorderColor, BorderColorProperty);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BorderWidth, BorderWidthProperty);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BorderStyle, BorderStyleProperty);
+    ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
 
 protected:
     RenderContext() = default;
@@ -102,7 +104,6 @@ protected:
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}
-    virtual void OnBorderWidthUpdate(const BorderWidthProperty& value) {}
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
 
 private:
