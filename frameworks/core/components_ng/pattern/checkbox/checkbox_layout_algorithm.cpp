@@ -43,7 +43,7 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     // TODO use theme
     constexpr double DEFAULT_WIDTH = 30;
 
-    // 情况1：前端中设置了width和height，直接返回此大小
+    // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.Width().has_value() && contentConstraint.selfIdealSize.Height().has_value() &&
         contentConstraint.selfIdealSize.IsNonNegative()) {
         auto height = contentConstraint.selfIdealSize.Height().value();
@@ -51,20 +51,20 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
         auto length = std::min(width, height);
         return SizeF(length, length);
     }
-    // 情况2：前端中只设置了width或者height中的一个，那么按照theme的长宽比去处理返回
-    // 2.1 Width设定了值
+    // Case 2: The front end only sets either width or height
+    // 2.1 Width is set to a value
     if (contentConstraint.selfIdealSize.Width().has_value() &&
         NonNegative(contentConstraint.selfIdealSize.Width().value())) {
         auto width = contentConstraint.selfIdealSize.Width().value();
         return SizeF(width, width);
     }
-    // 2.2 Height设定了值
+    // 2.2 Height is set to a value
     if (contentConstraint.selfIdealSize.Height().has_value() &&
         NonNegative(contentConstraint.selfIdealSize.Height().value())) {
         auto height = contentConstraint.selfIdealSize.Height().value();
         return SizeF(height, height);
     }
-    // 情况3：前端中没有设置width和height，那么从theme中返回
+    // Case 3: Width and height are not set in the front end, so return from the theme
     auto size = SizeF(DEFAULT_WIDTH, DEFAULT_WIDTH);
     size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     if (!NearEqual(size.Width(), size.Height())) {
