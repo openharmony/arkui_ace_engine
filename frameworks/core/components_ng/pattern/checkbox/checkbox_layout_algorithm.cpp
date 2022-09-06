@@ -67,6 +67,11 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     // 情况3：前端中没有设置width和height，那么从theme中返回
     auto size = SizeF(DEFAULT_WIDTH, DEFAULT_WIDTH);
     size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
+    if (!NearEqual(size.Width(), size.Height())) {
+        auto length = std::min(size.Width(), size.Height());
+        size.SetWidth(length);
+        size.SetHeight(length);
+    }
     return size;
 }
 } // namespace OHOS::Ace::NG
