@@ -228,7 +228,7 @@ if (is_standard_system) {
       sources += [
         "$ace_napi_path/arkui/napi/libace_napi_ark${dylib_suffix}",
         "$ark_js_path/ark/ark_js_runtime/libark_jsruntime${dylib_suffix}",
-        "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
+        "//third_party/icu/ohos_icu4j/data/icudt69l.dat",
       ]
     } else {
       deps += [ "$ace_napi:ace_napi_quickjs" ]
