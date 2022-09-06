@@ -21,15 +21,16 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TabContentView {
 public:
-    static void Create(std::function<void(int32_t)>&& deepRenderFunc);
+    static void Create(std::function<void()>&& deepRenderFunc);
     static void Create();
     static void Pop();
-    static void SetTabBar(const std::string& text, const std::string& icon);
+    static void SetTabBar(const std::string& text, const std::string& icon, TabBarBuilderFunc&& builder);
 };
 
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/group_node.h"
+#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 
@@ -40,16 +41,12 @@ public:
     static void SetAxis(Axis axis);
     static void SetScrollable(bool scrollable);
     static void SetAnimationDuration(int32_t duration);
+    static void SetOnChange(ChangeEvent&& onChange);
 
     static RefPtr<SwiperController> GetSwiperController();
 
-    static RefPtr<GroupNode> GetOrCreateGroupNode(
+    static RefPtr<GroupNode> CreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
-
-    static RefPtr<GroupNode> CreateGroupNode(
-        const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
-
-    static RefPtr<GroupNode> GetGroupNode(const std::string& tag, int32_t nodeId);
 
 private:
     static RefPtr<TabBarLayoutProperty> GetTabBarLayoutProperty();

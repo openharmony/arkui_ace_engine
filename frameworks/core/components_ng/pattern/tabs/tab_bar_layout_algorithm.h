@@ -52,8 +52,8 @@ public:
 
 private:
     Axis GetAxis(LayoutWrapper* layoutWrapper) const;
-    void UpdateChildConstraint(LayoutConstraintF& childConstraint,
-        const RefPtr<TabBarLayoutProperty>& layoutProperty, const SizeF& ideaSize, int32_t childCount, Axis axis);
+    void UpdateChildConstraint(LayoutConstraintF& childConstraint, const RefPtr<TabBarLayoutProperty>& layoutProperty,
+        const SizeF& ideaSize, int32_t childCount, Axis axis);
 
     std::vector<OffsetF> tabItemOffset_;
     float currentOffset_ = 0.0f;

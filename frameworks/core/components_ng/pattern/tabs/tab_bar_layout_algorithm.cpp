@@ -63,9 +63,10 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto axis = GetAxis(layoutWrapper);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize = CreateIdealSize(constraint.value(), axis, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
+    auto idealSize =
+        CreateIdealSize(constraint.value(), axis, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
-    auto defaultSize = ConvertToPx(TAB_BAR_DEFAULT_SIZE, scale, 0.0).value_or(0);
+    auto defaultSize = ConvertToPx(TAB_BAR_DEFAULT_SIZE, scale, 0).value_or(0);
     if (!constraint->selfIdealSize.Width().has_value() && axis == Axis::VERTICAL) {
         idealSize.SetWidth(defaultSize);
     }
@@ -78,7 +79,6 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childCount = layoutWrapper->GetTotalChildCount();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateChildConstraint(childLayoutConstraint, layoutProperty, idealSize.ConvertToSizeT(), childCount, axis);
-    LOGE("CCCC Measure idealSize: %{public}s, childConstraint: %{public}s", idealSize.ConvertToSizeT().ToString().c_str(), childLayoutConstraint.ToString().c_str());
 
     // Measure children.
     childrenMainSize_ = 0.0f;
@@ -94,7 +94,6 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (childGeometryNode) {
             childrenMainSize_ += childGeometryNode->GetFrameSize().MainSize(axis);
         }
-        LOGE("CCCC Measure childSize: %{public}s - %{public}d", childWrapper->GetGeometryNode()->GetFrameSize().ToString().c_str(), index);
     }
 }
 
@@ -106,29 +105,31 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto childCount = layoutWrapper->GetTotalChildCount();
     auto axis = GetAxis(layoutWrapper);
+    auto frameSize = geometryNode->GetFrameSize();
 
-    auto parentOffset =
-        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
-    auto scrollableDistance = std::max(childrenMainSize_ - geometryNode->GetFrameSize().MainSize(axis), 0.0f);
+    auto parentOffset = geometryNode->GetParentGlobalOffset() + geometryNode->GetFrameOffset();
+    auto scrollableDistance = std::max(childrenMainSize_ - frameSize.MainSize(axis), 0.0f);
     currentOffset_ = std::clamp(currentOffset_, -scrollableDistance, 0.0f);
-    OffsetF childOffset = (axis == Axis::HORIZONTAL ?
-        OffsetF(currentOffset_, 0.0f) : OffsetF(0.0f, currentOffset_));
+    OffsetF childOffset = (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0.0f) : OffsetF(0.0f, currentOffset_));
     for (int32_t index = 0; index < childCount; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        CHECK_NULL_VOID(childWrapper);
+        if (!childWrapper) {
+            continue;
+        }
         auto childGeometryNode = childWrapper->GetGeometryNode();
-        CHECK_NULL_VOID(childGeometryNode);
-        childGeometryNode->SetFrameOffset(childOffset);
+        if (!childGeometryNode) {
+            continue;
+        }
+        auto childFrameSize = childGeometryNode->GetFrameSize();
+        auto centerOffset = OffsetF(0, (frameSize.Height() - childFrameSize.Height()) / 2.0); // Center child in vertical.
+        childGeometryNode->SetFrameOffset(childOffset + centerOffset);
         childWrapper->Layout(parentOffset);
         tabItemOffset_.emplace_back(childOffset);
 
-        LOGE("CCCC Layout childOffset: %{public}s, parentOffset: %{public}s, currentOffset: %{public}lf",
-            childOffset.ToString().c_str(), parentOffset.ToString().c_str(), currentOffset_);
-
         if (axis == Axis::HORIZONTAL) {
-            childOffset += OffsetF(childGeometryNode->GetFrameSize().Width(), 0.0f);
+            childOffset += OffsetF(childFrameSize.Width(), 0.0f);
         } else {
-            childOffset += OffsetF(0.0f, childGeometryNode->GetFrameSize().Height());
+            childOffset += OffsetF(0.0f, childFrameSize.Height());
         }
     }
     tabItemOffset_.emplace_back(childOffset);

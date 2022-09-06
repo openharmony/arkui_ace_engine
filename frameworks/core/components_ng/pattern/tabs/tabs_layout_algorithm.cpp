@@ -36,6 +36,11 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
+    if (GreatOrEqual(idealSize.Width(), Infinity<float>()) || GreatOrEqual(idealSize.Height(), Infinity<float>())) {
+        LOGW("Size is infinity.");
+        geometryNode->SetFrameSize(SizeF());
+        return;
+    }
     geometryNode->SetFrameSize(idealSize);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
@@ -47,7 +52,6 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         tabBarWrapper->Measure(childLayoutConstraint);
         tabBarSize = tabBarWrapper->GetGeometryNode()->GetFrameSize();
     }
-    LOGE("CCCC Measure tabBarSize: %{public}s, childConstraint: %{public}s", tabBarSize.ToString().c_str(), childLayoutConstraint.ToString().c_str());
 
     // Measure swiper.
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(1);
@@ -62,8 +66,6 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         childLayoutConstraint.parentIdealSize = OptionalSizeF(parentIdealSize);
         swiperWrapper->Measure(childLayoutConstraint);
-        LOGE("CCCC Measure swiper size: %{public}s, childLayoutConstraint: %{public}s",
-            swiperWrapper->GetGeometryNode()->GetFrameSize().ToString().c_str(), childLayoutConstraint.ToString().c_str());
     }
 }
 
@@ -73,6 +75,10 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
+    if (!frameSize.IsPositive()) {
+        LOGW("Frame size is not positive.");
+        return;
+    }
 
     auto tabBarWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(1);
@@ -101,7 +107,8 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             tabBarOffset = OffsetF();
             swiperOffset = OffsetF(tabBarFrameSize.MainSize(Axis::HORIZONTAL), 0.0f);
         } else {
-            tabBarOffset = OffsetF(frameSize.MainSize(Axis::HORIZONTAL) - tabBarFrameSize.MainSize(Axis::HORIZONTAL), 0.0);
+            tabBarOffset =
+                OffsetF(frameSize.MainSize(Axis::HORIZONTAL) - tabBarFrameSize.MainSize(Axis::HORIZONTAL), 0.0f);
             swiperOffset = OffsetF();
         }
     }
@@ -109,7 +116,6 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto parentOffset = geometryNode->GetParentGlobalOffset() + geometryNode->GetFrameOffset();
     tabBarGeometryNode->SetFrameOffset(tabBarOffset);
     tabBarWrapper->Layout(parentOffset);
-    LOGE("CCCC Layout tabBarOffset: %{public}s, parentOffset: %{public}s", tabBarOffset.ToString().c_str(), parentOffset.ToString().c_str());
 
     swiperWrapper->GetGeometryNode()->SetFrameOffset(swiperOffset);
     swiperWrapper->Layout(parentOffset);

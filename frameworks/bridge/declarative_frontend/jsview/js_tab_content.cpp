@@ -63,8 +63,8 @@ void JSTabContent::Create(const JSCallbackInfo& info)
     if (usePartialUpdate && info.Length() > 0 && info[0]->IsFunction()) {
         JSRef<JSVal> builderFunctionJS = info[0];
         LOGD("We have a build function for a tab");
-        auto jsWrapperFunc =
-            [context = info.GetExecutionContext(), builder = builderFunctionJS]() -> RefPtr<Component> {
+        auto jsWrapperFunc = [context = info.GetExecutionContext(),
+                                 builder = builderFunctionJS]() -> RefPtr<Component> {
             JAVASCRIPT_EXECUTION_SCOPE(context)
             JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
             return ViewStackProcessor::GetInstance()->Finish();
@@ -90,7 +90,7 @@ void JSTabContent::CreateForNG(const JSCallbackInfo& info)
 
     RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(info[0]));
     auto tabContentDeepRenderFunc = [execCtx = info.GetExecutionContext(),
-                                    jsDeepRenderFunc = std::move(jsDeepRender)](int32_t nodeId) {
+                                        jsDeepRenderFunc = std::move(jsDeepRender)]() {
         if (!jsDeepRenderFunc) {
             LOGE("Func is null.");
             return;
@@ -180,8 +180,8 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     if (tabContentItemComponent->GetBarElementId() == ElementRegister::UndefinedElementId) {
         const auto id = ElementRegister::GetInstance()->MakeUniqueId();
         tabContentItemComponent->SetBarElementId(id);
-        LOGD("Setting ID for tab bar item to %{public}d tabContentItemComponent id %{public}d",
-            id, tabContentItemComponent->GetBarElementId());
+        LOGD("Setting ID for tab bar item to %{public}d tabContentItemComponent id %{public}d", id,
+            tabContentItemComponent->GetBarElementId());
     }
 }
 
@@ -194,7 +194,7 @@ void JSTabContent::SetTabBarForNG(const JSCallbackInfo& info)
     std::string content;
     if (ParseJsString(info[0], content)) {
         auto textVal = content.empty() ? DEFAULT_TAB_BAR_NAME : content;
-        NG::TabContentView::SetTabBar(textVal, "");
+        NG::TabContentView::SetTabBar(textVal, "", nullptr);
         return;
     }
 
@@ -207,28 +207,37 @@ void JSTabContent::SetTabBarForNG(const JSCallbackInfo& info)
     JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
 
     if (builderFuncParam->IsFunction()) {
-        // TODO adapt builder
+        auto tabBarBuilder = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderFuncParam));
+        auto tabBarBuilderFunc = [execCtx = info.GetExecutionContext(),
+                                     tabBarBuilderFunc = std::move(tabBarBuilder)]() {
+            if (tabBarBuilderFunc) {
+                ACE_SCOPED_TRACE("JSTabContent::Execute TabBar builder");
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                tabBarBuilderFunc->ExecuteJS();
+            }
+        };
+        NG::TabContentView::SetTabBar("", "", std::move(tabBarBuilderFunc));
         return;
     }
 
     std::string text;
     std::string icon;
     ParseJsString(textParam, text);
-    ParseJsString(iconParam, icon);
-    NG::TabContentView::SetTabBar(text.empty() ? DEFAULT_TAB_BAR_NAME : text, icon);
+    ParseJsMedia(iconParam, icon);
+    NG::TabContentView::SetTabBar(text.empty() ? DEFAULT_TAB_BAR_NAME : text, icon, nullptr);
 }
 
-RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(const JSCallbackInfo& info,
-    RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc)
+RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(
+    const JSCallbackInfo& info, RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc)
 {
     tabContent->SetBarText("custom");
     if (Container::IsCurrentUsePartialUpdate()) {
         auto jsWrapperFunc = [context = info.GetExecutionContext(), builder = builderFunc]() -> RefPtr<Component> {
-                ACE_SCORING_EVENT("TabContent.tabBarBuilder");
-                JAVASCRIPT_EXECUTION_SCOPE(context)
-                JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
-                return ViewStackProcessor::GetInstance()->Finish();
-            };
+            ACE_SCORING_EVENT("TabContent.tabBarBuilder");
+            JAVASCRIPT_EXECUTION_SCOPE(context)
+            JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
+            return ViewStackProcessor::GetInstance()->Finish();
+        };
 
         tabContent->SetBarBuilder(jsWrapperFunc);
         return nullptr;
@@ -240,7 +249,6 @@ RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(const JSCallbackInf
     jsBuilderFunc.Execute();
     RefPtr<Component> builderGeneratedRootComponent = ViewStackProcessor::GetInstance()->Finish();
     return builderGeneratedRootComponent;
-
 }
 
 RefPtr<Component> JSTabContent::CreateTabBarLabelComponent(

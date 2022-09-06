@@ -32,26 +32,26 @@ void TabBarPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
-void TabBarPattern::OnModifyDone()
+void TabBarPattern::InitClick(const RefPtr<GestureEventHub>& gestureHub)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
+    if (clickEvent_) {
+        return;
+    }
 
-    // Init click event.
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto tabBar = weak.Upgrade();
         if (tabBar) {
             tabBar->HandleClick(info);
         }
     };
-    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gestureHub->AddClickEvent(clickEvent);
+    clickEvent_ = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureHub->AddClickEvent(clickEvent_);
+}
 
-    // Init scrollable.
+void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
@@ -77,6 +77,34 @@ void TabBarPattern::OnModifyDone()
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
     scrollableEvent_->SetScrollPositionCallback(std::move(task));
     gestureHub->AddScrollableEvent(scrollableEvent_);
+}
+
+void TabBarPattern::InitTouch(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (touchEvent_) {
+        return;
+    }
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTouchEvent(info.GetTouches().front());
+    };
+    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void TabBarPattern::OnModifyDone()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    InitClick(gestureHub);
+    InitScrollable(gestureHub);
+    InitTouch(gestureHub);
 }
 
 bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -129,7 +157,8 @@ void TabBarPattern::HandleClick(const GestureEvent& info) const
                 return;
             }
         } else {
-            if (GreatNotEqual(local.GetX(), frameSize.MainSize(axis)) || LessNotEqual(local.GetX(), clickRange.second)) {
+            if (GreatNotEqual(local.GetX(), frameSize.MainSize(axis)) ||
+                LessNotEqual(local.GetX(), clickRange.second)) {
                 LOGW("clicked (%{public}lf) position out of range [%{public}lf, %{public}lf]", local.GetX(),
                     clickRange.first, clickRange.second);
                 return;
@@ -138,18 +167,23 @@ void TabBarPattern::HandleClick(const GestureEvent& info) const
     }
     auto pos = std::lower_bound(tabItemOffsets_.begin(), tabItemOffsets_.end(), local,
         [axis, isRTL = isRTL_](const OffsetF& a, const OffsetF& b) {
-            return isRTL ? GreatNotEqual(a.GetX(), b.GetX())
-                : (axis == Axis::VERTICAL ? LessNotEqual(a.GetY(), b.GetY()) : LessNotEqual(a.GetX(), b.GetX()));
+            return isRTL
+                       ? GreatNotEqual(a.GetX(), b.GetX())
+                       : (axis == Axis::VERTICAL ? LessNotEqual(a.GetY(), b.GetY()) : LessNotEqual(a.GetX(), b.GetX()));
         });
 
     if (pos == tabItemOffsets_.end()) {
         return;
     }
-    auto index = isRTL_ ? std::distance(tabItemOffsets_.begin(), pos)
-        : std::distance(tabItemOffsets_.begin(), pos) - 1;
+    auto index = isRTL_ ? std::distance(tabItemOffsets_.begin(), pos) : std::distance(tabItemOffsets_.begin(), pos) - 1;
     if (index >= 0 && index < totalCount && swiperController_) {
         swiperController_->SwipeTo(index);
     }
+}
+
+void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
+{
+    // TODO change background color when touch down.
 }
 
 void TabBarPattern::UpdateCurrentOffset(float offset)

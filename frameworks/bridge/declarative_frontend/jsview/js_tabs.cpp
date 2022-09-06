@@ -38,29 +38,42 @@ JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventIn
 
 void JSTabs::SetOnChange(const JSCallbackInfo& args)
 {
-    if (args[0]->IsFunction()) {
-        auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
-            JSRef<JSFunc>::Cast(args[0]), TabContentChangeEventToJSValue);
-        auto onChange = EventMarker([executionContext = args.GetExecutionContext(), func = std::move(changeHandler)](
-                                        const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-            auto TabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
-            if (!TabsInfo) {
-                LOGE("HandleChangeEvent TabsInfo == nullptr");
-                return;
-            }
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Tabs.onChange");
-            func->Execute(*TabsInfo);
-        });
-        auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (component) {
-            auto tabContent = component->GetTabContentChild();
-            if (tabContent) {
-                tabContent->SetChangeEventId(onChange);
-            }
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(index));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::TabsView::SetOnChange(std::move(onChange));
+        return;
+    }
+
+    auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), TabContentChangeEventToJSValue);
+    auto onChange = EventMarker([executionContext = args.GetExecutionContext(), func = std::move(changeHandler)](
+                                    const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        auto TabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!TabsInfo) {
+            LOGE("HandleChangeEvent TabsInfo == nullptr");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onChange");
+        func->Execute(*TabsInfo);
+    });
+    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (component) {
+        auto tabContent = component->GetTabContentChild();
+        if (tabContent) {
+            tabContent->SetChangeEventId(onChange);
         }
     }
-    args.ReturnSelf();
 }
 
 void JSTabs::Create(const JSCallbackInfo& info)

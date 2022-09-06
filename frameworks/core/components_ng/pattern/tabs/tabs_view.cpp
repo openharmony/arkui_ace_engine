@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/tabs/tabs_view.h"
+
 #include <type_traits>
 
 #include "base/memory/referenced.h"
@@ -38,12 +39,11 @@ void TabsView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto groupNode = GetOrCreateGroupNode(V2::TABS_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    auto groupNode = CreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
 
     // Create Swiper node to contain TabContent.
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateLoop(false);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
@@ -51,32 +51,15 @@ void TabsView::Create()
     auto swiperController = swiperPattern->GetSwiperController();
 
     // Create TabBar to contain TabBar of TabContent.
-    auto tabBarNode = FrameNode::GetOrCreateFrameNode(V2::TAB_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        [swiperController]() { return AceType::MakeRefPtr<TabBarPattern>(swiperController); });
+    auto tabBarNode =
+        FrameNode::GetOrCreateFrameNode(V2::TAB_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            [swiperController]() { return AceType::MakeRefPtr<TabBarPattern>(swiperController); });
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
 
     tabBarNode->MountToParent(groupNode);
     swiperNode->MountToParent(groupNode);
 
     ViewStackProcessor::GetInstance()->Push(groupNode);
-}
-
-RefPtr<GroupNode> TabsView::GetGroupNode(const std::string& tag, int32_t nodeId)
-{
-    auto groupNode = ElementRegister::GetInstance()->GetSpecificItemById<TabsNode>(nodeId);
-    if (!groupNode) {
-        return nullptr;
-    }
-    if (groupNode->GetTag() != tag) {
-        LOGE("the tag is changed");
-        ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
-        auto parent = groupNode->GetParent();
-        if (parent) {
-            parent->RemoveChild(groupNode);
-        }
-        return nullptr;
-    }
-    return groupNode;
 }
 
 void TabsView::SetTabBarPosition(BarPosition tabBarPosition)
@@ -149,6 +132,17 @@ void TabsView::SetAnimationDuration(int32_t duration)
     swiperPaintProperty->UpdateDuration(duration);
 }
 
+void TabsView::SetOnChange(ChangeEvent&& onChange)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().back());
+    CHECK_NULL_VOID(swiperNode);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
 RefPtr<TabBarLayoutProperty> TabsView::GetTabBarLayoutProperty()
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -206,24 +200,27 @@ void TabsView::Pop()
     swiperNode->MarkModifyDone();
 }
 
-RefPtr<GroupNode> TabsView::CreateGroupNode(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
+RefPtr<GroupNode> TabsView::CreateTabsNode(
+    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
-    auto groupNode = AceType::MakeRefPtr<TabsNode>(tag, nodeId, pattern, isRoot);
+    RefPtr<GroupNode> groupNode;
+    groupNode = ElementRegister::GetInstance()->GetSpecificItemById<TabsNode>(nodeId);
+    if (groupNode) {
+        if (groupNode->GetTag() == tag) {
+            return groupNode;
+        }
+        ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
+        auto parent = groupNode->GetParent();
+        if (parent) {
+            parent->RemoveChild(groupNode);
+        }
+    }
+
+    auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
+    groupNode = AceType::MakeRefPtr<TabsNode>(tag, nodeId, pattern, false);
     groupNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(groupNode);
     return groupNode;
-}
-
-RefPtr<GroupNode> TabsView::GetOrCreateGroupNode(
-    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
-{
-    auto groupNode = GetGroupNode(tag, nodeId);
-    if (groupNode) {
-        return groupNode;
-    }
-    auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
-    return CreateGroupNode(tag, nodeId, pattern);
 }
 
 } // namespace OHOS::Ace::NG

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_BAT_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_BAT_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_BAR_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_BAR_PATTERN_H
 
 #include <optional>
 
@@ -60,17 +60,23 @@ private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
+    void InitClick(const RefPtr<GestureEventHub>& gestureHub);
+    void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
+    void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info) const;
+    void HandleTouchEvent(const TouchLocationInfo& info);
 
+    RefPtr<ClickEvent> clickEvent_;
+    RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<SwiperController> swiperController_;
-    std::vector<OffsetF> tabItemOffsets_;
 
     float currentOffset_;
     Axis axis_ = Axis::HORIZONTAL;
-    RefPtr<ScrollableEvent> scrollableEvent_;
+    std::vector<OffsetF> tabItemOffsets_;
 
     bool isRTL_ = false; // TODO Adapt RTL.
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_BAT_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_BAR_PATTERN_H

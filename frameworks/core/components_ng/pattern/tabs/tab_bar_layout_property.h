@@ -25,9 +25,11 @@
 
 namespace OHOS::Ace::NG {
 
+using TabBarBuilderFunc = std::function<void()>;
 struct TabBarParam {
     std::string text;
     std::string icon;
+    TabBarBuilderFunc builder;
 };
 
 class ACE_EXPORT TabBarLayoutProperty : public LayoutProperty {

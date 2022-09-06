@@ -25,7 +25,8 @@ class ACE_EXPORT TabsNode : public GroupNode {
 
 public:
     TabsNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false)
-        : GroupNode(tag, nodeId, pattern, isRoot) {}
+        : GroupNode(tag, nodeId, pattern, isRoot)
+    {}
     ~TabsNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child) override;
 };
