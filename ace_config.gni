@@ -43,6 +43,9 @@ declare_args() {
 
   # Enable test coverage
   ace_engine_feature_enable_coverage = false
+
+  # Disable in OH Core
+  ace_engine_standard_fonts_enable = true
 }
 
 use_external_v8_snapshot = false
