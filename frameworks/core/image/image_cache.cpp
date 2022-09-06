@@ -152,7 +152,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImage
     }
     auto iter = imageDataCache_.find(key);
     if (iter == imageDataCache_.end()) {
-        if (!processImageDataCacheInner(dataSize)) {
+        if (!ProcessImageDataCacheInner(dataSize)) {
             return;
         }
         dataCacheList_.emplace_front(key, imageData);
@@ -161,7 +161,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImage
         auto oldSize = iter->second->imageDataPtr->GetSize();
         if (oldSize != dataSize) {
             curDataSize_ -= oldSize;
-            if (!processImageDataCacheInner(dataSize)) {
+            if (!ProcessImageDataCacheInner(dataSize)) {
                 return;
             }
         }
@@ -171,7 +171,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImage
     }
 }
 
-bool ImageCache::processImageDataCacheInner(size_t dataSize)
+bool ImageCache::ProcessImageDataCacheInner(size_t dataSize)
 {
     while (dataSize + curDataSize_ > dataSizeLimit_ && !dataCacheList_.empty()) {
         curDataSize_ -= dataCacheList_.back().imageDataPtr->GetSize();

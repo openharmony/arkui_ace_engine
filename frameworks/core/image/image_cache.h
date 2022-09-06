@@ -189,7 +189,7 @@ protected:
 
     static bool GetFromCacheFileInner(const std::string& filePath);
 
-    bool processImageDataCacheInner(size_t dataSize);
+    bool ProcessImageDataCacheInner(size_t dataSize);
 
     mutable std::mutex cacheListMutex_;
     std::list<CacheNode<std::shared_ptr<CachedImage>>> cacheList_;
