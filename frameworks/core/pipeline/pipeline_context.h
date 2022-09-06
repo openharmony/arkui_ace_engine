@@ -307,6 +307,13 @@ public:
     }
     void NotifyWebPaint() const;
 
+    using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
+    void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
+    {
+        virtualKeyBoardCallback_.push_back(std::move(listener));
+    }
+    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const;
+
     float GetViewScale() const
     {
         return viewScale_;
@@ -1072,13 +1079,14 @@ public:
         rectCallbackList_.emplace_back(RectCallback(getRectCallback, touchCallback, mouseCallback));
     }
 
-protected:
-    bool OnDumpInfo(const std::vector<std::string>& params) const override;
-    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void SetRootRect(double width, double height, double offset = 0.0) override
     {
         SetRootSizeWithWidthHeight(width, height, offset);
     }
+
+protected:
+    bool OnDumpInfo(const std::vector<std::string>& params) const override;
+    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
@@ -1195,6 +1203,7 @@ private:
     EventTrigger eventTrigger_;
 
     std::list<WebPaintCallback> webPaintCallback_;
+    std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
     WeakPtr<RenderNode> requestedRenderNode_;
     // Make page update tasks pending here to avoid block receiving vsync.
     std::queue<std::function<void()>> pageUpdateTasks_;

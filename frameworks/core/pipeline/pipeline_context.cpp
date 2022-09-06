@@ -2040,6 +2040,9 @@ void PipelineContext::OnVirtualKeyboardAreaChange(Rect keyboardArea)
     if (textFieldManager_) {
         positionY = textFieldManager_->GetClickPosition().GetY();
     }
+    if (NotifyVirtualKeyBoard(width_, height_, keyboardHeight)) {
+        return;
+    }
     double offsetFix = (height_ - positionY) > 100.0 ? keyboardHeight - (height_ - positionY) / 2.0 : keyboardHeight;
     LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
         (height_ - keyboardHeight), offsetFix);
@@ -2151,6 +2154,17 @@ void PipelineContext::NotifyWebPaint() const
             iterWebPaintCallback();
         }
     }
+}
+
+bool PipelineContext::NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
+{
+    CHECK_RUN_ON(UI);
+    for (auto& iterVirtualKeyBoardCallback : virtualKeyBoardCallback_) {
+        if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
@@ -2511,6 +2525,7 @@ void PipelineContext::Destroy()
     window_->Destroy();
     touchPluginPipelineContext_.clear();
     webPaintCallback_.clear();
+    virtualKeyBoardCallback_.clear();
     rectCallbackList_.clear();
     LOGI("PipelineContext::Destroy end.");
 }
