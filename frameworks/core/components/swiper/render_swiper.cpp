@@ -1507,11 +1507,21 @@ int32_t RenderSwiper::GetIndex(int32_t index, bool leftOrTop) const
 
 void RenderSwiper::ShowPrevious()
 {
+    int32_t index = 0;
     if (isIndicatorAnimationStart_) {
-        int32_t index = GetPrevIndexOnAnimation();
+        if (needReverse_) {
+            index = GetNextIndexOnAnimation();
+        } else {
+            index = GetPrevIndexOnAnimation();
+        }
         RedoSwipeToAnimation(index, false);
     } else {
-        int32_t index = GetPrevIndex();
+        if (needReverse_) {
+            index = GetNextIndex();
+        } else {
+            index = GetPrevIndex();
+        }
+        
         StopIndicatorSpringAnimation();
         DoSwipeToAnimation(currentIndex_, index, false);
     }
@@ -1519,11 +1529,20 @@ void RenderSwiper::ShowPrevious()
 
 void RenderSwiper::ShowNext()
 {
+    int32_t index = 0;
     if (isIndicatorAnimationStart_) {
-        int32_t index = GetNextIndexOnAnimation();
+        if (needReverse_) {
+            index = GetPrevIndexOnAnimation();
+        } else {
+            index = GetNextIndexOnAnimation();
+        }
         RedoSwipeToAnimation(index, false);
     } else {
-        int32_t index = GetNextIndex();
+        if (needReverse_) {
+            index = GetPrevIndex();
+        } else {
+            index = GetNextIndex();
+        }
         StopIndicatorSpringAnimation();
         DoSwipeToAnimation(currentIndex_, index, false);
     }
@@ -1732,7 +1751,12 @@ void RenderSwiper::Tick(uint64_t duration)
                 ResetHoverZoomDot();
                 StartZoomOutAnimation(true);
             }
-            int nextIndex = GetNextIndex();
+            int32_t nextIndex = 0;
+            if (needReverse_) {
+                nextIndex = GetPrevIndex();
+            } else {
+                nextIndex = GetNextIndex();
+            }
             StartIndicatorAnimation(currentIndex_, nextIndex, currentIndex_ > nextIndex);
         }
         elapsedTime_ = 0;

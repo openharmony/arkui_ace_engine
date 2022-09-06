@@ -109,6 +109,7 @@ void RenderList::Update(const RefPtr<Component>& component)
     component_ = AceType::DynamicCast<ListComponent>(component);
     ACE_DCHECK(component_);
 
+    isRightToLeft_ = component_->GetTextDirection() == TextDirection::RTL ? true : false;
     RemoveAllItems();
 
     auto axis = component_->GetDirection();
@@ -821,6 +822,15 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
         // set item position for one row
         for (size_t i = 0; i < itemSet.size(); i++) {
             auto position = offset + MakeValue<Offset>(0.0, childCrossSize / itemSet.size() * i);
+            if (isRightToLeft_) {
+                if (IsVertical()) {
+                    position = MakeValue<Offset>(
+                        GetMainAxis(position), crossSize - childCrossSize / itemSet.size() - GetCrossAxis(position));
+                } else {
+                    position = MakeValue<Offset>(
+                        mainSize - childMainSize - GetMainAxis(position), GetCrossAxis(position));
+                }
+            }
             SetChildPosition(itemSet[i], position);
         }
 
@@ -902,7 +912,17 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
             const auto& stickyItemLayoutSize = currentStickyItem_->GetLayoutSize();
             const double mainStickySize = GetMainSize(stickyItemLayoutSize) + spaceWidth_;
             if (nextStickyItem && LessNotEqual(nextStickyMainAxis, mainStickySize)) {
-                currentStickyItem_->SetPosition(MakeValue<Offset>(nextStickyMainAxis - mainStickySize, 0.0));
+                auto position = MakeValue<Offset>(nextStickyMainAxis - mainStickySize, 0.0);
+                if (isRightToLeft_) {
+                    if (IsVertical()) {
+                        position = MakeValue<Offset>(
+                            GetMainAxis(position), crossSize - GetCrossSize(stickyItemLayoutSize) - GetCrossAxis(position));
+                    } else {
+                        position = MakeValue<Offset>(
+                            mainSize - mainStickySize - GetMainAxis(position), GetCrossAxis(position));
+                    }
+                }
+                currentStickyItem_->SetPosition(position);
             } else {
                 currentStickyItem_->SetPosition(MakeValue<Offset>(0.0, 0.0));
             }
@@ -974,6 +994,13 @@ Size RenderList::SetItemsPosition(double mainSize)
             offset += MakeValue<Offset>(-chainDelta, 0.0);
         }
 
+        if (isRightToLeft_) {
+            if (IsVertical()) {
+                offset = MakeValue<Offset>(GetMainAxis(offset), crossSize - GetCrossSize(childLayoutSize) - GetCrossAxis(offset));
+            } else {
+                offset = MakeValue<Offset>(mainSize - GetMainSize(childLayoutSize) - GetMainAxis(offset), GetCrossAxis(offset));
+            }
+        }
         SetChildPosition(child, offset);
         // Disable sticky mode while expand all items
         if (fixedMainSize_ && child->GetSticky() != StickyMode::NONE) {
@@ -1024,7 +1051,17 @@ Size RenderList::SetItemsPosition(double mainSize)
         const double mainStickySize = GetMainSize(stickyItemLayoutSize) + spaceWidth_;
         auto offsetCross = CalculateLaneCrossOffset(crossSize, GetCrossSize(currentStickyItem_->GetLayoutSize()));
         if (nextStickyItem && LessNotEqual(nextStickyMainAxis, mainStickySize)) {
-            currentStickyItem_->SetPosition(MakeValue<Offset>(nextStickyMainAxis - mainStickySize, offsetCross));
+            auto position = MakeValue<Offset>(nextStickyMainAxis - mainStickySize, offsetCross);
+            if (isRightToLeft_) {
+                if (IsVertical()) {
+                    position = MakeValue<Offset>(
+                        GetMainAxis(position), crossSize - GetCrossSize(stickyItemLayoutSize) - GetCrossAxis(position));
+                } else {
+                    position = MakeValue<Offset>(
+                        mainSize - mainStickySize - GetMainAxis(position), GetCrossAxis(position));
+                }
+            }
+            currentStickyItem_->SetPosition(position);
         } else {
             currentStickyItem_->SetPosition(MakeValue<Offset>(0.0, offsetCross));
         }
