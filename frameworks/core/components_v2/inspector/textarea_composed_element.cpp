@@ -220,6 +220,15 @@ RefPtr<RenderTextField> TextareaComposedElement::GetRenderTextField() const
     return nullptr;
 }
 
+std::string TextareaComposedElement::GetHeight() const
+{
+    auto render = GetRenderTextField();
+    if (render) {
+        return render->GetDimensionHeight().ToString();
+    }
+    return "";
+}
+
 std::string TextareaComposedElement::ConvertFontFamily(const std::vector<std::string>& fontFamily) const
 {
     std::string result = "";
