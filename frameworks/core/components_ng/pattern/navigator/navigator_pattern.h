@@ -53,7 +53,7 @@ public:
 
 private:
     // in target container
-    bool useSubStage_ = false;
+    // bool useSubStage_ = false;
 
     EventMarker clickEventId_;
     RefPtr<TouchEventImpl> touchListener_;

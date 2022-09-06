@@ -22,6 +22,10 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT NavigatorLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(NavigatorLayoutProperty, LayoutAlgorithm);
+
+    void Measure(LayoutWrapper* layoutWrapper) override;
+
+    void Layout(LayoutWrapper* layoutWrapper) override;
 };
 
 } // namespace OHOS::Ace::NG

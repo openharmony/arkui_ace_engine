@@ -23,16 +23,6 @@ void NavigatorPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto navigatorLayoutProps = GetLayoutProperty<NavigatorLayoutProperty>();
-    CHECK_NULL_VOID(navigatorLayoutProps);
-
-    auto hostProps = host->GetLayoutProperty();
-    CHECK_NULL_VOID(hostProps);
-    if (hostProps->GetPositionProperty()) {
-        hostProps->UpdateAlignment(hostProps->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
-    } else {
-        hostProps->UpdateAlignment(Alignment::CENTER);
-    }
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
 
@@ -40,7 +30,6 @@ void NavigatorPattern::OnModifyDone()
     if (touchListener_) {
         return;
     }
-
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

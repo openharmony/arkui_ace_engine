@@ -182,8 +182,7 @@ public:
     static RefPtr<Container> GetActive();
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static void UpdateCurrent(int32_t id);
-
-    void NavigatePage(NG::NavigatorType type, PageTarget& target, const std::string& params) const;
+    static void NavigatePage(NG::NavigatorType type, const std::string& url, const std::string& params);
 
     void SetUseNewPipeline()
     {

@@ -14,5 +14,38 @@
  */
 
 #include "navigator_layout_algorithm.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/navigator/navigator_layout_property.h"
+#include "core/components_ng/property/measure_utils.h"
 
-namespace OHOS::Ace::NG {} // namespace OHOS::Ace::NG
+namespace OHOS::Ace::NG {
+
+void NavigatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    auto props = AceType::DynamicCast<NavigatorLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
+
+    // set size based on child
+    auto size = CreateIdealSize(props->GetLayoutConstraint().value(), Axis::VERTICAL,
+        props->GetMeasureType(MeasureType::MATCH_PARENT), true);
+
+    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Measure(props->GetLayoutConstraint());
+    }
+    LOGI("ZTE frame size: %{public}f x %{public}f", size.Height(), size.Width());
+}
+
+void NavigatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    auto parentOffset =
+        layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    for (auto&& child : children) {
+        child->Layout(parentOffset);
+    }
+}
+
+} // namespace OHOS::Ace::NG

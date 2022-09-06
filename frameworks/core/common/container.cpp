@@ -19,6 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
 
@@ -58,9 +59,27 @@ void Container::UpdateCurrent(int32_t id)
     ContainerScope::UpdateCurrent(id);
 }
 
-void Container::NavigatePage(NG::NavigatorType type, PageTarget& target, const std::string& params) const
+void Container::NavigatePage(NG::NavigatorType type, const std::string& url, const std::string& params)
 {
-    GetFrontend()->NavigatePage(uint8_t(type), target, params);
+    LOGI("ZTE container navigate page starts");
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        LOGE("get jsi delegate failed");
+        return;
+    }
+    switch (type) {
+        case NG::NavigatorType::PUSH:
+            delegate->Push(url, params);
+            break;
+        case NG::NavigatorType::REPLACE:
+            delegate->Replace(url, params);
+            break;
+        case NG::NavigatorType::BACK:
+            delegate->Back(url, params);
+            break;
+        default:
+            LOGE("Navigator type is invalid!");
+    }
 }
 
 } // namespace OHOS::Ace

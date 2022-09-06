@@ -16,20 +16,18 @@
 #include "navigator_event_hub.h"
 
 #include "core/common/container.h"
-#include "core/components/page/page_target.h"
 
 namespace OHOS::Ace::NG {
 
 void NavigatorEventHub::OnClick()
 {
     NavigatePage();
-    // click event
 }
 
 void NavigatorEventHub::NavigatePage()
 {
     auto container = Ace::Container::Current();
-    auto target = Ace::PageTarget(url_, nullptr);
-    container->NavigatePage(type_, target, params_);
+    LOGI("ZTE url = %{public}s", url_.c_str());
+    container->NavigatePage(type_, url_, params_);
 }
 } // namespace OHOS::Ace::NG
