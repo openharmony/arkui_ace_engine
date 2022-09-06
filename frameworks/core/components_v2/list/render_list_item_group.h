@@ -112,6 +112,11 @@ public:
         return startIndexOffset_;
     }
 
+    double GetReferencePos() const
+    {
+        return forwardLayout_ ? forwardReferencePos_ : backwardReferencePos_;
+    }
+
     template<class T>
     T MakeValue(double mainValue, double crossValue) const
     {
