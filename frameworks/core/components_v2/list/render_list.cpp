@@ -2196,7 +2196,10 @@ void RenderList::UpdateAccessibilityVisible()
         if (!listItem || listItem->GetChildren().empty()) {
             continue;
         }
-        auto node = listItem->GetAccessibilityNode().Upgrade();
+        // RenderListItem's accessibility node is List's in v2, see ViewStackProcessor::WrapComponents() and
+        // RenderElement::SetAccessibilityNode
+        auto listItemWithAccessibilityNode = listItem->GetFirstChild();
+        auto node = listItemWithAccessibilityNode->GetAccessibilityNode().Upgrade();
         if (!node) {
             continue;
         }
@@ -2206,10 +2209,10 @@ void RenderList::UpdateAccessibilityVisible()
             listItemRect.SetOffset(globalOffset + listItem->GetPosition());
             visible = listItemRect.IsIntersectWith(viewPortRect);
         }
-        listItem->SetAccessibilityVisible(visible);
+        listItemWithAccessibilityNode->SetAccessibilityVisible(visible);
         if (visible) {
             Rect clampRect = listItemRect.Constrain(viewPortRect);
-            listItem->SetAccessibilityRect(clampRect);
+            listItemWithAccessibilityNode->SetAccessibilityRect(clampRect);
         } else {
             listItem->NotifyPaintFinish();
         }
