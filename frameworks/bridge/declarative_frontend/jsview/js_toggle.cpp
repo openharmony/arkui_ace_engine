@@ -71,7 +71,6 @@ void JSToggle::Create(const JSCallbackInfo& info)
     auto toggleTypeInt = static_cast<int32_t>(toggleType);
 
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGE("JS_TOGGLE::isOn %d", isOn);
         NG::ToggleView::Create(NG::ToggleType(toggleTypeInt), isOn);
         return;
     }

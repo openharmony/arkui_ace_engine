@@ -44,14 +44,19 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     } else {
         frameWidth =
             static_cast<float>((switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).Value());
+        if (frameWidth > contentConstraint.maxSize.Width()) {
+            frameWidth = contentConstraint.maxSize.Width();
+        }
     }
     if (contentConstraint.selfIdealSize.Height().has_value()) {
         frameHeight = contentConstraint.selfIdealSize.Height().value();
     } else {
         frameHeight =
             static_cast<float>((switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).Value());
+        if (frameHeight > contentConstraint.maxSize.Height()) {
+            frameHeight = contentConstraint.maxSize.Height();
+        }
     }
-
     if ((frameWidth / frameHeight) < ratio_) {
         width_ = frameWidth;
         height_ = width_ / ratio_;
