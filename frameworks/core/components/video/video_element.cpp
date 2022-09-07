@@ -1046,6 +1046,7 @@ void VideoElement::OnPrepared(
     }
 
     if (renderNode_ != nullptr) {
+        video->SetNeedControls(needControls_);
         renderNode_->Update(video);
     }
     UpdateChildInner(CreateChild());
