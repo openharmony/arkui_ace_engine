@@ -55,6 +55,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "//third_party/opencl-headers:libcl",
   ]
 
   external_deps = [ "c_utils:utils" ]

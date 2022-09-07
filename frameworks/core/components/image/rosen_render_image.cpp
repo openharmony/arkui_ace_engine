@@ -771,7 +771,7 @@ void RosenRenderImage::CanvasDrawImageRect(
     if (GetBackgroundImageFlag()) {
         return;
     }
-    if (!image_ || !image_->image()) {
+    if (!image_ || (!image_->image() && !image_->compressData())) {
         imageDataNotReady_ = true;
         LOGD("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
             rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
@@ -784,7 +784,8 @@ void RosenRenderImage::CanvasDrawImageRect(
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
         Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_);
-        recordingCanvas->DrawImageWithParm(image_->image(), rsImageInfo, paint);
+        recordingCanvas->DrawImageWithParm(image_->image(), image_->compressData(), rsImageInfo, paint);
+        image_->setCompress(nullptr, 0, 0);
         return;
     }
     bool isLoading = ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) ||

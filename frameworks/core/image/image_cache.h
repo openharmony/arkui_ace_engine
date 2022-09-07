@@ -89,7 +89,8 @@ public:
     RefPtr<ImageObject> GetCacheImgObj(const std::string& key);
 
     static void SetCacheFileInfo();
-    static void WriteCacheFile(const std::string& url, const void * const data, const size_t size);
+    static void WriteCacheFile(const std::string& url, const void * const data,
+        const size_t size, const std::string suffix = std::string());
 
     void SetCapacity(size_t capacity)
     {

@@ -292,6 +292,21 @@ public:
         return windowAnimationEnabled_;
     }
 
+    static bool IsAstcEnabled()
+    {
+        return astcEnabled_;
+    }
+
+    static int32_t GetAstcMaxError()
+    {
+        return astcMax_;
+    }
+
+    static int32_t GetAstcPsnr()
+    {
+        return astcPsnr_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
@@ -321,6 +336,9 @@ private:
     static bool debugBoundaryEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
+    static bool astcEnabled_;
+    static int32_t astcMax_;
+    static int32_t astcPsnr_;
 };
 
 } // namespace OHOS::Ace

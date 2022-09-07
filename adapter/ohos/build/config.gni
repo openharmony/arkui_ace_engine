@@ -77,6 +77,7 @@ video_components_support = true
 image_components_support = true
 preview_support = false
 enable_system_clipboard = true
+enable_image_compression = true
 
 if (defined(preview_support) && preview_support) {
   defines += [ "PREVIEW" ]
