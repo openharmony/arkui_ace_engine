@@ -200,6 +200,12 @@ public:
     void SetLineDash(const std::vector<double>& segments)
     {
         strokeState_.SetLineDash(segments);
+        lineDash_ = segments;
+    }
+
+    const std::vector<double>& GetLineDash() const
+    {
+        return lineDash_;
     }
 
     void SetTextAlign(TextAlign align)
@@ -309,6 +315,7 @@ protected:
 
     bool smoothingEnabled_ = true;
     std::string smoothingQuality_ = "low";
+    std::vector<double> lineDash_;
 
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
     std::stack<PaintHolder> saveStates_;
