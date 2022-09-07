@@ -30,7 +30,6 @@ namespace {
 constexpr double SPRING_SCROLL_MASS = 0.5;
 constexpr double SPRING_SCROLL_STIFFNESS = 100.0;
 constexpr double SPRING_SCROLL_DAMPING = 15.55635;
-constexpr double MAX_FRICTION = 0.766;
 const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
     AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
 #ifndef WEARABLE_PRODUCT
@@ -174,13 +173,6 @@ void Scrollable::HandleTouchDown()
     springController_->Stop();
     if (!controller_->IsStopped()) {
         controller_->Stop();
-        if (motion_) {
-            // Don't stop immediately, keep moving with a big friction.
-            motion_->Reset(MAX_FRICTION, motion_->GetCurrentPosition(), motion_->GetCurrentVelocity() / 2);
-            FixScrollMotion(motion_->GetCurrentPosition());
-            controller_->PlayMotion(motion_);
-            currentPos_ = motion_->GetCurrentPosition();
-        }
     } else {
         // Resets values.
         currentPos_ = 0.0;

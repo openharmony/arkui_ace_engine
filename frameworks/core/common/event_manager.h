@@ -88,6 +88,7 @@ public:
     void MouseTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);
 
     bool DispatchMouseEvent(const MouseEvent& event);
+    void DispatchMouseHoverAnimation(const MouseEvent& event);
     bool DispatchMouseHoverEvent(const MouseEvent& event);
 
     void AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode);

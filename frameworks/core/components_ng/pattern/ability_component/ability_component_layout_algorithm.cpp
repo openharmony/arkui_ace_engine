@@ -20,11 +20,19 @@ namespace OHOS::Ace::NG {
 std::optional<SizeF> AbilityComponentLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* /*layoutWrapper*/)
 {
-    if (contentConstraint.selfIdealSize.IsValid()) {
-        return contentConstraint.selfIdealSize.ConvertToSizeT();
-    }
+    OptionalSizeF contentSize;
+    do {
+        // Use idea size first if it is valid.
+        contentSize.UpdateSizeWithCheck(contentConstraint.selfIdealSize);
+        if (contentSize.IsValid()) {
+            break;
+        }
+        contentSize.UpdateIllegalSizeWithCheck(contentConstraint.parentIdealSize);
+        // use max is parent ideal size is invalid.
+        contentSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
+    } while (false);
 
-    return contentConstraint.maxSize;
+    return contentSize.ConvertToSizeT();
 }
 
 } // namespace OHOS::Ace::NG

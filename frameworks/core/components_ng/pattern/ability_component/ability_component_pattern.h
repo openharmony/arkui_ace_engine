@@ -44,8 +44,6 @@ public:
     {
         return MakeRefPtr<AbilityComponentEventHub>();
     }
-    // Called on main thread to check if need rerender of the content.
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void OnModifyDone() override;
     void FireConnect();
     void FireDisConnect();
@@ -67,6 +65,9 @@ private:
         isActive_ = false;
     }
 
+    void OnLayoutChange(
+        bool frameSizeChange, bool frameOffsetChange, bool contentSizeChange, bool contentOffsetChange) override;
+    void updateWindowRect();
     bool isActive_ = false;
     bool hasConnectionToAbility_ = false;
     RefPtr<WindowExtensionConnectionAdapter> adapter_;

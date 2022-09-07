@@ -482,6 +482,12 @@ void JSPanGestureOption::JSBind(BindingTarget globalObj)
     JSClass<JSPanGestureOption>::CustomMethod("setDistance", &JSPanGestureOption::SetDistance);
     JSClass<JSPanGestureOption>::CustomMethod("setFingers", &JSPanGestureOption::SetFingers);
     JSClass<JSPanGestureOption>::Bind(globalObj, &JSPanGestureOption::Constructor, &JSPanGestureOption::Destructor);
+
+    JSClass<JSPanGestureOption>::Declare("PanGestureOptions");
+    JSClass<JSPanGestureOption>::CustomMethod("setDirection", &JSPanGestureOption::SetDirection);
+    JSClass<JSPanGestureOption>::CustomMethod("setDistance", &JSPanGestureOption::SetDistance);
+    JSClass<JSPanGestureOption>::CustomMethod("setFingers", &JSPanGestureOption::SetFingers);
+    JSClass<JSPanGestureOption>::Bind(globalObj, &JSPanGestureOption::Constructor, &JSPanGestureOption::Destructor);
 }
 
 void JSPanGestureOption::SetDirection(const JSCallbackInfo& args)

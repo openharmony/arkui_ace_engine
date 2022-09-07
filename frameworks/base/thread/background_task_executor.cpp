@@ -24,7 +24,7 @@
 namespace OHOS::Ace {
 namespace {
 
-constexpr size_t MAX_BACKGROUND_THREADS = 3;
+constexpr size_t MAX_BACKGROUND_THREADS = 8;
 constexpr uint32_t PURGE_FLAG_MASK = (1 << MAX_BACKGROUND_THREADS) - 1;
 
 void SetThreadName(uint32_t threadNo)

@@ -29,9 +29,6 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT AbilityComponentView {
 public:
     static void Create();
-    static void SetWidth(Dimension value);
-    static void SetHeight(Dimension value);
-    static void SetOpacity(Dimension value);
     static void SetWant(const std::string& want);
     static void SetOnConnect(ConnectEvent&& onConnect);
     static void SetOnDisConnect(DisConnectEvent&& onDisConnect);

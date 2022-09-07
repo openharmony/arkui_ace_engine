@@ -157,7 +157,7 @@ public:
         needSyncRenderTree_ = true;
     }
 
-    void RebuildRenderContextTree();
+    void RebuildRenderContextTree() override;
 
 private:
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;

@@ -37,6 +37,7 @@ public:
     std::string GetColumnStart() const;
     std::string GetColumnEnd() const;
     std::string GetForceRebuild() const;
+    std::string GetSelectable() const;
 
     AceType::IdType GetTargetTypeId() const override
     {

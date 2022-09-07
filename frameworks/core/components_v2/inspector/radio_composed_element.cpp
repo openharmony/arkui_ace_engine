@@ -63,6 +63,30 @@ std::string RadioComposedElement::GetChecked() const
     return ConvertBoolToString(checked);
 }
 
+std::string RadioComposedElement::GetWidth() const
+{
+    auto render = GetRenderRadio();
+    if (render) {
+        auto component = render->GetRadioComponent();
+        if (component) {
+            return component->GetWidth().ToString();
+        }
+    }
+    return "";
+}
+
+std::string RadioComposedElement::GetHeight() const
+{
+    auto render = GetRenderRadio();
+    if (render) {
+        auto component = render->GetRadioComponent();
+        if (component) {
+            return component->GetHeight().ToString();
+        }
+    }
+    return "";
+}
+
 RefPtr<RenderRadio> RadioComposedElement::GetRenderRadio() const
 {
     auto node = GetInspectorNode(CheckableElement::TypeId());

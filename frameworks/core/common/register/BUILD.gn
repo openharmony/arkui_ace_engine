@@ -35,7 +35,7 @@ ohos_shared_library("hdc_register") {
 
   deps += [
     "//commonlibrary/c_utils/base:utilsecurec",
-    "//third_party/libuv:uv_static",
+    "//third_party/libuv:uv",
   ]
 
   external_deps += [ "c_utils:utils" ]

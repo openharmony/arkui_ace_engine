@@ -31,26 +31,11 @@ void AbilityComponentPattern::OnModifyDone()
     LOGI("connect to windows extension begin %{public}s", GetHost()->GetTag().c_str());
 }
 
-bool AbilityComponentPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
-{
-    if (hasConnectionToAbility_) {
-        auto size = GetHost()->GetGeometryNode()->GetFrameSize();
-        auto offset = GetHost()->GetGeometryNode()->GetFrameOffset();
-        LOGI("ConnectExtension: %{public}f %{public}f %{public}f %{public}f", offset.GetX(), offset.GetY(),
-            size.Width(), size.Height());
-        Rect rect;
-        rect.SetRect(offset.GetX(), offset.GetY(), size.Width(), size.Height());
-        if (adapter_) {
-            adapter_->UpdateRect(rect);
-        }
-    }
-    return false;
-}
-
 void AbilityComponentPattern::FireConnect()
 {
     hasConnectionToAbility_ = true;
+    updateWindowRect();
+
     auto abilityComponentEventHub = GetEventHub<AbilityComponentEventHub>();
     CHECK_NULL_VOID(abilityComponentEventHub);
     abilityComponentEventHub->FireOnConnect();
@@ -62,6 +47,30 @@ void AbilityComponentPattern::FireDisConnect()
     auto abilityComponentEventHub = GetEventHub<AbilityComponentEventHub>();
     CHECK_NULL_VOID(abilityComponentEventHub);
     abilityComponentEventHub->FireOnDisConnect();
+}
+
+void AbilityComponentPattern::OnLayoutChange(
+    bool frameSizeChange, bool frameOffsetChange, bool /*contentSizeChange*/, bool /*contentOffsetChange*/)
+{
+    if (frameSizeChange || frameOffsetChange) {
+        updateWindowRect();
+    }
+}
+
+void AbilityComponentPattern::updateWindowRect()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto size = host->GetGeometryNode()->GetFrameSize();
+    auto offset = host->GetGeometryNode()->GetFrameOffset() + host->GetGeometryNode()->GetParentGlobalOffset();
+
+    LOGI("ConnectExtension: %{public}f %{public}f %{public}f %{public}f", offset.GetX(), offset.GetY(), size.Width(),
+        size.Height());
+    Rect rect;
+    rect.SetRect(offset.GetX(), offset.GetY(), size.Width(), size.Height());
+    if (adapter_) {
+        adapter_->UpdateRect(rect);
+    }
 }
 
 } // namespace OHOS::Ace::NG

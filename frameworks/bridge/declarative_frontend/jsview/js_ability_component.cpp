@@ -102,7 +102,7 @@ void JSAbilityComponent::JsOnConnect(const JSCallbackInfo& info)
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onConnect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("AbilityComponent.onChange");
+            ACE_SCORING_EVENT("AbilityComponent.onConnect");
             auto newJSVal = JSRef<JSVal>::Make();
             func->ExecuteJS(1, &newJSVal);
         };
@@ -118,7 +118,7 @@ void JSAbilityComponent::JsOnDisconnect(const JSCallbackInfo& info)
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onDisConnect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("AbilityComponent.onChange");
+            ACE_SCORING_EVENT("AbilityComponent.onDisConnect");
             auto newJSVal = JSRef<JSVal>::Make();
             func->ExecuteJS(1, &newJSVal);
         };
@@ -147,14 +147,8 @@ void JSAbilityComponent::Width(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsWidth(info);
     if (Container::IsCurrentUseNewPipeline()) {
-        Dimension value;
-        if (!ParseJsDimensionVp(info[0], value)) {
-            return;
-        }
-        NG::AbilityComponentView::SetWidth(value);
         return;
     }
-
     auto component = AceType::DynamicCast<V2::AbilityComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (component) {
         Dimension value;
@@ -169,11 +163,6 @@ void JSAbilityComponent::Height(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
     if (Container::IsCurrentUseNewPipeline()) {
-        Dimension value;
-        if (!ParseJsDimensionVp(info[0], value)) {
-            return;
-        }
-        NG::AbilityComponentView::SetHeight(value);
         return;
     }
     auto component = AceType::DynamicCast<V2::AbilityComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

@@ -195,8 +195,6 @@ void PrepareSpecializedComponent(OHOS::Ace::RefPtr<OHOS::Ace::SearchComponent>& 
     if (boxComponent->GetBackDecoration()) {
         boxBorder = boxComponent->GetBackDecoration()->GetBorder();
     }
-    searchComponent->SetTextDirection(TextDirection::LTR);
-    textFieldComponent->SetTextDirection(TextDirection::LTR);
     UpdateDecorationStyle(boxComponent, textFieldComponent, boxBorder, false);
     if (GreatOrEqual(boxComponent->GetHeightDimension().Value(), 0.0)) {
         textFieldComponent->SetHeight(boxComponent->GetHeightDimension());

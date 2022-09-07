@@ -13,8 +13,5 @@
 
 group("property_unittest") {
   testonly = true
-  deps = [
-    "list:list_property_test",
-    "swiper:swiper_property_test_ng",
-  ]
+  deps = [ "swiper:swiper_property_test_ng" ]
 }

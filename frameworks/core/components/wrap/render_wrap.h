@@ -63,7 +63,7 @@ public:
     void SetWrapLayoutSize(double mainLength, double crossLength)
     {
         Size wrapSize;
-        if (direction_ == WrapDirection::HORIZONTAL) {
+        if (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE) {
             wrapSize = GetLayoutParam().Constrain(Size(mainLength, crossLength));
         } else {
             wrapSize = GetLayoutParam().Constrain(Size(crossLength, mainLength));

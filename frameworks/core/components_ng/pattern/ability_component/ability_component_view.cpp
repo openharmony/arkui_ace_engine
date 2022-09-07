@@ -28,23 +28,8 @@ void AbilityComponentView::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::ABILITY_COMPONENT_TAG, nodeId, []() { return AceType::MakeRefPtr<AbilityComponentPattern>(); });
+        V2::ABILITY_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<AbilityComponentPattern>(); });
     stack->Push(frameNode);
-}
-
-void AbilityComponentView::SetWidth(Dimension value)
-{
-    ACE_UPDATE_PAINT_PROPERTY(AbilityComponentRenderProperty, Width, value);
-}
-
-void AbilityComponentView::SetHeight(Dimension value)
-{
-    ACE_UPDATE_PAINT_PROPERTY(AbilityComponentRenderProperty, Height, value);
-}
-
-void AbilityComponentView::SetOpacity(Dimension value)
-{
-    ACE_UPDATE_PAINT_PROPERTY(AbilityComponentRenderProperty, Opacity, value);
 }
 
 void AbilityComponentView::SetWant(const std::string& want)
@@ -67,6 +52,6 @@ void AbilityComponentView::SetOnDisConnect(DisConnectEvent&& onDisConnect)
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<AbilityComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnConnect(std::move(onDisConnect));
+    eventHub->SetOnDisConnect(std::move(onDisConnect));
 }
 } // namespace OHOS::Ace::NG

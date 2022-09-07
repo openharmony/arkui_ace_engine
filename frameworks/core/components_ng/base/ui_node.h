@@ -153,12 +153,14 @@ public:
         }
     }
 
+    virtual void MarkNeedSyncRenderTree();
+
+    virtual void RebuildRenderContextTree();
+
 protected:
     virtual void OnChildAdded(const RefPtr<UINode>& child) {}
 
     virtual void OnChildRemoved(const RefPtr<UINode>& child) {}
-
-    virtual void MarkNeedSyncRenderTree();
 
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {

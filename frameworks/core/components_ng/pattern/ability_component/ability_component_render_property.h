@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 
 // PaintProperty are used to set render properties.
 class AbilityComponentRenderProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(RemoteWindowRenderProperty, PaintProperty)
+    DECLARE_ACE_TYPE(AbilityComponentRenderProperty, PaintProperty)
 
 public:
     AbilityComponentRenderProperty() = default;
@@ -33,13 +33,18 @@ public:
 
     RefPtr<PaintProperty> Clone() const override
     {
-        auto renderProperty = MakeRefPtr<AbilityComponentRenderProperty>();
-        renderProperty->UpdatePaintProperty(this);
-        return renderProperty;
+        auto paintProperty = MakeRefPtr<AbilityComponentRenderProperty>();
+        paintProperty->UpdatePaintProperty(this);
+        paintProperty->propWant_ = CloneWant();
+        return paintProperty;
     }
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Width, Dimension, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Height, Dimension, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Opacity, Dimension, PROPERTY_UPDATE_RENDER);
+
+    void Reset() override
+    {
+        PaintProperty::Reset();
+        ResetWant();
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Want, std::string, PROPERTY_UPDATE_RENDER);
 
 private:

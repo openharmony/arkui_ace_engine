@@ -39,8 +39,9 @@ namespace OHOS::Ace {
 
 class ConnectionCallback : public Rosen::IWindowExtensionCallback {
 public:
-    ConnectionCallback(WeakPtr<RenderNode> node, int32_t instanceId) : node_(std::move(node)), instanceId_(instanceId)
-    {}
+    ACE_DISALLOW_COPY_AND_MOVE(ConnectionCallback);
+    ConnectionCallback(WeakPtr<RenderNode> node, int32_t instanceId)
+        : node_(std::move(node)), instanceId_(instanceId) {}
     ~ConnectionCallback() override = default;
     void OnWindowReady(const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode) override
     {
@@ -78,9 +79,7 @@ public:
     {
         LOGI("window extension disconnect");
         auto ability = AceType::DynamicCast<V2::RenderAbilityComponent>(node_.Upgrade());
-        if (!ability) {
-            return;
-        }
+        CHECK_NULL_VOID(ability);
         if (originNode_) {
             ability->SyncRSNode(originNode_);
         }
@@ -106,25 +105,13 @@ public:
 private:
     void PostTaskToUI(const std::function<void()>&& task) const
     {
-        if (!task) {
-            LOGE("task is empty");
-            return;
-        }
+        CHECK_NULL_VOID(task);
         auto container = AceEngine::Get().GetContainer(instanceId_);
-        if (!container) {
-            LOGE("container is null");
-            return;
-        }
+        CHECK_NULL_VOID(container);
         auto context = container->GetPipelineContext();
-        if (!context) {
-            LOGE("context is null");
-            return;
-        }
+        CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
-        if (!taskExecutor) {
-            LOGE("task executor is null");
-            return;
-        }
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
     }
 
@@ -135,29 +122,22 @@ private:
 
 class NGConnectionCallback : public Rosen::IWindowExtensionCallback {
 public:
-    NGConnectionCallback(NGConnectionCallback const&) = delete;
-    NGConnectionCallback& operator=(NGConnectionCallback const&) = delete;
-    NGConnectionCallback(NGConnectionCallback&&) = delete;
-    NGConnectionCallback& operator=(NGConnectionCallback&&) = delete;
-    NGConnectionCallback(const RefPtr<NG::FrameNode>& originNode, int32_t instanceId)
+    ACE_DISALLOW_COPY_AND_MOVE(NGConnectionCallback);
+    NGConnectionCallback(const WeakPtr<NG::FrameNode>& originNode, int32_t instanceId)
         : originNode_(originNode), instanceId_(instanceId)
     {}
 
     ~NGConnectionCallback() override = default;
     void OnWindowReady(const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode) override
     {
-        if (!rsSurfaceNode || !originNode_) {
-            LOGI("cannot replace sureface node because the render node or surfacenode is empty");
-            return;
-        }
-        auto context = originNode_->GetRenderContext();
-        if (!context) {
-            LOGI("context is empty");
-            return;
-        }
+        CHECK_NULL_VOID(rsSurfaceNode);
+        auto nodeStrong = originNode_.Upgrade();
+        CHECK_NULL_VOID(nodeStrong);
+        auto context = nodeStrong->GetRenderContext();
+        CHECK_NULL_VOID(rsSurfaceNode);
         rsOriginNode_ = std::static_pointer_cast<Rosen::RSSurfaceNode>(
             AceType::DynamicCast<NG::RosenRenderContext>(context)->GetRSNode());
-        auto task = [weak = AceType::WeakClaim(AceType::RawPtr(originNode_)), rsNode = rsSurfaceNode,
+        auto task = [weak = originNode_, rsNode = rsSurfaceNode,
                         instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
             auto node = weak.Upgrade();
@@ -177,7 +157,7 @@ public:
     void OnExtensionDisconnected() override
     {
         LOGI("window extension disconnect");
-        auto task = [weak = AceType::WeakClaim(AceType::RawPtr(originNode_)), rsNode = rsOriginNode_,
+        auto task = [weak = originNode_, rsNode = rsOriginNode_,
                         instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
             auto node = weak.Upgrade();
@@ -200,25 +180,13 @@ public:
 private:
     void PostTaskToUI(const std::function<void()>&& task) const
     {
-        if (!task) {
-            LOGE("task is empty");
-            return;
-        }
+        CHECK_NULL_VOID(task);
         auto container = AceEngine::Get().GetContainer(instanceId_);
-        if (!container) {
-            LOGE("container is null");
-            return;
-        }
+        CHECK_NULL_VOID(container);
         auto context = container->GetPipelineContext();
-        if (!context) {
-            LOGE("context is null");
-            return;
-        }
+        CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
-        if (!taskExecutor) {
-            LOGE("task executor is null");
-            return;
-        }
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
     }
 
@@ -230,31 +198,19 @@ private:
         auto offset = node->GetGeometryNode()->GetFrameOffset();
         LOGI("OnWindowReady surface size:%{public}f %{public}f %{public}f %{public}f", offset.GetX(), offset.GetY(),
             size.Width(), size.Height());
-        rsSurfaceNode->SetBounds(0, 0, size.Width(), size.Height());
+        rsSurfaceNode->SetBounds(offset.GetX(), offset.GetY(), size.Width(), size.Height());
         rsSurfaceNode->SetBackgroundColor(Color::WHITE.GetValue());
         auto context = node->GetRenderContext();
-        if (!context) {
-            LOGI("context is empty");
-            return;
-        }
+        CHECK_NULL_VOID(context);
         AceType::DynamicCast<NG::RosenRenderContext>(context)->SetRSNode(rsSurfaceNode);
         auto parent = node->GetParent();
-        if (!parent) {
-            LOGI("parent is empty");
-            return;
-        }
-        auto children = parent->GetChildren();
-        std::list<RefPtr<NG::FrameNode>> temp;
-        for (const auto& child : children) {
-            temp.emplace_back(AceType::DynamicCast<NG::FrameNode>(child));
-        }
-        auto parentContent = AceType::DynamicCast<NG::RosenRenderContext>(
-            AceType::DynamicCast<NG::FrameNode>(parent)->GetRenderContext());
-        parentContent->RebuildFrame(AceType::DynamicCast<NG::FrameNode>(AceType::RawPtr(parent)), temp);
+        CHECK_NULL_VOID(parent);
+        parent->MarkNeedSyncRenderTree();
+        parent->RebuildRenderContextTree();
         context->RequestNextFrame();
     }
 
-    RefPtr<NG::FrameNode> originNode_;
+    WeakPtr<NG::FrameNode> originNode_;
     WeakPtr<RenderNode> node_;
     std::shared_ptr<Rosen::RSSurfaceNode> rsOriginNode_;
     int32_t instanceId_ = -1;
@@ -286,14 +242,16 @@ void WindowExtensionConnectionAdapterOhos::ConnectExtension(const RefPtr<NG::Fra
         LOGE("fail to queryAccountId, so cannot connect extension");
         return;
     }
-    RefPtr<NG::AbilityComponentRenderProperty> renderProperty =
-        node->GetPaintProperty<NG::AbilityComponentRenderProperty>();
+    auto size = node->GetGeometryNode()->GetFrameSize();
+    auto offset = node->GetGeometryNode()->GetFrameOffset() + node->GetGeometryNode()->GetParentGlobalOffset();
+
     Rosen::Rect rosenRect = {
-        0,
-        0,
-        static_cast<uint32_t>(renderProperty->GetHeightValue().ConvertToPx()),
-        static_cast<uint32_t>(renderProperty->GetWidthValue().ConvertToPx()),
+        static_cast<int32_t>(offset.GetX()),
+        static_cast<int32_t>(offset.GetY()),
+        static_cast<uint32_t>(size.Width()),
+        static_cast<uint32_t>(size.Height()),
     };
+    auto renderProperty = node->GetPaintProperty<NG::AbilityComponentRenderProperty>();
     std::string want = renderProperty->GetWantValue();
     AppExecFwk::ElementName element;
     WantConverter(want, element);
