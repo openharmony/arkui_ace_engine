@@ -280,8 +280,6 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info)
         return;
     }
     for (auto& touchPoint : touchInfos) {
-        touchPoint.x -= GetGlobalOffset().GetX();
-        touchPoint.y -= GetGlobalOffset().GetY();
         touchOffset = Offset(touchPoint.x, touchPoint.y);
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
     }
