@@ -235,6 +235,32 @@ std::string SelectComposedElement::GetOptionFontColor() const
     return "";
 }
 
+std::string SelectComposedElement::GetWidth() const
+{
+    auto render = GetRenderSelect();
+    if (!render) {
+        return "";
+    }
+    auto selectComponent = render->GetSelectComponent();
+    if (!selectComponent) {
+        return "";
+    }
+    return selectComponent->GetWidth().ToString();
+}
+
+std::string SelectComposedElement::GetHeight() const
+{
+    auto render = GetRenderSelect();
+    if (!render) {
+        return "";
+    }
+    auto selectComponent = render->GetSelectComponent();
+    if (!selectComponent) {
+        return "";
+    }
+    return selectComponent->GetHeight().ToString();
+}
+
 OHOS::Ace::RefPtr<OHOS::Ace::RenderSelect> SelectComposedElement::GetRenderSelect() const
 {
     auto node = GetInspectorNode(SelectElement::TypeId());

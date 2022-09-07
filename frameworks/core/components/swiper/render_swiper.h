@@ -306,6 +306,20 @@ public:
         return cachedCount_;
     }
 
+    int32_t GetDisplayCount() const
+    {
+        return displayCount_;
+    }
+    SwiperDisplayMode GetDisplayMode() const
+    {
+        return displayMode_;
+    }
+
+    EdgeEffect GetEdgeEffect() const
+    {
+        return edgeEffect_;
+    }
+
     bool HandleMouseEvent(const MouseEvent& event) override;
     bool RefuseUpdatePosition(int32_t index);
     void OnPaintFinish() override;
@@ -549,6 +563,9 @@ private:
     double prevMargin_ = 0.0;
     double nextMargin_ = 0.0;
     int32_t cachedCount_ = -1;
+    int32_t displayCount_ = 1;
+    SwiperDisplayMode displayMode_ = SwiperDisplayMode::STRETCH;
+    EdgeEffect edgeEffect_ = EdgeEffect::SPRING;
 
     // need timer for autoplay
     RefPtr<Scheduler> scheduler_;

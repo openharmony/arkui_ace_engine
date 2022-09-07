@@ -34,6 +34,7 @@ public:
     std::string GetSticky() const;
     std::string GetEditable() const;
     int32_t GetZIndex() const override;
+    std::string GetSelectable() const;
 
     AceType::IdType GetTargetTypeId() const override
     {
