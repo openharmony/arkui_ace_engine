@@ -163,6 +163,15 @@ std::string ButtonComposedElement::ConvertButtonTypeToString(ButtonType buttonTy
     return result;
 }
 
+std::string ButtonComposedElement::GetBorderRadius() const
+{
+    auto renderButton = GetRenderButton();
+    if (renderButton) {
+        return Dimension(renderButton->GetRadius()).ToString();
+    }
+    return "0";
+}
+
 void ButtonComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
 {
     auto buttonElement = GetContentElement<ButtonElement>(ButtonElement::TypeId());
