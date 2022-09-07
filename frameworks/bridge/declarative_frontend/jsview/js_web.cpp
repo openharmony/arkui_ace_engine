@@ -488,6 +488,7 @@ public:
         JSClass<JSWebResourceResponse>::CustomMethod("setReasonMessage", &JSWebResourceResponse::SetReasonMessage);
         JSClass<JSWebResourceResponse>::CustomMethod("setResponseCode", &JSWebResourceResponse::SetResponseCode);
         JSClass<JSWebResourceResponse>::CustomMethod("setResponseHeader", &JSWebResourceResponse::SetResponseHeader);
+        JSClass<JSWebResourceResponse>::CustomMethod("setResponseIsReady", &JSWebResourceResponse::SetResponseIsReady);
         JSClass<JSWebResourceResponse>::Bind(
             globalObj, &JSWebResourceResponse::Constructor, &JSWebResourceResponse::Destructor);
 
@@ -560,11 +561,21 @@ public:
 
     void SetResponseData(const JSCallbackInfo& args)
     {
-        if ((args.Length() <= 0) || !(args[0]->IsString())) {
+        if (args.Length() <= 0) {
             return;
         }
-        auto data = args[0]->ToString();
-        response_->SetData(data);
+        if (args[0]->IsNumber()) {
+            auto fd = args[0]->ToNumber<int32_t>();
+            LOGI("intercept set data file handle %{public}d", fd);
+            response_->SetFileHandle(fd);
+            return;
+        }
+        if (args[0]->IsString()) {
+            LOGI("intercept set data string");
+            auto data = args[0]->ToString();
+            response_->SetData(data);
+            return;
+        }
     }
 
     void SetResponseEncoding(const JSCallbackInfo& args)
@@ -622,6 +633,20 @@ public:
             LOGI("Set Response Header %{public}s:%{public}s", keystr.c_str(), valstr.c_str());
             response_->SetHeadersVal(keystr, valstr);
         }
+    }
+
+    void SetResponseIsReady(const JSCallbackInfo& args)
+    {
+        if ((args.Length() <= 0) || !(args[0]->IsBoolean())) {
+            return;
+        }
+        bool isReady = false;
+        if (!ConvertFromJSValue(args[0], isReady)) {
+            LOGE("get response status fail");
+            return;
+        }
+        LOGI("intercept set response status is %{public}d", isReady);
+        response_->SetResponseStatus(isReady);
     }
 private:
     static void Constructor(const JSCallbackInfo& args)
