@@ -2152,6 +2152,7 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoratio
         Dimension borderWidth;
         if (ParseJsDimensionVp(args, borderWidth)) {
             NG::ViewAbstract::SetBorderWidth(borderWidth);
+            return;
         }
     }
     auto stack = ViewStackProcessor::GetInstance();
@@ -2521,6 +2522,7 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
         Color borderColor;
         if (ParseJsColor(args, borderColor)) {
             NG::ViewAbstract::SetBorderColor(borderColor);
+            return;
         }
     }
     auto stack = ViewStackProcessor::GetInstance();
@@ -2725,6 +2727,7 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoratio
     if (Container::IsCurrentUseNewPipeline()) {
         auto borderStyle = static_cast<BorderStyle>(args->ToNumber<int32_t>());
         NG::ViewAbstract::SetBorderStyle(borderStyle);
+        return;
     }
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
