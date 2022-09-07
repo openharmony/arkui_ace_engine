@@ -183,13 +183,12 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ProgressView::SetStrokeWidth(strokeWidthDimension.Value());
+        NG::ProgressView::SetStrokeWidth(strokeWidthDimension);
     }
 
     auto jsScaleCount = paramObject->GetProperty("scaleCount");
     auto scaleCount = jsScaleCount->IsNumber() ? jsScaleCount->ToNumber<int32_t>() : theme->GetScaleNumber();
-    if(scaleCount > 0.0 && Container::IsCurrentUseNewPipeline())
-    {
+    if (scaleCount > 0.0 && Container::IsCurrentUseNewPipeline()) {
         NG::ProgressView::SetScaleCount(scaleCount);
     }
 
@@ -205,7 +204,7 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ProgressView::SetScaleWidth(scaleWidthDimension.Value());
+        NG::ProgressView::SetScaleWidth(scaleWidthDimension);
         return;
     }
 
@@ -218,12 +217,10 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
 
     progress->SetTrackThickness(strokeWidthDimension);
 
-    
     if (scaleCount > 0.0) {
         progress->SetScaleNumber(scaleCount);
     }
 
-    
     progress->SetScaleWidth(scaleWidthDimension);
 }
 

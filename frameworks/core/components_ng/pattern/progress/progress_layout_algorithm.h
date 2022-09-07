@@ -38,7 +38,7 @@ public:
     ProgressLayoutAlgorithm();
 
     ~ProgressLayoutAlgorithm() override = default;
-    
+
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
@@ -49,12 +49,8 @@ public:
     double GetStrokeWidth() const;
     int32_t GetScaleCount() const;
     double GetScaleWidth() const;
-    
-    
-
 
 private:
-
     double maxValue_;
     double value_;
     Color color_;

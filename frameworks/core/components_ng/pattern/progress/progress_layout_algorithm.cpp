@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
+
 #include <algorithm>
 
 #include "base/geometry/dimension.h"
@@ -42,31 +43,58 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     const auto& progressDate = progressLayoutProperty->GetProgressDate();
     const auto& progressStyle = progressLayoutProperty->GetProgressStyle();
     CHECK_NULL_RETURN(progressDate, std::nullopt);
+    CHECK_NULL_RETURN(progressStyle, std::nullopt);
     value_ = progressDate->GetValue().value_or(0);
     maxValue_ = progressDate->GetMaxValue().value_or(100);
-    color_ = progressStyle->GetColor().value_or(progressTheme?progressTheme->GetTrackSelectedColor():Color::BLUE);
+    color_ = progressStyle->GetColor().value_or(progressTheme ? progressTheme->GetTrackSelectedColor() : Color::BLUE);
     type_ = progressStyle->GetType().value_or(ProgressType::LINEAR);
-    strokeWidth_=progressStyle->GetStrokeWidth().value_or(10);
-    scaleCount_ = progressStyle->GetScaleCount().value_or(progressTheme?progressTheme->GetScaleNumber():20);
-    scaleWidth_ = progressStyle->GetScaleWidth().value_or(progressTheme?progressTheme->GetScaleWidth().Value():10);
-    double width_ = progressTheme?progressTheme->GetTrackWidth().Value():contentConstraint.maxSize.Width();
-    
-    if (contentConstraint.selfIdealSize.Width()){
-        width_=std::min(contentConstraint.selfIdealSize.Width().value(),contentConstraint.maxSize.Width());
+    strokeWidth_ = progressStyle->GetStrokeWidth()
+                       .value_or(progressTheme ? (type_ == ProgressType::SCALE ? progressTheme->GetScaleLength()
+                                                                               : progressTheme->GetTrackThickness())
+                                               : Dimension(20))
+                       .ConvertToPx();
+    scaleWidth_ = progressStyle->GetScaleWidth()
+                      .value_or(progressTheme ? progressTheme->GetScaleWidth() : Dimension(2))
+                      .ConvertToPx();
+    scaleCount_ = progressStyle->GetScaleCount().value_or(progressTheme ? progressTheme->GetScaleNumber() : 20);
+    double radius = progressTheme ? progressTheme->GetRingRadius().ConvertToPx() : 20;
+    double width_ = progressTheme ? progressTheme->GetTrackWidth().ConvertToPx() : contentConstraint.maxSize.Width();
+    if (contentConstraint.selfIdealSize.Width()) {
+        width_ = contentConstraint.selfIdealSize.Width().value();
     }
-    double height_ =  contentConstraint.maxSize.Height();
-    if(type_ == ProgressType::LINEAR)
-    {   
-        height_ = std::min(strokeWidth_*2,height_);
+    double height_ = strokeWidth_ * 2;
+    LOGI("%{public}lf",height_);
+    if (contentConstraint.selfIdealSize.Height()) {
+        height_ = contentConstraint.selfIdealSize.Height().value();
     }
-    if(type_ == ProgressType::RING || type_ == ProgressType::SCALE || type_ ==ProgressType::MOON)
-    {
-        height_ = std::min(width_,height_);
-        width_=height_;
+    if (type_ == ProgressType::RING || type_ == ProgressType::SCALE || type_ == ProgressType::MOON) {
+        if (!contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
+            width_ = 2 * radius;
+            height_ = width_;
+        }
+        if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
+            height_ = width_;
+        }
+        if (contentConstraint.selfIdealSize.Height() && !contentConstraint.selfIdealSize.Width()) {
+            width_ = height_;
+        }
     }
-    if (contentConstraint.selfIdealSize.Height()){
-        height_=std::min(contentConstraint.selfIdealSize.Height().value(),contentConstraint.maxSize.Height());
+    if (type_ == ProgressType::CAPSULE) {
+        if (!contentConstraint.selfIdealSize.Height()) {
+            height_ = 2 * radius;
+        }
+        if (!contentConstraint.selfIdealSize.Width()) {
+            width_ = 2 * radius;
+        }
     }
+    height_ = std::min(height_, static_cast<double>(contentConstraint.maxSize.Height()));
+    width_ = std::min(width_, static_cast<double>(contentConstraint.maxSize.Width()));
+    if (type_ == ProgressType::LINEAR) {
+        strokeWidth_ = std::min(strokeWidth_, height_ / 2);
+        strokeWidth_ = std::min(strokeWidth_, width_ / 2);
+    }
+    LOGI("ProgressLayoutAlgorithm::Type:%{public}d MeasureContent: width_: %{public}fl ,height_: %{public}fl", type_,
+        width_, height_);
     return SizeF(width_, height_);
 }
 

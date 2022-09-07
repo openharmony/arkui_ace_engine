@@ -51,7 +51,7 @@ void ProgressView::SetColor(const Color& value)
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Color, value);
 }
 
-void ProgressView::SetStrokeWidth(const double& value)
+void ProgressView::SetStrokeWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, StrokeWidth, value);
 }
@@ -61,7 +61,7 @@ void ProgressView::SetScaleCount(const int32_t& value)
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, ScaleCount, value);
 }
 
-void ProgressView::SetScaleWidth(const double& value)
+void ProgressView::SetScaleWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, ScaleWidth, value);
 }

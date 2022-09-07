@@ -24,23 +24,39 @@
 namespace OHOS::Ace::NG {
 void ProgressPaintMethod::PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const
 {
-    PointF start = PointF(offset.GetX() + strokeWidth_ / 2, offset.GetY() + strokeWidth_ / 2);
-    PointF end = PointF(offset.GetX() + frameSize.Width() - strokeWidth_ / 2, offset.GetY() + strokeWidth_ / 2);
-    PointF end2 = PointF(offset.GetX() + strokeWidth_ / 2 + (frameSize.Width() - strokeWidth_) * value_ / maxValue_,
-        offset.GetY() + strokeWidth_ / 2);
     RSPen pen;
     pen.SetAntiAlias(true);
-    pen.SetWidth(strokeWidth_);
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
     pen.SetColor(ToRSColor((Color::GRAY)));
-    canvas.AttachPen(pen);
-    if (end2 != end) {
-        canvas.DrawLine(ToRSPonit(end2), ToRSPonit(end));
-    }
-    pen.SetColor(ToRSColor((color_)));
-    canvas.AttachPen(pen);
-    if (start != end2) {
-        canvas.DrawLine(ToRSPonit(start), ToRSPonit(end2));
+    pen.SetWidth(strokeWidth_);
+    if (frameSize.Width() >= frameSize.Height()) {
+        PointF start = PointF(offset.GetX() + strokeWidth_ / 2, offset.GetY() + strokeWidth_ / 2);
+        PointF end = PointF(offset.GetX() + frameSize.Width() - strokeWidth_ / 2, offset.GetY() + strokeWidth_ / 2);
+        PointF end2 = PointF(offset.GetX() + strokeWidth_ / 2 + (frameSize.Width() - strokeWidth_) * value_ / maxValue_,
+            offset.GetY() + strokeWidth_ / 2);
+        canvas.AttachPen(pen);
+        if (end2 != end) {
+            canvas.DrawLine(ToRSPonit(end2), ToRSPonit(end));
+        }
+        pen.SetColor(ToRSColor((color_)));
+        canvas.AttachPen(pen);
+        if (start != end2) {
+            canvas.DrawLine(ToRSPonit(start), ToRSPonit(end2));
+        }
+    } else {
+        PointF start = PointF(offset.GetX() + strokeWidth_ / 2, offset.GetY() + strokeWidth_ / 2);
+        PointF end = PointF(offset.GetX() + strokeWidth_ / 2, offset.GetY() + frameSize.Height() - strokeWidth_ / 2);
+        PointF end2 = PointF(offset.GetX() + strokeWidth_ / 2,
+            offset.GetY() + strokeWidth_ / 2 + (frameSize.Height() - strokeWidth_) * value_ / maxValue_);
+        canvas.AttachPen(pen);
+        if (end2 != end) {
+            canvas.DrawLine(ToRSPonit(end2), ToRSPonit(end));
+        }
+        pen.SetColor(ToRSColor((color_)));
+        canvas.AttachPen(pen);
+        if (start != end2) {
+            canvas.DrawLine(ToRSPonit(start), ToRSPonit(end2));
+        }
     }
 }
 
@@ -48,10 +64,16 @@ void ProgressPaintMethod::PaintRing(RSCanvas& canvas, const OffsetF& offset, con
 {
     static int32_t totalDegree = 360;
     PointF centerPt = PointF(frameSize.Width() / 2, frameSize.Height() / 2) + offset;
-    double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2) - strokeWidth_ / 2;
+    double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2);
     RSPen pen;
     pen.SetAntiAlias(true);
-    pen.SetWidth(strokeWidth_);
+    double widthOfLine = strokeWidth_;
+    if (widthOfLine >= radius) {
+        LOGI("strokeWidth is lager than radius,  auto set strokeWidth as half of radius");
+        widthOfLine = radius / 2;
+    }
+    radius = radius - widthOfLine / 2;
+    pen.SetWidth(widthOfLine);
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
     pen.SetColor(ToRSColor((Color::GRAY)));
     canvas.AttachPen(pen);
@@ -68,14 +90,25 @@ void ProgressPaintMethod::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset
 {
     static int32_t totalDegree = 360;
     PointF centerPt = PointF(frameSize.Width() / 2, frameSize.Height() / 2) + offset;
-    double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2) - strokeWidth_ / 2;
+    double radius = std::min(frameSize.Width() / 2, frameSize.Height() / 2);
+    double lengthOfScale = strokeWidth_;
+    if (lengthOfScale > radius) {
+        LOGI("strokeWidth is lager than radius,  auto set strokeWidth as half of radius");
+        lengthOfScale = radius / 2;
+    }
     double pathDistance = 2.0 * M_PI * radius / scaleCount_;
+    if (scaleWidth_ > pathDistance) {
+        LOGI("scaleWidth is lager than pathDistance,  auto changeto paint ring");
+        PaintRing(canvas, offset, frameSize);
+        return;
+    }
+    double widthOfLine = scaleWidth_;
     RSPen pen;
     Rosen::Drawing::Path path;
-    double widthOfLine = std::min(scaleWidth_, pathDistance);
-    path.AddRoundRect({ 0, 0, widthOfLine, strokeWidth_ }, 90, 90, rosen::PathDirection::CW_DIRECTION);
+    pen.SetWidth(widthOfLine);
+    LOGI("scaleWidth %lf strokeWidth  %lf, radius %lf pathDistance %lf ",widthOfLine, lengthOfScale , radius, pathDistance);
+    path.AddRoundRect({ 0, 0, widthOfLine, lengthOfScale }, widthOfLine/2, widthOfLine/2, rosen::PathDirection::CW_DIRECTION);
     pen.SetAntiAlias(true);
-    pen.SetWidth(scaleWidth_);
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
     pen.SetPathEffect(rosen::PathEffect::CreatePathDashEffect(path, pathDistance, 0.0f, rosen::PathDashStyle::ROTATE));
     pen.SetColor(ToRSColor((Color::GRAY)));

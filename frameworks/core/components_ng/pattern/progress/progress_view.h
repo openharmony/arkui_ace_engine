@@ -23,18 +23,17 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 
-
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ProgressView{
+class ACE_EXPORT ProgressView {
 public:
-    static void Create(double min, double value, double cachedValue, double max,ProgressType type);
+    static void Create(double min, double value, double cachedValue, double max, ProgressType type);
     static void SetValue(const double& value);
     static void SetMaxValue(const double& value);
     static void SetColor(const Color& value);
-    static void SetStrokeWidth(const double& value);
+    static void SetStrokeWidth(const Dimension& value);
     static void SetScaleCount(const int32_t& value);
-    static void SetScaleWidth(const double& value);
+    static void SetScaleWidth(const Dimension& value);
 };
 } // namespace OHOS::Ace::NG
 

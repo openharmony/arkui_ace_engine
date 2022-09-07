@@ -42,13 +42,10 @@ struct ProgressDate {
 struct ProgressStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Color, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Type, ProgressType);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, double);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ScaleCount, int32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScaleWidth, double);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScaleWidth, Dimension);
 };
-
-// ProgressDate CreateProgressDateUsingTheme(const std::unique_ptr<ProgressDate>& progressDate,
-//  const RefPtr<ProgressTheme>& progressTheme);
 
 } // namespace OHOS::Ace::NG
 
