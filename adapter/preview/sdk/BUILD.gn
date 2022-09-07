@@ -131,6 +131,13 @@ if (is_standard_system) {
           get_label_info("//third_party/sqlite:sqlite_sdk", "root_out_dir")
       deps += [ "//third_party/sqlite:sqlite_sdk" ]
       sources += [ "${sqlite_path}/common/common/libsqlite_sdk${dylib_suffix}" ]
+
+      # Add dynamic library "libcrypto_restool"
+      libcrypto_path = get_label_info("//third_party/openssl:libcrypto_restool",
+                                      "root_out_dir")
+      deps += [ "//third_party/openssl:libcrypto_restool" ]
+      sources +=
+          [ "${libcrypto_path}/security/huks/libcrypto_restool${dylib_suffix}" ]
     }
 
     # Add dynamic library "hilog"
