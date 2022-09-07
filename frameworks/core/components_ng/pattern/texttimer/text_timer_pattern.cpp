@@ -22,6 +22,11 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double DEFAULT_COUNT = 60000.0;
+const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
+} // namespace
+
 TextTimerPattern::TextTimerPattern()
 {
     textTimerController_ = MakeRefPtr<TextTimerController>();
@@ -73,11 +78,13 @@ void TextTimerPattern::InitTimerDisplay()
             auto timer = weak.Upgrade();
             if (timer) {
                 timer->Tick(duration);
+            } else {
+                LOGW("empty timer, skip tick callback.");
             }
         };
         scheduler_ = SchedulerBuilder::Build(callback, host->GetContext());
         auto count = isCountDown_ ? inputCount_ : 0;
-        updateTextTimer(static_cast<uint32_t>(count));
+        UpdateTextTimer(static_cast<uint32_t>(count));
     } else {
         HandleReset();
     }
@@ -88,18 +95,18 @@ void TextTimerPattern::Tick(uint64_t duration)
     elapsedTime_ += duration;
     FireChangeEvent();
 
-    auto tmp_value = static_cast<double>(elapsedTime_);
+    auto tmpValue = static_cast<double>(elapsedTime_);
     if (isCountDown_) {
-        tmp_value =
+        tmpValue =
             (inputCount_ >= static_cast<double>(elapsedTime_)) ? (inputCount_ - static_cast<double>(elapsedTime_)) : 0;
     }
-    if (isCountDown_ && tmp_value <= 0) {
-        updateTextTimer(0);
+    if (isCountDown_ && tmpValue <= 0) {
+        UpdateTextTimer(0);
         HandlePause();
         return;
     }
 
-    updateTextTimer(static_cast<uint32_t>(tmp_value));
+    UpdateTextTimer(static_cast<uint32_t>(tmpValue));
 }
 
 void TextTimerPattern::OnModifyDone()
@@ -118,7 +125,7 @@ void TextTimerPattern::OnModifyDone()
     InitTimerDisplay();
 }
 
-void TextTimerPattern::updateTextTimer(uint32_t elapsedTime)
+void TextTimerPattern::UpdateTextTimer(uint32_t elapsedTime)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -135,8 +142,8 @@ void TextTimerPattern::updateTextTimer(uint32_t elapsedTime)
 std::string TextTimerPattern::GetFormat() const
 {
     auto textTimerLayoutProperty = GetLayoutProperty<TextTimerLayoutProperty>();
-    CHECK_NULL_RETURN(textTimerLayoutProperty, "hh:mm:ss.ms");
-    return textTimerLayoutProperty->GetFormat().value_or("hh:mm:ss.ms");
+    CHECK_NULL_RETURN(textTimerLayoutProperty, DEFAULT_FORMAT);
+    return textTimerLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
 }
 
 bool TextTimerPattern::GetIsCountDown() const
@@ -149,8 +156,8 @@ bool TextTimerPattern::GetIsCountDown() const
 double TextTimerPattern::GetInputCount() const
 {
     auto textTimerLayoutProperty = GetLayoutProperty<TextTimerLayoutProperty>();
-    CHECK_NULL_RETURN(textTimerLayoutProperty, 0.0);
-    return textTimerLayoutProperty->GetInputCount().value_or(0.0);
+    CHECK_NULL_RETURN(textTimerLayoutProperty, DEFAULT_COUNT);
+    return textTimerLayoutProperty->GetInputCount().value_or(DEFAULT_COUNT);
 }
 
 void TextTimerPattern::HandleStart()
@@ -174,6 +181,6 @@ void TextTimerPattern::HandleReset()
     }
     elapsedTime_ = 0;
     auto count = isCountDown_ ? inputCount_ : 0;
-    updateTextTimer(static_cast<uint32_t>(count));
+    UpdateTextTimer(static_cast<uint32_t>(count));
 }
 } // namespace OHOS::Ace::NG

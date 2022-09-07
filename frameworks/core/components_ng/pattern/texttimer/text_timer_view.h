@@ -36,7 +36,7 @@ public:
     static void SetFontFamily(const std::vector<std::string>& fontFamilies);
     static void SetOnTimer(ChangeEvent&& onChange);
     static void SetIsCountDown(bool isCountDown);
-    static void SetInputCount(const double& count);
+    static void SetInputCount(double count);
 };
 } // namespace OHOS::Ace::NG
 

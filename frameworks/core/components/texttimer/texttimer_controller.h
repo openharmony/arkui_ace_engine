@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXTTIMER_TEXTTIMER_CONTROLLER_H
 
 #include "base/memory/ace_type.h"
+#include <functional>
 
 namespace OHOS::Ace {
 using TimerFuncImpl = std::function<void()>;

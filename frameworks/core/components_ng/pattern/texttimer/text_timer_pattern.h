@@ -57,7 +57,7 @@ private:
 
     void InitTextTimerController();
     void InitTimerDisplay();
-    void updateTextTimer(uint32_t elapsedTime);
+    void UpdateTextTimer(uint32_t elapsedTime);
     void Tick(uint64_t duration);
     void FireChangeEvent() const;
 

@@ -30,15 +30,12 @@ namespace OHOS::Ace::NG {
 RefPtr<TextTimerController> TextTimerView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = (stack ? stack->ClaimNodeId() : 0);
+    auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTTIMER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextTimerPattern>(); });
-    CHECK_NULL_RETURN(frameNode, nullptr);
     if (frameNode->GetChildren().empty()) {
         auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
-        CHECK_NULL_RETURN(textNode, nullptr);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(textLayoutProperty, nullptr);
         textLayoutProperty->UpdateContent(std::string(""));
         frameNode->AddChild(textNode);
     } else {
@@ -128,7 +125,7 @@ void TextTimerView::SetIsCountDown(bool isCountDown)
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, IsCountDown, isCountDown);
 }
 
-void TextTimerView::SetInputCount(const double& count)
+void TextTimerView::SetInputCount(double count)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count);
 }

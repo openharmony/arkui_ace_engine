@@ -14,7 +14,6 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
-#include <array>
 
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -39,15 +38,16 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
         auto controller = NG::TextTimerView::Create();
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto tempIsCountDown = paramObject->GetProperty("isCountDown");
-        bool isCountDown = tempIsCountDown->ToBoolean();
-        NG::TextTimerView::SetIsCountDown(isCountDown);
-
-        if (isCountDown) {
-            auto count = paramObject->GetProperty("count");
-            if (count->IsNumber()) {
-                auto inputCount = count->ToNumber<double>();
-                if (inputCount > 0) {
-                    NG::TextTimerView::SetInputCount(inputCount);
+        if (tempIsCountDown->IsBoolean()) {
+            bool isCountDown = tempIsCountDown->ToBoolean();
+            NG::TextTimerView::SetIsCountDown(isCountDown);
+            if (isCountDown) {
+                auto count = paramObject->GetProperty("count");
+                if (count->IsNumber()) {
+                    auto inputCount = count->ToNumber<double>();
+                    if (inputCount > 0) {
+                        NG::TextTimerView::SetInputCount(inputCount);
+                    }
                 }
             }
         }
@@ -276,7 +276,6 @@ void JSTextTimer::SetFontFamily(const JSCallbackInfo& info)
     timerComponent->SetTextStyle(std::move(textStyle));
 }
 
-
 void JSTextTimer::OnTimer(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -285,9 +284,10 @@ void JSTextTimer::OnTimer(const JSCallbackInfo& info)
 
     if (Container::IsCurrentUseNewPipeline()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](uint64_t utc, uint64_t elapsedTime) {
+        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                            uint64_t utc, uint64_t elapsedTime) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("TextClock.onTimer");
+            ACE_SCORING_EVENT("TextTimer.onTimer");
             JSRef<JSVal> newJSVal[2];
             newJSVal[0] = JSRef<JSVal>::Make(ToJSValue(utc));
             newJSVal[1] = JSRef<JSVal>::Make(ToJSValue(elapsedTime));
@@ -296,7 +296,7 @@ void JSTextTimer::OnTimer(const JSCallbackInfo& info)
         NG::TextTimerView::SetOnTimer(std::move(onChange));
         return;
     }
-    
+
     if (!JSViewBindEvent(&TextTimerComponent::SetOnTimer, info)) {
         LOGW("Failed(OnTimer) to bind event");
     }
@@ -309,8 +309,8 @@ void JSTextTimerController::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimerController>::CustomMethod("start", &JSTextTimerController::Start);
     JSClass<JSTextTimerController>::CustomMethod("pause", &JSTextTimerController::Pause);
     JSClass<JSTextTimerController>::CustomMethod("reset", &JSTextTimerController::Reset);
-    JSClass<JSTextTimerController>::Bind(globalObj,
-        JSTextTimerController::Constructor, JSTextTimerController::Destructor);
+    JSClass<JSTextTimerController>::Bind(
+        globalObj, JSTextTimerController::Constructor, JSTextTimerController::Destructor);
 }
 
 void JSTextTimerController::Constructor(const JSCallbackInfo& info)
