@@ -55,6 +55,7 @@
 #include "core/gestures/long_press_gesture.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/core/components/text/text_component.h"
 
@@ -4343,6 +4344,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("restoreId", &JSViewAbstract::JsRestoreId);
     JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
+    JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
 #if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
@@ -4898,6 +4900,20 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& args)
         };
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
         box->SetOnMouseId(onMouseId);
+    }
+}
+
+void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onHoverId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onHover");
+            func->Execute(param);
+        };
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        box->SetOnHoverId(onHoverId);
     }
 }
 
