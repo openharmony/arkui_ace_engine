@@ -1124,7 +1124,7 @@ void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std:
                 }
                 // determine whether the previous page needs to be loaded
                 if (pageRouteStack_[pageRouteSize - 2].isRestore) {
-                    pagePath = manifestParser_->GetRouter()->GetPagePath(pageRouteStack_[pageRouteSize - 2].url);
+                    pagePath = pageRouteStack_[pageRouteSize - 2].url;
                 }
             }
         }
@@ -1135,7 +1135,7 @@ void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std:
         LOGI("run in normal back");
         PopPage();
     } else {
-        std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url);
+        std::string pagePath = manifestParser_->GetRouter()->GetPagePath(target.url, ".js");
         LOGD("router.Back pagePath = %{private}s", pagePath.c_str());
         if (!pagePath.empty()) {
             bool isRestore = false;
