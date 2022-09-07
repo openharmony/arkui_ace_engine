@@ -40,6 +40,7 @@ public:
     std::string GetFontColor() const;
     std::string GetBackgroundColor() const override;
     std::string ConvertButtonTypeToString(ButtonType buttonType) const;
+    std::string GetBorderRadius() const override;
 
     AceType::IdType GetTargetTypeId() const override
     {
