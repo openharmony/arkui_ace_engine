@@ -1642,6 +1642,14 @@ void WebDelegate::SetWebCallBack()
                 }
             });
         });
+        webController->SetGetUrlImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->GetUrl();
+            }
+            return std::string();
+        });
+
     }
 }
 
@@ -2832,6 +2840,14 @@ void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAc
         dragEvent.action = static_cast<OHOS::NWeb::DragAction>(dragAction);
         nweb_->SendDragEvent(dragEvent);
     }
+}
+
+std::string WebDelegate::GetUrl()
+{
+    if (nweb_) {
+        return nweb_->GetUrl();
+    }
+    return "";
 }
 #endif
 
