@@ -16,12 +16,14 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
 
 #include <string>
+#include <utility>
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-
+#include "core/common/container.h"
 #include "core/components/toggle/toggle_component.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/pattern/toggle/switch_pattern.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -36,7 +38,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("size", &JSToggle::JsSize);
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
-    
+
     JSClass<JSToggle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSToggle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSToggle>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -65,6 +67,15 @@ void JSToggle::Create(const JSCallbackInfo& info)
     auto tempIsOn = paramObject->GetProperty("isOn");
     bool isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
     auto toggleType = static_cast<ToggleType>(type->ToNumber<int32_t>());
+
+    auto toggleTypeInt = static_cast<int32_t>(toggleType);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGE("JS_TOGGLE::isOn %d", isOn);
+        NG::ToggleView::Create(NG::ToggleType(toggleTypeInt), isOn);
+        return;
+    }
+
     RefPtr<Component> component;
     if (toggleType == ToggleType::CHECKBOX) {
         RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
@@ -148,6 +159,12 @@ void JSToggle::JsWidth(const JSRef<JSVal>& jsValue)
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsWidth(jsValue);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     Dimension padding;
     auto box = stack->GetBoxComponent();
@@ -181,6 +198,12 @@ void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
     if (!ParseJsDimensionVp(jsValue, value)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsHeight(jsValue);
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto box = stack->GetBoxComponent();
     Dimension padding;
@@ -217,6 +240,17 @@ void JSToggle::JsSize(const JSCallbackInfo& info)
 
 void JSToggle::OnChange(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](bool isOn) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Toggle.onChange");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::ToggleView::OnChange(std::move(onChange));
+        return;
+    }
     if (JSViewBindEvent(&ToggleComponent::SetOnChange, args) ||
         JSViewBindEvent(&CheckableComponent::SetOnChange, args)) {
     } else {
@@ -236,6 +270,12 @@ void JSToggle::SelectedColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], selectedColor)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ToggleView::SetSelectedColor(selectedColor);
+        return;
+    }
+
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto toggle = AceType::DynamicCast<ToggleComponent>(mainComponent);
     if (toggle) {
@@ -255,6 +295,14 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
+    Color color;
+    if (!JSContainerBase::ParseJsColor(info[0], color)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ToggleView::SetSwitchPointColor(color);
+        return;
+    }
 
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto switchComponent = AceType::DynamicCast<SwitchComponent>(mainComponent);
@@ -262,10 +310,8 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
         LOGE("pointstyle only support switch");
         return;
     }
-    Color color;
-    if (JSContainerBase::ParseJsColor(info[0], color)) {
-        switchComponent->SetPointColor(color);
-    }
+
+    switchComponent->SetPointColor(color);
 }
 
 void JSToggle::JsPadding(const JSCallbackInfo& info)

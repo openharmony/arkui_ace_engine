@@ -93,6 +93,10 @@ build_component_ng("pattern_ng") {
     "xcomponent/xcomponent_layout_algorithm.cpp",
     "xcomponent/xcomponent_pattern.cpp",
     "xcomponent/xcomponent_view.cpp",
+    "toggle/toggle_view.cpp",
+    "toggle/switch_pattern.cpp",
+    "toggle/switch_paint_method.cpp",
+    "toggle/switch_layout_algorithm.cpp",
   ]
 }
 
