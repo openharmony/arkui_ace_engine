@@ -36,6 +36,7 @@ public:
     static void SetLaneMinLength(const Dimension& laneMinLength);
     static void SetLaneMaxLength(const Dimension& laneMaxLength);
     static void SetListItemAlign(V2::ListItemAlign listItemAlign);
+    static void SetCachedCount(const int32_t& cachedCount);
 };
 
 } // namespace OHOS::Ace::NG

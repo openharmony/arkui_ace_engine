@@ -115,6 +115,13 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::CENTER);
     CalculateLanes(listLayoutProperty->GetLayoutConstraint().value(), axis);
 
+    cachedCount_ = listLayoutProperty->GetCachedCount().value_or(0);
+    if (lanes_.has_value() && lanes_.value() > 1) {
+        if (cachedCount_ % lanes_.value() != 0) {
+            cachedCount_ = (cachedCount_ / lanes_.value() + 1) * lanes_.value();
+        }
+    }
+
     if (lanes_.has_value() && lanes_.value() > 1) {
         if (NonNegative(currentOffset_)) {
             LayoutForwardForLaneList(layoutWrapper, contentLayoutConstraint, axis, mainSize);
@@ -148,6 +155,9 @@ void ListLayoutAlgorithm::LayoutForward(
     float currentStartPos = currentEndPos;
     auto currentIndex = preStartIndex_ - 1;
     float cacheSize = mainSize * CACHE_SIZE_RADIO;
+    if (cachedCount_ > 0) {
+        cacheSize = 0.0f;
+    }
     do {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
         if (!wrapper) {
@@ -175,11 +185,14 @@ void ListLayoutAlgorithm::LayoutForward(
         if (currentIndex >= 0) {
             currentEndPos = currentEndPos + spaceWidth_;
         }
-    } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize));
+        if (GreatOrEqual(currentStartPos, endMainPos_ + cacheSize)) {
+            endCachedCount_++;
+        }
+    } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize) || (endCachedCount_ < cachedCount_));
     currentEndPos = currentEndPos - spaceWidth_;
 
     startIndex_ = newStartIndex.value_or(preStartIndex_);
-    endIndex_ = currentIndex;
+    endIndex_ = currentIndex - endCachedCount_;
 
     // adjust offset.
     if (LessNotEqual(currentEndPos, endMainPos_)) {
@@ -228,6 +241,9 @@ void ListLayoutAlgorithm::LayoutBackward(
     float currentEndPos = currentStartPos;
     auto currentIndex = preEndIndex_ + 1;
     float cacheSize = mainSize * CACHE_SIZE_RADIO;
+    if (cachedCount_ > 0) {
+        cacheSize = 0.0f;
+    }
     do {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
         if (!wrapper) {
@@ -257,10 +273,13 @@ void ListLayoutAlgorithm::LayoutBackward(
         if (currentIndex > 0) {
             currentStartPos = currentStartPos - spaceWidth_;
         }
-    } while (GreatNotEqual(currentStartPos, startMainPos_ - cacheSize));
+        if (LessOrEqual(currentEndPos, startMainPos_ - cacheSize)) {
+            startCachedCount_++;
+        }
+    } while (GreatNotEqual(currentStartPos, startMainPos_ - cacheSize) || (startCachedCount_ < cachedCount_));
 
     endIndex_ = newEndIndex.value_or(preEndIndex_);
-    startIndex_ = currentIndex;
+    startIndex_ = currentIndex + startCachedCount_;
 
     // adjust offset.
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
@@ -303,7 +322,8 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
 
     // layout items.
-    for (auto index = startIndex_.value_or(preStartIndex_); index <= endIndex_.value_or(preEndIndex_); ++index) {
+    for (auto index = startIndex_.value_or(preStartIndex_) - startCachedCount_;
+        index <= endIndex_.value_or(preEndIndex_) + endCachedCount_; ++index) {
         auto offset = paddingOffset;
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!wrapper) {
@@ -456,6 +476,9 @@ void ListLayoutAlgorithm::LayoutForwardForLaneList(
     float currentStartPos = currentEndPos;
     auto currentIndex = preStartIndex_ - 1;
     float cacheSize = mainSize * CACHE_SIZE_RADIO;
+    if (cachedCount_ > 0) {
+        cacheSize = 0.0f;
+    }
     float mainLength = 0.0f;
     bool outOfListSize = false;
     do {
@@ -485,13 +508,16 @@ void ListLayoutAlgorithm::LayoutForwardForLaneList(
             itemPosition_[currentIndex] = { currentStartPos, currentStartPos + mainLength };
         }
         currentEndPos = currentStartPos + mainLength;
+        if (GreatOrEqual(currentStartPos, endMainPos_ + cacheSize)) {
+            endCachedCount_ = endCachedCount_ + lanes_.value();
+        }
         if (outOfListSize) {
             break;
         }
-    } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize));
+    } while (LessNotEqual(currentEndPos, endMainPos_ + cacheSize) || (endCachedCount_ < cachedCount_));
 
     startIndex_ = newStartIndex.value_or(preStartIndex_);
-    endIndex_ = currentIndex;
+    endIndex_ = currentIndex - endCachedCount_;
 
     // adjust offset.
     if (LessNotEqual(currentEndPos, endMainPos_)) {
@@ -540,6 +566,9 @@ void ListLayoutAlgorithm::LayoutBackwardForLaneList(
     float currentEndPos = currentStartPos;
     auto currentIndex = preEndIndex_ + 1;
     float cacheSize = mainSize * CACHE_SIZE_RADIO;
+    if (cachedCount_ > 0) {
+        cacheSize = 0.0f;
+    }
     do {
         currentEndPos = currentStartPos;
         float mainLength = 0.0f;
@@ -556,7 +585,7 @@ void ListLayoutAlgorithm::LayoutBackwardForLaneList(
             }
             mainLength = GetMainAxisSize(wrapper->GetGeometryNode()->GetFrameSize(), axis);
             // out of display area, mark inactive.
-            if (LessNotEqual(currentEndPos - mainLength, startMainPos_ + cacheSize)) {
+            if (GreatNotEqual(currentEndPos - mainLength, endMainPos_ + cacheSize)) {
                 inActiveItems.emplace(currentIndex);
             } else {
                 // mark new start index.
@@ -567,13 +596,16 @@ void ListLayoutAlgorithm::LayoutBackwardForLaneList(
             itemPosition_[currentIndex] = { currentEndPos - mainLength, currentEndPos };
         }
         currentStartPos = currentEndPos - mainLength;
+        if (LessOrEqual(currentEndPos, startMainPos_ - cacheSize)) {
+            startCachedCount_ = startCachedCount_ + lanes_.value();
+        }
         if (currentIndex <= 0) {
             break;
         }
-    } while (GreatNotEqual(currentStartPos, startMainPos_ - cacheSize));
+    } while (GreatNotEqual(currentStartPos, startMainPos_ - cacheSize) || (startCachedCount_ < cachedCount_));
 
     endIndex_ = newEndIndex.value_or(preEndIndex_);
-    startIndex_ = currentIndex;
+    startIndex_ = currentIndex + startCachedCount_;
 
     // adjust offset.
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
