@@ -43,7 +43,6 @@
 #include "core/common/hdc_register.h"
 #include "core/common/platform_window.h"
 #include "core/common/text_field_manager.h"
-#include "core/common/watch_dog.h"
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager.h"
@@ -1152,9 +1151,11 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         TaskExecutor::TaskType::UI);
     aceView_->Launch();
 
-    // Only MainWindow instance will be registered to watch dog.
     if (!isSubContainer_) {
-        AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
+        // Only MainWindow instance in FA model will be registered to watch dog.
+        if (!GetSettings().usingSharedRuntime) {
+            AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
+        }
         frontend_->AttachPipelineContext(pipelineContext_);
     } else {
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
