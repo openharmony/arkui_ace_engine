@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 #define SET_PROP_FOR_NG(propName, propType, propValue) \
     ImageView::Set##propName(static_cast<propType>(propValue));
 
-void ImageModelNG::SetAlt(std::string src)
+void ImageModelNG::SetAlt(const std::string& src)
 {
 }
 
@@ -46,12 +46,12 @@ void ImageModelNG::SetFitMaxSize(bool value)
 {
 }
 
-void ImageModelNG::SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback)
+void ImageModelNG::SetOnComplete(std::function<void(LoadImageSuccessEvent& info)>&& callback)
 {
     NG::ImageView::SetOnComplete(std::move(callback));
 }
 
-void ImageModelNG::SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback)
+void ImageModelNG::SetOnError(std::function<void(LoadImageFailEvent& info)>&& callback)
 {
     NG::ImageView::SetOnError(std::move(callback));
 }
@@ -60,12 +60,12 @@ void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
 {
 }
 
-void ImageModelNG::Create(std::string src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
 {
     NG::ImageView::Create(src);
 }
 
-void ImageModelNG::SetImageSourceSize(std::pair<Dimension, Dimension> size)
+void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension>& size)
 {
     NG::ImageView::SetImageSourceSize(size);
 }

@@ -103,9 +103,8 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
         auto jsLoadSuccFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageSuccessEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageSuccEventToJSValue);
 
-        auto onComplete = 
-            [execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)](
-                                const LoadImageSuccessEvent& info) {
+        auto onComplete = [execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)](
+            const LoadImageSuccessEvent& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onComplete");
             func->Execute(info);
@@ -161,10 +160,24 @@ void JSImage::Create(const JSCallbackInfo& info)
 
     RefPtr<PixelMap> pixMap = nullptr;
 #if defined(IMAGE_SUPPORTED)
-    pixMap = CreatePixelMapFromNapiValue(info[0]);
+    if (!noPixMap) {
+        pixMap = CreatePixelMapFromNapiValue(info[0]);
+    }
 #endif
 
     ImageModel::GetInstance()->Create(src, noPixMap, pixMap);
+}
+
+void JSImage::JsBorder(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorder(info);
+    SetBorder(GetBackDecoration()->GetBorder());
+}
+
+void JSImage::JsBorderRadius(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorderRadius(info);
+    SetBorder(GetBackDecoration()->GetBorder());
 }
 
 void JSImage::SetSourceSize(const JSCallbackInfo& info)
@@ -318,9 +331,9 @@ void JSImage::JSBind(BindingTarget globalObj)
     // Are those needed, we inherit from JSViewAbstract
     JSClass<JSImage>::StaticMethod("borderStyle", &JSViewAbstract::JsBorderStyle);
     JSClass<JSImage>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
-    JSClass<JSImage>::StaticMethod("border", &JSViewAbstract::JsBorder);
+    JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
-    JSClass<JSImage>::StaticMethod("borderRadius", &JSViewAbstract::JsBorderRadius);
+    JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
     JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);

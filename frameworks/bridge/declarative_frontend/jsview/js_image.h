@@ -42,6 +42,13 @@ public:
     static void SetSyncLoad(const JSCallbackInfo& info);
     static void SetColorFilter(const JSCallbackInfo& info);
 
+    static void JsBorder(const JSCallbackInfo& info);
+    static void JsBorderRadius(const JSCallbackInfo& info);
+    static void SetLeftBorderWidth(const Dimension& value);
+    static void SetTopBorderWidth(const Dimension& value);
+    static void SetRightBorderWidth(const Dimension& value);
+    static void SetBottomBorderWidth(const Dimension& value);
+    static void SetBorderRadius(const Dimension& value);
     static void JsOpacity(const JSCallbackInfo& info);
     static void JsBlur(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);

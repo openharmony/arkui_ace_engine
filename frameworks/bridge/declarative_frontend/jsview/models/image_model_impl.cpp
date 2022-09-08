@@ -24,8 +24,7 @@
 
 namespace OHOS::Ace::Framework {
 
-
-void ImageModelImpl::SetAlt(std::string src)
+void ImageModelImpl::SetAlt(const std::string& src)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
@@ -67,8 +66,7 @@ void ImageModelImpl::SetFitMaxSize(bool value)
 
 void ImageModelImpl::SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback)
 {
-    auto onCompleteEvent = EventMarker([func = std::move(callback)](const BaseEventInfo* info)
-    {
+    auto onCompleteEvent = EventMarker([func = std::move(callback)](const BaseEventInfo* info) {
         auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageSuccessEvent>(info);
         func(*eventInfo);
     });
@@ -78,8 +76,7 @@ void ImageModelImpl::SetOnComplete(std::function<void(const LoadImageSuccessEven
 
 void ImageModelImpl::SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback)
 {
-    auto onErrorEvent = EventMarker([func = std::move(callback)](const BaseEventInfo* info)
-    {
+    auto onErrorEvent = EventMarker([func = std::move(callback)](const BaseEventInfo* info) {
         auto eventInfo = TypeInfoHelper::DynamicCast<LoadImageFailEvent>(info);
         func(*eventInfo);
     });
@@ -90,15 +87,14 @@ void ImageModelImpl::SetOnError(std::function<void(const LoadImageFailEvent& inf
 void ImageModelImpl::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
 {
 
-    auto onFinishEvent = EventMarker([func = std::move(callback)]()
-    {
+    auto onFinishEvent = EventMarker([func = std::move(callback)]() {
         func();
     });
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     image->SetSvgAnimatorFinishEvent(onFinishEvent);
 }
 
-void ImageModelImpl::Create(std::string src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+void ImageModelImpl::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
 {
     RefPtr<ImageComponent> image = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
     ViewStackProcessor::GetInstance()->ClaimElementId(image);
@@ -115,7 +111,7 @@ void ImageModelImpl::Create(std::string src, bool noPixMap, RefPtr<PixelMap>& pi
 #endif
 }
 
-void ImageModelImpl::SetImageSourceSize(std::pair<Dimension, Dimension> size)
+void ImageModelImpl::SetImageSourceSize(const std::pair<Dimension, Dimension>& size)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     image->SetImageSourceSize(size);
