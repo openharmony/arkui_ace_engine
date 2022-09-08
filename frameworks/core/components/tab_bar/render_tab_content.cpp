@@ -166,6 +166,13 @@ void RenderTabContent::FireDomChangeEvent(int32_t index) const
     }
 }
 
+void RenderTabContent::HandContentIndicatorEvent(int32_t newIndex, bool needChange) const
+{
+    if (indicatorCallback_) {
+       indicatorCallback_(scrollOffset_ / contentWidth_, newIndex, needChange);
+    }
+}
+
 void RenderTabContent::HandleDragStart()
 {
     LOGD("HandleDragStart");
@@ -181,6 +188,14 @@ void RenderTabContent::HandleDragUpdate(double offset)
         return;
     }
     UpdateScrollPosition(offset);
+    if (NearZero(scrollOffset_)) {
+        LOGI("ScrollOffset near equals 0.");
+        return;
+    }
+    
+    int32_t newIndex = IsRightToLeft() ? (scrollOffset_ < 0.0 ? GetPrevIndex() : GetNextIndex())
+                                       : (scrollOffset_ > 0.0 ? GetPrevIndex() : GetNextIndex());
+    HandContentIndicatorEvent(newIndex,false);
 }
 
 void RenderTabContent::HandleDragEnd()
@@ -279,6 +294,7 @@ void RenderTabContent::ScrollContents(int32_t newIndex, bool isLinkBar, bool fro
         auto tabContent = weak.Upgrade();
         if (tabContent) {
             tabContent->HandleStartListener(newIndex, needChange, isLinkBar);
+            tabContent->HandContentIndicatorEvent(newIndex, needChange);
         }
     });
     animator_->SetDuration(static_cast<int32_t>(scrollDuration_));

@@ -100,6 +100,13 @@ bool TabBarElement::RequestNextFocus(bool vertical, bool reverse, const Rect& re
     return false;
 }
 
+void TabBarElement::UpdateScrollIndicator(double percent, int32_t newIndex, bool needChange){
+    RefPtr<RenderTabBar> tabBar = AceType::DynamicCast<RenderTabBar>(renderNode_);
+    if (tabBar) {
+        tabBar->SetScrollIndicator(percent, newIndex, needChange);
+    }
+}
+
 void TabBarElement::UpdateIndex(int32_t index)
 {
     RefPtr<RenderTabBar> tabBar = AceType::DynamicCast<RenderTabBar>(renderNode_);

@@ -48,6 +48,7 @@ public:
     {
         return GetTextDirection() == TextDirection::RTL && !isVertical_;
     }
+    void SetScrollIndicator(double percent, int32_t newIndex, bool needChange);
     void SetIndex(int32_t index, bool force = false);
     void UpdateIndicatorStyle(const RefPtr<Component>& component);
     void HandleFocusEvent(bool focus);
@@ -197,6 +198,8 @@ private:
     RefPtr<TabBarSizeAnimation> tabBarSizeAnimation_;
     int accessibilityIndex_ = -1;
     BarPosition barPosition_ = BarPosition::START;
+    double indicatorPlusX_ = 0.0;
+    double indicatorPlusWidth_ = 0.0;
 };
 
 } // namespace OHOS::Ace

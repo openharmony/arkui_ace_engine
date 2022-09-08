@@ -52,6 +52,12 @@ public:
         requireCallback_ = callback;
     }
 
+    using UpdateIndicatorFunc = std::function<void(double percent, int32_t newIndex, bool needChange)>;
+    void RegisterIndicatorCallback(const UpdateIndicatorFunc& callback)
+    {
+        indicatorCallback_ = callback;
+    }
+
     void ChangeScroll(int32_t index, bool fromController = false);
 
     void UpdateDragPosition(int32_t index);
@@ -168,6 +174,7 @@ private:
 
     void Initialize(const WeakPtr<PipelineContext>& context);
     void FireContentChangeEvent() const;
+    void HandContentIndicatorEvent(int32_t newIndex, bool needChange) const;
 
     // used to scroll TabContent and update the position
     void ScrollContents(int32_t newIndex, bool isLinkBar, bool fromController = false);
@@ -231,6 +238,7 @@ private:
     // callbacks when updating the index
     UpdateIndexFunc callback_;
     UpdateIndexFunc requireCallback_;
+    UpdateIndicatorFunc indicatorCallback_;
 
     RefPtr<TabController> controller_;
     bool useInitialIndex_ = true;
