@@ -113,9 +113,9 @@ void ListPattern::OnModifyDone()
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
-bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (skipMeasure && skipLayout) {
+    if (config.skipMeasure && config.skipLayout) {
         return false;
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());

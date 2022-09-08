@@ -97,9 +97,9 @@ void SwiperPattern::OnModifyDone()
     InitPanEvent(gestureHub);
 }
 
-bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (skipMeasure && skipLayout) {
+    if (config.skipMeasure && config.skipLayout) {
         return false;
     }
 

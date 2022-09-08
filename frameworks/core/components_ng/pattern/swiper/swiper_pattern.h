@@ -88,7 +88,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);

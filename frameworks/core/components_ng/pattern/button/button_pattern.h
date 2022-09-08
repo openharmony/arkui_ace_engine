@@ -54,7 +54,7 @@ public:
         return MakeRefPtr<ButtonLayoutProperty>();
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
 protected:
     void OnModifyDone() override;

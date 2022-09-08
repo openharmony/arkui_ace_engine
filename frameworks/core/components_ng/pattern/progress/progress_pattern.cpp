@@ -18,9 +18,9 @@
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
-bool ProgressPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool ProgressPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());

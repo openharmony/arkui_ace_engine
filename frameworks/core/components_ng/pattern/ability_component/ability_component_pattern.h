@@ -65,8 +65,7 @@ private:
         isActive_ = false;
     }
 
-    void OnLayoutChange(
-        bool frameSizeChange, bool frameOffsetChange, bool contentSizeChange, bool contentOffsetChange) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void updateWindowRect();
     bool isActive_ = false;
     bool hasConnectionToAbility_ = false;

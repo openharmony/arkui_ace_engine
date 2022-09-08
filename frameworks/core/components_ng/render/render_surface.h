@@ -34,12 +34,12 @@ public:
 
     virtual void InitSurface() {}
 
+    virtual void UpdateXComponentConfig() {}
+
     virtual void* GetNativeWindow()
     {
         return nullptr;
     }
-
-    virtual void CreateSurface() {}
 
     virtual void SetRenderContext(const RefPtr<RenderContext>& renderContext) {};
 

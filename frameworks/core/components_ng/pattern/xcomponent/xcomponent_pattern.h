@@ -42,7 +42,7 @@ public:
         const RefPtr<XComponentController>& xcomponentController);
     ~XComponentPattern() override = default;
 
-    std::optional<std::string> SurfaceNodeName() const override
+    std::optional<std::string> GetSurfaceNodeName() const override
     {
         return id_ + "Surface";
     }
@@ -114,9 +114,7 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode() override;
-    void OnLayoutChange(
-        bool frameSizeChange, bool frameOffsetChange, bool contentSizeChange, bool contentOffsetChange) override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);

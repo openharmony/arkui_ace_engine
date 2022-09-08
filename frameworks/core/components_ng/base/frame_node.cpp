@@ -43,7 +43,7 @@ namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
-    renderContext_->InitContext(IsRootNode(), pattern_->SurfaceNodeName());
+    renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName());
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
@@ -175,19 +175,21 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     bool frameOffsetChange = geometryNode_->GetFrameOffset() != dirty->GetGeometryNode()->GetFrameOffset();
     bool contentSizeChange = geometryNode_->GetContentSize() != dirty->GetGeometryNode()->GetContentSize();
     bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
-    if (frameSizeChange || frameOffsetChange || (pattern_->SurfaceNodeName().has_value() && contentSizeChange)) {
+    if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
         renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
     }
     SetGeometryNode(dirty->GetGeometryNode());
     // clean layout flag.
     layoutProperty_->CleanDirty();
-
-    pattern_->OnLayoutChange(frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange);
+    DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
     // check if need to paint content.
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
-    auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(
-        dirty, layoutAlgorithmWrapper->SkipMeasure(), layoutAlgorithmWrapper->SkipLayout());
+    config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
+    config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
+    auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
+    // TODO: temp use and need to delete.
+    needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
     if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }

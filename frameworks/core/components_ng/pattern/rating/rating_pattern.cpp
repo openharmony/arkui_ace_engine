@@ -160,9 +160,9 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
         foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_, singleStarImagePaintConfig, starNum);
 }
 
-bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
     if (!foregroundImageCanvas_ || !secondaryImageCanvas_ || !backgroundImageCanvas_) {

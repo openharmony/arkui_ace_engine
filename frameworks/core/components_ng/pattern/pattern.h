@@ -29,6 +29,15 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+struct DirtySwapConfig {
+    bool frameSizeChange = false;
+    bool frameOffsetChange = false;
+    bool contentSizeChange = false;
+    bool contentOffsetChange = false;
+    bool skipMeasure = false;
+    bool skipLayout = false;
+};
+
 // Pattern is the base class for different measure, layout and paint behavior.
 class Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
@@ -44,7 +53,7 @@ public:
         return true;
     }
 
-    virtual std::optional<std::string> SurfaceNodeName() const
+    virtual std::optional<std::string> GetSurfaceNodeName() const
     {
         return std::nullopt;
     }
@@ -63,10 +72,6 @@ public:
         frameNode_ = frameNode;
         OnAttachToFrameNode();
     }
-
-    virtual void OnLayoutChange(
-        bool frameSizeChange, bool frameOffsetChange, bool contentSizeChange, bool contentOffsetChange)
-    {}
 
     virtual RefPtr<PaintProperty> CreatePaintProperty()
     {
@@ -112,9 +117,16 @@ public:
         return true;
     }
 
-    // Called on main thread to check if need rerender of the content.
+    // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
+    {
+        return false;
+    }
+
+    // Called on main thread to check if need rerender of the content.
+    virtual bool OnDirtyLayoutWrapperSwap(
+        const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*changeConfig*/)
     {
         return false;
     }
@@ -135,6 +147,15 @@ public:
             return std::nullopt;
         }
         return frameNode->GetGeometryNode()->GetFrameOffset();
+    }
+
+    std::optional<OffsetF> GetHostFrameGlobalOffset() const
+    {
+        auto frameNode = frameNode_.Upgrade();
+        if (!frameNode) {
+            return std::nullopt;
+        }
+        return frameNode->GetGeometryNode()->GetFrameOffset() + frameNode->GetGeometryNode()->GetParentGlobalOffset();
     }
 
     std::optional<SizeF> GetHostContentSize() const

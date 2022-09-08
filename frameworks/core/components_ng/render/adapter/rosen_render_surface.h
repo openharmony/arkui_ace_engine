@@ -32,9 +32,9 @@ public:
 
     void InitSurface() override;
 
-    void* GetNativeWindow() override;
+    void UpdateXComponentConfig() override;
 
-    void CreateSurface() override;
+    void* GetNativeWindow() override;
 
     void SetRenderContext(const RefPtr<RenderContext>& renderContext) override;
 
@@ -48,7 +48,7 @@ public:
 
     std::string GetUniqueId() const override;
 
-    OHOS::sptr<OHOS::Surface> GetSurface()
+    OHOS::sptr<OHOS::Surface> GetSurface() const
     {
         return producerSurface_;
     }
