@@ -46,12 +46,12 @@ void ImageModelNG::SetFitMaxSize(bool value)
 {
 }
 
-void ImageModelNG::SetOnComplete(std::function<void(LoadImageSuccessEvent& info)>&& callback)
+void ImageModelNG::SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback)
 {
     NG::ImageView::SetOnComplete(std::move(callback));
 }
 
-void ImageModelNG::SetOnError(std::function<void(LoadImageFailEvent& info)>&& callback)
+void ImageModelNG::SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback)
 {
     NG::ImageView::SetOnError(std::move(callback));
 }

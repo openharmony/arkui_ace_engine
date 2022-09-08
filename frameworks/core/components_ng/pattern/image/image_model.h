@@ -38,8 +38,8 @@ public:
     virtual void SetImageFit(int32_t value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;
     virtual void SetFitMaxSize(bool value) = 0;
-    virtual void SetOnComplete(std::function<void(LoadImageSuccessEvent& info)>&& callback) = 0;
-    virtual void SetOnError(std::function<void(LoadImageFailEvent& info)>&& callback) = 0;
+    virtual void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) = 0;
+    virtual void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) = 0;
     virtual void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) = 0;
     virtual void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) = 0;
