@@ -72,10 +72,6 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
         color = paintProperty->GetCheckBoxSelectedColorValue();
     }
     auto offset = paintWrapper->GetContentOffset();
-    // if (!offset.NonOffset()) {
-    //     PAINT_OFFSET_X = offset.GetX();
-    //     PAINT_OFFSET_Y = offset.GetY();
-    // }
 
     RSPen pen = RSPen();
     RSBrush brush = RSBrush();

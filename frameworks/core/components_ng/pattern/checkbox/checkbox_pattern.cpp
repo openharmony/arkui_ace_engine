@@ -37,6 +37,15 @@
 
 namespace OHOS::Ace::NG {
 
+void CheckBoxPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToFrame(true);
+
+    host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+}
+
 void CheckBoxPattern::OnModifyDone()
 {
     auto host = GetHost();
