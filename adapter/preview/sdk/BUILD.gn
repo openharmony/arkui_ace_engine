@@ -59,6 +59,12 @@ if (is_standard_system) {
   ohos_copy("copy_napi_modules_shared_library") {
     deps = []
     sources = []
+    out_path = get_label_info(
+            "//base/hiviewdfx/hilog/interfaces/js/kits/napi:libhilognapi",
+            "root_out_dir")
+    deps += [ "//base/hiviewdfx/hilog/interfaces/js/kits/napi:libhilognapi" ]
+    sources += [ "${out_path}/hiviewdfx/hilog_native/libhilog${dylib_suffix}" ]
+
     foreach(module, common_napi_libs) {
       out_path = get_label_info("$ace_root/interfaces/napi/kits:${module}",
                                 "root_out_dir")
