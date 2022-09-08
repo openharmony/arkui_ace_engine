@@ -76,7 +76,7 @@ void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
         if (!usingExistVM_) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
+#if !defined(PREVIEW)
             JSNApi::StopDebugger(vm_);
 #endif
             JSNApi::DestroyJSVM(vm_);
@@ -105,6 +105,12 @@ shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::str
 bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath)
 {
     JSExecutionScope executionScope(vm_);
+#if !defined(PREVIEW)
+    if (!libPath_.empty()) {
+        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_,
+            debuggerPostTask_);
+    }
+#endif
     LocalScope scope(vm_);
     bool ret = JSNApi::Execute(vm_, buffer, size, PANDA_MAIN_FUNCTION, filePath);
     HandleUncaughtException();
@@ -114,12 +120,12 @@ bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std
 bool ArkJSRuntime::ExecuteJsBin(const std::string& fileName)
 {
     JSExecutionScope executionScope(vm_);
+#if !defined(PREVIEW)
     if (!libPath_.empty()) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
         JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_,
             debuggerPostTask_);
-#endif
     }
+#endif
     LocalScope scope(vm_);
     bool ret = JSNApi::Execute(vm_, fileName, PANDA_MAIN_FUNCTION);
     HandleUncaughtException();

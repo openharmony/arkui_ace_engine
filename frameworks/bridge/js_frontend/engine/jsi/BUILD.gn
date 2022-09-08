@@ -90,7 +90,9 @@ template("js_engine_ark") {
         "//foundation/arkui/napi/native_engine/impl/ark:ace_napi_impl_ark",
       ]
     } else {
-      sources += [ "jsi_utils.cpp" ]
+      if (!defined(config.build_for_android) || !config.build_for_android) {
+        sources += [ "jsi_utils.cpp" ]
+      }
       deps += [ "//third_party/jsframework:ark_build" ]
       external_deps = [
         "multimedia_image_standard:image",
