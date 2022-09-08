@@ -1149,6 +1149,11 @@ const TextEditingValue& RenderTextField::GetPreEditingValue() const
     return controller_->GetPreValue();
 }
 
+double RenderTextField::GetEditingBoxY() const
+{
+    return GetGlobalOffset().GetY() + height_.Value();
+}
+
 void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent, bool isClearRecords)
 {
     if (newValue.text != GetEditingValue().text && needFireChangeEvent) {
