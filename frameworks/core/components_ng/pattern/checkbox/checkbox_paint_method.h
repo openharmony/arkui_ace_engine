@@ -35,10 +35,16 @@ public:
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
+    void InitializeParam();
     void PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
     void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, RSBrush& brush, SizeF& paintSize) const;
     void DrawActiveBorder(RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
     void DrawCheck(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
+
+    float borderWidth_ = 0.0f;
+    float borderRadius_ = 0.0f;
+    float checkStroke_ = 0.0f;
+    Color activeColor_ = Color::BLUE;
 };
 } // namespace OHOS::Ace::NG
 

@@ -26,32 +26,22 @@
 
 namespace OHOS::Ace::NG {
 
-void CheckBoxView::Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName)
+void CheckBoxView::Create(
+    const std::optional<std::string>& name, const std::optional<std::string>& groupName, const std::string& tagName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CHECKBOX_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CheckBoxPattern>(); });
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<CheckBoxPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();    
-    if(name.has_value()){
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    if (name.has_value()) {
         eventHub->SetName(name.value());
     }
-    if(groupName.has_value()){
+    if (groupName.has_value()) {
         eventHub->SetGroupname(groupName.value());
     }
-    
-    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, false);
-}
-
-void CheckBoxView::Create()
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CHECKBOX_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CheckBoxPattern>(); });
-    ViewStackProcessor::GetInstance()->Push(frameNode);
 
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, false);
 }

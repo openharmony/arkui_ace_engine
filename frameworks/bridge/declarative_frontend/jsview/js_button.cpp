@@ -27,6 +27,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/text/text_view.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -268,7 +269,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::Create();
+        NG::ButtonView::Create(V2::BUTTON_ETS_TAG);
         if (!labelSet && info[0]->IsObject()) {
             SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
         }
@@ -298,7 +299,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::Create();
+        NG::ButtonView::Create(V2::BUTTON_ETS_TAG);
         if (info[0]->IsObject()) {
             auto obj = JSRef<JSObject>::Cast(info[0]);
             SetTypeAndStateEffect(obj);

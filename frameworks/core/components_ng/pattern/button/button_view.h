@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ButtonView {
 public:
     static void CreateWithLabel(const std::string& label);
-    static void Create();
+    static void Create(const std::string& tagName);
     static void SetType(ButtonType buttonType);
     static void SetStateEffect(bool stateEffect);
     static void SetFontSize(const Dimension& fontSize);
