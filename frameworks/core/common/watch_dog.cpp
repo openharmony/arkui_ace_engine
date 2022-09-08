@@ -35,13 +35,13 @@
 namespace OHOS::Ace {
 namespace {
 
-constexpr int32_t NORMAL_CHECK_PERIOD = 6;
-constexpr int32_t WARNING_CHECK_PERIOD = 5;
-constexpr int32_t FREEZE_CHECK_PERIOD = 4;
+constexpr int32_t NORMAL_CHECK_PERIOD = 3;
+constexpr int32_t WARNING_CHECK_PERIOD = 3;
+constexpr int32_t FREEZE_CHECK_PERIOD = 1;
 constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
 constexpr char UNKNOWN_THREAD_NAME[] = "unknown thread";
-constexpr uint64_t ANR_INPUT_FREEZE_TIME = 10000;
+constexpr uint64_t ANR_INPUT_FREEZE_TIME = 5000;
 constexpr int32_t IMMEDIATELY_PERIOD = 0;
 constexpr int32_t ANR_DIALOG_BLOCK_TIME = 20;
 
@@ -473,7 +473,7 @@ void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExec
 
 void WatchDog::Unregister(int32_t instanceId)
 {
-    int32_t num = static_cast<int32_t>(watchMap_.erase(instanceId));
+    auto num = watchMap_.erase(instanceId);
     if (num == 0) {
         LOGW("Unregister from watch dog failed with instanceID %{public}d", instanceId);
     }
