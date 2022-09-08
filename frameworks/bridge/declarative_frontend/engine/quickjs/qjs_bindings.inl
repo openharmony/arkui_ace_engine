@@ -372,6 +372,7 @@ JSValue QJSKlass<C>::InternalMemberFunctionSetCallback(
     LOGD("InternalmemberFunctionSetCallback: Calling %s::%s", ThisJSClass::JSName(), binding->Name());
     auto fnPtr =
         static_cast<FunctionBinding<T, JSValue, JSContext*, JSValueConst, JSValueConst>*>(binding)->Get();
+    QJSContext::Scope scp(ctx);
     return (instance->*fnPtr)(ctx, thisObj, val);
 }
 
@@ -387,6 +388,7 @@ JSValue QJSKlass<C>::InternalJSMemberFunctionCallback(
 
     auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
     QJSCallbackInfo info(ctx, thisObj, argc, argv);
+    QJSContext::Scope scp(ctx);
     (instance->*fnPtr)(info);
 
     std::variant<void*, JSValue> retVal = info.GetReturnValue();
@@ -419,6 +421,7 @@ JSValue QJSKlass<C>::InternalJSMemberFunctionGetCallback(
 
     auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
     QJSCallbackInfo info(ctx, thisObj, 0, nullptr);
+    QJSContext::Scope scp(ctx);
     (instance->*fnPtr)(info);
 
     std::variant<void*, JSValue> retVal = info.GetReturnValue();
@@ -451,6 +454,7 @@ JSValue QJSKlass<C>::InternalJSMemberFunctionSetCallback(
 
     auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
     QJSCallbackInfo info(ctx, thisObj, 1, &argv);
+    QJSContext::Scope scp(ctx);
     (instance->*fnPtr)(info);
 
     std::variant<void*, JSValue> retVal = info.GetReturnValue();
