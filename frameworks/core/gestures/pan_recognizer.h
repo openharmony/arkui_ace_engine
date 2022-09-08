@@ -109,6 +109,8 @@ public:
 
     void OnAccepted() override;
     void OnRejected() override;
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
 
 private:
     enum class GestureAcceptResult {
@@ -132,8 +134,6 @@ private:
     void ChangeDirection(const PanDirection& direction);
     void ChangeDistance(double distance);
     double GetMainAxisDelta();
-    void OnFlushTouchEventsBegin() override;
-    void OnFlushTouchEventsEnd() override;
 
     const TouchRestrict& GetTouchRestrict() const
     {

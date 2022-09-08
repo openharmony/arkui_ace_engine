@@ -82,6 +82,20 @@ Scrollable::~Scrollable()
     springController_->Stop();
 }
 
+void Scrollable::OnFlushTouchEventsBegin()
+{
+    if (panRecognizer_) {
+        panRecognizer_->OnFlushTouchEventsBegin();
+    }
+}
+
+void Scrollable::OnFlushTouchEventsEnd()
+{
+    if (panRecognizer_) {
+        panRecognizer_->OnFlushTouchEventsEnd();
+    }
+}
+
 void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
 {
     context_ = context;
