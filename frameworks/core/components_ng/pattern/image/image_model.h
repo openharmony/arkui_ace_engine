@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/image/image_event.h"
 
@@ -35,6 +36,7 @@ public:
 
     virtual void SetAlt(const std::string& src) = 0;
     virtual void SetBlur(double blur) = 0;
+    virtual void SetBorder(const Border& border) = 0;
     virtual void SetImageFit(int32_t value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;
     virtual void SetFitMaxSize(bool value) = 0;

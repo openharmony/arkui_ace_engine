@@ -29,6 +29,10 @@ void ImageModelNG::SetAlt(const std::string& src)
 {
 }
 
+void ImageModelNG::SetBorder(const Border& border)
+{
+}
+
 void ImageModelNG::SetBlur(double blur)
 {
 }

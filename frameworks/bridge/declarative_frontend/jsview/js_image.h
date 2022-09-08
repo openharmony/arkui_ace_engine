@@ -60,6 +60,7 @@ public:
     static void SetCopyOption(const JSCallbackInfo& info);
 
 protected:
+    static void SetBorder(const Border& border);
     static void SetAutoResize(bool autoResize);
 
 };

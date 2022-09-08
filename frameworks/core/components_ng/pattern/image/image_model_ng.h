@@ -26,6 +26,7 @@ namespace OHOS::Ace::NG {
 class  ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
     void SetAlt(const std::string& src) override;
+    void SetBorder(const Border& border) override;
     void SetBlur(double blur) override;
     void SetImageFit(int32_t value) override;
     void SetMatchTextDirection(bool value) override;

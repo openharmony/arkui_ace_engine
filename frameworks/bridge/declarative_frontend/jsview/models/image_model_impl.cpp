@@ -32,6 +32,14 @@ void ImageModelImpl::SetAlt(const std::string& src)
     }
 }
 
+void ImageModelImpl::SetBorder(const Border& border)
+{
+    auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (image) {
+        image->SetBorder(border);
+    }
+}
+
 void ImageModelImpl::SetBlur(double blur)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

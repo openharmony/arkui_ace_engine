@@ -96,6 +96,11 @@ void JSImage::SetFitOriginalSize(bool value)
     ImageModel::GetInstance()->SetFitMaxSize(value);
 }
 
+void JSImage::SetBorder(const Border& border)
+{
+    GetFrontDecoration()->SetBorder(border);
+    ImageModel::GetInstance()->SetBorder(border);
+}
 void JSImage::OnComplete(const JSCallbackInfo& args)
 {
     LOGD("JSImage V8OnComplete");
