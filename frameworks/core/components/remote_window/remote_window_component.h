@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Rosen {
-class RSProxyNode;
+class RSNode;
 }
 
 namespace Ace {
@@ -33,18 +33,18 @@ public:
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
 
-    void SetRSProxyNode(const std::shared_ptr<Rosen::RSProxyNode>& proxyNode)
+    void SetExternalRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode)
     {
-        proxyNode_ = proxyNode;
+        rsNode_ = rsNode;
     }
 
-    const std::shared_ptr<Rosen::RSProxyNode>& GetRSProxyNode() const
+    const std::shared_ptr<Rosen::RSNode>& GetExternalRSNode() const
     {
-        return proxyNode_;
+        return rsNode_;
     }
 
 private:
-    std::shared_ptr<Rosen::RSProxyNode> proxyNode_;
+    std::shared_ptr<Rosen::RSNode> rsNode_;
 };
 } // namespace Ace
 } // namespace OHOS
