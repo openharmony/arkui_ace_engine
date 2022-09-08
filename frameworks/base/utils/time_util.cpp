@@ -109,4 +109,58 @@ bool IsDayTime(const TimeOfNow& timeOfNow)
            LessNotEqual(timeOfNow.hour24_, DAY_TIME_UPPER_LIMIT);
 }
 
+TimeOfZone GetTimeOfZone(int32_t hoursWest)
+{
+    struct timeval currentTime;
+    struct timezone timeZone;
+    gettimeofday(&currentTime, &timeZone);
+
+    TimeOfZone timeOfZone(hoursWest);
+    int32_t minutesWest = timeZone.tz_minuteswest;
+    if (HoursWestIsValid(timeOfZone.hoursWest_)) {
+        minutesWest = Round(TOTAL_MINUTE_OF_HOUR * timeOfZone.hoursWest_);
+    } else {
+        // when [hoursWest] is invalid, set current time zone to [hoursWest].
+        if (!NearEqual(timeOfZone.hoursWest_, DEFAULT_HOURS_WEST)) { // default value of hoursWest_ is DEFAULT_HOURS_WEST
+            LOGW("hoursWest [%{public}d] is invalid, use current time zone.", timeOfZone.hoursWest_);
+        }
+        timeOfZone.hoursWest_ = minutesWest / TOTAL_MINUTE_OF_HOUR;
+    }
+    int secondsOfToday = currentTime.tv_sec % TOTAL_SECONDS_OF_DAY - minutesWest * TOTAL_SECONDS_OF_MINUTE;
+    if (secondsOfToday < 0) {
+        secondsOfToday += TOTAL_SECONDS_OF_DAY;
+    }
+    timeOfZone.minute_ = (secondsOfToday / TOTAL_SECONDS_OF_MINUTE) % TOTAL_MINUTE_OF_HOUR +
+                        secondsOfToday % TOTAL_SECONDS_OF_MINUTE / TOTAL_SECONDS_OF_MINUTE;
+    timeOfZone.hour24_ =
+        (secondsOfToday / TOTAL_SECONDS_OF_HOUR) % TWENTY_FOUR_HOUR_BASE + timeOfZone.minute_ / TOTAL_MINUTE_OF_HOUR;
+    timeOfZone.hour12_ =
+        (timeOfZone.hour24_ < TWELVE_HOUR_BASE) ? timeOfZone.hour24_ : (timeOfZone.hour24_ - TWELVE_HOUR_BASE);
+    timeOfZone.second_ = secondsOfToday % TOTAL_SECONDS_OF_MINUTE;
+    timeOfZone.timeUsec_ = currentTime.tv_usec;
+    return timeOfZone;
+}
+
+bool HoursWestIsValid(int32_t& hoursWest)
+{
+    // valid hoursWest is within [-14, 12]
+    bool isValid = GreatOrEqual(hoursWest, HOURS_WEST_LOWER_LIMIT) && LessOrEqual(hoursWest, HOURS_WEST_UPPER_LIMIT);
+    if (!isValid) {
+        return false;
+    }
+    // Theoretically, the time zone range should be [-12, +12], but some countries and regions that cross the
+    // International Date Line use -13(UTC+13) and -14(UTC+14) to keep the whole country or region at the same date.
+    bool isSpecialTimeZone = LessNotEqual(hoursWest, HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT);
+    if (isSpecialTimeZone) {
+        hoursWest += TWENTY_FOUR_HOUR_BASE;
+    }
+    return true;
+}
+
+bool IsDayTime(const TimeOfZone& timeOfZone)
+{
+    return GreatOrEqual(timeOfZone.hour24_, DAY_TIME_LOWER_LIMIT) &&
+           LessNotEqual(timeOfZone.hour24_, DAY_TIME_UPPER_LIMIT);
+}
+
 } // namespace OHOS::Ace

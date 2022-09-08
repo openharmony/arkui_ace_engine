@@ -229,6 +229,8 @@ public:
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
+    virtual void Clone(RefPtr<LayoutProperty> layoutProperty) const;
+
 private:
     // This will call after ModifyLayoutConstraint.
     void CheckSelfIdealSize();
