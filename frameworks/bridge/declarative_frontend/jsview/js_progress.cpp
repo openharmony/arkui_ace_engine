@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-#include <cmath>
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_progress.h"
 
+#include <cmath>
+
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/progress/progress_component.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components/track/track_component.h"
+#include "core/components_ng/pattern/progress/progress_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -70,6 +72,11 @@ void JSProgress::Create(const JSCallbackInfo& info)
         progressType = ProgressType::CAPSULE;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ProgressView::Create(0.0, value, 0.0, total, static_cast<OHOS::Ace::NG::ProgressType>(progressType));
+        return;
+    }
+
     auto progressComponent = AceType::MakeRefPtr<OHOS::Ace::ProgressComponent>(0.0, value, 0.0, total, progressType);
     ViewStackProcessor::GetInstance()->ClaimElementId(progressComponent);
     auto theme = GetTheme<ProgressTheme>();
@@ -113,6 +120,11 @@ void JSProgress::JSBind(BindingTarget globalObj)
 
 void JSProgress::SetValue(double value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ProgressView::SetValue(value);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto progress = AceType::DynamicCast<ProgressComponent>(component);
     if (!progress) {
@@ -128,6 +140,16 @@ void JSProgress::SetValue(double value)
 
 void JSProgress::SetColor(const JSCallbackInfo& info)
 {
+    Color colorVal;
+    if (!ParseJsColor(info[0], colorVal)) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ProgressView::SetColor(colorVal);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto progress = AceType::DynamicCast<ProgressComponent>(component);
     if (!progress) {
@@ -136,10 +158,7 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
     }
     RefPtr<TrackComponent> track = progress->GetTrack();
 
-    Color colorVal;
-    if (ParseJsColor(info[0], colorVal))  {
-        track->SetSelectColor(colorVal);
-    }
+    track->SetSelectColor(colorVal);
 }
 
 void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
@@ -150,12 +169,6 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
     }
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto progress = AceType::DynamicCast<ProgressComponent>(component);
-    if (!progress) {
-        LOGI("progress component is null.");
-        return;
-    }
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
 
     Dimension strokeWidthDimension;
@@ -168,12 +181,15 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
     if (strokeWidthDimension.Value() <= 0.0) {
         strokeWidthDimension = theme->GetTrackThickness();
     }
-    progress->SetTrackThickness(strokeWidthDimension);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ProgressView::SetStrokeWidth(strokeWidthDimension);
+    }
 
     auto jsScaleCount = paramObject->GetProperty("scaleCount");
     auto scaleCount = jsScaleCount->IsNumber() ? jsScaleCount->ToNumber<int32_t>() : theme->GetScaleNumber();
-    if (scaleCount > 0.0) {
-        progress->SetScaleNumber(scaleCount);
+    if (scaleCount > 0.0 && Container::IsCurrentUseNewPipeline()) {
+        NG::ProgressView::SetScaleCount(scaleCount);
     }
 
     Dimension scaleWidthDimension;
@@ -186,6 +202,25 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
     if ((scaleWidthDimension.Value() <= 0.0) || (scaleWidthDimension.Value() > strokeWidthDimension.Value())) {
         scaleWidthDimension = theme->GetScaleWidth();
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ProgressView::SetScaleWidth(scaleWidthDimension);
+        return;
+    }
+
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto progress = AceType::DynamicCast<ProgressComponent>(component);
+    if (!progress) {
+        LOGI("progress component is null.");
+        return;
+    }
+
+    progress->SetTrackThickness(strokeWidthDimension);
+
+    if (scaleCount > 0.0) {
+        progress->SetScaleNumber(scaleCount);
+    }
+
     progress->SetScaleWidth(scaleWidthDimension);
 }
 
@@ -209,10 +244,9 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
     }
 
     Color colorVal;
-    if (ParseJsColor(info[0], colorVal))  {
+    if (ParseJsColor(info[0], colorVal)) {
         track->SetBackgroundColor(colorVal);
     }
 }
 
 } // namespace OHOS::Ace::Framework
-
