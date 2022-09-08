@@ -141,6 +141,9 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
     }
     fadeColor_ = swiper->GetFadeColor();
     scale_ = context->GetDipScale();
+    displayMode_ = swiper->GetDisplayMode();
+    displayCount_ = swiper->GetDisplayCount();
+    edgeEffect_ = swiper->GetEdgeEffect();
 
     curve_ = swiper->GetCurve();
     if (curve_) {

@@ -33,6 +33,8 @@ public:
 
     std::string GetValue() const;
     std::string GetChecked() const;
+    std::string GetWidth() const override;
+    std::string GetHeight() const override;
 
 private:
     RefPtr<RenderRadio> GetRenderRadio() const;

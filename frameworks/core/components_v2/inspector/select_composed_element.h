@@ -43,6 +43,8 @@ public:
     std::string GetOptionBgColor(void) const;
     std::string GetOptionFont(void) const;
     std::string GetOptionFontColor(void) const;
+    std::string GetWidth() const override;
+    std::string GetHeight() const override;
 
 private:
     OHOS::Ace::RefPtr<OHOS::Ace::RenderSelect> GetRenderSelect() const;

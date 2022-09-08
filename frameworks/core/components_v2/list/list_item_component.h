@@ -82,7 +82,7 @@ public:
 
 private:
     OnSelectFunc onSelectId_;
-    bool selectable_ = false;
+    bool selectable_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemComponent);
 };
 
