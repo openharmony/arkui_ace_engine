@@ -797,6 +797,7 @@ void QuickJsGroupJsBridge::CallModuleJsCallback(int32_t callbackId, int32_t code
             return;
         }
 
+        QJSContext::Scope scp(context_);
         // Pass only 1 parameter, call promise resolve call back.
         JS_Call(context_, jsFunc, JS_UNDEFINED, 1, &callBackResult);
         js_std_loop(context_);

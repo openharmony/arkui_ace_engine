@@ -266,7 +266,38 @@ bool PipelineContext::OnBackPressed()
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
-    touchEvents_.emplace_back(point);
+    auto scalePoint = point.CreateScalePoint(GetViewScale());
+    LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
+        scalePoint.type);
+    if (scalePoint.type == TouchType::DOWN) {
+        LOGD("receive touch down event, first use touch test to collect touch event target");
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = point.sourceType;
+        eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, false);
+    }
+
+    if (scalePoint.type == TouchType::MOVE) {
+        touchEvents_.emplace_back(point);
+        hasIdleTasks_ = true;
+        window_->RequestFrame();
+        return;
+    }
+
+    std::optional<TouchEvent> lastMoveEvent;
+    if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
+        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end(); ++iter) {
+            auto movePoint = (*iter).CreateScalePoint(GetViewScale());
+            if (scalePoint.id == movePoint.id) {
+                lastMoveEvent = movePoint;
+                touchEvents_.erase(iter++);
+            }
+        }
+        if (lastMoveEvent.has_value()) {
+            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
+        }
+    }
+
+    eventManager_->DispatchTouchEvent(scalePoint);
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -291,19 +322,28 @@ void PipelineContext::FlushTouchEvents()
         return;
     }
     {
-        ACE_SCOPED_TRACE("PipelineContext::DispatchTouchEvent");
+        eventManager_->FlushTouchEventsBegin(touchEvents_);
+        std::unordered_set<int32_t> moveEventIds;
         decltype(touchEvents_) touchEvents(std::move(touchEvents_));
-        for (const auto& touchEvent : touchEvents) {
-            auto scalePoint = touchEvent.CreateScalePoint(GetViewScale());
-            LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
-                scalePoint.type);
-            if (scalePoint.type == TouchType::DOWN) {
-                LOGD("receive touch down event, first use touch test to collect touch event target");
-                TouchRestrict touchRestrict { TouchRestrict::NONE };
-                touchRestrict.sourceType = touchEvent.sourceType;
-                eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, false);
+        if (touchEvents.empty()) {
+            return;
+        }
+        std::list<TouchEvent> touchPoints;
+        for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
+            auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
+            auto result = moveEventIds.emplace(scalePoint.id);
+            if (result.second) {
+                touchPoints.emplace_front(scalePoint);
             }
-            eventManager_->DispatchTouchEvent(scalePoint);
+        }
+
+        auto maxSize = touchPoints.size();
+        for (auto iter = touchPoints.rbegin(); iter != touchPoints.rend(); ++iter) {
+            maxSize--;
+            if (maxSize == 0) {
+                eventManager_->FlushTouchEventsEnd(touchPoints);
+            }
+            eventManager_->DispatchTouchEvent(*iter);
         }
     }
 }

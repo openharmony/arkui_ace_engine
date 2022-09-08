@@ -3116,6 +3116,7 @@ void RenderList::AddChildItem(RefPtr<RenderNode> child)
 
 void RenderList::SizeChangeOffset(double newWindowHeight)
 {
+    LOGD("list newWindowHeight = %{public}f", newWindowHeight);
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -3123,6 +3124,10 @@ void RenderList::SizeChangeOffset(double newWindowHeight)
     auto textFieldManager = AceType::DynamicCast<TextFieldManager>(context->GetTextFieldManager());
     // only need to offset vertical lists
     if (textFieldManager && vertical_) {
+        // only when textField is onFocus
+        if (!textFieldManager->GetOnFocusTextField().Upgrade()) {
+            return;
+        }
         auto position = textFieldManager->GetClickPosition().GetY();
         double offset = newWindowHeight - position;
         if (LessOrEqual(offset, 0.0)) {
@@ -3130,6 +3135,7 @@ void RenderList::SizeChangeOffset(double newWindowHeight)
             currentOffset_ += offset;
             startIndexOffset_ += offset;
         }
+        LOGD("size change offset applied, %{public}f", offset);
     }
 }
 

@@ -31,7 +31,7 @@ namespace {
 void MakeNodeMapById(const std::list<RefPtr<UINode>>& nodes, const std::list<int32_t>& indexes,
     std::map<int32_t, RefPtr<UINode>>& result)
 {
-    ACE_DCHECK(ids.size() == nodes.size());
+    ACE_DCHECK(indexes.size() == nodes.size());
     auto idsIter = indexes.begin();
     auto nodeIter = nodes.begin();
     while (idsIter != indexes.end()) {
