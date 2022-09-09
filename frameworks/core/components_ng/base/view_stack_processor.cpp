@@ -16,8 +16,10 @@
 #include "core/components_ng/base/view_stack_processor.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/base/group_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -46,7 +48,7 @@ RefPtr<UINode> ViewStackProcessor::GetMainElementNode() const
     return elementsStack_.top();
 }
 
-void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool isCustomView)
+void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView*/)
 {
     if (ShouldPopImmediately()) {
         Pop();
@@ -86,13 +88,14 @@ void ViewStackProcessor::Pop()
         return;
     }
 
-    auto element = elementsStack_.top();
-    elementsStack_.pop();
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    if (frameNode) {
-        frameNode->MarkModifyDone();
+    auto currentNode = Finish();
+    auto parent = GetMainElementNode();
+    if (AceType::InstanceOf<GroupNode>(parent)) {
+        auto groupNode = AceType::DynamicCast<GroupNode>(parent);
+        groupNode->AddChildToGroup(currentNode);
+        return;
     }
-    element->MountToParent(GetMainElementNode());
+    currentNode->MountToParent(parent);
     LOGD("ViewStackProcessor Pop size %{public}zu", elementsStack_.size());
 }
 
@@ -105,7 +108,10 @@ void ViewStackProcessor::PopContainer()
         return;
     }
 
-    while (top->IsAtomicNode()) {
+    while (top && (top->IsAtomicNode())) {
+        if (elementsStack_.size() == 1) {
+            return;
+        }
         Pop();
         top = GetMainElementNode();
     }
@@ -124,11 +130,10 @@ RefPtr<UINode> ViewStackProcessor::Finish()
     if (frameNode) {
         frameNode->MarkModifyDone();
     }
-    if (!elementsStack_.empty()) {
-        LOGE("the elementsStack size is not right");
-        do {
-            elementsStack_.pop();
-        } while (!elementsStack_.empty());
+    // ForEach Partial Update Path.
+    if (AceType::InstanceOf<ForEachNode>(element)) {
+        auto forEachNode = AceType::DynamicCast<ForEachNode>(element);
+        forEachNode->CompareAndUpdateChildren();
     }
     return element;
 }

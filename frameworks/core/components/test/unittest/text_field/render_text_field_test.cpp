@@ -140,6 +140,11 @@ public:
     {
         return Size();
     }
+
+    CopyOptions GetCopyOption()
+    {
+        return copyOption_;
+    }
 };
 
 class RenderTextFieldTest : public testing::Test {
@@ -388,6 +393,81 @@ HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate010, TestSize.Level1)
     renderTextField->Update(textField);
     EXPECT_TRUE(renderTextField->NeedLayout());
     EXPECT_TRUE(renderTextField->IsExtend());
+}
+
+/**
+ * @tc.name: RenderTextFieldUpdate011
+ * @tc.desc: Verify the Update Inline style of RenderTextField work correctly.
+ * @tc.type: FUNC
+ * @tc.require: issueI5JQ3F
+ */
+HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate011, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderTextFieldTest RenderTextFieldUpdate011 start";
+    /**
+     * @tc.steps: step1. construct TextFieldComponent and RenderTextField.
+     */
+    RefPtr<TextFieldComponent> textField = AceType::MakeRefPtr<TextFieldComponent>();
+    textField->SetInputStyle(InputStyle::INLINE);
+    RefPtr<MockRenderTextField> renderTextField = AceType::MakeRefPtr<MockRenderTextField>();
+
+    /**
+     * @tc.steps: step2. call the Update interface of RenderTextField.
+     * @tc.expected: step2. RenderTextField style is set as InputStyle::INLINE.
+     */
+    renderTextField->Update(textField);
+    EXPECT_EQ(renderTextField->GetInputStyle(), InputStyle::INLINE);
+    GTEST_LOG_(INFO) << "RenderTextFieldTest RenderTextFieldUpdate011 end";
+}
+
+/**
+ * @tc.name: RenderTextFieldUpdate012
+ * @tc.desc: Verify the Update Default style of RenderTextField work correctly.
+ * @tc.type: FUNC
+ * @tc.require: issueI5JQ3F
+ */
+HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate012, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderTextFieldTest RenderTextFieldUpdate012 start";
+    /**
+     * @tc.steps: step1. construct TextFieldComponent and RenderTextField.
+     */
+    RefPtr<TextFieldComponent> textField = AceType::MakeRefPtr<TextFieldComponent>();
+    textField->SetInputStyle(InputStyle::INLINE);
+    RefPtr<MockRenderTextField> renderTextField = AceType::MakeRefPtr<MockRenderTextField>();
+
+    /**
+     * @tc.steps: step2. call the Update interface of RenderTextField.
+     * @tc.expected: step2. RenderTextField style is set as InputStyle::DEFAULT.
+     */
+    renderTextField->Update(textField);
+    EXPECT_EQ(renderTextField->GetInputStyle(), InputStyle::DEFAULT);
+    GTEST_LOG_(INFO) << "RenderTextFieldTest RenderTextFieldUpdate012 start";
+}
+
+/**
+ * @tc.name: RenderTextFieldUpdate013
+ * @tc.desc: Verify the Update Interface of RenderTextField work correctly with copyOption_.
+ * @tc.type: FUNC
+ * @tc.require: issueI5NYZF
+ */
+HWTEST_F(RenderTextFieldTest, RenderTextFieldUpdate013, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderTextFieldTest RenderTextFieldUpdate013 start";
+    /**
+     * @tc.steps: step1. construct TextFieldComponent and RenderTextField.
+     */
+    RefPtr<TextFieldComponent> textField = AceType::MakeRefPtr<TextFieldComponent>();
+    textField->SetCopyOption(CopyOptions::InApp);
+    RefPtr<MockRenderTextField> renderTextField = AceType::MakeRefPtr<MockRenderTextField>();
+
+    /**
+     * @tc.steps: step2. call the Update interface of RenderTextField.
+     * @tc.expected: step2. RenderTextField copyOption is set as CopyOptions::InApp.
+     */
+    renderTextField->Update(textField);
+    EXPECT_EQ(renderTextField->GetCopyOption(), CopyOptions::InApp);
+    GTEST_LOG_(INFO) << "RenderTextFieldTest RenderTextFieldUpdate013 start";
 }
 
 } // namespace OHOS::Ace

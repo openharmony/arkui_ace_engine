@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PAPAGRAPH_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PAPAGRAPH_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 
 #include "flutter/third_party/txt/src/txt/font_collection.h"
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_txt.h"
 
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
@@ -31,15 +32,17 @@ class TxtParagraph : public Paragraph {
 public:
     TxtParagraph(const WeakPtr<PipelineContext>& context, const ParagraphStyle& paraStyle,
         std::shared_ptr<txt::FontCollection> fontCollection)
-        : context_(context), paraStyle_(paraStyle), fontCollection_(fontCollection)
+        : context_(context), paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
-    ~TxtParagraph() = default;
+    ~TxtParagraph() override = default;
 
     // whether the paragraph has been build
     bool IsValid() override;
 
     // interfaces for build text paragraph
     void PushStyle(const TextStyle& style) override;
+    void PopStyle() override;
+
     void AddText(const std::u16string& text) override;
     void Build() override;
     void Reset() override;
@@ -60,8 +63,10 @@ private:
     std::unique_ptr<txt::Paragraph> paragraph_;
     std::unique_ptr<txt::ParagraphBuilder> builder_;
     std::shared_ptr<txt::FontCollection> fontCollection_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(TxtParagraph);
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PAPAGRAPH_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H

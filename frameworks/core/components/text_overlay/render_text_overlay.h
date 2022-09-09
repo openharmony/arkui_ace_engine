@@ -42,6 +42,9 @@ const Dimension STROKE_MIN_WIDTH = 1.5_vp;
 
 using StartAnimationCallback = std::function<void(const TweenOption&, const TweenOption&, bool, bool)>;
 
+#ifdef WEB_SUPPORTED
+class RenderWeb;
+#endif
 class RenderTextOverlay : public RenderNode {
     DECLARE_ACE_TYPE(RenderTextOverlay, RenderNode)
 
@@ -146,6 +149,10 @@ protected:
     WeakPtr<RenderTextField> weakTextField_;
     WeakPtr<RenderText> weakText_;
     WeakPtr<RenderImage> weakImage_;
+#ifdef WEB_SUPPORTED
+    WeakPtr<RenderWeb> weakWeb_;
+#endif
+    bool isUsedByWeb_ = false;
     RefPtr<Animator> controller_;
     WeakPtr<TextOverlayComponent> overlayComponent_;
 
@@ -153,6 +160,9 @@ private:
     void UpdateWeakTextField(const RefPtr<TextOverlayComponent>& overlay);
     void UpdateWeakText(const RefPtr<TextOverlayComponent>& overlay);
     void UpdateWeakImage(const RefPtr<TextOverlayComponent>& overlay);
+#ifdef WEB_SUPPORTED
+    void UpdateWeakWeb(const RefPtr<TextOverlayComponent>& overlay);
+#endif
     void BindBackendEvent(const RefPtr<TextOverlayComponent>& overlay);
     void BindBackendEventV2(const RefPtr<TextOverlayComponent>& overlay);
     void RemoveBackendEvent(const RefPtr<TextOverlayComponent>& overlay);

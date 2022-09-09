@@ -22,10 +22,12 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_page.h"
 #include "core/common/platform_window.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace {
 
+namespace NG {
+class FrameNode;
+}
 class ACE_EXPORT Window {
 public:
     Window() = default;
@@ -44,7 +46,7 @@ public:
 
     virtual void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) {}
 
-    virtual void RecordFrameTime(uint64_t timeStamp, const std::string name) {}
+    virtual void RecordFrameTime(uint64_t timeStamp, const std::string& name) {}
 
     virtual void FlushTasks() {}
 

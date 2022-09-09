@@ -43,7 +43,6 @@
 #include "core/common/hdc_register.h"
 #include "core/common/platform_window.h"
 #include "core/common/text_field_manager.h"
-#include "core/common/watch_dog.h"
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager.h"
@@ -267,7 +266,12 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
         return true;
     }
     ContainerScope scope(instanceId);
-    auto context = DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto baseContext = container->GetPipelineContext();
+    auto contextNG = DynamicCast<NG::PipelineContext>(baseContext);
+    if (contextNG) {
+        return contextNG->OnBackPressed();
+    }
+    auto context = DynamicCast<PipelineContext>(baseContext);
     if (!context) {
         return false;
     }
@@ -579,7 +583,6 @@ void AceContainer::InitializeCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess]() {
                 context->OnTouchEvent(event);
-                context->NotifyDispatchTouchEventDismiss(event);
                 if (markProcess) {
                     markProcess();
                 }
@@ -643,6 +646,16 @@ void AceContainer::InitializeCallback()
             TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
+
+    auto&& viewPositionChangeCallback = [context = pipelineContext_, id = instanceId_](
+        int32_t posX, int32_t posY) {
+        ContainerScope scope(id);
+        ACE_SCOPED_TRACE("ViewPositionChangeCallback(%d, %d)", posX, posY);
+        context->GetTaskExecutor()->PostTask(
+            [context, posX, posY]() { context->OnSurfacePositionChanged(posX, posY); },
+            TaskExecutor::TaskType::UI);
+    };
+    aceView_->RegisterViewPositionChangeCallback(viewPositionChangeCallback);
 
     auto&& densityChangeCallback = [context = pipelineContext_, id = instanceId_](double density) {
         ContainerScope scope(id);
@@ -1138,9 +1151,11 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         TaskExecutor::TaskType::UI);
     aceView_->Launch();
 
-    // Only MainWindow instance will be registered to watch dog.
     if (!isSubContainer_) {
-        AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
+        // Only MainWindow instance in FA model will be registered to watch dog.
+        if (!GetSettings().usingSharedRuntime) {
+            AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
+        }
         frontend_->AttachPipelineContext(pipelineContext_);
     } else {
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
@@ -1252,7 +1267,7 @@ std::string AceContainer::GetContentInfo(int32_t instanceId)
 
 void AceContainer::SetWindowPos(int32_t left, int32_t top)
 {
-    if (!frontend_) {
+    if (!frontend_ || IsSubContainer()) {
         return;
     }
     auto accessibilityManager = frontend_->GetAccessibilityManager();
@@ -1264,9 +1279,18 @@ void AceContainer::SetWindowPos(int32_t left, int32_t top)
 
 void AceContainer::InitializeSubContainer(int32_t parentContainerId)
 {
-    auto taskExec = AceEngine::Get().GetContainer(parentContainerId)->GetTaskExecutor();
+    auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+    if (!parentContainer) {
+        LOGE("Parent container is null, InitializeSubContainer failed.");
+        return;
+    }
+
+    auto taskExec = parentContainer->GetTaskExecutor();
     taskExecutor_ = AceType::DynamicCast<FlutterTaskExecutor>(std::move(taskExec));
-    GetSettings().useUIAsJSThread = true;
+    auto parentSettings = parentContainer->GetSettings();
+    GetSettings().useUIAsJSThread = parentSettings.useUIAsJSThread;
+    GetSettings().usePlatformAsUIThread = parentSettings.usePlatformAsUIThread;
+    GetSettings().usingSharedRuntime = parentSettings.usingSharedRuntime;
 }
 
 void AceContainer::InitWindowCallback()
@@ -1412,4 +1436,16 @@ void AceContainer::UpdateFrondend(bool needReloadTransition)
             }, TaskExecutor::TaskType::UI);
         }, TaskExecutor::TaskType::JS);
 }
+
+extern "C" ACE_EXPORT void OHOS_ACE_HotReloadPage()
+{
+    AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
+        auto ace = AceType::DynamicCast<AceContainer>(container);
+        if (ace) {
+            ace->UpdateFrondend(true);
+        }
+        LOGI("frontend rebuild finished");
+    });
+}
+
 } // namespace OHOS::Ace::Platform

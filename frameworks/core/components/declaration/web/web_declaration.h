@@ -30,7 +30,6 @@ struct WebAttribute : Attribute {
 struct WebEvent : Event {
     EventMarker pageStartEventId;
     EventMarker pageFinishEventId;
-    EventMarker progressChangeEventId;
     EventMarker titleReceiveEventId;
     EventMarker geolocationHideEventId;
     EventMarker geolocationShowEventId;
@@ -45,6 +44,7 @@ struct WebEvent : Event {
     EventMarker scaleChangeId;
     EventMarker permissionRequestId;
     EventMarker searchResultReceiveEventId;
+    EventMarker scrollId;
 };
 
 struct WebMethod : Method {
@@ -108,18 +108,6 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.pageFinishEventId;
-    }
-
-    void SetProgressChangeEventId(const EventMarker& progressChangeEventId)
-    {
-        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
-        event.progressChangeEventId = progressChangeEventId;
-    }
-
-    const EventMarker& GetProgressChangeEventId() const
-    {
-        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
-        return event.progressChangeEventId;
     }
 
     void SetTitleReceiveEventId(const EventMarker& titleReceiveEventId)
@@ -264,6 +252,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.scaleChangeId;
+    }
+
+    void SetScrollId(const EventMarker& scrollId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.scrollId = scrollId;
+    }
+
+    const EventMarker& GetScrollId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.scrollId;
     }
 
     void SetPermissionRequestEventId(const EventMarker& permissionRequestId)

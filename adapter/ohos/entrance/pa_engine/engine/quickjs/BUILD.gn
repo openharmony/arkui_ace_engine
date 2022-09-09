@@ -39,13 +39,13 @@ template("js_pa_engine_qjs") {
       "//foundation/arkui/napi:ace_napi",
       "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-      "//utils/native/base:utils",
     ]
     external_deps = [
       "ability_base:want",
       "ability_base:zuri",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+      "c_utils:utils",
       "eventhandler:libeventhandler",
       "form_fwk:form_manager",
       "hiviewdfx_hilog_native:libhilog",

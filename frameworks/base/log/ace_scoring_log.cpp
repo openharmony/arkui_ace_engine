@@ -16,6 +16,9 @@
 #include "base/log/ace_scoring_log.h"
 
 #include <cinttypes>
+#ifdef LINUX_PLATFORM
+#include <mutex>
+#endif
 
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"

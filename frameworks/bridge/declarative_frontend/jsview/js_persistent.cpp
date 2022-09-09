@@ -55,7 +55,7 @@ void JSPersistent::DestructorCallback(JSPersistent* persistent)
 
 void JSPersistent::Set(const JSCallbackInfo& args)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return;
@@ -87,7 +87,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
 
 void JSPersistent::Get(const JSCallbackInfo& args)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return;
@@ -104,14 +104,17 @@ void JSPersistent::Get(const JSCallbackInfo& args)
     }
     auto executor = container->GetTaskExecutor();
     std::string value = StorageProxy::GetInstance()->GetStorage(executor)->GetString(key);
-    auto returnValue = JSVal(ToJSValue(value));
-    auto returnPtr = JSRef<JSVal>::Make(returnValue);
-    args.SetReturnValue(returnPtr);
+    if (value.empty()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSVal> ret = obj->ToJsonObject(value.c_str());
+    args.SetReturnValue(ret);
 }
 
 void JSPersistent::Delete(const JSCallbackInfo& args)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return;
@@ -132,7 +135,7 @@ void JSPersistent::Delete(const JSCallbackInfo& args)
 
 void JSPersistent::Clear(const JSCallbackInfo& args)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the PersistentStorage in the Previewer. Perform this operation on the "
         "emulator or a real device instead.");
     return;

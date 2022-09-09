@@ -33,6 +33,12 @@ struct TextSpecializedStyle : Style {
     bool autoMaxLines = false;
 };
 
+enum class TextShadowSettings {
+    OFFSET_ONLY = 2,
+    OFFSET_EXTRA,
+    OFFSET_BLUR_CLOR,
+};
+
 class TextDeclaration : public Declaration {
     DECLARE_ACE_TYPE(TextDeclaration, Declaration);
 
@@ -139,6 +145,8 @@ public:
     {
         return hasSetTextColor_;
     }
+
+    static std::vector<Shadow> ParseTextShadow(const std::string& val, TextDeclaration& declaration);
 
 protected:
     void InitSpecialized() override;

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_STAGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_STAGE_PATTERN_H
 
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
@@ -28,11 +29,6 @@ public:
     StagePattern() = default;
     ~StagePattern() override = default;
 
-    bool IsRootPattern() const override
-    {
-        return true;
-    }
-
     bool IsMeasureBoundary() const override
     {
         return true;
@@ -43,11 +39,19 @@ public:
         return false;
     }
 
-private:
-    void OnAttachToFrameNode() override;
+    void OnAttachToFrameNode() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+    }
 
+private:
     int32_t currentPageIndex_ = 0;
     friend class StageManager;
+
+    ACE_DISALLOW_COPY_AND_MOVE(StagePattern);
 };
 } // namespace OHOS::Ace::NG
 

@@ -16,9 +16,10 @@ import("//build/test.gni")
 group("unittest") {
   testonly = true
   deps = []
-
-  deps += [
-    "unittest/alignment:unittest",
-    "unittest/color:unittest",
-  ]
+  if (!is_asan) {
+    deps += [
+      "unittest/alignment:unittest",
+      "unittest/color:unittest",
+    ]
+  }
 }

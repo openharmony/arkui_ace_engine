@@ -31,6 +31,8 @@
 #include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -57,6 +59,20 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
+float PipelineContext::GetCurrentRootWidth()
+{
+    auto context = GetCurrentContext();
+    CHECK_NULL_RETURN(context, 0.0f);
+    return static_cast<float>(context->rootWidth_);
+}
+
+float PipelineContext::GetCurrentRootHeight()
+{
+    auto context = GetCurrentContext();
+    CHECK_NULL_RETURN(context, 0.0f);
+    return static_cast<float>(context->rootHeight_);
+}
+
 void PipelineContext::AddDirtyCustomNode(const RefPtr<CustomNode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);
@@ -70,7 +86,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    UITaskScheduler::GetInstance()->AddDirtyLayoutNode(dirty);
+    taskScheduler_.AddDirtyLayoutNode(dirty);
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -79,7 +95,7 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    UITaskScheduler::GetInstance()->AddDirtyRenderNode(dirty);
+    taskScheduler_.AddDirtyRenderNode(dirty);
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -157,7 +173,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 {
     FlushDirtyNodeUpdate();
     FlushTouchEvents();
-    UITaskScheduler::GetInstance()->FlushTask();
+    taskScheduler_.FlushTask();
     FlushMessages();
 }
 
@@ -165,24 +181,34 @@ void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
     rootNode_ = FrameNode::CreateFrameNodeWithTree(
-        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>(), Claim(this));
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
-    rootNode_->GetRenderContext()->UpdateBgColor(Color::WHITE);
+    rootNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     layoutConstraint.maxSize = idealSize;
     rootNode_->UpdateLayoutConstraint(layoutConstraint);
     window_->SetRootFrameNode(rootNode_);
-    stageManager_ = MakeRefPtr<StageManager>(rootNode_);
     rootNode_->AttachToMainTree();
+
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+    stageNode->MountToParent(rootNode_);
+    stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     LOGI("SetupRootElement success!");
 }
 
-RefPtr<StageManager> PipelineContext::GetStageManager()
+const RefPtr<StageManager>& PipelineContext::GetStageManager()
 {
     return stageManager_;
+}
+
+const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
+{
+    return overlayManager_;
 }
 
 void PipelineContext::SetRootRect(double width, double height, double offset)
@@ -205,10 +231,73 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     }
 }
 
+bool PipelineContext::OnBackPressed()
+{
+    LOGD("OnBackPressed");
+    CHECK_RUN_ON(PLATFORM);
+    auto frontend = weakFrontend_.Upgrade();
+    if (!frontend) {
+        // return back.
+        return false;
+    }
+
+    auto result = false;
+    taskExecutor_->PostSyncTask(
+        [weakFrontend = weakFrontend_, weakPipelineContext = WeakClaim(this), &result]() {
+            auto frontend = weakFrontend.Upgrade();
+            if (!frontend) {
+                LOGW("frontend is nullptr");
+                result = false;
+                return;
+            }
+            result = frontend->OnBackPressed();
+        },
+        TaskExecutor::TaskType::JS);
+
+    if (result) {
+        // user accept
+        LOGI("CallRouterBackToPopPage(): frontend accept");
+        return true;
+    }
+    LOGI("CallRouterBackToPopPage(): return platform consumed");
+    return false;
+}
+
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
-    touchEvents_.emplace_back(point);
+    auto scalePoint = point.CreateScalePoint(GetViewScale());
+    LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
+        scalePoint.type);
+    if (scalePoint.type == TouchType::DOWN) {
+        LOGD("receive touch down event, first use touch test to collect touch event target");
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = point.sourceType;
+        eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, false);
+    }
+
+    if (scalePoint.type == TouchType::MOVE) {
+        touchEvents_.emplace_back(point);
+        hasIdleTasks_ = true;
+        window_->RequestFrame();
+        return;
+    }
+
+    std::optional<TouchEvent> lastMoveEvent;
+    if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
+        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end(); ++iter) {
+            auto movePoint = (*iter).CreateScalePoint(GetViewScale());
+            if (scalePoint.id == movePoint.id) {
+                lastMoveEvent = movePoint;
+                touchEvents_.erase(iter++);
+            }
+        }
+        if (lastMoveEvent.has_value()) {
+            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
+        }
+    }
+
+    eventManager_->DispatchTouchEvent(scalePoint);
     hasIdleTasks_ = true;
     window_->RequestFrame();
 }
@@ -233,19 +322,28 @@ void PipelineContext::FlushTouchEvents()
         return;
     }
     {
-        ACE_SCOPED_TRACE("PipelineContext::DispatchTouchEvent");
+        eventManager_->FlushTouchEventsBegin(touchEvents_);
+        std::unordered_set<int32_t> moveEventIds;
         decltype(touchEvents_) touchEvents(std::move(touchEvents_));
-        for (const auto& touchEvent : touchEvents) {
-            auto scalePoint = touchEvent.CreateScalePoint(GetViewScale());
-            LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
-                scalePoint.type);
-            if (scalePoint.type == TouchType::DOWN) {
-                LOGD("receive touch down event, first use touch test to collect touch event target");
-                TouchRestrict touchRestrict { TouchRestrict::NONE };
-                touchRestrict.sourceType = touchEvent.sourceType;
-                eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, false);
+        if (touchEvents.empty()) {
+            return;
+        }
+        std::list<TouchEvent> touchPoints;
+        for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
+            auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
+            auto result = moveEventIds.emplace(scalePoint.id);
+            if (result.second) {
+                touchPoints.emplace_front(scalePoint);
             }
-            eventManager_->DispatchTouchEvent(scalePoint);
+        }
+
+        auto maxSize = touchPoints.size();
+        for (auto iter = touchPoints.rbegin(); iter != touchPoints.rend(); ++iter) {
+            maxSize--;
+            if (maxSize == 0) {
+                eventManager_->FlushTouchEventsEnd(touchPoints);
+            }
+            eventManager_->DispatchTouchEvent(*iter);
         }
     }
 }

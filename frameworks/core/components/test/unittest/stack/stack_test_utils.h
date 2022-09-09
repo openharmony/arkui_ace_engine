@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEST_UNITTEST_STACK_STACK_TEST_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEST_UNITTEST_STACK_STACK_TEST_UTILS_H
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/positioned/render_positioned.h"
 #include "core/components/stack/render_stack.h"
@@ -29,7 +30,8 @@ class MockRenderStack : public RenderStack {
 
 class StackTestUtils {
 public:
-    static RefPtr<RenderStack> CreateRenderStack(const Alignment& alignment, Overflow overflow, StackFit stackFit);
+    static RefPtr<RenderStack> CreateRenderStack(const Alignment& alignment, Overflow overflow,
+        StackFit stackFit, HitTestMode hitTestMode = HitTestMode::HTMDEFAULT);
     static RefPtr<RenderPositioned> CreateRenderPositioned(RefPtr<PositionedComponent> positioned);
 };
 

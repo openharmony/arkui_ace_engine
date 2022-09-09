@@ -27,12 +27,14 @@
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "core/common/container.h"
 #include "core/components/box/box_component.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/transform/transform_component.h"
 #include "core/pipeline/base/component.h"
+#include "core/components/menu/menu_component.h"
 #include "frameworks/core/gestures/tap_gesture.h"
 
 namespace OHOS::Ace::Framework {
@@ -72,6 +74,7 @@ public:
     static void GetAngle(
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
+    static void ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<MenuComponent> menuComponent);
 
     static void JsScale(const JSCallbackInfo& info);
     static void JsScaleX(const JSCallbackInfo& info);
@@ -133,6 +136,7 @@ public:
     static void JsUseSizeType(const JSCallbackInfo& Info);
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
+    static void JsOnHover(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
@@ -224,7 +228,7 @@ public:
     static void JsFocusOnTouch(const JSCallbackInfo& info);
     static void JsDefaultFocus(const JSCallbackInfo& info);
     static void JsGroupDefaultFocus(const JSCallbackInfo& info);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     static void JsDebugLine(const JSCallbackInfo& info);
 #endif
     static void JsOpacityPassThrough(const JSCallbackInfo& info);

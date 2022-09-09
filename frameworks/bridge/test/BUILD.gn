@@ -16,59 +16,61 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 group("unittest") {
   testonly = true
-
-  deps = [
-    "unittest/jsfrontend/animation:unittest",
-    "unittest/jsfrontend/codec:unittest",
-    "unittest/jsfrontend/dombutton:unittest",
-    "unittest/jsfrontend/domdiv:unittest",
-    "unittest/jsfrontend/domdivider:unittest",
-    "unittest/jsfrontend/domimage:unittest",
-    "unittest/jsfrontend/domimageanimator:unittest",
-    "unittest/jsfrontend/dominput:unittest",
-    "unittest/jsfrontend/domlabel:unittest",
-    "unittest/jsfrontend/domlist:unittest",
-
-    #"unittest/jsfrontend/domnode:unittest",
-    "unittest/jsfrontend/domspan:unittest",
-    "unittest/jsfrontend/domsvg:unittest",
-    "unittest/jsfrontend/domsvgtext:unittest",
-    "unittest/jsfrontend/domtext:unittest",
-    "unittest/jsfrontend/event:unittest",
-    "unittest/jsfrontend/manifest:unittest",
-    "unittest/jsfrontend/progress:unittest",
-    "unittest/jsfrontend/source_map:unittest",
-    "unittest/jsfrontend/swiper:unittest",
-    "unittest/jsfrontend/switch:unittest",
-    "unittest/jsfrontend/utils:unittest",
-  ]
-
-  if (!is_standard_system) {
-    deps += [ "unittest/jsfrontend/codec:unittest" ]
-  }
-
-  if (!is_wearable_product) {
+  deps = []
+  if (!is_asan) {
     deps += [
-      "unittest/cardfrontend/dombutton:unittest",
-      "unittest/cardfrontend/domclock:unittest",
-      "unittest/cardfrontend/domdiv:unittest",
-      "unittest/cardfrontend/domimage:unittest",
-      "unittest/cardfrontend/domprogress:unittest",
-      "unittest/cardfrontend/domstack:unittest",
-      "unittest/cardfrontend/domtext:unittest",
-      "unittest/cardfrontend/frontend:unittest",
-      "unittest/cardfrontend/mediaquery:unittest",
-      "unittest/jsfrontend/dompiece:unittest",
-      "unittest/jsfrontend/dompopup:unittest",
-      "unittest/jsfrontend/domrating:unittest",
-      "unittest/jsfrontend/domrefresh:unittest",
-      "unittest/jsfrontend/domsearch:unittest",
-      "unittest/jsfrontend/domtab:unittest",
-      "unittest/jsfrontend/domtextarea:unittest",
-      "unittest/jsfrontend/marquee:unittest",
-      "unittest/jsfrontend/slider:unittest",
-      "unittest/jsfrontend/video:unittest",
-      "unittest/pluginfrontend:unittest",
+      "unittest/jsfrontend/animation:unittest",
+      "unittest/jsfrontend/codec:unittest",
+      "unittest/jsfrontend/dombutton:unittest",
+      "unittest/jsfrontend/domdiv:unittest",
+      "unittest/jsfrontend/domdivider:unittest",
+      "unittest/jsfrontend/domimage:unittest",
+      "unittest/jsfrontend/domimageanimator:unittest",
+      "unittest/jsfrontend/dominput:unittest",
+      "unittest/jsfrontend/domlabel:unittest",
+      "unittest/jsfrontend/domlist:unittest",
+
+      #"unittest/jsfrontend/domnode:unittest",
+      "unittest/jsfrontend/domspan:unittest",
+      "unittest/jsfrontend/domsvg:unittest",
+      "unittest/jsfrontend/domsvgtext:unittest",
+      "unittest/jsfrontend/domtext:unittest",
+      "unittest/jsfrontend/event:unittest",
+      "unittest/jsfrontend/manifest:unittest",
+      "unittest/jsfrontend/progress:unittest",
+      "unittest/jsfrontend/source_map:unittest",
+      "unittest/jsfrontend/swiper:unittest",
+      "unittest/jsfrontend/switch:unittest",
+      "unittest/jsfrontend/utils:unittest",
     ]
+
+    if (!is_standard_system) {
+      deps += [ "unittest/jsfrontend/codec:unittest" ]
+    }
+
+    if (!is_wearable_product) {
+      deps += [
+        "unittest/cardfrontend/dombutton:unittest",
+        "unittest/cardfrontend/domclock:unittest",
+        "unittest/cardfrontend/domdiv:unittest",
+        "unittest/cardfrontend/domimage:unittest",
+        "unittest/cardfrontend/domprogress:unittest",
+        "unittest/cardfrontend/domstack:unittest",
+        "unittest/cardfrontend/domtext:unittest",
+        "unittest/cardfrontend/frontend:unittest",
+        "unittest/cardfrontend/mediaquery:unittest",
+        "unittest/jsfrontend/dompiece:unittest",
+        "unittest/jsfrontend/dompopup:unittest",
+        "unittest/jsfrontend/domrating:unittest",
+        "unittest/jsfrontend/domrefresh:unittest",
+        "unittest/jsfrontend/domsearch:unittest",
+        "unittest/jsfrontend/domtab:unittest",
+        "unittest/jsfrontend/domtextarea:unittest",
+        "unittest/jsfrontend/marquee:unittest",
+        "unittest/jsfrontend/slider:unittest",
+        "unittest/jsfrontend/video:unittest",
+        "unittest/pluginfrontend:unittest",
+      ]
+    }
   }
 }

@@ -144,6 +144,7 @@ RefPtr<Component> ContainerModalComponent::BuildControlButton(
     auto image = AceType::MakeRefPtr<ImageComponent>(icon);
     image->SetWidth(TITLE_ICON_SIZE);
     image->SetHeight(TITLE_ICON_SIZE);
+    image->SetFocusable(false);
     std::list<RefPtr<Component>> btnChildren;
     btnChildren.emplace_back(image);
 
@@ -218,6 +219,7 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
         titleIcon_ = AceType::MakeRefPtr<ImageComponent>();
         titleIcon_->SetWidth(TITLE_ICON_SIZE);
         titleIcon_->SetHeight(TITLE_ICON_SIZE);
+        titleIcon_->SetFocusable(false);
     }
 
     // title text
@@ -287,8 +289,10 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
     std::list<RefPtr<Component>> titleChildren;
     titleChildren.emplace_back(SetPadding(titleIcon_, TITLE_PADDING_START, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     if (isDeclarative_) {
-        titleChildren.emplace_back(AceType::MakeRefPtr<V2::InspectorComposedComponent>(
-            V2::InspectorComposedComponent::GenerateId(), V2::TEXT_COMPONENT_TAG, titleLabel_));
+        auto inspectorTitle = AceType::MakeRefPtr<V2::InspectorComposedComponent>(
+            V2::InspectorComposedComponent::GenerateId(), V2::TEXT_COMPONENT_TAG, titleLabel_);
+        inspectorTitle->MarkNeedUpdate();
+        titleChildren.emplace_back(inspectorTitle);
     } else {
         titleChildren.emplace_back(AceType::MakeRefPtr<ComposedComponent>(
             isFloating ? std::to_string(FLOATING_TITLE_LABEL) : std::to_string(TITLE_LABEL), DOM_NODE_TAG_TEXT,

@@ -272,7 +272,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::ToJsonObject() const
 void InspectorComposedElement::Prepare(const WeakPtr<Element>& weakParent)
 {
     accessibilityEnabled_ = false;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     accessibilityEnabled_ = true;
 #else
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || SystemProperties::GetAccessibilityEnabled()) {
@@ -324,7 +324,11 @@ void InspectorComposedElement::Update()
 
 bool InspectorComposedElement::CanUpdate(const RefPtr<Component>& newComponent)
 {
-    return Element::CanUpdate(newComponent);
+    auto component = AceType::DynamicCast<InspectorComposedComponent>(newComponent);
+    if (!component) {
+        return false;
+    }
+    return GetInspectorTag() == component->GetName();
 }
 
 void InspectorComposedElement::AddComposedComponentId()
@@ -401,7 +405,7 @@ RefPtr<AccessibilityNode> InspectorComposedElement::GetAccessibilityNode() const
         LOGW("get AccessibilityManager failed");
         return nullptr;
     }
-    return accessibilityManager->GetAccessibilityNodeById(std::stoi(id_));
+    return accessibilityManager->GetAccessibilityNodeById(StringUtils::StringToInt(id_));
 }
 
 RefPtr<RenderBox> InspectorComposedElement::GetRenderBox() const
@@ -615,7 +619,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetPosition() const
     auto render = AceType::DynamicCast<RenderFlexItem>(node);
     if (render) {
         PositionType type = render->GetPositionType();
-        if (type == PositionType::ABSOLUTE) {
+        if (type == PositionType::PTABSOLUTE) {
             jsonValue->Put("x", render->GetLeft().ToString().c_str());
             jsonValue->Put("y", render->GetTop().ToString().c_str());
             return jsonValue;
@@ -658,7 +662,7 @@ std::unique_ptr<JsonValue> InspectorComposedElement::GetOffset() const
     auto render = AceType::DynamicCast<RenderFlexItem>(node);
     if (render) {
         PositionType type = render->GetPositionType();
-        if (type == PositionType::OFFSET) {
+        if (type == PositionType::PTOFFSET) {
             jsonValue->Put("x", render->GetLeft().ToString().c_str());
             jsonValue->Put("y", render->GetTop().ToString().c_str());
             return jsonValue;

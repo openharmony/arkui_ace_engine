@@ -17,7 +17,7 @@
 
 #include <cerrno>
 #include <functional>
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 #ifdef OHOS_STANDARD_SYSTEM
 #include <sys/prctl.h>
 #endif
@@ -90,7 +90,7 @@ bool PostTaskToTaskRunner(const fml::RefPtr<fml::TaskRunner>& taskRunner, TaskEx
 
 void SetThreadPriority(int32_t priority)
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#if !defined(PREVIEW) and !defined(IOS_PLATFORM)
     if (setpriority(PRIO_PROCESS, gettid(), priority) < 0) {
         LOGW("Failed to set thread priority, errno = %{private}d", errno);
     }
@@ -184,8 +184,11 @@ void FlutterTaskExecutor::InitOtherThreads(const flutter::TaskRunners& taskRunne
 bool FlutterTaskExecutor::OnPostTask(Task&& task, TaskType type, uint32_t delayTime) const
 {
     int32_t currentId = Container::CurrentId();
-    auto traceIdFunc = [this, type]() {
-        this->taskIdTable_[static_cast<uint32_t>(type)]++;
+    auto traceIdFunc = [weak = WeakClaim(const_cast<FlutterTaskExecutor*>(this)), type]() {
+        auto sp = weak.Upgrade();
+        if (sp) {
+            sp->taskIdTable_[static_cast<uint32_t>(type)]++;
+        }
     };
     TaskExecutor::Task wrappedTask =
         currentId >= 0 ? WrapTaskWithContainer(std::move(task), currentId, std::move(traceIdFunc)) : std::move(task);
@@ -321,7 +324,7 @@ void FlutterTaskExecutor::FillTaskTypeTable(TaskType type)
     constexpr size_t MAX_THREAD_NAME_SIZE = 32;
     char threadNameBuf[MAX_THREAD_NAME_SIZE] = { 0 };
     const char* threadName = threadNameBuf;
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#if !defined(PREVIEW) and !defined(IOS_PLATFORM)
 #ifdef OHOS_STANDARD_SYSTEM
     if (prctl(PR_GET_NAME, threadNameBuf) < 0) {
         threadName = "unknown";
@@ -336,7 +339,7 @@ void FlutterTaskExecutor::FillTaskTypeTable(TaskType type)
     localTaskType = type;
     ThreadInfo info = {
         .threadId = std::this_thread::get_id(),
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#if !defined(PREVIEW) and !defined(IOS_PLATFORM)
         .tid = gettid(),
 #endif
         .threadName = threadName,

@@ -57,7 +57,7 @@ private:
     bool IsCompatibleVersion();
     void EffectAutoMaxLines();
     // Change text direction accroding to first strong direction letter when developer set direction auto.
-    void ChangeDirectionIfNeeded(const std::string& data);
+    bool ChangeDirectionIfNeeded(const std::string& data);
     std::string ApplyWhiteSpace();
     void ApplyIndents(double width);
 

@@ -40,12 +40,12 @@ ohos_fuzztest("UiServiceFuzzTest") {
     "//foundation/window/window_manager/wm:libwm",
     "//third_party/icu/icu4c:shared_icui18n",
     "//third_party/icu/icu4c:shared_icuuc",
-    "//utils/native/base:utils",
   ]
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",

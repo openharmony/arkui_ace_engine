@@ -15,18 +15,24 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 
+#include <utility>
+
 #include "base/log/event_report.h"
+#include "base/log/exception_handler.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 const int32_t OFFSET_PREVIEW = 9;
 #endif
 
 namespace OHOS::Ace::Framework {
-std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, std::shared_ptr<JsRuntime> runtime)
+std::string JsiBaseUtils::GenerateSummaryBody(
+    const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
 {
     std::string summaryBody;
     summaryBody.append("Lifetime: ")
@@ -41,20 +47,29 @@ std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, st
         return summaryBody;
     }
 
-    const AceType *data = static_cast<AceType *>(runtime->GetEmbedderData());
-    auto runningPage = GetRunningPage(data);
-
+    const AceType* data = static_cast<AceType*>(runtime->GetEmbedderData());
+    std::string pageUrl;
     RefPtr<RevSourceMap> pageMap;
     RefPtr<RevSourceMap> appMap;
-    std::string pageUrl;
-    if (runningPage) {
-        pageUrl = runningPage->GetUrl();
-        summaryBody.append("page: ").append(pageUrl).append("\n");
-
-        pageMap = runningPage->GetPageMap();
-        appMap = runningPage->GetAppMap();
+    auto container = Container::Current();
+    if (container && container->IsUseNewPipeline()) {
+        auto frontEnd = container->GetFrontend();
+        if (frontEnd) {
+            pageUrl = frontEnd->GetCurrentPageUrl();
+            pageMap = frontEnd->GetCurrentPageSourceMap();
+            appMap = frontEnd->GetFaAppSourceMap();
+        }
+    } else {
+        auto runningPage = GetRunningPage(data);
+        if (runningPage) {
+            pageUrl = runningPage->GetUrl();
+            pageMap = runningPage->GetPageMap();
+            appMap = runningPage->GetAppMap();
+        }
     }
-
+    if (!pageUrl.empty()) {
+        summaryBody.append("page: ").append(pageUrl).append("\n");
+    }
     if (!error->IsObject(runtime) || error->IsNull(runtime)) {
         std::string errorInfo = error->ToString(runtime);
         summaryBody.append(errorInfo).append("\n");
@@ -84,12 +99,35 @@ std::string JsiBaseUtils::GenerateSummaryBody(std::shared_ptr<JsValue> error, st
     if (pageMap || appMap) {
         std::string showStack = TranslateStack(rawStack, pageUrl, pageMap, appMap, data);
         summaryBody.append(sourceCodeInfo).append(stackHead).append(showStack);
+        // show raw stack for troubleshooting in the frame
+        LOGI("JS Stack:\n%{public}s", TranslateRawStack(rawStack).c_str());
     } else {
         summaryBody.append("Cannot get SourceMap info, dump raw stack:\n");
         summaryBody.append(stackHead).append(rawStack);
     }
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    std::string summaryBodyInsertedWithTagStr = "[Engine Log]";
+    size_t lastPosOfNextLine = -1;
+    size_t currPosOfNextLine = 0;
+    while (true) {
+        lastPosOfNextLine++; // Become the next position at which we start to find the target charactor.
+        currPosOfNextLine = summaryBody.find_first_of("\n", lastPosOfNextLine);
+        if (currPosOfNextLine == -1) {
+            break;
+        }
+        summaryBodyInsertedWithTagStr
+            .append(summaryBody.substr(lastPosOfNextLine, (currPosOfNextLine - lastPosOfNextLine) + 1))
+            .append("[Engine Log]");
+        lastPosOfNextLine = currPosOfNextLine;
+    }
+    summaryBodyInsertedWithTagStr
+        .append(summaryBody.substr(lastPosOfNextLine, summaryBody.length() - lastPosOfNextLine))
+        .append("\n");
+    return summaryBodyInsertedWithTagStr;
+#else
     return summaryBody;
+#endif
 }
 
 ErrorPos JsiBaseUtils::GetErrorPos(const std::string& rawStack)
@@ -108,8 +146,8 @@ ErrorPos JsiBaseUtils::GetErrorPos(const std::string& rawStack)
     return std::make_pair(StringToInt(lineStr), StringToInt(columnStr));
 }
 
-std::string JsiBaseUtils::GetSourceCodeInfo(std::shared_ptr<JsRuntime> runtime,
-    const shared_ptr<JsValue>& errorFunc, ErrorPos pos)
+std::string JsiBaseUtils::GetSourceCodeInfo(
+    std::shared_ptr<JsRuntime> runtime, const shared_ptr<JsValue>& errorFunc, ErrorPos pos)
 {
     if (pos.first == 0) {
         return "";
@@ -135,19 +173,36 @@ std::string JsiBaseUtils::GetSourceCodeInfo(std::shared_ptr<JsRuntime> runtime,
 
 std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const std::string& rawStack)
 {
-    if (!runningPage) {
-        return rawStack;
-    }
-    std::string summaryBody;
     RefPtr<RevSourceMap> pageMap;
     RefPtr<RevSourceMap> appMap;
     std::string pageUrl;
-    if (runningPage) {
-        pageUrl = runningPage->GetUrl();
-        summaryBody.append(" Page: ").append(pageUrl).append("\n");
-        pageMap = runningPage->GetPageMap();
-        appMap = runningPage->GetAppMap();
+    auto container = Container::Current();
+    if (container && container->IsUseNewPipeline()) {
+        auto frontEnd = container->GetFrontend();
+        if (frontEnd) {
+            pageUrl = frontEnd->GetCurrentPageUrl();
+            pageMap = frontEnd->GetCurrentPageSourceMap();
+            appMap = frontEnd->GetFaAppSourceMap();
+        } else {
+            LOGE("fail to find frontEnd");
+        }
+    } else {
+        if (runningPage) {
+            pageUrl = runningPage->GetUrl();
+            pageMap = runningPage->GetPageMap();
+            appMap = runningPage->GetAppMap();
+        } else {
+            LOGE("runningPage is nullptr");
+        }
     }
+
+    if (!pageMap) {
+        LOGE("fail to find page map");
+        return rawStack;
+    }
+
+    std::string summaryBody;
+    summaryBody.append(" Page: ").append(pageUrl).append("\n");
 
     std::string stackHead = "Stacktrace:\n";
     if (pageMap || appMap) {
@@ -161,15 +216,35 @@ std::string JsiBaseUtils::TransSourceStack(RefPtr<JsAcePage> runningPage, const 
     return summaryBody;
 }
 
+std::string JsiBaseUtils::TranslateRawStack(const std::string& rawStackStr)
+{
+    std::string ans;
+    std::string tempStack = rawStackStr;
+
+    // find per line of stack
+    std::vector<std::string> res;
+    ExtractEachInfo(tempStack, res);
+
+    // collect error info first
+    for (const auto& temp : res) {
+        const std::string sourceInfo = GetRelativePath(temp, "/");
+        ans = ans + sourceInfo + "\n";
+    }
+    if (ans.empty()) {
+        return tempStack;
+    }
+    return ans;
+}
+
 std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std::string& pageUrl,
-    const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, const AceType *data)
+    const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, const AceType* data)
 {
     const std::string closeBrace = ")";
     const std::string openBrace = "(";
-    std::string ans = "";
+    std::string ans;
     std::string tempStack = stackStr;
     std::string runningPageTag = "app_.js";
-    int32_t appFlag = static_cast<int32_t>(tempStack.find(runningPageTag));
+    auto appFlag = static_cast<int32_t>(tempStack.find(runningPageTag));
     bool isAppPage = appFlag > 0 && appMap;
     if (!isAppPage) {
         std::string tag = std::as_const(pageUrl);
@@ -188,11 +263,11 @@ std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std:
         if (temp.rfind(runningPageTag) == std::string::npos) {
             continue;
         }
-        int32_t closeBracePos = static_cast<int32_t>(temp.find(closeBrace));
-        int32_t openBracePos = static_cast<int32_t>(temp.find(openBrace));
+        auto closeBracePos = static_cast<int32_t>(temp.find(closeBrace));
+        auto openBracePos = static_cast<int32_t>(temp.find(openBrace));
 
-        std::string line = "";
-        std::string column = "";
+        std::string line;
+        std::string column;
         GetPosInfo(temp, closeBracePos, line, column);
         if (line.empty() || column.empty()) {
             LOGI("the stack without line info");
@@ -214,7 +289,7 @@ std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std:
 
 void JsiBaseUtils::ExtractEachInfo(const std::string& tempStack, std::vector<std::string>& res)
 {
-    std::string tempStr = "";
+    std::string tempStr;
     for (uint32_t i = 0; i < tempStack.length(); i++) {
         if (tempStack[i] == '\n') {
             res.push_back(tempStr);
@@ -249,7 +324,7 @@ void JsiBaseUtils::GetPosInfo(const std::string& temp, int32_t start, std::strin
 }
 
 std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::string& column,
-    const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType *data)
+    const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data)
 {
     int32_t offSet = GetLineOffset(data);
     std::string sourceInfo;
@@ -257,7 +332,7 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
     if (isAppPage) {
         mapInfo = appMap->Find(StringToInt(line) - offSet, StringToInt(column));
     } else {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         mapInfo = pageMap->Find(StringToInt(line) - offSet + OFFSET_PREVIEW, StringToInt(column));
 #else
         mapInfo = pageMap->Find(StringToInt(line) - offSet, StringToInt(column));
@@ -272,14 +347,14 @@ std::string JsiBaseUtils::GetSourceInfo(const std::string& line, const std::stri
     return sourceInfo;
 }
 
-std::string JsiBaseUtils::GetRelativePath(const std::string& sources)
+std::string JsiBaseUtils::GetRelativePath(const std::string& sources, std::string splitStr)
 {
     std::string temp = sources;
     std::size_t splitPos = std::string::npos;
     const static int pathLevel = 3;
     int i = 0;
     while (i < pathLevel) {
-        splitPos = temp.find_last_of("/\\");
+        splitPos = temp.find_last_of(splitStr);
         if (splitPos != std::string::npos) {
             temp = temp.substr(0, splitPos - 1);
         } else {
@@ -304,6 +379,7 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
     std::string summaryBody = GenerateSummaryBody(error, runtime);
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
     EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), "", summaryBody);
+    ExceptionHandler::HandleJsException(summaryBody);
 }
 
 std::string ParseLogContent(const std::vector<std::string>& params)
@@ -313,8 +389,8 @@ std::string ParseLogContent(const std::vector<std::string>& params)
         return ret;
     }
     std::string formatStr = params[0];
-    int32_t size = static_cast<int32_t>(params.size());
-    int32_t len = static_cast<int32_t>(formatStr.size());
+    auto size = static_cast<int32_t>(params.size());
+    auto len = static_cast<int32_t>(formatStr.size());
     int32_t pos = 0;
     int32_t count = 1;
     for (; pos < len; ++pos) {
@@ -362,6 +438,7 @@ std::string GetLogContent(
         return argv[0]->ToString(runtime);
     }
     std::vector<std::string> params;
+    params.reserve(argc);
     for (int32_t i = 0; i < argc; ++i) {
         params.emplace_back(argv[i]->ToString(runtime));
     }
@@ -477,25 +554,25 @@ int PrintLog(int id, int level, const char* tag, const char* fmt, const char* me
 shared_ptr<JsValue> JsiBaseUtils::JsDebugLogPrint(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    return JsLogPrint(runtime, JsLogLevel::DEBUG, std::move(argv), argc);
+    return JsLogPrint(runtime, JsLogLevel::DEBUG, argv, argc);
 }
 
 shared_ptr<JsValue> JsiBaseUtils::JsInfoLogPrint(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    return JsLogPrint(runtime, JsLogLevel::INFO, std::move(argv), argc);
+    return JsLogPrint(runtime, JsLogLevel::INFO, argv, argc);
 }
 
 shared_ptr<JsValue> JsiBaseUtils::JsWarnLogPrint(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    return JsLogPrint(runtime, JsLogLevel::WARNING, std::move(argv), argc);
+    return JsLogPrint(runtime, JsLogLevel::WARNING, argv, argc);
 }
 
 shared_ptr<JsValue> JsiBaseUtils::JsErrorLogPrint(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    return JsLogPrint(runtime, JsLogLevel::ERROR, std::move(argv), argc);
+    return JsLogPrint(runtime, JsLogLevel::ERROR, argv, argc);
 }
 
 std::string GetLogContent(NativeEngine* nativeEngine, NativeCallbackInfo* info)

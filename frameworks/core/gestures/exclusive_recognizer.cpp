@@ -19,6 +19,8 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
+#include "base/memory/ace_type.h"
+#include "core/gestures/click_recognizer.h"
 #include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
@@ -46,6 +48,10 @@ void ExclusiveRecognizer::OnAccepted(size_t touchId)
             recognizer->OnRejected(touchId);
             recognizer->SetRefereeState(RefereeState::FAIL);
         }
+    }
+
+    if (AceType::InstanceOf<ClickRecognizer>(activeRecognizer_)) {
+        Reset();
     }
 }
 
@@ -112,6 +118,20 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
     return true;
 }
 
+void ExclusiveRecognizer::OnFlushTouchEventsBegin()
+{
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnFlushTouchEventsBegin();
+    }
+}
+
+void ExclusiveRecognizer::OnFlushTouchEventsEnd()
+{
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnFlushTouchEventsEnd();
+    }
+}
+
 void ExclusiveRecognizer::BatchAdjudicate(
     const std::set<size_t>& touchIds, const RefPtr<GestureRecognizer>& recognizer, GestureDisposal disposal)
 {
@@ -148,7 +168,7 @@ void ExclusiveRecognizer::BatchAdjudicate(
         for (auto& tmpRecognizer : recognizers_) {
             if (tmpRecognizer->GetRefereeState() == RefereeState::BLOCKED &&
                 tmpRecognizer->GetDetectState() == DetectState::DETECTED) {
-                activeRecognizer_ = recognizer;
+                activeRecognizer_ = tmpRecognizer;
                 state_ = DetectState::DETECTED;
                 MultiFingersRecognizer::Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
                 break;

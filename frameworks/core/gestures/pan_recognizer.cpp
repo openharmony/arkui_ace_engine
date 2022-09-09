@@ -202,8 +202,20 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         }
 
         LOGD("pan recognizer detected successful");
-        SendCallbackMsg(onActionUpdate_);
+        if (isFlushTouchEventsEnd_) {
+            SendCallbackMsg(onActionUpdate_);
+        }
     }
+}
+
+void PanRecognizer::OnFlushTouchEventsBegin()
+{
+    isFlushTouchEventsEnd_ = false;
+}
+
+void PanRecognizer::OnFlushTouchEventsEnd()
+{
+    isFlushTouchEventsEnd_ = true;
 }
 
 void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)

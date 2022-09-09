@@ -83,7 +83,7 @@ bool RenderScroll::ValidateOffset(int32_t source)
     if (!scrollEffect_ || scrollEffect_->IsRestrictBoundary() || source == SCROLL_FROM_JUMP ||
         source == SCROLL_FROM_BAR || source == SCROLL_FROM_ROTATE || refreshParent_.Upgrade()) {
         if (axis_ == Axis::HORIZONTAL) {
-            if (rightToLeft_) {
+            if (IsRowReverse()) {
                 currentOffset_.SetX(std::clamp(currentOffset_.GetX(), viewPort_.Width() - mainScrollExtent_, 0.0));
             } else {
                 currentOffset_.SetX(std::clamp(currentOffset_.GetX(), 0.0, mainScrollExtent_ - viewPort_.Width()));
@@ -103,7 +103,7 @@ bool RenderScroll::ValidateOffset(int32_t source)
 #endif
         }
     } else {
-        if (IsRowReverse()) {
+        if (IsRowReverse()  || IsColReverse()) {
             if (GetMainOffset(currentOffset_) > 0) {
                 outBoundaryExtent_ = GetMainOffset(currentOffset_);
             }
@@ -190,6 +190,9 @@ bool RenderScroll::UpdateOffset(Offset& delta, int32_t source)
     if (delta.IsZero()) {
         return false;
     }
+    if (IsAtTop() && HandleRefreshEffect(-delta.GetY(), source, currentOffset_.GetY())) {
+        return true;
+    }
     if (!ScrollPageCheck(delta, source)) {
         return false;
     }
@@ -198,17 +201,10 @@ bool RenderScroll::UpdateOffset(Offset& delta, int32_t source)
             return false;
         }
     }
-
     if (scrollBar_ && scrollBar_->NeedScrollBar()) {
         scrollBar_->SetOutBoundary(std::abs(scrollBarOutBoundaryExtent_));
         scrollBar_->SetActive(SCROLL_FROM_CHILD != source);
     }
-
-    // handle refresh with list
-    if (!HandleRefreshEffect(delta, source)) {
-        return false;
-    }
-
     currentOffset_ += delta;
     currentDeltaInMain_ += GetMainOffset(delta);
     // handle edge effect
@@ -251,25 +247,6 @@ bool RenderScroll::UpdateOffset(Offset& delta, int32_t source)
     correctedDelta_ = correctedDelta;
     MarkNeedLayout(true);
     return next;
-}
-
-bool RenderScroll::HandleRefreshEffect(Offset& delta, int32_t source)
-{
-    // return true means scroll will update offset
-    auto refresh = refreshParent_.Upgrade();
-    if (!refresh || axis_ == Axis::HORIZONTAL) {
-        LOGD("not support refresh");
-        return true;
-    }
-
-    if ((LessOrEqual(currentOffset_.GetY(), 0.0) && source == SCROLL_FROM_UPDATE) || inLinkRefresh_) {
-        refresh->UpdateScrollableOffset(-delta.GetY());
-        inLinkRefresh_ = true;
-    }
-    if (refresh->GetStatus() != RefreshStatus::INACTIVE) {
-        return false;
-    }
-    return true;
 }
 
 void RenderScroll::HandleScrollEffect()
@@ -391,7 +368,7 @@ bool RenderScroll::ScrollPageByChild(Offset& delta, int32_t source)
 
 bool RenderScroll::IsOutOfBottomBoundary()
 {
-    if (IsRowReverse()) {
+    if (IsRowReverse() || IsColReverse()) {
         return LessOrEqual(GetMainOffset(currentOffset_), (GetMainSize(viewPort_) - mainScrollExtent_)) &&
                ReachMaxCount();
     } else {
@@ -402,7 +379,7 @@ bool RenderScroll::IsOutOfBottomBoundary()
 
 bool RenderScroll::IsOutOfTopBoundary()
 {
-    if (IsRowReverse()) {
+    if (IsRowReverse() || IsColReverse()) {
         return GreatOrEqual(GetMainOffset(currentOffset_), 0.0);
     } else {
         return LessOrEqual(GetMainOffset(currentOffset_), 0.0);
@@ -431,7 +408,7 @@ void RenderScroll::AdjustOffset(Offset& delta, int32_t source)
     double overscrollPastEnd = 0.0;
     double overscrollPast = 0.0;
     bool easing = false;
-    if (IsRowReverse()) {
+    if (IsRowReverse()  || IsColReverse()) {
         overscrollPastStart = std::max(GetCurrentPosition(), 0.0);
         overscrollPastEnd = std::max(-GetCurrentPosition() - maxScrollExtent, 0.0);
         // do not adjust offset if direction opposite from the overScroll direction when out of boundary
@@ -488,7 +465,7 @@ void RenderScroll::ResetEdgeEffect()
         scrollEffect_->SetLeadingCallback([weakScroll = AceType::WeakClaim(this)]() {
             auto scroll = weakScroll.Upgrade();
             if (scroll) {
-                if (!scroll->IsRowReverse()) {
+                if (!scroll->IsRowReverse() && !scroll->IsColReverse()) {
                     return scroll->GetMainSize(scroll->viewPort_) - scroll->mainScrollExtent_;
                 }
             }
@@ -497,7 +474,7 @@ void RenderScroll::ResetEdgeEffect()
         scrollEffect_->SetTrailingCallback([weakScroll = AceType::WeakClaim(this)]() {
             auto scroll = weakScroll.Upgrade();
             if (scroll) {
-                if (scroll->IsRowReverse()) {
+                if (scroll->IsRowReverse() || scroll->IsColReverse()) {
                     return scroll->mainScrollExtent_ - scroll->GetMainSize(scroll->viewPort_);
                 }
             }
@@ -506,7 +483,7 @@ void RenderScroll::ResetEdgeEffect()
         scrollEffect_->SetInitLeadingCallback([weakScroll = AceType::WeakClaim(this)]() {
             auto scroll = weakScroll.Upgrade();
             if (scroll) {
-                if (!scroll->IsRowReverse()) {
+                if (!scroll->IsRowReverse() && !scroll->IsColReverse()) {
                     return scroll->GetMainSize(scroll->viewPort_) - scroll->GetMainScrollExtent();
                 }
             }
@@ -515,7 +492,7 @@ void RenderScroll::ResetEdgeEffect()
         scrollEffect_->SetInitTrailingCallback([weakScroll = AceType::WeakClaim(this)]() {
             auto scroll = weakScroll.Upgrade();
             if (scroll) {
-                if (scroll->IsRowReverse()) {
+                if (scroll->IsRowReverse() || scroll->IsColReverse()) {
                     return scroll->GetMainScrollExtent() - scroll->GetMainSize(scroll->viewPort_);
                 }
             }
@@ -556,29 +533,6 @@ void RenderScroll::ResetScrollEventCallBack()
                 std::make_shared<ScrollEventInfo>(ScrollEvent::SCROLL_TOUCHUP, 0.0, 0.0, -1));
         }
     });
-
-    scrollable_->SetDragEndCallback([weakScroll = AceType::WeakClaim(this)]() {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            auto refresh = scroll->refreshParent_.Upgrade();
-            if (refresh && scroll->inLinkRefresh_) {
-                refresh->HandleDragEnd();
-                scroll->inLinkRefresh_ = false;
-            }
-        }
-    });
-
-    scrollable_->SetDragCancel([weakScroll = AceType::WeakClaim(this)]() {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            auto refresh = scroll->refreshParent_.Upgrade();
-            if (refresh && scroll->inLinkRefresh_) {
-                refresh->HandleDragCancel();
-                scroll->inLinkRefresh_ = false;
-            }
-        }
-    });
-
     if (positionController_) {
         positionController_->SetMiddle();
         double mainOffset = GetMainOffset(currentOffset_);
@@ -676,6 +630,7 @@ void RenderScroll::ResetScrollable()
             scroll->MarkNeedLayout(true);
         }
     });
+    InitializeScrollable(scrollable_);
 
     currentBottomOffset_ = Offset::Zero();
     currentOffset_ = Offset::Zero();
@@ -911,6 +866,8 @@ void RenderScroll::Update(const RefPtr<Component>& component)
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(GetContext());
     }
+    // ApplyRestoreInfo maybe change currentOffset_
+    ApplyRestoreInfo();
     lastOffset_ = currentOffset_;
     // Send scroll none when first build.
     HandleScrollPosition(0.0, 0.0, SCROLL_NONE);
@@ -1109,6 +1066,29 @@ bool RenderScroll::IsAxisScrollable(AxisDirection direction)
 
 void RenderScroll::HandleAxisEvent(const AxisEvent& event)
 {
+}
+
+std::string RenderScroll::ProvideRestoreInfo()
+{
+    if (!NearZero(currentOffset_.GetY()) && axis_ == Axis::VERTICAL) {
+        return std::to_string(currentOffset_.GetY());
+    } else if (!NearZero(currentOffset_.GetX()) && axis_ == Axis::HORIZONTAL) {
+        return std::to_string(currentOffset_.GetX());
+    }
+    return "";
+}
+
+void RenderScroll::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    if (axis_ == Axis::VERTICAL) {
+        currentOffset_.SetY(StringUtils::StringToDouble(GetRestoreInfo()));
+    } else {
+        currentOffset_.SetX(StringUtils::StringToDouble(GetRestoreInfo()));
+    }
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

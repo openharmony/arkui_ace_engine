@@ -21,6 +21,7 @@
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/dialog/dialog_element.h"
+#include "core/components/dialog_tween/render_dialog_tween.h"
 #include "core/components/drop_filter/drop_filter_element.h"
 #include "core/components/page/page_element.h"
 #include "core/components/picker/picker_base_element.h"
@@ -354,8 +355,8 @@ void StackElement::PerformPopPopup(const ComposeId& id)
         auto child = DynamicCast<TweenElement>(*iter);
         if (child && child->GetId() == id) {
             auto themeManager = GetThemeManager();
-            if (!themeManager) {
-                LOGE("themeManager is null!");
+            if (!themeManager || !themeManager->GetTheme<PopupTheme>()) {
+                LOGE("themeManager or get theme is null!");
                 return;
             }
 
@@ -544,6 +545,34 @@ RefPtr<BubbleElement> StackElement::GetBubble(const RefPtr<Element>& element) co
     }
 
     return GetBubble(element->GetFirstChild());
+}
+
+bool StackElement::PopDialogIfExist() const
+{
+    auto dialogTweenElement = GetDialog(GetLastChild());
+    if (!dialogTweenElement) {
+        return false;
+    }
+    auto renderDialogTween = DynamicCast<RenderDialogTween>(dialogTweenElement->GetRenderNode());
+    if (!renderDialogTween) {
+        return false;
+    }
+    renderDialogTween->PopDialog();
+    return true;
+}
+
+RefPtr<DialogTweenElement> StackElement::GetDialog(const RefPtr<Element>& element) const
+{
+    if (!element) {
+        return nullptr;
+    }
+
+    auto dialog = DynamicCast<DialogTweenElement>(element);
+    if (dialog) {
+        return dialog;
+    }
+
+    return GetDialog(element->GetFirstChild());
 }
 
 } // namespace OHOS::Ace

@@ -363,7 +363,7 @@ void ContainerModalElement::Update()
         });
         containerElement->controller_->Backward();
     });
-    containerBox->SetOnContainerModalClickId(tapGesture);
+    containerBox->SetOnClick(tapGesture);
 }
 
 bool ContainerModalElement::CanShowFloatingTitle()
@@ -441,7 +441,7 @@ void ContainerModalElement::ChangeFloatingTitleIcon(bool isFocus)
         rowElement->SetUpdateComponent(titleChildrenRow);
     }
     if (splitButton) {
-        splitButton->SetHidden(windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN);
+        splitButton->SetHidden(windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY);
     }
 }
 
@@ -532,6 +532,25 @@ void ContainerModalElement::SetTitleButtonHide(bool hideSplit, bool hideMaximize
         FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(true));
     floatingTitleChildrenRow->SetUpdateType(UpdateType::REBUILD);
     floatingRowElement->SetUpdateComponent(floatingTitleChildrenRow);
+}
+
+void ContainerModalElement::SetAppTitle(const std::string& title)
+{
+    CHECK_NULL_VOID(containerModalComponent_);
+    auto textComponent = containerModalComponent_->GetTitleLabel();
+    CHECK_NULL_VOID(textComponent);
+    textComponent->SetData(title);
+    FlushReload();
+}
+
+void ContainerModalElement::SetAppIcon(const RefPtr<PixelMap>& icon)
+{
+    CHECK_NULL_VOID(containerModalComponent_);
+    auto imageComponent = containerModalComponent_->GetTitleIcon();
+    CHECK_NULL_VOID(imageComponent);
+    imageComponent->SetSrc("");
+    imageComponent->SetPixmap(icon);
+    FlushReload();
 }
 
 } // namespace OHOS::Ace

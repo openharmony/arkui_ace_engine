@@ -17,7 +17,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
-#include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -35,15 +35,18 @@ void FlutterRenderContext::StartRecording()
         return;
     }
     recorder_ = std::make_unique<SkPictureRecorder>();
-    recordingCanvas_ = Canvas::Create(recorder_->beginRecording(
-        SkRect::MakeXYWH(0, 0, flutterNode_->FrameRect().Width(), flutterNode_->FrameRect().Height())));
+    // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by recorder_
+    recordingCanvas_ = { recorder_->beginRecording(SkRect::MakeXYWH(
+                             0, 0, flutterNode_->FrameRect().Width(), flutterNode_->FrameRect().Height())),
+        [](SkCanvas*) {} };
     LOGD("StartRecording %{public}s", flutterNode_->FrameRect().ToString().c_str());
 }
 
 void FlutterRenderContext::StartPictureRecording(float x, float y, float width, float height)
 {
     recorder_ = std::make_unique<SkPictureRecorder>();
-    recordingCanvas_ = Canvas::Create(recorder_->beginRecording(SkRect::MakeXYWH(x, y, width, height)));
+    // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by recorder_
+    recordingCanvas_ = { recorder_->beginRecording(SkRect::MakeXYWH(x, y, width, height)), [](SkCanvas*) {} };
 }
 
 void FlutterRenderContext::StopRecordingIfNeeded()
@@ -54,11 +57,11 @@ void FlutterRenderContext::StopRecordingIfNeeded()
             flutterNode_->AddPicture(picture);
         }
         recorder_.reset();
-        recordingCanvas_.Reset();
+        recordingCanvas_.reset();
     }
 }
 
-void FlutterRenderContext::InitContext(bool isRoot)
+void FlutterRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName)
 {
     LOGD("InitContext root:%d", isRoot);
     flutterNode_ = std::make_shared<FlutterNode>(isRoot);
@@ -74,7 +77,7 @@ void FlutterRenderContext::SyncGeometryProperties(GeometryNode* geometryNode)
     flutterNode_->SetFrameRect(frameRect);
 }
 
-void FlutterRenderContext::UpdateBgColor(const Color& value)
+void FlutterRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
     LOGD("UpdateBgColor color:%s", value.ColorToString().c_str());
     if (!flutterNode_) {
@@ -86,7 +89,7 @@ void FlutterRenderContext::UpdateBgColor(const Color& value)
 
 void FlutterRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDraw)
 {
-    auto canvas = GetCanvas();
+    RSCanvas canvas(&recordingCanvas_);
     if (contentDraw) {
         contentDraw(canvas);
     }
@@ -94,7 +97,7 @@ void FlutterRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& content
 
 void FlutterRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)
 {
-    auto canvas = GetCanvas();
+    RSCanvas canvas(&recordingCanvas_);
     if (foregroundDraw) {
         foregroundDraw(canvas);
     }
@@ -104,7 +107,7 @@ void FlutterRenderContext::FlushOverlayDrawFunction(CanvasDrawFunction&& overlay
 
 RefPtr<Canvas> FlutterRenderContext::GetCanvas()
 {
-    return recordingCanvas_;
+    return nullptr;
 }
 
 sk_sp<SkPicture> FlutterRenderContext::FinishRecordingAsPicture()

@@ -29,10 +29,12 @@
 #include "core/event/axis_event.h"
 #include "core/gestures/raw_recognizer.h"
 #include "base/window/drag_window.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 
 constexpr int32_t MAX_GESTURE_SIZE = 3;
+constexpr int32_t DEFAULT_INDEX_VALUE = -1;
 
 class ACE_EXPORT RenderBox : public RenderBoxBase, public DragDropEvent {
     DECLARE_ACE_TYPE(RenderBox, RenderBoxBase, DragDropEvent);
@@ -187,14 +189,8 @@ public:
     bool HandleMouseEvent(const MouseEvent& event) override;
     void HandleMouseHoverEvent(MouseState mouseState) override;
 
-    bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
-        TouchTestResult& result) override;
-
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
-
-    void OnTouchTestHierarchy(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
-        const std::vector<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& result);
 
     void AddRecognizerToResult(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result);
@@ -222,9 +218,7 @@ protected:
 
     Offset GetBorderOffset() const override;
     Radius GetBorderRadius() const override;
-    void UpdateGestureRecognizer(const std::vector<RefPtr<Gesture>>& gestures);
-    void UpdateGestureRecognizerHierarchy(const std::vector<std::pair<GesturePriority,
-            std::vector<RefPtr<Gesture>>>>& gestures);
+    void UpdateGestureRecognizer(const std::array<RefPtr<Gesture>, MAX_GESTURE_SIZE>& gestures);
     bool ExistGestureRecognizer();
 
     // Remember clear all below members in ClearRenderObject().
@@ -251,7 +245,7 @@ private:
     void UpdateBackDecoration(const RefPtr<Decoration>& newDecoration);
     void UpdateFrontDecoration(const RefPtr<Decoration>& newDecoration);
     void HandleRemoteMessage(const ClickInfo& clickInfo);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void CalculateScale(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
     void CalculateRotate(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
     void CalculateTranslate(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size);
@@ -261,12 +255,12 @@ private:
     void SetAccessibilityFocusImpl();
     void SetAccessibilityClickImpl();
 
-    std::vector<RefPtr<GestureRecognizer>> recognizers_;
-    std::vector<std::pair<GesturePriority, std::vector<RefPtr<GestureRecognizer>>>> recognizerHierarchy_;
+    // 0 - low priority gesture, 1 - high priority gesture, 2 - parallel priority gesture
+    std::array<RefPtr<GestureRecognizer>, MAX_GESTURE_SIZE> recognizers_;
 
     RefPtr<GestureRecognizer> onClick_;
-    RefPtr<ClickRecognizer> onContainerModalClick_;
     RefPtr<GestureRecognizer> onLongPress_;
+    RefPtr<GestureRecognizer> parallelRecognizer_;
     RefPtr<RawRecognizer> touchRecognizer_;
     RefPtr<StateAttributes<BoxStateAttribute>> stateAttributeList_;
     OnHoverCallback onHover_;
@@ -285,7 +279,7 @@ private:
     OnTouchEventCallback onTouchDownId_;
     OnTouchEventCallback onTouchMoveId_;
     size_t selectedIndex_ = DEFAULT_INDEX;
-    size_t insertIndex_ = DEFAULT_INDEX;
+    int32_t insertIndex_ = DEFAULT_INDEX_VALUE;
     std::function<void(const std::shared_ptr<ClickInfo>&)> remoteMessageEvent_;
     bool enableDragStart_ = true;
 }; // class RenderBox

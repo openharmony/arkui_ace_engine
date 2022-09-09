@@ -19,6 +19,7 @@
 #include "core/components/box/box_component.h"
 #include "core/components/rating/rating_component.h"
 #include "core/components/rating/rating_theme.h"
+#include "core/components_ng/pattern/rating/rating_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -42,6 +43,14 @@ void JSRating::Create(const JSCallbackInfo& info)
     if (getIndicator->IsBoolean()) {
         indicator = getIndicator->ToBoolean();
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::RatingView::Create();
+        NG::RatingView::SetRatingScore(rating);
+        NG::RatingView::SetIndicator(indicator);
+        return;
+    }
+
     auto component = AceType::MakeRefPtr<RatingComponent>();
     component->SetMouseAnimationType(HoverAnimationType::NONE);
     component->SetRatingScore(rating);
@@ -86,7 +95,6 @@ void JSRating::JSBind(BindingTarget globalObj)
     JSClass<JSRating>::StaticMethod("stepSize", &JSRating::SetStepSize, opt);
     JSClass<JSRating>::StaticMethod("starStyle", &JSRating::SetStarStyle, opt);
     JSClass<JSRating>::StaticMethod("onChange", &JSRating::SetOnChange);
-
     JSClass<JSRating>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRating>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRating>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -107,6 +115,11 @@ void JSRating::SetStars(const JSCallbackInfo& info)
 
     if (!info[0]->IsNumber()) {
         LOGE("arg is not number.");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::RatingView::SetStars(info[0]->ToNumber<int32_t>());
         return;
     }
 
@@ -131,6 +144,11 @@ void JSRating::SetStepSize(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::RatingView::SetStepSize(info[0]->ToNumber<double>());
+        return;
+    }
+
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<RatingComponent>(stack->GetMainComponent());
     if (!component) {
@@ -144,13 +162,6 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGE("the arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
-
-    auto stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<RatingComponent>(stack->GetMainComponent());
-    if (!component) {
-        LOGE("ratingComponent is null");
         return;
     }
 
@@ -175,6 +186,20 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
 
     if (getSecondaryUri->IsString()) {
         secondaryUri = getSecondaryUri->ToString();
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::RatingView::SetForegroundSrc(foregroundUri);
+        NG::RatingView::SetSecondarySrc(secondaryUri);
+        NG::RatingView::SetBackgroundSrc(backgroundUri);
+        return;
+    }
+
+    auto stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<RatingComponent>(stack->GetMainComponent());
+    if (!component) {
+        LOGE("ratingComponent is null");
+        return;
     }
 
     component->SetBackgroundSrc(backgroundUri);

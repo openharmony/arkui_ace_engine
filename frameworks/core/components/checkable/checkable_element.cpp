@@ -55,14 +55,16 @@ void CheckableElement::OnClick()
 
 void CheckableElement::OnFocus()
 {
-    if (renderNode_ != nullptr) {
+    auto context = context_.Upgrade();
+    if (context && context->GetIsTabKeyPressed() && renderNode_) {
         renderNode_->ChangeStatus(RenderStatus::FOCUS);
     }
 }
 
 void CheckableElement::OnBlur()
 {
-    if (renderNode_ != nullptr) {
+    auto context = context_.Upgrade();
+    if (context && context->GetIsTabKeyPressed() && renderNode_) {
         renderNode_->ChangeStatus(RenderStatus::BLUR);
     }
 }

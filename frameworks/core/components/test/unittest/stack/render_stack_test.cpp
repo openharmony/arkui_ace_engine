@@ -18,6 +18,7 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components/box/box_component.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/test/unittest/flex/flex_test_utils.h"
 #include "core/components/test/unittest/mock/mock_render_common.h"
 #include "core/components/test/unittest/stack/stack_test_utils.h"
@@ -33,6 +34,9 @@ constexpr double MEDIUM_BOX = 200.0;
 constexpr double LARGE_BOX = 300.0;
 constexpr double RECT_WIDTH = 1080.0;
 constexpr double RECT_HEIGHT = 2244.0;
+constexpr double BUTTON_WIDTH_DEFAULT = 400.0;
+constexpr double BUTTON_HEIGHT_DEFAULT = 200.0;
+const Point TOUCH_POINT = Point(100.0, 100.0);
 
 } // namespace
 
@@ -466,6 +470,39 @@ HWTEST_F(RenderStackTest, RenderStackLayout010, TestSize.Level1)
     EXPECT_TRUE(firstBox->GetLayoutSize() == Size(RECT_WIDTH, RECT_HEIGHT));
     EXPECT_TRUE(secondBox->GetLayoutSize() == Size(RECT_WIDTH, RECT_HEIGHT));
     EXPECT_TRUE(thirdBox->GetLayoutSize() == Size(RECT_WIDTH, RECT_HEIGHT));
+}
+
+/**
+ * @tc.name: RenderStackHitTest001
+ * @tc.desc: Verify the stack component with hitTestBehavior works fine.
+ * @tc.type: FUNC
+ * @tc.require: issueI5JQ3J
+ */
+HWTEST_F(RenderStackTest, RenderStackHitTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct the node tree, stack is set HitTestMode::HTMBLOCK.
+     */
+    auto mockContext = MockRenderCommon::GetMockContext();
+    RefPtr<RenderRoot> root = FlexTestUtils::CreateRenderRoot();
+    RefPtr<RenderStack> stack =
+        StackTestUtils::CreateRenderStack(Alignment::TOP_LEFT, Overflow::CLIP,
+            StackFit::STRETCH, HitTestMode::HTMBLOCK);
+    root->AddChild(stack);
+    auto renderButton = FlexTestUtils::CreateRenderButton(BUTTON_WIDTH_DEFAULT, BUTTON_HEIGHT_DEFAULT);
+    renderButton->Attach(mockContext);
+    stack->AddChild(renderButton);
+    stack->PerformLayout();
+
+    /**
+     * @tc.steps: step2. call TouchTest interface
+     * @tc.expected: step2. the result is empty
+     */
+    root->Attach(mockContext);
+    stack->Attach(mockContext);
+    TouchTestResult result;
+    stack->TouchTest(TOUCH_POINT, TOUCH_POINT, { TouchRestrict::NONE }, result);
+    EXPECT_EQ(result.size(), 0);
 }
 
 } // namespace OHOS::Ace

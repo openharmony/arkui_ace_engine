@@ -18,12 +18,16 @@
 #include "napi/native_api.h"
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
+#include "uv.h"
 
 #include "frameworks/base/log/log.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Napi {
+const char EN_ALERT_APPROVE[] = "enableAlertBeforeBackPage:ok";
+const char EN_ALERT_REJECT[] = "enableAlertBeforeBackPage:fail cancel";
+const char DIS_ALERT_SUCCESS[] = "disableAlertBeforeBackPage:ok";
 
 static constexpr size_t ARGC_WITH_MODE = 2;
 static constexpr uint32_t STANDARD = 0;
@@ -45,25 +49,27 @@ static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
 
 static void ParseParams(napi_env env, napi_value params, std::string& paramsString)
 {
-    if (params != nullptr) {
-        napi_value globalValue;
-        napi_get_global(env, &globalValue);
-        napi_value jsonValue;
-        napi_get_named_property(env, globalValue, "JSON", &jsonValue);
-        napi_value stringifyValue;
-        napi_get_named_property(env, jsonValue, "stringify", &stringifyValue);
-        napi_value funcArgv[1] = { params };
-        napi_value returnValue;
-        napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue);
-        auto nativeValue = reinterpret_cast<NativeValue*>(returnValue);
-        auto resultValue = nativeValue->ToString();
-        auto nativeString = reinterpret_cast<NativeString*>(resultValue->GetInterface(NativeString::INTERFACE_ID));
-        size_t len = nativeString->GetLength() + 1;
-        std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(len);
-        size_t ret = 0;
-        napi_get_value_string_utf8(env, returnValue, paramsChar.get(), len, &ret);
-        paramsString = paramsChar.get();
+    // TODO: Save the original data instead of making the serial number.
+    if (params == nullptr) {
+        return;
     }
+    napi_value globalValue;
+    napi_get_global(env, &globalValue);
+    napi_value jsonValue;
+    napi_get_named_property(env, globalValue, "JSON", &jsonValue);
+    napi_value stringifyValue;
+    napi_get_named_property(env, jsonValue, "stringify", &stringifyValue);
+    napi_value funcArgv[1] = { params };
+    napi_value returnValue;
+    napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue);
+    auto nativeValue = reinterpret_cast<NativeValue*>(returnValue);
+    auto resultValue = nativeValue->ToString();
+    auto nativeString = reinterpret_cast<NativeString*>(resultValue->GetInterface(NativeString::INTERFACE_ID));
+    size_t len = nativeString->GetLength() + 1;
+    std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(len);
+    size_t ret = 0;
+    napi_get_value_string_utf8(env, returnValue, paramsChar.get(), len, &ret);
+    paramsString = paramsChar.get();
 }
 
 static napi_value JSRouterPush(napi_env env, napi_callback_info info)
@@ -202,8 +208,7 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
         if (valueType == napi_string) {
             ParseUri(env, uriNApi, uriString);
         } else {
-            LOGE("the url and path is all invalid");
-            return nullptr;
+            LOGW("the url and path is all invalid");
         }
 
         napi_get_named_property(env, argv, "params", &params);
@@ -273,25 +278,76 @@ static napi_value JSRouterGetState(napi_env env, napi_callback_info info)
 
 struct RouterAsyncContext {
     napi_env env = nullptr;
-    napi_async_work work = nullptr;
-    napi_value message_napi = nullptr;
     napi_ref callbackSuccess = nullptr;
     napi_ref callbackFail = nullptr;
     napi_ref callbackComplete = nullptr;
-    std::string messageString;
-    std::string fail;
-    std::string success;
-    std::string complete;
+    int32_t callbackType = 0;
+    ~RouterAsyncContext()
+    {
+        if (callbackSuccess) {
+            napi_delete_reference(env, callbackSuccess);
+        }
+        if (callbackFail) {
+            napi_delete_reference(env, callbackFail);
+        }
+        if (callbackComplete) {
+            napi_delete_reference(env, callbackComplete);
+        }
+    }
 };
 
-napi_value GetReturnObj(napi_env env, std::string callbackString)
+void CallBackToJSTread(RouterAsyncContext* context)
 {
-    napi_value result = nullptr;
-    napi_value returnObj = nullptr;
-    napi_create_object(env, &returnObj);
-    napi_create_string_utf8(env, callbackString.c_str(), NAPI_AUTO_LENGTH, &result);
-    napi_set_named_property(env, returnObj, "errMsg", result);
-    return returnObj;
+    uv_loop_s* loop = nullptr;
+    napi_get_uv_event_loop(context->env, &loop);
+
+    uv_work_t* work = new uv_work_t;
+    work->data = (void*)context;
+
+    uv_queue_work(
+        loop, work, [](uv_work_t* work) {},
+        [](uv_work_t* work, int status) {
+            RouterAsyncContext* context = (RouterAsyncContext*)work->data;
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(context->env, &scope);
+            if (scope == nullptr) {
+                return;
+            }
+
+            napi_value result = nullptr;
+            napi_value callback = nullptr;
+            napi_value ret = nullptr;
+            if (Framework::AlertState(context->callbackType) == Framework::AlertState::USER_CONFIRM) {
+                if (context->callbackSuccess) {
+                    napi_create_string_utf8(context->env, EN_ALERT_APPROVE, NAPI_AUTO_LENGTH, &result);
+                    napi_value argv[1] = { result };
+                    napi_get_reference_value(context->env, context->callbackSuccess, &callback);
+                    napi_call_function(context->env, nullptr, callback, 1, argv, &ret);
+                }
+                if (context->callbackComplete) {
+                    napi_get_reference_value(context->env, context->callbackComplete, &callback);
+                    napi_call_function(context->env, nullptr, callback, 0, nullptr, &ret);
+                }
+            }
+            if (Framework::AlertState(context->callbackType) == Framework::AlertState::USER_CANCEL) {
+                if (context->callbackFail) {
+                    napi_create_string_utf8(context->env, EN_ALERT_REJECT, NAPI_AUTO_LENGTH, &result);
+                    napi_value argv[1] = { result };
+                    napi_get_reference_value(context->env, context->callbackFail, &callback);
+                    napi_call_function(context->env, nullptr, callback, 1, argv, &ret);
+                }
+                if (context->callbackComplete) {
+                    napi_get_reference_value(context->env, context->callbackComplete, &callback);
+                    napi_call_function(context->env, nullptr, callback, 0, nullptr, &ret);
+                }
+            }
+
+            napi_close_handle_scope(context->env, scope);
+
+            if (work != nullptr) {
+                delete work;
+            }
+        });
 }
 
 static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_info info)
@@ -301,85 +357,107 @@ static napi_value JSRouterEnableAlertBeforeBackPage(napi_env env, napi_callback_
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
-    auto routerAsyncContext = new RouterAsyncContext();
-    routerAsyncContext->env = env;
+
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
-    if (valueType == napi_object) {
-        napi_get_named_property(env, argv, "message", &routerAsyncContext->message_napi);
-        napi_typeof(env, routerAsyncContext->message_napi, &valueType);
-        if (valueType == napi_string) {
-            auto nativeValue = reinterpret_cast<NativeValue*>(routerAsyncContext->message_napi);
-            auto resultValue = nativeValue->ToString();
-            auto nativeString = reinterpret_cast<NativeString*>(resultValue->GetInterface(NativeString::INTERFACE_ID));
-            size_t len = nativeString->GetLength() + 1;
-            std::unique_ptr<char[]> messageChar = std::make_unique<char[]>(len);
-            size_t ret = 0;
-            napi_get_value_string_utf8(env, routerAsyncContext->message_napi, messageChar.get(), len, &ret);
-            routerAsyncContext->messageString = messageChar.get();
-        } else {
-            LOGE("The message type is incorrect.");
-            return nullptr;
-        }
+    if (valueType != napi_object) {
+        LOGW("EnableAlertBeforeBackPage: params is null");
+        return nullptr;
     }
-    napi_value resource = nullptr;
-    napi_create_string_utf8(env, "JSRouterEnableAlertBeforeBackPage", NAPI_AUTO_LENGTH, &resource);
-    napi_create_async_work(
-        env, nullptr, resource, [](napi_env env, void* data) {},
-        [](napi_env env, napi_status status, void* data) {
-            RouterAsyncContext* asyncContext = (RouterAsyncContext*)data;
-            auto callBack = [](int32_t callbackType) {};
-            auto delegate = EngineHelper::GetCurrentDelegate();
-            if (delegate) {
-                delegate->EnableAlertBeforeBackPage(asyncContext->messageString, std::move(callBack));
-            } else {
-                LOGE("can not get delegate.");
-            }
-            napi_delete_async_work(env, asyncContext->work);
-            delete asyncContext;
-        },
-        (void*)routerAsyncContext, &routerAsyncContext->work);
-    napi_queue_async_work(env, routerAsyncContext->work);
+
+    napi_value messageNapi = nullptr;
+    std::unique_ptr<char[]> messageChar;
+    napi_get_named_property(env, argv, "message", &messageNapi);
+    napi_typeof(env, messageNapi, &valueType);
+    if (valueType == napi_string) {
+        size_t length = 0;
+        napi_get_value_string_utf8(env, messageNapi, nullptr, 0, &length);
+        messageChar = std::make_unique<char[]>(length + 1);
+        napi_get_value_string_utf8(env, messageNapi, messageChar.get(), length + 1, &length);
+    } else {
+        LOGW("EnableAlertBeforeBackPage: message is null");
+        return nullptr;
+    }
+
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        LOGW("EnableAlertBeforeBackPage: delegate is null");
+        return nullptr;
+    }
+
+    auto routerAsyncContext = new RouterAsyncContext();
+    routerAsyncContext->env = env;
+    napi_value successFunc = nullptr;
+    napi_value failFunc = nullptr;
+    napi_value completeFunc = nullptr;
+    napi_get_named_property(env, argv, "success", &successFunc);
+    napi_get_named_property(env, argv, "cancel", &failFunc);
+    napi_get_named_property(env, argv, "complete", &completeFunc);
+    napi_typeof(env, successFunc, &valueType);
+    if (valueType == napi_function) {
+        napi_create_reference(env, successFunc, 1, &routerAsyncContext->callbackSuccess);
+    }
+
+    napi_typeof(env, failFunc, &valueType);
+    if (valueType == napi_function) {
+        napi_create_reference(env, failFunc, 1, &routerAsyncContext->callbackFail);
+    }
+    napi_typeof(env, completeFunc, &valueType);
+    if (valueType == napi_function) {
+        napi_create_reference(env, completeFunc, 1, &routerAsyncContext->callbackComplete);
+    }
+
+    auto dilogCallback = [routerAsyncContext](int32_t callbackType) {
+        LOGI("callback after dialog click, callbackType = %{public}d", callbackType);
+        if (routerAsyncContext && Framework::AlertState(callbackType) == Framework::AlertState::RECOVERY) {
+            delete routerAsyncContext;
+            return;
+        }
+        routerAsyncContext->callbackType = callbackType;
+        CallBackToJSTread(routerAsyncContext);
+    };
+    delegate->EnableAlertBeforeBackPage(messageChar.get(), std::move(dilogCallback));
+
     return nullptr;
 }
 
-struct DisableRouterAsyncContext {
-    napi_env env = nullptr;
-    napi_async_work work = nullptr;
-    napi_ref callbackSuccess = nullptr;
-    napi_ref callbackFail = nullptr;
-    napi_ref callbackComplete = nullptr;
-    std::string fail;
-    std::string success;
-    std::string complete;
-};
-
 static napi_value JSRouterDisableAlertBeforeBackPage(napi_env env, napi_callback_info info)
 {
-    auto disableRouterAsyncContext = new DisableRouterAsyncContext();
-    disableRouterAsyncContext->env = env;
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (delegate) {
+        delegate->DisableAlertBeforeBackPage();
+    } else {
+        LOGW("DisableAlertBeforeBackPage: delegate is null");
+        return nullptr;
+    }
+
     size_t argc = 1;
     napi_value argv = nullptr;
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
-    napi_value resource = nullptr;
-    napi_create_string_utf8(env, "JSRouterDisableAlertBeforeBackPage", NAPI_AUTO_LENGTH, &resource);
-    napi_create_async_work(
-        env, nullptr, resource, [](napi_env env, void* data) {},
-        [](napi_env env, napi_status status, void* data) {
-            DisableRouterAsyncContext* asyncContext = (DisableRouterAsyncContext*)data;
-            auto delegate = EngineHelper::GetCurrentDelegate();
-            if (delegate) {
-                delegate->DisableAlertBeforeBackPage();
-            } else {
-                LOGE("can not get delegate.");
-            }
-            napi_delete_async_work(env, asyncContext->work);
-            delete asyncContext;
-        },
-        (void*)disableRouterAsyncContext, &disableRouterAsyncContext->work);
-    napi_queue_async_work(env, disableRouterAsyncContext->work);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv, &valueType);
+    if (valueType == napi_object) {
+        napi_value successFunc = nullptr;
+        napi_value completeFunc = nullptr;
+        napi_get_named_property(env, argv, "success", &successFunc);
+        napi_get_named_property(env, argv, "complete", &completeFunc);
+
+        napi_value result = nullptr;
+        napi_value ret = nullptr;
+        napi_create_string_utf8(env, DIS_ALERT_SUCCESS, NAPI_AUTO_LENGTH, &result);
+        napi_value argv[1] = { result };
+
+        napi_typeof(env, successFunc, &valueType);
+        if (valueType == napi_function) {
+            napi_call_function(env, nullptr, successFunc, 1, argv, &ret);
+        }
+        napi_typeof(env, completeFunc, &valueType);
+        if (valueType == napi_function) {
+            napi_call_function(env, nullptr, completeFunc, 1, argv, &ret);
+        }
+    }
     return nullptr;
 }
 
@@ -425,7 +503,7 @@ static napi_value RouterExport(napi_env env, napi_value exports)
     napi_create_uint32(env, SINGLE, &prop);
     napi_set_named_property(env, routerMode, "Single", prop);
 
-    static napi_property_descriptor routerDesc[] = {
+    napi_property_descriptor routerDesc[] = {
         DECLARE_NAPI_FUNCTION("push", JSRouterPush),
         DECLARE_NAPI_FUNCTION("replace", JSRouterReplace),
         DECLARE_NAPI_FUNCTION("back", JSRouterBack),

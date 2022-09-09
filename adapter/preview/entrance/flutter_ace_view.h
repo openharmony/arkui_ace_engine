@@ -68,6 +68,8 @@ public:
         }
     }
 
+    void RegisterViewPositionChangeCallback(ViewPositionChangeCallback&& callback) override {}
+
     void RegisterDensityChangeCallback(DensityChangeCallback&& callback) override
     {
         if (callback) {

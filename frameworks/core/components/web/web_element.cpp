@@ -58,12 +58,13 @@ void WebElement::OnFocus()
         return;
     }
     renderWeb->GetDelegate()->OnFocus();
+    renderWeb->SetWebIsFocus(true);
     FocusNode::OnFocus();
 }
 
 void WebElement::OnBlur()
 {
-    LOGI("web element onblur");
+    LOGI("web element onBlur");
     auto renderWeb = AceType::DynamicCast<RenderWeb>(renderNode_);
     if (!renderWeb) {
         return;
@@ -73,6 +74,8 @@ void WebElement::OnBlur()
         return;
     }
     renderWeb->GetDelegate()->OnBlur();
+    renderWeb->SetWebIsFocus(false);
+    renderWeb->OnQuickMenuDismissed();
     FocusNode::OnBlur();
 }
 
@@ -86,7 +89,10 @@ bool WebElement::OnKeyEvent(const KeyEvent& keyEvent)
         LOGE("Delegate is nullptr.");
         return false;
     }
-    return renderWeb->GetDelegate()->OnKeyEvent(static_cast<int32_t>(keyEvent.code),
+    bool ret = renderWeb->GetDelegate()->OnKeyEvent(static_cast<int32_t>(keyEvent.code),
         static_cast<int32_t>(keyEvent.action));
+
+    renderWeb->HandleKeyEvent(keyEvent);
+    return ret;
 }
 } // namespace OHOS::Ace

@@ -22,13 +22,14 @@
 #include "base/memory/ace_type.h"
 #include "core/animation/curve.h"
 #include "core/components/common/properties/scroll_bar.h"
-#include "core/components/refresh/render_refresh.h"
+#include "core/components/refresh/render_refresh_target.h"
 #include "core/components/scroll/scroll_bar_controller.h"
 #include "core/components/scroll/scroll_component.h"
 #include "core/components/scroll/scroll_edge_effect.h"
 #include "core/components/scroll/scroll_position_controller.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
 
@@ -40,8 +41,8 @@ enum class ScrollType {
     SCROLL_TOP,
 };
 
-class RenderScroll : public RenderNode {
-    DECLARE_ACE_TYPE(RenderScroll, RenderNode)
+class RenderScroll : public RenderNode, public RenderRefreshTarget {
+    DECLARE_ACE_TYPE(RenderScroll, RenderNode, RenderRefreshTarget)
 
 public:
     ~RenderScroll() override;
@@ -127,9 +128,24 @@ public:
         return axis_;
     }
 
-    bool IsRowReverse()
+    void SetDirection(FlexDirection direction)
     {
-        return axis_ == Axis::HORIZONTAL && rightToLeft_;
+        direction_ = direction;
+    }
+
+    FlexDirection GetDirection() const
+    {
+        return direction_;
+    }
+
+    bool IsRowReverse() const
+    {
+        return (axis_ == Axis::HORIZONTAL && rightToLeft_) || direction_ == FlexDirection::ROW_REVERSE;
+    }
+
+    bool IsColReverse() const
+    {
+        return  direction_ == FlexDirection::COLUMN_REVERSE;
     }
 
     virtual bool ReachMaxCount() const
@@ -216,6 +232,9 @@ public:
     void HandleMouseHoverEvent(const MouseState mouseState) override;
     bool HandleMouseEvent(const MouseEvent& event) override;
 
+    // distribute
+    std::string ProvideRestoreInfo() override;
+
 protected:
     explicit RenderScroll();
 
@@ -276,7 +295,6 @@ private:
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
     void HandleScrollPosition(double scrollX, double scrollY, int32_t scrollState) const;
     void SetEdgeEffectAttribute();
-    bool HandleRefreshEffect(Offset& delta, int32_t source);
     void ResetScrollEventCallBack();
     void HandleScrollEffect();
     void SetBarCallBack(bool isVertical);
@@ -287,6 +305,10 @@ private:
     void OnReachTop() const;
     void OnReachBottom() const;
 
+    // distribute
+    void ApplyRestoreInfo();
+
+    FlexDirection direction_ { FlexDirection::COLUMN };
     using OnReachFunc = std::function<void(const std::string&)>;
     OnReachFunc onReachStart_;
     OnReachFunc onReachEnd_;

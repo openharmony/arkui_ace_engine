@@ -406,6 +406,16 @@ public:
         return innerPadding_.Bottom();
     }
 
+    const Dimension& GetHeight() const
+    {
+        return height_;
+    }
+
+    const Dimension& GetWidth() const
+    {
+        return width_;
+    }
+
 private:
     bool disabled_ { false };
     bool clicked_ { false };

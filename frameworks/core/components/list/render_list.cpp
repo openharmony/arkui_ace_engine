@@ -750,10 +750,13 @@ void RenderList::NotifyDragStart(double startPosition)
         LOGE("NotifyDragStart failed. layout manager is null.");
         return;
     }
-    double globalMainOffset = direction_ == FlexDirection::ROW ? GetGlobalOffset().GetX() : GetGlobalOffset().GetY();
+    double globalMainOffset = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)
+                                  ? GetGlobalOffset().GetX()
+                                  : GetGlobalOffset().GetY();
     double localOffset = startPosition - globalMainOffset;
-    double scrollPosition =
-        direction_ == FlexDirection::ROW ? layoutManager_->GetPosition().GetX() : layoutManager_->GetPosition().GetY();
+    double scrollPosition = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)
+                                ? layoutManager_->GetPosition().GetX()
+                                : layoutManager_->GetPosition().GetY();
     double position = localOffset - scrollPosition;
     auto render = RenderListItem::GetRenderListItem(GetNearChildByPosition(position));
     if (render) {

@@ -31,6 +31,8 @@ constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 
 XComponentElement::~XComponentElement()
 {
+    // App release its res first and xcomponent release surface
+    OnSurfaceDestroyEvent();
     ReleasePlatformResource();
 }
 
@@ -59,7 +61,6 @@ void XComponentElement::Prepare(const WeakPtr<Element>& parent)
 {
     xcomponent_ = AceType::DynamicCast<XComponentComponent>(component_);
     InitEvent();
-    RegisterSurfaceDestroyEvent();
 
     RenderElement::Prepare(parent);
     if (xcomponent_) {
@@ -107,19 +108,6 @@ void XComponentElement::InitEvent()
     if (!xcomponent_->GetXComponentDestroyEventId().IsEmpty()) {
         onXComponentDestroy_ =
             AceAsyncEvent<void(const std::string&)>::Create(xcomponent_->GetXComponentDestroyEventId(), context_);
-    }
-}
-
-void XComponentElement::RegisterSurfaceDestroyEvent()
-{
-    auto context = context_.Upgrade();
-    if (context) {
-        context->SetDestroyHandler([weak = WeakClaim(this)] {
-            auto element = weak.Upgrade();
-            if (element) {
-                element->OnSurfaceDestroyEvent();
-            }
-        });
     }
 }
 
@@ -367,8 +355,7 @@ void XComponentElement::OnXComponentSizeInit(int64_t textureId, int32_t textureW
         }
     }
 
-    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
-                                                         TaskExecutor::TaskType::PLATFORM);
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
         auto xcomponentElement = weak.Upgrade();
         if (xcomponentElement) {

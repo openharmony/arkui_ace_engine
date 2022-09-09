@@ -26,6 +26,7 @@
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/grid_layout/grid_layout_component.h"
 #include "core/components/grid_layout/render_grid_layout.h"
+#include "core/components/refresh/render_refresh_target.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/pipeline/base/render_node.h"
@@ -51,8 +52,8 @@ private:
     int32_t scrollIndex_ = 0;
 };
 
-class RenderGridScroll : public RenderGridLayout {
-    DECLARE_ACE_TYPE(RenderGridScroll, RenderGridLayout);
+class RenderGridScroll : public RenderGridLayout, public RenderRefreshTarget {
+    DECLARE_ACE_TYPE(RenderGridScroll, RenderGridLayout, RenderRefreshTarget);
 
 public:
     using BuildChildByIndex = std::function<bool(int32_t)>;
@@ -144,6 +145,9 @@ public:
 
     bool IsAxisScrollable(AxisDirection direction) override;
 
+    // distribute
+    std::string ProvideRestoreInfo() override;
+
 protected:
     int32_t GetItemMainIndex(const RefPtr<RenderNode>& child, bool isMain) const;
     void SetMainSize(Size& dst, const Size& src);
@@ -205,6 +209,9 @@ protected:
     int32_t GetIndexByPosition(double position) const;
 
     void OnScrolled(int32_t scrolled) const;
+
+    // distribute
+    void ApplyRestoreInfo();
 
     enum class SCROLLABLE : uint32_t {
         NO_SCROLL = 0,

@@ -45,7 +45,9 @@ double GetMainAxisValue(const Size& size, FlexDirection direction)
 
 inline bool IsNonRelativePosition(PositionType pos)
 {
-    return ((pos != PositionType::RELATIVE) && (pos != PositionType::SEMI_RELATIVE) && (pos != PositionType::OFFSET));
+    return ((pos != PositionType::PTRELATIVE) &&
+            (pos != PositionType::PTSEMI_RELATIVE) &&
+            (pos != PositionType::PTOFFSET));
 }
 
 } // namespace
@@ -557,6 +559,12 @@ void RenderFlex::PerformLayoutInItemMode()
         mainAxisSize = MainAxisSize::MIN;
     }
     LayoutAbsoluteChildren();
+    if (needRelayoutCross_) {
+        crossSize_ = 0.0;
+        for (const auto& item : relativeNodes_) {
+            crossSize_ = std::max(crossSize_, GetCrossSize(item));
+        }
+    }
     // get layout size and set positions
     DetermineSelfSize(mainAxisSize, useViewPort);
     DetermineItemsPosition(baselineProperties);
@@ -599,6 +607,9 @@ void RenderFlex::ResizeItems(const FlexItemProperties& flexItemProps, BaselinePr
         getFlex = [](const RefPtr<RenderFlexItem>& item) { return item->GetFlexShrink(); };
         spacePerFlex = NearZero(flexItemProps.totalShrink) ? 0.0 : remainSpace / flexItemProps.totalShrink;
         lastChild = flexItemProps.lastShrinkChild;
+    }
+    if (!NearZero(spacePerFlex)) {
+        needRelayoutCross_ = true;
     }
     // In second layout, do not need to check the size validity, they are all checked.
     for (const auto& item : relativeNodes_) {
@@ -740,13 +751,13 @@ void RenderFlex::PlaceChildren(double frontSpace, double betweenSpace, const Bas
         }
         Offset offset;
         if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
-            if (item->GetPositionType() == PositionType::SEMI_RELATIVE) {
+            if (item->GetPositionType() == PositionType::PTSEMI_RELATIVE) {
                 childMainPos = 0.0;
             }
             offset = Offset(childMainPos, childCrossPos);
         } else {
             offset =
-                Offset((item->GetPositionType() == PositionType::SEMI_RELATIVE) ? 0.0 : childCrossPos, childMainPos);
+                Offset((item->GetPositionType() == PositionType::PTSEMI_RELATIVE) ? 0.0 : childCrossPos, childMainPos);
         }
 
         if (!IsStartTopLeft(direction_, GetTextDirection())) {
@@ -911,6 +922,7 @@ void RenderFlex::InitFlexProperties()
     layoutMode_ = FlexLayoutMode::FLEX_WEIGHT_MODE;
     totalFlexWeight_ = 0.0;
     maxDisplayIndex_ = 0;
+    needRelayoutCross_ = false;
     if (direction_ == FlexDirection::ROW) {
         isMainInfinite_ = GetLayoutParam().GetMaxSize().IsWidthInfinite();
         isCrossInfinite_ = GetLayoutParam().GetMaxSize().IsHeightInfinite();
@@ -979,7 +991,7 @@ void RenderFlex::ResizeByItem(const RefPtr<RenderNode>& item, double &allocatedS
 
     crossSize_ = std::max(crossSize_, GetCrossSize(item));
     // Semi relative and variable allocatedSize is used for grid container.
-    if ((item->GetPositionType() == PositionType::SEMI_RELATIVE) &&
+    if ((item->GetPositionType() == PositionType::PTSEMI_RELATIVE) &&
         (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)) {
         allocatedSize_ = std::max(allocatedSize_, mainSize);
         allocatedSize = mainSize;
@@ -1029,7 +1041,7 @@ double RenderFlex::GetMainSize(const RefPtr<RenderNode>& item) const
     }
     if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
         size = item->GetLayoutSize().Width();
-        if (item->GetPositionType() == PositionType::SEMI_RELATIVE) {
+        if (item->GetPositionType() == PositionType::PTSEMI_RELATIVE) {
             Offset absoluteOffset = PositionLayoutUtils::GetAbsoluteOffset(Claim(const_cast<RenderFlex*>(this)), item);
             size += absoluteOffset.GetX();
         }
@@ -1049,7 +1061,7 @@ double RenderFlex::GetCrossSize(const RefPtr<RenderNode>& item) const
         size = item->GetLayoutSize().Height();
     } else {
         size = item->GetLayoutSize().Width();
-        if (item->GetPositionType() == PositionType::SEMI_RELATIVE) {
+        if (item->GetPositionType() == PositionType::PTSEMI_RELATIVE) {
             Offset absoluteOffset = PositionLayoutUtils::GetAbsoluteOffset(Claim(const_cast<RenderFlex*>(this)), item);
             size += absoluteOffset.GetX();
         }

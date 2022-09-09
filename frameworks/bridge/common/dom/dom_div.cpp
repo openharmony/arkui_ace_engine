@@ -117,9 +117,21 @@ void DOMDiv::CreateOrUpdateGrid()
         grid_ = AceType::MakeRefPtr<GridLayoutComponent>(std::list<RefPtr<Component>>());
     }
     if (boxWrap_) {
-        grid_->SetDirection(direction_ == DOM_FLEX_ROW ? FlexDirection::COLUMN : FlexDirection::ROW);
+        if (direction_ == DOM_FLEX_ROW || direction_ == DOM_FLEX_ROW_REVERSE) {
+            grid_->SetDirection(FlexDirection::COLUMN);
+        } else {
+            grid_->SetDirection(FlexDirection::ROW);
+        }
     } else {
-        grid_->SetDirection(direction_ == DOM_FLEX_COLUMN ? FlexDirection::COLUMN : FlexDirection::ROW);
+        if (direction_ == DOM_FLEX_COLUMN_REVERSE) {
+            grid_->SetDirection(FlexDirection::COLUMN_REVERSE);
+        } else if (direction_ == DOM_FLEX_ROW) {
+            grid_->SetDirection(FlexDirection::ROW);
+        } else if (direction_ == DOM_FLEX_ROW_REVERSE) {
+            grid_->SetDirection(FlexDirection::ROW_REVERSE);
+        } else {
+            grid_->SetDirection(FlexDirection::COLUMN);
+        }
     }
     grid_->SetColumnsArgs(columnsArgs_);
     grid_->SetRowsArgs(rowsArgs_);
@@ -184,14 +196,18 @@ void DOMDiv::CreateOrUpdateFlex()
     if (!boxWrap_) {
         SetFlexHeight(flexMainAlign);
     }
-    if ((flexDirection_ == FlexDirection::ROW && boxComponent_->GetWidthDimension().IsValid()) ||
-        (flexDirection_ == FlexDirection::COLUMN && boxComponent_->GetHeightDimension().IsValid())) {
+    if (((flexDirection_ == FlexDirection::ROW || flexDirection_ == FlexDirection::ROW_REVERSE) &&
+            boxComponent_->GetWidthDimension().IsValid()) ||
+        ((flexDirection_ == FlexDirection::COLUMN || flexDirection_ == FlexDirection::COLUMN_REVERSE) &&
+            boxComponent_->GetHeightDimension().IsValid())) {
         flexChild_->SetMainAxisSize(MainAxisSize::MAX);
     }
     // When cross size is determined by developers, the flex cross size should be as large as the box.
     // Otherwise, flex cross size is as large as the max child's size.
-    if ((flexDirection_ == FlexDirection::ROW && boxComponent_->GetHeightDimension().IsValid()) ||
-        (flexDirection_ == FlexDirection::COLUMN && boxComponent_->GetWidthDimension().IsValid())) {
+    if (((flexDirection_ == FlexDirection::ROW || flexDirection_ == FlexDirection::ROW_REVERSE) &&
+            boxComponent_->GetHeightDimension().IsValid()) ||
+        ((flexDirection_ == FlexDirection::COLUMN || flexDirection_ == FlexDirection::COLUMN_REVERSE) &&
+            boxComponent_->GetWidthDimension().IsValid())) {
         flexChild_->SetStretchToParent(!boxWrap_);
         flexChild_->SetCrossAxisSize(CrossAxisSize::MAX);
     }

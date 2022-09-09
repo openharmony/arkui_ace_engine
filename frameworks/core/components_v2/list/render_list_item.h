@@ -52,6 +52,11 @@ public:
     void Paint(RenderContext& context, const Offset& offset) override;
     void UpdateTouchRect() override;
 
+    virtual bool IsForwardLayout() const
+    {
+        return true;
+    }
+
     bool IsDeletable() const
     {
         return component_ ? (component_->GetEditMode() & EditMode::DELETABLE) != 0 : false;
@@ -107,6 +112,11 @@ public:
         return isSelected_;
     }
 
+    bool IsDragStart() const
+    {
+        return isDragStart_;
+    }
+
     Dimension GetBorderRadius() const
     {
         return borderRadius_;
@@ -125,17 +135,17 @@ public:
         getChildCallback_ = std::move(callback);
     }
 
-    RefPtr<RenderNode> GetSwiperStartRnderNode() const
+    RefPtr<RenderNode> GetSwiperStartRenderNode() const
     {
         return getChildCallback_ ? getChildCallback_(ListItemChildType::SWIPER_START) : nullptr;
     }
 
-    RefPtr<RenderNode> GetSwiperEndRnderNode() const
+    RefPtr<RenderNode> GetSwiperEndRenderNode() const
     {
         return getChildCallback_ ? getChildCallback_(ListItemChildType::SWIPER_END) : nullptr;
     }
 
-    RefPtr<RenderNode> GetItemChildRnderNode() const
+    RefPtr<RenderNode> GetItemChildRenderNode() const
     {
         return getChildCallback_ ? getChildCallback_(ListItemChildType::ITEM_CHILD) : nullptr;
     }
@@ -197,6 +207,7 @@ private:
     OnSelectFunc onSelectId_;
     bool selectable_ = true;
     bool isSelected_ = false;
+    bool isDragStart_ = false;
     Dimension borderRadius_;
 
     double curOffset_ = 0.0;

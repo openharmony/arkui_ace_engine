@@ -162,7 +162,7 @@ void RenderButton::UpdateAccessibility()
     if (!accessibilityNode) {
         return;
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     Offset globalOffset = GetGlobalOffset();
     if (isTv_ && isFocus_) {
         Size size = GetLayoutSize();

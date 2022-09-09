@@ -19,6 +19,7 @@
 
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 #include "bridge/common/accessibility/accessibility_node_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -43,14 +44,21 @@ static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc,
     JSValue jsView = JS_DupValue(ctx, argv[0]);
 
     JSView* view = static_cast<JSView*>(UnwrapAny(jsView));
-    if (!view) {
+    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return JS_ThrowReferenceError(ctx, "loadDocument: argument provided is not a View!");
     }
+
+    Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
+    LOGD("Loading page root component: Setting pipeline to use %{public}s.",
+        view->isFullUpdate() ? "Full Update" : "Partial Update");
 
     auto page = QJSDeclarativeEngineInstance::GetRunningPage(ctx);
     LOGD("Load Document setting root view");
     CreatePageRoot(page, view);
     // We are done, tell to the JSAgePage
+    if (!page) {
+        return JS_UNDEFINED;
+    }
     page->SetPageCreated();
     page->SetDeclarativeOnPageAppearCallback([view]() { view->FireOnShow(); });
     page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
@@ -529,7 +537,7 @@ static JSValue RequestFocus(JSContext* ctx, JSValueConst new_target, int argc, J
     if (!container) {
         return JS_ThrowSyntaxError(ctx, "container is null");
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     if (!pipelineContext) {
         return JS_ThrowSyntaxError(ctx, "pipeline is null");
     }

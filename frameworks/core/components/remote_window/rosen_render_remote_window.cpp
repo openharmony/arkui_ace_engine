@@ -15,7 +15,7 @@
 
 #include "core/components/remote_window/rosen_render_remote_window.h"
 
-#include "render_service_client/core/ui/rs_surface_node.h"
+#include "render_service_client/core/ui/rs_proxy_node.h"
 
 namespace OHOS::Ace {
 void RosenRenderRemoteWindow::Update(const RefPtr<Component>& component)
@@ -32,11 +32,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderRemoteWindow::ExtractRSNode(const RefP
         return nullptr;
     }
 
-    // update RSNode if surface node changed
-    auto surfaceNode = remoteWindowComponent->GetRSSurfaceNode();
-    if (surfaceNode) {
-        surfaceNode->CreateNodeInRenderThread(true);
-    }
-    return std::static_pointer_cast<Rosen::RSNode>(surfaceNode);
+    auto proxyNode = remoteWindowComponent->GetRSProxyNode();
+    return std::static_pointer_cast<Rosen::RSNode>(proxyNode);
 }
 } // namespace OHOS::Ace

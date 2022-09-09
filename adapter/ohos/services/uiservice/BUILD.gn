@@ -40,7 +40,7 @@ config("uiservicems_config") {
     "$ability_runtime_services_path/common/include",
     "$ace_root/adapter/ohos/services/uiservice",
     "$ace_root/adapter/ohos/services/uiservice/uiservice_plugins",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
     "//prebuilts/jdk/jdk8/linux-x86/include",
     "//prebuilts/jdk/jdk8/linux-x86/include/linux",
@@ -72,7 +72,6 @@ template("uiservice_static") {
       "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
       "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-      "//utils/native/base:utils",
     ]
 
     deps += [ "$ace_root/adapter/ohos/services/uiservice/dialog_ui/dialog_picker/js:dialog_picker_js_files_etc" ]
@@ -85,6 +84,7 @@ template("uiservice_static") {
       "appspawn:appspawn_socket_client",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+      "c_utils:utils",
       "eventhandler:libeventhandler",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",

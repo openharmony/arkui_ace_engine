@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <optional>
+
 #include "gtest/gtest.h"
 
 #include "base/memory/ace_type.h"
@@ -41,6 +43,8 @@ const Ace::TextDecoration TEXT_DECORATION_VALUE = Ace::TextDecoration::INHERIT;
 const Color TEXT_DECORATION_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Dimension BASELINE_OFFSET_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
+const Dimension ADAPT_MIN_FONT_SIZE_VALUE = Dimension(50, DimensionUnit::PX);
+const Dimension ADAPT_MAX_FONT_SIZE_VALUE = Dimension(200, DimensionUnit::PX);
 } // namespace
 
 struct TestProperty {
@@ -57,53 +61,75 @@ struct TestProperty {
     std::optional<Color> textDecorationColorValue = std::nullopt;
     std::optional<Dimension> baselineOffsetValue = std::nullopt;
     std::optional<Ace::TextCase> textCaseValue = std::nullopt;
+    std::optional<Dimension> adaptMinFontSize = std::nullopt;
+    std::optional<Dimension> adaptMaxFontSize = std::nullopt;
 };
 
 class TextPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
+    void SetUp() override;
+    void TearDown() override;
 
 protected:
-    RefPtr<FrameNode> CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty);
+    static RefPtr<FrameNode> CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty);
 };
 
 void TextPatternTestNg::SetUpTestCase() {}
 void TextPatternTestNg::TearDownTestCase() {}
 void TextPatternTestNg::SetUp() {}
 void TextPatternTestNg::TearDown() {}
+
 RefPtr<FrameNode> TextPatternTestNg::CreateTextParagraph(
     const std::string& createValue, const TestProperty& testProperty)
 {
     TextView::Create(createValue);
-    if (testProperty.fontSizeValue.has_value())
-        TextView::FontSize(testProperty.fontSizeValue.value());
-    if (testProperty.textColorValue.has_value())
-        TextView::TextColor(testProperty.textColorValue.value());
-    if (testProperty.italicFontStyleValue.has_value())
-        TextView::ItalicFontStyle(testProperty.italicFontStyleValue.value());
-    if (testProperty.fontWeightValue.has_value())
-        TextView::FontWeight(testProperty.fontWeightValue.value());
-    if (testProperty.fontFamilyValue.has_value())
-        TextView::FontFamily(testProperty.fontFamilyValue.value());
-    if (testProperty.textAlignValue.has_value())
-        TextView::TextAlign(testProperty.textAlignValue.value());
-    if (testProperty.textOverflowValue.has_value())
-        TextView::TextOverflow(testProperty.textOverflowValue.value());
-    if (testProperty.maxLinesValue.has_value())
-        TextView::MaxLines(testProperty.maxLinesValue.value());
-    if (testProperty.lineHeightValue.has_value())
-        TextView::LineHeight(testProperty.lineHeightValue.value());
-    if (testProperty.textDecorationValue.has_value())
-        TextView::TextDecoration(testProperty.textDecorationValue.value());
-    if (testProperty.textDecorationColorValue.has_value())
-        TextView::TextDecorationColor(testProperty.textDecorationColorValue.value());
-    if (testProperty.baselineOffsetValue.has_value())
-        TextView::BaselineOffset(testProperty.baselineOffsetValue.value());
-    if (testProperty.textCaseValue.has_value())
-        TextView::TextCase(testProperty.textCaseValue.value());
+    if (testProperty.fontSizeValue.has_value()) {
+        TextView::SetFontSize(testProperty.fontSizeValue.value());
+    }
+    if (testProperty.textColorValue.has_value()) {
+        TextView::SetTextColor(testProperty.textColorValue.value());
+    }
+    if (testProperty.italicFontStyleValue.has_value()) {
+        TextView::SetItalicFontStyle(testProperty.italicFontStyleValue.value());
+    }
+    if (testProperty.fontWeightValue.has_value()) {
+        TextView::SetFontWeight(testProperty.fontWeightValue.value());
+    }
+    if (testProperty.fontFamilyValue.has_value()) {
+        TextView::SetFontFamily(testProperty.fontFamilyValue.value());
+    }
+    if (testProperty.textAlignValue.has_value()) {
+        TextView::SetTextAlign(testProperty.textAlignValue.value());
+    }
+    if (testProperty.textOverflowValue.has_value()) {
+        TextView::SetTextOverflow(testProperty.textOverflowValue.value());
+    }
+    if (testProperty.maxLinesValue.has_value()) {
+        TextView::SetMaxLines(testProperty.maxLinesValue.value());
+    }
+    if (testProperty.lineHeightValue.has_value()) {
+        TextView::SetLineHeight(testProperty.lineHeightValue.value());
+    }
+    if (testProperty.textDecorationValue.has_value()) {
+        TextView::SetTextDecoration(testProperty.textDecorationValue.value());
+    }
+    if (testProperty.textDecorationColorValue.has_value()) {
+        TextView::SetTextDecorationColor(testProperty.textDecorationColorValue.value());
+    }
+    if (testProperty.baselineOffsetValue.has_value()) {
+        TextView::SetBaselineOffset(testProperty.baselineOffsetValue.value());
+    }
+    if (testProperty.textCaseValue.has_value()) {
+        TextView::SetTextCase(testProperty.textCaseValue.value());
+    }
+    if (testProperty.adaptMinFontSize.has_value()) {
+        TextView::SetAdaptMinFontSize(testProperty.adaptMinFontSize.value());
+    }
+    if (testProperty.adaptMaxFontSize.has_value()) {
+        TextView::SetAdaptMaxFontSize(testProperty.adaptMaxFontSize.value());
+    }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
     return AceType::DynamicCast<FrameNode>(element);
@@ -113,7 +139,6 @@ RefPtr<FrameNode> TextPatternTestNg::CreateTextParagraph(
  * @tc.name: TextFrameNodeCreator001
  * @tc.desc: Test all the properties of text.
  * @tc.type: FUNC
- * @tc.author: yangweitao
  */
 HWTEST_F(TextPatternTestNg, TextFrameNodeCreator001, TestSize.Level1)
 {
@@ -131,6 +156,8 @@ HWTEST_F(TextPatternTestNg, TextFrameNodeCreator001, TestSize.Level1)
     testProperty.textDecorationColorValue = std::make_optional(TEXT_DECORATION_COLOR_VALUE);
     testProperty.baselineOffsetValue = std::make_optional(BASELINE_OFFSET_VALUE);
     testProperty.textCaseValue = std::make_optional(TEXT_CASE_VALUE);
+    testProperty.adaptMinFontSize = std::make_optional(ADAPT_MIN_FONT_SIZE_VALUE);
+    testProperty.adaptMaxFontSize = std::make_optional(ADAPT_MAX_FONT_SIZE_VALUE);
 
     RefPtr<FrameNode> frameNode = CreateTextParagraph(CREATE_VALUE, testProperty);
     EXPECT_EQ(frameNode == nullptr, false);
@@ -157,5 +184,9 @@ HWTEST_F(TextPatternTestNg, TextFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(textStyle.GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(textStyle.GetBaselineOffset(), BASELINE_OFFSET_VALUE);
     EXPECT_EQ(textStyle.GetTextCase(), TEXT_CASE_VALUE);
+    EXPECT_EQ(textStyle.GetAdaptMinFontSize(), ADAPT_MIN_FONT_SIZE_VALUE);
+    EXPECT_EQ(textStyle.GetAdaptMaxFontSize(), ADAPT_MAX_FONT_SIZE_VALUE);
+    EXPECT_EQ(textStyle.GetAdaptTextSize(),
+        testProperty.adaptMinFontSize.has_value() || testProperty.adaptMaxFontSize.has_value());
 }
 } // namespace OHOS::Ace::NG

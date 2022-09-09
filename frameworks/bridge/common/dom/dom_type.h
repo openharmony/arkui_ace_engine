@@ -161,6 +161,8 @@ ACE_EXPORT extern const char DOM_BOX_SHADOW_SPREAD[];
 ACE_EXPORT extern const char DOM_BOX_SHADOW_COLOR[];
 ACE_EXPORT extern const char DOM_FLEX_DIRECTION[];
 ACE_EXPORT extern const char DOM_FLEX_ROW[];
+ACE_EXPORT extern const char DOM_FLEX_COLUMN_REVERSE[];
+ACE_EXPORT extern const char DOM_FLEX_ROW_REVERSE[];
 ACE_EXPORT extern const char DOM_FLEX_COLUMN[];
 ACE_EXPORT extern const char DOM_FLEX[];
 ACE_EXPORT extern const char DOM_FLEX_GROW[];
@@ -580,6 +582,7 @@ ACE_EXPORT extern const char DOM_WHITE_SPACE_PREWRAP[];
 ACE_EXPORT extern const char DOM_WHITE_SPACE_NOWRAP[];
 ACE_EXPORT extern const char DOM_WHITE_SPACE_PRE[];
 ACE_EXPORT extern const char DOM_WHITE_SPACE_INHERIT[];
+ACE_EXPORT extern const char DOM_TEXT_SHADOW[];
 
 // popup attribute and style constants
 ACE_EXPORT extern const char DOM_TARGET[];
@@ -752,6 +755,7 @@ ACE_EXPORT extern const char DOM_MARQUEE_COLOR[];
 ACE_EXPORT extern const char DOM_MARQUEE_FONT_SIZE[];
 ACE_EXPORT extern const char DOM_MARQUEE_FONT_WEIGHT[];
 ACE_EXPORT extern const char DOM_MARQUEE_FONT_FAMILY[];
+ACE_EXPORT extern const char DOM_MARQUEE_TEXT_ALIGN[];
 ACE_EXPORT extern const char DOM_MARQUEE_EVENT_BOUNCE[];
 ACE_EXPORT extern const char DOM_MARQUEE_EVENT_FINISH[];
 ACE_EXPORT extern const char DOM_MARQUEE_EVENT_START[];

@@ -27,8 +27,8 @@ RefPtr<Paragraph> Paragraph::Create(const WeakPtr<PipelineContext>& context, con
 {
     auto txtFontCollection = DynamicCast<TxtFontCollection>(fontCollection);
     CHECK_NULL_RETURN(txtFontCollection, nullptr);
-    auto sharedfontColletcion = txtFontCollection->GetRawFontCollection();
-    return AceType::MakeRefPtr<TxtParagraph>(context, paraStyle, sharedfontColletcion);
+    auto sharedFontCollection = txtFontCollection->GetRawFontCollection();
+    return AceType::MakeRefPtr<TxtParagraph>(context, paraStyle, sharedFontCollection);
 }
 
 bool TxtParagraph::IsValid()
@@ -59,6 +59,12 @@ void TxtParagraph::PushStyle(const TextStyle& style)
     txt::TextStyle txtStyle;
     Constants::ConvertTxtStyle(style, context_, txtStyle);
     builder_->PushStyle(txtStyle);
+}
+
+void TxtParagraph::PopStyle()
+{
+    CHECK_NULL_VOID(builder_);
+    builder_->Pop();
 }
 
 void TxtParagraph::AddText(const std::u16string& text)
@@ -116,7 +122,7 @@ void TxtParagraph::Paint(const RefPtr<Canvas>& canvas, float x, float y)
     CHECK_NULL_VOID(paragraph_);
     auto skiaCanvas = AceType::DynamicCast<SkiaCanvas>(canvas);
     CHECK_NULL_VOID(skiaCanvas);
-    auto skCanvas = skiaCanvas->RawCanvas();
+    auto* skCanvas = skiaCanvas->RawCanvas();
     CHECK_NULL_VOID(skCanvas);
     paragraph_->Paint(skCanvas, x, y);
 }

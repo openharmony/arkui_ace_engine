@@ -35,8 +35,6 @@ void RosenRenderRoot::Paint(RenderContext& context, const Offset& offset)
         bgColor_ = Color::TRANSPARENT;
     }
     rsNode->SetBackgroundColor(bgColor_.GetValue());
-    rsNode->SetPivot(0.0f, 0.0f);
-    rsNode->SetScale(scale_);
     RenderNode::Paint(context, offset);
 }
 
@@ -48,9 +46,12 @@ void RosenRenderRoot::SyncGeometryProperties()
     }
     Offset paintOffset = GetPaintOffset();
     Size paintSize = GetLayoutSize();
+
     rsNode->SetBounds(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
-    rsNode->SetFrame(paintOffset.GetX() * scale_, paintOffset.GetY() * scale_, paintSize.Width() * scale_,
-        paintSize.Height() * scale_);
+    rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
+
+    rsNode->SetPivot(0.0f, 0.0f);
+    rsNode->SetScale(scale_);
 }
 
 void RosenRenderRoot::FinishRender(const std::unique_ptr<DrawDelegate>& delegate, const Rect& dirty)

@@ -19,6 +19,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -47,6 +48,9 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
     it = children_.begin();
     std::advance(it, slot);
     children_.insert(it, child);
+
+    child->SetParent(Claim(this));
+    child->SetDepth(GetDepth() + 1);
     if (onMainTree_) {
         child->AttachToMainTree();
     }
@@ -57,22 +61,18 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
 void UINode::RemoveChild(const RefPtr<UINode>& child)
 {
     CHECK_NULL_VOID(child);
-
-    children_.remove(child);
     if (onMainTree_) {
         child->DetachFromMainTree();
     }
     OnChildRemoved(child);
+    children_.remove(child);
     MarkNeedSyncRenderTree();
 }
 
 void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
 {
-    SetParent(parent);
-    SetDepth(parent != nullptr ? parent->GetDepth() + 1 : 1);
-    if (parent) {
-        parent->AddChild(AceType::Claim(this), slot);
-    }
+    CHECK_NULL_VOID(parent);
+    parent->AddChild(AceType::Claim(this), slot);
 }
 
 void UINode::AttachToMainTree()
@@ -112,6 +112,7 @@ void UINode::MovePosition(int32_t slot)
         std::advance(it, slot);
         if ((it != children.end()) && (*it == this)) {
             // Already at the right place
+            LOGD("Already at the right place");
             return;
         }
 
@@ -119,7 +120,6 @@ void UINode::MovePosition(int32_t slot)
         if (itSelf != children.end()) {
             children.erase(itSelf);
         } else {
-            LOGW("Should NOT be here");
             children.remove(self);
             ++it;
         }
@@ -127,7 +127,7 @@ void UINode::MovePosition(int32_t slot)
         children.remove(self);
     }
     children.insert(it, self);
-    MarkNeedSyncRenderTree();
+    parentNode->MarkNeedSyncRenderTree();
 }
 
 void UINode::UpdateLayoutPropertyFlag()
@@ -148,6 +148,14 @@ void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
     for (const auto& child : children_) {
         child->MarkDirtyNode(extraFlag);
+    }
+}
+
+void UINode::MarkNeedFlushDirty(PropertyChangeFlag extraFlag)
+{
+    auto parent = parent_.Upgrade();
+    if (parent) {
+        parent->MarkDirtyNode(extraFlag);
     }
 }
 
@@ -195,23 +203,47 @@ void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool f
     }
 }
 
+void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
+{
+    for (const auto& child : children_) {
+        child->OnGenerateOneDepthVisibleFrame(visibleList);
+    }
+}
+
 RefPtr<PipelineContext> UINode::GetContext()
 {
     return PipelineContext::GetCurrentContext();
 }
 
-bool UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,
-    TouchTestResult& result)
+HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    bool preventBubbling = false;
+    HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
         auto& child = *iter;
-        if (child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result)) {
-            preventBubbling = true;
-            break;
+        auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+        if (hitResult == HitTestResult::STOP_BUBBLING) {
+            return HitTestResult::STOP_BUBBLING;
+        }
+        if (hitResult == HitTestResult::BUBBLING) {
+            hitTestResult = HitTestResult::BUBBLING;
         }
     }
-    return preventBubbling;
+    return hitTestResult;
+}
+
+int32_t UINode::FrameCount() const
+{
+    return TotalChildCount();
+}
+
+int32_t UINode::TotalChildCount() const
+{
+    int32_t count = 0;
+    for (const auto& child : GetChildren()) {
+        count += child->FrameCount();
+    }
+    return count;
 }
 
 } // namespace OHOS::Ace::NG

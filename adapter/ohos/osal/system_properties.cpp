@@ -70,7 +70,7 @@ bool IsSvgTraceEnabled()
 
 bool IsHookModeEnabled()
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     return false;
 #endif
     const int bufferLen = 128;
@@ -85,7 +85,7 @@ bool IsHookModeEnabled()
 
 bool IsRosenBackendEnabled()
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     return false;
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
@@ -106,7 +106,7 @@ bool IsRosenBackendEnabled()
 
 bool IsWindowAnimationEnabled()
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     return false;
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
@@ -222,6 +222,21 @@ bool SystemProperties::IsScoringEnabled(const std::string& name)
     return prop == name;
 }
 
+bool GetAstcEnabled()
+{
+    return system::GetParameter("persist.astc.enable", "true") == "true";
+}
+
+int32_t GetAstcMaxErrorProp()
+{
+    return system::GetIntParameter<int>("persist.astc.max", 50000);
+}
+
+int32_t GetAstcPsnrProp()
+{
+    return system::GetIntParameter<int>("persist.astc.psnr", 0);
+}
+
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
@@ -250,6 +265,9 @@ bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 bool SystemProperties::debugEnabled_ = IsDebugEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
+bool SystemProperties::astcEnabled_ = GetAstcEnabled();
+int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
+int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 
 DeviceType SystemProperties::GetDeviceType()
 {

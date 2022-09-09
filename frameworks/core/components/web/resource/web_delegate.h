@@ -23,12 +23,14 @@
 #include <ui/rs_surface_node.h>
 #endif
 
+#include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/web/resource/web_client_impl.h"
 #include "core/components/web/resource/web_resource.h"
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #ifdef OHOS_STANDARD_SYSTEM
+#include "nweb_handler.h"
 #include "nweb_helper.h"
 #include "nweb_hit_testresult.h"
 #include "window.h"
@@ -99,6 +101,19 @@ public:
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebJSHttpAuthResult> result_;
+};
+
+class SslErrorResultOhos : public SslErrorResult {
+    DECLARE_ACE_TYPE(SslErrorResultOhos, SslErrorResult)
+
+public:
+    SslErrorResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result) : result_(result) {}
+
+    void HandleConfirm() override;
+    void HandleCancel() override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result_;
 };
 
 class FileSelectorParamOhos : public WebFileSelectorParam {
@@ -188,6 +203,17 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebAccessRequest> request_;
 };
 
+enum class DragAction {
+    DRAG_START = 0,
+    DRAG_ENTER,
+    DRAG_LEAVE,
+    DRAG_OVER,
+    DRAG_DROP,
+    DRAG_END,
+    DRAG_CANCEL,
+};
+
+class RenderWeb;
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -211,6 +237,8 @@ public:
     {
         ACE_DCHECK(!type.empty());
     }
+
+    void SetRenderWeb(const WeakPtr<RenderWeb>& renderWeb);
 
     void CreatePlatformResource(const Size& size, const Offset& position,
         const WeakPtr<PipelineContext>& context);
@@ -244,7 +272,7 @@ public:
     void UpdateOverviewModeEnabled(const bool& isOverviewModeAccessEnabled);
     void UpdateFileFromUrlEnabled(const bool& isFileFromUrlAccessEnabled);
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
-    void UpdateTextZoomAtio(const int32_t& textZoomAtioNum);
+    void UpdateTextZoomRatio(const int32_t& textZoomRatioNum);
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void LoadUrl();
@@ -259,10 +287,20 @@ public:
     void HandleTouchCancel();
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
-    void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action);
+    void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
     void OnFocus();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
+    bool RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
+                      std::shared_ptr<NWeb::NWebQuickMenuCallback> callback);
+    void OnQuickMenuDismissed();
+    void OnTouchSelectionChanged(
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
+    void HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction);
+    RefPtr<PixelMap> GetDragPixelMap();
+    std::string GetUrl();
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -280,6 +318,7 @@ public:
     void OnRequestFocus();
     bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType);
     bool OnHttpAuthRequest(const BaseEventInfo* info);
+    bool OnSslErrorRequest(const BaseEventInfo* info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);
@@ -293,8 +332,10 @@ public:
     bool OnHandleInterceptUrlLoading(const std::string& url);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);
+    void OnScroll(double xOffset, double yOffset);
     bool LoadDataWithRichText();
     void OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting);
+    bool OnDragAndDropData(const void* data, size_t len, int width, int height);
 
 private:
     void InitWebEvent();
@@ -346,6 +387,7 @@ private:
     void Backward();
     void Forward();
     void ClearHistory();
+    void ClearSslCache();
     bool AccessStep(int32_t step);
     void BackOrForward(int32_t step);
     bool AccessBackward();
@@ -361,6 +403,7 @@ private:
 #endif
 
     WeakPtr<WebComponent> webComponent_;
+    WeakPtr<RenderWeb> renderWeb_;
     std::list<CreatedCallback> createdCallbacks_;
     std::list<ReleasedCallback> releasedCallbacks_;
     EventCallback onPageStarted_;
@@ -393,12 +436,14 @@ private:
     EventCallbackV2 onRenderExitedV2_;
     EventCallbackV2 onResourceLoadV2_;
     EventCallbackV2 onScaleChangeV2_;
+    EventCallbackV2 onScrollV2_;
     EventCallbackV2 onPermissionRequestV2_;
     EventCallbackV2 onSearchResultReceiveV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;
-
+    RefPtr<PixelMap> pixelMap_ = nullptr;
+    bool isRefreshPixelMap_ = false;
 #endif
 };
 

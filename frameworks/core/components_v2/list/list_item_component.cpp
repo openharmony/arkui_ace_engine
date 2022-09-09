@@ -30,24 +30,6 @@ RefPtr<Element> ListItemComponent::CreateElement()
     return AceType::MakeRefPtr<ListItemElement>();
 }
 
-RefPtr<ListItemComponent> ListItemComponent::FindListItem(const RefPtr<Component>& component)
-{
-    RefPtr<ListItemComponent> itemComponent;
-    RefPtr<Component> item = component;
-    while (item) {
-        itemComponent = AceType::DynamicCast<ListItemComponent>(item);
-        if (itemComponent) {
-            break;
-        }
-        auto parent = AceType::DynamicCast<SingleChild>(item);
-        if (!parent) {
-            break;
-        }
-        item = parent->GetChild();
-    }
-    return itemComponent;
-}
-
 uint32_t ListItemComponent::Compare(const RefPtr<Component> &component) const
 {
     auto listItem = AceType::DynamicCast<ListItemComponent>(component);

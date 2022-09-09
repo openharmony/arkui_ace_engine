@@ -26,11 +26,9 @@
 #include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
 #include "core/focus/focus_node.h"
+#include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
-
-constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
-constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 
 namespace NG {
 class FrameNode;
@@ -56,7 +54,10 @@ struct RectCallback final {
 };
 
 class EventManager : public virtual AceType {
+    DECLARE_ACE_TYPE(EventManager, AceType);
 public:
+    EventManager();
+    ~EventManager() override = default;
     // After the touch down event is triggered, the touch test is performed to collect the corresponding
     // touch event target list.
     void TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
@@ -69,10 +70,14 @@ public:
 
     bool DispatchTouchEvent(const TouchEvent& point);
     bool DispatchTouchEvent(const AxisEvent& event);
+    void FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents);
+    void FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents);
 
     // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
     // platform will handle it.
     bool DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode);
+    bool DispatchTabIndexEvent(
+        const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage);
 
     // Distribute the rotation event to the corresponding render tree or requested render node. If the render is not
     // processed, return false and the platform will handle it.
@@ -83,6 +88,7 @@ public:
     void MouseTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);
 
     bool DispatchMouseEvent(const MouseEvent& event);
+    void DispatchMouseHoverAnimation(const MouseEvent& event);
     bool DispatchMouseHoverEvent(const MouseEvent& event);
 
     void AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode);
@@ -99,28 +105,19 @@ public:
     }
     void HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager);
 
-    std::list<std::pair<int32_t, WeakPtr<FocusNode>>>& GetTabIndexNodes()
-    {
-        return tabIndexNodes_;
-    }
-
-    void SetTabIndexNodes(std::list<std::pair<int32_t, WeakPtr<FocusNode>>>& tabIndexNodes)
-    {
-        tabIndexNodes_ = std::move(tabIndexNodes);
-    }
-
-    void SetIsTabNodesCollected(bool isTabNodesCollected)
-    {
-        isTabNodesCollected_ = isTabNodesCollected;
-    }
-
     void CollectTabIndexNodes(const RefPtr<FocusNode>& rootNode);
 
     void AdjustTabIndexNodes();
 
-    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusNode>& focusNode);
+    bool HandleFocusByTabIndex(
+        const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage);
 
     void HandleOutOfRectCallback(const Point& point, std::vector<RectCallback>& rectCallbackList);
+
+    RefPtr<GestureReferee> GetGestureReferee()
+    {
+        return referee_;
+    }
 
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
@@ -131,12 +128,9 @@ private:
     WeakPtr<RenderNode> mouseHoverNodePre_;
     WeakPtr<RenderNode> mouseHoverNode_;
     WeakPtr<RenderNode> axisNode_;
-    bool isTabNodesCollected_ = false;
-    int32_t curTabFocusedIndex_ = DEFAULT_TAB_FOCUSED_INDEX;
-    std::list<std::pair<int32_t, WeakPtr<FocusNode>>> tabIndexNodes_;
-    WeakPtr<FocusNode> firstZeroNode_;
     int32_t instanceId_ = 0;
     bool inSelectedRect_ = false;
+    RefPtr<GestureReferee> referee_;
 };
 
 } // namespace OHOS::Ace

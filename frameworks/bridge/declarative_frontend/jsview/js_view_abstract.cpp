@@ -29,6 +29,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_abstract.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -56,6 +57,7 @@
 #include "core/gestures/long_press_gesture.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/core/components/text/text_component.h"
 
@@ -68,13 +70,13 @@ constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
 constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
-constexpr double EPSILON = 0.000002f;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 constexpr double ROUND_UNIT = 360.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
+constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
 
 bool CheckJSCallbackInfo(
     const std::string& callerName, const JSCallbackInfo& info, std::vector<JSCallbackInfoType>& infoTypes)
@@ -164,6 +166,26 @@ void ParseJsTranslate(
     }
 }
 
+void GetDefaultRotateVector(double& dx, double& dy, double& dz)
+{
+    dx = 0.0;
+    dy = 0.0;
+    dz = 0.0;
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("container is null");
+        return;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    if (!pipelineContext) {
+        LOGE("pipelineContext is null!");
+        return;
+    }
+    if (pipelineContext->GetMinPlatformVersion() >= MIN_ROTATE_VECTOR_Z) {
+        dz = 1.0;
+    }
+}
+
 void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy, float& dz, Dimension& centerX,
     Dimension& centerY, std::optional<float>& angle)
 {
@@ -171,6 +193,7 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy
     double dxVal = 0.0;
     double dyVal = 0.0;
     double dzVal = 0.0;
+    GetDefaultRotateVector(dxVal, dyVal, dzVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("x"), dxVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("y"), dyVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("z"), dzVal);
@@ -785,24 +808,21 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
             LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
             return;
         }
-        if (argsPtrItem->Contains("x") || argsPtrItem->Contains("y") || argsPtrItem->Contains("z")) {
-            // default: dx, dy, dz (0.0, 0.0, 0.0)
-            float dx = 0.0f;
-            float dy = 0.0f;
-            float dz = 0.0f;
-            // default centerX, centerY 50% 50%;
-            Dimension centerX = 0.5_pct;
-            Dimension centerY = 0.5_pct;
-            std::optional<float> angle;
-            ParseJsRotate(argsPtrItem, dx, dy, dz, centerX, centerY, angle);
-            if (angle) {
-                transform->Rotate(dx, dy, dz, angle.value(), option);
-                transform->SetOriginDimension(DimensionOffset(centerX, centerY));
-            } else {
-                LOGE("Js JsRotate failed, not specify angle");
-            }
-            return;
+        float dx = 0.0f;
+        float dy = 0.0f;
+        float dz = 0.0f;
+        // default centerX, centerY 50% 50%;
+        Dimension centerX = 0.5_pct;
+        Dimension centerY = 0.5_pct;
+        std::optional<float> angle;
+        ParseJsRotate(argsPtrItem, dx, dy, dz, centerX, centerY, angle);
+        if (angle) {
+            transform->Rotate(dx, dy, dz, angle.value(), option);
+            transform->SetOriginDimension(DimensionOffset(centerX, centerY));
+        } else {
+            LOGE("Js JsRotate failed, not specify angle");
         }
+        return;
     }
     double rotateZ;
     if (ParseJsDouble(info[0], rotateZ)) {
@@ -1145,33 +1165,50 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
         return;
     }
 
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
 
     JSRef<JSVal> minWidthValue = sizeObj->GetProperty("minWidth");
     Dimension minWidth;
+    JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
+    Dimension maxWidth;
+    JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
+    Dimension minHeight;
+    JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
+    Dimension maxHeight;
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (ParseJsDimensionVp(minWidthValue, minWidth)) {
+            NG::ViewAbstract::SetMinWidth(NG::CalcLength(minWidth));
+        }
+        if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
+            NG::ViewAbstract::SetMaxWidth(NG::CalcLength(maxWidth));
+        }
+        if (ParseJsDimensionVp(minHeightValue, minHeight)) {
+            NG::ViewAbstract::SetMinHeight(NG::CalcLength(minHeight));
+        }
+        if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
+            NG::ViewAbstract::SetMaxHeight(NG::CalcLength(maxHeight));
+        }
+        return;
+    }
+
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+
     if (ParseJsDimensionVp(minWidthValue, minWidth)) {
         box->SetMinWidth(minWidth);
         flexItem->SetMinWidth(minWidth);
     }
 
-    JSRef<JSVal> maxWidthValue = sizeObj->GetProperty("maxWidth");
-    Dimension maxWidth;
     if (ParseJsDimensionVp(maxWidthValue, maxWidth)) {
         box->SetMaxWidth(maxWidth);
         flexItem->SetMaxWidth(maxWidth);
     }
 
-    JSRef<JSVal> minHeightValue = sizeObj->GetProperty("minHeight");
-    Dimension minHeight;
     if (ParseJsDimensionVp(minHeightValue, minHeight)) {
         box->SetMinHeight(minHeight);
         flexItem->SetMinHeight(minHeight);
     }
 
-    JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
-    Dimension maxHeight;
     if (ParseJsDimensionVp(maxHeightValue, maxHeight)) {
         box->SetMaxHeight(maxHeight);
         flexItem->SetMaxHeight(maxHeight);
@@ -1239,7 +1276,7 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
         auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
         flexItemComponent->SetLeft(x);
         flexItemComponent->SetTop(y);
-        flexItemComponent->SetPositionType(PositionType::ABSOLUTE);
+        flexItemComponent->SetPositionType(PositionType::PTABSOLUTE);
     }
 }
 
@@ -1262,7 +1299,7 @@ void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
         auto flexItemComponent = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
         flexItemComponent->SetLeft(x);
         flexItemComponent->SetTop(y);
-        flexItemComponent->SetPositionType(PositionType::OFFSET);
+        flexItemComponent->SetPositionType(PositionType::PTOFFSET);
     }
 }
 
@@ -1578,8 +1615,12 @@ void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsAlignSelf", info, checkList)) {
         return;
     }
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     auto alignVal = info[0]->ToNumber<int32_t>();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetAlignSelf(alignVal);
+        return;
+    }
+    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
 
     if (alignVal >= 0 && alignVal <= MAX_ALIGN_VALUE) {
         flexItem->SetAlignSelf((FlexAlign)alignVal);
@@ -1810,6 +1851,33 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
     decoration->SetImage(image);
 }
 
+void JSViewAbstract::ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<MenuComponent> menuComponent)
+{
+    // use another VSP instance while executing the builder function
+    ScopedViewStackProcessor builderViewStackProcessor;
+    {
+        ACE_SCORING_EVENT("contextMenu.builder");
+        builderFunc->Execute();
+    }
+    auto customComponent = ViewStackProcessor::GetInstance()->Finish();
+    if (!customComponent) {
+        LOGE("Custom component is null.");
+        return;
+    }
+
+    // Set the theme
+    auto menuTheme = GetTheme<SelectTheme>();
+    menuComponent->SetTheme(menuTheme);
+    auto optionTheme = GetTheme<SelectTheme>();
+    auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+
+    // Set the custom component
+    optionComponent->SetCustomComponent(customComponent);
+    menuComponent->ClearOptions();
+    menuComponent->AppendOption(optionComponent);
+    LOGI("Context menu is added.");
+}
+
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
@@ -1817,56 +1885,55 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
     if (!menuComponent) {
         return;
     }
-    auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
-    tapGesture->SetOnActionId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](const GestureEvent& info) {
-        auto refPtr = weak.Upgrade();
-        if (!refPtr) {
-            return;
-        }
-        auto showDialog = refPtr->GetTargetCallback();
-        showDialog("BindMenu", info.GetGlobalLocation());
-    });
-    click->SetOnClick(tapGesture);
-    auto menuTheme = GetTheme<SelectTheme>();
-    menuComponent->SetTheme(menuTheme);
-
+    auto weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent);
+    GestureEventFunc eventFunc;
     if (info[0]->IsArray()) {
         auto context = info.GetExecutionContext();
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
-        size_t size = paramArray->Length();
-        for (size_t i = 0; i < size; i++) {
-            std::string value;
-            auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
-            auto menuValue = indexObject->GetProperty("value");
-            auto menuAction = indexObject->GetProperty("action");
-            ParseJsString(menuValue, value);
-            auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(menuAction));
+        eventFunc = [weak, context, paramArray](const GestureEvent& info) {
+            auto menuComponent = weak.Upgrade();
+            if (!menuComponent) {
+                return;
+            }
+            auto menuTheme = GetTheme<SelectTheme>();
+            if (menuTheme) {
+                menuComponent->SetTheme(menuTheme);
+            }
 
-            auto optionTheme = GetTheme<SelectTheme>();
-            auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
+            menuComponent->ClearOptions();
+            size_t size = paramArray->Length();
+            for (size_t i = 0; i < size; i++) {
+                std::string value;
+                auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
+                auto menuValue = indexObject->GetProperty("value");
+                auto menuAction = indexObject->GetProperty("action");
+                ParseJsString(menuValue, value);
+                auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(menuAction));
 
-            optionComponent->SetTextStyle(optionTheme->GetOptionTextStyle());
-            optionComponent->SetTheme(optionTheme);
-            optionComponent->SetText(textComponent);
-            optionComponent->SetValue(value);
-            optionComponent->SetCustomizedCallback([action, context] {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
-                ACE_SCORING_EVENT("menu.action");
-                action->Execute();
-            });
-            menuComponent->AppendOption(optionComponent);
-        }
-    } else {
-        JSRef<JSObject> menuObj;
-        if (info[0]->IsObject()) {
-            menuObj = JSRef<JSObject>::Cast(info[0]);
-        } else {
-            LOGE("No param object.");
-            return;
-        }
+                auto optionTheme = GetTheme<SelectTheme>();
+                if (!optionTheme) {
+                    continue;
+                }
 
+                auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
+                auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(value);
+
+                optionComponent->SetTextStyle(optionTheme->GetOptionTextStyle());
+                optionComponent->SetTheme(optionTheme);
+                optionComponent->SetText(textComponent);
+                optionComponent->SetValue(value);
+                optionComponent->SetCustomizedCallback([action, context] {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
+                    ACE_SCORING_EVENT("menu.action");
+                    action->Execute();
+                });
+                menuComponent->AppendOption(optionComponent);
+            }
+            auto showDialog = menuComponent->GetTargetCallback();
+            showDialog("BindMenu", info.GetGlobalLocation());
+        };
+    } else if (info[0]->IsObject()) {
+        JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
         auto builder = menuObj->GetProperty("builder");
         if (!builder->IsFunction()) {
             LOGE("builder param is not a function.");
@@ -1877,24 +1944,25 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             LOGE("builder function is null.");
             return;
         }
-        // use another VSP instance while executing the builder function
-        ScopedViewStackProcessor builderViewStackProcessor;
-        {
-            ACE_SCORING_EVENT("menu.builder");
-            builderFunc->Execute();
-        }
-        auto customComponent = ViewStackProcessor::GetInstance()->Finish();
-        if (!customComponent) {
-            LOGE("Custom component is null.");
-            return;
-        }
 
-        auto optionTheme = GetTheme<SelectTheme>();
-        auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-        optionComponent->SetCustomComponent(customComponent);
-
-        menuComponent->AppendOption(optionComponent);
+        eventFunc = [weak, builderFunc](const GestureEvent& info) {
+            auto menuComponent = weak.Upgrade();
+            if (!menuComponent) {
+                return;
+            }
+            menuComponent->SetIsCustomMenu(true);
+            ExecMenuBuilder(builderFunc, menuComponent);
+            auto showDialog = menuComponent->GetTargetCallback();
+            showDialog("BindMenu", info.GetGlobalLocation());
+        };
+    } else {
+        LOGE("No param object.");
+        return;
     }
+    auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>();
+    tapGesture->SetOnActionId(eventFunc);
+    click->SetOnClick(tapGesture);
 }
 
 void JSViewAbstract::JsPadding(const JSCallbackInfo& info)
@@ -2026,7 +2094,7 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoratio
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
-    if (!decoration) {
+    if (!decoration && !Container::IsCurrentUseNewPipeline()) {
         decoration = GetBackDecoration();
     }
     Dimension leftDimen = BoxComponentHelper::GetBorderLeftWidth(decoration);
@@ -2041,6 +2109,24 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoratio
         bottomDimen = borderWidth;
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::BorderWidthProperty borderWidthProperty;
+            if (ParseJsDimensionVp(object->GetProperty("left"), leftDimen)) {
+                borderWidthProperty.leftDimen = leftDimen;
+            }
+            if (ParseJsDimensionVp(object->GetProperty("right"), rightDimen)) {
+                borderWidthProperty.rightDimen = rightDimen;
+            }
+            if (ParseJsDimensionVp(object->GetProperty("top"), topDimen)) {
+                borderWidthProperty.topDimen = topDimen;
+            }
+            if (ParseJsDimensionVp(object->GetProperty("bottom"), bottomDimen)) {
+                borderWidthProperty.bottomDimen = bottomDimen;
+            }
+            NG::ViewAbstract::SetBorderWidth(borderWidthProperty);
+            return;
+        }
+
         auto valueLeft = object->GetProperty("left");
         if (!valueLeft->IsUndefined()) {
             ParseJsDimensionVp(valueLeft, leftDimen);
@@ -2062,6 +2148,13 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoratio
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        Dimension borderWidth;
+        if (ParseJsDimensionVp(args, borderWidth)) {
+            NG::ViewAbstract::SetBorderWidth(borderWidth);
+            return;
+        }
+    }
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
@@ -2371,7 +2464,7 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
-    if (!decoration) {
+    if (!decoration && !Container::IsCurrentUseNewPipeline()) {
         decoration = GetBackDecoration();
     }
     Color leftColor = BoxComponentHelper::GetBorderColorTop(decoration);
@@ -2386,6 +2479,24 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
         bottomColor = borderColor;
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::BorderColorProperty borderColorProperty;
+            if (ParseJsColor(object->GetProperty("left"), leftColor)) {
+                borderColorProperty.leftColor = leftColor;
+            }
+            if (ParseJsColor(object->GetProperty("right"), rightColor)) {
+                borderColorProperty.rightColor = rightColor;
+            }
+            if (ParseJsColor(object->GetProperty("top"), topColor)) {
+                borderColorProperty.topColor = topColor;
+            }
+            if (ParseJsColor(object->GetProperty("bottom"), bottomColor)) {
+                borderColorProperty.bottomColor = bottomColor;
+            }
+            NG::ViewAbstract::SetBorderColor(borderColorProperty);
+            return;
+        }
+
         auto valueLeft = object->GetProperty("left");
         if (!valueLeft->IsUndefined()) {
             ParseJsColor(valueLeft, leftColor);
@@ -2407,6 +2518,13 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        Color borderColor;
+        if (ParseJsColor(args, borderColor)) {
+            NG::ViewAbstract::SetBorderColor(borderColor);
+            return;
+        }
+    }
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
@@ -2445,7 +2563,7 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decorati
         return;
     }
     RefPtr<Decoration> tarDecoration = decoration;
-    if (!tarDecoration) {
+    if (!tarDecoration && !Container::IsCurrentUseNewPipeline()) {
         tarDecoration = GetBackDecoration();
     }
     Dimension radiusTopLeft = BoxComponentHelper::GetBorderRadiusTopLeft(tarDecoration).GetX();
@@ -2460,6 +2578,28 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decorati
         radiusBottomRight = borderRadius;
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::BorderRadiusProperty borderRadiusProperty;
+            Dimension topLeft;
+            if (ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
+                borderRadiusProperty.radiusTopLeft = topLeft;
+            }
+            Dimension topRight;
+            if (ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
+                borderRadiusProperty.radiusTopRight = topRight;
+            }
+            Dimension bottomLeft;
+            if (ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
+                borderRadiusProperty.radiusBottomLeft = bottomLeft;
+            }
+            Dimension bottomRight;
+            if (ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
+                borderRadiusProperty.radiusBottomRight = bottomRight;
+            }
+            NG::ViewAbstract::SetBorderRadius(borderRadiusProperty);
+            return;
+        }
+
         auto valueTopLeft = object->GetProperty("topLeft");
         if (!valueTopLeft->IsUndefined()) {
             ParseJsDimensionVp(valueTopLeft, radiusTopLeft);
@@ -2481,6 +2621,13 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, RefPtr<Decorati
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        Dimension borderRadiusSize;
+        if (ParseJsDimensionVp(args, borderRadiusSize)) {
+            NG::ViewAbstract::SetBorderRadius(borderRadiusSize);
+            return;
+        }
+    }
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
@@ -2522,7 +2669,7 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoratio
         LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
         return;
     }
-    if (!decoration) {
+    if (!decoration && !Container::IsCurrentUseNewPipeline()) {
         decoration = GetBackDecoration();
     }
     BorderStyle styleLeft = BoxComponentHelper::GetBorderStyleLeft(decoration);
@@ -2531,6 +2678,28 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoratio
     BorderStyle styleBottom = BoxComponentHelper::GetBorderStyleBottom(decoration);
     if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::BorderStyleProperty borderStyleProperty;
+            auto leftValue = object->GetProperty("left");
+            if (!leftValue->IsUndefined() && leftValue->IsNumber()) {
+                borderStyleProperty.styleLeft = static_cast<BorderStyle>(leftValue->ToNumber<int32_t>());
+            }
+            auto rightValue = object->GetProperty("right");
+            if (!rightValue->IsUndefined() && rightValue->IsNumber()) {
+                borderStyleProperty.styleRight = static_cast<BorderStyle>(rightValue->ToNumber<int32_t>());
+            }
+            auto topValue = object->GetProperty("top");
+            if (!topValue->IsUndefined() && topValue->IsNumber()) {
+                borderStyleProperty.styleTop = static_cast<BorderStyle>(topValue->ToNumber<int32_t>());
+            }
+            auto bottomValue = object->GetProperty("bottom");
+            if (!bottomValue->IsUndefined() && bottomValue->IsNumber()) {
+                borderStyleProperty.styleBottom = static_cast<BorderStyle>(bottomValue->ToNumber<int32_t>());
+            }
+            NG::ViewAbstract::SetBorderStyle(borderStyleProperty);
+            return;
+        }
+
         auto leftValue = object->GetProperty("left");
         if (!leftValue->IsUndefined() && leftValue->IsNumber()) {
             styleLeft = static_cast<BorderStyle>(leftValue->ToNumber<int32_t>());
@@ -2555,6 +2724,11 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoratio
         styleBottom = borderStyle;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto borderStyle = static_cast<BorderStyle>(args->ToNumber<int32_t>());
+        NG::ViewAbstract::SetBorderStyle(borderStyle);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
     if (!stack->IsVisualStateSet()) {
@@ -3288,7 +3462,7 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
         }
 
         auto builderObj = JSRef<JSObject>::Cast(ret);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         auto pixmap = builderObj->GetProperty("pixelMap");
         itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
 #endif
@@ -3816,9 +3990,6 @@ void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
         return;
     }
 
-    if (value.Value() == 0) {
-        value.SetValue(EPSILON);
-    }
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetBrightness(value);
 }
@@ -3833,10 +4004,6 @@ void JSViewAbstract::JsContrast(const JSCallbackInfo& info)
     Dimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
-    }
-
-    if (value.Value() == 0) {
-        value.SetValue(EPSILON);
     }
 
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -3855,10 +4022,6 @@ void JSViewAbstract::JsSaturate(const JSCallbackInfo& info)
     Dimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
-    }
-
-    if (value.Value() == 0) {
-        value.SetValue(EPSILON);
     }
 
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -4106,14 +4269,18 @@ void JSViewAbstract::JsKey(const std::string& key)
         component->SetInspectorKey(key);
     }
 
-    auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
-    if (flexItem) {
-        flexItem->SetInspectorKey(key);
+    if (!AceType::InstanceOf<TextSpanComponent>(ViewStackProcessor::GetInstance()->GetMainComponent())) {
+        auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
+        if (flexItem) {
+            flexItem->SetInspectorKey(key);
+        }
     }
 
-    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
-    if (focusableComponent) {
-        focusableComponent->SetInspectorKey(key);
+    if (!AceType::InstanceOf<TextSpanComponent>(ViewStackProcessor::GetInstance()->GetMainComponent())) {
+        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
+        if (focusableComponent) {
+            focusableComponent->SetInspectorKey(key);
+        }
     }
 }
 
@@ -4130,7 +4297,7 @@ void JSViewAbstract::JsRestoreId(int32_t restoreId)
     }
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
@@ -4215,62 +4382,40 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 #endif
 
     // Check the parameters
-    if (info.Length() > 0 && info[0]->IsObject()) {
-        JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
-        auto builder = menuObj->GetProperty("builder");
-        if (!builder->IsFunction()) {
-            LOGE("builder param is not a function.");
-            return;
-        }
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-        if (!builderFunc) {
-            LOGE("builder function is null.");
-            return;
-        }
-
-        // use another VSP instance while executing the builder function
-        ScopedViewStackProcessor builderViewStackProcessor;
-        {
-            ACE_SCORING_EVENT("contextMenu.builder");
-            builderFunc->Execute();
-        }
-        auto customComponent = ViewStackProcessor::GetInstance()->Finish();
-        if (!customComponent) {
-            LOGE("Custom component is null.");
-            return;
-        }
-
-        // Set the theme
-        auto menuTheme = GetTheme<SelectTheme>();
-        menuComponent->SetTheme(menuTheme);
-        auto optionTheme = GetTheme<SelectTheme>();
-        auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-
-        // Set the custom component
-        optionComponent->SetCustomComponent(customComponent);
-        menuComponent->ClearOptions();
-        menuComponent->AppendOption(optionComponent);
-        LOGI("Context menu is added.");
-    } else {
+    if (info.Length() <= 0 || !info[0]->IsObject()) {
         LOGE("Builder param is invalid, not an object.");
         return;
     }
+    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[0]);
+    auto builder = menuObj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        LOGE("builder param is not a function.");
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    if (!builderFunc) {
+        LOGE("builder function is null.");
+        return;
+    }
+
     int32_t responseType = static_cast<int32_t>(ResponseType::LONGPRESS);
     if (info.Length() == 2 && info[1]->IsNumber()) {
         responseType = info[1]->ToNumber<int32_t>();
         LOGI("Set the responseType is %d.", responseType);
     }
 
+    auto weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent);
     if (responseType == static_cast<int32_t>(ResponseType::RIGHT_CLICK)) {
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        box->SetOnMouseId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](MouseInfo& info) {
-            auto refPtr = weak.Upgrade();
-            if (!refPtr) {
+        box->SetOnMouseId([weak, builderFunc](MouseInfo& info) {
+            auto menuComponent = weak.Upgrade();
+            if (!menuComponent) {
                 LOGE("Menu component is null.");
                 return;
             }
             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-                auto showMenu = refPtr->GetTargetCallback();
+                ExecMenuBuilder(builderFunc, menuComponent);
+                auto showMenu = menuComponent->GetTargetCallback();
                 info.SetStopPropagation(true);
                 LOGI("Context menu is triggered, type is right click.");
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
@@ -4284,14 +4429,15 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
         RefPtr<Gesture> longGesture = AceType::MakeRefPtr<LongPressGesture>(
             DEFAULT_LONG_PRESS_FINGER, false, DEFAULT_LONG_PRESS_DURATION, false, true);
-        longGesture->SetOnActionId([weak = WeakPtr<OHOS::Ace::MenuComponent>(menuComponent)](const GestureEvent& info) {
-            auto refPtr = weak.Upgrade();
-            if (!refPtr) {
+        longGesture->SetOnActionId([weak, builderFunc](const GestureEvent& info) {
+            auto menuComponent = weak.Upgrade();
+            if (!menuComponent) {
                 LOGE("Menu component is null.");
                 return;
             }
+            ExecMenuBuilder(builderFunc, menuComponent);
             LOGI("Context menu is triggered, type is long press.");
-            auto showMenu = refPtr->GetTargetCallback();
+            auto showMenu = menuComponent->GetTargetCallback();
 #if defined(MULTIPLE_WINDOW_SUPPORTED)
             showMenu("", info.GetScreenLocation());
 #else
@@ -4422,7 +4568,8 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("restoreId", &JSViewAbstract::JsRestoreId);
     JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
+#if defined(PREVIEW)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
 #endif
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
@@ -4981,6 +5128,20 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& args)
     }
 }
 
+void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onHoverId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onHover");
+            func->Execute(param);
+        };
+        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+        box->SetOnHoverId(onHoverId);
+    }
+}
+
 void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
 {
     if (info.Length() != 2) {
@@ -5046,7 +5207,7 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
         return;
     }
 
-    HitTestMode hitTestMode = HitTestMode::DEFAULT;
+    HitTestMode hitTestMode = HitTestMode::HTMDEFAULT;
     if (info[0]->IsNumber()) {
         hitTestMode = static_cast<HitTestMode>(info[0]->ToNumber<int32_t>());
     }

@@ -28,23 +28,30 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ImagePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ImagePaintMethod, NodePaintMethod)
 public:
-    ImagePaintMethod(const RefPtr<CanvasImage>& image, const SizeF& imageSize) : image_(image), imageSize_(imageSize) {}
+    ImagePaintMethod(const RefPtr<CanvasImage>& canvasImage, const ImagePaintConfig& ImagePaintConfig)
+        : canvasImage_(canvasImage), imagePaintConfig_(ImagePaintConfig)
+    {}
     ~ImagePaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
-        CHECK_NULL_RETURN(image_, nullptr);
-
+        CHECK_NULL_RETURN(canvasImage_, nullptr);
         auto offset = paintWrapper->GetContentOffset();
         auto contentSize = paintWrapper->GetContentSize();
-        ImagePainter imagePainter(image_, imageSize_, contentSize);
-
-        return [imagePainter, offset](const RefPtr<Canvas>& canvas) { imagePainter.DrawImage(canvas, offset); };
+        ImagePainter imagePainter(canvasImage_);
+        return [imagePainter, offset, ImagePaintConfig = imagePaintConfig_, contentSize](RSCanvas& canvas) {
+            if (ImagePaintConfig.imageRepeat_ == ImageRepeat::NOREPEAT) {
+                imagePainter.DrawImage(canvas, offset, ImagePaintConfig);
+                return;
+            }
+            imagePainter.DrawImageWithRepeat(canvas, ImagePaintConfig,
+                RectF(offset.GetX(), offset.GetY(), contentSize.Width(), contentSize.Height()));
+        };
     }
 
 private:
-    RefPtr<CanvasImage> image_;
-    SizeF imageSize_;
+    RefPtr<CanvasImage> canvasImage_;
+    ImagePaintConfig imagePaintConfig_;
 };
 
 } // namespace OHOS::Ace::NG

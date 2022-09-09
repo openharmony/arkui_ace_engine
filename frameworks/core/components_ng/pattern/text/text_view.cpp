@@ -33,68 +33,84 @@ void TextView::Create(const std::string& content)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
 }
 
-void TextView::FontSize(const Dimension& value)
+void TextView::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
 }
 
-void TextView::TextColor(const Color& value)
+void TextView::SetTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
 }
 
-void TextView::ItalicFontStyle(const NG::ItalicFontStyle& value)
+void TextView::SetItalicFontStyle(const NG::ItalicFontStyle& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, value);
 }
 
-void TextView::FontWeight(const Ace::FontWeight& value)
+void TextView::SetFontWeight(const Ace::FontWeight& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
 }
 
-void TextView::FontFamily(const std::vector<std::string>& value)
+void TextView::SetFontFamily(const std::vector<std::string>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value);
 }
 
-void TextView::TextAlign(const Ace::TextAlign& value)
+void TextView::SetTextAlign(const Ace::TextAlign& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value);
 }
 
-void TextView::TextOverflow(const Ace::TextOverflow& value)
+void TextView::SetTextOverflow(const Ace::TextOverflow& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value);
 }
 
-void TextView::MaxLines(const uint32_t& value)
+void TextView::SetMaxLines(const uint32_t& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value);
 }
 
-void TextView::LineHeight(const Dimension& value)
+void TextView::SetLineHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value);
 }
 
-void TextView::TextDecoration(const Ace::TextDecoration& value)
+void TextView::SetTextDecoration(const Ace::TextDecoration& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, value);
 }
 
-void TextView::TextDecorationColor(const Color& value)
+void TextView::SetTextDecorationColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationColor, value);
 }
 
-void TextView::BaselineOffset(const Dimension& value)
+void TextView::SetBaselineOffset(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, value);
 }
 
-void TextView::TextCase(const Ace::TextCase& value)
+void TextView::SetTextCase(const Ace::TextCase& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value);
 }
+
+void TextView::SetLetterSpacing(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, value);
+}
+
+void TextView::SetAdaptMinFontSize(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMinFontSize, value);
+}
+
+void TextView::SetAdaptMaxFontSize(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value);
+}
+
 } // namespace OHOS::Ace::NG

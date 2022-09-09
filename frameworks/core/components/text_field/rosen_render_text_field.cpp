@@ -27,6 +27,7 @@
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
+#include "core/common/text_field_manager.h"
 #include "core/components/box/render_box_base.h"
 #include "core/components/calendar/rosen_render_calendar.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
@@ -43,7 +44,6 @@ namespace {
 
 constexpr char16_t NEWLINE_CODE = u'\n';
 // pixel for how far the caret to the top of paint rect. Sometimes may leave some space for the floor.
-constexpr Dimension INLINE_STYLE_CARET_HEIGHT = 24.0_vp;
 constexpr Dimension INLINE_STYLE_CORNER_RADIUS = 4.0_vp;
 constexpr Color INLINE_STYLE_SELECTED_COLOR = Color(0x1A0A59F7);
 constexpr double CARET_HEIGHT_OFFSET = -2.0;
@@ -113,11 +113,6 @@ bool RosenRenderTextField::GetCaretRect(int32_t extent, Rect& caretRect, double 
             LOGD("Illegal caret height. Consider release restriction of paragraph max_line.");
             return false;
         }
-        if (inputStyle_ == InputStyle::INLINE) {
-            caretRect.SetRect(metrics.offset.GetX(), (GetLayoutSize().Height() - metrics.height) / 2.0,
-                NormalizeToPx(CURSOR_WIDTH), metrics.height);
-            return true;
-        }
         caretRect.SetRect(metrics.offset.GetX(), metrics.offset.GetY() + caretHeightOffset, NormalizeToPx(CURSOR_WIDTH),
             metrics.height - caretHeightOffset * 2.0);
     } else {
@@ -141,7 +136,7 @@ void RosenRenderTextField::PaintCaret(SkCanvas& canvas, const Rect& caretRect)
         cursorColor = style_.GetTextColor();
     }
     paint.setColor(Constants::ConvertSkColor(cursorColor));
-
+    paint.setAntiAlias(true);
     if (NearZero(cursorRadius_.Value())) {
         canvas.drawRect(
             SkRect::MakeLTRB(caretRect.Left(), caretRect.Top(), caretRect.Right(), caretRect.Bottom()), paint);
@@ -460,6 +455,10 @@ void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
         auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale * MAGNIFIER_GAIN,
             GetLayoutSize().Height() * viewScale * MAGNIFIER_GAIN, SkColorType::kRGBA_8888_SkColorType,
             SkAlphaType::kOpaque_SkAlphaType);
+        if (imageInfo.width() < 0 || imageInfo.height() < 0) {
+            LOGE("Paint imageInfo width is invalid");
+            return;
+        }
         canvasCache_.reset();
         canvasCache_.allocPixels(imageInfo);
         magnifierCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
@@ -494,7 +493,15 @@ Size RosenRenderTextField::Measure()
 
     double decorationHeight = 0.0;
     if (decoration_) {
+        auto padding = decoration_->GetPadding();
+        auto paddingOri = padding;
+        padding.SetLeft(NormalizePercentToPx(padding.Left(), false));
+        padding.SetTop(NormalizePercentToPx(padding.Top(), true));
+        padding.SetRight(NormalizePercentToPx(padding.Right(), false));
+        padding.SetBottom(NormalizePercentToPx(padding.Bottom(), true));
+        decoration_->SetPadding(padding);
         decorationHeight = decoration_->VerticalSpaceOccupied(pipelineContext->GetDipScale());
+        decoration_->SetPadding(paddingOri);
     }
 
     auto paragraphStyle = CreateParagraphStyle();
@@ -519,19 +526,8 @@ Size RosenRenderTextField::Measure()
     // Get height of text
     auto paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     if (paragraphTxt != nullptr) {
-        auto textHeight = paragraphTxt->GetHeight();
-        auto textLines = paragraphTxt->GetLineCount();
-        auto layoutParamChanged = lastLayoutParam_.value() == GetLayoutParam();
-        if (layoutParamChanged) {
-            lastLayoutParam_ = std::make_optional(GetLayoutParam());
-        }
-        bool needNotifyChangeEvent = !isValueFromFront_ || layoutParamChanged;
-        // If height or lines is changed, make needNotifyChangeEvent_ true to notify change event.
-        if (needNotifyChangeEvent && (!NearEqual(textHeight_, textHeight) || textLines_ != textLines)) {
-            needNotifyChangeEvent_ = true;
-        }
-        textHeight_ = textHeight;
-        textLines_ = textLines;
+        textHeight_ = paragraphTxt->GetHeight();
+        textLines_ = paragraphTxt->GetLineCount();
     } else {
         textHeight_ = 0.0;
         textLines_ = 0;
@@ -665,7 +661,7 @@ void RosenRenderTextField::ComputeExtendHeight(double decorationHeight)
     if (paragraph_ && extend_ && GreatOrEqual(paragraph_->GetHeight(), heightInPx - decorationHeight)) {
         extendHeight_ = paragraph_->GetHeight() + decorationHeight;
     } else {
-        extendHeight_ = heightInPx;
+        extendHeight_ = std::max(heightInPx, decorationHeight);
     }
     extendHeight_ = std::min(extendHeight_, GetLayoutParam().GetMaxSize().Height());
 }
@@ -680,9 +676,6 @@ void RosenRenderTextField::ComputeOffsetAfterLayout()
         if (resetToStart_ && keyboard_ != TextInputType::MULTILINE) {
             caretRect_ -= textOffsetForShowCaret_;
             textOffsetForShowCaret_ = Offset();
-        }
-        if (inputStyle_ == InputStyle::INLINE) {
-            return;
         }
         if (showPlaceholder_) {
             caretRect_ += ComputeVerticalOffsetForCenter(innerRect_.Height(), placeholderParagraph_->GetHeight());
@@ -699,10 +692,29 @@ void RosenRenderTextField::ComputeOffsetAfterLayout()
         .width = caretRect_.Width(),
         .height = caretRect_.Height()
     };
-    MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
-    auto value = GetEditingValue();
-    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
-        StringUtils::Str8ToStr16(value.text), value.selection.GetStart(), value.selection.GetEnd());
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("context is nullptr");
+        return;
+    }
+    auto manager = context->GetTextFieldManager();
+    if (!manager) {
+        LOGE("manager is nullptr");
+        return;
+    }
+    auto textFieldManager = AceType::DynamicCast<TextFieldManager>(manager);
+    if (!textFieldManager) {
+        LOGE("textFieldmanager is nullptr");
+        return;
+    }
+    auto weakFocusedTextField = textFieldManager->GetOnFocusTextField();
+    auto focusedTextField = weakFocusedTextField.Upgrade();
+    if (focusedTextField && focusedTextField == AceType::Claim(this)) {
+        MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
+        auto value = GetEditingValue();
+        MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+            StringUtils::Str8ToStr16(value.text), value.selection.GetStart(), value.selection.GetEnd());
+    }
 #endif
 }
 
@@ -906,11 +918,6 @@ std::unique_ptr<txt::TextStyle> RosenRenderTextField::CreateTextStyle(const Text
 
 void RosenRenderTextField::UpdateCaretProto()
 {
-    if (inputStyle_ == InputStyle::INLINE) {
-        caretProto_.SetRect(0.0, (GetLayoutSize().Height() - NormalizeToPx(INLINE_STYLE_CARET_HEIGHT)) / 2.0,
-            NormalizeToPx(CURSOR_WIDTH), NormalizeToPx(INLINE_STYLE_CARET_HEIGHT));
-        return;
-    }
     caretProto_.SetRect(
         0.0, CARET_HEIGHT_OFFSET, NormalizeToPx(CURSOR_WIDTH), PreferredLineHeight() - 2.0 * CARET_HEIGHT_OFFSET);
 }
@@ -995,9 +1002,6 @@ bool RosenRenderTextField::ComputeOffsetForCaretUpstream(int32_t extent, CaretMe
     result.offset.SetX(offsetX);
     result.offset.SetY(textBox.rect.fTop);
     result.height = textBox.rect.fBottom - textBox.rect.fTop;
-    if (inputStyle_ == InputStyle::INLINE) {
-        result.height = NormalizeToPx(INLINE_STYLE_CARET_HEIGHT);
-    }
     return true;
 }
 
@@ -1028,9 +1032,6 @@ bool RosenRenderTextField::ComputeOffsetForCaretDownstream(int32_t extent, Caret
     result.offset.SetX(offsetX);
     result.offset.SetY(textBox.rect.fTop);
     result.height = textBox.rect.fBottom - textBox.rect.fTop;
-    if (inputStyle_ == InputStyle::INLINE) {
-        result.height = NormalizeToPx(INLINE_STYLE_CARET_HEIGHT);
-    }
     return true;
 }
 
@@ -1368,9 +1369,6 @@ Offset RosenRenderTextField::GetHandleOffset(int32_t extend)
     Rect result;
     GetCaretRect(extend, result);
     selectHeight_ = result.Bottom() - result.Top();
-    if (inputStyle_ == InputStyle::INLINE) {
-        return Offset(0.0, 0.0);
-    }
     Offset handleLocalOffset = Offset((result.Left() + result.Right()) / 2.0, result.Bottom());
     Offset handleOffset = handleLocalOffset + innerRect_.GetOffset() + GetOffsetToPage() + textOffsetForShowCaret_;
     if (paragraph_) {

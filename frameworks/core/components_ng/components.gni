@@ -105,6 +105,22 @@ template("build_component_ng") {
         cflags_cc += invoker.cflags_cc
       }
 
+      # using graphcis_2d drawing lib
+      include_dirs = [
+        "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+        "//commonlibrary/c_utils/base/include",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+      ]
+
+      if (platform == "ohos") {
+        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics" ]
+      } else {
+        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
+      }
+
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
@@ -113,10 +129,8 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/rosen/modules/composer:libcomposer",
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
         ]
-        include_dirs = [
-          "//utils/native/base/include",
-          "//foundation/window/window_manager/interfaces/innerkits",
-        ]
+        include_dirs +=
+            [ "//foundation/window/window_manager/interfaces/innerkits" ]
       }
 
       if (defined(config.enable_standard_input) &&

@@ -234,6 +234,13 @@ bool TextDeclaration::SetSpecializedStyle(const std::pair<std::string, std::stri
                     specializedStyle.textStyle.SetTextOverflow(ConvertStrToTextOverflow(val));
                 }
             } },
+        { DOM_TEXT_SHADOW,
+            [](const std::string& val, TextDeclaration& declaration) {
+                auto& specializedStyle = declaration.MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
+                if (specializedStyle.IsValid()) {
+                    specializedStyle.textStyle.SetTextShadows(TextDeclaration::ParseTextShadow(val, declaration));
+                }
+            } },
         { DOM_TEXT_VERTICAL_ALIGN,
             [](const std::string& val, TextDeclaration& declaration) {
                 auto& specializedStyle = declaration.MaybeResetStyle<TextSpecializedStyle>(StyleTag::SPECIALIZED_STYLE);
@@ -272,6 +279,68 @@ bool TextDeclaration::SetSpecializedStyle(const std::pair<std::string, std::stri
         return true;
     }
     return false;
+}
+
+std::vector<Shadow> TextDeclaration::ParseTextShadow(const std::string& val, TextDeclaration& declaration)
+{
+    std::vector<Shadow> textShadowList;
+    std::vector<std::string> textShadowValues;
+    StringUtils::SplitStr(val, ",", textShadowValues);
+    auto IsValidDimension = [](const std::string& str) {
+        return str.find("px") != std::string::npos || str == "0";
+    };
+
+    for (auto &textShadowValue : textShadowValues) {
+        std::vector<std::string> textShadowProps;
+        StringUtils::SplitStr(textShadowValue, " ", textShadowProps);
+        Shadow textShadow;
+        size_t pos = 0;
+        switch (static_cast<TextShadowSettings>(textShadowProps.size())) {
+            case TextShadowSettings::OFFSET_ONLY:
+                // text shadow values format:offsetx, offsety
+                textShadow.SetOffsetX(declaration.ParseDouble(textShadowProps[pos++]));
+                textShadow.SetOffsetY(declaration.ParseDouble(textShadowProps[pos]));
+                break;
+            case TextShadowSettings::OFFSET_EXTRA:
+                // support text shadow values format: offsetx offsety [blur-radius | color]
+                if (IsValidDimension(textShadowProps[0])) {
+                    textShadow.SetOffsetX(declaration.ParseDouble(textShadowProps[pos++]));
+                    textShadow.SetOffsetY(declaration.ParseDouble(textShadowProps[pos++]));
+                    if (IsValidDimension(textShadowProps[pos])) {
+                        // text shadow values format: offsetx offsety blur-radius
+                        textShadow.SetBlurRadius(declaration.ParseDouble(textShadowProps[pos]));
+                    } else {
+                        // text shadow values format: offsetx offsety color
+                        textShadow.SetColor(declaration.ParseColor(textShadowProps[pos]));
+                    }
+                } else {
+                    // text shadow values format:color offsetx offsety
+                    textShadow.SetColor(declaration.ParseColor(textShadowProps[pos++]));
+                    textShadow.SetOffsetX(declaration.ParseDouble(textShadowProps[pos++]));
+                    textShadow.SetOffsetY(declaration.ParseDouble(textShadowProps[pos]));
+                }
+                break;
+            case TextShadowSettings::OFFSET_BLUR_CLOR:
+                if (IsValidDimension(textShadowProps[pos])) {
+                    // text shadow values format: offsetx offsety blur-radius color
+                    textShadow.SetOffsetX(declaration.ParseDouble(textShadowProps[pos++]));
+                    textShadow.SetOffsetY(declaration.ParseDouble(textShadowProps[pos++]));
+                    textShadow.SetBlurRadius(declaration.ParseDouble(textShadowProps[pos++]));
+                    textShadow.SetColor(declaration.ParseColor(textShadowProps[pos]));
+                } else {
+                    // text shadow values format:color offsetx offsety
+                    textShadow.SetColor(declaration.ParseColor(textShadowProps[pos++]));
+                    textShadow.SetOffsetX(declaration.ParseDouble(textShadowProps[pos++]));
+                    textShadow.SetOffsetY(declaration.ParseDouble(textShadowProps[pos++]));
+                    textShadow.SetBlurRadius(declaration.ParseDouble(textShadowProps[pos]));
+                }
+                break;
+            default:
+                break;
+        }
+        textShadowList.emplace_back(textShadow);
+    }
+    return textShadowList;
 }
 
 } // namespace OHOS::Ace

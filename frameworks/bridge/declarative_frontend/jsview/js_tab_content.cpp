@@ -78,18 +78,18 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     if (!tabContentItemComponent) {
         return;
     }
-    auto weakTabs = tabContentItemComponent->GetTabsComponent();
 
-    RefPtr<V2::TabsComponent> tabs;
-    RefPtr<TabBarComponent> tabBar;
+    auto weakTabs = tabContentItemComponent->GetTabsComponent();
+    // Full update: tabs and tabBar always exist
+    // Partial update: tabs and tabBar exist for initial render and nullptr for rerender
+    auto tabs = weakTabs.Upgrade();
+    auto tabBar = tabs ? tabs->GetTabBarChild() : nullptr;
 
     if (!Container::IsCurrentUsePartialUpdate()) {
-        tabs = weakTabs.Upgrade();
         if (!tabs) {
             LOGE("can not get Tabs parent component error.");
             return;
         }
-        tabBar = tabs->GetTabBarChild();
         if (!tabBar) {
             LOGE("can not get TabBar component error.");
             return;
@@ -106,6 +106,11 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
             tabContentItemComponent->SetBarText(textVal);
         }
     } else {
+        // For Partial Update ProcessTabBarXXX methods
+        // do not create any components for the tab bar items
+        // and return nullptr.
+        // Tab bar items created and added later by
+        // TabContentItemElementProxy class.
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
         JSRef<JSVal> textParam = paramObject->GetProperty("text");
@@ -114,8 +119,9 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
         auto isIconEmpty = iconParam->IsEmpty() || iconParam->IsUndefined() || iconParam->IsNull();
 
         if (builderFuncParam->IsFunction()) {
-            tabBarChild = ProcessTabBarBuilderFunction(tabContentItemComponent, builderFuncParam);
-            if (!Container::IsCurrentUsePartialUpdate()) {
+            tabBarChild = ProcessTabBarBuilderFunction(info, tabContentItemComponent, builderFuncParam);
+            // Update tabBar always for full update and for initial render only for partial update
+            if (tabBar) {
                 tabBar->ResetIndicator();
                 tabBar->SetAlignment(Alignment::TOP_LEFT);
             }
@@ -142,16 +148,29 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     }
 }
 
-RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(
+RefPtr<Component> JSTabContent::ProcessTabBarBuilderFunction(const JSCallbackInfo& info,
     RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc)
 {
     tabContent->SetBarText("custom");
+    if (Container::IsCurrentUsePartialUpdate()) {
+        auto jsWrapperFunc = [context = info.GetExecutionContext(), builder = builderFunc]() -> RefPtr<Component> {
+                ACE_SCORING_EVENT("TabContent.tabBarBuilder");
+                JAVASCRIPT_EXECUTION_SCOPE(context)
+                JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
+                return ViewStackProcessor::GetInstance()->Finish();
+            };
+
+        tabContent->SetBarBuilder(jsWrapperFunc);
+        return nullptr;
+    }
+
     ScopedViewStackProcessor builderViewStackProcessor;
     JsFunction jsBuilderFunc(builderFunc);
     ACE_SCORING_EVENT("TabContent.tabBarBuilder");
     jsBuilderFunc.Execute();
     RefPtr<Component> builderGeneratedRootComponent = ViewStackProcessor::GetInstance()->Finish();
     return builderGeneratedRootComponent;
+
 }
 
 RefPtr<Component> JSTabContent::CreateTabBarLabelComponent(

@@ -16,11 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_CONTEXT_H
 
+#include <cstdint>
+#include <optional>
+
 #include "render_service_client/core/ui/rs_node.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
+#include "base/utils/noncopyable.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -30,13 +36,21 @@ public:
     RosenRenderContext() = default;
     ~RosenRenderContext() override;
 
-    void InitContext(bool isRoot = false) override;
+    void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
-    void UpdateBgColor(const Color& value) override;
+    void AddFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
+
+    void RemoveFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
+
+    void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) override;
+
+    void ResetBlendBgColor() override;
+
+    void BlendBgColor(const Color& color) override;
 
     RefPtr<Canvas> GetCanvas() override;
     void Restore() override;
@@ -76,12 +90,20 @@ public:
     void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) override;
 
 private:
+    void OnBackgroundColorUpdate(const Color& value) override;
+    void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
+    void OnBorderColorUpdate(const BorderColorProperty& value) override;
+    void UpdateBorderWidth(const BorderWidthPropertyF& value) override;
+    void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
+
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
     RefPtr<Canvas> recordingCanvas_;
     RefPtr<Canvas> rosenCanvas_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };
 } // namespace OHOS::Ace::NG
 

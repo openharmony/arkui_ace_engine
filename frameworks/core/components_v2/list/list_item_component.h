@@ -64,8 +64,6 @@ public:
     ACE_DEFINE_COMPONENT_PROP(BorderRadius, Dimension, 0.0_vp);
     ACE_DEFINE_COMPONENT_PROP(EdgeEffect, SwipeEdgeEffect, SwipeEdgeEffect::Spring);
 
-    static RefPtr<ListItemComponent> FindListItem(const RefPtr<Component>& component);
-
     uint32_t Compare(const RefPtr<Component>& component) const override;
 
     bool GetSelectable() const
@@ -135,11 +133,22 @@ public:
         return isLazyCreating_;
     }
 
+    bool IsDragStart() const
+    {
+        return isDragStart_;
+    }
+
+    void MarkIsDragStart(bool isDragStart)
+    {
+        isDragStart_ = isDragStart;
+    }
+
 private:
     OnSelectFunc onSelectId_;
     DeepRenderFunc deepRenderFunc_ = nullptr;
     bool isLazyCreating_ = false;
     bool selectable_ = true;
+    bool isDragStart_ = false;
     RefPtr<Component> swiperStartComponent_;
     RefPtr<Component> swiperEndComponent_;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemComponent);

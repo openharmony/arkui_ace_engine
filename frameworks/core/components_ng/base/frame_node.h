@@ -28,6 +28,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -51,7 +52,7 @@ class ACE_EXPORT FrameNode : public UINode {
 public:
     // create a new child element with new element tree.
     static RefPtr<FrameNode> CreateFrameNodeWithTree(
-        const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, const RefPtr<PipelineContext>& context);
+        const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern);
 
     static RefPtr<FrameNode> GetOrCreateFrameNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
@@ -68,11 +69,19 @@ public:
 
     ~FrameNode() override;
 
+    int32_t FrameCount() const override
+    {
+        return 1;
+    }
+
     void InitializePatternAndContext();
 
     void MarkModifyDone();
 
     void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
+
+    void MarkDirtyNode(
+        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
     void FlushUpdateAndMarkDirty() override;
 
@@ -102,6 +111,12 @@ public:
     const RefPtr<Pattern>& GetPattern() const;
 
     template<typename T>
+    RefPtr<T> GetPattern() const
+    {
+        return DynamicCast<T>(pattern_);
+    }
+
+    template<typename T>
     RefPtr<T> GetLayoutProperty() const
     {
         return DynamicCast<T>(layoutProperty_);
@@ -129,19 +144,23 @@ public:
         return layoutProperty_;
     }
 
-    void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
+    static void PostTask(std::function<void()>&& task, TaskExecutor::TaskType taskType = TaskExecutor::TaskType::UI);
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
-    bool TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const TouchRestrict& touchRestrict,
-        TouchTestResult& result) override;
+    HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+        const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
     bool IsAtomicNode() const override;
 
+    void MarkNeedSyncRenderTree() override
+    {
+        needSyncRenderTree_ = true;
+    }
+
+    void RebuildRenderContextTree();
+
 private:
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
-
-    void MarkDirtyNode(
-        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
@@ -149,17 +168,12 @@ private:
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
 
-    std::optional<LayoutConstraintF> GetLayoutConstraint() const;
-    std::optional<OffsetF> GetParentGlobalOffset() const;
+    LayoutConstraintF GetLayoutConstraint() const;
+    OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
 
-    void MarkNeedSyncRenderTree() override
-    {
-        needSyncRenderTree_ = true;
-    }
-
-    void RebuildRenderContextTree(const std::list<RefPtr<FrameNode>>& children);
+    void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
@@ -169,6 +183,8 @@ private:
 
     // dump self info.
     void DumpInfo() override;
+
+    HitTestMode GetHitTestMode() const;
 
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
@@ -184,6 +200,8 @@ private:
     bool isRenderDirtyMarked_ = false;
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
+
+    bool isActive_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

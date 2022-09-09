@@ -61,14 +61,16 @@ public:
 
     void SetTheme(const RefPtr<SelectTheme>& theme)
     {
-        SetClickedColor(theme->GetClickedColor());
-        SetSelectedColor(theme->GetSelectedColor());
-        SetFontColor(theme->GetFontColor());
-        SetFontSize(theme->GetFontSize());
-        SetFontWeight(theme->GetFontWeight());
-        SetFontFamily(theme->GetFontFamily());
-        SetTextDecoration(theme->GetTextDecoration());
-        SetAllowScale(theme->IsAllowScale());
+        if (theme) {
+            SetClickedColor(theme->GetClickedColor());
+            SetSelectedColor(theme->GetSelectedColor());
+            SetFontColor(theme->GetFontColor());
+            SetFontSize(theme->GetFontSize());
+            SetFontWeight(theme->GetFontWeight());
+            SetFontFamily(theme->GetFontFamily());
+            SetTextDecoration(theme->GetTextDecoration());
+            SetAllowScale(theme->IsAllowScale());
+        }
     }
 
     bool GetSelected() const

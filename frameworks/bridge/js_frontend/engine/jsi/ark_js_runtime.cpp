@@ -25,7 +25,7 @@
 namespace OHOS::Ace::Framework {
 // NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto PANDA_MAIN_FUNCTION = "_GLOBAL::func_main_0";
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 constexpr int32_t FORMAT_JSON = 1;
 #endif
 
@@ -43,7 +43,7 @@ bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, 
     LOGI("Ark: create jsvm");
     RuntimeOption option;
     option.SetGcType(RuntimeOption::GC_TYPE::GEN_GC);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
     option.SetArkProperties(SystemProperties::GetArkProperties());
     option.SetGcThreadNum(SystemProperties::GetGcThreadNum());
     option.SetLongPauseTime(SystemProperties::GetLongPauseTime());
@@ -76,7 +76,7 @@ void ArkJSRuntime::Reset()
 {
     if (vm_ != nullptr) {
         if (!usingExistVM_) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
             JSNApi::StopDebugger(vm_);
 #endif
             JSNApi::DestroyJSVM(vm_);
@@ -87,7 +87,7 @@ void ArkJSRuntime::Reset()
         delete data;
     }
     dataList_.clear();
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     previewComponents_.clear();
 #endif
 }
@@ -102,11 +102,11 @@ shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::str
     return NewUndefined();
 }
 
-bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size)
+bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath)
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
-    bool ret = JSNApi::Execute(vm_, buffer, size, PANDA_MAIN_FUNCTION);
+    bool ret = JSNApi::Execute(vm_, buffer, size, PANDA_MAIN_FUNCTION, filePath);
     HandleUncaughtException();
     return ret;
 }
@@ -115,7 +115,7 @@ bool ArkJSRuntime::ExecuteJsBin(const std::string& fileName)
 {
     JSExecutionScope executionScope(vm_);
     if (!libPath_.empty()) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
         JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_,
             debuggerPostTask_);
 #endif
@@ -235,7 +235,7 @@ void ArkJSRuntime::ExecutePendingJob()
     JSNApi::ExecutePendingJob(vm_);
 }
 
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
 {
     if (vm_ == nullptr) {

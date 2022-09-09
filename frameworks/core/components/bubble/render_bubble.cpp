@@ -591,7 +591,7 @@ bool RenderBubble::PopBubble()
     if (!context) {
         return false;
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     const auto& accessibilityManager = context->GetAccessibilityManager();
     if (accessibilityManager) {
         accessibilityManager->RemoveAccessibilityNodeById(StringUtils::StringToInt(bubbleComponent_->GetId()));

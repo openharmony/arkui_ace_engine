@@ -19,6 +19,9 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/utils/utils.h"
+#include "core/common/ace_page.h"
+#include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_declarative_engine.h"
@@ -469,16 +472,31 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     if (disallowPopLastPage_) {
         delegate_->DisallowPopLastPage();
     }
-    if (jsEngine_) {
-        delegate_->SetGroupJsBridge(jsEngine_->GetGroupJsBridge());
-    } else {
+    if (!jsEngine_) {
         LOGE("the js engine is nullptr");
         EventReport::SendAppStartException(AppStartExcepType::JS_ENGINE_CREATE_ERR);
+        return;
+    }
+    delegate_->SetGroupJsBridge(jsEngine_->GetGroupJsBridge());
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto loadPageCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& url) {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->LoadPageSource(url);
+        };
+        delegate_->InitializeRouterManager(std::move(loadPageCallback));
     }
 }
 
 void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
 {
+    if (Container::IsCurrentUseNewPipeline() && !pageProfile_.empty()) {
+        // In NG structure and fa mode, first load app.js
+        CHECK_NULL_VOID(jsEngine_);
+        jsEngine_->LoadFaAppSource();
+    }
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarative.
     if (delegate_) {
         delegate_->RunPage(url, params, pageProfile_);
@@ -521,31 +539,54 @@ void DeclarativeFrontend::NavigatePage(uint8_t type, const PageTarget& target, c
     }
 }
 
+std::string DeclarativeFrontend::GetCurrentPageUrl() const
+{
+    CHECK_NULL_RETURN(delegate_, "");
+    return delegate_->GetCurrentPageUrl();
+}
+
+// Get the currently running JS page information in NG structure.
+RefPtr<Framework::RevSourceMap> DeclarativeFrontend::GetCurrentPageSourceMap() const
+{
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    return delegate_->GetCurrentPageSourceMap();
+}
+
+// Get the currently running JS page information in NG structure.
+RefPtr<Framework::RevSourceMap> DeclarativeFrontend::GetFaAppSourceMap() const
+{
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    return delegate_->GetFaAppSourceMap();
+}
+
+RefPtr<NG::PageRouterManager> DeclarativeFrontend::GetPageRouterManager() const
+{
+    CHECK_NULL_RETURN(delegate_, nullptr);
+    return delegate_->GetPageRouterManager();
+}
+
 std::string DeclarativeFrontend::RestoreRouterStack(const std::string& contentInfo)
 {
     if (delegate_) {
         return delegate_->RestoreRouterStack(contentInfo);
-    } else {
-        return "";
     }
+    return "";
 }
 
 std::string DeclarativeFrontend::GetContentInfo() const
 {
     if (delegate_) {
         return delegate_->GetContentInfo();
-    } else {
-        return "";
     }
+    return "";
 }
 
 int32_t DeclarativeFrontend::GetRouterSize() const
 {
     if (delegate_) {
         return delegate_->GetStackSize();
-    } else {
-        return -1;
     }
+    return -1;
 }
 
 void DeclarativeFrontend::SendCallbackMessage(const std::string& callbackId, const std::string& data) const
@@ -576,7 +617,7 @@ void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, s
     }
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void DeclarativeFrontend::TransferJsResponseDataPreview(int callbackId, int32_t code, ResponseData responseData) const
 {
     delegate_->TransferJsResponseDataPreview(callbackId, code, responseData);

@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/event/touch_event.h"
 
@@ -42,6 +43,8 @@ public:
     // In ets UI compiler, the atomic node does not Add Pop function, only have Create function.
     virtual bool IsAtomicNode() const = 0;
 
+    virtual int32_t FrameCount() const;
+
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT);
     void RemoveChild(const RefPtr<UINode>& child);
@@ -51,10 +54,14 @@ public:
     void AttachToMainTree();
     void DetachFromMainTree();
 
+    int32_t TotalChildCount() const;
+
     const std::list<RefPtr<UINode>>& GetChildren() const
     {
         return children_;
     }
+
+    void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
 
     RefPtr<UINode> GetParent() const
     {
@@ -126,8 +133,7 @@ public:
         hostPageId_ = id;
     }
 
-    // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
-    virtual bool TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result);
 
     // In the request to re-layout the scene, needs to obtain the changed state of the child node for the creation of
@@ -137,6 +143,8 @@ public:
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
 
     virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+
+    void MarkNeedFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
     virtual void FlushUpdateAndMarkDirty()
     {
@@ -151,6 +159,13 @@ protected:
     virtual void OnChildRemoved(const RefPtr<UINode>& child) {}
 
     virtual void MarkNeedSyncRenderTree();
+
+    virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
+    {
+        for (const auto& child : children_) {
+            child->OnGenerateOneDepthVisibleFrame(visibleList);
+        }
+    }
 
     virtual void OnContextAttached() {}
     // dump self info.

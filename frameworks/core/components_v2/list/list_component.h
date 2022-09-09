@@ -26,16 +26,10 @@
 #include "core/components/scroll_bar/scroll_bar_proxy.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/components_v2/list/list_position_controller.h"
+#include "core/components_v2/list/list_item_group_component.h"
 #include "core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace::V2 {
-
-struct ItemDivider final {
-    Dimension strokeWidth = 0.0_vp;
-    Dimension startMargin = 0.0_vp;
-    Dimension endMargin = 0.0_vp;
-    Color color = Color::TRANSPARENT;
-};
 
 enum class ScrollState {
     IDLE = 0,
@@ -58,6 +52,12 @@ enum class ListItemAlign {
      * display list item at center of cross axis.
      */
     END,
+};
+
+enum StickyStyle : uint32_t {
+    NONE = 0,
+    HEADER = 1,
+    FOOTER = 2,
 };
 
 using OnItemDragStartFunc = std::function<RefPtr<Component>(const ItemDragInfo&, int32_t)>;
@@ -90,7 +90,7 @@ public:
     ACE_DEFINE_COMPONENT_PROP(EdgeEffect, EdgeEffect, EdgeEffect::SPRING);
     ACE_DEFINE_COMPONENT_PROP(ScrollBar, DisplayMode, DisplayMode::OFF);
     ACE_DEFINE_COMPONENT_PROP(InitialIndex, int32_t, 0);
-    ACE_DEFINE_COMPONENT_PROP(CachedCount, int32_t, 1);
+    ACE_DEFINE_COMPONENT_PROP(CachedCount, int32_t, 3);
     ACE_DEFINE_COMPONENT_PROP(EditMode, bool, false);
     ACE_DEFINE_COMPONENT_PROP(ScrollController, RefPtr<ListPositionController>);
     ACE_DEFINE_COMPONENT_PROP(ScrollBarProxy, RefPtr<ScrollBarProxy>);
@@ -98,6 +98,7 @@ public:
     ACE_DEFINE_COMPONENT_PROP(MultiSelectable, bool, false);
     ACE_DEFINE_COMPONENT_PROP(HasHeight, bool, false);
     ACE_DEFINE_COMPONENT_PROP(HasWidth, bool, false);
+    ACE_DEFINE_COMPONENT_PROP(Sticky, StickyStyle, StickyStyle::NONE);
 
     ACE_DEFINE_COMPONENT_EVENT(OnScroll, void(Dimension, ScrollState));
     ACE_DEFINE_COMPONENT_EVENT(OnScrollIndex, void(int32_t, int32_t));

@@ -41,6 +41,7 @@ void SourceMapTest::TearDown() {}
  * @tc.name: GetOriginalNames001
  * @tc.desc: Test get original names from sourceCode which is empty string.
  * @tc.type: FUNC
+ * @tc.require: issueI5IZXS
  */
 HWTEST_F(SourceMapTest, GetOriginalNames001, TestSize.Level1)
 {
@@ -66,6 +67,7 @@ HWTEST_F(SourceMapTest, GetOriginalNames001, TestSize.Level1)
  * @tc.name: GetOriginalNames002
  * @tc.desc: Test get original names from sourceCode which doesn't have "SourceCode:\n".
  * @tc.type: FUNC
+ * @tc.require: issueI5IZXS
  */
 HWTEST_F(SourceMapTest, GetOriginalNames002, TestSize.Level1)
 {

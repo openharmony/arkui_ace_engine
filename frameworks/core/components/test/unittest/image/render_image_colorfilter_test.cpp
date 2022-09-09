@@ -95,6 +95,7 @@ void RenderImageColorFilterTest::TearDown()
  * @tc.name: colorfilter001
  * @tc.desc: Verify that renderimage can normally obtain the data of the primary color matrix
  * @tc.type: FUNC
+ * @tc.require: issueI5NC61
  */
 HWTEST_F(RenderImageColorFilterTest, colorfilter001, TestSize.Level1)
 {
@@ -120,6 +121,7 @@ HWTEST_F(RenderImageColorFilterTest, colorfilter001, TestSize.Level1)
  * @tc.name: colorfilter002
  * @tc.desc: Verify that renderimage can normally obtain the data of the green color matrix
  * @tc.type: FUNC
+ * @tc.require: issueI5NC61
  */
 HWTEST_F(RenderImageColorFilterTest, colorfilter002, TestSize.Level1)
 {
@@ -145,6 +147,7 @@ HWTEST_F(RenderImageColorFilterTest, colorfilter002, TestSize.Level1)
  * @tc.name: colorfilter003
  * @tc.desc: Verify that renderimage can normally obtain the data of the blue color matrix
  * @tc.type: FUNC
+ * @tc.require: issueI5NC61
  */
 HWTEST_F(RenderImageColorFilterTest, colorfilter003, TestSize.Level1)
 {
@@ -170,6 +173,7 @@ HWTEST_F(RenderImageColorFilterTest, colorfilter003, TestSize.Level1)
  * @tc.name: colorfilter004
  * @tc.desc: Verify that renderimage cannot obtain abnormal matrix data
  * @tc.type: FUNC
+ * @tc.require: issueI5MX66
  */
 HWTEST_F(RenderImageColorFilterTest, colorfilter004, TestSize.Level1)
 {
@@ -191,6 +195,7 @@ HWTEST_F(RenderImageColorFilterTest, colorfilter004, TestSize.Level1)
  * @tc.name: colorfilter005
  * @tc.desc: Verify that renderimage cannot obtain abnormal matrix data
  * @tc.type: FUNC
+ * @tc.require: issueI5MX66
  */
 HWTEST_F(RenderImageColorFilterTest, colorfilter005, TestSize.Level1)
 {

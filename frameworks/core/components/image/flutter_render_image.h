@@ -134,6 +134,7 @@ private:
     Rect RecalculateSrcRect(const Size& realImageSize);
     void ApplyColorFilter(flutter::Paint& paint);
     void ApplyInterpolation(flutter::Paint& paint);
+    void ApplyBlur(flutter::Paint& paint);
     void ApplyBorderRadius(const Offset& offset, const ScopedCanvas& canvas, const Rect& paintRect);
     void AddSvgChild();
     void CreateAnimatedPlayer(const RefPtr<ImageProvider>& provider, SkCodec* codecPtr, bool forceResize);

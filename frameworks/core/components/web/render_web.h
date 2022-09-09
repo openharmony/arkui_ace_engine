@@ -17,25 +17,48 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RENDER_WEB_H
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_component.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
-namespace OHOS::Ace {
+#include <chrono>
+#include<queue>
 
+namespace OHOS::Ace {
 namespace {
+
+struct MouseClickInfo {
+    double x = -1;
+    double y = -1;
+    TimeStamp start;
+};
+
 #ifdef OHOS_STANDARD_SYSTEM
 struct TouchInfo {
     double x = -1;
     double y = -1;
     int32_t id = -1;
 };
+
+struct TouchHandleState {
+    int32_t id = -1;
+    int32_t x = -1;
+    int32_t y = -1;
+    int32_t edge_height = 0;
+};
+
+enum WebOverlayType {
+    INSERT_OVERLAY,
+    SELECTION_OVERLAY,
+    INVALID_OVERLAY
+};
 #endif
 }
 
-class RenderWeb : public RenderNode {
-    DECLARE_ACE_TYPE(RenderWeb, RenderNode);
+class RenderWeb : public RenderNode, public DragDropEvent {
+    DECLARE_ACE_TYPE(RenderWeb, RenderNode, DragDropEvent);
 
 public:
     static RefPtr<RenderNode> Create();
@@ -43,28 +66,45 @@ public:
     RenderWeb();
     ~RenderWeb() override = default;
 
+    enum class VkState {
+        VK_NONE,
+        VK_SHOW,
+        VK_HIDE
+    };
+
     void Update(const RefPtr<Component>& component) override;
     void PerformLayout() override;
     void OnAttachContext() override;
     void OnMouseEvent(const MouseEvent& event);
     bool HandleMouseEvent(const MouseEvent& event) override;
+    void SendDoubleClickEvent(const MouseClickInfo& info);
+    bool HandleDoubleClickEvent(const MouseEvent& event);
+    void HandleKeyEvent(const KeyEvent& keyEvent);
 
 #ifdef OHOS_STANDARD_SYSTEM
-    void OnAppShow() override
-    {
-        RenderNode::OnAppShow();
-        if (delegate_) {
-            delegate_->ShowWebView();
-        }
-    }
+    void OnAppShow() override;
+    void OnAppHide() override;
+    void OnPositionChanged() override;
+    void OnSizeChanged() override;
+    void HandleTouchDown(const TouchEventInfo& info, bool fromOverlay);
+    void HandleTouchUp(const TouchEventInfo& info, bool fromOverlay);
+    void HandleTouchMove(const TouchEventInfo& info, bool fromOverlay);
+    void HandleTouchCancel(const TouchEventInfo& info);
 
-    void OnAppHide() override
-    {
-        RenderNode::OnAppHide();
-        if (delegate_) {
-            delegate_->HideWebView();
-        }
-    }
+    // Related to text overlay
+    void SetUpdateHandlePosition(
+        const std::function<void(const OverlayShowOption&, float, float)>& updateHandlePosition);
+    bool RunQuickMenu(
+        std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+        std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
+    void OnQuickMenuDismissed();
+    void OnTouchSelectionChanged(
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
+    bool TextOverlayMenuShouldShow() const;
+    bool GetShowStartTouchHandle() const;
+    bool GetShowEndTouchHandle() const;
 #endif
 
     void SetDelegate(const RefPtr<WebDelegate>& delegate)
@@ -80,28 +120,78 @@ public:
     void HandleAxisEvent(const AxisEvent& event) override;
     bool IsAxisScrollable(AxisDirection direction) override;
     WeakPtr<RenderNode> CheckAxisNode() override;
+    
+    void SetWebIsFocus(bool isFocus)
+    {
+        isFocus_ = isFocus;
+    }
+
+    bool GetWebIsFocus() const
+    {
+        return isFocus_;
+    }
+    void PanOnActionStart(const GestureEvent& info) override;
+    void PanOnActionUpdate(const GestureEvent& info) override;
+    void PanOnActionEnd(const GestureEvent& info) override;
+    void PanOnActionCancel() override;
+    DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
 
 protected:
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebComponent> web_;
     Size drawSize_;
+    Size drawSizeCache_;
     bool isUrlLoaded_ = false;
 
 private:
 #ifdef OHOS_STANDARD_SYSTEM
     void Initialize();
-    void HandleTouchDown(const TouchEventInfo& info);
-    void HandleTouchUp(const TouchEventInfo& info);
-    void HandleTouchMove(const TouchEventInfo& info);
-    void HandleTouchCancel(const TouchEventInfo& info);
     bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos, const TouchType& touchType);
     void OnTouchTestHit(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
+    bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
+    bool IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
+    WebOverlayType GetTouchHandleOverlayType(
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
+    RefPtr<TextOverlayComponent> CreateTextOverlay(
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
+    void PushTextOverlayToStack();
+    void PopTextOverlay();
+    Offset NormalizeTouchHandleOffset(float x, float y);
+    void RegisterTextOverlayCallback(
+        int32_t flags, std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
+    void OnDragWindowStartEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info,
+        const DragItemInfo& dragItemInfo);
+    void OnDragWindowMoveEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
+    void OnDragWindowDropEvent(RefPtr<PipelineContext> pipelineContext, const GestureEvent& info);
+
     RefPtr<RawRecognizer> touchRecognizer_ = nullptr;
     OnMouseCallback onMouse_;
-#endif
+    OnKeyEventCallback onKeyEvent_;
+    RefPtr<TextOverlayComponent> textOverlay_;
+    WeakPtr<StackElement> stackElement_;
+    std::function<void(const OverlayShowOption&, float, float)> updateHandlePosition_ = nullptr;
 
+    bool showTextOveralyMenu_ = false;
+    bool showStartTouchHandle_ = false;
+    bool showEndTouchHandle_ = false;
+    bool isDragging_ = false;
+    bool isW3cDragEvent_ = false;
+#endif
+    void RegistVirtualKeyBoardListener();
+    bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
+    void SetRootView(int32_t width, int32_t height, int32_t offset);
     Offset position_;
+    Offset webPoint_;
+    Offset globlePointPosition_;
+    bool needUpdateWeb_ = true;
+    bool isFocus_ = false;
+    VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
+    std::queue<MouseClickInfo> doubleClickQueue_;
 };
 
 } // namespace OHOS::Ace

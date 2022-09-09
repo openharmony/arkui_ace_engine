@@ -17,15 +17,23 @@ import(
 build_component("list_v2") {
   sources = [
     "flutter_render_list.cpp",
+    "flutter_render_list_item_group.cpp",
     "list_component.cpp",
     "list_element.cpp",
     "list_item_component.cpp",
     "list_item_element.cpp",
+    "list_item_group_component.cpp",
+    "list_item_group_element.cpp",
     "list_position_controller.cpp",
     "list_scroll_bar_controller.cpp",
     "render_list.cpp",
     "render_list_creator.cpp",
     "render_list_item.cpp",
+    "render_list_item_group.cpp",
+    "render_list_item_group_creator.cpp",
   ]
-  rosen_sources = [ "rosen_render_list.cpp" ]
+  rosen_sources = [
+    "rosen_render_list.cpp",
+    "rosen_render_list_item_group.cpp",
+  ]
 }

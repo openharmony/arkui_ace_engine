@@ -26,7 +26,9 @@ namespace OHOS::Ace::Framework {
 
 const std::map<std::string, FlexDirection> FlexDirectionMap = {
     { DOM_FLEX_COLUMN, FlexDirection::COLUMN },
-    { DOM_FLEX_ROW, FlexDirection::ROW }
+    { DOM_FLEX_ROW, FlexDirection::ROW },
+    { DOM_FLEX_COLUMN_REVERSE, FlexDirection::COLUMN_REVERSE },
+    { DOM_FLEX_ROW_REVERSE, FlexDirection::ROW_REVERSE }
 };
 
 const std::map<std::string, FlexAlign> FlexJustifyContentMap = {

@@ -55,9 +55,38 @@ T ConvertIntToEnum(int32_t index, const T (&values)[N], T defaultValue)
     return defaultValue;
 }
 
+template<typename T>
+constexpr T Infinity()
+{
+    return static_cast<const T>(1000000.0);
+}
+
 inline bool NearEqual(const double left, const double right, const double epsilon)
 {
     return (std::abs(left - right) <= epsilon);
+}
+
+template<typename T>
+constexpr bool NearEqual(const T& left, const T& right);
+
+template<>
+inline bool NearEqual<float>(const float& left, const float& right)
+{
+    constexpr double epsilon = 0.001f;
+    return NearEqual(left, right, epsilon);
+}
+
+template<>
+inline bool NearEqual<double>(const double& left, const double& right)
+{
+    constexpr double epsilon = 0.00001f;
+    return NearEqual(left, right, epsilon);
+}
+
+template<typename T>
+constexpr bool NearEqual(const T& left, const T& right)
+{
+    return left == right;
 }
 
 inline bool NearZero(const double value, const double epsilon)
@@ -67,43 +96,43 @@ inline bool NearZero(const double value, const double epsilon)
 
 inline bool NearEqual(const double left, const double right)
 {
-    static constexpr double epsilon = 0.001f;
+    constexpr double epsilon = 0.001f;
     return NearEqual(left, right, epsilon);
 }
 
 inline bool NearZero(const double left)
 {
-    static constexpr double epsilon = 0.001f;
+    constexpr double epsilon = 0.001f;
     return NearZero(left, epsilon);
 }
 
 inline bool LessOrEqual(double left, double right)
 {
-    static constexpr double epsilon = 0.001f;
+    constexpr double epsilon = 0.001f;
     return (left - right) < epsilon;
 }
 
 inline bool LessNotEqual(double left, double right)
 {
-    static constexpr double epsilon = -0.001f;
+    constexpr double epsilon = -0.001f;
     return (left - right) < epsilon;
 }
 
 inline bool GreatOrEqual(double left, double right)
 {
-    static constexpr double epsilon = -0.001f;
+    constexpr double epsilon = -0.001f;
     return (left - right) > epsilon;
 }
 
 inline bool GreatNotEqual(double left, double right)
 {
-    static constexpr double epsilon = 0.001f;
+    constexpr double epsilon = 0.001f;
     return (left - right) > epsilon;
 }
 
 inline double Round(double rawNum)
 {
-    static constexpr double epsilon = 0.001f;
+    constexpr double epsilon = 0.001f;
     return std::round(rawNum + epsilon);
 }
 

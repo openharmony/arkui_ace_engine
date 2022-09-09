@@ -172,6 +172,7 @@ template("ace_core_source_set") {
       "image/animated_image_player.cpp",
       "image/flutter_image_cache.cpp",
       "image/image_cache.cpp",
+      "image/image_compressor.cpp",
       "image/image_loader.cpp",
       "image/image_object.cpp",
       "image/image_provider.cpp",
@@ -301,7 +302,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/text:ace_core_components_text_$platform",
       "$ace_root/frameworks/core/components/text_clock:ace_core_components_text_clock_$platform",
       "$ace_root/frameworks/core/components/text_field:ace_core_components_text_field_$platform",
-      "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_$platform",
       "$ace_root/frameworks/core/components/text_span:ace_core_components_text_span_$platform",
       "$ace_root/frameworks/core/components/texttimer:ace_core_components_texttimer_$platform",
       "$ace_root/frameworks/core/components/texttimer:ace_core_components_texttimer_$platform",
@@ -338,6 +338,7 @@ template("ace_core_source_set") {
     deps += [
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
       "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/image_provider:ace_core_components_image_provider_ng_$platform",
       "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_$platform",
@@ -345,19 +346,32 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
     ]
 
+    if (defined(config.enable_image_compression) &&
+        config.enable_image_compression) {
+      if (product_name != "ohos-sdk") {
+        deps += [ "//third_party/opencl-headers:libcl" ]
+        defines += [ "ENABLE_OPENCL" ]
+      }
+    }
+
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources += [ "animation/native_curve_helper.cpp" ]
       deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
     }
 
     if (!use_mingw_win && !use_mac && !is_wearable_product &&
-        !is_standard_system) {
+        !is_standard_system && !use_linux) {
       deps += [ "$ace_root/frameworks/core/components/rich_text:ace_core_components_rich_text_$platform" ]
     }
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      deps += [ "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform" ]
+      deps += [
+        "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_for_web_$platform",
+        "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
+      ]
+    } else {
+      deps += [ "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_$platform" ]
     }
 
     # xcomponent components supports phone, TV and wearable except PC Preview
@@ -373,7 +387,7 @@ template("ace_core_source_set") {
 
     if (defined(config.form_components_support) &&
         config.form_components_support) {
-      if (!use_mingw_win && !use_mac) {
+      if (!use_mingw_win && !use_mac && !use_linux) {
         sources += [ "common/form_manager.cpp" ]
         deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
         external_deps = [ "form_fwk:form_manager" ]
@@ -390,7 +404,7 @@ template("ace_core_source_set") {
         config.plugin_components_support) {
       deps += [ "$ace_root/frameworks/core/components/plugin:ace_core_components_plugin_$platform" ]
       sources += [ "common/plugin_manager.cpp" ]
-      deps += [ "//utils/native/base:utils" ]
+      deps += [ "//commonlibrary/c_utils/base:utils" ]
     }
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
@@ -511,6 +525,7 @@ template("ace_core_ng_source_set") {
       "gestures/timeout_gesture.cpp",
 
       # pipeline
+      "pipeline/base/constants.cpp",
       "pipeline/base/element_register.cpp",
       "pipeline/base/related_node.cpp",
       "pipeline/pipeline_base.cpp",
@@ -600,6 +615,7 @@ template("ace_core_ng_source_set") {
     deps += [
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
       "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/image_provider:ace_core_components_image_provider_ng_$platform",
       "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_$platform",

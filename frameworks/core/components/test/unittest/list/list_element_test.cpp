@@ -1288,6 +1288,228 @@ HWTEST_F(ListElementTest, ListElementItemFocusTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListElementItemFocusTest005
+ * @tc.desc: Verify list item by render sequence.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListElementTest, ListElementItemFocusTest005, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create list.
+    * @tc.expected: step1. create list correctly and item 0 on focus.
+    */
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    for (int32_t i = 0; i < ITEM_COUNT; ++i) {
+        listComponent->AppendChild(MakeListChild("list1_id", "list1_name"));
+    }
+    listComponent->SetDirection(FlexDirection::COLUMN_REVERSE);
+    listComponent->SetPositionController(AceType::MakeRefPtr<ScrollPositionController>());
+    listOne_->SetNewComponent(listComponent);
+    listOne_->Mount(rootContainer_);
+    auto renderNodeOne = listOne_->GetRenderNode();
+
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(0.0, 0.0));
+    layoutParam.SetMaxSize(Size(1000.0, 1000.0));
+    renderNodeOne->SetLayoutParam(layoutParam);
+    renderNodeOne->PerformLayout();
+    rootContainer_->RequestFocusImmediately();
+
+    EXPECT_TRUE(rootContainer_->IsCurrentFocus());
+    EXPECT_TRUE(listOne_->IsCurrentFocus());
+    EXPECT_TRUE(CheckItemFocus(listOne_->GetChildren(), 0));
+
+    /**
+    * @tc.steps: step2. Animation to the up
+    * @tc.expected: step2. RootContainer and listOne acquire the focus. listOne's second child Get the focus.
+    */
+    listOne_->RequestNextFocus(true, false, Rect());
+    EXPECT_TRUE(rootContainer_->IsCurrentFocus());
+    EXPECT_TRUE(listOne_->IsCurrentFocus());
+    EXPECT_TRUE(CheckItemFocus(listOne_->GetChildren(), 1));
+}
+
+/**
+ * @tc.name: ListElementItemFocusTest006
+ * @tc.desc: Verify list item support long jump.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListElementTest, ListElementItemFocusTest006, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create list with 50 item.
+    * @tc.expected: step1. create list correctly and item 0 on focus.
+    */
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    for (int32_t i = 0; i < 50; ++i) {
+        listComponent->AppendChild(MakeListChild("list1_id", "list1_name"));
+    }
+    listComponent->SetDirection(FlexDirection::COLUMN_REVERSE);
+    listComponent->SetPositionController(AceType::MakeRefPtr<ScrollPositionController>());
+    listOne_->SetNewComponent(listComponent);
+    listOne_->Mount(rootContainer_);
+    auto renderNodeOne = listOne_->GetRenderNode();
+
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(0.0, 0.0));
+    layoutParam.SetMaxSize(Size(1000.0, 5000.0));
+    renderNodeOne->SetLayoutParam(layoutParam);
+    renderNodeOne->PerformLayout();
+    rootContainer_->RequestFocusImmediately();
+
+    /**
+    * @tc.steps: step2. set item focusable false partly.
+    * @tc.expected: step2. set item focusable false correctly.
+    */
+    for (auto focusNode : listOne_->GetChildrenList()) {
+        auto listItem = AceType::DynamicCast<ListItemElement>(focusNode);
+        if (listItem->GetIndex() > 0 && listItem->GetIndex() < 48) {
+            focusNode->SetFocusable(false);
+        }
+    }
+
+    EXPECT_TRUE(rootContainer_->IsCurrentFocus());
+    EXPECT_TRUE(listOne_->IsCurrentFocus());
+    EXPECT_TRUE(CheckItemFocus(listOne_->GetChildren(), 0));
+
+    /**
+    * @tc.steps: step3. Animation to the up
+    * @tc.expected: step3. RootContainer and listOne acquire the focus. item 48 Get the focus.
+    */
+    listOne_->RequestNextFocus(true, false, Rect());
+    EXPECT_TRUE(CheckItemFocus(listOne_->GetChildren(), 48));
+
+    /**
+    * @tc.steps: step4. Animation to the up
+    * @tc.expected: step4. RootContainer and listOne acquire the focus. item 49 Get the focus.
+    */
+    listOne_->RequestNextFocus(true, false, Rect());
+    EXPECT_TRUE(CheckItemFocus(listOne_->GetChildren(), 49));
+}
+
+/**
+ * @tc.name: ListElementItemFocusTest007
+ * @tc.desc: Verify list item support long jump.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListElementTest, ListElementItemFocusTest007, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create list with 50 item.
+    * @tc.expected: step1. create list correctly and item 0 on focus.
+    */
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    for (int32_t i = 0; i < 50; ++i) {
+        listComponent->AppendChild(MakeListChild("list1_id", "list1_name"));
+    }
+    listComponent->SetDirection(FlexDirection::COLUMN_REVERSE);
+    listComponent->SetPositionController(AceType::MakeRefPtr<ScrollPositionController>());
+    listOne_->SetNewComponent(listComponent);
+    listOne_->Mount(rootContainer_);
+    auto renderNodeOne = listOne_->GetRenderNode();
+
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(0.0, 0.0));
+    layoutParam.SetMaxSize(Size(1000.0, 5000.0));
+    renderNodeOne->SetLayoutParam(layoutParam);
+    renderNodeOne->PerformLayout();
+    rootContainer_->RequestFocusImmediately();
+
+    /**
+    * @tc.steps: step2. set item focusable false partly.
+    * @tc.expected: step2. set item focusable false correctly.
+    */
+    for (auto focusNode : listOne_->GetChildrenList()) {
+        auto listItem = AceType::DynamicCast<ListItemElement>(focusNode);
+        if (listItem->GetIndex() > 0 && listItem->GetIndex() < 48) {
+            focusNode->SetFocusable(false);
+        }
+    }
+
+    EXPECT_TRUE(rootContainer_->IsCurrentFocus());
+    EXPECT_TRUE(listOne_->IsCurrentFocus());
+    EXPECT_TRUE(CheckItemFocus(listOne_->GetChildren(), 0));
+
+    /**
+    * @tc.steps: step3. Animation to the up
+    * @tc.expected: step3. RootContainer and listOne acquire the focus. item 48 Get the focus.
+    */
+    listOne_->RequestNextFocus(true, false, Rect());
+    EXPECT_TRUE(CheckItemFocus(listOne_->GetChildren(), 48));
+
+    /**
+    * @tc.steps: step4. Animation to the down
+    * @tc.expected: step4. RootContainer and listOne acquire the focus. item 0 Get the focus.
+    */
+    listOne_->RequestNextFocus(true, true, Rect());
+    EXPECT_TRUE(CheckItemFocus(listOne_->GetChildren(), 0));
+}
+
+/**
+ * @tc.name: ListItemFocusTest008
+ * @tc.desc: Verify list item support long jump.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListElementTest, ListElementItemFocusTest008, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create list with 50 item.
+    * @tc.expected: step1. create list correctly and item 0 on focus.
+    */
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    for (int32_t i = 0; i < 50; ++i) {
+        listComponent->AppendChild(MakeListChild("list1_id", "list1_name", "focus", 200, ITEM_HEIGHT));
+    }
+    listComponent->SetDirection(FlexDirection::COLUMN_REVERSE);
+    listComponent->SetPositionController(AceType::MakeRefPtr<ScrollPositionController>());
+    listOne_->SetNewComponent(listComponent);
+    listOne_->Mount(rootContainer_);
+    auto renderNodeOne = listOne_->GetRenderNode();
+
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(0.0, 0.0));
+    layoutParam.SetMaxSize(Size(1000.0, 5000.0));
+    renderNodeOne->SetLayoutParam(layoutParam);
+    renderNodeOne->PerformLayout();
+    rootContainer_->RequestFocusImmediately();
+
+    /**
+    * @tc.steps: step2. set item focusable false partly.
+    * @tc.expected: step2. set item focusable false correctly.
+    */
+    for (auto focusNode : listOne_->GetChildrenList()) {
+        auto listItem = AceType::DynamicCast<ListItemElement>(focusNode);
+        if (listItem->GetIndex() > 0 && listItem->GetIndex() < 48) {
+            focusNode->SetFocusable(false);
+        }
+    }
+
+    EXPECT_TRUE(rootContainer_->IsCurrentFocus());
+    EXPECT_TRUE(listOne_->IsCurrentFocus());
+    EXPECT_TRUE(CheckItemFocus(listOne_->GetChildren(), 0));
+
+    /**
+    * @tc.steps: step3. Animation to the up
+    * @tc.expected: step3. RootContainer and listOne acquire the focus. item 48 Get the focus.
+    */
+    listOne_->RequestNextFocus(true, false, Rect());
+    EXPECT_TRUE(CheckItemFocus(listOne_->GetChildren(), 48));
+
+    /**
+    * @tc.steps: step4. Get the focus item position in list
+    * @tc.expected: step4. position in list may not be zero when item index is not zero.
+    */
+    auto renderList = AceType::DynamicCast<RenderList>(renderNodeOne->GetChildren().front());
+    ASSERT_TRUE(renderList);
+    auto itemChild = renderList->GetChildByIndex(48);
+    ASSERT_TRUE(itemChild);
+    auto listItem = RenderListItem::GetRenderListItem(itemChild);
+    ASSERT_TRUE(listItem);
+    double focusPostion = listItem->GetPositionInList();
+    EXPECT_TRUE(NearEqual(focusPostion, ITEM_HEIGHT * 48));
+}
+
+/**
  * @tc.name: ListItemGroupFocusTest001
  * @tc.desc: Verify list item group nextFocusNode when item group is collapse.
  * @tc.type: FUNC

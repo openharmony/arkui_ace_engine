@@ -497,7 +497,7 @@ bool DOMPickerBase::CreatePicker()
         basePickerChild_->SetTextDirection((IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR));
         basePickerChild_->SetIsDialog(hasValue_);
         basePickerChild_->SetNodeId(GetNodeId());
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         basePickerChild_->SetPickerBaseId(pickerId_);
 #endif
         return true;

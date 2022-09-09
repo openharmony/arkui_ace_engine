@@ -112,7 +112,7 @@ public:
         createTime_ = time;
     }
 
-    bool IsFirstUpdate()
+    bool IsFirstUpdate() const
     {
         return firstUpdateData_;
     }
@@ -187,34 +187,34 @@ public:
         useNewPipeline_ = true;
     }
 
+    bool IsUseNewPipeline() const
+    {
+        return useNewPipeline_;
+    }
+
     static bool IsCurrentUseNewPipeline()
     {
         auto container = Current();
         return container ? container->useNewPipeline_ : false;
     }
 
-    void SetPartialUpdateOn()
-    {
-        partialUpdate_ = true;
-    }
-
-    bool IsUseNewPipeline() const
-    {
-        return useNewPipeline_;
-    }
-
+    // SetCurrentUsePartialUpdate is called when initial render on a page
+    // starts, see zyz_view_register loadDocument() implementation
     static bool IsCurrentUsePartialUpdate()
     {
         auto container = Current();
-        CHECK_NULL_RETURN(container, false);
-        if (container->partialUpdate_) {
-            return true;
-        }
-        auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
-        return !(packageName.empty()) && (packageName == SystemProperties::GetPartialUpdatePkg());
+        return container ? container->usePartialUpdate_ : false;
     }
 
-    Window* GetWindow()
+    static void SetCurrentUsePartialUpdate(bool useIt = false)
+    {
+        auto container = Current();
+        if (container) {
+            container->usePartialUpdate_ = useIt;
+        }
+    }
+
+    Window* GetWindow() const
     {
         auto context = GetPipelineContext();
         return context ? context->GetWindow() : nullptr;
@@ -230,7 +230,7 @@ private:
     std::string moduleName_;
     std::string bundlePath_;
     std::string filesDataPath_;
-    bool partialUpdate_ = false;
+    bool usePartialUpdate_ = false;
     Settings settings_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };

@@ -20,7 +20,9 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
@@ -38,7 +40,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TextPaintMethod>(paragraph_);
+        return MakeRefPtr<TextPaintMethod>(paragraph_, baselineOffset_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -48,7 +50,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<TextLayoutAlgorithm>();
+        return MakeRefPtr<TextLayoutAlgorithm>(spanItemChildren_);
     }
 
     bool IsAtomicNode() const override
@@ -56,10 +58,23 @@ public:
         return false;
     }
 
+    void OnModifyDone() override;
+
+    void BeforeCreateLayoutWrapper() override;
+
+    void AddChildSpanItem(const RefPtr<SpanNode>& child)
+    {
+        spanItemChildren_.emplace_back(child->GetSpanItem());
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
-    RefPtr<Paragraph> paragraph_;
+    std::list<RefPtr<SpanItem>> spanItemChildren_;
+    std::shared_ptr<RSParagraph> paragraph_;
+    float baselineOffset_ = 0.0f;
+
+    ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG
 

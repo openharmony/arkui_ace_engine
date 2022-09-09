@@ -363,7 +363,7 @@ void AccessibilityNodeManager::ClearNodeRectInfo(RefPtr<AccessibilityNode>& node
     for (auto it = children.begin(); it != children.end(); it++) {
         ClearNodeRectInfo(*it, isPopDialog);
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (isPopDialog) {
         node->SetClearRectInfoFlag(true);
     } else {
@@ -383,7 +383,7 @@ int32_t AccessibilityNodeManager::GenerateNextAccessibilityId()
 RefPtr<AccessibilityNode> AccessibilityNodeManager::CreateSpecializedNode(
     const std::string& tag, int32_t nodeId, int32_t parentNodeId)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (IsDeclarative()) {
         return nullptr;
     }

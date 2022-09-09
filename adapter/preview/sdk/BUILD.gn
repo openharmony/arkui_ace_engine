@@ -50,8 +50,10 @@ if (is_standard_system) {
   # Avoid conditional judgment branches caused by dynamic library suffixes.
   if (use_mac) {
     dylib_suffix = ".dylib"
-  } else {
+  } else if (use_mingw_win) {
     dylib_suffix = ".dll"
+  } else if (use_linux) {
+    dylib_suffix = ".so"
   }
 
   # All dynamic libraries to be copied to the path "/previewer/common/bin/module/",
@@ -70,6 +72,21 @@ if (is_standard_system) {
         [ target_out_dir + "/previewer/common/bin/module/{{source_file_part}}" ]
     module_source_dir = target_out_dir + "/previewer/common/bin/module/"
     module_install_name = ""
+  }
+
+  if (use_mac || use_mingw_win) {
+    ohos_copy("copy_distributeddata_library") {
+      out_path = get_label_info(
+              "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/jskits/distributeddata:distributeddata",
+              "root_out_dir")
+      deps = [ "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/jskits/distributeddata:distributeddata" ]
+      sources = [ "${out_path}/distributeddatamgr/kv_store/libdistributeddata${dylib_suffix}" ]
+
+      outputs = [ target_out_dir +
+                  "/previewer/common/bin/module/data/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/previewer/common/bin/module/data/"
+      module_install_name = ""
+    }
   }
 
   # All dynamic libraries to be copied to the path "/previewer/common/bin/",
@@ -94,10 +111,90 @@ if (is_standard_system) {
     ]
 
     # Add the dynamic library with the same name on the mac and windows system here.
+    if (use_mac || use_mingw_win) {
+      # Add dynamic library "native_preferences"
+      native_preferences_path = get_label_info(
+              "//foundation/distributeddatamgr/preferences/interfaces/inner_api:native_preferences",
+              "root_out_dir")
+      deps += [ "//foundation/distributeddatamgr/preferences/interfaces/inner_api:native_preferences" ]
+      sources += [ "${native_preferences_path}/distributeddatamgr/preferences/libnative_preferences${dylib_suffix}" ]
+
+      # Add dynamic library "native_rdb"
+      native_rdb_path = get_label_info(
+              "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb:native_rdb",
+              "root_out_dir")
+      deps += [ "//foundation/distributeddatamgr/relational_store/interfaces/inner_api/rdb:native_rdb" ]
+      sources += [ "${native_rdb_path}/distributeddatamgr/relational_store/libnative_rdb${dylib_suffix}" ]
+
+      # Add dynamic library "sqlite"
+      sqlite_path =
+          get_label_info("//third_party/sqlite:sqlite_sdk", "root_out_dir")
+      deps += [ "//third_party/sqlite:sqlite_sdk" ]
+      sources += [ "${sqlite_path}/common/common/libsqlite_sdk${dylib_suffix}" ]
+
+      # Add dynamic library "libcrypto_restool"
+      libcrypto_path = get_label_info("//third_party/openssl:libcrypto_restool",
+                                      "root_out_dir")
+      deps += [ "//third_party/openssl:libcrypto_restool" ]
+      sources +=
+          [ "${libcrypto_path}/security/huks/libcrypto_restool${dylib_suffix}" ]
+    }
+
+    # Add dynamic library "hilog"
+    if (use_mac) {
+      hilog_path = get_label_info(
+              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_mac",
+              "root_out_dir")
+      deps +=
+          [ "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_mac" ]
+      sources +=
+          [ "${hilog_path}/hiviewdfx/hilog_native/libhilog_mac${dylib_suffix}" ]
+    } else if (use_mingw_win) {
+      hilog_path = get_label_info(
+              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_windows",
+              "root_out_dir")
+      deps += [
+        "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_windows",
+      ]
+      sources += [
+        "${hilog_path}/hiviewdfx/hilog_native/libhilog_windows${dylib_suffix}",
+      ]
+    } else if (use_linux) {
+      hilog_path = get_label_info(
+              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_linux",
+              "root_out_dir")
+      deps += [
+        "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_linux",
+      ]
+      sources += [
+        "${hilog_path}/hiviewdfx/hilog_native/libhilog_linux${dylib_suffix}",
+      ]
+    }
+
     # Add dynamic library "libcurl_shared"
     curl_path = get_label_info("//third_party/curl:curl_shared", "root_out_dir")
     deps += [ "//third_party/curl:curl_shared" ]
     sources += [ curl_path + "/thirdparty/curl/libcurl_shared${dylib_suffix}" ]
+
+    if (use_mac || use_mingw_win) {
+      # add kvfdb
+      out_path = get_label_info(
+              "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/innerkits/distributeddata:distributeddata_inner_mock",
+              "root_out_dir")
+      deps += [ "//foundation/distributeddatamgr/kv_store/kvstoremock/interfaces/innerkits/distributeddata:distributeddata_inner_mock" ]
+      sources += [ "${out_path}/distributeddatamgr/kv_store/libdistributeddata_inner_mock${dylib_suffix}" ]
+      out_path = get_label_info(
+              "//foundation/distributeddatamgr/kv_store/kvstoremock/distributeddb:distributeddb_mock",
+              "root_out_dir")
+      deps += [ "//foundation/distributeddatamgr/kv_store/kvstoremock/distributeddb:distributeddb_mock" ]
+      sources += [ "${out_path}/distributeddatamgr/kv_store/libdistributeddb_mock${dylib_suffix}" ]
+
+      #add shared_libz
+      out_path =
+          get_label_info("//third_party/zlib:shared_libz", "root_out_dir")
+      deps += [ "//third_party/zlib:shared_libz" ]
+      sources += [ "${out_path}/thirdparty/zlib/libshared_libz${dylib_suffix}" ]
+    }
 
     # Add dynamic library "libsec_shared"
     sec_path =
@@ -105,8 +202,8 @@ if (is_standard_system) {
                        "root_out_dir")
     deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
     sources +=
-        [ sec_path + "/thirdparty/bounds_checking_function/libsec_shared" +
-          dylib_suffix ]
+        [ sec_path +
+          "/thirdparty/bounds_checking_function/libsec_shared${dylib_suffix}" ]
 
     # Add napi framework-related dynamic libraries
     ace_napi_path =
@@ -138,7 +235,7 @@ if (is_standard_system) {
       sources += [
         "$ace_napi_path/arkui/napi/libace_napi_ark${dylib_suffix}",
         "$ark_js_path/ark/ark_js_runtime/libark_jsruntime${dylib_suffix}",
-        "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
+        "//third_party/icu/ohos_icu4j/data/icudt69l.dat",
       ]
     } else {
       deps += [ "$ace_napi:ace_napi_quickjs" ]
@@ -150,8 +247,9 @@ if (is_standard_system) {
     if (use_mac) {
       ace_engine_path =
           get_label_info("$ace_root/adapter/preview/build::libace_engine_mac",
-                         "root_out_dir") + "/common/common/libace_engine_mac" +
-          dylib_suffix
+                         "root_out_dir") +
+          "/common/common/libace_engine_mac${dylib_suffix}"
+
       resource_manager_path = get_label_info(
                                   "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
                                   "root_out_dir") + "/global/resource_management/libglobal_resmgr_mac${dylib_suffix}"
@@ -159,18 +257,30 @@ if (is_standard_system) {
         "$ace_root/adapter/preview/build:libace_engine_mac",
         "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
       ]
-    } else {
+    } else if (use_mingw_win) {
       ace_engine_path =
           get_label_info(
               "$ace_root/adapter/preview/build::libace_engine_windows",
-              "root_out_dir") + "/common/common/libace_engine_windows" +
-          dylib_suffix
+              "root_out_dir") +
+          "/common/common/libace_engine_windows${dylib_suffix}"
       resource_manager_path = get_label_info(
                                   "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
                                   "root_out_dir") + "/global/resource_management/libglobal_resmgr_win${dylib_suffix}"
       deps += [
         "$ace_root/adapter/preview/build:libace_engine_windows",
         "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
+      ]
+    } else if (use_linux) {
+      ace_engine_path =
+          get_label_info("$ace_root/adapter/preview/build::libace_engine_linux",
+                         "root_out_dir") +
+          "/common/common/libace_engine_linux${dylib_suffix}"
+      resource_manager_path = get_label_info(
+                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux",
+                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_linux${dylib_suffix}"
+      deps += [
+        "$ace_root/adapter/preview/build:libace_engine_linux",
+        "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux",
       ]
     }
 
@@ -193,6 +303,31 @@ if (is_standard_system) {
     outputs = [ target_out_dir + "/previewer/common/{{source_file_part}}" ]
     module_source_dir = target_out_dir + "/previewer/common"
     module_install_name = ""
+  }
+
+  if (use_mac || use_mingw_win) {
+    ohos_copy("copy_distributeddatamgr_library") {
+      #preferences
+      out_path = get_label_info(
+              "//foundation/distributeddatamgr/preferences/frameworks/js/napi:preferences",
+              "root_out_dir")
+      deps = [ "//foundation/distributeddatamgr/preferences/frameworks/js/napi:preferences" ]
+      sources = [ "${out_path}/distributeddatamgr/preferences/libpreferences${dylib_suffix}" ]
+
+      #rdb
+      out_path = get_label_info(
+              "//foundation/distributeddatamgr/relational_store/frameworks/js/napi/rdb:rdb",
+              "root_out_dir")
+      deps += [ "//foundation/distributeddatamgr/relational_store/frameworks/js/napi/rdb:rdb" ]
+      sources += [
+        "${out_path}/distributeddatamgr/relational_store/librdb${dylib_suffix}",
+      ]
+
+      outputs = [ target_out_dir +
+                  "/previewer/common/bin/module/data/{{source_file_part}}" ]
+      module_source_dir = target_out_dir + "/previewer/common/bin/module/data/"
+      module_install_name = ""
+    }
   }
 
   if (use_mingw_win) {

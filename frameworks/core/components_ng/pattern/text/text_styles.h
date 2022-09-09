@@ -29,6 +29,11 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, ItalicFontStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, TextDecoration);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextCase, TextCase);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMinFontSize, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMaxFontSize, Dimension);
 };
 
 struct TextLineStyle {
@@ -38,9 +43,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextOverflow, TextOverflow);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAlign, TextAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLines, uint32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, TextDecoration);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextCase, TextCase);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LetterSpacing, Dimension);
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,

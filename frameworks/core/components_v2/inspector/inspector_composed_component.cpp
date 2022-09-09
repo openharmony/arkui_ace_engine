@@ -37,9 +37,11 @@
 #include "core/components_v2/inspector/divider_composed_element.h"
 #include "core/components_v2/inspector/flex_composed_element.h"
 #include "core/components_v2/inspector/gauge_composed_element.h"
+#include "core/components_v2/inspector/grid_col_composed_element.h"
 #include "core/components_v2/inspector/grid_composed_element.h"
 #include "core/components_v2/inspector/grid_container_composed_element.h"
 #include "core/components_v2/inspector/grid_item_composed_element.h"
+#include "core/components_v2/inspector/grid_row_composed_element.h"
 #include "core/components_v2/inspector/hyperlink_composed_element.h"
 #include "core/components_v2/inspector/image_animator_composed_element.h"
 #include "core/components_v2/inspector/image_composed_element.h"
@@ -47,6 +49,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/list_composed_element.h"
 #include "core/components_v2/inspector/list_item_composed_element.h"
+#include "core/components_v2/inspector/list_item_group_composed_element.h"
 #include "core/components_v2/inspector/loading_progress_composed_element.h"
 #include "core/components_v2/inspector/marquee_composed_element.h"
 #include "core/components_v2/inspector/menu_composed_element.h"
@@ -121,6 +124,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { LIST_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ListComposedElement>(id); } },
     { LIST_ITEM_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ListItemComposedElement>(id); } },
+    { LIST_ITEM_GROUP_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::ListItemGroupComposedElement>(id); } },
     { NAVIGATOR_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigatorComposedElement>(id); } },
     { PANEL_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::PanelComposedElement>(id); } },
@@ -180,6 +185,10 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { GAUGE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::GaugeComposedElement>(id); } },
     { GRIDCONTAINER_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::GridContainerComposedElement>(id); } },
+    { GRID_COL_COMPONENT_TAG,
+    [](const std::string& id) { return AceType::MakeRefPtr<V2::GridColComposedElement>(id); } },
+    { GRID_ROW_COMPONENT_TAG,
+    [](const std::string& id) { return AceType::MakeRefPtr<V2::GridRowComposedElement>(id); } },
     { MENU_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::MenuComposedElement>(id); } },
     { TEXTAREA_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TextareaComposedElement>(id); } },
@@ -239,6 +248,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { GRID_ITEM_COMPONENT_TAG, GRID_ITEM_ETS_TAG },
     { LIST_COMPONENT_TAG, LIST_ETS_TAG },
     { LIST_ITEM_COMPONENT_TAG, LIST_ITEM_ETS_TAG },
+    { LIST_ITEM_GROUP_COMPONENT_TAG, LIST_ITEM_GROUP_ETS_TAG },
     { NAVIGATOR_COMPONENT_TAG, NAVIGATOR_ETS_TAG },
     { PANEL_COMPONENT_TAG, PANEL_ETS_TAG },
     { PATTERN_LOCK_COMPONENT_TAG, PATTERN_LOCK_ETS_TAG },
@@ -277,6 +287,8 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { TIME_PICKER_COMPONENT_TAG, TIME_PICKER_ETS_TAG },
     { RADIO_COMPONENT_TAG, RADIO_ETS_TAG },
     { GRIDCONTAINER_COMPONENT_TAG, GRIDCONTAINER_ETS_TAG },
+    { GRID_COL_COMPONENT_TAG, GRID_COL_ETS_TAG },
+    { GRID_ROW_COMPONENT_TAG, GRID_ROW_ETS_TAG },
     { INDEXER_COMPONENT_TAG, INDEXER_ETS_TAG },
     { MENU_COMPONENT_TAG, MENU_ETS_TAG },
     { MENU_TAG, MENU_ETS_TAG },
@@ -310,7 +322,7 @@ RefPtr<Element> InspectorComposedComponent::CreateElement()
     if (generateFunc != CREATE_ELEMENT_MAP.end()) {
         auto composedElement = generateFunc->second(id_);
         composedElement->SetInspectorTag(GetName());
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         composedElement->SetDebugLine(GetDebugLine());
 #endif
         auto inspectorElement = AceType::DynamicCast<InspectorComposedElement>(composedElement);

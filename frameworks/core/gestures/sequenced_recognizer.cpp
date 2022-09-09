@@ -48,6 +48,10 @@ void SequencedRecognizer::OnRejected()
     }
 
     for (size_t touchId : refereePointers_) {
+        auto recognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizers_[activeIndex]);
+        if (recognizer && recognizer->GetRefereeState() == RefereeState::SUCCEED) {
+            recognizer->SetRefereePointer(touchId);
+        }
         recognizers_[activeIndex]->OnRejected(touchId);
     }
     recognizers_[activeIndex]->SetRefereeState(RefereeState::FAIL);
@@ -125,6 +129,20 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
         }
     }
     return true;
+}
+
+void SequencedRecognizer::OnFlushTouchEventsBegin()
+{
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnFlushTouchEventsBegin();
+    }
+}
+
+void SequencedRecognizer::OnFlushTouchEventsEnd()
+{
+    for (auto& recognizer : recognizers_) {
+        recognizer->OnFlushTouchEventsEnd();
+    }
 }
 
 void SequencedRecognizer::BatchAdjudicate(

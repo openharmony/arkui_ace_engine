@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cstdlib>
+#include <cmath>
 #include "core/components/checkable/render_switch.h"
 
 #include "base/log/event_report.h"
@@ -307,7 +309,7 @@ void RenderSwitch::OnDrag(const Offset& updatePoint)
     // there are four situations in which the checked status needs to be reversed:
     // 1. A'B'CD, 2. A'BC'D, 3. AB'C'D, 4. ABCD,
     // so [needChangeStatus] = A'B'CD + ABCD + A'BC'D + AB'C'D = (A'B' + AB)CD + (A'B + AB')C'D
-    bool effectiveMove = abs(pointPositionDelta_) > halfTrackLength;
+    bool effectiveMove = std::abs(pointPositionDelta_) > halfTrackLength;
     bool moveRight = pointPositionDelta_ > 0.0;
     bool needChangeStatus = ((needReverse_ == oldChecked_) && moveRight && effectiveMove) ||
                             ((needReverse_ != oldChecked_) && !moveRight && effectiveMove);
@@ -319,7 +321,7 @@ void RenderSwitch::OnDrag(const Offset& updatePoint)
     // 1. A'B'C'D', 2. A'B'C'D, 3. ABC'D', 4. ABC'D, 5. A'BCD', 6. A'BCD, 7. AB'CD', 8. AB'CD,
     // so [constrainDeltaToZero] = (A'B'C'D' + A'B'C'D) +( ABC'D' + ABC'D) + (A'BCD' + A'BCD) + (AB'CD' + AB'CD)
     //                           = A'B'C' + ABC' + A'BC + AB'C = (A'B' + AB)C' + (A'B + AB')C
-    bool excessiveMove = abs(pointPositionDelta_) > pointTrackLength;
+    bool excessiveMove = std::abs(pointPositionDelta_) > pointTrackLength;
     bool constrainDeltaToZero =
         (moveRight && (needReverse_ != oldChecked_)) || (!moveRight && (needReverse_ == oldChecked_));
     // there are four situations in which the absolute value of [pointPositionDelta_] needs to be constrained to

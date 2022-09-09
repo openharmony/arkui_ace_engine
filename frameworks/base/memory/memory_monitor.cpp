@@ -18,7 +18,7 @@
 #include <map>
 #include <mutex>
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM) and !defined(LINUX_PLATFORM)
 #include <malloc.h>
 #endif
 
@@ -29,7 +29,7 @@ namespace OHOS::Ace {
 
 void PurgeMallocCache()
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(IOS_PLATFORM) and !defined(LINUX_PLATFORM)
 #if defined(__BIONIC__)
     mallopt(M_PURGE, 0);
 #endif

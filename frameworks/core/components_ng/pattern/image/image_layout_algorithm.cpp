@@ -21,52 +21,74 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* /*layoutWrapper*/)
 {
-    if (imageObject_) {
-        LOGD("already has image object");
-        return ProcessContentSize(contentConstraint, imageObject_);
+    // case 1: image component is set with valid size, return contentConstraint.selfIdealSize as component size
+    if (contentConstraint.selfIdealSize.IsValid()) {
+        return contentConstraint.selfIdealSize.ConvertToSizeT();
     }
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, contentConstraint.selfIdealSize);
-    auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(imageLayoutProperty, contentConstraint.selfIdealSize);
-    auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
-    if (!imageInfo) {
-        LOGE("fail to get image info");
-        return contentConstraint.selfIdealSize;
+
+    // case 2: image component is not set with size, use image source size to determine component size
+    // if image data is not ready, can not decide content size,
+    // return std::nullopt and wait for next layout task triggered by [OnImageDataReady]
+    if (!loadingCtx_->GetImageSize().IsPositive()) {
+        return std::nullopt;
     }
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, contentConstraint.selfIdealSize);
-    // TODO: add adapter for flutter.
-#ifdef NG_BUILD
-    auto currentState = flutter::ace::WindowManager::GetWindow(pipeline->GetInstanceId());
-#else
-    auto* currentState = flutter::UIDartState::Current();
-#endif
-    CHECK_NULL_RETURN(currentState, contentConstraint.selfIdealSize);
-    auto renderTaskHolder = MakeRefPtr<FlutterRenderTaskHolder>(currentState->GetSkiaUnrefQueue(),
-        currentState->GetIOManager(), currentState->GetTaskRunners().GetIOTaskRunner());
-    ImageProvider::FetchImageObject(imageInfo.value(), successCallback_, uploadSuccessCallback_, failedCallback_,
-        pipeline, false, false, false, renderTaskHolder, onBackgroundTaskPostCallback_);
-    return contentConstraint.selfIdealSize;
+
+    auto rawImageSize = loadingCtx_->GetImageSize();
+    SizeF componentSize(rawImageSize);
+    do {
+        // case 2.1: image component is not set with size, use image source size as image component size
+        if (contentConstraint.selfIdealSize.IsNull()) {
+            break;
+        }
+
+        // case 2.2 image data is ready, use image source size to determine image component size
+        //          keep the principle of making the component aspect ratio and the image source aspect ratio the same
+        auto sizeSet = contentConstraint.selfIdealSize.ConvertToSizeT();
+        uint8_t sizeSetStatus = Negative(sizeSet.Width()) << 1 | Negative(sizeSet.Height());
+        double aspectRatio = Size::CalcRatio(rawImageSize);
+        switch (sizeSetStatus) {
+            case 0b01: // width is positive and height is negative
+                componentSize.SetHeight(static_cast<float>(rawImageSize.Width() / aspectRatio));
+                break;
+            case 0b10: // width is negative and height is positive
+                componentSize.SetWidth(static_cast<float>(rawImageSize.Height() * aspectRatio));
+                break;
+            case 0b11: // both width and height are negative
+            default:
+                break;
+        }
+    } while (false);
+    return contentConstraint.Constrain(componentSize);
 }
 
-SizeF ImageLayoutAlgorithm::ProcessContentSize(
-    const LayoutConstraintF& contentConstraint, const RefPtr<ImageObject>& imageObject)
+void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    if (contentConstraint.selfIdealSize) {
-        return contentConstraint.selfIdealSize.value();
+    BoxLayoutAlgorithm::Layout(layoutWrapper);
+    // if layout size has not decided yet, resize target can not be calculated
+    if (!layoutWrapper->GetGeometryNode()->GetContent()) {
+        return;
     }
-    auto imageSize = imageObject->GetImageSize();
-    SizeF size = SizeF(static_cast<float>(imageSize.Width()), static_cast<float>(imageSize.Height()));
-    size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
-    return size;
+    const auto& imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(imageLayoutProperty);
+    const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
+    bool incomingNeedResize = imageLayoutProperty->GetAutoResize().value_or(true);
+    ImageFit incomingImageFit = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
+    const std::optional<std::pair<Dimension, Dimension>>& sourceSize = imageLayoutProperty->GetSourceSize();
+    bool needMakeCanvasImage = incomingNeedResize != loadingCtx_->GetNeedResize() ||
+                               dstSize != loadingCtx_->GetDstSize() || incomingImageFit != loadingCtx_->GetImageFit();
+    // do [MakeCanvasImage] only when:
+    // 1. [autoResize] changes
+    // 2. component size (aka [dstSize] here) changes.
+    // 3. [ImageFit] changes
+    if (needMakeCanvasImage) {
+        loadingCtx_->MakeCanvasImage(dstSize, incomingNeedResize, incomingImageFit, sourceSize);
+    }
 }
 
 } // namespace OHOS::Ace::NG

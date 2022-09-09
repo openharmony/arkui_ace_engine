@@ -307,6 +307,39 @@ private:
     std::string realm_;
 };
 
+class ACE_EXPORT SslErrorResult : public AceType {
+    DECLARE_ACE_TYPE(SslErrorResult, AceType)
+
+public:
+    SslErrorResult() = default;
+    ~SslErrorResult() = default;
+    virtual void HandleConfirm() = 0;
+    virtual void HandleCancel() = 0;
+};
+
+class ACE_EXPORT WebSslErrorEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebSslErrorEvent, BaseEventInfo);
+
+public:
+    WebSslErrorEvent(const RefPtr<SslErrorResult>& result, int32_t error)
+        : BaseEventInfo("WebSslErrorEvent"), result_(result), error_(error) {}
+    ~WebSslErrorEvent() = default;
+
+    const RefPtr<SslErrorResult>& GetResult() const
+    {
+        return result_;
+    }
+
+    int32_t GetError() const
+    {
+        return error_;
+    }
+
+private:
+    RefPtr<SslErrorResult> result_;
+    int32_t error_;
+};
+
 class ACE_EXPORT WebGeolocation : public AceType {
     DECLARE_ACE_TYPE(WebGeolocation, AceType)
 
@@ -743,6 +776,28 @@ public:
 private:
     float oldScale_ = 0.0f;
     float newScale_ = 0.0f;
+};
+
+class ACE_EXPORT OnScrollEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(OnScrollEvent, BaseEventInfo);
+
+public:
+    OnScrollEvent(double xOffset, double yOffset) : BaseEventInfo
+        ("OnScrollEvent"), xOffset_(xOffset), yOffset_(yOffset) {}
+    ~OnScrollEvent() = default;
+
+    float GetX() const
+    {
+        return xOffset_;
+    }
+
+    float GetY() const
+    {
+        return yOffset_;
+    }
+private:
+    double xOffset_ = 0.0f;
+    double yOffset_ = 0.0f;
 };
 
 class WebContextMenuParam : public AceType {

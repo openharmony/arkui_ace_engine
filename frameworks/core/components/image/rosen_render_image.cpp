@@ -771,7 +771,7 @@ void RosenRenderImage::CanvasDrawImageRect(
     if (GetBackgroundImageFlag()) {
         return;
     }
-    if (!image_ || !image_->image()) {
+    if (!image_ || (!image_->image() && !image_->compressData())) {
         imageDataNotReady_ = true;
         LOGD("image data is not ready, rawImageSize_: %{public}s, image source: %{private}s",
             rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
@@ -784,7 +784,8 @@ void RosenRenderImage::CanvasDrawImageRect(
     if (GetAdaptiveFrameRectFlag()) {
         recordingCanvas->translate(imageRenderPosition_.GetX() * -1, imageRenderPosition_.GetY() * -1);
         Rosen::RsImageInfo rsImageInfo(fitNum, repeatNum, radii_, scale_);
-        recordingCanvas->DrawImageWithParm(image_->image(), rsImageInfo, paint);
+        recordingCanvas->DrawImageWithParm(image_->image(), image_->compressData(), rsImageInfo, paint);
+        image_->setCompress(nullptr, 0, 0);
         return;
     }
     bool isLoading = ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) ||
@@ -912,9 +913,6 @@ void RosenRenderImage::PaintBgImage(const std::shared_ptr<RSNode>& rsNode)
 
 bool RosenRenderImage::NeedUploadImageObjToGpu()
 {
-    if (sourceInfo_.GetSrcType() == SrcType::MEMORY && imageObj_ != nullptr) {
-        return true;
-    }
     bool sourceChange = sourceInfo_ != curSourceInfo_;
     bool newSourceCallLoadImage = (sourceChange && rawImageSize_.IsValid() && srcRect_.IsValid() &&
                                    (rawImageSizeUpdated_ && imageLoadingStatus_ != ImageLoadingStatus::LOADING) &&
@@ -1159,6 +1157,10 @@ void RosenRenderImage::UpdateLoadSuccessState()
 {
     LOGD("update success state info: %{public}s", sourceInfo_.ToString().c_str());
     imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
+    if (!imageObj_) {
+        LOGE("image obj is null");
+        return;
+    }
     auto currentFrameCount = imageObj_->GetFrameCount();
     if ((!sourceInfo_.IsSvg() && currentFrameCount == 1) || (currentFrameCount > 1 && curSourceInfo_ != sourceInfo_)) {
         FireLoadEvent(imageSizeForEvent_);

@@ -121,14 +121,6 @@ RefPtr<RenderNode> TextFieldElement::CreateRenderNode()
                 }
             }
         });
-
-        renderNode->SetOnIsCurrentFocus([wp = AceType::WeakClaim(this)]() -> bool {
-            auto sp = wp.Upgrade();
-            if (sp) {
-                return sp->IsCurrentFocus();
-            }
-            return false;
-        });
     }
     return node;
 }
@@ -150,7 +142,8 @@ bool TextFieldElement::OnKeyEvent(const KeyEvent& keyEvent)
         }
     }
 
-    if (keyEvent.action != KeyAction::UP) {
+    // always use DOWN actions to trigger events
+    if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }
 

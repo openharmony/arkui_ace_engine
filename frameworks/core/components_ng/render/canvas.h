@@ -71,8 +71,6 @@ public:
         const RefPtr<CanvasImage>& image, const RectF& srcRect, const RectF& dstRect, const RefPtr<Paint>& paint) = 0;
 };
 
-using CanvasDrawFunction = std::function<void(const RefPtr<Canvas>& canvas)>;
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_H

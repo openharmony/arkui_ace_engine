@@ -89,12 +89,14 @@ private:
     void OnAnimationStart();
     void OnAnimationStop();
     bool NeedMarquee() const;
+    Offset GetTextPosition() const;
 
     RefPtr<RenderNode> childText_;
     RefPtr<Animator> controller_;
     RefPtr<CurveAnimation<double>> translate_;
     Offset childPosition_ = Offset::ErrorOffset();
 
+    bool needAnimation_ = true;
     bool startAfterLayout_ = true;
     bool startAfterShowed_ = false;
     bool playerFinishControl_ = false;

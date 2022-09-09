@@ -79,9 +79,8 @@ ohos_unittest("ImageCacheTest") {
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
-
+  external_deps = [ "c_utils:utils" ]
   part_name = ace_engine_part
 }
 
@@ -156,8 +155,8 @@ ohos_unittest("ImageProviderTest") {
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
+  external_deps = [ "c_utils:utils" ]
 
   part_name = ace_engine_part
 }

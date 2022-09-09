@@ -41,8 +41,11 @@ public:
             LOGE("Render slider create error!");
             return;
         }
-        slider_->ChangeStatus(RenderStatus::FOCUS);
-        slider_->SetFocus(true);
+        auto context = context_.Upgrade();
+        if (context && context->GetIsTabKeyPressed()) {
+            slider_->ChangeStatus(RenderStatus::FOCUS);
+            slider_->SetFocus(true);
+        }
     }
 
     void OnBlur() override

@@ -14,6 +14,7 @@
  */
 
 #include "core/image/image_object.h"
+#include "core/image/image_compressor.h"
 
 #include "base/thread/background_task_executor.h"
 #include "core/common/container.h"
@@ -129,6 +130,7 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         }
 
         auto key = GenerateCacheKey(imageSource, imageSize);
+        // is already uploaded
         if (!ImageProvider::TryUploadingImage(key, successCallback, failedCallback)) {
             LOGI("other thread is uploading same image to gpu : %{public}s", imageSource.ToString().c_str());
             return;
@@ -147,32 +149,20 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
                 cachedFlutterImage = cachedImage->imagePtr;
             }
         }
+        // found cached image obj (can be rendered)
         if (cachedFlutterImage) {
             LOGD("get cached image success: %{public}s", key.c_str());
             ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, cachedFlutterImage);
             return;
         }
 
-        if (!skData) {
-            LOGD("reload sk data");
-            skData = ImageProvider::LoadImageRawData(imageSource, pipelineContext, imageSize);
-            if (!skData) {
-                LOGE("reload image data failed. imageSource: %{private}s", imageSource.ToString().c_str());
+        auto callback = [successCallback, imageSource, taskExecutor, imageCache,
+                imageSize, key, id = Container::CurrentId()]
+                (flutter::SkiaGPUObject<SkImage> image, sk_sp<SkData> compressData) {
+            if (!image.get() && !compressData.get()) {
                 ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
-                    "Image data may be broken or absent, please check if image file or image data is valid.");
-                return;
+                    "Image data may be broken or absent in upload callback.");
             }
-        }
-        auto rawImage = SkImage::MakeFromEncoded(skData);
-        if (!rawImage) {
-            LOGE("static image MakeFromEncoded fail! imageSource: %{private}s", imageSource.ToString().c_str());
-            ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
-                "Image data may be broken, please check if image file or image data is broken.");
-            return;
-        }
-        auto image = ImageProvider::ResizeSkImage(rawImage, imageSource.GetSrc(), imageSize, forceResize);
-        auto callback = [successCallback, imageSource, taskExecutor, imageCache, imageSize, key,
-                            id = Container::CurrentId()](flutter::SkiaGPUObject<SkImage> image) {
             ContainerScope scope(id);
 #ifdef NG_BUILD
             auto canvasImage = NG::CanvasImage::Create();
@@ -183,6 +173,9 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
 #else
             auto canvasImage = flutter::CanvasImage::Create();
             canvasImage->set_image(std::move(image));
+            int32_t width = static_cast<int32_t>(imageSize.Width() + 0.5);
+            int32_t height = static_cast<int32_t>(imageSize.Height() + 0.5);
+            canvasImage->setCompress(std::move(compressData), width, height);
 #endif
             if (imageCache) {
                 LOGD("cache image key: %{public}s", key.c_str());
@@ -190,7 +183,48 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
             }
             ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, canvasImage);
         };
-        ImageProvider::UploadImageToGPUForRender(image, callback, renderTaskHolder);
+        // here skdata is origin pic, also have 'target size'
+        // if have skdata, means origin pic is rendered first time
+        // if no skdata, means origin pic has shown, and has been cleared
+        // we try to use small image or compressed image instead of origin pic.
+        sk_sp<SkData> stripped;
+        if (ImageCompressor::GetInstance()->CanCompress() && imageSize.IsValid()) {
+            // load compressed
+            auto compressedData = ImageProvider::LoadImageRawDataFromFileCache(pipelineContext, key, ".astc");
+            stripped = ImageCompressor::StripFileHeader(compressedData);
+        }
+        auto smallData = ImageProvider::LoadImageRawDataFromFileCache(pipelineContext, key);
+        if (smallData) {
+            skData = smallData;
+        }
+
+        if (!skData) {
+            LOGD("reload sk data");
+            skData = ImageProvider::LoadImageRawData(imageSource, pipelineContext);
+            if (!skData) {
+                LOGE("reload image data failed. imageSource: %{private}s", imageSource.ToString().c_str());
+                ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
+                    "Image data may be broken or absent, please check if image file or image data is valid.");
+                return;
+            }
+        }
+
+        // make lazy image from file
+        auto rawImage = SkImage::MakeFromEncoded(skData);
+        if (!rawImage) {
+            LOGE("static image MakeFromEncoded fail! imageSource: %{private}s", imageSource.ToString().c_str());
+            ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
+                "Image data may be broken, please check if image file or image data is broken.");
+            return;
+        }
+        sk_sp<SkImage> image;
+        if (smallData) {
+            image = rawImage;
+        } else {
+            image = ImageProvider::ResizeSkImage(rawImage, imageSource.GetSrc(), imageSize, forceResize);
+        }
+        ImageProvider::UploadImageToGPUForRender(image, stripped, callback, renderTaskHolder, key);
+        skData = nullptr;
     };
     if (syncMode) {
         task();

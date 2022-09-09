@@ -42,6 +42,7 @@ config("alignment_test") {
 
 group("unittest") {
   testonly = true
-
-  deps = [ ":AlignmentTest" ]
+  if (!is_asan) {
+    deps = [ ":AlignmentTest" ]
+  }
 }

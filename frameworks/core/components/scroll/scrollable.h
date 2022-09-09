@@ -59,10 +59,10 @@ using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEventCallback = std::function<void()>;
 using OutBoundaryCallback = std::function<bool()>;
 using ScrollOverCallback = std::function<void(double velocity)>;
-using DragEndForRefreshCallback = std::function<void()>;
-using DragCancelRefreshCallback = std::function<void()>;
 using WatchFixCallback = std::function<double(double final, double current)>;
 using ScrollBeginCallback = std::function<ScrollInfo(Dimension, Dimension)>;
+using DragEndForRefreshCallback = std::function<void()>;
+using DragCancelRefreshCallback = std::function<void()>;
 
 class Scrollable : public TouchEventTarget, public RelatedChild {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
@@ -204,9 +204,19 @@ public:
         dragEndCallback_ = dragEndCallback;
     }
 
-    void SetDragCancel(const DragCancelRefreshCallback& dragCancelCallback)
+    void SetDragCancelCallback(const DragCancelRefreshCallback& dragCancelCallback)
     {
         dragCancelCallback_ = dragCancelCallback;
+    }
+
+    const DragEndForRefreshCallback& GetDragEndCallback() const
+    {
+        return dragEndCallback_;
+    }
+
+    const DragCancelRefreshCallback& GetDragCancelCallback() const
+    {
+        return dragCancelCallback_;
     }
 
     void SetWatchFixCallback(const WatchFixCallback& watchFixCallback)
@@ -283,6 +293,9 @@ public:
         scrollBeginCallback_ = scrollBeginCallback;
     }
 
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -297,10 +310,10 @@ private:
     ScrollOverCallback scrollOverCallback_;       // scroll motion controller when edge set to spring
     ScrollOverCallback notifyScrollOverCallback_; // scroll motion controller when edge set to spring
     OutBoundaryCallback outBoundaryCallback_;     // whether out of boundary check when edge set to spring
-    DragEndForRefreshCallback dragEndCallback_;
-    DragCancelRefreshCallback dragCancelCallback_;
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;
+    DragEndForRefreshCallback dragEndCallback_;
+    DragCancelRefreshCallback dragCancelCallback_;
     Axis axis_;
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<RawRecognizer> rawRecognizer_;

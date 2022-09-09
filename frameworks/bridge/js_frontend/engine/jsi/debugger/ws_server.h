@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_ARK_DEBUGGER_WS_SERVER_H
 
 #include <boost/asio/error.hpp>
-#ifdef WINDOWS_PLATFORM
+#if defined(PREVIEW)
 #include <boost/asio/ip/tcp.hpp>
 #else
 #include <boost/asio/local/stream_protocol.hpp>
@@ -34,7 +34,7 @@ namespace OHOS::Ace::Framework {
 
 namespace beast = boost::beast;
 namespace websocket = beast::websocket;
-#ifdef WINDOWS_PLATFORM
+#if defined(PREVIEW)
 using CommProtocol = boost::asio::ip::tcp;
 #else
 using CommProtocol = boost::asio::local::stream_protocol;

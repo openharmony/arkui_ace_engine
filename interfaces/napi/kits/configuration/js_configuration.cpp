@@ -61,7 +61,7 @@ static napi_value JSConfigurationGetLocale(napi_env env, napi_callback_info info
 
 static napi_value ConfigurationExport(napi_env env, napi_value exports)
 {
-    static napi_property_descriptor configurationDesc[] = {
+    napi_property_descriptor configurationDesc[] = {
         DECLARE_NAPI_FUNCTION("getLocale", JSConfigurationGetLocale),
     };
     NAPI_CALL(env, napi_define_properties(

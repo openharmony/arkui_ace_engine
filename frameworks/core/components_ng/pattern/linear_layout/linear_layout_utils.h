@@ -16,17 +16,28 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_LINEAR_LAYOUT_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_LINEAR_LAYOUT_UTILS_H
 
+#include "base/geometry/ng/size_t.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
 // used for linear measure and layout
 struct LinearMeasureProperty {
-    SizeF realSize;
+    OptionalSizeF realSize;
     float crossSize = 0.0f;
     float allocatedSize = 0.0f;
     std::list<RefPtr<LayoutWrapper>> relativeNodes;
     std::list<RefPtr<LayoutWrapper>> weightNodes;
     float totalFlexWeight = 0.0f;
+    float space = 0.0f;
+};
+
+struct LayoutConditions {
+    LayoutWrapper* layoutWrapper = nullptr;
+    bool isVertical = true;
+    FlexAlign crossAlign = FlexAlign::FLEX_START;
+    FlexAlign mainAlign = FlexAlign::FLEX_START;
+    SizeF size { 0.0f, 0.0f };
+    OffsetF paddingOffset { 0.0f, 0.0f };
     float space = 0.0f;
 };
 
@@ -40,7 +51,9 @@ public:
     static void Measure(LayoutWrapper* layoutWrapper, bool isVertical);
 
     // Called to perform layout render node.
-    static void Layout(LayoutWrapper* layoutWrapper, bool isVertical, FlexAlign flexAlign);
+    static void Layout(LayoutWrapper* layoutWrapper, bool isVertical, FlexAlign crossAlign, FlexAlign mainAlign);
+
+    static void LayoutCondition(LayoutConditions& layoutConditions);
 };
 } // namespace OHOS::Ace::NG
 

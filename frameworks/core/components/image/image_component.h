@@ -163,6 +163,26 @@ public:
         return colorfilter_;
     }
 
+    bool GetFocusable() const
+    {
+        return focusable_;
+    }
+
+    void SetFocusable(bool focusable)
+    {
+        focusable_ = focusable;
+    }
+
+    float GetBlurRadius() const
+    {
+        return blurRadius_;
+    }
+
+    void SetBlur(float radius)
+    {
+        blurRadius_ = radius;
+    }
+
 private:
     std::string src_;
     std::string alt_;
@@ -172,6 +192,7 @@ private:
     std::optional<Color> color_;
     std::optional<Color> fillColor_; // used for paint svg path.
     std::vector<float> colorfilter_;
+    float blurRadius_ = 0.0f;
 
     EventMarker loadSuccessEvent_;
     EventMarker loadFailEvent_;
@@ -183,6 +204,7 @@ private:
     bool matchTextDirection_ = false;
     bool useSkiaSvg_ = true;
     bool autoResize_ = true;
+    bool focusable_ = true;
 
     ImageFit imageFit_ = ImageFit::COVER;
     // set default value to [ImageInterpolation::LOW] to keep consistent for the old frontend

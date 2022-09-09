@@ -40,6 +40,7 @@ public:
     using InitEventCallback = std::function<void(const std::string&)>;
     using DestroyEventCallback = std::function<void(const std::string&)>;
     using ExternalEventCallback = std::function<void(const std::string&, const uint32_t, const bool)>;
+
     ~XComponentElement();
     void Prepare(const WeakPtr<Element>& parent) override;
     void SetNewComponent(const RefPtr<Component>& newComponent) override;
@@ -48,7 +49,6 @@ public:
 
 private:
     void InitEvent();
-    void RegisterSurfaceDestroyEvent();
     void OnSurfaceDestroyEvent();
     void OnXComponentInit(const std::string& param);
     void OnSurfaceInit(const std::string& componentId, const uint32_t nodeId);

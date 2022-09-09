@@ -41,6 +41,7 @@ struct PositionInfo {
 
 using ActionClickImpl = std::function<void()>;
 using ActionLongClickImpl = std::function<void()>;
+using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = std::function<bool()>;
 using ActionScrollBackwardImpl = std::function<bool()>;
 using ActionFocusImpl = std::function<void()>;
@@ -67,6 +68,8 @@ public:
     bool ActionClick();
     void SetActionLongClickImpl(const ActionLongClickImpl& actionLongClickImpl);
     bool ActionLongClick();
+    void SetActionSetTextImpl(const ActionSetTextImpl& actionSetTextImpl);
+    bool ActionSetText(const std::string& text);
     void SetActionScrollForward(const ActionScrollForwardImpl& actionScrollForwardImpl);
     bool ActionScrollForward();
     void SetActionScrollBackward(const ActionScrollBackwardImpl& actionScrollBackwardImpl);
@@ -156,6 +159,11 @@ public:
     const EventMarker& GetLongPressEventMarker() const
     {
         return onLongPressId_;
+    }
+
+    const EventMarker& GetSetTextEventMarker() const
+    {
+        return onSetTextId_;
     }
 
     const EventMarker& GetFocusEventMarker() const
@@ -639,7 +647,37 @@ public:
         return clipFlag_;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    size_t GetListBeginIndex() const
+    {
+        return listBeginIndex_;
+    }
+
+    void SetListBeginIndex(const size_t& index)
+    {
+        listBeginIndex_ = index;
+    }
+
+    size_t GetListEndIndex() const
+    {
+        return listEndIndex_;
+    }
+
+    void SetListEndIndex(const size_t& index)
+    {
+        listEndIndex_ = index;
+    }
+
+    size_t GetListItemCounts() const
+    {
+        return listItemCounts_;
+    }
+
+    void SetListItemCounts(const size_t& index)
+    {
+        listItemCounts_ = index;
+    }
+
+#if defined(PREVIEW)
     // used for inspector node in PC preview
     bool GetClearRectInfoFlag() const
     {
@@ -799,9 +837,11 @@ protected:
     ActionFocusImpl actionFocusImpl_;
     ActionUpdateIdsImpl actionUpdateIdsImpl_;
     ActionAccessibilityFocusImpl actionAccessibilityFocusIdsImpl_;
+    ActionSetTextImpl actionSetTextImpl_;
     EventMarker onAccessibilityEventId_;
     EventMarker onClickId_;
     EventMarker onLongPressId_;
+    EventMarker onSetTextId_;
     EventMarker onFocusId_;
     EventMarker onBlurId_;
     FocusChangeCallback focusChangeEventId_;
@@ -810,6 +850,9 @@ private:
     void SetOperableInfo();
 
     // node attr need to barrierfree
+    size_t listBeginIndex_ = -1;
+    size_t listEndIndex_ = -1;
+    size_t listItemCounts_ = 0;
     size_t maxTextLength_ = 0;
     int32_t textSelectionStart_ = 0;
     int32_t textSelectionEnd_ = 0;
@@ -859,7 +902,7 @@ private:
     std::vector<std::pair<std::string, std::string>> attrs_;
     std::vector<std::pair<std::string, std::string>> styles_;
     bool clipFlag_ = false;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     // used for inspector node in PC preview
     bool isClearRectInfo_ = false;
     // focus scale or translateScale for inspector node in PC preview

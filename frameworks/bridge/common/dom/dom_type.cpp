@@ -159,6 +159,8 @@ const char DOM_BOX_SHADOW_COLOR[] = "boxShadowColor";
 const char DOM_FLEX_DIRECTION[] = "flexDirection";
 const char DOM_FLEX_ROW[] = "row";
 const char DOM_FLEX_COLUMN[] = "column";
+const char DOM_FLEX_ROW_REVERSE[] = "row-reverse";
+const char DOM_FLEX_COLUMN_REVERSE[] = "column-reverse";
 const char DOM_FLEX[] = "flex";
 const char DOM_FLEX_GROW[] = "flexGrow";
 const char DOM_FLEX_SHRINK[] = "flexShrink";
@@ -576,6 +578,7 @@ const char DOM_WHITE_SPACE_PREWRAP[] = "pre-wrap";
 const char DOM_WHITE_SPACE_NOWRAP[] = "nowrap";
 const char DOM_WHITE_SPACE_PRE[] = "pre";
 const char DOM_WHITE_SPACE_INHERIT[] = "inherit";
+const char DOM_TEXT_SHADOW[] = "textShadow";
 
 // popup attribute and style constants
 const char DOM_TARGET[] = "target";
@@ -748,6 +751,7 @@ const char DOM_MARQUEE_COLOR[] = "color";
 const char DOM_MARQUEE_FONT_SIZE[] = "fontSize";
 const char DOM_MARQUEE_FONT_WEIGHT[] = "fontWeight";
 const char DOM_MARQUEE_FONT_FAMILY[] = "fontFamily";
+const char DOM_MARQUEE_TEXT_ALIGN[] = "textAlign";
 const char DOM_MARQUEE_EVENT_BOUNCE[] = "bounce";
 const char DOM_MARQUEE_EVENT_FINISH[] = "finish";
 const char DOM_MARQUEE_EVENT_START[] = "start";

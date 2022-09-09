@@ -27,6 +27,7 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components/box/box_component.h"
 #include "core/components/box/box_component_helper.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/root/root_element.h"
 #include "core/components/text_field/render_text_field.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
@@ -107,16 +108,6 @@ void RenderBox::Update(const RefPtr<Component>& component)
         responseRegion_ = box->GetResponseRegion();
         isResponseRegion_ = box->IsResponseRegion();
 
-        auto containerModalTapGesture = box->GetOnContainerModalClickId();
-        if (containerModalTapGesture) {
-            onContainerModalClick_ =
-                AceType::DynamicCast<ClickRecognizer>(containerModalTapGesture->CreateRecognizer(context_));
-            if (onContainerModalClick_) {
-                onContainerModalClick_->SetIsExternalGesture(true);
-                onContainerModalClick_->SetUseCatchMode(false);
-            }
-        }
-
         auto tapGesture = box->GetOnClick();
         if (tapGesture) {
             onClick_ = tapGesture->CreateRecognizer(context_);
@@ -178,7 +169,8 @@ void RenderBox::Update(const RefPtr<Component>& component)
         onMouse_ = box->GetOnMouseId();
         onLongPressId_ = box->GetOnLongPress();
 
-        UpdateGestureRecognizerHierarchy(box->GetGestureHierarchy());
+        auto gestures = box->GetGestures();
+        UpdateGestureRecognizer(gestures);
         SetAccessibilityFocusImpl();
 
         if (box->HasStateAttributes()) {
@@ -299,9 +291,10 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
     }
 
     GestureEvent newInfo = info;
-    newInfo.SetGlobalPoint(startPoint_);
+    Point newPoint = UpdatePoint(pipelineContext, startPoint_);
+    newInfo.SetGlobalPoint(newPoint);
     auto dragItemInfo = GenerateDragItemInfo(pipelineContext, newInfo);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (dragItemInfo.pixelMap) {
         auto initRenderNode = AceType::Claim(this);
         isDragDropNode_  = true;
@@ -343,7 +336,7 @@ void RenderBox::PanOnActionStart(const GestureEvent& info)
 
 void RenderBox::PanOnActionUpdate(const GestureEvent& info)
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_  && dragWindow_) {
         int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
         int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
@@ -371,19 +364,18 @@ void RenderBox::PanOnActionUpdate(const GestureEvent& info)
     auto extraParams = JsonUtil::Create(true);
     auto targetDragDropNode = FindDragDropNode(pipelineContext, info);
     auto preDragDropNode = GetPreDragDropNode();
+    GestureEvent newInfo = info;
+    Point newPoint = UpdatePoint(pipelineContext, info.GetGlobalPoint());
+    newInfo.SetGlobalPoint(newPoint);
+    SetInsertIndex(targetDragDropNode, newInfo);
+    if (targetDragDropNode != initialDragDropNode_) {
+        extraParams->Put("selectedIndex", DEFAULT_INDEX_VALUE);
+    } else {
+        extraParams->Put("selectedIndex", selectedIndex_);
+    }
+    extraParams->Put("insertIndex", insertIndex_);
     if (preDragDropNode == targetDragDropNode) {
         if (targetDragDropNode && targetDragDropNode->GetOnDragMove()) {
-            SetInsertIndex(targetDragDropNode, info);
-            if (insertIndex_ != DEFAULT_INDEX) {
-                (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
-                return;
-            }
-            if (targetDragDropNode != initialDragDropNode_) {
-                extraParams->Put("selectedIndex", -1);
-            } else {
-                extraParams->Put("selectedIndex", selectedIndex_);
-            }
-            extraParams->Put("insertIndex", insertIndex_);
             (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
         }
         return;
@@ -404,7 +396,7 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
         LOGE("Context is null.");
         return;
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_ ) {
         isDragDropNode_  = false;
         RestoreCilpboardData(pipelineContext);
@@ -453,14 +445,17 @@ void RenderBox::PanOnActionEnd(const GestureEvent& info)
     }
     if (targetDragDropNode->GetOnDrop()) {
         auto extraParams = JsonUtil::Create(true);
-        SetInsertIndex(targetDragDropNode, info);
-        if (insertIndex_ == DEFAULT_INDEX) {
+        GestureEvent newInfo = info;
+        Point newPoint = UpdatePoint(pipelineContext, info.GetGlobalPoint());
+        newInfo.SetGlobalPoint(newPoint);
+        SetInsertIndex(targetDragDropNode, newInfo);
+        if (insertIndex_ == DEFAULT_INDEX_VALUE) {
             (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
             SetPreDragDropNode(nullptr);
             return;
         }
         if (targetDragDropNode != initialDragDropNode_) {
-            extraParams->Put("selectedIndex", -1);
+            extraParams->Put("selectedIndex", DEFAULT_INDEX_VALUE);
         } else {
             extraParams->Put("selectedIndex", selectedIndex_);
         }
@@ -478,7 +473,7 @@ void RenderBox::PanOnActionCancel()
         return;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_) {
         RestoreCilpboardData(pipelineContext);
         isDragDropNode_ = false;
@@ -510,6 +505,7 @@ void RenderBox::SetInsertIndex(const RefPtr<DragDropEvent>& targetDragDropNode, 
 {
     auto renderNode = AceType::DynamicCast<RenderNode>(targetDragDropNode);
     if (!renderNode) {
+        insertIndex_ = DEFAULT_INDEX_VALUE;
         return;
     }
     auto renderList = renderNode->FindTargetRenderNode<V2::RenderList>(context_.Upgrade(), info);
@@ -658,7 +654,7 @@ void RenderBox::OnPaintFinish()
         EventReport::SendRenderException(RenderExcepType::VIEW_SCALE_ERR);
         return;
     }
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     Size size = GetPaintSize() * viewScale;
     Offset globalOffset = (GetGlobalOffsetExternal() + margin_.GetOffset()) * viewScale;
     node->SetMarginSize(margin_.GetLayoutSize() * viewScale);
@@ -693,7 +689,7 @@ Offset RenderBox::GetGlobalOffsetExternal() const
     return offset;
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void RenderBox::CalculateScale(RefPtr<AccessibilityNode> node, Offset& globalOffset, Size& size)
 {
     double scaleFactor = node->GetScale();
@@ -804,6 +800,7 @@ void RenderBox::ClearRenderObject()
     }
 
     dragDropGesture_ = nullptr;
+    parallelRecognizer_ = nullptr;
     preDragDropNode_  = nullptr;
     initialDragDropNode_ = nullptr;
     updateBuilder_ = nullptr;
@@ -813,7 +810,6 @@ void RenderBox::ClearRenderObject()
     onDragLeave_ = nullptr;
     onDrop_ = nullptr;
     onClick_ = nullptr;
-    onContainerModalClick_ = nullptr;
     onLongPress_ = nullptr;
 }
 
@@ -1089,6 +1085,14 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
     info.SetTimeStamp(event.time);
     info.SetDeviceId(event.deviceId);
     info.SetSourceDevice(event.sourceType);
+#ifdef LINUX_PLATFORM
+    LOGI("RenderBox::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
+         "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), "
+         "DeviceId(%{public}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
+        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(), info.GetLocalLocation().GetX(),
+        info.GetLocalLocation().GetY(), info.GetButton(), info.GetAction(),
+        info.GetDeviceId(), info.GetSourceDevice(), info.IsStopPropagation());
+#else
     LOGI("RenderBox::HandleMouseEvent: Do mouse callback with mouse event{ Global(%{public}f,%{public}f), "
          "Local(%{public}f,%{public}f)}, Button(%{public}d), Action(%{public}d), Time(%{public}lld), "
          "DeviceId(%{public}" PRId64 ", SourceType(%{public}d) }. Return: %{public}d",
@@ -1096,6 +1100,7 @@ bool RenderBox::HandleMouseEvent(const MouseEvent& event)
         info.GetLocalLocation().GetY(), info.GetButton(), info.GetAction(),
         info.GetTimeStamp().time_since_epoch().count(), info.GetDeviceId(), info.GetSourceDevice(),
         info.IsStopPropagation());
+#endif
     onMouse_(info);
     return info.IsStopPropagation();
 }
@@ -1502,110 +1507,56 @@ double RenderBox::GetWindowBlurProgress() const
     return 0.0;
 }
 
-bool RenderBox::TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
-    TouchTestResult& result)
+void RenderBox::AddRecognizerToResult(
+    const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    if (recognizerHierarchy_.empty()) {
-        return RenderBoxBase::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+    if (!ExistGestureRecognizer()) {
+        return;
     }
 
-    TouchTestResult innerResult;
-    bool parentResult = RenderBoxBase::TouchTest(globalPoint, parentLocalPoint, touchRestrict, innerResult);
-    if (!parentResult) {
-        Point transformPoint = GetTransformPoint(parentLocalPoint);
-        if (!InTouchRectList(transformPoint, GetTouchRectList())) {
-            return false;
-        }
-    }
-
-    std::vector<RefPtr<GestureRecognizer>> innerRecognizers;
-    const auto coordinateOffset = Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY());
-
-    for (auto const& eventTarget : innerResult) {
-        auto recognizer = AceType::DynamicCast<GestureRecognizer>(eventTarget);
-        if (recognizer) {
-            recognizer->SetCoordinateOffset(coordinateOffset);
-            innerRecognizers.push_back(std::move(recognizer));
-        } else {
-            result.push_back(eventTarget);
-        }
-    }
-
-    OnTouchTestHierarchy(coordinateOffset, touchRestrict, innerRecognizers, result);
-
-    return parentResult;
-}
-
-void RenderBox::OnTouchTestHierarchy(const Offset& coordinateOffset, const TouchRestrict& touchRestrict,
-    const std::vector<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& result)
-{
-    RefPtr<GestureRecognizer> current;
-    if (innerRecognizers.size() == 1) {
-        current = innerRecognizers[0];
-    } else if (innerRecognizers.size() > 1) {
-        current = AceType::MakeRefPtr<ExclusiveRecognizer>(innerRecognizers);
-        current->SetCoordinateOffset(coordinateOffset);
-    }
-
-    for (auto const& level : recognizerHierarchy_) {
-        GesturePriority priority = level.first;
-        auto recognizers = level.second;
-
-        if (recognizers.empty()) {
-            continue;
-        }
-
-        for (auto& recognizer : recognizers) {
-            recognizer->SetCoordinateOffset(coordinateOffset);
-            auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(recognizer);
-            if (clickRecognizer && clickRecognizer->GetRefereeState() == RefereeState::PENDING) {
-                clickRecognizer->MultiClickReset();
-                clickRecognizer->DecCount();
-            }
-        }
-
-        if (priority == GesturePriority::Parallel) {
-            if (current) {
-                recognizers.push_back(current);
-            }
-
-            if (recognizers.size() > 1) {
-                current = AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers));
-                current->SetCoordinateOffset(coordinateOffset);
-            } else if (recognizers.size() == 1) {
-                current = recognizers[0];
-            }
-        } else {
-            if (current) {
-                if (priority == GesturePriority::Low) {
-                    recognizers.insert(recognizers.begin(), current);
-                } else {
-                    recognizers.push_back(current);
-                }
-            }
-
-            if (recognizers.size() > 1) {
-                current = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers));
-                current->SetCoordinateOffset(coordinateOffset);
-            } else if (recognizers.size() == 1) {
-                current = recognizers[0];
+    bool ignoreInternal = false;
+    for (int i = MAX_GESTURE_SIZE - 1; i >= 0; i--) {
+        if (recognizers_[i]) {
+            ignoreInternal = recognizers_[i]->GetPriorityMask() == GestureMask::IgnoreInternal;
+            if (ignoreInternal) {
+                break;
             }
         }
     }
-    result.push_back(std::move(current));
+
+    if (ignoreInternal) {
+        auto iter = result.begin();
+        while (iter != result.end()) {
+            auto recognizer = AceType::DynamicCast<GestureRecognizer>(*iter);
+            if (!recognizer) {
+                iter++;
+                continue;
+            }
+
+            if (!recognizer->GetIsExternalGesture()) {
+                iter++;
+                continue;
+            }
+            iter = result.erase(iter);
+        }
+    }
+
+    for (int i = MAX_GESTURE_SIZE - 1; i >= 0; i--) {
+        if (recognizers_[i]) {
+            LOGD("OnTouchTestHit add recognizer to result %{public}s", AceType::TypeName(recognizers_[i]));
+            recognizers_[i]->SetCoordinateOffset(coordinateOffset);
+            result.emplace_back(recognizers_[i]);
+        }
+    }
 }
 
 void RenderBox::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    AddRecognizerToResult(coordinateOffset, touchRestrict, result);
     if (touchRecognizer_) {
         touchRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(touchRecognizer_);
-    }
-    if (onContainerModalClick_) {
-        onContainerModalClick_->SetCoordinateOffset(coordinateOffset);
-        result.emplace_back(onContainerModalClick_);
-        MarkIsNotSiblingAddRecognizerToResult(true);
     }
     if (onClick_) {
         onClick_->SetCoordinateOffset(coordinateOffset);
@@ -1614,9 +1565,9 @@ void RenderBox::OnTouchTestHit(
     }
     if (onLongPress_ && dragDropGesture_) {
         std::vector<RefPtr<GestureRecognizer>> recognizers { onLongPress_, dragDropGesture_ };
-        auto parallelRecognizer = AceType::MakeRefPtr<OHOS::Ace::ParallelRecognizer>(recognizers);
-        parallelRecognizer->SetCoordinateOffset(coordinateOffset);
-        result.emplace_back(parallelRecognizer);
+        parallelRecognizer_ = AceType::MakeRefPtr<OHOS::Ace::ParallelRecognizer>(recognizers);
+        parallelRecognizer_->SetCoordinateOffset(coordinateOffset);
+        result.emplace_back(parallelRecognizer_);
         MarkIsNotSiblingAddRecognizerToResult(true);
         return;
     }
@@ -1632,39 +1583,39 @@ void RenderBox::OnTouchTestHit(
     }
 }
 
-void RenderBox::UpdateGestureRecognizerHierarchy(
-    const std::vector<std::pair<GesturePriority, std::vector<RefPtr<Gesture>>>>& hierarchy)
+void RenderBox::UpdateGestureRecognizer(const std::array<RefPtr<Gesture>, MAX_GESTURE_SIZE>& gestures)
 {
-    bool success = hierarchy.size() == recognizerHierarchy_.size();
-
-    if (success) {
-        for (size_t i = 0; i < hierarchy.size(); ++i) {
-            if (hierarchy[i].first != recognizerHierarchy_[i].first ||
-                hierarchy[i].second.size() != recognizerHierarchy_[i].second.size()) {
-                success = false;
-                break;
-            }
-
-            for (size_t j = 0; j < hierarchy[i].second.size(); ++j) {
-                auto newRecognizer = hierarchy[i].second[j]->CreateRecognizer(context_);
-
-                success = success && recognizerHierarchy_[i].second[j]->ReconcileFrom(newRecognizer);
+    // Considering 4 cases:
+    // 1. new gesture == null && old recognizer == null  -->  do nothing
+    // 2. new gesture != null && old recognizer == null  -->  create new recognizer configured with new gesture
+    // 3. new gesture == null && old recognizer != null  -->  remove old recognizer
+    // 4. new gesture != null && old recognizer != null  -->  update old recognizer with new configuration if
+    // possible(determined by[GestureRecognizer::ReconcileFrom]), or remove the old recognizer and create new
+    // one configured with new gesture.
+    for (size_t i = 0; i < gestures.size(); i++) {
+        if (!gestures[i]) {
+            recognizers_[i] = nullptr;
+            continue;
+        }
+        auto recognizer = gestures[i]->CreateRecognizer(context_);
+        if (recognizer) {
+            recognizer->SetIsExternalGesture(true);
+            if (!recognizers_[i] || !recognizers_[i]->ReconcileFrom(recognizer)) {
+                recognizers_[i] = recognizer;
             }
         }
     }
+}
 
-    if (!success) {
-        recognizerHierarchy_.clear();
-        for (auto const& level : hierarchy) {
-            recognizerHierarchy_.emplace_back(level.first, std::vector<RefPtr<GestureRecognizer>>());
-
-            for (auto const& gesture : level.second) {
-                auto recognizer = gesture->CreateRecognizer(context_);
-                recognizer->SetIsExternalGesture(true);
-                recognizerHierarchy_.back().second.push_back(std::move(recognizer));
-            }
+bool RenderBox::ExistGestureRecognizer()
+{
+    for (size_t i = 0; i < recognizers_.size(); i++) {
+        if (recognizers_[i]) {
+            return true;
         }
     }
+
+    return false;
 }
 
 void RenderBox::HandleRemoteMessage(const ClickInfo& clickInfo)

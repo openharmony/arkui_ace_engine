@@ -56,7 +56,9 @@ void RenderMarquee::Start()
         // Start first loop
         currentLoop_ = 1;
         UpdateAnimation();
-        controller_->Play();
+        if (needAnimation_) {
+            controller_->Play();
+        }
     } else {
         LOGD("Animation already started.");
     }
@@ -112,6 +114,12 @@ void RenderMarquee::UpdateAnimation()
     }
     // "scrollAmount_" won't be zero, since it's initialized at Update().
     int32_t duration = static_cast<int32_t>(std::abs(to - from) * DEFAULT_MARQUEE_SCROLL_DELAY / scrollAmount_);
+    if (duration <= 0) {
+        needAnimation_ = false;
+        LOGI("Animation duration is negative, don't need animation.");
+        return;
+    }
+    needAnimation_ = true;
     if (translate_) {
         controller_->RemoveInterpolator(translate_);
     }
@@ -178,7 +186,9 @@ void RenderMarquee::OnAnimationStop()
     }
     if (continueAnimation) {
         UpdateAnimation();
-        controller_->Play();
+        if (needAnimation_) {
+            controller_->Play();
+        }
     }
 }
 
@@ -193,6 +203,9 @@ void RenderMarquee::Update(const RefPtr<Component>& component)
     GetMarqueeCallback(component);
     value_ = marquee->GetValue();
     start_ = marquee->GetPlayerStatus();
+    if (start_) {
+        startAfterLayout_ = true;
+    }
     textStyle_ = marquee->GetTextStyle();
     auto context = GetContext().Upgrade();
     if (!context) {
@@ -294,7 +307,7 @@ void RenderMarquee::PerformLayout()
         childText_->GetLayoutSize().ToString().c_str());
     if (!NeedMarquee()) {
         Stop();
-        childText_->SetPosition(Offset(0.0, 0.0));
+        childText_->SetPosition(GetTextPosition());
         return;
     }
     if (lastLayoutSize_ != childText_->GetLayoutSize() && IsPlayingAnimation(controller_)) {
@@ -365,6 +378,37 @@ bool RenderMarquee::NeedMarquee() const
         return needMarquee;
     }
     return true;
+}
+
+Offset RenderMarquee::GetTextPosition() const
+{
+    if (!childText_) {
+        return Offset(0.0, 0.0);
+    }
+
+    auto textWidth = childText_->GetLayoutSize().Width();
+    auto marqueeWidth = GetLayoutSize().Width();
+    if (GreatOrEqual(textWidth, marqueeWidth)) {
+        return Offset(0.0, 0.0);
+    }
+
+    auto textAlign = textStyle_.GetTextAlign();
+    // adjust START and END
+    if (textAlign == TextAlign::START) {
+        textAlign = RenderNode::GetTextDirection() == TextDirection::LTR ? TextAlign::LEFT : TextAlign::RIGHT;
+    }
+    if (textAlign == TextAlign::END) {
+        textAlign = RenderNode::GetTextDirection() == TextDirection::LTR ? TextAlign::RIGHT : TextAlign::LEFT;
+    }
+
+    const static double HALF_DIVIDE = 2.0;
+    if (textAlign == TextAlign::CENTER) {
+        return Offset((marqueeWidth - textWidth) / HALF_DIVIDE, 0.0);
+    } else if (textAlign == TextAlign::RIGHT) {
+        return Offset(marqueeWidth - textWidth, 0.0);
+    } else {
+        return Offset(0.0, 0.0);
+    }
 }
 
 } // namespace OHOS::Ace

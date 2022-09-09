@@ -22,7 +22,7 @@
 #include "frameworks/bridge/codec/function_call.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "adapter/preview/entrance/ace_container.h"
 #include "core/common/ace_engine.h"
@@ -91,7 +91,7 @@ int32_t JsiGroupJsBridge::LoadJsBridgeFunction()
     }
     return JS_CALL_SUCCESS;
 }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 shared_ptr<JsValue> JsiGroupJsBridge::ProcessJsRequest(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
@@ -661,7 +661,7 @@ void JsiGroupJsBridge::Destroy()
     moduleCallBackFuncs_.clear();
     runtime_.reset();
 }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void JsiGroupJsBridge::TriggerModuleJsCallbackPreview(int32_t callbackId, int32_t code, ResponseData responseData)
 {
     shared_ptr<JsValue> callBackResult = runtime_->NewNull();

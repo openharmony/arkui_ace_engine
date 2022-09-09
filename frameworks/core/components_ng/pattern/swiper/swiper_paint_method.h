@@ -18,7 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -33,7 +33,7 @@ public:
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
-    void PaintFade(const RefPtr<Canvas>& canvas, PaintWrapper* paintWrapper) const;
+    void PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
 
     Axis axis_;
     float mainDelta_ = 0.0f;

@@ -32,13 +32,11 @@ public:
     FlutterRenderContext() = default;
     ~FlutterRenderContext() override;
 
-    void InitContext(bool isRoot = false) override;
+    void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
-
-    void UpdateBgColor(const Color& value) override;
 
     RefPtr<Canvas> GetCanvas() override;
     void Restore() override;
@@ -65,17 +63,18 @@ public:
 
     void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) override;
 
-    const std::shared_ptr<FlutterNode> GetNode()
+    const std::shared_ptr<FlutterNode>& GetNode()
     {
         return flutterNode_;
     }
 
+protected:
+    void OnBackgroundColorUpdate(const Color& value) override;
+
 private:
-    bool isRoot_ = false;
-    bool needUpdateRootLayer_ = false;
     std::unique_ptr<SkPictureRecorder> recorder_;
     std::shared_ptr<FlutterNode> flutterNode_;
-    RefPtr<Canvas> recordingCanvas_;
+    std::shared_ptr<SkCanvas> recordingCanvas_;
 };
 } // namespace OHOS::Ace::NG
 

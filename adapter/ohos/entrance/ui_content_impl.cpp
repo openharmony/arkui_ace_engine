@@ -27,6 +27,7 @@
 #include "js_runtime_utils.h"
 #include "native_reference.h"
 #include "service_extension_context.h"
+#include "adapter/ohos/osal/pixel_map_ohos.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -192,7 +193,19 @@ public:
     void OnTouchOutside() const
     {
         LOGI("window is touching outside. instance id is %{public}d", instanceId_);
-        SubwindowManager::GetInstance()->ClearMenu();
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        if (!container) {
+            LOGE("OnTouchOutside: container may be destroyed.");
+            return;
+        }
+        auto taskExecutor = container->GetTaskExecutor();
+        if (!taskExecutor) {
+            LOGE("OnTouchOutside: taskExecutor is null.");
+            return;
+        }
+
+        ContainerScope scope(instanceId_);
+        taskExecutor->PostTask([] { SubwindowManager::GetInstance()->ClearMenu(); }, TaskExecutor::TaskType::UI);
     }
 
 private:
@@ -309,6 +322,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     if (SystemProperties::GetRosenBackendEnabled()) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
         rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+        rsUiDirector->SetCacheDir(context->GetCacheDir());
         rsUiDirector->Init();
     }
 
@@ -776,6 +790,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
             Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
                 static_cast<WindowSizeChangeReason>(reason));
+            Platform::FlutterAceView::SurfacePositionChanged(aceView, config.Left(), config.Top());
         }, TaskExecutor::TaskType::PLATFORM);
 }
 
@@ -946,6 +961,26 @@ void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
 void UIContentImpl::NotifyMemoryLevel(int32_t level)
 {
     LOGI("Receive memory level notification, level: %{public}d", level);
+}
+
+void UIContentImpl::SetAppWindowTitle(const std::string& title)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    LOGI("set app title");
+    pipelineContext->SetAppTitle(title);
+}
+
+void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    LOGI("set app icon");
+    pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
 }
 
 } // namespace OHOS::Ace

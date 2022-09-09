@@ -270,7 +270,7 @@ void RenderTabBar::UpdatePosition()
 void RenderTabBar::SetIndex(int32_t index, bool force)
 {
     if (Container::IsCurrentUsePartialUpdate()) {
-        tabsSize_ = indicator_? GetChildren().size() - 1 : GetChildren().size();
+        tabsSize_ = static_cast<int32_t>(indicator_? GetChildren().size() - 1 : GetChildren().size());
     }
 
     if (index < 0 || index >= tabsSize_) {

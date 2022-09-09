@@ -26,10 +26,16 @@ testEnvironment();
 
 testPersistentStorage();
 
-testViewState();
+testViewStateFU();
 
-nestedObsObjProps();
+nestedObsObjPropsFU();
 
-array1ObsObjProps();
+array1ObsObjPropsFU();
+
+nestedObsObjPropsPU();
+
+array1ObsObjPropsPU();
+
+testViewAppStorage();
 
 reportTestResults();

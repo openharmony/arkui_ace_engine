@@ -34,16 +34,17 @@ ohos_shared_library("hdc_register") {
   external_deps = hilog_deps
 
   deps += [
-    "//third_party/libuv:uv_static",
-    "//utils/native/base:utils",
-    "//utils/native/base:utilsecurec",
+    "//commonlibrary/c_utils/base:utilsecurec",
+    "//third_party/libuv:uv",
   ]
+
+  external_deps += [ "c_utils:utils" ]
 
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
     "$ace_root/frameworks/core/common/register",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
 
   sources = [

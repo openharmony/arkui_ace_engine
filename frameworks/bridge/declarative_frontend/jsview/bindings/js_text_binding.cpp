@@ -30,6 +30,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
     JSClass<JSText>::StaticMethod("textOverflow", &JSText::SetTextOverflow, opt);
     JSClass<JSText>::StaticMethod("fontStyle", &JSText::SetFontStyle, opt);
+    JSClass<JSText>::StaticMethod("align", &JSText::SetAlign, opt);
     JSClass<JSText>::StaticMethod("textAlign", &JSText::SetTextAlign, opt);
     JSClass<JSText>::StaticMethod("lineHeight", &JSText::SetLineHeight, opt);
     JSClass<JSText>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);

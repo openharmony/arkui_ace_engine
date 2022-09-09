@@ -119,13 +119,13 @@ std::string GaugeComposedElement::GetColors() const
         return jsonColors->ToString();
     }
     auto colors = renderProgress->GetProgressComponent()->GetTrack()->GetSectionsColors();
-    auto size = colors.size();
-    if (size == 1) {
-        return colors[0].ColorToString();
-    }
-    auto index = 0;
-    for (auto value : colors) {
-        jsonColors->Put(std::to_string(index++).c_str(), value.ColorToString().c_str());
+    auto weights = renderProgress->GetProgressComponent()->GetTrack()->GetSectionsWeights();
+    for (size_t i = 0; i < colors.size(); i++) {
+        auto jsonObject = JsonUtil::CreateArray(true);
+        jsonObject->Put("0", colors[i].ColorToString().c_str());
+        jsonObject->Put("1", weights[i]);
+        auto index = std::to_string(i);
+        jsonColors->Put(index.c_str(), jsonObject);
     }
     return jsonColors->ToString();
 }

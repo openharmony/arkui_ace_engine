@@ -204,6 +204,9 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     if (textField->HasSetResetToStart() && textField->GetUpdateType() == UpdateType::ALL) {
         resetToStart_ = textField->GetResetToStart();
     }
+    if (keyboard_ != TextInputType::UNSPECIFIED && keyboard_ != textField->GetTextInputType()) {
+        CloseKeyboard();
+    }
     if (keyboard_ != textField->GetTextInputType()) {
         auto context = context_.Upgrade();
         if (context && context->GetIsDeclarative()) {
@@ -214,17 +217,16 @@ void RenderTextField::Update(const RefPtr<Component>& component)
             }
         }
         keyboard_ = textField->GetTextInputType();
-        CloseKeyboard();
     }
 
-    if (action_ != textField->GetAction()) {
+    if (action_ != TextInputAction::UNSPECIFIED && action_ != textField->GetAction()) {
         auto context = context_.Upgrade();
         if (context && context->GetIsDeclarative()) {
             CloseKeyboard();
-            action_ = textField->GetAction();
-        } else {
-            action_ = textField->GetAction();
         }
+    }
+    if (action_ != textField->GetAction()) {
+        action_ = textField->GetAction();
     }
 
     actionLabel_ = textField->GetActionLabel();
@@ -263,6 +265,7 @@ void RenderTextField::Update(const RefPtr<Component>& component)
             controller_->SetText(textField->GetValue(), false);
         }
     }
+    // maybe change text and selection
     ApplyRestoreInfo();
     extend_ = textField->IsExtend();
     softKeyboardEnabled_ = textField->IsSoftKeyboardEnabled();
@@ -323,6 +326,31 @@ void RenderTextField::OnPaintFinish()
     UpdateOverlay();
     InitAccessibilityEventListener();
     UpdateAccessibilityPosition();
+    auto layoutParamChanged = lastLayoutParam_.value() == GetLayoutParam();
+    if (layoutParamChanged) {
+        lastLayoutParam_ = std::make_optional(GetLayoutParam());
+    }
+    bool needNotifyChangeEvent = !isValueFromFront_ || layoutParamChanged;
+    // If height or lines is changed, make needNotifyChangeEvent_ true to notify change event.
+    if (needNotifyChangeEvent && (!NearEqual(textHeight_, textHeightLast_) || textLines_ != textLinesLast_)) {
+        needNotifyChangeEvent_ = true;
+        textHeightLast_ = textHeight_;
+        textLinesLast_ = textLines_;
+    }
+    if (needNotifyChangeEvent_ && (onTextChangeEvent_ || onValueChangeEvent_ || onChange_)) {
+        needNotifyChangeEvent_ = false;
+        if (onValueChangeEvent_) {
+            onValueChangeEvent_(GetEditingValue().text);
+        }
+        if (onTextChangeEvent_) {
+            auto jsonResult = JsonUtil::Create(true);
+            jsonResult->Put("text", GetEditingValue().text.c_str());
+            jsonResult->Put("value", GetEditingValue().text.c_str());
+            jsonResult->Put("lines", textLines_);
+            jsonResult->Put("height", textHeight_);
+            onTextChangeEvent_(std::string(R"("change",)").append(jsonResult->ToString()));
+        }
+    }
 }
 
 void RenderTextField::PerformLayout()
@@ -376,20 +404,6 @@ void RenderTextField::PerformLayout()
     }
     if (renderHideIcon_) {
         renderHideIcon_->Layout(layoutParam);
-    }
-    if (needNotifyChangeEvent_ && (onTextChangeEvent_ || onValueChangeEvent_ || onChange_)) {
-        needNotifyChangeEvent_ = false;
-        if (onValueChangeEvent_) {
-            onValueChangeEvent_(GetEditingValue().text);
-        }
-        if (onTextChangeEvent_) {
-            auto jsonResult = JsonUtil::Create(true);
-            jsonResult->Put("text", GetEditingValue().text.c_str());
-            jsonResult->Put("value", GetEditingValue().text.c_str());
-            jsonResult->Put("lines", textLines_);
-            jsonResult->Put("height", textHeight_);
-            onTextChangeEvent_(std::string(R"("change",)").append(jsonResult->ToString()));
-        }
     }
 
     HandleDeviceOrientationChange();
@@ -1001,12 +1015,17 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
         if (textChangeListener_ == nullptr) {
             textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
         }
+        auto inputMethod = MiscServices::InputMethodController::GetInstance();
+        if (!inputMethod) {
+            LOGE("Request open soft keyboard failed because input method is null.");
+            return false;
+        }
         auto context = context_.Upgrade();
         if (context) {
             LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
-            MiscServices::InputMethodController::GetInstance()->SetCallingWindow(context->GetWindowId());
+            inputMethod->SetCallingWindow(context->GetWindowId());
         }
-        MiscServices::InputMethodController::GetInstance()->Attach(textChangeListener_);
+        inputMethod->Attach(textChangeListener_);
 #else
         if (!HasConnection()) {
             AttachIme();
@@ -1043,15 +1062,20 @@ bool RenderTextField::CloseKeyboard(bool forceClose)
         if (!textFieldController_) {
             StopTwinkling();
         }
-        if (HasConnection()) {
-            LOGI("Request close soft keyboard");
+        LOGI("Request close soft keyboard");
 #if defined(ENABLE_STANDARD_INPUT)
-            MiscServices::InputMethodController::GetInstance()->HideTextInput();
+        auto inputMethod = MiscServices::InputMethodController::GetInstance();
+        if (!inputMethod) {
+            LOGE("Request close soft keyboard failed because input method is null.");
+            return false;
+        }
+        inputMethod->HideTextInput();
 #else
+        if (HasConnection()) {
             connection_->Close(GetInstanceId());
             connection_ = nullptr;
-#endif
         }
+#endif
 
         if (onKeyboardClose_) {
             onKeyboardClose_(forceClose);
@@ -1146,9 +1170,15 @@ void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFire
             SetTextStyle(placeHoldStyle_);
         }
     }
-
     controller_->SetValue(newValue, needFireChangeEvent);
     UpdateAccessibilityAttr();
+}
+
+void RenderTextField::SetEditingValue(const std::string& text)
+{
+    auto newValue = GetEditingValue();
+    newValue.text = text;
+    SetEditingValue(std::move(newValue));
 }
 
 void RenderTextField::ClearEditingValue()
@@ -1379,7 +1409,7 @@ void RenderTextField::PerformAction(TextInputAction action, bool forceCloseKeybo
         onSubmitEvent_(controller_->GetValue().text);
     }
     if (onSubmit_) {
-        onSubmit_(static_cast<int32_t>(action_));
+        onSubmit_(static_cast<int32_t>(action));
     }
 }
 
@@ -1991,7 +2021,7 @@ void RenderTextField::HandleOnCut()
     }
     if (copyOption_ != CopyOptions::None) {
         LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
-        clipboard_->SetData(GetEditingValue().GetSelectedText());
+        clipboard_->SetData(GetEditingValue().GetSelectedText(), copyOption_);
     }
     if (onCut_) {
         onCut_(GetEditingValue().GetSelectedText());
@@ -2016,7 +2046,7 @@ void RenderTextField::HandleOnCopy()
     }
     if (copyOption_ != CopyOptions::None) {
         LOGD("copy value is %{private}s", GetEditingValue().GetSelectedText().c_str());
-        clipboard_->SetData(GetEditingValue().GetSelectedText());
+        clipboard_->SetData(GetEditingValue().GetSelectedText(), copyOption_);
     }
     if (onCopy_) {
         onCopy_(GetEditingValue().GetSelectedText());
@@ -2103,9 +2133,13 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
 {
     std::string appendElement;
     if (event.action == KeyAction::DOWN) {
-        if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_NUMPAD_ENTER) {
+        if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_NUMPAD_ENTER ||
+            event.code == KeyCode::KEY_DPAD_CENTER) {
             if (keyboard_ == TextInputType::MULTILINE) {
                 appendElement = "\n";
+            } else {
+                // normal enter should trigger onSubmit
+                PerformAction(action_, true);
             }
         } else if (event.IsNumberKey()) {
             appendElement = event.ConvertCodeToString();
@@ -2214,6 +2248,12 @@ void RenderTextField::InitAccessibilityEventListener()
     });
 
     accessibilityNode->AddSupportAction(AceAction::ACTION_SET_TEXT);
+    accessibilityNode->SetActionSetTextImpl([weakPtr = WeakClaim(this)](const std::string& text) {
+        const auto& textField = weakPtr.Upgrade();
+        if (textField) {
+            textField->SetEditingValue(text);
+        }
+    });
 }
 
 void RenderTextField::UpdateDirectionStatus()
@@ -2393,13 +2433,14 @@ void RenderTextField::Delete(int32_t start, int32_t end)
 
 std::string RenderTextField::ProvideRestoreInfo()
 {
-    if (!onIsCurrentFocus_ || !onIsCurrentFocus_()) {
-        return "";
-    }
     auto value = GetEditingValue();
     auto jsonObj = JsonUtil::Create(true);
-    jsonObj->Put("start", value.selection.GetStart());
-    jsonObj->Put("end", value.selection.GetEnd());
+    if (controller_) {
+        jsonObj->Put("text", controller_->GetText().c_str());
+    } else {
+        return "";
+    }
+    jsonObj->Put("position", value.selection.baseOffset);
     return jsonObj->ToString();
 }
 
@@ -2413,10 +2454,13 @@ void RenderTextField::ApplyRestoreInfo()
         LOGW("RenderTextField:: restore info is invalid");
         return;
     }
-    auto jsonStart = info->GetValue("start");
-    auto jsonEnd = info->GetValue("end");
-    UpdateSelection(jsonStart->GetInt(), jsonEnd->GetInt());
-    StartTwinkling();
+    auto jsonPosition = info->GetValue("position");
+    auto jsonText = info->GetValue("text");
+    if (!jsonText->GetString().empty() && controller_) {
+        controller_->SetText(jsonText->GetString());
+        UpdateSelection(std::max(jsonPosition->GetInt(), 0));
+        cursorPositionType_ = CursorPositionType::NORMAL;
+    }
     SetRestoreInfo("");
 }
 

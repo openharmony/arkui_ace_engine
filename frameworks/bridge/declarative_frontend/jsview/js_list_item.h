@@ -27,12 +27,14 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& args);
     static void CreateForPartialUpdate(const JSCallbackInfo& args);
+    static void CreateForNGPartialUpdate(const JSCallbackInfo& args);
     static void SetSticky(int32_t sticky);
     static void SetEditable(const JSCallbackInfo& args);
     static void SetSelectable(bool selectable);
     static void SetSwiperAction(const JSCallbackInfo& args);
     static void SelectCallback(const JSCallbackInfo& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
+    static void JsOnDragStart(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

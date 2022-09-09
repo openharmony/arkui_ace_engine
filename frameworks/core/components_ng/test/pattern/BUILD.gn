@@ -13,5 +13,8 @@
 
 group("pattern_unittest") {
   testonly = true
-  deps = [ "text:text_pattern_test_ng" ]
+  deps = [
+    "button:button_pattern_unit_test",
+    "text:text_pattern_test_ng",
+  ]
 }

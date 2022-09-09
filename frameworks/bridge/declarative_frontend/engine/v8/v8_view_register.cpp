@@ -61,7 +61,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_richtext.h"
@@ -82,6 +82,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_list_item_group.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
@@ -96,7 +97,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
@@ -582,6 +583,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"LazyForEach", JSLazyForEach::JSBind},
     {"List", JSList::JSBind},
     {"ListItem", JSListItem::JSBind},
+    {"ListItemGroup", JSListItemGroup::JSBind},
     {"LoadingProgress", JSLoadingProgress::JSBind},
     {"Image", JSImage::JSBind},
     {"ImageAnimator", JSImageAnimator::JSBind},
@@ -645,13 +647,13 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"TextInput", JSTextInput::JSBind},
     {"TextClock", JSTextClock::JSBind},
     {"SideBarContainer", JSSideBar::JSBind},
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     {"QRCode", JSQRCode::JSBind},
 #ifdef FORM_SUPPORTED
     {"FormComponent", JSForm::JSBind},
 #endif
 #endif
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM) and !defined(OHOS_STANDARD_SYSTEM)
+#if !defined(PREVIEW) and !defined(OHOS_STANDARD_SYSTEM)
     {"RichText", JSRichText::JSBind},
     {"Web", JSWeb::JSBind},
     {"WebController", JSWebController::JSBind},
@@ -680,6 +682,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"RotationGesture", JSGesture::JSBind},
     {"GestureGroup", JSGesture::JSBind},
     {"PanGestureOption", JSPanGestureOption::JSBind},
+    {"PanGestureOptions", JSPanGestureOption::JSBind},
     {"CustomDialogController", JSCustomDialogController::JSBind},
     {"Scroller", JSScroller::JSBind},
     {"SwiperController", JSSwiperController::JSBind},

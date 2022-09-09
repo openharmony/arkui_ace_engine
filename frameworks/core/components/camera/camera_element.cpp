@@ -16,7 +16,7 @@
 #include "core/components/camera/camera_element.h"
 
 #include <sstream>
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 #include "base/i18n/localization.h"
 #endif
 #include "base/utils/system_properties.h"
@@ -138,7 +138,7 @@ void CameraElement::Prepare(const WeakPtr<Element>& parent)
 #ifndef OHOS_STANDARD_SYSTEM
         InitDeclarativePara(cameraComponent);
 #endif
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         textDirection_ = cameraComponent->GetTextDirection();
 #endif
         InitEvent(cameraComponent);
@@ -722,7 +722,7 @@ void CameraElement::OnTakePhotoCallBack(const std::map<std::string, std::string>
     }
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 const RefPtr<Component> CameraElement::CreateErrorText(const std::string& errorMsg)
 {
     auto text = AceType::MakeRefPtr<TextComponent>(errorMsg);
@@ -744,7 +744,7 @@ void CameraElement::UpdateChildInner(const RefPtr<Component>& childComponent)
 
 void CameraElement::OnError(const std::string& errorcode, const std::string& errormsg)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     std::string errorDescription = "This component is not supported on PC Preview.";
     UpdateChildInner(CreateErrorText(errorDescription));
 #endif

@@ -19,6 +19,7 @@
 #include <iterator>
 
 #include "bridge/common/utils/utils.h"
+#include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/swiper/swiper_component.h"
@@ -43,14 +44,20 @@ JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
 void JSSwiper::Create(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::SwiperView::Create();
+        auto controller = NG::SwiperView::Create();
+        if (info.Length() > 0 && info[0]->IsObject()) {
+            auto* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSwiperController>();
+            if (jsController) {
+                jsController->SetController(controller);
+            }
+        }
         return;
     }
 
     std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
     RefPtr<OHOS::Ace::SwiperComponent> component = AceType::MakeRefPtr<OHOS::Ace::SwiperComponent>(componentChildren);
     if (info.Length() > 0 && info[0]->IsObject()) {
-        JSSwiperController* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSwiperController>();
+        auto* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSwiperController>();
         if (jsController) {
             jsController->SetController(component->GetSwiperController());
         }
@@ -68,7 +75,7 @@ void JSSwiper::JsRemoteMessage(const JSCallbackInfo& info)
 {
     EventMarker remoteMessageEventId;
     JSInteractableView::JsRemoteMessage(info, remoteMessageEventId);
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto swiperComponent = AceType::DynamicCast<SwiperComponent>(stack->GetMainComponent());
     if (!swiperComponent) {
         LOGE("swiperComponent is null");
@@ -82,7 +89,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::Declare("Swiper");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSwiper>::StaticMethod("create", &JSSwiper::Create, opt);
-    JSClass<JSSwiper>::StaticMethod("autoPlay", &JSSwiper::SetAutoplay, opt);
+    JSClass<JSSwiper>::StaticMethod("autoPlay", &JSSwiper::SetAutoPlay, opt);
     JSClass<JSSwiper>::StaticMethod("digital", &JSSwiper::SetDigital, opt);
     JSClass<JSSwiper>::StaticMethod("duration", &JSSwiper::SetDuration, opt);
     JSClass<JSSwiper>::StaticMethod("index", &JSSwiper::SetIndex, opt);
@@ -117,7 +124,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::Bind<>(globalObj);
 }
 
-void JSSwiper::SetAutoplay(bool autoPlay)
+void JSSwiper::SetAutoPlay(bool autoPlay)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::SwiperView::SetAutoPlay(autoPlay);
@@ -490,41 +497,54 @@ void JSSwiper::SetCurve(const std::string& curveStr)
     swiper->SetCurve(curve);
 }
 
-void JSSwiper::SetOnChange(const JSCallbackInfo& args)
+void JSSwiper::SetOnChange(const JSCallbackInfo& info)
 {
-    if (args[0]->IsFunction()) {
-        auto changeHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
-            JSRef<JSFunc>::Cast(args[0]), SwiperChangeEventToJSValue);
-        auto onChange = EventMarker([executionContext = args.GetExecutionContext(), func = std::move(changeHandler)](
-                                        const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-            auto swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
-            if (!swiperInfo) {
-                LOGE("HandleChangeEvent swiperInfo == nullptr");
-                return;
-            }
-            ACE_SCORING_EVENT("Swiper.OnChange");
-            func->Execute(*swiperInfo);
-        });
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
-        if (swiper) {
-            swiper->SetChangeEventId(onChange);
-        }
+    if (!info[0]->IsFunction()) {
+        return;
     }
-    args.ReturnSelf();
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Swiper.onChange");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(index));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::SwiperView::SetOnChange(std::move(onChange));
+        return;
+    }
+
+    auto changeHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
+    auto onChange = EventMarker([executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
+                                    const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!swiperInfo) {
+            LOGE("HandleChangeEvent swiperInfo == nullptr");
+            return;
+        }
+        ACE_SCORING_EVENT("Swiper.OnChange");
+        func->Execute(*swiperInfo);
+    });
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
+    if (swiper) {
+        swiper->SetChangeEventId(onChange);
+    }
 }
 
-void JSSwiper::SetOnClick(const JSCallbackInfo& args)
+void JSSwiper::SetOnClick(const JSCallbackInfo& info)
 {
-    if (args[0]->IsFunction()) {
+    if (info[0]->IsFunction()) {
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         auto swiper = AceType::DynamicCast<OHOS::Ace::SwiperComponent>(component);
         if (swiper) {
-            swiper->SetClickEventId(JSInteractableView::GetClickEventMarker(args));
+            swiper->SetClickEventId(JSInteractableView::GetClickEventMarker(info));
         }
     }
-    args.SetReturnValue(args.This());
+    info.SetReturnValue(info.This());
 }
 
 RefPtr<OHOS::Ace::SwiperIndicator> JSSwiper::InitIndicatorStyle()
@@ -617,9 +637,10 @@ void JSSwiper::SetSize(const JSCallbackInfo& info)
 void JSSwiperController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSSwiperController>::Declare("SwiperController");
+    JSClass<JSSwiperController>::CustomMethod("swipeTo", &JSSwiperController::SwipeTo);
     JSClass<JSSwiperController>::CustomMethod("showNext", &JSSwiperController::ShowNext);
-    JSClass<JSSwiperController>::CustomMethod("finishAnimation", &JSSwiperController::FinishAnimation);
     JSClass<JSSwiperController>::CustomMethod("showPrevious", &JSSwiperController::ShowPrevious);
+    JSClass<JSSwiperController>::CustomMethod("finishAnimation", &JSSwiperController::FinishAnimation);
     JSClass<JSSwiperController>::Bind(globalObj, JSSwiperController::Constructor, JSSwiperController::Destructor);
 }
 
@@ -639,21 +660,25 @@ void JSSwiperController::Destructor(JSSwiperController* scroller)
 
 void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
 {
-    if (args[0]->IsFunction()) {
-        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-        auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Swiper.finishAnimation");
-            func->Execute();
-        });
-        if (controller_) {
-            controller_->SetFinishCallback(eventMarker);
-        }
+    if (!args[0]->IsFunction() || !controller_) {
+        return;
     }
-    if (controller_) {
+
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Swiper.finishAnimation");
+        func->Execute();
+    };
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        controller_->SetFinishCallback(onFinish);
         controller_->FinishAnimation();
+        return;
     }
-    args.ReturnSelf();
+
+    controller_->SetFinishCallback(onFinish);
+    controller_->FinishAnimation();
 }
 
 } // namespace OHOS::Ace::Framework

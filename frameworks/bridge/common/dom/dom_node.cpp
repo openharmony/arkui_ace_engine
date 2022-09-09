@@ -778,7 +778,7 @@ void DOMNode::AddNode(const RefPtr<DOMNode>& node, int32_t slot)
     auto pos = children_.begin();
     std::advance(pos, slot);
     children_.insert(pos, node);
-    if (node->GetPosition() != PositionType::FIXED) {
+    if (node->GetPosition() != PositionType::PTFIXED) {
         if (!node->IsProxy() && GetDisplay() == DisplayType::NONE) {
             node->GenerateComponentNode();
         }
@@ -792,7 +792,7 @@ void DOMNode::RemoveNode(const RefPtr<DOMNode>& node)
         return;
     }
     children_.remove_if([node](const RefPtr<DOMNode>& child) { return node->GetNodeId() == child->GetNodeId(); });
-    if (node->GetPosition() != PositionType::FIXED) {
+    if (node->GetPosition() != PositionType::PTFIXED) {
         OnChildNodeRemoved(node);
     }
 }
@@ -1300,7 +1300,7 @@ void DOMNode::CompositeComponents()
         Component::MergeRSNode(components, mainComponent);
     }
     // Only fixed position has position component
-    if (positionComponent_ && GetPosition() == PositionType::FIXED) {
+    if (positionComponent_ && GetPosition() == PositionType::PTFIXED) {
         components.emplace(components.begin(), positionComponent_);
         Component::MergeRSNode(positionComponent_);
     }
@@ -1420,10 +1420,12 @@ void DOMNode::UpdateFlexItemComponent()
         (parentNode->GetTag() == DOM_NODE_TAG_DIV || parentNode->GetTag() == DOM_NODE_TAG_GRID_COLUMN)) {
         auto parent = AceType::DynamicCast<DOMDiv>(parentNode);
         // Stretch flag means that if the child's main size is determined, it can not be stretched.
-        if ((parent->GetFlexDirection() == FlexDirection::ROW && (GreatOrEqual(GetHeight().Value(), 0.0) ||
-            GetHeight().Unit() == DimensionUnit::CALC)) ||
-            (parent->GetFlexDirection() == FlexDirection::COLUMN && (GreatOrEqual(GetWidth().Value(), 0.0) ||
-            GetWidth().Unit() == DimensionUnit::CALC))) {
+        if (((parent->GetFlexDirection() == FlexDirection::ROW ||
+                 parent->GetFlexDirection() == FlexDirection::ROW_REVERSE) &&
+                 (GreatOrEqual(GetHeight().Value(), 0.0) || GetHeight().Unit() == DimensionUnit::CALC)) ||
+            ((parent->GetFlexDirection() == FlexDirection::COLUMN ||
+                 parent->GetFlexDirection() == FlexDirection::COLUMN_REVERSE) &&
+                 (GreatOrEqual(GetWidth().Value(), 0.0) || GetWidth().Unit() == DimensionUnit::CALC))) {
             flexItemComponent_->SetStretchFlag(false);
         } else {
             flexItemComponent_->SetStretchFlag(true);
@@ -2055,7 +2057,7 @@ void DOMNode::UpdateFocusableEventComponents()
 
 void DOMNode::UpdatePositionProps()
 {
-    if (!declaration_ || !declaration_->HasPositionStyle() || GetPosition() == PositionType::FIXED) {
+    if (!declaration_ || !declaration_->HasPositionStyle() || GetPosition() == PositionType::PTFIXED) {
         return;
     }
 
@@ -2136,7 +2138,7 @@ void DOMNode::UpdateTweenPosition(const RefPtr<TweenComponent> tweenComponent)
 
 void DOMNode::UpdatePositionComponent()
 {
-    if (!declaration_ || !declaration_->HasPositionStyle() || GetPosition() != PositionType::FIXED) {
+    if (!declaration_ || !declaration_->HasPositionStyle() || GetPosition() != PositionType::PTFIXED) {
         return;
     }
     if (!positionComponent_) {

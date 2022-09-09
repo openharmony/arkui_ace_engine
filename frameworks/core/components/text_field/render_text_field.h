@@ -45,7 +45,7 @@
 #include "core/pipeline/base/render_node.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
-#include "utils/native/base/include/refbase.h"
+#include "commonlibrary/c_utils/base/include/refbase.h"
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
@@ -179,6 +179,11 @@ public:
         return height_.Value();
     }
 
+    const Dimension& GetDimensionHeight() const
+    {
+        return height_;
+    }
+
     void SetHeight(double height)
     {
         if (GreatOrEqual(height, 0.0) && !NearEqual(height_.Value(), height)) {
@@ -307,7 +312,7 @@ public:
         needNotifyChangeEvent_ = needNotifyChangeEvent;
     }
 
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     void SetInputMethodStatus(bool imeAttached)
     {
         imeAttached_ = imeAttached;
@@ -315,17 +320,15 @@ public:
 
     void UpdateConfiguration();
 #endif
-    std::string ProvideRestoreInfo() override;
 
-    void SetOnIsCurrentFocus(const std::function<bool()>& onIsCurrentFocus)
-    {
-        onIsCurrentFocus_ = onIsCurrentFocus;
-    }
+    // distribute
+    std::string ProvideRestoreInfo() override;
 
     int32_t instanceId_ = -1;
 
     bool hasFocus_ = false;
     void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
+    void SetEditingValue(const std::string& text);
 
     const std::function<void(bool)>& GetOnEditChanged() const
     {
@@ -335,6 +338,15 @@ public:
     void OnEditChange(bool isInEditStatus);
     void GetFieldAndOverlayTouchRect(std::vector<Rect>& resRectList);
 
+    void SetInputStyle(InputStyle style)
+    {
+        inputStyle_ = style;
+    }
+
+    InputStyle GetInputStyle()
+    {
+        return inputStyle_;
+    }
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -391,7 +403,7 @@ protected:
 
     bool HasConnection() const
     {
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         return imeAttached_;
 #else
         return connection_;
@@ -447,7 +459,7 @@ protected:
     // multiply by [twinklingInterval]. For example, 3 * 500ms = 1500ms.
     int32_t obscureTickPendings_ = 0;
     // What the keyboard should appears.
-    TextInputType keyboard_ = TextInputType::TEXT;
+    TextInputType keyboard_ = TextInputType::UNSPECIFIED;
     // Action when "enter" pressed.
     TextInputAction action_ = TextInputAction::UNSPECIFIED;
     std::string actionLabel_;
@@ -482,9 +494,11 @@ protected:
     // One line TextField is more common in usual cases.
     uint32_t maxLines_ = 1;
     size_t textLines_ = 0;
+    size_t textLinesLast_ = 0;
     int32_t cursorPositionForShow_ = 0;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
     DirectionStatus directionStatus_ = DirectionStatus::LEFT_LEFT;
+    CopyOptions copyOption_ = CopyOptions::Distributed;
 
     bool showPasswordIcon_ = true; // Whether show password icon, effect only type is password.
     bool showCounter_ = false; // Whether show counter, 10/100 means maxlength is 100 and 10 has been inputted.
@@ -505,6 +519,7 @@ protected:
     bool isCallbackCalled_ = false; // Whether custom font is loaded.
     bool isOverlayShowed_ = false;  // Whether overlay has showed.
     double textHeight_ = 0.0;       // Height of text.
+    double textHeightLast_ = 0.0;
     double iconSize_ = 0.0;
     double iconHotZoneSize_ = 0.0;
     double extendHeight_ = 0.0;
@@ -581,6 +596,7 @@ private:
 
     void AttachIme();
 
+    // distribute
     void ApplyRestoreInfo();
 
     int32_t initIndex_ = 0;
@@ -597,7 +613,6 @@ private:
     Color hoverColor_;
     TextSelection selection_; // Selection from custom.
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
-    CopyOptions copyOption_ = CopyOptions::Distributed;
     std::function<void()> onValueChange_;
     std::function<void(bool)> onKeyboardClose_;
     std::function<void(const Rect&)> onClipRectChanged_;
@@ -618,7 +633,6 @@ private:
     std::function<void()> onLongPressEvent_;
     std::function<void()> moveNextFocusEvent_;
     std::function<void(bool)> onOverlayFocusChange_;
-    std::function<bool()> onIsCurrentFocus_;
     std::function<void(std::string)> onCopy_;
     std::function<void(std::string)> onCut_;
     std::function<void(std::string)> onPaste_;
@@ -647,7 +661,7 @@ private:
     RefPtr<Animator> animator_;
     std::vector<TextEditingValue> operationRecords_;
     std::vector<TextEditingValue> inverseOperationRecords_;
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
 #endif
 

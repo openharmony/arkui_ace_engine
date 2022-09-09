@@ -46,11 +46,6 @@ constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 
 } // namespace
 
-RefPtr<RenderNode> RenderSideBarContainer::Create()
-{
-    return AceType::MakeRefPtr<RenderSideBarContainer>();
-}
-
 void RenderSideBarContainer::CorrectWidth(const Dimension& width, const Dimension& minWidth, const Dimension& maxWidth)
 {
     if (ConvertWidthToVp(minWidth) > ConvertWidthToVp(maxWidth)) {
@@ -131,6 +126,11 @@ void RenderSideBarContainer::Update(const RefPtr<Component>& component)
     iconSwitch_ = sideBar_->GetSwitchIcon();
     showControlButton_ = sideBar_->GetShowControlButton();
     autoHide_ = sideBar_->GetAutoHide();
+
+    if (isInitialized_ && sideBarPosition_ != sideBar_->GetSideBarPositon()) {
+        animationController_->SetSideBarPositon(sideBar_->GetSideBarPositon());
+    }
+
     sideBarPosition_ = sideBar_->GetSideBarPositon();
 
     exceptRegion_.SetRect(SystemProperties::Vp2Px(sideBar_->GetButtonLeft()),
@@ -381,7 +381,7 @@ void RenderSideBarContainer::PlaceChildren()
     for (const auto& item : GetChildren()) {
         auto positionedItem = AceType::DynamicCast<RenderPositioned>(item);
         if (!positionedItem) {
-            if (item->GetPositionType() == PositionType::ABSOLUTE) {
+            if (item->GetPositionType() == PositionType::PTABSOLUTE) {
                 auto itemOffset = PositionLayoutUtils::GetAbsoluteOffset(Claim(this), item);
                 item->SetAbsolutePosition(itemOffset);
                 continue;

@@ -117,7 +117,7 @@ public:
         return inspectorFunctionImpl_;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void SetDebugLine(std::string debugLine)
     {
         debugLine_ = debugLine;
@@ -145,7 +145,7 @@ private:
     RefPtr<InspectorFunctionImpl> inspectorFunctionImpl_ = MakeRefPtr<InspectorFunctionImpl>();
     static thread_local int32_t composedElementId_;
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     std::string debugLine_;
 #endif
 };

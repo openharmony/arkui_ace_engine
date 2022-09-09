@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
 
@@ -30,7 +30,7 @@ void JsEngine::RunNativeEngineLoop()
     }
 }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 PixelMapNapiEntry JsEngine::GetPixelMapNapiEntry()
 {
     static PixelMapNapiEntry pixelMapNapiEntry_ = nullptr;

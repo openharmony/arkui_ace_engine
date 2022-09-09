@@ -399,6 +399,7 @@ protected:
     bool syncMode_ = false;
     Border border_;
     std::vector<float> colorfilter_;
+    float blurRadius_;
 private:
     void UpdateOverlay();
     void HandleOnCopy();

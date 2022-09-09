@@ -28,6 +28,7 @@ public:
     static void SetInspectorTag(const std::string& inspectorTag);
     static void ClearInspectorTag();
     static void SetAlignItems(int32_t value);
+    static void SetJustifyContent(int32_t value);
 private:
     static std::string inspectorTag_;
 };

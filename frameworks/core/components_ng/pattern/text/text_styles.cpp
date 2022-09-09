@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace::NG {
-#define DEFINE_STYLE_UPDATE(group, name, func)           \
+#define UPDATE_TEXT_STYLE(group, name, func)             \
     do {                                                 \
         if ((group)->prop##name.has_value()) {           \
             textStyle.func((group)->prop##name.value()); \
@@ -28,22 +28,25 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
 {
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
     if (fontStyle) {
-        DEFINE_STYLE_UPDATE(fontStyle, FontSize, SetFontSize);
-        DEFINE_STYLE_UPDATE(fontStyle, TextColor, SetTextColor);
-        DEFINE_STYLE_UPDATE(fontStyle, ItalicFontStyle, SetFontStyle);
-        DEFINE_STYLE_UPDATE(fontStyle, FontWeight, SetFontWeight);
-        DEFINE_STYLE_UPDATE(fontStyle, FontFamily, SetFontFamilies);
+        UPDATE_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
+        UPDATE_TEXT_STYLE(fontStyle, TextColor, SetTextColor);
+        UPDATE_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
+        UPDATE_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
+        UPDATE_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
+        UPDATE_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
+        UPDATE_TEXT_STYLE(fontStyle, TextDecorationColor, SetTextDecorationColor);
+        UPDATE_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
+        UPDATE_TEXT_STYLE(fontStyle, AdaptMinFontSize, SetAdaptMinFontSize);
+        UPDATE_TEXT_STYLE(fontStyle, AdaptMaxFontSize, SetAdaptMaxFontSize);
     }
     if (textLineStyle) {
-        DEFINE_STYLE_UPDATE(textLineStyle, LineHeight, SetLineHeight);
-        DEFINE_STYLE_UPDATE(textLineStyle, TextBaseline, SetTextBaseline);
-        DEFINE_STYLE_UPDATE(textLineStyle, BaselineOffset, SetBaselineOffset);
-        DEFINE_STYLE_UPDATE(textLineStyle, TextOverflow, SetTextOverflow);
-        DEFINE_STYLE_UPDATE(textLineStyle, TextAlign, SetTextAlign);
-        DEFINE_STYLE_UPDATE(textLineStyle, MaxLines, SetMaxLines);
-        DEFINE_STYLE_UPDATE(textLineStyle, TextDecoration, SetTextDecoration);
-        DEFINE_STYLE_UPDATE(textLineStyle, TextDecorationColor, SetTextDecorationColor);
-        DEFINE_STYLE_UPDATE(textLineStyle, TextCase, SetTextCase);
+        UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
+        UPDATE_TEXT_STYLE(textLineStyle, TextBaseline, SetTextBaseline);
+        UPDATE_TEXT_STYLE(textLineStyle, BaselineOffset, SetBaselineOffset);
+        UPDATE_TEXT_STYLE(textLineStyle, TextOverflow, SetTextOverflow);
+        UPDATE_TEXT_STYLE(textLineStyle, TextAlign, SetTextAlign);
+        UPDATE_TEXT_STYLE(textLineStyle, MaxLines, SetMaxLines);
+        UPDATE_TEXT_STYLE(textLineStyle, LetterSpacing, SetLetterSpacing);
     }
     return textStyle;
 }

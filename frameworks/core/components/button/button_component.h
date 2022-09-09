@@ -219,6 +219,19 @@ public:
         animationType_ = animationType;
     }
 
+    // hasCustomChild is true for ets include child such as
+    // Button() {
+    //   Text(button label)
+    // }
+    void SetHasCustomChild(bool value)
+    {
+        hasCustomChild_ = value;
+    }
+    bool GetHasCustomChild()
+    {
+        return hasCustomChild_;
+    }
+
 private:
     RefPtr<ButtonDeclaration> declaration_;
     ButtonType type_ { ButtonType::NORMAL };
@@ -232,6 +245,7 @@ private:
     bool needResetHeight_ = true;
     uint32_t layoutFlag_ = 0;
     Dimension height_;
+    bool hasCustomChild_  = false;
     // for custom button type
     std::array<Radius, 4> radii_ = { Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp), Radius(0.0_vp) };
     RefPtr<StateAttributes<ButtonStateAttribute>> stateAttributeList_;

@@ -149,14 +149,6 @@ VideoElement::~VideoElement()
         }
     }
     ReleasePlatformResource();
-
-    if (focusChangeCallbackId_ > 0) {
-        auto context = context_.Upgrade();
-        if (context) {
-            context->UnregisterWindowFocusChangedCallback(focusChangeCallbackId_);
-        }
-    }
-
 #ifdef OHOS_STANDARD_SYSTEM
     if (mediaPlayer_ != nullptr) {
         mediaPlayer_->Release();
@@ -213,18 +205,6 @@ void VideoElement::InitStatus(const RefPtr<VideoComponent>& videoComponent)
             InitListener();
         }
     }
-
-    auto context = context_.Upgrade();
-    if (!context || focusChangeCallbackId_ > 0) {
-        return;
-    }
-    auto focusChangedCallback = [weak = WeakClaim(this)](bool isFocus) {
-        auto video = weak.Upgrade();
-        if (video) {
-            video->HiddenChange(!isFocus);
-        }
-    };
-    focusChangeCallbackId_ = context->RegisterWindowFocusChangedCallback(focusChangedCallback);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1007,7 +987,7 @@ void VideoElement::UpdateChildInner(const RefPtr<Component>& childComponent)
 void VideoElement::OnError(const std::string& errorId, const std::string& param)
 {
     isError_ = true;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     std::string errorcode = "This component is not supported on PC Preview.";
 #else
     std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
@@ -1074,6 +1054,7 @@ void VideoElement::OnPrepared(
     }
 
     if (renderNode_ != nullptr) {
+        video->SetNeedControls(needControls_);
         renderNode_->Update(video);
     }
     UpdateChildInner(CreateChild());

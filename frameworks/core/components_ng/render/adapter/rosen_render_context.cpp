@@ -15,14 +15,20 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
+#include <cstdint>
+
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
 
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 RosenRenderContext::~RosenRenderContext()
@@ -63,16 +69,20 @@ void RosenRenderContext::StopRecordingIfNeeded()
     }
 }
 
-void RosenRenderContext::InitContext(bool isRoot)
+void RosenRenderContext::InitContext(bool isRoot, const std::optional<std::string>& surfaceName)
 {
     if (!rsNode_) {
-        if (isRoot) {
-            LOGE("create RSRootNode");
+        if (surfaceName.has_value()) {
+            struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceName.value() };
+            rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+        } else if (isRoot) {
+            LOGI("create RSRootNode");
             rsNode_ = Rosen::RSRootNode::Create();
         } else {
             rsNode_ = Rosen::RSCanvasNode::Create();
         }
     }
+    rsNode_->SetBounds(0, 0, 0, 0);
     rsNode_->SetFrame(0, 0, 0, 0);
     rsNode_->SetPivot(0.0F, 0.0F);
 }
@@ -83,10 +93,17 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* geometryNode)
         return;
     }
     const auto& frameRect = geometryNode->GetFrame().GetRect();
+    if (rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE) {
+        const auto& contentRect = geometryNode->GetContent()->GetRect();
+        rsNode_->SetBounds(frameRect.GetX() + contentRect.GetX(), frameRect.GetY() + contentRect.GetY(),
+            contentRect.Width(), contentRect.Height());
+    } else {
+        rsNode_->SetBounds(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
+    }
     rsNode_->SetFrame(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
 }
 
-void RosenRenderContext::UpdateBgColor(const Color& value)
+void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
     if (!rsNode_) {
         return;
@@ -95,24 +112,81 @@ void RosenRenderContext::UpdateBgColor(const Color& value)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector4f cornerRadius;
+    cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
+    rsNode_->SetCornerRadius(cornerRadius);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBorderColorUpdate(const BorderColorProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBorderColor(value.leftColor.value_or(Color::BLACK).GetValue(),
+        value.topColor.value_or(Color::BLACK).GetValue(), value.rightColor.value_or(Color::BLACK).GetValue(),
+        value.bottomColor.value_or(Color::BLACK).GetValue());
+    RequestNextFrame();
+}
+
+void RosenRenderContext::UpdateBorderWidth(const BorderWidthPropertyF& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector4f cornerBorderWidth;
+    cornerBorderWidth.SetValues(value.leftDimen.value_or(0), static_cast<float>(value.topDimen.value_or(0)),
+        static_cast<float>(value.rightDimen.value_or(0)), static_cast<float>(value.bottomDimen.value_or(0)));
+    rsNode_->SetBorderWidth(cornerBorderWidth);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBorderStyleUpdate(const BorderStyleProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBorderStyle(static_cast<uint32_t>(value.styleLeft.value_or(BorderStyle::SOLID)),
+        static_cast<uint32_t>(value.styleTop.value_or(BorderStyle::SOLID)),
+        static_cast<uint32_t>(value.styleRight.value_or(BorderStyle::SOLID)),
+        static_cast<uint32_t>(value.styleBottom.value_or(BorderStyle::SOLID)));
+    RequestNextFrame();
+}
+
+void RosenRenderContext::ResetBlendBgColor()
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
+    RequestNextFrame();
+}
+
+void RosenRenderContext::BlendBgColor(const Color& color)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto blendColor = GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(color);
+    rsNode_->SetBackgroundColor(blendColor.GetValue());
+    RequestNextFrame();
+}
+
 void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDraw)
 {
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(contentDraw);
-    rsNode_->DrawOnNode(Rosen::RSModifierType::CONTENT_STYLE, [contentDraw = std::move(contentDraw)](SkCanvas* canvas) {
-        auto canvasWrapper = MakeRefPtr<SkiaCanvas>(canvas);
-        contentDraw(canvasWrapper);
-    });
+    rsNode_->DrawOnNode(
+        Rosen::RSModifierType::CONTENT_STYLE, [contentDraw = std::move(contentDraw)](std::shared_ptr<SkCanvas> canvas) {
+            RSCanvas rsCanvas(&canvas);
+            contentDraw(rsCanvas);
+        });
 }
 
 void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)
 {
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(foregroundDraw);
-    rsNode_->DrawOnNode(
-        Rosen::RSModifierType::FOREGROUND_STYLE, [foregroundDraw = std::move(foregroundDraw)](SkCanvas* canvas) {
-            auto canvasWrapper = MakeRefPtr<SkiaCanvas>(canvas);
-            foregroundDraw(canvasWrapper);
+    rsNode_->DrawOnNode(Rosen::RSModifierType::FOREGROUND_STYLE,
+        [foregroundDraw = std::move(foregroundDraw)](std::shared_ptr<SkCanvas> canvas) {
+            RSCanvas rsCanvas(&canvas);
+            foregroundDraw(rsCanvas);
         });
 }
 
@@ -120,10 +194,11 @@ void RosenRenderContext::FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDr
 {
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(overlayDraw);
-    rsNode_->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE, [overlayDraw = std::move(overlayDraw)](SkCanvas* canvas) {
-        auto canvasWrapper = MakeRefPtr<SkiaCanvas>(canvas);
-        overlayDraw(canvasWrapper);
-    });
+    rsNode_->DrawOnNode(
+        Rosen::RSModifierType::OVERLAY_STYLE, [overlayDraw = std::move(overlayDraw)](std::shared_ptr<SkCanvas> canvas) {
+            RSCanvas rsCanvas(&canvas);
+            overlayDraw(rsCanvas);
+        });
 }
 
 RefPtr<Canvas> RosenRenderContext::GetCanvas()
@@ -153,16 +228,19 @@ void RosenRenderContext::Restore()
     }
 }
 
-void RosenRenderContext::RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::RebuildFrame(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
 {
     ReCreateRsNodeTree(children);
 }
 
 void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
 {
+    CHECK_NULL_VOID(rsNode_);
     rsNode_->ClearChildren();
     for (const auto& child : children) {
-        ACE_DCHECK(child);
+        if (!child) {
+            continue;
+        }
         auto rosenRenderContext = DynamicCast<RosenRenderContext>(child->renderContext_);
         if (!rosenRenderContext) {
             continue;
@@ -173,4 +251,53 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
         }
     }
 }
+
+void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
+{
+    CHECK_NULL_VOID(rsNode_);
+    for (const auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        auto rosenRenderContext = DynamicCast<RosenRenderContext>(child->renderContext_);
+        if (!rosenRenderContext) {
+            continue;
+        }
+        auto rsnode = rosenRenderContext->GetRSNode();
+        if (rsnode) {
+            rsNode_->AddChild(rsnode, -1);
+        }
+    }
+}
+
+void RosenRenderContext::RemoveFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
+{
+    CHECK_NULL_VOID(rsNode_);
+    for (const auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        auto rosenRenderContext = DynamicCast<RosenRenderContext>(child->renderContext_);
+        if (!rosenRenderContext) {
+            continue;
+        }
+        auto rsnode = rosenRenderContext->GetRSNode();
+        if (rsnode) {
+            rsNode_->RemoveChild(rsnode);
+        }
+    }
+}
+
+void RosenRenderContext::MoveFrame(FrameNode* /*self*/, const RefPtr<FrameNode>& child, int32_t index)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(child);
+    auto rosenRenderContext = DynamicCast<RosenRenderContext>(child->renderContext_);
+    CHECK_NULL_VOID(rosenRenderContext);
+    auto rsnode = rosenRenderContext->GetRSNode();
+    if (rsnode) {
+        rsNode_->MoveChild(rsnode, index);
+    }
+}
+
 } // namespace OHOS::Ace::NG

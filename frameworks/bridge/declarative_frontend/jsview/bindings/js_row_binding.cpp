@@ -25,7 +25,7 @@ void JSRow::JSBind(BindingTarget globalObj)
     JSClass<JSRow>::StaticMethod("createWithWrap", &JSRow::CreateWithWrap, opt);
     JSClass<JSRow>::StaticMethod("fillParent", &JSFlex::SetFillParent, opt);
     JSClass<JSRow>::StaticMethod("wrapContent", &JSFlex::SetWrapContent, opt);
-    JSClass<JSRow>::StaticMethod("justifyContent", &JSFlex::SetJustifyContent, opt);
+    JSClass<JSRow>::StaticMethod("justifyContent", &JSRow::SetJustifyContent, opt);
     JSClass<JSRow>::StaticMethod("alignItems", &JSRow::SetAlignItems, opt);
     JSClass<JSRow>::StaticMethod("alignContent", &JSFlex::SetAlignContent, opt);
     JSClass<JSRow>::StaticMethod("height", &JSFlex::JsHeight, opt);

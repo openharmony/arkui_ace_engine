@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H
 
 #include <cstdint>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 #include "base/utils/macros.h"
 
@@ -55,6 +55,8 @@ ACE_EXPORT extern const char ATTRS_COMMON_ZINDEX[];
 
 // root view
 ACE_EXPORT extern const char ROOT_ETS_TAG[];
+// stage view
+ACE_EXPORT extern const char STAGE_ETS_TAG[];
 // page view
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
 // js custom view
@@ -63,8 +65,12 @@ ACE_EXPORT extern const char JS_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char JS_LAZY_FOR_EACH_ETS_TAG[];
 // js lazy foreach node
 ACE_EXPORT extern const char JS_FOR_EACH_ETS_TAG[];
+// js lazy foreach node
+ACE_EXPORT extern const char JS_SYNTAX_ITEM_ETS_TAG[];
 // js if lese node
 ACE_EXPORT extern const char JS_IF_ELSE_ETS_TAG[];
+// js toast node
+ACE_EXPORT extern const char TOAST_ETS_TAG[];
 
 // column
 ACE_EXPORT extern const char COLUMN_COMPONENT_TAG[];
@@ -130,6 +136,10 @@ ACE_EXPORT extern const char LIST_ETS_TAG[];
 // list-item
 ACE_EXPORT extern const char LIST_ITEM_COMPONENT_TAG[];
 ACE_EXPORT extern const char LIST_ITEM_ETS_TAG[];
+
+// list-item
+ACE_EXPORT extern const char LIST_ITEM_GROUP_COMPONENT_TAG[];
+ACE_EXPORT extern const char LIST_ITEM_GROUP_ETS_TAG[];
 
 // navigator
 ACE_EXPORT extern const char NAVIGATOR_COMPONENT_TAG[];
@@ -204,7 +214,6 @@ ACE_EXPORT extern const char TOGGLE_ETS_TAG[];
 // scroll
 ACE_EXPORT extern const char SCROLL_COMPONENT_TAG[];
 ACE_EXPORT extern const char SCROLL_ETS_TAG[];
-
 
 // calendar
 ACE_EXPORT extern const char CALENDAR_COMPONENT_TAG[];
@@ -288,6 +297,14 @@ ACE_EXPORT extern const char GAUGE_ETS_TAG[];
 // gridContainer
 ACE_EXPORT extern const char GRIDCONTAINER_COMPONENT_TAG[];
 ACE_EXPORT extern const char GRIDCONTAINER_ETS_TAG[];
+
+// gridCol
+ACE_EXPORT extern const char GRID_COL_COMPONENT_TAG[];
+ACE_EXPORT extern const char GRID_COL_ETS_TAG[];
+
+// gridRow
+ACE_EXPORT extern const char GRID_ROW_COMPONENT_TAG[];
+ACE_EXPORT extern const char GRID_ROW_ETS_TAG[];
 
 // menu
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[];

@@ -16,9 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_RENDER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_RENDER_PROPERTY_H
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
+
+struct ImagePaintStyle {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageRenderMode, ImageRenderMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageInterpolation, ImageInterpolation);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageRepeat, ImageRepeat);
+};
+
 // PaintProperty are used to set render properties.
 class ImageRenderProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ImageRenderProperty, PaintProperty)
@@ -31,16 +40,20 @@ public:
     {
         auto renderProperty = MakeRefPtr<ImageRenderProperty>();
         renderProperty->UpdatePaintProperty(this);
-        renderProperty->propAutoResize_ = CloneAutoResize();
+        renderProperty->propImagePaintStyle_ = CloneImagePaintStyle();
         return renderProperty;
     }
 
     void Reset() override
     {
-        propAutoResize_.reset();
+        ResetImagePaintStyle();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoResize, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_GROUP(ImagePaintStyle, ImagePaintStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, ImageRenderMode, ImageRenderMode, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        ImagePaintStyle, ImageInterpolation, ImageInterpolation, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, ImageRepeat, ImageRepeat, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

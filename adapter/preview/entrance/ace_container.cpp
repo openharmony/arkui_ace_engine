@@ -36,7 +36,6 @@
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_window.h"
 #include "core/common/text_field_manager.h"
-#include "core/common/watch_dog.h"
 #include "core/common/window.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_constants.h"
@@ -171,18 +170,32 @@ void AceContainer::RunNativeEngineLoop()
     taskExecutor_->PostTask([frontend = frontend_]() { frontend->RunNativeEngineLoop(); }, TaskExecutor::TaskType::JS);
 }
 
-void AceContainer::SetStageAppConfig()
+void AceContainer::ParseStageAppConfig(const std::string& assetPath, bool formsEnabled)
 {
     const char* configFilename = "module.json";
     std::string appConfig;
     if (!Framework::GetAssetContentImpl(assetManager_, configFilename, appConfig)) {
-        LOGI("Can not load the application config of stage model.");
+        LOGE("Can not load the application config of stage model.");
         return;
     }
     RefPtr<StageModuleParser> stageModuleParser = AceType::MakeRefPtr<StageModuleParser>();
     stageModuleParser->Parse(appConfig);
     auto appInfo = stageModuleParser->GetAppInfo();
-    if (pipelineContext_ && appInfo) {
+    if (!appInfo) {
+        LOGE("Extract appInfo from module.json failed");
+        return;
+    }
+    std::string bundleName = appInfo->GetBundleName();
+    auto& moduleInfo = stageModuleParser->GetModuleInfo();
+    const std::string& compileMode = moduleInfo->GetCompileMode();
+    bool isBundle = (compileMode != "esmodule");
+    if (frontend_) {
+        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+        declarativeFrontend->InitializeModuleSearcher(bundleName, assetPath, isBundle);
+    } else {
+        LOGE("frontend_ is nullptr");
+    }
+    if (pipelineContext_ && !formsEnabled) {
         LOGI("Set MinPlatformVersion to %{public}d", appInfo->GetMinAPIVersion());
         pipelineContext_->SetMinPlatformVersion(appInfo->GetMinAPIVersion());
     }

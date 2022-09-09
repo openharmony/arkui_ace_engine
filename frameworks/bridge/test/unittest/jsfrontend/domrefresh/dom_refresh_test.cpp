@@ -116,6 +116,7 @@ void DomRefreshTest::TearDown() {}
  * @tc.name: DomRefreshTest001
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ67
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest001, TestSize.Level1)
 {
@@ -140,6 +141,7 @@ HWTEST_F(DomRefreshTest, DomRefreshTest001, TestSize.Level1)
  * @tc.name: DomRefreshTest002
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ67
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest002, TestSize.Level1)
 {
@@ -164,6 +166,7 @@ HWTEST_F(DomRefreshTest, DomRefreshTest002, TestSize.Level1)
  * @tc.name: DomRefreshTest003
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ67
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest003, TestSize.Level1)
 {
@@ -187,6 +190,7 @@ HWTEST_F(DomRefreshTest, DomRefreshTest003, TestSize.Level1)
  * @tc.name: DomRefreshTest004
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ2D
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest004, TestSize.Level1)
 {
@@ -209,6 +213,7 @@ HWTEST_F(DomRefreshTest, DomRefreshTest004, TestSize.Level1)
  * @tc.name: DomRefreshTest005
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ2D
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest005, TestSize.Level1)
 {
@@ -231,6 +236,7 @@ HWTEST_F(DomRefreshTest, DomRefreshTest005, TestSize.Level1)
  * @tc.name: DomRefreshTest006
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ2D
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest006, TestSize.Level1)
 {
@@ -253,6 +259,7 @@ HWTEST_F(DomRefreshTest, DomRefreshTest006, TestSize.Level1)
  * @tc.name: DomRefreshTest007
  * @tc.desc: Test refresh node are created as expected.
  * @tc.type: FUNC
+ * @tc.require: issueI5JQ2D
  */
 HWTEST_F(DomRefreshTest, DomRefreshTest007, TestSize.Level1)
 {

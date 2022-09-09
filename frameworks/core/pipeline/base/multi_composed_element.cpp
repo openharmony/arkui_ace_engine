@@ -108,7 +108,7 @@ void MultiComposedElement::UpdateChildrenForRebuild(const std::list<RefPtr<Compo
     }
 
     // 3. Collect children at middle
-    std::unordered_map<ComposeId, RefPtr<Element>> elements;
+    std::unordered_multimap<ComposeId, RefPtr<Element>> elements;
     while (itChildStart != itChildEnd) {
         const auto& child = *(itChildStart++);
         auto composedElement = AceType::DynamicCast<ComposedElement>(child);
@@ -146,6 +146,7 @@ void MultiComposedElement::UpdateChildrenForRebuild(const std::list<RefPtr<Compo
             auto newChild = UpdateChildWithSlot(
                 nullptr, component, slot++, useSlot ? countRenderNode_ + GetRenderSlot() : DEFAULT_RENDER_SLOT);
             countRenderNode_ += newChild->CountRenderNode();
+            continue;
         }
 
         elements.erase(it);
@@ -158,7 +159,8 @@ void MultiComposedElement::UpdateChildrenForRebuild(const std::list<RefPtr<Compo
 
     // 6. Try to update children at end with new components by order
     while (itChildEnd != children_.end() && itComponentEnd != newComponents.end()) {
-        auto newChild = UpdateChildWithSlot(*(itChildEnd++), *(itComponentEnd++), slot++,
+        auto child = *(itChildEnd++);
+        auto newChild = UpdateChildWithSlot(child, *(itComponentEnd++), slot++,
             useSlot ? countRenderNode_ + GetRenderSlot() : DEFAULT_RENDER_SLOT);
         countRenderNode_ += newChild->CountRenderNode();
     }

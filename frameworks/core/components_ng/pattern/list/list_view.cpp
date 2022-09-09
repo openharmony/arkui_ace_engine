@@ -51,6 +51,11 @@ void ListView::SetEdgeEffect(EdgeEffect edgeEffect)
     // TODO: add impl.
 }
 
+void ListView::SetDivider(const V2::ItemDivider& divider)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider);
+}
+
 void ListView::SetLanes(int32_t lanes)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Lanes, lanes);
@@ -69,5 +74,10 @@ void ListView::SetLaneMaxLength(const Dimension& laneMaxLength)
 void ListView::SetListItemAlign(V2::ListItemAlign listItemAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign);
+}
+
+void ListView::SetCachedCount(const int32_t& cachedCount)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount);
 }
 } // namespace OHOS::Ace::NG

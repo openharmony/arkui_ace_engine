@@ -181,6 +181,7 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
 
 std::string ConnectServerManager::GetInstanceMapMessage(const char* messageType, int32_t instanceId)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     auto message = JsonUtil::Create(true);
     message->Put("type", messageType);
     message->Put("instanceId", instanceId);

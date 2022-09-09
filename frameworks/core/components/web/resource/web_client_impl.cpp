@@ -375,6 +375,16 @@ void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)
     delegate->OnScaleChange(oldScaleFactor, newScaleFactor);
 }
 
+void WebClientImpl::OnScroll(double xOffset, double yOffset)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnScroll(xOffset, yOffset);
+}
+
 bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthResult> result, const std::string &host,
     const std::string &realm)
 {
@@ -399,6 +409,33 @@ bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthRe
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
 
     LOGI("OnHttpAuthRequestByJS result:%{public}d", jsResult);
+    return jsResult;
+}
+
+bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
+    OHOS::NWeb::SslError error)
+{
+    LOGI("OnSslErrorRequestByJS");
+    ContainerScope scope(instanceId_);
+
+    bool jsResult = false;
+    auto param = std::make_shared<WebSslErrorEvent>(AceType::MakeRefPtr<SslErrorResultOhos>(result), static_cast<int32_t>(error));
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+    task->PostSyncTask([webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnSslErrorRequest(param.get());
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+
+    LOGI("OnSslErrorRequestByJS result:%{public}d", jsResult);
     return jsResult;
 }
 
@@ -436,5 +473,68 @@ bool WebClientImpl::RunContextMenu(
         OHOS::Ace::TaskExecutor::TaskType::JS);
     LOGI("OnContextMenuEventShow result:%{public}d", jsResult);
     return jsResult;
+}
+
+bool WebClientImpl::RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
+                                 std::shared_ptr<NWeb::NWebQuickMenuCallback> callback)
+{
+    if (!params || !callback) {
+        return false;
+    }
+    ContainerScope scope(instanceId_);
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+    return delegate->RunQuickMenu(params, callback);
+}
+
+void WebClientImpl::OnQuickMenuDismissed()
+{
+    ContainerScope scope(instanceId_);
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return;
+    }
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnQuickMenuDismissed();
+}
+
+void WebClientImpl::OnTouchSelectionChanged(
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
+{
+    ContainerScope scope(instanceId_);
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return;
+    }
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->OnTouchSelectionChanged(
+        insertHandle, startSelectionHandle, endSelectionHandle);
+}
+
+bool WebClientImpl::OnDragAndDropData(const void* data, size_t len, const NWeb::ImageOptions& opt)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+    return delegate->OnDragAndDropData(data, len, opt.width, opt.height);
 }
 } // namespace OHOS::Ace

@@ -408,6 +408,343 @@ HWTEST_F(RenderListTest, RenderListTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RenderListTest009
+ * @tc.desc: Verify List PerformLayout can calculate children with row-reverse direction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct ListComponent by row direction.
+     * @tc.expected: step1. properties are set correctly.
+     */
+    int32_t totalCount = 10;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::ROW_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::ROW_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+
+    /**
+     * @tc.steps: step2. construct RenderList with list component.
+     * @tc.expected: step2. properties are set correctly.
+     */
+    renderList_->Update(listComponent);
+    renderList_->RegisterBuildItemCallback([this](int32_t index) -> bool {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(400.0, 400.0, mockContext_);
+        renderList_->AddListItem(index, node);
+        return true;
+    });
+
+    /**
+     * @tc.steps: step3. trigger layout for render list.
+     * @tc.expected: step3. List and children layout correct.
+     */
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(0.0, 0.0));
+    layoutParam.SetMaxSize(Size(1000.0, 1000.0));
+    renderList_->SetLayoutParam(layoutParam);
+    renderList_->PerformLayout();
+    ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Width(), 400.0));
+}
+
+/**
+ * @tc.name: RenderListTest010
+ * @tc.desc: Verify List PerformLayout can calculate children with column-reverse direction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct ListComponent by column direction.
+     * @tc.expected: step1. properties are set correctly.
+     */
+    int32_t totalCount = 6;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::COLUMN_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::COLUMN_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+
+    /**
+     * @tc.steps: step2. construct RenderList with list component.
+     * @tc.expected: step2. properties are set correctly.
+     */
+    renderList_->Update(listComponent);
+    renderList_->RegisterBuildItemCallback([this](int32_t index) -> bool {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(500.0, 500.0, mockContext_);
+        renderList_->AddListItem(index, node);
+        return true;
+    });
+
+    /**
+     * @tc.steps: step3. trigger layout for render list.
+     * @tc.expected: step3. List and children layout correct.
+     */
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(100.0, 100.0));
+    layoutParam.SetMaxSize(Size(900.0, 900.0));
+    renderList_->SetLayoutParam(layoutParam);
+    renderList_->PerformLayout();
+    ASSERT_TRUE(NearEqual(renderList_->GetLayoutSize().Height(), 500.0));
+
+}
+
+/**
+ * @tc.name: RenderListTest011
+ * @tc.desc: Verify List PerformLayout can load children by step.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct ListComponent by  direction COLUMN_REVERSE.
+     * @tc.expected: step1. properties are set correctly.
+     */
+    int32_t totalCount = 100;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::COLUMN_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetOnRequestItem(EventMarker { "builder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::COLUMN_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+
+    /**
+     * @tc.steps: step2. construct RenderList with list component.
+     * @tc.expected: step2. properties are set correctly.
+     */
+    renderList_->Update(listComponent);
+    renderList_->RegisterBuildItemCallback([this](int32_t index) -> bool {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(300.0, 300.0, mockContext_);
+        renderList_->AddListItem(0, node);
+        index_++;
+        return true;
+    });
+
+    /**
+     * @tc.steps: step3. trigger layout for render list.
+     * @tc.expected: step3. List and children layout correct.
+     */
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(200.0, 200.0));
+    layoutParam.SetMaxSize(Size(600.0, 600.0));
+    renderList_->SetLayoutParam(layoutParam);
+    ASSERT_TRUE(index_ == 0);
+    renderList_->PerformLayout();
+    ASSERT_TRUE(index_ > 0);
+}
+
+/**
+ * @tc.name: RenderListTest012
+ * @tc.desc: Verify List Scroll Event can callback when event trigger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Event listener to receive Scroll event.
+     * @tc.expected: step1. Event listener create success.
+     */
+    std::string scrollEventId = "list_scroll_id";
+    index_ = 0;
+    RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
+        [this, scrollEventId](const std::string& eventId, const std::string& param) {
+            std::string scrollResult = std::string("\"scroll\",{\"scrollX\":")
+                                           .append(std::to_string(450.0 * (index_ % 3)))
+                                           .append(",\"scrollY\":")
+                                           .append(std::to_string(450.0 * (index_ % 3)))
+                                           .append(",\"scrollState\":")
+                                           .append(std::to_string(index_ % 3))
+                                           .append("},null");
+            EXPECT_EQ(param, scrollResult);
+            EXPECT_EQ(eventId, scrollEventId);
+            index_++;
+        });
+    mockContext_->RegisterEventHandler(eventHandler);
+
+    /**
+     * @tc.steps: step2. Create RenderList and add 10 child by ROW_REVERSE Direction.
+     * @tc.expected: step2. Properties and children are calculated correctly.
+     */
+    int32_t totalCount = 200;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::ROW_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::ROW_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+    renderList_->Update(listComponent);
+    for (int32_t i = 0; i < 10; ++i) {
+        RefPtr<RenderBox> box = ListTestUtils::CreateRenderBox(400.0, 400.0);
+        box->Attach(mockContext_);
+        renderList_->AddChild(box);
+    }
+    ASSERT_TRUE(renderList_->GetChildren().size() == 10);
+}
+
+/**
+ * @tc.name: RenderListTest013
+ * @tc.desc: Verify List ScrollBottom Event can callback when event trigger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Event listener to receive ScrollBottom event.
+     * @tc.expected: step1. Event listener create success.
+     */
+    std::string scrollEventId = "list_scrollbottom_id";
+    RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
+        [this, scrollEventId](const std::string& eventId, const std::string& param) {
+            std::string ret = std::string("\"scrollbottom\",null");
+            EXPECT_EQ(param, ret);
+            EXPECT_EQ(eventId, scrollEventId);
+        });
+    mockContext_->RegisterEventHandler(eventHandler);
+
+    /**
+     * @tc.steps: step2. Create RenderList and add 10 child by COLUMN_REVERSE Direction.
+     * @tc.expected: step2. Properties and children are calculated correctly.
+     */
+    int32_t totalCount = 99;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::COLUMN_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::COLUMN_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+    renderList_->Update(listComponent);
+    renderList_->RegisterRequestItemsCallback([this](int32_t index, int32_t count) {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(200.0, 500.0, mockContext_);
+        renderList_->AddListItem(1, node);
+    });
+    ASSERT_TRUE(renderList_->GetChildren().size() == 0);
+}
+
+/**
+ * @tc.name: RenderListTest014
+ * @tc.desc: Verify List ScrollTop Event can callback when event trigger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Event listener to receive ScrollTop event.
+     * @tc.expected: step1. Event listener create success.
+     */
+    std::string scrollEventId = "list_scrolltop_id";
+    index_ = 0;
+    RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
+        [this, scrollEventId](const std::string& eventId, const std::string& param) {
+            std::string ret = std::string("\"scrolltop\",null");
+            EXPECT_EQ(param, ret);
+            EXPECT_EQ(eventId, scrollEventId);
+            index_++;
+        });
+    mockContext_->RegisterEventHandler(eventHandler);
+
+    /**
+     * @tc.steps: step2. Create RenderList and add 10 child by ROW_REVERSE Direction.
+     * @tc.expected: step2. Properties and children are calculated correctly.
+     */
+    int32_t totalCount = 0;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::ROW_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::ROW_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+    renderList_->Update(listComponent);
+    renderList_->RegisterRequestItemsCallback([this](int32_t index, int32_t count) {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(500.0, 600.0, mockContext_);
+        renderList_->AddListItem(2, node);
+    });
+    ASSERT_TRUE(renderList_->GetChildren().size() == 0);
+}
+
+/**
+ * @tc.name: RenderListTest015
+ * @tc.desc: Verify List ScrollEnd Event can callback when event trigger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Event listener to receive ScrollEnd event.
+     * @tc.expected: step1. Event listener create success.
+     */
+    std::string scrollEventId = "list_scrollend_id";
+    index_ = 0;
+    RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
+        [this, scrollEventId](const std::string& eventId, const std::string& param) {
+            std::string ret = std::string("\"scrollend\",null");
+            EXPECT_EQ(param, ret);
+            EXPECT_EQ(eventId, scrollEventId);
+            index_++;
+        });
+    mockContext_->RegisterEventHandler(eventHandler);
+
+    /**
+     * @tc.steps: step2. Create RenderList and add 10 child by COLUMN_REVERSE Direction.
+     * @tc.expected: step2. Properties and children are calculated correctly.
+     */
+    int32_t totalCount = 0;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::COLUMN_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::COLUMN_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+    renderList_->Update(listComponent);
+    RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(150.0, 500.0, mockContext_);
+    renderList_->AddListItem(100, node);
+    ASSERT_TRUE(renderList_->GetChildren().size() == 0);
+}
+
+/**
+ * @tc.name: RenderListTest016
+ * @tc.desc: Verify List ScrollTouchUp Event can callback when event trigger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Event listener to receive ScrollTouchUp event.
+     * @tc.expected: step1. Event listener create success.
+     */
+    std::string scrollEventId = "list_scrolltouchup_id";
+    index_ = 0;
+    RefPtr<TestListEventHandler> eventHandler = AceType::MakeRefPtr<TestListEventHandler>(
+        [this, scrollEventId](const std::string& eventId, const std::string& param) {
+            std::string ret = std::string("\"scrolltouchup\",null");
+            EXPECT_EQ(param, ret);
+            EXPECT_EQ(eventId, scrollEventId);
+            index_++;
+        });
+    mockContext_->RegisterEventHandler(eventHandler);
+
+    /**
+     * @tc.steps: step2. Create RenderList and add 10 child by ROW_REVERSE Direction.
+     * @tc.expected: step2. Properties and children are calculated correctly.
+     */
+    int32_t totalCount = -100;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::ROW_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::ROW_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == 0);
+    renderList_->Update(listComponent);
+    renderList_->RegisterRequestItemsCallback([this](int32_t index, int32_t count) {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(150.0, 150.0, mockContext_);
+        renderList_->AddListItem(-1, node);
+    });
+    ASSERT_TRUE(renderList_->GetChildren().size() == 0);
+}
+
+/**
  * @tc.name: ScrollMotionTest001
  * @tc.desc: Verify scroll can calculate attributes with different edge effect.
  * @tc.type: FUNC
@@ -1532,6 +1869,438 @@ HWTEST_F(RenderListTest, RenderListFocusMoveTest007, TestSize.Level1)
     ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == 0); // RIGHT
     renderList_->ListItemFocused(0);
 }
+
+
+/**
+ * @tc.name: RenderListFocusMoveTest008
+ * @tc.desc: Verify List can move focus when single column and Direction::ROW_REVERSE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListFocusMoveTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct ListComponent by row_reverse direction.
+     * @tc.expected: step1. properties are set correctly.
+     */
+    int32_t totalCount = 8;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::ROW_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetColumnCount(1);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::ROW_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+    ASSERT_TRUE(listComponent->GetColumnCount() == 1);
+
+    /**
+     * @tc.steps: step2. construct RenderList with list component.
+     * @tc.expected: step2. properties are set correctly.
+     */
+    renderList_->Update(listComponent);
+    renderList_->RegisterBuildItemCallback([this](int32_t index) -> bool {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(200.0, 300.0, mockContext_);
+        renderList_->AddListItem(index, node);
+        return true;
+    });
+
+    /**
+     * @tc.steps: step3. trigger layout for render list.
+     * @tc.expected: step3. List and children layout correct.
+     */
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(0.0, 0.0));
+    layoutParam.SetMaxSize(Size(600.0, 300.0));
+    renderList_->SetLayoutParam(layoutParam);
+    renderList_->ResetLayoutRange(0.0, 600.0, Offset(0.0, 0.0), Size(600.0, 300.0));
+    renderList_->PerformLayout();
+
+    /**
+     * @tc.steps: step4. trigger focus move for render list.
+     * @tc.expected: step4. Focus move correct.
+     */
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, true) == 1); // RIGHT
+    renderList_->ListItemFocused(1);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, true) == 2); // RIGHT
+    renderList_->ListItemFocused(2);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == 1); // LEFT
+    renderList_->ListItemFocused(1);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, true) == -1); // DOWN
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, false) == -1);  // UP
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == 0);  // LEFT
+    renderList_->ListItemFocused(0);
+}
+
+
+/**
+ * @tc.name: RenderListFocusMoveTest009
+ * @tc.desc: Verify List can move focus when single column and Direction::ROW_REVERSE and RTL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListFocusMoveTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct ListComponent by row direction and RTL.
+     * @tc.expected: step1. properties are set correctly.
+     */
+    int32_t totalCount = 8;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::ROW_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetRightToLeft(true);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::ROW_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+    ASSERT_TRUE(listComponent->GetRightToLeft());
+
+    /**
+     * @tc.steps: step2. construct RenderList with list component.
+     * @tc.expected: step2. properties are set correctly.
+     */
+    renderList_->Update(listComponent);
+    renderList_->RegisterBuildItemCallback([this](int32_t index) -> bool {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(200.0, 300.0, mockContext_);
+        renderList_->AddListItem(index, node);
+        return true;
+    });
+
+    /**
+     * @tc.steps: step3. trigger layout for render list.
+     * @tc.expected: step3. List and children layout correct.
+     */
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(0.0, 0.0));
+    layoutParam.SetMaxSize(Size(600.0, 300.0));
+    renderList_->SetLayoutParam(layoutParam);
+    renderList_->ResetLayoutRange(0.0, 600.0, Offset(0.0, 0.0), Size(600.0, 300.0));
+    renderList_->PerformLayout();
+
+    /**
+     * @tc.steps: step4. trigger focus move for render list.
+     * @tc.expected: step4. Focus move correct.
+     */
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, true) == 1); // LEFT
+    renderList_->ListItemFocused(1);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, true) == 2); // LEFT
+    renderList_->ListItemFocused(2);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == 1); // RIGHT
+    renderList_->ListItemFocused(1);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, false) == -1); // DOWN
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, true) == -1);  // UP
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == 0); // RIGHT
+    renderList_->ListItemFocused(0);
+
+}
+
+/**
+ * @tc.name: RenderListFocusMoveTest010
+ * @tc.desc: Verify List can move focus when single column and Direction::COLUMN_REVERSE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListFocusMoveTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct ListComponent by column direction.
+     * @tc.expected: step1. properties are set correctly.
+     */
+    int32_t totalCount = 8;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::COLUMN_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::COLUMN_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+
+    /**
+     * @tc.steps: step2. construct RenderList with list component.
+     * @tc.expected: step2. properties are set correctly.
+     */
+    renderList_->Update(listComponent);
+    renderList_->RegisterBuildItemCallback([this](int32_t index) -> bool {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(300.0, 200.0, mockContext_);
+        renderList_->AddListItem(index, node);
+        return true;
+    });
+
+    /**
+     * @tc.steps: step3. trigger layout for render list.
+     * @tc.expected: step3. List and children layout correct.
+     */
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(0.0, 0.0));
+    layoutParam.SetMaxSize(Size(300.0, 600.0));
+    renderList_->SetLayoutParam(layoutParam);
+    renderList_->ResetLayoutRange(0.0, 600.0, Offset(0.0, 0.0), Size(300.0, 600.0));
+    renderList_->PerformLayout();
+
+    /**
+     * @tc.steps: step4. trigger focus move for render list.
+     * @tc.expected: step4. Focus move correct.
+     */
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, true) == 1); // DOWN
+    renderList_->ListItemFocused(1);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, true) == 2); // DOWN
+    renderList_->ListItemFocused(2);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, false) == 1); // UP
+    renderList_->ListItemFocused(1);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, true) == -1); // RIGHT
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == -1);  // LEFT
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, false) == 0);    // UP
+    renderList_->ListItemFocused(0);
+}
+
+/**
+ * @tc.name: RenderListFocusMoveTest011
+ * @tc.desc: Verify List can move focus when multi columns and Direction::ROW_REVERSE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListFocusMoveTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct ListComponent by row direction.
+     * @tc.expected: step1. properties are set correctly.
+     */
+    int32_t totalCount = 8;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::ROW_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetColumnCount(2);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::ROW_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+    ASSERT_TRUE(listComponent->GetColumnCount() == 2);
+
+    /**
+     * @tc.steps: step2. construct RenderList with list component.
+     * @tc.expected: step2. properties are set correctly.
+     */
+    renderList_->Update(listComponent);
+    renderList_->RegisterBuildItemCallback([this](int32_t index) -> bool {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(200.0, 300.0, mockContext_);
+        renderList_->AddListItem(index, node);
+        return true;
+    });
+
+    /**
+     * @tc.steps: step3. trigger layout for render list.
+     * @tc.expected: step3. List and children layout correct.
+     */
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(0.0, 0.0));
+    layoutParam.SetMaxSize(Size(600.0, 600.0));
+    renderList_->SetLayoutParam(layoutParam);
+    renderList_->ResetLayoutRange(0.0, 600.0, Offset(0.0, 0.0), Size(600.0, 600.0));
+    renderList_->PerformLayout();
+
+    /**
+     * @tc.steps: step4. trigger focus move for render list.
+     * @tc.expected: step4. Focus move correct.
+     */
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, true) == 2); // RIGHT
+    renderList_->ListItemFocused(2);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, true) == 4); // RIGHT
+    renderList_->ListItemFocused(4);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, false) == 5); // DOWN
+    renderList_->ListItemFocused(5);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == 3); // LEFT
+    renderList_->ListItemFocused(3);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == 1); // LEFT
+    renderList_->ListItemFocused(1);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, false) == -1); // DOWN
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, true) == 0);   // UP
+    renderList_->ListItemFocused(0);
+
+}
+
+/**
+ * @tc.name: RenderListFocusMoveTest012
+ * @tc.desc: Verify List can move focus when multi columns and Direction::ROW_REVERSE and RTL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListFocusMoveTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct ListComponent by row direction and RTL.
+     * @tc.expected: step1. properties are set correctly.
+     */
+    int32_t totalCount = 8;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::ROW_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetColumnCount(2);
+    listComponent->SetRightToLeft(true);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::ROW_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+    ASSERT_TRUE(listComponent->GetColumnCount() == 2);
+    ASSERT_TRUE(listComponent->GetRightToLeft());
+
+    /**
+     * @tc.steps: step2. construct RenderList with list component.
+     * @tc.expected: step2. properties are set correctly.
+     */
+    renderList_->Update(listComponent);
+    renderList_->RegisterBuildItemCallback([this](int32_t index) -> bool {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(200.0, 300.0, mockContext_);
+        renderList_->AddListItem(index, node);
+        return true;
+    });
+
+    /**
+     * @tc.steps: step3. trigger layout for render list.
+     * @tc.expected: step3. List and children layout correct.
+     */
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(0.0, 0.0));
+    layoutParam.SetMaxSize(Size(600.0, 600.0));
+    renderList_->SetLayoutParam(layoutParam);
+    renderList_->ResetLayoutRange(0.0, 600.0, Offset(0.0, 0.0), Size(600.0, 600.0));
+    renderList_->PerformLayout();
+
+    /**
+     * @tc.steps: step4. trigger focus move for render list.
+     * @tc.expected: step4. Focus move correct.
+     */
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, true) == 2); // LEFT
+    renderList_->ListItemFocused(2);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, true) == 4); // LEFT
+    renderList_->ListItemFocused(4);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, false) == 5); // DOWN
+    renderList_->ListItemFocused(5);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == 3); // RIGHT
+    renderList_->ListItemFocused(3);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == 1); // RIGHT
+    renderList_->ListItemFocused(1);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, false) == -1); // DOWN
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, true) == 0);   // UP
+    renderList_->ListItemFocused(0);
+}
+
+/**
+ * @tc.name: RenderListFocusMoveTest013
+ * @tc.desc: Verify List can move focus when multi columns and Direction::COLUMN_REVERSE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListFocusMoveTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct ListComponent by column direction.
+     * @tc.expected: step1. properties are set correctly.
+     */
+    int32_t totalCount = 6;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::COLUMN_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetColumnCount(2);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::COLUMN_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+    ASSERT_TRUE(listComponent->GetColumnCount() == 2);
+
+    /**
+     * @tc.steps: step2. construct RenderList with list component.
+     * @tc.expected: step2. properties are set correctly.
+     */
+    renderList_->Update(listComponent);
+    renderList_->RegisterBuildItemCallback([this](int32_t index) -> bool {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(300.0, 200.0, mockContext_);
+        renderList_->AddListItem(index, node);
+        return true;
+    });
+
+    /**
+     * @tc.steps: step3. trigger layout for render list.
+     * @tc.expected: step3. List and children layout correct.
+     */
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(0.0, 0.0));
+    layoutParam.SetMaxSize(Size(600.0, 600.0));
+    renderList_->SetLayoutParam(layoutParam);
+    renderList_->ResetLayoutRange(0.0, 600.0, Offset(0.0, 0.0), Size(600.0, 600.0));
+    renderList_->PerformLayout();
+
+    /**
+     * @tc.steps: step4. trigger focus move for render list.
+     * @tc.expected: step4. Focus move correct.
+     */
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, true) == 2); // DOWN
+    renderList_->ListItemFocused(2);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, true) == 4); // DOWN
+    renderList_->ListItemFocused(4);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == 5); // RIGHT
+    renderList_->ListItemFocused(5);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, false) == 3); // UP
+    renderList_->ListItemFocused(3);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, false) == 1); // UP
+    renderList_->ListItemFocused(1);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == -1); // RIGHT
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, true) == 0);   // LEFT
+    renderList_->ListItemFocused(0);
+}
+
+/**
+ * @tc.name: RenderListFocusMoveTest014
+ * @tc.desc: Verify List can move focus when multi columns and Direction::COLUMN_REVERSE and RTL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderListTest, RenderListFocusMoveTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct ListComponent by column direction and RTL.
+     * @tc.expected: step1. properties are set correctly.
+     */
+    int32_t totalCount = 6;
+    RefPtr<ListComponent> listComponent = AceType::MakeRefPtr<ListComponent>();
+    listComponent->SetDirection(FlexDirection::COLUMN_REVERSE);
+    listComponent->SetTotalCount(totalCount);
+    listComponent->SetRightToLeft(true);
+    listComponent->SetColumnCount(2);
+    listComponent->SetOnRequestItem(EventMarker { "itemBuilder_ID" });
+    ASSERT_TRUE(listComponent->GetDirection() == FlexDirection::COLUMN_REVERSE);
+    ASSERT_TRUE(listComponent->GetTotalCount() == totalCount);
+    listComponent->SetRightToLeft(true);
+    ASSERT_TRUE(listComponent->GetColumnCount() == 2);
+
+    /**
+     * @tc.steps: step2. construct RenderList with list component.
+     * @tc.expected: step2. properties are set correctly.
+     */
+    renderList_->Update(listComponent);
+    renderList_->RegisterBuildItemCallback([this](int32_t index) -> bool {
+        RefPtr<RenderNode> node = ListTestUtils::CreateRenderItem(300.0, 200.0, mockContext_);
+        renderList_->AddListItem(index, node);
+        return true;
+    });
+
+    /**
+     * @tc.steps: step3. trigger layout for render list.
+     * @tc.expected: step3. List and children layout correct.
+     */
+    LayoutParam layoutParam;
+    layoutParam.SetMinSize(Size(0.0, 0.0));
+    layoutParam.SetMaxSize(Size(600.0, 600.0));
+    renderList_->SetLayoutParam(layoutParam);
+    renderList_->ResetLayoutRange(0.0, 600.0, Offset(0.0, 0.0), Size(600.0, 600.0));
+    renderList_->PerformLayout();
+
+    /**
+     * @tc.steps: step4. trigger focus move for render list.
+     * @tc.expected: step4. Focus move correct.
+     */
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, true) == 2); // DOWN
+    renderList_->ListItemFocused(2);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, true) == 4); // DOWN
+    renderList_->ListItemFocused(4);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, true) == 5); // LEFT
+    renderList_->ListItemFocused(5);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, false) == 3); // UP
+    renderList_->ListItemFocused(3);
+    ASSERT_TRUE(renderList_->RequestNextFocus(true, false) == 1); // UP
+    renderList_->ListItemFocused(1);
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, true) == -1); // LEFT
+    ASSERT_TRUE(renderList_->RequestNextFocus(false, false) == 0); // RIGHT
+    renderList_->ListItemFocused(0);
+}
+
 
 /**
  * @tc.name: AceListExpansion001

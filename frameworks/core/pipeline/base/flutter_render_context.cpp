@@ -62,7 +62,7 @@ void FlutterRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Off
 
     Rect rect = child->GetTransitionPaintRect() + offset;
     if (!(child->IsPaintOutOfParent() || canChildOverflow) && !estimatedRect_.IsIntersectWith(rect)) {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         child->ClearAccessibilityRect();
 #endif
         return;
@@ -185,7 +185,7 @@ bool FlutterRenderContext::IsIntersectWith(const RefPtr<RenderNode>& child, Offs
 
     Rect rect = child->GetTransitionPaintRect() + offset;
     if (!estimatedRect_.IsIntersectWith(rect)) {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         child->ClearAccessibilityRect();
 #endif
         return false;

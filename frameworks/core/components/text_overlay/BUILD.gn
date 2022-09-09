@@ -14,6 +14,17 @@
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components/components.gni")
 
+config("ohos_text_overlay_web_config") {
+  include_dirs = [
+    "$ability_runtime_path/interfaces/kits/native/appkit/app",
+    "//commonlibrary/c_utils/base/include",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
+    "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
+    "//foundation/multimedia/image_standard/interfaces/innerkits/include",
+  ]
+}
+
 build_component("text_overlay") {
   sources = [
     "flutter_render_text_overlay.cpp",
@@ -25,4 +36,20 @@ build_component("text_overlay") {
   ]
 
   rosen_sources = [ "rosen_render_text_overlay.cpp" ]
+}
+
+build_component("text_overlay_for_web") {
+  sources = [
+    "flutter_render_text_overlay.cpp",
+    "render_text_overlay.cpp",
+    "render_text_overlay_creator.cpp",
+    "text_overlay_component.cpp",
+    "text_overlay_element.cpp",
+    "text_overlay_manager.cpp",
+  ]
+
+  rosen_sources = [ "rosen_render_text_overlay.cpp" ]
+
+  standard_web_configs = [ ":ohos_text_overlay_web_config" ]
+  standard_web_deps = [ "webview:libnweb" ]
 }

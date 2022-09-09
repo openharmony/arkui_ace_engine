@@ -19,6 +19,7 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/common/clipboard/clipboard_proxy.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
 #include "core/components/positioned/positioned_component.h"
@@ -68,6 +69,7 @@ void RenderImage::Update(const RefPtr<Component>& component)
     currentDstRect_ = dstRect_;
     currentDstRectList_ = rectList_;
     colorfilter_ = image->GetColorFilterMatrix();
+    blurRadius_ = image->GetBlurRadius();
     width_ = image->GetWidth();
     syncMode_ = image->GetSyncMode();
     height_ = image->GetHeight();
@@ -231,7 +233,7 @@ bool RenderImage::HandleKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if (event.IsCtrlWith(KeyCode::KEY_C)) {
+    if (event.IsCtrlWith(KeyCode::KEY_C) && copyOption_ != CopyOptions::None) {
         HandleOnCopy();
         return true;
     }
@@ -328,20 +330,20 @@ void RenderImage::HandleOnCopy()
     auto type = sourceInfo_.GetSrcType();
     switch (type) {
         case SrcType::PIXMAP: {
-            clipboard_->SetPixelMapData(sourceInfo_.GetPixmap());
+            clipboard_->SetPixelMapData(sourceInfo_.GetPixmap(), copyOption_);
             break;
         }
         case SrcType::BASE64: {
-            clipboard_->SetData(sourceInfo_.GetSrc());
+            clipboard_->SetData(sourceInfo_.GetSrc(), copyOption_);
             break;
         }
         case SrcType::DATA_ABILITY_DECODED:
         case SrcType::DATA_ABILITY: {
-            clipboard_->SetData(sourceInfo_.GetSrc());
+            clipboard_->SetData(sourceInfo_.GetSrc(), copyOption_);
             break;
         }
         default: {
-            clipboard_->SetPixelMapData(renderImage->GetPixmapFromSkImage());
+            clipboard_->SetPixelMapData(renderImage->GetPixmapFromSkImage(), copyOption_);
             break;
         }
     }
@@ -942,8 +944,11 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
         return;
     }
 
-    auto dragItemInfo = GenerateDragItemInfo(pipelineContext, info);
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+    GestureEvent newInfo = info;
+    Point newPoint = UpdatePoint(pipelineContext, startPoint_);
+    newInfo.SetGlobalPoint(newPoint);
+    auto dragItemInfo = GenerateDragItemInfo(pipelineContext, newInfo);
+#if !defined(PREVIEW)
     if (!dragItemInfo.pixelMap && !dragItemInfo.customComponent) {
         auto initRenderNode = AceType::Claim(this);
         isDragDropNode_ = true;
@@ -1005,7 +1010,7 @@ void RenderImage::PanOnActionStart(const GestureEvent& info)
 
 void RenderImage::PanOnActionUpdate(const GestureEvent& info)
 {
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_ && dragWindow_) {
         int32_t x = static_cast<int32_t>(info.GetGlobalPoint().GetX());
         int32_t y = static_cast<int32_t>(info.GetGlobalPoint().GetY());
@@ -1055,7 +1060,7 @@ void RenderImage::PanOnActionEnd(const GestureEvent& info)
         LOGE("Context is null.");
         return;
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_) {
         isDragDropNode_ = false;
         RestoreCilpboardData(pipelineContext);
@@ -1115,7 +1120,7 @@ void RenderImage::PanOnActionCancel()
         return;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (isDragDropNode_) {
         isDragDropNode_ = false;
         RestoreCilpboardData(pipelineContext);

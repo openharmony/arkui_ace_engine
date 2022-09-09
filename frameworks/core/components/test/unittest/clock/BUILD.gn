@@ -188,10 +188,9 @@ ohos_unittest("ClockComponentTest") {
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
-  external_deps = []
+  external_deps = [ "c_utils:utils" ]
   if (!is_standard_system) {
     external_deps += [
       "hilog:libhilog",
@@ -199,7 +198,6 @@ ohos_unittest("ClockComponentTest") {
     ]
   } else {
   }
-
   subsystem_name = "arkui"
   part_name = "ace_engine_full"
 }
@@ -207,7 +205,7 @@ ohos_unittest("ClockComponentTest") {
 config("config_render_clock_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$ace_root",
   ]
 }

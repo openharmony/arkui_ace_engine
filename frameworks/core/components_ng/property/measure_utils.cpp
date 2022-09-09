@@ -18,52 +18,78 @@
 #include <optional>
 
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/size.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
-SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& parentSize)
+SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference)
 {
-    auto width = ConvertToPx(size.Width(), scaleProperty, parentSize.Width());
-    auto height = ConvertToPx(size.Height(), scaleProperty, parentSize.Height());
+    auto width = ConvertToPx(size.Width(), scaleProperty, percentReference.Width());
+    auto height = ConvertToPx(size.Height(), scaleProperty, percentReference.Height());
     return { width.value_or(-1.0f), height.value_or(-1.0f) };
 }
 
-std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty, float parentLength)
+OptionalSizeF ConvertToOptionalSize(
+    const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference)
+{
+    auto width = ConvertToPx(size.Width(), scaleProperty, percentReference.Width());
+    auto height = ConvertToPx(size.Height(), scaleProperty, percentReference.Height());
+    return { width, height };
+}
+
+std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty, float percentReference)
 {
     double result = -1.0;
     if (!value.NormalizeToPx(
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength, result)) {
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
         LOGE("fail to Convert CalcDimension To Px: %{public}f, %{public}f, %{public}f, %{public}f",
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength);
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
         return std::nullopt;
     }
     return static_cast<float>(result);
 }
 
 std::optional<float> ConvertToPx(
-    const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty, float parentLength)
+    const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty, float percentReference)
 {
     if (!value) {
         return std::nullopt;
     }
     double result = -1.0;
     if (!value.value().NormalizeToPx(
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength, result)) {
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
         LOGE("optional: fail to Convert CalcDimension To Px: %{public}f, %{public}f, %{public}f, %{public}f",
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength);
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
         return std::nullopt;
     }
     return static_cast<float>(result);
 }
 
-std::optional<float> ConvertToPx(const Dimension& dimension, const ScaleProperty& scaleProperty, float parentLength)
+std::optional<float> ConvertToPx(const Dimension& dimension, const ScaleProperty& scaleProperty, float percentReference)
 {
     double result = -1.0;
     if (!dimension.NormalizeToPx(
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, parentLength, result)) {
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
         LOGE("fail to Convert dimension To Px: %{public}f, %{public}f, %{public}f, %{public}f", scaleProperty.vpScale,
-            scaleProperty.fpScale, scaleProperty.lpxScale, parentLength);
+            scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
+        return std::nullopt;
+    }
+    return static_cast<float>(result);
+}
+
+std::optional<float> ConvertToPx(
+    const std::optional<Dimension>& dimension, const ScaleProperty& scaleProperty, float percentReference)
+{
+    if (!dimension) {
+        return std::nullopt;
+    }
+    double result = -1.0;
+    if (!dimension.value().NormalizeToPx(
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
+        LOGE("fail to Convert dimension To Px: %{public}f, %{public}f, %{public}f, %{public}f", scaleProperty.vpScale,
+            scaleProperty.fpScale, scaleProperty.lpxScale, percentReference);
         return std::nullopt;
     }
     return static_cast<float>(result);
@@ -92,8 +118,8 @@ void MinusPaddingToConstraint(const std::unique_ptr<PaddingProperty>& padding, L
 
 void MinusPaddingToConstraint(const PaddingProperty& padding, LayoutConstraintF& size)
 {
-    auto width = size.selfIdealSize.has_value() ? size.selfIdealSize->Width() : 0;
-    auto height = size.selfIdealSize.has_value() ? size.selfIdealSize->Height() : 0;
+    auto width = size.percentReference.Width();
+    auto height = size.percentReference.Height();
     auto left = ConvertToPx(padding.left, size.scaleProperty, width);
     auto right = ConvertToPx(padding.right, size.scaleProperty, width);
     auto top = ConvertToPx(padding.top, size.scaleProperty, height);
@@ -102,22 +128,42 @@ void MinusPaddingToConstraint(const PaddingProperty& padding, LayoutConstraintF&
 }
 
 PaddingPropertyF ConvertToPaddingPropertyF(
-    const std::unique_ptr<PaddingProperty>& padding, const ScaleProperty& scaleProperty, float parentWidth)
+    const std::unique_ptr<PaddingProperty>& padding, const ScaleProperty& scaleProperty, float percentReference)
 {
     if (!padding) {
         return {};
     }
-    return ConvertToPaddingPropertyF(*padding, scaleProperty, parentWidth);
+    return ConvertToPaddingPropertyF(*padding, scaleProperty, percentReference);
 }
 
 PaddingPropertyF ConvertToPaddingPropertyF(
-    const PaddingProperty& padding, const ScaleProperty& scaleProperty, float parentWidth)
+    const PaddingProperty& padding, const ScaleProperty& scaleProperty, float percentReference)
 {
-    auto left = ConvertToPx(padding.left, scaleProperty, parentWidth);
-    auto right = ConvertToPx(padding.right, scaleProperty, parentWidth);
-    auto top = ConvertToPx(padding.top, scaleProperty, parentWidth);
-    auto bottom = ConvertToPx(padding.bottom, scaleProperty, parentWidth);
+    auto left = ConvertToPx(padding.left, scaleProperty, percentReference);
+    auto right = ConvertToPx(padding.right, scaleProperty, percentReference);
+    auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
+    auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
     return PaddingPropertyF { left, right, top, bottom };
+}
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyF(
+    const std::unique_ptr<BorderWidthProperty>& borderWidth, const ScaleProperty& scaleProperty, float percentReference)
+{
+    if (!borderWidth) {
+        return {};
+    }
+    return ConvertToBorderWidthPropertyF(*borderWidth, scaleProperty, percentReference);
+}
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyF(
+    const BorderWidthProperty& borderWidth, const ScaleProperty& scaleProperty, float percentReference)
+{
+    auto left = ConvertToPx(borderWidth.leftDimen, scaleProperty, percentReference);
+    auto right = ConvertToPx(borderWidth.rightDimen, scaleProperty, percentReference);
+    auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
+    auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
+
+    return BorderWidthPropertyF { left, top, right, bottom };
 }
 
 void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize,
@@ -151,6 +197,16 @@ void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size)
     size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
+void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
+{
+    size.AddPadding(padding.left, padding.right, padding.top, padding.bottom);
+}
+
+void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
+{
+    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom);
+}
+
 float GetMainAxisOffset(const OffsetF& offset, Axis axis)
 {
     return axis == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
@@ -175,34 +231,76 @@ void SetCrossAxisSize(float value, Axis axis, SizeF& size)
     size.SetHeight(value);
 }
 
-SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType)
+std::optional<float> GetMainAxisSize(const OptionalSizeF& size, Axis axis)
 {
-    SizeF idealSize = { -1.0f, -1.0f };
+    return axis == Axis::HORIZONTAL ? size.Width() : size.Height();
+}
+
+std::optional<float> GetCrossAxisSize(const OptionalSizeF& size, Axis axis)
+{
+    return axis == Axis::HORIZONTAL ? size.Height() : size.Width();
+}
+
+void SetCrossAxisSize(float value, Axis axis, OptionalSizeF& size)
+{
+    if (axis == Axis::VERTICAL) {
+        size.SetWidth(value);
+        return;
+    }
+    size.SetHeight(value);
+}
+
+void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size)
+{
+    if (axis == Axis::VERTICAL) {
+        size.SetHeight(value);
+        return;
+    }
+    size.SetWidth(value);
+}
+
+SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingMaxSize)
+{
+    auto optional = CreateIdealSize(layoutConstraint, axis, measureType);
+    if (usingMaxSize) {
+        optional.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
+    } else {
+        optional.UpdateIllegalSizeWithCheck(layoutConstraint.minSize);
+    }
+    return optional.ConvertToSizeT();
+}
+
+OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType)
+{
+    OptionalSizeF idealSize;
     do {
         // Use idea size first if it is valid.
-        if (layoutConstraint.selfIdealSize.has_value()) {
-            const auto& selfIdeaSize = layoutConstraint.selfIdealSize.value();
-            idealSize.UpdateSizeWithCheck(selfIdeaSize);
-            if (idealSize.IsNonNegative()) {
-                break;
-            }
+        idealSize.UpdateSizeWithCheck(layoutConstraint.selfIdealSize);
+        if (idealSize.IsValid()) {
+            break;
         }
 
-        if (measureType == MeasureType::MATCH_PARENT && layoutConstraint.parentIdealSize.has_value()) {
-            idealSize.UpdateIllegalSizeWithCheck(*layoutConstraint.parentIdealSize);
-            if (idealSize.IsNonNegative()) {
-                break;
-            }
+        if (measureType == MeasureType::MATCH_PARENT) {
+            idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.parentIdealSize);
+            break;
         }
-        if (GetCrossAxisSize(idealSize, axis) < 0) {
-            auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize.value_or(SizeF(-1, -1)), axis);
-            if (parentCrossSize < 0) {
-                parentCrossSize = GetCrossAxisSize(layoutConstraint.maxSize, axis);
+
+        if (measureType == MeasureType::MATCH_PARENT_CROSS_AXIS) {
+            auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, axis);
+            if (parentCrossSize) {
+                SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
             }
-            SetCrossAxisSize(parentCrossSize, axis, idealSize);
+            break;
+        }
+
+        if (measureType == MeasureType::MATCH_PARENT_MAIN_AXIS) {
+            auto parentCrossSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
+            if (parentCrossSize) {
+                SetMainAxisSize(parentCrossSize.value(), axis, idealSize);
+            }
+            break;
         }
     } while (false);
-    idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
     return idealSize;
 }
 } // namespace OHOS::Ace::NG

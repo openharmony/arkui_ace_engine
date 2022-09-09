@@ -16,72 +16,77 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 group("unittest") {
   testonly = true
-  deps = [
-    "align:unittest",
-    "border:unittest",
-    "box:unittest",
-
-    #"button:unittest",
-    "checkable:unittest",
-    "click_effect:unittest",
-    "decoration:unittest",
-    "dialog:unittest",
-    "display:unittest",
-    "divider:unittest",
-    "drag_bar:unittest",
-    "flex:unittest",
-
-    #"gestures:unittest",
-    "grid:unittest",
-    "grid_layout:unittest",
-
-    #"image:unittest",
-    #"image_animator:unittest",
-    "indexer:unittest",
-    "list:unittest",
-    "padding:unittest",
-    "pattern_lock:unittest",
-    "progress:unittest",
-
-    #"refresh:unittest",
-    "relative_container:unittest",
-    "rotation:unittest",
-    "scroll:unittest",
-    "semimodal:unittest",
-    "shadow:unittest",
-    "side_bar:unittest",
-    "slider:unittest",
-    "stack:unittest",
-    "stage:unittest",
-    "svg:unittest",
-    "swiper:unittest",
-    "text:unittest",
-    "theme:unittest",
-    "transform:unittest",
-    "transition:unittest",
-    "tween:unittest",
-
-    #"view_update:unittest",
-    "water_flow:unittest",
-    "wrap:unittest",
-  ]
-  if (!is_wearable_product) {
+  deps = []
+  if (!is_asan) {
     deps += [
-      #"clock:unittest", Open this after fix OHOS build error.
-      #"video:unittest", Open this after fix OHOS build error.
-      "camera:unittest",
-      "marquee:unittest",
-      "menu:unittest",
+      "align:unittest",
+      "border:unittest",
+      "box:unittest",
 
-      #"picker:unittest",
-      "piece:unittest",
-      "plugin:unittest",
-      "rating:unittest",
-      "select:unittest",
-      "tabbar:unittest",
-      "text_field:unittest",
+      #"button:unittest",
+      "checkable:unittest",
+      "click_effect:unittest",
+      "decoration:unittest",
+      "dialog:unittest",
+      "display:unittest",
+      "divider:unittest",
+      "drag_bar:unittest",
+      "flex:unittest",
 
-      #"text_select:unittest",
+      #"gestures:unittest",
+      "grid:unittest",
+      "grid_layout:unittest",
+      "image:unittest",
+
+      #"image_animator:unittest",
+      "indexer:unittest",
+      "list:unittest",
+      "padding:unittest",
+      "pattern_lock:unittest",
+      "progress:unittest",
+
+      #"refresh:unittest",
+      "relative_container:unittest",
+      "rotation:unittest",
+      "scroll:unittest",
+      "semimodal:unittest",
+      "shadow:unittest",
+      "side_bar:unittest",
+      "slider:unittest",
+      "sliding_panel:unittest",
+      "stack:unittest",
+      "stage:unittest",
+      "svg:unittest",
+      "swiper:unittest",
+      "text:unittest",
+      "theme:unittest",
+      "transform:unittest",
+      "transition:unittest",
+      "tween:unittest",
+
+      #"view_update:unittest",
+      "water_flow:unittest",
+      "wrap:unittest",
     ]
+    if (!is_wearable_product) {
+      deps += [
+        #"clock:unittest", Open this after fix OHOS build error.
+        #"video:unittest", Open this after fix OHOS build error.
+        "camera:unittest",
+        "marquee:unittest",
+        "menu:unittest",
+
+        #"picker:unittest",
+        "piece:unittest",
+        "plugin:unittest",
+        "rating:unittest",
+        "select:unittest",
+        "tabbar:unittest",
+        "text_field:unittest",
+        "web:unittest",
+
+        #"text_select:unittest",
+      ]
+    }
   }
 }

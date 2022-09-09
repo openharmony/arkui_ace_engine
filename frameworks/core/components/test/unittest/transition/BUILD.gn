@@ -195,10 +195,10 @@ common_module_files = [
   "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
 
   # add secure c API
-  "//utils/native/base/src/securec/strcpy_s.c",
-  "//utils/native/base/src/securec/vsnprintf_s.c",
-  "//utils/native/base/src/securec/securecutil.c",
-  "//utils/native/base/src/securec/secureprintoutput_a.c",
+  "//commonlibrary/c_utils/base/src/securec/strcpy_s.c",
+  "//commonlibrary/c_utils/base/src/securec/vsnprintf_s.c",
+  "//commonlibrary/c_utils/base/src/securec/securecutil.c",
+  "//commonlibrary/c_utils/base/src/securec/secureprintoutput_a.c",
 ]
 
 ohos_unittest("TransitionElementTest") {
@@ -232,7 +232,6 @@ ohos_unittest("TransitionElementTest") {
     "$cjson_root:cjson_static",
     "//third_party/googletest:gtest_main",
     "//third_party/zlib:libz",
-    "//utils/native/base:utils",
   ]
 
   if (is_standard_system) {
@@ -250,7 +249,7 @@ ohos_unittest("TransitionElementTest") {
       "init_lite:libbegetutil",
     ]
   }
-
+  external_deps += [ "c_utils:utils" ]
   sources += [
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
@@ -290,7 +289,6 @@ ohos_unittest("SharedTransitionElementTest") {
     "$cjson_root:cjson_static",
     "//third_party/googletest:gtest_main",
     "//third_party/zlib:libz",
-    "//utils/native/base:utils",
   ]
 
   if (is_standard_system) {
@@ -308,7 +306,7 @@ ohos_unittest("SharedTransitionElementTest") {
       "init_lite:libbegetutil",
     ]
   }
-
+  external_deps += [ "c_utils:utils" ]
   sources += [
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
@@ -349,7 +347,6 @@ ohos_unittest("TransitionPropertyElementTest") {
     "$cjson_root:cjson_static",
     "//third_party/googletest:gtest_main",
     "//third_party/zlib:libz",
-    "//utils/native/base:utils",
   ]
 
   if (is_standard_system) {
@@ -369,6 +366,7 @@ ohos_unittest("TransitionPropertyElementTest") {
       "init_lite:libbegetutil",
     ]
   }
+  external_deps += [ "c_utils:utils" ]
 
   sources += [
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
@@ -382,7 +380,7 @@ ohos_unittest("TransitionPropertyElementTest") {
 config("config_transition_element_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$ace_root",
   ]
 }

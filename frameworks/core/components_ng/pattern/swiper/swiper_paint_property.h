@@ -16,14 +16,20 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_PAINT_PROPERTY_H
 
-#include "src/core/SkPaintPriv.h"
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
-// PaintProperty are used to set paint properties.
+
+struct SwiperAnimationStyle {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AutoPlay, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AutoPlayInterval, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Duration, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Curve, RefPtr<Curve>);
+};
+
 class SwiperPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(SwiperPaintProperty, PaintProperty)
 
@@ -36,10 +42,7 @@ public:
         auto paintProperty = MakeRefPtr<SwiperPaintProperty>();
         paintProperty->UpdatePaintProperty(this);
         paintProperty->propLoop_ = CloneLoop();
-        paintProperty->propAutoPlay_ = CloneAutoPlay();
-        paintProperty->propAutoPlayInterval_ = CloneAutoPlayInterval();
-        paintProperty->propDuration_ = CloneDuration();
-        paintProperty->propCurve_ = CloneCurve();
+        paintProperty->propSwiperAnimationStyle_ = CloneSwiperAnimationStyle();
         paintProperty->propEnabled_ = CloneEnabled();
         paintProperty->propDisableSwipe_ = CloneDisableSwipe();
         paintProperty->propEdgeEffect_ = CloneEdgeEffect();
@@ -51,24 +54,20 @@ public:
     {
         PaintProperty::Reset();
         ResetLoop();
-        ResetAutoPlay();
-        ResetAutoPlayInterval();
-        ResetDuration();
-        ResetCurve();
+        ResetSwiperAnimationStyle();
         ResetEnabled();
         ResetDisableSwipe();
         ResetEdgeEffect();
         ResetFadeColor();
     }
 
+    ACE_DEFINE_PROPERTY_GROUP(SwiperAnimationStyle, SwiperAnimationStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, AutoPlay, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, AutoPlayInterval, int32_t, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, Duration, int32_t, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, Curve, RefPtr<Curve>, PROPERTY_UPDATE_RENDER);
+    
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_RENDER);
-
-    // TODO use group
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoPlay, bool, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoPlayInterval, int32_t, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Duration, int32_t, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Curve, RefPtr<Curve>, PROPERTY_UPDATE_RENDER);
-
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Enabled, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, EdgeEffect, PROPERTY_UPDATE_RENDER);

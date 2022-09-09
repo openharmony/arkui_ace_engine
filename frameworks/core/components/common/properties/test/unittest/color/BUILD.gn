@@ -42,6 +42,7 @@ config("color_test") {
 
 group("unittest") {
   testonly = true
-
-  deps = [ ":ColorPropertyTest" ]
+  if (!is_asan) {
+    deps = [ ":ColorPropertyTest" ]
+  }
 }

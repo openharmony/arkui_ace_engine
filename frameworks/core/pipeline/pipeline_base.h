@@ -57,6 +57,8 @@ public:
         const RefPtr<Frontend>& frontend, int32_t instanceId);
     ~PipelineBase() override;
 
+    static RefPtr<PipelineBase> GetCurrentContext();
+
     virtual void SetupRootElement() = 0;
 
     virtual uint64_t GetTimeFromExternalTimer();
@@ -133,6 +135,8 @@ public:
     virtual void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) = 0;
 
+    virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
+
     virtual void OnSurfaceDensityChanged(double density) = 0;
 
     virtual void OnSystemBarHeightChanged(double statusBar, double navigationBar) = 0;
@@ -150,6 +154,11 @@ public:
     virtual void Finish(bool autoFinish = true) const {}
 
     virtual void RequestFullWindow(int32_t duration) {}
+
+    virtual bool RequestFocus(const std::string& targetNodeId)
+    {
+        return false;
+    }
 
     // Called by AceAbility and UiContent.
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const;
@@ -437,6 +446,16 @@ public:
         return isRightToLeft_;
     }
 
+    void SetEventManager(const RefPtr<EventManager>& eventManager)
+    {
+        eventManager_ = eventManager;
+    }
+
+    RefPtr<EventManager> GetEventManager() const
+    {
+        return eventManager_;
+    }
+
     bool IsRebuildFinished() const
     {
         return isRebuildFinished_;
@@ -454,15 +473,9 @@ public:
 
     void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    virtual void FlushReload()
-    {
-        return;
-    }
+    virtual void FlushReload() {}
 
-    virtual void FlushReloadTransition()
-    {
-        return;
-    }
+    virtual void FlushReloadTransition() {}
 
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const

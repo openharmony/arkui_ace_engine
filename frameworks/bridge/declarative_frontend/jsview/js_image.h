@@ -21,7 +21,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
 #endif
@@ -69,6 +69,7 @@ public:
     static void SetBottomBorderWidth(const Dimension& value);
     static void SetBorderRadius(const Dimension& value);
     static void JsOpacity(const JSCallbackInfo& info);
+    static void JsBlur(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
@@ -30,7 +31,7 @@ class ACE_EXPORT ImagePattern : public Pattern {
     DECLARE_ACE_TYPE(ImagePattern, Pattern);
 
 public:
-    ImagePattern() = default;
+    explicit ImagePattern(const ImageSourceInfo& imageSourceInfo);
     ~ImagePattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -47,16 +48,19 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto layoutAlgorithm = MakeRefPtr<ImageLayoutAlgorithm>(CreateSuccessCallback(), CreateUploadSuccessCallback(),
-            CreateFailedCallback(), CreateOnBackgroundTaskPostCallback());
-        layoutAlgorithm->SetImageObject(imageObject_);
-        return layoutAlgorithm;
+        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_);
+    }
+
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<ImageEventHub>();
     }
 
     // Called on main thread to check if need rerender of the content.
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
 private:
+    void OnModifyDone() override;
     void OnActive() override
     {
         isActive_ = true;
@@ -64,38 +68,29 @@ private:
 
     void OnInActive() override
     {
-        fetchImageObjTask_.Reset(nullptr);
         isActive_ = false;
     }
 
     void PaintImage(RenderContext* renderContext, const OffsetF& offset);
 
-    void SetFetchImageObjBackgroundTask(const CancelableTask& task)
-    {
-        if (fetchImageObjTask_) {
-            fetchImageObjTask_.Cancel(false);
-        }
-        fetchImageObjTask_ = task;
-    }
-
-    void OnImageObjectReady(const RefPtr<ImageObject>& imageObj);
-    // TODO: add adapter for image.
-#ifdef NG_BUILD
-    void OnImageDataUploaded(RefPtr<CanvasImage> image);
-#else
-    void OnImageDataUploaded(fml::RefPtr<flutter::CanvasImage> image);
-#endif
+    void OnImageDataReady();
+    void OnImageLoadFail();
+    void OnImageLoadSuccess();
     void CacheImageObject();
 
-    ImageObjSuccessCallback CreateSuccessCallback();
-    UploadSuccessCallback CreateUploadSuccessCallback();
-    FailedCallback CreateFailedCallback();
-    OnPostBackgroundTask CreateOnBackgroundTaskPostCallback();
+    DataReadyNotifyTask CreateDataReadyCallback();
+    LoadSuccessNotifyTask CreateLoadSuccessCallback();
+    LoadFailNotifyTask CreateLoadFailCallback();
 
-    RefPtr<ImageObject> imageObject_;
-    RefPtr<CanvasImage> image_;
-    CancelableTask fetchImageObjTask_;
+    ImageSourceInfo sourceInfo_;
+
+    RefPtr<CanvasImage> lastCanvasImage_;
+    RectF lastDstRect_;
+    RectF lastSrcRect_;
+
     bool isActive_ = false;
+
+    RefPtr<ImageLoadingContext> loadingCtx_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };

@@ -40,6 +40,11 @@ public:
 
     void OnReset() override {}
 
+    const PositionMap& GetItemPosition() const
+    {
+        return itemPosition_;
+    }
+
     void SetCurrentOffset(float offset)
     {
         currentOffset_ = offset;
@@ -127,9 +132,11 @@ private:
     std::optional<int32_t> endIndex_;
 
     float spaceWidth_ = 0.0f;
-
     bool isInitialized_ = false;
-
+    int32_t cachedCount_ = 0;
+    int32_t startCachedCount_ = 0;
+    int32_t endCachedCount_ = 0;
+    
     std::optional<int32_t> lanes_;
     std::optional<float> minLaneLength_;
     std::optional<float> maxLaneLength_;

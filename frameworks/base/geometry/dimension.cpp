@@ -19,8 +19,52 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
+
+double Dimension::ConvertToVp() const
+{
+    if (unit_ == DimensionUnit::VP) {
+        return value_;
+    }
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0);
+    if (unit_ == DimensionUnit::PX) {
+        return value_ / pipeline->GetDipScale();
+    }
+    if (unit_ == DimensionUnit::FP) {
+        return value_ * pipeline->GetFontScale();
+    }
+    if (unit_ == DimensionUnit::LPX) {
+        return value_ * pipeline->GetLogicScale() / pipeline->GetDipScale();
+    }
+    LOGE("fail to ConvertToVp, %{public}f, %{public}d", value_, unit_);
+    return 0.0;
+}
+
+double Dimension::ConvertToPx() const
+{
+    if (unit_ == DimensionUnit::PX) {
+        return value_;
+    }
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0);
+    if (unit_ == DimensionUnit::VP) {
+        return value_ * pipeline->GetDipScale();
+    }
+    if (unit_ == DimensionUnit::FP) {
+        return value_ * pipeline->GetDipScale() * pipeline->GetFontScale();
+    }
+    if (unit_ == DimensionUnit::LPX) {
+        return value_ * pipeline->GetLogicScale();
+    }
+    LOGE("fail to ConvertToPx, %{public}f, %{public}d", value_, unit_);
+    return 0.0;
+}
+
 std::string Dimension::ToString() const
 {
     static const int32_t unitsNum = 6;
@@ -56,7 +100,7 @@ bool Dimension::NormalizeToPx(
     }
     if (unit_ == DimensionUnit::FP) {
         if (Positive(fpScale)) {
-            result = value_ * fpScale;
+            result = value_ * fpScale * vpScale;
             return true;
         }
         return false;

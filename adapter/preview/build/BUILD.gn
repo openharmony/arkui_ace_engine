@@ -30,3 +30,7 @@ libace_engine("libace_engine_windows") {
 libace_engine("libace_engine_mac") {
   platform = "mac"
 }
+
+libace_engine("libace_engine_linux") {
+  platform = "linux"
+}

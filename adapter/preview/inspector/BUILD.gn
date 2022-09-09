@@ -34,7 +34,7 @@ template("ace_inspector") {
 
 foreach(item, ace_platforms) {
   platform = item.name
-  if (platform == "windows" || platform == "mac") {
+  if (platform == "windows" || platform == "mac" || platform == "linux") {
     ace_inspector("ace_inspector_" + item.name) {
       defines = []
       config = {

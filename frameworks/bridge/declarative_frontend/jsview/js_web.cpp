@@ -23,8 +23,11 @@
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_web_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -157,6 +160,52 @@ private:
     }
 
     RefPtr<AuthResult> result_;
+};
+
+class JSWebSslError : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebSslError>::Declare("WebSslErrorResult");
+        JSClass<JSWebSslError>::CustomMethod("handleConfirm", &JSWebSslError::HandleConfirm);
+        JSClass<JSWebSslError>::CustomMethod("handleCancel", &JSWebSslError::HandleCancel);
+        JSClass<JSWebSslError>::Bind(globalObj, &JSWebSslError::Constructor, &JSWebSslError::Destructor);
+    }
+
+    void SetResult(const RefPtr<SslErrorResult>& result)
+    {
+        result_ = result;
+    }
+
+    void HandleConfirm(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->HandleConfirm();
+        }
+    }
+
+    void HandleCancel(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->HandleCancel();
+        }
+    }
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebSslError = Referenced::MakeRefPtr<JSWebSslError>();
+        jsWebSslError->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebSslError));
+    }
+
+    static void Destructor(JSWebSslError* jsWebSslError)
+    {
+        if (jsWebSslError != nullptr) {
+            jsWebSslError->DecRefCount();
+        }
+    }
+
+    RefPtr<SslErrorResult> result_;
 };
 
 class JSWebConsoleLog : public Referenced {
@@ -1003,11 +1052,12 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("overviewModeAccess", &JSWeb::OverviewModeAccess);
     JSClass<JSWeb>::StaticMethod("fileFromUrlAccess", &JSWeb::FileFromUrlAccess);
     JSClass<JSWeb>::StaticMethod("databaseAccess", &JSWeb::DatabaseAccess);
-    JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::TextZoomAtio);
+    JSClass<JSWeb>::StaticMethod("textZoomRatio", &JSWeb::TextZoomRatio);
+    JSClass<JSWeb>::StaticMethod("textZoomAtio", &JSWeb::TextZoomRatio);
     JSClass<JSWeb>::StaticMethod("webDebuggingAccess", &JSWeb::WebDebuggingAccessEnabled);
     JSClass<JSWeb>::StaticMethod("initialScale", &JSWeb::InitialScale);
     JSClass<JSWeb>::StaticMethod("backgroundColor", &JSWeb::BackgroundColor);
-    JSClass<JSWeb>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSWeb>::StaticMethod("onKeyEvent", &JSWeb::OnKeyEvent);
     JSClass<JSWeb>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSWeb>::StaticMethod("onMouse", &JSWeb::OnMouse);
     JSClass<JSWeb>::StaticMethod("onResourceLoad", &JSWeb::OnResourceLoad);
@@ -1016,10 +1066,17 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("tableData", &JSWeb::TableData);
     JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::OnFileSelectorShowAbandoned);
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::OnHttpAuthRequest);
+    JSClass<JSWeb>::StaticMethod("onSslErrorEventReceive", &JSWeb::OnSslErrorRequest);
     JSClass<JSWeb>::StaticMethod("onPermissionRequest", &JSWeb::OnPermissionRequest);
     JSClass<JSWeb>::StaticMethod("onContextMenuShow", &JSWeb::OnContextMenuShow);
     JSClass<JSWeb>::StaticMethod("onSearchResultReceive", &JSWeb::OnSearchResultReceive);
     JSClass<JSWeb>::StaticMethod("mediaPlayGestureAccess", &JSWeb::MediaPlayGestureAccess);
+    JSClass<JSWeb>::StaticMethod("onDragStart", &JSWeb::JsOnDragStart);
+    JSClass<JSWeb>::StaticMethod("onDragEnter", &JSWeb::JsOnDragEnter);
+    JSClass<JSWeb>::StaticMethod("onDragMove", &JSWeb::JsOnDragMove);
+    JSClass<JSWeb>::StaticMethod("onDragLeave", &JSWeb::JsOnDragLeave);
+    JSClass<JSWeb>::StaticMethod("onDrop", &JSWeb::JsOnDrop);
+    JSClass<JSWeb>::StaticMethod("onScroll", &JSWeb::OnScroll);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1031,6 +1088,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSFileSelectorParam::JSBind(globalObj);
     JSFileSelectorResult::JSBind(globalObj);
     JSWebHttpAuth::JSBind(globalObj);
+    JSWebSslError::JSBind(globalObj);
     JSWebPermissionRequest::JSBind(globalObj);
     JSContextMenuParam::JSBind(globalObj);
     JSContextMenuResult::JSBind(globalObj);
@@ -1147,6 +1205,21 @@ JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("host", eventInfo.GetHost());
     obj->SetProperty("realm", eventInfo.GetRealm());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> resultObj = JSClass<JSWebSslError>::NewInstance();
+    auto jsWebSslError = Referenced::Claim(resultObj->Unwrap<JSWebSslError>());
+    if (!jsWebSslError) {
+        LOGE("jsWebSslError is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
+    jsWebSslError->SetResult(eventInfo.GetResult());
+    obj->SetPropertyObject("handler", resultObj);
+    obj->SetProperty("error", eventInfo.GetError());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -1307,19 +1380,18 @@ void JSWeb::OnPageFinish(const JSCallbackInfo& args)
 
 void JSWeb::OnProgressChange(const JSCallbackInfo& args)
 {
-    if (!args[0]->IsFunction()) {
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebProgressChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebProgressChangeEventToJSValue);
-    auto eventMarker = EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]
-        (const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
-            func->Execute(*eventInfo);
-        });
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)] (const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
+        func->Execute(*eventInfo);
+    };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    webComponent->SetProgressChangeEventId(eventMarker);
+    webComponent->SetProgressChangeImpl(std::move(jsCallback));
 }
 
 void JSWeb::OnTitleReceive(const JSCallbackInfo& args)
@@ -1438,6 +1510,36 @@ void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
     webComponent->SetOnHttpAuthRequestImpl(std::move(jsCallback));
 }
 
+void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("param is invalid.");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebSslErrorEvent, 1>>(JSRef<JSFunc>::Cast(args[0]),
+                                                                            WebSslErrorEventToJSValue);
+    auto jsCallback = [func = std::move(jsFunc)]
+        (const BaseEventInfo* info) -> bool {
+            ACE_SCORING_EVENT("OnSslErrorRequest CallBack");
+            if (func == nullptr) {
+                LOGW("function is null");
+                return false;
+            }
+            auto eventInfo = TypeInfoHelper::DynamicCast<WebSslErrorEvent>(info);
+            if (eventInfo == nullptr) {
+                LOGW("eventInfo is null");
+                return false;
+            }
+            JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
+            if (result->IsBoolean()) {
+                return result->ToBoolean();
+            }
+            return false;
+        };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnSslErrorRequestImpl(std::move(jsCallback));
+}
+
 void JSWeb::MediaPlayGestureAccess(bool isNeedGestureAccess)
 {
     auto stack = ViewStackProcessor::GetInstance();
@@ -1447,6 +1549,26 @@ void JSWeb::MediaPlayGestureAccess(bool isNeedGestureAccess)
         return;
     }
     webComponent->SetMediaPlayGestureAccess(isNeedGestureAccess);
+}
+
+void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnKeyEvent");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+
+    RefPtr<JsKeyFunction> jsOnKeyEventFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto onKeyEventId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyEventFunc)](
+                            KeyEventInfo& keyEventInfo) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onKeyEvent");
+        func->Execute(keyEventInfo);
+    };
+
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnKeyEventCallback(onKeyEventId);
 }
 
 JSRef<JSVal> ReceivedErrorEventToJSValue(const ReceivedErrorEvent& eventInfo)
@@ -1931,7 +2053,7 @@ void JSWeb::DatabaseAccess(bool isDatabaseAccessEnabled)
     webComponent->SetDatabaseAccessEnabled(isDatabaseAccessEnabled);
 }
 
-void JSWeb::TextZoomAtio(int32_t textZoomAtioNum)
+void JSWeb::TextZoomRatio(int32_t textZoomRatioNum)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
@@ -1939,7 +2061,7 @@ void JSWeb::TextZoomAtio(int32_t textZoomAtioNum)
         LOGE("JSWeb: MainComponent is null.");
         return;
     }
-    webComponent->SetTextZoomAtio(textZoomAtioNum);
+    webComponent->SetTextZoomRatio(textZoomRatioNum);
 }
 
 void JSWeb::WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
@@ -2023,6 +2145,32 @@ void JSWeb::OnScaleChange(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetScaleChangeId(eventMarker);
+}
+
+JSRef<JSVal> ScrollEventToJSValue(const OnScrollEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("xOffset", eventInfo.GetX());
+    obj->SetProperty("yOffset", eventInfo.GetY());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnScroll(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<OnScrollEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ScrollEventToJSValue);
+    auto eventMarker =
+        EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<OnScrollEvent>(info);
+            func->Execute(*eventInfo);
+        });
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetScrollId(eventMarker);
 }
 
 JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& eventInfo)
@@ -2114,5 +2262,102 @@ void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetSearchResultReceiveEventId(eventMarker);
+}
+
+void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
+        DragItemInfo itemInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
+
+        auto ret = func->Execute(info, extraParams);
+        if (!ret->IsObject()) {
+            LOGE("builder param is not an object.");
+            return itemInfo;
+        }
+        auto component = ParseDragItemComponent(ret);
+        if (component) {
+            LOGI("use custom builder param.");
+            itemInfo.customComponent = component;
+            return itemInfo;
+        }
+
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+        auto pixmap = builderObj->GetProperty("pixelMap");
+        itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
+#endif
+        auto extraInfo = builderObj->GetProperty("extraInfo");
+        ParseJsString(extraInfo, itemInfo.extraInfo);
+        component = ParseDragItemComponent(builderObj->GetProperty("builder"));
+        itemInfo.customComponent = component;
+        return itemInfo;
+    };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (webComponent) {
+        webComponent->SetOnDragStartId(onDragStartId);
+    }
+}
+
+void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragEnter");
+        func->Execute(info, extraParams);
+    };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (webComponent) {
+        webComponent->SetOnDragEnterId(onDragEnterId);
+    }
+}
+
+void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+                            const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragMove");
+        func->Execute(info, extraParams);
+    };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (webComponent) {
+        webComponent->SetOnDragMoveId(onDragMoveId);
+    }
+}
+
+void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragLeave");
+        func->Execute(info, extraParams);
+    };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (webComponent) {
+        webComponent->SetOnDragLeaveId(onDragLeaveId);
+    }
+}
+
+void JSWeb::JsOnDrop(const JSCallbackInfo& info)
+{
+    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+                        const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDrop");
+        func->Execute(info, extraParams);
+    };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (webComponent) {
+        webComponent->SetOnDropId(onDropId);
+    }
 }
 } // namespace OHOS::Ace::Framework

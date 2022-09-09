@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_STACK_STACK_ELEMENT_H
 
 #include "core/components/bubble/bubble_element.h"
+#include "core/components/dialog_tween/dialog_tween_element.h"
 #include "core/pipeline/base/component_group_element.h"
 
 namespace OHOS::Ace {
@@ -69,6 +70,7 @@ public:
     void PopTextOverlay();
     void PopPopup(const ComposeId& id);
     bool PopPopupIfExist() const;
+    bool PopDialogIfExist() const;
     void PopMenu();
     void PopVideo();
     void PopInstant();
@@ -100,6 +102,7 @@ private:
     void PerformPopupChild();
     void EnableTouchEventAndRequestFocus();
     RefPtr<BubbleElement> GetBubble(const RefPtr<Element>& element) const;
+    RefPtr<DialogTweenElement> GetDialog(const RefPtr<Element>& element) const;
 
     void CreateInspectorComponent(PopupComponentInfo& componentInfo) const;
 

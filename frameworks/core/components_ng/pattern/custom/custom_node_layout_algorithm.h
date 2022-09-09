@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -31,7 +32,7 @@ class ACE_EXPORT CustomNodeLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(CustomNodeLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    CustomNodeLayoutAlgorithm(const RenderFunction& renderFunction) : renderFunction_(renderFunction) {}
+    explicit CustomNodeLayoutAlgorithm(const RenderFunction& renderFunction) : renderFunction_(renderFunction) {}
 
     ~CustomNodeLayoutAlgorithm() override = default;
 
@@ -50,6 +51,8 @@ public:
 private:
     RenderFunction renderFunction_;
     RefPtr<UINode> buildItem_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(CustomNodeLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
 

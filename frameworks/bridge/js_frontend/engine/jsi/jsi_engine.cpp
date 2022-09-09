@@ -28,6 +28,7 @@
 #include "base/utils/time_util.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_value.h"
+#include "bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
@@ -56,7 +57,7 @@
 #include "pixel_map_napi.h"
 #endif
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 extern const char _binary_strip_native_min_abc_start[];
 extern const char _binary_strip_native_min_abc_end[];
 #endif
@@ -77,7 +78,7 @@ static int32_t globalNodeId = 100000;
 std::map<const std::string, std::string> JsiEngineInstance::dataMap_;
 RefPtr<Clipboard> clipboard;
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue> jsValue)
 {
     auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
@@ -2397,7 +2398,7 @@ shared_ptr<JsValue> AppSetDataImage(const shared_ptr<JsRuntime>& runtime, const 
     if (argv.empty() || argc != 3) {
         return runtime->NewBoolean(false);
     }
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     DOMDocument::pixelMap_ = CreatePixelMapFromNapiValue(runtime, argv[0]);
     if (argv[1] && argv[1]->IsInt32(runtime)) {
         DOMDocument::pixelMapOffsetX_ = argv[1]->ToInt32(runtime);
@@ -2956,7 +2957,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
         return false;
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     for (const auto& [key, value] : extraNativeObject) {
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
@@ -2972,7 +2973,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     RegisterI18nPluralRulesModule();
 
     // load jsfwk
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (!runtime_->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
         LOGE("Failed to load js framework!");
         return false;
@@ -3079,7 +3080,7 @@ void JsiEngineInstance::CallJs(const std::string& callbackId, const std::string&
     func->Call(runtime_, global, argv, argv.size());
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 bool JsiEngineInstance::CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
 {
     auto dispatcher = dispatcher_.Upgrade();
@@ -3133,7 +3134,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     nativeEngine_ = nativeEngine;
     engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     nativeEngine_->CheckUVLoop();
 #endif
 
@@ -3152,7 +3153,6 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 
 void JsiEngine::SetPostTask(NativeEngine* nativeEngine)
 {
-    LOGI("SetPostTask");
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
     auto&& postTask = [weakDelegate, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
@@ -3203,7 +3203,7 @@ void JsiEngine::RegisterInitWorkerFunc()
             LOGE("instance is nullptr");
             return;
         }
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
         ConnectServerManager::Get().AddInstance(gettid());
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
@@ -3220,7 +3220,7 @@ void JsiEngine::RegisterInitWorkerFunc()
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
 
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
 void JsiEngine::RegisterOffWorkerFunc()
 {
     auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
@@ -3270,7 +3270,7 @@ void JsiEngine::RegisterAssetFunc()
 void JsiEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
     RegisterOffWorkerFunc();
 #endif
     RegisterAssetFunc();
@@ -3280,7 +3280,7 @@ JsiEngine::~JsiEngine()
 {
     LOG_DESTROY();
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         nativeEngine_->DeleteEngine();
@@ -3332,7 +3332,7 @@ bool JsiEngine::ExecuteAbc(const std::string &fileName)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     std::string basePath = delegate->GetAssetPath(fileName);
     if (!basePath.empty()) {
         std::string abcPath = basePath.append(fileName);

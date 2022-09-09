@@ -19,9 +19,14 @@
 #include <memory>
 #include <optional>
 
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/magic_layout_property.h"
@@ -62,6 +67,11 @@ public:
         return padding_;
     }
 
+    const std::unique_ptr<BorderWidthProperty>& GetBorderWidthProperty() const
+    {
+        return borderWidth_;
+    }
+
     const std::unique_ptr<PositionProperty>& GetPositionProperty() const
     {
         return positionProperty_;
@@ -72,6 +82,10 @@ public:
         return calcLayoutConstraint_;
     }
 
+    const std::unique_ptr<FlexItemProperty>& GetFlexItemProperty() const
+    {
+        return flexItemProperty_;
+    }
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
     {
         return measureType_.value_or(defaultType);
@@ -83,6 +97,16 @@ public:
             padding_ = std::make_unique<PaddingProperty>();
         }
         if (padding_->UpdateWithCheck(value)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateBorderWidth(const BorderWidthProperty& value)
+    {
+        if (!borderWidth_) {
+            borderWidth_ = std::make_unique<BorderWidthProperty>();
+        }
+        if (borderWidth_->UpdateWithCheck(value)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
         }
     }
@@ -129,43 +153,78 @@ public:
         }
     }
 
-    void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint, bool updateFlag = false);
+    void UpdateCalcMinSize(const CalcSize& value)
+    {
+        if (!calcLayoutConstraint_) {
+            calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+        }
+        if (calcLayoutConstraint_->UpdateMinSizeWithCheck(value)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateCalcMaxSize(const CalcSize& value)
+    {
+        if (!calcLayoutConstraint_) {
+            calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+        }
+        if (calcLayoutConstraint_->UpdateMaxSizeWithCheck(value)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
     void UpdateSelfIdealSize(const SizeF& value)
     {
         if (!layoutConstraint_.has_value()) {
             layoutConstraint_ = LayoutConstraintF();
         }
-        if (layoutConstraint_->UpdateSelfIdealSizeWithCheck(value)) {
+        if (layoutConstraint_->UpdateSelfIdealSizeWithCheck(OptionalSizeF(value))) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateFlexGrow(const int32_t flexGrow, bool updateFlag = false) {
+        if (!flexItemProperty_) {
+            flexItemProperty_ = std::make_unique<FlexItemProperty>();
+        }
+        if (flexItemProperty_->UpdateFlexGrow(flexGrow)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateFlexShrink(const int32_t flexShrink, bool updateFlag = false) {
+        if (!flexItemProperty_) {
+            flexItemProperty_ = std::make_unique<FlexItemProperty>();
+        }
+        if (flexItemProperty_->UpdateFlexShrink(flexShrink)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
+    void UpdateAlignSelf(const FlexAlign& flexAlign, bool updateFlag = false) {
+        if (!flexItemProperty_) {
+            flexItemProperty_ = std::make_unique<FlexItemProperty>();
+        }
+        if (flexItemProperty_->UpdateAlignSelf(flexAlign)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }
 
     void UpdateContentConstraint();
 
-    std::optional<LayoutConstraintF> CreateChildConstraint() const
-    {
-        auto layoutConstraint = contentConstraint_;
-        if (layoutConstraint.has_value()) {
-            if (layoutConstraint->selfIdealSize.has_value()) {
-                layoutConstraint->parentIdealSize = layoutConstraint->selfIdealSize;
-            }
-            // for child constraint, reset parent selfIdealSize.
-            layoutConstraint->selfIdealSize.reset();
-        }
-        return layoutConstraint;
-    }
+    LayoutConstraintF CreateChildConstraint() const;
 
     LayoutConstraintF CreateContentConstraint() const
     {
         auto layoutConstraint = contentConstraint_.value_or(LayoutConstraintF());
-        if (layoutConstraint.selfIdealSize) {
-            layoutConstraint.maxSize.UpdateSizeWhenSmaller(layoutConstraint.selfIdealSize.value());
-        }
+        layoutConstraint.maxSize.UpdateSizeWhenSmaller(layoutConstraint.selfIdealSize.ConvertToSizeT());
         return layoutConstraint;
     }
 
-    PaddingPropertyF CreatePaddingPropertyF();
+    PaddingPropertyF CreatePaddingWithoutBorder();
+    PaddingPropertyF CreatePaddingAndBorder();
 
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
@@ -179,9 +238,13 @@ private:
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
     std::unique_ptr<PaddingProperty> padding_;
+    std::unique_ptr<BorderWidthProperty> borderWidth_;
     std::unique_ptr<MagicItemProperty> magicItemProperty_;
     std::unique_ptr<PositionProperty> positionProperty_;
+    std::unique_ptr<FlexItemProperty> flexItemProperty_;
     std::optional<MeasureType> measureType_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
 } // namespace OHOS::Ace::NG
 

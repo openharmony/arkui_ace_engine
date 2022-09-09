@@ -40,6 +40,7 @@
 #include "core/components/swiper/render_swiper.h"
 #include "core/components/test/json/json_frontend.h"
 #include "core/components/text/render_text.h"
+#include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components/transform/render_transform.h"
 #include "core/mock/fake_asset_manager.h"
 #include "core/mock/fake_task_executor.h"
@@ -305,18 +306,6 @@ RefPtr<RenderNode> RenderTransform::Create()
     return AceType::MakeRefPtr<MockRenderTransform>();
 }
 
-void SemiModalElement::UpdateSystemBarHeight(double statusBar, double navigationBar) {}
-
-RefPtr<OverlayElement> SemiModalElement::GetOverlayElement() const
-{
-    return nullptr;
-}
-
-RefPtr<StageElement> SemiModalElement::GetStageElement() const
-{
-    return nullptr;
-}
-
 RefPtr<Component> SemiModalComponent::Create(
     RefPtr<Component> child, bool isFullScreen, int32_t modalHeight, uint32_t color)
 {
@@ -338,13 +327,6 @@ RefPtr<StageElement> DialogModalElement::GetStageElement() const
 RefPtr<Component> DialogModalComponent::Create(RefPtr<Component> child)
 {
     return nullptr;
-}
-
-void SemiModalElement::AnimateToExitApp() const {}
-
-bool SemiModalElement::IsFullWindow() const
-{
-    return true;
 }
 
 void DialogModalElement::AnimateToExitApp() {}

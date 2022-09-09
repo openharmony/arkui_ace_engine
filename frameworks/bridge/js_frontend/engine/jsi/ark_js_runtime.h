@@ -16,8 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 #include <unordered_map>
+#include "frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.h"
 #endif
 #include <memory>
 
@@ -64,7 +65,7 @@ public:
     void Reset() override;
     void SetLogPrint(LOG_PRINT out) override;
     shared_ptr<JsValue> EvaluateJsCode(const std::string& src) override;
-    bool EvaluateJsCode(const uint8_t* buffer, int32_t size) override;
+    bool EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath = "") override;
     bool ExecuteJsBin(const std::string& fileName) override;
     shared_ptr<JsValue> GetGlobal() override;
     void RunGC() override;
@@ -96,7 +97,7 @@ public:
         debuggerPostTask_ = std::move(task);
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     void SetPreviewFlag(bool flag)
     {
         isComponentPreview_ = flag;
@@ -131,6 +132,17 @@ public:
         panda::Global<panda::ObjectRef> undefined(vm, panda::JSValueRef::Undefined(vm));
         return undefined;
     }
+
+    void SetPathResolveCallback(const std::string& bundleName, const std::string& assetPath)
+    {
+        panda::JSNApi::SetHostResolvePathTracker(vm_, JsiModuleSearcher(bundleName, assetPath));
+        panda::JSNApi::SetAssetPath(vm_, assetPath);
+    }
+
+    void SetBundle(bool isBundle)
+    {
+        panda::JSNApi::SetBundle(vm_, isBundle);
+    }
 #endif
 
 private:
@@ -143,7 +155,7 @@ private:
     bool usingExistVM_ = false;
     bool isDebugMode_ = true;
     DebuggerPostTask debuggerPostTask_;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     bool isComponentPreview_ = false;
     std::string requiredComponent_ {};
     std::unordered_map<std::string, panda::Global<panda::ObjectRef>> previewComponents_;

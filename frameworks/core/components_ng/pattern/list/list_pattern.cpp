@@ -26,14 +26,14 @@ namespace OHOS::Ace::NG {
 
 void ListPattern::OnAttachToFrameNode()
 {
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
 void ListPattern::OnModifyDone()
 {
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
@@ -71,15 +71,21 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, b
     startIndex_ = listLayoutAlgorithm->GetStartIndex();
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
     isInitialized_ = listLayoutAlgorithm->GetIsInitialized();
-    return false;
+    itemPosition_ = listLayoutAlgorithm->GetItemPosition();
+    auto host = GetHost();
+    if (host == nullptr) {
+        return false;
+    }
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
 }
 
 void ListPattern::UpdateCurrentOffset(float offset)
 {
     currentOffset_ = currentOffset_ - offset;
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_REQUEST_NEW_CHILD_NODE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 } // namespace OHOS::Ace::NG

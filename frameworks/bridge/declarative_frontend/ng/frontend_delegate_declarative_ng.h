@@ -62,7 +62,6 @@ public:
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
     RefPtr<JsAcePage> GetPage(int32_t pageId) const override;
-    int32_t GetRunningPageId() const;
     size_t GetComponentsCount() override
     {
         return 0;
@@ -165,9 +164,13 @@ public:
 
     RefPtr<PipelineBase> GetPipelineContext() override;
 
-    void SetPageRouterManager(const RefPtr<PageRouterManager>& routerMgr)
+    void SetPageRouterManager(const RefPtr<NG::PageRouterManager>& routerMgr)
     {
         pageRouterManager_ = routerMgr;
+    }
+    const RefPtr<NG::PageRouterManager>& GetPageRouterManager() const
+    {
+        return pageRouterManager_;
     }
 
     WindowConfig& GetWindowConfig()
@@ -180,7 +183,7 @@ public:
 private:
     PipelineContextHolder pipelineContextHolder_;
     RefPtr<TaskExecutor> taskExecutor_;
-    RefPtr<PageRouterManager> pageRouterManager_;
+    RefPtr<NG::PageRouterManager> pageRouterManager_;
     RefPtr<Framework::ManifestParser> manifestParser_;
     RefPtr<MediaQueryInfo> mediaQueryInfo_;
     RefPtr<GroupJsBridge> groupJsBridge_;

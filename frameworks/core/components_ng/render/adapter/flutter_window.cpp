@@ -22,6 +22,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/adapter/flutter_render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -73,7 +74,7 @@ void FlutterWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
     rootNode_ = root;
 }
 
-void FlutterWindow::RecordFrameTime(uint64_t timeStamp, const std::string name)
+void FlutterWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
 {
     LOGD("FlutterWindow RecordFrameTime");
 }

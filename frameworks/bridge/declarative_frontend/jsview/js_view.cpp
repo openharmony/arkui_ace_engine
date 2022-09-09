@@ -40,12 +40,7 @@ namespace OHOS::Ace::Framework {
 
 void JSView::JSBind(BindingTarget object)
 {
-    if (Container::IsCurrentUsePartialUpdate()) {
-        JSViewPartialUpdate::JSBind(object);
-        LOGD("Creating JSViewPartialUpdate");
-        return;
-    }
-    LOGD("Creating JSViewFullUpdate");
+    JSViewPartialUpdate::JSBind(object);
     JSViewFullUpdate::JSBind(object);
 }
 
@@ -241,7 +236,7 @@ void JSViewFullUpdate::MarkNeedUpdate()
 
 void JSViewFullUpdate::Destroy(JSView* parentCustomView)
 {
-    LOGD("JSView::Destroy start");
+    LOGD("JSViewFullUpdate::Destroy start");
     DestroyChild(parentCustomView);
     {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].Disappear");
@@ -251,11 +246,14 @@ void JSViewFullUpdate::Destroy(JSView* parentCustomView)
         ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToBeDeleted");
         jsViewFunction_->ExecuteAboutToBeDeleted();
     }
-    LOGD("JSView::Destroy end");
+    LOGD("JSViewFullUpdate::Destroy end");
 }
 
 void JSViewFullUpdate::Create(const JSCallbackInfo& info)
 {
+    LOGD("Creating new View for full update");
+    ACE_DCHECK(!Container::IsCurrentUsePartialUpdate());
+
     if (info[0]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
         auto* view = object->Unwrap<JSViewFullUpdate>();
@@ -275,7 +273,8 @@ void JSViewFullUpdate::Create(const JSCallbackInfo& info)
 
 void JSViewFullUpdate::JSBind(BindingTarget object)
 {
-    JSClass<JSViewFullUpdate>::Declare("NativeView");
+    LOGD("JSViewFullUpdate::Bind");
+    JSClass<JSViewFullUpdate>::Declare("NativeViewFullUpdate");
     JSClass<JSViewFullUpdate>::StaticMethod("create", &JSViewFullUpdate::Create);
     JSClass<JSViewFullUpdate>::Method("markNeedUpdate", &JSViewFullUpdate::MarkNeedUpdate);
     JSClass<JSViewFullUpdate>::Method("syncInstanceId", &JSViewFullUpdate::SyncInstanceId);
@@ -335,17 +334,17 @@ void JSViewFullUpdate::ConstructorCallback(const JSCallbackInfo& info)
 void JSViewFullUpdate::DestructorCallback(JSViewFullUpdate* view)
 {
     if (view == nullptr) {
-        LOGE("DestructorCallback failed: the view is nullptr");
+        LOGE("JSViewFullUpdate::DestructorCallback failed: the view is nullptr");
         return;
     }
-    LOGD("JSView(DestructorCallback) start: %{public}s", view->id_.c_str());
+    LOGD("JSViewFullUpdate(DestructorCallback) start: %{public}s", view->id_.c_str());
     view->DecRefCount();
-    LOGD("JSView(DestructorCallback) end");
+    LOGD("JSViewFullUpdate(DestructorCallback) end");
 }
 
 void JSViewFullUpdate::DestroyChild(JSView* parentCustomView)
 {
-    LOGD("JSView::DestroyChild start");
+    LOGD("JSViewFullUpdate::DestroyChild start");
     for (auto&& child : customViewChildren_) {
         auto* view = child.second->Unwrap<JSView>();
         if (view != nullptr) {
@@ -362,7 +361,7 @@ void JSViewFullUpdate::DestroyChild(JSView* parentCustomView)
         lazyChild.second.Reset();
     }
     customViewChildrenWithLazy_.clear();
-    LOGD("JSView::DestroyChild end");
+    LOGD("JSViewFullUpdate::DestroyChild end");
 }
 
 void JSViewFullUpdate::CleanUpAbandonedChild()
@@ -393,7 +392,12 @@ void JSViewFullUpdate::CleanUpAbandonedChild()
 
 JSRef<JSObject> JSViewFullUpdate::GetChildById(const std::string& viewId)
 {
-    auto id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    std::string id;
+    if (Container::IsCurrentUseNewPipeline()) {
+        id = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    } else {
+        id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    }
     auto found = customViewChildren_.find(id);
     if (found != customViewChildren_.end()) {
         ChildAccessedById(id);
@@ -408,15 +412,21 @@ JSRef<JSObject> JSViewFullUpdate::GetChildById(const std::string& viewId)
 
 std::string JSViewFullUpdate::AddChildById(const std::string& viewId, const JSRef<JSObject>& obj)
 {
-    auto id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    std::string id;
+    if (Container::IsCurrentUsePartialUpdate()) {
+        id = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    } else {
+        id = ViewStackProcessor::GetInstance()->ProcessViewId(viewId);
+    }
     JSView* jsView = nullptr;
     if (isLazyForEachProcessed_) {
         auto result = customViewChildrenWithLazy_.try_emplace(id, obj);
         if (!result.second) {
             jsView = result.first->second->Unwrap<JSView>();
             result.first->second = obj;
+        } else {
+            lazyItemGroups_[lazyItemGroupId_].emplace_back(id);
         }
-        lazyItemGroups_[lazyItemGroupId_].emplace_back(id);
     } else {
         auto result = customViewChildren_.try_emplace(id, obj);
         if (!result.second) {
@@ -436,7 +446,7 @@ void JSViewFullUpdate::RemoveChildGroupById(const std::string& viewId)
     // js runtime may be released
     CHECK_JAVASCRIPT_SCOPE_AND_RETURN;
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
-    LOGD("RemoveChildGroupById in lazy for each case: %{public}s", viewId.c_str());
+    LOGD("JSViewFullUpdate::RemoveChildGroupById in lazy for each case: %{public}s", viewId.c_str());
     auto iter = lazyItemGroups_.find(viewId);
     if (iter == lazyItemGroups_.end()) {
         LOGI("can not find this group to delete: %{public}s", viewId.c_str());
@@ -446,11 +456,13 @@ void JSViewFullUpdate::RemoveChildGroupById(const std::string& viewId)
     for (auto&& item : iter->second) {
         auto removeView = customViewChildrenWithLazy_.find(item);
         if (removeView != customViewChildrenWithLazy_.end()) {
-            auto* view = removeView->second->Unwrap<JSView>();
-            if (view != nullptr) {
-                view->Destroy(this);
+            if (!removeView->second.IsEmpty()) {
+                auto* view = removeView->second->Unwrap<JSView>();
+                if (view != nullptr) {
+                    view->Destroy(this);
+                }
+                removeView->second.Reset();
             }
-            removeView->second.Reset();
             removedViewIds.emplace_back(item);
         }
     }
@@ -484,7 +496,7 @@ JSViewPartialUpdate::~JSViewPartialUpdate()
 
 RefPtr<Component> JSViewPartialUpdate::CreateComponent()
 {
-    ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
+    ACE_SCOPED_TRACE("JSViewPartialUpdate::CreateSpecializedComponent");
     // create component, return new something, need to set proper ID
 
     const auto reservedElementId = ViewStackProcessor::GetInstance()->ClaimElementId();
@@ -523,14 +535,14 @@ RefPtr<Component> JSViewPartialUpdate::CreateComponent()
 
     // partial update relies on remove function
     auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
-        LOGD("remove function lambda start ...");
+        LOGD("JSViewPartialUpdate remove function lambda start ...");
         auto jsView = weak.Upgrade();
         if (!jsView) {
             LOGE("invalid weak ref to JSView in renderFunction, internal error!");
             return;
         }
         jsView->Destroy(nullptr);
-        LOGD("remove function lambda - done ");
+        LOGD("JSViewPartialUpdate remove function lambda - done ");
     };
 
     auto elementFunction = [weak = AceType::WeakClaim(this), renderFunction, removeFunction](
@@ -588,7 +600,7 @@ RefPtr<Component> JSViewPartialUpdate::InitialRender()
 
 RefPtr<NG::CustomNode> JSViewPartialUpdate::CreateUINode()
 {
-    ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
+    ACE_SCOPED_TRACE("JSViewPartialUpdate::CreateSpecializedComponent");
     auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
     viewId_ = std::to_string(viewId);
     auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
@@ -652,7 +664,12 @@ RefPtr<NG::UINode> JSViewPartialUpdate::InitialUIRender()
 // parentCustomView in not used by PartialUpdate
 void JSViewPartialUpdate::Destroy(JSView* parentCustomView)
 {
-    LOGD("JSView::Destroy start");
+    if (jsViewFunction_ == nullptr) {
+        // already called Destroy before
+        return;
+    }
+
+    LOGD("JSViewPartialUpdate::Destroy start");
     {
         ACE_SCORING_EVENT("Component[" + viewId_ + "].Disappear");
         jsViewFunction_->ExecuteDisappear();
@@ -666,7 +683,7 @@ void JSViewPartialUpdate::Destroy(JSView* parentCustomView)
 
     // release reference to JS view object, and allow GC, calls DestructorCallback
     jsViewObject_.Reset();
-    LOGD("JSView::Destroy end");
+    LOGD("JSViewPartialUpdate::Destroy end");
 }
 
 void JSViewPartialUpdate::MarkNeedUpdate()
@@ -690,11 +707,14 @@ void JSViewPartialUpdate::MarkNeedUpdate()
  */
 void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
 {
+    LOGD("Creating new JSViewPartialUpdate for partial update");
+    ACE_DCHECK(Container::IsCurrentUsePartialUpdate());
+
     if (info[0]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
         auto* view = object->Unwrap<JSView>();
         if (view == nullptr) {
-            LOGE("JSView is null");
+            LOGE("View is null");
             return;
         }
         if (Container::IsCurrentUseNewPipeline()) {
@@ -703,13 +723,14 @@ void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
             ViewStackProcessor::GetInstance()->Push(view->CreateComponent(), true);
         }
     } else {
-        LOGE("JSView Object is expected.");
+        LOGE("View Object is expected.");
     }
 }
 
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
-    JSClass<JSViewPartialUpdate>::Declare("NativeView");
+    LOGD("JSViewPartialUpdate::Bind");
+    JSClass<JSViewPartialUpdate>::Declare("NativeViewPartialUpdate");
     MethodOptions opt = MethodOptions::NONE;
 
     JSClass<JSViewPartialUpdate>::StaticMethod("create", &JSViewPartialUpdate::Create, opt);
@@ -747,12 +768,12 @@ void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
 void JSViewPartialUpdate::DestructorCallback(JSViewPartialUpdate* view)
 {
     if (view == nullptr) {
-        LOGE("DestructorCallback failed: the view is nullptr");
+        LOGE("JSViewPartialUpdate::DestructorCallback failed: the view is nullptr");
         return;
     }
-    LOGD("JSView(DestructorCallback) start");
+    LOGD("JSViewPartialUpdate(DestructorCallback) start");
     view->DecRefCount();
-    LOGD("JSView(DestructorCallback) end");
+    LOGD("JSViewPartialUpdate(DestructorCallback) end");
 }
 
 // ===========================================================

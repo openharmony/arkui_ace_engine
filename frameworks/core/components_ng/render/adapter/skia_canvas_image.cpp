@@ -16,6 +16,7 @@
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,6 +30,39 @@ RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
 
     return AceType::MakeRefPtr<SkiaCanvasImage>(*imageRef);
 #endif
+}
+
+void SkiaCanvasImage::ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage)
+{
+#ifndef NG_BUILD
+    image_->set_image(std::move(newSkGpuObjSkImage));
+#endif
+}
+
+int32_t SkiaCanvasImage::GetWidth() const
+{
+#ifdef NG_BUILD
+    return 0;
+#else
+    return image_->width();
+#endif
+}
+
+int32_t SkiaCanvasImage::GetHeight() const
+{
+#ifdef NG_BUILD
+    return 0;
+#else
+    return image_->height();
+#endif
+}
+
+void SkiaCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect)
+{
+    auto image = GetCanvasImage();
+    RSImage rsImage(&image);
+    RSSamplingOptions options;
+    canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
 }
 
 } // namespace OHOS::Ace::NG

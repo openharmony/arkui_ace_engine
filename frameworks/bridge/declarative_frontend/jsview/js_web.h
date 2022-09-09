@@ -63,21 +63,29 @@ public:
     static void OverviewModeAccess(bool isOverviewModeAccessEnabled);
     static void FileFromUrlAccess(bool isFileFromUrlAccessEnabled);
     static void DatabaseAccess(bool isDatabaseAccessEnabled);
-    static void TextZoomAtio(int32_t textZoomAtioNum);
+    static void TextZoomRatio(int32_t textZoomRatioNum);
     static void WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled);
     static void OnMouse(const JSCallbackInfo& args);
     static void OnResourceLoad(const JSCallbackInfo& args);
     static void OnScaleChange(const JSCallbackInfo& args);
+    static void OnScroll(const JSCallbackInfo& args);
     static void BackgroundColor(const JSCallbackInfo& info);
     static void InitialScale(float scale);
     static void Password(bool password);
     static void TableData(bool tableData);
     static void OnFileSelectorShowAbandoned(const JSCallbackInfo& args);
     static void OnHttpAuthRequest(const JSCallbackInfo& args);
+    static void OnSslErrorRequest(const JSCallbackInfo& args);
     static void OnPermissionRequest(const JSCallbackInfo& args);
     static void OnContextMenuShow(const JSCallbackInfo& args);
     static void OnSearchResultReceive(const JSCallbackInfo& args);
     static void MediaPlayGestureAccess(bool isNeedGestureAccess);
+    static void OnKeyEvent(const JSCallbackInfo& args);
+    static void JsOnDragStart(const JSCallbackInfo& info);
+    static void JsOnDragEnter(const JSCallbackInfo& info);
+    static void JsOnDragMove(const JSCallbackInfo& info);
+    static void JsOnDragLeave(const JSCallbackInfo& info);
+    static void JsOnDrop(const JSCallbackInfo& info);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

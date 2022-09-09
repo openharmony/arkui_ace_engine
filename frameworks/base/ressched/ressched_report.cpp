@@ -19,12 +19,42 @@
 
 namespace OHOS::Ace {
 namespace {
-    const uint32_t RES_TYPE_CLICK_RECOGNIZE = 9;
-    const uint32_t RES_TYPE_PUSH_PAGE       = 10;
-    const uint32_t RES_TYPE_SLIDE           = 11;
-    const uint32_t RES_TYPE_POP_PAGE        = 28;
-    const int32_t TOUCH_EVENT               = 1;
-    const int32_t CLICK_EVENT               = 2;
+constexpr uint32_t RES_TYPE_CLICK_RECOGNIZE = 9;
+constexpr uint32_t RES_TYPE_PUSH_PAGE       = 10;
+constexpr uint32_t RES_TYPE_SLIDE           = 11;
+constexpr uint32_t RES_TYPE_POP_PAGE        = 28;
+constexpr uint32_t RES_TYPE_WEB_GESTURE     = 29;
+constexpr int32_t TOUCH_EVENT               = 1;
+constexpr int32_t CLICK_EVENT               = 2;
+constexpr int32_t SLIDE_OFF_EVENT = 0;
+constexpr int32_t SLIDE_ON_EVENT = 1;
+constexpr int32_t PUSH_PAGE_START_EVENT = 0;
+constexpr int32_t PUSH_PAGE_COMPLETE_EVENT = 1;
+constexpr int32_t POP_PAGE_EVENT = 0;
+constexpr char NAME[] = "name";
+constexpr char PID[] = "pid";
+constexpr char UID[] = "uid";
+constexpr char BUNDLE_NAME[] = "bundleName";
+constexpr char ABILITY_NAME[] = "abilityName";
+constexpr char CLICK[] = "click";
+constexpr char PUSH_PAGE[] = "push_page";
+constexpr char POP_PAGE[] = "pop_page";
+constexpr char SLIDE_ON[] = "slide_on";
+constexpr char SLIDE_OFF[] = "slide_off";
+constexpr char TOUCH[] = "touch";
+constexpr char WEB_GESTURE[] = "web_gesture";
+
+void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& payload)
+{
+    auto& aceApplicationInfo = AceApplicationInfo::GetInstance();
+    payload[PID] = std::to_string(aceApplicationInfo.GetPid());
+    payload[UID] = std::to_string(aceApplicationInfo.GetUid());
+    payload[BUNDLE_NAME] = aceApplicationInfo.GetPackageName();
+    payload[ABILITY_NAME] = aceApplicationInfo.GetAbilityName();
+    for (auto& pair : payload) {
+        LOGI("DataReport:  %{public}s :  %{public}s", pair.first.c_str(), pair.second.c_str());
+    }
+}
 }
 
 ResSchedReport& ResSchedReport::GetInstance()
@@ -33,49 +63,68 @@ ResSchedReport& ResSchedReport::GetInstance()
     return instance;
 }
 
-void ResSchedReport::ResSchedDataReport(const char* name)
-{
-    std::unordered_map<std::string, std::string> payload;
-    payload["name"] = name;
-    if (reportDataFunc_ == nullptr) {
-        reportDataFunc_ = LoadReportDataFunc();
-    }
-    if (reportDataFunc_ != nullptr) {
-        if (strcmp(name, "click") == 0) {
-            reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, CLICK_EVENT, payload);
-        } else if (strcmp(name, "slide_on") == 0) {
-            reportDataFunc_(RES_TYPE_SLIDE, 1, payload);
-        } else if (strcmp(name, "slide_off") == 0) {
-            reportDataFunc_(RES_TYPE_SLIDE, 0, payload);
-        }
-    }
-}
-
 void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param)
 {
     std::unordered_map<std::string, std::string> payload = param;
-    payload["name"] = name;
+    payload[NAME] = name;
+    if (!reportDataFunc_) {
+        reportDataFunc_ = LoadReportDataFunc();
+    }
+    if (!reportDataFunc_) {
+        return;
+    }
+    static std::unordered_map<std::string, std::function<void(std::unordered_map<std::string, std::string>&)>>
+        functionMap = {
+            { CLICK,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, CLICK_EVENT, payload);
+                }
+            },
+            { SLIDE_ON,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_SLIDE, SLIDE_ON_EVENT, payload);
+                }
+            },
+            { SLIDE_OFF,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_SLIDE, SLIDE_OFF_EVENT, payload);
+                }
+            },
+            { POP_PAGE,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    LoadAceApplicationContext(payload);
+                    reportDataFunc_(RES_TYPE_POP_PAGE, POP_PAGE_EVENT, payload);
+                }
+            },
+            { WEB_GESTURE,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_WEB_GESTURE, 0, payload);
+                }
+            },
+        };
+    auto it = functionMap.find(name);
+    if (it == functionMap.end()) {
+        LOGE("ResSchedDataReport the name not found: %{public}s", name);
+        return;
+    }
+    it->second(payload);
+}
+
+void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
+    const std::unordered_map<std::string, std::string>& payload)
+{
     if (reportDataFunc_ == nullptr) {
         reportDataFunc_ = LoadReportDataFunc();
     }
     if (reportDataFunc_ != nullptr) {
-        if (strcmp(name, "push_page_start") == 0) {
-            LoadAceApplicationContext(payload);
-            reportDataFunc_(RES_TYPE_PUSH_PAGE, 0, payload);
-        } else if (strcmp(name, "push_page_complete") == 0) {
-            LoadAceApplicationContext(payload);
-            reportDataFunc_(RES_TYPE_PUSH_PAGE, 1, payload);
-        } else if (strcmp(name, "pop_page") == 0) {
-            LoadAceApplicationContext(payload);
-            reportDataFunc_(RES_TYPE_POP_PAGE, 0, payload);
-        }
+        reportDataFunc_(resType, value, payload);
     }
 }
 
 void ResSchedReport::MarkNeedUpdate()
 {
     std::unordered_map<std::string, std::string> payload;
-    payload["name"] = "touch_event";
+    payload[NAME] = TOUCH;
     if (reportDataFunc_ == nullptr) {
         reportDataFunc_ = LoadReportDataFunc();
     }
@@ -99,16 +148,21 @@ void ResSchedReport::DispatchTouchEventEnd()
     isInTouchDownUp_ = false;
 }
 
-void ResSchedReport::LoadAceApplicationContext(std::unordered_map<std::string, std::string>& payload)
+ResSchedReportScope::ResSchedReportScope(const std::string& name,
+    const std::unordered_map<std::string, std::string>& param) : name_(name), payload_(param)
 {
-    auto& aceApplicationInfo = AceApplicationInfo::GetInstance();
-    payload["pid"] = std::to_string(aceApplicationInfo.GetPid());
-    payload["uid"] = std::to_string(aceApplicationInfo.GetUid());
-    payload["bundleName"] = aceApplicationInfo.GetPackageName();
-    payload["abilityName"] = aceApplicationInfo.GetAbilityName();
+    name_ = name;
+    payload_[NAME] = name;
+    LoadAceApplicationContext(payload_);
+    if (name_ == PUSH_PAGE) {
+        ResSchedReport::GetInstance().ResSchedDataReport(RES_TYPE_PUSH_PAGE, PUSH_PAGE_START_EVENT, payload_);
+    }
+}
 
-    for (auto& pair : payload) {
-        LOGI("DataReport:  %{public}s :  %{public}s", pair.first.c_str(), pair.second.c_str());
+ResSchedReportScope::~ResSchedReportScope()
+{
+    if (name_ == PUSH_PAGE) {
+        ResSchedReport::GetInstance().ResSchedDataReport(RES_TYPE_PUSH_PAGE, PUSH_PAGE_COMPLETE_EVENT, payload_);
     }
 }
 } // namespace OHOS::Ace

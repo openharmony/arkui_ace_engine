@@ -45,7 +45,7 @@ ohos_unittest("DialogCreatorTest") {
 config("config_json_creator_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$ace_root",
   ]
 }
@@ -63,9 +63,11 @@ ohos_unittest("RenderDialogTest") {
   configs = [
     ":config_render_dialog_test",
     "$ace_root:ace_test_config",
+    "$ace_flutter_engine_root:flutter_config",
   ]
 
   deps = [
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components/test:json",
   ]
@@ -76,7 +78,7 @@ ohos_unittest("RenderDialogTest") {
 config("config_render_dialog_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$ace_root",
   ]
 }
@@ -102,7 +104,7 @@ ohos_unittest("DialogComponentTest") {
 config("config_component_build_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$ace_root",
   ]
 }
@@ -114,7 +116,6 @@ group("unittest") {
   deps += [
     ":DialogComponentTest",
     ":DialogCreatorTest",
-
-    # ":RenderDialogTest",
+    ":RenderDialogTest",
   ]
 }

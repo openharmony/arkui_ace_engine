@@ -15,8 +15,10 @@
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
+#include "base/geometry/ng/size_t.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -45,23 +47,20 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
-    const auto& parentIdeaSize = layoutConstraint->parentIdealSize;
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingPropertyF();
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
-    SizeF frameSize = { -1, -1 };
+    OptionalSizeF frameSize;
     do {
         // Use idea size first if it is valid.
-        if (layoutConstraint->selfIdealSize.has_value()) {
-            const auto& selfIdeaSize = layoutConstraint->selfIdealSize.value();
-            frameSize.UpdateSizeWithCheck(selfIdeaSize);
-            if (frameSize.IsNonNegative()) {
-                break;
-            }
+        frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
+        if (frameSize.IsValid()) {
+            break;
         }
 
-        if (measureType == MeasureType::MATCH_PARENT && parentIdeaSize.has_value()) {
-            frameSize.UpdateIllegalSizeWithCheck(*parentIdeaSize);
-            if (frameSize.IsNonNegative()) {
+        if (measureType == MeasureType::MATCH_PARENT) {
+            frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->parentIdealSize);
+            if (frameSize.IsValid()) {
+                frameSize.Constrain(minSize, maxSize);
                 break;
             }
         }
@@ -83,10 +82,10 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             AddPaddingToSize(padding, childFrame);
             frameSize.UpdateIllegalSizeWithCheck(childFrame);
         }
-        frameSize.UpdateIllegalSizeWithCheck({ 0.0f, 0.0f });
+        frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     } while (false);
 
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 
 // Called to perform layout render node and child.
@@ -94,7 +93,7 @@ void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
 {
     // update child position.
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingPropertyF();
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);

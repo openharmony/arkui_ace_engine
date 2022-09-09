@@ -42,7 +42,7 @@ ohos_unittest("RenderFlexTest") {
 config("config_render_flex_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$ace_root",
   ]
 }
@@ -76,9 +76,10 @@ config("config_json_creator_test") {
 group("unittest") {
   testonly = true
   deps = []
-
-  deps += [
-    ":FlexCreatorTest",
-    #":RenderFlexTest",
-  ]
+  if (!is_asan) {
+    deps += [
+      ":FlexCreatorTest",
+      #":RenderFlexTest",
+    ]
+  }
 }

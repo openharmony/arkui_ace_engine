@@ -18,12 +18,16 @@ build_component_ng("render_ng") {
   sources = [
     "adapter/skia_canvas.cpp",
     "adapter/skia_canvas_image.cpp",
+    "adapter/skia_color_filter.cpp",
     "adapter/skia_paint.cpp",
     "adapter/txt_font_collection.cpp",
     "adapter/txt_paragraph.cpp",
+    "divider_painter.cpp",
+    "drawing_prop_convertor.cpp",
     "image_painter.cpp",
     "paint_wrapper.cpp",
     "render_context_creator.cpp",
+    "render_surface_creator.cpp",
   ]
 
   if (enable_ng_build) {
@@ -37,6 +41,7 @@ build_component_ng("render_ng") {
 
   rosen_sources = [
     "adapter/rosen_render_context.cpp",
+    "adapter/rosen_render_surface.cpp",
     "adapter/rosen_window.cpp",
   ]
 }

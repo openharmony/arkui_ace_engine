@@ -23,18 +23,22 @@
 
 namespace OHOS::Ace::V2 {
 namespace {
+std::map<RefPtr<RenderGridCol>, RefPtr<RenderNode>> gridColToNodeMap;
 
-bool OrderComporator(const RefPtr<RenderNode>& left, const RefPtr<RenderNode>& right)
+bool OrderComparator(const RefPtr<RenderNode>& left, const RefPtr<RenderNode>& right)
 {
     auto leftGrid = AceType::DynamicCast<RenderGridCol>(left);
     auto rightGrid = AceType::DynamicCast<RenderGridCol>(right);
-    return (leftGrid->GetOrder(leftGrid->GetSizeType()) < rightGrid->GetOrder(rightGrid->GetSizeType()));
+    if (leftGrid && rightGrid) {
+        return (leftGrid->GetOrder(leftGrid->GetSizeType()) < rightGrid->GetOrder(rightGrid->GetSizeType()));
+    }
+    return false;
 }
 
 inline std::list<RefPtr<RenderNode>> SortChildrenByOrder(const std::list<RefPtr<RenderNode>>& children)
 {
     auto sortChildren = children;
-    sortChildren.sort(OrderComporator);
+    sortChildren.sort(OrderComparator);
     return sortChildren;
 }
 
@@ -75,10 +79,47 @@ void RenderGridRow::Update(const RefPtr<Component>& component)
     gridRowComponent_ = component;
 }
 
+GridRowDirection RenderGridRow::GetDirection() const
+{
+    auto component = AceType::DynamicCast<GridRowComponent>(gridRowComponent_);
+    if (!component) {
+        return GridRowDirection::Row;
+    }
+    return component->GetDirection();
+}
+
+RefPtr<BreakPoints> RenderGridRow::GetBreakPoints() const
+{
+    auto component = AceType::DynamicCast<GridRowComponent>(gridRowComponent_);
+    if (!component) {
+        return nullptr;
+    }
+    return component->GetBreakPoints();
+}
+
+int32_t RenderGridRow::GetTotalCol() const
+{
+    auto component = AceType::DynamicCast<GridRowComponent>(gridRowComponent_);
+    if (!component) {
+        return 0;
+    }
+    auto totalColumn = GridContainerUtils::ProcessColumn(currentSizeType_, component->GetTotalCol());
+    return totalColumn;
+}
+
+std::pair<double, double> RenderGridRow::GetGutter() const
+{
+    auto component = AceType::DynamicCast<GridRowComponent>(gridRowComponent_);
+    if (!component) {
+        return std::make_pair<double, double>(0.0, 0.0);
+    }
+    auto gutter = GridContainerUtils::ProcessGutter(currentSizeType_, component->GetGutter());
+    return std::make_pair<double, double>(NormalizeToPx(gutter.first), NormalizeToPx(gutter.second));
+}
+
 void RenderGridRow::PerformLayout()
 {
     auto maxSize = GetLayoutParam().GetMaxSize();
-    SetLayoutSize(maxSize);
     auto component = AceType::DynamicCast<GridRowComponent>(gridRowComponent_);
     if (!component) {
         LOGI("Grid row fail to perform build");
@@ -90,85 +131,182 @@ void RenderGridRow::PerformLayout()
         return;
     }
     auto sizeType = GridContainerUtils::ProcessGridSizeType(component->GetBreakPoints(), maxSize, context);
-    if (originSizeType_ != sizeType) {
+    if (currentSizeType_ != sizeType) {
         auto sizeTypeString = ConvertSizeTypeToString(sizeType);
         component->FirebreakPointEvent(sizeTypeString);
+        currentSizeType_ = sizeType;
     }
-    auto getter = GridContainerUtils::ProcessGetter(sizeType, component->GetGetter());
-    auto getterInDouble = std::make_pair<double, double>(NormalizeToPx(getter.first), NormalizeToPx(getter.second));
+    auto gutter = GridContainerUtils::ProcessGutter(sizeType, component->GetGutter());
+    auto gutterInDouble = std::make_pair<double, double>(NormalizeToPx(gutter.first), NormalizeToPx(gutter.second));
     int32_t columnNum = GridContainerUtils::ProcessColumn(sizeType, component->GetTotalCol());
-    double childWidthLimit = GridContainerUtils::ProcessColumnWidth(getterInDouble, columnNum, maxSize);
-    LayoutEachChild(childWidthLimit, maxSize.Height(), getterInDouble.first, sizeType);
-    int offset = 0;
+    double columnUnitWidth = GridContainerUtils::ProcessColumnWidth(gutterInDouble, columnNum, maxSize);
+    LayoutEachChild(columnUnitWidth, maxSize.Height(), gutterInDouble.first, sizeType, columnNum);
+    int32_t offset = 0;
     Offset rowPosition;
-    double rowHeight = 0.0;
+    double currentRowHeight = 0.0;
+    double totalHeight = 0.0;
     double lastLength = maxSize.Width();
     for (auto child : gridColChildren_) {
-        if (GetGridColSpan(child, sizeType) == 0) {
+        auto gridColChild = AceType::DynamicCast<RenderGridCol>(child);
+        if (!gridColChild) {
             continue;
         }
-        if (NeedNewLine(child, offset, columnNum, sizeType)) {
-            rowPosition.SetY(rowPosition.GetY() + rowHeight + getterInDouble.second);
-            rowHeight = 0.0;
-            offset = 0;
+        auto currentChildSpan = GetGridColSpan(gridColChild, sizeType);
+        if (currentChildSpan == 0) {
+            continue;
         }
-        rowHeight = std::max(rowHeight, child->GetLayoutSize().Height());
+        currentChildSpan = std::min(columnNum, currentChildSpan);
+        NewLineOffset newLineOffset;
+        CalculateOffsetOfNewline(
+            gridColChild, currentChildSpan, columnNum - offset, columnNum, sizeType, newLineOffset);
+        if (!newLineOffset.isValid) {
+            continue;
+        }
+        if (newLineOffset.newLineCount > 0) {
+            totalHeight += currentRowHeight * newLineOffset.newLineCount + gutterInDouble.second;
+            rowPosition.SetY(
+                rowPosition.GetY() + currentRowHeight * newLineOffset.newLineCount + gutterInDouble.second);
+            offset = newLineOffset.offset;
+            currentRowHeight = gridColToNodeMap[gridColChild]->GetLayoutSize().Height();
+            lastLength = maxSize.Width();
+        } else {
+            currentRowHeight = std::max(currentRowHeight, gridColToNodeMap[gridColChild]->GetLayoutSize().Height());
+        }
         Offset position;
         if (component->GetDirection() == V2::GridRowDirection::RowReverse) {
-            position.SetX(lastLength -
-                ((offset + GetRelativeOffset(child, sizeType) + GetGridColSpan(child, sizeType)) * childWidthLimit +
-                ((offset + GetRelativeOffset(child, sizeType) + GetGridColSpan(child, sizeType)) - 1)
-                 * getterInDouble.first));
+            double childSpanPlusOffsetWidth = 0.0;
+            if (newLineOffset.newLineCount > 0) {
+                childSpanPlusOffsetWidth = ((currentChildSpan + newLineOffset.offset) * columnUnitWidth +
+                    ((currentChildSpan + newLineOffset.offset) - 1) * gutterInDouble.first);
+                position.SetX(lastLength - childSpanPlusOffsetWidth);
+            } else {
+                childSpanPlusOffsetWidth =
+                    ((currentChildSpan + GetRelativeOffset(gridColChild, sizeType)) * columnUnitWidth +
+                    ((currentChildSpan + GetRelativeOffset(gridColChild, sizeType)) - 1) * gutterInDouble.first);
+                offset += GetRelativeOffset(gridColChild, sizeType);
+            }
+            position.SetX(lastLength - childSpanPlusOffsetWidth);
+            lastLength -= childSpanPlusOffsetWidth + gutterInDouble.first;
         } else if (component->GetDirection() == V2::GridRowDirection::Row) {
-            position.SetX(
-                (offset + GetRelativeOffset(child, sizeType)) * childWidthLimit +
-                ((offset + GetRelativeOffset(child, sizeType)) == 0 ? 0 : offset + GetRelativeOffset(child, sizeType)) *
-                    getterInDouble.first);
+            if (newLineOffset.newLineCount > 0) {
+                position.SetX(offset > 0 ? offset * columnUnitWidth + offset * gutterInDouble.first : 0);
+            } else {
+                offset += GetRelativeOffset(gridColChild, sizeType);
+                position.SetX(offset * (columnUnitWidth + gutterInDouble.first));
+            }
         }
         position.SetY(rowPosition.GetY());
-        child->SetPosition(position);
-        offset += GetRelativeOffset(child, sizeType) + GetGridColSpan(child, sizeType);
+        gridColToNodeMap[gridColChild]->SetPosition(position);
+        offset += currentChildSpan;
+    }
+    totalHeight += currentRowHeight;
+    if (component->HasContainerHeight()) {
+        SetLayoutSize(Size(maxSize.Width(), maxSize.Height()));
+    } else {
+        SetLayoutSize(Size(maxSize.Width(), totalHeight));
     }
 }
 
 void RenderGridRow::LayoutEachChild(
-    double childWidthLimit, double childHeightLimit, double getter, GridSizeType sizeType)
+    double columnUnitWidth, double childHeightLimit, double xGutter, GridSizeType sizeType, int32_t columnNum)
 {
     auto children = GetChildren();
+    std::list<RefPtr<RenderNode>> gridColChildren;
     for (auto child : children) {
-        auto gridCol = AceType::DynamicCast<RenderGridCol>(child);
+        RefPtr<RenderNode> childPtr = child;
+        FindGridColChild(childPtr);
+        auto gridCol = AceType::DynamicCast<RenderGridCol>(childPtr);
         if (!gridCol) {
-            LOGI("check the component inside grid_row is grid_col");
-            return;
+            LOGE("Not a grid_col component");
+            continue;
         }
-        auto span = gridCol->GetSpan(sizeType);
+        auto span = std::min(gridCol->GetSpan(sizeType), columnNum);
         gridCol->SetSizeType(sizeType);
-        LayoutParam childLayout(Size(childWidthLimit * span + (span - 1) * getter, childHeightLimit),
-            Size(childWidthLimit * span + (span - 1) * getter, 0));
+        LayoutParam childLayout(Size(columnUnitWidth * span + (span - 1) * xGutter, childHeightLimit),
+            Size(columnUnitWidth * span + (span - 1) * xGutter, 0));
         child->Layout(childLayout);
+        gridColChildren.emplace_back(gridCol);
+        gridColToNodeMap[gridCol] = child;
     }
-    gridColChildren_ = SortChildrenByOrder(children);
+    gridColChildren_ = SortChildrenByOrder(gridColChildren);
 }
 
-bool RenderGridRow::NeedNewLine(
-    const RefPtr<RenderNode>& node, int32_t offset, int32_t totalColNums, GridSizeType sizeType) const
+bool RenderGridRow::ParseNewLineForLargeOffset(int32_t childSpan, int32_t childOffset, int32_t restColumnNum,
+    int32_t totalColumnNum, NewLineOffset& newLineOffset) const
+{
+    if (childOffset <= totalColumnNum) {
+        return false;
+    }
+    auto totalOffsetStartFromNewLine = childOffset - restColumnNum;
+    int32_t lineCountForLargeChildOffset = static_cast<int32_t>(totalOffsetStartFromNewLine / totalColumnNum);
+    if (totalOffsetStartFromNewLine > totalColumnNum) {
+        // ex. totalColumn 12, restColumn is 4, child offset 26, span 6. Offsets of next 2 lines are 12 and 10
+        // then the child will be placed at the third new line with offset 0.
+        if ((totalOffsetStartFromNewLine % totalColumnNum) + childSpan > totalColumnNum) {
+            newLineOffset.offset = 0;
+            lineCountForLargeChildOffset++;
+        } else {
+            // ex. totalColumn 12, restColumn is 4, child offset 20, span 6. Offsets of next 2 lines are 12 and 4
+            // then the child will be placed at the second new line with offset 4.
+            newLineOffset.offset = totalOffsetStartFromNewLine % totalColumnNum;
+        }
+        newLineOffset.newLineCount = lineCountForLargeChildOffset;
+        return true;
+    }
+    if (totalOffsetStartFromNewLine + childSpan > totalColumnNum) {
+        newLineOffset.newLineCount += 1;
+        newLineOffset.offset = 0;
+        return true;
+    }
+    return false;
+}
+
+void RenderGridRow::CalculateOffsetOfNewline(const RefPtr<RenderNode>& node, int32_t currentChildSpan,
+    int32_t restColumnNum, int32_t totalColumnNum, GridSizeType sizeType, NewLineOffset& newLineOffset) const
 {
     auto gridCol = AceType::DynamicCast<RenderGridCol>(node);
     if (!gridCol) {
-        LOGI("check the component inside grid_row is grid_col");
-        return false;
+        LOGE("Not a grid_col component");
+        return;
     }
-    if (totalColNums >= offset + gridCol->GetSpan(sizeType) + gridCol->GetOffset(sizeType)) {
-        return false;
+    newLineOffset.isValid = true;
+    if (restColumnNum < gridCol->GetOffset(sizeType) + currentChildSpan) {
+        newLineOffset.newLineCount = 1;
+        // ex. if there are 7 columns left and chile span is 4 or 8(< or > than restColumnNum), offset is 5,
+        // child will be set on a new row with offset 0
+        if (restColumnNum >= gridCol->GetOffset(sizeType)) {
+            newLineOffset.offset = 0;
+            return;
+        }
+        // in this case, child will be set on a new row with offset (child offset - restColumnNum)
+        if (restColumnNum < gridCol->GetOffset(sizeType) && restColumnNum > currentChildSpan) {
+            if (ParseNewLineForLargeOffset(currentChildSpan, gridCol->GetOffset(sizeType), restColumnNum,
+                totalColumnNum, newLineOffset)) {
+                return;
+            }
+            newLineOffset.offset = gridCol->GetOffset(sizeType) - restColumnNum;
+            return;
+        }
+        // in this case, empty line(s) will be placed
+        if (restColumnNum < gridCol->GetOffset(sizeType) && restColumnNum < currentChildSpan) {
+            if (ParseNewLineForLargeOffset(currentChildSpan, gridCol->GetOffset(sizeType), restColumnNum,
+                totalColumnNum, newLineOffset)) {
+                return;
+            }
+            newLineOffset.offset = gridCol->GetOffset(sizeType) - restColumnNum;
+            return;
+        }
     }
-    return true;
+    // in this case, child can be place at current row
+    newLineOffset.offset = gridCol->GetOffset(sizeType);
+    return;
 }
 
 int32_t RenderGridRow::GetRelativeOffset(const RefPtr<RenderNode>& node, GridSizeType sizeType) const
 {
     auto gridCol = AceType::DynamicCast<RenderGridCol>(node);
     if (!gridCol) {
-        LOGI("check the component inside grid_row is grid_col");
+        LOGE("Not a grid_col component");
         return false;
     }
     return gridCol->GetOffset(sizeType);
@@ -178,10 +316,20 @@ int32_t RenderGridRow::GetGridColSpan(const RefPtr<RenderNode>& node, GridSizeTy
 {
     auto gridCol = AceType::DynamicCast<RenderGridCol>(node);
     if (!gridCol) {
-        LOGI("check the component inside grid_row is grid_col");
+        LOGE("Not a grid_col component");
         return 0;
     }
     return gridCol->GetSpan(sizeType);
 }
 
+void RenderGridRow::FindGridColChild(RefPtr<RenderNode>& gridColChild) const
+{
+    while (gridColChild) {
+        if (AceType::InstanceOf<RenderGridCol>(gridColChild)) {
+            return;
+        }
+        gridColChild = gridColChild->GetChildren().front();
+    }
+    return;
+}
 } // namespace OHOS::Ace::V2

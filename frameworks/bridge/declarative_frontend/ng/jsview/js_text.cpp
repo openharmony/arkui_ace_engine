@@ -55,12 +55,12 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
-    NG::TextView::FontSize(fontSize);
+    NG::TextView::SetFontSize(fontSize);
 }
 
 void JSText::SetFontWeight(const std::string& value)
 {
-    NG::TextView::FontWeight(ConvertStrToFontWeight(value));
+    NG::TextView::SetFontWeight(ConvertStrToFontWeight(value));
 }
 
 void JSText::SetTextColor(const JSCallbackInfo& info)
@@ -74,7 +74,7 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
         return;
     }
 
-    NG::TextView::TextColor(textColor);
+    NG::TextView::SetTextColor(textColor);
 }
 
 void JSText::SetTextOverflow(const JSCallbackInfo& info)
@@ -91,10 +91,12 @@ void JSText::SetFontStyle(int32_t value)
         return;
     }
 
-    NG::TextView::ItalicFontStyle(FONT_STYLES[value]);
+    NG::TextView::SetItalicFontStyle(FONT_STYLES[value]);
 }
 
 void JSText::SetTextAlign(int32_t value) {}
+
+void JSText::SetAlign(int32_t value) {}
 
 void JSText::SetLineHeight(const JSCallbackInfo& info) {}
 
@@ -110,7 +112,7 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
         return;
     }
 
-    NG::TextView::FontFamily(fontFamilies);
+    NG::TextView::SetFontFamily(fontFamilies);
 }
 
 void JSText::SetMinFontSize(const JSCallbackInfo& info) {}

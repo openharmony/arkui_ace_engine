@@ -21,7 +21,9 @@
 
 #include "base/json/json_util.h"
 #include "base/log/log.h"
+#include "base/ressched/ressched_report.h"
 #include "core/common/container.h"
+#include "core/components/web/render_web.h"
 #include "core/components/web/web_event.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/back_end_event_manager.h"
@@ -29,6 +31,7 @@
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
 #include "nweb_adapter_helper.h"
+#include "nweb_handler.h"
 #include "web_javascript_execute_callback.h"
 #include "web_javascript_result_callback.h"
 #endif
@@ -87,7 +90,7 @@ void WebMessagePortOhos::Close()
         return;
     }
     delegate->ClosePort(handle_);
-    
+
 }
 
 void WebMessagePortOhos::PostMessage(std::string& data)
@@ -183,6 +186,20 @@ void AuthResultOhos::Cancel()
 {
     if (result_) {
         result_->Cancel();
+    }
+}
+
+void SslErrorResultOhos::HandleConfirm()
+{
+    if (result_) {
+        result_->HandleConfirm();
+    }
+}
+
+void SslErrorResultOhos::HandleCancel()
+{
+    if (result_) {
+        result_->HandleCancel();
     }
 }
 
@@ -346,7 +363,7 @@ void ContextMenuResultOhos::Cancel() const
 void ContextMenuResultOhos::CopyImage() const
 {
     if (callback_) {
-        callback_->Cancel();
+        callback_->Continue(CI_IMAGE_COPY, EF_NONE);
     }
 }
 
@@ -407,6 +424,11 @@ void WebDelegate::UnregisterEvent()
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_PAGEERROR));
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_ROUTERPUSH));
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_ONMESSAGE));
+}
+
+void WebDelegate::SetRenderWeb(const WeakPtr<RenderWeb>& renderWeb)
+{
+    renderWeb_ = renderWeb;
 }
 
 void WebDelegate::CreatePlatformResource(
@@ -517,6 +539,28 @@ void WebDelegate::ClearHistory()
             }
             if (delegate->nweb_) {
                 delegate->nweb_->DeleteNavigateHistory();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::ClearSslCache()
+{
+    LOGE("WebDelegate ClearSslCache");
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Get context failed, it is null.");
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->ClearSslCache();
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -1218,8 +1262,6 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
             webCom->GetPageFinishedEventId(), pipelineContext);
         onPageStartedV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webCom->GetPageStartedEventId(), pipelineContext);
-        onProgressChangeV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webCom->GetProgressChangeEventId(), pipelineContext);
         onTitleReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webCom->GetTitleReceiveEventId(), pipelineContext);
         onGeolocationHideV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
@@ -1246,6 +1288,8 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineContext>& context, sptr<Surf
             webCom->GetPermissionRequestEventId(), pipelineContext);
         onSearchResultReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
             webCom->GetSearchResultReceiveEventId(), pipelineContext);
+        onScrollV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+            webCom->GetScrollId(), pipelineContext);
     }
 }
 
@@ -1319,6 +1363,14 @@ void WebDelegate::SetWebCallBack()
                 auto delegate = weak.Upgrade();
                 if (delegate) {
                     delegate->ClearHistory();
+                }
+            });
+        });
+        webController->SetClearSslCacheImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ClearSslCache();
                 }
             });
         });
@@ -1590,6 +1642,14 @@ void WebDelegate::SetWebCallBack()
                 }
             });
         });
+        webController->SetGetUrlImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->GetUrl();
+            }
+            return std::string();
+        });
+
     }
 }
 
@@ -1732,7 +1792,7 @@ void WebDelegate::InitWebViewWithSurface(sptr<Surface> surface)
             setting->PutLoadWithOverviewMode(component->GetOverviewModeAccessEnabled());
             setting->PutEnableRawFileAccessFromFileURLs(component->GetFileFromUrlAccessEnabled());
             setting->PutDatabaseAllowed(component->GetDatabaseAccessEnabled());
-            setting->PutZoomingForTextFactor(component->GetTextZoomAtio());
+            setting->PutZoomingForTextFactor(component->GetTextZoomRatio());
             setting->PutWebDebuggingAccess(component->GetWebDebuggingAccessEnabled());
             setting->PutMediaPlayGestureAccess(component->IsMediaPlayGestureAccess());
         },
@@ -2010,18 +2070,18 @@ void WebDelegate::UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled)
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void WebDelegate::UpdateTextZoomAtio(const int32_t& textZoomAtioNum)
+void WebDelegate::UpdateTextZoomRatio(const int32_t& textZoomRatioNum)
 {
     auto context = context_.Upgrade();
     if (!context) {
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), textZoomAtioNum]() {
+        [weak = WeakClaim(this), textZoomRatioNum]() {
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_) {
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
-                setting->PutZoomingForTextFactor(textZoomAtioNum);
+                setting->PutZoomingForTextFactor(textZoomRatioNum);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -2369,10 +2429,12 @@ void WebDelegate::OnPageFinished(const std::string& param)
 
 void WebDelegate::OnProgressChanged(int param)
 {
-    // ace 2.0
-    if (onProgressChangeV2_) {
-        onProgressChangeV2_(std::make_shared<LoadWebProgressChangeEvent>(param));
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return;
     }
+    auto paramin = std::make_shared<LoadWebProgressChangeEvent>(param);
+    webCom->OnProgressChange(paramin.get());
 }
 
 void WebDelegate::OnReceivedTitle(const std::string& param)
@@ -2436,6 +2498,15 @@ bool WebDelegate::OnHttpAuthRequest(const BaseEventInfo* info)
         return false;
     }
     return webCom->OnHttpAuthRequest(info);
+}
+
+bool WebDelegate::OnSslErrorRequest(const BaseEventInfo* info)
+{
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return false;
+    }
+    return webCom->OnSslErrorRequest(info);
 }
 
 void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,
@@ -2618,6 +2689,13 @@ void WebDelegate::OnScaleChange(float oldScaleFactor, float newScaleFactor)
     }
 }
 
+void WebDelegate::OnScroll(double xOffset, double yOffset)
+{
+    if (onScrollV2_) {
+        onScrollV2_(std::make_shared<OnScrollEvent>(xOffset, yOffset));
+    }
+}
+
 void WebDelegate::OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting)
 {
     if (onSearchResultReceiveV2_) {
@@ -2626,11 +2704,34 @@ void WebDelegate::OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatc
     }
 }
 
+bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int height)
+{
+    LOGI("store pixel map, len = %{public}zu, width = %{public}d, height = %{public}d", len, width, height);
+    pixelMap_ = PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height);
+    if (pixelMap_ == nullptr) {
+        LOGE("convert drag image to pixel map failed");
+        return false;
+    }
+    isRefreshPixelMap_ = true;
+    return true;
+}
+
+RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
+{
+    if (isRefreshPixelMap_) {
+        isRefreshPixelMap_ = false;
+        return pixelMap_;
+    }
+
+    return nullptr;
+}
+
 #ifdef OHOS_STANDARD_SYSTEM
 void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
+        ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
         nweb_->OnTouchPress(id, x, y);
     }
 }
@@ -2639,6 +2740,7 @@ void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
+        ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
         nweb_->OnTouchRelease(id, x, y);
     }
 }
@@ -2674,10 +2776,10 @@ bool WebDelegate::OnKeyEvent(int32_t keyCode, int32_t keyAction)
     return false;
 }
 
-void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action)
+void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count)
 {
     if (nweb_) {
-        nweb_->SendMouseEvent(x, y, static_cast<int>(button), static_cast<int>(action));
+        nweb_->SendMouseEvent(x, y, static_cast<int>(button), static_cast<int>(action), count);
     }
 }
 
@@ -2695,6 +2797,57 @@ void WebDelegate::OnBlur()
     if (nweb_) {
         nweb_->OnBlur();
     }
+}
+
+bool WebDelegate::RunQuickMenu(
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
+{
+    auto renderWeb = renderWeb_.Upgrade();
+    if (!renderWeb || !params || !callback) {
+        return false;
+    }
+
+    return renderWeb->RunQuickMenu(params, callback);
+}
+
+void WebDelegate::OnQuickMenuDismissed()
+{
+    auto renderWeb = renderWeb_.Upgrade();
+    if (renderWeb) {
+        renderWeb->OnQuickMenuDismissed();
+    }
+}
+
+void WebDelegate::OnTouchSelectionChanged(
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
+{
+    auto renderWeb = renderWeb_.Upgrade();
+    if (renderWeb) {
+        renderWeb->OnTouchSelectionChanged(
+            insertHandle, startSelectionHandle, endSelectionHandle);
+    }
+}
+
+void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction)
+{
+    if (nweb_) {
+        OHOS::NWeb::DragEvent dragEvent;
+        dragEvent.x = x;
+        dragEvent.y = y;
+        dragEvent.action = static_cast<OHOS::NWeb::DragAction>(dragAction);
+        nweb_->SendDragEvent(dragEvent);
+    }
+}
+
+std::string WebDelegate::GetUrl()
+{
+    if (nweb_) {
+        return nweb_->GetUrl();
+    }
+    return "";
 }
 #endif
 
@@ -2759,5 +2912,4 @@ void WebDelegate::SetComponent(const RefPtr<WebComponent>& component)
 {
     webComponent_ = component;
 }
-
 } // namespace OHOS::Ace

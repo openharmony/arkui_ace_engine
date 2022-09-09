@@ -56,7 +56,7 @@ void JSDistributed::DestructorCallback(JSDistributed* distributed)
 
 void JSDistributed::Set(const JSCallbackInfo& args)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the DistributedStorage in the Previewer. Perform this operation on the "
          "emulator or a real device instead.");
     return;
@@ -96,7 +96,7 @@ void JSDistributed::Set(const JSCallbackInfo& args)
 
 void JSDistributed::Get(const JSCallbackInfo& args)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the DistributedStorage in the Previewer. Perform this operation on the "
          "emulator or a real device instead.");
     return;
@@ -155,7 +155,7 @@ void JSDistributed::Get(const JSCallbackInfo& args)
 
 void JSDistributed::Delete(const JSCallbackInfo& args)
 {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     LOGW("[Engine Log] Unable to use the DistributedStorage in the Previewer. Perform this operation on the "
          "emulator or a real device instead.");
     return;

@@ -37,23 +37,20 @@
 #include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/image/image_cache.h"
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
 #include "native_engine/impl/quickjs/quickjs_native_engine.h"
 #endif
 
 extern const char _binary_stateMgmt_js_start[];
-extern const char _binary_stateMgmtPU_js_start[];
 extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsMockSystemPlugin_js_start[];
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM) || defined(IOS_PLATFORM)
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM) || defined(IOS_PLATFORM) || defined(LINUX_PLATFORM)
 extern const char* _binary_stateMgmt_js_end;
-extern const char* _binary_stateMgmtPU_js_end;
 extern const char* _binary_jsEnumStyle_js_end;
 extern const char* _binary_jsMockSystemPlugin_js_end;
 #else
 extern const char _binary_stateMgmt_js_end[];
-extern const char _binary_stateMgmtPU_js_end[];
 extern const char _binary_jsEnumStyle_js_end[];
 extern const char _binary_jsMockSystemPlugin_js_end[];
 #endif
@@ -333,7 +330,7 @@ bool QJSDeclarativeEngineInstance::ExecuteDocumentJS(JSValue jsCode)
         LOGD("Failed executing JS!");
         auto page = GetRunningPage(ctx);
         QJSUtils::JsStdDumpErrorAce(ctx, JsErrorType::LOAD_JS_BUNDLE_ERROR, instanceId_,
-            page->GetUrl().c_str(), page, true);
+            page ? page->GetUrl().c_str() : "unknown", page, true);
         return false;
     }
     js_std_loop(ctx);
@@ -398,7 +395,7 @@ JSContext* InitJSContext(JSContext* ctx1, size_t maxStackSize,
         LOGE("QJS created JS context but failed to init hbs, os, or std module.!");
     }
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     for (const auto& [key, value] : extraNativeObject) {
         auto nativeObjectInfo = std::make_unique<NativeObjectInfo>();
         nativeObjectInfo->nativeObject = value;
@@ -455,12 +452,8 @@ bool QJSDeclarativeEngineInstance::InitJSEnv(JSRuntime* runtime, JSContext* cont
         return false;
     }
 
-    std::string jsProxy;
-    if (Container::IsCurrentUsePartialUpdate()) {
-        jsProxy = std::string(_binary_stateMgmtPU_js_start, _binary_stateMgmtPU_js_end - _binary_stateMgmtPU_js_start);
-    } else {
-        jsProxy = std::string(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end - _binary_stateMgmt_js_start);
-    }
+    std::string jsProxy = std::string(_binary_stateMgmt_js_start,
+        _binary_stateMgmt_js_end - _binary_stateMgmt_js_start);
 
     // make jsProxy end of '\0'
     std::string jsEnum(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end - _binary_jsEnumStyle_js_start);
@@ -469,7 +462,7 @@ bool QJSDeclarativeEngineInstance::InitJSEnv(JSRuntime* runtime, JSContext* cont
         return false;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     std::string jsMockSystemPlugin(_binary_jsMockSystemPlugin_js_start,
                                    _binary_jsMockSystemPlugin_js_end - _binary_jsMockSystemPlugin_js_start);
     if (!InitAceModules(jsMockSystemPlugin.c_str(), jsMockSystemPlugin.length(), "jsMockSystemPlugin.js")) {

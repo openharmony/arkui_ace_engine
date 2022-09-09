@@ -50,7 +50,7 @@ static napi_value JSGridGetSystemLayoutInfo(napi_env env, napi_callback_info inf
 
 static napi_value GridExport(napi_env env, napi_value exports)
 {
-    static napi_property_descriptor gridDesc[] = {
+    napi_property_descriptor gridDesc[] = {
         DECLARE_NAPI_FUNCTION("getSystemLayoutInfo", JSGridGetSystemLayoutInfo),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(gridDesc) / sizeof(gridDesc[0]), gridDesc));

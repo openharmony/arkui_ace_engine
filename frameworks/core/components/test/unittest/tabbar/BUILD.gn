@@ -75,7 +75,6 @@ ohos_unittest("RenderTabContentTest") {
     "$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   if (!is_standard_system) {
@@ -87,6 +86,7 @@ ohos_unittest("RenderTabContentTest") {
   } else {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   }
+  external_deps += [ "c_utils:utils" ]
 
   part_name = ace_engine_part
 }
@@ -94,7 +94,7 @@ ohos_unittest("RenderTabContentTest") {
 config("config_render_tabcontent_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$ace_root",
   ]
 }
@@ -147,7 +147,7 @@ ohos_unittest("TabBarElementTest") {
 config("config_tabbar_element_test") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "$ace_root",
   ]
 }

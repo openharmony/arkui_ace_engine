@@ -107,6 +107,7 @@ public:
         return NonNegative(value_);
     }
 
+    // Deprecated: don't use this to covert to px.
     double ConvertToPx(double dipScale) const
     {
         if (unit_ == DimensionUnit::VP || unit_ == DimensionUnit::FP) {
@@ -115,27 +116,11 @@ public:
         return value_;
     }
 
-    double ConvertToVp() const
-    {
-        if (unit_ == DimensionUnit::VP) {
-            return value_;
-        }
-        if (unit_ == DimensionUnit::PX) {
-            return SystemProperties::Px2Vp(value_);
-        }
-        return 0;
-    }
+    // Percentage unit conversion is not supported.
+    double ConvertToVp() const;
 
-    double ConvertToPx() const
-    {
-        if (unit_ == DimensionUnit::PX) {
-            return value_;
-        }
-        if (unit_ == DimensionUnit::VP) {
-            return SystemProperties::Vp2Px(value_);
-        }
-        return 0;
-    }
+    // Percentage unit conversion is not supported.
+    double ConvertToPx() const;
 
     bool NormalizeToPx(double vpScale, double fpScale, double lpxScale, double parentLength, double& result) const;
 

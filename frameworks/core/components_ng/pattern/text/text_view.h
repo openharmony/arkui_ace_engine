@@ -27,19 +27,22 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextView {
 public:
     static void Create(const std::string& content);
-    static void FontSize(const Dimension& value);
-    static void TextColor(const Color& value);
-    static void ItalicFontStyle(const ItalicFontStyle& value);
-    static void FontWeight(const FontWeight& value);
-    static void FontFamily(const std::vector<std::string>& value);
-    static void TextAlign(const TextAlign& value);
-    static void TextOverflow(const TextOverflow& value);
-    static void MaxLines(const uint32_t& value);
-    static void LineHeight(const Dimension& value);
-    static void TextDecoration(const TextDecoration& value);
-    static void TextDecorationColor(const Color& value);
-    static void BaselineOffset(const Dimension& value);
-    static void TextCase(const TextCase& value);
+    static void SetFontSize(const Dimension& value);
+    static void SetTextColor(const Color& value);
+    static void SetItalicFontStyle(const ItalicFontStyle& value);
+    static void SetFontWeight(const FontWeight& value);
+    static void SetFontFamily(const std::vector<std::string>& value);
+    static void SetTextAlign(const TextAlign& value);
+    static void SetTextOverflow(const TextOverflow& value);
+    static void SetMaxLines(const uint32_t& value);
+    static void SetLineHeight(const Dimension& value);
+    static void SetTextDecoration(const TextDecoration& value);
+    static void SetTextDecorationColor(const Color& value);
+    static void SetBaselineOffset(const Dimension& value);
+    static void SetTextCase(const TextCase& value);
+    static void SetLetterSpacing(const Dimension& value);
+    static void SetAdaptMinFontSize(const Dimension& value);
+    static void SetAdaptMaxFontSize(const Dimension& value);
 };
 } // namespace OHOS::Ace::NG
 

@@ -34,7 +34,6 @@ namespace {
 const char UNIT_PERCENT[] = "%";
 const char UNIT_RATIO[] = "fr";
 constexpr int32_t TIME_THRESHOLD = 3 * 1000000; // 3 millisecond
-constexpr int32_t MICROSEC_TO_NANOSEC = 1000;
 
 } // namespace
 
@@ -55,8 +54,6 @@ void RenderGridScroll::Update(const RefPtr<Component>& component)
     if (!NeedUpdate(component)) {
         return;
     }
-
-    LOGD("RenderGridScroll::Update");
     useScrollable_ = SCROLLABLE::NO_SCROLL;
     mainSize_ = &rowSize_;
     crossSize_ = &colSize_;
@@ -66,7 +63,10 @@ void RenderGridScroll::Update(const RefPtr<Component>& component)
     mainGap_ = &rowGap_;
     startRankItemIndex_ = 0;
     currentItemIndex_ = 0;
+    // maybe change ItemIndex
+    ApplyRestoreInfo();
     RenderGridLayout::Update(component);
+    FindRefreshParent(AceType::WeakClaim(this));
     InitScrollBar(component);
     TakeBoundary();
     const RefPtr<GridLayoutComponent> grid = AceType::DynamicCast<GridLayoutComponent>(component);
@@ -152,6 +152,7 @@ void RenderGridScroll::CreateScrollable()
             }
         }
     });
+    InitializeScrollable(scrollable_);
     scrollable_->Initialize(context_);
 }
 
@@ -167,7 +168,9 @@ bool RenderGridScroll::UpdateScrollPosition(double offset, int32_t source)
     if (scrollBar_ && scrollBar_->NeedScrollBar()) {
         scrollBar_->SetActive(SCROLL_FROM_CHILD != source);
     }
-
+    if (reachHead_ && HandleRefreshEffect(offset, source, currentOffset_)) {
+        return false;
+    }
     if (reachHead_ && reachTail_) {
         return false;
     }
@@ -184,7 +187,7 @@ bool RenderGridScroll::UpdateScrollPosition(double offset, int32_t source)
         reachHead_ = false;
     }
 
-    currentOffset_ += Round(offset);
+    currentOffset_ += offset;
     MarkNeedLayout(true);
     return true;
 }
@@ -1564,7 +1567,6 @@ void RenderGridScroll::OnPaintFinish()
 
 void RenderGridScroll::OnPredictLayout(int64_t deadline)
 {
-    auto startTime = GetSysTimestamp(); // unit: ns
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -1594,7 +1596,7 @@ void RenderGridScroll::OnPredictLayout(int64_t deadline)
                     }
                 }
                 // Stop predictLayout less than 3 milliseconds before the next vsync arrives.
-                if (GetSysTimestamp() - startTime + TIME_THRESHOLD > deadline * MICROSEC_TO_NANOSEC) {
+                if (GetSysTimestamp() + TIME_THRESHOLD > deadline) {
                     MarkNeedPredictLayout();
                     return;
                 }
@@ -1615,6 +1617,30 @@ bool RenderGridScroll::IsAxisScrollable(AxisDirection direction)
 
 void RenderGridScroll::HandleAxisEvent(const AxisEvent& event)
 {
+}
+
+std::string RenderGridScroll::ProvideRestoreInfo()
+{
+    int32_t currentItemIndex = 0;
+    auto items = gridMatrix_.find(startIndex_);
+    if (items != gridMatrix_.end() && !items->second.empty()) {
+        currentItemIndex = items->second.begin()->second;
+    }
+
+    if (currentItemIndex > 0) {
+        return std::to_string(currentItemIndex);
+    }
+    return "";
+}
+
+void RenderGridScroll::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    currentItemIndex_ = StringUtils::StringToInt(GetRestoreInfo());
+    startRankItemIndex_ = GetStartingItem(currentItemIndex_);
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace::V2

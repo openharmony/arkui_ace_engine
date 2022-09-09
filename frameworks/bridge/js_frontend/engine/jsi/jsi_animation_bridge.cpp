@@ -430,6 +430,10 @@ void JsiAnimationBridge::JsCreateAnimation(const RefPtr<JsAcePage>& page, const 
     if (iterFill != animationStringOptions.end()) {
         tweenOption.SetFillMode(StringToFillMode(iterFill->second));
     }
+    auto iterDirection = animationStringOptions.find(DOM_ANIMATION_DIRECTION_API);
+    if (iterDirection != animationStringOptions.end()) {
+        tweenOption.SetAnimationDirection(StringToAnimationDirection(iterDirection->second));
+    }
     auto iterDelay = animationDoubleOptions.find(DOM_ANIMATION_DELAY_API);
     if (iterDelay != animationDoubleOptions.end()) {
         tweenOption.SetDelay(iterDelay->second);

@@ -47,7 +47,6 @@ template("js_engine_ark") {
 
     configs = [
       "$ace_root:ace_config",
-      "$ark_runtime_path/libpandabase:arkbase_public_config",
       "//arkcompiler/ets_runtime:ark_jsruntime_public_config",
     ]
 

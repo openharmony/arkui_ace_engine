@@ -501,7 +501,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 
 static napi_value PromptExport(napi_env env, napi_value exports)
 {
-    static napi_property_descriptor promptDesc[] = {
+    napi_property_descriptor promptDesc[] = {
         DECLARE_NAPI_FUNCTION("showToast", JSPromptShowToast),
         DECLARE_NAPI_FUNCTION("showDialog", JSPromptShowDialog),
         DECLARE_NAPI_FUNCTION("showActionMenu", JSPromptShowActionMenu),

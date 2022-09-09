@@ -23,7 +23,7 @@ namespace OHOS::Ace::Framework {
 constexpr int32_t DEFAULT_APP_ID = 10002;
 constexpr int32_t FRAGMENT_SIZE = 100;
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 constexpr char JS_LOG_TAG[] = "Console";
 #else
 constexpr char JS_LOG_TAG[] = "JSApp";

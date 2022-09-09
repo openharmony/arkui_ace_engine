@@ -27,8 +27,13 @@
 
 namespace OHOS::Ace {
 
+class FocusNode;
 class FocusGroup;
 class ClickInfo;
+
+using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusNode>>>;
+constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
+constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 
 class ACE_EXPORT FocusNode : public virtual AceType {
     DECLARE_ACE_TYPE(FocusNode, AceType);
@@ -39,6 +44,9 @@ public:
     ~FocusNode() override = default;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes);
+    bool GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx);
+    bool HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusGroup>& curPage);
     bool RequestFocusImmediately();
     void UpdateAccessibilityFocusInfo();
     // Use pipeline to request focus. In this case that node gets focus when the layout needs to be completed.
@@ -190,7 +198,7 @@ public:
         inspectorKey_ = inspectorKey;
     }
 
-    RefPtr<FocusNode> GetChildDefaultFoucsNode(bool isGetDefaultFocus = true);
+    RefPtr<FocusNode> GetChildDefaultFocusNode(bool isGetDefaultFocus = true);
 
     RefPtr<FocusNode> GetChildFocusNodeById(const std::string& id);
 
@@ -321,6 +329,8 @@ public:
     void SwitchFocus(const RefPtr<FocusNode>& focusNode);
     bool GoToNextFocus(bool reverse, const Rect& rect = Rect());
 
+    int32_t GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes);
+
     const std::list<RefPtr<FocusNode>>& GetChildrenList() const
     {
         return focusNodes_;
@@ -339,6 +349,15 @@ public:
 
     void RefreshParentFocusable(bool focusable) override;
 
+    void SetIsGroupDefaultFocused(bool isGroupDefaultFocused)
+    {
+        isGroupDefaultFocused_ = isGroupDefaultFocused;
+    }
+    bool IsGroupDefaultFocused() const
+    {
+        return isGroupDefaultFocused_;
+    }
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
     void OnFocus() override;
@@ -355,6 +374,8 @@ protected:
 
 private:
     bool CalculatePosition();
+    bool isGroupDefaultFocused_ { false };
+    bool isFirstFocusInPage_ { true };
 };
 
 } // namespace OHOS::Ace

@@ -30,7 +30,6 @@
 namespace OHOS::Ace::V2 {
 namespace {
 constexpr int32_t TIME_THRESHOLD = 3 * 1000000; // milliseconds
-constexpr int32_t MICROSEC_TO_NANOSEC = 1000;
 constexpr int32_t DEFAULT_DEPTH = 10;
 constexpr bool HORIZONTAL = false;
 constexpr bool VERTICAL = true;
@@ -1420,7 +1419,6 @@ void RenderWaterFlow::OnPredictLayout(int64_t deadline)
     if (updateFlag_) {
         return;
     }
-    auto startTime = GetSysTimestamp(); // unit: ns
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -1441,7 +1439,7 @@ void RenderWaterFlow::OnPredictLayout(int64_t deadline)
     }
     LOGD("OnPredictLayout loadingIndex_: %{public}d.", loadingIndex_);
     ACE_SCOPED_TRACE("OnPredictLayout %d", loadingIndex_);
-    if (GetSysTimestamp() - startTime + TIME_THRESHOLD > deadline * MICROSEC_TO_NANOSEC) {
+    if (GetSysTimestamp() + TIME_THRESHOLD > deadline) {
         MarkNeedPredictLayout();
         return;
     }

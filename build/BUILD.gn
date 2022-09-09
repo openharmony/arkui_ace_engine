@@ -151,15 +151,16 @@ foreach(item, ace_platforms) {
         "$ace_root/frameworks/core:ace_core_ohos",
         "$ace_root/frameworks/core/components/theme:build_theme_code",
         "//third_party/googletest:gtest_main",
-        "//utils/native/base:utils",
       ]
+
+      external_deps = [ "c_utils:utils" ]
     }
   }
 }
 
 # Config for reduceing eh_frame section on aosp platform to save rom size.
 config("reduce_eh_frame_config") {
-  if (!use_mingw_win && !use_mac) {
+  if (!use_mingw_win && !use_mac && !use_linux) {
     cflags = [
       "-fno-unwind-tables",
       "-fomit-frame-pointer",

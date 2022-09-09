@@ -17,6 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_NODE_H
 
 #include <cstdint>
+#include <list>
+#include <string>
+#include <type_traits>
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"
@@ -28,7 +31,7 @@ class ACE_EXPORT ForEachNode : public UINode {
     DECLARE_ACE_TYPE(ForEachNode, UINode);
 
 public:
-    static RefPtr<ForEachNode> GetOrCreateLazyForEachNode(int32_t nodeId);
+    static RefPtr<ForEachNode> GetOrCreateForEachNode(int32_t nodeId);
 
     explicit ForEachNode(int32_t nodeId) : UINode(V2::JS_FOR_EACH_ETS_TAG, nodeId) {}
     ~ForEachNode() override = default;
@@ -38,7 +41,33 @@ public:
         return false;
     }
 
+    void CreateTempItems()
+    {
+        std::swap(ids_, tempIds_);
+        std::swap(children_, tempChildren_);
+    }
+
+    void CompareAndUpdateChildren();
+
+    void FlushUpdateAndMarkDirty() override;
+
+    const std::list<std::string>& GetTempIds() const
+    {
+        return tempIds_;
+    }
+
+    void SetIds(std::list<std::string>&& ids)
+    {
+        ids_ = std::move(ids);
+    }
+
 private:
+    std::list<std::string> ids_;
+
+    // temp items use to compare each update.
+    std::list<std::string> tempIds_;
+    std::list<RefPtr<UINode>> tempChildren_;
+
     ACE_DISALLOW_COPY_AND_MOVE(ForEachNode);
 };
 

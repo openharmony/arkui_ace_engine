@@ -192,6 +192,15 @@ RefPtr<ScrollComponent> ViewStackProcessor::GetStepperScrollComponent()
 
 RefPtr<BoxComponent> ViewStackProcessor::GetBoxComponent()
 {
+#if defined(PREVIEW)
+    if (componentsStack_.empty()) {
+        RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<OHOS::Ace::BoxComponent>();
+        std::unordered_map<std::string, RefPtr<Component>> wrappingComponentsMap;
+        wrappingComponentsMap.emplace("box", boxComponent);
+        componentsStack_.push(wrappingComponentsMap);
+        return boxComponent;
+    }
+#endif
     auto& wrappingComponentsMap = componentsStack_.top();
     if (wrappingComponentsMap.find("box") != wrappingComponentsMap.end()) {
         auto boxComponent = AceType::DynamicCast<BoxComponent>(wrappingComponentsMap["box"]);
@@ -418,7 +427,7 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
     CreateInspectorComposedComponent(tag);
     CreateScoringComponent(tag);
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (!isCustomView && !AceType::InstanceOf<MultiComposedComponent>(component) &&
         !AceType::InstanceOf<TextSpanComponent>(component)) {
         GetBoxComponent();
@@ -437,6 +446,13 @@ void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomV
 
 bool ViewStackProcessor::ShouldPopImmediately()
 {
+// Pop the non-pop mock component immediately on the preview
+#if defined(PREVIEW)
+    auto inspectorTag = GetMainComponent()->GetInspectorTag();
+    if (inspectorTag == "XComponentComponent" || inspectorTag == "WebComponent") {
+        return true;
+    }
+#endif
     auto type = AceType::TypeName(GetMainComponent());
     auto componentGroup = AceType::DynamicCast<ComponentGroup>(GetMainComponent());
     auto multiComposedComponent = AceType::DynamicCast<MultiComposedComponent>(GetMainComponent());
@@ -603,6 +619,18 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
         }
     }
 
+    // Adjust layout param in TextComponent
+    auto isTextComponent = AceType::InstanceOf<TextComponent>(mainComponent);
+    if (isTextComponent) {
+        auto iter = wrappingComponentsMap.find("box");
+        if (iter != wrappingComponentsMap.end()) {
+            auto boxComponent = AceType::DynamicCast<BoxComponent>(wrappingComponentsMap["box"]);
+            if (boxComponent) {
+                boxComponent->SetDeliverMinToChild(false);
+            }
+        }
+    }
+
     if (wrappingComponentsMap.find("shared_transition") != wrappingComponentsMap.end() &&
         wrappingComponentsMap.find("display") != wrappingComponentsMap.end()) {
         auto sharedTransitionComponent =
@@ -694,7 +722,8 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     }
 
     for (auto&& component : components) {
-        component->SetTouchable(mainComponent->IsTouchable() && mainComponent->GetHitTestMode() != HitTestMode::NONE);
+        component->SetTouchable(mainComponent->IsTouchable() &&
+        mainComponent->GetHitTestMode() != HitTestMode::HTMNONE);
     }
 
     for (auto&& component : components) {

@@ -240,7 +240,7 @@ void RenderSemiModal::OnNavigationBarHeightChanged(const Dimension& height)
     }
     updateMinBlank_ = true;
     updateDefaultBlank_ = true;
-    if (abs(delta) < context->GetRootHeight() * KEYBOARD_HEIGHT_RATIO) {
+    if (std::abs(delta) < context->GetRootHeight() * KEYBOARD_HEIGHT_RATIO) {
         // Is not a keyboard changing.
         blankHeight_ = std::max(blankHeight_ + delta, statusBarHeight_);
     } else {

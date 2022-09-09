@@ -23,106 +23,138 @@
 
 namespace OHOS::Ace::NG {
 
-ImageObjSuccessCallback ImagePattern::CreateSuccessCallback()
+ImagePattern::ImagePattern(const ImageSourceInfo& imageSourceInfo)
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& info, const RefPtr<ImageObject>& image) {
+    LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
+    loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(imageSourceInfo, std::move(loadNotifier));
+    loadingCtx_->LoadImageData();
+}
+
+DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
+{
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
-        if (pattern && pattern->isActive_) {
-            pattern->OnImageObjectReady(image);
+        CHECK_NULL_VOID(pattern);
+        auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        if (imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo("")) != sourceInfo) {
+            LOGW("sourceInfo does not match, ignore current callback. current: %{private}s vs callback's: %{private}s",
+                pattern->sourceInfo_.ToString().c_str(), sourceInfo.ToString().c_str());
+            return;
         }
+        pattern->OnImageDataReady();
     };
     return task;
 }
 
-UploadSuccessCallback ImagePattern::CreateUploadSuccessCallback()
+LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
 {
-    auto task = [weak = WeakClaim(this)](
-#ifdef NG_BUILD
-                    const ImageSourceInfo& imageSourceInfo, RefPtr<CanvasImage> image) {
-#else
-                    const ImageSourceInfo& imageSourceInfo, fml::RefPtr<flutter::CanvasImage> image) {
-#endif
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
-        if (pattern && pattern->isActive_) {
-            pattern->OnImageDataUploaded(image);
+        CHECK_NULL_VOID(pattern);
+        auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        if (imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo("")) != sourceInfo) {
+            LOGW("sourceInfo does not match, ignore current callback. current: %{private}s vs callback's: %{private}s",
+                pattern->sourceInfo_.ToString().c_str(), sourceInfo.ToString().c_str());
+            return;
         }
+        pattern->OnImageLoadSuccess();
     };
     return task;
 }
 
-FailedCallback ImagePattern::CreateFailedCallback()
+LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
 {
-    auto task = [](const ImageSourceInfo& info, const std::string& errorMsg) {};
-    return task;
-}
-
-OnPostBackgroundTask ImagePattern::CreateOnBackgroundTaskPostCallback()
-{
-    auto task = [weak = WeakClaim(this)](const CancelableTask& task) {
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->SetFetchImageObjBackgroundTask(task);
+        CHECK_NULL_VOID(pattern);
+        auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        if (imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo("")) != sourceInfo) {
+            LOGW("sourceInfo does not match, ignore current callback. current: %{private}s vs callback's: %{private}s",
+                pattern->sourceInfo_.ToString().c_str(), sourceInfo.ToString().c_str());
+            return;
         }
+        pattern->OnImageLoadFail();
     };
     return task;
 }
 
-#ifdef NG_BUILD
-void ImagePattern::OnImageDataUploaded(RefPtr<CanvasImage> image)
-#else
-void ImagePattern::OnImageDataUploaded(fml::RefPtr<flutter::CanvasImage> image)
-#endif
+void ImagePattern::OnImageLoadSuccess()
 {
-    LOGD("on image data uploaded, %{public}s.", imageObject_->GetSourceInfo().GetSrc().c_str());
-#ifdef NG_BUILD
-    image_ = image;
-#else
-    image_ = CanvasImage::Create(&image);
-#endif
-    if (imageObject_ && (imageObject_->GetSourceInfo().GetSrcType() != SrcType::MEMORY) &&
-        imageObject_->IsSingleFrame()) {
-        imageObject_->ClearData();
-    }
-    CacheImageObject();
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto imageEventHub = GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    LoadImageSuccessEvent loadImageSuccessEvent_(
+        loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 1);
+    imageEventHub->FireCompleteEvent(std::move(loadImageSuccessEvent_));
+
+    lastCanvasImage_ = loadingCtx_->GetCanvasImage();
+    lastSrcRect_ = loadingCtx_->GetSrcRect();
+    lastDstRect_ = loadingCtx_->GetDstRect();
+    // TODO: only do paint task when the pattern is active
+    // figure out why here is always inactive
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void ImagePattern::CacheImageObject()
 {
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-
-    auto imageCache = context->GetImageCache();
-    if (imageCache && imageObject_ && imageObject_->IsSingleFrame()) {
-        imageCache->CacheImgObj(imageObject_->GetSourceInfo().ToString(), imageObject_);
-    }
+    // TODO: do cache
 }
 
-void ImagePattern::OnImageObjectReady(const RefPtr<ImageObject>& imageObj)
+void ImagePattern::OnImageDataReady()
 {
-    LOGD("on image object ready: %{public}s", imageObj->GetSourceInfo().GetSrc().c_str());
-    imageObject_ = imageObj;
-    auto host = frameNode_.Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto imageEventHub = GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    LoadImageSuccessEvent loadImageSuccessEvent_(
+        loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 0);
+    imageEventHub->FireCompleteEvent(std::move(loadImageSuccessEvent_));
+
     if (!geometryNode->GetContent()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void ImagePattern::OnImageLoadFail()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    auto imageEventHub = GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEventHub);
+    LoadImageFailEvent loadImageFailEvent_(
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), "");
+    // TODO: remove errorMsg in fail event
+    imageEventHub->FireErrorEvent(std::move(loadImageFailEvent_));
 }
 
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
-    CHECK_NULL_RETURN(image_, nullptr);
-    CHECK_NULL_RETURN(imageObject_, nullptr);
-    auto size = imageObject_->GetImageSize();
-    SizeF imageSize = { static_cast<float>(size.Width()), static_cast<float>(size.Height()) };
-    return MakeRefPtr<ImagePaintMethod>(image_, imageSize);
+    CHECK_NULL_RETURN(lastCanvasImage_, nullptr);
+    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(imageRenderProperty, nullptr);
+    ImagePaintConfig imagePaintConfig(lastSrcRect_, lastDstRect_);
+    imagePaintConfig.renderMode_ = imageRenderProperty->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
+    imagePaintConfig.imageInterpolation_ =
+        imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE);
+    imagePaintConfig.imageRepeat_ = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NOREPEAT);
+    return MakeRefPtr<ImagePaintMethod>(lastCanvasImage_, imagePaintConfig);
 }
 
 bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -130,7 +162,20 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-    return image_;
+    return lastCanvasImage_;
+}
+
+void ImagePattern::OnModifyDone()
+{
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    if (loadingCtx_->GetSourceInfo() == imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""))) {
+        return;
+    }
+    LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
+    loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo("")), std::move(loadNotifier));
+    loadingCtx_->LoadImageData();
 }
 
 } // namespace OHOS::Ace::NG

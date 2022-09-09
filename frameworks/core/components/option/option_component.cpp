@@ -39,8 +39,10 @@ constexpr double MIN_TEXT_SIZE_PHONE = 9.0;
 
 OptionComponent::OptionComponent(const RefPtr<SelectTheme>& theme)
 {
-    theme_ = theme->clone();
-    theme_->SetFontWeight(FontWeight::W400);
+    if (theme) {
+        theme_ = theme->clone();
+        theme_->SetFontWeight(FontWeight::W400);
+    }
 }
 
 void OptionComponent::InitTheme(const RefPtr<ThemeManager>& themeManager)
@@ -136,7 +138,7 @@ bool OptionComponent::Initialize(const RefPtr<AccessibilityManager>& manager)
     AppendChild(text_);
     SetNode((!manager ? nullptr
                   : manager->CreateAccessibilityNode("option", StringUtils::StringToInt(GetId()), GetParentId(), -1)));
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (node_) {
         node_->SetAttr(GetAttr());
         node_->SetStyle(GetStyle());

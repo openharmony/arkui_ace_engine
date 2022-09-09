@@ -19,8 +19,6 @@
 
 namespace OHOS::Ace {
 
-thread_local std::unique_ptr<GestureReferee> GestureReferee::instance_ = nullptr;
-
 void GestureScope::AddMember(const RefPtr<GestureRecognizer>& recognizer)
 {
     if (!recognizer) {
@@ -78,6 +76,11 @@ void GestureScope::DelMember(const RefPtr<GestureRecognizer>& recognizer)
 
 void GestureScope::HandleGestureDisposal(const RefPtr<GestureRecognizer>& recognizer, const GestureDisposal disposal)
 {
+    if (!Existed(recognizer)) {
+        LOGE("can not find the recognizer");
+        return;
+    }
+
     GesturePriority priority = recognizer->GetPriority();
     if (priority == GesturePriority::Parallel) {
         HandleParallelDisposal(recognizer, disposal);
@@ -115,12 +118,24 @@ void GestureScope::HandleParallelDisposal(const RefPtr<GestureRecognizer>& recog
 
 void GestureScope::HandleAcceptDisposal(const RefPtr<GestureRecognizer>& recognizer)
 {
+    if (CheckNeedBlocked(recognizer)) {
+        LOGI("gesture referee ready to notify block for %{public}s", AceType::TypeName(recognizer));
+        recognizer->SetRefereeState(RefereeState::BLOCKED);
+        return;
+    }
+
     LOGI("gesture referee accept %{public}s of id %{public}zu", AceType::TypeName(recognizer), touchId_);
     AcceptGesture(recognizer);
 }
 
 void GestureScope::HandlePendingDisposal(const RefPtr<GestureRecognizer>& recognizer)
 {
+    if (CheckNeedBlocked(recognizer)) {
+        LOGI("gesture referee ready to notify block for %{public}s", AceType::TypeName(recognizer));
+        recognizer->SetRefereeState(RefereeState::BLOCKED);
+        return;
+    }
+
     LOGI("gesture referee ready to notify pending for %{public}s", AceType::TypeName(recognizer));
     recognizer->SetRefereeState(RefereeState::PENDING);
     recognizer->OnPending(touchId_);
@@ -198,15 +213,14 @@ bool GestureScope::CheckNeedBlocked(const RefPtr<GestureRecognizer>& recognizer)
     }
 
     std::list<WeakPtr<GestureRecognizer>> members = GetMembersByRecognizer(recognizer);
-    auto pendingMember =
-        std::find_if(std::begin(members), std::end(members), [recognizer](const WeakPtr<GestureRecognizer>& member) {
-            return (member != recognizer) &&
-                   (member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::PENDING);
-        });
+    for (const auto& member : members) {
+        if (member == recognizer) {
+            return false;
+        }
 
-    if (pendingMember != members.end()) {
-        LOGD("detected pending gesture in members");
-        return true;
+        if (member.Upgrade() && member.Upgrade()->GetRefereeState() == RefereeState::PENDING) {
+            return true;
+        }
     }
 
     return false;
@@ -404,14 +418,6 @@ void GestureReferee::Adjudicate(size_t touchId, const RefPtr<GestureRecognizer>&
     } else {
         LOGE("fail to find the gesture scope for %{public}zu session id", touchId);
     }
-}
-
-GestureReferee* GestureReferee::GetInstance()
-{
-    if (!instance_) {
-        instance_.reset(new GestureReferee);
-    }
-    return instance_.get();
 }
 
 } // namespace OHOS::Ace

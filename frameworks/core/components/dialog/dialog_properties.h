@@ -17,8 +17,10 @@
 #define FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_CORE_COMPONENTS_COMMON_PROPERTIES_DIALOG_PROPERTIES_H
 
 #include "base/geometry/dimension_offset.h"
+#include "core/components/common/properties/color.h"
 #include "core/event/ace_event_handler.h"
 #include "core/gestures/gesture_info.h"
+#include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
 
@@ -61,7 +63,7 @@ struct ButtonInfo {
     std::string text;      // text of button.
     std::string textColor; // style of text in button.
     bool isBgColorSetted = false;
-    Color bgColor;   // background color of button.
+    Color bgColor; // background color of button.
 
     // Whether button info is valid, valid if text is not empty.
     bool IsValid() const

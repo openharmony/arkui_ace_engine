@@ -110,12 +110,22 @@ public:
     bool OnHandleInterceptUrlLoading(const std::string& url) override;
     void OnResource(const std::string& url) override;
     void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;
+    void OnScroll(double xOffset, double yOffset) override;
     bool OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthResult> result, const std::string &host,
         const std::string &realm) override;
+    bool OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
+        OHOS::NWeb::SslError error) override;
     void OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request) override;
     bool RunContextMenu(std::shared_ptr<NWeb::NWebContextMenuParams> params,
         std::shared_ptr<NWeb::NWebContextMenuCallback> callback) override;
-
+    bool RunQuickMenu(std::shared_ptr<NWeb::NWebQuickMenuParams> params,
+                      std::shared_ptr<NWeb::NWebQuickMenuCallback> callback) override;
+    void OnQuickMenuDismissed() override;
+    void OnTouchSelectionChanged(
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle) override;
+    bool OnDragAndDropData(const void* data, size_t len, const NWeb::ImageOptions& opt) override;
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
         webDelegate_ = delegate;

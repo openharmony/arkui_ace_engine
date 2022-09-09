@@ -59,6 +59,13 @@ PipelineBase::~PipelineBase()
     LOG_DESTROY();
 }
 
+RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
+{
+    auto currentContainer = Container::Current();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    return currentContainer->GetPipelineContext();
+}
+
 uint64_t PipelineBase::GetTimeFromExternalTimer()
 {
     static const int64_t secToNanosec = 1000000000;

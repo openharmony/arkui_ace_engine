@@ -20,6 +20,8 @@
 #include "vsync_receiver.h"
 #include "wm/window.h"
 
+#include "base/thread/task_executor.h"
+#include "base/utils/noncopyable.h"
 #include "core/common/window.h"
 
 namespace OHOS::Ace::NG {
@@ -37,7 +39,7 @@ public:
 
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 
-    void RecordFrameTime(uint64_t timeStamp, const std::string name) override;
+    void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;
 
     void FlushTasks() override;
 
@@ -50,6 +52,8 @@ private:
     int32_t id_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<OHOS::Rosen::VsyncCallback> vsyncCallback_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(RosenWindow);
 };
 
 } // namespace OHOS::Ace::NG

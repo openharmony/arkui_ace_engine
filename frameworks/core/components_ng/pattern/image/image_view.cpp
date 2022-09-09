@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/image/image_view.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -25,12 +26,59 @@ void ImageView::Create(const std::string& src)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    stack->Push(frameNode);
-
     ImageSourceInfo imageSourceInfo(src);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, [imageSourceInfo]() { return AceType::MakeRefPtr<ImagePattern>(imageSourceInfo); });
+    stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
+}
+
+void ImageView::SetObjectFit(ImageFit imageFit)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, imageFit);
+}
+
+void ImageView::SetAutoResize(bool autoResize)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, AutoResize, autoResize);
+}
+
+void ImageView::SetImageRenderMode(ImageRenderMode imageRenderMode)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, imageRenderMode);
+}
+
+void ImageView::SetImageInterpolation(ImageInterpolation imageInterpolation)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, imageInterpolation);
+}
+
+void ImageView::SetImageRepeat(ImageRepeat imageRepeat)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat);
+}
+
+void ImageView::SetImageSourceSize(const std::pair<Dimension, Dimension>& sourceSize)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize);
+}
+
+void ImageView::SetOnError(ErrorEvent&& onError)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnError(std::move(onError));
+}
+
+void ImageView::SetOnComplete(CompleteEvent&& onComplete)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(onComplete));
 }
 
 } // namespace OHOS::Ace::NG

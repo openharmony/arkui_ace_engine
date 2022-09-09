@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_SKIA_CANVAS_IMAGE_H
 
 #ifdef NG_BUILD
+#include "flutter/flow/skia_gpu_object.h"
 #include "third_party/skia/include/core/SkImage.h"
 #else
 #include "flutter/lib/ui/painting/image.h"
@@ -46,6 +47,11 @@ public:
 #endif
         return nullptr;
     }
+    void ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage);
+    int32_t GetWidth() const override;
+    int32_t GetHeight() const override;
+
+    void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override;
 
 private:
     // TODO: should not deps on flutter.

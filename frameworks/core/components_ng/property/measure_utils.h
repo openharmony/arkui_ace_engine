@@ -20,22 +20,26 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 std::optional<float> ConvertToPx(
-    const CalcLength& value, const ScaleProperty& scaleProperty, float parentLength = -1.0f);
+    const CalcLength& value, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
 
 std::optional<float> ConvertToPx(
-    const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty, float parentLength = -1.0f);
+    const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
 
 std::optional<float> ConvertToPx(
-    const Dimension& dimension, const ScaleProperty& scaleProperty, float parentLength = -1.0f);
+    const Dimension& dimension, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
 
 SizeF ConvertToSize(
-    const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& parentSize = SizeF(-1.0f, -1.0f));
+    const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference = SizeF(-1.0f, -1.0f));
+
+OptionalSizeF ConvertToOptionalSize(
+    const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference = SizeF(-1.0f, -1.0f));
 
 SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSize);
 
@@ -43,11 +47,17 @@ void MinusPaddingToConstraint(const std::unique_ptr<PaddingProperty>& padding, L
 
 void MinusPaddingToConstraint(const PaddingProperty& padding, LayoutConstraintF& size);
 
-PaddingPropertyF ConvertToPaddingPropertyF(
-    const std::unique_ptr<PaddingProperty>& padding, const ScaleProperty& scaleProperty, float parentWidth = -1.0f);
+PaddingPropertyF ConvertToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
+    const ScaleProperty& scaleProperty, float percentReference = -1.0f);
 
 PaddingPropertyF ConvertToPaddingPropertyF(
-    const PaddingProperty& padding, const ScaleProperty& scaleProperty, float parentWidth = -1.0f);
+    const PaddingProperty& padding, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyF(const std::unique_ptr<BorderWidthProperty>& borderWidth,
+    const ScaleProperty& scaleProperty, float percentReference = -1.0f);
+
+BorderWidthPropertyF ConvertToBorderWidthPropertyF(
+    const BorderWidthProperty& borderWidth, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
 
 void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize,
     PaddingPropertyF& paddingValue);
@@ -55,6 +65,10 @@ void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty&
 void AddPaddingToSize(const PaddingPropertyF& padding, SizeF& size);
 
 void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size);
+
+void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
+
+void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
 float GetCrossAxisSize(const SizeF& size, Axis axis);
 
@@ -64,7 +78,34 @@ float GetMainAxisSize(const SizeF& size, Axis axis);
 
 void SetCrossAxisSize(float value, Axis axis, SizeF& size);
 
-SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType);
+std::optional<float> GetCrossAxisSize(const OptionalSizeF& size, Axis axis);
+
+std::optional<float> GetMainAxisSize(const OptionalSizeF& size, Axis axis);
+
+void SetCrossAxisSize(float value, Axis axis, OptionalSizeF& size);
+
+void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size);
+
+/**
+ * @brief Create node IdealSize.
+ *
+ * @param layoutConstraint the constraint of current node.
+ * @param axis the axis of this node.
+ * @param measureType the measure info.
+ * @param usingMaxSize When the component cannot confirm the size, it decides whether to use the maxi or min value.
+ * @return SizeF the node size info.
+ */
+SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingMaxSize);
+
+/**
+ * @brief Create node IdealSize.
+ *
+ * @param layoutConstraint the constraint of current node.
+ * @param axis the axis of this node.
+ * @param measureType the measure info.
+ * @return SizeF the node size info.
+ */
+OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_UTILS_H

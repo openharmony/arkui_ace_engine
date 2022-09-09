@@ -91,6 +91,17 @@ RefPtr<RenderBox> FlexTestUtils::CreateRenderBox(double width, double height)
     return renderBox;
 }
 
+RefPtr<RenderButton> FlexTestUtils::CreateRenderButton(double width, double height)
+{
+    auto renderButton = AceType::MakeRefPtr<MockRenderButton>();
+    std::list<RefPtr<Component>> children;
+    auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(children);
+    buttonComponent->SetWidth(width);
+    buttonComponent->SetHeight(height);
+    renderButton->Update(buttonComponent);
+    return renderButton;
+}
+
 RefPtr<RenderBox> FlexTestUtils::CreateWeightedBox(double weight, double width, double height)
 {
     RefPtr<RenderBox> renderBox = AceType::MakeRefPtr<MockRenderBox>();

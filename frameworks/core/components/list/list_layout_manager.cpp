@@ -85,7 +85,7 @@ LayoutParam ListLayoutManager::MakeInnerLayoutParam(FlexAlign crossAxisAlign) co
         } else {
             extent = renderList_.NormalizeToPx(itemExtent_);
         }
-        if (direction_ == FlexDirection::ROW) {
+        if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
             maxSize = Size(extent, renderList_.GetLayoutParam().GetMaxSize().Height());
             minSize = Size(extent, renderList_.GetLayoutParam().GetMinSize().Height());
         } else {
@@ -96,7 +96,7 @@ LayoutParam ListLayoutManager::MakeInnerLayoutParam(FlexAlign crossAxisAlign) co
             minSize = maxSize;
         }
     } else {
-        if (direction_ == FlexDirection::ROW) {
+        if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
             maxSize = Size(Size::INFINITE_SIZE, renderList_.GetLayoutParam().GetMaxSize().Height());
             if (crossAxisAlign == FlexAlign::STRETCH) {
                 minSize = Size(0.0, renderList_.GetLayoutParam().GetMaxSize().Height());
@@ -688,7 +688,7 @@ void ListLayoutManager::SetChildPosition(const RefPtr<RenderNode>& child, int32_
     }
 
     if (isVertical_) {
-        if (direction_ == FlexDirection::COLUMN_REVERSE) {
+        if (IsColReverse()) {
             mainAxis = mainLen - renderList_.GetMainSize(child->GetLayoutSize()) - mainAxis;
         }
         child->SetPosition(Offset(crossAxis, mainAxis) + position_);

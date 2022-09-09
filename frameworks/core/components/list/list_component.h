@@ -101,10 +101,6 @@ public:
 
     void SetDirection(FlexDirection direction)
     {
-        if (direction == FlexDirection::COLUMN_REVERSE || direction == FlexDirection::ROW_REVERSE) {
-            LOGE("Not support. direction: %{public}d", direction);
-            return;
-        }
         direction_ = direction;
     }
 

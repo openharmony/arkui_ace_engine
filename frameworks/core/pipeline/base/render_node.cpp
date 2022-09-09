@@ -59,7 +59,10 @@ constexpr float PRESS_KEYFRAME_END = 1.0f;
 struct ZIndexComparator {
     bool operator()(const RefPtr<RenderNode>& left, const RefPtr<RenderNode>& right) const
     {
-        return (left->GetZIndex() < right->GetZIndex());
+        if (left && right) {
+            return (left->GetZIndex() < right->GetZIndex());
+        }
+        return false;
     }
 };
 
@@ -724,7 +727,7 @@ bool RenderNode::DispatchTouchTestToChildren(const Point& localPoint, const Poin
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
     bool dispatchSuccess = false;
-    if (!IsChildrenTouchEnable() || GetHitTestMode() == HitTestMode::BLOCK) {
+    if (!IsChildrenTouchEnable() || GetHitTestMode() == HitTestMode::HTMBLOCK) {
         return dispatchSuccess;
     }
 
@@ -736,14 +739,14 @@ bool RenderNode::DispatchTouchTestToChildren(const Point& localPoint, const Poin
         }
         if (child->TouchTest(globalPoint, localPoint, touchRestrict, result)) {
             dispatchSuccess = true;
-            if (child->GetHitTestMode() != HitTestMode::TRANSPARENT) {
+            if (child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) {
                 break;
             }
         }
         auto interceptTouchEvent = (child->IsTouchable() &&
             (child->InterceptTouchEvent() || IsExclusiveEventForChild()) &&
-            child->GetHitTestMode() != HitTestMode::TRANSPARENT);
-        if (child->GetHitTestMode() == HitTestMode::BLOCK || interceptTouchEvent) {
+            child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT);
+        if (child->GetHitTestMode() == HitTestMode::HTMBLOCK || interceptTouchEvent) {
             auto localTransformPoint = child->GetTransformPoint(localPoint);
             bool isInRegion = false;
             for (const auto& rect : child->GetTouchRectList()) {
@@ -753,7 +756,7 @@ bool RenderNode::DispatchTouchTestToChildren(const Point& localPoint, const Poin
                     break;
                 }
             }
-            if (isInRegion && child->GetHitTestMode() != HitTestMode::DEFAULT) {
+            if (isInRegion && child->GetHitTestMode() != HitTestMode::HTMDEFAULT) {
                 break;
             }
         }
@@ -967,7 +970,7 @@ bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
     return true;
 }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
 void RenderNode::SetAccessibilityRect(const Rect& rect)
 {
     Rect parentRect = rect;
@@ -1189,7 +1192,7 @@ double RenderNode::NormalizePercentToPx(const Dimension& dimension, bool isVerti
         if (!parent) {
             referSize = GetLayoutParam().GetMaxSize();
         } else {
-            if (positionParam_.type == PositionType::OFFSET) {
+            if (positionParam_.type == PositionType::PTOFFSET) {
                 referSize = parent->GetLayoutSize();
             } else {
                 referSize = parent->GetLayoutParam().GetMaxSize();
@@ -1332,7 +1335,7 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
             if (auto rsNode = GetRSNode()) {
                 auto nativeMotionOption = std::make_shared<Rosen::RSMotionPathOption>(
                     NativeCurveHelper::ToNativeMotionPathOption(motionPathOption_,
-                        positionParam_.type == PositionType::OFFSET));
+                        positionParam_.type == PositionType::PTOFFSET));
                 rsNode->SetMotionPathOption(nativeMotionOption);
             }
         }

@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/macros.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -40,7 +41,7 @@ public:
     }
 
     virtual std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+        const LayoutConstraintF& /*contentConstraint*/, LayoutWrapper* /*layoutWrapper*/)
     {
         return std::nullopt;
     }
@@ -66,13 +67,15 @@ public:
 
 protected:
     virtual void OnReset() {}
+
+    ACE_DISALLOW_COPY_AND_MOVE(LayoutAlgorithm);
 };
 
 class ACE_EXPORT LayoutAlgorithmWrapper : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(LayoutAlgorithmWrapper, LayoutAlgorithm);
 
 public:
-    LayoutAlgorithmWrapper(
+    explicit LayoutAlgorithmWrapper(
         const RefPtr<LayoutAlgorithm>& layoutAlgorithmT, bool skipMeasure = false, bool skipLayout = false)
         : layoutAlgorithm_(layoutAlgorithmT), skipMeasure_(skipMeasure), skipLayout_(skipLayout)
     {}
@@ -140,6 +143,8 @@ private:
 
     bool skipMeasure_ = false;
     bool skipLayout_ = false;
+
+    ACE_DISALLOW_COPY_AND_MOVE(LayoutAlgorithmWrapper);
 };
 } // namespace OHOS::Ace::NG
 

@@ -16,8 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FRONTEND_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_FRONTEND_H
 
+#include <string>
+#include <utility>
+
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "bridge/common/utils/source_map.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_page.h"
 #include "core/common/js_message_dispatcher.h"
@@ -84,6 +88,24 @@ public:
 
     virtual RefPtr<AcePage> GetPage(int32_t pageId) const = 0;
 
+    // Get the currently running JS page information in NG structure.
+    virtual std::string GetCurrentPageUrl() const
+    {
+        return "";
+    };
+
+    // Get the currently running JS page information in NG structure.
+    virtual RefPtr<Framework::RevSourceMap> GetCurrentPageSourceMap() const
+    {
+        return nullptr;
+    };
+
+    // Get the currently running JS page information in NG structure.
+    virtual RefPtr<Framework::RevSourceMap> GetFaAppSourceMap() const
+    {
+        return nullptr;
+    };
+
     virtual void RunPage(int32_t pageId, const std::string& content, const std::string& params) = 0;
 
     virtual void ReplacePage(const std::string& url, const std::string& params) = 0;
@@ -148,11 +170,11 @@ public:
     // when configuration update
     virtual void OnConfigurationUpdated(const std::string& data) {}
 
-    virtual void OnSaveAbilityState (std::string& data) = 0;
+    virtual void OnSaveAbilityState(std::string& data) = 0;
 
-    virtual void OnMemoryLevel(const int32_t level) = 0;
+    virtual void OnMemoryLevel(int32_t level) = 0;
 
-    virtual void OnRestoreAbilityState (const std::string& data) = 0;
+    virtual void OnRestoreAbilityState(const std::string& data) = 0;
 
     // when front on active
     virtual void OnActive() = 0;
@@ -213,7 +235,7 @@ public:
     }
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     virtual void RunNativeEngineLoop() {}
 #endif
 
@@ -225,13 +247,10 @@ public:
 
     virtual void SetDialogCallback(FrontendDialogCallback callback)
     {
-        dialogCallback_ = callback;
+        dialogCallback_ = std::move(callback);
     }
 
-    virtual void FlushReload()
-    {
-        return;
-    }
+    virtual void FlushReload() {}
 
 protected:
     bool disallowPopLastPage_ = false;

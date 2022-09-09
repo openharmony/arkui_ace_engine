@@ -182,7 +182,9 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushRender();
     FlushRenderFinish();
     FlushWindowBlur();
-    FlushFocus();
+    if (onShow_ && onFocus_) {
+        FlushFocus();
+    }
     FireVisibleChangeEvent();
     ProcessPostFlush();
     ClearDeactivateElements();
@@ -268,29 +270,23 @@ void PipelineContext::FlushFocus()
     if (!focusNode) {
         dirtyFocusNode_.Reset();
     } else {
-        if (isTabKeyPressed_) {
-            focusNode->RequestFocusImmediately();
-            dirtyFocusNode_.Reset();
-            dirtyFocusScope_.Reset();
-            return;
-        }
+        focusNode->RequestFocusImmediately();
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        return;
     }
     auto focusScope = dirtyFocusScope_.Upgrade();
     if (!focusScope) {
         dirtyFocusScope_.Reset();
     } else {
-        if (isTabKeyPressed_) {
-            focusScope->RequestFocusImmediately();
-            dirtyFocusNode_.Reset();
-            dirtyFocusScope_.Reset();
-            return;
-        }
+        focusScope->RequestFocusImmediately();
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        return;
     }
-    if (isTabKeyPressed_) {
-        if (!RequestDefaultFocus()) {
-            if (rootElement_ && !rootElement_->IsCurrentFocus()) {
-                rootElement_->RequestFocusImmediately();
-            }
+    if (!RequestDefaultFocus()) {
+        if (rootElement_ && !rootElement_->IsCurrentFocus()) {
+            rootElement_->RequestFocusImmediately();
         }
     }
 
@@ -550,14 +546,19 @@ void PipelineContext::FlushLayout()
 
     CreateGeometryTransition();
     FlushGeometryProperties();
+    TryCallNextFrameLayoutCallback();
+    if (FrameReport::GetInstance().GetEnable()) {
+        FrameReport::GetInstance().EndFlushLayout();
+    }
+}
 
+void PipelineContext::TryCallNextFrameLayoutCallback()
+{
     if (isForegroundCalled_ && nextFrameLayoutCallback_) {
         isForegroundCalled_ = false;
         nextFrameLayoutCallback_();
+        LOGI("nextFrameLayoutCallback called");
         nextFrameLayoutCallback_ = nullptr;
-    }
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().EndFlushLayout();
     }
 }
 
@@ -1100,7 +1101,7 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
     ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
     std::unordered_map<std::string, std::string> params {{"pageUrl", pageComponent->GetPageUrl()}};
-    ResSchedReport::GetInstance().ResSchedDataReport("push_page_start", params);
+    ResSchedReportScope report("push_page", params);
     auto stageElement = stage;
     if (!stageElement) {
         // if not target stage, use root stage
@@ -1120,7 +1121,6 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
         RefPtr<DisplayComponent> display = AceType::MakeRefPtr<DisplayComponent>(pageComponent);
         stageElement->PushPage(display);
     }
-    ResSchedReport::GetInstance().ResSchedDataReport("push_page_complete", params);
 
 #if defined(ENABLE_NATIVE_VIEW) || defined(ENABLE_ROSEN_BACKEND)
     if (GetIsDeclarative()) {
@@ -1385,6 +1385,10 @@ bool PipelineContext::PopPageStackOverlay()
     LOGI("Pop page overlays");
     // If last child is popup, use PopPopup to trigger state change event.
     if (pageStack->PopPopupIfExist()) {
+        return true;
+    }
+
+    if (pageStack->PopDialogIfExist()) {
         return true;
     }
 
@@ -1670,19 +1674,30 @@ void PipelineContext::FlushTouchEvents()
         return;
     }
     {
+        eventManager_->FlushTouchEventsBegin(touchEvents_);
         std::unordered_set<int32_t> moveEventIds;
         decltype(touchEvents_) touchEvents(std::move(touchEvents_));
         if (touchEvents.empty()) {
             return;
         }
+        std::list<TouchEvent> touchPoints;
         for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
             auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
             auto result = moveEventIds.emplace(scalePoint.id);
             if (result.second) {
-                ResSchedReport::GetInstance().DispatchTouchEventStart(scalePoint.type);
-                eventManager_->DispatchTouchEvent(scalePoint);
-                ResSchedReport::GetInstance().DispatchTouchEventEnd();
+                touchPoints.emplace_front(scalePoint);
             }
+        }
+
+        auto maxSize = touchPoints.size();
+        for (auto iter = touchPoints.rbegin(); iter != touchPoints.rend(); ++iter) {
+            maxSize--;
+            if (maxSize == 0) {
+                eventManager_->FlushTouchEventsEnd(touchPoints);
+            }
+            ResSchedReport::GetInstance().DispatchTouchEventStart((*iter).type);
+            eventManager_->DispatchTouchEvent(*iter);
+            ResSchedReport::GetInstance().DispatchTouchEventEnd();
         }
     }
 }
@@ -1707,9 +1722,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
     }
     rootElement_->HandleSpecifiedKey(event);
-    if (event.code == KeyCode::KEY_BACK) {
-        NotifyDestroyEventDismiss();
-    }
+
     SetShortcutKey(event);
 
     pressedKeyCodes = event.pressedCodes;
@@ -1732,10 +1745,11 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN && !isTabKeyPressed_) {
         isTabKeyPressed_ = true;
-        FlushFocus();
-        return true;
     }
-    return eventManager_->DispatchKeyEvent(event, rootElement_);
+    if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, GetLastPage())) {
+        return eventManager_->DispatchKeyEvent(event, rootElement_);
+    }
+    return true;
 }
 
 bool PipelineContext::RequestDefaultFocus()
@@ -1746,7 +1760,7 @@ bool PipelineContext::RequestDefaultFocus()
         return false;
     }
     curPageElement->SetIsFocused(true);
-    auto defaultFocusNode = curPageElement->GetChildDefaultFoucsNode();
+    auto defaultFocusNode = curPageElement->GetChildDefaultFocusNode();
     CHECK_NULL_RETURN(defaultFocusNode, false);
     if (!defaultFocusNode->IsFocusableWholePath()) {
         return false;
@@ -1811,6 +1825,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     }
     eventManager_->MouseTest(scaleEvent, rootElement_->GetRenderNode());
     eventManager_->DispatchMouseEvent(scaleEvent);
+    eventManager_->DispatchMouseHoverAnimation(scaleEvent);
     eventManager_->DispatchMouseHoverEvent(scaleEvent);
     FlushMessages();
 }
@@ -2022,6 +2037,9 @@ void PipelineContext::OnVirtualKeyboardAreaChange(Rect keyboardArea)
     if (textFieldManager_) {
         positionY = textFieldManager_->GetClickPosition().GetY();
     }
+    if (NotifyVirtualKeyBoard(width_, height_, keyboardHeight)) {
+        return;
+    }
     double offsetFix = (height_ - positionY) > 100.0 ? keyboardHeight - (height_ - positionY) / 2.0 : keyboardHeight;
     LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
         (height_ - keyboardHeight), offsetFix);
@@ -2084,6 +2102,11 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
         }
         case WindowSizeChangeReason::DRAG_START: {
             isDragStart_ = true;
+#ifdef ENABLE_ROSEN_BACKEND
+            if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+                rsUIDirector_->SetAppFreeze(true);
+            }
+#endif
             BlurWindowWithDrag(true);
             NotifyWebPaint();
             break;
@@ -2097,6 +2120,11 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
         case WindowSizeChangeReason::DRAG_END: {
             isDragStart_ = false;
             isFirstDrag_ = true;
+#ifdef ENABLE_ROSEN_BACKEND
+            if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
+                rsUIDirector_->SetAppFreeze(false);
+            }
+#endif
             BlurWindowWithDrag(false);
             SetRootSizeWithWidthHeight(width, height);
             NotifyWebPaint();
@@ -2135,12 +2163,23 @@ void PipelineContext::NotifyWebPaint() const
     }
 }
 
+bool PipelineContext::NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
+{
+    CHECK_RUN_ON(UI);
+    for (auto& iterVirtualKeyBoardCallback : virtualKeyBoardCallback_) {
+        if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     if (width_ == width && height_ == height && isSurfaceReady_ && type != WindowSizeChangeReason::DRAG_START &&
         type != WindowSizeChangeReason::DRAG_END && !isDensityUpdate_) {
         LOGI("Surface size is same, no need update");
@@ -2199,6 +2238,15 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 #ifndef WEARABLE_PRODUCT
     multiModalManager_->OpenChannel(Claim(this));
 #endif
+}
+
+void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY)
+{
+    for (auto&& [id, callback] : surfacePositionChangedCallbackMap_) {
+        if (callback) {
+            callback(posX, posY);
+        }
+    }
 }
 
 void PipelineContext::OnSurfaceDensityChanged(double density)
@@ -2484,7 +2532,7 @@ void PipelineContext::Destroy()
     window_->Destroy();
     touchPluginPipelineContext_.clear();
     webPaintCallback_.clear();
-    windowFocusChangedCallbackMap_.clear();
+    virtualKeyBoardCallback_.clear();
     rectCallbackList_.clear();
     LOGI("PipelineContext::Destroy end.");
 }
@@ -2705,6 +2753,7 @@ void PipelineContext::OnHide()
 #ifdef ENABLE_ROSEN_BACKEND
             if (context->rsUIDirector_) {
                 context->rsUIDirector_->GoBackground();
+                context->rsUIDirector_->SendMessages();
             }
 #endif
             context->NotifyPopupDismiss();
@@ -2740,8 +2789,6 @@ void PipelineContext::RefreshRootBgColor() const
 void PipelineContext::OnPageShow()
 {
     CHECK_RUN_ON(UI);
-    isTabKeyPressed_ = false;
-    eventManager_->SetIsTabNodesCollected(false);
     if (onPageShowCallBack_) {
         onPageShowCallBack_();
     }
@@ -2858,12 +2905,7 @@ void PipelineContext::RootLostFocus() const
 
 void PipelineContext::WindowFocus(bool isFocus)
 {
-    for (const auto& [id, callback] : windowFocusChangedCallbackMap_) {
-        if (callback) {
-            callback(isFocus);
-        }
-    }
-
+    onFocus_ = isFocus;
     if (!isFocus) {
         NotifyPopupDismiss();
         OnVirtualKeyboardAreaChange(Rect());
@@ -2948,7 +2990,7 @@ void PipelineContext::DumpAccessibility(const std::vector<std::string>& params) 
         accessibilityManager->DumpTree(0, 0);
     } else if (params.size() == 2) {
         accessibilityManager->DumpProperty(params);
-    } else if (params.size() == 3) {
+    } else if (params.size() == 3 || params.size() == 4) {
         accessibilityManager->DumpHandleEvent(params);
     }
 }
@@ -3748,10 +3790,10 @@ std::string PipelineContext::GetRestoreInfo(int32_t restoreId)
 {
     auto iter = restoreNodeInfo_.find(restoreId);
     if (iter != restoreNodeInfo_.end()) {
-        LOGE("PipelineContext::GetRestoreInfo, id = %{public}d, info = %{public}s", restoreId, iter->second.c_str());
-        return iter->second;
+        std::string restoreNodeInfo = iter->second;
+        restoreNodeInfo_.erase(iter);
+        return restoreNodeInfo;
     }
-    LOGE("PipelineContext::GetRestoreInfo not find, id = %{public}d", restoreId);
     return "";
 }
 
@@ -3764,6 +3806,22 @@ void PipelineContext::SetSinglePageId(int32_t pageId)
     }
 
     stageElement->SetSinglePageId(pageId);
+}
+
+void PipelineContext::SetAppTitle(const std::string& title)
+{
+    CHECK_NULL_VOID(rootElement_);
+    auto containerModalElement = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+    CHECK_NULL_VOID(containerModalElement);
+    containerModalElement->SetAppTitle(title);
+}
+
+void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
+{
+    CHECK_NULL_VOID(rootElement_);
+    auto containerModalElement = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
+    CHECK_NULL_VOID(containerModalElement);
+    containerModalElement->SetAppIcon(icon);
 }
 
 } // namespace OHOS::Ace

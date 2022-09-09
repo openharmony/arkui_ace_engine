@@ -21,7 +21,6 @@ static thread_local Inspector* g_inspector = nullptr;
 static bool g_isDebugMode;
 static void* HandleClient(void* inspector)
 {
-    LOGI("HandleClient");
     if (inspector == nullptr) {
         LOGE("inspector=nullptr");
         return nullptr;

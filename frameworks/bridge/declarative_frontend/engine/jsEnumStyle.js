@@ -475,6 +475,13 @@ var Sticky;
   Sticky[Sticky["Opacity"] = 2] = "Opacity";
 })(Sticky || (Sticky = {}));
 
+var StickyStyle;
+(function (StickyStyle) {
+  StickyStyle[StickyStyle["None"] = 0] = "None";
+  StickyStyle[StickyStyle["Header"] = 1] = "Header";
+  StickyStyle[StickyStyle["Footer"] = 2] = "Footer";
+})(StickyStyle || (StickyStyle = {}));
+
 var Week;
 (function (Week) {
   Week["Mon"] = 0b0000001;
@@ -839,8 +846,8 @@ var BlurStyle;
 
 var BreakpointsReference;
 (function (BreakpointsReference) {
-  BreakpointsReference[BreakpointsReference["ComponentSize"] = 0] = "ComponentSize";
-  BreakpointsReference[BreakpointsReference["WindowSize"] = 1] = "WindowSize";
+  BreakpointsReference[BreakpointsReference["WindowSize"] = 0] = "WindowSize";
+  BreakpointsReference[BreakpointsReference["ComponentSize"] = 1] = "ComponentSize";
 })(BreakpointsReference || (BreakpointsReference = {}));
 
 var GridRowDirection;
@@ -856,3 +863,11 @@ var HitTestMode;
   HitTestMode[HitTestMode["Transparent"] = 2] = "Transparent";
   HitTestMode[HitTestMode["None"] = 3] = "None";
 })(HitTestMode || (HitTestMode = {}));
+
+var GridDirection;
+(function (GridDirection) {
+  GridDirection[GridDirection["Row"] = 0] = "Row";
+  GridDirection[GridDirection["Column"] = 1] = "Column";
+  GridDirection[GridDirection["RowReverse"] = 2] = "RowReverse";
+  GridDirection[GridDirection["ColumnReverse"] = 3] = "ColumnReverse";
+})(GridDirection || (GridDirection = {}));

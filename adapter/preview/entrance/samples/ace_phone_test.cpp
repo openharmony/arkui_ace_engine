@@ -29,7 +29,6 @@ constexpr int32_t GET_INSPECTOR_TREE_TIMES = 12;
 constexpr int32_t GET_INSPECTOR_TREE_INTERVAL = 5000;
 constexpr char FILE_NAME[] = "InspectorTree.txt";
 constexpr char ACE_VERSION_2[] = "2.0";
-constexpr char ACE_VERSION_PU[] = "PU";
 constexpr char MODEL_STAGE[] = "stage";
 constexpr char MAX_ARGS_COUNT = 2;
 
@@ -54,7 +53,7 @@ int main(int argc, const char* argv[])
     std::string appResourcesPathStage = "/Volumes/SSD2T/daily-test/preview/js/default_stage";
     std::string systemResourcesPath = "/Volumes/SSD2T/daily-test/preview/js/SystemResources";
     constexpr double density = 2;
-#else
+#elif WINDOWS_PLATFORM
     std::string assetPathJs = "D:\\Workspace\\preview\\js\\default";
     std::string assetPathEts = "D:\\Workspace\\preview\\js\\default_2.0";
     std::string assetPathEtsStage = "D:\\Workspace\\preview\\js\\default_stage\\ets";
@@ -62,6 +61,14 @@ int main(int argc, const char* argv[])
     std::string appResourcesPathStage = "D:\\Workspace\\preview\\js\\default_stage";
     std::string systemResourcesPath = "D:\\Workspace\\preview\\js\\SystemResources\\assets\\entry";
     constexpr double density = 1;
+#else
+    std::string assetPathJs = "/home/ubuntu/demo/preview/js/default";
+    std::string assetPathEts = "/home/ubuntu/demo/preview/js/default_2.0";
+    std::string assetPathEtsStage = "/home/ubuntu/demo/preview/js/default_stage/ets";
+    std::string appResourcesPath = "/home/ubuntu/demo/preview/js/AppResources";
+    std::string appResourcesPathStage = "/home/ubuntu/demo/preview/js/default_stage";
+    std::string systemResourcesPath = "/home/ubuntu/demo/preview/js/SystemResources";
+    constexpr double density = 2;
 #endif
     std::string pageProfile = "main_page";
     OHOS::Ace::Platform::AceRunArgs args = {
@@ -87,9 +94,6 @@ int main(int argc, const char* argv[])
             args.aceVersion = OHOS::Ace::Platform::AceVersion::ACE_2_0;
             args.projectModel = OHOS::Ace::Platform::ProjectModel::STAGE;
             args.pageProfile = pageProfile;
-        } else if (!std::strcmp(argv[1], ACE_VERSION_PU)) {
-            args.assetPath = assetPathEts;
-            args.aceVersion = OHOS::Ace::Platform::AceVersion::ACE_Partial_Update;
         }
     }
 

@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_CUSTOM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_CUSTOM_PATTERN_H
 
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/pattern/custom/custom_node_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -31,11 +33,10 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        if (isBuildDone_) {
-            return MakeRefPtr<CustomNodeLayoutAlgorithm>(nullptr);
+        if (renderFunction_) {
+            return MakeRefPtr<CustomNodeLayoutAlgorithm>(renderFunction_);
         }
-        isBuildDone_ = true;
-        return MakeRefPtr<CustomNodeLayoutAlgorithm>(renderFunction_);
+        return MakeRefPtr<BoxLayoutAlgorithm>();
     }
 
     void SetRenderFunction(const RenderFunction& renderFunction)
@@ -47,7 +48,8 @@ public:
 
 private:
     RenderFunction renderFunction_;
-    bool isBuildDone_ = false;
+
+    ACE_DISALLOW_COPY_AND_MOVE(CustomNodePattern);
 };
 } // namespace OHOS::Ace::NG
 

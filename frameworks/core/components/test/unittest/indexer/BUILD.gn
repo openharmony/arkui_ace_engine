@@ -39,5 +39,8 @@ ohos_unittest("RenderIndexerTest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":RenderIndexerTest" ]
+  deps = []
+  if (!is_asan) {
+    deps = [ ":RenderIndexerTest" ]
+  }
 }

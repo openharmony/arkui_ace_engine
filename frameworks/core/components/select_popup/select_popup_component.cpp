@@ -99,7 +99,7 @@ void SelectPopupComponent::InnerHideDialog(uint32_t index)
         }
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (node_) {
         auto parentNode = node_->GetParentNode();
         if (parentNode) {
@@ -194,7 +194,7 @@ void SelectPopupComponent::CloseContextMenu()
     } else {
         SubwindowManager::GetInstance()->ClearMenu();
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     auto parentNode = node_->GetParentNode();
     if (parentNode) {
         parentNode->SetLeft(0);
@@ -324,7 +324,7 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
         back->SetBorderRadius(Radius(theme_->GetPopupRRectSize()));
         back->AddShadow(ShadowConfig::DefaultShadowM);
         box->SetBackDecoration(back);
-        box->SetPadding(Edge(IN_OUT_BOX_INTERVAL));
+        box->SetPadding(isCustomMenu_ ? Edge() : Edge(IN_OUT_BOX_INTERVAL));
     }
     box->SetChild(innerBox);
 
@@ -334,7 +334,7 @@ bool SelectPopupComponent::Initialize(const RefPtr<AccessibilityManager>& manage
     tween->SetIsFirstFrameShow(false);
     tween->SetAnimationOperation(AnimationOperation::PLAY);
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     auto popupNode = manager->CreateSpecializedNode("select-popup", id, GetSelectPopupId());
     SetNode(popupNode);
 #else

@@ -111,8 +111,9 @@ public:
     using TimeProvider = std::function<int64_t(void)>;
     using SurfaceChangedCallbackMap =
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
+    using SurfacePositionChangedCallbackMap =
+        std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using PostRTTaskCallback = std::function<void(std::function<void()>&&)>;
-    using WindowFocusChangedCallbackMap = std::unordered_map<int32_t, std::function<void(bool)>>;
 
     PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -263,6 +264,8 @@ public:
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
 
+    void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
+
     void WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void OnSurfaceDensityChanged(double density) override;
@@ -303,6 +306,13 @@ public:
         webPaintCallback_.push_back(std::move(listener));
     }
     void NotifyWebPaint() const;
+
+    using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
+    void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
+    {
+        virtualKeyBoardCallback_.push_back(std::move(listener));
+    }
+    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const;
 
     float GetViewScale() const
     {
@@ -384,7 +394,7 @@ public:
     bool AccessibilityRequestFocus(const ComposeId& id);
 
     bool RequestFocus(const RefPtr<Element>& targetElement);
-    bool RequestFocus(const std::string& targetNodeId);
+    bool RequestFocus(const std::string& targetNodeId) override;
     bool RequestDefaultFocus();
 
     RefPtr<AccessibilityManager> GetAccessibilityManager() const override;
@@ -714,6 +724,20 @@ public:
     {
         surfaceChangedCallbackMap_.erase(callbackId);
     }
+
+    int32_t RegisterSurfacePositionChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
+    {
+        if (callback) {
+            surfacePositionChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterSurfacePositionChangedCallback(int32_t callbackId)
+    {
+        surfacePositionChangedCallbackMap_.erase(callbackId);
+    }
     void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
     void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override;
@@ -822,16 +846,6 @@ public:
     }
 
     void SetShortcutKey(const KeyEvent& event);
-
-    void SetEventManager(const RefPtr<EventManager>& eventManager)
-    {
-        eventManager_ = eventManager;
-    }
-
-    RefPtr<EventManager> GetEventManager() const
-    {
-        return eventManager_;
-    }
 
     void SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager)
     {
@@ -1049,33 +1063,23 @@ public:
         this->isForegroundCalled_ = isForegroundCalled;
     }
 
-    int32_t RegisterWindowFocusChangedCallback(std::function<void(bool)>&& callback)
-    {
-        if (callback) {
-            windowFocusChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
-            return callbackId_;
-        }
-        return 0;
-    }
-
-    void UnregisterWindowFocusChangedCallback(int32_t callbackId)
-    {
-        windowFocusChangedCallbackMap_.erase(callbackId);
-    }
-
     void AddRectCallback(OutOfRectGetRectCallback& getRectCallback, OutOfRectTouchCallback& touchCallback,
         OutOfRectMouseCallback& mouseCallback)
     {
         rectCallbackList_.emplace_back(RectCallback(getRectCallback, touchCallback, mouseCallback));
     }
 
-protected:
-    bool OnDumpInfo(const std::vector<std::string>& params) const override;
-    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void SetRootRect(double width, double height, double offset = 0.0) override
     {
         SetRootSizeWithWidthHeight(width, height, offset);
     }
+
+    void SetAppTitle(const std::string& title);
+    void SetAppIcon(const RefPtr<PixelMap>& icon);
+
+protected:
+    bool OnDumpInfo(const std::vector<std::string>& params) const override;
+    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
@@ -1109,6 +1113,7 @@ private:
     void CreateTouchEventOnZoom(const AxisEvent& event);
     void HandleVisibleAreaChangeEvent();
     void FlushTouchEvents();
+    void TryCallNextFrameLayoutCallback();
 
     template<typename T>
     struct NodeCompare {
@@ -1191,6 +1196,7 @@ private:
     EventTrigger eventTrigger_;
 
     std::list<WebPaintCallback> webPaintCallback_;
+    std::list<virtualKeyBoardCallback> virtualKeyBoardCallback_;
     WeakPtr<RenderNode> requestedRenderNode_;
     // Make page update tasks pending here to avoid block receiving vsync.
     std::queue<std::function<void()>> pageUpdateTasks_;
@@ -1219,6 +1225,7 @@ private:
     bool isFlushingAnimation_ = false;
     bool isMoving_ = false;
     std::atomic<bool> onShow_ = true;
+    std::atomic<bool> onFocus_ = true;
     bool isKeyEvent_ = false;
     bool needWindowBlurRegionRefresh_ = false;
     bool isJsPlugin_ = false;
@@ -1256,7 +1263,7 @@ private:
 
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
-    WindowFocusChangedCallbackMap windowFocusChangedCallbackMap_;
+    SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
 
     std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;
     Offset pluginOffset_ { 0, 0 };

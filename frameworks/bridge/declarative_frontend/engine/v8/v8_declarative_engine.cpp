@@ -51,8 +51,6 @@
 
 extern const char _binary_stateMgmt_js_start[];
 extern const char _binary_stateMgmt_js_end[];
-extern const char _binary_stateMgmtPU_js_start[];
-extern const char _binary_stateMgmtPU_js_end[];
 extern const char _binary_jsEnumStyle_js_start[];
 extern const char _binary_jsEnumStyle_js_end[];
 
@@ -508,13 +506,8 @@ void V8DeclarativeEngineInstance::InitJSContext()
     InitJsNativeModuleObject(localContext);
     InitJsExportsUtilObject(localContext);
 
-    if (Container::IsCurrentUsePartialUpdate()) {
-        LOGE("Loading State Mgmt JS lib for Partial Update");
-        InitAceModules(_binary_stateMgmtPU_js_start, _binary_stateMgmtPU_js_end, isolate_.Get());
-    } else {
-        LOGE("Loading State Mgmt JS lib for full update");
-        InitAceModules(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end, isolate_.Get());
-    }
+    LOGE("Loading State Mgmt JS lib for full and partial update combined");
+    InitAceModules(_binary_stateMgmt_js_start, _binary_stateMgmt_js_end, isolate_.Get());
 
     InitAceModules(_binary_jsEnumStyle_js_start, _binary_jsEnumStyle_js_end, isolate_.Get());
 
@@ -908,7 +901,7 @@ bool V8DeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         new V8NativeEngine(GetPlatform().get(), isolate, engineInstance_->GetContext(), static_cast<void*>(this));
     engineInstance_->SetNativeEngine(nativeEngine_);
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {
@@ -1054,9 +1047,8 @@ V8DeclarativeEngine::~V8DeclarativeEngine()
         }
     }
     LOG_DESTROY();
-    XComponentClient::GetInstance().SetJSValCallToNull();
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         delete nativeEngine_;
@@ -1797,6 +1789,7 @@ void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, cons
         XComponentClient::GetInstance().DeleteFromXcomponentsMapById(componentId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(componentId);
         XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(componentId);
+        XComponentClient::GetInstance().DeleteFromJsValMapById(componentId);
         return;
     }
     InitXComponent();
@@ -1839,18 +1832,7 @@ void V8DeclarativeEngine::FireExternalEvent(const std::string& componentId, cons
     renderContextXComp_.Reset(isolateXComp_, renderContext);
     auto objContext = V8Object(renderContext);
     JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
-    RefPtr<JSXComponentController> controller = OHOS::Ace::Framework::XComponentClient::GetInstance().
-        GetControllerFromJSXComponentControllersMap(componentId);
-    auto weakController = AceType::WeakClaim(AceType::RawPtr(controller));
-    auto getJSValCallback = [obj, weakController](JSRef<JSVal>& jsVal) {
-        jsVal = obj;
-        auto jsXComponentController = weakController.Upgrade();
-        if (jsXComponentController) {
-            jsXComponentController->SetXComponentContext(obj);
-        }
-        return true;
-    };
-    XComponentClient::GetInstance().RegisterJSValCallback(getJSValCallback);
+    XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
     auto delegate =
         static_cast<RefPtr<FrontendDelegate>*>(isolateXComp_->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
     v8::TryCatch tryCatch(isolateXComp_);

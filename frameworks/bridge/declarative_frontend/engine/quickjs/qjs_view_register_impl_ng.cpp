@@ -16,6 +16,9 @@
 #include <cstdint>
 
 #include "base/log/log.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "frameworks/bridge/declarative_frontend/engine/quickjs/qjs_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
@@ -32,6 +35,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
+#include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -75,8 +79,19 @@ void JsBindViews(BindingTarget globalObj)
 
 void CreatePageRoot(RefPtr<JsAcePage>& page, JSView* view)
 {
+    CHECK_NULL_VOID(view);
+    Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto frontEnd = AceType::DynamicCast<DeclarativeFrontendNG>(container->GetFrontend());
+    CHECK_NULL_VOID(frontEnd);
+    auto pageRouterManager = frontEnd->GetPageRouterManager();
+    CHECK_NULL_VOID(pageRouterManager);
+    auto pageNode = pageRouterManager->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
     auto pageRootNode = view->CreateUINode();
-    page->SetRootNode(pageRootNode);
+    CHECK_NULL_VOID(pageRootNode);
+    pageRootNode->MountToParent(pageNode);
 }
 
 } // namespace OHOS::Ace::Framework

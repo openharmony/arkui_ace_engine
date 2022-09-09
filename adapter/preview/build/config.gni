@@ -14,6 +14,9 @@
 # source code for Windows.
 use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
 
+# source code for linux.
+use_linux = "${current_os}_${current_cpu}" == "linux_x64"
+
 # source code for mac.
 
 use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||

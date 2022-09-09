@@ -56,14 +56,14 @@ public:
     {
         textComponent_->SetHasLeft(true);
         textComponent_->SetLeft(x);
-        textComponent_->SetPositionType(PositionType::RELATIVE);
+        textComponent_->SetPositionType(PositionType::PTRELATIVE);
     }
 
     void SetY(const Dimension& y)
     {
         textComponent_->SetHasTop(true);
         textComponent_->SetTop(y);
-        textComponent_->SetPositionType(PositionType::RELATIVE);
+        textComponent_->SetPositionType(PositionType::PTRELATIVE);
     }
 
     const Dimension& GetX() const

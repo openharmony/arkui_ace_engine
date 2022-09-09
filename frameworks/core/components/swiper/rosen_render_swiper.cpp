@@ -98,7 +98,6 @@ void RosenRenderSwiper::PaintShadow(SkCanvas* canvas, const Offset& offset)
     static constexpr double FADE_MAX_RADIUS = 2.0f;
     static constexpr double FADE_ALPHA = 0.45f;
     static constexpr double FADE_SCALE_RATE = 0.2f;
-
     bool isVertical = axis_ == Axis::VERTICAL;
     double height = swiperHeight_;
     double width = swiperWidth_;
@@ -254,7 +253,6 @@ void RosenRenderSwiper::CanvasDrawIndicator(RenderContext& context, const Offset
 
     SkPaint paint;
     paint.setAntiAlias(true);
-
     IndicatorProperties indicatorProperties = PrepareIndicatorProperties();
     Offset center = indicatorPosition_ + indicatorProperties.centerPadding;
     double targetIndex = currentIndex_;

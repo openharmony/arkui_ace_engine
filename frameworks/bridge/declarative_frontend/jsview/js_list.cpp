@@ -68,6 +68,10 @@ void JSList::SetEditMode(bool editMode)
 
 void JSList::SetCachedCount(int32_t cachedCount)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ListView::SetCachedCount(cachedCount);
+        return;
+    }
     JSViewSetProperty(&V2::ListComponent::SetCachedCount, cachedCount);
 }
 
@@ -165,6 +169,32 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        int32_t laneNum = 1;
+        if (ParseJsInteger<int32_t>(info[0], laneNum)) {
+            // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
+            NG::ListView::SetLanes(laneNum);
+            return;
+        }
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        auto minLengthParam = jsObj->GetProperty("minLength");
+        auto maxLengthParam = jsObj->GetProperty("maxLength");
+        if (minLengthParam->IsNull() || maxLengthParam->IsNull()) {
+            LOGW("minLength and maxLength are not both set");
+            return;
+        }
+        Dimension minLengthValue;
+        Dimension maxLengthValue;
+        if (!ParseJsDimensionVp(minLengthParam, minLengthValue) || !ParseJsDimensionVp(maxLengthParam, maxLengthValue)) {
+            LOGW("minLength param or maxLength param is invalid");
+            return;
+        }
+        NG::ListView::SetLaneMinLength(minLengthValue);
+        NG::ListView::SetLaneMaxLength(maxLengthValue);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto listComponent = AceType::DynamicCast<V2::ListComponent>(component);
     if (!listComponent) {
@@ -174,10 +204,6 @@ void JSList::SetLanes(const JSCallbackInfo& info)
     int32_t laneNum = 1;
     if (ParseJsInteger<int32_t>(info[0], laneNum)) {
         // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ListView::SetLanes(laneNum);
-            return;
-        }
         listComponent->SetLanes(laneNum);
         return;
     }
@@ -195,63 +221,46 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         LOGW("minLength param or maxLength param is invalid");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ListView::SetLaneMinLength(minLengthValue);
-        NG::ListView::SetLaneMaxLength(maxLengthValue);
-        return;
-    }
     listComponent->SetLaneConstrain(minLengthValue, maxLengthValue);
 }
 
-void JSList::JSBind(BindingTarget globalObj)
+void JSList::SetSticky(int32_t sticky)
 {
-    JSClass<JSList>::Declare("List");
-    JSClass<JSList>::StaticMethod("create", &JSList::Create);
-
-    JSClass<JSList>::StaticMethod("width", &JSList::JsWidth);
-    JSClass<JSList>::StaticMethod("height", &JSList::JsHeight);
-    JSClass<JSList>::StaticMethod("listDirection", &JSList::SetDirection);
-    JSClass<JSList>::StaticMethod("scrollBar", &JSList::SetScrollBar);
-    JSClass<JSList>::StaticMethod("edgeEffect", &JSList::SetEdgeEffect);
-    JSClass<JSList>::StaticMethod("divider", &JSList::SetDivider);
-    JSClass<JSList>::StaticMethod("editMode", &JSList::SetEditMode);
-    JSClass<JSList>::StaticMethod("cachedCount", &JSList::SetCachedCount);
-    JSClass<JSList>::StaticMethod("chainAnimation", &JSList::SetChainAnimation);
-    JSClass<JSList>::StaticMethod("multiSelectable", &JSList::SetMultiSelectable);
-    JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
-    JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
-
-    JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
-    JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
-    JSClass<JSList>::StaticMethod("onReachEnd", &JSList::ReachEndCallback);
-    JSClass<JSList>::StaticMethod("onScrollStop", &JSList::ScrollStopCallback);
-    JSClass<JSList>::StaticMethod("onItemDelete", &JSList::ItemDeleteCallback);
-    JSClass<JSList>::StaticMethod("onItemMove", &JSList::ItemMoveCallback);
-    JSClass<JSList>::StaticMethod("onScrollIndex", &JSList::ScrollIndexCallback);
-    JSClass<JSList>::StaticMethod("onScrollBegin", &JSList::ScrollBeginCallback);
-
-    JSClass<JSList>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSList>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSList>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
-    JSClass<JSList>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSList>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSList>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
-    JSClass<JSList>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-
-    JSClass<JSList>::StaticMethod("onItemDragStart", &JSList::ItemDragStartCallback);
-    JSClass<JSList>::StaticMethod("onItemDragEnter", &JSList::ItemDragEnterCallback);
-    JSClass<JSList>::StaticMethod("onItemDragMove", &JSList::ItemDragMoveCallback);
-    JSClass<JSList>::StaticMethod("onItemDragLeave", &JSList::ItemDragLeaveCallback);
-    JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
-    JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
-
-    JSClass<JSList>::Inherit<JSContainerBase>();
-    JSClass<JSList>::Inherit<JSViewAbstract>();
-    JSClass<JSList>::Bind(globalObj);
+    JSViewSetProperty(&V2::ListComponent::SetSticky, static_cast<V2::StickyStyle>(sticky));
 }
 
 void JSList::SetDivider(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        do {
+            if (args.Length() < 1 || !args[0]->IsObject()) {
+                LOGW("Invalid params");
+                break;
+            }
+
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+            Dimension strokeWidth;
+            if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) && strokeWidth.IsValid()) {
+                LOGW("Invalid strokeWidth of divider");
+                break;
+            }
+
+            V2::ItemDivider divider;
+            divider.strokeWidth = strokeWidth;
+            if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+                // Failed to get color from param, using default color defined in theme
+                RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
+                if (listTheme) {
+                    divider.color = listTheme->GetDividerColor();
+                }
+            }
+            ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin);
+            ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
+
+            NG::ListView::SetDivider(divider);
+        } while (0);
+        return;
+    }
     do {
         if (args.Length() < 1 || !args[0]->IsObject()) {
             LOGW("Invalid params");

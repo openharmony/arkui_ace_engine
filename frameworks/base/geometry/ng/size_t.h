@@ -125,6 +125,11 @@ public:
         return Negative(width_) && Negative(height_);
     }
 
+    bool IsPositive() const
+    {
+        return Positive(width_) && Positive(height_);
+    }
+
     bool IsNonPositive() const
     {
         return NonPositive(width_) && NonPositive(height_);
@@ -194,20 +199,19 @@ public:
         return isModified;
     }
 
-    // used this instead of IsValid.
     void Constrain(const SizeT& minSize, const SizeT& maxSize)
     {
-        if (NonNegative(width_) && NonNegative(minSize.width_)) {
-            width_ = width_ > minSize.width_ ? width_ : minSize.width_;
+        if (NonNegative(minSize.width_)) {
+            width_ = width_ > minSize.Width() ? width_ : minSize.Width();
         }
-        if (NonNegative(height_) && NonNegative(minSize.height_)) {
-            height_ = height_ > minSize.height_ ? height_ : minSize.height_;
+        if (NonNegative(minSize.height_)) {
+            height_ = height_ > minSize.Height() ? height_ : minSize.Height();
         }
-        if (NonNegative(width_) && NonNegative(maxSize.width_)) {
-            width_ = width_ < maxSize.width_ ? width_ : maxSize.width_;
+        if (NonNegative(maxSize.width_)) {
+            width_ = width_ < maxSize.Width() ? width_ : maxSize.Width();
         }
-        if (NonNegative(height_) && NonNegative(maxSize.height_)) {
-            height_ = height_ < maxSize.height_ ? height_ : maxSize.height_;
+        if (NonNegative(maxSize.height_)) {
+            height_ = height_ < maxSize.Height() ? height_ : maxSize.Height();
         }
     }
 
@@ -216,37 +220,37 @@ public:
         return SizeT(width_ * value, height_ * value);
     }
 
-    bool operator==(const SizeT& SizeT) const
+    bool operator==(const SizeT& size) const
     {
-        return NearEqual(width_, SizeT.width_) && NearEqual(height_, SizeT.height_);
+        return NearEqual(width_, size.width_) && NearEqual(height_, size.height_);
     }
 
-    bool operator!=(const SizeT& SizeT) const
+    bool operator!=(const SizeT& size) const
     {
-        return !operator==(SizeT);
+        return !operator==(size);
     }
 
-    SizeT operator+(const SizeT& SizeT) const
+    SizeT operator+(const SizeT& size) const
     {
-        return SizeT(width_ + SizeT.Width(), height_ + SizeT.Height());
+        return SizeT(width_ + size.Width(), height_ + size.Height());
     }
 
-    SizeT operator+=(const SizeT& SizeT)
+    SizeT& operator+=(const SizeT& size)
     {
-        width_ += SizeT.Width();
-        height_ += SizeT.Height();
+        width_ += size.Width();
+        height_ += size.Height();
         return *this;
     }
 
-    SizeT operator-(const SizeT& SizeT) const
+    SizeT operator-(const SizeT& size) const
     {
-        return SizeT(width_ - SizeT.Width(), height_ - SizeT.Height());
+        return SizeT(width_ - size.Width(), height_ - size.Height());
     }
 
-    SizeT operator-=(const SizeT& SizeT)
+    SizeT& operator-=(const SizeT& size)
     {
-        width_ -= SizeT.Width();
-        height_ -= SizeT.Height();
+        width_ -= size.Width();
+        height_ -= size.Height();
         return *this;
     }
 
@@ -304,6 +308,395 @@ private:
 };
 
 using SizeF = SizeT<float>;
+
+template<typename T>
+class OptionalSize {
+public:
+    OptionalSize() = default;
+    ~OptionalSize() = default;
+    OptionalSize(const std::optional<T>& width, const std::optional<T>& height) : width_(width), height_(height) {}
+    OptionalSize(const T& width, const T& height) : width_(width), height_(height) {}
+    explicit OptionalSize(const SizeT<T>& size) : width_(size.Width()), height_(size.Height()) {}
+
+    void Reset()
+    {
+        width_.reset();
+        height_.reset();
+    }
+
+    const std::optional<T>& Width() const
+    {
+        return width_;
+    }
+
+    const std::optional<T>& Height() const
+    {
+        return height_;
+    }
+
+    const std::optional<T>& MainSize(Axis axis) const
+    {
+        return axis == Axis::HORIZONTAL ? width_ : height_;
+    }
+
+    void SetWidth(T width)
+    {
+        width_ = width;
+    }
+
+    void SetHeight(T height)
+    {
+        height_ = height;
+    }
+
+    void SetWidth(const std::optional<T>& width)
+    {
+        width_ = width;
+    }
+
+    void SetHeight(const std::optional<T>& height)
+    {
+        height_ = height;
+    }
+
+    void SetSize(const SizeT<T>& sizeF)
+    {
+        width_ = sizeF.Width();
+        height_ = sizeF.Height();
+    }
+
+    void SetOptionalSize(const OptionalSize& size)
+    {
+        width_ = size.Width();
+        height_ = size.Height();
+    }
+
+    OptionalSize& AddHeight(float height)
+    {
+        height_ = height_.value_or(0) + height;
+        return *this;
+    }
+
+    OptionalSize& AddWidth(float width)
+    {
+        width_ = width_.value_or(0) + width;
+        return *this;
+    }
+
+    OptionalSize& MinusHeight(float height)
+    {
+        height_ = height_.value_or(0) - height;
+        return *this;
+    }
+
+    OptionalSize& MinusWidth(float width)
+    {
+        width_ = width_.value_or(0) - width;
+        return *this;
+    }
+
+    void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
+        const std::optional<T>& bottom)
+    {
+        if (width_) {
+            T tempWidth = width_.value() - left.value_or(0) - right.value_or(0);
+            width_ = NonNegative(tempWidth) ? tempWidth : 0;
+        }
+        if (height_) {
+            T tempHeight = height_.value() - top.value_or(0) - bottom.value_or(0);
+            height_ = NonNegative(tempHeight) ? tempHeight : 0;
+        }
+    }
+
+    void AddPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
+        const std::optional<T>& bottom)
+    {
+        if (width_) {
+            width_ = width_.value() + left.value_or(0) + right.value_or(0);
+        }
+        if (height_) {
+            height_ = height_.value() + top.value_or(0) + bottom.value_or(0);
+        }
+    }
+
+    bool IsValid() const
+    {
+        return width_ && height_;
+    }
+
+    bool AtLeastOneValid() const
+    {
+        return width_ || height_;
+    }
+
+    bool IsNull() const
+    {
+        return !width_ && !height_;
+    }
+
+    bool IsNonNegative() const
+    {
+        return NonNegative(width_.value_or(-1)) && NonNegative(height_.value_or(-1));
+    }
+
+    // width and height all less than zero.
+    bool IsNegative() const
+    {
+        return Negative(width_.value_or(-1)) && Negative(height_.value_or(-1));
+    }
+
+    bool IsPositive() const
+    {
+        return Positive(width_.value_or(-1)) && Positive(height_.value_or(-1));
+    }
+
+    bool IsNonPositive() const
+    {
+        return NonPositive(width_.value_or(-1)) && NonPositive(height_.value_or(-1));
+    }
+
+    bool UpdateSizeWithCheck(const OptionalSize& size)
+    {
+        bool isModified = false;
+        if (size.width_ && (width_ != size.width_)) {
+            width_ = size.width_;
+            isModified = true;
+        }
+        if (size.height_ && (height_ != size.height_)) {
+            height_ = size.height_;
+            isModified = true;
+        }
+        return isModified;
+    }
+
+    bool UpdateSizeWithCheck(const SizeT<T>& size)
+    {
+        bool isModified = false;
+        if (NonNegative(size.Width()) && (width_ != size.Width())) {
+            width_ = size.Width();
+            isModified = true;
+        }
+        if (NonNegative(size.Height()) && (height_ != size.Height())) {
+            height_ = size.Height();
+            isModified = true;
+        }
+        return isModified;
+    }
+
+    void UpdateIllegalSizeWithCheck(const OptionalSize& size)
+    {
+        if (!width_ && size.Width()) {
+            width_ = size.Width();
+        }
+        if (!height_ && size.Height()) {
+            height_ = size.Height();
+        }
+    }
+
+    void UpdateIllegalSizeWithCheck(const SizeT<T>& size)
+    {
+        if (!width_.has_value() && NonNegative(size.Width())) {
+            width_ = size.Width();
+        }
+        if (!height_.has_value() && NonNegative(size.Height())) {
+            height_ = size.Height();
+        }
+    }
+
+    bool UpdateSizeWhenLarger(const SizeT<T>& size)
+    {
+        bool isModified = false;
+        if (NonNegative(size.Width()) && width_) {
+            auto temp = width_.value_or(0) > size.Width() ? width_ : size.Width();
+            if (width_ != temp) {
+                isModified = true;
+            }
+            width_ = temp;
+        }
+        if (NonNegative(size.Height()) && height_) {
+            auto temp = height_.value_or(0) > size.Height() ? height_ : size.Height();
+            if (height_ != temp) {
+                isModified = true;
+            }
+            height_ = temp;
+        }
+        return isModified;
+    }
+
+    bool UpdateSizeWhenSmaller(const SizeT<T>& size)
+    {
+        bool isModified = false;
+        if (NonNegative(size.Width())) {
+            auto temp = width_.value_or(0) < size.Width() ? width_ : size.Width();
+            if (width_ != temp) {
+                isModified = true;
+            }
+            width_ = temp;
+        }
+        if (NonNegative(size.Height())) {
+            auto temp = height_.value_or(0) < size.Height() ? height_ : size.Height();
+            if (height_ != temp) {
+                isModified = true;
+            }
+            height_ = temp;
+        }
+        return isModified;
+    }
+
+    void Constrain(const SizeT<T>& minSize, const SizeT<T>& maxSize)
+    {
+        if (NonNegative(minSize.Width())) {
+            width_ = width_.value_or(0) > minSize.Width() ? width_ : minSize.Width();
+        }
+        if (NonNegative(minSize.Height())) {
+            height_ = height_.value_or(0) > minSize.Height() ? height_ : minSize.Height();
+        }
+        if (NonNegative(maxSize.Width())) {
+            width_ = width_.value_or(0) < maxSize.Width() ? width_ : maxSize.Width();
+        }
+        if (NonNegative(maxSize.Height())) {
+            height_ = height_.value_or(0) < maxSize.Height() ? Height() : maxSize.Height();
+        }
+    }
+
+    OptionalSize operator*(double value) const
+    {
+        return OptionalSize(width_ ? *width_.value() * value : width_, height_ ? height_.value() * value : height_);
+    }
+
+    bool operator==(const OptionalSize& size) const
+    {
+        if (width_.has_value() ^ size.width_.has_value()) {
+            return false;
+        }
+        if (!NearEqual(width_.value_or(0), size.width_.value_or(0))) {
+            return false;
+        }
+        if (height_.has_value() ^ size.height_.has_value()) {
+            return false;
+        }
+        if (!NearEqual(height_.value_or(0), size.height_.value_or(0))) {
+            return false;
+        }
+        return true;
+    }
+
+    bool operator!=(const OptionalSize& size) const
+    {
+        return !operator==(size);
+    }
+
+    OptionalSize operator+(const OptionalSize& size) const
+    {
+        std::optional<T> width;
+        if (width_) {
+            width = width_.value() + size.width_.value_or(0);
+        }
+        std::optional<T> height;
+        if (height_) {
+            height = height_.value() + size.height_.value_or(0);
+        }
+        return OptionalSize(width, height);
+    }
+
+    OptionalSize& operator+=(const OptionalSize& size)
+    {
+        if (width_) {
+            width_ = width_.value() + size.width_.value_or(0);
+        }
+        if (height_) {
+            height_ = height_.value() + size.height_.value_or(0);
+        }
+        return *this;
+    }
+
+    OptionalSize operator-(const OptionalSize& size) const
+    {
+        std::optional<T> width;
+        if (width_) {
+            width = width_.value() - size.width_.value_or(0);
+        }
+        std::optional<T> height;
+        if (height_) {
+            height = height_.value() - size.height_.value_or(0);
+        }
+        return OptionalSize(width, height);
+    }
+
+    OptionalSize& operator-=(const OptionalSize& size)
+    {
+        if (width_) {
+            width_ = width_.value() - size.width_.value_or(0);
+        }
+        if (height_) {
+            height_ = height_.value() - size.height_.value_or(0);
+        }
+        return *this;
+    }
+
+    void ApplyScale(double scale)
+    {
+        width_ = width_ ? width_.value() * scale : width_;
+        height_ = height_ ? height_.value() * scale : height_;
+    }
+
+    bool operator>(const SizeT<T>& size) const
+    {
+        if (IsNonNegative() && size.IsNonNegative()) {
+            return GreatOrEqual(width_.value_or(0), size.Width()) && GreatOrEqual(height_.value_or(0), size.Height());
+        }
+        return false;
+    }
+
+    bool operator<(const SizeT<T>& size) const
+    {
+        if (IsNonNegative() && size.IsNonNegative()) {
+            return LessOrEqual(width_.value_or(0), size.Width()) && LessOrEqual(height_.value_or(0), size.Height());
+        }
+        return false;
+    }
+
+    double CalcRatio() const
+    {
+        if (NearZero(height_.value_or(0))) {
+            return 0.0;
+        }
+        return static_cast<double>(width_.value_or(0)) / static_cast<double>(height_.value());
+    }
+
+    SizeT<T> ConvertToSizeT() const
+    {
+        return { width_.value_or(-1), height_.value_or(-1) };
+    }
+
+    std::string ToString() const
+    {
+        static const int32_t precision = 2;
+        std::stringstream ss;
+        ss << "[" << std::fixed << std::setprecision(precision);
+        if (width_) {
+            ss << width_.value();
+        } else {
+            ss << "NA";
+        }
+        ss << " x ";
+        if (height_) {
+            ss << height_.value();
+        } else {
+            ss << "NA";
+        }
+        ss << "]";
+        std::string output = ss.str();
+        return output;
+    }
+
+private:
+    std::optional<T> width_;
+    std::optional<T> height_;
+};
+
+using OptionalSizeF = OptionalSize<float>;
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_PROPERTIES_SIZE_H

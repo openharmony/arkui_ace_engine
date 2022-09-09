@@ -534,7 +534,20 @@ bool DOMList::SetSpecializedStyle(const std::pair<std::string, std::string>& sty
             } },
         { DOM_FLEX_DIRECTION,
             [](const std::string& val, DOMList& list) {
-                list.flexDirection_ = val == DOM_FLEX_ROW ? FlexDirection::ROW : FlexDirection::COLUMN;
+                LOGD("DOMList::SetSpecializedStyle, val:%{public}s ", val.c_str());
+                if (val == DOM_FLEX_ROW) {
+                    list.flexDirection_ = FlexDirection::ROW;
+                } else if (val == DOM_FLEX_ROW_REVERSE) {
+                    LOGD("DOMList::SetSpecializedStyle, val:%{public}s ,rv:%{public}s ", val.c_str(),
+                        DOM_FLEX_ROW_REVERSE);
+                    list.flexDirection_ = FlexDirection::ROW_REVERSE;
+                } else if (val == DOM_FLEX_COLUMN_REVERSE) {
+                    LOGD("DOMList::SetSpecializedStyle, val:%{public}s ,cv:%{public}s ", val.c_str(),
+                        DOM_FLEX_COLUMN_REVERSE);
+                    list.flexDirection_ = FlexDirection::COLUMN_REVERSE;
+                } else {
+                    list.flexDirection_ = FlexDirection::COLUMN;
+                }
                 return true;
             } },
         { DOM_LIST_ITEM_EXTENT,

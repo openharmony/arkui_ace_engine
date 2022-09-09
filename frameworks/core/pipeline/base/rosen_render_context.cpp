@@ -52,8 +52,11 @@ void RosenRenderContext::Repaint(const RefPtr<RenderNode>& node)
     std::string name = AceType::TypeName(node);
     if (name != "RosenRenderForm" && name != "RosenRenderPlugin") {
         InitContext(rsNode, node->GetRectWithShadow(), offset);
+        node->RenderWithContext(*this, offset);
+        UpdateChildren(rsNode);
+    } else {
+        node->RenderWithContext(*this, offset);
     }
-    node->RenderWithContext(*this, offset);
     StopRecordingIfNeeded();
 }
 
@@ -70,7 +73,7 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
     bool canChildOverflow = pipelineContext->GetMinPlatformVersion() >= OVERFLOW_PLATFORM_VERSION;
     Rect rect = child->GetTransitionPaintRect() + offset;
     if (!(child->IsPaintOutOfParent() || canChildOverflow) && !estimatedRect_.IsIntersectWith(rect)) {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         child->ClearAccessibilityRect();
 #endif
         return;
@@ -78,7 +81,7 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
 
     auto childRSNode = child->GetRSNode();
     if (childRSNode && childRSNode != rsNode_) {
-        rsNode_->AddChild(childRSNode, -1);
+        childNodes_.emplace_back(childRSNode);
         std::string name = AceType::TypeName(child);
         if (name != "RosenRenderForm" && name != "RosenRenderPlugin") {
             if (child->NeedRender()) {
@@ -156,7 +159,7 @@ bool RosenRenderContext::IsIntersectWith(const RefPtr<RenderNode>& child, Offset
 
     Rect rect = child->GetTransitionPaintRect() + offset;
     if (!estimatedRect_.IsIntersectWith(rect)) {
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         child->ClearAccessibilityRect();
 #endif
         return false;
@@ -174,7 +177,7 @@ void RosenRenderContext::InitContext(
     if (rsNode_ == nullptr) {
         return;
     }
-    rsNode_->ClearChildren();
+    childNodes_.clear();
     if (auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>()) {
         rosenCanvas_ = rsCanvasNode->BeginRecording(rsCanvasNode->GetPaintWidth(), rsCanvasNode->GetPaintHeight());
     }
@@ -221,4 +224,19 @@ void RosenRenderContext::Restore()
     }
 }
 
+void RosenRenderContext::UpdateChildren(const std::shared_ptr<RSNode>& rsNode)
+{
+    std::vector<OHOS::Rosen::NodeId> childNodeIds;
+    for (auto& child : childNodes_) {
+        if (auto childNode = child.lock()) {
+            childNodeIds.emplace_back(childNode->GetId());
+        }
+    }
+    if (childNodeIds != rsNode->GetChildren()) {
+        rsNode->ClearChildren();
+        for (auto& child : childNodes_) {
+            rsNode->AddChild(child.lock());
+        }
+    }
+}
 } // namespace OHOS::Ace

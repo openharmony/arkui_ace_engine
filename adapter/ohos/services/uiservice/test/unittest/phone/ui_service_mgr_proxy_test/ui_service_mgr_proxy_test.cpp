@@ -23,6 +23,10 @@
 
 namespace OHOS {
 namespace Ace {
+namespace {
+constexpr int32_t TEST_RETVAL_ONREMOTEREQUEST = 1000;
+}
+
 using namespace testing::ext;
 using ::testing::_;
 
@@ -35,9 +39,6 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-
-private:
-    constexpr int TEST_RETVAL_ONREMOTEREQUEST = 1000;
 };
 void UIServiceMgrProxyTest::SetUpTestCase(void)
 {}
@@ -64,7 +65,7 @@ HWTEST_F(UIServiceMgrProxyTest, UIServiceMgrProxyTest_RegisterCallBack_0100, Tes
     std::shared_ptr<UIServiceMgrProxy> uiServiceManagerProxy =
         std::make_shared<UIServiceMgrProxy>(mockUIServiceMgrStub);
     sptr<Ace::IUIService> uiService(new (std::nothrow) MockUIServiceStub());
-    Want want;
+    AAFwk::Want want;
     const int retVal = uiServiceManagerProxy->RegisterCallBack(want, uiService);
 
     EXPECT_EQ(testVal, retVal);
@@ -87,7 +88,7 @@ HWTEST_F(UIServiceMgrProxyTest, UIServiceMgrProxyTest_UnregisterCallBack_0100, T
     sptr<MockUIServiceMgrStub> mockUIServiceMgrStub(new (std::nothrow) MockUIServiceMgrStub());
     std::shared_ptr<UIServiceMgrProxy> uiServiceManagerProxy =
         std::make_shared<UIServiceMgrProxy>(mockUIServiceMgrStub);
-    Want want;
+    AAFwk::Want want;
     const int retVal = uiServiceManagerProxy->UnregisterCallBack(want);
 
     EXPECT_EQ(testVal, retVal);
@@ -111,7 +112,7 @@ HWTEST_F(UIServiceMgrProxyTest, UIServiceMgrProxyTest_Push_0100, TestSize.Level1
     std::shared_ptr<UIServiceMgrProxy> uiServiceManagerProxy =
         std::make_shared<UIServiceMgrProxy>(mockUIServiceMgrStub);
     sptr<Ace::IUIService> uiService(new (std::nothrow) MockUIServiceStub());
-    Want want;
+    AAFwk::Want want;
     const std::string name = "name";
     const std::string jsonPath = "jsonPath";
     const std::string data = "data";
@@ -138,7 +139,7 @@ HWTEST_F(UIServiceMgrProxyTest, UIServiceMgrProxyTest_Request_0100, TestSize.Lev
     std::shared_ptr<UIServiceMgrProxy> uiServiceManagerProxy =
         std::make_shared<UIServiceMgrProxy>(mockUIServiceMgrStub);
     sptr<Ace::IUIService> uiService(new (std::nothrow) MockUIServiceStub());
-    Want want;
+    AAFwk::Want want;
     const std::string name = "name";
     const std::string data = "data";
     const int retVal = uiServiceManagerProxy->Request(want, name, data);
@@ -163,7 +164,7 @@ HWTEST_F(UIServiceMgrProxyTest, UIServiceMgrProxyTest_ReturnRequest_0100, TestSi
     std::shared_ptr<UIServiceMgrProxy> uiServiceManagerProxy =
         std::make_shared<UIServiceMgrProxy>(mockUIServiceMgrStub);
     sptr<Ace::IUIService> uiService(new (std::nothrow) MockUIServiceStub());
-    Want want;
+    AAFwk::Want want;
     const std::string source = "source";
     const std::string data = "data";
     const std::string extraData = "extraData";

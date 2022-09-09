@@ -14,15 +14,20 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ui_service/ui_service"
+if (is_standard_system) {
+  module_output_path = "ace_engine/graphicalbasicability/uiservice"
+} else {
+  module_output_path = "ace_engine_full/graphicalbasicability/uiservice"
+}
 
-ohos_unittest("ui_service_mgr_client_test") {
+ohos_unittest("UIServiceMgrClientTest") {
   module_out_path = module_output_path
 
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/include",
     "//foundation/systemabilitymgr/safwk/services/safwk/include",
+    "//foundation/arkui/ace_engine/frameworks",
   ]
 
   sources = [ "ui_service_mgr_client_test.cpp" ]
@@ -33,16 +38,18 @@ ohos_unittest("ui_service_mgr_client_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:uiservice",
+    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:uiservice_static_ohos",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
     "ability_base:want",
+    "ability_runtime:runtime",
+    "appspawn:appspawn_socket_client",
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
@@ -52,5 +59,5 @@ ohos_unittest("ui_service_mgr_client_test") {
 group("unittest") {
   testonly = true
 
-  deps = [ ":ui_service_mgr_client_test" ]
+  deps = [ ":UIServiceMgrClientTest" ]
 }

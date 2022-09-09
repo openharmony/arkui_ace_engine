@@ -18,6 +18,9 @@
 
 #include "core/common/window.h"
 
+#include "base/thread/task_executor.h"
+#include "base/utils/noncopyable.h"
+
 namespace OHOS::Ace::NG {
 
 class FlutterWindow : public Window {
@@ -33,7 +36,7 @@ public:
 
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 
-    void RecordFrameTime(uint64_t timeStamp, const std::string name) override;
+    void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;
 
     void FlushTasks() override;
 
@@ -41,6 +44,8 @@ private:
     WeakPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::FrameNode> rootNode_;
     int32_t id_ = 0;
+
+    ACE_DISALLOW_COPY_AND_MOVE(FlutterWindow);
 };
 
 } // namespace OHOS::Ace::NG

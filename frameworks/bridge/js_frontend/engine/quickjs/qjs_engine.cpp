@@ -2775,7 +2775,7 @@ bool InitJsContext(JSContext* ctx, size_t maxStackSize, int32_t instanceId, cons
     JS_SetPropertyStr(ctx, perfUtil, "end", JS_NewCFunction(ctx, JsPerfEnd, "end", 1));
     JS_SetPropertyStr(ctx, globalObj, "perfutil", perfUtil);
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     for (const auto& [key, value] : extraNativeObject) {
         auto nativeObjectInfo = std::make_unique<NativeObjectInfo>();
         nativeObjectInfo->nativeObject = value;
@@ -3183,7 +3183,7 @@ bool QjsEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     bool ret = engineInstance_->InitJsEnv(runtime, context, GetExtraNativeObject());
 
     SetPostTask(nativeEngine_);
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     nativeEngine_->CheckUVLoop();
 #endif
     RegisterWorker();
@@ -3284,7 +3284,7 @@ QjsEngine::~QjsEngine()
 {
     LOG_DESTROY();
     if (nativeEngine_ != nullptr) {
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
 #endif
         nativeEngine_->DeleteEngine();

@@ -25,8 +25,7 @@ namespace OHOS::Ace::Framework {
 
 void JSView::JSBind(BindingTarget object)
 {
-    // TODO: Need adapt to partial update
-    LOGD("Creating JSViewFullUpdate");
+    JSViewPartialUpdate::JSBind(object);
     JSViewFullUpdate::JSBind(object);
 }
 
@@ -122,5 +121,112 @@ std::string JSViewFullUpdate::AddChildById(const std::string& viewId, const JSRe
 {
     return "";
 }
+
+RefPtr<NG::CustomNode> JSViewPartialUpdate::CreateUINode()
+{
+    ACE_SCOPED_TRACE("JSViewPartialUpdate::CreateSpecializedComponent");
+    auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
+    viewId_ = std::to_string(viewId);
+    auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
+    LOGD("Creating CustomNode with claimed elmtId %{public}d.", viewId);
+    auto customNode = NG::CustomNode::CreateCustomNode(viewId, key);
+    node_ = customNode;
+    {
+        ACE_SCORING_EVENT("Component[" + viewId_ + "].Appear");
+        if (jsViewFunction_) {
+            jsViewFunction_->ExecuteAppear();
+        }
+    }
+
+    auto renderFunction = [weak = AceType::WeakClaim(this)]() -> RefPtr<NG::UINode> {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_RETURN(jsView, nullptr);
+        if (!jsView->isFirstRender_) {
+            LOGW("the js view has already called initial render");
+            return nullptr;
+        }
+        jsView->isFirstRender_ = false;
+        return jsView->InitialUIRender();
+    };
+    customNode->SetRenderFunction(renderFunction);
+
+    auto updateFunction = [weak = AceType::WeakClaim(this)]() -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        if (!jsView->needsUpdate_) {
+            LOGW("the js view does not need to update");
+            return;
+        }
+        jsView->needsUpdate_ = false;
+        LOGD("Rerender function start for ComposedElement elmtId %{public}s - start...", jsView->viewId_.c_str());
+        {
+            ACE_SCOPED_TRACE("JSView: ExecuteRerender");
+            jsView->jsViewFunction_->ExecuteRerender();
+        }
+    };
+    customNode->SetUpdateFunction(std::move(updateFunction));
+
+    // partial update relies on remove function
+    auto removeFunction = [weak = AceType::WeakClaim(this)]() -> void {
+        LOGD("call remove view function");
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        jsView->Destroy(nullptr);
+        jsView->node_.Reset();
+    };
+    customNode->SetDestroyFunction(std::move(removeFunction));
+    return customNode;
+}
+
+RefPtr<NG::UINode> JSViewPartialUpdate::InitialUIRender()
+{
+    needsUpdate_ = false;
+    RenderJSExecution();
+    return NG::ViewStackProcessor::GetInstance()->Finish();
+}
+
+void JSViewPartialUpdate::MarkNeedUpdate()
+{
+    auto customNode = node_.Upgrade();
+    if (!customNode) {
+        LOGE("fail to update due to custom Node is null");
+        return;
+    }
+    needsUpdate_ = true;
+    customNode->MarkNeedUpdate();
+}
+
+/**
+ * in JS View.create(new View(...));
+ * used for FullRender case, not for re-render case
+ */
+void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
+{
+    LOGD("Creating new JSViewPartialUpdate for partial update");
+    ACE_DCHECK(Container::IsCurrentUsePartialUpdate());
+
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+        auto* view = object->Unwrap<JSView>();
+        if (view == nullptr) {
+            LOGE("View is null");
+            return;
+        }
+        NG::ViewStackProcessor::GetInstance()->Push(view->CreateUINode(), true);
+    } else {
+        LOGE("View Object is expected.");
+    }
+}
+
+// ===========================================================
+// partial update own functions start below
+// ===========================================================
+
+void JSViewPartialUpdate::JsFinishUpdateFunc(int32_t elmtId)
+{
+    NG::ViewStackProcessor::GetInstance()->FlushRerenderTask();
+}
+
+void JSViewPartialUpdate::ComponentToElementLocalizedUpdate(const UpdateFuncResult& updateFuncResult) {}
 
 } // namespace OHOS::Ace::Framework

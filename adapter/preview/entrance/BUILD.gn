@@ -55,14 +55,19 @@ template("preview_entrance_source") {
     if (!is_cross_platform_build) {
       if (platform == "windows") {
         defines -= [ "UNICODE" ]
-        include_dirs = [ "//utils/native/base/include" ]
+        include_dirs = [ "//commonlibrary/c_utils/base/include" ]
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win" ]
         cflags_cc += [ "-DNONLS" ]
       }
 
       if (platform == "mac") {
-        include_dirs = [ "//utils/native/base/include" ]
+        include_dirs = [ "//commonlibrary/c_utils/base/include" ]
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac" ]
+      }
+
+      if (platform == "linux") {
+        include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+        deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux" ]
       }
     }
   }
@@ -70,7 +75,7 @@ template("preview_entrance_source") {
 
 foreach(item, ace_platforms) {
   platform = item.name
-  if (platform == "windows" || platform == "mac") {
+  if (platform == "windows" || platform == "mac" || platform == "linux") {
     preview_entrance_source("ace_preview_entrance_" + item.name) {
       platform = item.name
       defines = []

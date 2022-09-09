@@ -21,21 +21,29 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
+constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
+
+float GetDisplayRefreshRate()
+{
+    return 60.0f;
 }
+} // namespace
 
 namespace OHOS::Ace::NG {
 
 RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
+    int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
-    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos) {
+    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos) {
         auto taskExecutor = weakTask.Upgrade();
-        auto onVsync = [id, timeStampNanos] {
+        auto onVsync = [id, timeStampNanos, refreshPeriod] {
             ContainerScope scope(id);
             // use container to get window can make sure the window is valid
             auto container = Container::Current();
@@ -45,7 +53,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), 0);
             auto pipeline = container->GetPipelineContext();
             if (pipeline) {
-                pipeline->OnIdle(timeStampNanos);
+                pipeline->OnIdle(timeStampNanos + refreshPeriod);
             }
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
@@ -118,7 +126,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
     }
 }
 
-void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string name)
+void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
 {
     LOGD("Rosenwindow RecordFrameTime");
     rsUIDirector_->SetTimeStamp(timeStamp, name);

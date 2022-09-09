@@ -43,6 +43,19 @@ public:
         const std::string& data));
     MOCK_METHOD4(ReturnRequest, int(const AAFwk::Want& want, const std::string& source,
         const std::string& data,  const std::string& extraData));
+    MOCK_METHOD9(ShowDialog, int(const std::string& name,
+        const std::string& params,
+        uint32_t windowType,
+        int x,
+        int y,
+        int width,
+        int height,
+        const sptr<OHOS::Ace::IDialogCallback>& dialogCallback,
+        int* id));
+    MOCK_METHOD1(CancelDialog, int(int id));
+    MOCK_METHOD2(UpdateDialog, int(int id, const std::string& data));
+    MOCK_METHOD2(AttachToUiService, int32_t(const sptr<IRemoteObject>& dialog, int32_t pid));
+    MOCK_METHOD3(RemoteDialogCallback, int32_t(int32_t id, const std::string& event, const std::string& params));
 };
 
 class MockUIServiceStub : public Ace::UIServiceStub {

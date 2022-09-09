@@ -60,6 +60,7 @@ void RenderListItem::Update(const RefPtr<Component>& component)
 
     onSelectId_ = item->GetOnSelectId();
     selectable_ = item->GetSelectable();
+    isDragStart_ = item->IsDragStart();
     borderRadius_ = item->GetBorderRadius();
     edgeEffect_ = item->GetEdgeEffect();
 
@@ -89,7 +90,7 @@ void RenderListItem::Paint(RenderContext& context, const Offset& offset)
 
 void RenderListItem::PerfLayoutSwiperMode()
 {
-    child_ = GetItemChildRnderNode();
+    child_ = GetItemChildRenderNode();
     if (!child_) {
         return;
     }
@@ -100,7 +101,7 @@ void RenderListItem::PerfLayoutSwiperMode()
 
     if (GreatNotEqual(curOffset_, 0.0)) {
         swiperEnd_.Reset();
-        auto swiperStart = GetSwiperStartRnderNode();
+        auto swiperStart = GetSwiperStartRenderNode();
         if (swiperStart) {
             Size startSize = startSize_;
             if (!swiperStart_) {
@@ -120,7 +121,7 @@ void RenderListItem::PerfLayoutSwiperMode()
         swiperStart_ = swiperStart;
     } else {
         swiperStart_.Reset();
-        auto swiperEnd = GetSwiperEndRnderNode();
+        auto swiperEnd = GetSwiperEndRenderNode();
         if (swiperEnd) {
             Size endSize = endSize_;
             if (!swiperEnd_) {
@@ -161,7 +162,7 @@ void RenderListItem::PerformLayout()
         buttonLayoutSize = button_->GetLayoutSize();
     }
 
-    child_ = GetItemChildRnderNode();
+    child_ = GetItemChildRenderNode();
     if (child_) {
         auto maxSize = layoutParam.GetMaxSize();
         auto minSize = layoutParam.GetMinSize();
@@ -350,9 +351,9 @@ void RenderListItem::UpdatePostion(double delta)
         } else if (swiperEnd_ && GreatNotEqual(-curOffset_, GetCrossSize(endSize_))) {
             curOffset_ = -GetCrossSize(endSize_);
         }
-        if (Negative(curOffset_) && !GetSwiperEndRnderNode()) {
+        if (Negative(curOffset_) && !GetSwiperEndRenderNode()) {
             curOffset_ = 0.0;
-        } else if (Positive(curOffset_) && !GetSwiperStartRnderNode()) {
+        } else if (Positive(curOffset_) && !GetSwiperStartRenderNode()) {
             curOffset_ = 0.0;
         }
     }
@@ -445,7 +446,7 @@ void RenderListItem::OnTouchTestHit(
         return;
     }
 
-    if (GetSwiperStartRnderNode() || GetSwiperEndRnderNode()) {
+    if (GetSwiperStartRenderNode() || GetSwiperEndRenderNode()) {
         InitDragRecognizer();
     } else {
         dragDetector_.Reset();

@@ -52,7 +52,7 @@ void RenderSlider::Update(const RefPtr<Component>& component)
     }
     sliderComponent_ = slider;
     if (!blockActive_) {
-        Initialize();
+        Initialize(slider);
         if (!slider) {
             LOGE("RenderSlider update with nullptr");
             EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
@@ -272,29 +272,31 @@ Size RenderSlider::Measure()
     }
 }
 
-void RenderSlider::Initialize()
+void RenderSlider::Initialize(const RefPtr<SliderComponent>& sliderComponent)
 {
-    if (!dragDetector_) {
+    if (sliderComponent && sliderComponent->GetDirection() == Axis::VERTICAL) {
+        dragDetector_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
+    } else {
         dragDetector_ = AceType::MakeRefPtr<HorizontalDragRecognizer>();
-        dragDetector_->SetOnDragStart([weakSlider = AceType::WeakClaim(this)](const DragStartInfo& info) {
-            auto slider = weakSlider.Upgrade();
-            if (slider) {
-                slider->HandleDragStart(info.GetLocalLocation());
-            }
-        });
-        dragDetector_->SetOnDragUpdate([weakSlider = AceType::WeakClaim(this)](const DragUpdateInfo& info) {
-            auto slider = weakSlider.Upgrade();
-            if (slider) {
-                slider->HandleDragUpdate(info.GetLocalLocation());
-            }
-        });
-        dragDetector_->SetOnDragEnd([weakSlider = AceType::WeakClaim(this)](const DragEndInfo& info) {
-            auto slider = weakSlider.Upgrade();
-            if (slider) {
-                slider->HandleDragEnd();
-            }
-        });
     }
+    dragDetector_->SetOnDragStart([weakSlider = AceType::WeakClaim(this)](const DragStartInfo& info) {
+        auto slider = weakSlider.Upgrade();
+        if (slider) {
+            slider->HandleDragStart(info.GetLocalLocation());
+        }
+    });
+    dragDetector_->SetOnDragUpdate([weakSlider = AceType::WeakClaim(this)](const DragUpdateInfo& info) {
+        auto slider = weakSlider.Upgrade();
+        if (slider) {
+            slider->HandleDragUpdate(info.GetLocalLocation());
+        }
+    });
+    dragDetector_->SetOnDragEnd([weakSlider = AceType::WeakClaim(this)](const DragEndInfo& info) {
+        auto slider = weakSlider.Upgrade();
+        if (slider) {
+            slider->HandleDragEnd();
+        }
+    });
     if (!clickDetector_) {
         clickDetector_ = AceType::MakeRefPtr<ClickRecognizer>();
         clickDetector_->SetOnClick([weakSlider = AceType::WeakClaim(this)](const ClickInfo& info) {
@@ -333,6 +335,7 @@ void RenderSlider::Initialize()
         if (slider) {
             slider->isPress_ = false;
             slider->MarkNeedLayout();
+            slider->FireMoveEndEvent();
         }
     });
 }
@@ -461,7 +464,6 @@ void RenderSlider::HandleClick(const Offset& clickPosition)
     }
     insideBlockRegion_ = false;
     FireMovingEvent(SliderEvent::CLICK);
-    FireMoveEndEvent();
 }
 
 void RenderSlider::HandleDragStart(const Offset& startPoint)
@@ -516,7 +518,6 @@ void RenderSlider::HandleDragEnd()
         UpdateTouchRegion();
     }
     FireMovingEvent(SliderEvent::MOVE_END);
-    FireMoveEndEvent();
 
     insideBlockRegion_ = false;
     blockActive_ = false;
@@ -533,15 +534,15 @@ void RenderSlider::RenderBlockPosition(const Offset& touchPosition)
 {
     double diff = 0.0;
     if (direction_ == Axis::VERTICAL) {
-        diff = isReverse_ ?
-            GetLayoutSize().Height() - touchPosition.GetY() : touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP);
+        diff = isReverse_ ? GetLayoutSize().Height() - touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP) :
+            touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP);
     } else {
         if ((GetTextDirection() == TextDirection::LTR &&
             !isReverse_) || (GetTextDirection() == TextDirection::RTL && isReverse_)) {
             diff = touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP);
         } else if ((GetTextDirection() == TextDirection::RTL &&
             !isReverse_) || (GetTextDirection() == TextDirection::LTR && isReverse_)) {
-            diff = GetLayoutSize().Width() - touchPosition.GetX();
+            diff = GetLayoutSize().Width() - touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP);
         }
     }
     if (diff < 0.0) {
@@ -583,15 +584,15 @@ void RenderSlider::UpdateBlockPosition(const Offset& touchPosition, bool isClick
     }
     double diff = 0.0;
     if (direction_ == Axis::VERTICAL) {
-        diff = isReverse_ ?
-            GetLayoutSize().Height() - touchPosition.GetY() : touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP);
+        diff = isReverse_ ? GetLayoutSize().Height() - touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP) :
+            touchPosition.GetY() - NormalizeToPx(SLIDER_PADDING_DP);
     } else {
         if ((GetTextDirection() == TextDirection::LTR &&
             !isReverse_) || (GetTextDirection() == TextDirection::RTL && isReverse_)) {
             diff = touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP);
         } else if ((GetTextDirection() == TextDirection::RTL &&
             !isReverse_) || (GetTextDirection() == TextDirection::LTR && isReverse_)) {
-            diff = GetLayoutSize().Width() - touchPosition.GetX();
+            diff = GetLayoutSize().Width() - touchPosition.GetX() - NormalizeToPx(SLIDER_PADDING_DP);
         }
     }
     double totalRatio = diff / trackLength_;

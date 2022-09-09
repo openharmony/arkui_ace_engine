@@ -19,13 +19,20 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/scroll/scroll_component.h"
+#include "core/components_ng/pattern/scroll/scroll_view.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
     const std::vector<DisplayMode> DISPLAY_MODE = {DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON};
+    const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::FREE, Axis::NONE };
 }
 void JSScroll::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ScrollView::Create();
+        return;
+    }
+    
     RefPtr<Component> child;
     auto scrollComponent = AceType::MakeRefPtr<OHOS::Ace::ScrollComponent>(child);
     ViewStackProcessor::GetInstance()->ClaimElementId(scrollComponent);
@@ -59,14 +66,20 @@ void JSScroll::Create(const JSCallbackInfo& info)
 
 void JSScroll::SetScrollable(int32_t value)
 {
-    if (value >= 0 && value < 4) {  // Number of scrolling methods
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto scrollComponent = AceType::DynamicCast<ScrollComponent>(component);
-        if (scrollComponent) {
-            scrollComponent->SetAxisDirection((Axis)value);
-        }
-    } else {
-        LOGE("invalid value for SetScrollable");
+    if (value < 0 || value >= static_cast<int32_t>(AXIS.size())) {
+        LOGE("value is not valid: %{public}d", value);
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ScrollView::SetAxis(AXIS[value]);
+        return;
+    }
+
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto scrollComponent = AceType::DynamicCast<ScrollComponent>(component);
+    if (scrollComponent) {
+        scrollComponent->SetAxisDirection(AXIS[value]);
     }
 }
 

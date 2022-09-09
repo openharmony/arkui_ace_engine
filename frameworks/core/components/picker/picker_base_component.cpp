@@ -419,7 +419,7 @@ void PickerBaseComponent::InitializeTitle(std::list<RefPtr<Component>>& outChild
         LOGE("theme is null.");
         return;
     }
-    if (isDialog_ && hasTitle_) {
+    if ((isDialog_ || isCreateDialogComponent_) && hasTitle_) {
         auto triangle = AceType::MakeRefPtr<TriangleComponent>();
         triangle->SetPadding(8.0_vp); // all padding
         triangle->SetWidth(25.0_vp); // left padding + it width + right padding = 8dp + 9dp + 8dp
@@ -517,7 +517,7 @@ void PickerBaseComponent::ClearAccessibilityNodes()
     for (const auto& column : columns_) {
         column->SetNodeId(-1); // reset id.
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (accessibilityManager) {
         auto node = accessibilityManager->GetAccessibilityNodeById(GetPickerBaseId());
         if (node) {
@@ -742,7 +742,7 @@ void PickerBaseComponent::Initialize(
     // picker need build rootAccessibilityNode but picker-view don't need.
     if (!rootAccessibility_ && isDialog_) {
         rootAccessibilityId_ = accessibilityManager->GenerateNextAccessibilityId();
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
         rootAccessibility_ = accessibilityManager->CreateSpecializedNode(
             "picker-dialog", rootAccessibilityId_, GetPickerBaseId());
 #else

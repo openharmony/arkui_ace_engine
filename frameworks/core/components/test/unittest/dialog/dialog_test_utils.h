@@ -81,6 +81,8 @@ public:
 class DialogTestUtils {
 public:
     static RefPtr<MockRenderBubble> CreateRenderBubble(const Placement placement,
+        const Offset& offset, const Size& size, const std::optional<Dimension>& arrowOffset);
+    static RefPtr<MockRenderBubble> CreateRenderBubble(const Placement placement,
         const Offset& offset, const Size& size);
 };
 

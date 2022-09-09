@@ -15,9 +15,13 @@
 
 #include "core/components_ng/layout/layout_property.h"
 
+#include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void LayoutProperty::Reset()
@@ -25,6 +29,7 @@ void LayoutProperty::Reset()
     layoutConstraint_.reset();
     calcLayoutConstraint_.reset();
     padding_.reset();
+    borderWidth_.reset();
     magicItemProperty_.reset();
     positionProperty_.reset();
     measureType_.reset();
@@ -46,6 +51,9 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     }
     if (layoutProperty->padding_) {
         padding_ = std::make_unique<PaddingProperty>(*layoutProperty->padding_);
+    }
+    if (layoutProperty->borderWidth_) {
+        borderWidth_ = std::make_unique<BorderWidthProperty>(*layoutProperty->borderWidth_);
     }
     if (layoutProperty->magicItemProperty_) {
         magicItemProperty_ = std::make_unique<MagicItemProperty>(*layoutProperty->magicItemProperty_);
@@ -73,50 +81,126 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
 }
 
-void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint, bool updateFlag)
+void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     layoutConstraint_ = parentConstraint;
     if (calcLayoutConstraint_) {
-        auto parentSize = parentConstraint.parentIdealSize.value_or(SizeF(-1, -1));
         if (calcLayoutConstraint_->maxSize.has_value()) {
-            layoutConstraint_->UpdateMaxSizeWithCheck(
-                ConvertToSize(calcLayoutConstraint_->maxSize.value(), parentConstraint.scaleProperty, parentSize));
+            layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
+                parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->minSize.has_value()) {
-            layoutConstraint_->UpdateMinSizeWithCheck(
-                ConvertToSize(calcLayoutConstraint_->minSize.value(), parentConstraint.scaleProperty, parentSize));
+            layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
+                parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
-            layoutConstraint_->UpdateSelfIdealSizeWithCheck(ConvertToSize(
-                calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty, parentSize));
+            layoutConstraint_->UpdateSelfIdealSizeWithCheck(
+                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
+                    parentConstraint.percentReference));
         }
     }
-    layoutConstraint_->scaleProperty = parentConstraint.scaleProperty;
     CheckSelfIdealSize();
 }
 
 void LayoutProperty::CheckSelfIdealSize()
 {
-    if (measureType_ == MeasureType::MATCH_PARENT && layoutConstraint_->parentIdealSize.has_value()) {
-        layoutConstraint_->UpdateSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize.value());
+    if (measureType_ == MeasureType::MATCH_PARENT) {
+        layoutConstraint_->UpdateSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
     }
+    if (!calcLayoutConstraint_) {
+        return;
+    }
+    if (calcLayoutConstraint_->minSize.has_value()) {
+        layoutConstraint_->selfIdealSize.UpdateSizeWhenLarger(ConvertToSize(calcLayoutConstraint_->minSize.value(),
+            layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+    }
+    if (calcLayoutConstraint_->maxSize.has_value()) {
+        layoutConstraint_->selfIdealSize.UpdateSizeWhenSmaller(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
+            layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+    }
+}
+
+LayoutConstraintF LayoutProperty::CreateChildConstraint() const
+{
+    if (!layoutConstraint_) {
+        LOGE("fail to create child constraint due to layoutConstraint_ is null");
+        return {};
+    }
+    auto layoutConstraint = contentConstraint_.value();
+    layoutConstraint.parentIdealSize = layoutConstraint.selfIdealSize;
+    // update max size when ideal size has value.
+    if (layoutConstraint.parentIdealSize.Width()) {
+        layoutConstraint.maxSize.SetWidth(layoutConstraint.parentIdealSize.Width().value());
+        layoutConstraint.percentReference.SetWidth(layoutConstraint.parentIdealSize.Width().value());
+    }
+    if (layoutConstraint.parentIdealSize.Height()) {
+        layoutConstraint.maxSize.SetHeight(layoutConstraint.parentIdealSize.Height().value());
+        layoutConstraint.percentReference.SetHeight(layoutConstraint.parentIdealSize.Height().value());
+    }
+    // for child constraint, reset current selfIdealSize.
+    layoutConstraint.selfIdealSize.Reset();
+    return layoutConstraint;
 }
 
 void LayoutProperty::UpdateContentConstraint()
 {
-    auto contentConstraint = layoutConstraint_.value_or(LayoutConstraintF());
-    if (padding_) {
-        auto paddingF = ConvertToPaddingPropertyF(*padding_, contentConstraint.scaleProperty,
-            contentConstraint.parentIdealSize.value_or(SizeF(0, 0)).Width());
-        contentConstraint.MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+    if (!layoutConstraint_) {
+        LOGE("fail to get content constraint due to layoutConstraint_ is null");
+        return;
     }
-    contentConstraint_ = contentConstraint;
+    contentConstraint_ = layoutConstraint_.value();
+    // update percent reference when parent has size.
+    if (contentConstraint_->parentIdealSize.Width()) {
+        contentConstraint_->percentReference.SetWidth(contentConstraint_->parentIdealSize.Width().value());
+    }
+    if (contentConstraint_->parentIdealSize.Height()) {
+        contentConstraint_->percentReference.SetHeight(contentConstraint_->parentIdealSize.Height().value());
+    }
+    if (padding_) {
+        auto paddingF = ConvertToPaddingPropertyF(
+            *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
+        contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+    }
+    if (borderWidth_) {
+        auto borderWidthF = ConvertToBorderWidthPropertyF(
+            *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
+        contentConstraint_->MinusPadding(
+            borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+    }
 }
 
-PaddingPropertyF LayoutProperty::CreatePaddingPropertyF()
+PaddingPropertyF LayoutProperty::CreatePaddingAndBorder()
 {
-    CHECK_NULL_RETURN(layoutConstraint_, PaddingPropertyF());
+    if (layoutConstraint_.has_value()) {
+        auto padding = ConvertToPaddingPropertyF(
+            padding_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
+        auto borderWidth = ConvertToBorderWidthPropertyF(
+            borderWidth_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
+
+        return PaddingPropertyF { padding.left.value_or(0) + borderWidth.leftDimen.value_or(0),
+            padding.right.value_or(0) + borderWidth.rightDimen.value_or(0),
+            padding.top.value_or(0) + borderWidth.topDimen.value_or(0),
+            padding.bottom.value_or(0) + borderWidth.bottomDimen.value_or(0) };
+    }
+    auto padding = ConvertToPaddingPropertyF(
+        padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+    auto borderWidth = ConvertToBorderWidthPropertyF(
+        borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
+
+    return PaddingPropertyF { padding.left.value_or(0) + borderWidth.leftDimen.value_or(0),
+        padding.right.value_or(0) + borderWidth.rightDimen.value_or(0),
+        padding.top.value_or(0) + borderWidth.topDimen.value_or(0),
+        padding.bottom.value_or(0) + borderWidth.bottomDimen.value_or(0) };
+}
+
+PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
+{
+    if (layoutConstraint_.has_value()) {
+        return ConvertToPaddingPropertyF(
+            padding_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+    }
+
     return ConvertToPaddingPropertyF(
-        padding_, layoutConstraint_->scaleProperty, layoutConstraint_->parentIdealSize.value_or(SizeF(-1, -1)).Width());
+        padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
 }
 } // namespace OHOS::Ace::NG

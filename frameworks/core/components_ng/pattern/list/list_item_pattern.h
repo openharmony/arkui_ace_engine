@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_PATTERN_H
 
+#include "base/memory/referenced.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
 
@@ -24,13 +27,26 @@ class ACE_EXPORT ListItemPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemPattern, Pattern);
 
 public:
-    ListItemPattern() = default;
+    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
     ~ListItemPattern() override = default;
 
     bool IsAtomicNode() const override
     {
         return false;
     }
+
+    void BeforeCreateLayoutWrapper() override
+    {
+        if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
+            shallowBuilder_->ExecuteDeepRender();
+            shallowBuilder_.Reset();
+        }
+    }
+
+private:
+    RefPtr<ShallowBuilder> shallowBuilder_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);
 };
 } // namespace OHOS::Ace::NG
 

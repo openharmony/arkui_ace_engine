@@ -19,8 +19,6 @@
 #include <list>
 #include <string>
 
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/pipeline/base/composed_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -29,6 +27,11 @@
 namespace OHOS::Ace {
 
 class ComposedElement;
+
+namespace NG {
+class CustomNode;
+class UINode;
+} // namespace NG
 
 } // namespace OHOS::Ace
 
@@ -109,22 +112,15 @@ public:
     }
 
     // Used by full update variant only from js_lazy_foreach.cpp
-    virtual void RemoveChildGroupById(const std::string& viewId)
+    virtual void RemoveChildGroupById(const std::string& viewId) {}
+    virtual void MarkLazyForEachProcess(const std::string& groudId) {}
+    virtual void ResetLazyForEachProcess() {}
+    virtual void ExecuteUpdateWithValueParams(const std::string& jsonData) {}
+
+    virtual bool isFullUpdate() const
     {
-        LOGE("Internal error. Not implemented");
-    };
-    virtual void MarkLazyForEachProcess(const std::string& groudId)
-    {
-        LOGE("Internal error. Not implemented");
-    };
-    virtual void ResetLazyForEachProcess()
-    {
-        LOGE("Internal error. Not implemented");
-    };
-    virtual void ExecuteUpdateWithValueParams(const std::string& jsonData)
-    {
-        LOGE("Internal error. Not implemented");
-    };
+        return true;
+    }
 
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
@@ -319,6 +315,11 @@ public:
     bool JsElementIdExists(int32_t elmtId);
 
     void JSGetProxiedItemRenderState(const JSCallbackInfo& info);
+
+    bool isFullUpdate() const override
+    {
+        return false;
+    }
 
 private:
     void MarkNeedUpdate() override;

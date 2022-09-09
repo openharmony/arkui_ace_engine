@@ -150,6 +150,12 @@ void GetMouseEventAction(int32_t action, MouseEvent& events)
         case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
             events.action = MouseAction::RELEASE;
             break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW:
+            events.action = MouseAction::WINDOW_ENTER;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW:
+            events.action = MouseAction::WINDOW_LEAVE;
+            break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
             events.action = MouseAction::MOVE;
             break;
@@ -189,7 +195,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     MMI::PointerEvent::PointerItem item;
     bool ret = pointerEvent->GetPointerItem(pointerID, item);
     if (!ret) {
-        LOGE("get pointer item failed.");
+        LOGE("get pointer: %{public}d item failed.", pointerID);
         return;
     }
 
@@ -333,6 +339,9 @@ FlutterAceView* FlutterAceView::CreateView(int32_t instanceId, bool useCurrentEv
 #else
     settings.enable_software_rendering = true;
 #endif
+#ifdef ENABLE_ROSEN_BACKEND
+    settings.use_system_render_thread = SystemProperties::GetRosenBackendEnabled();
+#endif
     settings.platform_as_ui_thread = usePlatformThread;
     settings.use_current_event_runner = useCurrentEventRunner;
     LOGD("software render: %{public}s", settings.enable_software_rendering ? "true" : "false");
@@ -394,6 +403,13 @@ void FlutterAceView::SurfaceChanged(
         platformView->NotifyChanged(SkISize::Make(width, height));
     }
     LOGD("<<< FlutterAceView::SurfaceChanged, end");
+}
+
+void FlutterAceView::SurfacePositionChanged(FlutterAceView* view, int32_t posX, int32_t posY)
+{
+    if (view != nullptr) {
+        view->NotifySurfacePositionChanged(posX, posY);
+    }
 }
 
 void FlutterAceView::SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics)

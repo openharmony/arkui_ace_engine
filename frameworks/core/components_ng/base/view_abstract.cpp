@@ -15,6 +15,8 @@
 
 #include "core/components_ng/base/view_abstract.h"
 
+#include <optional>
+
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
@@ -25,7 +27,7 @@ void ViewAbstract::SetWidth(const CalcLength& width)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateCalcSelfIdealSize(CalcSize(width, CalcLength(-1.0f)));
+    layoutProperty->UpdateCalcSelfIdealSize(CalcSize(width, std::nullopt));
 }
 
 void ViewAbstract::SetHeight(const CalcLength& height)
@@ -34,17 +36,57 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateCalcSelfIdealSize(CalcSize(CalcLength(-1.0f), height));
+    layoutProperty->UpdateCalcSelfIdealSize(CalcSize(std::nullopt, height));
+}
+
+void ViewAbstract::SetMinWidth(const CalcLength& width)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMinSize(CalcSize(width, std::nullopt));
+}
+
+void ViewAbstract::SetMinHeight(const CalcLength& height)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, height));
+}
+
+void ViewAbstract::SetMaxWidth(const CalcLength& width)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMaxSize(CalcSize(width, std::nullopt));
+}
+
+void ViewAbstract::SetMaxHeight(const CalcLength& height)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
 }
 
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
-    ACE_UPDATE_RENDER_CONTEXT(BgColor, color);
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
 }
 
 void ViewAbstract::SetLayoutWeight(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
+}
+
+void ViewAbstract::SetAlignSelf(int32_t value) {
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, static_cast<FlexAlign>(value));
 }
 
 void ViewAbstract::SetPadding(const CalcLength& value)
@@ -57,6 +99,54 @@ void ViewAbstract::SetPadding(const CalcLength& value)
 void ViewAbstract::SetPadding(const PaddingProperty& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, value);
+}
+
+void ViewAbstract::SetBorderRadius(const Dimension& value)
+{
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(value);
+    ACE_UPDATE_RENDER_CONTEXT(BorderRadius, borderRadius);
+}
+
+void ViewAbstract::SetBorderRadius(const BorderRadiusProperty& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BorderRadius, value);
+}
+
+void ViewAbstract::SetBorderColor(const Color& value)
+{
+    BorderColorProperty borderColor;
+    borderColor.SetColor(value);
+    ACE_UPDATE_RENDER_CONTEXT(BorderColor, borderColor);
+}
+
+void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BorderColor, value);
+}
+
+void ViewAbstract::SetBorderWidth(const Dimension& value)
+{
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth);
+}
+
+void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value);
+}
+
+void ViewAbstract::SetBorderStyle(const BorderStyle& value)
+{
+    BorderStyleProperty borderStyle;
+    borderStyle.SetBorderStyle(value);
+    ACE_UPDATE_RENDER_CONTEXT(BorderStyle, borderStyle);
+}
+
+void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BorderStyle, value);
 }
 
 void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)

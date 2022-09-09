@@ -26,12 +26,12 @@ bool CheckNeedRequestMeasureAndLayout(PropertyChangeFlag propertyChangeFlag)
 {
     return ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
            ((propertyChangeFlag & PROPERTY_UPDATE_LAYOUT) == PROPERTY_UPDATE_LAYOUT) ||
-           ((propertyChangeFlag & PROPERTY_REQUEST_NEW_CHILD_NODE) == PROPERTY_REQUEST_NEW_CHILD_NODE) ||
+           ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE_SELF) == PROPERTY_UPDATE_MEASURE_SELF) ||
            ((propertyChangeFlag & PROPERTY_UPDATE_BY_CHILD_REQUEST) == PROPERTY_UPDATE_BY_CHILD_REQUEST) ||
            ((propertyChangeFlag & PROPERTY_UPDATE_POSITION) == PROPERTY_UPDATE_POSITION);
 }
 
-bool CheckNeedRequestParent(PropertyChangeFlag propertyChangeFlag)
+bool CheckNeedRequestParentMeasure(PropertyChangeFlag propertyChangeFlag)
 {
     return CheckMeasureFlag(propertyChangeFlag) || CheckPositionFlag(propertyChangeFlag);
 }
@@ -52,9 +52,9 @@ bool CheckPositionFlag(PropertyChangeFlag propertyChangeFlag)
     return ((propertyChangeFlag & PROPERTY_UPDATE_POSITION) == PROPERTY_UPDATE_POSITION);
 }
 
-bool CheckRequestNewChildNodeFlag(PropertyChangeFlag propertyChangeFlag)
+bool CheckMeasureSelfFlag(PropertyChangeFlag propertyChangeFlag)
 {
-    return ((propertyChangeFlag & PROPERTY_REQUEST_NEW_CHILD_NODE) == PROPERTY_REQUEST_NEW_CHILD_NODE);
+    return ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE_SELF) == PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 bool CheckUpdateByChildRequest(PropertyChangeFlag propertyChangeFlag)

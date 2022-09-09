@@ -18,10 +18,16 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/common/ace_page.h"
 #include "core/components/box/box_component_helper.h"
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/padding/padding_component.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/button/button_view.h"
+#include "core/components_ng/pattern/text/text_view.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -38,6 +44,10 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
     }
     Dimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ButtonView::SetFontSize(fontSize);
         return;
     }
     auto textComponent = GetTextComponent();
@@ -60,6 +70,10 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
 
 void JSButton::SetFontWeight(std::string value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ButtonView::SetFontWeight(ConvertStrToFontWeight(value));
+        return;
+    }
     auto textComponent = GetTextComponent();
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
@@ -73,6 +87,10 @@ void JSButton::SetFontStyle(int32_t value)
     const std::vector<FontStyle> fontStyles = { FontStyle::NORMAL, FontStyle::ITALIC };
     if (value < 0 || value >= static_cast<int32_t>(fontStyles.size())) {
         LOGE("Text fontStyle(%d) is invalid value", value);
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ButtonView::SetItalicFontStyle(fontStyles[value]);
         return;
     }
     auto textComponent = GetTextComponent();
@@ -94,6 +112,10 @@ void JSButton::SetFontFamily(const JSCallbackInfo& info)
         LOGE("Parse FontFamilies failed");
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ButtonView::SetFontFamily(fontFamilies);
+        return;
+    }
     auto textComponent = GetTextComponent();
     if (textComponent) {
         auto textStyle = textComponent->GetTextStyle();
@@ -110,6 +132,10 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ButtonView::SetTextColor(textColor);
         return;
     }
     auto textComponent = GetTextComponent();
@@ -141,6 +167,10 @@ void JSButton::SetType(int value)
 {
     if ((ButtonType)value == ButtonType::CAPSULE || (ButtonType)value == ButtonType::CIRCLE ||
         (ButtonType)value == ButtonType::ARC || (ButtonType)value == ButtonType::NORMAL) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ButtonView::SetType(static_cast<ButtonType>(value));
+            return;
+        }
         auto stack = ViewStackProcessor::GetInstance();
         auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
         if (buttonComponent) {
@@ -153,6 +183,10 @@ void JSButton::SetType(int value)
 
 void JSButton::SetStateEffect(bool stateEffect)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ButtonView::SetStateEffect(stateEffect);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
     if (buttonComponent) {
@@ -211,9 +245,21 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     bool labelSet = false;
     if (ParseJsString(info[0], label)) {
         labelSet = true;
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ButtonView::CreateWithLabel(label);
+            if (!labelSet && info[0]->IsObject()) {
+                SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
+            }
+            if ((info.Length() > 1) && info[1]->IsObject()) {
+                SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
+            }
+            return;
+        }
         auto textComponent = AceType::MakeRefPtr<TextComponent>(label);
         auto buttonTheme = GetTheme<ButtonTheme>();
         auto textStyle = buttonTheme ? buttonTheme->GetTextStyle() : textComponent->GetTextStyle();
+        textStyle.SetMaxLines(buttonTheme->GetTextMaxLines());
+        textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         textComponent->SetTextStyle(std::move(textStyle));
         auto padding = AceType::MakeRefPtr<PaddingComponent>();
         padding->SetPadding(buttonTheme ? buttonTheme->GetPadding() : Edge());
@@ -221,8 +267,20 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         Component::MergeRSNode(padding, textComponent);
         buttonChildren.emplace_back(padding);
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ButtonView::Create(V2::BUTTON_ETS_TAG);
+        if (!labelSet && info[0]->IsObject()) {
+            SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
+        }
+        if ((info.Length() > 1) && info[1]->IsObject()) {
+            SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
+        }
+        return;
+    }
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
     ViewStackProcessor::GetInstance()->ClaimElementId(buttonComponent);
+    buttonComponent->SetHasCustomChild(false);
     buttonComponent->SetCatchMode(false);
     SetDefaultAttributes(buttonComponent);
     if (!labelSet && info[0]->IsObject()) {
@@ -240,14 +298,26 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
 
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ButtonView::Create(V2::BUTTON_ETS_TAG);
+        if (info[0]->IsObject()) {
+            auto obj = JSRef<JSObject>::Cast(info[0]);
+            SetTypeAndStateEffect(obj);
+        }
+        return;
+    }
     std::list<RefPtr<Component>> buttonChildren;
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
     ViewStackProcessor::GetInstance()->ClaimElementId(buttonComponent);
+    buttonComponent->SetHasCustomChild(true);
     buttonComponent->SetCatchMode(false);
     SetDefaultAttributes(buttonComponent);
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
         SetTypeAndStateEffect(obj, buttonComponent);
+    }
+    if ((info.Length() > 1) && info[1]->IsObject()) {
+        SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]), buttonComponent);
     }
     ViewStackProcessor::GetInstance()->Push(buttonComponent);
     JSInteractableView::SetFocusable(true);
@@ -270,6 +340,19 @@ void JSButton::SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonCompone
     buttonComponent->SetBackgroundColor(buttonTheme->GetBgColor());
     buttonComponent->SetClickedColor(buttonComponent->GetBackgroundColor().BlendColor(buttonTheme->GetClickedColor()));
     buttonComponent->SetHoverColor(buttonTheme->GetHoverColor());
+}
+
+void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj)
+{
+    auto type = obj->GetProperty("type");
+    if (type->IsNumber()) {
+        auto buttonType = static_cast<ButtonType>(type->ToNumber<int32_t>());
+        NG::ButtonView::SetType(buttonType);
+    }
+    auto stateEffect = obj->GetProperty("stateEffect");
+    if (stateEffect->IsBoolean()) {
+        NG::ButtonView::SetStateEffect(stateEffect->ToBoolean());
+    }
 }
 
 void JSButton::SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<ButtonComponent>& buttonComponent)
@@ -401,6 +484,10 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 
 void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsBackgroundColor(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
@@ -436,6 +523,10 @@ void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
 
 void JSButton::JsWidth(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsWidth(info);
+        return;
+    }
     JSViewAbstract::JsWidth(info);
     Dimension value = GetSizeValue(info);
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -461,6 +552,10 @@ void JSButton::JsWidth(const JSCallbackInfo& info)
 
 void JSButton::JsHeight(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsHeight(info);
+        return;
+    }
     JSViewAbstract::JsHeight(info);
     Dimension value = GetSizeValue(info);
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -515,7 +610,7 @@ void JSButton::JsSize(const JSCallbackInfo& info)
             buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
                 ButtonStateAttribute::WIDTH, AnimatableDimension(width, option), stack->GetVisualState());
             if (!buttonComponent->GetStateAttributes()->HasAttribute(
-                ButtonStateAttribute::WIDTH, VisualState::NORMAL)) {
+                    ButtonStateAttribute::WIDTH, VisualState::NORMAL)) {
                 buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::WIDTH,
                     AnimatableDimension(buttonComponent->GetWidth(), option), VisualState::NORMAL);
             }
@@ -532,7 +627,7 @@ void JSButton::JsSize(const JSCallbackInfo& info)
             buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(
                 ButtonStateAttribute::HEIGHT, AnimatableDimension(height, option), stack->GetVisualState());
             if (!buttonComponent->GetStateAttributes()->HasAttribute(
-                ButtonStateAttribute::HEIGHT, VisualState::NORMAL)) {
+                    ButtonStateAttribute::HEIGHT, VisualState::NORMAL)) {
                 buttonComponent->GetStateAttributes()->AddAttribute<AnimatableDimension>(ButtonStateAttribute::HEIGHT,
                     AnimatableDimension(buttonComponent->GetHeight(), option), VisualState::NORMAL);
             }
@@ -549,6 +644,9 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
     Dimension radius;
     if (!ParseJsDimensionVp(info[0], radius)) {
         return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetBorderRadius(radius);
     }
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());

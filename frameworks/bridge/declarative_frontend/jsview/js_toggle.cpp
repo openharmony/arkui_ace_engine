@@ -68,6 +68,9 @@ void JSToggle::Create(const JSCallbackInfo& info)
     RefPtr<Component> component;
     if (toggleType == ToggleType::CHECKBOX) {
         RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
+        if (!checkBoxTheme) {
+            return;
+        }
         RefPtr<CheckboxComponent> checkboxComponent = AceType::MakeRefPtr<OHOS::Ace::CheckboxComponent>(checkBoxTheme);
         checkboxComponent->SetValue(isOn);
         checkboxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
@@ -78,6 +81,9 @@ void JSToggle::Create(const JSCallbackInfo& info)
         component = checkboxComponent;
     } else if (toggleType == ToggleType::SWITCH) {
         RefPtr<SwitchTheme> switchTheme = GetTheme<SwitchTheme>();
+        if (!switchTheme) {
+            return;
+        }
         RefPtr<SwitchComponent> switchComponent = AceType::MakeRefPtr<OHOS::Ace::SwitchComponent>(switchTheme);
         switchComponent->SetValue(isOn);
         switchComponent->SetMouseAnimationType(HoverAnimationType::NONE);
@@ -88,6 +94,9 @@ void JSToggle::Create(const JSCallbackInfo& info)
         component = switchComponent;
     } else {
         RefPtr<ToggleTheme> toggleTheme = GetTheme<ToggleTheme>();
+        if (!toggleTheme) {
+            return;
+        }
         RefPtr<ToggleComponent> toggleComponent = AceType::MakeRefPtr<ToggleComponent>();
         toggleComponent->SetBackgroundColor(toggleTheme->GetBackgroundColor());
         toggleComponent->SetCheckedColor(toggleTheme->GetCheckedColor());
@@ -102,14 +111,23 @@ void JSToggle::Create(const JSCallbackInfo& info)
     box->SetDeliverMinToChild(true);
     if (toggleType == ToggleType::CHECKBOX) {
         RefPtr<CheckboxTheme> checkBoxTheme = GetTheme<CheckboxTheme>();
+        if (!checkBoxTheme) {
+            return;
+        }
         box->SetWidth(checkBoxTheme->GetWidth());
         box->SetHeight(checkBoxTheme->GetHeight());
     } else if (toggleType == ToggleType::SWITCH) {
         RefPtr<SwitchTheme> switchTheme = GetTheme<SwitchTheme>();
+        if (!switchTheme) {
+            return;
+        }
         box->SetWidth(switchTheme->GetWidth());
         box->SetHeight(switchTheme->GetHeight());
     } else {
         RefPtr<ToggleTheme> toggleTheme = GetTheme<ToggleTheme>();
+        if (!toggleTheme) {
+            return;
+        }
         box->SetHeight(toggleTheme->GetHeight().Value(), toggleTheme->GetHeight().Unit());
     }
 }

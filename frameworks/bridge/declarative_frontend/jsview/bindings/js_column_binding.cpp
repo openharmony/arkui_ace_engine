@@ -25,7 +25,7 @@ void JSColumn::JSBind(BindingTarget globalObj)
     JSClass<JSColumn>::StaticMethod("createWithWrap", &JSColumn::CreateWithWrap, opt);
     JSClass<JSColumn>::StaticMethod("fillParent", &JSFlex::SetFillParent, opt);
     JSClass<JSColumn>::StaticMethod("wrapContent", &JSFlex::SetWrapContent, opt);
-    JSClass<JSColumn>::StaticMethod("justifyContent", &JSFlex::SetJustifyContent, opt);
+    JSClass<JSColumn>::StaticMethod("justifyContent", &JSColumn::SetJustifyContent, opt);
     JSClass<JSColumn>::StaticMethod("alignItems", &JSColumn::SetAlignItems, opt);
     JSClass<JSColumn>::StaticMethod("alignContent", &JSFlex::SetAlignContent, opt);
     JSClass<JSColumn>::StaticMethod("height", &JSFlex::JsHeight, opt);

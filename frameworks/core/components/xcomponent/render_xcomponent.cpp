@@ -21,6 +21,11 @@ RenderXComponent::RenderXComponent()
     Initialize();
 }
 
+RenderXComponent::~RenderXComponent()
+{
+    NativeXComponentDestroy();
+}
+
 void RenderXComponent::Initialize()
 {
     auto wp = AceType::WeakClaim(this);
@@ -203,16 +208,23 @@ void RenderXComponent::PerformLayout()
 void RenderXComponent::Paint(RenderContext& context, const Offset& offset)
 {
     position_ = GetGlobalOffset();
-    if (!isXComponentInit) {
+    if (!isSurfaceInit_) {
         prePosition_ = position_;
         preDrawSize_ = drawSize_;
 
         NativeXComponentOffset(position_.GetX(), position_.GetY());
 
+        // The first time enter the Paint(), drawSize is (0, 0)
+        // If the width or height equal to zero, it will not
+        if (NearEqual(drawSize_.Width(), 0) || NearEqual(drawSize_.Height(), 0)) {
+            RenderNode::Paint(context, offset);
+            return;
+        }
+
         if (xcomponentSizeInitEvent_ && (!drawSize_.IsHeightInfinite())) {
             xcomponentSizeInitEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
+            isSurfaceInit_ = true;
         }
-        isXComponentInit = true;
     } else {
         if ((!NearEqual(prePosition_.GetX(), position_.GetX())) ||
             (!NearEqual(prePosition_.GetY(), position_.GetY()))) {
@@ -302,6 +314,11 @@ void RenderXComponent::NativeXComponentChange()
 
 void RenderXComponent::NativeXComponentDestroy()
 {
+    if (!isSurfaceInit_) {
+        return;
+    }
+    isSurfaceInit_ = false;
+
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("NativeXComponentDestroy context null");

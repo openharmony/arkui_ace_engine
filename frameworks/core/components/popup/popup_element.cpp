@@ -61,7 +61,7 @@ bool PopupElement::ShowPopup()
         return false;
     }
 
-    if (!GetThemeManager()) {
+    if (!GetThemeManager() || !GetThemeManager()->GetTheme<PopupTheme>()) {
         return false;
     }
 
@@ -97,7 +97,7 @@ bool PopupElement::ShowPopup()
     tween->SetChild(bubble);
 
     stackElement->PushComponent(tween, false);
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     auto manager = context->GetAccessibilityManager();
     if (manager) {
         auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(popup_->GetId()));
@@ -126,7 +126,7 @@ bool PopupElement::CancelPopup(const ComposeId& id)
             accessibilityManager->RemoveAccessibilityNodeById(StringUtils::StringToInt(popup_->GetId()));
         }
     }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     if (context) {
         auto manager = context->GetAccessibilityManager();
         if (manager) {

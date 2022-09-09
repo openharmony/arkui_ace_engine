@@ -181,7 +181,7 @@ private:
     JSValue renderContext_;
     JSValue dataURL_;
 
-#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+#if !defined(PREVIEW)
     CanvasRenderContextBase* webglRenderContext_ = nullptr;
     CanvasRenderContextBase* webgl2RenderContext_ = nullptr;
 #endif

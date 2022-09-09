@@ -135,9 +135,17 @@ sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
     return nullptr;
 }
 
+RefPtr<NG::ImageData> ImageLoader::GetImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
+{
+    sk_sp<SkData> skData = LoadImageData(imageSourceInfo, context);
+    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skData));
+}
+
 sk_sp<SkData> FileImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
+    ACE_FUNCTION_TRACE();
     auto src = imageSourceInfo.GetSrc();
     std::string filePath = RemovePathHead(src);
     if (imageSourceInfo.GetSrcType() == SrcType::INTERNAL) {
@@ -209,6 +217,7 @@ sk_sp<SkData> DataProviderImageLoader::LoadImageData(
 sk_sp<SkData> AssetImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase> context)
 {
+    ACE_FUNCTION_TRACE();
     auto src = imageSourceInfo.GetSrc();
     if (src.empty()) {
         LOGE("image src is empty");
@@ -236,9 +245,24 @@ sk_sp<SkData> AssetImageLoader::LoadImageData(
         LOGE("No asset data!");
         return nullptr;
     }
-    const uint8_t* data = assetData->GetData();
-    const size_t dataSize = assetData->GetSize();
-    return SkData::MakeWithCopy(data, dataSize);
+    std::string assetString = assetManager->GetAssetPath(assetSrc);
+    std::string filePath = assetString + src;
+    if (filePath.length() > PATH_MAX) {
+        LOGE("src path too long");
+        return nullptr;
+    }
+    char realPath[PATH_MAX] = { 0x00 };
+    if (realpath(filePath.c_str(), realPath) == nullptr) {
+        LOGE("realpath fail! filePath: %{private}s, fail reason: %{public}s", filePath.c_str(),
+            strerror(errno));
+        return nullptr;
+    }
+    std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
+    if (!file) {
+        LOGE("asset image open failed");
+        return nullptr;
+    }
+    return SkData::MakeFromFILE(file.get());
 }
 
 std::string AssetImageLoader::LoadJsonData(const std::string& src, const WeakPtr<PipelineBase> context)

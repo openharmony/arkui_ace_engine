@@ -31,7 +31,9 @@
 #include "frameworks/core/animation/animator.h"
 
 namespace OHOS::Ace {
-
+#ifdef WEB_SUPPORTED
+class RenderWeb;
+#endif
 constexpr Dimension ICON_SIZE = 24.0_vp;
 constexpr Dimension ICON_PADDING = 2.0_vp;
 
@@ -66,6 +68,11 @@ public:
 
     void SetWeakImage(const WeakPtr<RenderImage>& weakImage);
     const WeakPtr<RenderImage>& GetWeakImage() const;
+
+#ifdef WEB_SUPPORTED
+    void SetWeakWeb(const WeakPtr<RenderWeb>& weakWeb);
+    const WeakPtr<RenderWeb>& GetWeakWeb() const;
+#endif
 
     bool HasMoreButton() const;
 
@@ -207,6 +214,9 @@ private:
     WeakPtr<RenderTextField> weakTextField_;
     WeakPtr<RenderText> weakText_;
     WeakPtr<RenderImage> weakImage_;
+#ifdef WEB_SUPPORTED
+    WeakPtr<RenderWeb> weakWeb_;
+#endif
     RefPtr<TextOverlayTheme> theme_;
     RefPtr<SelectPopupComponent> menu_;
     RefPtr<ThemeManager> themeManager_;

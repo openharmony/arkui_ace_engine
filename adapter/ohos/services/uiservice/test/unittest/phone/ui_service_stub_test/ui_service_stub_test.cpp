@@ -84,7 +84,7 @@ HWTEST_F(UIServiceStubTest, UIServiceStub_OnPushCallBack_001, TestSize.Level1)
 
     data.WriteInterfaceToken(UIServiceProxy::GetDescriptor());
 
-    Want want;
+    AAFwk::Want want;
     const std::string name = "name";
     const std::string jsonPath = "jsonPath";
     const std::string dataStr = "data";
@@ -128,7 +128,7 @@ HWTEST_F(UIServiceStubTest, UIServiceStub_OnRequestCallBack_001, TestSize.Level1
 
     data.WriteInterfaceToken(UIServiceProxy::GetDescriptor());
 
-    Want want;
+    AAFwk::Want want;
     const std::string name = "name";
     const std::string dataStr = "data";
     data.WriteParcelable(&want);
@@ -163,7 +163,7 @@ HWTEST_F(UIServiceStubTest, UIServiceStub_OnReturnRequest_001, TestSize.Level1)
 
     data.WriteInterfaceToken(UIServiceProxy::GetDescriptor());
 
-    Want want;
+    AAFwk::Want want;
     const std::string source = "source";
     const std::string dataStr = "data";
     const std::string extraData = "extraData";

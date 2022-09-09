@@ -31,9 +31,6 @@
 #endif
 #include "core/components/page/page_target.h"
 #include "core/components/page_transition/page_transition_component.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
-#include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/utils/source_map.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/base_animation_bridge.h"
@@ -41,9 +38,16 @@
 #include "frameworks/bridge/js_frontend/engine/common/base_xcomponent_bridge.h"
 #include "frameworks/bridge/js_frontend/js_command.h"
 
+namespace OHOS::Ace::NG {
+
+class UINode;
+
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace::Framework {
 
 #ifndef NG_BUILD
+class DOMDocument;
 using JsPageRadioGroups = std::unordered_map<std::string, RadioGroupComponent<std::string>>;
 #endif
 
@@ -53,15 +57,10 @@ class ACE_EXPORT JsAcePage final : public AcePage {
 
 public:
 #ifdef NG_BUILD
-    JsAcePage(int32_t pageId, const std::string& url) : AcePage(pageId), url_(url) {}
+    JsAcePage(int32_t pageId, const std::string& url);
 #else
     JsAcePage(int32_t pageId, const RefPtr<DOMDocument>& document, const std::string& url,
-        const WeakPtr<StageElement>& container = nullptr)
-        : AcePage(pageId), domDoc_(document), url_(url), container_(container),
-          radioGroups_(std::make_shared<JsPageRadioGroups>())
-    {
-        ACE_DCHECK(domDoc_);
-    }
+        const WeakPtr<StageElement>& container = nullptr);
 #endif
 
     ~JsAcePage() override;
@@ -285,10 +284,7 @@ public:
         component_ = component;
     }
 
-    void SetRootNode(const RefPtr<NG::UINode>& node)
-    {
-        pageRootNode_ = node;
-    }
+    void SetRootNode(const RefPtr<NG::UINode>& node);
 
     const RefPtr<NG::UINode>& GetRootNode() const
     {

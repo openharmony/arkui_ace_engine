@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace::NG {
 
 bool CustomNodePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -24,11 +26,14 @@ bool CustomNodePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(host, false);
     auto customNodeLayoutAlgorithm =
         DynamicCast<CustomNodeLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm());
-    if (customNodeLayoutAlgorithm) {
-        auto uiNode = customNodeLayoutAlgorithm->MoveBuildItem();
-        if (uiNode) {
-            uiNode->MountToParent(host);
-        }
+    if (!customNodeLayoutAlgorithm) {
+        // second measure.
+        return false;
+    }
+    auto uiNode = customNodeLayoutAlgorithm->MoveBuildItem();
+    if (uiNode) {
+        uiNode->MountToParent(host);
+        renderFunction_ = nullptr;
     }
     return false;
 }

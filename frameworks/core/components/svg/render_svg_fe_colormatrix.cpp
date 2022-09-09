@@ -15,8 +15,9 @@
 
 #include "frameworks/core/components/svg/render_svg_fe_colormatrix.h"
 
+#include "commonlibrary/c_utils/base/include/securec.h"
+
 #include "frameworks/core/components/svg/svg_fe_colormatrix_component.h"
-#include "utils/native/base/include/securec.h"
 
 namespace OHOS::Ace {
 

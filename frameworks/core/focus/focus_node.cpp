@@ -90,6 +90,100 @@ bool FocusNode::HandleKeyEvent(const KeyEvent& keyEvent)
     }
 }
 
+void FocusNode::CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes)
+{
+    RefPtr<FocusNode> node = AceType::Claim(this);
+    CHECK_NULL_VOID(node);
+    RefPtr<FocusGroup> scope = AceType::DynamicCast<FocusGroup>(node);
+    if (scope && scope->IsFocusable()) {
+        auto children = scope->GetChildrenList();
+        if (children.size() == 1 && !AceType::DynamicCast<FocusGroup>(children.front())) {
+            if (scope->GetTabIndex() > 0) {
+                tabIndexNodes.emplace_back(scope->GetTabIndex(), WeakClaim(AceType::RawPtr(scope)));
+            }
+            return;
+        }
+        for (auto& child : children) {
+            child->CollectTabIndexNodes(tabIndexNodes);
+        }
+    }
+    if (node->IsFocusable() && node->GetTabIndex() > 0) {
+        tabIndexNodes.emplace_back(node->GetTabIndex(), WeakClaim(AceType::RawPtr(node)));
+    }
+}
+
+bool FocusNode::GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx)
+{
+    auto iter = tabIndexNodes.begin();
+    std::advance(iter, tabNodeIdx);
+    if (iter == tabIndexNodes.end()) {
+        LOGE("Tab index node is not found");
+        return false;
+    }
+    auto nodeNeedToFocus = (*iter).second.Upgrade();
+    if (!nodeNeedToFocus) {
+        LOGE("Tab index node is null");
+        return false;
+    }
+    LOGI("Focus on tab index node(%{public}d)", tabNodeIdx);
+    auto scopeNeedToFocus = AceType::DynamicCast<FocusGroup>(nodeNeedToFocus);
+    if (scopeNeedToFocus && !scopeNeedToFocus->IsGroupDefaultFocused()) {
+        auto defaultFocusNode = nodeNeedToFocus->GetChildDefaultFocusNode(false);
+        if (defaultFocusNode) {
+            if (!defaultFocusNode->IsFocusableWholePath()) {
+                LOGW("node(%{public}d) is not focusable", tabNodeIdx);
+                return false;
+            }
+            scopeNeedToFocus->SetIsGroupDefaultFocused(true);
+            return defaultFocusNode->RequestFocusImmediately();
+        }
+    }
+    if (!nodeNeedToFocus->IsFocusableWholePath()) {
+        LOGW("node(%{public}d) is not focusable", tabNodeIdx);
+        return false;
+    }
+    return nodeNeedToFocus->RequestFocusImmediately();
+}
+
+bool FocusNode::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusGroup>& curPage)
+{
+    if (event.code != KeyCode::KEY_TAB || event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (!curPage) {
+        LOGE("Current page node is not exit. Can't handle focus by tabIndex.");
+        return false;
+    }
+    TabIndexNodeList tabIndexNodes;
+    tabIndexNodes.clear();
+    curPage->CollectTabIndexNodes(tabIndexNodes);
+    tabIndexNodes.sort([](std::pair<int32_t, WeakPtr<FocusNode>>& a, std::pair<int32_t, WeakPtr<FocusNode>>& b) {
+        return a.first < b.first;
+    });
+    int32_t curTabFocusIndex = curPage->GetFocusingTabNodeIdx(tabIndexNodes);
+    if ((curTabFocusIndex < 0 || curTabFocusIndex >= static_cast<int32_t>(tabIndexNodes.size())) &&
+        curTabFocusIndex != DEFAULT_TAB_FOCUSED_INDEX) {
+        LOGI("Current focused tabIndex node: %{public}d. Use default focus system.", curTabFocusIndex);
+        return false;
+    }
+    if (curTabFocusIndex == DEFAULT_TAB_FOCUSED_INDEX) {
+        curTabFocusIndex = 0;
+    } else {
+        if (event.IsShiftWith(KeyCode::KEY_TAB)) {
+            LOGI("RequestNextFocus by 'SHIFT-TAB'");
+            --curTabFocusIndex;
+        } else {
+            LOGI("RequestNextFocus by 'TAB'");
+            ++curTabFocusIndex;
+        }
+    }
+    if (curTabFocusIndex < 0 || curTabFocusIndex >= static_cast<int32_t>(tabIndexNodes.size())) {
+        LOGI("Focus from tab index node to normal node. Use default focus system.");
+        return false;
+    }
+    return GoToFocusByTabNodeIdx(tabIndexNodes, curTabFocusIndex);
+}
+
 void FocusNode::DumpFocus() {}
 
 void FocusNode::DumpFocusTree(int32_t depth)
@@ -164,7 +258,7 @@ bool FocusNode::RequestFocusImmediately()
     return true;
 }
 
-RefPtr<FocusNode> FocusNode::GetChildDefaultFoucsNode(bool isGetDefaultFocus)
+RefPtr<FocusNode> FocusNode::GetChildDefaultFocusNode(bool isGetDefaultFocus)
 {
     if (isGetDefaultFocus && isDefaultFocus_ && IsFocusable()) {
         return AceType::Claim(this);
@@ -178,7 +272,7 @@ RefPtr<FocusNode> FocusNode::GetChildDefaultFoucsNode(bool isGetDefaultFocus)
     }
     auto children = scope->GetChildrenList();
     for (const auto& child : children) {
-        auto findNode = child->GetChildDefaultFoucsNode(isGetDefaultFocus);
+        auto findNode = child->GetChildDefaultFocusNode(isGetDefaultFocus);
         if (findNode) {
             return findNode;
         }
@@ -326,11 +420,19 @@ bool FocusNode::OnKeyEvent(const KeyEvent& keyEvent)
         if (!onKeyEventCallback_) {
             return false;
         }
+#ifdef LINUX_PLATFORM
+        LOGI("FocusNode::OnKeyEvent: Do key callback on %{public}s with key event{ Code(%{public}d), "
+             "Action(%{public}d), "
+             "SourceType(%{public}d), DeviceId(%{public}" PRId64 ") }. Return: %{public}d",
+            AceType::TypeName(this), info->GetKeyCode(), info->GetKeyType(), info->GetSourceDevice(),
+            info->GetDeviceId(), info->IsStopPropagation());
+#else
         LOGI("FocusNode::OnKeyEvent: Do key callback on %{public}s with key event{ Code(%{public}d), "
              "Action(%{public}d), "
              "SourceType(%{public}d), DeviceId(%{public}" PRId64 "), Time(%{public}lld) }. Return: %{public}d",
             AceType::TypeName(this), info->GetKeyCode(), info->GetKeyType(), info->GetSourceDevice(),
             info->GetDeviceId(), info->GetTimeStamp().time_since_epoch().count(), info->IsStopPropagation());
+#endif
         onKeyEventCallback_(info);
         return info->IsStopPropagation();
     } else {
@@ -375,12 +477,20 @@ void FocusNode::OnClick(const KeyEvent& event)
             Offset((GetRect().Right() - GetRect().Left()) / 2, (GetRect().Bottom() - GetRect().Top()) / 2));
         info->SetSourceDevice(static_cast<SourceType>(event.sourceType));
         info->SetDeviceId(event.deviceId);
+#ifdef LINUX_PLATFORM
+        LOGI("FocusNode::OnClick: Do click callback on %{public}s with key event{ Global(%{public}f,%{public}f), "
+             "Local(%{public}f,%{public}f), SourceType(%{public}d), DeviceId(%{public}" PRId64 ")}",
+            AceType::TypeName(this), info->GetGlobalLocation().GetX(), info->GetGlobalLocation().GetY(),
+            info->GetLocalLocation().GetX(), info->GetLocalLocation().GetY(), info->GetSourceDevice(),
+            info->GetDeviceId());
+#else
         LOGI("FocusNode::OnClick: Do click callback on %{public}s with key event{ Global(%{public}f,%{public}f), "
              "Local(%{public}f,%{public}f), SourceType(%{public}d), DeviceId(%{public}" PRId64
              "), Time(%{public}lld) }",
             AceType::TypeName(this), info->GetGlobalLocation().GetX(), info->GetGlobalLocation().GetY(),
             info->GetLocalLocation().GetX(), info->GetLocalLocation().GetY(), info->GetSourceDevice(),
             info->GetDeviceId(), info->GetTimeStamp().time_since_epoch().count());
+#endif
         onClickEventCallback_(info);
     }
 }
@@ -775,6 +885,29 @@ void FocusGroup::RebuildChild(std::list<RefPtr<FocusNode>>&& rebuildFocusNodes)
     LostFocus();
     itLastFocusNode_ = focusNodes_.end();
     RequestFocusImmediately();
+}
+
+int32_t FocusGroup::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes)
+{
+    if (tabIndexNodes.empty()) {
+        LOGD("No tabIndex node exist in this page.");
+        return NONE_TAB_FOCUSED_INDEX;
+    }
+    if (isFirstFocusInPage_) {
+        isFirstFocusInPage_ = false;
+        return DEFAULT_TAB_FOCUSED_INDEX;
+    }
+    int32_t res = NONE_TAB_FOCUSED_INDEX;
+    int32_t i = 0;
+    for (auto& wpNode : tabIndexNodes) {
+        auto node = wpNode.second.Upgrade();
+        if (node && node->IsCurrentFocus()) {
+            res = i;
+            break;
+        }
+        ++i;
+    }
+    return res;
 }
 
 } // namespace OHOS::Ace

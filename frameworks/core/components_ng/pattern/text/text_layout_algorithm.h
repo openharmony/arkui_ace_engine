@@ -17,10 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_H
 
 #include <string>
+#include <utility>
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
@@ -33,6 +36,10 @@ class ACE_EXPORT TextLayoutAlgorithm : public BoxLayoutAlgorithm {
 public:
     TextLayoutAlgorithm();
 
+    explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spanItemChildren)
+        : spanItemChildren_(std::move(spanItemChildren))
+    {}
+
     ~TextLayoutAlgorithm() override = default;
 
     void OnReset() override;
@@ -40,14 +47,22 @@ public:
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
-    const RefPtr<Paragraph>& GetTxtParagraph();
+    const std::shared_ptr<RSParagraph>& GetParagraph();
+    float GetBaselineOffset() const;
 
 private:
-    bool CreateParagraph(const TextStyle& textStyle, const RefPtr<PipelineContext>& context, std::string content);
-    TextDirection GetTextDirection(const std::string& content);
+    bool CreateParagraph(const TextStyle& textStyle, std::string content);
+    bool CreateParagraphAndLayout(
+        const TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint);
+    bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
+        const RefPtr<PipelineContext>& pipeline);
+    bool DidExceedMaxLines(const LayoutConstraintF& contentConstraint);
+    static TextDirection GetTextDirection(const std::string& content);
     double GetTextWidth() const;
 
-    RefPtr<Paragraph> paragraph_;
+    std::list<RefPtr<SpanItem>> spanItemChildren_;
+    std::shared_ptr<RSParagraph> paragraph_;
+    float baselineOffset_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };

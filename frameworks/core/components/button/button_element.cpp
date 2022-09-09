@@ -16,6 +16,7 @@
 #include "core/components/button/button_element.h"
 
 #include "core/event/key_event.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace {
 
@@ -70,6 +71,11 @@ void ButtonElement::LocalizedUpdate()
 {
     Update();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(component_);
+
+    if (Container::IsCurrentUsePartialUpdate() && buttonComponent->GetHasCustomChild()) {
+        // in partial update code path a custom child updates independently
+        return;
+    }
     ComponentGroupElement::UpdateChildrenForDeclarative(buttonComponent->GetChildren());
 }
 
@@ -98,7 +104,10 @@ void ButtonElement::OnFocus()
     }
     button_->HandleFocusEvent(true);
     button_->PlayFocusAnimation(true);
-    button_->ChangeStatus(RenderStatus::FOCUS);
+    auto context = context_.Upgrade();
+    if (context && context->GetIsTabKeyPressed()) {
+        button_->ChangeStatus(RenderStatus::FOCUS);
+    }
 }
 
 void ButtonElement::OnClick()
@@ -134,11 +143,13 @@ void ButtonElement::OnBlur()
     }
     button_->HandleFocusEvent(false);
     button_->PlayFocusAnimation(false);
-    button_->ChangeStatus(RenderStatus::BLUR);
     auto context = context_.Upgrade();
     if (!context) {
         LOGE("Pipeline context is nullptr");
         return;
+    }
+    if (context->GetIsTabKeyPressed()) {
+        button_->ChangeStatus(RenderStatus::BLUR);
     }
     context->CancelFocusAnimation();
     context->CancelShadow();

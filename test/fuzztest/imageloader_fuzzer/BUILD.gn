@@ -55,8 +55,10 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//utils/native/base:utils",
+    "//third_party/opencl-headers:libcl",
   ]
+
+  external_deps = [ "c_utils:utils" ]
 
   configs = [ "$ace_root:ace_test_config" ]
 }
@@ -65,9 +67,8 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
 group("fuzztest") {
   testonly = true
   deps = []
-  deps += [
-    # deps file
-    ":ImageLoaderFuzzTest",
-  ]
+  if (!is_asan) {
+    deps += [ ":ImageLoaderFuzzTest" ]
+  }
 }
 ###############################################################################

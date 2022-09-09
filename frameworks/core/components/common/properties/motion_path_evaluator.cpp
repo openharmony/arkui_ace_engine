@@ -68,7 +68,7 @@ MotionPathPosition MotionPathEvaluator::Evaluate(float fraction)
     auto progress = motionPathOption_.GetBegin() * (1.0f - fraction) + motionPathOption_.GetEnd() * fraction;
     MotionPathPosition position;
     if (FlutterSvgPainter::GetMotionPathPosition(motionPathOption_.GetPath(), progress, position)) {
-        if (positionType_ == PositionType::OFFSET) {
+        if (positionType_ == PositionType::PTOFFSET) {
             position.offset += startPoint_;
         }
         return position;

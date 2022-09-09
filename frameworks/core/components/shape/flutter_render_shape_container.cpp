@@ -15,10 +15,11 @@
 
 #include "frameworks/core/components/shape/flutter_render_shape_container.h"
 
+#include "commonlibrary/c_utils/base/include/securec.h"
 #include "flutter/lib/ui/painting/picture.h"
+
 #include "frameworks/core/components/transform/flutter_render_transform.h"
 #include "frameworks/core/pipeline/base/flutter_render_context.h"
-#include "utils/native/base/include/securec.h"
 
 namespace OHOS::Ace {
 namespace {

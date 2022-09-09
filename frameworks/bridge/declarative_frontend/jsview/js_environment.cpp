@@ -55,7 +55,7 @@ void JSEnvironment::DestructorCallback(JSEnvironment* environment)
 void JSEnvironment::GetAccessibilityEnabled(const JSCallbackInfo& args)
 {
     std::string value;
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     value = "false";
 #else
     auto container = Container::Current();

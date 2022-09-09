@@ -225,7 +225,7 @@ public:
         parent_ = parent;
     }
 
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+#if defined(PREVIEW)
     int32_t GetChildrenSize() {
         return children_.size();
     }

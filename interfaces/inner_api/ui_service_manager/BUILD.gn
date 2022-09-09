@@ -33,7 +33,7 @@ config("uiservice_manager_public_config") {
     "//third_party/icu/icu4c/source/i18n",
     "//third_party/icu/icu4c/source/ohos",
     "//third_party/icu/icu4c/source",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//utils/system/safwk/native/include",
   ]
   cflags = []
@@ -52,21 +52,19 @@ ohos_shared_library("ui_service_mgr") {
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_stub.cpp",
   ]
 
-  configs = [ "//utils/native/base:utils_config" ]
+  configs = [ "//commonlibrary/c_utils/base:utils_config" ]
 
   public_configs = [
     ":uiservice_manager_public_config",
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:uiservicems_config",
   ]
 
-  deps = [
-    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//utils/native/base:utils",
-  ]
+  deps = [ "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy" ]
 
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "input:libmmi-client",
