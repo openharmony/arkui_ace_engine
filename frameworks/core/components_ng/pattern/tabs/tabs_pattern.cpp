@@ -31,16 +31,4 @@ void TabsPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
-void TabsPattern::OnModifyDone() {}
-
-bool TabsPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
-{
-    if (skipMeasure && skipLayout) {
-        return false;
-    }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    return false;
-}
-
 } // namespace OHOS::Ace::NG

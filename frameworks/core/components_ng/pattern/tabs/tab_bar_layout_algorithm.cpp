@@ -29,6 +29,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 
+// TODO use theme
 constexpr Dimension TAB_BAR_DEFAULT_SIZE = 56.0_vp;
 
 } // namespace
@@ -37,7 +38,7 @@ void TabBarLayoutAlgorithm::UpdateChildConstraint(LayoutConstraintF& childConstr
     const RefPtr<TabBarLayoutProperty>& layoutProperty, const SizeF& ideaSize, int32_t childCount, Axis axis)
 {
     childConstraint.parentIdealSize = OptionalSizeF(ideaSize);
-    auto barMode = layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED);
+    const auto& barMode = layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED);
     if (barMode == TabBarMode::FIXED) {
         auto childIdeaSize = ideaSize;
         if (axis == Axis::HORIZONTAL) {
@@ -65,8 +66,7 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize =
         CreateIdealSize(constraint.value(), axis, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
-    auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
-    auto defaultSize = ConvertToPx(TAB_BAR_DEFAULT_SIZE, scale, 0).value_or(0);
+    auto defaultSize = static_cast<float>(TAB_BAR_DEFAULT_SIZE.ConvertToPx());
     if (!constraint->selfIdealSize.Width().has_value() && axis == Axis::VERTICAL) {
         idealSize.SetWidth(defaultSize);
     }
@@ -86,14 +86,10 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {
             LOGI("Child %{public}d is null.", index);
-            return;
+            continue;
         }
         childWrapper->Measure(childLayoutConstraint);
-
-        auto childGeometryNode = childWrapper->GetGeometryNode();
-        if (childGeometryNode) {
-            childrenMainSize_ += childGeometryNode->GetFrameSize().MainSize(axis);
-        }
+        childrenMainSize_ += childWrapper->GetGeometryNode()->GetFrameSize().MainSize(axis);
     }
 }
 
@@ -117,11 +113,9 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto childGeometryNode = childWrapper->GetGeometryNode();
-        if (!childGeometryNode) {
-            continue;
-        }
         auto childFrameSize = childGeometryNode->GetFrameSize();
-        auto centerOffset = OffsetF(0, (frameSize.Height() - childFrameSize.Height()) / 2.0); // Center child in vertical.
+        auto centerOffset =
+            OffsetF(0, (frameSize.Height() - childFrameSize.Height()) / 2.0); // Center child in vertical.
         childGeometryNode->SetFrameOffset(childOffset + centerOffset);
         childWrapper->Layout(parentOffset);
         tabItemOffset_.emplace_back(childOffset);

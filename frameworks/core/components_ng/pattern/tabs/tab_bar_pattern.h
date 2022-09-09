@@ -29,6 +29,13 @@
 
 namespace OHOS::Ace::NG {
 
+using TabBarBuilderFunc = std::function<void()>;
+struct TabBarParam {
+    std::string text;
+    std::string icon;
+    TabBarBuilderFunc builder;
+};
+
 class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
@@ -71,7 +78,7 @@ private:
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<SwiperController> swiperController_;
 
-    float currentOffset_;
+    float currentOffset_ = 0.0f;
     Axis axis_ = Axis::HORIZONTAL;
     std::vector<OffsetF> tabItemOffsets_;
 

@@ -66,7 +66,7 @@ public:
 
     void ExpandChildrenOnInitial()
     {
-        OnExpandChildrenOnInitial();
+        OnExpandChildrenOnInitialInNG();
     }
 
     void OnDataReloaded() override {}
@@ -82,7 +82,7 @@ public:
 protected:
     virtual int32_t OnGetTotalCount() = 0;
     virtual std::pair<std::string, RefPtr<UINode>> OnGetChildByIndex(int32_t index) = 0;
-    virtual void OnExpandChildrenOnInitial() = 0;
+    virtual void OnExpandChildrenOnInitialInNG() = 0;
 
 private:
     // [index : [key, UINode]]

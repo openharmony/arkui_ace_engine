@@ -158,6 +158,7 @@ void JSTabs::CreateForNG(const JSCallbackInfo& info)
 
 void JSTabs::Pop()
 {
+    LOGE("CCCC JSTabs::Pop");
     if (Container::IsCurrentUseNewPipeline()) {
         NG::TabsView::Pop();
         NG::ViewStackProcessor::GetInstance()->PopContainer();

@@ -19,6 +19,12 @@ namespace OHOS::Ace::NG {
 
 void TabsNode::AddChildToGroup(const RefPtr<UINode>& child)
 {
+    if (swiperChildren_.find(child->GetId()) != swiperChildren_.end()) {
+        LOGW("Child has already exist.");
+        return;
+    }
+
+    swiperChildren_.emplace(child->GetId());
     auto swiperNode = GetChildren().back();
     if (swiperNode) {
         child->MountToParent(swiperNode);

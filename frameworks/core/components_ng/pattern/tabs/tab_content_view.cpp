@@ -23,7 +23,9 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -64,19 +66,24 @@ void TabContentView::Create(std::function<void()>&& deepRenderFunc)
 void TabContentView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    int32_t nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     stack->Push(frameNode);
 }
 
-void TabContentView::Pop()
+void TabContentView::Pop(const RefPtr<FrameNode>& tabContent)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto tabsNode = stack->GetMainFrameNode();
+    CHECK_NULL_VOID(tabContent);
+    auto tabContentId = tabContent->GetId();
+    auto swiperNode = tabContent->GetParent();
+    CHECK_NULL_VOID(swiperNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(swiperNode->GetParent());
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = tabsNode->GetChildren().front();
     CHECK_NULL_VOID(tabBarNode);
+
+    auto* stack = ViewStackProcessor::GetInstance();
     auto tabBarParam = stack->PopTabBar();
 
     // Create tab bar with builder.
@@ -84,9 +91,7 @@ void TabContentView::Pop()
         ScopedViewStackProcessor builderViewStackProcessor;
         tabBarParam.builder();
         auto builderNode = ViewStackProcessor::GetInstance()->Finish();
-        if (builderNode) {
-            builderNode->MountToParent(tabBarNode);
-        }
+        tabBarNode->ReplaceChild(tabsNode->GetBuilderByContentId(tabContentId, builderNode), builderNode);
         return;
     }
 
@@ -95,50 +100,60 @@ void TabContentView::Pop()
         return;
     }
 
-    // Create text node.
-    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    // Create column node to contain image and text node.
+    auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetTabBarByContentId(tabContentId),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto linearLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(linearLayoutProperty);
+    linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
+    linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    linearLayoutProperty->UpdateSpace(TAB_BAR_SPACE);
+    columnNode->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
+
+    // Create text node and image node.
+    RefPtr<FrameNode> textNode;
+    RefPtr<FrameNode> imageNode;
+    if (static_cast<int32_t>(columnNode->GetChildren().size()) == 0) {
+        ImageSourceInfo imageSourceInfo(tabBarParam.icon);
+        imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            [imageSourceInfo]() { return AceType::MakeRefPtr<ImagePattern>(imageSourceInfo); });
+        textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<TextPattern>(); });
+        columnNode->MountToParent(tabBarNode);
+        imageNode->MountToParent(columnNode);
+        textNode->MountToParent(columnNode);
+    } else {
+        imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+        textNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
+    }
+    CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(imageNode);
+
+    // Update property of text.
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(tabBarParam.text);
     textLayoutProperty->UpdateFontSize(DEFAULT_SINGLE_TEXT_FONT_SIZE);
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
 
+    // Update property of image.
+    auto imageProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageProperty);
     if (!tabBarParam.icon.empty()) {
         textLayoutProperty->UpdateFontSize(DEFAULT_SMALL_TEXT_FONT_SIZE);
-        // Create column node to contain image and text node.
-        auto columnNode =
-            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        auto linearLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
-        CHECK_NULL_VOID(linearLayoutProperty);
-        linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
-        linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
-        linearLayoutProperty->UpdateSpace(TAB_BAR_SPACE);
-
-        // Create image node.
-        ImageSourceInfo imageSourceInfo(tabBarParam.icon);
-        auto imageNode =
-            FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-                [imageSourceInfo]() { return AceType::MakeRefPtr<ImagePattern>(imageSourceInfo); });
-        auto imageProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(imageProperty);
-        imageProperty->UpdateImageSourceInfo(imageSourceInfo);
         imageProperty->UpdateCalcSelfIdealSize(
             CalcSize(NG::CalcLength(DEFAULT_IMAGE_SIZE), NG::CalcLength(DEFAULT_IMAGE_SIZE)));
-
-        columnNode->MountToParent(tabBarNode);
-        imageNode->MountToParent(columnNode);
-        imageNode->MarkModifyDone();
-        textNode->MountToParent(columnNode);
-        textNode->MarkModifyDone();
-        columnNode->MarkModifyDone();
-        return;
+    } else {
+        imageProperty->UpdateCalcSelfIdealSize(CalcSize());
     }
+    ImageSourceInfo imageSourceInfo(tabBarParam.icon);
+    imageProperty->UpdateImageSourceInfo(imageSourceInfo);
 
-    textNode->MountToParent(tabBarNode);
+    imageNode->MarkModifyDone();
     textNode->MarkModifyDone();
+    columnNode->MarkModifyDone();
 }
 
 void TabContentView::SetTabBar(const std::string& text, const std::string& icon, TabBarBuilderFunc&& builder)

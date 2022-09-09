@@ -26,7 +26,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
+#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/render_context.h"
 

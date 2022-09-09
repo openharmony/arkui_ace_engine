@@ -494,7 +494,7 @@ public:
         return GetTotalIndexCount();
     }
 
-    void OnExpandChildrenOnInitial() override
+    void OnExpandChildrenOnInitialInNG() override
     {
         auto totalIndex = GetTotalIndexCount();
         auto* stack = NG::ViewStackProcessor::GetInstance();

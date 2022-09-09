@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_NODE_H
 
+#include <optional>
 #include "core/components_ng/base/group_node.h"
 
 namespace OHOS::Ace::NG {
@@ -29,6 +30,62 @@ public:
     {}
     ~TabsNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child) override;
+
+    bool HasSwiperNode() const
+    {
+        return swiperId_.has_value();
+    }
+
+    bool HasTabBarNode() const
+    {
+        return tabBarId_.has_value();
+    }
+
+    int32_t GetSwiperId()
+    {
+        if (!swiperId_.has_value()) {
+            swiperId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return swiperId_.value();
+    }
+
+    int32_t GetTabBarId()
+    {
+        if (!tabBarId_.has_value()) {
+            tabBarId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return tabBarId_.value();
+    }
+
+    int32_t GetTabBarByContentId(int32_t tabContentId)
+    {
+        auto iter = tabBarNode_.find(tabContentId);
+        if (iter == tabBarNode_.end()) {
+            auto tabBarId = ElementRegister::GetInstance()->MakeUniqueId();
+            tabBarNode_.try_emplace(tabContentId, tabBarId);
+            return tabBarId;
+        }
+        return iter->second;
+    }
+
+    RefPtr<UINode> GetBuilderByContentId(int32_t tabContentId, const RefPtr<UINode>& builderNode)
+    {
+        auto iter = builderNode_.find(tabContentId);
+        if (iter == builderNode_.end()) {
+            builderNode_.try_emplace(tabContentId, builderNode);
+            return nullptr;
+        }
+        auto result = iter->second;
+        builderNode_[tabContentId] = builderNode;
+        return result;
+    }
+
+private:
+    std::optional<int32_t> swiperId_;
+    std::optional<int32_t> tabBarId_;
+    std::set<int32_t> swiperChildren_;
+    std::map<int32_t, int32_t> tabBarNode_; // Key is id of TabContent, value is id of Column of TabBar.
+    std::map<int32_t, RefPtr<UINode>> builderNode_; // Key is id of TabContent, value is id of builder of TabBar.
 };
 
 } // namespace OHOS::Ace::NG

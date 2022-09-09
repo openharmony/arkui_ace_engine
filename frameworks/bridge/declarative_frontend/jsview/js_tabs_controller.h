@@ -48,7 +48,7 @@ public:
 
 private:
     RefPtr<TabController> controller_;
-    RefPtr<SwiperController> swiperController_;
+    RefPtr<SwiperController> swiperController_; // used by ng structure
 
     ACE_DISALLOW_COPY_AND_MOVE(JSTabsController);
 };

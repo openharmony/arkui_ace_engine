@@ -25,11 +25,10 @@
 
 namespace OHOS::Ace::NG {
 
-using TabBarBuilderFunc = std::function<void()>;
-struct TabBarParam {
-    std::string text;
-    std::string icon;
-    TabBarBuilderFunc builder;
+struct TabBarProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TabBarMode, TabBarMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TabBarWidth, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TabBarHeight, Dimension);
 };
 
 class ACE_EXPORT TabBarLayoutProperty : public LayoutProperty {
@@ -43,9 +42,7 @@ public:
     {
         auto value = MakeRefPtr<TabBarLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(AceType::DynamicCast<LayoutProperty>(this));
-        value->propTabBarMode_ = CloneTabBarMode();
-        value->propTabBarWidth_ = CloneTabBarWidth();
-        value->propTabBarHeight_ = CloneTabBarHeight();
+        value->propTabBarProperty_ = CloneTabBarProperty();
         value->propAxis_ = CloneAxis();
         return value;
     }
@@ -53,15 +50,15 @@ public:
     void Reset() override
     {
         LayoutProperty::Reset();
-        ResetTabBarMode();
-        ResetTabBarWidth();
-        ResetTabBarHeight();
+        ResetTabBarProperty();
         ResetAxis();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarMode, TabBarMode, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarWidth, Dimension, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarHeight, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_GROUP(TabBarProperty, TabBarProperty);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TabBarProperty, TabBarMode, TabBarMode, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TabBarProperty, TabBarWidth, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TabBarProperty, TabBarHeight, Dimension, PROPERTY_UPDATE_LAYOUT);
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_LAYOUT);
 };
 

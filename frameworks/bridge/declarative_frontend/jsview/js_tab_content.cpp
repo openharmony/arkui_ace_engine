@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
 
 #include "base/log/ace_trace.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/tabs/tab_content_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -295,8 +296,13 @@ RefPtr<Component> JSTabContent::ProcessTabBarTextIconPair(
 
 void JSTabContent::Pop()
 {
-    JSContainerBase::Pop();
-    NG::TabContentView::Pop();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto tabContent = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
+        NG::TabContentView::Pop(tabContent);
+    } else {
+        JSContainerBase::Pop();
+    }
 }
 
 void JSTabContent::JSBind(BindingTarget globalObj)

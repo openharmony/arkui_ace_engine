@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
+#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,10 +30,9 @@ class ACE_EXPORT TabContentView {
 public:
     static void Create(std::function<void()>&& deepRenderFunc);
     static void Create();
-    static void Pop();
+    static void Pop(const RefPtr<FrameNode>& tabContent);
     static void SetTabBar(const std::string& text, const std::string& icon, TabBarBuilderFunc&& builder);
 };
 
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_CONTENT_VIEW_H
