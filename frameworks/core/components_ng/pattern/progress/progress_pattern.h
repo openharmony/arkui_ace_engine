@@ -20,15 +20,12 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
-#include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
-#include "core/components_ng/pattern/progress/progress_view.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 // ProgressPattern is the base class for text render node to perform paint progress.

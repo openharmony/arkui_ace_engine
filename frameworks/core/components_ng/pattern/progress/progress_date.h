@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_DATE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_DATE_H
 
-#include "core/components/common/properties/progress_data.h"
-#include "core/components/progress/progress_theme.h"
+#include "base/geometry/dimension.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {

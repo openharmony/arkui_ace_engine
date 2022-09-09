@@ -20,42 +20,41 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 void ProgressPaintMethod::PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const
 {
-    RSPen pen;
-    pen.SetAntiAlias(true);
-    pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
-    pen.SetColor(ToRSColor((Color::GRAY)));
-    pen.SetWidth(strokeWidth_);
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(ToRSColor((Color::GRAY)));
+    double radius = strokeWidth_ / 2;
     if (frameSize.Width() >= frameSize.Height()) {
-        PointF start = PointF(offset.GetX() + strokeWidth_ / 2, offset.GetY() + strokeWidth_ / 2);
-        PointF end = PointF(offset.GetX() + frameSize.Width() - strokeWidth_ / 2, offset.GetY() + strokeWidth_ / 2);
-        PointF end2 = PointF(offset.GetX() + strokeWidth_ / 2 + (frameSize.Width() - strokeWidth_) * value_ / maxValue_,
-            offset.GetY() + strokeWidth_ / 2);
-        canvas.AttachPen(pen);
-        if (end2 != end) {
-            canvas.DrawLine(ToRSPonit(end2), ToRSPonit(end));
-        }
-        pen.SetColor(ToRSColor((color_)));
-        canvas.AttachPen(pen);
-        if (start != end2) {
-            canvas.DrawLine(ToRSPonit(start), ToRSPonit(end2));
+        double dateLength = frameSize.Width() * value_ / maxValue_;
+        canvas.AttachBrush(brush);
+        canvas.DrawRoundRect(
+            { { offset.GetX(), offset.GetY(), frameSize.Width() + offset.GetX(), strokeWidth_ + offset.GetY() }, radius,
+                radius });
+        brush.SetColor(ToRSColor((color_)));
+        canvas.AttachBrush(brush);
+        if (!NearEqual(dateLength, 0.0)) {
+            canvas.DrawRoundRect(
+                { { offset.GetX(), offset.GetY(), dateLength + offset.GetX(), strokeWidth_ + offset.GetY() }, radius,
+                    radius });
         }
     } else {
-        PointF start = PointF(offset.GetX() + strokeWidth_ / 2, offset.GetY() + strokeWidth_ / 2);
-        PointF end = PointF(offset.GetX() + strokeWidth_ / 2, offset.GetY() + frameSize.Height() - strokeWidth_ / 2);
-        PointF end2 = PointF(offset.GetX() + strokeWidth_ / 2,
-            offset.GetY() + strokeWidth_ / 2 + (frameSize.Height() - strokeWidth_) * value_ / maxValue_);
-        canvas.AttachPen(pen);
-        if (end2 != end) {
-            canvas.DrawLine(ToRSPonit(end2), ToRSPonit(end));
-        }
-        pen.SetColor(ToRSColor((color_)));
-        canvas.AttachPen(pen);
-        if (start != end2) {
-            canvas.DrawLine(ToRSPonit(start), ToRSPonit(end2));
+        double dateLength = frameSize.Height() * value_ / maxValue_;
+        canvas.AttachBrush(brush);
+        canvas.DrawRoundRect(
+            { { offset.GetX(), offset.GetY(), strokeWidth_ + offset.GetX(), frameSize.Height() + offset.GetY() },
+                radius, radius });
+        brush.SetColor(ToRSColor((color_)));
+        canvas.AttachBrush(brush);
+        if (!NearEqual(dateLength, 0.0)) {
+            ;
+            canvas.DrawRoundRect(
+                { { offset.GetX(), offset.GetY(), strokeWidth_ + offset.GetX(), dateLength + offset.GetY() }, radius,
+                    radius });
         }
     }
 }
@@ -106,8 +105,10 @@ void ProgressPaintMethod::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset
     RSPen pen;
     Rosen::Drawing::Path path;
     pen.SetWidth(widthOfLine);
-    LOGI("scaleWidth %lf strokeWidth  %lf, radius %lf pathDistance %lf ",widthOfLine, lengthOfScale , radius, pathDistance);
-    path.AddRoundRect({ 0, 0, widthOfLine, lengthOfScale }, widthOfLine/2, widthOfLine/2, rosen::PathDirection::CW_DIRECTION);
+    LOGI("scaleWidth %lf strokeWidth  %lf, radius %lf pathDistance %lf ", widthOfLine, lengthOfScale, radius,
+        pathDistance);
+    path.AddRoundRect(
+        { 0, 0, widthOfLine, lengthOfScale }, widthOfLine / 2, widthOfLine / 2, rosen::PathDirection::CW_DIRECTION);
     pen.SetAntiAlias(true);
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
     pen.SetPathEffect(rosen::PathEffect::CreatePathDashEffect(path, pathDistance, 0.0f, rosen::PathDashStyle::ROTATE));

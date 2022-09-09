@@ -17,11 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_LAYOUT_PROPERTY_H
 
 #include "base/geometry/dimension.h"
-#include "base/log/log_wrapper.h"
-#include "core/components/progress/progress_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ProgressLayoutProperty : public LayoutProperty {
