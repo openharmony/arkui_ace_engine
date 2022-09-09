@@ -348,10 +348,8 @@ template("ace_core_source_set") {
 
     if (defined(config.enable_image_compression) &&
         config.enable_image_compression) {
-      if (product_name != "ohos-sdk") {
-        deps += [ "//third_party/opencl-headers:libcl" ]
-        defines += [ "ENABLE_OPENCL" ]
-      }
+      deps += [ "//third_party/opencl-headers:libcl" ]
+      defines += [ "ENABLE_OPENCL" ]
     }
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {

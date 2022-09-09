@@ -55,6 +55,8 @@ public:
 
 private:
     static std::shared_ptr<ImageCompressor> instance_;
+    static std::mutex instanceMutex_;
+
     bool clOk_;
     bool switch_;
     void Init();
@@ -88,7 +90,7 @@ private:
     std::vector<PartInfo> parts_;
     std::string compileOption_;
 
-    mutable std::mutex recordsMutex_;
+    std::mutex recordsMutex_;
     std::set<std::string> failedRecords_;
     std::string recordsPath_;
     void InitRecords();
