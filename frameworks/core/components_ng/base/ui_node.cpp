@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/ui_node.h"
+
 #include <algorithm>
 
 #include "base/geometry/ng/point_t.h"
@@ -69,12 +70,11 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         return children_.end();
     }
 
-    auto result = children_.erase(iter);
     if (onMainTree_) {
         child->DetachFromMainTree();
     }
     OnChildRemoved(child);
-    children_.remove(child);
+    auto result = children_.erase(iter);
     MarkNeedSyncRenderTree();
     return result;
 }
@@ -87,7 +87,6 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
         }
         return;
     }
-
 
     auto iter = RemoveChild(oldNode);
     children_.insert(iter, newNode);

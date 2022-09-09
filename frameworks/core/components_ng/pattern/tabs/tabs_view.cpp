@@ -39,7 +39,6 @@ void TabsView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    LOGE("CCCC TabsView::Create: %{public}d", nodeId);
     auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
 
     bool hasSwiperNode = tabsNode->HasSwiperNode();
@@ -65,7 +64,6 @@ void TabsView::Create()
     if (!hasTabBarNode) {
         swiperNode->MountToParent(tabsNode);
     }
-    LOGE("CCCC Create: %{public}d", static_cast<int32_t>(tabsNode->GetChildren().size()));
     ViewStackProcessor::GetInstance()->Push(tabsNode);
 }
 
