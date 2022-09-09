@@ -200,24 +200,24 @@ void PipelineContext::RemoveScheduleTask(uint32_t id)
 {
 }
 
-bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
+bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack)
 {
     return true;
 }
 
-void PipelineContext::OpenImplicitAnimation(const AnimationOption& option,
+void PipelineBase::OpenImplicitAnimation(const AnimationOption& option,
     const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
 {}
 
-bool PipelineContext::CloseImplicitAnimation()
+bool PipelineBase::CloseImplicitAnimation()
 {
     return true;
 }
 
-void PipelineContext::PrepareOpenImplicitAnimation() {}
+void PipelineBase::PrepareOpenImplicitAnimation() {}
 
-void PipelineContext::PrepareCloseImplicitAnimation() {}
+void PipelineBase::PrepareCloseImplicitAnimation() {}
 
 bool PipelineContext::GetIsDeclarative() const
 {

@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_UTILS_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_UTILS_H
 
-#include "render_service_client/core/animation/rs_transition.h"
+#include "core/components/common/properties/animation_option.h"
 
 namespace OHOS::Ace {
-
-using RSTransitionEffect = Rosen::RSTransitionEffect;
-
+class AnimationUtils {
+public:
+    static void OpenImplicitAnimation(
+        const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
+    static bool CloseImplicitAnimation();
+};
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_UTILS_H
