@@ -48,7 +48,7 @@ void ListView::SetListDirection(Axis axis)
 
 void ListView::SetEdgeEffect(EdgeEffect edgeEffect)
 {
-    // TODO: add impl.
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, EdgeEffect, edgeEffect);
 }
 
 void ListView::SetDivider(const V2::ItemDivider& divider)

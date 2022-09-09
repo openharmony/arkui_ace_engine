@@ -68,11 +68,19 @@ private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
+    float MainSize() const;
+    Axis GetDirection() const;
+    void PlaySpringAnimation(double dragVelocity);
+
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<Animator> springController_;
+    int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
     bool isInitialized_ = false;
+    bool playEdgeEffectAnimation_ = false;
     float currentOffset_ = 0.0;
+    float lastOffset_ = 0.0f;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
 };
