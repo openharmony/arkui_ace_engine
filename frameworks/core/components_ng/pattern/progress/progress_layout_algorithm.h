@@ -42,22 +42,12 @@ public:
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
-    double GetMaxValue() const;
-    double GetValue() const;
-    Color GetColor() const;
     ProgressType GetType() const;
-    double GetStrokeWidth() const;
-    int32_t GetScaleCount() const;
-    double GetScaleWidth() const;
+    float GetStrokeWidth() const;
 
 private:
-    double maxValue_;
-    double value_;
-    Color color_;
-    ProgressType type_;
-    int32_t scaleCount_;
-    double strokeWidth_;
-    double scaleWidth_;
+    ProgressType type_ = ProgressType::LINEAR;
+    float strokeWidth_= 2.0f;
     ACE_DISALLOW_COPY_AND_MOVE(ProgressLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

@@ -37,14 +37,14 @@ enum class ProgressType {
 struct ProgressDate {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxValue, double);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Value, double);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScaleCount, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScaleWidth, Dimension);
 };
 
 struct ProgressStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Color, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Type, ProgressType);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScaleCount, int32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScaleWidth, Dimension);
 };
 
 } // namespace OHOS::Ace::NG

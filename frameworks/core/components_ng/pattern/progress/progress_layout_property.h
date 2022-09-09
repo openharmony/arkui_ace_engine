@@ -33,27 +33,23 @@ public:
     {
         auto value = MakeRefPtr<ProgressLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propProgressDate_ = CloneProgressDate();
         value->propProgressStyle_ = CloneProgressStyle();
+        value->propStrokeWidth_ = CloneStrokeWidth();
         return value;
     }
 
     void Reset() override
     {
         LayoutProperty::Reset();
-        ResetProgressDate();
         ResetProgressStyle();
+        ResetStrokeWidth();
     }
 
-    ACE_DEFINE_PROPERTY_GROUP(ProgressDate, ProgressDate);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressDate, MaxValue, double, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressDate, Value, double, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(ProgressStyle, ProgressStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressStyle, Color, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressStyle, Type, ProgressType, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressStyle, StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressStyle, ScaleCount, int32_t, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressStyle, ScaleWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ProgressLayoutProperty);

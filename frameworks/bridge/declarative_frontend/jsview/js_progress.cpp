@@ -73,7 +73,7 @@ void JSProgress::Create(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ProgressView::Create(0.0, value, 0.0, total, static_cast<OHOS::Ace::NG::ProgressType>(progressType));
+        NG::ProgressView::Create(0.0, value, 0.0, total, static_cast<NG::ProgressType>(progressType));
         return;
     }
 

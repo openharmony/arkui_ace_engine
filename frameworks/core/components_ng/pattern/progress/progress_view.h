@@ -28,11 +28,11 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ProgressView {
 public:
     static void Create(double min, double value, double cachedValue, double max, ProgressType type);
-    static void SetValue(const double& value);
-    static void SetMaxValue(const double& value);
+    static void SetValue(double value);
+    static void SetMaxValue(double value);
     static void SetColor(const Color& value);
     static void SetStrokeWidth(const Dimension& value);
-    static void SetScaleCount(const int32_t& value);
+    static void SetScaleCount(int32_t value);
     static void SetScaleWidth(const Dimension& value);
 };
 } // namespace OHOS::Ace::NG

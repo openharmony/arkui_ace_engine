@@ -40,30 +40,20 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     auto progressTheme = themeManager->GetTheme<ProgressTheme>();
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
-    const auto& progressDate = progressLayoutProperty->GetProgressDate();
     const auto& progressStyle = progressLayoutProperty->GetProgressStyle();
-    CHECK_NULL_RETURN(progressDate, std::nullopt);
     CHECK_NULL_RETURN(progressStyle, std::nullopt);
-    value_ = progressDate->GetValue().value_or(0);
-    maxValue_ = progressDate->GetMaxValue().value_or(100);
-    color_ = progressStyle->GetColor().value_or(progressTheme ? progressTheme->GetTrackSelectedColor() : Color::BLUE);
     type_ = progressStyle->GetType().value_or(ProgressType::LINEAR);
-    strokeWidth_ = progressStyle->GetStrokeWidth()
+    strokeWidth_ = progressLayoutProperty->GetStrokeWidth()
                        .value_or(progressTheme ? (type_ == ProgressType::SCALE ? progressTheme->GetScaleLength()
                                                                                : progressTheme->GetTrackThickness())
                                                : Dimension(20))
                        .ConvertToPx();
-    scaleWidth_ = progressStyle->GetScaleWidth()
-                      .value_or(progressTheme ? progressTheme->GetScaleWidth() : Dimension(2))
-                      .ConvertToPx();
-    scaleCount_ = progressStyle->GetScaleCount().value_or(progressTheme ? progressTheme->GetScaleNumber() : 20);
-    double radius = progressTheme ? progressTheme->GetRingRadius().ConvertToPx() : 20;
-    double width_ = progressTheme ? progressTheme->GetTrackWidth().ConvertToPx() : contentConstraint.maxSize.Width();
+    float radius = progressTheme ? progressTheme->GetRingRadius().ConvertToPx() : 20.0f;
+    float width_ = progressTheme ? progressTheme->GetTrackWidth().ConvertToPx() : contentConstraint.maxSize.Width();
     if (contentConstraint.selfIdealSize.Width()) {
         width_ = contentConstraint.selfIdealSize.Width().value();
     }
-    double height_ = strokeWidth_ * 2;
-    LOGI("%{public}lf",height_);
+    float height_ = strokeWidth_ * 2.0f;
     if (contentConstraint.selfIdealSize.Height()) {
         height_ = contentConstraint.selfIdealSize.Height().value();
     }
@@ -87,30 +77,15 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
             width_ = 2 * radius;
         }
     }
-    height_ = std::min(height_, static_cast<double>(contentConstraint.maxSize.Height()));
-    width_ = std::min(width_, static_cast<double>(contentConstraint.maxSize.Width()));
+    height_ = std::min(height_, static_cast<float>(contentConstraint.maxSize.Height()));
+    width_ = std::min(width_, static_cast<float>(contentConstraint.maxSize.Width()));
     if (type_ == ProgressType::LINEAR) {
-        strokeWidth_ = std::min(strokeWidth_, height_ / 2);
-        strokeWidth_ = std::min(strokeWidth_, width_ / 2);
+        strokeWidth_ = std::min(strokeWidth_, height_ / 2.0f);
+        strokeWidth_ = std::min(strokeWidth_, width_ / 2.0f);
     }
-    LOGI("ProgressLayoutAlgorithm::Type:%{public}d MeasureContent: width_: %{public}fl ,height_: %{public}fl", type_,
+    LOGD("ProgressLayoutAlgorithm::Type:%{public}d MeasureContent: width_: %{public}fl ,height_: %{public}fl", type_,
         width_, height_);
     return SizeF(width_, height_);
-}
-
-double ProgressLayoutAlgorithm::GetValue() const
-{
-    return value_;
-}
-
-double ProgressLayoutAlgorithm::GetMaxValue() const
-{
-    return maxValue_;
-}
-
-Color ProgressLayoutAlgorithm::GetColor() const
-{
-    return color_;
 }
 
 ProgressType ProgressLayoutAlgorithm::GetType() const
@@ -118,19 +93,9 @@ ProgressType ProgressLayoutAlgorithm::GetType() const
     return type_;
 }
 
-double ProgressLayoutAlgorithm::GetStrokeWidth() const
+float ProgressLayoutAlgorithm::GetStrokeWidth() const
 {
     return strokeWidth_;
-}
-
-int32_t ProgressLayoutAlgorithm::GetScaleCount() const
-{
-    return scaleCount_;
-}
-
-double ProgressLayoutAlgorithm::GetScaleWidth() const
-{
-    return scaleWidth_;
 }
 
 } // namespace OHOS::Ace::NG

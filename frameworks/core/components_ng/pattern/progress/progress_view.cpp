@@ -31,24 +31,24 @@ void ProgressView::Create(double min, double value, double cachedValue, double m
         FrameNode::GetOrCreateFrameNode(V2::PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ProgressPattern>(); });
     stack->Push(frameNode);
 
-    ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Value, value);
-    ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, MaxValue, max);
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, max);
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type);
 }
 
-void ProgressView::SetValue(const double& value)
+void ProgressView::SetValue(double value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Value, value);
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);
 }
 
-void ProgressView::SetMaxValue(const double& value)
+void ProgressView::SetMaxValue(double value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, MaxValue, value);
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, MaxValue, value);
 }
 
 void ProgressView::SetColor(const Color& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Color, value);
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, value);
 }
 
 void ProgressView::SetStrokeWidth(const Dimension& value)
@@ -56,13 +56,13 @@ void ProgressView::SetStrokeWidth(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, StrokeWidth, value);
 }
 
-void ProgressView::SetScaleCount(const int32_t& value)
+void ProgressView::SetScaleCount(int32_t value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, ScaleCount, value);
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ScaleCount, value);
 }
 
 void ProgressView::SetScaleWidth(const Dimension& value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, ScaleWidth, value);
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ScaleWidth, value);
 }
 } // namespace OHOS::Ace::NG

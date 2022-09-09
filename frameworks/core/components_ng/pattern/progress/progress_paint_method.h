@@ -16,11 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PROGRESS_PROGRESS_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PROGRESS_PROGRESS_PAINT_METHOD_H
 
+#include <optional>
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/progress/progress_theme.h"
+#include "core/components_ng/pattern/progress/progress_date.h"
+#include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/progress/progress_view.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -30,10 +37,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ProgressPaintMethod, NodePaintMethod)
 public:
-    explicit ProgressPaintMethod(double maxValue, double value, Color color, ProgressType progressType,
-        double strokeWidth, double scaleWidth, int32_t scaleCount)
-        : maxValue_(maxValue), value_(value), color_(color), strokeWidth_(strokeWidth), scaleWidth_(scaleWidth),
-          scaleCount_(scaleCount), progressType_(progressType)
+    ProgressPaintMethod(ProgressType progressType, float strokeWidth)
+        : strokeWidth_(strokeWidth), progressType_(progressType)
     {}
     ~ProgressPaintMethod() override = default;
 
@@ -41,6 +46,15 @@ public:
     {
         auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
         auto offset = paintWrapper->GetContentOffset();
+        auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
+        GetThemeDate();
+        color_ = paintProperty->GetColor().value_or(color_);
+        if (paintProperty) {
+            maxValue_ = paintProperty->GetMaxValue().value_or(maxValue_);
+            value_ = paintProperty->GetValue().value_or(value_);
+            scaleCount_ = paintProperty->GetScaleCount().value_or(scaleCount_);
+            scaleWidth_ = paintProperty->GetScaleWidth().value_or(Dimension(scaleWidth_)).ConvertToPx();
+        }
         if (progressType_ == ProgressType::LINEAR) {
             return [frameSize, offset, this](RSCanvas& canvas) { PaintLinear(canvas, offset, frameSize); };
         }
@@ -62,6 +76,7 @@ public:
         return [frameSize, offset, this](RSCanvas& canvas) { PaintLinear(canvas, offset, frameSize); };
     }
 
+    void GetThemeDate();
     void PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
     void PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
     void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
@@ -70,13 +85,14 @@ public:
     void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
 
 private:
-    double maxValue_;
-    double value_;
-    Color color_;
-    double strokeWidth_;
-    double scaleWidth_;
-    int32_t scaleCount_;
-    ProgressType progressType_;
+    float maxValue_ = 100.0f;
+    float value_ = 0.0f;
+    Color color_ = Color::BLUE;
+    float strokeWidth_ = 2.0f;
+    float scaleWidth_ = 10.0f;
+    int32_t scaleCount_ = 100;
+    ProgressType progressType_ = ProgressType::LINEAR;
+
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPaintMethod);
 };
 
