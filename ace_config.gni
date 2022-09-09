@@ -111,6 +111,9 @@ if (is_standard_system) {
   }
 }
 
+# Config subsystem name
+ace_engine_subsystem = "arkui"
+
 # Config part name
 if (is_standard_system) {
   ace_engine_part = "ace_engine"

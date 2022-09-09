@@ -19,6 +19,7 @@ template("framework_bridge") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     configs = [ "$ace_root:ace_config" ]
 
@@ -45,6 +46,7 @@ template("framework_bridge_ng") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     configs = [ "$ace_root:ace_config" ]
 

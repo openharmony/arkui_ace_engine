@@ -312,7 +312,7 @@ ohos_unittest("SharedTransitionElementTest") {
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
   ]
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = "ace_engine_full"
 }
 
@@ -357,7 +357,7 @@ ohos_unittest("TransitionPropertyElementTest") {
       "init:libbegetutil",
       "ipc:ipc_core",
     ]
-    subsystem_name = "arkui"
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
   } else {
     external_deps = [
@@ -373,7 +373,7 @@ ohos_unittest("TransitionPropertyElementTest") {
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/mock/mock_resource_adapter.cpp",
   ]
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = "ace_engine_full"
 }
 

@@ -198,7 +198,7 @@ ohos_unittest("ClockComponentTest") {
     ]
   } else {
   }
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = "ace_engine_full"
 }
 

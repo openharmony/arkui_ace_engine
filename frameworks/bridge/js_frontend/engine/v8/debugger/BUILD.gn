@@ -69,6 +69,6 @@ ohos_shared_library("v8_debugger") {
     "//third_party/icu/icu4c:icu_config",
   ]
 
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = "ace_engine_full"
 }

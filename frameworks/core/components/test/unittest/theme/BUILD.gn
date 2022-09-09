@@ -103,7 +103,7 @@ ohos_unittest("ThemeManagerTest") {
       "resmgr:resourcemanager",
     ]
   } else {
-    subsystem_name = "arkui"
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     sources += [
       "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
@@ -117,7 +117,7 @@ ohos_unittest("ThemeManagerTest") {
   }
   external_deps += [ "c_utils:utils" ]
 
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = "ace_engine_full"
 }
 
