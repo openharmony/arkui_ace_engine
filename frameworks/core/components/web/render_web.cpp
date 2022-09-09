@@ -140,6 +140,7 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
         offsetFix = 0.0;
     }
     if (delegate_) {
+        offsetFix_ = offsetFix;
         if (!isFocus_) {
             if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
                 drawSize_.SetSize(drawSizeCache_);
@@ -375,7 +376,7 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= GetGlobalOffset().GetX();
-            touchPoint.y -= GetGlobalOffset().GetY();
+            touchPoint.y -= GetGlobalOffset().GetY() + offsetFix_;
         }
         touchOffset = Offset(touchPoint.x, touchPoint.y);
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
@@ -406,7 +407,7 @@ void RenderWeb::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= GetGlobalOffset().GetX();
-            touchPoint.y -= GetGlobalOffset().GetY();
+            touchPoint.y -= GetGlobalOffset().GetY() + offsetFix_;
         }
         delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y);
     }
@@ -433,7 +434,7 @@ void RenderWeb::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= GetGlobalOffset().GetX();
-            touchPoint.y -= GetGlobalOffset().GetY();
+            touchPoint.y -= GetGlobalOffset().GetY() + offsetFix_;
         }
         delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y);
     }
@@ -750,17 +751,17 @@ RefPtr<TextOverlayComponent> RenderWeb::CreateTextOverlay(
         return nullptr;
     }
 
-    Offset renderWebOffset = GetGlobalOffset();
-    Size renderWebSize = GetLayoutSize();
     Offset startOffset;
     Offset endOffset;
     float startEdgeHeight;
     float endEdgeHeight;
     if (overlayType == INSERT_OVERLAY) {
+        float lineHeight = GreatNotEqual(insertHandle->GetEdgeHeight(), insertHandle->GetY()) ?
+            insertHandle->GetY() : insertHandle->GetEdgeHeight();
         startOffset = NormalizeTouchHandleOffset(insertHandle->GetX()+1, insertHandle->GetY());
         endOffset = startOffset;
-        startEdgeHeight = insertHandle->GetEdgeHeight();
-        endEdgeHeight = startEdgeHeight;
+        startEdgeHeight = lineHeight;
+        endEdgeHeight = lineHeight;
     } else {
         startOffset = NormalizeTouchHandleOffset(startSelectionHandle->GetX(), startSelectionHandle->GetY());
         endOffset = NormalizeTouchHandleOffset(endSelectionHandle->GetX(), endSelectionHandle->GetY());
@@ -769,8 +770,7 @@ RefPtr<TextOverlayComponent> RenderWeb::CreateTextOverlay(
     }
     textOverlay->SetWeakWeb(WeakClaim(this));
     textOverlay->SetIsSingleHandle(false);
-    Rect clipRect(renderWebOffset.GetX(), renderWebOffset.GetY(),
-                  renderWebSize.Width(), renderWebSize.Height());
+    Rect clipRect(0.0, 0.0, Size::INFINITE_SIZE, Size::INFINITE_SIZE);
     textOverlay->SetLineHeight(startEdgeHeight);
     textOverlay->SetStartHandleHeight(startEdgeHeight);
     textOverlay->SetEndHandleHeight(endEdgeHeight);
@@ -806,6 +806,7 @@ Offset RenderWeb::NormalizeTouchHandleOffset(float x, float y)
     } else {
         resultY = y + renderWebOffset.GetY();
     }
+    resultY += offsetFix_;
     return {resultX, resultY};
 }
 
@@ -841,7 +842,9 @@ void RenderWeb::OnTouchSelectionChanged(
     if (overlayType == INSERT_OVERLAY) {
         showStartTouchHandle_ = IsTouchHandleShow(insertHandle);
         showEndTouchHandle_ = IsTouchHandleShow(insertHandle);
-        textOverlay_->SetStartHandleHeight(insertHandle->GetEdgeHeight());
+        float lineHeight = GreatNotEqual(insertHandle->GetEdgeHeight(), insertHandle->GetY()) ?
+            insertHandle->GetY() : insertHandle->GetEdgeHeight();
+        textOverlay_->SetStartHandleHeight(lineHeight);
         showTextOveralyMenu_ = false;
         OverlayShowOption option {
             .showMenu = showTextOveralyMenu_,
@@ -852,7 +855,7 @@ void RenderWeb::OnTouchSelectionChanged(
             .showEndHandle = showEndTouchHandle_,
         };
         if (updateHandlePosition_) {
-            updateHandlePosition_(option, insertHandle->GetEdgeHeight(), insertHandle->GetEdgeHeight());
+            updateHandlePosition_(option, lineHeight, lineHeight);
         }
     } else {
         showStartTouchHandle_ = IsTouchHandleShow(startSelectionHandle);
