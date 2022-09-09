@@ -494,6 +494,21 @@ public:
         return GetTotalIndexCount();
     }
 
+    void OnExpandChildrenOnInitialInNG() override
+    {
+        auto totalIndex = GetTotalIndexCount();
+        auto* stack = NG::ViewStackProcessor::GetInstance();
+        JSRef<JSVal> params[2];
+        for (auto index = 0; index < totalIndex; index++) {
+            params[0] = CallJSFunction(getDataFunc_, dataSourceObj_, index);
+            params[1] = JSRef<JSVal>::Make(ToJSValue(index));
+            std::string key = keyGenFunc_(params[0], index);
+            stack->PushKey(key);
+            itemGenFunc_->Call(JSRef<JSObject>(), 2, params);
+            stack->PopKey();
+        }
+    }
+
     std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(int32_t index) override
     {
         std::pair<std::string, RefPtr<NG::UINode>> info;

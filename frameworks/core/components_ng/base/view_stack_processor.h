@@ -26,6 +26,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/render_context.h"
 
@@ -104,6 +105,9 @@ public:
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
     void Push(const RefPtr<UINode>& element, bool isCustomView = false);
+
+    void PushTabBar(const TabBarParam& tabBarParam);
+    const TabBarParam& PopTabBar() const;
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrapped component has child of the new stack top's main component.
@@ -243,6 +247,8 @@ private:
 
     // elmtId to account get access to
     ElementIdType accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
+
+    TabBarParam tabBarParam_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };

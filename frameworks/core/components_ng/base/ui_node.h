@@ -47,7 +47,8 @@ public:
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT);
-    void RemoveChild(const RefPtr<UINode>& child);
+    std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child);
+    void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT);
 

@@ -64,6 +64,11 @@ public:
         return cachedItems_;
     }
 
+    void ExpandChildrenOnInitial()
+    {
+        OnExpandChildrenOnInitialInNG();
+    }
+
     void OnDataReloaded() override {}
     void OnDataAdded(size_t index) override {}
     void OnDataDeleted(size_t index) override {}
@@ -77,6 +82,7 @@ public:
 protected:
     virtual int32_t OnGetTotalCount() = 0;
     virtual std::pair<std::string, RefPtr<UINode>> OnGetChildByIndex(int32_t index) = 0;
+    virtual void OnExpandChildrenOnInitialInNG() = 0;
 
 private:
     // [index : [key, UINode]]

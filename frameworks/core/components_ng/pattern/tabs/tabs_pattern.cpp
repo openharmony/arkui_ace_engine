@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_GROUP_NODE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_GROUP_NODE_H
+#include "core/components_ng/pattern/tabs/tabs_pattern.h"
 
-#include "core/components_ng/base/frame_node.h"
+#include "base/geometry/axis.h"
+#include "base/geometry/dimension.h"
+#include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/property/property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT GroupNode : public FrameNode {
-    DECLARE_ACE_TYPE(GroupNode, FrameNode);
-
-public:
-    GroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false)
-        : FrameNode(tag, nodeId, pattern, isRoot) {}
-    ~GroupNode() override = default;
-    virtual void AddChildToGroup(const RefPtr<UINode>& children) {}
-};
+void TabsPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToFrame(true);
+}
 
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_GROUP_NODE_H
