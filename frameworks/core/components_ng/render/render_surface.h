@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/components/video/video_utils.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -57,6 +58,15 @@ public:
     virtual std::string GetUniqueId() const
     {
         return "";
+    }
+
+    virtual void CreateMediaPlayer() {}
+
+    virtual void ResetMediaPlayer() {}
+
+    virtual bool IsMediaPlayerValid()
+    {
+        return false;
     }
 
 protected:
