@@ -16,11 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATOR_NAVIGATOR_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATOR_NAVIGATOR_PATTERN_H
 
-#include "navigator_event_hub.h"
-#include "navigator_layout_algorithm.h"
-#include "navigator_layout_property.h"
-
-#include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -39,30 +36,10 @@ public:
         return MakeRefPtr<NavigatorEventHub>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<NavigatorLayoutAlgorithm>();
-    }
-
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<NavigatorLayoutProperty>();
-    }
-
     void OnModifyDone() override;
 
 private:
-    // in target container
-    // bool useSubStage_ = false;
-
-    EventMarker clickEventId_;
-    RefPtr<TouchEventImpl> touchListener_;
-
-    // child onClick events
-    std::function<void(const ClickInfo&)> onClickWithInfo_;
-    std::function<void()> onClick_;
-
-    void SetAccessibilityClickImpl();
+    RefPtr<ClickEvent> clickListener_;
 };
 } // namespace OHOS::Ace::NG
 

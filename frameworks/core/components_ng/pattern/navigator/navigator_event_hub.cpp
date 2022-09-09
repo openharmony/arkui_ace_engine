@@ -15,19 +15,30 @@
 
 #include "navigator_event_hub.h"
 
-#include "core/common/container.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 
-void NavigatorEventHub::OnClick()
-{
-    NavigatePage();
-}
-
 void NavigatorEventHub::NavigatePage()
 {
-    auto container = Ace::Container::Current();
-    LOGI("ZTE url = %{public}s", url_.c_str());
-    container->NavigatePage(type_, url_, params_);
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        LOGE("get jsi delegate failed");
+        return;
+    }
+    switch (type_) {
+        case NavigatorType::PUSH:
+            delegate->Push(url_, params_);
+            break;
+        case NavigatorType::REPLACE:
+            delegate->Replace(url_, params_);
+            break;
+        case NavigatorType::BACK:
+            delegate->Back(url_, params_);
+            break;
+        default:
+            LOGE("Navigator type is invalid!");
+    }
 }
+
 } // namespace OHOS::Ace::NG

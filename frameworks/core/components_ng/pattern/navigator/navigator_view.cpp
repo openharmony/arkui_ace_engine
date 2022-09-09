@@ -35,6 +35,7 @@ void NavigatorView::SetType(NavigatorType value)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
     eventHub->SetType(value);
 }
 
@@ -42,6 +43,7 @@ void NavigatorView::SetActive(bool active)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
     eventHub->SetActive(active);
 }
 
@@ -49,6 +51,7 @@ void NavigatorView::SetUri(const std::string& uri)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
     eventHub->SetUrl(uri);
 }
 
@@ -56,17 +59,8 @@ void NavigatorView::SetParams(const std::string& params)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
     auto eventHub = frameNode->GetEventHub<NavigatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
     eventHub->SetParams(params);
-}
-
-void NavigatorView::SetIsDefHeight(bool isDefHeight)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigatorLayoutProperty, IsDefHeight, isDefHeight);
-}
-
-void NavigatorView::SetIsDefWidth(bool isDefWidth)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigatorLayoutProperty, IsDefWidth, isDefWidth);
 }
 
 } // namespace OHOS::Ace::NG

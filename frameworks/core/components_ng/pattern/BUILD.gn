@@ -48,7 +48,6 @@ build_component_ng("pattern_ng") {
     "list/list_pattern.cpp",
     "list/list_view.cpp",
     "navigator/navigator_event_hub.cpp",
-    "navigator/navigator_layout_algorithm.cpp",
     "navigator/navigator_pattern.cpp",
     "navigator/navigator_view.cpp",
     "overlay/overlay_manager.cpp",

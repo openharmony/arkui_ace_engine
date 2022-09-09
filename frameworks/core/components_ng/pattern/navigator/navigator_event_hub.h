@@ -39,26 +39,32 @@ public:
         params_ = params;
     }
 
-    void SetActive(const bool active)
+    void SetActive(bool active)
     {
+        if (active) {
+            NavigatePage();
+        }
         active_ = active;
     }
 
-    void SetType(const NavigatorType type)
+    bool GetActive()
+    {
+        return active_;
+    }
+
+    void SetType(NavigatorType type)
     {
         type_ = type;
     }
 
-    void OnClick();
+    void NavigatePage();
 
 private:
     std::string url_;
     std::string params_;
+    NavigatorType type_ = NavigatorType::PUSH;
     // navigate page if active_
     bool active_ = false;
-    NavigatorType type_ = NavigatorType::PUSH;
-
-    void NavigatePage();
 
     ACE_DISALLOW_COPY_AND_MOVE(NavigatorEventHub);
 };

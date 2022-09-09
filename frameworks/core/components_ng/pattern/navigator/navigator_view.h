@@ -18,11 +18,8 @@
 
 #include <string>
 
-#include "navigator_event_hub.h"
-
 #include "base/utils/macros.h"
-#include "core/components/common/layout/constants.h"
-#include "core/event/ace_event_handler.h"
+#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -33,9 +30,6 @@ public:
     static void SetActive(bool active);
     static void SetUri(const std::string& uri);
     static void SetParams(const std::string& params);
-    static void SetIsDefHeight(bool isDefHeight);
-    static void SetIsDefWidth(bool isDefWidth);
-    static void SetClickedEventId(const EventMarker& eventId);
 };
 
 } // namespace OHOS::Ace::NG

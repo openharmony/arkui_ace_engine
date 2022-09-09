@@ -34,7 +34,6 @@ void JSNavigator::Create(const JSCallbackInfo& info)
             if (target->IsString()) {
                 NG::NavigatorView::SetUri(target->ToString());
             }
-            LOGI("ZTE target set: %{public}s", target->ToString().c_str());
 
             JSRef<JSVal> type = obj->GetProperty("type");
             if (type->IsNumber()) {
@@ -166,13 +165,13 @@ void JSNavigator::SetParams(const JSCallbackInfo& args)
 
 void JSNavigator::JsWidth(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsWidth(info);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsWidth(info);
         return;
     }
 
@@ -190,13 +189,13 @@ void JSNavigator::JsWidth(const JSRef<JSVal>& jsValue)
 
 void JSNavigator::JsHeight(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsHeight(info);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsHeight(info);
         return;
     }
 

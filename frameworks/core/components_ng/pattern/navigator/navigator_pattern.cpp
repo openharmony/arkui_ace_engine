@@ -13,33 +13,43 @@
  * limitations under the License.
  */
 
-#include "navigator_pattern.h"
+#include "core/components_ng/pattern/navigator/navigator_pattern.h"
 
 #include "base/utils/macros.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 void NavigatorPattern::OnModifyDone()
 {
+    // navigate immediately if active_ is set to true
+    auto eventHub = GetEventHub<NavigatorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (eventHub->GetActive()) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->GetTaskExecutor()->PostTask([eventHub] {
+            eventHub->NavigatePage();
+        },
+        TaskExecutor::TaskType::JS);
+    }
+
+    // register click event
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
 
-    // not initialized yet
-    if (touchListener_) {
-        return;
-    }
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        // pass touchEvent to eventHub
+        // pass to eventHub to perform navigation
         auto eventHub = pattern->GetEventHub<NavigatorEventHub>();
         CHECK_NULL_VOID(eventHub);
-        eventHub->OnClick();
+        eventHub->NavigatePage();
     };
-    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchListener_);
+
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gesture->AddClickEvent(clickListener_);
 }
 
 } // namespace OHOS::Ace::NG
