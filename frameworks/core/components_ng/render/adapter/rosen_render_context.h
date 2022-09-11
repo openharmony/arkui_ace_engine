@@ -89,6 +89,9 @@ public:
 
     void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) override;
 
+    void AnimateHoverEffectScale(bool isHovered) override;
+    void AnimateHoverEffectBoard(bool isHovered) override;
+
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
@@ -102,6 +105,8 @@ private:
     SkPictureRecorder* recorder_ = nullptr;
     RefPtr<Canvas> recordingCanvas_;
     RefPtr<Canvas> rosenCanvas_;
+    bool isHoveredScale_ = false;
+    bool isHoveredBoard_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

@@ -232,6 +232,23 @@ HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentL
     return hitTestResult;
 }
 
+HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
+{
+    HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
+    for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
+        auto& child = *iter;
+        auto hitResult = child->MouseTest(globalPoint, parentLocalPoint, onMouseResult, onHoverResult, hoverNode);
+        if (hitResult == HitTestResult::STOP_BUBBLING) {
+            return HitTestResult::STOP_BUBBLING;
+        }
+        if (hitResult == HitTestResult::BUBBLING) {
+            hitTestResult = HitTestResult::BUBBLING;
+        }
+    }
+    return hitTestResult;
+}
+
 int32_t UINode::FrameCount() const
 {
     return TotalChildCount();

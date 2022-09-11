@@ -96,7 +96,6 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int64_t SEC_TO_NANOSEC = 1000000000;
-constexpr int32_t MOUSE_PRESS_LEFT = 1;
 constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
 constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;

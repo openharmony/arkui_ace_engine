@@ -308,4 +308,28 @@ void PipelineContext::FlushTouchEvents()
     }
 }
 
+void PipelineContext::OnMouseEvent(const MouseEvent& event)
+{
+    CHECK_RUN_ON(UI);
+
+    if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
+            event.action == MouseAction::MOVE) &&
+        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
+        auto touchPoint = event.CreateTouchPoint();
+        LOGD("Mouse event to touch: button is %{public}d, action is %{public}d", event.button, event.action);
+        OnTouchEvent(touchPoint);
+    }
+
+    CHECK_NULL_VOID(rootNode_);
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    LOGD(
+        "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
+        scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.button, scaleEvent.pressedButtons);
+    eventManager_->MouseTest(scaleEvent, rootNode_);
+    eventManager_->DispatchMouseEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
+    window_->RequestFrame();
+}
+
 } // namespace OHOS::Ace::NG

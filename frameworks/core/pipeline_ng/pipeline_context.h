@@ -89,7 +89,7 @@ public:
     }
 
     // Called by view when mouse event received.
-    void OnMouseEvent(const MouseEvent& event) override {}
+    void OnMouseEvent(const MouseEvent& event) override;
 
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override {}

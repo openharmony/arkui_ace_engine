@@ -558,4 +558,54 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     return HitTestResult::BUBBLING;
 }
+
+HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
+{
+    const auto& rect = geometryNode_->GetFrame().GetRect();
+    LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
+        GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    // TODO: disableTouchEvent || disabled_ need handle
+
+    // TODO: Region need change to RectList
+    if (!rect.IsInRegion(parentLocalPoint)) {
+        return HitTestResult::OUT_OF_REGION;
+    }
+
+    bool preventBubbling = false;
+
+    const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
+    const auto& children = GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        auto childHitResult = child->MouseTest(globalPoint, localPoint, onMouseResult, onHoverResult, hoverNode);
+        if (childHitResult == HitTestResult::STOP_BUBBLING) {
+            preventBubbling = true;
+        }
+        // In normal process, the node block the brother node.
+        if (childHitResult == HitTestResult::BUBBLING) {
+            // TODO: add hit test mode judge.
+            break;
+        }
+    }
+
+    MouseTestResult mouseResult;
+    MouseTestResult hoverResult;
+    bool isPrevent = true;
+    auto mouseHub = eventHub_->GetInputEventHub();
+    if (mouseHub) {
+        const auto coordinateOffset = globalPoint - localPoint;
+        isPrevent = mouseHub->ProcessMouseTestHit(coordinateOffset, mouseResult, hoverResult, hoverNode);
+        onHoverResult.splice(onHoverResult.end(), std::move(hoverResult));
+    }
+
+    if (!preventBubbling) {
+        preventBubbling = isPrevent;
+        onMouseResult.splice(onMouseResult.end(), std::move(mouseResult));
+    }
+    if (preventBubbling) {
+        return HitTestResult::STOP_BUBBLING;
+    }
+    return HitTestResult::BUBBLING;
+}
 } // namespace OHOS::Ace::NG

@@ -96,6 +96,15 @@ public:
         return frameNode->GetOrCreateGestureEventHub();
     }
 
+    RefPtr<InputEventHub> GetMainFrameNodeInputEventHub() const
+    {
+        auto frameNode = GetMainFrameNode();
+        if (!frameNode) {
+            return nullptr;
+        }
+        return frameNode->GetOrCreateInputEventHub();
+    }
+
     RefPtr<FrameNode> GetMainFrameNode() const;
 
     // Get main component include composed component created by js view.
