@@ -24,16 +24,23 @@ bool CheckNeedRender(PropertyChangeFlag propertyChangeFlag)
 
 bool CheckNeedRequestMeasureAndLayout(PropertyChangeFlag propertyChangeFlag)
 {
-    return ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
-           ((propertyChangeFlag & PROPERTY_UPDATE_LAYOUT) == PROPERTY_UPDATE_LAYOUT) ||
-           ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE_SELF) == PROPERTY_UPDATE_MEASURE_SELF) ||
-           ((propertyChangeFlag & PROPERTY_UPDATE_BY_CHILD_REQUEST) == PROPERTY_UPDATE_BY_CHILD_REQUEST) ||
-           ((propertyChangeFlag & PROPERTY_UPDATE_POSITION) == PROPERTY_UPDATE_POSITION);
+    return CheckNeedMeasure(propertyChangeFlag) || CheckNeedLayout(propertyChangeFlag);
 }
 
 bool CheckNeedRequestParentMeasure(PropertyChangeFlag propertyChangeFlag)
 {
-    return CheckMeasureFlag(propertyChangeFlag) || CheckPositionFlag(propertyChangeFlag);
+    return CheckMeasureFlag(propertyChangeFlag) || CheckMeasureSelfAndParentFlag(propertyChangeFlag);
+}
+
+bool CheckNeedMeasure(PropertyChangeFlag propertyChangeFlag)
+{
+    return CheckMeasureFlag(propertyChangeFlag) || CheckMeasureSelfAndParentFlag(propertyChangeFlag) ||
+           CheckMeasureSelfFlag(propertyChangeFlag);
+}
+
+bool CheckNeedLayout(PropertyChangeFlag propertyChangeFlag)
+{
+    return CheckLayoutFlag(propertyChangeFlag);
 }
 
 bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag)
@@ -47,14 +54,14 @@ bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag)
     return ((propertyChangeFlag & PROPERTY_UPDATE_LAYOUT) == PROPERTY_UPDATE_LAYOUT);
 }
 
-bool CheckPositionFlag(PropertyChangeFlag propertyChangeFlag)
-{
-    return ((propertyChangeFlag & PROPERTY_UPDATE_POSITION) == PROPERTY_UPDATE_POSITION);
-}
-
 bool CheckMeasureSelfFlag(PropertyChangeFlag propertyChangeFlag)
 {
     return ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE_SELF) == PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+bool CheckMeasureSelfAndParentFlag(PropertyChangeFlag propertyChangeFlag)
+{
+    return ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT) == PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 bool CheckUpdateByChildRequest(PropertyChangeFlag propertyChangeFlag)

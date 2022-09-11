@@ -51,6 +51,8 @@ public:
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT);
+    void Clean();
+    void RemoveChildAtIndex(int32_t index);
 
     void AttachToMainTree();
     void DetachFromMainTree();
@@ -145,7 +147,7 @@ public:
 
     virtual void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
-    void MarkNeedFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+    virtual void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
     virtual void FlushUpdateAndMarkDirty()
     {
@@ -155,10 +157,6 @@ public:
     }
 
 protected:
-    virtual void OnChildAdded(const RefPtr<UINode>& child) {}
-
-    virtual void OnChildRemoved(const RefPtr<UINode>& child) {}
-
     virtual void MarkNeedSyncRenderTree();
 
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
