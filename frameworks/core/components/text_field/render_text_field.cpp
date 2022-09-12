@@ -500,6 +500,7 @@ void RenderTextField::OnTouchTestHit(
             auto textField = weak.Upgrade();
             if (textField) {
                 textField->StartPressAnimation(false);
+                textField->OnTapCallback();
             }
         });
 
@@ -592,10 +593,8 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     if (SearchAction(globalPosition, globalOffset)) {
         return;
     }
-    if (isFocusOnTouch_ && tapCallback_) {
-        if (!tapCallback_()) {
-            return;
-        }
+    if (!onTapCallbackResult_) {
+        return;
     }
     if (onTapEvent_) {
         onTapEvent_();
@@ -617,6 +616,13 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
         context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
     }
     AddOutOfRectCallbackToContext();
+}
+
+void RenderTextField::OnTapCallback()
+{
+    if (isFocusOnTouch_ && tapCallback_) {
+        onTapCallbackResult_ = tapCallback_();
+    }
 }
 
 void RenderTextField::OnEditChange(bool isInEditStatus)
