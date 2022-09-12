@@ -16,6 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H
 
+#include <map>
+
+#include "base/memory/ace_type.h"
+#include "core/event/ace_events.h"
+
 namespace OHOS::Ace {
 
 enum DialogEventType {
@@ -28,7 +33,7 @@ enum DialogEventType {
 class WebConsoleLog : public AceType {
     DECLARE_ACE_TYPE(WebConsoleLog, AceType)
 public:
-   WebConsoleLog() = default;
+    WebConsoleLog() = default;
     ~WebConsoleLog() = default;
 
     virtual int GetLineNumber() = 0;
@@ -229,9 +234,10 @@ class ACE_EXPORT WebDialogEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(WebDialogEvent, BaseEventInfo);
 
 public:
-    WebDialogEvent(const std::string& url, const std::string& message, const std::string& value, 
+    WebDialogEvent(const std::string& url, const std::string& message, const std::string& value,
         const DialogEventType& type, const RefPtr<Result>& result)
-        : BaseEventInfo("WebDialogEvent"), url_(url), message_(message), value_(value), type_(type), result_(result) {}
+        : BaseEventInfo("WebDialogEvent"), url_(url), message_(message), value_(value), type_(type), result_(result)
+    {}
     ~WebDialogEvent() = default;
 
     const std::string& GetUrl() const
@@ -274,7 +280,7 @@ public:
     AuthResult() = default;
     ~AuthResult() = default;
 
-    virtual bool Confirm(std::string &userName, std::string &pwd) = 0;
+    virtual bool Confirm(std::string& userName, std::string& pwd) = 0;
     virtual bool IsHttpAuthInfoSaved() = 0;
     virtual void Cancel() = 0;
 };
@@ -283,8 +289,9 @@ class ACE_EXPORT WebHttpAuthEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(WebHttpAuthEvent, BaseEventInfo);
 
 public:
-    WebHttpAuthEvent(const RefPtr<AuthResult>& result, const std::string &host, const std::string &realm)
-        : BaseEventInfo("WebHttpAuthEvent"), result_(result), host_(host), realm_(realm) {}
+    WebHttpAuthEvent(const RefPtr<AuthResult>& result, const std::string& host, const std::string& realm)
+        : BaseEventInfo("WebHttpAuthEvent"), result_(result), host_(host), realm_(realm)
+    {}
     ~WebHttpAuthEvent() = default;
 
     const RefPtr<AuthResult>& GetResult() const
@@ -301,6 +308,7 @@ public:
     {
         return realm_;
     }
+
 private:
     RefPtr<AuthResult> result_;
     std::string host_;
@@ -370,8 +378,7 @@ class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageStartEvent, BaseEventInfo);
 
 public:
-    explicit LoadWebPageStartEvent(const std::string& url) : BaseEventInfo
-        ("LoadWebPageStartEvent"), loadedUrl_(url) {}
+    explicit LoadWebPageStartEvent(const std::string& url) : BaseEventInfo("LoadWebPageStartEvent"), loadedUrl_(url) {}
     ~LoadWebPageStartEvent() = default;
 
     const std::string& GetLoadedUrl() const
@@ -387,8 +394,8 @@ class ACE_EXPORT LoadWebPageFinishEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebPageFinishEvent, BaseEventInfo);
 
 public:
-    explicit LoadWebPageFinishEvent(const std::string& url) : BaseEventInfo
-        ("LoadWebPageFinishEvent"), loadedUrl_(url) {}
+    explicit LoadWebPageFinishEvent(const std::string& url) : BaseEventInfo("LoadWebPageFinishEvent"), loadedUrl_(url)
+    {}
     ~LoadWebPageFinishEvent() = default;
 
     const std::string& GetLoadedUrl() const
@@ -405,7 +412,8 @@ class ACE_EXPORT LoadWebProgressChangeEvent : public BaseEventInfo {
 
 public:
     explicit LoadWebProgressChangeEvent(const int& newProgress)
-        : BaseEventInfo("LoadWebProgressChangeEvent"), newProgress_(newProgress) {}
+        : BaseEventInfo("LoadWebProgressChangeEvent"), newProgress_(newProgress)
+    {}
     ~LoadWebProgressChangeEvent() = default;
 
     const int& GetNewProgress() const
@@ -421,8 +429,9 @@ class ACE_EXPORT LoadWebTitleReceiveEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebTitleReceiveEvent, BaseEventInfo);
 
 public:
-    explicit LoadWebTitleReceiveEvent(const std::string& title) : BaseEventInfo
-        ("LoadWebTitleReceiveEvent"), title_(title) {}
+    explicit LoadWebTitleReceiveEvent(const std::string& title)
+        : BaseEventInfo("LoadWebTitleReceiveEvent"), title_(title)
+    {}
     ~LoadWebTitleReceiveEvent() = default;
 
     const std::string& GetTitle() const
@@ -438,8 +447,7 @@ class ACE_EXPORT UrlLoadInterceptEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(UrlLoadInterceptEvent, BaseEventInfo);
 
 public:
-    explicit UrlLoadInterceptEvent(const std::string& data) : BaseEventInfo
-        ("UrlLoadInterceptEvent"), data_(data) {}
+    explicit UrlLoadInterceptEvent(const std::string& data) : BaseEventInfo("UrlLoadInterceptEvent"), data_(data) {}
     ~UrlLoadInterceptEvent() = default;
 
     const std::string& GetData() const
@@ -456,7 +464,8 @@ class ACE_EXPORT LoadWebGeolocationHideEvent : public BaseEventInfo {
 
 public:
     explicit LoadWebGeolocationHideEvent(const std::string& origin)
-        : BaseEventInfo("LoadWebGeolocationHideEvent"), origin_(origin) {}
+        : BaseEventInfo("LoadWebGeolocationHideEvent"), origin_(origin)
+    {}
     ~LoadWebGeolocationHideEvent() = default;
 
     const std::string& GetOrigin() const
@@ -473,7 +482,8 @@ class ACE_EXPORT LoadWebGeolocationShowEvent : public BaseEventInfo {
 
 public:
     LoadWebGeolocationShowEvent(const std::string& origin, const RefPtr<WebGeolocation>& webGeolocation)
-        : BaseEventInfo("LoadWebGeolocationShowEvent"), origin_(origin), webGeolocation_(webGeolocation) {}
+        : BaseEventInfo("LoadWebGeolocationShowEvent"), origin_(origin), webGeolocation_(webGeolocation)
+    {}
     ~LoadWebGeolocationShowEvent() = default;
 
     const std::string& GetOrigin() const
@@ -496,7 +506,8 @@ class ACE_EXPORT WebPermissionRequestEvent : public BaseEventInfo {
 
 public:
     WebPermissionRequestEvent(const RefPtr<WebPermissionRequest>& webPermissionRequest)
-        : BaseEventInfo("WebPermissionRequestEvent"), webPermissionRequest_(webPermissionRequest) {}
+        : BaseEventInfo("WebPermissionRequestEvent"), webPermissionRequest_(webPermissionRequest)
+    {}
     ~WebPermissionRequestEvent() = default;
 
     const RefPtr<WebPermissionRequest>& GetWebPermissionRequest() const
@@ -513,9 +524,10 @@ class ACE_EXPORT DownloadStartEvent : public BaseEventInfo {
 
 public:
     DownloadStartEvent(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
-        const std::string& mimetype, long contentLength) : BaseEventInfo("DownloadStartEvent"), url_(url),
-        userAgent_(userAgent), contentDisposition_(contentDisposition), mimetype_(mimetype),
-        contentLength_(contentLength) {}
+        const std::string& mimetype, long contentLength)
+        : BaseEventInfo("DownloadStartEvent"), url_(url), userAgent_(userAgent),
+          contentDisposition_(contentDisposition), mimetype_(mimetype), contentLength_(contentLength)
+    {}
     ~DownloadStartEvent() = default;
 
     const std::string& GetUrl() const
@@ -627,14 +639,16 @@ class ACE_EXPORT LoadWebRequestFocusEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebRequestFocusEvent, BaseEventInfo);
 
 public:
-    explicit LoadWebRequestFocusEvent(const std::string& url) : BaseEventInfo
-        ("LoadWebRequestFocusEvent"), focusUrl_(url) {}
+    explicit LoadWebRequestFocusEvent(const std::string& url)
+        : BaseEventInfo("LoadWebRequestFocusEvent"), focusUrl_(url)
+    {}
     ~LoadWebRequestFocusEvent() = default;
 
     const std::string& GetRequestFocus() const
     {
         return focusUrl_;
     }
+
 private:
     std::string focusUrl_;
 };
@@ -643,14 +657,14 @@ class ACE_EXPORT LoadWebOnFocusEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebOnFocusEvent, BaseEventInfo);
 
 public:
-    explicit LoadWebOnFocusEvent(const std::string& url) : BaseEventInfo
-        ("LoadWebOnFocusEvent"), focusUrl_(url) {}
+    explicit LoadWebOnFocusEvent(const std::string& url) : BaseEventInfo("LoadWebOnFocusEvent"), focusUrl_(url) {}
     ~LoadWebOnFocusEvent() = default;
 
     const std::string& GetOnFocus() const
     {
         return focusUrl_;
     }
+
 private:
     std::string focusUrl_;
 };
@@ -659,8 +673,8 @@ class ACE_EXPORT LoadWebConsoleLogEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebConsoleLogEvent, BaseEventInfo);
 
 public:
-    LoadWebConsoleLogEvent(RefPtr<WebConsoleLog> message) : BaseEventInfo("LoadWebConsoleLogEvent"),
-                                                            message_(message) {}
+    LoadWebConsoleLogEvent(RefPtr<WebConsoleLog> message) : BaseEventInfo("LoadWebConsoleLogEvent"), message_(message)
+    {}
     ~LoadWebConsoleLogEvent() = default;
 
     const RefPtr<WebConsoleLog> GetMessage() const
@@ -692,9 +706,9 @@ class ACE_EXPORT RefreshAccessedHistoryEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(RefreshAccessedHistoryEvent, BaseEventInfo);
 
 public:
-    RefreshAccessedHistoryEvent(const std::string& url, bool isRefreshed) :
-                                BaseEventInfo("RefreshAccessedHistoryEvent"),
-                                url_(url),  isRefreshed_(isRefreshed) {}
+    RefreshAccessedHistoryEvent(const std::string& url, bool isRefreshed)
+        : BaseEventInfo("RefreshAccessedHistoryEvent"), url_(url), isRefreshed_(isRefreshed)
+    {}
 
     ~RefreshAccessedHistoryEvent() = default;
 
@@ -717,8 +731,7 @@ class ACE_EXPORT FileSelectorEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(FileSelectorEvent, BaseEventInfo);
 
 public:
-    FileSelectorEvent(const RefPtr<WebFileSelectorParam>& param,
-                      const RefPtr<FileSelectorResult>& result)
+    FileSelectorEvent(const RefPtr<WebFileSelectorParam>& param, const RefPtr<FileSelectorResult>& result)
         : BaseEventInfo("FileSelectorEvent"), param_(param), result_(result)
     {
         LOGI("FileSelectorEvent constructor");
@@ -744,14 +757,14 @@ class ACE_EXPORT ResourceLoadEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(ResourceLoadEvent, BaseEventInfo);
 
 public:
-    explicit ResourceLoadEvent(const std::string& url) : BaseEventInfo
-        ("ResourceLoadEvent"), loadUrl_(url) {}
+    explicit ResourceLoadEvent(const std::string& url) : BaseEventInfo("ResourceLoadEvent"), loadUrl_(url) {}
     ~ResourceLoadEvent() = default;
 
     const std::string& GetOnResourceLoadUrl() const
     {
         return loadUrl_;
     }
+
 private:
     std::string loadUrl_;
 };
@@ -760,8 +773,9 @@ class ACE_EXPORT ScaleChangeEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(ScaleChangeEvent, BaseEventInfo);
 
 public:
-    ScaleChangeEvent(float oldScale, float newScale) : BaseEventInfo
-        ("ScaleChangeEvent"), oldScale_(oldScale), newScale_(newScale) {}
+    ScaleChangeEvent(float oldScale, float newScale)
+        : BaseEventInfo("ScaleChangeEvent"), oldScale_(oldScale), newScale_(newScale)
+    {}
     ~ScaleChangeEvent() = default;
 
     float GetOnScaleChangeOldScale() const
@@ -773,6 +787,7 @@ public:
     {
         return newScale_;
     }
+
 private:
     float oldScale_ = 0.0f;
     float newScale_ = 0.0f;
@@ -782,8 +797,8 @@ class ACE_EXPORT OnScrollEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(OnScrollEvent, BaseEventInfo);
 
 public:
-    OnScrollEvent(double xOffset, double yOffset) : BaseEventInfo
-        ("OnScrollEvent"), xOffset_(xOffset), yOffset_(yOffset) {}
+    OnScrollEvent(double xOffset, double yOffset) : BaseEventInfo("OnScrollEvent"), xOffset_(xOffset), yOffset_(yOffset)
+    {}
     ~OnScrollEvent() = default;
 
     float GetX() const
@@ -795,6 +810,7 @@ public:
     {
         return yOffset_;
     }
+
 private:
     double xOffset_ = 0.0f;
     double yOffset_ = 0.0f;
@@ -830,8 +846,7 @@ class ACE_EXPORT ContextMenuEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(ContextMenuEvent, BaseEventInfo);
 
 public:
-    ContextMenuEvent(const RefPtr<WebContextMenuParam>& param,
-                      const RefPtr<ContextMenuResult>& result)
+    ContextMenuEvent(const RefPtr<WebContextMenuParam>& param, const RefPtr<ContextMenuResult>& result)
         : BaseEventInfo("ContextShowEvent"), param_(param), result_(result)
     {
         LOGI("ContextShowEvent constructor");

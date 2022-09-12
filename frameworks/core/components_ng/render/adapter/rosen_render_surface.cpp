@@ -39,8 +39,19 @@ RosenRenderSurface::~RosenRenderSurface()
 
 void RosenRenderSurface::InitSurface()
 {
-    CreateSurface();
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_VOID(renderContext);
 
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
+    auto surfaceNode =
+        OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(rosenRenderContext->GetRSNode());
+    if (surfaceNode) {
+        producerSurface_ = surfaceNode->GetSurface();
+    }
+}
+
+void RosenRenderSurface::UpdateXComponentConfig()
+{
     CHECK_NULL_VOID(producerSurface_);
 
     auto* surfaceUtils = SurfaceUtils::GetInstance();
@@ -57,19 +68,6 @@ void RosenRenderSurface::InitSurface()
 void* RosenRenderSurface::GetNativeWindow()
 {
     return nativeWindow_;
-}
-
-void RosenRenderSurface::CreateSurface()
-{
-    auto renderContext = renderContext_.Upgrade();
-    CHECK_NULL_VOID(renderContext);
-
-    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
-    auto surfaceNode =
-        OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(rosenRenderContext->GetRSNode());
-    if (surfaceNode) {
-        producerSurface_ = surfaceNode->GetSurface();
-    }
 }
 
 void RosenRenderSurface::SetRenderContext(const RefPtr<RenderContext>& renderContext)

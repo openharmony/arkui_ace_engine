@@ -23,6 +23,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
+#include "base/utils/noncopyable.h"
 #include "core/components/video/video_controller_v2.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -43,7 +44,7 @@ public:
     explicit VideoPattern(const RefPtr<VideoControllerV2>& videoController);
     ~VideoPattern() override = default;
 
-    std::optional<std::string> SurfaceNodeName() const override
+    std::optional<std::string> GetSurfaceNodeName() const override
     {
         return "VideoSurface";
     }
@@ -130,6 +131,8 @@ private:
     bool autoPlay_ = false;
     bool loop_ = false;
     double progressRate_ = 1.0;
+
+    ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
 } // namespace OHOS::Ace::NG
 

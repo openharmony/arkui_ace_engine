@@ -18,6 +18,8 @@
 #include <sstream>
 
 #include "base/log/log.h"
+#include "core/components/box/drag_drop_event.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 
@@ -35,8 +37,8 @@ void WebResource::Release(const std::function<void(bool)>& onRelease)
     if (id_ == INVALID_ID) {
         return;
     }
-
-    auto context = context_.Upgrade();
+    // TODO: add support for ng.
+    auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     if (!context) {
         LOGE("fail to release resource due to context is null");
         return;
@@ -47,8 +49,7 @@ void WebResource::Release(const std::function<void(bool)>& onRelease)
         return;
     }
 
-    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
-                                                         TaskExecutor::TaskType::PLATFORM);
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
     auto releaseTask = [weakWeb = AceType::WeakClaim(this), weakRes, onRelease] {
         auto webResource = weakWeb.Upgrade();
@@ -145,23 +146,21 @@ void WebResource::OnError(const std::string& errorCode, const std::string& error
     }
 }
 
-void WebResource::CallResRegisterMethod(const std::string& method,
-                                        const std::string& param,
-                                        const std::function<void(std::string&)>& callback)
+void WebResource::CallResRegisterMethod(
+    const std::string& method, const std::string& param, const std::function<void(std::string&)>& callback)
 {
     if (method.empty()) {
         return;
     }
 
-    auto context = context_.Upgrade();
+    auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     if (!context) {
         LOGE("fail to get context to call res register method");
         return;
     }
 
     auto resRegister = context->GetPlatformResRegister();
-    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
-                                                         TaskExecutor::TaskType::PLATFORM);
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
 
     auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
     platformTaskExecutor.PostTask([method, param, weakRes, callback] {

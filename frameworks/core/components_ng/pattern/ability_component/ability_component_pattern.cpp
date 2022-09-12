@@ -49,12 +49,13 @@ void AbilityComponentPattern::FireDisConnect()
     abilityComponentEventHub->FireOnDisConnect();
 }
 
-void AbilityComponentPattern::OnLayoutChange(
-    bool frameSizeChange, bool frameOffsetChange, bool /*contentSizeChange*/, bool /*contentOffsetChange*/)
+bool AbilityComponentPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& config)
 {
-    if (frameSizeChange || frameOffsetChange) {
+    if (config.frameSizeChange || config.frameOffsetChange) {
         updateWindowRect();
     }
+    return false;
 }
 
 void AbilityComponentPattern::updateWindowRect()

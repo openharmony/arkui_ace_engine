@@ -32,6 +32,9 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    std::optional<SizeF> MeasureContent(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+
     // Called to perform measure current render node.
     static void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
 

@@ -15,8 +15,13 @@
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
+#include <optional>
+
 #include "base/geometry/ng/size_t.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 
@@ -39,6 +44,37 @@ void BoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Layout(parentOffset);
     }
+}
+
+std::optional<SizeF> BoxLayoutAlgorithm::MeasureContent(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    if (!host->IsAtomicNode()) {
+        return std::nullopt;
+    }
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto measureType = layoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT);
+    OptionalSizeF contentSize;
+    do {
+        // Use idea size first if it is valid.
+        contentSize.UpdateSizeWithCheck(contentConstraint.selfIdealSize);
+        if (contentSize.IsValid()) {
+            break;
+        }
+
+        if (measureType == MeasureType::MATCH_PARENT) {
+            contentSize.UpdateIllegalSizeWithCheck(contentConstraint.parentIdealSize);
+            // use max is parent ideal size is invalid.
+            contentSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
+            break;
+        }
+
+        // wrap content case use min size default.
+        contentSize.UpdateIllegalSizeWithCheck(contentConstraint.minSize);
+    } while (false);
+    return contentSize.ConvertToSizeT();
 }
 
 // Called to perform measure current render node.
