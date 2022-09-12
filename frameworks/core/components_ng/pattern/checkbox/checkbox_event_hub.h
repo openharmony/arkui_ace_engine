@@ -70,7 +70,7 @@ private:
     ChangeEvent changeEvent_;
     std::string name_;
     std::string groupname_;
-    
+
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxEventHub);
 };
 

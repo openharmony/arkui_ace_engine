@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_EVENT_HUB_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_EVENT_HUB_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_EVENT_HUB_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -22,28 +22,32 @@
 
 namespace OHOS::Ace::NG {
 
-class ButtonEventHub : public EventHub {
-    DECLARE_ACE_TYPE(ButtonEventHub, EventHub)
+using ChangeEvent = std::function<void(const bool)>;
+
+class SwitchEventHub : public EventHub {
+    DECLARE_ACE_TYPE(SwitchEventHub, EventHub)
 
 public:
-    ButtonEventHub() = default;
-    ~ButtonEventHub() override = default;
+    SwitchEventHub() = default;
+    ~SwitchEventHub() override = default;
 
-    void SetStateEffect(bool stateEffect)
+    void SetOnChange(ChangeEvent&& changeEvent)
     {
-        stateEffect_ = stateEffect;
+        changeEvent_ = std::move(changeEvent);
     }
 
-    bool GetStateEffect() const
+    void UpdateChangeEvent(bool isOn) const
     {
-        return stateEffect_.value_or(true);
+        if (changeEvent_) {
+            changeEvent_(isOn);
+        }
     }
 
 private:
-    std::optional<bool> stateEffect_;
+    ChangeEvent changeEvent_;
 
-    ACE_DISALLOW_COPY_AND_MOVE(ButtonEventHub);
+    ACE_DISALLOW_COPY_AND_MOVE(SwitchEventHub);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_EVENT_HUB_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_EVENT_HUB_H
