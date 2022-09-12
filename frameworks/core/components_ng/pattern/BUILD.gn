@@ -83,6 +83,8 @@ build_component_ng("pattern_ng") {
     "text/text_pattern.cpp",
     "text/text_styles.cpp",
     "text/text_view.cpp",
+    "text_clock/text_clock_pattern.cpp",
+    "text_clock/text_clock_view.cpp",
     "texttimer/text_timer_pattern.cpp",
     "texttimer/text_timer_view.cpp",
     "xcomponent/xcomponent_layout_algorithm.cpp",

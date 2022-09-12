@@ -32,10 +32,7 @@ public:
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<TextLayoutProperty>();
-        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propFontStyle_ = CloneFontStyle();
-        value->propTextLineStyle_ = CloneTextLineStyle();
-        value->propContent_ = CloneContent();
+        Clone(value);
         return value;
     }
 
@@ -68,6 +65,16 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LetterSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::string, PROPERTY_UPDATE_MEASURE);
 
+protected:    
+    void Clone(RefPtr<LayoutProperty> property) const override
+    {
+        auto value = DynamicCast<TextLayoutProperty>(property);
+        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propFontStyle_ = CloneFontStyle();
+        value->propTextLineStyle_ = CloneTextLineStyle();
+        value->propContent_ = CloneContent();
+    }
+    
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutProperty);
 };
