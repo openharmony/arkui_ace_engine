@@ -23,12 +23,12 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
-#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -61,6 +61,7 @@ public:
         layoutAlgorithm->SetTargetIndex(targetIndex_);
         layoutAlgorithm->SetTotalCount(TotalCount());
         layoutAlgorithm->SetPreItemRange(preItemRange_);
+        layoutAlgorithm->SetIsLoop(IsLoop());
         return layoutAlgorithm;
     }
 
@@ -129,9 +130,10 @@ private:
     void FireChangeEvent() const;
     void CalculateCacheRange();
 
+    float GetItemSpace() const;
     Axis GetDirection() const;
     int32_t CurrentIndex() const;
-    int32_t GetDisplayCount()const;
+    int32_t GetDisplayCount() const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;

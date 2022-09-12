@@ -44,7 +44,7 @@ public:
     }
 
 private:
-     ChangeEvent changeEvent_;
+    ChangeEvent changeEvent_;
 };
 
 } // namespace OHOS::Ace::NG
