@@ -83,10 +83,20 @@ build_component_ng("pattern_ng") {
     "text/text_pattern.cpp",
     "text/text_styles.cpp",
     "text/text_view.cpp",
+    "text_clock/text_clock_pattern.cpp",
+    "text_clock/text_clock_view.cpp",
     "texttimer/text_timer_pattern.cpp",
     "texttimer/text_timer_view.cpp",
     "xcomponent/xcomponent_layout_algorithm.cpp",
     "xcomponent/xcomponent_pattern.cpp",
     "xcomponent/xcomponent_view.cpp",
+  ]
+}
+
+build_component_ng("pattern_ability_component_ng") {
+  sources = [
+    "ability_component/ability_component_layout_algorithm.cpp",
+    "ability_component/ability_component_pattern.cpp",
+    "ability_component/ability_component_view.cpp",
   ]
 }

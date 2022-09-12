@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 #include "base/log/ace_trace.h"
@@ -28,7 +29,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT LazyForEachBuilder : public virtual AceType, public V2::DataChangeListener {
+class ACE_EXPORT LazyForEachBuilder : public virtual AceType {
     DECLARE_ACE_TYPE(NG::LazyForEachBuilder, AceType)
 public:
     LazyForEachBuilder() = default;
@@ -39,29 +40,53 @@ public:
         return OnGetTotalCount();
     }
 
-    RefPtr<UINode> GetChildByIndex(int32_t index)
+    std::pair<std::string, RefPtr<UINode>> CreateChildByIndex(int32_t index)
     {
-        auto iter = cachedItems_.find(index);
-        if (iter != cachedItems_.end()) {
-            return iter->second.second;
-        }
         {
             ACE_SCOPED_TRACE("Builder:BuildLazyItem");
-            auto itemInfo = OnGetChildByIndex(index);
-            CHECK_NULL_RETURN(itemInfo.second, nullptr);
-            cachedItems_.try_emplace(index, itemInfo);
-            return itemInfo.second;
+            auto itemInfo = OnGetChildByIndex(index, generatedItem_);
+            CHECK_NULL_RETURN(itemInfo.second, itemInfo);
+            auto result = generatedItem_.try_emplace(itemInfo.first, itemInfo.second);
+            if (!result.second) {
+                LOGD("already has same key %{private}s child", itemInfo.first.c_str());
+            }
+            return *(result.first);
         }
     }
 
-    const std::map<int32_t, std::pair<std::string, RefPtr<UINode>>>& GetCacheItems() const
+    RefPtr<UINode> GetChildByKey(const std::string& key)
     {
-        return cachedItems_;
+        auto iter = generatedItem_.find(key);
+        if (iter != generatedItem_.end()) {
+            return iter->second;
+        }
+        return nullptr;
     }
 
-    std::map<int32_t, std::pair<std::string, RefPtr<UINode>>>& ModifyCacheItems()
+    void UpdateCachedItems(const std::list<std::optional<std::string>>& nodeIds)
     {
-        return cachedItems_;
+        // use active ids to update cached items.
+        std::unordered_map<std::string, RefPtr<UINode>> generatedItem;
+        std::swap(generatedItem, generatedItem_);
+        for (const auto& id : nodeIds) {
+            if (!id) {
+                continue;
+            }
+            auto iter = generatedItem.find(*id);
+            if (iter != generatedItem.end()) {
+                generatedItem_.try_emplace(iter->first, iter->second);
+            }
+        }
+    }
+
+    void Clean()
+    {
+        generatedItem_.clear();
+    }
+
+    void RemoveChild(const std::string& id)
+    {
+        generatedItem_.erase(id);
     }
 
     void ExpandChildrenOnInitial()
@@ -69,24 +94,19 @@ public:
         OnExpandChildrenOnInitialInNG();
     }
 
-    void OnDataReloaded() override {}
-    void OnDataAdded(size_t index) override {}
-    void OnDataDeleted(size_t index) override {}
-    void OnDataChanged(size_t index) override {}
-    void OnDataMoved(size_t from, size_t to) override {}
-
     virtual void ReleaseChildGroupById(const std::string& id) = 0;
     virtual void RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;
     virtual void UnregisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;
-    virtual std::pair<std::string, RefPtr<UINode>> OnGetChildByIndex(int32_t index) = 0;
+    virtual std::pair<std::string, RefPtr<UINode>> OnGetChildByIndex(
+        int32_t index, const std::unordered_map<std::string, RefPtr<UINode>>& cachedItems) = 0;
     virtual void OnExpandChildrenOnInitialInNG() = 0;
 
 private:
-    // [index : [key, UINode]]
-    std::map<int32_t, std::pair<std::string, RefPtr<UINode>>> cachedItems_;
+    // [key, UINode]
+    std::unordered_map<std::string, RefPtr<UINode>> generatedItem_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };

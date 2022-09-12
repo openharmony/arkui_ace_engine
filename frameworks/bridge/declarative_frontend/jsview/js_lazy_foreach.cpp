@@ -509,7 +509,8 @@ public:
         }
     }
 
-    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(int32_t index) override
+    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
+        int32_t index, const std::unordered_map<std::string, RefPtr<NG::UINode>>& cachedItems) override
     {
         std::pair<std::string, RefPtr<NG::UINode>> info;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, info);
@@ -521,6 +522,12 @@ public:
         params[0] = CallJSFunction(getDataFunc_, dataSourceObj_, index);
         params[1] = JSRef<JSVal>::Make(ToJSValue(index));
         std::string key = keyGenFunc_(params[0], index);
+        auto cachedIter = cachedItems.find(key);
+        if (cachedIter != cachedItems.end()) {
+            info.first = key;
+            info.second = cachedIter->second;
+            return info;
+        }
 
         ScopedViewStackProcessor scopedViewStackProcessor;
         auto* viewStack = NG::ViewStackProcessor::GetInstance();

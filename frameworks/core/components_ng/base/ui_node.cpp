@@ -16,6 +16,8 @@
 #include "core/components_ng/base/ui_node.h"
 
 #include <algorithm>
+#include <cstdint>
+#include <iterator>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
@@ -56,7 +58,6 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
     if (onMainTree_) {
         child->AttachToMainTree();
     }
-    OnChildAdded(child);
     MarkNeedSyncRenderTree();
 }
 
@@ -69,14 +70,20 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         LOGE("child is not exist.");
         return children_.end();
     }
-
-    if (onMainTree_) {
-        child->DetachFromMainTree();
-    }
-    OnChildRemoved(child);
     auto result = children_.erase(iter);
     MarkNeedSyncRenderTree();
     return result;
+}
+
+void UINode::RemoveChildAtIndex(int32_t index)
+{
+    if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
+        return;
+    }
+    auto iter = children_.begin();
+    std::advance(iter, index);
+    children_.erase(iter);
+    MarkNeedSyncRenderTree();
 }
 
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode)
@@ -95,7 +102,12 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     if (onMainTree_) {
         newNode->AttachToMainTree();
     }
-    OnChildAdded(newNode);
+    MarkNeedSyncRenderTree();
+}
+
+void UINode::Clean()
+{
+    children_.clear();
     MarkNeedSyncRenderTree();
 }
 
@@ -122,11 +134,11 @@ void UINode::DetachFromMainTree()
     if (!onMainTree_) {
         return;
     }
+    onMainTree_ = false;
+    OnDetachFromMainTree();
     for (const auto& child : children_) {
         child->DetachFromMainTree();
     }
-    onMainTree_ = false;
-    OnDetachFromMainTree();
 }
 
 void UINode::MovePosition(int32_t slot)
@@ -181,11 +193,11 @@ void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
     }
 }
 
-void UINode::MarkNeedFlushDirty(PropertyChangeFlag extraFlag)
+void UINode::MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag)
 {
     auto parent = parent_.Upgrade();
     if (parent) {
-        parent->MarkDirtyNode(extraFlag);
+        parent->MarkNeedFrameFlushDirty(extraFlag);
     }
 }
 
@@ -197,19 +209,16 @@ void UINode::MarkNeedSyncRenderTree()
     }
 }
 
-void UINode::OnDetachFromMainTree()
+void UINode::RebuildRenderContextTree()
 {
-    for (const auto& child : children_) {
-        child->OnDetachFromMainTree();
+    auto parent = parent_.Upgrade();
+    if (parent) {
+        parent->RebuildRenderContextTree();
     }
 }
+void UINode::OnDetachFromMainTree() {}
 
-void UINode::OnAttachToMainTree()
-{
-    for (const auto& child : children_) {
-        child->OnAttachToMainTree();
-    }
-}
+void UINode::OnAttachToMainTree() {}
 
 void UINode::DumpTree(int32_t depth)
 {
