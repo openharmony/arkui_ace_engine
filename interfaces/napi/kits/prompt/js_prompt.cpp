@@ -116,8 +116,8 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         napi_get_value_string_utf8(env, bottomNApi, bottom.get(), bottomLen, &ret);
         bottomString = bottom.get();
     } else if (valueType == napi_number) {
-        int32_t bottom = 0;
-        napi_get_value_int32(env, bottomNApi, &bottom);
+        double bottom = 0.0;
+        napi_get_value_double(env, bottomNApi, &bottom);
         bottomString = std::to_string(bottom);
     } else if (valueType == napi_object) {
         int32_t id = 0;
