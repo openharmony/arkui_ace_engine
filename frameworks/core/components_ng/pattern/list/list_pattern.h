@@ -60,6 +60,7 @@ public:
         listLayoutAlgorithm->SetCurrentOffset(currentOffset_);
         currentOffset_ = 0;
         listLayoutAlgorithm->SetIsInitialized(isInitialized_);
+        listLayoutAlgorithm->SetPlayEdgeEffectAnimation(playEdgeEffectAnimation_);
         return listLayoutAlgorithm;
     }
 
@@ -83,7 +84,7 @@ private:
     bool playEdgeEffectAnimation_ = false;
     float currentOffset_ = 0.0;
     float lastOffset_ = 0.0f;
-
+    
     ListLayoutAlgorithm::PositionMap itemPosition_;
 };
 } // namespace OHOS::Ace::NG
