@@ -89,7 +89,7 @@ public:                                                     \
         return prop##group##_.reset();                      \
     }                                                       \
                                                             \
-private:                                                    \
+protected:                                                    \
     std::unique_ptr<type> prop##group##_;
 
 #define ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_GET(group, name, type) \
