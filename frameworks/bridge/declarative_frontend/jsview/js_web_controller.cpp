@@ -459,6 +459,7 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("accessForward", &JSWebController::AccessForward);
     JSClass<JSWebController>::CustomMethod("accessBackward", &JSWebController::AccessBackward);
     JSClass<JSWebController>::CustomMethod("clearHistory", &JSWebController::ClearHistory);
+    JSClass<JSWebController>::CustomMethod("clearSslCache", &JSWebController::ClearSslCache);
     JSClass<JSWebController>::CustomMethod("getCookieManager", &JSWebController::GetCookieManager);
     JSClass<JSWebController>::CustomMethod("getHitTestValue", &JSWebController::GetHitTestValue);
     JSClass<JSWebController>::CustomMethod("backOrForward", &JSWebController::BackOrForward);
@@ -473,6 +474,7 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("searchAllAsync", &JSWebController::SearchAllAsync);
     JSClass<JSWebController>::CustomMethod("clearMatches", &JSWebController::ClearMatches);
     JSClass<JSWebController>::CustomMethod("searchNext", &JSWebController::SearchNext);
+    JSClass<JSWebController>::CustomMethod("getUrl", &JSWebController::GetUrl);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
     JSWebCookie::JSBind(globalObj);
     JSHitTestValue::JSBind(globalObj);
@@ -749,6 +751,15 @@ void JSWebController::ClearHistory(const JSCallbackInfo& args)
     ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->ClearHistory();
+    }
+}
+
+void JSWebController::ClearSslCache(const JSCallbackInfo& args)
+{
+    LOGE("JSWebController clear ssl cache.");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        webController_->ClearSslCache();
     }
 }
 
@@ -1098,6 +1109,14 @@ void JSWebController::SearchNext(const JSCallbackInfo& args)
 
     if (webController_) {
         webController_->SearchNext(forward);
+    }
+}
+void JSWebController::GetUrl(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        std::string result = webController_->GetUrl();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
     }
 }
 } // namespace OHOS::Ace::Framework

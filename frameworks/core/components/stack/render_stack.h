@@ -68,6 +68,11 @@ public:
         return overflow_;
     }
 
+    bool IsRightToLeft() const
+    {
+        return (GetTextDirection() == TextDirection::RTL);
+    }
+
     void OnAttachContext() override;
 
 protected:

@@ -49,6 +49,7 @@ public:
     std::string GetTextFontWeight() const;
     std::string GetTextFontFamily() const;
     std::string GetTextInputFilter() const;
+    std::string GetHeight() const override;
 
 private:
     RefPtr<RenderTextField> GetRenderTextField() const;

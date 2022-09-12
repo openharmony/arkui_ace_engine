@@ -131,6 +131,13 @@ if (is_standard_system) {
           get_label_info("//third_party/sqlite:sqlite_sdk", "root_out_dir")
       deps += [ "//third_party/sqlite:sqlite_sdk" ]
       sources += [ "${sqlite_path}/common/common/libsqlite_sdk${dylib_suffix}" ]
+
+      # Add dynamic library "libcrypto_restool"
+      libcrypto_path = get_label_info("//third_party/openssl:libcrypto_restool",
+                                      "root_out_dir")
+      deps += [ "//third_party/openssl:libcrypto_restool" ]
+      sources +=
+          [ "${libcrypto_path}/security/huks/libcrypto_restool${dylib_suffix}" ]
     }
 
     # Add dynamic library "hilog"
@@ -228,7 +235,7 @@ if (is_standard_system) {
       sources += [
         "$ace_napi_path/arkui/napi/libace_napi_ark${dylib_suffix}",
         "$ark_js_path/ark/ark_js_runtime/libark_jsruntime${dylib_suffix}",
-        "//third_party/icu/icu4c/source/data/out/tmp/icudt67l.dat",
+        "//third_party/icu/ohos_icu4j/data/icudt69l.dat",
       ]
     } else {
       deps += [ "$ace_napi:ace_napi_quickjs" ]

@@ -36,7 +36,6 @@
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_window.h"
 #include "core/common/text_field_manager.h"
-#include "core/common/watch_dog.h"
 #include "core/common/window.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_constants.h"
@@ -187,9 +186,12 @@ void AceContainer::ParseStageAppConfig(const std::string& assetPath, bool formsE
         return;
     }
     std::string bundleName = appInfo->GetBundleName();
+    auto& moduleInfo = stageModuleParser->GetModuleInfo();
+    const std::string& compileMode = moduleInfo->GetCompileMode();
+    bool isBundle = (compileMode != "esmodule");
     if (frontend_) {
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-        declarativeFrontend->InitializeModuleSearcher(bundleName, assetPath);
+        declarativeFrontend->InitializeModuleSearcher(bundleName, assetPath, isBundle);
     } else {
         LOGE("frontend_ is nullptr");
     }

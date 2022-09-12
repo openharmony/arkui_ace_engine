@@ -228,4 +228,9 @@ void FlutterFontCollection::SetIsZawgyiMyanmar(bool isZawgyiMyanmar)
     });
 }
 
+void FlutterFontCollection::UnloadFont()
+{
+    families_.clear();
+}
+
 } // namespace OHOS::Ace

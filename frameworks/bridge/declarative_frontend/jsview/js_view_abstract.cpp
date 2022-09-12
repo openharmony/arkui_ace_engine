@@ -2152,6 +2152,7 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args, RefPtr<Decoratio
         Dimension borderWidth;
         if (ParseJsDimensionVp(args, borderWidth)) {
             NG::ViewAbstract::SetBorderWidth(borderWidth);
+            return;
         }
     }
     auto stack = ViewStackProcessor::GetInstance();
@@ -2521,6 +2522,7 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args, RefPtr<Decoratio
         Color borderColor;
         if (ParseJsColor(args, borderColor)) {
             NG::ViewAbstract::SetBorderColor(borderColor);
+            return;
         }
     }
     auto stack = ViewStackProcessor::GetInstance();
@@ -2725,6 +2727,7 @@ void JSViewAbstract::ParseBorderStyle(const JSRef<JSVal>& args, RefPtr<Decoratio
     if (Container::IsCurrentUseNewPipeline()) {
         auto borderStyle = static_cast<BorderStyle>(args->ToNumber<int32_t>());
         NG::ViewAbstract::SetBorderStyle(borderStyle);
+        return;
     }
     auto stack = ViewStackProcessor::GetInstance();
     AnimationOption option = stack->GetImplicitAnimationOption();
@@ -3473,7 +3476,7 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
     box->SetOnDragStartId(onDragStartId);
 }
 
-RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& info)
+bool JSViewAbstract::ParseDragItem(const JSRef<JSVal>& info)
 {
     JSRef<JSVal> builder;
     if (info->IsObject()) {
@@ -3482,14 +3485,14 @@ RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& inf
     } else if (info->IsFunction()) {
         builder = info;
     } else {
-        return nullptr;
+        return false;
     }
     if (!builder->IsFunction()) {
-        return nullptr;
+        return false;
     }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     if (!builderFunc) {
-        return nullptr;
+        return false;
     }
     // use another VSP instance while executing the builder function
     ScopedViewStackProcessor builderViewStackProcessor;
@@ -3497,6 +3500,15 @@ RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& inf
         ACE_SCORING_EVENT("onDragStart.builder");
         builderFunc->Execute();
     }
+    return true;
+}
+
+RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& info)
+{
+    if (!ParseDragItem(info)) {
+        return nullptr;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->Finish();
     if (!component) {
         LOGE("Custom component is null.");
@@ -5071,6 +5083,10 @@ void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
         LOGE("info[0] is not a number");
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
+        return;
+    }
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
     if (!boxComponent) {
         LOGE("boxComponent is null");
@@ -5101,42 +5117,65 @@ RefPtr<Gesture> JSViewAbstract::GetTapGesture(const JSCallbackInfo& info, int32_
     return tapGesture;
 }
 
-void JSViewAbstract::JsOnMouse(const JSCallbackInfo& args)
+void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
 {
-    if (args[0]->IsFunction()) {
-        auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-        if (!inspector) {
-            LOGE("fail to get inspector for on mouse event");
-            return;
-        }
-        auto impl = inspector->GetInspectorFunctionImpl();
-        RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args[0]));
-        auto onMouseId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnMouseFunc), impl](
-                             MouseInfo& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            if (impl) {
-                impl->UpdateEventInfo(info);
-            }
-            ACE_SCORING_EVENT("onMouse");
-            func->Execute(info);
-        };
-        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        box->SetOnMouseId(onMouseId);
+    if (!info[0]->IsFunction()) {
+        LOGE("the param is not a function");
+        return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onMouseId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMouseFunc)](MouseInfo& mouseInfo) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onMouse");
+            func->Execute(mouseInfo);
+        };
+        NG::ViewAbstract::SetOnMouse(std::move(onMouseId));
+        return;
+    }
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("fail to get inspector for on mouse event");
+        return;
+    }
+    auto impl = inspector->GetInspectorFunctionImpl();
+    RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onMouseId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMouseFunc), impl](MouseInfo& mouseInfo) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        if (impl) {
+            impl->UpdateEventInfo(mouseInfo);
+        }
+        ACE_SCORING_EVENT("onMouse");
+        func->Execute(mouseInfo);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnMouseId(onMouseId);
 }
 
 void JSViewAbstract::JsOnHover(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
+    if (!info[0]->IsFunction()) {
+        LOGE("the param is not a function");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
         RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
         auto onHoverId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onHover");
             func->Execute(param);
         };
-        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        box->SetOnHoverId(onHoverId);
+        NG::ViewAbstract::SetOnHover(std::move(onHoverId));
+        return;
     }
+    RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onHoverId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onHover");
+        func->Execute(param);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnHoverId(onHoverId);
 }
 
 void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)

@@ -52,7 +52,7 @@ void RenderSlider::Update(const RefPtr<Component>& component)
     }
     sliderComponent_ = slider;
     if (!blockActive_) {
-        Initialize();
+        Initialize(slider);
         if (!slider) {
             LOGE("RenderSlider update with nullptr");
             EventReport::SendRenderException(RenderExcepType::RENDER_COMPONENT_ERR);
@@ -272,29 +272,31 @@ Size RenderSlider::Measure()
     }
 }
 
-void RenderSlider::Initialize()
+void RenderSlider::Initialize(const RefPtr<SliderComponent>& sliderComponent)
 {
-    if (!dragDetector_) {
+    if (sliderComponent && sliderComponent->GetDirection() == Axis::VERTICAL) {
+        dragDetector_ = AceType::MakeRefPtr<VerticalDragRecognizer>();
+    } else {
         dragDetector_ = AceType::MakeRefPtr<HorizontalDragRecognizer>();
-        dragDetector_->SetOnDragStart([weakSlider = AceType::WeakClaim(this)](const DragStartInfo& info) {
-            auto slider = weakSlider.Upgrade();
-            if (slider) {
-                slider->HandleDragStart(info.GetLocalLocation());
-            }
-        });
-        dragDetector_->SetOnDragUpdate([weakSlider = AceType::WeakClaim(this)](const DragUpdateInfo& info) {
-            auto slider = weakSlider.Upgrade();
-            if (slider) {
-                slider->HandleDragUpdate(info.GetLocalLocation());
-            }
-        });
-        dragDetector_->SetOnDragEnd([weakSlider = AceType::WeakClaim(this)](const DragEndInfo& info) {
-            auto slider = weakSlider.Upgrade();
-            if (slider) {
-                slider->HandleDragEnd();
-            }
-        });
     }
+    dragDetector_->SetOnDragStart([weakSlider = AceType::WeakClaim(this)](const DragStartInfo& info) {
+        auto slider = weakSlider.Upgrade();
+        if (slider) {
+            slider->HandleDragStart(info.GetLocalLocation());
+        }
+    });
+    dragDetector_->SetOnDragUpdate([weakSlider = AceType::WeakClaim(this)](const DragUpdateInfo& info) {
+        auto slider = weakSlider.Upgrade();
+        if (slider) {
+            slider->HandleDragUpdate(info.GetLocalLocation());
+        }
+    });
+    dragDetector_->SetOnDragEnd([weakSlider = AceType::WeakClaim(this)](const DragEndInfo& info) {
+        auto slider = weakSlider.Upgrade();
+        if (slider) {
+            slider->HandleDragEnd();
+        }
+    });
     if (!clickDetector_) {
         clickDetector_ = AceType::MakeRefPtr<ClickRecognizer>();
         clickDetector_->SetOnClick([weakSlider = AceType::WeakClaim(this)](const ClickInfo& info) {

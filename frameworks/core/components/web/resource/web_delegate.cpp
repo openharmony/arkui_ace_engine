@@ -189,6 +189,20 @@ void AuthResultOhos::Cancel()
     }
 }
 
+void SslErrorResultOhos::HandleConfirm()
+{
+    if (result_) {
+        result_->HandleConfirm();
+    }
+}
+
+void SslErrorResultOhos::HandleCancel()
+{
+    if (result_) {
+        result_->HandleCancel();
+    }
+}
+
 std::string FileSelectorParamOhos::GetTitle()
 {
     if (param_) {
@@ -525,6 +539,28 @@ void WebDelegate::ClearHistory()
             }
             if (delegate->nweb_) {
                 delegate->nweb_->DeleteNavigateHistory();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::ClearSslCache()
+{
+    LOGE("WebDelegate ClearSslCache");
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("Get context failed, it is null.");
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                LOGE("Get delegate failed, it is null.");
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->ClearSslCache();
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -1330,6 +1366,14 @@ void WebDelegate::SetWebCallBack()
                 }
             });
         });
+        webController->SetClearSslCacheImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ClearSslCache();
+                }
+            });
+        });
         webController->SetAccessStepImpl([weak = WeakClaim(this)](int32_t step) {
             auto delegate = weak.Upgrade();
             if (delegate) {
@@ -1598,6 +1642,14 @@ void WebDelegate::SetWebCallBack()
                 }
             });
         });
+        webController->SetGetUrlImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->GetUrl();
+            }
+            return std::string();
+        });
+
     }
 }
 
@@ -2448,6 +2500,15 @@ bool WebDelegate::OnHttpAuthRequest(const BaseEventInfo* info)
     return webCom->OnHttpAuthRequest(info);
 }
 
+bool WebDelegate::OnSslErrorRequest(const BaseEventInfo* info)
+{
+    auto webCom = webComponent_.Upgrade();
+    if (!webCom) {
+        return false;
+    }
+    return webCom->OnSslErrorRequest(info);
+}
+
 void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,
     const std::string& contentDisposition, const std::string& mimetype, long contentLength)
 {
@@ -2779,6 +2840,14 @@ void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAc
         dragEvent.action = static_cast<OHOS::NWeb::DragAction>(dragAction);
         nweb_->SendDragEvent(dragEvent);
     }
+}
+
+std::string WebDelegate::GetUrl()
+{
+    if (nweb_) {
+        return nweb_->GetUrl();
+    }
+    return "";
 }
 #endif
 

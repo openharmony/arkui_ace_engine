@@ -35,14 +35,7 @@ namespace OHOS::Ace::NG {
 std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, std::nullopt);
-
-    // TODO use theme
-    constexpr double DEFAULT_WIDTH = 30;
-
+    InitializeParam();
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.Width().has_value() && contentConstraint.selfIdealSize.Height().has_value() &&
         contentConstraint.selfIdealSize.IsNonNegative()) {
@@ -65,7 +58,9 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
         return SizeF(height, height);
     }
     // Case 3: Width and height are not set in the front end, so return from the theme
-    auto size = SizeF(DEFAULT_WIDTH, DEFAULT_WIDTH);
+    auto width = defaultWidth_ - 2 * horizontalPadding_;
+    auto height = defaultHeight_ - 2 * verticalPadding_;
+    auto size = SizeF(width, height);
     size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     if (!NearEqual(size.Width(), size.Height())) {
         auto length = std::min(size.Width(), size.Height());
@@ -74,4 +69,16 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     }
     return size;
 }
+
+void CheckBoxLayoutAlgorithm::InitializeParam()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetThemeManager()->GetTheme<CheckboxTheme>();
+    defaultWidth_ = checkBoxTheme->GetDefaultWidth().ConvertToPx();
+    defaultHeight_ = checkBoxTheme->GetDefaultHeight().ConvertToPx();
+    horizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
+    verticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding().ConvertToPx();
+}
+
 } // namespace OHOS::Ace::NG

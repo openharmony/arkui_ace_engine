@@ -23,12 +23,14 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 RosenRenderContext::~RosenRenderContext()
@@ -118,8 +120,8 @@ void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
     Rosen::Vector4f cornerRadius;
     cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPx()),
         static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()));
+        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPx()),
+        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPx()));
     rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
 }
@@ -133,14 +135,12 @@ void RosenRenderContext::OnBorderColorUpdate(const BorderColorProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnBorderWidthUpdate(const BorderWidthProperty& value)
+void RosenRenderContext::UpdateBorderWidth(const BorderWidthPropertyF& value)
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerBorderWidth;
-    cornerBorderWidth.SetValues(static_cast<float>(value.leftDimen.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.rightDimen.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.topDimen.value_or(Dimension()).ConvertToPx()),
-        static_cast<float>(value.bottomDimen.value_or(Dimension()).ConvertToPx()));
+    cornerBorderWidth.SetValues(value.leftDimen.value_or(0), static_cast<float>(value.topDimen.value_or(0)),
+        static_cast<float>(value.rightDimen.value_or(0)), static_cast<float>(value.bottomDimen.value_or(0)));
     rsNode_->SetBorderWidth(cornerBorderWidth);
     RequestNextFrame();
 }
@@ -158,16 +158,14 @@ void RosenRenderContext::OnBorderStyleUpdate(const BorderStyleProperty& value)
 void RosenRenderContext::ResetBlendBgColor()
 {
     CHECK_NULL_VOID(rsNode_);
-    CHECK_NULL_VOID(bgColor_);
-    rsNode_->SetBackgroundColor(bgColor_->GetValue());
+    rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
     RequestNextFrame();
 }
 
 void RosenRenderContext::BlendBgColor(const Color& color)
 {
     CHECK_NULL_VOID(rsNode_);
-    bgColor_ = GetBackgroundColor();
-    auto blendColor = bgColor_.value_or(Color::TRANSPARENT).BlendColor(color);
+    auto blendColor = GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(color);
     rsNode_->SetBackgroundColor(blendColor.GetValue());
     RequestNextFrame();
 }
@@ -302,6 +300,72 @@ void RosenRenderContext::MoveFrame(FrameNode* /*self*/, const RefPtr<FrameNode>&
     if (rsnode) {
         rsNode_->MoveChild(rsnode, index);
     }
+}
+
+void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
+{
+    LOGD("AnimateHoverEffectScale: isHoverd = %{public}d", isHovered);
+    if ((isHovered && isHoveredScale_) || (!isHovered && !isHoveredScale_)) {
+        return;
+    }
+    CHECK_NULL_VOID(rsNode_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto appTheme = themeManager->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
+    float themeScaleStart = appTheme->GetHoverScaleStart();
+    float themeScaleEnd = appTheme->GetHoverScaleEnd();
+    int32_t themeDuration = appTheme->GetHoverDuration();
+    float scaleBegin = isHovered ? themeScaleStart : themeScaleEnd;
+    float scaleEnd = isHovered ? themeScaleEnd : themeScaleStart;
+
+    rsNode_->SetScale(scaleBegin);
+    Rosen::RSAnimationTimingProtocol protocol;
+    protocol.SetDuration(themeDuration);
+    RSNode::Animate(
+        protocol, Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f),
+        [rsNode = rsNode_, scaleEnd]() {
+            if (rsNode) {
+                rsNode->SetScale(scaleEnd);
+            }
+        },
+        []() {});
+    isHoveredScale_ = isHovered;
+}
+
+void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
+{
+    LOGD("AnimateHoverEffectBoard: isHoverd = %{public}d", isHovered);
+    if ((isHovered && isHoveredBoard_) || (!isHovered && !isHoveredBoard_)) {
+        return;
+    }
+    CHECK_NULL_VOID(rsNode_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto appTheme = themeManager->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
+    Color themeHighlightStart = appTheme->GetHoverHighlightStart();
+    Color themeHighlightEnd = appTheme->GetHoverHighlightEnd();
+    int32_t themeDuration = appTheme->GetHoverDuration();
+    Color colorBegin = isHovered ? themeHighlightStart : themeHighlightEnd;
+    Color colorEnd = isHovered ? themeHighlightEnd : themeHighlightStart;
+
+    rsNode_->SetBackgroundColor(colorBegin.GetValue());
+    Rosen::RSAnimationTimingProtocol protocol;
+    protocol.SetDuration(themeDuration);
+    RSNode::Animate(
+        protocol, Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f),
+        [rsNode = rsNode_, colorEnd]() {
+            if (rsNode) {
+                rsNode->SetBackgroundColor(colorEnd.GetValue());
+            }
+        },
+        []() {});
+    isHoveredBoard_ = isHovered;
 }
 
 } // namespace OHOS::Ace::NG

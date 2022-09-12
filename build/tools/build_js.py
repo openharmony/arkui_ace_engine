@@ -50,7 +50,7 @@ def main(argv):
     if os.path.exists(js2bundle_target_path):
         shutil.rmtree(js2bundle_target_path)
     os.makedirs(js2bundle_target_path);
-    js2bundle_target_path = os.path.join(js2bundle_target_path, "ace-js2bundle")
+    js2bundle_target_path = os.path.join(js2bundle_target_path, "ace_js2bundle")
     shutil.copytree(js2bundle_path, js2bundle_target_path, True, ignore=shutil.ignore_patterns('.git'))
     js2bundle_target_path = os.path.join(js2bundle_target_path, "ace-loader")
     os.chdir(js2bundle_target_path)

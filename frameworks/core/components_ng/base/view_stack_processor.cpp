@@ -56,6 +56,16 @@ void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView
     elementsStack_.push(element);
 }
 
+void ViewStackProcessor::PushTabBar(const TabBarParam& tabBarParam)
+{
+    tabBarParam_ = tabBarParam;
+}
+
+const TabBarParam& ViewStackProcessor::PopTabBar() const
+{
+    return tabBarParam_;
+}
+
 bool ViewStackProcessor::ShouldPopImmediately()
 {
     if (elementsStack_.size() <= 1) {

@@ -86,9 +86,14 @@ public:
 
     // mouse event target list.
     void MouseTest(const MouseEvent& touchPoint, const RefPtr<RenderNode>& renderNode);
-
     bool DispatchMouseEvent(const MouseEvent& event);
+    void DispatchMouseHoverAnimation(const MouseEvent& event);
     bool DispatchMouseHoverEvent(const MouseEvent& event);
+
+    void MouseTest(const MouseEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode);
+    bool DispatchMouseEventNG(const MouseEvent& event);
+    void DispatchMouseHoverAnimationNG(const MouseEvent& event);
+    bool DispatchMouseHoverEventNG(const MouseEvent& event);
 
     void AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode);
     bool DispatchAxisEvent(const AxisEvent& event);
@@ -121,6 +126,11 @@ public:
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
+    MouseTestResult currMouseTestResults_;
+    MouseTestResult currHoverTestResults_;
+    MouseTestResult lastHoverTestResults_;
+    WeakPtr<NG::FrameNode> lastHoverNode_;
+    WeakPtr<NG::FrameNode> currHoverNode_;
     TouchTestResult axisTouchTestResult_;
     MouseHoverTestList mouseHoverTestResults_;
     MouseHoverTestList mouseHoverTestResultsPre_;

@@ -517,7 +517,6 @@ void DeclarativeFrontend::PushPage(const std::string& url, const std::string& pa
     }
 }
 
-// navigator component call router
 void DeclarativeFrontend::NavigatePage(uint8_t type, const PageTarget& target, const std::string& params)
 {
     if (!delegate_) {

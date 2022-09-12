@@ -16,18 +16,29 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H
 
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/offset.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
 
+class MouseInfo;
+
+constexpr int32_t MOUSE_PRESS_LEFT = 1;
 static const int32_t MOUSE_BASE_ID = 1000;
+
+// TODO: Need Delete
+using OnHoverEventFunc = std::function<void(bool)>;
+using OnMouseEventFunc = std::function<void(MouseInfo& info)>;
 
 enum class MouseAction : int32_t {
     NONE = 0,
     PRESS = 1,
     RELEASE = 2,
     MOVE = 3,
-    HOVER = 4,
+    WINDOW_ENTER = 4,
+    WINDOW_LEAVE = 5,
+    HOVER,
     HOVER_ENTER,
     HOVER_MOVE,
     HOVER_EXIT,
@@ -48,6 +59,15 @@ enum class MouseButton : int32_t {
     SIDE_BUTTON = 32,
     EXTRA_BUTTON = 64,
     TASK_BUTTON = 128,
+};
+
+enum class HoverEffectType : int32_t {
+    NONE,
+    OPACITY,
+    SCALE,
+    BOARD,
+    AUTO,
+    UNKNOWN,
 };
 
 struct MouseEvent final {
@@ -259,7 +279,74 @@ class MouseEventTarget : public virtual AceType {
     DECLARE_ACE_TYPE(MouseEventTarget, AceType);
 
 public:
-    virtual void HandleEvent(const MouseEvent& event) = 0;
+    MouseEventTarget() = default;
+    ~MouseEventTarget() override = default;
+
+    void SetOnMouseCallback(const OnMouseEventFunc& onMouseCallback)
+    {
+        onMouseCallback_ = onMouseCallback;
+    }
+    void SetOnHoverCallback(const OnHoverEventFunc& onHoverCallback)
+    {
+        onHoverCallback_ = onHoverCallback;
+    }
+
+    void SetCoordinateOffset(const NG::OffsetF& coordinateOffset)
+    {
+        coordinateOffset_ = coordinateOffset;
+    }
+
+    void SetGetEventTargetImpl(const GetEventTargetImpl& getEventTargetImpl)
+    {
+        getEventTargetImpl_ = getEventTargetImpl;
+    }
+
+    std::optional<EventTarget> GetEventTarget() const
+    {
+        if (getEventTargetImpl_) {
+            return getEventTargetImpl_();
+        }
+        return std::nullopt;
+    }
+
+    bool HandleMouseEvent(const MouseEvent& event)
+    {
+        if (!onMouseCallback_) {
+            return false;
+        }
+        MouseInfo info;
+        info.SetButton(event.button);
+        info.SetAction(event.action);
+        info.SetGlobalLocation(event.GetOffset());
+        Offset localLocation = Offset(
+            event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
+        info.SetLocalLocation(localLocation);
+        info.SetScreenLocation(event.GetScreenOffset());
+        info.SetTimeStamp(event.time);
+        info.SetDeviceId(event.deviceId);
+        info.SetSourceDevice(event.sourceType);
+        info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        onMouseCallback_(info);
+        return info.IsStopPropagation();
+    }
+
+    bool HandleHoverEvent(bool isHovered)
+    {
+        LOGI("Do HanleHoverEvent. isHovered = %{public}d", isHovered);
+        if (!onHoverCallback_) {
+            return false;
+        }
+        onHoverCallback_(isHovered);
+        return true;
+    }
+
+    virtual void HandleEvent(const MouseEvent& event) {}
+
+private:
+    OnMouseEventFunc onMouseCallback_;
+    OnHoverEventFunc onHoverCallback_;
+    NG::OffsetF coordinateOffset_;
+    GetEventTargetImpl getEventTargetImpl_;
 };
 
 using MouseTestResult = std::list<RefPtr<MouseEventTarget>>;

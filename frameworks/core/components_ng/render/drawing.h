@@ -33,12 +33,16 @@ using RSColorMatrix = Rosen::Drawing::ColorMatrix;
 using RSPen = Rosen::Drawing::Pen;
 using RSColor = Rosen::Drawing::Color;
 using RSRect = Rosen::Drawing::RectF;
+using RSRoundRect = Rosen::Drawing::RoundRect;
 using RSPoint = Rosen::Drawing::PointF;
 using RSBlendMode = Rosen::Drawing::BlendMode;
 using RSSamplingOptions = Rosen::Drawing::SamplingOptions;
 using RSRoundRect = Rosen::Drawing::RoundRect;
 using RSPath = Rosen::Drawing::Path;
 
+using RSPathEffect = rosen::PathEffect;
+using RSPathDirection = rosen::PathDirection;
+using RSPathDashStyle = rosen::PathDashStyle;
 using RSParagraph = rosen::Typography;
 using RSParagraphBuilder = rosen::TypographyCreate;
 using RSFontCollection = rosen::FontCollection;

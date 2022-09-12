@@ -29,6 +29,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -139,6 +140,11 @@ public:
         return eventHub_->GetOrCreateGestureEventHub();
     }
 
+    RefPtr<InputEventHub> GetOrCreateInputEventHub() const
+    {
+        return eventHub_->GetOrCreateInputEventHub();
+    }
+
     const RefPtr<LayoutProperty>& GetLayoutProperty() const
     {
         return layoutProperty_;
@@ -149,6 +155,26 @@ public:
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+
+    HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
+        MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
+
+    void AnimateHoverEffect(bool isHovered) const
+    {
+        auto renderContext = GetRenderContext();
+        if (!renderContext) {
+            return;
+        }
+        HoverEffectType animationType = HoverEffectType::UNKNOWN;
+        if (eventHub_->GetInputEventHub()) {
+            animationType = eventHub_->GetInputEventHub()->GetHoverEffect();
+        }
+        if (animationType == HoverEffectType::SCALE) {
+            renderContext->AnimateHoverEffectScale(isHovered);
+        } else if (animationType == HoverEffectType::BOARD) {
+            renderContext->AnimateHoverEffectBoard(isHovered);
+        }
+    }
 
     bool IsAtomicNode() const override;
 

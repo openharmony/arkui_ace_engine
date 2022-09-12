@@ -29,8 +29,8 @@ template<typename T>
 struct BorderRadiusPropertyT {
     std::optional<T> radiusTopLeft;
     std::optional<T> radiusTopRight;
-    std::optional<T> radiusBottomLeft;
     std::optional<T> radiusBottomRight;
+    std::optional<T> radiusBottomLeft;
 
     void SetRadius(const T& borderRadius)
     {
@@ -89,8 +89,8 @@ template<>
 struct BorderRadiusPropertyT<float> {
     std::optional<float> radiusTopLeft;
     std::optional<float> radiusTopRight;
-    std::optional<float> radiusBottomLeft;
     std::optional<float> radiusBottomRight;
+    std::optional<float> radiusBottomLeft;
 
     bool operator==(const BorderRadiusPropertyT<float>& value) const
     {
@@ -175,8 +175,8 @@ struct BorderColorPropertyT {
 template<typename T>
 struct BorderWidthPropertyT {
     std::optional<T> leftDimen;
-    std::optional<T> rightDimen;
     std::optional<T> topDimen;
+    std::optional<T> rightDimen;
     std::optional<T> bottomDimen;
 
     void SetBorderWidth(const T& borderWidth)
@@ -229,8 +229,8 @@ struct BorderWidthPropertyT {
 template<>
 struct BorderWidthPropertyT<float> {
     std::optional<float> leftDimen;
-    std::optional<float> rightDimen;
     std::optional<float> topDimen;
+    std::optional<float> rightDimen;
     std::optional<float> bottomDimen;
 
     bool operator==(const BorderWidthPropertyT<float>& value) const

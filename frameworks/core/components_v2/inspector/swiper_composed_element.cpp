@@ -36,7 +36,13 @@ const std::unordered_map<std::string, std::function<std::string(const SwiperComp
     { "itemSpace", [](const SwiperComposedElement& inspector) { return inspector.GetItemSpace(); } },
     { "curve", [](const SwiperComposedElement& inspector) { return inspector.GetCurve(); } },
     { "indicatorStyle", [](const SwiperComposedElement& inspector) { return inspector.GetIndicatorStyle(); } },
+    { "effectMode", [](const SwiperComposedElement& inspector) { return inspector.GetEffectMode(); } },
+    { "displayMode", [](const SwiperComposedElement& inspector) { return inspector.GetDisplayMode(); } }
+};
+
+const std::unordered_map<std::string, std::function<int32_t(const SwiperComposedElement&)>> CREATE_JSON_INT_MAP {
     { "cachedCount", [](const SwiperComposedElement& inspector) { return inspector.GetCachedCount(); } },
+    { "displayCount", [](const SwiperComposedElement& inspector) { return inspector.GetDisplayCount(); } }
 };
 
 } // namespace
@@ -68,6 +74,9 @@ std::unique_ptr<JsonValue> SwiperComposedElement::ToJsonObject() const
     auto resultJson = InspectorComposedElement::ToJsonObject();
     for (const auto& value : CREATE_JSON_MAP) {
         resultJson->Put(value.first.c_str(), value.second(*this).c_str());
+    }
+    for (const auto& value : CREATE_JSON_INT_MAP) {
+        resultJson->Put(value.first.c_str(), value.second(*this));
     }
     return resultJson;
 }
@@ -240,11 +249,54 @@ RefPtr<RenderSwiper> SwiperComposedElement::GetRenderSwiper() const
     return nullptr;
 }
 
-std::string SwiperComposedElement::GetCachedCount() const
+int32_t SwiperComposedElement::GetCachedCount() const
 {
     auto renderSwiper = GetRenderSwiper();
     auto cachedCount = renderSwiper ? renderSwiper->GetCachedCount() : 1;
-    return std::to_string(cachedCount);
+    return cachedCount;
+}
+
+std::string SwiperComposedElement::GetEffectMode() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    if (!renderSwiper) {
+        return "EdgeEffect.Spring";
+    }
+    switch (renderSwiper->GetEdgeEffect()) {
+        case EdgeEffect::FADE:
+            return "EdgeEffect.Fade";
+        case EdgeEffect::NONE:
+            return "EdgeEffect.None";
+        case EdgeEffect::SPRING:
+        default:
+            return "EdgeEffect.Spring";
+    }
+    return "EdgeEffect.Spring";
+}
+
+std::string SwiperComposedElement::GetDisplayMode() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    if (!renderSwiper) {
+        return "SwiperDisplayMode.Stretch";
+    }
+    switch (renderSwiper->GetDisplayMode()) {
+        case SwiperDisplayMode::AUTO_LINEAR:
+            return "SwiperDisplayMode.AutoLinear";
+        case SwiperDisplayMode::STRETCH:
+        default:
+            return "SwiperDisplayMode.Stretch";
+    }
+    return "SwiperDisplayMode.Stretch";
+}
+
+int32_t SwiperComposedElement::GetDisplayCount() const
+{
+    auto renderSwiper = GetRenderSwiper();
+    if (!renderSwiper) {
+        return 1;
+    }
+    return renderSwiper->GetDisplayCount();
 }
 
 void SwiperComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)

@@ -163,7 +163,7 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(
     auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
     auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
 
-    return BorderWidthPropertyF { left, right, top, bottom };
+    return BorderWidthPropertyF { left, top, right, bottom };
 }
 
 void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize,

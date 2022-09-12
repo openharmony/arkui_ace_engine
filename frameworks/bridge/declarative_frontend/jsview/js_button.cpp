@@ -27,6 +27,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/text/text_view.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -252,6 +253,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
             if ((info.Length() > 1) && info[1]->IsObject()) {
                 SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
             }
+            NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
             return;
         }
         auto textComponent = AceType::MakeRefPtr<TextComponent>(label);
@@ -268,13 +270,14 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::Create();
+        NG::ButtonView::Create(V2::BUTTON_ETS_TAG);
         if (!labelSet && info[0]->IsObject()) {
             SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
         }
         if ((info.Length() > 1) && info[1]->IsObject()) {
             SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[1]));
         }
+        NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
         return;
     }
     auto buttonComponent = AceType::MakeRefPtr<ButtonComponent>(buttonChildren);
@@ -298,11 +301,12 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
 void JSButton::CreateWithChild(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::Create();
+        NG::ButtonView::Create(V2::BUTTON_ETS_TAG);
         if (info[0]->IsObject()) {
             auto obj = JSRef<JSObject>::Cast(info[0]);
             SetTypeAndStateEffect(obj);
         }
+        NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
         return;
     }
     std::list<RefPtr<Component>> buttonChildren;
@@ -692,6 +696,10 @@ void JSButton::JsHoverEffect(const JSCallbackInfo& info)
 {
     if (!info[0]->IsNumber()) {
         LOGE("The arg is not a number");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
         return;
     }
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

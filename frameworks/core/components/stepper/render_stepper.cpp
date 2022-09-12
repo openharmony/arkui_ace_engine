@@ -378,7 +378,12 @@ void RenderStepper::UpdateButtonStatus()
         rightButtonData_.buttonType = StepperButtonType::NONE;
         return;
     }
-    LoadDefaultButtonStatus();
+    if (needReverse_) {
+        LoadDefaultButtonStatus(rightButtonData_, leftButtonData_);
+    } else {
+        LoadDefaultButtonStatus(leftButtonData_, rightButtonData_);
+    }
+    
     UpdateRightButtonStatus(stepperLabels_[currentIndex_].initialStatus,
         Localization::GetInstance()->GetEntryLetters("stepper.skip"));
 }
@@ -398,40 +403,40 @@ void RenderStepper::UpdateRightButtonStatus(const std::string& status, const std
     }
 }
 
-void RenderStepper::LoadDefaultButtonStatus()
+void RenderStepper::LoadDefaultButtonStatus(ControlPanelData& buttonDataPrev, ControlPanelData& buttonDataNext)
 {
     std::string leftLabel = stepperLabels_[currentIndex_].leftLabel;
     std::string rightLabel = stepperLabels_[currentIndex_].rightLabel;
     if (totalItemCount_ == 1) {
-        leftButtonData_.buttonType = StepperButtonType::NONE;
-        rightButtonData_.buttonType = StepperButtonType::TEXT;
-        rightButtonData_.buttonStatus = StepperButtonStatus::NORMAL;
-        rightButtonData_.text = rightLabel.empty() ?
+        buttonDataPrev.buttonType = StepperButtonType::NONE;
+        buttonDataNext.buttonType = StepperButtonType::TEXT;
+        buttonDataNext.buttonStatus = StepperButtonStatus::NORMAL;
+        buttonDataNext.text = rightLabel.empty() ?
             Localization::GetInstance()->GetEntryLetters("stepper.start") : rightLabel;
     } else if (totalItemCount_ > 1) {
         if (currentIndex_ == 0) {
-            leftButtonData_.buttonType = StepperButtonType::NONE;
-            rightButtonData_.buttonType = StepperButtonType::TEXT_ARROW;
-            rightButtonData_.buttonStatus = StepperButtonStatus::NORMAL;
-            rightButtonData_.text = rightLabel.empty() ?
+            buttonDataPrev.buttonType = StepperButtonType::NONE;
+            buttonDataNext.buttonType = StepperButtonType::TEXT_ARROW;
+            buttonDataNext.buttonStatus = StepperButtonStatus::NORMAL;
+            buttonDataNext.text = rightLabel.empty() ?
                 Localization::GetInstance()->GetEntryLetters("stepper.next") : rightLabel;
         } else if (currentIndex_ == totalItemCount_ - 1) {
-            leftButtonData_.buttonType = StepperButtonType::TEXT_ARROW;
-            leftButtonData_.buttonStatus = StepperButtonStatus::NORMAL;
-            leftButtonData_.text = leftLabel.empty() ?
+            buttonDataPrev.buttonType = StepperButtonType::TEXT_ARROW;
+            buttonDataPrev.buttonStatus = StepperButtonStatus::NORMAL;
+            buttonDataPrev.text = leftLabel.empty() ?
                 Localization::GetInstance()->GetEntryLetters("stepper.back") : leftLabel;
-            rightButtonData_.buttonType = StepperButtonType::TEXT;
-            rightButtonData_.text = rightLabel.empty() ?
+            buttonDataNext.buttonType = StepperButtonType::TEXT;
+            buttonDataNext.text = rightLabel.empty() ?
                 Localization::GetInstance()->GetEntryLetters("stepper.start") : rightLabel;
-            rightButtonData_.buttonStatus = StepperButtonStatus::NORMAL;
+            buttonDataNext.buttonStatus = StepperButtonStatus::NORMAL;
         } else {
-            leftButtonData_.buttonType = StepperButtonType::TEXT_ARROW;
-            leftButtonData_.buttonStatus = StepperButtonStatus::NORMAL;
-            leftButtonData_.text = leftLabel.empty() ?
+            buttonDataPrev.buttonType = StepperButtonType::TEXT_ARROW;
+            buttonDataPrev.buttonStatus = StepperButtonStatus::NORMAL;
+            buttonDataPrev.text = leftLabel.empty() ?
                 Localization::GetInstance()->GetEntryLetters("stepper.back") : leftLabel;
-            rightButtonData_.buttonType = StepperButtonType::TEXT_ARROW;
-            rightButtonData_.buttonStatus = StepperButtonStatus::NORMAL;
-            rightButtonData_.text = rightLabel.empty() ?
+            buttonDataNext.buttonType = StepperButtonType::TEXT_ARROW;
+            buttonDataNext.buttonStatus = StepperButtonStatus::NORMAL;
+            buttonDataNext.text = rightLabel.empty() ?
                 Localization::GetInstance()->GetEntryLetters("stepper.next") : rightLabel;
         }
     }
@@ -658,18 +663,34 @@ void RenderStepper::FireItemEvent(int32_t index, bool isAppear) const
 
 int32_t RenderStepper::GetPrevIndex() const
 {
-    int32_t index = currentIndex_ - 1;
-    if (index < 0) {
-        index = 0;
+    int32_t index;
+    if (needReverse_) {
+        index = currentIndex_ + 1;
+        if (index >= totalItemCount_) {
+            index = totalItemCount_ - 1;
+        }
+    } else {
+        index = currentIndex_ - 1;
+        if (index < 0) {
+            index = 0;
+        }
     }
     return index;
 }
 
 int32_t RenderStepper::GetNextIndex() const
 {
-    int32_t index = currentIndex_ + 1;
-    if (index >= totalItemCount_) {
-        index = totalItemCount_ - 1;
+    int32_t index;
+    if (needReverse_) {
+        index = currentIndex_ - 1;
+        if (index < 0) {
+            index = 0;
+        }
+    } else {
+        index = currentIndex_ + 1;
+        if (index >= totalItemCount_) {
+            index = totalItemCount_ - 1;
+        }
     }
     return index;
 }
@@ -832,12 +853,42 @@ void RenderStepper::HandleClick(const ClickInfo& clickInfo)
 
     leftHotRect_ = leftButtonData_.displayRender->GetPaintRect() + GetGlobalOffset();
     if (leftHotRect_.IsInRegion(clickPoint)) {
-        StepperPrev();
+        if (needReverse_) {
+            HandleLeftButtonClick();
+        } else {
+            StepperPrev();
+        }
     }
 
     rightHotRect_ = rightButtonData_.displayRender->GetPaintRect() + GetGlobalOffset();
     if (rightHotRect_.IsInRegion(clickPoint)) {
-        HandleRightButtonClick();
+        if (needReverse_) {
+            StepperNext();
+        } else {
+            HandleRightButtonClick();
+        }
+    }
+}
+
+void RenderStepper::HandleLeftButtonClick()
+{
+    switch (leftButtonData_.buttonStatus) {
+        case StepperButtonStatus::NORMAL:
+            if (currentIndex_ == totalItemCount_ - 1) {
+                FireFinishEvent();
+            } else {
+                StepperPrev();
+            }
+            break;
+        case StepperButtonStatus::SKIP:
+            FireSkipEvent();
+            break;
+        case StepperButtonStatus::DISABLED:
+            break;
+        case StepperButtonStatus::WAITING:
+            break;
+        default:
+            break;
     }
 }
 
@@ -970,9 +1021,17 @@ void RenderStepper::UpdateButtonFocus(bool focus, bool isLeft)
 void RenderStepper::HandleButtonClick(bool isLeft)
 {
     if (isLeft) {
-        StepperPrev();
+        if (needReverse_) {
+            HandleLeftButtonClick();
+        } else {
+            StepperPrev();
+        }
     } else {
-        HandleRightButtonClick();
+        if (needReverse_) {
+            StepperNext();
+        } else {
+            HandleRightButtonClick();
+        }
     }
 }
 

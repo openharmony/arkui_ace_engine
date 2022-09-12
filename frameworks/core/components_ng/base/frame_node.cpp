@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/render_context.h"
@@ -184,11 +185,18 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     bool frameOffsetChange = geometryNode_->GetFrameOffset() != dirty->GetGeometryNode()->GetFrameOffset();
     bool contentSizeChange = geometryNode_->GetContentSize() != dirty->GetGeometryNode()->GetContentSize();
     bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
-    if (frameSizeChange || frameOffsetChange) {
+    if (frameSizeChange || frameOffsetChange || (pattern_->SurfaceNodeName().has_value() && contentSizeChange)) {
         renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
     }
     if (layoutProperty_->GetBorderWidthProperty()) {
-        renderContext_->UpdateBorderWidth(*layoutProperty_->GetBorderWidthProperty());
+        if (layoutProperty_->GetLayoutConstraint().has_value()) {
+            renderContext_->UpdateBorderWidth(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+                ScaleProperty::CreateScaleProperty(),
+                layoutProperty_->GetLayoutConstraint()->percentReference.Width()));
+        } else {
+            renderContext_->UpdateBorderWidth(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
+                ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
+        }
     }
     SetGeometryNode(dirty->MoveGeometryNode());
     pattern_->OnLayoutChange(frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange);
@@ -545,6 +553,56 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
     }
     result.splice(result.end(), std::move(newComingTargets));
+    if (preventBubbling) {
+        return HitTestResult::STOP_BUBBLING;
+    }
+    return HitTestResult::BUBBLING;
+}
+
+HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
+{
+    const auto& rect = geometryNode_->GetFrame().GetRect();
+    LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
+        GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    // TODO: disableTouchEvent || disabled_ need handle
+
+    // TODO: Region need change to RectList
+    if (!rect.IsInRegion(parentLocalPoint)) {
+        return HitTestResult::OUT_OF_REGION;
+    }
+
+    bool preventBubbling = false;
+
+    const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
+    const auto& children = GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        auto childHitResult = child->MouseTest(globalPoint, localPoint, onMouseResult, onHoverResult, hoverNode);
+        if (childHitResult == HitTestResult::STOP_BUBBLING) {
+            preventBubbling = true;
+        }
+        // In normal process, the node block the brother node.
+        if (childHitResult == HitTestResult::BUBBLING) {
+            // TODO: add hit test mode judge.
+            break;
+        }
+    }
+
+    MouseTestResult mouseResult;
+    MouseTestResult hoverResult;
+    bool isPrevent = true;
+    auto mouseHub = eventHub_->GetInputEventHub();
+    if (mouseHub) {
+        const auto coordinateOffset = globalPoint - localPoint;
+        isPrevent = mouseHub->ProcessMouseTestHit(coordinateOffset, mouseResult, hoverResult, hoverNode);
+        onHoverResult.splice(onHoverResult.end(), std::move(hoverResult));
+    }
+
+    if (!preventBubbling) {
+        preventBubbling = isPrevent;
+        onMouseResult.splice(onMouseResult.end(), std::move(mouseResult));
+    }
     if (preventBubbling) {
         return HitTestResult::STOP_BUBBLING;
     }

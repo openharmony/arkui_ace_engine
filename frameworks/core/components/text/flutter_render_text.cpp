@@ -102,11 +102,19 @@ void FlutterRenderText::Paint(RenderContext& context, const Offset& offset)
 
     switch (textStyle_.GetTextAlign()) {
         case TextAlign::LEFT:
+            break;
         case TextAlign::START:
+            if (TextDirection::RTL == defaultTextDirection_) {
+                newX = paintOffset.GetX() + (GetLayoutSize().Width() - textRealWidth);
+            }
             break;
         case TextAlign::RIGHT:
-        case TextAlign::END:
             newX = paintOffset.GetX() + (GetLayoutSize().Width() - textRealWidth);
+            break;
+        case TextAlign::END:
+            if (TextDirection::RTL != defaultTextDirection_) {
+                newX = paintOffset.GetX() + (GetLayoutSize().Width() - textRealWidth);
+            }
             break;
         case TextAlign::CENTER:
             newX = paintOffset.GetX() + (GetLayoutSize().Width() - textRealWidth) / 2.0;
@@ -451,7 +459,9 @@ bool FlutterRenderText::UpdateParagraph()
                 }
             }
         }
-        ChangeDirectionIfNeeded(data);
+        if (!ChangeDirectionIfNeeded(data)) {
+            defaultTextDirection_ = text_->GetTextDirection();
+        }
     }
     std::string displayData = ApplyWhiteSpace();
     style.text_direction = ConvertTxtTextDirection(defaultTextDirection_);
@@ -531,31 +541,32 @@ bool FlutterRenderText::DidExceedMaxLines(double paragraphMaxWidth)
     return false;
 }
 
-void FlutterRenderText::ChangeDirectionIfNeeded(const std::string& data)
+bool FlutterRenderText::ChangeDirectionIfNeeded(const std::string& data)
 {
     auto declaration = text_->GetDeclaration();
     if (!declaration) {
-        return;
+        return false;
     }
     auto& commonAttr = static_cast<CommonAttribute&>(declaration->GetAttribute(AttributeTag::COMMON_ATTR));
     if (!commonAttr.IsValid() || commonAttr.direction != TextDirection::AUTO) {
-        return;
+        return false;
     }
     auto showingTextForWString = StringUtils::ToWstring(data);
     for (const auto& charOfShowingText : showingTextForWString) {
         if (u_charDirection(charOfShowingText) == UCharDirection::U_LEFT_TO_RIGHT) {
             defaultTextDirection_ = TextDirection::LTR;
-            break;
+            return true;
         } else if (u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT ||
                    u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
             defaultTextDirection_ = TextDirection::RTL;
-            break;
+            return true;
         } else if (!IsCompatibleVersion() &&
                    u_charDirection(charOfShowingText) == UCharDirection::U_ARABIC_NUMBER) {
             defaultTextDirection_ = TextDirection::RTL;
-            break;
+            return true;
         }
     }
+    return false;
 }
 
 bool FlutterRenderText::MaybeRelease()

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/base/ui_node.h"
 
+#include <algorithm>
+
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -58,14 +60,42 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
     MarkNeedSyncRenderTree();
 }
 
-void UINode::RemoveChild(const RefPtr<UINode>& child)
+std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
 {
-    CHECK_NULL_VOID(child);
+    CHECK_NULL_RETURN(child, children_.end());
+
+    auto iter = std::find(children_.begin(), children_.end(), child);
+    if (iter == children_.end()) {
+        LOGE("child is not exist.");
+        return children_.end();
+    }
+
     if (onMainTree_) {
         child->DetachFromMainTree();
     }
     OnChildRemoved(child);
-    children_.remove(child);
+    auto result = children_.erase(iter);
+    MarkNeedSyncRenderTree();
+    return result;
+}
+
+void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode)
+{
+    if (!oldNode) {
+        if (newNode) {
+            AddChild(newNode);
+        }
+        return;
+    }
+
+    auto iter = RemoveChild(oldNode);
+    children_.insert(iter, newNode);
+    newNode->SetParent(Claim(this));
+    newNode->SetDepth(GetDepth() + 1);
+    if (onMainTree_) {
+        newNode->AttachToMainTree();
+    }
+    OnChildAdded(newNode);
     MarkNeedSyncRenderTree();
 }
 
@@ -222,6 +252,23 @@ HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentL
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
         auto& child = *iter;
         auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+        if (hitResult == HitTestResult::STOP_BUBBLING) {
+            return HitTestResult::STOP_BUBBLING;
+        }
+        if (hitResult == HitTestResult::BUBBLING) {
+            hitTestResult = HitTestResult::BUBBLING;
+        }
+    }
+    return hitTestResult;
+}
+
+HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
+{
+    HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
+    for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
+        auto& child = *iter;
+        auto hitResult = child->MouseTest(globalPoint, parentLocalPoint, onMouseResult, onHoverResult, hoverNode);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }

@@ -682,6 +682,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     {"RotationGesture", JSGesture::JSBind},
     {"GestureGroup", JSGesture::JSBind},
     {"PanGestureOption", JSPanGestureOption::JSBind},
+    {"PanGestureOptions", JSPanGestureOption::JSBind},
     {"CustomDialogController", JSCustomDialogController::JSBind},
     {"Scroller", JSScroller::JSBind},
     {"SwiperController", JSSwiperController::JSBind},

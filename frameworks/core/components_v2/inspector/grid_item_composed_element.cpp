@@ -29,7 +29,8 @@ const std::unordered_map<std::string, std::function<std::string(const GridItemCo
     { "rowEnd", [](const GridItemComposedElement& inspector) { return inspector.GetRowEnd(); } },
     { "columnStart", [](const GridItemComposedElement& inspector) { return inspector.GetColumnStart(); } },
     { "columnEnd", [](const GridItemComposedElement& inspector) { return inspector.GetColumnEnd(); } },
-    { "forceRebuild", [](const GridItemComposedElement& inspector) { return inspector.GetForceRebuild(); } }
+    { "forceRebuild", [](const GridItemComposedElement& inspector) { return inspector.GetForceRebuild(); } },
+    { "selectable", [](const GridItemComposedElement& inspector) { return inspector.GetSelectable(); } }
 };
 
 }
@@ -134,6 +135,19 @@ std::string GridItemComposedElement::GetForceRebuild() const
         return renderGripItem->GetForceRebuild() ? "true" : "false";
     }
     return "false";
+}
+
+std::string GridItemComposedElement::GetSelectable() const
+{
+    auto node = GetInspectorNode(GridLayoutItemElement::TypeId(), true);
+    if (!node) {
+        return "true";
+    }
+    auto renderGripItem = AceType::DynamicCast<RenderGridLayoutItem>(node);
+    if (renderGripItem) {
+        return renderGripItem->GetSelectable() ? "true" : "false";
+    }
+    return "true";
 }
 
 void GridItemComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)

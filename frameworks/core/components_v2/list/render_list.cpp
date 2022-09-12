@@ -109,6 +109,7 @@ void RenderList::Update(const RefPtr<Component>& component)
     component_ = AceType::DynamicCast<ListComponent>(component);
     ACE_DCHECK(component_);
 
+    isRightToLeft_ = component_->GetTextDirection() == TextDirection::RTL ? true : false;
     RemoveAllItems();
 
     auto axis = component_->GetDirection();
@@ -821,6 +822,15 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
         // set item position for one row
         for (size_t i = 0; i < itemSet.size(); i++) {
             auto position = offset + MakeValue<Offset>(0.0, childCrossSize / itemSet.size() * i);
+            if (isRightToLeft_) {
+                if (IsVertical()) {
+                    position = MakeValue<Offset>(
+                        GetMainAxis(position), crossSize - childCrossSize / itemSet.size() - GetCrossAxis(position));
+                } else {
+                    position = MakeValue<Offset>(
+                        mainSize - childMainSize - GetMainAxis(position), GetCrossAxis(position));
+                }
+            }
             SetChildPosition(itemSet[i], position);
         }
 
@@ -902,7 +912,17 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
             const auto& stickyItemLayoutSize = currentStickyItem_->GetLayoutSize();
             const double mainStickySize = GetMainSize(stickyItemLayoutSize) + spaceWidth_;
             if (nextStickyItem && LessNotEqual(nextStickyMainAxis, mainStickySize)) {
-                currentStickyItem_->SetPosition(MakeValue<Offset>(nextStickyMainAxis - mainStickySize, 0.0));
+                auto position = MakeValue<Offset>(nextStickyMainAxis - mainStickySize, 0.0);
+                if (isRightToLeft_) {
+                    if (IsVertical()) {
+                        position = MakeValue<Offset>(
+                            GetMainAxis(position), crossSize - GetCrossSize(stickyItemLayoutSize) - GetCrossAxis(position));
+                    } else {
+                        position = MakeValue<Offset>(
+                            mainSize - mainStickySize - GetMainAxis(position), GetCrossAxis(position));
+                    }
+                }
+                currentStickyItem_->SetPosition(position);
             } else {
                 currentStickyItem_->SetPosition(MakeValue<Offset>(0.0, 0.0));
             }
@@ -974,6 +994,13 @@ Size RenderList::SetItemsPosition(double mainSize)
             offset += MakeValue<Offset>(-chainDelta, 0.0);
         }
 
+        if (isRightToLeft_) {
+            if (IsVertical()) {
+                offset = MakeValue<Offset>(GetMainAxis(offset), crossSize - GetCrossSize(childLayoutSize) - GetCrossAxis(offset));
+            } else {
+                offset = MakeValue<Offset>(mainSize - GetMainSize(childLayoutSize) - GetMainAxis(offset), GetCrossAxis(offset));
+            }
+        }
         SetChildPosition(child, offset);
         // Disable sticky mode while expand all items
         if (fixedMainSize_ && child->GetSticky() != StickyMode::NONE) {
@@ -1024,7 +1051,17 @@ Size RenderList::SetItemsPosition(double mainSize)
         const double mainStickySize = GetMainSize(stickyItemLayoutSize) + spaceWidth_;
         auto offsetCross = CalculateLaneCrossOffset(crossSize, GetCrossSize(currentStickyItem_->GetLayoutSize()));
         if (nextStickyItem && LessNotEqual(nextStickyMainAxis, mainStickySize)) {
-            currentStickyItem_->SetPosition(MakeValue<Offset>(nextStickyMainAxis - mainStickySize, offsetCross));
+            auto position = MakeValue<Offset>(nextStickyMainAxis - mainStickySize, offsetCross);
+            if (isRightToLeft_) {
+                if (IsVertical()) {
+                    position = MakeValue<Offset>(
+                        GetMainAxis(position), crossSize - GetCrossSize(stickyItemLayoutSize) - GetCrossAxis(position));
+                } else {
+                    position = MakeValue<Offset>(
+                        mainSize - mainStickySize - GetMainAxis(position), GetCrossAxis(position));
+                }
+            }
+            currentStickyItem_->SetPosition(position);
         } else {
             currentStickyItem_->SetPosition(MakeValue<Offset>(0.0, offsetCross));
         }
@@ -2159,7 +2196,10 @@ void RenderList::UpdateAccessibilityVisible()
         if (!listItem || listItem->GetChildren().empty()) {
             continue;
         }
-        auto node = listItem->GetAccessibilityNode().Upgrade();
+        // RenderListItem's accessibility node is List's in v2, see ViewStackProcessor::WrapComponents() and
+        // RenderElement::SetAccessibilityNode
+        auto listItemWithAccessibilityNode = listItem->GetFirstChild();
+        auto node = listItemWithAccessibilityNode->GetAccessibilityNode().Upgrade();
         if (!node) {
             continue;
         }
@@ -2169,10 +2209,10 @@ void RenderList::UpdateAccessibilityVisible()
             listItemRect.SetOffset(globalOffset + listItem->GetPosition());
             visible = listItemRect.IsIntersectWith(viewPortRect);
         }
-        listItem->SetAccessibilityVisible(visible);
+        listItemWithAccessibilityNode->SetAccessibilityVisible(visible);
         if (visible) {
             Rect clampRect = listItemRect.Constrain(viewPortRect);
-            listItem->SetAccessibilityRect(clampRect);
+            listItemWithAccessibilityNode->SetAccessibilityRect(clampRect);
         } else {
             listItem->NotifyPaintFinish();
         }
@@ -3076,6 +3116,7 @@ void RenderList::AddChildItem(RefPtr<RenderNode> child)
 
 void RenderList::SizeChangeOffset(double newWindowHeight)
 {
+    LOGD("list newWindowHeight = %{public}f", newWindowHeight);
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -3083,6 +3124,10 @@ void RenderList::SizeChangeOffset(double newWindowHeight)
     auto textFieldManager = AceType::DynamicCast<TextFieldManager>(context->GetTextFieldManager());
     // only need to offset vertical lists
     if (textFieldManager && vertical_) {
+        // only when textField is onFocus
+        if (!textFieldManager->GetOnFocusTextField().Upgrade()) {
+            return;
+        }
         auto position = textFieldManager->GetClickPosition().GetY();
         double offset = newWindowHeight - position;
         if (LessOrEqual(offset, 0.0)) {
@@ -3090,6 +3135,7 @@ void RenderList::SizeChangeOffset(double newWindowHeight)
             currentOffset_ += offset;
             startIndexOffset_ += offset;
         }
+        LOGD("size change offset applied, %{public}f", offset);
     }
 }
 

@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT GroupNode : public FrameNode {
     DECLARE_ACE_TYPE(GroupNode, FrameNode);
+
 public:
     GroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false)
         : FrameNode(tag, nodeId, pattern, isRoot) {}

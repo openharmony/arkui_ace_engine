@@ -264,7 +264,7 @@ public:
         return;
     }
 
-    virtual void InitializeModuleSearcher(const std::string& bundleName, const std::string assetPath)
+    virtual void InitializeModuleSearcher(const std::string& bundleName, const std::string assetPath, bool isBundle)
     {
         LOGE("V8 and QuickJs does not support InitializeModuleSearcher");
     }

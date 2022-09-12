@@ -159,11 +159,12 @@ private:
     void UpdateButton(ControlPanelData& buttonData);
     void UpdateButtonStatus();
     void UpdateRightButtonStatus(const std::string& status, const std::string& label);
-    void LoadDefaultButtonStatus();
+    void LoadDefaultButtonStatus(ControlPanelData& buttonDataPrev, ControlPanelData& buttonDataNext);
     void LayoutButton(ControlPanelData& buttonData);
     void LayoutProgress();
     void SetRightButtonStatus(const std::string& status, const std::string& label);
     void HandleRightButtonClick();
+    void HandleLeftButtonClick();
     void FireFinishEvent() const;
     void FireSkipEvent() const;
     void FireChangedEvent(int32_t oldIndex, int32_t newIndex) const;

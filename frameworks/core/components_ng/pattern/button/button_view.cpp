@@ -52,12 +52,12 @@ void ButtonView::CreateWithLabel(const std::string& label)
     stack->Push(frameNode);
 }
 
-void ButtonView::Create()
+void ButtonView::Create(const std::string& tagName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        tagName, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     stack->Push(frameNode);
 }
 

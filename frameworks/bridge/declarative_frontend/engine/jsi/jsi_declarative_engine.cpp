@@ -56,11 +56,6 @@
 #if defined(PREVIEW)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
 extern const char _binary_jsMockSystemPlugin_abc_end[];
-#if defined(WINDOWS_PLATFORM)
-constexpr char SEPERATOR[] = "\\";
-#else
-constexpr char SEPERATOR[] = "/";
-#endif
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_stateMgmt_abc_end[];
@@ -1010,20 +1005,15 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             return;
         }
 #else
-        std::vector<uint8_t> content;
-        if (!delegate->GetAssetContent(urlName, content)) {
-            LOGD("GetAssetContent \"%{public}s\" failed.", urlName.c_str());
-        }
-        if (!assetPath_.empty()) {
+        if (!assetPath_.empty() && !isBundle_) {
             auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
             arkRuntime->SetPathResolveCallback(bundleName_, assetPath_);
-        }
-#ifdef WINDOWS_PLATFORM
-        replace(urlName.begin(), urlName.end(), '/', '\\');
-#endif
-        urlName = assetPath_ + SEPERATOR + urlName;
-        if (!runtime->EvaluateJsCode(content.data(), content.size(), urlName)) {
-            LOGE("EvaluateJsCode \"%{public}s\" failed.", urlName.c_str());
+            arkRuntime->SetBundle(isBundle_);
+            if (!runtime->ExecuteJsBin(urlName)) {
+                LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
+            }
+        } else {
+            ExecuteAbc(urlName);
         }
 #endif
     }

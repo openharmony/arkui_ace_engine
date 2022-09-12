@@ -113,13 +113,18 @@ bool HdcJdwpSimulator::Connect()
     for (size_t i = 0; i < sizeof(jdwp); i++) {
         caddr.sun_path[i] = jdwp[i];
     }
-    int cfd = socket(AF_UNIX, SOCK_STREAM, 0);
+    int cfd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
     if (cfd < 0) {
         LOGE("socket failed errno:%{public}d", errno);
         return false;
     }
 
-    int rc = connect(cfd, reinterpret_cast<struct sockaddr *>(&caddr), sizeof(caddr));
+    struct timeval timeout;
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
+    setsockopt(cfd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
+    size_t caddrLen = sizeof(caddr.sun_family) + sizeof(jdwp) - 1;
+    int rc = connect(cfd, reinterpret_cast<struct sockaddr *>(&caddr), caddrLen);
     if (rc != 0) {
         LOGE("connect failed errno:%{public}d", errno);
         close(cfd);

@@ -26,7 +26,8 @@ namespace {
 
 const std::unordered_map<std::string, std::function<std::string(const ListItemComposedElement&)>> CREATE_JSON_MAP {
     { "sticky", [](const ListItemComposedElement& inspector) { return inspector.GetSticky(); } },
-    { "editable", [](const ListItemComposedElement& inspector) { return inspector.GetEditable(); } }
+    { "editable", [](const ListItemComposedElement& inspector) { return inspector.GetEditable(); } },
+    { "selectable", [](const ListItemComposedElement& inspector) { return inspector.GetSelectable(); } }
 };
 }
 
@@ -101,6 +102,19 @@ int32_t ListItemComposedElement::GetZIndex() const
         return 0;
     }
     return renderListItem->GetZIndex();
+}
+
+std::string ListItemComposedElement::GetSelectable() const
+{
+    auto node = GetInspectorNode(ListItemElement::TypeId(), true);
+    if (!node) {
+        return "true";
+    }
+    auto renderListItem = AceType::DynamicCast<RenderListItem>(node);
+    if (renderListItem) {
+        return renderListItem->GetSelectable() ? "true" : "false";
+    }
+    return "true";
 }
 
 void ListItemComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
