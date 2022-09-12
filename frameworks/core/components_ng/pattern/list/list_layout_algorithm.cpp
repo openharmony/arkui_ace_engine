@@ -161,6 +161,7 @@ void ListLayoutAlgorithm::LayoutForward(
     do {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
         if (!wrapper) {
+            maxListItemIndex_ = currentIndex;
             LOGI("the start %{public}d index wrapper is null", currentIndex + 1);
             break;
         }
@@ -194,6 +195,9 @@ void ListLayoutAlgorithm::LayoutForward(
     startIndex_ = newStartIndex.value_or(preStartIndex_);
     endIndex_ = currentIndex - endCachedCount_;
 
+    if (playEdgeEffectAnimation_) {
+        edgeEffectOffset_ = currentOffset_;
+    }
     // adjust offset.
     if (LessNotEqual(currentEndPos, endMainPos_)) {
         auto firstItemTop = itemPosition_[startIndex_.value()].first;
@@ -281,6 +285,9 @@ void ListLayoutAlgorithm::LayoutBackward(
     endIndex_ = newEndIndex.value_or(preEndIndex_);
     startIndex_ = currentIndex + startCachedCount_;
 
+    if (playEdgeEffectAnimation_) {
+        edgeEffectOffset_ = currentOffset_;
+    }
     // adjust offset.
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
         currentOffset_ = currentStartPos;
@@ -335,11 +342,13 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             float laneCrossOffset = CalculateLaneCrossOffset(GetCrossAxisSize(size, axis),
                 GetCrossAxisSize(wrapper->GetGeometryNode()->GetFrameSize() * lanes_.value(), axis));
             if (axis == Axis::VERTICAL) {
-                offset = offset + OffsetF(0, itemPosition_[index].first - currentOffset_) +
-                         OffsetF(size.Width() / lanes_.value() * laneIndex, 0) + OffsetF(laneCrossOffset, 0);
+                offset = offset + OffsetF(0, itemPosition_[index].first - currentOffset_)
+                    + OffsetF(size.Width() / lanes_.value() * laneIndex, 0) + OffsetF(laneCrossOffset, 0)
+                    + OffsetF(0, edgeEffectOffset_);
             } else {
-                offset = offset + OffsetF(itemPosition_[index].first - currentOffset_, 0) +
-                         OffsetF(0, size.Width() / lanes_.value() * laneIndex) + OffsetF(0, laneCrossOffset);
+                offset = offset + OffsetF(itemPosition_[index].first - currentOffset_, 0)
+                    + OffsetF(0, size.Width() / lanes_.value() * laneIndex) + OffsetF(0, laneCrossOffset)
+                    + OffsetF(edgeEffectOffset_, 0);
             }
         } else {
             lanes_ = 1;
@@ -347,9 +356,11 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             float childCrossSize = GetCrossAxisSize(wrapper->GetGeometryNode()->GetFrameSize(), axis);
             float laneCrossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
             if (axis == Axis::VERTICAL) {
-                offset = offset + OffsetF(0, itemPosition_[index].first - currentOffset_) + OffsetF(laneCrossOffset, 0);
+                offset = offset + OffsetF(0, itemPosition_[index].first - currentOffset_) + OffsetF(laneCrossOffset, 0)
+                    + OffsetF(0, edgeEffectOffset_);
             } else {
-                offset = offset + OffsetF(itemPosition_[index].first - currentOffset_, 0) + OffsetF(0, laneCrossOffset);
+                offset = offset + OffsetF(itemPosition_[index].first - currentOffset_, 0) + OffsetF(0, laneCrossOffset)
+                    + OffsetF(edgeEffectOffset_, 0);
             }
         }
         wrapper->GetGeometryNode()->SetFrameOffset(offset);
@@ -486,6 +497,7 @@ void ListLayoutAlgorithm::LayoutForwardForLaneList(
         for (int32_t i = 0; i < lanes_.value(); i++) {
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
             if (!wrapper) {
+                maxListItemIndex_ = currentIndex;
                 LOGE("the start %{public}d index wrapper is null", currentIndex + 1);
                 outOfListSize = true;
                 break;
@@ -519,6 +531,9 @@ void ListLayoutAlgorithm::LayoutForwardForLaneList(
     startIndex_ = newStartIndex.value_or(preStartIndex_);
     endIndex_ = currentIndex - endCachedCount_;
 
+    if (playEdgeEffectAnimation_) {
+        edgeEffectOffset_ = currentOffset_;
+    }
     // adjust offset.
     if (LessNotEqual(currentEndPos, endMainPos_)) {
         auto firstItemTop = itemPosition_[startIndex_.value()].first;
@@ -607,6 +622,9 @@ void ListLayoutAlgorithm::LayoutBackwardForLaneList(
     endIndex_ = newEndIndex.value_or(preEndIndex_);
     startIndex_ = currentIndex + startCachedCount_;
 
+    if (playEdgeEffectAnimation_) {
+        edgeEffectOffset_ = currentOffset_;
+    }
     // adjust offset.
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
         currentOffset_ = currentStartPos;

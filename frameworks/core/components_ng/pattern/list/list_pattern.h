@@ -21,6 +21,8 @@
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_paint_method.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/render/render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -58,6 +60,7 @@ public:
         listLayoutAlgorithm->SetCurrentOffset(currentOffset_);
         currentOffset_ = 0;
         listLayoutAlgorithm->SetIsInitialized(isInitialized_);
+        listLayoutAlgorithm->SetPlayEdgeEffectAnimation(playEdgeEffectAnimation_);
         return listLayoutAlgorithm;
     }
 
@@ -68,12 +71,20 @@ private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
+    float MainSize() const;
+    Axis GetDirection() const;
+    void PlaySpringAnimation(double dragVelocity);
+
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<Animator> springController_;
+    int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
     bool isInitialized_ = false;
+    bool playEdgeEffectAnimation_ = false;
     float currentOffset_ = 0.0;
-
+    float lastOffset_ = 0.0f;
+    
     ListLayoutAlgorithm::PositionMap itemPosition_;
 };
 } // namespace OHOS::Ace::NG
