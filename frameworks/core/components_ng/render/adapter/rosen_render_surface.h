@@ -16,11 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_SURFACE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_SURFACE_H
 
+#include "surface.h"
+#include "window.h"
+
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/render/render_surface.h"
-#include "foundation/graphic/graphic_2d/interfaces/inner_api/surface/window.h"
-#include "foundation/graphic/graphic_2d/interfaces/inner_api/surface/surface.h"
 
 namespace OHOS::Ace::NG {
 class RosenRenderSurface : public RenderSurface {
@@ -47,9 +48,14 @@ public:
 
     std::string GetUniqueId() const override;
 
+    OHOS::sptr<OHOS::Surface> GetSurface()
+    {
+        return producerSurface_;
+    }
+
 private:
     OHOS::sptr<OHOS::Surface> producerSurface_ = nullptr;
-    struct NativeWindow *nativeWindow_ = nullptr;
+    struct NativeWindow* nativeWindow_ = nullptr;
     WeakPtr<NG::RenderContext> renderContext_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderSurface);
