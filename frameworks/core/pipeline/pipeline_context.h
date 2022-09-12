@@ -593,20 +593,6 @@ public:
 
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params);
 
-    void ForceLayoutForImplicitAnimation();
-
-    bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr) override;
-
-    void PrepareOpenImplicitAnimation() override;
-
-    void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallBack = nullptr) override;
-
-    void PrepareCloseImplicitAnimation() override;
-
-    bool CloseImplicitAnimation() override;
-
     void AddKeyFrame(
         float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback) override;
 
@@ -1085,6 +1071,10 @@ protected:
     void FlushAnimation(uint64_t nanoTimestamp) override;
     void FlushReload() override;
     void FlushReloadTransition() override;
+    void FlushUITasks() override
+    {
+        FlushLayout();
+    }
 
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     bool hasIdleTasks_ = false;
@@ -1172,7 +1162,6 @@ private:
     UpdateWindowBlurDrawOpHandler updateWindowBlurDrawOpHandler_;
     DragEventHandler dragEventHandler_;
     InitDragEventListener initDragEventListener_;
-    std::stack<bool> pendingImplicitLayout_;
     std::vector<KeyCode> pressedKeyCodes;
     TouchEvent zoomEventA_;
     TouchEvent zoomEventB_;

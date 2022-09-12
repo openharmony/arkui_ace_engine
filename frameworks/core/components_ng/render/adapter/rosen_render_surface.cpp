@@ -16,12 +16,14 @@
 
 #include "foundation/graphic/graphic_2d/interfaces/inner_api/surface/surface_utils.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
+
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-const char * const SURFACE_STRIDE_ALIGNMENT = "8";
+const char* const SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 } // namespace
 RosenRenderSurface::~RosenRenderSurface()
@@ -44,7 +46,7 @@ void RosenRenderSurface::InitSurface()
     auto* surfaceUtils = SurfaceUtils::GetInstance();
     auto ret = surfaceUtils->Add(producerSurface_->GetUniqueId(), producerSurface_);
     if (ret != SurfaceError::SURFACE_ERROR_OK) {
-        LOGE("xcomponent add surface error: %{public}d", ret);
+        LOGE("add surface error: %{public}d", ret);
     }
 
     producerSurface_->SetQueueSize(SURFACE_QUEUE_SIZE);
@@ -106,4 +108,5 @@ std::string RosenRenderSurface::GetUniqueId() const
 {
     return std::to_string(producerSurface_->GetUniqueId());
 }
+
 } // namespace OHOS::Ace::NG

@@ -61,7 +61,7 @@ public:                                                                      \
             return;                                                          \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
-        MarkNeedFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);                \
+        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);           \
     }
 
 namespace OHOS::Ace::NG {
@@ -101,7 +101,7 @@ public:
             return;
         }
         spanItem_->content = content;
-        MarkNeedFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
 
     void UpdateOnClickEvent(GestureEventFunc&& onClick)

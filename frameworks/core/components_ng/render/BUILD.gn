@@ -25,6 +25,7 @@ build_component_ng("render_ng") {
     "divider_painter.cpp",
     "drawing_prop_convertor.cpp",
     "image_painter.cpp",
+    "media_player_creator.cpp",
     "paint_wrapper.cpp",
     "render_context_creator.cpp",
     "render_surface_creator.cpp",
@@ -40,6 +41,8 @@ build_component_ng("render_ng") {
   }
 
   rosen_sources = [
+    "adapter/rosen_animation_utils.cpp",
+    "adapter/rosen_media_player.cpp",
     "adapter/rosen_render_context.cpp",
     "adapter/rosen_render_surface.cpp",
     "adapter/rosen_window.cpp",

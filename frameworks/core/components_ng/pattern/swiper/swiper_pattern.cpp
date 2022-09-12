@@ -87,6 +87,7 @@ void SwiperPattern::OnModifyDone()
     if (IsDisableSwipe()) {
         if (panEvent_) {
             gestureHub->RemovePanEvent(panEvent_);
+            panEvent_.Reset();
         }
         return;
     }

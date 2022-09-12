@@ -27,21 +27,22 @@ namespace OHOS::Ace::NG {
 using PropertyChangeFlag = uint32_t;
 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_NORMAL = 0;
-// Affects self size.
+// Mark self, parent, children to remeasure.
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE = 1;
-// Affects the child position.
+// Mark self to reLayout.
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_LAYOUT = 1 << 1;
-// Affects self position.
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_POSITION = 1 << 2;
 
-// Mark self be measure boundary to remeasure.
+// Mark self to remeasure.
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF = 1 << 3;
 
-// Mark self measure due to child size may change.
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_BY_CHILD_REQUEST = 1 << 4;
+// Mark self and parent to remeasure.
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT = 1 << 4;
 
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER = 1 << 5;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST = 1 << 6;
+// Mark self remeasure due to child size may change, which may mark parent, self and children to remeasure.
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_BY_CHILD_REQUEST = 1 << 5;
+
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER = 1 << 6;
+inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST = 1 << 7;
 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 8;
 
@@ -51,13 +52,17 @@ bool CheckNeedRequestMeasureAndLayout(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNeedRequestParentMeasure(PropertyChangeFlag propertyChangeFlag);
 
+bool CheckNeedMeasure(PropertyChangeFlag propertyChangeFlag);
+
+bool CheckNeedLayout(PropertyChangeFlag propertyChangeFlag);
+
 bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckPositionFlag(PropertyChangeFlag propertyChangeFlag);
-
 bool CheckMeasureSelfFlag(PropertyChangeFlag propertyChangeFlag);
+
+bool CheckMeasureSelfAndParentFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckUpdateByChildRequest(PropertyChangeFlag propertyChangeFlag);
 

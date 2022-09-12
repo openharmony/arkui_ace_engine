@@ -163,6 +163,27 @@ void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
     gestureHub->SetTouchEvent(std::move(touchEventFunc));
 }
 
+void ViewAbstract::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetMouseEvent(std::move(onMouseEventFunc));
+}
+
+void ViewAbstract::SetOnHover(OnHoverEventFunc&& onHoverEventFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverEvent(std::move(onHoverEventFunc));
+}
+
+void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverAnimation(hoverEffect);
+}
+
 void ViewAbstract::Pop()
 {
     ViewStackProcessor::GetInstance()->Pop();

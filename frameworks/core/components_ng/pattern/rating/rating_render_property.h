@@ -36,6 +36,7 @@ public:
         renderProperty->UpdatePaintProperty(this);
         renderProperty->propRatingScore_ = CloneRatingScore();
         renderProperty->propStepSize_ = CloneStepSize();
+        renderProperty->propTouchStar_ = CloneTouchStar();
         return renderProperty;
     }
 
@@ -43,11 +44,14 @@ public:
     {
         propRatingScore_.reset();
         propStepSize_.reset();
+        propTouchStar_.reset();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RatingScore, double, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StepSize, double, PROPERTY_UPDATE_RENDER);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TouchStar, int32_t, PROPERTY_UPDATE_RENDER);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RatingRenderProperty);

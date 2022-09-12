@@ -52,11 +52,68 @@ public:
         backgroundColor_ = color;
     }
 
+    float GetHoverScaleStart() const
+    {
+        return hoverScaleStart_;
+    }
+
+    void SetHoverScaleStart(float scale)
+    {
+        hoverScaleStart_ = scale;
+    }
+
+    float GetHoverScaleEnd() const
+    {
+        return hoverScaleEnd_;
+    }
+
+    void SetHoverScaleEnd(float scale)
+    {
+        hoverScaleEnd_ = scale;
+    }
+
+    const Color& GetHoverHighlightStart() const
+    {
+        return hoverHighlightStart_;
+    }
+
+    void SetHoverHighlightStart(const Color& color)
+    {
+        hoverHighlightStart_ = color;
+    }
+
+    const Color& GetHoverHighlightEnd() const
+    {
+        return hoverHighlightEnd_;
+    }
+
+    void SetHoverHighlightEnd(const Color& color)
+    {
+        hoverHighlightEnd_ = color;
+    }
+
+    int32_t GetHoverDuration() const
+    {
+        return hoverDuration_;
+    }
+
+    void SetHoverDuration(int32_t duration)
+    {
+        hoverDuration_ = duration;
+    }
+
 protected:
     AppTheme() = default;
 
 private:
     Color backgroundColor_;
+    
+    // HoverEffect parameters
+    float hoverScaleStart_ = 1.0f;
+    float hoverScaleEnd_ = 1.05f;                               // HoverEffect.Scale change from scale rate 1 to 1.05
+    Color hoverHighlightStart_ = Color::TRANSPARENT;
+    Color hoverHighlightEnd_ = Color::FromRGBO(0, 0, 0, 0.05);  // HoverEffect.HighLight change transparency from 100% to 5%
+    int32_t hoverDuration_ = 250;                               // HoverEffect animation duration
 };
 
 } // namespace OHOS::Ace

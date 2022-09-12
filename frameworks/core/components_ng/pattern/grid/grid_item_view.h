@@ -16,11 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_VIEW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_VIEW_H
 
+#include <functional>
+
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT GridItemView {
 public:
+    static void Create(std::function<void(int32_t)>&& deepRenderFunc);
     static void Create();
 };
 } // namespace OHOS::Ace::NG

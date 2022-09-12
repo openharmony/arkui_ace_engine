@@ -90,10 +90,10 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure children.
     auto layoutConstraint = swiperLayoutProperty->CreateChildConstraint();
+    layoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
     for (const auto& index : itemRange_) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!wrapper) {
-            LOGE("Item %{public}d wrapper is null", index);
             break;
         }
         wrapper->Measure(layoutConstraint);

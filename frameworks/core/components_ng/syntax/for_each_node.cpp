@@ -98,7 +98,7 @@ void ForEachNode::CompareAndUpdateChildren()
 void ForEachNode::FlushUpdateAndMarkDirty()
 {
     // mark parent dirty to flush measure.
-    MarkNeedFlushDirty(PROPERTY_UPDATE_MEASURE);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 } // namespace OHOS::Ace::NG

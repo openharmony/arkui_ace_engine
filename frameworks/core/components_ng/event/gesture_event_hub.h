@@ -156,7 +156,7 @@ public:
 
     void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, float distance)
     {
-        if (!panEventActuator_) {
+        if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
             panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance);
         }
         panEventActuator_->AddPanEvent(panEvent);

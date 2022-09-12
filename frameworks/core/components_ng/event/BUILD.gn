@@ -19,6 +19,8 @@ build_component_ng("event_ng") {
     "click_event.cpp",
     "event_hub.cpp",
     "gesture_event_hub.cpp",
+    "input_event.cpp",
+    "input_event_hub.cpp",
     "pan_event.cpp",
     "scrollable_event.cpp",
     "touch_event.cpp",

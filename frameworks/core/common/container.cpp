@@ -57,4 +57,5 @@ void Container::UpdateCurrent(int32_t id)
 {
     ContainerScope::UpdateCurrent(id);
 }
+
 } // namespace OHOS::Ace

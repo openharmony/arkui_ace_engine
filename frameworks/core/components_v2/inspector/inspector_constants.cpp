@@ -95,6 +95,10 @@ const char TABS_ETS_TAG[] = "Tabs";
 const char TAB_CONTENT_ITEM_COMPONENT_TAG[] = "TabContentItemComponent";
 const char TAB_CONTENT_ITEM_ETS_TAG[] = "TabContent";
 
+// tab bar
+const char TAB_BAR_COMPONENT_TAG[] = "TabBarComponent";
+const char TAB_BAR_ETS_TAG[] = "TabBar";
+
 // navigation view
 const char NAVIGATION_VIEW_COMPONENT_TAG[] = "NavigationContainerComponent";
 const char NAVIGATION_VIEW_ETS_TAG[] = "Navigation";
@@ -381,5 +385,8 @@ ACE_EXPORT extern const char RICH_TEXT_ETS_TAG[] = "RichText";
 // xcomponent
 ACE_EXPORT extern const char XCOMPONENT_TAG[] = "XComponentComponent";
 ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[] = "XComponent";
+
+// ability_component
+ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[] = "AbilityComponent";
 
 } // namespace OHOS::Ace::V2
