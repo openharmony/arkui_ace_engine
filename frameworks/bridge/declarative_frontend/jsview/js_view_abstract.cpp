@@ -738,6 +738,10 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetOpacity(opacity);
+        return;
+    }
     auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
     auto stack = ViewStackProcessor::GetInstance();
     auto option = stack->GetImplicitAnimationOption();

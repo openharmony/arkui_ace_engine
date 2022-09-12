@@ -185,6 +185,11 @@ void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
     eventHub->SetHoverAnimation(hoverEffect);
 }
 
+void ViewAbstract::SetOpacity(double opacity)
+{
+    ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
+}
+
 void ViewAbstract::SetScale(NG::VectorF scale)
 {
     ACE_UPDATE_RENDER_CONTEXT(TransformScale, scale);

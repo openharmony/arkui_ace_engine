@@ -118,6 +118,13 @@ void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnOpacityUpdate(double opacity)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetAlpha(opacity);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
 {
     if (!rsNode_) {
