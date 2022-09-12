@@ -125,8 +125,8 @@ void ListPattern::PlaySpringAnimation(double dragVelocity)
     playEdgeEffectAnimation_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!SpringController_) {
-        SpringController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
+    if (!springController_) {
+        springController_ = AceType::MakeRefPtr<Animator>(host->GetContext());
     }
     springController_->ClearStopListeners();
     springController_->ClearInterpolators();
@@ -146,7 +146,7 @@ void ListPattern::PlaySpringAnimation(double dragVelocity)
         if (list) {
             list->UpdateCurrentOffset(list->currentOffset_ - static_cast<float>(position));
         }
-    })
+    });
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {});
     springController_->PlayMotion(scrollMotion);
 }
