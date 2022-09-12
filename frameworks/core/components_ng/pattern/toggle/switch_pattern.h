@@ -44,14 +44,14 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto layoutAlgorithm = MakeRefPtr<SwitchLayoutAlgorithm>();
-        layoutAlgorithm->SetCurrentOffset(currentOffset_);
-        return layoutAlgorithm;
+        return MakeRefPtr<SwitchLayoutAlgorithm>();
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        return MakeRefPtr<SwitchPaintProperty>();
+        auto paintProperty = MakeRefPtr<SwitchPaintProperty>();
+        paintProperty->UpdateCurrentOffset(currentOffset_);
+        return paintProperty;
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
@@ -59,32 +59,24 @@ public:
         return MakeRefPtr<SwitchPaintMethod>(currentOffset_);
     }
 
-    void OnModifyDone() override;
-
-protected:
-    void UpdateCurrentOffset(float offset);
-
 private:
+    void OnModifyDone() override;
+    void UpdateCurrentOffset(float offset);
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void PlayTranslateAnimation(float startPos, float endPos);
     RefPtr<Curve> GetCurve() const;
     int32_t GetDuration() const;
     void StopTranslateAnimation();
-    void FireChangeEvent() const;
+    void UpdateChangeEvent() const;
     void OnChange();
     float GetSwitchWidth() const;
 
-    // Init touch event, stop animation when touch down.
-    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown();
-    void HandleTouchUp();
+    void OnClick();
 
     RefPtr<Animator> controller_;
-    RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<ClickEvent> clickListener_;
     RefPtr<CurveAnimation<double>> translate_;
-    SizeF contentSize_;
     bool isOn_ = false;
     float currentOffset_ = 0.0f;
 

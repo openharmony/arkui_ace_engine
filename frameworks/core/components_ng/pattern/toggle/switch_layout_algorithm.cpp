@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 
-#include "hilog/log_c.h"
-
 #include "base/geometry/ng/size_t.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -57,25 +55,21 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
             frameHeight = contentConstraint.maxSize.Height();
         }
     }
-    if ((frameWidth / frameHeight) < ratio_) {
-        width_ = frameWidth;
-        height_ = width_ / ratio_;
-    } else if ((frameWidth / frameHeight) > ratio_) {
-        height_ = frameHeight;
-        width_ = height_ * ratio_;
+    float width = 0.0f;
+    float height = 0.0f;
+    auto ratio = switchTheme->GetRatio();
+    if ((frameWidth / frameHeight) < ratio) {
+        width = frameWidth;
+        height = width / ratio;
+    } else if ((frameWidth / frameHeight) > ratio) {
+        height = frameHeight;
+        width = height * ratio;
     } else {
-        height_ = frameHeight;
-        width_ = frameWidth;
+        height = frameHeight;
+        width = frameWidth;
     }
 
-    if (layoutProperty->GetPositionProperty()) {
-        layoutProperty->UpdateAlignment(
-            layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
-    } else {
-        layoutProperty->UpdateAlignment(Alignment::CENTER);
-    }
-
-    return SizeF(width_, height_);
+    return SizeF(width, height);
 }
 
 } // namespace OHOS::Ace::NG

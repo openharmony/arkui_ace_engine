@@ -18,6 +18,10 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/toggle_button_pattern.h"
+#include "core/components_ng/pattern/button/toggle_button_view.h"
+#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components_ng/pattern/checkbox/checkbox_view.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -30,12 +34,24 @@ void ToggleView::Create(Ace::NG::ToggleType toggleType, bool isOn)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwitchPattern>(); });
     stack->Push(frameNode);
-    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, ToggleType, toggleType);
     ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn);
 }
 
 void ToggleView::SetSelectedColor(const Color& selectedColor)
 {
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto checkboxPattern = stack->GetMainFrameNodePattern<CheckBoxPattern>();
+    if (checkboxPattern) {
+        CheckBoxView::SetSelectedColor(selectedColor);
+        return;
+    }
+    auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
+    if (buttonPattern) {
+        ToggleButtonView::SetSelectedColor(selectedColor);
+        return;
+    }
+
     ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, selectedColor);
 }
 
@@ -45,8 +61,24 @@ void ToggleView::SetSwitchPointColor(const Color& switchPointColor)
 }
 void ToggleView::OnChange(ChangeEvent&& onChange)
 {
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto checkboxPattern = stack->GetMainFrameNodePattern<CheckBoxPattern>();
+    if (checkboxPattern) {
+        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnChange(std::move(onChange));
+        return;
+    }
+    auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
+    if (buttonPattern) {
+        auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnChange(std::move(onChange));
+        return;
+    }
     auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));

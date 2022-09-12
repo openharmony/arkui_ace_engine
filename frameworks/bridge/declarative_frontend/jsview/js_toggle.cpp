@@ -21,9 +21,17 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
+#include "core/components/button/render_button.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/toggle/toggle_component.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/button/toggle_button_view.h"
+#include "core/components_ng/pattern/checkbox/checkbox_view.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
+#include "core/components_ng/render/render_property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -69,9 +77,22 @@ void JSToggle::Create(const JSCallbackInfo& info)
     auto toggleType = static_cast<ToggleType>(type->ToNumber<int32_t>());
 
     auto toggleTypeInt = static_cast<int32_t>(toggleType);
-
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ToggleView::Create(NG::ToggleType(toggleTypeInt), isOn);
+        switch (toggleTypeInt) {
+            case 0:
+                NG::CheckBoxView::Create(std::nullopt, std::nullopt, V2::CHECKBOX_ETS_TAG);
+                NG::CheckBoxView::SetSelect(isOn);
+                break;
+            case 1:
+                NG::ToggleView::Create(NG::ToggleType(toggleTypeInt), isOn);
+                break;
+            case 2:
+                NG::ToggleButtonView::Create(V2::TOGGLE_ETS_TAG);
+                NG::ToggleButtonView::SetIsOn(isOn);
+                break;
+            default:
+                break;
+        }
         return;
     }
 
@@ -295,7 +316,7 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
         return;
     }
     Color color;
-    if (!JSContainerBase::ParseJsColor(info[0], color)) {
+    if (!ParseJsColor(info[0], color)) {
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {

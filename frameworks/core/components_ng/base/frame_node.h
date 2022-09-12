@@ -105,7 +105,7 @@ public:
     {
         return geometryNode_;
     }
-    void SetGeometryNode(RefPtr<GeometryNode>&& node);
+    void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
     const RefPtr<RenderContext>& GetRenderContext() const
     {

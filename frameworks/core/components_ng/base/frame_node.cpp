@@ -178,7 +178,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     if (frameSizeChange || frameOffsetChange || (pattern_->SurfaceNodeName().has_value() && contentSizeChange)) {
         renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
     }
-    SetGeometryNode(dirty->MoveGeometryNode());
+    SetGeometryNode(dirty->GetGeometryNode());
     // clean layout flag.
     layoutProperty_->CleanDirty();
 
@@ -208,9 +208,9 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     RebuildRenderContextTree();
 }
 
-void FrameNode::SetGeometryNode(RefPtr<GeometryNode>&& node)
+void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
 {
-    geometryNode_.Swap(std::move(node));
+    geometryNode_ = node;
 }
 
 std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)

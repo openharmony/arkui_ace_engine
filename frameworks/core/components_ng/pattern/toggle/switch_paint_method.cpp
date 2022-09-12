@@ -16,38 +16,36 @@
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"
 
 #include "base/geometry/ng/offset_t.h"
-#include "base/geometry/offset.h"
-#include "base/geometry/point.h"
-#include "base/geometry/size.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
-CanvasDrawFunction SwitchPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
+CanvasDrawFunction SwitchPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
-    auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
+    auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    auto contentSize = paintWrapper->GetContentSize();
+    auto contentOffset = paintWrapper->GetContentOffset();
+    auto paintFunc = [weak = WeakClaim(this), paintProperty, contentSize, contentOffset](RSCanvas& canvas) {
         auto switch_ = weak.Upgrade();
         if (switch_) {
-            switch_->PaintContent(canvas, paintWrapper);
+            switch_->PaintContent(canvas, paintProperty, contentSize, contentOffset);
         }
     };
 
     return paintFunc;
 }
 
-void SwitchPaintMethod::PaintContent(RSCanvas& canvas, PaintWrapper* paintWrapper)
+void SwitchPaintMethod::PaintContent(
+    RSCanvas& canvas, RefPtr<SwitchPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset)
 {
-    CHECK_NULL_VOID(paintWrapper);
-    auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
@@ -57,12 +55,12 @@ void SwitchPaintMethod::PaintContent(RSCanvas& canvas, PaintWrapper* paintWrappe
     RefPtr<SwitchTheme> switchTheme = themeManager->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
 
-    width_ = paintWrapper->GetContentSize().Width();
-    height_ = paintWrapper->GetContentSize().Height();
-    auto radius = height_ / 2;
+    auto width = contentSize.Width();
+    auto height = contentSize.Height();
+    auto radius = height / 2;
 
-    auto xOffset = paintWrapper->GetContentOffset().GetX();
-    auto yOffset = paintWrapper->GetContentOffset().GetY();
+    auto xOffset = contentOffset.GetX();
+    auto yOffset = contentOffset.GetY();
 
     auto borderWidth_ = static_cast<float>(switchTheme->GetBorderWidth().Value());
     auto hoverRadius_ = static_cast<float>(switchTheme->GetHoverRadius().Value());
@@ -77,8 +75,8 @@ void SwitchPaintMethod::PaintContent(RSCanvas& canvas, PaintWrapper* paintWrappe
     rosen::Rect rect;
     rect.SetLeft(xOffset);
     rect.SetTop(yOffset);
-    rect.SetRight(xOffset + width_);
-    rect.SetBottom(yOffset + height_);
+    rect.SetRight(xOffset + width);
+    rect.SetBottom(yOffset + height);
     rosen::RoundRect roundRect(rect, radius, radius);
     canvas.DrawRoundRect(roundRect);
 
@@ -88,8 +86,8 @@ void SwitchPaintMethod::PaintContent(RSCanvas& canvas, PaintWrapper* paintWrappe
         rosen::Rect rectCover;
         rectCover.SetLeft(xOffset);
         rectCover.SetTop(yOffset);
-        rectCover.SetRight(xOffset + mainDelta_ + height_ - radiusGap_);
-        rectCover.SetBottom(yOffset + height_);
+        rectCover.SetRight(xOffset + mainDelta_ + height - radiusGap_);
+        rectCover.SetBottom(yOffset + height);
         rosen::RoundRect roundRectCover(rectCover, radius, radius);
         canvas.DrawRoundRect(roundRectCover);
     }

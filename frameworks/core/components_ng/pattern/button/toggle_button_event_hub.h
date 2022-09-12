@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_EVENT_HUB_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_EVENT_HUB_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_TOGGLE_BUTTON_EVENT_HUB_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_TOGGLE_BUTTON_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -24,30 +24,30 @@ namespace OHOS::Ace::NG {
 
 using ChangeEvent = std::function<void(const bool)>;
 
-class SwitchEventHub : public EventHub {
-    DECLARE_ACE_TYPE(SwitchEventHub, EventHub)
+class ToggleButtonEventHub : public EventHub {
+    DECLARE_ACE_TYPE(ToggleButtonEventHub, EventHub)
 
 public:
-    SwitchEventHub() = default;
-    ~SwitchEventHub() override = default;
+    ToggleButtonEventHub() = default;
+    ~ToggleButtonEventHub() override = default;
 
     void SetOnChange(ChangeEvent&& changeEvent)
     {
         changeEvent_ = std::move(changeEvent);
     }
 
-    void UpdateChangeEvent(bool isOn) const
+    void UpdateChangeEvent(bool select) const
     {
         if (changeEvent_) {
-            changeEvent_(isOn);
+            changeEvent_(select);
         }
     }
 
 private:
     ChangeEvent changeEvent_;
 
-    ACE_DISALLOW_COPY_AND_MOVE(SwitchEventHub);
+    ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonEventHub);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_EVENT_HUB_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_TOGGLE_BUTTON_EVENT_HUB_H

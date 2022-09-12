@@ -12,28 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_VIEW_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_VIEW_H
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_TOGGLE_BUTTON_VIEW_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_TOGGLE_BUTTON_VIEW_H
+
+#include <string>
 
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/toggle/switch_event_hub.h"
-#include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace::NG {
-enum class ToggleType {
-    CHECKBOX = 0,
-    SWITCH,
-    BUTTON,
-};
-
-class ACE_EXPORT ToggleView {
+class ACE_EXPORT ToggleButtonView {
 public:
-    static void Create(ToggleType toggleType, bool isOn);
+    static void Create(const std::string& tagName);
     static void SetSelectedColor(const Color& selectedColor);
-    static void SetSwitchPointColor(const Color& switchPointColor);
-    static void OnChange(ChangeEvent&& onChange);
+    static void SetIsOn(bool isOn);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWITCH_SWITCH_VIEW_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_TOGGLE_BUTTON_VIEW_H

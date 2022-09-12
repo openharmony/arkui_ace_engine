@@ -34,31 +34,7 @@ public:
 
     void OnReset() override {}
 
-    void SetCurrentOffset(float offset)
-    {
-        currentOffset_ = offset;
-    }
-
-    float GetCurrentOffset() const
-    {
-        return currentOffset_;
-    }
-
-    float GetWidth() const
-    {
-        return width_;
-    }
-
-    float GetHeight() const
-    {
-        return height_;
-    }
-
 private:
-    float currentOffset_ = 0.0f;
-    const float ratio_ = 1.8f;
-    float width_ = 0.0f;
-    float height_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

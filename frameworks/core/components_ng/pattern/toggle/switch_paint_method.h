@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWITCH_SWITCH_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWITCH_SWITCH_PAINT_METHOD_H
 
+#include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
+
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SwitchPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SwitchPaintMethod, NodePaintMethod)
@@ -28,13 +30,12 @@ public:
     explicit SwitchPaintMethod(float mainDelta) : mainDelta_(mainDelta) {};
     ~SwitchPaintMethod() override = default;
 
-    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
-    void PaintContent(RSCanvas& canvas, PaintWrapper* paintWrapper);
+    void PaintContent(
+        RSCanvas& canvas, RefPtr<SwitchPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset);
     float mainDelta_ = 0.0f;
-    float width_ = 0.0f;
-    float height_ = 0.0f;
     const float radiusGap_ = 2.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPaintMethod);

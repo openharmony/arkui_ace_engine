@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 struct SwitchPaintParagraph {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SwitchPointColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(CurrentOffset, float);
 };
 
 struct SwitchAnimationStyle {
@@ -43,7 +44,6 @@ public:
         auto value = MakeRefPtr<SwitchPaintProperty>();
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
         value->propSwitchPaintParagraph_ = CloneSwitchPaintParagraph();
-        value->propToggleType_ = CloneToggleType();
         value->propIsOn_ = CloneIsOn();
         value->propSwitchAnimationStyle_ = CloneSwitchAnimationStyle();
         return value;
@@ -53,7 +53,6 @@ public:
     {
         PaintProperty::Reset();
         ResetSwitchPaintParagraph();
-        ResetToggleType();
         ResetIsOn();
         ResetSwitchAnimationStyle();
     }
@@ -64,8 +63,10 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(SwitchPaintParagraph, SwitchPaintParagraph);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, SelectedColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, SwitchPointColor, Color, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ToggleType, Ace::NG::ToggleType, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, CurrentOffset, float, PROPERTY_UPDATE_RENDER);
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsOn, bool, PROPERTY_UPDATE_MEASURE);
+
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPaintProperty);
 };
 } // namespace OHOS::Ace::NG

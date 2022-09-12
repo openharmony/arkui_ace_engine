@@ -47,17 +47,6 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto switchLayoutAlgorithm = DynamicCast<SwitchLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(switchLayoutAlgorithm, false);
-    contentSize_.SetWidth(switchLayoutAlgorithm->GetWidth());
-    contentSize_.SetHeight(switchLayoutAlgorithm->GetHeight());
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_RETURN(switchPaintProperty, false);
-    isOn_ = switchPaintProperty->GetIsOnValue();
     if (isOn_) {
         currentOffset_ = GetSwitchWidth();
     }
@@ -83,8 +72,23 @@ void SwitchPattern::OnModifyDone()
     }
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
-    isOn_ = switchPaintProperty->GetIsOnValue();
-    InitTouchEvent(gestureHub);
+    auto isOn = switchPaintProperty->GetIsOnValue();
+    if (isOn != isOn_) {
+        OnChange();
+    }
+    if (clickListener_) {
+        return;
+    }
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto checkboxPattern = weak.Upgrade();
+        CHECK_NULL_VOID(checkboxPattern);
+        checkboxPattern->OnClick();
+    };
+
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gesture->AddClickEvent(clickListener_);
 }
 
 void SwitchPattern::UpdateCurrentOffset(float offset)
@@ -130,14 +134,14 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
         auto switch_ = weak.Upgrade();
         CHECK_NULL_VOID(switch_);
         if (!isOn_) {
-            if (switch_->currentOffset_ == GetSwitchWidth()) {
+            if (NearEqual(switch_->currentOffset_, GetSwitchWidth())) {
                 switch_->isOn_ = true;
-                switch_->FireChangeEvent();
+                switch_->UpdateChangeEvent();
             }
         } else {
-            if (switch_->currentOffset_ == 0) {
+            if (NearEqual(switch_->currentOffset_, 0)) {
                 switch_->isOn_ = false;
-                switch_->FireChangeEvent();
+                switch_->UpdateChangeEvent();
             }
         }
     });
@@ -174,8 +178,6 @@ void SwitchPattern::OnChange()
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_VOID(switchPaintProperty);
     auto translateOffset = GetSwitchWidth();
     StopTranslateAnimation();
     if (!isOn_) {
@@ -188,59 +190,30 @@ void SwitchPattern::OnChange()
 float SwitchPattern::GetSwitchWidth() const
 {
     const float switchGap = 2.0f;
-    auto switchWidth = contentSize_.Width() - contentSize_.Height() + switchGap;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto switchWidth = geometryNode->GetContentSize().Width() - geometryNode->GetContentSize().Height() + switchGap;
     return switchWidth;
 }
 
-void SwitchPattern::FireChangeEvent() const
+void SwitchPattern::UpdateChangeEvent() const
 {
     auto switchEventHub = GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(switchEventHub);
-    switchEventHub->FireChangeEvent(isOn_);
+    switchEventHub->UpdateChangeEvent(isOn_);
 }
 
-void SwitchPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+void SwitchPattern::OnClick()
 {
-    if (touchEvent_) {
-        return;
-    }
-
-    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleTouchEvent(info);
-        }
-    };
-
-    if (touchEvent_) {
-        gestureHub->RemoveTouchEvent(touchEvent_);
-    }
-    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
-    gestureHub->AddTouchEvent(touchEvent_);
-}
-
-void SwitchPattern::HandleTouchEvent(const TouchEventInfo& info)
-{
-    auto touchType = info.GetTouches().front().GetTouchType();
-    if (touchType == TouchType::DOWN) {
-        HandleTouchDown();
-    } else if (touchType == TouchType::UP) {
-        HandleTouchUp();
-    }
-}
-
-void SwitchPattern::HandleTouchDown()
-{
-    // Stop translate animation when touch down.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (controller_ && !controller_->IsStopped()) {
         // Clear stop listener before stop, otherwise the previous swipe will be considered complete.
         controller_->ClearStopListeners();
         controller_->Stop();
     }
-}
-
-void SwitchPattern::HandleTouchUp()
-{
     OnChange();
 }
 

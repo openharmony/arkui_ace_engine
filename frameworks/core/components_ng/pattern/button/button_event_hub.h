@@ -21,6 +21,7 @@
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
+
 class ButtonEventHub : public EventHub {
     DECLARE_ACE_TYPE(ButtonEventHub, EventHub)
 

@@ -19,6 +19,8 @@ build_component_ng("pattern_ng") {
     "button/button_layout_algorithm.cpp",
     "button/button_pattern.cpp",
     "button/button_view.cpp",
+    "button/toggle_button_pattern.cpp",
+    "button/toggle_button_view.cpp",
     "checkbox/checkbox_layout_algorithm.cpp",
     "checkbox/checkbox_paint_method.cpp",
     "checkbox/checkbox_pattern.cpp",
