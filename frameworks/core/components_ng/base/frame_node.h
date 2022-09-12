@@ -86,13 +86,16 @@ public:
 
     void FlushUpdateAndMarkDirty() override;
 
-    void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
+    void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override
+    {
+        MarkDirtyNode(extraFlag);
+    }
 
-    RefPtr<LayoutWrapper> CreateLayoutWrapperOnCreate();
+    void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
     RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
-    std::optional<UITask> CreateLayoutTask(bool onCreate = false, bool forceUseMainThread = false);
+    std::optional<UITask> CreateLayoutTask(bool forceUseMainThread = false);
 
     std::optional<UITask> CreateRenderTask(bool forceUseMainThread = false);
 

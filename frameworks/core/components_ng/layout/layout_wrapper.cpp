@@ -75,7 +75,7 @@ void LayoutWrapper::RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper
 
 void LayoutWrapper::RemoveChildInRenderTree(int32_t index)
 {
-    auto wrapper = GetOrCreateChildByIndex(index);
+    auto wrapper = GetOrCreateChildByIndex(index, false);
     CHECK_NULL_VOID(wrapper);
     wrapper->isActive_ = false;
 }
