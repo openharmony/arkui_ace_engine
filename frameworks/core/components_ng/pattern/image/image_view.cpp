@@ -63,6 +63,16 @@ void ImageView::SetImageSourceSize(const std::pair<Dimension, Dimension>& source
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize);
 }
 
+void ImageView::SetFitOriginalSize(bool fitOriginalSize)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, FitOriginalSize, fitOriginalSize);
+}
+
+void ImageView::SetAlt(const std::string& altSrc)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, ImageSourceInfo(altSrc));
+}
+
 void ImageView::SetOnError(ErrorEvent&& onError)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_IMAGE_IMAGE_PATTERN_H
 
+#include <memory>
+
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
@@ -48,7 +50,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_);
+        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_);
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -82,15 +84,22 @@ private:
     LoadSuccessNotifyTask CreateLoadSuccessCallback();
     LoadFailNotifyTask CreateLoadFailCallback();
 
-    ImageSourceInfo sourceInfo_;
+    DataReadyNotifyTask CreateDataReadyCallbackForAlt();
+    LoadSuccessNotifyTask CreateLoadSuccessCallbackForAlt();
+    LoadFailNotifyTask CreateLoadFailCallbackForAlt();
 
+    RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> lastCanvasImage_;
     RectF lastDstRect_;
     RectF lastSrcRect_;
 
     bool isActive_ = false;
 
-    RefPtr<ImageLoadingContext> loadingCtx_;
+    // clear alt data after [OnImageLoadSuccess] being called
+    RefPtr<ImageLoadingContext> altLoadingCtx_;
+    RefPtr<CanvasImage> lastAltCanvasImage_;
+    std::unique_ptr<RectF> lastAltDstRect_;
+    std::unique_ptr<RectF> lastAltSrcRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };
