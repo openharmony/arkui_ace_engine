@@ -23,6 +23,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_column.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
@@ -75,6 +76,7 @@ void JsBindViews(BindingTarget globalObj)
     JSLocalStorage::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSEnvironment::JSBind(globalObj);
+    JSForEach::JSBind(globalObj);
 }
 
 void CreatePageRoot(RefPtr<JsAcePage>& page, JSView* view)
