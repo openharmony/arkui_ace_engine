@@ -19,6 +19,7 @@
 #include <regex>
 #include <vector>
 
+#include "base/geometry/ng/vector.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -634,7 +635,7 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
         return;
     }
 
-    auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+    RefPtr<TransformComponent> transform; 
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -651,6 +652,14 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
             Dimension centerX = 0.5_pct;
             Dimension centerY = 0.5_pct;
             ParseJsScale(argsPtrItem, scaleX, scaleY, scaleZ, centerX, centerY);
+            if (Container::IsCurrentUseNewPipeline()) {
+                // new pipeline
+                NG::ViewAbstract::SetScale(NG::VectorF(scaleX, scaleY));
+                NG::ViewAbstract::SetPivot(
+                    NG::VectorF(static_cast<float>(centerX.Value()), static_cast<float>(centerY.Value())));
+                return;
+            }
+            transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
             transform->Scale(scaleX, scaleY, scaleZ, option);
             transform->SetOriginDimension(DimensionOffset(centerX, centerY));
             return;
@@ -658,6 +667,14 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
     }
     double scale;
     if (ParseJsDouble(info[0], scale)) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            // new pipeline
+            NG::ViewAbstract::SetScale(NG::VectorF(scale, scale));
+            return;
+        }
+        if (!transform) {
+            transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+        }
         transform->Scale(scale, option);
     }
 }
@@ -675,6 +692,11 @@ void JSViewAbstract::JsScaleX(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        // new pipeline
+        NG::ViewAbstract::SetScale(NG::VectorF(scaleVal, 1.0f));
+        return;
+    }
     auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     transform->ScaleX(scaleVal, option);
@@ -693,6 +715,11 @@ void JSViewAbstract::JsScaleY(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        // new pipeline
+        NG::ViewAbstract::SetScale(NG::VectorF(1.0f, scaleVal));
+        return;
+    }
     auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     transform->ScaleY(scaleVal, option);
@@ -740,7 +767,7 @@ void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
     }
 
     Dimension value;
-    auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+    RefPtr<TransformComponent> transform; 
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -754,11 +781,25 @@ void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
             auto translateY = Dimension(0.0);
             auto translateZ = Dimension(0.0);
             ParseJsTranslate(argsPtrItem, translateX, translateY, translateZ);
+            if (Container::IsCurrentUseNewPipeline()) {
+                // new pipeline
+                NG::ViewAbstract::SetTranslate(NG::Vector3F(translateX.Value(), translateY.Value(), translateZ.Value()));
+                return;
+            }
+            transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
             transform->Translate(translateX, translateY, translateZ, option);
             return;
         }
     }
     if (ParseJsDimensionVp(info[0], value)) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            // new pipeline
+            NG::ViewAbstract::SetTranslate(NG::Vector3F(value.Value(), value.Value(), value.Value()));
+            return;
+        }
+        if (!transform) {
+            transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+        }
         transform->Translate(value, value, option);
     }
 }
@@ -774,7 +815,11 @@ void JSViewAbstract::JsTranslateX(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-
+    if (Container::IsCurrentUseNewPipeline()) {
+        // new pipeline
+        NG::ViewAbstract::SetTranslate(NG::Vector3F(value.Value(), 0.0f, 0.0f));
+        return;
+    }
     auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     transform->TranslateX(value, option);
@@ -791,6 +836,11 @@ void JSViewAbstract::JsTranslateY(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        // new pipeline
+        NG::ViewAbstract::SetTranslate(NG::Vector3F(0.0f, value.Value(), 0.0f));
+        return;
+    }
     auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     transform->TranslateY(value, option);
@@ -804,7 +854,7 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
         return;
     }
 
-    auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+    RefPtr<TransformComponent> transform; 
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -821,6 +871,15 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
         std::optional<float> angle;
         ParseJsRotate(argsPtrItem, dx, dy, dz, centerX, centerY, angle);
         if (angle) {
+            if (Container::IsCurrentUseNewPipeline()) {
+                // new pipeline
+                NG::ViewAbstract::SetAngle(angle.value());
+                NG::ViewAbstract::SetRotate(NG::Vector3F(dx, dy, dz));
+                NG::ViewAbstract::SetPivot(
+                    NG::VectorF(static_cast<float>(centerX.Value()), static_cast<float>(centerY.Value())));
+                return;
+            }
+            transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
             transform->Rotate(dx, dy, dz, angle.value(), option);
             transform->SetOriginDimension(DimensionOffset(centerX, centerY));
         } else {
@@ -830,6 +889,14 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
     }
     double rotateZ;
     if (ParseJsDouble(info[0], rotateZ)) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            // new pipeline
+            NG::ViewAbstract::SetRotate(NG::Vector3F(0.0f, 0.0f, rotateZ));
+            return;
+        }
+        if (!transform) {
+            transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
+        }
         transform->RotateZ(rotateZ, option);
     }
 }
@@ -844,6 +911,11 @@ void JSViewAbstract::JsRotateX(const JSCallbackInfo& info)
 
     double rotateVal = 0.0;
     if (!ParseJsDouble(info[0], rotateVal)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        // new pipeline
+        NG::ViewAbstract::SetRotate(NG::Vector3F(rotateVal, 0.0f, 0.0f));
         return;
     }
 
@@ -864,7 +936,11 @@ void JSViewAbstract::JsRotateY(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], rotateVal)) {
         return;
     }
-
+    if (Container::IsCurrentUseNewPipeline()) {
+        // new pipeline
+        NG::ViewAbstract::SetRotate(NG::Vector3F(0.0f, rotateVal, 0.0f));
+        return;
+    }
     auto transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     transform->RotateY(rotateVal, option);
