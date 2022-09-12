@@ -240,6 +240,8 @@ void RenderToggle::Update(const RefPtr<Component>& component)
     if (toggleComponent_->GetOnChange()) {
         onChangeToggle_ = *toggleComponent_->GetOnChange();
     }
+
+    ApplyRestoreInfo();
     SetAccessibilityClickImpl();
     MarkNeedLayout();
 }
@@ -288,6 +290,34 @@ void RenderToggle::SetAccessibilityClickImpl()
             }
         });
     }
+}
+
+std::string RenderToggle::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("checked", toggleComponent_->GetCheckedState());
+    jsonObj->Put("isPressed", isPressed_);
+
+    return jsonObj->ToString();
+}
+
+void RenderToggle::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    auto info = JsonUtil::ParseJsonString(GetRestoreInfo());
+    if (!info->IsValid() || !info->IsObject()) {
+        LOGW("RenderRadio:: restore info is invalid");
+        return;
+    }
+
+    auto jsonchecked = info->GetValue("checked");
+    auto jsonisPressed = info->GetValue("isPressed");
+
+    toggleComponent_->SetCheckedState(jsonchecked->GetBool());
+    isPressed_ = jsonisPressed->GetBool();
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

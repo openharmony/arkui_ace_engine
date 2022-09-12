@@ -54,6 +54,8 @@ public:
         return component_;
     }
 
+    std::string ProvideRestoreInfo() override;
+
 protected:
     void UpdateRenderText(const RefPtr<SwitchComponent>& component);
     void InitRenderText();
@@ -106,6 +108,7 @@ protected:
     bool isDraging = false;
 private:
     void SetAccessibilityClickImpl();
+    void ApplyRestoreInfo();
 };
 
 } // namespace OHOS::Ace

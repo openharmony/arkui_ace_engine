@@ -255,6 +255,26 @@ ohos_unittest("SwiperComponentTest") {
   part_name = ace_engine_part
 }
 
+ohos_unittest("RenderSwiperTest") {
+  module_out_path = module_output_path
+
+  sources = [
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
+    "render_swiper_test_v2.cpp",
+  ]
+
+  configs = [
+    ":config_render_swiper_test",
+    "$ace_root:ace_test_config",
+  ]
+
+  deps = [
+    "$ace_root/build:ace_ohos_unittest_base",
+    "$ace_root/frameworks/core/components/test:json",
+  ]
+  part_name = ace_engine_part
+}
+
 config("config_render_swiper_test") {
   visibility = [ ":*" ]
   include_dirs = [
@@ -267,6 +287,7 @@ group("unittest") {
   testonly = true
   deps = [
     # ":SwiperComponentTest",
+    ":RenderSwiperTest",
     ":SwiperCreatorTest",
   ]
 }

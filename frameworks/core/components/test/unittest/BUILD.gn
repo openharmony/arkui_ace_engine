@@ -83,6 +83,7 @@ group("unittest") {
         "select:unittest",
         "tabbar:unittest",
         "text_field:unittest",
+        "toggle:unittest",
         "web:unittest",
 
         #"text_select:unittest",

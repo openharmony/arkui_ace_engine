@@ -265,6 +265,18 @@ ohos_unittest("CheckableComponentTest") {
   part_name = ace_engine_part
 }
 
+ohos_unittest("RenderCheckableTestV2") {
+  module_out_path = module_output_path
+
+  sources = [ "render_checkable_test_v2.cpp" ]
+
+  configs = [ "$ace_root:ace_test_config" ]
+
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
+
+  part_name = ace_engine_part
+}
+
 config("config_render_checkable_test") {
   visibility = [ ":*" ]
   include_dirs = [
@@ -278,5 +290,6 @@ group("unittest") {
   deps = [
     #":CheckableComponentTest",
     ":CheckableCreatorTest",
+    ":RenderCheckableTestV2",
   ]
 }

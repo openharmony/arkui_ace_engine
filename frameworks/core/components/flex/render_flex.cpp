@@ -63,6 +63,9 @@ void RenderFlex::Update(const RefPtr<Component>& component)
     if (!flex) {
         return;
     }
+    isTabs_ = flex->GetTabsFlag();
+    isTabContent_ = flex->GetTabContentFlag();
+
     direction_ = flex->GetDirection();
     mainAxisAlign_ = flex->GetMainAxisAlign();
     crossAxisAlign_ = flex->GetCrossAxisAlign();
@@ -1271,6 +1274,25 @@ void RenderFlex::OnVisibleChanged()
     if (accessibilityNode) {
         accessibilityNode->SetVisible(GetVisible());
     }
+}
+
+std::string RenderFlex::ProvideRestoreInfo()
+{
+    if (isTabs_) {
+        auto childNode = GetChildren().front();
+        auto childChildNode = childNode->GetChildren().front();
+        isTabs_ = false;
+        return childChildNode->ProvideRestoreInfo();
+    } 
+
+    if (isTabContent_) {
+        auto childNode = GetChildren().back();
+        auto childChildNode = childNode->GetChildren().front();
+        isTabContent_ = false;
+        return childChildNode->ProvideRestoreInfo(); 
+    }
+    
+    return "";
 }
 
 } // namespace OHOS::Ace

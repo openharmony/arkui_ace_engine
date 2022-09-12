@@ -166,6 +166,27 @@ public:
         return alignPtr_;
     }
 
+    void SetTabsFlag(bool flag)
+    {
+        isTabs_ = flag;
+    }
+
+    bool GetTabsFlag()
+    {
+        return isTabs_;
+    }
+
+    void SetTabContentFlag(bool flag)
+    {
+        isTabContent_ = flag;
+    }
+
+    bool GetTabContentFlag()
+    {
+        return isTabContent_;
+    }
+
+
 private:
     FlexDirection direction_ = FlexDirection::ROW;
     FlexAlign mainAxisAlign_ = FlexAlign::FLEX_START;
@@ -181,6 +202,9 @@ private:
     bool stretchToParent_ = false;
     bool useViewPort_ = false;
     bool containsNavigation_ = false;
+
+    bool isTabs_ = false;
+    bool isTabContent_ = false;
 };
 
 class RowComponent : public FlexComponent {

@@ -20,6 +20,7 @@
 #include "core/components/flex/render_flex.h"
 #include "core/components/root/render_root.h"
 #include "core/components/tab_bar/render_tab_bar.h"
+#include "core/components/tab_bar/render_tab_content.h"
 
 namespace OHOS::Ace {
 
@@ -65,6 +66,19 @@ public:
     {
         return tabsSize_;
     }
+
+    void SetIndex(int32_t index)
+    {
+        index_ = index;
+    }
+};
+
+class MockRenderTabContent final : public RenderTabContent {
+    DECLARE_ACE_TYPE(MockRenderTabContent, RenderTabContent);
+
+public:
+    MockRenderTabContent() = default;
+    ~MockRenderTabContent() override = default;
 };
 
 class TabBarTestUtils {

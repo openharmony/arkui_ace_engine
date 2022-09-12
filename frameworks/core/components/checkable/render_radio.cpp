@@ -61,6 +61,9 @@ void RenderRadio::Update(const RefPtr<Component>& component)
     } else {
         checked_ = originChecked;
     }
+
+    ApplyRestoreInfo();
+
     auto theme = GetTheme<RadioTheme>();
     if (theme) {
         borderWidth_ = theme->GetBorderWidth();
@@ -244,6 +247,36 @@ void RenderRadio::UpdateAnimation(bool isOn)
         offController_->AddInterpolator(selectEngine);
         offController_->SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
     }
+}
+
+std::string RenderRadio::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("checked", checked_);
+    jsonObj->Put("radioValue", radioValue_.c_str());
+    jsonObj->Put("groupValue", groupValue_.c_str());
+    return jsonObj->ToString();
+}
+
+void RenderRadio::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    auto info = JsonUtil::ParseJsonString(GetRestoreInfo());
+    if (!info->IsValid() || !info->IsObject()) {
+        LOGW("RenderRadio:: restore info is invalid");
+        return;
+    }
+
+    auto jsonchecked = info->GetValue("checked");
+    auto jsonradioValue = info->GetValue("radioValue");
+    auto jsongroupValue = info->GetValue("groupValue");
+
+    checked_ = jsonchecked->GetBool();
+    radioValue_ = jsonradioValue->GetString();
+    groupValue_ = jsongroupValue->GetString();
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace

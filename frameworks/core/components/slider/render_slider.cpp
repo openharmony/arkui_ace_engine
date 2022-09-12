@@ -79,6 +79,10 @@ void RenderSlider::Update(const RefPtr<Component>& component)
         scaleValue_ = mode_ == SliderMode::INSET ? thickness_ / NormalizeToPx(DEFAULT_INSET_TRACK_THICKNESS) :
             thickness_ / NormalizeToPx(DEFAULT_OUTSET_TRACK_THICKNESS);
         SyncValueToComponent(std::clamp(slider->GetValue(), min_, max_));
+
+        ApplyRestoreInfo();
+        slider->SetCurrentValue(value_);
+
         if (min_ >= max_ || step_ > (max_ - min_) || step_ <= 0.0) {
             isValueError_ = true;
             LOGE("RenderSlider update min, max, value, step error");
@@ -816,6 +820,49 @@ void RenderSlider::UpdateAnimation()
     }));
     controller_->SetDuration(DEFAULT_SLIDER_ANIMATION_DURATION);
     controller_->AddInterpolator(translate_);
+}
+
+std::string RenderSlider::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("value", value_);
+    jsonObj->Put("showTips", showTips_);
+    jsonObj->Put("showSteps", showSteps_);
+    jsonObj->Put("thickness", thickness_);
+    jsonObj->Put("min", min_);
+    jsonObj->Put("max", max_);
+    jsonObj->Put("step", step_);
+    return jsonObj->ToString();
+}
+
+void RenderSlider::ApplyRestoreInfo()
+{
+    if (GetRestoreInfo().empty()) {
+        return;
+    }
+    auto info = JsonUtil::ParseJsonString(GetRestoreInfo());
+    if (!info->IsValid() || !info->IsObject()) {
+        LOGW("RenderSlider:: restore info is invalid");
+        return;
+    }
+
+    auto jsonvalue = info->GetValue("value");
+    auto jsonshowTips = info->GetValue("showTips");
+    auto jsonshowSteps = info->GetValue("showSteps");
+    auto jsonthickness = info->GetValue("thickness");
+    auto jsonmin = info->GetValue("min");
+    auto jsonmax = info->GetValue("max");
+    auto jsonstep = info->GetValue("step");
+
+    value_ = jsonvalue->GetDouble();
+    showTips_ = jsonshowTips->GetBool();
+    showSteps_ = jsonshowSteps->GetBool();
+    thickness_ = jsonthickness->GetDouble();
+    min_ = jsonmin->GetDouble();
+    max_ = jsonmax->GetDouble();
+    step_ = jsonstep->GetDouble();
+
+    SetRestoreInfo("");
 }
 
 } // namespace OHOS::Ace
