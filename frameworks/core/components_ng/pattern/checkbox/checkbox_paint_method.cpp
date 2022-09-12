@@ -16,8 +16,6 @@
 
 #include <optional>
 
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/draw/path.h"
-
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/rect.h"

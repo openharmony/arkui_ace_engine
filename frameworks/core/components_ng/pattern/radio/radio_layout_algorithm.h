@@ -13,23 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CHECKBOX_CHECKBOX_LAYOUT_ALGORITHM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CHECKBOX_CHECKBOX_LAYOUT_ALGORITHM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RADIO_RADIO_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RADIO_RADIO_LAYOUT_ALGORITHM_H
 
-#include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT CheckBoxLayoutAlgorithm : public BoxLayoutAlgorithm {
-    DECLARE_ACE_TYPE(CheckBoxLayoutAlgorithm, BoxLayoutAlgorithm);
+class ACE_EXPORT RadioLayoutAlgorithm : public BoxLayoutAlgorithm {
+    DECLARE_ACE_TYPE(RadioLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    CheckBoxLayoutAlgorithm() = default;
+    RadioLayoutAlgorithm() = default;
 
-    ~CheckBoxLayoutAlgorithm() override = default;
+    ~RadioLayoutAlgorithm() override = default;
 
     void OnReset() override {}
 
@@ -43,9 +42,7 @@ private:
     float verticalPadding_ = 0.0f;
 
     void InitializeParam();
-
-    ACE_DISALLOW_COPY_AND_MOVE(CheckBoxLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CHECKBOX_CHECKBOX_LAYOUT_ALGORITHM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RADIO_RADIO_LAYOUT_ALGORITHM_H

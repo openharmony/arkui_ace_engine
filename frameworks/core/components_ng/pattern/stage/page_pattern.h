@@ -16,13 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STAGE_PAGE_PATTERN_H
 
-#include <functional>
-#include <stdint.h>
-#include <string>
-
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"
 
 namespace OHOS::Ace::NG {
@@ -85,6 +82,11 @@ public:
     void SetOnBackPressed(std::function<bool()>&& OnBackPressed)
     {
         OnBackPressed_ = std::move(OnBackPressed);
+    }
+
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<PageEventHub>();
     }
 
 private:
