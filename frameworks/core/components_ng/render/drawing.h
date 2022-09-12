@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H
 
 #include "draw/canvas.h"
+#include "drawing/engine_adapter/impl_interface/bitmap_impl.h"
 #include "image/image.h"
 #include "rosen_text/ui/font_collection.h"
 #include "rosen_text/ui/typography.h"
@@ -39,6 +40,10 @@ using RSBlendMode = Rosen::Drawing::BlendMode;
 using RSSamplingOptions = Rosen::Drawing::SamplingOptions;
 using RSRoundRect = Rosen::Drawing::RoundRect;
 using RSPath = Rosen::Drawing::Path;
+using RSBitmap = Rosen::Drawing::Bitmap;
+using RSBitmapFormat = Rosen::Drawing::BitmapFormat;
+using RSColorType = Rosen::Drawing::ColorType;
+using RSAlphaType = Rosen::Drawing::AlphaType;
 
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;
@@ -48,7 +53,6 @@ using RSParagraphBuilder = rosen::TypographyCreate;
 using RSFontCollection = rosen::FontCollection;
 using RSParagraphStyle = rosen::TypographyStyle;
 using RSTextStyle = rosen::TextStyle;
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H

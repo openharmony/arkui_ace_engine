@@ -17,11 +17,17 @@
 
 #include "base/log/ace_trace.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/core/components_ng/base/view_abstract.h"
+#include "frameworks/core/components_ng/pattern/qrcode/qrcode_view.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSQRCode::Create(const std::string& value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::QRCodeView::Create(value);
+        return;
+    }
     RefPtr<QrcodeComponent> qrcodeComponent = AceType::MakeRefPtr<OHOS::Ace::QrcodeComponent>();
     qrcodeComponent->SetValue(value);
     qrcodeComponent->SetQrcodeColor(Color::BLACK);
@@ -38,6 +44,10 @@ void JSQRCode::SetQRCodeColor(const JSCallbackInfo& info)
     }
     Color qrcodeColor;
     if (!ParseJsColor(info[0], qrcodeColor)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::QRCodeView::SetQRCodeColor(qrcodeColor);
         return;
     }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -59,6 +69,12 @@ void JSQRCode::SetBackgroundColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], backgroundColor)) {
         return;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetBackgroundColor(backgroundColor);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto qrcode = AceType::DynamicCast<OHOS::Ace::QrcodeComponent>(component);
     if (!qrcode) {
