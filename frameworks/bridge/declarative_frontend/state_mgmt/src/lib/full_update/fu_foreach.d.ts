@@ -16,15 +16,15 @@
 // regular ForEach ===========================
 
 // Note: the API for ForEach with partial update and with full update 
-// are different. Only this declaration file or the one for full update
+// are different. Only this declaration file or the one for partial update
 // can be used. Using both would lead to syntax error.
 
 declare class ForEach {
-  static create(): void;
+  static create(compilerGenId: string,
+    owningView: View,
+    arraySource : Array<any>,
+    itemGenFunc: (item : any) => void,
+    idGenfunction?: (iten: any) => string);
   static pop(): void;
-  static getIdArray(elmtId: number, emptyArray: string[]): boolean;
-  static setIdArray(elmtId: number, newIdArray: string[]): void;
-  static createNewChildStart(id: string, parentView: NativeViewPartialUpdate): void;
-  static createNewChildFinish(id: string, parentView: NativeViewPartialUpdate): void;
 }
 

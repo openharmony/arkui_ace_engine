@@ -5,6 +5,7 @@
     "src/utest/mock/common/mock_environment_backend.ts",
     "src/utest/mock/common/local_storage_native_mock.ts",
     "src/utest/mock/full_update/fu_view_native_mock.ts",
+    "src/lib/common/lazy_foreach.d.ts",
 
     "src/utest/mock/partial_update/mock_viewstack_processor.ts",
     "src/utest/mock/partial_update/mock_foreach.ts",
