@@ -95,18 +95,30 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
     }
 }
 
-void JSInteractableView::JsOnHover(const JSCallbackInfo& args)
+void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
 {
-    if (args[0]->IsFunction()) {
-        RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(args[0]));
-        auto onHoverId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool info) {
+    if (!info[0]->IsFunction()) {
+        LOGE("the param is not a function");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onHoverId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onHover");
-            func->Execute(info);
+            func->Execute(param);
         };
-        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        box->SetOnHoverId(onHoverId);
+        NG::ViewAbstract::SetOnHover(std::move(onHoverId));
+        return;
     }
+    RefPtr<JsHoverFunction> jsOnHoverFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onHoverId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverFunc)](bool param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onHover");
+        func->Execute(param);
+    };
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnHoverId(onHoverId);
 }
 
 void JSInteractableView::JsOnPan(const JSCallbackInfo& args)

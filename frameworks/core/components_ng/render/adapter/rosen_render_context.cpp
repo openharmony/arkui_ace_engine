@@ -23,12 +23,14 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 RosenRenderContext::~RosenRenderContext()
@@ -125,11 +127,6 @@ void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnTransformCenterUpdate(const VectorF& scale)
-{
-
-}
-
 void RosenRenderContext::OnTransformTranslateUpdate(const Vector3F& translate)
 {
     if (!rsNode_) {
@@ -147,6 +144,8 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector3F& rotate)
     rsNode_->SetRotation(rotate.x, rotate.y, rotate.z);
     RequestNextFrame();
 }
+
+void RosenRenderContext::OnTransformCenterUpdate(const VectorF& center) {}
 
 void RosenRenderContext::OnTransformAngleUpdate(const float& angle)
 {
@@ -343,6 +342,72 @@ void RosenRenderContext::MoveFrame(FrameNode* /*self*/, const RefPtr<FrameNode>&
     if (rsnode) {
         rsNode_->MoveChild(rsnode, index);
     }
+}
+
+void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
+{
+    LOGD("AnimateHoverEffectScale: isHoverd = %{public}d", isHovered);
+    if ((isHovered && isHoveredScale_) || (!isHovered && !isHoveredScale_)) {
+        return;
+    }
+    CHECK_NULL_VOID(rsNode_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto appTheme = themeManager->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
+    float themeScaleStart = appTheme->GetHoverScaleStart();
+    float themeScaleEnd = appTheme->GetHoverScaleEnd();
+    int32_t themeDuration = appTheme->GetHoverDuration();
+    float scaleBegin = isHovered ? themeScaleStart : themeScaleEnd;
+    float scaleEnd = isHovered ? themeScaleEnd : themeScaleStart;
+
+    rsNode_->SetScale(scaleBegin);
+    Rosen::RSAnimationTimingProtocol protocol;
+    protocol.SetDuration(themeDuration);
+    RSNode::Animate(
+        protocol, Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f),
+        [rsNode = rsNode_, scaleEnd]() {
+            if (rsNode) {
+                rsNode->SetScale(scaleEnd);
+            }
+        },
+        []() {});
+    isHoveredScale_ = isHovered;
+}
+
+void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
+{
+    LOGD("AnimateHoverEffectBoard: isHoverd = %{public}d", isHovered);
+    if ((isHovered && isHoveredBoard_) || (!isHovered && !isHoveredBoard_)) {
+        return;
+    }
+    CHECK_NULL_VOID(rsNode_);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto appTheme = themeManager->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
+    Color themeHighlightStart = appTheme->GetHoverHighlightStart();
+    Color themeHighlightEnd = appTheme->GetHoverHighlightEnd();
+    int32_t themeDuration = appTheme->GetHoverDuration();
+    Color colorBegin = isHovered ? themeHighlightStart : themeHighlightEnd;
+    Color colorEnd = isHovered ? themeHighlightEnd : themeHighlightStart;
+
+    rsNode_->SetBackgroundColor(colorBegin.GetValue());
+    Rosen::RSAnimationTimingProtocol protocol;
+    protocol.SetDuration(themeDuration);
+    RSNode::Animate(
+        protocol, Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f),
+        [rsNode = rsNode_, colorEnd]() {
+            if (rsNode) {
+                rsNode->SetBackgroundColor(colorEnd.GetValue());
+            }
+        },
+        []() {});
+    isHoveredBoard_ = isHovered;
 }
 
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 
 #include <vector>
 
+#include "core/components_ng/base/view_abstract.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
@@ -548,6 +549,10 @@ void JSTextField::JsHoverEffect(const JSCallbackInfo& info)
 {
     if (!info[0]->IsNumber()) {
         LOGE("info[0] is not a number");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetHoverEffect(static_cast<HoverEffectType>(info[0]->ToNumber<int32_t>()));
         return;
     }
     auto component = AceType::DynamicCast<TextFieldComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

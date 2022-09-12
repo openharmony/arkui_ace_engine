@@ -42,6 +42,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     changedInfo.SetScreenLocation(Offset(point.screenX, point.screenY));
     changedInfo.SetTouchType(point.type);
     event.AddChangedTouchLocationInfo(std::move(changedInfo));
+    event.SetTarget(GetEventTarget().value_or(EventTarget()));
 
     // all fingers collection
     for (const auto& item : point.pointers) {

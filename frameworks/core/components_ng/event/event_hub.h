@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/input_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -44,6 +45,19 @@ public:
         return gestureEventHub_;
     }
 
+    const RefPtr<InputEventHub>& GetOrCreateInputEventHub()
+    {
+        if (!inputEventHub_) {
+            inputEventHub_ = MakeRefPtr<InputEventHub>(WeakClaim(this));
+        }
+        return inputEventHub_;
+    }
+
+    const RefPtr<InputEventHub>& GetInputEventHub() const
+    {
+        return inputEventHub_;
+    }
+
     void AttachHost(const WeakPtr<FrameNode>& host);
 
     RefPtr<FrameNode> GetFrameNode() const;
@@ -60,6 +74,7 @@ public:
 private:
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;
+    RefPtr<InputEventHub> inputEventHub_;
 };
 
 } // namespace OHOS::Ace::NG

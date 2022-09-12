@@ -92,6 +92,9 @@ public:
         }
     }
 
+    virtual void AnimateHoverEffectScale(bool isHovered) {}
+    virtual void AnimateHoverEffectBoard(bool isHovered) {}
+
     // Add Transform in group
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformScale, VectorF);
