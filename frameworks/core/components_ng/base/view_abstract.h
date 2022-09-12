@@ -45,7 +45,7 @@ public:
     static void SetBorderWidth(const BorderWidthProperty& value);
     static void SetBorderStyle(const BorderStyle& value);
     static void SetBorderStyle(const BorderStyleProperty& value);
-
+    static void SetOpacity(double opacity);
 
     // event
     static void SetOnClick(GestureEventFunc&& clickEventFunc);

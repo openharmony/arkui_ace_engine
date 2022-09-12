@@ -95,6 +95,7 @@ public:
 
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundColor, Color);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     // TODO Add BorderRadius in group.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
@@ -108,6 +109,7 @@ protected:
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
+    virtual void OnOpacityUpdate(double opacity) {}
 
 private:
     std::function<void()> requestFrame_;

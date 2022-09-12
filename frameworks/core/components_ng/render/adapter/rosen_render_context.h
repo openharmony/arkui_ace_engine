@@ -103,6 +103,7 @@ private:
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void UpdateBorderWidth(const BorderWidthPropertyF& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
+    void OnOpacityUpdate(double opacity) override;
 
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 

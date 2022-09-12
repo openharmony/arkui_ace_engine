@@ -184,6 +184,11 @@ void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
     eventHub->SetHoverAnimation(hoverEffect);
 }
 
+void ViewAbstract::SetOpacity(double opacity)
+{
+    ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
+}
+
 void ViewAbstract::Pop()
 {
     ViewStackProcessor::GetInstance()->Pop();
