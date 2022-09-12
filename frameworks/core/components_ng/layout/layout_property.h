@@ -143,7 +143,7 @@ public:
     // user defined max, min, self size.
     void UpdateCalcLayoutProperty(const MeasureProperty& constraint);
 
-    void UpdateCalcSelfIdealSize(const CalcSize& value)
+    void UpdateUserDefinedIdealSize(const CalcSize& value)
     {
         if (!calcLayoutConstraint_) {
             calcLayoutConstraint_ = std::make_unique<MeasureProperty>();

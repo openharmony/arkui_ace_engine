@@ -389,4 +389,9 @@ ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[] = "XComponent";
 // ability_component
 ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[] = "AbilityComponent";
 
+// bar item
+ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[] = "BarItem";
+
+// title bar
+ACE_EXPORT extern const char TITLE_BAR_ETS_TAG[] = "TitleBar";
 } // namespace OHOS::Ace::V2

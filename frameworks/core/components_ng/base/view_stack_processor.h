@@ -262,7 +262,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };
 
-class ScopedViewStackProcessor final {
+class ACE_EXPORT ScopedViewStackProcessor final {
 public:
     ScopedViewStackProcessor();
     ~ScopedViewStackProcessor();

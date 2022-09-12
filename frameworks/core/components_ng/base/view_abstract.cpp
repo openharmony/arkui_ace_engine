@@ -27,7 +27,7 @@ void ViewAbstract::SetWidth(const CalcLength& width)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateCalcSelfIdealSize(CalcSize(width, std::nullopt));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, std::nullopt));
 }
 
 void ViewAbstract::SetHeight(const CalcLength& height)
@@ -36,7 +36,7 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateCalcSelfIdealSize(CalcSize(std::nullopt, height));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
 }
 
 void ViewAbstract::SetMinWidth(const CalcLength& width)
