@@ -104,6 +104,12 @@ private:
     void UpdateBorderWidth(const BorderWidthPropertyF& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
 
+    void OnTransformScaleUpdate(const VectorF& scale) override;
+    void OnTransformCenterUpdate(const VectorF& center) override;
+    void OnTransformTranslateUpdate(const Vector3F& translate) override;
+    void OnTransformRotateUpdate(const Vector3F& rotate) override;
+    void OnTransformAngleUpdate(const float& angle) override;
+
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     std::shared_ptr<Rosen::RSNode> rsNode_;

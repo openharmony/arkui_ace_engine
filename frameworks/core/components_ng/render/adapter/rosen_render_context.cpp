@@ -103,6 +103,10 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* geometryNode)
         rsNode_->SetBounds(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
     }
     rsNode_->SetFrame(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
+    if (propTransform_ && propTransform_->HasTransformCenter()) {
+        auto vec = propTransform_->GetTransformCenterValue();
+        rsNode_->SetPivot(vec.x / frameRect.Width(), vec.y / frameRect.Height());
+    }
 }
 
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
@@ -111,6 +115,44 @@ void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
         return;
     }
     rsNode_->SetBackgroundColor(value.GetValue());
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
+{
+    if (!rsNode_) {
+        return;
+    }
+    rsNode_->SetScale(scale.x, scale.y);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnTransformTranslateUpdate(const Vector3F& translate)
+{
+    if (!rsNode_) {
+        return;
+    }
+    rsNode_->SetTranslate(translate.x, translate.y, translate.z);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnTransformRotateUpdate(const Vector3F& rotate)
+{
+    if (!rsNode_) {
+        return;
+    }
+    rsNode_->SetRotation(rotate.x, rotate.y, rotate.z);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnTransformCenterUpdate(const VectorF& center) {}
+
+void RosenRenderContext::OnTransformAngleUpdate(const float& angle)
+{
+    if (!rsNode_) {
+        return;
+    }
+    rsNode_->SetRotation(angle);
     RequestNextFrame();
 }
 
