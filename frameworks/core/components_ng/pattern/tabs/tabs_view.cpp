@@ -50,7 +50,7 @@ void TabsView::Create()
         V2::SWIPER_ETS_TAG, swiperId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateLoop(false);
-    swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::NONE);
+    swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto swiperController = swiperPattern->GetSwiperController();
