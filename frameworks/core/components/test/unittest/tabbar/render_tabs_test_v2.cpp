@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,12 +46,12 @@ void RenderTabsTestV2::SetUp() {}
 void RenderTabsTestV2::TearDown() {}
 
 /**
- * @tc.name: Continuation001
+ * @tc.name: RenderTabsContinuation001
  * @tc.desc: Test state transfer of the tabbar component
  * @tc.type: FUNC
- * @tc.require:I5NC9F
+ * @tc.require: issueI5NC9F
  */
-HWTEST_F(RenderTabsTestV2, Continuation001, TestSize.Level1)
+HWTEST_F(RenderTabsTestV2, RenderTabsContinuation001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenderTabsTestV2 Continuation001 start";
 
@@ -115,12 +115,12 @@ HWTEST_F(RenderTabsTestV2, Continuation001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Continuation002
+ * @tc.name: RenderTabsContinuation002
  * @tc.desc: Test state transfer of the tabcontent component
  * @tc.type: FUNC
- * @tc.require:I5NC9F
+ * @tc.require: issueI5NC9F
  */
-HWTEST_F(RenderTabsTestV2, Continuation002, TestSize.Level1)
+HWTEST_F(RenderTabsTestV2, RenderTabsContinuation002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenderTabsTestV2 Continuation002 start";
 
@@ -179,12 +179,12 @@ HWTEST_F(RenderTabsTestV2, Continuation002, TestSize.Level1)
 }
 
 /**
- * @tc.name: Continuation003
+ * @tc.name: RenderTabsContinuation003
  * @tc.desc: Test state transfer of the TabContentItemComponent
  * @tc.type: FUNC
- * @tc.require:I5NC9F
+ * @tc.require: issueI5NC9F
  */
-HWTEST_F(RenderTabsTestV2, Continuation003, TestSize.Level1)
+HWTEST_F(RenderTabsTestV2, RenderTabsContinuation003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenderTabsTestV2 Continuation003 start";
 
@@ -200,12 +200,12 @@ HWTEST_F(RenderTabsTestV2, Continuation003, TestSize.Level1)
 }
 
 /**
- * @tc.name: Continuation004
+ * @tc.name: RenderTabsContinuation004
  * @tc.desc: Test state transfer of the TabContentItemComponent
  * @tc.type: FUNC
- * @tc.require:I5NC9F
+ * @tc.require: issueI5NC9F
  */
-HWTEST_F(RenderTabsTestV2, Continuation004, TestSize.Level1)
+HWTEST_F(RenderTabsTestV2, RenderTabsContinuation004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenderTabsTestV2 Continuation004 start";
 

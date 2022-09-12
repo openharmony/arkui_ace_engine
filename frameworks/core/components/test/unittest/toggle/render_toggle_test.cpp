@@ -53,10 +53,10 @@ Size MockRenderToggle::Measure()
 }
 
 /**
- * @tc.name: Render_Toggle_Test_001
+ * @tc.name: RenderToggleTest001
  * @tc.desc: Test state transfer of the toggle component
  * @tc.type: FUNC
- * @tc.require:I5NC9F
+ * @tc.require: issueI5NC9F
  */
 HWTEST_F(RenderToggleTest, RenderToggleTest001, TestSize.Level1)
 {

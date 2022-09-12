@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,13 +99,12 @@ public:
 };
 
 /**
- * @tc.name: continuation001
+ * @tc.name: RenderCheckableContinuation001
  * @tc.desc: Test state transfer of the checkbox component
  * @tc.type: FUNC
- * @tc.require:
- * @tc.author:
+ * @tc.require: issueI5NC9F
  */
-HWTEST_F(RenderCheckableTestV2, continuation001, TestSize.Level1)
+HWTEST_F(RenderCheckableTestV2, RenderCheckableContinuation001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenderCheckableTestV2 continuation001 start";
 
@@ -148,13 +147,12 @@ HWTEST_F(RenderCheckableTestV2, continuation001, TestSize.Level1)
 }
 
 /**
- * @tc.name: continuation002
+ * @tc.name: RenderCheckableContinuation002
  * @tc.desc: Test state transfer of the switch component
  * @tc.type: FUNC
- * @tc.require:
- * @tc.author:
+ * @tc.require: issueI5NC9F
  */
-HWTEST_F(RenderCheckableTestV2, continuation002, TestSize.Level1)
+HWTEST_F(RenderCheckableTestV2, RenderCheckableContinuation002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenderCheckableTestV2 continuation002 start";
 
@@ -197,13 +195,12 @@ HWTEST_F(RenderCheckableTestV2, continuation002, TestSize.Level1)
 }
 
 /**
- * @tc.name: continuation003
+ * @tc.name: RenderCheckableContinuation003
  * @tc.desc: Test state transfer of the radio component
  * @tc.type: FUNC
- * @tc.require:
- * @tc.author:
+ * @tc.require: issueI5NC9F
  */
-HWTEST_F(RenderCheckableTestV2, continuation003, TestSize.Level1)
+HWTEST_F(RenderCheckableTestV2, RenderCheckableContinuation003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RenderCheckableTestV2 continuation003 start";
 
