@@ -38,8 +38,7 @@ public:
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(paragraph_, nullptr);
-        auto offset = paintWrapper->GetContentOffset();
-        auto paintOffset = offset - OffsetF(0.0, baselineOffset_);
+        auto paintOffset = OffsetF(0.0, baselineOffset_);
         return [paragraph = paragraph_, paintOffset](
                    RSCanvas& canvas) { paragraph->Paint(&canvas, paintOffset.GetX(), paintOffset.GetY()); };
     }

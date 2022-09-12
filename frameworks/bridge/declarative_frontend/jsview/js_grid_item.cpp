@@ -26,6 +26,10 @@ namespace OHOS::Ace::Framework {
 void JSGridItem::Create(const JSCallbackInfo& args)
 {
     if (Container::IsCurrentUseNewPipeline()) {
+        if (Container::IsCurrentUsePartialUpdate()) {
+            CreateForNGPartialUpdate(args);
+            return;
+        }
         NG::GridItemView::Create();
         return;
     }
@@ -82,6 +86,35 @@ void JSGridItem::Create(const JSCallbackInfo& args)
 
     itemComponent->SetDeepRenderFunc(gridItemDeepRenderFunc);
     itemComponent->SetIsLazyCreating(isLazy);
+}
+
+void JSGridItem::CreateForNGPartialUpdate(const JSCallbackInfo& args)
+{
+    if (args.Length() < 2 || !args[0]->IsFunction()) {
+        LOGE("Expected deep render function parameter");
+        return;
+    }
+    if (!args[1]->IsBoolean()) {
+        LOGE("Expected isLazy parameter");
+        return;
+    }
+    const bool isLazy = args[1]->ToBoolean();
+    if (!isLazy) {
+        NG::GridItemView::Create();
+    } else {
+        RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
+        auto gridItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
+                                          jsDeepRenderFunc = std::move(jsDeepRender)](int32_t nodeId) {
+            LOGD("GridItem elmtId %{public}d DeepRender JS function execution start ....", nodeId);
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            JSRef<JSVal> jsParams[2];
+            jsParams[0] = JSRef<JSVal>::Make(ToJSValue(nodeId));
+            jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
+            jsDeepRenderFunc->ExecuteJS(2, jsParams);
+        }; // gridItemDeepRenderFunc lambda
+        NG::GridItemView::Create(std::move(gridItemDeepRenderFunc));
+    }
+    args.ReturnSelf();
 }
 
 void JSGridItem::SetColumnStart(int32_t columnStart)

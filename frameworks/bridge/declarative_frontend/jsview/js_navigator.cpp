@@ -18,12 +18,39 @@
 #include "core/components/box/box_component.h"
 #include "core/components/navigator/navigator_component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/navigator/navigator_view.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSNavigator::Create(const JSCallbackInfo& info)
 {
     LOGD("Create component: JSNavigator");
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::NavigatorView::Create();
+        if (info.Length() > 0 && info[0]->IsObject()) {
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+            JSRef<JSVal> target = obj->GetProperty("target");
+            if (target->IsString()) {
+                NG::NavigatorView::SetUri(target->ToString());
+            }
+
+            JSRef<JSVal> type = obj->GetProperty("type");
+            if (type->IsNumber()) {
+                auto navigatorType = NG::NavigatorType(type->ToNumber<uint32_t>());
+                if (navigatorType == NG::NavigatorType::DEFAULT) {
+                    NG::NavigatorView::SetType(NG::NavigatorType::PUSH);
+                } else {
+                    NG::NavigatorView::SetType(navigatorType);
+                }
+            }
+        } else {
+            NG::NavigatorView::SetType(NG::NavigatorType::BACK);
+        }
+        LOGI("NG navigator created");
+        return;
+    }
+
     // when the navigator is created, we don't know the child. so I use an empty box here
     RefPtr<OHOS::Ace::Component> child;
     auto navigatorComponent = AceType::MakeRefPtr<OHOS::Ace::NavigatorComponent>(child);
@@ -49,16 +76,26 @@ void JSNavigator::Create(const JSCallbackInfo& info)
     }
 
     ViewStackProcessor::GetInstance()->Push(navigatorComponent);
+    LOGI("old framework navigator created");
 }
 
 void JSNavigator::SetTarget(const std::string& value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::NavigatorView::SetUri(value);
+        return;
+    }
     auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     navigator->SetUri(value);
 }
 
 void JSNavigator::SetType(int32_t value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::NavigatorView::SetType(NG::NavigatorType(value));
+        return;
+    }
+
     auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     NavigatorType navigatorType = NavigatorType(value);
     if (navigatorType == NavigatorType::DEFAULT) {
@@ -96,6 +133,11 @@ void JSNavigator::JSBind(BindingTarget globalObj)
 
 void JSNavigator::SetActive(bool active)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::NavigatorView::SetActive(active);
+        return;
+    }
+    
     auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (navigator) {
         navigator->SetActive(active);
@@ -104,6 +146,14 @@ void JSNavigator::SetActive(bool active)
 
 void JSNavigator::SetParams(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args.Length() > 0 && args[0]->IsObject()) {
+            JSRef<JSVal> val = JSRef<JSVal>::Cast(args[0]);
+            NG::NavigatorView::SetParams(val->ToString());
+        }
+        return;
+    }
+
     auto navigator = AceType::DynamicCast<NavigatorComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (navigator) {
         if (args.Length() > 0 && args[0]->IsObject()) {
@@ -117,6 +167,11 @@ void JSNavigator::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsWidth(info);
         return;
     }
 
@@ -136,6 +191,11 @@ void JSNavigator::JsHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsHeight(info);
         return;
     }
 
@@ -160,6 +220,11 @@ void JSNavigator::JsSize(const JSCallbackInfo& info)
 
     if (!info[0]->IsObject()) {
         LOGE("arg is not Object or String.");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsSize(info);
         return;
     }
 

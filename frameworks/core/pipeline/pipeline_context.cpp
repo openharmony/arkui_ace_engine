@@ -96,7 +96,6 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr int64_t SEC_TO_NANOSEC = 1000000000;
-constexpr int32_t MOUSE_PRESS_LEFT = 1;
 constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
 constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
@@ -3316,128 +3315,6 @@ void PipelineContext::NavigatePage(uint8_t type, const PageTarget& target, const
         return;
     }
     frontend->NavigatePage(type, target, params);
-}
-
-void PipelineContext::ForceLayoutForImplicitAnimation()
-{
-    if (!pendingImplicitLayout_.empty()) {
-        pendingImplicitLayout_.top() = true;
-    }
-}
-
-bool PipelineContext::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
-    const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
-{
-    if (!propertyCallback) {
-        LOGE("failed to create animation, property callback is null!");
-        return false;
-    }
-
-    OpenImplicitAnimation(option, curve, finishCallback);
-    propertyCallback();
-    return CloseImplicitAnimation();
-}
-
-void PipelineContext::PrepareOpenImplicitAnimation()
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!SystemProperties::GetRosenBackendEnabled()) {
-        LOGE("rosen backend is disabled");
-        return;
-    }
-
-    // initialize false for implicit animation layout pending flag
-    pendingImplicitLayout_.push(false);
-    FlushLayout();
-#endif
-}
-
-void PipelineContext::OpenImplicitAnimation(
-    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!SystemProperties::GetRosenBackendEnabled()) {
-        LOGE("rosen backend is disabled!");
-        return;
-    }
-
-    // initialize false for implicit animation layout pending flag
-    pendingImplicitLayout_.push(false);
-    FlushLayout();
-
-    auto wrapFinishCallback = [weak = AceType::WeakClaim(this), finishCallback]() {
-        auto context = weak.Upgrade();
-        if (!context) {
-            return;
-        }
-        context->GetTaskExecutor()->PostTask(
-            [finishCallback]() {
-                if (finishCallback) {
-                    finishCallback();
-                }
-            },
-            TaskExecutor::TaskType::UI);
-    };
-
-    Rosen::RSAnimationTimingProtocol timingProtocol;
-    timingProtocol.SetDuration(option.GetDuration());
-    timingProtocol.SetStartDelay(option.GetDelay());
-    timingProtocol.SetSpeed(option.GetTempo());
-    timingProtocol.SetRepeatCount(option.GetIteration());
-    timingProtocol.SetDirection(option.GetAnimationDirection() == AnimationDirection::NORMAL ||
-                                option.GetAnimationDirection() == AnimationDirection::ALTERNATE);
-    timingProtocol.SetAutoReverse(option.GetAnimationDirection() == AnimationDirection::ALTERNATE ||
-                                  option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
-    timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
-    RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), wrapFinishCallback);
-#endif
-}
-
-void PipelineContext::PrepareCloseImplicitAnimation()
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!SystemProperties::GetRosenBackendEnabled()) {
-        LOGE("rosen backend is disabled!");
-        return;
-    }
-
-    if (pendingImplicitLayout_.empty()) {
-        LOGE("close implicit animation failed, need to open implicit animation first!");
-        return;
-    }
-
-    // layout the views immediately to animate all related views, if layout updates are pending in the animation closure
-    if (pendingImplicitLayout_.top()) {
-        FlushLayout();
-    }
-    pendingImplicitLayout_.pop();
-#endif
-}
-
-bool PipelineContext::CloseImplicitAnimation()
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!SystemProperties::GetRosenBackendEnabled()) {
-        LOGE("rosen backend is disabled!");
-        return false;
-    }
-
-    if (pendingImplicitLayout_.empty()) {
-        LOGE("close implicit animation failed, need to open implicit animation first!");
-        return false;
-    }
-
-    // layout the views immediately to animate all related views, if layout updates are pending in the animation closure
-    if (pendingImplicitLayout_.top()) {
-        FlushLayout();
-    }
-    pendingImplicitLayout_.pop();
-
-    auto animations = RSNode::CloseImplicitAnimation();
-    return !animations.empty();
-#else
-    return false;
-#endif
 }
 
 void PipelineContext::AddKeyFrame(

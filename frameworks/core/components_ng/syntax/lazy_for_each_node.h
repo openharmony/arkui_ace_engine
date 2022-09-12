@@ -16,18 +16,22 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_LAZY_FOR_EACH_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_LAZY_FOR_EACH_NODE_H
 
+#include <list>
+#include <optional>
 #include <stdint.h>
 #include <string>
 #include <unordered_set>
 #include <utility>
 
+#include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT LazyForEachNode : public UINode {
+class ACE_EXPORT LazyForEachNode : public UINode, public V2::DataChangeListener {
     DECLARE_ACE_TYPE(LazyForEachNode, UINode);
 
 public:
@@ -37,6 +41,7 @@ public:
     LazyForEachNode(int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
         : UINode(V2::JS_LAZY_FOR_EACH_ETS_TAG, nodeId, false), builder_(forEachBuilder)
     {}
+
     ~LazyForEachNode() override = default;
 
     bool IsAtomicNode() const override
@@ -51,11 +56,31 @@ public:
 
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
 
-    void UpdateCachedItems(std::list<int32_t>& newIndexes);
+    void UpdateCachedItems(int32_t newStartIndex, int32_t newEndIndex, std::list<std::optional<std::string>>&& nodeIds);
+
+    void OnDataReloaded() override;
+    void OnDataAdded(size_t index) override;
+    void OnDataDeleted(size_t index) override;
+    void OnDataChanged(size_t index) override;
+    void OnDataMoved(size_t from, size_t to) override;
 
 private:
-    // Saves a list of component keys after the most recent layout update was completed.
-    std::list<int32_t> indexes_;
+    void OnAttachToMainTree() override
+    {
+        CHECK_NULL_VOID(builder_);
+        builder_->RegisterDataChangeListener(Claim(this));
+    }
+
+    void OnDetachFromMainTree() override
+    {
+        CHECK_NULL_VOID(builder_);
+        builder_->UnregisterDataChangeListener(Claim(this));
+    }
+
+    // The index values of the start and end of the current children nodes and the corresponding keys.
+    int32_t startIndex_ = -1;
+    int32_t endIndex_ = -1;
+    std::list<std::optional<std::string>> ids_;
 
     RefPtr<LazyForEachBuilder> builder_;
 

@@ -90,6 +90,9 @@ public:
         }
     }
 
+    virtual void AnimateHoverEffectScale(bool isHovered) {}
+    virtual void AnimateHoverEffectBoard(bool isHovered) {}
+
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundColor, Color);
     // TODO Add BorderRadius in group.

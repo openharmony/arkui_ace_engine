@@ -256,7 +256,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     MMI::PointerEvent::PointerItem item;
     bool ret = pointerEvent->GetPointerItem(pointerID, item);
     if (!ret) {
-        LOGE("get pointer item failed.");
+        LOGE("get pointer: %{public}d item failed.", pointerID);
         return;
     }
 

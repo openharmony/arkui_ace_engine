@@ -99,6 +99,10 @@ ACE_EXPORT extern const char TABS_ETS_TAG[];
 ACE_EXPORT extern const char TAB_CONTENT_ITEM_COMPONENT_TAG[];
 ACE_EXPORT extern const char TAB_CONTENT_ITEM_ETS_TAG[];
 
+// tab bar
+ACE_EXPORT extern const char TAB_BAR_COMPONENT_TAG[];
+ACE_EXPORT extern const char TAB_BAR_ETS_TAG[];
+
 // navigation view
 ACE_EXPORT extern const char NAVIGATION_VIEW_COMPONENT_TAG[];
 ACE_EXPORT extern const char NAVIGATION_VIEW_ETS_TAG[];

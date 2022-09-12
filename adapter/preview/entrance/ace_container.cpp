@@ -36,7 +36,6 @@
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_window.h"
 #include "core/common/text_field_manager.h"
-#include "core/common/watch_dog.h"
 #include "core/common/window.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_constants.h"

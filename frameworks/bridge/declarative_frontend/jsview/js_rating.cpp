@@ -212,6 +212,24 @@ void JSRating::SetOnChange(const JSCallbackInfo& info)
     if (!JSViewBindEvent(&RatingComponent::SetOnChange, info)) {
         LOGW("failed to bind event");
     }
+
+    if (!info[0]->IsFunction()) {
+        LOGE("failed to bind onChange Event to Rating due to it is not a function");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](double value) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Rating.onChange");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::RatingView::SetOnChange(std::move(onChange));
+        return;
+    }
+
     info.ReturnSelf();
 }
 

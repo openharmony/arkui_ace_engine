@@ -95,6 +95,10 @@ const char TABS_ETS_TAG[] = "Tabs";
 const char TAB_CONTENT_ITEM_COMPONENT_TAG[] = "TabContentItemComponent";
 const char TAB_CONTENT_ITEM_ETS_TAG[] = "TabContent";
 
+// tab bar
+const char TAB_BAR_COMPONENT_TAG[] = "TabBarComponent";
+const char TAB_BAR_ETS_TAG[] = "TabBar";
+
 // navigation view
 const char NAVIGATION_VIEW_COMPONENT_TAG[] = "NavigationContainerComponent";
 const char NAVIGATION_VIEW_ETS_TAG[] = "Navigation";

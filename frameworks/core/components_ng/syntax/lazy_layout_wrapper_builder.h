@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_LAZY_LAYOUT_WRAPPER_BUILDER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_LAZY_LAYOUT_WRAPPER_BUILDER_H
 
+#include <optional>
+
 #include "base/memory/referenced.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 
@@ -31,14 +34,49 @@ public:
 
     void SwapDirtyAndUpdateBuildCache() override;
 
+    void UpdateIndexRange(int32_t startIndex, int32_t endIndex, const std::list<std::optional<std::string>>& ids)
+    {
+        auto size = static_cast<int32_t>(ids.size());
+        if (!(size != 0) && (size != (endIndex - startIndex + 1))) {
+            LOGE("fail to update index range due to ides not match!, %{public}d, %{public}d, %{public}d", startIndex,
+                endIndex, size);
+            return;
+        }
+
+        preStartIndex_ = startIndex;
+        preEndIndex_ = endIndex;
+        preNodeIds_ = ids;
+    }
+
+    void UpdateForceFlag(bool forceMeasure, bool forceLayout)
+    {
+        forceMeasure_ = forceMeasure;
+        forceLayout_ = forceLayout;
+    }
+
 protected:
     int32_t OnGetTotalCount() override;
     RefPtr<LayoutWrapper> OnGetOrCreateWrapperByIndex(int32_t index) override;
-    std::list<RefPtr<LayoutWrapper>> OnExpandChildLayoutWrapper() override;
+    const std::list<RefPtr<LayoutWrapper>>& OnExpandChildLayoutWrapper() override;
 
 private:
     RefPtr<LazyForEachBuilder> builder_;
     WeakPtr<LazyForEachNode> host_;
+
+    int32_t preStartIndex_ = -1;
+    int32_t preEndIndex_ = -1;
+    std::list<std::optional<std::string>> preNodeIds_;
+
+    std::optional<int32_t> startIndex_;
+    std::optional<int32_t> endIndex_;
+    std::list<std::optional<std::string>> nodeIds_;
+
+    std::list<RefPtr<LayoutWrapper>> childWrappers_;
+
+    bool forceMeasure_ = false;
+    bool forceLayout_ = false;
+
+    ACE_DISALLOW_COPY_AND_MOVE(LazyLayoutWrapperBuilder);
 };
 
 } // namespace OHOS::Ace::NG

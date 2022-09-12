@@ -28,8 +28,8 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT CheckBoxView {
 public:
-    static void Create();
-    static void Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName);
+    static void Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
+        const std::string& tagName);
     static void SetSelect(bool isSelected);
     static void SetSelectedColor(Color color);
     static void SetOnChange(ChangeEvent&& onChange);

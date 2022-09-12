@@ -66,4 +66,13 @@ void RatingView::SetBackgroundSrc(const std::string& value)
     ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo, ImageSourceInfo(value));
 }
 
+void RatingView::SetOnChange(ChangeEvent&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
 } // namespace OHOS::Ace::NG

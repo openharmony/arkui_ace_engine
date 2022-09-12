@@ -28,8 +28,14 @@ public:
     {
         auto* stack = ViewStackProcessor::GetInstance();
         auto nodeId = stack->ClaimNodeId();
+
+        if (stack->GetMainFrameNode()->GetTag() == V2::TABS_ETS_TAG) {
+            forEachBuilder->ExpandChildrenOnInitial();
+            return;
+        }
+
         auto lazyForEach = LazyForEachNode::GetOrCreateLazyForEachNode(nodeId, forEachBuilder);
-        ViewStackProcessor::GetInstance()->Push(lazyForEach);
+        stack->Push(lazyForEach);
     }
 };
 } // namespace OHOS::Ace::NG
