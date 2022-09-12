@@ -46,6 +46,19 @@ public:
         return callback_;
     }
 
+    void SetScrollBeginCallback(ScrollBeginCallback&& scrollBeginCallback)
+    {
+        if (!scrollBeginCallback) {
+            return;
+        }
+        scrollBeginCallback_ = std::move(scrollBeginCallback);
+    }
+
+    const ScrollBeginCallback& GetScrollBeginCallback() const
+    {
+        return scrollBeginCallback_;
+    }
+
     Axis GetAxis() const
     {
         return axis_;
@@ -53,6 +66,7 @@ public:
 
 private:
     ScrollPositionCallback callback_;
+    ScrollBeginCallback scrollBeginCallback_;
     Axis axis_ = Axis::VERTICAL;
 };
 

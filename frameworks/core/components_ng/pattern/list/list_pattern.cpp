@@ -25,6 +25,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t SCROLL_STATE_IDLE = 0;
+constexpr int32_t SCROLL_STATE_SCROLL = 1;
+constexpr int32_t SCROLL_STATE_FLING = 2;
 // TODO define as common method
 float CalculateFriction(float gamma)
 {
@@ -54,9 +57,47 @@ void ListPattern::OnModifyDone()
             auto pattern = weak.Upgrade();
             if (pattern) {
                 pattern->UpdateCurrentOffset(static_cast<float>(offset));
+
+                auto host = pattern->GetHost();
+                auto listEventHub = host->GetEventHub<ListEventHub>();
+                CHECK_NULL_RETURN(listEventHub, true);
+                auto onScroll = listEventHub->GetOnScroll();
+                if (onScroll) {
+                    Dimension offsetPX = Dimension(offset);
+                    Dimension offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+                    if (source == SCROLL_FROM_UPDATE) {
+                        onScroll(offsetVP, V2::ScrollState(SCROLL_STATE_SCROLL));
+                    } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
+                        onScroll(offsetVP, V2::ScrollState(SCROLL_STATE_FLING));
+                    } else {
+                        onScroll(offsetVP, V2::ScrollState(SCROLL_STATE_IDLE));
+                    }
+                }
+                if (pattern->GetScrollState() == SCROLL_FROM_UPDATE && source == SCROLL_FROM_ANIMATION) {
+                    pattern->SetScrollStop(true);
+                }
             }
         }
         return true;
+    };
+
+    auto scrollBeginTask = [weak = WeakClaim(this)](Dimension dx, Dimension dy) {
+        ScrollInfo scrollInfo;
+        scrollInfo.dx = Dimension(0);
+        scrollInfo.dy = Dimension(0);
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            auto host = pattern->GetHost();
+            auto listEventHub = host->GetEventHub<ListEventHub>();
+            CHECK_NULL_RETURN(listEventHub, scrollInfo);
+            auto onScrollBegin = listEventHub->GetOnScrollBegin();
+            if (onScrollBegin) {
+                onScrollBegin(dx, dy);
+                scrollInfo.dx = dx;
+                scrollInfo.dy = dy;
+            }
+        }
+        return scrollInfo;
     };
 
     auto hub = host->GetEventHub<EventHub>();
@@ -68,6 +109,7 @@ void ListPattern::OnModifyDone()
     }
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL));
     scrollableEvent_->SetScrollPositionCallback(std::move(task));
+    scrollableEvent_->SetScrollBeginCallback(std::move(scrollBeginTask));
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
@@ -80,17 +122,47 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, b
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
-    startIndex_ = listLayoutAlgorithm->GetStartIndex();
-    endIndex_ = listLayoutAlgorithm->GetEndIndex();
     isInitialized_ = listLayoutAlgorithm->GetIsInitialized();
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     if (listLayoutAlgorithm->GetMaxListItemIndex().has_value()) {
         maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex().value();
     }
     auto host = GetHost();
-    if (host == nullptr) {
-        return false;
+    CHECK_NULL_RETURN(host, false);
+    auto listEventHub = host->GetEventHub<ListEventHub>();
+    CHECK_NULL_RETURN(listEventHub, false);
+    if (currentOffset_ != lastOffset_) {    
+        if (startIndex_ != listLayoutAlgorithm->GetStartIndex() ||
+                endIndex_ != listLayoutAlgorithm->GetEndIndex()) {
+                    auto onScrollIndex = listEventHub->GetOnScrollIndex();
+                    if (onScrollIndex) {
+                        onScrollIndex(startIndex_, endIndex_);
+                    }
+        }
+        bool scrollUpToCrossLine = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
+        bool scrollDownToCrossLine = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
+        if ((startIndex_ == 0) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
+            auto onReachStart = listEventHub->GetOnReachStart();
+            if (onReachStart) {
+                onReachStart();
+            }
+        }
+        if ((endIndex_ == maxListItemIndex_) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
+            auto onReachEnd = listEventHub->GetOnReachEnd();
+            if (onReachEnd) {
+                onReachEnd();
+            }
+        }
     }
+    if (scrollStop_) {
+        auto onScrollStop = listEventHub->GetOnScrollStop();
+        if (onScrollStop) {
+            onScrollStop();
+        }
+    }
+    startIndex_ = listLayoutAlgorithm->GetStartIndex();
+    endIndex_ = listLayoutAlgorithm->GetEndIndex();
+    
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     // TODO: now only support spring effect
     auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
