@@ -48,6 +48,7 @@ public:
     virtual void PushSvgMask(const sk_sp<SkSVGDOM>& svgDom, double x, double y, double scaleX, double scaleY) = 0;
     virtual void PushPathMask(const SkPaint& maskPaint, const SkPath& maskPath) = 0;
     virtual void PushFilter(const SkPaint& filterPaint) = 0;
+    virtual void PushHole(double dx, double dy, double width, double height, int32_t holeId) = 0;
     virtual void Pop() = 0;
 };
 

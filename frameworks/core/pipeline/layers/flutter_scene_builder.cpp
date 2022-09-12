@@ -14,6 +14,9 @@
  */
 #include "core/pipeline/layers/flutter_scene_builder.h"
 
+#include "include/core/SkRect.h"
+#include "include/core/SkScalar.h"
+
 namespace OHOS::Ace::Flutter {
 namespace {
 
@@ -26,7 +29,7 @@ tonic::Float64List ToFloat64List(const Matrix4& matrix4)
     return floatData;
 }
 
-}
+} // namespace
 
 FlutterSceneBuilder::FlutterSceneBuilder()
 {
@@ -106,6 +109,13 @@ void FlutterSceneBuilder::PushPathMask(const SkPaint& maskPaint, const SkPath& p
 void FlutterSceneBuilder::PushFilter(const SkPaint& filterPaint)
 {
     sceneBuilder_->PushFilter(filterPaint);
+}
+
+void FlutterSceneBuilder::PushHole(double dx, double dy, double width, double height, int32_t holeId)
+{
+    sceneBuilder_->PushHole(SkRect::MakeXYWH(static_cast<SkScalar>(dx), static_cast<SkScalar>(dy),
+                                static_cast<SkScalar>(width), static_cast<SkScalar>(height)),
+        holeId);
 }
 
 void FlutterSceneBuilder::Pop()
