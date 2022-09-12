@@ -64,6 +64,8 @@ protected:
     static void ForceRebuild(bool forceRebuild);
     static void SetSelectable(bool selectable);
     static void SelectCallback(const JSCallbackInfo& args);
+
+    static void CreateForNGPartialUpdate(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework
