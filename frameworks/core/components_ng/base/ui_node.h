@@ -159,8 +159,11 @@ public:
         }
     }
 
-protected:
     virtual void MarkNeedSyncRenderTree();
+
+    virtual void RebuildRenderContextTree();
+
+protected:
 
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {

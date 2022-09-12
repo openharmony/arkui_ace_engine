@@ -57,6 +57,11 @@ public:
 
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
+    void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode)
+    {
+        rsNode_ = rsNode;
+    }
+
     void StartRecording() override;
 
     void StopRecordingIfNeeded() override;

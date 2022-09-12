@@ -25,6 +25,7 @@ build_component_ng("base_ng") {
   component_ng_deps = [
     "event_ng",
     "layout_ng",
+    "pattern_ability_component_ng",
     "pattern_ng",
     "property_ng",
     "render_ng",

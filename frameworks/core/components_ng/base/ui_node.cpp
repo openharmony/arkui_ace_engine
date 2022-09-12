@@ -209,6 +209,13 @@ void UINode::MarkNeedSyncRenderTree()
     }
 }
 
+void UINode::RebuildRenderContextTree()
+{
+    auto parent = parent_.Upgrade();
+    if (parent) {
+        parent->RebuildRenderContextTree();
+    }
+}
 void UINode::OnDetachFromMainTree() {}
 
 void UINode::OnAttachToMainTree() {}
