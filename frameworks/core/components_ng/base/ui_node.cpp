@@ -93,6 +93,21 @@ void UINode::RemoveChildAtIndex(int32_t index)
     MarkNeedSyncRenderTree();
 }
 
+RefPtr<UINode> UINode::GetChildAtIndex(int32_t index)
+{
+    if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
+        return nullptr;
+    }
+    int32_t count = 0;
+    for (const auto& child : children_) {
+        if (count == index) {
+            return child;
+        }
+        count++;
+    }
+    return nullptr;
+}
+
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode)
 {
     if (!oldNode) {

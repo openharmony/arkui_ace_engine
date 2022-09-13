@@ -187,6 +187,11 @@ public:
         needSyncRenderTree_ = true;
     }
 
+    void SetVisible(bool visible)
+    {
+        isVisible_ = visible;
+    }
+
     void RebuildRenderContextTree() override;
 
     bool IsVisible() const
@@ -240,7 +245,7 @@ private:
     bool hasPendingRequest_ = false;
 
     bool isActive_ = false;
-
+    bool isVisible_ = true;
     friend class RosenRenderContext;
     friend class RenderContext;
     friend class Pattern;
