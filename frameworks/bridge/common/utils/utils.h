@@ -417,7 +417,7 @@ RefPtr<Curve> CreateBuiltinCurve(const std::string& aniTimFunc);
 
 RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc);
 
-ACE_EXPORT RefPtr<Curve> CreateCurve(const std::string& aniTimFunc);
+ACE_EXPORT RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
 
 ACE_EXPORT TransitionType ParseTransitionType(const std::string& transitionType);
 

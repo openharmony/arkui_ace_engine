@@ -318,33 +318,6 @@ RefPtr<BaseAnimationBridge> JsAcePage::GetAnimatorBridge(int32_t bridgeId)
     return bridge->second;
 }
 
-RefPtr<Curve> JsAcePage::GetCurve(const std::string& curveString)
-{
-    CHECK_RUN_ON(JS);
-    auto curveIter = curves_.find(curveString);
-    if (curveIter == curves_.end()) {
-        LOGW("the animation curve is not in the map");
-        return nullptr;
-    }
-    return curveIter->second;
-}
-
-void JsAcePage::RemoveCurve(const std::string& curveString)
-{
-    CHECK_RUN_ON(JS);
-    curves_.erase(curveString);
-}
-
-void JsAcePage::AddCurve(const std::string& curveString, const RefPtr<Curve>& curve)
-{
-    CHECK_RUN_ON(JS);
-    if (!curve) {
-        LOGE("AddCurve failed. Animation curve is null.");
-        return;
-    }
-    curves_[curveString] = curve;
-}
-
 void JsAcePage::AddAnimatorInfo(const std::string& animatorId, const RefPtr<AnimatorInfo>& animatorInfo)
 {
     if (!animatorInfo) {
