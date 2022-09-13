@@ -46,18 +46,8 @@ void QRCodePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) cons
         return;
     }
     auto value = paintProperty->GetValueValue();
-    // TODO use theme
-    Color color = Color::BLACK;
-    if (paintProperty->HasColor()) {
-        color = paintProperty->GetColorValue();
-    }
-    // TODO use theme
-    Color backgroundColor = Color::WHITE;
-    if (paintProperty->HasBackgroundColor()) {
-        backgroundColor = paintProperty->GetBackgroundColorValue();
-    }
-    // auto geometryNode = paintWrapper->GetGeometryNode();
-    // CHECK_NULL_VOID(geometryNode);
+    auto color = paintProperty->GetColorValue();
+    auto backgroundColor = paintProperty->GetBackgroundColorValue();
     auto qrCode = qrcodegen::QrCode::encodeText(value.c_str(), qrcodegen::QrCode::Ecc::LOW);
     if (!qrCode.getFlag() || qrCode.getSize() == 0 || qrCodeSize_ <= 0 ||
         qrCodeSize_ < static_cast<float>(qrCode.getSize())) {
