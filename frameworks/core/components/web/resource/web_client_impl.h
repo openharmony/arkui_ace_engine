@@ -115,6 +115,12 @@ public:
         const std::string &realm) override;
     bool OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
         OHOS::NWeb::SslError error) override;
+    bool OnSslSelectCertRequestByJS(
+        std::shared_ptr<NWeb::NWebJSSslSelectCertResult> result,
+        const std::string& host,
+        int32_t port,
+        const std::vector<std::string>& keyTypes,
+        const std::vector<std::string>& issuers) override;
     void OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest> request) override;
     bool RunContextMenu(std::shared_ptr<NWeb::NWebContextMenuParams> params,
         std::shared_ptr<NWeb::NWebContextMenuCallback> callback) override;
