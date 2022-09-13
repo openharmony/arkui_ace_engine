@@ -39,6 +39,15 @@ struct RequestFormInfo {
         paramStream << bundleName << abilityName << moduleName << cardName << dimension << index << temporary;
         return paramStream.str();
     }
+
+    bool operator==(const RequestFormInfo& formInfo) const
+    {
+        return id == formInfo.id && cardName == formInfo.cardName && bundleName == formInfo.bundleName &&
+               abilityName == formInfo.abilityName && moduleName == formInfo.moduleName &&
+               temporary == formInfo.temporary && dimension == formInfo.dimension &&
+               allowUpdate == formInfo.allowUpdate && width == formInfo.width && height == formInfo.height &&
+               index == formInfo.index;
+    }
 };
 
 } // namespace OHOS::Ace

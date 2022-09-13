@@ -16,6 +16,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
+#include "core/components_ng/pattern/form/form_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #if !defined(WEARABLE_PRODUCT)
 #include "frameworks/core/components/form/form_component.h"
@@ -54,6 +56,11 @@ void JSForm::Create(const JSCallbackInfo& info)
     }
     fomInfo.temporary = temporary->ToBoolean();
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::FormView::Create(fomInfo);
+        return;
+    }
+
     RefPtr<FormComponent> form = AceType::MakeRefPtr<OHOS::Ace::FormComponent>();
     form->SetFormRequestInfo(fomInfo);
     form->SetInspectorTag("FormComponent");
@@ -79,6 +86,9 @@ void JSForm::SetSize(const JSCallbackInfo& info)
             width = StringUtils::StringToDimension(widthValue->ToString(), true);
         }
     }
+    if (!width.IsValid()) {
+        width = 0.0_vp;
+    }
 
     JSRef<JSVal> heightValue = sizeObj->GetProperty("height");
     if (!heightValue->IsNull() && !heightValue->IsEmpty()) {
@@ -88,14 +98,28 @@ void JSForm::SetSize(const JSCallbackInfo& info)
             height = StringUtils::StringToDimension(heightValue->ToString(), true);
         }
     }
+    if (!height.IsValid()) {
+        height = 0.0_vp;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::FormView::SetSize(width, height);
+        return;
+    }
+
     auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (form) {
-        form->SetCardSize(width.IsValid() ? width : 0.0_vp, height.IsValid() ? height : 0.0_vp);
+        form->SetCardSize(width, height);
     }
 }
 
 void JSForm::SetDimension(int32_t value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::FormView::SetDimension(value);
+        return;
+    }
+
     auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (form) {
         form->SetDimension(value);
@@ -104,38 +128,77 @@ void JSForm::SetDimension(int32_t value)
 
 void JSForm::AllowUpdate(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && info[0]->IsBoolean()) {
-        auto allowUpdate = info[0]->ToBoolean();
-        auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (form) {
-            form->SetAllowUpdate(allowUpdate);
-        }
+    if (info.Length() <= 0 || !info[0]->IsBoolean()) {
+        LOGE("param is not valid");
+        return;
+    }
+
+    auto allowUpdate = info[0]->ToBoolean();
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::FormView::SetAllowUpdate(allowUpdate);
+        return;
+    }
+
+    auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (form) {
+        form->SetAllowUpdate(allowUpdate);
     }
 }
 
 void JSForm::SetVisibility(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && info[0]->IsNumber()) {
-        auto type = info[0]->ToNumber<int32_t>();
-        auto component = ViewStackProcessor::GetInstance()->GetDisplayComponent();
-        auto display = AceType::DynamicCast<DisplayComponent>(component);
-        display->SetVisible(VisibleType(type));
+    if (info.Length() <= 0 || !info[0]->IsNumber()) {
+        LOGE("param is not valid");
+        return;
     }
+
+    auto type = info[0]->ToNumber<int32_t>();
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::FormView::SetVisible(VisibleType(type));
+        return;
+    }
+
+    auto component = ViewStackProcessor::GetInstance()->GetDisplayComponent();
+    auto display = AceType::DynamicCast<DisplayComponent>(component);
+    display->SetVisible(VisibleType(type));
 }
 
 void JSForm::SetModuleName(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && info[0]->IsString()) {
-        auto moduleName = info[0]->ToString();
-        auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (form) {
-            form->SetModuleName(moduleName);
-        }
+    if (info.Length() <= 0 || !info[0]->IsString()) {
+        LOGE("param is not valid");
+        return;
+    }
+
+    auto moduleName = info[0]->ToString();
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::FormView::SetModuleName(moduleName);
+        return;
+    }
+
+    auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (form) {
+        form->SetModuleName(moduleName);
     }
 }
 
 void JSForm::JsOnAcquired(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onAcquired = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Form.onAcquired");
+            std::vector<std::string> keys = { "id" };
+            func->Execute(keys, param);
+        };
+        NG::FormView::SetOnAcquired(std::move(onAcquired));
+        return;
+    }
+
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -154,6 +217,18 @@ void JSForm::JsOnAcquired(const JSCallbackInfo& info)
 
 void JSForm::JsOnError(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Form.onAcquired");
+            std::vector<std::string> keys = { "errcode", "msg" };
+            func->Execute(keys, param);
+        };
+        NG::FormView::SetOnError(std::move(onError));
+        return;
+    }
+
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -173,6 +248,18 @@ void JSForm::JsOnError(const JSCallbackInfo& info)
 
 void JSForm::JsOnUninstall(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onUninstall = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Form.onAcquired");
+            std::vector<std::string> keys = { "id" };
+            func->Execute(keys, param);
+        };
+        NG::FormView::SetOnUninstall(std::move(onUninstall));
+        return;
+    }
+
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -192,6 +279,18 @@ void JSForm::JsOnUninstall(const JSCallbackInfo& info)
 
 void JSForm::JsOnRouter(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onRouter = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Form.onAcquired");
+            std::vector<std::string> keys = { "action" };
+            func->Execute(keys, param);
+        };
+        NG::FormView::SetOnRouter(std::move(onRouter));
+        return;
+    }
+
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
