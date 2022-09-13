@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_HYPERLINK_RENDER_HYPERLINK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_HYPERLINK_RENDER_HYPERLINK_H
 
+#include "base/mousestyle/mouse_style.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/hyperlink/hyperlink_component.h"
@@ -46,6 +47,9 @@ public:
     {
         return color_;
     }
+
+    bool HandleMouseEvent(const MouseEvent& event) override;
+    void HandleMouseHoverEvent(MouseState mouseState) override;
 
 private:
     void OnTouchTestHit(

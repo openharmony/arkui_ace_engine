@@ -16,6 +16,8 @@
 #include "core/components/hyperlink/render_hyperlink.h"
 
 #include "base/log/event_report.h"
+#include "base/log/log_wrapper.h"
+#include "core/common/event_manager.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/hyperlink/hyperlink_component.h"
 #include "core/components/image/image_component.h"
@@ -138,6 +140,28 @@ void RenderHyperlink::SetImageChildColor(const RefPtr<Component> node)
     } else if (singleChildComponent) {
         auto child = singleChildComponent->GetChild();
         SetImageChildColor(child);
+    }
+}
+
+bool RenderHyperlink::HandleMouseEvent(const MouseEvent& event)
+{
+    return true;
+}
+
+void RenderHyperlink::HandleMouseHoverEvent(MouseState mouseState)
+{
+    auto mousestyle = MouseStyle::CreateMouseStyle();
+    auto pipeline = context_.Upgrade();
+    if (!pipeline) {
+        return;
+    }
+    int32_t windowId = pipeline->GetWindowId();
+    MouseFormat handPointStyle = MouseFormat::HAND_POINTING;
+    MouseFormat defaultStyle = MouseFormat::DEFAULT;
+    if (mouseState == MouseState::HOVER) {
+        mousestyle->SetPointerStyle(windowId, handPointStyle);
+    } else {
+        mousestyle->SetPointerStyle(windowId, defaultStyle);
     }
 }
 

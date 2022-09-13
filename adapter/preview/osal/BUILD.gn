@@ -49,6 +49,7 @@ template("ace_osal_preview_source_set") {
       "exception_handler.cpp",
       "fetch_manager.cpp",
       "frame_report.cpp",
+      "mouse_style_ohos.cpp",
       "response_data.cpp",
       "ressched_report.cpp",
       "stage_card_parser.cpp",
