@@ -64,7 +64,6 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
             canvas.ClipRoundRect(rsRoundRect, OHOS::Rosen::Drawing::ClipOp::INTERSECT);
             canvas.DrawBackground(rsBrush);
             canvas.Restore();
-            return;
         }
 
         // step2: calculate 3 images repeat times.

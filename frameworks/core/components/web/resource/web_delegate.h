@@ -119,6 +119,22 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebJSSslErrorResult> result_;
 };
 
+class SslSelectCertResultOhos : public SslSelectCertResult {
+    DECLARE_ACE_TYPE(SslSelectCertResultOhos, SslSelectCertResult)
+
+public:
+    SslSelectCertResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslSelectCertResult> result)
+        : result_(result) {}
+
+    void HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile) override;
+
+    void HandleCancel() override;
+
+    void HandleIgnore() override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebJSSslSelectCertResult> result_;
+};
+
 class FileSelectorParamOhos : public WebFileSelectorParam {
     DECLARE_ACE_TYPE(FileSelectorParamOhos, WebFileSelectorParam)
 
@@ -324,6 +340,7 @@ public:
     bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType);
     bool OnHttpAuthRequest(const BaseEventInfo* info);
     bool OnSslErrorRequest(const BaseEventInfo* info);
+    bool OnSslSelectCertRequest(const BaseEventInfo* info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);
@@ -395,6 +412,7 @@ private:
     void Forward();
     void ClearHistory();
     void ClearSslCache();
+    void ClearClientAuthenticationCache();
     bool AccessStep(int32_t step);
     void BackOrForward(int32_t step);
     bool AccessBackward();

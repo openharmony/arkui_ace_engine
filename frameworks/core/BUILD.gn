@@ -351,10 +351,8 @@ template("ace_core_source_set") {
     }
     if (defined(config.enable_image_compression) &&
         config.enable_image_compression) {
-      if (product_name != "ohos-sdk") {
-        deps += [ "//third_party/opencl-headers:libcl" ]
-        defines += [ "ENABLE_OPENCL" ]
-      }
+      deps += [ "//third_party/opencl-headers:libcl" ]
+      defines += [ "ENABLE_OPENCL" ]
     }
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
@@ -377,6 +375,8 @@ template("ace_core_source_set") {
     } else {
       deps += [ "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_$platform" ]
     }
+
+    deps += [ "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform" ]
 
     # xcomponent components supports phone, TV and wearable except PC Preview
     if (defined(config.xcomponent_components_support) &&
@@ -622,6 +622,7 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/image_provider:ace_core_components_image_provider_ng_$platform",
       "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_$platform",
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",

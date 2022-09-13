@@ -28,11 +28,15 @@
 
 namespace OHOS::Ace {
 std::shared_ptr<ImageCompressor> ImageCompressor::instance_ = nullptr;
+std::mutex ImageCompressor::instanceMutex_;
 std::shared_ptr<ImageCompressor> ImageCompressor::GetInstance()
 {
     if (instance_ == nullptr) {
-        instance_.reset(new ImageCompressor());
-        instance_->Init();
+        std::lock_guard<std::mutex> lock(instanceMutex_);
+        if (instance_ == nullptr) {
+            instance_.reset(new ImageCompressor());
+            instance_->Init();
+        }
     }
     return instance_;
 }
@@ -46,6 +50,7 @@ void ImageCompressor::Init()
         maxErr_ = SystemProperties::GetAstcMaxError();
         psnr_ = SystemProperties::GetAstcPsnr();
         InitPartition();
+        InitRecords();
     }
 #endif // ENABLE_OPENCL
 }
@@ -489,8 +494,7 @@ void ImageCompressor::InitRecords()
 {
     recordsPath_ = ImageCache::GetImageCacheFilePath("record") + ".txt";
     std::ifstream openFile(recordsPath_);
-    if (openFile.fail()) {
-        openFile.close();
+    if (!openFile.is_open()) {
         return;
     }
     std::string line;

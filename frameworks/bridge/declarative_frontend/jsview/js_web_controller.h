@@ -70,6 +70,7 @@ public:
     void AccessForward(const JSCallbackInfo& args);
     void ClearHistory(const JSCallbackInfo& args);
     void ClearSslCache(const JSCallbackInfo& args);
+    void ClearClientAuthenticationCache(const JSCallbackInfo& args);
 
     const RefPtr<WebController>& GetController() const
     {

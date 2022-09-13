@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_CUSTOM_NODE_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_CUSTOM_NODE_LAYOUT_ALGORITHM_H
 
+#include <optional>
 #include <string>
 
 #include "base/utils/noncopyable.h"
@@ -42,6 +43,12 @@ public:
     }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
+
+    std::optional<SizeF> MeasureContent(
+        const LayoutConstraintF& /*contentConstraint*/, LayoutWrapper* /*layoutWrapper*/) override
+    {
+        return std::nullopt;
+    }
 
     RefPtr<UINode> MoveBuildItem()
     {

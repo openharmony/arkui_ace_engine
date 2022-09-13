@@ -539,6 +539,24 @@ public:
         onSslErrorRequestImpl_ = std::move(onSslErrorRequestImpl);
     }
 
+    using OnSslSelectCertRequestImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnSslSelectCertRequest(const BaseEventInfo* info) const
+    {
+        LOGI("OnSslSelectCertRequest");
+        if (onSslSelectCertRequestImpl_) {
+            LOGI("web_component.h OnSslSelectCertRequest onSslSelectCertRequestImpl_");
+            return onSslSelectCertRequestImpl_(info);
+        }
+        return false;
+    }
+    void SetOnSslSelectCertRequestImpl(OnSslSelectCertRequestImpl && impl)
+    {
+        if (impl == nullptr) {
+            return;
+        }
+        onSslSelectCertRequestImpl_ = std::move(impl);
+    }
+
     void RequestFocus();
 
     using OnConsoleImpl = std::function<bool(const BaseEventInfo* info)>;
@@ -738,6 +756,7 @@ private:
     OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
     OnSslErrorRequestImpl onSslErrorRequestImpl_;
+    OnSslSelectCertRequestImpl onSslSelectCertRequestImpl_;
     OnContextMenuImpl onContextMenuImpl_;
     OnInterceptRequestImpl onInterceptRequestImpl_ = nullptr;
     OnProgressChangeImpl onProgressChangeImpl_ = nullptr;

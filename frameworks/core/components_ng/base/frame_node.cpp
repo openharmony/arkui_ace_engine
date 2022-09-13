@@ -496,7 +496,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
     const auto& rect = geometryNode_->GetFrame().GetRect();
-    LOGD("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
+    LOGI("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
 
     if (!rect.IsInRegion(parentLocalPoint)) {
         return HitTestResult::OUT_OF_REGION;

@@ -188,7 +188,7 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         // if no skdata, means origin pic has shown, and has been cleared
         // we try to use small image or compressed image instead of origin pic.
         sk_sp<SkData> stripped;
-        if (ImageCompressor::GetInstance()->CanCompress() && imageSize.IsValid()) {
+        if (ImageCompressor::GetInstance()->CanCompress()) {
             // load compressed
             auto compressedData = ImageProvider::LoadImageRawDataFromFileCache(pipelineContext, key, ".astc");
             stripped = ImageCompressor::StripFileHeader(compressedData);

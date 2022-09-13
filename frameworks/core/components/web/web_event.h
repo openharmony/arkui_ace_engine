@@ -77,6 +77,26 @@ private:
     int32_t code_;
 };
 
+enum class WebResponseDataType : int32_t {
+    STRING_TYPE,
+    FILE_TYPE,
+};
+
+class WebResponseAsyncHandle : public AceType {
+    DECLARE_ACE_TYPE(WebResponseAsyncHandle, AceType)
+public:
+    WebResponseAsyncHandle() = default;
+    virtual ~WebResponseAsyncHandle() = default;
+
+    virtual void HandleData(std::string& data) = 0;
+    virtual void HandleFileFd(int32_t fd) = 0;
+    virtual void HandleHeadersVal(const std::map<std::string, std::string>& response_headers) = 0;
+    virtual void HandleEncoding(std::string& encoding) = 0;
+    virtual void HandleMimeType(std::string& mimeType) = 0;
+    virtual void HandleStatusCodeAndReason(int32_t statusCode, std::string& reason) = 0;
+    virtual void HandleResponseStatus(bool isReady) = 0;
+};
+
 class ACE_EXPORT WebResponse : public AceType {
     DECLARE_ACE_TYPE(WebResponse, AceType)
 
@@ -119,6 +139,16 @@ public:
         return statusCode_;
     }
 
+    bool GetResponseStatus() const
+    {
+        return isReady_;
+    }
+
+    int32_t GetFileHandle() const
+    {
+        return fd_;
+    }
+
     void SetHeadersVal(std::string& key, std::string& val)
     {
         headers_[key] = val;
@@ -127,6 +157,15 @@ public:
     void SetData(std::string& data)
     {
         data_ = data;
+        dataType_ = WebResponseDataType::STRING_TYPE;
+        fd_ = 0;
+    }
+
+    void SetFileHandle(int32_t fd)
+    {
+        fd_ = fd;
+        data_.clear();
+        dataType_ = WebResponseDataType::FILE_TYPE;
     }
 
     void SetEncoding(std::string& encoding)
@@ -149,13 +188,50 @@ public:
         statusCode_ = statusCode;
     }
 
+    void SetResponseStatus(bool isReady)
+    {
+        isReady_ = isReady;
+        if (handle_ == nullptr) {
+            return;
+        }
+        if (isReady_ == true) {
+            if (dataType_ == WebResponseDataType::FILE_TYPE) {
+                handle_->HandleFileFd(fd_);
+            } else {
+                handle_->HandleData(data_);
+            }
+            handle_->HandleHeadersVal(headers_);
+            handle_->HandleEncoding(encoding_);
+            handle_->HandleMimeType(mimeType_);
+            handle_->HandleStatusCodeAndReason(statusCode_, reason_);
+        }
+        handle_->HandleResponseStatus(isReady_);
+    }
+
+    void SetAsyncHandle(std::shared_ptr<WebResponseAsyncHandle> handle)
+    {
+        handle_ = handle;
+    }
+
+    bool IsFileHandle()
+    {
+        if (dataType_ == WebResponseDataType::FILE_TYPE) {
+            return true;
+        }
+        return false;
+    }
+
 private:
     std::map<std::string, std::string> headers_;
     std::string data_;
+    int32_t fd_;
+    WebResponseDataType dataType_;
     std::string encoding_;
     std::string mimeType_;
     std::string reason_;
     int32_t statusCode_;
+    bool isReady_ = true;
+    std::shared_ptr<WebResponseAsyncHandle> handle_;
 };
 
 class ACE_EXPORT WebRequest : public AceType {
@@ -346,6 +422,63 @@ public:
 private:
     RefPtr<SslErrorResult> result_;
     int32_t error_;
+};
+
+class ACE_EXPORT SslSelectCertResult : public AceType {
+    DECLARE_ACE_TYPE(SslSelectCertResult, AceType)
+public:
+    SslSelectCertResult() = default;
+    ~SslSelectCertResult() = default;
+
+    virtual void HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile) = 0;
+    virtual void HandleCancel() = 0;
+    virtual void HandleIgnore() = 0;
+};
+
+class ACE_EXPORT WebSslSelectCertEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebSSslSelectCertEvent, BaseEventInfo);
+
+public:
+    WebSslSelectCertEvent(const RefPtr<SslSelectCertResult>& result,
+        const std::string& host, int port,
+        const std::vector<std::string>& keyTypes,
+        const std::vector<std::string>& issuers)
+        : BaseEventInfo("WebSslSelectCertEvent"),
+        result_(result), host_(host), port_(port), keyTypes_(keyTypes), issuers_(issuers) {}
+
+    ~WebSslSelectCertEvent() = default;
+
+    const RefPtr<SslSelectCertResult>& GetResult() const
+    {
+        return result_;
+    }
+
+    const std::string& GetHost() const
+    {
+        return host_;
+    }
+
+    int32_t GetPort() const
+    {
+        return port_;
+    }
+
+    const std::vector<std::string>& GetKeyTypes() const
+    {
+        return keyTypes_;
+    }
+
+    const std::vector<std::string>& GetIssuers_() const
+    {
+        return issuers_;
+    }
+
+private:
+    RefPtr<SslSelectCertResult> result_;
+    std::string host_;
+    int32_t port_;
+    std::vector<std::string> keyTypes_;
+    std::vector<std::string> issuers_;
 };
 
 class ACE_EXPORT WebGeolocation : public AceType {

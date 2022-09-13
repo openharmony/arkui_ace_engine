@@ -245,24 +245,9 @@ sk_sp<SkData> AssetImageLoader::LoadImageData(
         LOGE("No asset data!");
         return nullptr;
     }
-    std::string assetString = assetManager->GetAssetPath(assetSrc);
-    std::string filePath = assetString + src;
-    if (filePath.length() > PATH_MAX) {
-        LOGE("src path too long");
-        return nullptr;
-    }
-    char realPath[PATH_MAX] = { 0x00 };
-    if (realpath(filePath.c_str(), realPath) == nullptr) {
-        LOGE("realpath fail! filePath: %{private}s, fail reason: %{public}s", filePath.c_str(),
-            strerror(errno));
-        return nullptr;
-    }
-    std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
-    if (!file) {
-        LOGE("asset image open failed");
-        return nullptr;
-    }
-    return SkData::MakeFromFILE(file.get());
+    const uint8_t* data = assetData->GetData();
+    const size_t dataSize = assetData->GetSize();
+    return SkData::MakeWithCopy(data, dataSize);
 }
 
 std::string AssetImageLoader::LoadJsonData(const std::string& src, const WeakPtr<PipelineBase> context)

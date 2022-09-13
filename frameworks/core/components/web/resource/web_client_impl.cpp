@@ -19,6 +19,71 @@
 #include "core/components/web/resource/web_delegate.h"
 
 namespace OHOS::Ace {
+class NWebResponseAsyncHandle : public WebResponseAsyncHandle {
+    DECLARE_ACE_TYPE(NWebResponseAsyncHandle, WebResponseAsyncHandle);
+public:
+    explicit NWebResponseAsyncHandle(std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse)
+        :nwebResponse_(nwebResponse) {}
+    ~NWebResponseAsyncHandle() = default;
+    void HandleFileFd(int32_t fd) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseFileHandle(fd);
+    }
+
+    void HandleData(std::string& data) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseData(data);
+    }
+
+    void HandleHeadersVal(const std::map<std::string, std::string>& response_headers) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseHeaders(response_headers);
+    }
+
+    void HandleEncoding(std::string& encoding) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseEncoding(encoding);
+    }
+
+    void HandleMimeType(std::string& mimeType) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseMimeType(mimeType);
+    }
+
+    void HandleStatusCodeAndReason(int32_t statusCode, std::string& reason) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseStateAndStatuscode(statusCode, reason);
+    }
+
+    void HandleResponseStatus(bool isReady) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseDataStatus(isReady);
+    }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse_;
+};
 
 bool OnJsCommonDialog(
     const WebClientImpl* webClientImpl,
@@ -273,6 +338,15 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse =
         std::make_shared<OHOS::NWeb::NWebUrlResourceResponse>(webResponse->GetMimeType(), webResponse->GetEncoding(),
         webResponse->GetStatusCode(), webResponse->GetReason(), webResponse->GetHeaders(), data);
+    if (webResponse->IsFileHandle() == true) {
+        nwebResponse->PutResponseFileHandle(webResponse->GetFileHandle());
+    }
+    if (webResponse->GetResponseStatus() == false) {
+        LOGI("intercept response async Handle");
+        std::shared_ptr<NWebResponseAsyncHandle> asyncHandle = std::make_shared<NWebResponseAsyncHandle>(nwebResponse);
+        webResponse->SetAsyncHandle(asyncHandle);
+        nwebResponse->PutResponseDataStatus(false);
+    }
     return nwebResponse;
 }
 
@@ -436,6 +510,41 @@ bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorRe
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
 
     LOGI("OnSslErrorRequestByJS result:%{public}d", jsResult);
+    return jsResult;
+}
+
+bool WebClientImpl::OnSslSelectCertRequestByJS(
+    std::shared_ptr<NWeb::NWebJSSslSelectCertResult> result,
+    const std::string& host,
+    int port,
+    const std::vector<std::string>& keyTypes,
+    const std::vector<std::string>& issuers)
+{
+    LOGI("OnSslSelectCertRequestByJS");
+    ContainerScope scope(instanceId_);
+
+    bool jsResult = false;
+    auto param = std::make_shared<WebSslSelectCertEvent>(AceType::MakeRefPtr<SslSelectCertResultOhos>(result),
+        host, port, keyTypes, issuers);
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return false;
+    }
+    LOGI("OnSslSelectCertRequestByJS PostSyncTask");
+
+    task->PostSyncTask([webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            LOGI("OnSslSelectCertRequestByJS PostSyncTask delegate->OnSslSelectCertRequest");
+            if (delegate) {
+                jsResult = delegate->OnSslSelectCertRequest(param.get());
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS);
+
+    LOGI("OnSslSelectCertRequestByJS result:%{public}d", jsResult);
     return jsResult;
 }
 
