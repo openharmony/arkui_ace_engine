@@ -38,6 +38,9 @@ public:
     virtual const TextEditingValue& GetEditingValue() const {};
 #endif
 
+    // Requests that this client Y point.
+    virtual double GetEditingBoxY() const { return 0.0; };
+
 };
 
 } // namespace OHOS::Ace
