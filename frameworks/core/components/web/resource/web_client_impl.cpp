@@ -19,6 +19,71 @@
 #include "core/components/web/resource/web_delegate.h"
 
 namespace OHOS::Ace {
+class NWebResponseAsyncHandle : public WebResponseAsyncHandle {
+    DECLARE_ACE_TYPE(NWebResponseAsyncHandle, WebResponseAsyncHandle);
+public:
+    explicit NWebResponseAsyncHandle(std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse)
+        :nwebResponse_(nwebResponse) {}
+    ~NWebResponseAsyncHandle() = default;
+    void HandleFileFd(int32_t fd) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseFileHandle(fd);
+    }
+
+    void HandleData(std::string& data) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseData(data);
+    }
+
+    void HandleHeadersVal(const std::map<std::string, std::string>& response_headers) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseHeaders(response_headers);
+    }
+
+    void HandleEncoding(std::string& encoding) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseEncoding(encoding);
+    }
+
+    void HandleMimeType(std::string& mimeType) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseMimeType(mimeType);
+    }
+
+    void HandleStatusCodeAndReason(int32_t statusCode, std::string& reason) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseStateAndStatuscode(statusCode, reason);
+    }
+
+    void HandleResponseStatus(bool isReady) override
+    {
+        if (nwebResponse_ == nullptr) {
+            return;
+        }
+        nwebResponse_->PutResponseDataStatus(isReady);
+    }
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse_;
+};
 
 bool OnJsCommonDialog(
     const WebClientImpl* webClientImpl,
@@ -273,6 +338,15 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> nwebResponse =
         std::make_shared<OHOS::NWeb::NWebUrlResourceResponse>(webResponse->GetMimeType(), webResponse->GetEncoding(),
         webResponse->GetStatusCode(), webResponse->GetReason(), webResponse->GetHeaders(), data);
+    if (webResponse->IsFileHandle() == true) {
+        nwebResponse->PutResponseFileHandle(webResponse->GetFileHandle());
+    }
+    if (webResponse->GetResponseStatus() == false) {
+        LOGI("intercept response async Handle");
+        std::shared_ptr<NWebResponseAsyncHandle> asyncHandle = std::make_shared<NWebResponseAsyncHandle>(nwebResponse);
+        webResponse->SetAsyncHandle(asyncHandle);
+        nwebResponse->PutResponseDataStatus(false);
+    }
     return nwebResponse;
 }
 
