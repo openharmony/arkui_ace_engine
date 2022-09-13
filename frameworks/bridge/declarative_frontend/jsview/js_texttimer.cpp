@@ -285,7 +285,7 @@ void JSTextTimer::OnTimer(const JSCallbackInfo& info)
     if (Container::IsCurrentUseNewPipeline()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                            uint64_t utc, uint64_t elapsedTime) {
+                            const std::string& utc, const std::string& elapsedTime) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("TextTimer.onTimer");
             JSRef<JSVal> newJSVal[2];
