@@ -387,7 +387,7 @@ class LocalStorage extends NativeLocalStorage {
             // property named 'storagePropName' not yet in storage
             // add new property to storage
             if (defaultValue === undefined) {
-                console.log(`${this.constructor.name}.__createSync(${storagePropName}, non-existing property and undefined default value. ERROR.`);
+                console.error(`${this.constructor.name}.__createSync(${storagePropName}, non-existing property and undefined default value. ERROR.`);
                 return undefined;
             }
             p = this.addNewPropertyInternal(storagePropName, defaultValue);
@@ -1284,12 +1284,11 @@ class SubscribableHandler {
                 }
             }
             else {
-                console.error(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+                console.warn(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
             }
         });
     }
     get(target, property) {
-        console.error(`SubscribableHandler: get '${property.toString()}'.`);
         return (property === SubscribableHandler.IS_OBSERVED_OBJECT) ? true :
             (property === SubscribableHandler.RAW_OBJECT) ? target : target[property];
     }
@@ -1309,7 +1308,6 @@ class SubscribableHandler {
                 if (target[property] == newValue) {
                     return true;
                 }
-                
                 target[property] = newValue;
                 this.notifyPropertyHasChanged(property.toString(), newValue);
                 return true;
@@ -1472,7 +1470,7 @@ class ObservedPropertyAbstract {
                 }
             }
             else {
-                console.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+                console.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
     }
@@ -2283,7 +2281,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 }
             }
             else {
-                console.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+                console.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
     }
@@ -2294,8 +2292,8 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     markDependentElementsDirty(view) {
         // TODO ace-ets2bundle, framework, compilated apps need to update together
         // this function will be removed after a short transiition periode
-        console.error(`markDependentElementsDirty no longer supported. 
-        Please update your ace-ets2bundle and recompile your application!`);
+        console.warn(`markDependentElementsDirty no longer supported. App will work ok, but
+        please update your ace-ets2bundle and recompile your application!`);
     }
     /**
      * factory function for concrete 'object' or 'simple' ObservedProperty object
