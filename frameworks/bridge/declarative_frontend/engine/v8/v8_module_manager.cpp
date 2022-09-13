@@ -646,7 +646,6 @@ void CurvesStepsInternal(const v8::FunctionCallbackInfo<v8::Value>& args)
         args.GetReturnValue().Set(curveContext);
         return;
     }
-
     auto page = static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8DeclarativeEngineInstance::STAGING_PAGE));
     if ((*page) == nullptr) {
         LOGE("page is nullptr");

@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-using ChangeEvent = std::function<void(const double)>;
+using ChangeEvent = std::function<void(const std::string&)>;
 
 class RatingEventHub : public EventHub {
     DECLARE_ACE_TYPE(RatingEventHub, EventHub)
@@ -36,7 +36,7 @@ public:
         changeEvent_ = std::move(changeEvent);
     }
 
-    void FireChangeEvent(double index) const
+    void FireChangeEvent(const std::string& index) const
     {
         if (changeEvent_) {
             changeEvent_(index);
