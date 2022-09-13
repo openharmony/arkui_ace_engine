@@ -77,7 +77,7 @@ private:
     RefPtr<Animator> controller_;
     RefPtr<ClickEvent> clickListener_;
     RefPtr<CurveAnimation<double>> translate_;
-    bool isOn_ = false;
+    std::optional<bool> isOn_;
     float currentOffset_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
