@@ -20,8 +20,8 @@
 
 namespace OHOS::Ace {
 
-const uint32_t FILE_SUFFIX_LEN = 4;
-const uint32_t APNG_FILE_SUFFIX_LEN = 5;
+constexpr uint32_t FILE_SUFFIX_LEN = 4;
+constexpr uint32_t APNG_FILE_SUFFIX_LEN = 5;
 bool ImageSourceInfo::IsSVGSource(const std::string& src, InternalResource::ResourceId resourceId)
 {
     // 4 is the length of ".svg".

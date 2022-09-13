@@ -25,7 +25,7 @@ template("ace_core_apng_source_set") {
     include_dirs = [
       "$flutter_root/skia/third_party/libpng",
       "$flutter_root/skia/third_party/externals/libpng",
-      "$ace_root/third_party/zlib",
+      "//third_party/zlib",
     ]
 
     # apng support file
