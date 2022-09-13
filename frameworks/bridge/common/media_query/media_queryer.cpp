@@ -129,7 +129,7 @@ const MediaQueryerRule CONDITION_WITH_AND(std::regex("(\\([\\.a-z0-9:>=<-]+\\))(
 // condition such as: (100 < width < 1000)
 const MediaQueryerRule CSS_LEVEL4_MULTI(
     std::regex(
-        "\\(([\\d\\.]+)(dpi|dppx|dpcm|px|vp)?(>|<|>=|<=)([a-z0-9:-]+)(>|<|>=|<=)([\\d\\.]+)(dpi|dppx|dpcm|px|vp)?\\)"),
+        "\\(([\\d\\.]+)(dpi|dppx|dpcm|px|vp)?(>=|<=|>|<)([a-z0-9:-]+)(>=|<=|>|<)([\\d\\.]+)(dpi|dppx|dpcm|px|vp)?\\)"),
     [](const std::smatch& matchResults, const MediaFeature& mediaFeature, MediaError& failReason) {
         static constexpr int32_t LEFT_CONDITION_VALUE = 6;
         static constexpr int32_t LEFT_UNIT = 7;
@@ -150,7 +150,7 @@ const MediaQueryerRule CSS_LEVEL4_MULTI(
 
 // condition such as: width < 1000
 const MediaQueryerRule CSS_LEVEL4_LEFT(
-    std::regex("\\(([^m][a-z-]+)(>|<|>=|<=)([\\d\\.]+)(dpi|dppx|dpcm|px|vp)?\\)"),
+    std::regex("\\(([^m][a-z-]+)(>=|<=|>|<)([\\d\\.]+)(dpi|dppx|dpcm|px|vp)?\\)"),
     [](const std::smatch& matchResults, const MediaFeature& mediaFeature, MediaError& failReason) {
         static constexpr int32_t CONDITION_VALUE = 3;
         static constexpr int32_t UNIT = 4;
@@ -165,7 +165,7 @@ const MediaQueryerRule CSS_LEVEL4_LEFT(
 
 // condition such as: 1000 < width
 const MediaQueryerRule CSS_LEVEL4_RIGHT(
-    std::regex("\\(([\\d\\.]+)(dpi|dppx|dpcm|px|vp)?(>|<|>=|<=)([^m][a-z-]+)\\)"),
+    std::regex("\\(([\\d\\.]+)(dpi|dppx|dpcm|px|vp)?(>=|<=|>|<)([^m][a-z-]+)\\)"),
     [](const std::smatch& matchResults, const MediaFeature& mediaFeature, MediaError& failReason) {
         static constexpr int32_t CONDITION_VALUE = 1;
         static constexpr int32_t UNIT = 2;
