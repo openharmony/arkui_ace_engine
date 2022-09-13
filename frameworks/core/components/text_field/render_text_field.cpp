@@ -2005,6 +2005,9 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
         if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_NUMPAD_ENTER) {
             if (keyboard_ == TextInputType::MULTILINE) {
                 appendElement = "\n";
+            // normal enter should trigger onSubmit
+            } else if (onSubmit_) {
+                onSubmit_(static_cast<int32_t>(keyboard_));
             }
         } else if (event.IsNumberKey()) {
             appendElement = event.ConvertCodeToString();
