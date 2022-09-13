@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
@@ -62,6 +63,11 @@ public:
     OffsetF GetFrameOffset() const
     {
         return frame_.rect_.GetOffset();
+    }
+
+    const RectF& GetFrameRect() const
+    {
+        return frame_.rect_;
     }
 
     void SetFrameOffset(const OffsetF& translate)

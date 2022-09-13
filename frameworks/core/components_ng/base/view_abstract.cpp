@@ -20,6 +20,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
 void ViewAbstract::SetWidth(const CalcLength& width)
@@ -86,7 +87,8 @@ void ViewAbstract::SetLayoutWeight(int32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
 }
 
-void ViewAbstract::SetAlignSelf(int32_t value) {
+void ViewAbstract::SetAlignSelf(int32_t value)
+{
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, static_cast<FlexAlign>(value));
 }
 
@@ -178,11 +180,39 @@ void ViewAbstract::SetOnHover(OnHoverEventFunc&& onHoverEventFunc)
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
 }
 
+void ViewAbstract::SetOnAppear(std::function<void()>&& onAppear)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAppear(std::move(onAppear));
+}
+
+void ViewAbstract::SetOnDisappear(std::function<void()>&& onDisappear)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDisappear(std::move(onDisappear));
+}
+
+void ViewAbstract::SetOnAreaChanged(
+    std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&&
+        onAreaChanged)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAreaChanged(std::move(onAreaChanged));
+}
+
 void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetHoverAnimation(hoverEffect);
+}
+
+void ViewAbstract::SetAlign(Alignment alignment)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 
 void ViewAbstract::SetOpacity(double opacity)
@@ -195,7 +225,7 @@ void ViewAbstract::SetScale(NG::VectorF scale)
     ACE_UPDATE_RENDER_CONTEXT(TransformScale, scale);
 }
 
-void ViewAbstract::SetPivot(NG::VectorF center) 
+void ViewAbstract::SetPivot(NG::VectorF center)
 {
     ACE_UPDATE_RENDER_CONTEXT(TransformCenter, center);
 }

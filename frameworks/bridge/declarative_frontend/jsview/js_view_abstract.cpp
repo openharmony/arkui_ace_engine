@@ -635,7 +635,7 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
         return;
     }
 
-    RefPtr<TransformComponent> transform; 
+    RefPtr<TransformComponent> transform;
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -767,7 +767,7 @@ void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
     }
 
     Dimension value;
-    RefPtr<TransformComponent> transform; 
+    RefPtr<TransformComponent> transform;
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -783,7 +783,8 @@ void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
             ParseJsTranslate(argsPtrItem, translateX, translateY, translateZ);
             if (Container::IsCurrentUseNewPipeline()) {
                 // new pipeline
-                NG::ViewAbstract::SetTranslate(NG::Vector3F(translateX.Value(), translateY.Value(), translateZ.Value()));
+                NG::ViewAbstract::SetTranslate(
+                    NG::Vector3F(translateX.Value(), translateY.Value(), translateZ.Value()));
                 return;
             }
             transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
@@ -854,7 +855,7 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
         return;
     }
 
-    RefPtr<TransformComponent> transform; 
+    RefPtr<TransformComponent> transform;
     AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -1344,6 +1345,10 @@ void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
     }
     auto value = info[0]->ToNumber<int32_t>();
     Alignment alignment = ParseAlignment(value);
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetAlign(alignment);
+        return;
+    }
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetAlignment(alignment);
 }
@@ -3671,6 +3676,19 @@ void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
         return;
     }
     auto jsOnAreaChangeFunction = AceType::MakeRefPtr<JsOnAreaChangeFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto onAreaChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction)](
+                                        const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect,
+                                        const NG::OffsetF& origin) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onAreaChange");
+            func->Execute(oldRect, oldOrigin, rect, origin);
+        };
+        NG::ViewAbstract::SetOnAreaChanged(std::move(onAreaChangeCallback));
+        return;
+    }
+
     auto onAreaChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAreaChangeFunction)](
                                     const Rect& oldRect, const Offset& oldOrigin, const Rect& rect,
                                     const Offset& origin) {
@@ -5220,7 +5238,8 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
     }
     auto impl = inspector->GetInspectorFunctionImpl();
     RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onMouseId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMouseFunc), impl](MouseInfo& mouseInfo) {
+    auto onMouseId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMouseFunc), impl](
+                         MouseInfo& mouseInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         if (impl) {
             impl->UpdateEventInfo(mouseInfo);

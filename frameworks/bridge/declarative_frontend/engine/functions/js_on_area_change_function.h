@@ -16,6 +16,8 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_ON_AREA_CHANGE_FUNCTION_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_ON_AREA_CHANGE_FUNCTION_H
 
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
@@ -31,6 +33,8 @@ public:
     explicit JsOnAreaChangeFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(jsFunction) {}
     ~JsOnAreaChangeFunction() override = default;
     void Execute(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin);
+    void Execute(
+        const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect, const NG::OffsetF& origin);
 };
 
 } // namespace OHOS::Ace::Framework
