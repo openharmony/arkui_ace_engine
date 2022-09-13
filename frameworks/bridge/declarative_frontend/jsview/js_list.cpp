@@ -294,6 +294,18 @@ void JSList::SetDivider(const JSCallbackInfo& args)
 
 void JSList::ScrollCallback(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
+                (const Dimension& scrollOffset, const V2::ScrollState& scrollState) {
+                    auto params = ConvertToJSValues(scrollOffset, scrollState);
+                    func->Call(JSRef<JSObject>(), params.size(), params.data());
+                    return;
+                };
+            NG::ListView::SetOnScroll(onScroll);
+        }
+        return;
+    }
     if (!JSViewBindEvent(&V2::ListComponent::SetOnScroll, args)) {
         LOGW("Failed to bind event");
     }
@@ -302,6 +314,16 @@ void JSList::ScrollCallback(const JSCallbackInfo& args)
 
 void JSList::ReachStartCallback(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+                func->Call(JSRef<JSObject>());
+                return;
+            };
+            NG::ListView::SetOnReachStart(onReachStart);
+        }
+        return;
+    }
     if (!JSViewBindEvent(&V2::ListComponent::SetOnReachStart, args)) {
         LOGW("Failed to bind event");
     }
@@ -310,6 +332,16 @@ void JSList::ReachStartCallback(const JSCallbackInfo& args)
 
 void JSList::ReachEndCallback(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+                func->Call(JSRef<JSObject>());
+                return;
+            };
+            NG::ListView::SetOnReachEnd(onReachEnd);
+        }
+        return;
+    }
     if (!JSViewBindEvent(&V2::ListComponent::SetOnReachEnd, args)) {
         LOGW("Failed to bind event");
     }
@@ -318,6 +350,16 @@ void JSList::ReachEndCallback(const JSCallbackInfo& args)
 
 void JSList::ScrollStopCallback(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+                func->Call(JSRef<JSObject>());
+                return;
+            };
+            NG::ListView::SetOnScrollStop(onScrollStop);
+        }
+        return;
+    }
     if (!JSViewBindEvent(&V2::ListComponent::SetOnScrollStop, args)) {
         LOGW("Failed to bind event");
     }
@@ -342,6 +384,18 @@ void JSList::ItemMoveCallback(const JSCallbackInfo& args)
 
 void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
+                (const int32_t start, const int32_t end) {
+                    auto params = ConvertToJSValues(start, end);
+                    func->Call(JSRef<JSObject>(), params.size(), params.data());
+                    return;
+            };
+            NG::ListView::SetOnScrollIndex(onScrollIndex);
+        }
+        return;
+    }
     if (!JSViewBindEvent(&V2::ListComponent::SetOnScrollIndex, args)) {
         LOGW("Failed to bind event");
     }
@@ -521,7 +575,10 @@ void JSList::ScrollBeginCallback(const JSCallbackInfo& args)
                     }
                     return scrollInfo;
                 };
-
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ListView::SetOnScrollBegin(onScrollBegin);
+            return;
+        }
         auto component = AceType::DynamicCast<V2::ListComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (!component) {
             LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<V2::ListComponent>());

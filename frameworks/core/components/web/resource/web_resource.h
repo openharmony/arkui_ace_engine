@@ -19,7 +19,7 @@
 #include <string>
 
 #include "base/memory/ace_type.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -41,16 +41,15 @@ public:
     using ErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using Method = std::string;
 
-    WebResource(const std::string& type,
-        const WeakPtr<PipelineContext>& context, ErrorCallback&& onError)
+    WebResource(const std::string& type, const WeakPtr<PipelineBase>& context, ErrorCallback&& onError)
         : type_(type), context_(context), onError_(std::move(onError))
     {}
-    virtual ~WebResource() = default;
+    ~WebResource() override = default;
 
     void Release(const std::function<void(bool)>& onRelease = nullptr);
 
-    void CallResRegisterMethod(const Method& method, const std::string& param,
-                               const std::function<void(std::string&)>& callback = nullptr);
+    void CallResRegisterMethod(
+        const Method& method, const std::string& param, const std::function<void(std::string&)>& callback = nullptr);
 
     int64_t GetId() const
     {
@@ -75,7 +74,7 @@ protected:
     int64_t id_ = INVALID_ID;
     std::string hash_;
     std::string type_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
     ErrorCallback onError_;
 };
 

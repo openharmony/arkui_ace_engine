@@ -29,6 +29,9 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_ng/pattern/swiper/swiper_utils.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -94,9 +97,9 @@ void SwiperPattern::OnModifyDone()
     InitPanEvent(gestureHub);
 }
 
-bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (skipMeasure && skipLayout) {
+    if (config.skipMeasure && config.skipLayout) {
         return false;
     }
 
@@ -175,7 +178,7 @@ void SwiperPattern::ShowNext()
     }
     StopAutoPlay();
     StopTranslateAnimation();
-    PlayTranslateAnimation(0, -MainSize(), (currentIndex_ + 1) % childrenSize, true);
+    PlayTranslateAnimation(0, -MainSize() / GetDisplayCount(), (currentIndex_ + 1) % childrenSize, true);
 }
 
 void SwiperPattern::ShowPrevious()
@@ -189,7 +192,7 @@ void SwiperPattern::ShowPrevious()
     }
     StopAutoPlay();
     StopTranslateAnimation();
-    PlayTranslateAnimation(0, MainSize(), (currentIndex_ + childrenSize - 1) % childrenSize, true);
+    PlayTranslateAnimation(0, MainSize() / GetDisplayCount(), (currentIndex_ + childrenSize - 1) % childrenSize, true);
 }
 
 void SwiperPattern::FinishAnimation()
@@ -360,7 +363,7 @@ void SwiperPattern::Tick(uint64_t duration)
                 scheduler_->Stop();
             }
         } else {
-            PlayTranslateAnimation(0, -MainSize(), (currentIndex_ + 1) % childrenSize);
+            PlayTranslateAnimation(0, -MainSize() / GetDisplayCount(), (currentIndex_ + 1) % childrenSize);
         }
         elapsedTime_ = 0;
     }
@@ -490,7 +493,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     }
 
     // Play translate animation.
-    auto mainSize = MainSize();
+    auto mainSize = MainSize() / GetDisplayCount();
     int32_t nextIndex = currentIndex_;
     float start = currentOffset_;
     float end = 0.0f;
@@ -652,6 +655,15 @@ float SwiperPattern::MainSize() const
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0);
     return geometryNode->GetFrameSize().MainSize(GetDirection());
+}
+
+float SwiperPattern::GetItemSpace() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, 0);
+    return ConvertToPx(swiperLayoutProperty->GetItemSpace().value_or(0.0_vp),
+        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0)
+        .value_or(0);
 }
 
 Axis SwiperPattern::GetDirection() const

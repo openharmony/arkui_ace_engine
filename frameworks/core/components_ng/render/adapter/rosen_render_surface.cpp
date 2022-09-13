@@ -16,12 +16,14 @@
 
 #include "foundation/graphic/graphic_2d/interfaces/inner_api/surface/surface_utils.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
+
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-const char * const SURFACE_STRIDE_ALIGNMENT = "8";
+const char* const SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
 } // namespace
 RosenRenderSurface::~RosenRenderSurface()
@@ -37,14 +39,25 @@ RosenRenderSurface::~RosenRenderSurface()
 
 void RosenRenderSurface::InitSurface()
 {
-    CreateSurface();
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_VOID(renderContext);
 
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
+    auto surfaceNode =
+        OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(rosenRenderContext->GetRSNode());
+    if (surfaceNode) {
+        producerSurface_ = surfaceNode->GetSurface();
+    }
+}
+
+void RosenRenderSurface::UpdateXComponentConfig()
+{
     CHECK_NULL_VOID(producerSurface_);
 
     auto* surfaceUtils = SurfaceUtils::GetInstance();
     auto ret = surfaceUtils->Add(producerSurface_->GetUniqueId(), producerSurface_);
     if (ret != SurfaceError::SURFACE_ERROR_OK) {
-        LOGE("xcomponent add surface error: %{public}d", ret);
+        LOGE("add surface error: %{public}d", ret);
     }
 
     producerSurface_->SetQueueSize(SURFACE_QUEUE_SIZE);
@@ -55,19 +68,6 @@ void RosenRenderSurface::InitSurface()
 void* RosenRenderSurface::GetNativeWindow()
 {
     return nativeWindow_;
-}
-
-void RosenRenderSurface::CreateSurface()
-{
-    auto renderContext = renderContext_.Upgrade();
-    CHECK_NULL_VOID(renderContext);
-
-    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
-    auto surfaceNode =
-        OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(rosenRenderContext->GetRSNode());
-    if (surfaceNode) {
-        producerSurface_ = surfaceNode->GetSurface();
-    }
 }
 
 void RosenRenderSurface::SetRenderContext(const RefPtr<RenderContext>& renderContext)
@@ -106,4 +106,5 @@ std::string RosenRenderSurface::GetUniqueId() const
 {
     return std::to_string(producerSurface_->GetUniqueId());
 }
+
 } // namespace OHOS::Ace::NG

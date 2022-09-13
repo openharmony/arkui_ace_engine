@@ -46,6 +46,8 @@ public:
     static void FirePageHide(const RefPtr<UINode>& node);
     static void FirePageShow(const RefPtr<UINode>& node);
 
+    RefPtr<FrameNode> GetLastPage();
+
 private:
     RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;

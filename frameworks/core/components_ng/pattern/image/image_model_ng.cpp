@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 
 void ImageModelNG::SetAlt(const std::string& src)
 {
+    SET_PROP_FOR_NG(Alt, std::string, src);
 }
 
 void ImageModelNG::SetBorder(const Border& border)
@@ -48,6 +49,7 @@ void ImageModelNG::SetMatchTextDirection(bool value)
 
 void ImageModelNG::SetFitMaxSize(bool value)
 {
+    SET_PROP_FOR_NG(FitOriginalSize, bool, value);
 }
 
 void ImageModelNG::SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback)

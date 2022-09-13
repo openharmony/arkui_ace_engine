@@ -1253,7 +1253,7 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest021, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest022
  * @tc.desc: Verify the function that trim the space(left, right) of input string.
  * @tc.type: FUNC
- * @tc.require: I5NC8W
+ * @tc.require: issueI5NC8W
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest022, TestSize.Level1)
 {
@@ -1281,7 +1281,7 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest022, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest023
  * @tc.desc: Verify the function that split the string and reture the result.
  * @tc.type: FUNC
- * @tc.require: I5NC8W
+ * @tc.require: issueI5NC8W
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest023, TestSize.Level1)
 {
@@ -1334,7 +1334,7 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest023, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest024
  * @tc.desc: Verify the function that verify the validity.
  * @tc.type: FUNC
- * @tc.require: I5NC8W
+ * @tc.require: issueI5NC8W
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest024, TestSize.Level1)
 {
@@ -1367,7 +1367,7 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest024, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest025
  * @tc.desc: Verify the function that parse the unit value of auto-fill.
  * @tc.type: FUNC
- * @tc.require: I5NC8W
+ * @tc.require: issueI5NC8W
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest025, TestSize.Level1)
 {
@@ -1400,7 +1400,7 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest025, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest026
  * @tc.desc: Verify the function that parse the unit value of auto-fill.
  * @tc.type: FUNC
- * @tc.require: I5NC8W
+ * @tc.require: issueI5NC8W
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest026, TestSize.Level1)
 {
@@ -1434,7 +1434,7 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest026, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest027
  * @tc.desc: Verify the function that parse the unit value of auto-fill.
  * @tc.type: FUNC
- * @tc.require: I5NC8W
+ * @tc.require: issueI5NC8W
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest027, TestSize.Level1)
 {
@@ -1479,7 +1479,7 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest027, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest028
  * @tc.desc: Verify the function that parse the unit value of auto-fill.
  * @tc.type: FUNC
- * @tc.require: I5NC8W
+ * @tc.require: issueI5NC8W
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest028, TestSize.Level1)
 {
@@ -1499,7 +1499,7 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest028, TestSize.Level1)
  * @tc.name: RenderGridLayoutTest029
  * @tc.desc: Verify the function that parse the unit value of auto-fill.
  * @tc.type: FUNC
- * @tc.require: I5NC8W
+ * @tc.require: issueI5NC8W
  */
 HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest029, TestSize.Level1)
 {
@@ -1571,4 +1571,27 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest029, TestSize.Level1)
     }
 }
 
+ * @tc.name: RenderGridLayoutTestRTL001
+ * @tc.desc: Test RTL of layout component
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC7M
+ */
+HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTestRTL001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderGridLayoutTest rtl001 start";
+
+    /**
+     * @tc.steps: step1. construct GridLayoutComponent and set direction.
+     * @tc.expected: step1. The text direction is correct.
+     */
+    std::string rowArgs = "1fr 540px";
+    std::string colArgs = "540px 50%";
+    std::list<RefPtr<Component>> children;
+    RefPtr<GridLayoutComponent> component = AceType::MakeRefPtr<GridLayoutComponent>(children);
+    component->SetTextDirection(TextDirection::RTL);
+    renderNode_->Update(component);
+    EXPECT_EQ(component->GetTextDirection(), TextDirection::RTL);
+
+    GTEST_LOG_(INFO) << "RenderGridLayoutTest rtl001 stop";
+}
 } // namespace OHOS::Ace

@@ -20,6 +20,7 @@
 #include "core/components/video/resource/player.h"
 #include "core/components/video/resource/texture.h"
 #include "core/components/video/video_component_v2.h"
+#include "core/components_ng/pattern/video/video_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -29,37 +30,65 @@ namespace OHOS::Ace::Framework {
 
 void JSVideo::Create(const JSCallbackInfo& info)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (info.Length() <= 0 || !info[0]->IsObject()) {
+        LOGE("JSVideo: info is invalid.");
+        return;
+    }
+    JSRef<JSObject> videoObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> srcValue = videoObj->GetProperty("src");
+    std::string videoPath;
+    JSRef<JSVal> currentProgressRateValue = videoObj->GetProperty("currentProgressRate");
+    double currentProgressRate;
+    JSRef<JSVal> previewUriValue = videoObj->GetProperty("previewUri");
+
+    auto controllerObj = videoObj->GetProperty("controller");
+    RefPtr<VideoControllerV2> videoController = nullptr;
+    if (controllerObj->IsObject()) {
+        auto* jsVideoController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSVideoController>();
+        if (jsVideoController) {
+            videoController = jsVideoController->GetController();
+        }
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::VideoView::Create(videoController);
+        if (ParseJsMedia(srcValue, videoPath)) {
+            NG::VideoView::SetSrc(videoPath);
+        }
+        if (ParseJsDouble(currentProgressRateValue, currentProgressRate)) {
+            NG::VideoView::SetProgressRate(currentProgressRate);
+        }
+        if (!previewUriValue->IsUndefined() && !previewUriValue->IsNull()) {
+            std::string previewUri;
+            if (ParseJsMedia(previewUriValue, previewUri)) {
+                NG::VideoView::SetPosterSourceInfo(previewUri);
+            } else {
+                // handle pixel map
+                LOGE("can not support pixel map");
+            }
+        }
+        return;
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::MakeRefPtr<OHOS::Ace::VideoComponentV2>();
-    videoComponent->SetSaveComponentEvent(
-        [videoComponent] (std::unordered_map<std::string, RefPtr<Component>> map) {
-            videoComponent->SetGestureComponentMap(map);
-        });
+    videoComponent->SetSaveComponentEvent([videoComponent](std::unordered_map<std::string, RefPtr<Component>> map) {
+        videoComponent->SetGestureComponentMap(map);
+    });
     if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
         videoComponent->SetTextDirection(TextDirection::RTL);
     }
 
     ViewStackProcessor::GetInstance()->ClaimElementId(videoComponent);
     ViewStackProcessor::GetInstance()->Push(videoComponent);
-    if (info.Length() <= 0 || !info[0]->IsObject()) {
-        LOGE("JSVideo: info is invalid.");
-        return;
-    }
 
-    JSRef<JSObject> videoObj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> srcValue = videoObj->GetProperty("src");
-    std::string videoPath;
     if (ParseJsMedia(srcValue, videoPath)) {
         videoComponent->SetSrc(videoPath);
     }
 
-    JSRef<JSVal> currentProgressRateValue = videoObj->GetProperty("currentProgressRate");
-    double currentProgressRate;
     if (ParseJsDouble(currentProgressRateValue, currentProgressRate)) {
         videoComponent->SetSpeed(currentProgressRate);
     }
 
-    JSRef<JSVal> previewUriValue = videoObj->GetProperty("previewUri");
     if (!previewUriValue->IsUndefined() && !previewUriValue->IsNull()) {
         std::string previewUri;
         auto noPixMap = ParseJsMedia(previewUriValue, previewUri);
@@ -77,19 +106,19 @@ void JSVideo::Create(const JSCallbackInfo& info)
         }
     }
 
-    auto controllerObj = videoObj->GetProperty("controller");
-    if (controllerObj->IsObject()) {
-        auto controller = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSVideoController>();
-        if (controller) {
-            videoComponent->SetVideoControllerV2(controller->GetController());
-        }
+    if (videoController) {
+        videoComponent->SetVideoControllerV2(videoController);
     }
     stack->GetFlexItemComponent();
 }
 
 void JSVideo::JsMuted(bool isMuted)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::VideoView::SetMuted(isMuted);
+        return;
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -101,7 +130,11 @@ void JSVideo::JsMuted(bool isMuted)
 
 void JSVideo::JsAutoPlay(bool autoPlay)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::VideoView::SetAutoPlay(autoPlay);
+        return;
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -113,7 +146,11 @@ void JSVideo::JsAutoPlay(bool autoPlay)
 
 void JSVideo::JsControls(bool controls)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::VideoView::SetControls(controls);
+        return;
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -125,7 +162,11 @@ void JSVideo::JsControls(bool controls)
 
 void JSVideo::JsLoop(bool loop)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::VideoView::SetLoop(loop);
+        return;
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -136,7 +177,11 @@ void JSVideo::JsLoop(bool loop)
 
 void JSVideo::JsObjectFit(int32_t objectFit)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::VideoView::SetObjectFit(static_cast<ImageFit>(objectFit));
+        return;
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -148,7 +193,17 @@ void JSVideo::JsObjectFit(int32_t objectFit)
 
 void JSVideo::JsOnStart(const JSCallbackInfo& args)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onStart = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Video.onStart");
+            std::vector<std::string> keys = { "start" };
+            func->Execute(keys, param);
+        };
+        NG::VideoView::SetOnStart(std::move(onStart));
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -160,7 +215,17 @@ void JSVideo::JsOnStart(const JSCallbackInfo& args)
 
 void JSVideo::JsOnPause(const JSCallbackInfo& args)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onPause = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Video.onPause");
+            std::vector<std::string> keys = { "pause" };
+            func->Execute(keys, param);
+        };
+        NG::VideoView::SetOnPause(std::move(onPause));
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -172,7 +237,17 @@ void JSVideo::JsOnPause(const JSCallbackInfo& args)
 
 void JSVideo::JsOnFinish(const JSCallbackInfo& args)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Video.onFinish");
+            std::vector<std::string> keys = { "finish" };
+            func->Execute(keys, param);
+        };
+        NG::VideoView::SetOnFinish(std::move(onFinish));
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -184,7 +259,7 @@ void JSVideo::JsOnFinish(const JSCallbackInfo& args)
 
 void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& args)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -196,7 +271,17 @@ void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& args)
 
 void JSVideo::JsOnPrepared(const JSCallbackInfo& args)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onPrepared = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Video.onPrepared");
+            std::vector<std::string> keys = { "duration" };
+            func->Execute(keys, param);
+        };
+        NG::VideoView::SetOnPrepared(std::move(onPrepared));
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -208,7 +293,17 @@ void JSVideo::JsOnPrepared(const JSCallbackInfo& args)
 
 void JSVideo::JsOnSeeking(const JSCallbackInfo& args)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onSeeking = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Video.onSeeking");
+            std::vector<std::string> keys = { "time" };
+            func->Execute(keys, param);
+        };
+        NG::VideoView::SetOnSeeking(std::move(onSeeking));
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -220,7 +315,17 @@ void JSVideo::JsOnSeeking(const JSCallbackInfo& args)
 
 void JSVideo::JsOnSeeked(const JSCallbackInfo& args)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onSeeked = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Video.onSeeked");
+            std::vector<std::string> keys = { "time" };
+            func->Execute(keys, param);
+        };
+        NG::VideoView::SetOnSeeked(std::move(onSeeked));
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -232,7 +337,17 @@ void JSVideo::JsOnSeeked(const JSCallbackInfo& args)
 
 void JSVideo::JsOnUpdate(const JSCallbackInfo& args)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onUpdate = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Video.onUpdate");
+            std::vector<std::string> keys = { "time" };
+            func->Execute(keys, param);
+        };
+        NG::VideoView::SetOnUpdate(std::move(onUpdate));
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -244,7 +359,17 @@ void JSVideo::JsOnUpdate(const JSCallbackInfo& args)
 
 void JSVideo::JsOnError(const JSCallbackInfo& args)
 {
-    auto stack = ViewStackProcessor::GetInstance();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onError = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Video.onError");
+            std::vector<std::string> keys = { "error" };
+            func->Execute(keys, param);
+        };
+        NG::VideoView::SetOnError(std::move(onError));
+    }
+    auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
         LOGE("JSVideo: MainComponent is null.");
@@ -262,8 +387,8 @@ EventMarker JSVideo::GetEventMarker(const JSCallbackInfo& info, const std::vecto
     }
 
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto eventMarker = EventMarker(
-        [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
+    auto eventMarker =
+        EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Execute(keys, param);
         });

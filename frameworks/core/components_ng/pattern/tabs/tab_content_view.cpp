@@ -86,21 +86,7 @@ void TabContentView::Pop(const RefPtr<FrameNode>& tabContent)
     auto* stack = ViewStackProcessor::GetInstance();
     auto tabBarParam = stack->PopTabBar();
 
-    // Create tab bar with builder.
-    if (tabBarParam.builder) {
-        ScopedViewStackProcessor builderViewStackProcessor;
-        tabBarParam.builder();
-        auto builderNode = ViewStackProcessor::GetInstance()->Finish();
-        tabBarNode->ReplaceChild(tabsNode->GetBuilderByContentId(tabContentId, builderNode), builderNode);
-        return;
-    }
-
-    if (tabBarParam.text.empty()) {
-        LOGW("Text is empty.");
-        return;
-    }
-
-    // Create column node to contain image and text node.
+    // Create column node to contain image and text or builder.
     auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetTabBarByContentId(tabContentId),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     auto linearLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
@@ -108,7 +94,21 @@ void TabContentView::Pop(const RefPtr<FrameNode>& tabContent)
     linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
     linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     linearLayoutProperty->UpdateSpace(TAB_BAR_SPACE);
-    columnNode->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
+
+    // Create tab bar with builder.
+    if (tabBarParam.builder) {
+        ScopedViewStackProcessor builderViewStackProcessor;
+        tabBarParam.builder();
+        auto builderNode = ViewStackProcessor::GetInstance()->Finish();
+        builderNode->MountToParent(columnNode);
+        tabBarNode->ReplaceChild(tabsNode->GetBuilderByContentId(tabContentId, columnNode), columnNode);
+        return;
+    }
+
+    if (tabBarParam.text.empty()) {
+        LOGW("Text is empty.");
+        return;
+    }
 
     // Create text node and image node.
     RefPtr<FrameNode> textNode;
