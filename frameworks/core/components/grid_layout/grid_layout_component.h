@@ -309,7 +309,7 @@ private:
     int32_t columnCount_ = 1;
     int32_t rowCount_ = 1;
     bool isDeclarative_ = false;
-    int32_t cacheCount_ = 3;
+    int32_t cacheCount_ = 1;
     bool supportAnimation_ = false;
     bool supportDragAnimation_ = false;
 
