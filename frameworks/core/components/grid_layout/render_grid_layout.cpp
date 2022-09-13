@@ -56,13 +56,13 @@ const char UNIT_AUTO_FILL[] = "auto-fill";
 const char REPEAT_PREFIX[] = "repeat";
 const std::regex REPEAT_NUM_REGEX(R"(^repeat\((\d+),(.+)\))", std::regex::icase); // regex for "repeat(2, 100px)"
 const std::regex AUTO_REGEX(R"(^repeat\((.+),(.+)\))", std::regex::icase);        // regex for "repeat(auto-fill, 10px)"
-const std::regex TRIM_REGEX(R"(^ +| +$|(\"[^\"\\\\]*(?:\\\\[\\s\\S][^\"\\\\]*)*\")|( ) +)");
+const std::regex TRIM_REGEX(R"(^ +| +$|(\"[^\"\\\\]*(?:\\\\[\\s\\S][^\"\\\\]*)*\")|( ) +)", std::regex::icase);
 const char TRIM_TEMPLATE[] = "$1$2";
-const char INVALID_PATTERN[] = "((repeat)\\(\\s{0,}(auto-fill),)";
+const char INVALID_PATTERN[] = "((repeat)\\(\\s{0,}(auto-fill)\\s{0,},)";
 const char SIZE_PATTERN[] = "\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}";
 const char PREFIX_PATTERN[] = "\\S{1,}(repeat)|(px|%|vp)\\d{1,}|\\)\\d{1,}";
 const char REPEAT_WITH_AUTOFILL[] =
-           "((repeat)\\(\\s{0,}(auto-fill),(\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}){1,}\\s{0,}\\))";
+           "((repeat)\\(\\s{0,}(auto-fill)\\s{0,},(\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}){1,}\\s{0,}\\))";
 
 // first bool mean if vertical, second bool mean if reverse
 // false, false --> RIGHT
@@ -3304,7 +3304,7 @@ bool RenderGridLayout::SplitTemplate(const std::string& str, std::vector<Value>&
     std::string merge;
     std::string regexResult;
     std::smatch result;
-    std::regex pattern(SIZE_PATTERN);
+    std::regex pattern(SIZE_PATTERN, std::regex::icase);
     std::string::const_iterator iterStart = str.begin();
     std::string::const_iterator iterEnd = str.end();
 
@@ -3323,7 +3323,7 @@ bool RenderGridLayout::SplitTemplate(const std::string& str, std::vector<Value>&
 std::string RenderGridLayout::GetRepeat(const std::string& str)
 {
     std::smatch result;
-    std::regex pattern(REPEAT_WITH_AUTOFILL);
+    std::regex pattern(REPEAT_WITH_AUTOFILL, std::regex::icase);
     std::string::const_iterator iterStart = str.begin();
     std::string::const_iterator iterEnd = str.end();
     std::string regexResult;
@@ -3347,7 +3347,7 @@ bool RenderGridLayout::CheckRepeatAndSplitString(
         return false;
     }
     std::string regexResult;
-    std::regex pattern(INVALID_PATTERN);
+    std::regex pattern(INVALID_PATTERN, std::regex::icase);
 
     for (auto it = vec.begin(); it != vec.end(); it++) {
         RTrim(*it);
@@ -3411,13 +3411,13 @@ bool RenderGridLayout::CheckAutoFillParameter(
         return false;
     }
     std::smatch result;
-    std::regex patternFilter(PREFIX_PATTERN);
+    std::regex patternFilter(PREFIX_PATTERN, std::regex::icase);
     if(std::regex_search(args, result, patternFilter)) {
         out.push_back(size);
         return false;
     }
 
-    std::regex pattern(REPEAT_WITH_AUTOFILL);
+    std::regex pattern(REPEAT_WITH_AUTOFILL, std::regex::icase);
     std::vector<std::string> vec(
         std::sregex_token_iterator(args.begin(), args.end(), pattern, -1), std::sregex_token_iterator());
 
@@ -3482,7 +3482,7 @@ std::vector<double> RenderGridLayout::ParseArgsWithAutoFill(const std::string& a
 
 std::vector<double> RenderGridLayout::ParseArgs(const std::string& args, double size, double gap)
 {
-    if (args.find(UNIT_AUTO_FILL) != std::string::npos) {
+    if (GetRepeat(args) != "") {
         return ParseArgsWithAutoFill(args, size, gap);
     } else {
         return ParseArgsInner(PreParseArgs(args), size, gap);

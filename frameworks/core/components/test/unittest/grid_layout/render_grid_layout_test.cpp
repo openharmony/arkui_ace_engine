@@ -1276,7 +1276,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest022, TestSize.Level1)
     ASSERT_TRUE(renderNode_->TrimTemplate(strLeftMidRightSpace) == strMidExpect);
 }
 
-// SplitTemplate
 /**
  * @tc.name: RenderGridLayoutTest023
  * @tc.desc: Verify the function that split the string and reture the result.
@@ -1395,7 +1394,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest025, TestSize.Level1)
     EXPECT_EQ(renderNode_->ParseUnit(valueVPE), 0.0);
 }
 
-// ConvertVirtualSize
 /**
  * @tc.name: RenderGridLayoutTest026
  * @tc.desc: Verify the function that parse the unit value of auto-fill.
@@ -1429,7 +1427,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest026, TestSize.Level1)
     EXPECT_EQ(renderNode_->ConvertVirtualSize("10.0", DimensionUnit::CALC), 0.0);
 }
 
-// CheckRepeatAndSplitString
 /**
  * @tc.name: RenderGridLayoutTest027
  * @tc.desc: Verify the function that parse the unit value of auto-fill.
@@ -1474,7 +1471,7 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest027, TestSize.Level1)
     vec.clear();
     result.clear();
 }
-// GetRepeat
+
 /**
  * @tc.name: RenderGridLayoutTest028
  * @tc.desc: Verify the function that parse the unit value of auto-fill.
@@ -1494,7 +1491,6 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest028, TestSize.Level1)
     EXPECT_TRUE(renderNode_->GetRepeat(param) == "");
 }
 
-// ParseArgsWithAutoFill
 /**
  * @tc.name: RenderGridLayoutTest029
  * @tc.desc: Verify the function that parse the unit value of auto-fill.
