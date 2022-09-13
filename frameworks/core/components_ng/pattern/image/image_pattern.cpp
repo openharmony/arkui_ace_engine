@@ -190,7 +190,7 @@ void ImagePattern::OnModifyDone()
             imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo("")), std::move(loadNotifier));
         loadingCtx_->LoadImageData();
     }
-    if (loadingCtx_->NeedAlt()) {
+    if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         LoadNotifier altLoadNotifier(CreateDataReadyCallbackForAlt(), CreateLoadSuccessCallbackForAlt(), nullptr);
         if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo) {
