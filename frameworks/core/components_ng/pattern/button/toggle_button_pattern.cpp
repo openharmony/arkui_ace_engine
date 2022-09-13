@@ -48,10 +48,13 @@ void ToggleButtonPattern::OnModifyDone()
 
     auto buttonPaintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
     CHECK_NULL_VOID(buttonPaintProperty);
+    if (!isOn_.has_value()) {
+        isOn_ = buttonPaintProperty->GetIsOnValue();
+    }
     bool changed = false;
     if (buttonPaintProperty->HasIsOn()) {
         bool isOn = buttonPaintProperty->GetIsOnValue();
-        changed = isOn ^ isOn_;
+        changed = isOn ^ isOn_.value();
         isOn_ = isOn;
     }
     auto pipeline = host->GetContext();
@@ -66,7 +69,7 @@ void ToggleButtonPattern::OnModifyDone()
         auto backgroundColor = toggleTheme->GetBackgroundColor();
         unselectedColor_ = renderContext->GetBackgroundColorValue(backgroundColor);
     }
-    if (isOn_) {
+    if (isOn_.value()) {
         auto color = toggleTheme->GetCheckedColor();
         auto selectedColor = buttonPaintProperty->GetSelectedColor().value_or(color);
         buttonPaintProperty->UpdateSelectedColor(selectedColor);
@@ -80,7 +83,7 @@ void ToggleButtonPattern::OnModifyDone()
     if (changed) {
         auto toggleButtonEventHub = GetEventHub<ToggleButtonEventHub>();
         CHECK_NULL_VOID(toggleButtonEventHub);
-        toggleButtonEventHub->UpdateChangeEvent(isOn_);
+        toggleButtonEventHub->UpdateChangeEvent(isOn_.value());
     }
 
     if (clickListener_) {

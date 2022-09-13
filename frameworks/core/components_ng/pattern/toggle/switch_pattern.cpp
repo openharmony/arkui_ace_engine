@@ -47,7 +47,11 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-    if (isOn_) {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    if (isOn_.value()) {
         currentOffset_ = GetSwitchWidth();
     }
     return true;
@@ -72,8 +76,11 @@ void SwitchPattern::OnModifyDone()
     }
     auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(switchPaintProperty);
+    if (!isOn_.has_value()) {
+        isOn_ = switchPaintProperty->GetIsOnValue();
+    }
     auto isOn = switchPaintProperty->GetIsOnValue();
-    if (isOn != isOn_) {
+    if (isOn != isOn_.value()) {
         OnChange();
     }
     if (clickListener_) {
@@ -82,9 +89,9 @@ void SwitchPattern::OnModifyDone()
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto checkboxPattern = weak.Upgrade();
-        CHECK_NULL_VOID(checkboxPattern);
-        checkboxPattern->OnClick();
+        auto switchPattern = weak.Upgrade();
+        CHECK_NULL_VOID(switchPattern);
+        switchPattern->OnClick();
     };
 
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
@@ -133,7 +140,7 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     controller_->AddStopListener([weak, this]() {
         auto switch_ = weak.Upgrade();
         CHECK_NULL_VOID(switch_);
-        if (!isOn_) {
+        if (!isOn_.value()) {
             if (NearEqual(switch_->currentOffset_, GetSwitchWidth())) {
                 switch_->isOn_ = true;
                 switch_->UpdateChangeEvent();
@@ -180,7 +187,7 @@ void SwitchPattern::OnChange()
     CHECK_NULL_VOID(geometryNode);
     auto translateOffset = GetSwitchWidth();
     StopTranslateAnimation();
-    if (!isOn_) {
+    if (!isOn_.value()) {
         PlayTranslateAnimation(0, translateOffset);
     } else {
         PlayTranslateAnimation(translateOffset, 0);
@@ -202,7 +209,7 @@ void SwitchPattern::UpdateChangeEvent() const
 {
     auto switchEventHub = GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(switchEventHub);
-    switchEventHub->UpdateChangeEvent(isOn_);
+    switchEventHub->UpdateChangeEvent(isOn_.value());
 }
 
 void SwitchPattern::OnClick()

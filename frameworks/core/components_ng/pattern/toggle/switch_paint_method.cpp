@@ -80,7 +80,7 @@ void SwitchPaintMethod::PaintContent(
     rosen::RoundRect roundRect(rect, radius, radius);
     canvas.DrawRoundRect(roundRect);
 
-    if (mainDelta_ != 0.0f) {
+    if (!NearEqual(mainDelta_, 0)) {
         brush.SetColor(ToRSColor(paintProperty->GetSelectedColor().value_or(switchTheme->GetActiveColor())));
         canvas.AttachBrush(brush);
         rosen::Rect rectCover;
