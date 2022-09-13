@@ -21,7 +21,7 @@ config("ohos_text_overlay_web_config") {
     "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
-    "//foundation/multimedia/image_standard/interfaces/innerkits/include",
+    "//foundation/multimedia/image_framework/interfaces/innerkits/include",
   ]
 }
 
