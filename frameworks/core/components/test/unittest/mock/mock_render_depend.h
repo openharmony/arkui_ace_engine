@@ -135,6 +135,11 @@ public:
     {
         return Offset();
     }
+
+    TextDirection GetDefaultTextDirection() const
+    {
+        return defaultTextDirection_;
+    }
 };
 
 class MockRenderPositioned : public RenderPositioned {
