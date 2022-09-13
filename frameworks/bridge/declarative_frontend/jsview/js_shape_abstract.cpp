@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
+#include "core/common/container.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -247,6 +248,10 @@ void JSShapeAbstract::SetAntiAlias(bool antiAlias)
 
 void JSShapeAbstract::JsWidth(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsWidth(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -273,6 +278,10 @@ void JSShapeAbstract::SetWidth(const JSRef<JSVal>& jsValue)
 
 void JSShapeAbstract::JsHeight(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsHeight(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -335,6 +344,10 @@ void JSShapeAbstract::ObjectWidth(const JSRef<JSVal>& jsValue)
         LOGE("Value is less than zero");
         return;
     }
+    if(Container::IsCurrentUseNewPipeline()){
+        JSViewAbstract::JsWidth(jsValue);
+        return;
+    }
     if (basicShape_) {
         basicShape_->SetWidth(value);
     }
@@ -359,6 +372,10 @@ void JSShapeAbstract::ObjectHeight(const JSRef<JSVal>& jsValue)
     }
     if (LessNotEqual(value.Value(), 0.0)) {
         LOGE("Value is less than zero");
+        return;
+    }
+    if(Container::IsCurrentUseNewPipeline()){
+        JSViewAbstract::JsHeight(jsValue);
         return;
     }
     if (basicShape_) {

@@ -15,14 +15,20 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
 
+#include "core/common/container.h"
 #include "core/components/box/box_component.h"
 #include "core/components/shape/shape_component.h"
+#include "core/components_ng/pattern/shape/circle_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSCircle::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::CircleView::Create();
+        return;
+    }
     RefPtr<Component> circleComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::CIRCLE);
     ViewStackProcessor::GetInstance()->ClaimElementId(circleComponent);
     ViewStackProcessor::GetInstance()->Push(circleComponent);
