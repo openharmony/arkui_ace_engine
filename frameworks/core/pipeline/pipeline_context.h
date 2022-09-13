@@ -1107,7 +1107,7 @@ private:
 
     template<typename T>
     struct NodeCompare {
-        bool operator()(const T& nodeLeft, const T& nodeRight)
+        bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
@@ -1121,7 +1121,7 @@ private:
 
     template<typename T>
     struct NodeCompareWeak {
-        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak)
+        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak) const
         {
             auto nodeLeft = nodeLeftWeak.Upgrade();
             auto nodeRight = nodeRightWeak.Upgrade();
