@@ -38,7 +38,7 @@ public:
         bool useSkiaSvg);
 
     ImageObject() = default;
-    ImageObject(ImageSourceInfo source) : imageSource_(source){}
+    explicit ImageObject(ImageSourceInfo source) : imageSource_(source){}
 
     ImageObject(
         ImageSourceInfo source,
