@@ -144,7 +144,6 @@ public:
     }
 };
 
-
 class JSWebConsoleLog : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
