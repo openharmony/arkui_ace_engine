@@ -33,10 +33,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        if (renderFunction_) {
-            return MakeRefPtr<CustomNodeLayoutAlgorithm>(renderFunction_);
-        }
-        return MakeRefPtr<BoxLayoutAlgorithm>();
+        return MakeRefPtr<CustomNodeLayoutAlgorithm>(renderFunction_);
     }
 
     void SetRenderFunction(const RenderFunction& renderFunction)
