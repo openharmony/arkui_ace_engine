@@ -21,6 +21,7 @@ template("ace_core_source_set") {
   ohos_source_set(target_name) {
     part_name = ace_engine_part
     defines += invoker.defines
+    platform = invoker.platform
 
     # add common source file needed by all product platform here
     sources = [
@@ -58,6 +59,7 @@ template("ace_core_source_set") {
       # common
       "common/ace_application_info.cpp",
       "common/ace_engine.cpp",
+      "common/anr_thread.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
       "common/container_scope.cpp",
@@ -192,6 +194,10 @@ template("ace_core_source_set") {
       "common/flutter/flutter_task_executor.cpp",
       "common/flutter/flutter_window.cpp",
     ]
+
+    if (platform == "ohos") {
+      sources -= [ "common/anr_thread.cpp" ]
+    }
 
     # add sources needed by phone and TV. wearable like watch do not need them
     if (!is_wearable_product) {
@@ -438,6 +444,7 @@ template("ace_core_ng_source_set") {
   ohos_source_set(target_name) {
     part_name = ace_engine_part
     defines += invoker.defines
+    platform = invoker.platform
 
     # add common source file needed by all product platform here
     sources = [
@@ -473,6 +480,7 @@ template("ace_core_ng_source_set") {
       # common
       "common/ace_application_info.cpp",
       "common/ace_engine.cpp",
+      "common/anr_thread.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
       "common/container_scope.cpp",
@@ -601,6 +609,10 @@ template("ace_core_ng_source_set") {
       "common/flutter/flutter_asset_manager.cpp",
       "common/flutter/flutter_task_executor.cpp",
     ]
+
+    if (platform == "ohos") {
+      sources -= [ "common/anr_thread.cpp" ]
+    }
 
     configs = [ "$ace_root:ace_config" ]
 
