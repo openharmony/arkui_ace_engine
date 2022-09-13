@@ -174,6 +174,7 @@ public:
     using ForwardImpl = std::function<void()>;
     using ClearHistoryImpl = std::function<void()>;
     using ClearSslCacheImpl = std::function<void()>;
+    using ClearClientAuthenticationCacheImpl = std::function<void()>;
 
     void LoadUrl(std::string url, std::map<std::string, std::string>& httpHeaders) const
     {
@@ -245,6 +246,14 @@ public:
         }
     }
 
+    void ClearClientAuthenticationCache()
+    {
+        LOGI("ClearClientAuthenticationCache");
+        if (clearClientAuthenticationCacheImpl_) {
+            clearClientAuthenticationCacheImpl_();
+        }
+    }
+
     void SetLoadUrlImpl(LoadUrlImpl && loadUrlImpl)
     {
         loadUrlImpl_ = std::move(loadUrlImpl);
@@ -288,6 +297,11 @@ public:
     void SetClearSslCacheImpl(ClearSslCacheImpl && clearSslCacheImpl)
     {
         clearSslCacheImpl_ = std::move(clearSslCacheImpl);
+    }
+
+    void SetClearClientAuthenticationCacheImpl(ClearClientAuthenticationCacheImpl && clearClientAuthenticationCacheImpl)
+    {
+        clearClientAuthenticationCacheImpl_ = std::move(clearClientAuthenticationCacheImpl);
     }
 
     using ExecuteTypeScriptImpl = std::function<void(std::string, std::function<void(std::string)>&&)>;
@@ -717,6 +731,7 @@ private:
     ForwardImpl forwardimpl_;
     ClearHistoryImpl clearHistoryImpl_;
     ClearSslCacheImpl clearSslCacheImpl_;
+    ClearClientAuthenticationCacheImpl clearClientAuthenticationCacheImpl_;
 
     ExecuteTypeScriptImpl executeTypeScriptImpl_;
     OnInactiveImpl onInactiveImpl_;

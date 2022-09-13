@@ -348,6 +348,63 @@ private:
     int32_t error_;
 };
 
+class ACE_EXPORT SslSelectCertResult : public AceType {
+    DECLARE_ACE_TYPE(SslSelectCertResult, AceType)
+public:
+    SslSelectCertResult() = default;
+    ~SslSelectCertResult() = default;
+
+    virtual void HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile) = 0;
+    virtual void HandleCancel() = 0;
+    virtual void HandleIgnore() = 0;
+};
+
+class ACE_EXPORT WebSslSelectCertEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebSSslSelectCertEvent, BaseEventInfo);
+
+public:
+    WebSslSelectCertEvent(const RefPtr<SslSelectCertResult>& result,
+        const std::string& host, int port,
+        const std::vector<std::string>& keyTypes,
+        const std::vector<std::string>& issuers)
+        : BaseEventInfo("WebSslSelectCertEvent"),
+        result_(result), host_(host), port_(port), keyTypes_(keyTypes), issuers_(issuers) {}
+
+    ~WebSslSelectCertEvent() = default;
+
+    const RefPtr<SslSelectCertResult>& GetResult() const
+    {
+        return result_;
+    }
+
+    const std::string& GetHost() const
+    {
+        return host_;
+    }
+
+    int32_t GetPort() const
+    {
+        return port_;
+    }
+
+    const std::vector<std::string>& GetKeyTypes() const
+    {
+        return keyTypes_;
+    }
+
+    const std::vector<std::string>& GetIssuers_() const
+    {
+        return issuers_;
+    }
+
+private:
+    RefPtr<SslSelectCertResult> result_;
+    std::string host_;
+    int32_t port_;
+    std::vector<std::string> keyTypes_;
+    std::vector<std::string> issuers_;
+};
+
 class ACE_EXPORT WebGeolocation : public AceType {
     DECLARE_ACE_TYPE(WebGeolocation, AceType)
 

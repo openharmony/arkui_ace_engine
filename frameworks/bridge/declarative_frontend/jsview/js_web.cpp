@@ -217,6 +217,63 @@ private:
     RefPtr<SslErrorResult> result_;
 };
 
+class JSWebSslSelectCert : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSWebSslSelectCert>::Declare("WebSslSelectCertResult");
+        JSClass<JSWebSslSelectCert>::CustomMethod("confirm", &JSWebSslSelectCert::HandleConfirm);
+        JSClass<JSWebSslSelectCert>::CustomMethod("cancel", &JSWebSslSelectCert::HandleCancel);
+        JSClass<JSWebSslSelectCert>::CustomMethod("ignore", &JSWebSslSelectCert::HandleIgnore);
+        JSClass<JSWebSslSelectCert>::Bind(globalObj, &JSWebSslSelectCert::Constructor, &JSWebSslSelectCert::Destructor);
+    }
+
+    void SetResult(const RefPtr<SslSelectCertResult>& result)
+    {
+        result_ = result;
+    }
+
+    void HandleConfirm(const JSCallbackInfo& args)
+    {
+        LOGW("JSWebSslSelectCert::HandleConfirm");
+        std::string privateKeyFile = args[0]->ToString();
+        std::string certChainFile = args[1]->ToString();
+        if (result_) {
+            result_->HandleConfirm(privateKeyFile, certChainFile);
+        }
+    }
+
+    void HandleCancel(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->HandleCancel();
+        }
+    }
+
+    void HandleIgnore(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->HandleIgnore();
+        }
+    }
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsWebSslSelectCert = Referenced::MakeRefPtr<JSWebSslSelectCert>();
+        jsWebSslSelectCert->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsWebSslSelectCert));
+    }
+
+    static void Destructor(JSWebSslSelectCert* jsWebSslSelectCert)
+    {
+        if (jsWebSslSelectCert != nullptr) {
+            jsWebSslSelectCert->DecRefCount();
+        }
+    }
+
+    RefPtr<SslSelectCertResult> result_;
+};
+
 class JSWebConsoleLog : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -1075,6 +1132,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::OnFileSelectorShowAbandoned);
     JSClass<JSWeb>::StaticMethod("onHttpAuthRequest", &JSWeb::OnHttpAuthRequest);
     JSClass<JSWeb>::StaticMethod("onSslErrorEventReceive", &JSWeb::OnSslErrorRequest);
+    JSClass<JSWeb>::StaticMethod("onClientAuthenticationRequest", &JSWeb::OnSslSelectCertRequest);
     JSClass<JSWeb>::StaticMethod("onPermissionRequest", &JSWeb::OnPermissionRequest);
     JSClass<JSWeb>::StaticMethod("onContextMenuShow", &JSWeb::OnContextMenuShow);
     JSClass<JSWeb>::StaticMethod("onSearchResultReceive", &JSWeb::OnSearchResultReceive);
@@ -1097,6 +1155,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSFileSelectorResult::JSBind(globalObj);
     JSWebHttpAuth::JSBind(globalObj);
     JSWebSslError::JSBind(globalObj);
+    JSWebSslSelectCert::JSBind(globalObj);
     JSWebPermissionRequest::JSBind(globalObj);
     JSContextMenuParam::JSBind(globalObj);
     JSContextMenuResult::JSBind(globalObj);
@@ -1228,6 +1287,40 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
     jsWebSslError->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("error", eventInfo.GetError());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> WebSslSelectCertEventToJSValue(const WebSslSelectCertEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> resultObj = JSClass<JSWebSslSelectCert>::NewInstance();
+    auto jsWebSslSelectCert = Referenced::Claim(resultObj->Unwrap<JSWebSslSelectCert>());
+    if (!jsWebSslSelectCert) {
+        LOGE("jsWebSslSelectCert is nullptr");
+        return JSRef<JSVal>::Cast(obj);
+    }
+    jsWebSslSelectCert->SetResult(eventInfo.GetResult());
+    obj->SetPropertyObject("handler", resultObj);
+    obj->SetProperty("host", eventInfo.GetHost());
+    obj->SetProperty("port", eventInfo.GetPort());
+
+    JSRef<JSArray> keyTypesArr = JSRef<JSArray>::New();
+    const std::vector<std::string>& keyTypes = eventInfo.GetKeyTypes();
+    for (int32_t idx = 0; idx < static_cast<int32_t>(keyTypes.size()); ++idx) {
+        JSRef<JSVal> keyType = JSRef<JSVal>::Make(ToJSValue(keyTypes[idx]));
+        keyTypesArr->SetValueAt(idx, keyType);
+    }
+    obj->SetPropertyObject("keyTypes", keyTypesArr);
+
+    JSRef<JSArray> issuersArr = JSRef<JSArray>::New();
+    const std::vector<std::string>& issuers = eventInfo.GetIssuers_();
+    for (int32_t idx = 0; idx < static_cast<int32_t>(issuers.size()); ++idx) {
+        JSRef<JSVal> issuer = JSRef<JSVal>::Make(ToJSValue(issuers[idx]));
+        issuersArr->SetValueAt(idx, issuer);
+    }
+
+    obj->SetPropertyObject("issuers", issuersArr);
+
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -1614,6 +1707,37 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetOnSslErrorRequestImpl(std::move(jsCallback));
+}
+
+void JSWeb::OnSslSelectCertRequest(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb::OnSslSelectCertRequest");
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("param is invalid.");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebSslSelectCertEvent, 1>>(JSRef<JSFunc>::Cast(args[0]),
+        WebSslSelectCertEventToJSValue);
+    auto jsCallback = [func = std::move(jsFunc)]
+        (const BaseEventInfo* info) -> bool {
+            ACE_SCORING_EVENT("OnSslSelectCertRequest CallBack");
+            if (func == nullptr) {
+                LOGW("function is null");
+                return false;
+            }
+            auto eventInfo = TypeInfoHelper::DynamicCast<WebSslSelectCertEvent>(info);
+            if (eventInfo == nullptr) {
+                LOGW("eventInfo is null");
+                return false;
+            }
+            JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
+            if (result->IsBoolean()) {
+                return result->ToBoolean();
+            }
+            return false;
+        };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    webComponent->SetOnSslSelectCertRequestImpl(std::move(jsCallback));
 }
 
 void JSWeb::MediaPlayGestureAccess(bool isNeedGestureAccess)
