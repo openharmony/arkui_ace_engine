@@ -17,10 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_H
 
 #include <cstdint>
+#include <functional>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
@@ -48,6 +51,9 @@ public:
     static void SetBorderStyle(const BorderStyleProperty& value);
     static void SetOpacity(double opacity);
 
+    // layout
+    static void SetAlign(Alignment alignment);
+
     // transform
     static void SetScale(NG::VectorF scale);
     static void SetPivot(NG::VectorF center);
@@ -61,6 +67,12 @@ public:
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
     static void SetOnHover(OnHoverEventFunc&& onHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
+    static void SetOnAppear(std::function<void()>&& onAppear);
+    static void SetOnDisappear(std::function<void()>&& onDisappear);
+    static void SetOnAreaChanged(
+        std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&&
+            onAreaChanged);
+
     // flex properties
     static void SetAlignSelf(int32_t value);
 

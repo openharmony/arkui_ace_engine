@@ -207,7 +207,7 @@ private:
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
 
-    void OnDetachFromMainTree() override {}
+    void OnDetachFromMainTree() override;
     void OnAttachToMainTree() override;
 
     // dump self info.

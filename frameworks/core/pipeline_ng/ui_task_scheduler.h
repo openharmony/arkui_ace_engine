@@ -84,6 +84,12 @@ public:
         currentPageId_ = id;
     }
 
+    void CleanUp()
+    {
+        dirtyLayoutNodes_.clear();
+        dirtyRenderNodes_.clear();
+    }
+
 private:
     template<typename T>
     struct NodeCompare {

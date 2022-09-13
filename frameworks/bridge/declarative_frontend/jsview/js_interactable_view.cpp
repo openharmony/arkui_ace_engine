@@ -269,13 +269,19 @@ void JSInteractableView::JsOnAppear(const JSCallbackInfo& info)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsOnAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-
-        auto onAppearId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
+        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             LOGI("About to call JsOnAppear method on js");
             ACE_SCORING_EVENT("onAppear");
             func->Execute();
-        });
+        };
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewAbstract::SetOnAppear(std::move(onAppear));
+            return;
+        }
+
+        auto onAppearId = EventMarker(onAppear);
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         component->SetOnAppearEventId(onAppearId);
     }
@@ -286,12 +292,18 @@ void JSInteractableView::JsOnDisAppear(const JSCallbackInfo& info)
     if (info[0]->IsFunction()) {
         RefPtr<JsFunction> jsOnDisAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-        auto onDisAppearId = EventMarker([execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
+        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             LOGD("Start to call JsOnDisAppear method on js");
             ACE_SCORING_EVENT("onDisAppear");
             func->Execute();
-        });
+        };
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewAbstract::SetOnDisappear(std::move(onDisappear));
+            return;
+        }
+
+        auto onDisAppearId = EventMarker(onDisappear);
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         component->SetOnDisappearEventId(onDisAppearId);
     }

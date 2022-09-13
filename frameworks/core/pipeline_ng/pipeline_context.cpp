@@ -373,4 +373,14 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     window_->RequestFrame();
 }
 
+void PipelineContext::Destroy()
+{
+    taskScheduler_.CleanUp();
+    scheduleTasks_.clear();
+    dirtyNodes_.clear();
+    rootNode_.Reset();
+    stageManager_.Reset();
+    overlayManager_.Reset();
+}
+
 } // namespace OHOS::Ace::NG

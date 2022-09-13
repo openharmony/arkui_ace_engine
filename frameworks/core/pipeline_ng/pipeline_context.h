@@ -110,7 +110,7 @@ public:
         return {};
     }
 
-    void Destroy() override {}
+    void Destroy() override;
 
     void OnShow() override {}
 
