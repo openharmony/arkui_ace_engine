@@ -245,7 +245,7 @@ void AnimatedImageObject::UploadToGpuForRender(
     bool forceResize,
     bool syncMode)
 {
-    constexpr float SizeOffset = 0.5;
+    constexpr float SizeOffset = 0.5f;
     if (!animatedPlayer_ && skData_) {
         auto codec = SkCodec::MakeFromData(skData_);
         int32_t dstWidth = -1;

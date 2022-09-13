@@ -18,15 +18,15 @@
 
 namespace OHOS::Ace {
 void ApngImageObject::UploadToGpuForRender(
-    const WeakPtr<PipelineBase> &context,
-    const RefPtr<FlutterRenderTaskHolder> &renderTaskHolder,
-    const UploadSuccessCallback &successCallback,
-    const FailedCallback &failedCallback,
-    const Size &imageSize,
+    const WeakPtr<PipelineBase>& context,
+    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+    const UploadSuccessCallback& successCallback,
+    const FailedCallback& failedCallback,
+    const Size& imageSize,
     bool forceResize,
     bool syncMode)
 {
-    const float SizeOffset = 0.5;
+    constexpr float SizeOffset = 0.5f;
 
     if (!animatedPlayer_ && skData_) {
         int32_t dstWidth = -1;

@@ -21,16 +21,16 @@
 
 namespace OHOS::Ace {
 class ApngImageObject : public ImageObject {
-DECLARE_ACE_TYPE(ApngImageObject, ImageObject);
+    DECLARE_ACE_TYPE(ApngImageObject, ImageObject);
 public:
     using CancelableTask = CancelableCallback<void()>;
 
     ApngImageObject(
         ImageSourceInfo source,
-        const Size &imageSize,
+        const Size& imageSize,
         int32_t frameCount,
-        const sk_sp<SkData> &data,
-        const RefPtr<PNGImageDecoder> &decoder)
+        const sk_sp<SkData>& data,
+        const RefPtr<PNGImageDecoder>& decoder)
         : ImageObject(source, imageSize, frameCount), skData_(data)
     {
         skData_ = data;
@@ -38,11 +38,11 @@ public:
     }
 
     void UploadToGpuForRender(
-        const WeakPtr<PipelineBase> &context,
-        const RefPtr<FlutterRenderTaskHolder> &renderTaskHolder,
-        const UploadSuccessCallback &successCallback,
-        const FailedCallback &failedCallback,
-        const Size &imageSize,
+        const WeakPtr<PipelineBase>& context,
+        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+        const UploadSuccessCallback& successCallback,
+        const FailedCallback& failedCallback,
+        const Size& imageSize,
         bool forceResize,
         bool syncMode = false) override;
 

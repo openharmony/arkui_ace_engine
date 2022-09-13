@@ -134,13 +134,13 @@ typedef enum {
  * interlace method   (1) 0 (no interlace) or 1 (Adam7 interlace)
  **/
 typedef struct {
-    uint32_t width;             ///< pixel count, should not be zero
-    uint32_t height;            ///< pixel count, should not be zero
-    uint8_t bitDepth;          ///< expected: 1, 2, 4, 8, 16
-    uint8_t colorType;         ///< see PngAlphaType
-    uint8_t compressionMethod; ///< 0 (deflate/inflate)
-    uint8_t filterMethod;      ///< 0 (adaptive filtering with five basic filter types)
-    uint8_t interlaceMethod;   ///< 0 (no interlace) or 1 (Adam7 interlace)
+    uint32_t width = 0;             ///< pixel count, should not be zero
+    uint32_t height = 0;            ///< pixel count, should not be zero
+    uint8_t bitDepth = 0;          ///< expected: 1, 2, 4, 8, 16
+    uint8_t colorType = 0;         ///< see PngAlphaType
+    uint8_t compressionMethod = 0; ///< 0 (deflate/inflate)
+    uint8_t filterMethod = 0;      ///< 0 (adaptive filtering with five basic filter types)
+    uint8_t interlaceMethod = 0;   ///< 0 (no interlace) or 1 (Adam7 interlace)
 } PngChunkIHDR;
 
 /**
@@ -158,15 +158,15 @@ typedef struct {
  * blend op          (1) type of frame area rendering for this frame (0:source, 1:over)
  **/
 typedef struct {
-    uint32_t sequenceNumber;  ///< sequence number of the animation chunk, starting from 0
-    uint32_t width;            ///< width of the following frame
-    uint32_t height;           ///< height of the following frame
-    uint32_t xOffset;         ///< x position at which to render the following frame
-    uint32_t yOffset;         ///< y position at which to render the following frame
-    uint16_t delayNum;        ///< frame delay fraction numerator
-    uint16_t delayDen;        ///< frame delay fraction denominator
-    uint8_t disposeOp;        ///< see PngDisposeOp
-    uint8_t blendOp;          ///< see PngBlendOp
+    uint32_t sequenceNumber = 0;  ///< sequence number of the animation chunk, starting from 0
+    uint32_t width = 0;            ///< width of the following frame
+    uint32_t height = 0;           ///< height of the following frame
+    uint32_t xOffset = 0;         ///< x position at which to render the following frame
+    uint32_t yOffset = 0;         ///< y position at which to render the following frame
+    uint16_t delayNum = 0;        ///< frame delay fraction numerator
+    uint16_t delayDen = 0;        ///< frame delay fraction denominator
+    uint8_t disposeOp = 0;        ///< see PngDisposeOp
+    uint8_t blendOp = 0;          ///< see PngBlendOp
 } PngChunkfcTL;
 
 /**
@@ -174,10 +174,10 @@ typedef struct {
  * use for identifier echo chunk data info
  **/
 typedef struct {
-    uint32_t offset; ///< chunk offset in PNG data
-    uint32_t fourcc; ///< chunk fourcc
-    uint32_t length; ///< chunk data length
-    uint32_t crc32;  ///< chunk crc32
+    uint32_t offset = 0; ///< chunk offset in PNG data
+    uint32_t fourcc = 0; ///< chunk fourcc
+    uint32_t length = 0; ///< chunk data length
+    uint32_t crc32 = 0;  ///< chunk crc32
 } PngChunkInfo;
 
 /**
@@ -186,9 +186,9 @@ typedef struct {
  * detail frame info in the fcTL
  **/
 typedef struct {
-    uint32_t chunkIndex; ///< the first `fdAT`/`IDAT` chunk index
-    uint32_t chunkNum;   ///< the `fdAT`/`IDAT` chunk count
-    uint32_t chunkSize;  ///< the `fdAT`/`IDAT` chunk bytes
+    uint32_t chunkIndex = 0; ///< the first `fdAT`/`IDAT` chunk index
+    uint32_t chunkNum = 0;   ///< the `fdAT`/`IDAT` chunk count
+    uint32_t chunkSize = 0;  ///< the `fdAT`/`IDAT` chunk bytes
     PngChunkfcTL frameControl;
 } PngFrameInfo;
 

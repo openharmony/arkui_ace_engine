@@ -21,6 +21,7 @@
 namespace OHOS::Ace {
 
 class APngImageAnimation : public Animation<int32_t> {
+    DECLARE_ACE_TYPE(APngImageAnimation, Animation);
 public:
     APngImageAnimation() = default;
 

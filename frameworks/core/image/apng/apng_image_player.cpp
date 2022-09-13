@@ -27,10 +27,10 @@ namespace OHOS::Ace {
 APngImagePlayer::APngImagePlayer(
     ImageSourceInfo source,
     UploadSuccessCallback successCallback,
-    const WeakPtr<PipelineBase> &weakContext,
-    const fml::WeakPtr<flutter::IOManager> &ioManager,
-    const fml::RefPtr<flutter::SkiaUnrefQueue> &gpuQueue,
-    const RefPtr<PNGImageDecoder> &decoder,
+    const WeakPtr<PipelineBase>& weakContext,
+    const fml::WeakPtr<flutter::IOManager>& ioManager,
+    const fml::RefPtr<flutter::SkiaUnrefQueue>& gpuQueue,
+    const RefPtr<PNGImageDecoder>& decoder,
     int32_t dstWidth,
     int32_t dstHeight)
     : imageSource_(source), successCallback_(successCallback), context_(weakContext), ioManager_(ioManager),
@@ -269,7 +269,7 @@ void APngImagePlayer::RenderFrame(const int32_t &index)
 /**
  * Get Frame Image mybe the image need draw in a new canvas
  * **/
-sk_sp<SkImage> APngImagePlayer::GetImage(const int32_t &index, bool extendToCanvas)
+sk_sp<SkImage> APngImagePlayer::GetImage(const int32_t& index, bool extendToCanvas)
 {
     uint32_t size = 0;
     if (!apngDecoder_ || !apngDecoder_->isApng()) {
@@ -374,7 +374,7 @@ void APngImagePlayer::DrawTest()
     blendCanvas_->drawRect(SkRect::MakeXYWH(TestX, TestX, TestWidth, TestWidth), pt);
 }
 
-void APngImagePlayer::DrawTestBorder(SkRect &rect)
+void APngImagePlayer::DrawTestBorder(SkRect& rect)
 {
     SkPaint pt;
     pt.setStyle(SkPaint::kStroke_Style);
@@ -524,7 +524,7 @@ SkCanvas *APngImagePlayer::CreateBlendCanvas()
  * @param index
  * @return frameInformation
  */
-APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t &index)
+APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t& index)
 {
     // first seek in cache
     auto iterator = cachedFrame_.find(index);
@@ -636,7 +636,7 @@ APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t &index)
  * @param src
  * @return
  */
-bool APngImagePlayer::CopyTo(SkBitmap *dst, const SkBitmap &src)
+bool APngImagePlayer::CopyTo(SkBitmap *dst, const SkBitmap& src)
 {
     SkPixmap srcPixmap;
     if (!src.peekPixels(&srcPixmap)) {
@@ -673,10 +673,10 @@ bool APngImagePlayer::CopyTo(SkBitmap *dst, const SkBitmap &src)
  * @param canvas
  * @param paintRect
  */
-void Paint(const flutter::Paint &paint,
-           const Offset &offset,
-           const ScopedCanvas &canvas,
-           const Rect &paintRect)
+void Paint(const flutter::Paint& paint,
+           const Offset& offset,
+           const ScopedCanvas& canvas,
+           const Rect& paintRect)
 {
     LOGD("TODO:apng player Paint wait to implement");
 }

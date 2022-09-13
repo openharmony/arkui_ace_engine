@@ -76,31 +76,31 @@ typedef enum {
  * Apng Header and frames information
  */
 typedef struct {
-    uint32_t index;            ///< sequence number of the animation chunk, starting from 0
-    uint32_t width;            ///< width of the following frame
-    uint32_t height;           ///< height of the following frame
-    uint32_t offsetX;          ///< x position at which to render the following frame
-    uint32_t offsetY;          ///< y position at which to render the following frame
-    float duration;
-    ImageDisposeMethod dispose;
-    ImageBlendOperation blend;
-    bool isFullSize;          ///< Whether frame fill the canvas.
-    uint32_t blendFromIndex;  ///< Blend from frame index to current frame.
-    sk_sp<SkImage> image;
+    uint32_t index = 0;            ///< sequence number of the animation chunk, starting from 0
+    uint32_t width = 0;            ///< width of the following frame
+    uint32_t height = 0;           ///< height of the following frame
+    uint32_t offsetX = 0;          ///< x position at which to render the following frame
+    uint32_t offsetY = 0;          ///< y position at which to render the following frame
+    float duration = 0.0;
+    ImageDisposeMethod dispose = ImageDisposeNone;
+    ImageBlendOperation blend  = ImageBlendNone;
+    bool isFullSize = false;          ///< Whether frame fill the canvas.
+    uint32_t blendFromIndex = 0;  ///< Blend from frame index to current frame.
+    sk_sp<SkImage> image = nullptr;
 } APngAnimatedFrameInfo;
 
 
 class APngImagePlayer : public virtual AceType {
-DECLARE_ACE_TYPE(APngImagePlayer, AceType);
+    DECLARE_ACE_TYPE(APngImagePlayer, AceType);
 
 public:
     APngImagePlayer(
         ImageSourceInfo source,
         UploadSuccessCallback successCallback,
-        const WeakPtr<PipelineBase> &weakContext,
-        const fml::WeakPtr<flutter::IOManager> &ioManager,
-        const fml::RefPtr<flutter::SkiaUnrefQueue> &gpuQueue,
-        const RefPtr<PNGImageDecoder> &decoder,
+        const WeakPtr<PipelineBase>& weakContext,
+        const fml::WeakPtr<flutter::IOManager>& ioManager,
+        const fml::RefPtr<flutter::SkiaUnrefQueue>& gpuQueue,
+        const RefPtr<PNGImageDecoder>& decoder,
         int32_t dstWidth = -1,
         int32_t dstHeight = -1);
 
@@ -110,12 +110,12 @@ public:
 
     void Resume();
 
-    void RenderFrame(const int32_t &index);
+    void RenderFrame(const int32_t& index);
 
     /**
      * Use for draw each frame image in self
      **/
-    void Paint(const flutter::Paint &paint, const Offset &offset, const ScopedCanvas &canvas, const Rect &paintRect);
+    void Paint(const flutter::Paint& paint, const Offset& offset, const ScopedCanvas& canvas, const Rect& paintRect);
 
     void SetTargetSize(int32_t width, int32_t height)
     {

@@ -27,32 +27,32 @@
 #endif
 
 namespace OHOS::Ace {
-const uint32_t PNGSize22 = 22;
-const uint32_t PNGSize24 = 24;
-const uint32_t PNGSize25 = 25;
-const uint32_t PNGHeadHeight = 4;
-const uint32_t PNGHeadBitDepth = 8;
-const uint32_t PNGHeadColorType = 9;
-const uint32_t PNGHeadCompMethod = 10;
-const uint32_t PNGHeadFilterMethod = 11;
-const uint32_t PNGHeadInterMethod = 12;
+constexpr uint32_t PNGSize22 = 22;
+constexpr uint32_t PNGSize24 = 24;
+constexpr uint32_t PNGSize25 = 25;
+constexpr uint32_t PNGHeadHeight = 4;
+constexpr uint32_t PNGHeadBitDepth = 8;
+constexpr uint32_t PNGHeadColorType = 9;
+constexpr uint32_t PNGHeadCompMethod = 10;
+constexpr uint32_t PNGHeadFilterMethod = 11;
+constexpr uint32_t PNGHeadInterMethod = 12;
 
-const uint32_t MiniChunkNum = 3;
-const uint32_t ChunkHeadLength = 13;
-const uint32_t PngHeadLength = 8;
-const uint32_t PngFOURCCLen = 4;
-const uint32_t PngFcTLLen = 26;
-const uint32_t Byte2 = 2;
-const uint32_t Byte4 = 4;
-const uint32_t Byte8 = 8;
-const uint32_t Byte12 = 12;
-const uint32_t Byte16 = 16;
-const uint32_t Byte17 = 17;
-const uint32_t Byte20 = 20;
-const uint32_t Byte21 = 21;
-const uint32_t Byte24 = 24;
-const uint32_t Byte25 = 25;
-const uint32_t Byte32 = 32;
+constexpr uint32_t MiniChunkNum = 3;
+constexpr uint32_t ChunkHeadLength = 13;
+constexpr uint32_t PngHeadLength = 8;
+constexpr uint32_t PngFOURCCLen = 4;
+constexpr uint32_t PngFcTLLen = 26;
+constexpr uint32_t Byte2 = 2;
+constexpr uint32_t Byte4 = 4;
+constexpr uint32_t Byte8 = 8;
+constexpr uint32_t Byte12 = 12;
+constexpr uint32_t Byte16 = 16;
+constexpr uint32_t Byte17 = 17;
+constexpr uint32_t Byte20 = 20;
+constexpr uint32_t Byte21 = 21;
+constexpr uint32_t Byte24 = 24;
+constexpr uint32_t Byte25 = 25;
+constexpr uint32_t Byte32 = 32;
 
 #define FOUR_CC(c1, c2, c3, c4) (static_cast<uint32_t>(((c4) << Byte24) | ((c3) << Byte16) | ((c2) << Byte8) | (c1)))
 #define TWO_CC(c1, c2) (static_cast<uint16_t>(((c2) << Byte8) | (c1)))
