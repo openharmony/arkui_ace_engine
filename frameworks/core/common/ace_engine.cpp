@@ -190,6 +190,8 @@ void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container
     }
     std::shared_lock<std::shared_mutex> lock(mutex_);
     for (const auto& [first, second] : containerMap_) {
+        // first = container ID
+        ContainerScope scope(first);
         callback(second);
     }
 }
