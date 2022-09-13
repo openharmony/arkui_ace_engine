@@ -54,7 +54,6 @@ constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
 constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
-constexpr double EPSILON = 0.000002f;
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
@@ -3218,9 +3217,6 @@ void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
         return;
     }
 
-    if (value.Value() == 0) {
-        value.SetValue(EPSILON);
-    }
     auto frontDecoration = GetFrontDecoration();
     frontDecoration->SetBrightness(value);
 }
@@ -3235,10 +3231,6 @@ void JSViewAbstract::JsContrast(const JSCallbackInfo& info)
     Dimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
-    }
-
-    if (value.Value() == 0) {
-        value.SetValue(EPSILON);
     }
 
     if (LessNotEqual(value.Value(), 0.0)) {
