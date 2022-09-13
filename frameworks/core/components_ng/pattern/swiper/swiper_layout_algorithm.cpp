@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -89,11 +90,10 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     InitItemRange();
 
     // Measure children.
-    auto layoutConstraint = swiperLayoutProperty->CreateChildConstraint();
+    auto layoutConstraint = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, idealSize);
     for (const auto& index : itemRange_) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!wrapper) {
-            LOGE("Item %{public}d wrapper is null", index);
             break;
         }
         wrapper->Measure(layoutConstraint);
@@ -115,6 +115,7 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto childrenSize = layoutWrapper->GetTotalChildCount();
     auto itemWidth = (axis == Axis::HORIZONTAL ? (size.Width() / displayCount) : (size.Height() / displayCount));
+    auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
 
     auto parentOffset =
         layoutWrapper->GetGeometryNode()->GetParentGlobalOffset() + layoutWrapper->GetGeometryNode()->GetFrameOffset();
@@ -122,12 +123,14 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // Effect when difference between current index and target index is greater than 1.
     // eg. Current index is 0, call swipeTo method to jump to index 2,
     // change item's position only 0 and 2, ignore others.
-    if (targetIndex_.has_value() && std::abs(targetIndex_.value() - currentIndex_) > 1) {
+    if (SwiperUtils::IsStretch(swiperLayoutProperty) && targetIndex_.has_value() &&
+        std::abs(targetIndex_.value() - currentIndex_) > 1) {
         auto currentOffset = axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0.0f) : OffsetF(0.0f, currentOffset_);
+        auto itemSpaceOffset = (axis == Axis::HORIZONTAL ? OffsetF(itemSpace / 2, 0) : OffsetF(0, itemSpace / 2));
         // Layout current item.
         auto currentWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex_);
         if (currentWrapper && currentWrapper->GetGeometryNode()) {
-            currentWrapper->GetGeometryNode()->SetFrameOffset(currentOffset);
+            currentWrapper->GetGeometryNode()->SetFrameOffset(currentOffset + itemSpaceOffset);
             currentWrapper->Layout(parentOffset);
         }
 
@@ -137,33 +140,73 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             axis == Axis::HORIZONTAL ? OffsetF(targetMainOffset, 0.0f) : OffsetF(0.0f, targetMainOffset);
         auto targetWrapper = layoutWrapper->GetOrCreateChildByIndex(targetIndex_.value());
         if (targetWrapper && targetWrapper->GetGeometryNode()) {
-            targetWrapper->GetGeometryNode()->SetFrameOffset(currentOffset + targetOffset);
+            targetWrapper->GetGeometryNode()->SetFrameOffset(currentOffset + targetOffset + itemSpaceOffset);
             targetWrapper->Layout(parentOffset);
         }
         return;
     }
 
     // Layout children.
+    // Split item range by current index.
+    std::set<int32_t, std::greater<>> preItems;
+    std::set<int32_t> nextItems;
     for (const auto& index : itemRange_) {
-        // When enable loop, adjust offset.
-        auto loopIndex = index;
-        if (currentIndex_ == 0 && GreatNotEqual(currentOffset_, 0.0) && index == childrenSize - 1) {
-            loopIndex = -1;
-        } else if (currentIndex_ == childrenSize - 1 && LessNotEqual(currentOffset_, 0.0) && index == 0) {
-            loopIndex = childrenSize;
-        }
-
-        auto offset = OffsetF(0.0, 0.0);
-        if (axis == Axis::HORIZONTAL) {
-            offset += OffsetF((loopIndex - currentIndex_) * itemWidth + currentOffset_, 0.0f);
-        } else if (axis == Axis::VERTICAL) {
-            offset += OffsetF(0.0f, (loopIndex - currentIndex_) * itemWidth + currentOffset_);
+        if (index < currentIndex_) {
+            preItems.insert(index);
         } else {
-            LOGW("axis [%{public}d] is not supported yet", axis);
+            nextItems.insert(index);
         }
+    }
+
+    // Layout items behind current item.
+    OffsetF preOffset = (axis == Axis::HORIZONTAL ? OffsetF(-itemSpace / 2 + currentOffset_, 0)
+                                                  : OffsetF(0, -itemSpace / 2 + currentOffset_));
+    for (const auto& index : preItems) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        wrapper->GetGeometryNode()->SetFrameOffset(offset);
+        if (!wrapper) {
+            continue;
+        }
+        auto geometryNode = wrapper->GetGeometryNode();
+        auto frameSize = geometryNode->GetFrameSize();
+        preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width(), 0) : OffsetF(0, frameSize.Height()));
+        geometryNode->SetFrameOffset(preOffset);
         wrapper->Layout(parentOffset);
+        preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(itemSpace, 0) : OffsetF(0, itemSpace));
+    }
+
+    // Layout items after current item.
+    OffsetF nextOffset = (axis == Axis::HORIZONTAL ? OffsetF(itemSpace / 2 + currentOffset_, 0)
+                                                   : OffsetF(0, itemSpace / 2 + currentOffset_));
+    for (const auto& index : nextItems) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        auto geometryNode = wrapper->GetGeometryNode();
+        geometryNode->SetFrameOffset(nextOffset);
+        wrapper->Layout(parentOffset);
+        auto frameSize = geometryNode->GetFrameSize();
+        nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width() + itemSpace, 0)
+                                                : OffsetF(0, frameSize.Height() + itemSpace));
+    }
+
+    // Adjust offset when loop.
+    if (!isLoop_) {
+        return;
+    }
+    if (currentIndex_ == 0 && GreatNotEqual(currentOffset_, 0.0)) {
+        auto lastWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 1);
+        if (lastWrapper) {
+            auto geometryNode = lastWrapper->GetGeometryNode();
+            auto frameSize = geometryNode->GetFrameSize();
+            preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width(), 0) : OffsetF(0, frameSize.Height()));
+            geometryNode->SetFrameOffset(preOffset);
+            lastWrapper->Layout(parentOffset);
+        }
+    } else if (currentIndex_ == childrenSize - 1 && LessNotEqual(currentOffset_, 0.0)) {
+        auto firstWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+        if (firstWrapper) {
+            auto geometryNode = firstWrapper->GetGeometryNode();
+            geometryNode->SetFrameOffset(nextOffset);
+            firstWrapper->Layout(parentOffset);
+        }
     }
 }
 

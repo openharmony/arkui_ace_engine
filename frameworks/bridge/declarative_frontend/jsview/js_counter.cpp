@@ -158,13 +158,8 @@ void JSCounter::JsBackgroundColor(const JSCallbackInfo& args)
         return;
     }
 
-    if (!args[0]->IsString() && !args[0]->IsNumber()) {
-        LOGE("arg is not a string or number.");
-        return;
-    }
-
     Color color;
-    if (!ConvertFromJSValue(args[0], color)) {
+    if (!ParseJsColor(args[0], color)) {
         LOGE("args can not set backgroundColor");
         return;
     }

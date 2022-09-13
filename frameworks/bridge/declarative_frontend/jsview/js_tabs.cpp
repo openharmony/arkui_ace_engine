@@ -17,6 +17,8 @@
 
 #include "core/components/tab_bar/tab_bar_component.h"
 #include "core/components/tab_bar/tab_content_component.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/tabs/tabs_view.h"
 #include "core/components_v2/tabs/tabs_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -36,33 +38,51 @@ JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventIn
 
 void JSTabs::SetOnChange(const JSCallbackInfo& args)
 {
-    if (args[0]->IsFunction()) {
-        auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
-            JSRef<JSFunc>::Cast(args[0]), TabContentChangeEventToJSValue);
-        auto onChange = EventMarker([executionContext = args.GetExecutionContext(), func = std::move(changeHandler)](
-                                        const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
-            auto TabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
-            if (!TabsInfo) {
-                LOGE("HandleChangeEvent TabsInfo == nullptr");
-                return;
-            }
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Tabs.onChange");
-            func->Execute(*TabsInfo);
-        });
-        auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (component) {
-            auto tabContent = component->GetTabContentChild();
-            if (tabContent) {
-                tabContent->SetChangeEventId(onChange);
-            }
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(index));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::TabsView::SetOnChange(std::move(onChange));
+        return;
+    }
+
+    auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), TabContentChangeEventToJSValue);
+    auto onChange = EventMarker([executionContext = args.GetExecutionContext(), func = std::move(changeHandler)](
+                                    const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        auto TabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!TabsInfo) {
+            LOGE("HandleChangeEvent TabsInfo == nullptr");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onChange");
+        func->Execute(*TabsInfo);
+    });
+    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (component) {
+        auto tabContent = component->GetTabContentChild();
+        if (tabContent) {
+            tabContent->SetChangeEventId(onChange);
         }
     }
-    args.ReturnSelf();
 }
 
 void JSTabs::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CreateForNG(info);
+        return;
+    }
+
     BarPosition barVal = BarPosition::START;
     RefPtr<TabController> tabController;
     if (info[0]->IsObject()) {
@@ -104,24 +124,68 @@ void JSTabs::Create(const JSCallbackInfo& info)
     ViewStackProcessor::GetInstance()->Push(tabsComponent);
 }
 
+void JSTabs::CreateForNG(const JSCallbackInfo& info)
+{
+    NG::TabsView::Create();
+    if (!info[0]->IsObject()) {
+        LOGE("param is not valid.");
+        return;
+    }
+
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    auto val = obj->GetProperty("barPosition");
+    if (val->IsNumber()) {
+        auto barPositionVal = val->ToNumber<int32_t>();
+        if (barPositionVal >= 0 && barPositionVal < static_cast<int32_t>(BAR_POSITIONS.size())) {
+            auto barVal = BAR_POSITIONS[barPositionVal];
+            NG::TabsView::SetTabBarPosition(barVal);
+        }
+    }
+
+    auto controller = obj->GetProperty("controller");
+    if (controller->IsObject()) {
+        auto jsTabsController = JSRef<JSObject>::Cast(controller)->Unwrap<JSTabsController>();
+        if (jsTabsController) {
+            jsTabsController->SetSwiperController(NG::TabsView::GetSwiperController());
+        }
+    }
+
+    auto index = obj->GetProperty("index");
+    if (index->IsNumber()) {
+        NG::TabsView::SetIndex(index->ToNumber<int32_t>());
+    }
+}
+
 void JSTabs::Pop()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TabsView::Pop();
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
+        return;
+    }
+
     ViewStackProcessor::GetInstance()->PopTabs();
     JSContainerBase::Pop();
 }
 
 void JSTabs::SetBarPosition(const JSCallbackInfo& info)
 {
-    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!component) {
-        return;
-    }
     BarPosition barVal = BarPosition::START;
     if (info.Length() > 0 && info[0]->IsNumber()) {
         auto barPositionVal = info[0]->ToNumber<int32_t>();
         if (barPositionVal >= 0 && barPositionVal < static_cast<int32_t>(BAR_POSITIONS.size())) {
             barVal = BAR_POSITIONS[barPositionVal];
         }
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TabsView::SetTabBarPosition(barVal);
+        return;
+    }
+
+    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        return;
     }
     auto tabBar = component->GetTabBarChild();
     if (tabBar) {
@@ -131,11 +195,16 @@ void JSTabs::SetBarPosition(const JSCallbackInfo& info)
 
 void JSTabs::SetVertical(const std::string& value)
 {
+    bool isVertical = StringToBool(value);
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TabsView::SetAxis(isVertical ? Axis::VERTICAL : Axis::HORIZONTAL);
+        return;
+    }
+
     auto tabsComponent = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!tabsComponent) {
         return;
     }
-    bool isVertical = StringToBool(value);
     if (isVertical) {
         tabsComponent->SetDirection(FlexDirection::ROW);
     } else {
@@ -153,6 +222,11 @@ void JSTabs::SetVertical(const std::string& value)
 
 void JSTabs::SetScrollable(const std::string& value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TabsView::SetScrollable(StringToBool(value));
+        return;
+    }
+
     auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         return;
@@ -165,29 +239,42 @@ void JSTabs::SetScrollable(const std::string& value)
 
 void JSTabs::SetBarMode(const std::string& value)
 {
+    auto tabBarMode = ConvertStrToTabBarMode(value);
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TabsView::SetTabBarMode(tabBarMode);
+        return;
+    }
+
     auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         return;
     }
     auto tabBar = component->GetTabBarChild();
     if (tabBar) {
-        tabBar->SetMode(ConvertStrToTabBarMode(value));
+        tabBar->SetMode(tabBarMode);
     }
 }
 
 void JSTabs::SetBarWidth(const JSCallbackInfo& info)
 {
-    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!component) {
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
+
     Dimension width;
     if (!ParseJsDimensionVp(info[0], width)) {
         LOGE("The arg is wrong, fail to parse dimension");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TabsView::SetTabBarWidth(width);
+        return;
+    }
+
+    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
         return;
     }
     auto tabBar = component->GetTabBarChild();
@@ -205,10 +292,6 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
 
 void JSTabs::SetBarHeight(const JSCallbackInfo& info)
 {
-    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!component) {
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -216,6 +299,16 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
     Dimension height;
     if (!ParseJsDimensionVp(info[0], height)) {
         LOGE("The arg is wrong, fail to parse dimension");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TabsView::SetTabBarHeight(height);
+        return;
+    }
+
+    auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
         return;
     }
     auto tabBar = component->GetTabBarChild();
@@ -233,6 +326,11 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
 
 void JSTabs::SetIndex(int32_t index)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TabsView::SetIndex(index);
+        return;
+    }
+
     auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         LOGE("can not find tabs component");
@@ -248,6 +346,11 @@ void JSTabs::SetIndex(int32_t index)
 
 void JSTabs::SetAnimationDuration(float value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TabsView::SetAnimationDuration(static_cast<int32_t>(value));
+        return;
+    }
+
     auto component = AceType::DynamicCast<V2::TabsComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         return;

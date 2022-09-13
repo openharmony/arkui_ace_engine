@@ -99,6 +99,10 @@ ACE_EXPORT extern const char TABS_ETS_TAG[];
 ACE_EXPORT extern const char TAB_CONTENT_ITEM_COMPONENT_TAG[];
 ACE_EXPORT extern const char TAB_CONTENT_ITEM_ETS_TAG[];
 
+// tab bar
+ACE_EXPORT extern const char TAB_BAR_COMPONENT_TAG[];
+ACE_EXPORT extern const char TAB_BAR_ETS_TAG[];
+
 // navigation view
 ACE_EXPORT extern const char NAVIGATION_VIEW_COMPONENT_TAG[];
 ACE_EXPORT extern const char NAVIGATION_VIEW_ETS_TAG[];
@@ -390,6 +394,9 @@ ACE_EXPORT extern const char RICH_TEXT_ETS_TAG[];
 // xcomponent
 ACE_EXPORT extern const char XCOMPONENT_TAG[];
 ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[];
+
+// ability_component
+ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[];
 
 } // namespace OHOS::Ace::V2
 

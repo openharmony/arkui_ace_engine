@@ -19,7 +19,8 @@
 
 namespace OHOS::Ace::NG {
 
-bool CustomNodePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool CustomNodePattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
 {
     CHECK_NULL_RETURN(dirty, false);
     auto host = GetHost();

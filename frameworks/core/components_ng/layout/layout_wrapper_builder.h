@@ -18,8 +18,10 @@
 
 #include <list>
 #include <map>
+#include <unordered_map>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace::NG {
 
@@ -33,7 +35,7 @@ public:
 
     RefPtr<LayoutWrapper> GetOrCreateWrapperByIndex(int32_t index);
 
-    std::list<RefPtr<LayoutWrapper>> ExpandAllChildWrappers();
+    const std::list<RefPtr<LayoutWrapper>>& ExpandAllChildWrappers();
 
     int32_t GetTotalCount()
     {
@@ -50,24 +52,18 @@ public:
         return startIndex_;
     }
 
-    void AddCachedItem(int32_t index, const RefPtr<LayoutWrapper>& wrapper)
-    {
-        auto result = buildItems_.try_emplace(index, wrapper);
-        if (!result.second) {
-            LOGE("fail to add cached items due to current index %{public}d exists already", index);
-        }
-    }
-
-    void SwapDirtyChildrenOnMainThread();
     virtual void SwapDirtyAndUpdateBuildCache() {}
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;
     virtual RefPtr<LayoutWrapper> OnGetOrCreateWrapperByIndex(int32_t index) = 0;
-    virtual std::list<RefPtr<LayoutWrapper>> OnExpandChildLayoutWrapper() = 0;
+    virtual const std::list<RefPtr<LayoutWrapper>>& OnExpandChildLayoutWrapper() = 0;
 
-    std::map<int32_t, RefPtr<LayoutWrapper>> buildItems_;
+    std::unordered_map<int32_t, RefPtr<LayoutWrapper>> wrapperMap_;
+
     int32_t startIndex_ = 0;
+
+    ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapperBuilder);
 };
 
 } // namespace OHOS::Ace::NG

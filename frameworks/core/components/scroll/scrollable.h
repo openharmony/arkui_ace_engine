@@ -293,6 +293,9 @@ public:
         scrollBeginCallback_ = scrollBeginCallback;
     }
 
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);

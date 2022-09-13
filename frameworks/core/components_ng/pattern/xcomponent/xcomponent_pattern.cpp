@@ -22,7 +22,6 @@
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 
-
 namespace OHOS::Ace::NG {
 XComponentPattern::XComponentPattern(const std::string& id, const std::string& type, const std::string& libraryname,
     const RefPtr<XComponentController>& xcomponentController)
@@ -79,31 +78,9 @@ void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHei
     renderSurface_->ConfigSurface(surfaceWidth, surfaceHeight);
 }
 
-void XComponentPattern::OnLayoutChange(
-    bool /* frameSizeChange */, bool frameOffsetChange, bool contentSizeChange, bool contentOffsetChange)
+bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!hasXComponentInit_) {
-        hasXComponentInit_ = true;
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    if (frameOffsetChange || contentOffsetChange) {
-        auto position = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
-        NativeXComponentOffset(position.GetX(), position.GetY());
-    }
-    if (contentSizeChange) {
-        auto drawSize = geometryNode->GetContentSize();
-        XComponentSizeChange(drawSize.Width(), drawSize.Height());
-    }
-}
-
-bool XComponentPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /* skipLayout */)
-{
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
     auto geometryNode = dirty->GetGeometryNode();
@@ -114,8 +91,18 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(
         auto drawSize = geometryNode->GetContentSize();
         NativeXComponentOffset(position.GetX(), position.GetY());
         XComponentSizeInit(drawSize.Width(), drawSize.Height());
+        hasXComponentInit_ = true;
+    } else {
+        if (config.frameOffsetChange || config.contentOffsetChange) {
+            auto position = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
+            NativeXComponentOffset(position.GetX(), position.GetY());
+        }
+        if (config.contentSizeChange) {
+            auto drawSize = geometryNode->GetContentSize();
+            XComponentSizeChange(drawSize.Width(), drawSize.Height());
+        }
     }
-    return true;
+    return false;
 }
 
 void XComponentPattern::OnPaint()

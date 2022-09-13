@@ -88,11 +88,6 @@ public:
         return geometryNode_;
     }
 
-    RefPtr<GeometryNode> MoveGeometryNode()
-    {
-        return std::move(geometryNode_);
-    }
-
     const RefPtr<LayoutProperty>& GetLayoutProperty() const
     {
         return layoutProperty_;

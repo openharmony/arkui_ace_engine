@@ -16,6 +16,7 @@
 #include "core/components_ng/base/view_abstract.h"
 
 #include <optional>
+#include <utility>
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -161,6 +162,57 @@ void ViewAbstract::SetOnTouch(TouchEventFunc&& touchEventFunc)
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetTouchEvent(std::move(touchEventFunc));
+}
+
+void ViewAbstract::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetMouseEvent(std::move(onMouseEventFunc));
+}
+
+void ViewAbstract::SetOnHover(OnHoverEventFunc&& onHoverEventFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverEvent(std::move(onHoverEventFunc));
+}
+
+void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverAnimation(hoverEffect);
+}
+
+void ViewAbstract::SetOpacity(double opacity)
+{
+    ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
+}
+
+void ViewAbstract::SetScale(NG::VectorF scale)
+{
+    ACE_UPDATE_RENDER_CONTEXT(TransformScale, scale);
+}
+
+void ViewAbstract::SetPivot(NG::VectorF center) 
+{
+    ACE_UPDATE_RENDER_CONTEXT(TransformCenter, center);
+}
+
+void ViewAbstract::SetTranslate(NG::Vector3F translate)
+{
+    ACE_UPDATE_RENDER_CONTEXT(TransformTranslate, translate);
+}
+
+void ViewAbstract::SetRotate(NG::Vector3F rotate)
+{
+    ACE_UPDATE_RENDER_CONTEXT(TransformRotate, rotate);
+}
+
+void ViewAbstract::SetAngle(float& angle)
+{
+    ACE_UPDATE_RENDER_CONTEXT(TransformAngle, angle);
 }
 
 void ViewAbstract::Pop()

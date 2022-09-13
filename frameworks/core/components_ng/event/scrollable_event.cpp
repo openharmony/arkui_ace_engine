@@ -58,6 +58,13 @@ void ScrollableActuator::InitializeScrollable()
             }
             bool canScroll = true;
             for (const auto& task : actuator->scrollableEvents_[axis]) {
+                if (task->GetScrollBeginCallback()) {
+                    if (axis == Axis::VERTICAL) {
+                        task->GetScrollBeginCallback()(Dimension(0), Dimension(offset));
+                    } else {
+                        task->GetScrollBeginCallback()(Dimension(offset), Dimension(0));
+                    }
+                }
                 canScroll = task->GetScrollPositionCallback()(offset, source) && canScroll;
             }
             return canScroll;

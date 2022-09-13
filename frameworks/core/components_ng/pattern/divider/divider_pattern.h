@@ -51,7 +51,7 @@ public:
     }
 
 private:
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     float constrainStrokeWidth_ = 0;
     float dividerLength_ = 0;

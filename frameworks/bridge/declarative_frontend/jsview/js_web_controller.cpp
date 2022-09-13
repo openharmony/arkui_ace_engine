@@ -474,6 +474,7 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("searchAllAsync", &JSWebController::SearchAllAsync);
     JSClass<JSWebController>::CustomMethod("clearMatches", &JSWebController::ClearMatches);
     JSClass<JSWebController>::CustomMethod("searchNext", &JSWebController::SearchNext);
+    JSClass<JSWebController>::CustomMethod("getUrl", &JSWebController::GetUrl);
     JSClass<JSWebController>::Bind(globalObj, JSWebController::Constructor, JSWebController::Destructor);
     JSWebCookie::JSBind(globalObj);
     JSHitTestValue::JSBind(globalObj);
@@ -1108,6 +1109,14 @@ void JSWebController::SearchNext(const JSCallbackInfo& args)
 
     if (webController_) {
         webController_->SearchNext(forward);
+    }
+}
+void JSWebController::GetUrl(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        std::string result = webController_->GetUrl();
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
     }
 }
 } // namespace OHOS::Ace::Framework

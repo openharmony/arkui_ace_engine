@@ -37,8 +37,11 @@ void ButtonPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
-bool ButtonPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool ButtonPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (!config.frameSizeChange) {
+        return false;
+    }
     auto buttonLayoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, false);
 
@@ -49,7 +52,7 @@ bool ButtonPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
         Dimension radius(dirty->GetGeometryNode()->GetFrameSize().Height() / 2.0f);
         BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-        // TODO Dynamic and new borderarradius 
+        // TODO Dynamic and new borderarradius
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     return false;
@@ -59,6 +62,7 @@ void ButtonPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
     auto buttonLayoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
 
@@ -116,4 +120,5 @@ void ButtonPattern::OnTouchUp()
         renderContext->ResetBlendBgColor();
     }
 }
+
 } // namespace OHOS::Ace::NG

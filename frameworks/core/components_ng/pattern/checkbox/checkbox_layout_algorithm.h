@@ -16,9 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CHECKBOX_CHECKBOX_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CHECKBOX_CHECKBOX_LAYOUT_ALGORITHM_H
 
-#include <cstdint>
-#include <map>
-
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -40,6 +37,13 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
 private:
+    float defaultWidth_ = 0.0f;
+    float defaultHeight_ = 0.0f;
+    float horizontalPadding_ = 0.0f;
+    float verticalPadding_ = 0.0f;
+
+    void InitializeParam();
+
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

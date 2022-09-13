@@ -64,7 +64,12 @@ public:
     {
         return endIndex_.value_or(0);
     }
-
+    
+    std::optional<int32_t> GetMaxListItemIndex() const
+    {
+        return maxListItemIndex_;
+    }
+    
     void SetSpaceWidth(float spaceWidth)
     {
         spaceWidth_ = spaceWidth;
@@ -93,6 +98,11 @@ public:
     std::optional<int32_t> GetLanes() const
     {
         return lanes_;
+    }
+
+    void SetPlayEdgeEffectAnimation(bool playEdgeEffectAnimation)
+    {
+        playEdgeEffectAnimation_ = playEdgeEffectAnimation;
     }
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -131,6 +141,7 @@ private:
     std::optional<int32_t> startIndex_;
     std::optional<int32_t> endIndex_;
 
+    std::optional<int32_t> maxListItemIndex_;
     float spaceWidth_ = 0.0f;
     bool isInitialized_ = false;
     int32_t cachedCount_ = 0;
@@ -141,6 +152,9 @@ private:
     std::optional<float> minLaneLength_;
     std::optional<float> maxLaneLength_;
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::CENTER;
+
+    bool playEdgeEffectAnimation_ = false;
+    float edgeEffectOffset_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

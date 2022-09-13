@@ -97,6 +97,11 @@ public:
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 
+    PanDirection GetDirection() const
+    {
+        return direction_;
+    }
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<PanEvent>> panEvents_;

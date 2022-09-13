@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/rating/rating_event_hub.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RatingView {
@@ -31,6 +32,7 @@ public:
     static void SetForegroundSrc(const std::string& value);
     static void SetSecondarySrc(const std::string& value);
     static void SetBackgroundSrc(const std::string& value);
+    static void SetOnChange(ChangeEvent&& onChange);
 };
 } // namespace OHOS::Ace::NG
 

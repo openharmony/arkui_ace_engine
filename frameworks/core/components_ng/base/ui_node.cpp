@@ -15,6 +15,10 @@
 
 #include "core/components_ng/base/ui_node.h"
 
+#include <algorithm>
+#include <cstdint>
+#include <iterator>
+
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -54,18 +58,56 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
     if (onMainTree_) {
         child->AttachToMainTree();
     }
-    OnChildAdded(child);
     MarkNeedSyncRenderTree();
 }
 
-void UINode::RemoveChild(const RefPtr<UINode>& child)
+std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child)
 {
-    CHECK_NULL_VOID(child);
-    if (onMainTree_) {
-        child->DetachFromMainTree();
+    CHECK_NULL_RETURN(child, children_.end());
+
+    auto iter = std::find(children_.begin(), children_.end(), child);
+    if (iter == children_.end()) {
+        LOGE("child is not exist.");
+        return children_.end();
     }
-    OnChildRemoved(child);
-    children_.remove(child);
+    auto result = children_.erase(iter);
+    MarkNeedSyncRenderTree();
+    return result;
+}
+
+void UINode::RemoveChildAtIndex(int32_t index)
+{
+    if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
+        return;
+    }
+    auto iter = children_.begin();
+    std::advance(iter, index);
+    children_.erase(iter);
+    MarkNeedSyncRenderTree();
+}
+
+void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode)
+{
+    if (!oldNode) {
+        if (newNode) {
+            AddChild(newNode);
+        }
+        return;
+    }
+
+    auto iter = RemoveChild(oldNode);
+    children_.insert(iter, newNode);
+    newNode->SetParent(Claim(this));
+    newNode->SetDepth(GetDepth() + 1);
+    if (onMainTree_) {
+        newNode->AttachToMainTree();
+    }
+    MarkNeedSyncRenderTree();
+}
+
+void UINode::Clean()
+{
+    children_.clear();
     MarkNeedSyncRenderTree();
 }
 
@@ -92,11 +134,11 @@ void UINode::DetachFromMainTree()
     if (!onMainTree_) {
         return;
     }
+    onMainTree_ = false;
+    OnDetachFromMainTree();
     for (const auto& child : children_) {
         child->DetachFromMainTree();
     }
-    onMainTree_ = false;
-    OnDetachFromMainTree();
 }
 
 void UINode::MovePosition(int32_t slot)
@@ -151,11 +193,11 @@ void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
     }
 }
 
-void UINode::MarkNeedFlushDirty(PropertyChangeFlag extraFlag)
+void UINode::MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag)
 {
     auto parent = parent_.Upgrade();
     if (parent) {
-        parent->MarkDirtyNode(extraFlag);
+        parent->MarkNeedFrameFlushDirty(extraFlag);
     }
 }
 
@@ -167,19 +209,16 @@ void UINode::MarkNeedSyncRenderTree()
     }
 }
 
-void UINode::OnDetachFromMainTree()
+void UINode::RebuildRenderContextTree()
 {
-    for (const auto& child : children_) {
-        child->OnDetachFromMainTree();
+    auto parent = parent_.Upgrade();
+    if (parent) {
+        parent->RebuildRenderContextTree();
     }
 }
+void UINode::OnDetachFromMainTree() {}
 
-void UINode::OnAttachToMainTree()
-{
-    for (const auto& child : children_) {
-        child->OnAttachToMainTree();
-    }
-}
+void UINode::OnAttachToMainTree() {}
 
 void UINode::DumpTree(int32_t depth)
 {
@@ -222,6 +261,23 @@ HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentL
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
         auto& child = *iter;
         auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result);
+        if (hitResult == HitTestResult::STOP_BUBBLING) {
+            return HitTestResult::STOP_BUBBLING;
+        }
+        if (hitResult == HitTestResult::BUBBLING) {
+            hitTestResult = HitTestResult::BUBBLING;
+        }
+    }
+    return hitTestResult;
+}
+
+HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
+{
+    HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
+    for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
+        auto& child = *iter;
+        auto hitResult = child->MouseTest(globalPoint, parentLocalPoint, onMouseResult, onHoverResult, hoverNode);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }

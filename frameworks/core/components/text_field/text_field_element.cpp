@@ -142,7 +142,8 @@ bool TextFieldElement::OnKeyEvent(const KeyEvent& keyEvent)
         }
     }
 
-    if (keyEvent.action != KeyAction::UP) {
+    // always use DOWN actions to trigger events
+    if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }
 

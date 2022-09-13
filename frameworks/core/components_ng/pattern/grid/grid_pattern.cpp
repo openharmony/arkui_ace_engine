@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -80,9 +81,9 @@ bool GridPattern::UpdateScrollPosition(float offset, int32_t source)
     return true;
 }
 
-bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (skipMeasure && skipLayout) {
+    if (config.skipMeasure && config.skipLayout) {
         return false;
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());

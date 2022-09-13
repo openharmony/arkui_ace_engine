@@ -143,6 +143,7 @@ protected:
     double radioInnerSizeRatio_ = 0.5;
     bool needFocus_ = true;
     bool backgroundSolid_ = true;
+    const float ratio_ = 1.8f;
 };
 
 class CheckboxTheme : public CheckableTheme {
@@ -301,6 +302,10 @@ public:
             theme->hotZoneVerticalPadding_ = switchPattern->GetAttr<Dimension>(SWITCH_VERTICAL_PADDING, 13.0_vp);
         }
     };
+    float GetRatio() const
+    {
+        return ratio_;
+    }
 };
 
 class RadioTheme : public CheckableTheme {

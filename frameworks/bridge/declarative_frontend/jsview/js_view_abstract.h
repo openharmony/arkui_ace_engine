@@ -194,6 +194,7 @@ public:
     static void Pop();
 
     static void JsOnDragStart(const JSCallbackInfo& info);
+    static bool ParseDragItem(const JSRef<JSVal>& info);
     static RefPtr<Component> ParseDragItemComponent(const JSRef<JSVal>& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);

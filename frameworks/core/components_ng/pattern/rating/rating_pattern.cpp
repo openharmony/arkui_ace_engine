@@ -16,12 +16,16 @@
 
 #include <cstdint>
 
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
+#include "core/components_ng/property/property.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
 constexpr int32_t DEFAULT_RATING_STAR_NUM = 5;
+constexpr double DEFAULT_RATING_STEP_SIZE = 0.5;
 
 void RatingPattern::CheckImageInfoHasChangedOrNot(
     int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag)
@@ -156,9 +160,9 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
         foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_, singleStarImagePaintConfig, starNum);
 }
 
-bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
     if (!foregroundImageCanvas_ || !secondaryImageCanvas_ || !backgroundImageCanvas_) {
@@ -204,19 +208,193 @@ void RatingPattern::ConstrainsRatingScore()
         ratingLayoutProperty->UpdateStars(GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
     }
 
-    // if ratingScore > StarsNum, constrain ratingScore value with StarNums.
-    if (ratingRenderProperty->HasRatingScore() && ratingLayoutProperty->HasStars()) {
-        if (GreatOrEqual(ratingRenderProperty->GetRatingScore().value(), ratingLayoutProperty->GetStars().value())) {
-            ratingRenderProperty->UpdateRatingScore(ratingLayoutProperty->GetStars().value());
-        }
-    }
-
     // if ratingScore < 0, assign the value defined in theme.
     if (ratingRenderProperty->HasRatingScore()) {
         if (LessOrEqual(ratingRenderProperty->GetRatingScore().value(), 0.0)) {
             ratingRenderProperty->UpdateRatingScore(GetRatingScoreFromTheme().value_or(0.0));
         }
     }
+
+    // Calculate drewScore based on the stepSize, and it is cannot be greater than starNum.
+    double ratingScore = ratingRenderProperty->GetRatingScore().value_or(GetRatingScoreFromTheme().value_or(0.0));
+    double stepSize =
+        ratingRenderProperty->GetStepSize().value_or(GetStepSizeFromTheme().value_or(DEFAULT_RATING_STEP_SIZE));
+    int32_t starNum =
+        ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
+    double drawScore = fmin(Round(ratingScore / stepSize) * stepSize, static_cast<double>(starNum));
+    ratingRenderProperty->UpdateRatingScore(drawScore);
+}
+
+void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(const double eventPointX)
+{
+    auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(ratingLayoutProperty);
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+
+    // step1: calculate the number of star which the touch point falls on.
+    double wholeStarNum = 0.0;
+    float singleWidth = singleStarDstRect_.Width();
+    wholeStarNum = floor(eventPointX / singleWidth);
+
+    // step2: calculate relative position where the touch point falls on the wholeStarNum star.
+    double posInSingle = 0.0;
+    posInSingle = (eventPointX - wholeStarNum * singleWidth) / singleWidth;
+    // step3: calculate the new ratingScore according to the touch point.
+    double ratingScore = wholeStarNum + posInSingle;
+    int32_t starNum =
+        ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
+    double stepSize = ratingRenderProperty->GetStepSize().value_or(GetStepSizeFromTheme().value_or(0.5));
+    // step3.1: constrain ratingScore which cannot be greater than starNum and be less than stepSize.
+    ratingScore = ratingScore > starNum ? starNum : ratingScore;
+    ratingScore = (ratingScore > stepSize) ? ratingScore : stepSize;
+    double newDrawScore = fmin(ceil(ratingScore / stepSize) * stepSize, starNum);
+    // step3.2: Determine whether the old and new ratingScores are same or not.
+    double oldRatingScore = ratingRenderProperty->GetRatingScoreValue();
+    double oldDrawScore = fmin(Round(oldRatingScore / stepSize) * stepSize, static_cast<double>(starNum));
+    if (NearEqual(newDrawScore, oldDrawScore)) {
+        return;
+    }
+    // step4: Update the ratingScore saved in renderProperty and update render.
+    ratingRenderProperty->UpdateRatingScore(newDrawScore);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool RatingPattern::IsIndicator()
+{
+    auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_RETURN(ratingLayoutProperty, true);
+    // Do not handle event when rating is set as indicator or single star size is invalid.
+    return ratingLayoutProperty->GetIndicator().value_or(false) || !singleStarDstRect_.IsValid();
+}
+
+void RatingPattern::HandleDragUpdate(const GestureEvent& info)
+{
+    RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX());
+}
+
+void RatingPattern::FireChangeEvent() const
+{
+    auto ratingEventHub = GetEventHub<RatingEventHub>();
+    CHECK_NULL_VOID(ratingEventHub);
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+    ratingEventHub->FireChangeEvent(ratingRenderProperty->GetRatingScoreValue());
+}
+
+void RatingPattern::HandleDragEnd()
+{
+    FireChangeEvent();
+}
+
+void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (IsIndicator() || panEvent_) {
+        return;
+    }
+
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) { LOGD("Pan event start"); };
+
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleDragUpdate(info);
+        }
+    };
+
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            // invoke onChange callback
+            pattern->HandleDragEnd();
+        }
+    };
+
+    auto actionCancelTask = [weak = WeakClaim(this)]() { LOGD("Pan event cancel"); };
+
+    float distance = DEFAULT_PAN_DISTANCE;
+    auto host = GetHost();
+    if (host) {
+        auto context = host->GetContext();
+        if (context) {
+            distance = static_cast<float>(context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP)));
+        }
+    }
+    PanDirection panDirection;
+    panDirection.type = PanDirection::HORIZONTAL;
+
+    panEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+}
+
+void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (IsIndicator() || touchEvent_) {
+        return;
+    }
+
+    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            auto localPosition = info.GetTouches().front().GetLocalLocation();
+            // handle touch down event and draw touch down effect.
+            pattern->HandleTouchDown(localPosition);
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            // handle touch up event and remove touch down effect.
+            pattern->HandleTouchUp();
+        }
+    };
+
+    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void RatingPattern::HandleTouchUp()
+{
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+    // Update touch star to 0 to indicate there is no star to be touched.
+    ratingRenderProperty->UpdateTouchStar(0);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RatingPattern::HandleTouchDown(const Offset& localPosition)
+{
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+    // calculate the number of star the touch point falls on adn trigger render update.
+    int32_t touchStar = floor(localPosition.GetX() / singleStarDstRect_.Width());
+    ratingRenderProperty->UpdateTouchStar(touchStar);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RatingPattern::HandleClick(const GestureEvent& info)
+{
+    RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX());
+    FireChangeEvent();
+}
+
+void RatingPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (IsIndicator() || clickEvent_) {
+        return;
+    }
+
+    auto touchTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        pattern->HandleClick(info);
+    };
+
+    clickEvent_ = MakeRefPtr<ClickEvent>(std::move(touchTask));
+    gestureHub->AddClickEvent(clickEvent_);
 }
 
 void RatingPattern::OnModifyDone()
@@ -264,5 +442,16 @@ void RatingPattern::OnModifyDone()
             AceType::MakeRefPtr<ImageLoadingContext>(backgroundImageSourceInfo, std::move(loadNotifierBackgroundImage));
         backgroundImageLoadingCtx_->LoadImageData();
     }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    // Init touch, pan and click event and register callback.
+    InitTouchEvent(gestureHub);
+    InitPanEvent(gestureHub);
+    InitClickEvent(gestureHub);
 }
 } // namespace OHOS::Ace::NG

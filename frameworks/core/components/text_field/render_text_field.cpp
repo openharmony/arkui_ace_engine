@@ -500,6 +500,7 @@ void RenderTextField::OnTouchTestHit(
             auto textField = weak.Upgrade();
             if (textField) {
                 textField->StartPressAnimation(false);
+                textField->OnTapCallback();
             }
         });
 
@@ -592,10 +593,8 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     if (SearchAction(globalPosition, globalOffset)) {
         return;
     }
-    if (isFocusOnTouch_ && tapCallback_) {
-        if (!tapCallback_()) {
-            return;
-        }
+    if (!onTapCallbackResult_) {
+        return;
     }
     if (onTapEvent_) {
         onTapEvent_();
@@ -617,6 +616,13 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
         context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
     }
     AddOutOfRectCallbackToContext();
+}
+
+void RenderTextField::OnTapCallback()
+{
+    if (isFocusOnTouch_ && tapCallback_) {
+        onTapCallbackResult_ = tapCallback_();
+    }
 }
 
 void RenderTextField::OnEditChange(bool isInEditStatus)
@@ -1409,7 +1415,7 @@ void RenderTextField::PerformAction(TextInputAction action, bool forceCloseKeybo
         onSubmitEvent_(controller_->GetValue().text);
     }
     if (onSubmit_) {
-        onSubmit_(static_cast<int32_t>(action_));
+        onSubmit_(static_cast<int32_t>(action));
     }
 }
 
@@ -2133,9 +2139,13 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
 {
     std::string appendElement;
     if (event.action == KeyAction::DOWN) {
-        if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_NUMPAD_ENTER) {
+        if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_NUMPAD_ENTER ||
+            event.code == KeyCode::KEY_DPAD_CENTER) {
             if (keyboard_ == TextInputType::MULTILINE) {
                 appendElement = "\n";
+            } else {
+                // normal enter should trigger onSubmit
+                PerformAction(action_, true);
             }
         } else if (event.IsNumberKey()) {
             appendElement = event.ConvertCodeToString();

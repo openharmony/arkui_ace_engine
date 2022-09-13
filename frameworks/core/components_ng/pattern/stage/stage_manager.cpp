@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
-#include <cstdint>
-
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -186,6 +184,17 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node)
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     pagePattern->OnShow();
+}
+
+RefPtr<FrameNode> StageManager::GetLastPage()
+{
+    CHECK_NULL_RETURN(stageNode_, nullptr);
+    const auto& children = stageNode_->GetChildren();
+    if (children.empty()) {
+        LOGE("fail to return page due to children is null");
+        return nullptr;
+    }
+    return DynamicCast<FrameNode>(children.back());
 }
 
 } // namespace OHOS::Ace::NG

@@ -57,6 +57,11 @@ public:
 
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
+    void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode)
+    {
+        rsNode_ = rsNode;
+    }
+
     void StartRecording() override;
 
     void StopRecordingIfNeeded() override;
@@ -89,12 +94,22 @@ public:
 
     void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) override;
 
+    void AnimateHoverEffectScale(bool isHovered) override;
+    void AnimateHoverEffectBoard(bool isHovered) override;
+
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void UpdateBorderWidth(const BorderWidthPropertyF& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
+    void OnOpacityUpdate(double opacity) override;
+
+    void OnTransformScaleUpdate(const VectorF& scale) override;
+    void OnTransformCenterUpdate(const VectorF& center) override;
+    void OnTransformTranslateUpdate(const Vector3F& translate) override;
+    void OnTransformRotateUpdate(const Vector3F& rotate) override;
+    void OnTransformAngleUpdate(const float& angle) override;
 
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
@@ -102,6 +117,8 @@ private:
     SkPictureRecorder* recorder_ = nullptr;
     RefPtr<Canvas> recordingCanvas_;
     RefPtr<Canvas> rosenCanvas_;
+    bool isHoveredScale_ = false;
+    bool isHoveredBoard_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

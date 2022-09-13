@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <memory>
+#include <stack>
 #include <string>
 #include <utility>
 
@@ -63,22 +64,24 @@ public:
 
     virtual uint64_t GetTimeFromExternalTimer();
 
-    virtual bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr) = 0;
+    bool Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& propertyCallback, const std::function<void()>& finishCallBack = nullptr);
 
     virtual void AddKeyFrame(
         float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback) = 0;
 
     virtual void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback) = 0;
 
-    virtual void PrepareOpenImplicitAnimation() = 0;
+    void PrepareOpenImplicitAnimation();
 
-    virtual void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-        const std::function<void()>& finishCallBack = nullptr) = 0;
+    void OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+        const std::function<void()>& finishCallBack = nullptr);
 
-    virtual void PrepareCloseImplicitAnimation() = 0;
+    void PrepareCloseImplicitAnimation();
 
-    virtual bool CloseImplicitAnimation() = 0;
+    bool CloseImplicitAnimation();
+
+    void ForceLayoutForImplicitAnimation();
 
     // add schedule task and return the unique mark id.
     virtual uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) = 0;
@@ -473,6 +476,8 @@ public:
 
     void PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
+    void PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
+
     virtual void FlushReload() {}
 
     virtual void FlushReloadTransition() {}
@@ -486,6 +491,7 @@ protected:
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
     virtual void FlushMessages() = 0;
+    virtual void FlushUITasks() = 0;
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
 
     bool isRebuildFinished_ = false;
@@ -501,6 +507,7 @@ protected:
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
 
+    std::stack<bool> pendingImplicitLayout_;
     std::unique_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;

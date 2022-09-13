@@ -18,6 +18,7 @@
 
 #include <cstdint>
 
+#include "base/geometry/ng/vector.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components_ng/property/border_property.h"
@@ -45,12 +46,21 @@ public:
     static void SetBorderWidth(const BorderWidthProperty& value);
     static void SetBorderStyle(const BorderStyle& value);
     static void SetBorderStyle(const BorderStyleProperty& value);
+    static void SetOpacity(double opacity);
 
+    // transform
+    static void SetScale(NG::VectorF scale);
+    static void SetPivot(NG::VectorF center);
+    static void SetTranslate(NG::Vector3F translate);
+    static void SetRotate(NG::Vector3F rotate);
+    static void SetAngle(float& angle);
 
     // event
     static void SetOnClick(GestureEventFunc&& clickEventFunc);
     static void SetOnTouch(TouchEventFunc&& touchEventFunc);
-
+    static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
+    static void SetOnHover(OnHoverEventFunc&& onHoverEventFunc);
+    static void SetHoverEffect(HoverEffectType hoverEffect);
     // flex properties
     static void SetAlignSelf(int32_t value);
 

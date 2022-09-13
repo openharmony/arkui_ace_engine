@@ -20,6 +20,7 @@
 
 #include "core/components/rating/rating_theme.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/rating/rating_event_hub.h"
 #include "core/components_ng/pattern/rating/rating_layout_algorithm.h"
 #include "core/components_ng/pattern/rating/rating_layout_property.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
@@ -66,8 +67,13 @@ public:
         return MakeRefPtr<RatingRenderProperty>();
     }
 
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<RatingEventHub>();
+    }
+
     // Called on main thread to check if need rerender of the content.
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(RatingScore, double);
     ACE_DEFINE_RATING_GET_PROPERTY_FROM_THEME(StepSize, double);
@@ -82,6 +88,28 @@ private:
     void CheckImageInfoHasChangedOrNot(
         int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag);
     static ImageSourceInfo GetImageSourceInfoFromTheme(int32_t imageFlag);
+
+    // Init pan recognizer to update render when drag updates, fire change event when drag ends.
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+
+    // Init touch event, show press effect when touch down, update render when touch up.
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+
+    // Init touch event, update render when click.
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd();
+    void HandleTouchDown(const Offset& localPosition);
+    void HandleTouchUp();
+    void HandleClick(const GestureEvent& info);
+    void FireChangeEvent() const;
+    void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX);
+    bool IsIndicator();
+
+    RefPtr<PanEvent> panEvent_;
+    RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<ClickEvent> clickEvent_;
 
     DataReadyNotifyTask CreateDataReadyCallback(int32_t imageFlag);
     LoadSuccessNotifyTask CreateLoadSuccessCallback(int32_t imageFlag);

@@ -23,6 +23,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_view.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
@@ -43,7 +44,7 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
                 checkboxGroup = group->ToString();
             }
         }
-        NG::CheckBoxView::Create(checkboxName, checkboxGroup);
+        NG::CheckBoxView::Create(checkboxName, checkboxGroup, V2::CHECK_BOX_ETS_TAG);
         return;
     }
 

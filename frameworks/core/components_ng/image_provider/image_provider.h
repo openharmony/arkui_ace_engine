@@ -22,6 +22,7 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/image_provider/image_data.h"
+#include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -48,7 +49,8 @@ struct LoadNotifier {
 class ImageObject;
 using DataReadyCallback = std::function<void(const ImageSourceInfo& sourceInfo, const RefPtr<ImageObject>& imageObj)>;
 using LoadSuccessCallback = std::function<void(const ImageSourceInfo& sourceInfo)>;
-using LoadFailCallback = std::function<void(const ImageSourceInfo& sourceInfo, const std::string& errorMsg)>;
+using LoadFailCallback = std::function<void(
+    const ImageSourceInfo& sourceInfo, const std::string& errorMsg, ImageLoadingCommand imageLoadingCommand)>;
 
 struct LoadCallbacks {
     LoadCallbacks(DataReadyCallback&& dataReadyCallback, LoadSuccessCallback&& loadSuccessCallback,

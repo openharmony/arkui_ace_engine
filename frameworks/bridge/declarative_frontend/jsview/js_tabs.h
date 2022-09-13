@@ -27,6 +27,7 @@ public:
     static void Pop();
 
 protected:
+    static void CreateForNG(const JSCallbackInfo& info);
     static void SetIndex(int32_t number);
     static void SetVertical(const std::string& value);
     static void SetBarPosition(const JSCallbackInfo& info);

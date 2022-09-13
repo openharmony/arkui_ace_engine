@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "core/components/swiper/swiper_controller.h"
 #include "core/components/tab_bar/tab_controller.h"
 
 namespace OHOS::Ace::Framework {
@@ -40,8 +41,14 @@ public:
         return controller_;
     }
 
+    void SetSwiperController(const RefPtr<SwiperController>& swiperController)
+    {
+        swiperController_ = swiperController;
+    }
+
 private:
     RefPtr<TabController> controller_;
+    RefPtr<SwiperController> swiperController_; // used by ng structure
 
     ACE_DISALLOW_COPY_AND_MOVE(JSTabsController);
 };

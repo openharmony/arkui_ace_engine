@@ -29,6 +29,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -85,13 +86,16 @@ public:
 
     void FlushUpdateAndMarkDirty() override;
 
-    void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
+    void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override
+    {
+        MarkDirtyNode(extraFlag);
+    }
 
-    RefPtr<LayoutWrapper> CreateLayoutWrapperOnCreate();
+    void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
     RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
-    std::optional<UITask> CreateLayoutTask(bool onCreate = false, bool forceUseMainThread = false);
+    std::optional<UITask> CreateLayoutTask(bool forceUseMainThread = false);
 
     std::optional<UITask> CreateRenderTask(bool forceUseMainThread = false);
 
@@ -101,7 +105,7 @@ public:
     {
         return geometryNode_;
     }
-    void SetGeometryNode(RefPtr<GeometryNode>&& node);
+    void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
     const RefPtr<RenderContext>& GetRenderContext() const
     {
@@ -139,6 +143,11 @@ public:
         return eventHub_->GetOrCreateGestureEventHub();
     }
 
+    RefPtr<InputEventHub> GetOrCreateInputEventHub() const
+    {
+        return eventHub_->GetOrCreateInputEventHub();
+    }
+
     const RefPtr<LayoutProperty>& GetLayoutProperty() const
     {
         return layoutProperty_;
@@ -150,6 +159,26 @@ public:
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result) override;
 
+    HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
+        MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
+
+    void AnimateHoverEffect(bool isHovered) const
+    {
+        auto renderContext = GetRenderContext();
+        if (!renderContext) {
+            return;
+        }
+        HoverEffectType animationType = HoverEffectType::UNKNOWN;
+        if (eventHub_->GetInputEventHub()) {
+            animationType = eventHub_->GetInputEventHub()->GetHoverEffect();
+        }
+        if (animationType == HoverEffectType::SCALE) {
+            renderContext->AnimateHoverEffectScale(isHovered);
+        } else if (animationType == HoverEffectType::BOARD) {
+            renderContext->AnimateHoverEffectBoard(isHovered);
+        }
+    }
+
     bool IsAtomicNode() const override;
 
     void MarkNeedSyncRenderTree() override
@@ -157,7 +186,7 @@ public:
         needSyncRenderTree_ = true;
     }
 
-    void RebuildRenderContextTree();
+    void RebuildRenderContextTree() override;
 
 private:
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;

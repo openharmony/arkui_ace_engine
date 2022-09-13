@@ -28,6 +28,7 @@ class JSTabContent : public JSContainerBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void Pop();
 
 protected:
     static void SetTabBar(const JSCallbackInfo& info);
@@ -49,6 +50,8 @@ protected:
     }
 
 private:
+    static void CreateForNG(const JSCallbackInfo& info);
+    static void SetTabBarForNG(const JSCallbackInfo& info);
     static RefPtr<Component> ProcessTabBarBuilderFunction(const JSCallbackInfo& info,
         RefPtr<V2::TabContentItemComponent>& tabContent, JSRef<JSObject> builderFunc);
     static RefPtr<Component> ProcessTabBarTextIconPair(

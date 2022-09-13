@@ -42,7 +42,7 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     dirtyRenderNodes_[dirty->GetPageId()].emplace(dirty);
 }
 
-void UITaskScheduler::FlushLayoutTask(bool onCreate, bool forceUseMainThread)
+void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
@@ -54,7 +54,7 @@ void UITaskScheduler::FlushLayoutTask(bool onCreate, bool forceUseMainThread)
             if (!node) {
                 continue;
             }
-            auto task = node->CreateLayoutTask(onCreate, forceUseMainThread);
+            auto task = node->CreateLayoutTask(forceUseMainThread);
             if (task) {
                 if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
                     (*task)();
