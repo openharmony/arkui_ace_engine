@@ -588,7 +588,7 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
 
     MouseTestResult mouseResult;
     MouseTestResult hoverResult;
-    bool isPrevent = true;
+    bool isPrevent = false;
     auto mouseHub = eventHub_->GetInputEventHub();
     if (mouseHub) {
         const auto coordinateOffset = globalPoint - localPoint;
