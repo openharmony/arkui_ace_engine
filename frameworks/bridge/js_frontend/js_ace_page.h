@@ -189,10 +189,6 @@ public:
     void RemoveAnimatorBridge(int32_t bridgeId);
     void AddAnimatorBridge(int32_t bridgeId, const RefPtr<BaseAnimationBridge>& animatorBridge);
 
-    RefPtr<Curve> GetCurve(const std::string& curveString);
-    void RemoveCurve(const std::string& curveString);
-    void AddCurve(const std::string& curveString, const RefPtr<Curve>& curve);
-
     RefPtr<AnimatorInfo> GetAnimatorInfo(const std::string& animatorId);
     void RemoveAnimatorInfo(const std::string& animatorId);
     void AddAnimatorInfo(const std::string& animatorId, const RefPtr<AnimatorInfo>& animatorInfo);
@@ -420,7 +416,6 @@ private:
     std::unordered_map<int32_t, RefPtr<BaseCanvasBridge>> offscreenCanvasBridges_;
     std::unordered_map<NodeId, RefPtr<BaseXComponentBridge>> xcomponentBridges_;
     std::unordered_map<int32_t, RefPtr<BaseAnimationBridge>> animatorBridges_;
-    std::unordered_map<std::string, RefPtr<Curve>> curves_;
     std::unordered_map<std::string, RefPtr<AnimatorInfo>> animatorInfos_;
 #ifndef NG_BUILD
     std::shared_ptr<JsPageRadioGroups> radioGroups_;

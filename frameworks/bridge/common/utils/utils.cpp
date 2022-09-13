@@ -297,7 +297,7 @@ RefPtr<Curve> CreateCustomCurve(const std::string& aniTimFunc)
     return customCurveMap[index].value(paramsVector);
 }
 
-RefPtr<Curve> CreateCurve(const std::string& aniTimFunc)
+RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault)
 {
     auto curve = CreateBuiltinCurve(aniTimFunc);
     if (curve) {
@@ -307,7 +307,7 @@ RefPtr<Curve> CreateCurve(const std::string& aniTimFunc)
     if (curve) {
         return curve;
     }
-    return Curves::EASE;
+    return useDefault? Curves::EASE : nullptr;
 }
 
 // used for declarative only

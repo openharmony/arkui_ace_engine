@@ -470,14 +470,7 @@ void CurvesInterpolate(const v8::FunctionCallbackInfo<v8::Value>& args)
         return;
     }
     std::string curveString(*curve);
-    auto delegate =
-        static_cast<RefPtr<FrontendDelegate>*>(isolate->GetData(V8DeclarativeEngineInstance::FRONTEND_DELEGATE));
-    auto page = (*delegate)->GetPage(pageId);
-    if (!page) {
-        LOGE("get page failed, page is nullptr");
-        return;
-    }
-    auto animationCurve = page->GetCurve(curveString);
+    auto animationCurve = CreateCurve(curveString, false);
     if (!animationCurve) {
         return;
     }
@@ -508,6 +501,12 @@ void CurvesInitInternal(const v8::FunctionCallbackInfo<v8::Value>& args)
         curveString = "linear";
     }
     curve = CreateCurve(curveString);
+    curveContext->Set(context, v8::String::NewFromUtf8(isolate, "__curveString").ToLocalChecked(),
+        v8::String::NewFromUtf8(isolate, curveString.c_str()).ToLocalChecked()).ToChecked();
+    if (Container::IsCurrentUseNewPipeline()) {
+        args.GetReturnValue().Set(curveContext);
+        return;
+    }
 
     auto page =
         static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8DeclarativeEngineInstance::STAGING_PAGE));
@@ -515,12 +514,9 @@ void CurvesInitInternal(const v8::FunctionCallbackInfo<v8::Value>& args)
         LOGE("page is nullptr");
         return;
     }
-    (*page)->AddCurve(curveString, curve);
     int32_t pageId = (*page)->GetPageId();
     curveContext->Set(context, v8::String::NewFromUtf8(isolate, "__pageId").ToLocalChecked(),
         v8::Int32::New(isolate, pageId)).ToChecked();
-    curveContext->Set(context, v8::String::NewFromUtf8(isolate, "__curveString").ToLocalChecked(),
-        v8::String::NewFromUtf8(isolate, curveString.c_str()).ToLocalChecked()).ToChecked();
     args.GetReturnValue().Set(curveContext);
 }
 
@@ -565,19 +561,22 @@ void ParseCurves(const v8::FunctionCallbackInfo<v8::Value>& args, std::string& c
         return;
     }
     auto customCurve = curve->ToString();
+    curveContext->Set(context, v8::String::NewFromUtf8(isolate, "__curveString").ToLocalChecked(),
+        v8::String::NewFromUtf8(isolate, customCurve.c_str()).ToLocalChecked()).ToChecked();
+    if (Container::IsCurrentUseNewPipeline()) {
+        args.GetReturnValue().Set(curveContext);
+        return;
+    }
     auto page =
         static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8DeclarativeEngineInstance::STAGING_PAGE));
     if ((*page) == nullptr) {
         LOGE("page is nullptr");
         return;
     }
-    (*page)->AddCurve(customCurve, curve);
     int32_t pageId = (*page)->GetPageId();
 
     curveContext->Set(context, v8::String::NewFromUtf8(isolate, "__pageId").ToLocalChecked(),
         v8::Int32::New(isolate, pageId)).ToChecked();
-    curveContext->Set(context, v8::String::NewFromUtf8(isolate, "__curveString").ToLocalChecked(),
-        v8::String::NewFromUtf8(isolate, customCurve.c_str()).ToLocalChecked()).ToChecked();
     args.GetReturnValue().Set(curveContext);
 }
 
@@ -641,18 +640,21 @@ void CurvesStepsInternal(const v8::FunctionCallbackInfo<v8::Value>& args)
         }
         curve = AceType::MakeRefPtr<StepsCurve>(stepSize);
     }
+    curveContext->Set(context, v8::String::NewFromUtf8(isolate, "__curveString").ToLocalChecked(),
+        v8::String::NewFromUtf8(isolate, curve->ToString().c_str()).ToLocalChecked()).ToChecked();
+    if (Container::IsCurrentUseNewPipeline()) {
+        args.GetReturnValue().Set(curveContext);
+        return;
+    }
 
     auto page = static_cast<RefPtr<JsAcePage>*>(isolate->GetData(V8DeclarativeEngineInstance::STAGING_PAGE));
     if ((*page) == nullptr) {
         LOGE("page is nullptr");
         return;
     }
-    (*page)->AddCurve(curve->ToString(), curve);
     int32_t pageId = (*page)->GetPageId();
     curveContext->Set(context, v8::String::NewFromUtf8(isolate, "__pageId").ToLocalChecked(),
                         v8::Int32::New(isolate, pageId)).ToChecked();
-    curveContext->Set(context, v8::String::NewFromUtf8(isolate, "__curveString").ToLocalChecked(),
-                        v8::String::NewFromUtf8(isolate, curve->ToString().c_str()).ToLocalChecked()).ToChecked();
     args.GetReturnValue().Set(curveContext);
 }
 
