@@ -5,6 +5,7 @@
     "src/lib/common/environment_setting.d.ts",
     "src/lib/common/storage.d.ts",
     "src/lib/common/local_storage_native.d.ts",
+    "src/lib/common/lazy_foreach.d.ts",
     // interfaces
     "src/lib/common/i_environment_backend.ts",
     "src/lib/common/i_property_subscriber.ts",

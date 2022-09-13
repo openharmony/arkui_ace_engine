@@ -36,7 +36,7 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
           (subscriber as IMultiPropertiesChangeSubscriber).propertyHasChanged(this.info_);
         }
       } else {
-        console.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+        console.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
       }
     });
   }
@@ -49,8 +49,8 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
   public markDependentElementsDirty(view: ViewPU) {
     // TODO ace-ets2bundle, framework, compilated apps need to update together
     // this function will be removed after a short transiition periode
-    console.error(`markDependentElementsDirty no longer supported. 
-        Please update your ace-ets2bundle and recompile your application!`);
+    console.warn(`markDependentElementsDirty no longer supported. App will work ok, but
+        please update your ace-ets2bundle and recompile your application!`);
   }
 
   /**
