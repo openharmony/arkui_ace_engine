@@ -55,7 +55,6 @@ private:
 
     RefPtr<ClickEvent> clickListener_;
     std::optional<bool> isOn_;
-    std::optional<Color> unselectedColor_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPattern);
 };

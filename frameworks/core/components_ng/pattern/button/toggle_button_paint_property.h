@@ -34,6 +34,7 @@ public:
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
         value->propIsOn_ = CloneIsOn();
         value->propSelectedColor_ = CloneSelectedColor();
+        value->propBackgroundColor_ = CloneBackgroundColor();
         return value;
     }
 
@@ -42,10 +43,12 @@ public:
         PaintProperty::Reset();
         ResetIsOn();
         ResetSelectedColor();
+        ResetBackgroundColor();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsOn, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPaintProperty);
 };
 } // namespace OHOS::Ace::NG
