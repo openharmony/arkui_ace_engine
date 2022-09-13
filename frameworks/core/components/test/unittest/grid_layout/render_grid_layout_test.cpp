@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1238,4 +1238,28 @@ HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTest021, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: RenderGridLayoutTestRTL001
+ * @tc.desc: Test RTL of layout component
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC7M
+ */
+HWTEST_F(RenderGridLayoutTest, RenderGridLayoutTestRTL001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderGridLayoutTest rtl001 start";
+
+    /**
+     * @tc.steps: step1. construct GridLayoutComponent and set direction.
+     * @tc.expected: step1. The text direction is correct.
+     */
+    std::string rowArgs = "1fr 540px";
+    std::string colArgs = "540px 50%";
+    std::list<RefPtr<Component>> children;
+    RefPtr<GridLayoutComponent> component = AceType::MakeRefPtr<GridLayoutComponent>(children);
+    component->SetTextDirection(TextDirection::RTL);
+    renderNode_->Update(component);
+    EXPECT_EQ(component->GetTextDirection(), TextDirection::RTL);
+
+    GTEST_LOG_(INFO) << "RenderGridLayoutTest rtl001 stop";
+}
 } // namespace OHOS::Ace

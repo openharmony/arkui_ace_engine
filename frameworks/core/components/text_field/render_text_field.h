@@ -598,6 +598,7 @@ private:
 
     // distribute
     void ApplyRestoreInfo();
+    void OnTapCallback();
 
     int32_t initIndex_ = 0;
     bool isOverlayFocus_ = false;
@@ -609,6 +610,7 @@ private:
     bool softKeyboardEnabled_ = true;
     bool isInEditStatus_ = false;
     bool isFocusOnTouch_ = true;
+    bool onTapCallbackResult_ = false;
     Color pressColor_;
     Color hoverColor_;
     TextSelection selection_; // Selection from custom.

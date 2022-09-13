@@ -19,6 +19,8 @@ build_component_ng("pattern_ng") {
     "button/button_layout_algorithm.cpp",
     "button/button_pattern.cpp",
     "button/button_view.cpp",
+    "button/toggle_button_pattern.cpp",
+    "button/toggle_button_view.cpp",
     "checkbox/checkbox_layout_algorithm.cpp",
     "checkbox/checkbox_paint_method.cpp",
     "checkbox/checkbox_pattern.cpp",
@@ -56,6 +58,10 @@ build_component_ng("pattern_ng") {
     "progress/progress_paint_method.cpp",
     "progress/progress_pattern.cpp",
     "progress/progress_view.cpp",
+    "radio/radio_layout_algorithm.cpp",
+    "radio/radio_paint_method.cpp",
+    "radio/radio_pattern.cpp",
+    "radio/radio_view.cpp",
     "rating/rating_layout_algorithm.cpp",
     "rating/rating_paint_method.cpp",
     "rating/rating_pattern.cpp",
@@ -64,6 +70,7 @@ build_component_ng("pattern_ng") {
     "scroll/scroll_pattern.cpp",
     "scroll/scroll_view.cpp",
     "stack/stack_view.cpp",
+    "stage/page_event_hub.cpp",
     "stage/page_pattern.cpp",
     "stage/stage_manager.cpp",
     "swiper/swiper_layout_algorithm.cpp",
@@ -83,10 +90,27 @@ build_component_ng("pattern_ng") {
     "text/text_pattern.cpp",
     "text/text_styles.cpp",
     "text/text_view.cpp",
+    "text_clock/text_clock_pattern.cpp",
+    "text_clock/text_clock_view.cpp",
     "texttimer/text_timer_pattern.cpp",
     "texttimer/text_timer_view.cpp",
+    "toggle/switch_layout_algorithm.cpp",
+    "toggle/switch_paint_method.cpp",
+    "toggle/switch_pattern.cpp",
+    "toggle/toggle_view.cpp",
+    "video/video_layout_algorithm.cpp",
+    "video/video_pattern.cpp",
+    "video/video_view.cpp",
     "xcomponent/xcomponent_layout_algorithm.cpp",
     "xcomponent/xcomponent_pattern.cpp",
     "xcomponent/xcomponent_view.cpp",
+  ]
+}
+
+build_component_ng("pattern_ability_component_ng") {
+  sources = [
+    "ability_component/ability_component_layout_algorithm.cpp",
+    "ability_component/ability_component_pattern.cpp",
+    "ability_component/ability_component_view.cpp",
   ]
 }

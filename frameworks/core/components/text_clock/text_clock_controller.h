@@ -18,6 +18,8 @@
 
 #include "base/memory/ace_type.h"
 
+#include <functional>
+
 namespace OHOS::Ace {
 using StatusCallback = std::function<void()>;
 class ACE_EXPORT TextClockController : public AceType {
@@ -28,12 +30,12 @@ public:
 
     void OnStart(StatusCallback statusCallback)
     {
-        start_ = statusCallback;
+        start_ = std::move(statusCallback);
     }
 
     void OnStop(StatusCallback statusCallback)
     {
-        stop_ = statusCallback;
+        stop_ = std::move(statusCallback);
     }
 
     void Start()
@@ -49,6 +51,12 @@ public:
             stop_();
         }
     }
+
+    bool HasInitialized() const
+    {
+        return start_ && stop_;
+    }
+
 private:
     StatusCallback start_;
     StatusCallback stop_;

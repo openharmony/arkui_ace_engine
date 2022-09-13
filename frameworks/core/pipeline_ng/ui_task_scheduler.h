@@ -75,7 +75,7 @@ public:
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
 
-    void FlushLayoutTask(bool onCreate = false, bool forceUseMainThread = false);
+    void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
     void FlushTask();
 

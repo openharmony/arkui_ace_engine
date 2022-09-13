@@ -182,7 +182,9 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, cons
             } while (0);
             if (!obj->GetData()) {
                 auto notifyLoadFailTask = [errorMsg = std::move(errorMessage), sourceInfo = obj->GetSourceInfo(),
-                                              loadCallbacks] { loadCallbacks.loadFailCallback_(sourceInfo, errorMsg); };
+                                              loadCallbacks] {
+                    loadCallbacks.loadFailCallback_(sourceInfo, errorMsg, ImageLoadingCommand::MAKE_CANVAS_IMAGE_FAIL);
+                };
                 ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
                 return;
             }
@@ -197,7 +199,7 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, cons
             std::string errorMessage("The image format is not supported, please check image format.");
             auto notifyLoadFailTask = [errorMsg = std::move(errorMessage), loadCallbacks,
                                           sourceInfo = obj->GetSourceInfo()] {
-                loadCallbacks.loadFailCallback_(sourceInfo, errorMsg);
+                loadCallbacks.loadFailCallback_(sourceInfo, errorMsg, ImageLoadingCommand::MAKE_CANVAS_IMAGE_FAIL);
             };
             ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
             return;

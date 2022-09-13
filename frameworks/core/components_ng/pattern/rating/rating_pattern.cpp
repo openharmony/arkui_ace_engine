@@ -15,6 +15,8 @@
 #include "core/components_ng/pattern/rating/rating_pattern.h"
 
 #include <cstdint>
+#include <iomanip>
+#include <sstream>
 
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
@@ -160,9 +162,9 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
         foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_, singleStarImagePaintConfig, starNum);
 }
 
-bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
     if (!foregroundImageCanvas_ || !secondaryImageCanvas_ || !backgroundImageCanvas_) {
@@ -281,7 +283,9 @@ void RatingPattern::FireChangeEvent() const
     CHECK_NULL_VOID(ratingEventHub);
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
-    ratingEventHub->FireChangeEvent(ratingRenderProperty->GetRatingScoreValue());
+    std::stringstream ss;
+    ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue();
+    ratingEventHub->FireChangeEvent(ss.str());
 }
 
 void RatingPattern::HandleDragEnd()

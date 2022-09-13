@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
+#include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Rosen::Drawing {
 class Canvas;
@@ -93,8 +95,17 @@ public:
     virtual void AnimateHoverEffectScale(bool isHovered) {}
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
 
+    // Add Transform in group
+    ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformScale, VectorF);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformCenter, VectorF);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, Vector3F);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector3F);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformAngle, float);
+
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundColor, Color);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
     // TODO Add BorderRadius in group.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
@@ -108,6 +119,13 @@ protected:
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
+    virtual void OnOpacityUpdate(double opacity) {}
+
+    virtual void OnTransformScaleUpdate(const VectorF& scale) {}
+    virtual void OnTransformCenterUpdate(const VectorF& center) {}
+    virtual void OnTransformTranslateUpdate(const Vector3F& translate) {}
+    virtual void OnTransformRotateUpdate(const Vector3F& translate) {}
+    virtual void OnTransformAngleUpdate(const float& angle) {}
 
 private:
     std::function<void()> requestFrame_;

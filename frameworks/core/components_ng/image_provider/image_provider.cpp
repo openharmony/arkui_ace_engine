@@ -56,7 +56,7 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& sourceInfo, const L
             LOGE("Fail to create image loader. source info: %{public}s", sourceInfo.ToString().c_str());
             std::string errorMessage("Image source type not supported");
             auto notifyLoadFailTask = [errorMsg = std::move(errorMessage), sourceInfo, loadCallbacks] {
-                loadCallbacks.loadFailCallback_(sourceInfo, errorMsg);
+                loadCallbacks.loadFailCallback_(sourceInfo, errorMsg, ImageLoadingCommand::LOAD_DATA_FAIL);
             };
             ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
             return;
@@ -70,7 +70,7 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& sourceInfo, const L
             LOGE("Fail to make encoded info. source info: %{public}s", sourceInfo.ToString().c_str());
             std::string errorMessage("Image data is broken.");
             auto notifyLoadFailTask = [errorMsg = std::move(errorMessage), sourceInfo, loadCallbacks] {
-                loadCallbacks.loadFailCallback_(sourceInfo, errorMsg);
+                loadCallbacks.loadFailCallback_(sourceInfo, errorMsg, ImageLoadingCommand::LOAD_DATA_FAIL);
             };
             ImageProvider::WrapTaskAndPostToUI(std::move(notifyLoadFailTask));
             return;
@@ -88,7 +88,7 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& sourceInfo, const L
                 break;
             }
             // TODO: create AnimatedImageObject
-        } while (0);
+        } while (false);
         auto notifyDataReadyTask = [loadCallbacks, imageObj, sourceInfo] {
             loadCallbacks.dataReadyCallback_(sourceInfo, imageObj);
         };

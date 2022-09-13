@@ -17,10 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_paint_method.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/render/render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -52,29 +55,87 @@ public:
         return MakeRefPtr<ListLayoutProperty>();
     }
 
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<ListEventHub>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto listLayoutAlgorithm = MakeRefPtr<ListLayoutAlgorithm>(startIndex_, endIndex_);
         listLayoutAlgorithm->SetCurrentOffset(currentOffset_);
         currentOffset_ = 0;
         listLayoutAlgorithm->SetIsInitialized(isInitialized_);
+        listLayoutAlgorithm->SetPlayEdgeEffectAnimation(playEdgeEffectAnimation_);
         return listLayoutAlgorithm;
     }
 
     void UpdateCurrentOffset(float offset);
 
+    int32_t GetStartIndex() const
+    {
+        return startIndex_;
+    }
+
+    int32_t GetEndIndex() const
+    {
+        return endIndex_;
+    }
+
+    int32_t GetMaxListItemIndex() const
+    {
+        return maxListItemIndex_;
+    }
+    
+    void SetIsScroll(bool isScroll)
+    {
+        isScroll_ = isScroll;
+    }
+
+    bool GetIsScroll() const
+    {
+        return isScroll_;
+    }
+
+    void SetScrollStop(bool scrollStop)
+    {
+        scrollStop_ = scrollStop;
+    }
+
+    void SetScrollState(int32_t scrollState)
+    {
+        scrollState_ = scrollState;
+    }
+
+    int32_t GetScrollState() const
+    {
+        return scrollState_;
+    }
+
+    Axis GetDirection() const;
+    
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    float MainSize() const;
+    void PlaySpringAnimation(double dragVelocity);
 
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<Animator> springController_;
+    int32_t maxListItemIndex_ = 0;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
     bool isInitialized_ = false;
-    float currentOffset_ = 0.0;
-
+    bool playEdgeEffectAnimation_ = false;
+    float currentOffset_ = 0.0f;
+    float lastOffset_ = 0.0f;
+    
     ListLayoutAlgorithm::PositionMap itemPosition_;
+    bool isScroll_ = false;
+    bool scrollStop_ = false;
+    int32_t scrollState_ = SCROLL_FROM_NONE;
 };
 } // namespace OHOS::Ace::NG
 

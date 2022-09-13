@@ -34,9 +34,19 @@ public:
         url_ = url;
     }
 
+    std::string GetUrl()
+    {
+        return url_;
+    }
+
     void SetParams(const std::string& params)
     {
         params_ = params;
+    }
+
+    std::string GetParams()
+    {
+        return params_;
     }
 
     void SetActive(bool active)
@@ -47,7 +57,7 @@ public:
         active_ = active;
     }
 
-    bool GetActive()
+    bool GetActive() const
     {
         return active_;
     }
@@ -55,6 +65,11 @@ public:
     void SetType(NavigatorType type)
     {
         type_ = type;
+    }
+
+    NavigatorType GetType()
+    {
+        return type_;
     }
 
     void NavigatePage();

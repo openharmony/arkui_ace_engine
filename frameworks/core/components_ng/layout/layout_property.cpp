@@ -39,8 +39,13 @@ void LayoutProperty::Reset()
 RefPtr<LayoutProperty> LayoutProperty::Clone() const
 {
     auto layoutProperty = MakeRefPtr<LayoutProperty>();
-    layoutProperty->UpdateLayoutProperty(this);
+    Clone(layoutProperty);
     return layoutProperty;
+}
+
+void LayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const
+{
+    layoutProperty->UpdateLayoutProperty(this);
 }
 
 void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)

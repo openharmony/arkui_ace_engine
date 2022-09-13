@@ -460,6 +460,7 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSClass<JSWebController>::CustomMethod("accessBackward", &JSWebController::AccessBackward);
     JSClass<JSWebController>::CustomMethod("clearHistory", &JSWebController::ClearHistory);
     JSClass<JSWebController>::CustomMethod("clearSslCache", &JSWebController::ClearSslCache);
+    JSClass<JSWebController>::CustomMethod("clearClientAuthenticationCache", &JSWebController::ClearClientAuthenticationCache);
     JSClass<JSWebController>::CustomMethod("getCookieManager", &JSWebController::GetCookieManager);
     JSClass<JSWebController>::CustomMethod("getHitTestValue", &JSWebController::GetHitTestValue);
     JSClass<JSWebController>::CustomMethod("backOrForward", &JSWebController::BackOrForward);
@@ -760,6 +761,15 @@ void JSWebController::ClearSslCache(const JSCallbackInfo& args)
     ContainerScope scope(instanceId_);
     if (webController_) {
         webController_->ClearSslCache();
+    }
+}
+
+void JSWebController::ClearClientAuthenticationCache(const JSCallbackInfo& args)
+{
+    LOGE("JSWebController ClearClientAuthenticationCache");
+    ContainerScope scope(instanceId_);
+    if (webController_) {
+        webController_->ClearClientAuthenticationCache();
     }
 }
 

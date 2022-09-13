@@ -190,6 +190,7 @@ private:
     Offset globlePointPosition_;
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
+    double offsetFix_ = 0.0;
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
     std::queue<MouseClickInfo> doubleClickQueue_;
 };

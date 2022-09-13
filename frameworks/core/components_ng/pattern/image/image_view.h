@@ -34,6 +34,8 @@ public:
     static void SetImageInterpolation(ImageInterpolation imageInterpolation);
     static void SetImageRepeat(ImageRepeat imageRepeat);
     static void SetImageSourceSize(const std::pair<Dimension, Dimension>& sourceSize);
+    static void SetFitOriginalSize(bool fitOriginalSize);
+    static void SetAlt(const std::string& altSrc);
     static void SetOnError(ErrorEvent&& onError);
     static void SetOnComplete(CompleteEvent&& onComplete);
 };

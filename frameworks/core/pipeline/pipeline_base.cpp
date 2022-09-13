@@ -284,6 +284,15 @@ void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::
     }
 }
 
+void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type)
+{
+    if (taskExecutor_) {
+        taskExecutor_->PostSyncTask(task, type);
+    } else {
+        LOGE("the task executor is nullptr");
+    }
+}
+
 void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
 {
     auto frontend = weakFrontend_.Upgrade();

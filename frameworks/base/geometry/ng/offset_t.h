@@ -21,6 +21,7 @@
 #include <sstream>
 #include <string>
 
+#include "base/geometry/axis.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -45,6 +46,11 @@ public:
     T GetY() const
     {
         return y_;
+    }
+
+    T GetMainOffset(Axis axis) const
+    {
+        return axis == Axis::HORIZONTAL ? x_ : y_;
     }
 
     void SetX(T x)
@@ -84,6 +90,13 @@ public:
     {
         x_ += offset.x_;
         y_ += offset.y_;
+        return *this;
+    }
+
+    OffsetT& operator-=(const OffsetT& offset)
+    {
+        x_ -= offset.x_;
+        y_ -= offset.y_;
         return *this;
     }
 

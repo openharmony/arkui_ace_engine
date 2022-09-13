@@ -15,38 +15,27 @@
 
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
 
 RefPtr<LayoutWrapper> LayoutWrapperBuilder::GetOrCreateWrapperByIndex(int32_t index)
 {
-    auto iter = buildItems_.find(index);
-    if (iter != buildItems_.end()) {
+    auto realIndex = index - startIndex_;
+    auto iter = wrapperMap_.find(realIndex);
+    if (iter != wrapperMap_.end()) {
         return iter->second;
     }
-    auto wrapper = OnGetOrCreateWrapperByIndex(index - startIndex_);
-    if (wrapper) {
-        buildItems_.emplace(index - startIndex_, wrapper);
-    }
+    auto wrapper = OnGetOrCreateWrapperByIndex(realIndex);
+    CHECK_NULL_RETURN(wrapper, nullptr);
+    wrapperMap_.try_emplace(realIndex, wrapper);
     return wrapper;
 }
 
-std::list<RefPtr<LayoutWrapper>> LayoutWrapperBuilder::ExpandAllChildWrappers()
+const std::list<RefPtr<LayoutWrapper>>& LayoutWrapperBuilder::ExpandAllChildWrappers()
 {
-    auto items = OnExpandChildLayoutWrapper();
-    int32_t index = 0;
-    for (const auto& item : items) {
-        buildItems_.emplace(++index, item);
-    }
-    return items;
-}
-
-void LayoutWrapperBuilder::SwapDirtyChildrenOnMainThread()
-{
-    for (const auto& child : buildItems_) {
-        child.second->SwapDirtyLayoutWrapperOnMainThread();
-    }
+    return OnExpandChildLayoutWrapper();
 }
 
 } // namespace OHOS::Ace::NG

@@ -43,10 +43,12 @@ namespace OHOS::Ace::NG {
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), pattern_(pattern)
 {
-    renderContext_->InitContext(IsRootNode(), pattern_->SurfaceNodeName());
+    renderContext_->InitContext(IsRootNode(), pattern_->GetSurfaceNodeName());
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     eventHub_ = pattern->CreateEventHub();
+    // first create make layout property dirty.
+    layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
 }
 
 FrameNode::~FrameNode()
@@ -168,26 +170,31 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         return;
     }
 
-    // check if need to paint content.
-    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_VOID(layoutAlgorithmWrapper);
-    auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(
-        dirty, layoutAlgorithmWrapper->SkipMeasure(), layoutAlgorithmWrapper->SkipLayout());
-    if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
-        MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
-    }
-
-    // rebuild child render node.
-    RebuildRenderContextTree();
-
     // update layout size.
     bool frameSizeChange = geometryNode_->GetFrameSize() != dirty->GetGeometryNode()->GetFrameSize();
     bool frameOffsetChange = geometryNode_->GetFrameOffset() != dirty->GetGeometryNode()->GetFrameOffset();
     bool contentSizeChange = geometryNode_->GetContentSize() != dirty->GetGeometryNode()->GetContentSize();
     bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
-    if (frameSizeChange || frameOffsetChange || (pattern_->SurfaceNodeName().has_value() && contentSizeChange)) {
+    if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
         renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
     }
+    SetGeometryNode(dirty->GetGeometryNode());
+    // clean layout flag.
+    layoutProperty_->CleanDirty();
+    DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
+    // check if need to paint content.
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
+    config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
+    auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
+    // TODO: temp use and need to delete.
+    needRerender = needRerender || pattern_->OnDirtyLayoutWrapperSwap(dirty, config.skipMeasure, config.skipLayout);
+    if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
+        MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
+    }
+
+    // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
         if (layoutProperty_->GetLayoutConstraint().has_value()) {
             renderContext_->UpdateBorderWidth(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
@@ -198,31 +205,25 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
                 ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
         }
     }
-    SetGeometryNode(dirty->MoveGeometryNode());
-    pattern_->OnLayoutChange(frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange);
 
-    // clean layout flag.
-    layoutProperty_->CleanDirty();
+    // rebuild child render node.
+    RebuildRenderContextTree();
 }
 
-void FrameNode::SetGeometryNode(RefPtr<GeometryNode>&& node)
+void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
 {
-    geometryNode_.Swap(std::move(node));
+    geometryNode_ = node;
 }
 
-std::optional<UITask> FrameNode::CreateLayoutTask(bool onCreate, bool forceUseMainThread)
+std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
 {
     if (!isLayoutDirtyMarked_) {
         return std::nullopt;
     }
     ACE_SCOPED_TRACE("CreateLayoutTask:PrepareTask");
     RefPtr<LayoutWrapper> layoutWrapper;
-    if (!onCreate) {
-        UpdateLayoutPropertyFlag();
-        layoutWrapper = CreateLayoutWrapper();
-    } else {
-        layoutWrapper = CreateLayoutWrapperOnCreate();
-    }
+    UpdateLayoutPropertyFlag();
+    layoutWrapper = CreateLayoutWrapper();
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), offset = GetParentGlobalOffset(),
                     forceUseMainThread]() {
         layoutWrapper->SetActive();
@@ -309,27 +310,11 @@ void FrameNode::UpdateLayoutPropertyFlag()
     if ((flag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
-    if ((flag & PROPERTY_UPDATE_POSITION) == PROPERTY_UPDATE_POSITION) {
-        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
-    }
 }
 
 void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 {
     flag = flag | layoutProperty_->GetPropertyChangeFlag();
-}
-
-RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapperOnCreate()
-{
-    pattern_->BeforeCreateLayoutWrapper();
-    isLayoutDirtyMarked_ = false;
-    auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
-    layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
-    const auto& children = GetChildren();
-    for (const auto& child : children) {
-        child->AdjustLayoutWrapperTree(layoutWrapper, true, true);
-    }
-    return layoutWrapper;
 }
 
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
@@ -339,14 +324,13 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     auto flag = layoutProperty_->GetPropertyChangeFlag();
     auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
     do {
-        // when inactive node need to reactive in render tree, need to measure again.
-        if (CheckMeasureFlag(flag) || CheckMeasureSelfFlag(flag) || forceMeasure) {
+        if (CheckNeedMeasure(flag) || forceMeasure) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
             bool forceChildMeasure = CheckMeasureFlag(flag) || forceMeasure;
             UpdateChildrenLayoutWrapper(layoutWrapper, forceChildMeasure, false);
             break;
         }
-        if (CheckLayoutFlag(flag) || forceLayout) {
+        if (CheckNeedLayout(flag) || forceLayout) {
             layoutWrapper->SetLayoutAlgorithm(
                 MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm(), true, false));
             UpdateChildrenLayoutWrapper(layoutWrapper, false, false);
@@ -400,8 +384,6 @@ void FrameNode::RebuildRenderContextTree()
     }
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthVisibleFrame(children);
-    LOGD("%{public}s rebuild render context tree, child: %{public}d", GetTag().c_str(),
-        static_cast<int32_t>(children.size()));
     renderContext_->RebuildFrame(this, children);
     needSyncRenderTree_ = false;
 }
@@ -514,7 +496,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
     const auto& rect = geometryNode_->GetFrame().GetRect();
-    LOGD("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
+    LOGI("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
 
     if (!rect.IsInRegion(parentLocalPoint)) {
         return HitTestResult::OUT_OF_REGION;

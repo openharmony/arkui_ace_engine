@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
 #include "base/geometry/rect.h"
+#include  "core/components_ng/base/frame_node.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -31,7 +32,7 @@ public:
     virtual void Show() {}
     virtual void Hide() {}
     virtual void RequestFocus() {}
-
+    virtual void ConnectExtension(const RefPtr<NG::FrameNode>& node) = 0;
     virtual void ConnectExtension(const std::string& want, const Rect& rect, WeakPtr<RenderNode> node) = 0;
     virtual void UpdateRect(const Rect& rect) = 0;
     virtual void RemoveExtension() = 0;

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_PROPERTY_H
 
+#include "base/geometry/ng/vector.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/property.h"
 
@@ -29,6 +30,14 @@ struct BorderProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderStyle, BorderStyleProperty);
+};
+
+struct TransformProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformScale, VectorF);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, VectorF);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformTranslate, Vector3F);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector3F);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformAngle, float);
 };
 
 } // namespace OHOS::Ace::NG

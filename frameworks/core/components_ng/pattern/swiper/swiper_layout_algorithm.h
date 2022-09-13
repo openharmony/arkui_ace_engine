@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_LAYOUT_ALGORITHM_H
 
-#include <map>
 #include <cstdint>
 #include <optional>
 
@@ -31,8 +30,9 @@ class ACE_EXPORT SwiperLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(SwiperLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    SwiperLayoutAlgorithm(int32_t currentIndex, int32_t startIndex, int32_t endIndex) :
-        currentIndex_(currentIndex), startIndex_(startIndex), endIndex_(endIndex) {}
+    SwiperLayoutAlgorithm(int32_t currentIndex, int32_t startIndex, int32_t endIndex)
+        : currentIndex_(currentIndex), startIndex_(startIndex), endIndex_(endIndex)
+    {}
     ~SwiperLayoutAlgorithm() override = default;
 
     void OnReset() override {}
@@ -74,9 +74,15 @@ public:
         preItemRange_ = preItemRange;
     }
 
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
+    }
+
 private:
     void InitItemRange();
 
+    bool isLoop_ = true;
     int32_t currentIndex_ = 0;
     int32_t startIndex_;
     int32_t endIndex_;
@@ -87,6 +93,6 @@ private:
     std::set<int32_t> preItemRange_;
     std::vector<int32_t> inActiveItems_;
 };
-} // namespace OHOS::Ace::NG
 
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_LAYOUT_ALGORITHM_H

@@ -62,8 +62,7 @@ void ButtonLayoutAlgorithm::MeasureCircleButton(LayoutWrapper* layoutWrapper)
                 auto radiusBottomMax = std::max(radius->radiusBottomLeft, radius->radiusBottomRight);
                 auto radiusMax = std::max(radiusTopMax, radiusBottomMax);
                 auto rrectRadius = radiusMax->ConvertToPx();
-                frameSize.SetSizeT(SizeF { static_cast<float>(rrectRadius * 2),
-                    static_cast<float>(rrectRadius * 2) });
+                frameSize.SetSizeT(SizeF { static_cast<float>(rrectRadius * 2), static_cast<float>(rrectRadius * 2) });
                 break;
             }
             if (!width) {
