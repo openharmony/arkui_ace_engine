@@ -121,31 +121,18 @@ void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
     }
 }
 
-void ResSchedReport::MarkNeedUpdate()
-{
-    std::unordered_map<std::string, std::string> payload;
-    payload[NAME] = TOUCH;
-    if (reportDataFunc_ == nullptr) {
-        reportDataFunc_ = LoadReportDataFunc();
-    }
-    if (reportDataFunc_ != nullptr && isInTouchDownUp_) {
-        reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, TOUCH_EVENT, payload);
-        isInTouchDownUp_ = false;
-    }
-}
-
-void ResSchedReport::DispatchTouchEventStart(const TouchType& touchType)
+void ResSchedReport::OnTouchEvent(const TouchType& touchType)
 {
     if (touchType == TouchType::DOWN || touchType == TouchType::UP) {
-        isInTouchDownUp_ = true;
-    } else {
-        isInTouchDownUp_ = false;
+        std::unordered_map<std::string, std::string> payload;
+        payload[NAME] = TOUCH;
+        if (reportDataFunc_ == nullptr) {
+            reportDataFunc_ = LoadReportDataFunc();
+        }
+        if (reportDataFunc_ != nullptr) {
+            reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, TOUCH_EVENT, payload);
+        }
     }
-}
-
-void ResSchedReport::DispatchTouchEventEnd()
-{
-    isInTouchDownUp_ = false;
 }
 
 ResSchedReportScope::ResSchedReportScope(const std::string& name,

@@ -1597,6 +1597,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     auto scalePoint = point.CreateScalePoint(viewScale_);
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
     if (scalePoint.type == TouchType::DOWN) {
         eventManager_->HandleOutOfRectCallback(
             { scalePoint.x, scalePoint.y, scalePoint.sourceType }, rectCallbackList_);
@@ -1648,15 +1649,11 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             }
         }
         if (lastMoveEvent.has_value()) {
-            ResSchedReport::GetInstance().DispatchTouchEventStart(lastMoveEvent->type);
             eventManager_->DispatchTouchEvent(lastMoveEvent.value());
-            ResSchedReport::GetInstance().DispatchTouchEventEnd();
         }
     }
 
-    ResSchedReport::GetInstance().DispatchTouchEventStart(scalePoint.type);
     eventManager_->DispatchTouchEvent(scalePoint);
-    ResSchedReport::GetInstance().DispatchTouchEventEnd();
     if (scalePoint.type == TouchType::UP) {
         touchPluginPipelineContext_.clear();
         eventManager_->SetInstanceId(GetInstanceId());
@@ -1694,9 +1691,7 @@ void PipelineContext::FlushTouchEvents()
             if (maxSize == 0) {
                 eventManager_->FlushTouchEventsEnd(touchPoints);
             }
-            ResSchedReport::GetInstance().DispatchTouchEventStart((*iter).type);
             eventManager_->DispatchTouchEvent(*iter);
-            ResSchedReport::GetInstance().DispatchTouchEventEnd();
         }
     }
 }
