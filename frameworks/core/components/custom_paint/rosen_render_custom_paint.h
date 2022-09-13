@@ -140,10 +140,12 @@ private:
     // Specifically refers to the class Path2D in canvas.d.ts
     SkPath skPath2d_;
     SkPaint imagePaint_;
+    SkPaint cachePaint_;
+    SkBitmap cacheBitmap_;
     SkBitmap canvasCache_;
     SkBitmap webglBitmap_;
-    std::unique_ptr<SkCanvas> bitmapCanvas_;
-    SkCanvas* skCanvas_;
+    std::unique_ptr<SkCanvas> skCanvas_;
+    std::unique_ptr<SkCanvas> cacheCanvas_;
 #ifdef CANVAS_USE_GPU
     void InitializeEglContext();
 
