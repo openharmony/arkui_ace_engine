@@ -15,7 +15,7 @@ group("pattern_unittest") {
   testonly = true
   deps = [
     "button:button_pattern_unit_test",
-    "text:text_pattern_test_ng",
     "qrcode:qrcode_pattern_test_ng",
+    "text:text_pattern_test_ng",
   ]
 }

@@ -50,7 +50,6 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePaintPropertyTest001, TestSize.Level1)
     EXPECT_FALSE(frameNode == nullptr);
     auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
     EXPECT_FALSE(qrcodePaintProperty == nullptr);
-    GTEST_LOG_(INFO) << "->GetValue():" << qrcodePaintProperty->GetValue()->c_str() << "\n";
     EXPECT_EQ(qrcodePaintProperty->GetValue(), CREATE_VALUE);
 }
 
@@ -67,7 +66,6 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePaintPropertyTest002, TestSize.Level1)
     EXPECT_FALSE(frameNode == nullptr);
     auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
     EXPECT_FALSE(qrcodePaintProperty == nullptr);
-    GTEST_LOG_(INFO) << "->GetColorValue():" << qrcodePaintProperty->GetColorValue().ColorToString().c_str() << "\n";
     EXPECT_EQ(qrcodePaintProperty->GetColorValue(), QRCODE_COLOR_VALUE);
 }
 
