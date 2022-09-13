@@ -21,8 +21,6 @@
 #include <pthread.h>
 #include <shared_mutex>
 
-#include "flutter/fml/thread.h"
-
 #include "base/log/event_report.h"
 #include "base/log/log.h"
 #include "base/thread/background_task_executor.h"
@@ -31,12 +29,13 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
+#include "core/common/anr_thread.h"
 
 namespace OHOS::Ace {
 namespace {
 
 constexpr int32_t NORMAL_CHECK_PERIOD = 3;
-constexpr int32_t WARNING_CHECK_PERIOD = 3;
+constexpr int32_t WARNING_CHECK_PERIOD = 2;
 constexpr int32_t FREEZE_CHECK_PERIOD = 1;
 constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
@@ -46,24 +45,6 @@ constexpr int32_t IMMEDIATELY_PERIOD = 0;
 constexpr int32_t ANR_DIALOG_BLOCK_TIME = 20;
 
 enum class State { NORMAL, WARNING, FREEZE };
-
-using Task = std::function<void()>;
-std::unique_ptr<fml::Thread> g_anrThread;
-
-bool PostTaskToTaskRunner(Task&& task, uint32_t delayTime)
-{
-    if (!g_anrThread || !task) {
-        return false;
-    }
-
-    auto anrTaskRunner = g_anrThread->GetTaskRunner();
-    if (delayTime > 0) {
-        anrTaskRunner->PostDelayedTask(std::move(task), fml::TimeDelta::FromSeconds(delayTime));
-    } else {
-        anrTaskRunner->PostTask(std::move(task));
-    }
-    return true;
-}
 
 #if defined(OHOS_PLATFORM) || defined(ANDROID_PLATFORM)
 constexpr int32_t SIGNAL_FOR_GC = 60;
@@ -95,7 +76,7 @@ void CheckGcSignal()
     }
 
     // Check again
-    PostTaskToTaskRunner(CheckGcSignal, GC_CHECK_PERIOD);
+    AnrThread::AnrThread::PostTaskToTaskRunner(CheckGcSignal, GC_CHECK_PERIOD);
 }
 
 inline int32_t BlockGcSignal()
@@ -179,7 +160,7 @@ ThreadWatcher::ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type, bo
     : instanceId_(instanceId), type_(type), useUIAsJSThread_(useUIAsJSThread)
 {
     InitThreadName();
-    PostTaskToTaskRunner(
+    AnrThread::PostTaskToTaskRunner(
         [weak = Referenced::WeakClaim(this)]() {
             auto sp = weak.Upgrade();
             if (sp) {
@@ -308,7 +289,7 @@ void ThreadWatcher::Check()
         }
     }
 
-    PostTaskToTaskRunner(
+    AnrThread::PostTaskToTaskRunner(
         [weak = Referenced::WeakClaim(this)]() {
             auto sp = weak.Upgrade();
             if (sp) {
@@ -440,17 +421,15 @@ void ThreadWatcher::TagIncrease()
 
 WatchDog::WatchDog()
 {
-    if (!g_anrThread) {
-        g_anrThread = std::make_unique<fml::Thread>("anr");
-    }
+    AnrThread::Start();
 #if defined(OHOS_PLATFORM) || defined(ANDROID_PLATFORM)
-    PostTaskToTaskRunner(InitializeGcTrigger, GC_CHECK_PERIOD);
+    AnrThread::PostTaskToTaskRunner(InitializeGcTrigger, GC_CHECK_PERIOD);
 #endif
 }
 
 WatchDog::~WatchDog()
 {
-    g_anrThread.reset();
+    AnrThread::Stop();
 }
 
 void WatchDog::Register(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread)
@@ -487,7 +466,7 @@ void WatchDog::BuriedBomb(int32_t instanceId, uint64_t bombId)
     }
 
     Watchers watchers = iter->second;
-    PostTaskToTaskRunner(
+    AnrThread::PostTaskToTaskRunner(
         [watchers, bombId]() {
             if (watchers.jsWatcher) {
                 watchers.jsWatcher->BuriedBomb(bombId);
@@ -508,7 +487,7 @@ void WatchDog::DefusingBomb(int32_t instanceId)
     }
 
     Watchers watchers = iter->second;
-    PostTaskToTaskRunner(
+    AnrThread::PostTaskToTaskRunner(
         [watchers]() {
             if (watchers.jsWatcher) {
                 watchers.jsWatcher->DefusingBomb();
