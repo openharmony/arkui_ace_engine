@@ -50,6 +50,7 @@ ohos_unittest("RenderListTest") {
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
     "list_test_utils.cpp",
     "render_list_test.cpp",
+    "render_list_test_v2.cpp",
   ]
 
   configs = [ "$ace_root:ace_test_config" ]

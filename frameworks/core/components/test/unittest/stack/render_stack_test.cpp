@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -503,6 +503,42 @@ HWTEST_F(RenderStackTest, RenderStackHitTest001, TestSize.Level1)
     TouchTestResult result;
     stack->TouchTest(TOUCH_POINT, TOUCH_POINT, { TouchRestrict::NONE }, result);
     EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: RenderStackRtlTest001
+ * @tc.desc: Test RTL of stack component
+ * @tc.type: FUNC
+ * @tc.require: issueI5NC7M
+ */
+HWTEST_F(RenderStackTest, RenderStackRtlTest001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RenderStackTest rtl001 start";
+
+    /**
+     * @tc.steps: step1. construct Box Component and RenderStack.
+     */
+    RefPtr<BoxComponent> box = AceType::MakeRefPtr<BoxComponent>();
+    box->SetTextDirection(TextDirection::RTL);
+    RefPtr<MockRenderStack> renderStack = AceType::MakeRefPtr<MockRenderStack>();
+
+    /**
+     * @tc.steps: step2. call the Update interface of RenderFlex
+     * @tc.expected: step2. The text direction is correct.
+     */
+    renderStack->Update(box);
+    EXPECT_EQ(box->GetTextDirection(), TextDirection::RTL);
+
+    /**
+     * @tc.steps: step3. call the GetNonPositionedChildOffset interface of RenderFlex
+     * @tc.expected: step3. The return offset is correct.
+     */
+    Size size = Size(0, 0);
+    Offset offset = renderStack->GetNonPositionedChildOffsetTest(size);
+    EXPECT_EQ(offset.GetX(), 0);
+    EXPECT_EQ(offset.GetY(), 0);
+
+    GTEST_LOG_(INFO) << "RenderStackTest rtl001 stop";
 }
 
 } // namespace OHOS::Ace
