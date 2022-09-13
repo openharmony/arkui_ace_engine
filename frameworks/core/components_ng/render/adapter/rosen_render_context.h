@@ -119,6 +119,8 @@ private:
     RefPtr<Canvas> rosenCanvas_;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
+    Color blendColor_ = Color::TRANSPARENT;
+    Color hoveredColor_ = Color::TRANSPARENT;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

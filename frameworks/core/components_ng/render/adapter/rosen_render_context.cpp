@@ -207,14 +207,19 @@ void RosenRenderContext::OnBorderStyleUpdate(const BorderStyleProperty& value)
 void RosenRenderContext::ResetBlendBgColor()
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetBackgroundColor(GetBackgroundColor().value_or(Color::TRANSPARENT).GetValue());
+    blendColor_ = Color::TRANSPARENT;
+    auto blendColor =
+        GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(blendColor_).BlendColor(hoveredColor_);
+    rsNode_->SetBackgroundColor(blendColor.GetValue());
     RequestNextFrame();
 }
 
 void RosenRenderContext::BlendBgColor(const Color& color)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto blendColor = GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(color);
+    blendColor_ = color;
+    auto blendColor =
+        GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(blendColor_).BlendColor(hoveredColor_);
     rsNode_->SetBackgroundColor(blendColor.GetValue());
     RequestNextFrame();
 }
@@ -353,7 +358,7 @@ void RosenRenderContext::MoveFrame(FrameNode* /*self*/, const RefPtr<FrameNode>&
 
 void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
 {
-    LOGD("AnimateHoverEffectScale: isHoverd = %{public}d", isHovered);
+    LOGD("HoverEffect.Scale: isHoverd = %{public}d", isHovered);
     if ((isHovered && isHoveredScale_) || (!isHovered && !isHoveredScale_)) {
         return;
     }
@@ -364,13 +369,15 @@ void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
     CHECK_NULL_VOID(themeManager);
     auto appTheme = themeManager->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
-    float themeScaleStart = appTheme->GetHoverScaleStart();
-    float themeScaleEnd = appTheme->GetHoverScaleEnd();
-    int32_t themeDuration = appTheme->GetHoverDuration();
-    float scaleBegin = isHovered ? themeScaleStart : themeScaleEnd;
-    float scaleEnd = isHovered ? themeScaleEnd : themeScaleStart;
 
-    rsNode_->SetScale(scaleBegin);
+    float hoverScaleFrom = isHovered ? appTheme->GetHoverScaleStart() : appTheme->GetHoverScaleEnd();
+    float hoverColorTo = isHovered ? appTheme->GetHoverScaleEnd() : appTheme->GetHoverScaleStart();
+    float scaleStart = hoverScaleFrom;
+    float scaleEnd = hoverColorTo;
+    int32_t themeDuration = appTheme->GetHoverDuration();
+
+    LOGD("HoverEffect.Scale: scale from %{public}f to %{public}f", scaleStart, scaleEnd);
+    rsNode_->SetScale(scaleStart);
     Rosen::RSAnimationTimingProtocol protocol;
     protocol.SetDuration(themeDuration);
     RSNode::Animate(
@@ -386,7 +393,7 @@ void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
 
 void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
 {
-    LOGD("AnimateHoverEffectBoard: isHoverd = %{public}d", isHovered);
+    LOGD("HoverEffect.Highlight: isHoverd = %{public}d", isHovered);
     if ((isHovered && isHoveredBoard_) || (!isHovered && !isHoveredBoard_)) {
         return;
     }
@@ -397,23 +404,29 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
     CHECK_NULL_VOID(themeManager);
     auto appTheme = themeManager->GetTheme<AppTheme>();
     CHECK_NULL_VOID(appTheme);
-    Color themeHighlightStart = appTheme->GetHoverHighlightStart();
-    Color themeHighlightEnd = appTheme->GetHoverHighlightEnd();
-    int32_t themeDuration = appTheme->GetHoverDuration();
-    Color colorBegin = isHovered ? themeHighlightStart : themeHighlightEnd;
-    Color colorEnd = isHovered ? themeHighlightEnd : themeHighlightStart;
 
-    rsNode_->SetBackgroundColor(colorBegin.GetValue());
+    Color hoverColorFrom = isHovered ? appTheme->GetHoverHighlightStart() : appTheme->GetHoverHighlightEnd();
+    Color hoverColorTo = isHovered ? appTheme->GetHoverHighlightEnd() : appTheme->GetHoverHighlightStart();
+    Color highlightStart =
+        GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(blendColor_).BlendColor(hoverColorFrom);
+    Color highlightEnd =
+        GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(blendColor_).BlendColor(hoverColorTo);
+    int32_t themeDuration = appTheme->GetHoverDuration();
+
+    LOGD("HoverEffect.Highlight: backgroud color from %{public}x to %{public}x", highlightStart.GetValue(),
+        highlightEnd.GetValue());
+    rsNode_->SetBackgroundColor(highlightStart.GetValue());
     Rosen::RSAnimationTimingProtocol protocol;
     protocol.SetDuration(themeDuration);
     RSNode::Animate(
         protocol, Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2f, 0.0f, 0.2f, 1.0f),
-        [rsNode = rsNode_, colorEnd]() {
+        [rsNode = rsNode_, highlightEnd]() {
             if (rsNode) {
-                rsNode->SetBackgroundColor(colorEnd.GetValue());
+                rsNode->SetBackgroundColor(highlightEnd.GetValue());
             }
         },
         []() {});
+    hoveredColor_ = hoverColorTo;
     isHoveredBoard_ = isHovered;
 }
 
