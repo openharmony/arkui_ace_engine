@@ -1001,6 +1001,9 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             }
         }
 #if !defined(PREVIEW)
+        if (LoadJsWithModule(urlName)) {
+            return;
+        }
         if (!ExecuteAbc(urlName)) {
             return;
         }
