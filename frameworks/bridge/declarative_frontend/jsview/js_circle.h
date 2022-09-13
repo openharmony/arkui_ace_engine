@@ -26,7 +26,7 @@ class JSCircle : public JSShapeAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
-
+    
     static void ConstructorCallback(const JSCallbackInfo& info);
     static void DestructorCallback(JSCircle* obj);
 };

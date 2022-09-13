@@ -161,6 +161,15 @@ ACE_EXPORT extern const char PATTERN_LOCK_ETS_TAG[];
 ACE_EXPORT extern const char ROW_COMPONENT_TAG[];
 ACE_EXPORT extern const char ROW_ETS_TAG[];
 
+// rect
+ACE_EXPORT extern const char RECT_ETS_TAG[];
+
+// line
+ACE_EXPORT extern const char LINE_ETS_TAG[];
+
+// circle
+ACE_EXPORT extern const char CIRCLE_ETS_TAG[];
+
 // shape
 ACE_EXPORT extern const char SHAPE_COMPONENT_TAG[];
 ACE_EXPORT extern const char SHAPE_ETS_TAG[];
