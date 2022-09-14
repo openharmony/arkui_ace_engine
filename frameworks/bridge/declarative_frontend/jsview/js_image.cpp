@@ -383,10 +383,7 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
             LOGE("builder param is not an object.");
             return itemInfo;
         }
-
-        ParseDragItem(ret);
-        if (ImageModel::GetInstance()->UpdateDragItemInfo(itemInfo)) {
-            LOGI("use custom builder param.");
+        if (ParseAndUpdateDragItemInfo(ret, itemInfo)) {
             return itemInfo;
         }
 
@@ -397,8 +394,7 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 #endif
         auto extraInfo = builderObj->GetProperty("extraInfo");
         ParseJsString(extraInfo, itemInfo.extraInfo);
-        ParseDragItem(builderObj->GetProperty("builder"));
-        ImageModel::GetInstance()->UpdateDragItemInfo(itemInfo);
+        ParseAndUpdateDragItemInfo(builderObj->GetProperty("builder"), itemInfo);
         return itemInfo;
     };
     ImageModel::GetInstance()->SetOnDragStartId(onDragStartId);

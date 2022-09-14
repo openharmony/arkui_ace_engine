@@ -3556,7 +3556,19 @@ void JSViewAbstract::JsOnDragStart(const JSCallbackInfo& info)
     box->SetOnDragStartId(onDragStartId);
 }
 
-bool JSViewAbstract::ParseDragItem(const JSRef<JSVal>& info)
+
+bool JSViewAbstract::ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, DragItemInfo& dragInfo)
+{
+    auto component = ParseDragItemComponent(info);
+
+    if (!component) {
+        return false;
+    }
+    dragInfo.customComponent = component;
+    return true;
+}
+
+RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& info)
 {
     JSRef<JSVal> builder;
     if (info->IsObject()) {
@@ -3565,14 +3577,14 @@ bool JSViewAbstract::ParseDragItem(const JSRef<JSVal>& info)
     } else if (info->IsFunction()) {
         builder = info;
     } else {
-        return false;
+        return nullptr;
     }
     if (!builder->IsFunction()) {
-        return false;
+        return nullptr;
     }
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     if (!builderFunc) {
-        return false;
+        return nullptr;
     }
     // use another VSP instance while executing the builder function
     ScopedViewStackProcessor builderViewStackProcessor;
@@ -3580,15 +3592,6 @@ bool JSViewAbstract::ParseDragItem(const JSRef<JSVal>& info)
         ACE_SCORING_EVENT("onDragStart.builder");
         builderFunc->Execute();
     }
-    return true;
-}
-
-RefPtr<Component> JSViewAbstract::ParseDragItemComponent(const JSRef<JSVal>& info)
-{
-    if (!ParseDragItem(info)) {
-        return nullptr;
-    }
-
     auto component = ViewStackProcessor::GetInstance()->Finish();
     if (!component) {
         LOGE("Custom component is null.");
