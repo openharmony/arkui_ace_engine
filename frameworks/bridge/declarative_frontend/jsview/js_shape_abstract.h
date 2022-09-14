@@ -59,6 +59,7 @@ public:
     void ObjectFill(const JSCallbackInfo& info);
 protected:
     static void SetSize(const JSCallbackInfo& info);
+    static void SetNgSize(const JSCallbackInfo& info);
     static void SetWidth(const JSRef<JSVal>& jsValue);
     static void SetHeight(const JSRef<JSVal>& jsValue);
     void ObjectWidth(const JSRef<JSVal>& jsValue);
