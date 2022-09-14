@@ -42,6 +42,7 @@ void JSLine::Create(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::LineView::Create();
+        SetNgSize(info);
         return;
     }
     RefPtr<ShapeComponent> lineComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::LINE);

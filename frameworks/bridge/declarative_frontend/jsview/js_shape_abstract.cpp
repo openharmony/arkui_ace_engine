@@ -476,4 +476,21 @@ void JSShapeAbstract::SetSize(const JSCallbackInfo& info)
     }
 }
 
+void JSShapeAbstract::SetNgSize(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> width = obj->GetProperty("width");
+        Dimension dimWidth;
+        if (ParseJsDimensionVp(width, dimWidth)) {
+            JSViewAbstract::JsWidth(width);
+        }
+        JSRef<JSVal> height = obj->GetProperty("height");
+        Dimension dimHeight;
+        if (ParseJsDimensionVp(height, dimHeight)) {
+            JSViewAbstract::JsHeight(height);
+        }
+    }
+}
+
 } // namespace OHOS::Ace::Framework

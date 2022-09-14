@@ -27,6 +27,7 @@ void JSCircle::Create(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::CircleView::Create();
+        SetNgSize(info);
         return;
     }
     RefPtr<Component> circleComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::CIRCLE);
