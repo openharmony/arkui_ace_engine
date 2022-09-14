@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -978,6 +978,53 @@ HWTEST_F(RenderWrapTest, RenderWrapPerformLayout020, TestSize.Level1)
     EXPECT_TRUE(firstBox->GetLayoutSize() == Size(BOX_HEIGHT, MID_LARGE_BOX_HEIGHT));
     EXPECT_TRUE(secondBox->GetLayoutSize() == Size(BOX_HEIGHT, MID_LARGE_BOX_HEIGHT));
     EXPECT_TRUE(thirdBox->GetLayoutSize() == Size(CROSS_LENGTH / 2, MID_LARGE_BOX_HEIGHT));
+}
+
+/**
+ * @tc.name: RenderWrapPerformLayout021
+ * @tc.desc: Wrap component layout size
+ * @tc.type: FUNC
+ * @tc.required: issueI5NC8W
+ */
+HWTEST_F(RenderWrapTest, RenderWrapPerformLayout021, TestSize.Level1)
+{
+    RefPtr<RenderRoot> root = WrapTestUtils::CreateRenderRoot();
+    std::list<RefPtr<Component>> children;
+    RefPtr<WrapComponent> wrapComponent = AceType::MakeRefPtr<WrapComponent>(children);
+    wrapComponent->SetAlignment(WrapAlignment::START);
+    wrapComponent->SetMainAlignment(WrapAlignment::START);
+    wrapComponent->SetCrossAlignment(WrapAlignment::START);
+
+    auto mockContext = MockRenderCommon::GetMockContext();
+    RefPtr<RenderWrap> wrap = WrapTestUtils::CreateRenderWrap(wrapComponent, mockContext);
+
+    wrapComponent->SetDirection(WrapDirection::HORIZONTAL);
+    wrapComponent->SetHorizontalMeasure(MeasureType::DEFAULT);
+    wrap->Update(wrapComponent);
+    wrap->SetWrapLayoutSize(200, 100);
+    Size wrapSize = wrap->GetLayoutSize();
+    EXPECT_TRUE(wrapSize == Size(200, 100));
+
+    wrapComponent->SetDirection(WrapDirection::HORIZONTAL_REVERSE);
+    wrapComponent->SetHorizontalMeasure(MeasureType::DEFAULT);
+    wrap->Update(wrapComponent);
+    wrap->SetWrapLayoutSize(300, 100);
+    wrapSize = wrap->GetLayoutSize();
+    EXPECT_TRUE(wrapSize == Size(300, 100));
+
+    wrapComponent->SetDirection(WrapDirection::VERTICAL);
+    wrapComponent->SetHorizontalMeasure(MeasureType::DEFAULT);
+    wrap->Update(wrapComponent);
+    wrap->SetWrapLayoutSize(200, 100);
+    wrapSize = wrap->GetLayoutSize();
+    EXPECT_TRUE(wrapSize == Size(100, 200));
+
+    wrapComponent->SetDirection(WrapDirection::VERTICAL_REVERSE);
+    wrapComponent->SetHorizontalMeasure(MeasureType::DEFAULT);
+    wrap->Update(wrapComponent);
+    wrap->SetWrapLayoutSize(300, 100);
+    wrapSize = wrap->GetLayoutSize();
+    EXPECT_TRUE(wrapSize == Size(100, 300));
 }
 
 } // namespace OHOS::Ace

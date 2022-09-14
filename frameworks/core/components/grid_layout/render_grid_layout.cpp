@@ -56,13 +56,13 @@ const char UNIT_AUTO_FILL[] = "auto-fill";
 const char REPEAT_PREFIX[] = "repeat";
 const std::regex REPEAT_NUM_REGEX(R"(^repeat\((\d+),(.+)\))", std::regex::icase); // regex for "repeat(2, 100px)"
 const std::regex AUTO_REGEX(R"(^repeat\((.+),(.+)\))", std::regex::icase);        // regex for "repeat(auto-fill, 10px)"
-const std::regex TRIM_REGEX(R"(^ +| +$|(\"[^\"\\\\]*(?:\\\\[\\s\\S][^\"\\\\]*)*\")|( ) +)");
+const std::regex TRIM_REGEX(R"(^ +| +$|(\"[^\"\\\\]*(?:\\\\[\\s\\S][^\"\\\\]*)*\")|( ) +)", std::regex::icase);
 const char TRIM_TEMPLATE[] = "$1$2";
-const char INVALID_PATTERN[] = "((repeat)\\(\\s{0,}(auto-fill),)";
+const char INVALID_PATTERN[] = "((repeat)\\(\\s{0,}(auto-fill)\\s{0,},)";
 const char SIZE_PATTERN[] = "\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}";
-const char PREFIX_PATTERN[] = "\\d{1,}(repeat)|(px|%|vp)\\d{1,}|\\)\\d{1,}";
+const char PREFIX_PATTERN[] = "\\S{1,}(repeat)|(px|%|vp)\\d{1,}|\\)\\d{1,}";
 const char REPEAT_WITH_AUTOFILL[] =
-           "((repeat)\\(\\s{0,}(auto-fill),(\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}){1,}\\s{0,}\\))";
+           "((repeat)\\(\\s{0,}(auto-fill)\\s{0,},(\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}){1,}\\s{0,}\\))";
 
 // first bool mean if vertical, second bool mean if reverse
 // false, false --> RIGHT
@@ -475,6 +475,28 @@ std::string RenderGridLayout::PreParseCols()
     return colsArgs;
 }
 
+std::string RenderGridLayout::PreParseArgs(const std::string& args)
+{
+    if (args.empty() || args.find(UNIT_AUTO) == std::string::npos) {
+        return args;
+    }
+    std::string arg;
+    std::vector<std::string> strs;
+    StringUtils::StringSplitter(args, ' ', strs);
+    std::string current;
+    int32_t argSize = strs.size();
+    for (int32_t i = 0; i < argSize; ++i) {
+        current = strs[i];
+        if (strs[i] == std::string(UNIT_AUTO)) {
+            Size layoutSize = GetTargetLayoutSize(i, 0);
+            current = StringUtils::DoubleToString(layoutSize.Height()) + std::string(UNIT_PIXEL);
+            gridMatrix_.clear();
+        }
+        arg += ' ' + current;
+    }
+    return arg;
+}
+
 void RenderGridLayout::InitialGridProp()
 {
     // Not first time layout after update, no need to initial.
@@ -496,8 +518,8 @@ void RenderGridLayout::InitialGridProp()
         (colsArgs_.find(UNIT_PERCENT) != std::string::npos || colsArgs_.find(UNIT_RATIO) != std::string::npos)) {
         colSize_ = viewPort_.Width();
     }
-    std::vector<double> rows = ParseArgsWithAutoFill(PreParseRows(), rowSize_, rowGap_);
-    std::vector<double> cols = ParseArgsWithAutoFill(PreParseCols(), colSize_, colGap_);
+    std::vector<double> rows = ParseArgs(GetRowTemplate(), rowSize_, rowGap_);
+    std::vector<double> cols = ParseArgs(GetColumnsTemplate(), colSize_, colGap_);
     if (rows.empty()) {
         rows.push_back(rowSize_);
     }
@@ -554,7 +576,7 @@ void RenderGridLayout::UpdateAccessibilityAttr()
 // (3) 30% 20% 50%
 // (4) repeat(2,100px 20%) -- will be prebuilt by JS Engine to --- 100px 20% 100px 20%
 // (5) repeat(auto-fill, 100px 300px)  -- will be prebuilt by JS Engine to --- auto-fill 100px 300px
-std::vector<double> RenderGridLayout::ParseArgs(const std::string& args, double size, double gap)
+std::vector<double> RenderGridLayout::ParseArgsInner(const std::string& args, double size, double gap)
 {
     std::vector<double> lens;
     if (args.empty()) {
@@ -1640,7 +1662,7 @@ void RenderGridLayout::CalculateVerticalSize(
         colSize_ = viewPort_.Width();
     }
     // Get item width
-    cols = ParseArgsWithAutoFill(PreParseCols(), colSize_, colGap_);
+    cols = ParseArgs(GetColumnsTemplate(), colSize_, colGap_);
     if (cols.empty()) {
         cols.push_back(colSize_);
     }
@@ -1666,7 +1688,7 @@ void RenderGridLayout::CalculateHorizontalSize(
         rowSize_ = viewPort_.Height();
     }
     // Get item width
-    rows = ParseArgsWithAutoFill(PreParseRows(), rowSize_, rowGap_);
+    rows = ParseArgs(GetRowTemplate(), rowSize_, rowGap_);
     if (rows.empty()) {
         rows.push_back(rowSize_);
     }
@@ -3270,7 +3292,8 @@ std::string RenderGridLayout::TrimTemplate(std::string& str)
     return std::regex_replace(str, TRIM_REGEX, TRIM_TEMPLATE);
 }
 
-void RenderGridLayout::RTrim(std::string& str) {
+void RenderGridLayout::RTrim(std::string& str)
+{
     str.erase(std::find_if(str.rbegin(), str.rend(), [](int ch) {
         return !std::isspace(ch);
         }).base(), str.end());
@@ -3281,7 +3304,7 @@ bool RenderGridLayout::SplitTemplate(const std::string& str, std::vector<Value>&
     std::string merge;
     std::string regexResult;
     std::smatch result;
-    std::regex pattern(SIZE_PATTERN);
+    std::regex pattern(SIZE_PATTERN, std::regex::icase);
     std::string::const_iterator iterStart = str.begin();
     std::string::const_iterator iterEnd = str.end();
 
@@ -3300,7 +3323,7 @@ bool RenderGridLayout::SplitTemplate(const std::string& str, std::vector<Value>&
 std::string RenderGridLayout::GetRepeat(const std::string& str)
 {
     std::smatch result;
-    std::regex pattern(REPEAT_WITH_AUTOFILL);
+    std::regex pattern(REPEAT_WITH_AUTOFILL, std::regex::icase);
     std::string::const_iterator iterStart = str.begin();
     std::string::const_iterator iterEnd = str.end();
     std::string regexResult;
@@ -3324,7 +3347,7 @@ bool RenderGridLayout::CheckRepeatAndSplitString(
         return false;
     }
     std::string regexResult;
-    std::regex pattern(INVALID_PATTERN);
+    std::regex pattern(INVALID_PATTERN, std::regex::icase);
 
     for (auto it = vec.begin(); it != vec.end(); it++) {
         RTrim(*it);
@@ -3388,25 +3411,29 @@ bool RenderGridLayout::CheckAutoFillParameter(
         return false;
     }
     std::smatch result;
-    std::regex patternFilter(PREFIX_PATTERN);
+    std::regex patternFilter(PREFIX_PATTERN, std::regex::icase);
     if(std::regex_search(args, result, patternFilter)) {
         out.push_back(size);
         return false;
     }
 
-    std::regex pattern(REPEAT_WITH_AUTOFILL);
+    std::regex pattern(REPEAT_WITH_AUTOFILL, std::regex::icase);
     std::vector<std::string> vec(
         std::sregex_token_iterator(args.begin(), args.end(), pattern, -1), std::sregex_token_iterator());
 
     std::string repeat = GetRepeat(args);
-    return CheckRepeatAndSplitString(vec, repeat, resultvec);
+    bool bRet = CheckRepeatAndSplitString(vec, repeat, resultvec);
+    if (!bRet && out.size() == 0) {
+        out.push_back(size);
+    }
+    return bRet;
 }
 
 std::vector<double> RenderGridLayout::ParseArgsWithAutoFill(const std::string& args, double size, double gap)
 {
     std::vector<double> lens;
     if (args.find(UNIT_AUTO_FILL) == std::string::npos) {
-        return ParseArgs(args, size, gap);
+        return ParseArgsInner(PreParseArgs(args), size, gap);
     }
     std::vector<Value> retTemplates;
     if (!CheckAutoFillParameter(args, size, lens, retTemplates)) {
@@ -3440,6 +3467,10 @@ std::vector<double> RenderGridLayout::ParseArgsWithAutoFill(const std::string& a
     int count = 0;
     if (!NearZero(sizeRepeat)) {
         count = LessOrEqual(sizeLeft / sizeRepeat, 1) ? 1 : floor(sizeLeft / sizeRepeat);
+    } else {
+        if (GetChildren().size() >= countNonRepeat && retTemplates.size() > 0) {
+            count = ceil((GetChildren().size() - countNonRepeat) * 1.0 / (retTemplates.size() - countNonRepeat));
+        }
     }
     lens.insert(lens.end(), prefixLens.begin(), prefixLens.end());
     for (int i = 0; i < count; i++) {
@@ -3449,4 +3480,12 @@ std::vector<double> RenderGridLayout::ParseArgsWithAutoFill(const std::string& a
     return lens;
 }
 
+std::vector<double> RenderGridLayout::ParseArgs(const std::string& args, double size, double gap)
+{
+    if (GetRepeat(args) != "") {
+        return ParseArgsWithAutoFill(args, size, gap);
+    } else {
+        return ParseArgsInner(PreParseArgs(args), size, gap);
+    }
+}
 } // namespace OHOS::Ace
