@@ -40,6 +40,8 @@ public:
 
     // Requests that this client Y point.
     virtual double GetEditingBoxY() const { return 0.0; };
+    virtual double GetEditingBoxTopY() const { return 0.0; };
+    virtual bool GetEditingBoxModel() const { return false; };
 
 };
 

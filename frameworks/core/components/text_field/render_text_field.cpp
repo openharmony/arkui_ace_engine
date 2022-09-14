@@ -1160,6 +1160,21 @@ double RenderTextField::GetEditingBoxY() const
     return GetGlobalOffset().GetY() + height_.Value();
 }
 
+double RenderTextField::GetEditingBoxTopY() const
+{
+    return GetGlobalOffset().GetY();
+}
+
+bool RenderTextField::GetEditingBoxModel() const
+{
+    bool isDeclarative = false;
+    auto context = context_.Upgrade();
+    if (context && context->GetIsDeclarative()) {
+        isDeclarative = true;
+    }
+    return isDeclarative;
+}
+
 void RenderTextField::SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent, bool isClearRecords)
 {
     if (newValue.text != GetEditingValue().text && needFireChangeEvent) {
