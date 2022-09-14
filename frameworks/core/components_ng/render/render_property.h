@@ -34,10 +34,9 @@ struct BorderProperty {
 
 struct TransformProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformScale, VectorF);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, VectorF);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformTranslate, Vector3F);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector3F);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformAngle, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector4F);
 };
 
 } // namespace OHOS::Ace::NG

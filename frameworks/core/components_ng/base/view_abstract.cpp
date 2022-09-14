@@ -220,29 +220,24 @@ void ViewAbstract::SetOpacity(double opacity)
     ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
 }
 
-void ViewAbstract::SetScale(NG::VectorF scale)
+void ViewAbstract::SetScale(const NG::VectorF& value)
 {
-    ACE_UPDATE_RENDER_CONTEXT(TransformScale, scale);
+    ACE_UPDATE_RENDER_CONTEXT(TransformScale, value);
 }
 
-void ViewAbstract::SetPivot(NG::VectorF center)
+void ViewAbstract::SetPivot(const DimensionOffset& value)
 {
-    ACE_UPDATE_RENDER_CONTEXT(TransformCenter, center);
+    ACE_UPDATE_RENDER_CONTEXT(TransformCenter, value);
 }
 
-void ViewAbstract::SetTranslate(NG::Vector3F translate)
+void ViewAbstract::SetTranslate(const NG::Vector3F& value)
 {
-    ACE_UPDATE_RENDER_CONTEXT(TransformTranslate, translate);
+    ACE_UPDATE_RENDER_CONTEXT(TransformTranslate, value);
 }
 
-void ViewAbstract::SetRotate(NG::Vector3F rotate)
+void ViewAbstract::SetRotate(const NG::Vector4F& value)
 {
-    ACE_UPDATE_RENDER_CONTEXT(TransformRotate, rotate);
-}
-
-void ViewAbstract::SetAngle(float& angle)
-{
-    ACE_UPDATE_RENDER_CONTEXT(TransformAngle, angle);
+    ACE_UPDATE_RENDER_CONTEXT(TransformRotate, value);
 }
 
 void ViewAbstract::Pop()

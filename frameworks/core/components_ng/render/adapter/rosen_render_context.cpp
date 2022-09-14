@@ -16,6 +16,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 #include <cstdint>
+#include <cmath>
 
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
@@ -105,7 +106,11 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* geometryNode)
     rsNode_->SetFrame(frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height());
     if (propTransform_ && propTransform_->HasTransformCenter()) {
         auto vec = propTransform_->GetTransformCenterValue();
-        rsNode_->SetPivot(vec.x / frameRect.Width(), vec.y / frameRect.Height());
+        if (vec.GetX().Unit() == DimensionUnit::PERCENT) {
+            rsNode_->SetPivot(vec.GetX().Value(), vec.GetY().Value());
+        } else {
+            rsNode_->SetPivot(vec.GetX().ConvertToPx()/frameRect.Width(), vec.GetY().ConvertToPx()/frameRect.Height());
+        }
     }
 }
 
@@ -143,25 +148,23 @@ void RosenRenderContext::OnTransformTranslateUpdate(const Vector3F& translate)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnTransformRotateUpdate(const Vector3F& rotate)
+void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
 {
     if (!rsNode_) {
         return;
     }
-    rsNode_->SetRotation(rotate.x, rotate.y, rotate.z);
+    float norm = std::sqrt(std::pow(rotate.x, 2) + std::pow(rotate.y, 2) + std::pow(rotate.z, 2));
+    // pi = 4*atan(1)
+    float angle = rotate.w/2*4*std::atan(1)/180;
+    float dx = rotate.x*std::sin(angle)/norm;
+    float dy = rotate.y*std::sin(angle)/norm;
+    float dz = rotate.z*std::sin(angle)/norm;
+    float dw = std::cos(angle);
+    rsNode_->SetRotation(OHOS::Rosen::Quaternion(dx, dy, dz, dw));
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnTransformCenterUpdate(const VectorF& center) {}
-
-void RosenRenderContext::OnTransformAngleUpdate(const float& angle)
-{
-    if (!rsNode_) {
-        return;
-    }
-    rsNode_->SetRotation(angle);
-    RequestNextFrame();
-}
+void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center) {}
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {

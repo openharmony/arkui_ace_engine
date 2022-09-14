@@ -55,11 +55,10 @@ public:
     static void SetAlign(Alignment alignment);
 
     // transform
-    static void SetScale(NG::VectorF scale);
-    static void SetPivot(NG::VectorF center);
-    static void SetTranslate(NG::Vector3F translate);
-    static void SetRotate(NG::Vector3F rotate);
-    static void SetAngle(float& angle);
+    static void SetScale(const NG::VectorF& value);
+    static void SetPivot(const DimensionOffset& value);
+    static void SetTranslate(const NG::Vector3F& value);
+    static void SetRotate(const NG::Vector4F& value);
 
     // event
     static void SetOnClick(GestureEventFunc&& clickEventFunc);
