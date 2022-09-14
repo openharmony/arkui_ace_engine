@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-using ChangeEvent = std::function<void(const uint64_t, uint64_t)>;
+using ChangeEvent = std::function<void(const std::string, const std::string)>;
 
 class TextTimerEventHub : public EventHub {
     DECLARE_ACE_TYPE(TextTimerEventHub, EventHub)
@@ -35,10 +35,10 @@ public:
         changeEvent_ = std::move(changeEvent);
     }
 
-    void FireChangeEvent(uint64_t utc, uint64_t elapsedTime) const
+    void FireChangeEvent(std::string utc, std::string elapsedTime) const
     {
         if (changeEvent_) {
-            changeEvent_(utc, elapsedTime);
+            changeEvent_(std::move(utc), std::move(elapsedTime));
         }
     }
 

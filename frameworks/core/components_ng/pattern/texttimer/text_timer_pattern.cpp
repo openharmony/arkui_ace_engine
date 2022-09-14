@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 
 #include <stack>
+#include <string>
 
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
@@ -36,7 +37,7 @@ void TextTimerPattern::FireChangeEvent() const
 {
     auto textTimerEventHub = GetEventHub<TextTimerEventHub>();
     CHECK_NULL_VOID(textTimerEventHub);
-    textTimerEventHub->FireChangeEvent(GetMilliseconds(), elapsedTime_);
+    textTimerEventHub->FireChangeEvent(std::to_string(GetMilliseconds()), std::to_string(elapsedTime_));
 }
 
 void TextTimerPattern::InitTextTimerController()
