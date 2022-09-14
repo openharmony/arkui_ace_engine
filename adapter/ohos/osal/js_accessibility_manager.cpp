@@ -823,8 +823,6 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessib
     if (!jsAccessibilityManager) {
         LOGW("SetSearchElementInfoByAccessibilityIdResult elementId(%{public}d) requestId(%{public}d)", elementId,
             requestId);
-        std::list<AccessibilityElementInfo> infos;
-        jsAccessibilityManager->SetSearchElementInfoByAccessibilityIdResult(callback, infos, requestId);
         return;
     }
 
@@ -833,8 +831,6 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessib
         context->GetTaskExecutor()->PostTask(
             [jsAccessibilityManager, elementId, requestId, &callback, mode]() {
                 if (!jsAccessibilityManager) {
-                    std::list<AccessibilityElementInfo> infos;
-                    jsAccessibilityManager->SetSearchElementInfoByAccessibilityIdResult(callback, infos, requestId);
                     LOGW("SetSearchElementInfoByAccessibilityIdResult elementId(%{public}d) requestId(%{public}d)",
                         elementId, requestId);
                     return;
@@ -897,12 +893,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfosByText(co
     if (context) {
         context->GetTaskExecutor()->PostTask(
             [jsAccessibilityManager, elementId, text, requestId, &callback]() {
-                AccessibilityElementInfo nodeInfo;
                 if (!jsAccessibilityManager) {
-                    std::list<AccessibilityElementInfo> infos;
-                    AccessibilityElementInfo nodeInfo;
-                    infos.push_back(nodeInfo);
-                    jsAccessibilityManager->SetSearchElementInfoByTextResult(callback, infos, requestId);
                     return;
                 }
 
@@ -967,9 +958,6 @@ void JsAccessibilityManager::JsInteractionOperation::FindFocusedElementInfo(cons
         context->GetTaskExecutor()->PostTask(
             [jsAccessibilityManager, elementId, focusType, requestId, &callback]() {
                 if (!jsAccessibilityManager) {
-                    AccessibilityElementInfo nodeInfo;
-                    nodeInfo.SetValidElement(false);
-                    jsAccessibilityManager->SetFindFocusedElementInfoResult(callback, nodeInfo, requestId);
                     return;
                 }
                 jsAccessibilityManager->FindFocusedElementInfo(elementId, focusType, requestId, callback);
@@ -987,21 +975,13 @@ void JsAccessibilityManager::FindFocusedElementInfo(const int32_t elementId, con
         SetFindFocusedElementInfoResult(callback, nodeInfo, requestId);
         return;
     }
-    auto weak = WeakClaim(this);
-    auto jsAccessibilityManager = weak.Upgrade();
-    if (!jsAccessibilityManager) {
-        LOGI("FindFocusedElementInfo jsAccessibilityManager is null");
-        nodeInfo.SetValidElement(false);
-        SetFindFocusedElementInfoResult(callback, nodeInfo, requestId);
-        return;
-    }
 
     NodeId nodeId = static_cast<NodeId>(elementId);
     if (elementId == -1) {
         nodeId = 0;
     }
 
-    auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage(nodeId);
+    auto node = GetAccessibilityNodeFromPage(nodeId);
     if (!node) {
         nodeInfo.SetValidElement(false);
         SetFindFocusedElementInfoResult(callback, nodeInfo, requestId);
@@ -1020,8 +1000,7 @@ void JsAccessibilityManager::FindFocusedElementInfo(const int32_t elementId, con
     LOGI("FindFocus status(%{public}d)", status);
     if ((status) && (resultNode != nullptr)) {
         LOGI("FindFocus nodeId:%{public}d", resultNode->GetNodeId());
-        UpdateAccessibilityNodeInfo(resultNode, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_,
-            jsAccessibilityManager->GetRootNodeId());
+        UpdateAccessibilityNodeInfo(resultNode, nodeInfo, Claim(this), windowId_, GetRootNodeId());
     }
 
     SetFindFocusedElementInfoResult(callback, nodeInfo, requestId);
