@@ -19,10 +19,12 @@
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
+
 class ACE_EXPORT CircleView {
 public:
     static void Create();
 };
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_VIEW_H

@@ -32,8 +32,8 @@ public:
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
         auto linePaintProperty = DynamicCast<LinePaintProperty>(paintWrapper->GetPaintProperty());
-        if(!linePaintProperty->GetStartPoint() || !linePaintProperty->GetEndPoint()){
-             return nullptr;
+        if (!linePaintProperty->GetStartPoint() || !linePaintProperty->GetEndPoint()) {
+            return nullptr;
         }
         return [startPoint = linePaintProperty->GetStartPointValue(), endPoint = linePaintProperty->GetEndPointValue()](
                    RSCanvas& canvas) { LinePainter::DrawLine(canvas, startPoint, endPoint); };

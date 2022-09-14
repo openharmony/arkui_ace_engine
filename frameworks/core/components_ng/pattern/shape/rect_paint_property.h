@@ -50,8 +50,7 @@ public:
         ResetTopRightRadius();
     }
 
-public:
-    const std ::optional<Radius>& GetTopLeftRadius()
+    const std::optional<Radius>& GetTopLeftRadius()
     {
         return propTopLeftRadius_;
     }
@@ -59,11 +58,11 @@ public:
     {
         return propTopLeftRadius_.has_value();
     }
-    Radius GetTopLeftRadiusValue() const
+    const Radius& GetTopLeftRadiusValue() const
     {
         return propTopLeftRadius_.value();
     }
-    std ::optional<Radius> CloneTopLeftRadius() const
+    const std::optional<Radius>& CloneTopLeftRadius() const
     {
         return propTopLeftRadius_;
     }
@@ -77,7 +76,7 @@ public:
         UpdateRadius(propTopLeftRadius_, value);
     }
 
-    const std ::optional<Radius>& GetTopRightRadius()
+    const std::optional<Radius>& GetTopRightRadius()
     {
         return propTopRightRadius_;
     }
@@ -89,7 +88,7 @@ public:
     {
         return propTopRightRadius_.value();
     }
-    std ::optional<Radius> CloneTopRightRadius() const
+    const std::optional<Radius>& CloneTopRightRadius() const
     {
         return propTopRightRadius_;
     }
@@ -103,7 +102,7 @@ public:
         UpdateRadius(propTopRightRadius_, value);
     }
 
-    const std ::optional<Radius>& GetBottomRightRadius()
+    const std::optional<Radius>& GetBottomRightRadius()
     {
         return propBottomRightRadius_;
     }
@@ -115,7 +114,7 @@ public:
     {
         return propBottomRightRadius_.value();
     }
-    std ::optional<Radius> CloneBottomRightRadius() const
+    const std::optional<Radius>& CloneBottomRightRadius() const
     {
         return propBottomRightRadius_;
     }
@@ -129,7 +128,7 @@ public:
         UpdateRadius(propBottomRightRadius_, value);
     }
 
-    const std ::optional<Radius>& GetBottomLeftRadius()
+    const std::optional<Radius>& GetBottomLeftRadius()
     {
         return propBottomLeftRadius_;
     }
@@ -141,7 +140,7 @@ public:
     {
         return propBottomLeftRadius_.value();
     }
-    std ::optional<Radius> CloneBottomLeftRadius() const
+    const std::optional<Radius>& CloneBottomLeftRadius() const
     {
         return propBottomLeftRadius_;
     }
@@ -179,12 +178,12 @@ public:
     }
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(RectPaintProperty);
+    std::optional<Radius> propTopLeftRadius_;
+    std::optional<Radius> propTopRightRadius_;
+    std::optional<Radius> propBottomLeftRadius_;
+    std::optional<Radius> propBottomRightRadius_;
 
-    std ::optional<Radius> propTopLeftRadius_;
-    std ::optional<Radius> propTopRightRadius_;
-    std ::optional<Radius> propBottomLeftRadius_;
-    std ::optional<Radius> propBottomRightRadius_;
+    ACE_DISALLOW_COPY_AND_MOVE(RectPaintProperty);
 };
 
 } // namespace OHOS::Ace::NG
