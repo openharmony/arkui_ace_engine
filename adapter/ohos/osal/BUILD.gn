@@ -73,6 +73,7 @@ template("ace_osal_ohos_source_set") {
       ]
       external_deps += [
         "ability_base:want",
+        "input:libmmi-client",
         "multimedia_image_standard:image",
         "napi:ace_napi",
       ]
@@ -90,7 +91,10 @@ template("ace_osal_ohos_source_set") {
     } else {
       external_deps += [ "multimedia_image:image" ]
     }
-    sources += [ "pixel_map_ohos.cpp" ]
+    sources += [
+      "mouse_style_ohos.cpp",
+      "pixel_map_ohos.cpp",
+    ]
     external_deps += [
       "hicollie_native:libhicollie",
       "hisysevent_native:libhisysevent",

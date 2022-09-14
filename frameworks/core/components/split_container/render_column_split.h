@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SPLIT_CONTAINER_RENDER_COLUMN_SPLIT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SPLIT_CONTAINER_RENDER_COLUMN_SPLIT_H
 
-#include "core/pipeline/base/render_node.h"
 #include "core/components/split_container/render_split_container.h"
 #include "core/gestures/drag_recognizer.h"
+#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 

@@ -16,6 +16,8 @@
 #include "core/components/search/render_search.h"
 
 #include "base/json/json_util.h"
+#include "base/log/log_wrapper.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/utils/system_properties.h"
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
@@ -161,8 +163,8 @@ void RenderSearch::InitRect(const RefPtr<RenderTextField>& renderTextField)
         double searchBoxWidth = renderSearchBox_->GetLayoutSize().Width();
         Offset searchTextOffset = Offset(
             GetLayoutSize().Width() - rightBorderWidth - searchBoxWidth - searchBoxSpacing, searchBoxVerticalOffset);
-        Offset searchReactOffset = Offset(
-            GetLayoutSize().Width() - rightBorderWidth - searchBoxWidth - searchBoxSpacing, topBorderWidth);
+        Offset searchReactOffset =
+            Offset(GetLayoutSize().Width() - rightBorderWidth - searchBoxWidth - searchBoxSpacing, topBorderWidth);
         if (needReverse_) {
             searchTextOffset = Offset(leftBorderWidth, searchBoxVerticalOffset);
             searchReactOffset = Offset(leftBorderWidth, topBorderWidth);
@@ -177,8 +179,7 @@ void RenderSearch::InitRect(const RefPtr<RenderTextField>& renderTextField)
 
     auto context = context_.Upgrade();
     if (context && context->GetIsDeclarative()) {
-        double padding = searchTextRect_.Width() + rightBorderWidth +
-                         NormalizeToPx(closeIconHotZoneHorizontal_) -
+        double padding = searchTextRect_.Width() + rightBorderWidth + NormalizeToPx(closeIconHotZoneHorizontal_) -
                          (NormalizeToPx(closeIconSize_) / 2.0);
         renderTextField->SetPaddingHorizonForSearch(padding);
     } else {
@@ -561,5 +562,46 @@ void RenderSearch::CancelTextFieldHover()
         renderTextField->MarkNeedRender();
     }
 }
+
+bool RenderSearch::HandleMouseEvent(const MouseEvent& event)
+{
+    MouseInfo info;
+    info.SetButton(event.button);
+    info.SetAction(event.action);
+    info.SetGlobalLocation(event.GetOffset());
+    info.SetLocalLocation(event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY()));
+    info.SetScreenLocation(event.GetScreenOffset());
+    info.SetTimeStamp(event.time);
+    auto lowBound = searchReactRect_.GetOffset().GetX();
+    auto upBound = searchReactRect_.GetOffset().GetX() + searchReactRect_.GetSize().Width();
+    RefPtr mouseStyle = MouseStyle::CreateMouseStyle();
+    auto context = GetContext().Upgrade();
+    auto windowId = context->GetWindowId();
+    int32_t curPointerStyle = 0;
+
+    if (info.GetLocalLocation().GetX() >= lowBound && info.GetLocalLocation().GetX() <= upBound) {
+        isInSearchButton_ = true;
+    } else {
+        isInSearchButton_ = false;
+    }
+    if (preIsInSearchButton_ != isInSearchButton_) {
+        preIsInSearchButton_ = isInSearchButton_;
+        if (isInSearchButton_) {
+            MouseFormat defaultStyle = MouseFormat::DEFAULT;
+            mouseStyle->SetPointerStyle(windowId, defaultStyle);
+        } else {
+            MouseFormat textCursorStyle = MouseFormat::TEXT_CURSOR;
+            mouseStyle->SetPointerStyle(windowId, textCursorStyle);
+        }
+    }
+    MouseFormat hopenPointStyle = isInSearchButton_ ? MouseFormat::DEFAULT : MouseFormat::TEXT_CURSOR;
+    if (mouseStyle->GetPointerStyle(windowId, curPointerStyle) != -1 && (int32_t)hopenPointStyle != curPointerStyle) {
+        mouseStyle->SetPointerStyle(windowId, hopenPointStyle);
+        isInSearchButton_ = hopenPointStyle == MouseFormat::DEFAULT ? true : false;
+    }
+    return true;
+}
+
+void RenderSearch::HandleMouseHoverEvent(MouseState mouseState) {}
 
 } // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 #include "base/memory/referenced.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/split_container/split_container_component.h"
-#include "core/pipeline/base/render_node.h"
 #include "core/gestures/drag_recognizer.h"
+#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 
@@ -44,6 +44,9 @@ public:
         return resizeable_;
     }
 
+    bool HandleMouseEvent(const MouseEvent& event) override;
+    void HandleMouseHoverEvent(MouseState mouseState) override;
+
 protected:
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -52,6 +55,9 @@ protected:
     bool resizeable_ = false;
     double layoutWidth_ = 0.0;
     double layoutHeight_ = 0.0;
+    bool preIsDraged_ = false;
+    bool isDraged_ = false;
+    bool isDragedMoving_ = false;
     std::map<int32_t, std::list<MagicLayoutNode>> magicNodes_;
     std::set<RefPtr<RenderNode>> displayNodes_;
     std::set<RefPtr<RenderNode>> disableHideNodes_;

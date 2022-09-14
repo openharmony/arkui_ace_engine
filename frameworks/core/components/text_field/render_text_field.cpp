@@ -19,6 +19,8 @@
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -33,6 +35,7 @@
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
+#include "core/event/mouse_event.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components/text_field/on_text_changed_listener_impl.h"
@@ -434,6 +437,23 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
     return false;
 }
 
+void RenderTextField::HandleMouseHoverEvent(MouseState mouseState)
+{
+    auto pipeline = context_.Upgrade();
+    if (!pipeline) {
+        return;
+    }
+    int32_t windowId = pipeline->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    MouseFormat defaultStyle = MouseFormat::DEFAULT;
+    MouseFormat textCursorStyle = MouseFormat::TEXT_CURSOR;
+    if (mouseState == MouseState::HOVER) {
+        mouseStyle->SetPointerStyle(windowId, textCursorStyle);
+    } else {
+        mouseStyle->SetPointerStyle(windowId, defaultStyle);
+    }
+}
+
 void RenderTextField::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
@@ -670,13 +690,11 @@ void RenderTextField::GetFieldAndOverlayTouchRect(std::vector<Rect>& resRectList
     for (auto& rect : fieldTouchRectList) {
         rect.SetOffset(GetGlobalOffset());
     }
-    resRectList.insert(
-        resRectList.end(), fieldTouchRectList.begin(), fieldTouchRectList.end());
+    resRectList.insert(resRectList.end(), fieldTouchRectList.begin(), fieldTouchRectList.end());
     auto textOverlayManager = context->GetTextOverlayManager();
     if (textOverlayManager) {
         auto overlayTouchRectList = textOverlayManager->GetTextOverlayRect();
-        resRectList.insert(
-            resRectList.end(), overlayTouchRectList.begin(), overlayTouchRectList.end());
+        resRectList.insert(resRectList.end(), overlayTouchRectList.begin(), overlayTouchRectList.end());
     }
 }
 
