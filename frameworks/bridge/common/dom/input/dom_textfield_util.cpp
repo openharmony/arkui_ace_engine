@@ -194,7 +194,11 @@ void DOMTextFieldUtil::SetChildAttr(const RefPtr<TextFieldComponent>& component,
         if (GreatOrEqual(boxComponent->GetHeightDimension().Value(), 0.0)) {
             component->SetHeight(boxComponent->GetHeightDimension());
         }
-        boxComponent->SetHeight(-1.0, DimensionUnit::PX);
+        if (NearZero(boxComponent->GetHeightDimension().Value(), 0.0)) {
+            boxComponent->SetHeight(0.0, DimensionUnit::PX);
+        } else {
+            boxComponent->SetHeight(-1.0, DimensionUnit::PX);
+        }
     }
 }
 
