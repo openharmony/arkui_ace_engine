@@ -203,6 +203,8 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
+
+    runtime_->StartDebugger();
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());

@@ -2949,8 +2949,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     runtime_->SetLogPrint(PrintLog);
     std::string library_path = "";
     if (debugger_mode) {
-        library_path = ARK_DEBUGGER_LIB_PATH;
-        SetDebuggerPostTask();
+        SetDebuggerPostTask(library_path);
     }
     if (!runtime_->Initialize(library_path, isDebugMode_, GetInstanceId())) {
         LOGE("Js Engine initialize runtime failed");
@@ -2962,6 +2961,8 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
+
+    runtime_->StartDebugger();
 #endif
 
     RegisterAceModule();
@@ -3094,8 +3095,9 @@ bool JsiEngineInstance::CallCurlFunction(const OHOS::Ace::RequestData& requestDa
 }
 #endif
 
-void JsiEngineInstance::SetDebuggerPostTask()
+void JsiEngineInstance::SetDebuggerPostTask(std::string& library_path)
 {
+    library_path = ARK_DEBUGGER_LIB_PATH;
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(frontendDelegate_));
     auto&& postTask = [weakDelegate](std::function<void()>&& task) {
         auto delegate = weakDelegate.Upgrade();

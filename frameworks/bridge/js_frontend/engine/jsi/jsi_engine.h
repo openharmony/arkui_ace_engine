@@ -59,7 +59,7 @@ public:
         isDebugMode_ = isDebugMode;
     }
 
-    void SetDebuggerPostTask();
+    void SetDebuggerPostTask(std::string& library_path);
 
     RefPtr<FrontendDelegate> GetDelegate() const
     {

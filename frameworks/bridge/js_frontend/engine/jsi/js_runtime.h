@@ -41,6 +41,7 @@ public:
     virtual bool Initialize(const std::string &libraryPath, bool isDebugMode, int32_t instanceId = 0) = 0;
     virtual void Reset() = 0;
     virtual void SetLogPrint(LOG_PRINT out) = 0;
+    virtual bool StartDebugger() = 0;
 
     // Evaluate a piece of js code, returns true if success.
     // If exception occurs during execution, it is handled inside this interface.
