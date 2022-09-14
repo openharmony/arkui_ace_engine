@@ -105,6 +105,8 @@ public:
     const TextEditingValue& GetEditingValue() const;
     const TextEditingValue& GetPreEditingValue() const;   
     double GetEditingBoxY() const override;
+    double GetEditingBoxTopY() const override;
+    bool GetEditingBoxModel() const override;
     void Delete(int32_t start, int32_t end);
     void CursorMoveLeft(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
     void CursorMoveRight(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
