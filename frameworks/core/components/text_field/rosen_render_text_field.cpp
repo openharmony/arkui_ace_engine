@@ -438,6 +438,10 @@ void RosenRenderTextField::Paint(RenderContext& context, const Offset& offset)
         auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale * MAGNIFIER_GAIN,
             GetLayoutSize().Height() * viewScale * MAGNIFIER_GAIN, SkColorType::kRGBA_8888_SkColorType,
             SkAlphaType::kOpaque_SkAlphaType);
+        if (imageInfo.width() < 0 || imageInfo.height() < 0) {
+            LOGE("Paint imageInfo width is invalid");
+            return;
+        }
         canvasCache_.reset();
         canvasCache_.allocPixels(imageInfo);
         magnifierCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
@@ -472,7 +476,15 @@ Size RosenRenderTextField::Measure()
 
     double decorationHeight = 0.0;
     if (decoration_) {
+        auto padding = decoration_->GetPadding();
+        auto paddingOri = padding;
+        padding.SetLeft(NormalizePercentToPx(padding.Left(), false));
+        padding.SetTop(NormalizePercentToPx(padding.Top(), true));
+        padding.SetRight(NormalizePercentToPx(padding.Right(), false));
+        padding.SetBottom(NormalizePercentToPx(padding.Bottom(), true));
+        decoration_->SetPadding(padding);
         decorationHeight = decoration_->VerticalSpaceOccupied(pipelineContext->GetDipScale());
+        decoration_->SetPadding(paddingOri);
     }
 
     auto paragraphStyle = CreateParagraphStyle();
@@ -632,7 +644,7 @@ void RosenRenderTextField::ComputeExtendHeight(double decorationHeight)
     if (paragraph_ && extend_ && GreatOrEqual(paragraph_->GetHeight(), heightInPx - decorationHeight)) {
         extendHeight_ = paragraph_->GetHeight() + decorationHeight;
     } else {
-        extendHeight_ = heightInPx;
+        extendHeight_ = std::max(heightInPx, decorationHeight);
     }
     extendHeight_ = std::min(extendHeight_, GetLayoutParam().GetMaxSize().Height());
 }
