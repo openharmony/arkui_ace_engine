@@ -73,6 +73,7 @@ private:
     RefPtr<TextClockController> textClockController_;
     TimeCallback timeCallback_;
     bool isStart_ = true;
+    int32_t hourWest_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextClockPattern);
 };
