@@ -143,10 +143,10 @@ void TabContentView::Pop(const RefPtr<FrameNode>& tabContent)
     CHECK_NULL_VOID(imageProperty);
     if (!tabBarParam.icon.empty()) {
         textLayoutProperty->UpdateFontSize(DEFAULT_SMALL_TEXT_FONT_SIZE);
-        imageProperty->UpdateCalcSelfIdealSize(
+        imageProperty->UpdateUserDefinedIdealSize(
             CalcSize(NG::CalcLength(DEFAULT_IMAGE_SIZE), NG::CalcLength(DEFAULT_IMAGE_SIZE)));
     } else {
-        imageProperty->UpdateCalcSelfIdealSize(CalcSize());
+        imageProperty->UpdateUserDefinedIdealSize(CalcSize());
     }
     ImageSourceInfo imageSourceInfo(tabBarParam.icon);
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
