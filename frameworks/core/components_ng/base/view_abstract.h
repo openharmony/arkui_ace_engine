@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
@@ -74,6 +75,9 @@ public:
 
     // flex properties
     static void SetAlignSelf(int32_t value);
+
+    // Bind properties
+    static void BindPopup(const RefPtr<PopupParam>& param);
 
     static void Pop();
 };
