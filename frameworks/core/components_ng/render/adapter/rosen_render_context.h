@@ -24,6 +24,7 @@
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
+#include "base/geometry/dimension_offset.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/measure_property.h"
@@ -105,11 +106,10 @@ private:
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
     void OnOpacityUpdate(double opacity) override;
 
-    void OnTransformScaleUpdate(const VectorF& scale) override;
-    void OnTransformCenterUpdate(const VectorF& center) override;
-    void OnTransformTranslateUpdate(const Vector3F& translate) override;
-    void OnTransformRotateUpdate(const Vector3F& rotate) override;
-    void OnTransformAngleUpdate(const float& angle) override;
+    void OnTransformScaleUpdate(const VectorF& value) override;
+    void OnTransformCenterUpdate(const DimensionOffset& value) override;
+    void OnTransformTranslateUpdate(const Vector3F& value) override;
+    void OnTransformRotateUpdate(const Vector4F& value) override;
 
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
