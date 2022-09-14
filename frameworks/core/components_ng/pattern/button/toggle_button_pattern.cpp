@@ -65,19 +65,15 @@ void ToggleButtonPattern::OnModifyDone()
     CHECK_NULL_VOID(toggleTheme);
     const auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (!unselectedColor_.has_value()) {
-        auto backgroundColor = toggleTheme->GetBackgroundColor();
-        unselectedColor_ = renderContext->GetBackgroundColorValue(backgroundColor);
-    }
+
     if (isOn_.value()) {
         auto color = toggleTheme->GetCheckedColor();
         auto selectedColor = buttonPaintProperty->GetSelectedColor().value_or(color);
-        buttonPaintProperty->UpdateSelectedColor(selectedColor);
         renderContext->UpdateBackgroundColor(selectedColor);
     } else {
         auto backgroundColor = toggleTheme->GetBackgroundColor();
-        unselectedColor_ = renderContext->GetBackgroundColorValue(backgroundColor);
-        renderContext->UpdateBackgroundColor(unselectedColor_.value());
+        auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(backgroundColor);
+        renderContext->UpdateBackgroundColor(bgColor);
     }
 
     if (changed) {
@@ -123,11 +119,11 @@ void ToggleButtonPattern::OnClick()
     const auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     Color selectedColor;
+    auto buttonPaintProperty = host->GetPaintProperty<ToggleButtonPaintProperty>();
+    CHECK_NULL_VOID(buttonPaintProperty);
     if (isLastSelected) {
-        selectedColor = unselectedColor_.value();
+        selectedColor = buttonPaintProperty->GetBackgroundColor().value_or(toggleTheme->GetBackgroundColor());
     } else {
-        auto buttonPaintProperty = host->GetPaintProperty<ToggleButtonPaintProperty>();
-        CHECK_NULL_VOID(buttonPaintProperty);
         selectedColor = buttonPaintProperty->GetSelectedColor().value_or(color);
     }
     paintProperty->UpdateIsOn(!isLastSelected);

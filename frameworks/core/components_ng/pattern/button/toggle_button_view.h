@@ -26,6 +26,7 @@ class ACE_EXPORT ToggleButtonView {
 public:
     static void Create(const std::string& tagName);
     static void SetSelectedColor(const Color& selectedColor);
+    static void SetBackgroundColor(const Color& backgroundColor);
     static void SetIsOn(bool isOn);
 };
 } // namespace OHOS::Ace::NG

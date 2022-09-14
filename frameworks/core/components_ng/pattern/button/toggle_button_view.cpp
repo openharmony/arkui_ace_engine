@@ -16,6 +16,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
@@ -38,6 +39,20 @@ void ToggleButtonView::SetSelectedColor(const Color& selectedColor)
 void ToggleButtonView::SetIsOn(bool isOn)
 {
     ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, IsOn, isOn);
+}
+
+void ToggleButtonView::SetBackgroundColor(const Color& backgroundColor)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
+    if (buttonPattern) {
+        ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, BackgroundColor, backgroundColor);
+        return;
+    }
+    NG::ViewAbstract::SetBackgroundColor(backgroundColor);
 }
 
 } // namespace OHOS::Ace::NG
