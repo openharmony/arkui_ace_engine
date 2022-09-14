@@ -189,14 +189,8 @@ JsiRef<JsiValue> JsiObject::ToJsonObject(const char* value) const
 {
     auto vm = GetEcmaVM();
     auto valueRef = JsiValueConvertor::toJsiValueWithVM<std::string>(vm, value);
-    panda::Local<JSValueRef> result = JSON::Parse(vm, valueRef);
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    if (result.IsEmpty() || runtime->HasPendingException()) {
-        runtime->HandleUncaughtException();
-        return JsiRef<JsiValue>::Make(JSValueRef::Undefined(vm));
-    }
-
-    return JsiRef<JsiValue>::Make(result);
+    auto refValue = JsiRef<JsiValue>::Make(JSON::Parse(vm, valueRef));
+    return refValue;
 }
 
 void JsiObject::SetPropertyJsonObject(const char* prop, const char* value) const
