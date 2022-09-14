@@ -88,7 +88,7 @@ public:
     void Dump() override;
 
     bool OnKeyEvent(const KeyEvent& event);
-    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling = false);
+    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling = false, bool needShowSoftKeyboard = true);
     bool CloseKeyboard(bool forceClose = false);
     void ShowError(const std::string& errorText, bool resetToStart = true);
     void ShowTextOverlay(const Offset& showOffset, bool isSingleHandle, bool isUsingMouse = false);
