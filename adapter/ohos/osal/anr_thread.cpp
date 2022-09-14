@@ -34,10 +34,10 @@ bool AnrThread::PostTaskToTaskRunner(Task&& task, uint32_t delayTime)
     }
 
     if (delayTime > 0) {
-        OHOS::HiviewDFX::Watchdog::GetInstance().RunOnshotTask(
+        OHOS::HiviewDFX::Watchdog::GetInstance().RunOneShotTask(
             ARKUI_WATCH_DOG, std::move(task), delayTime * SECOND_TO_MILLISECOND);
     } else {
-        OHOS::HiviewDFX::Watchdog::GetInstance().RunOnshotTask(ARKUI_WATCH_DOG, std::move(task));
+        OHOS::HiviewDFX::Watchdog::GetInstance().RunOneShotTask(ARKUI_WATCH_DOG, std::move(task));
     }
     return true;
 }
