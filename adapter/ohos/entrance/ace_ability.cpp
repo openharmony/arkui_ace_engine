@@ -463,6 +463,19 @@ void AceAbility::OnStart(const Want& want)
         context->SetActionEventHandler(actionEventHandler);
     }
 
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(context);
+    if (pipelineContext) {
+        pipelineContext->SetGetWindowRectImpl([window]() -> Rect {
+            Rect rect;
+            if (!window) {
+                return rect;
+            }
+            auto windowRect = window->GetRect();
+            rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+            return rect;
+        });
+    }
+
     // get url
     std::string parsedPageUrl;
     if (!remotePageUrl_.empty()) {
