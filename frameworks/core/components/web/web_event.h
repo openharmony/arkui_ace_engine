@@ -436,7 +436,7 @@ public:
 };
 
 class ACE_EXPORT WebSslSelectCertEvent : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(WebSSslSelectCertEvent, BaseEventInfo);
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebSslSelectCertEvent, BaseEventInfo);
 
 public:
     WebSslSelectCertEvent(const RefPtr<SslSelectCertResult>& result,
