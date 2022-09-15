@@ -98,10 +98,9 @@ public:
     // Add Transform in group
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformScale, VectorF);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformCenter, VectorF);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, Vector3F);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector3F);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformAngle, float);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector4F);
 
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundColor, Color);
@@ -121,11 +120,10 @@ protected:
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
 
-    virtual void OnTransformScaleUpdate(const VectorF& scale) {}
-    virtual void OnTransformCenterUpdate(const VectorF& center) {}
-    virtual void OnTransformTranslateUpdate(const Vector3F& translate) {}
-    virtual void OnTransformRotateUpdate(const Vector3F& translate) {}
-    virtual void OnTransformAngleUpdate(const float& angle) {}
+    virtual void OnTransformScaleUpdate(const VectorF& value) {}
+    virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
+    virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
+    virtual void OnTransformRotateUpdate(const Vector4F& value) {}
 
 private:
     std::function<void()> requestFrame_;

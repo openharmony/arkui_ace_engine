@@ -72,6 +72,11 @@ public:
         return DimensionOffset(deltaX_ * value, deltaY_ * value);
     }
 
+    bool operator==(const DimensionOffset& dimensionOffset) const 
+    {
+        return deltaX_ == dimensionOffset.deltaX_ && deltaY_ == dimensionOffset.deltaY_;
+    }
+
 private:
     Dimension deltaX_;
     Dimension deltaY_;
