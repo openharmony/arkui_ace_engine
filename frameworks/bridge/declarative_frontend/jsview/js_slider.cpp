@@ -258,8 +258,8 @@ void JSSlider::SetMinLabel(const JSCallbackInfo& info)
         return;
     }
 
-    if (!info[0]->IsNumber()) {
-        LOGE("arg is not number.");
+    if (!info[0]->IsString()) {
+        LOGE("arg is not string.");
         return;
     }
 
@@ -269,7 +269,7 @@ void JSSlider::SetMinLabel(const JSCallbackInfo& info)
         LOGE("Slider Component is null");
         return;
     }
-    Slider->SetMinValue(info[0]->ToNumber<double>());
+    Slider->SetMinValue(StringUtils::StringToDouble(info[0]->ToString()));
 }
 
 void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
@@ -279,8 +279,8 @@ void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
         return;
     }
 
-    if (!info[0]->IsNumber()) {
-        LOGE("arg is not number.");
+    if (!info[0]->IsString()) {
+        LOGE("arg is not string.");
         return;
     }
 
@@ -290,7 +290,7 @@ void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
         LOGE("Slider Component is null");
         return;
     }
-    Slider->SetMaxValue(info[0]->ToNumber<double>());
+    Slider->SetMaxValue(StringUtils::StringToDouble(info[0]->ToString()));
 }
 
 void JSSlider::SetShowSteps(const JSCallbackInfo& info)
