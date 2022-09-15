@@ -111,8 +111,9 @@ public:
     void ReplaceJSContent(const std::string& url, const std::string componentName);
 #endif
 
-     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
-     OH_NativeXComponent *nativeXComponent_ = nullptr;
+    RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
+    OH_NativeXComponent* nativeXComponent_ = nullptr;
+
 private:
     void RegisterWorker();
     void RegisterInitWorkerFunc();
@@ -121,10 +122,6 @@ private:
 
     RefPtr<QJSDeclarativeEngineInstance> engineInstance_;
     int32_t instanceId_ = 0;
-
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    std::string preContent_ = "";
-#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(QJSDeclarativeEngine);
 };

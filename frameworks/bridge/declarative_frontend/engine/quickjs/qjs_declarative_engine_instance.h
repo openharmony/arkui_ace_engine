@@ -36,8 +36,8 @@ public:
 
     ~QJSDeclarativeEngineInstance() override;
     void FlushCommandBuffer(void* context, const std::string& command) override;
-    bool InitJSEnv(JSRuntime* runtime, JSContext* context,
-        const std::unordered_map<std::string, void*>& extraNativeObject);
+    bool InitJSEnv(
+        JSRuntime* runtime, JSContext* context, const std::unordered_map<std::string, void*>& extraNativeObject);
 
     bool InitAceModules(const char* start, size_t length, const char* fileName);
 
@@ -151,12 +151,54 @@ public:
 
     void RunGarbageCollection();
 
-    static std::unique_ptr<JsonValue> GetI18nStringResource(const std::string& targetStringKey,
-        const std::string& targetStringValue);
+    static std::unique_ptr<JsonValue> GetI18nStringResource(
+        const std::string& targetStringKey, const std::string& targetStringValue);
     static std::string GetMeidaResource(const std::string& targetMediaFileName);
     static int EvalBuf(JSContext* ctx, const char* buf, size_t bufLen, const char* filename, int evalFlags);
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    void SetPreviewFlag(bool flag)
+    {
+        isComponentPreview_ = flag;
+    }
+
+    bool GetPreviewFlag() const
+    {
+        return isComponentPreview_;
+    }
+
+    std::string GetRequiredComponent() const
+    {
+        return requiredComponent_;
+    }
+
+    void SetRequiredComponent(const std::string& componentName)
+    {
+        requiredComponent_ = componentName;
+    }
+
+    void AddPreviewComponent(const std::string& componentName, JSValue& componentObj)
+    {
+        previewComponents_.insert_or_assign(componentName, componentObj);
+    }
+
+    JSValue GetPreviewComponent(const std::string& componentName)
+    {
+        auto iter = previewComponents_.find(componentName);
+        if (iter != previewComponents_.end()) {
+            return iter->second;
+        }
+        return JS_UNDEFINED;
+    }
+#endif
+
 private:
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    bool isComponentPreview_ = false;
+    std::string requiredComponent_ {};
+    std::unordered_map<std::string, JSValue> previewComponents_;
+#endif
+
     void output_object_code(JSContext* ctx, int fho, JSValueConst obj);
     JSValue eval_binary_buf(JSContext* ctx, const uint8_t* buf, size_t buf_len);
 

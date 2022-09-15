@@ -153,6 +153,115 @@
 
 namespace OHOS::Ace::Framework {
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+static JSValue JsPreviewComponent(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    LOGD("PreviewerComponent start");
+    if (ctx == nullptr) {
+        LOGE("ctx is nullptr. Failed!");
+        return JS_UNDEFINED;
+    }
+    auto* instance = QJSDeclarativeEngineInstance::UnWrapEngineInstance(ctx);
+    if (!instance) {
+        LOGE("QJS context has no ref to engine instance. Failed!");
+        return JS_UNDEFINED;
+    }
+    std::string requiredComponentName = instance->GetRequiredComponent();
+    JSValue obj = instance->GetPreviewComponent(requiredComponentName);
+    if (JS_IsUndefined(obj)) {
+        LOGE("Get PreviewComponent object from map failed");
+        return JS_UNDEFINED;
+    }
+
+    JSView* view = static_cast<JSView*>(UnwrapAny(obj));
+    if (!view) {
+        return JS_ThrowReferenceError(ctx, "JsPreviewComponent: argument provided is not a View!");
+    }
+
+    auto page = QJSDeclarativeEngineInstance::GetRunningPage(ctx);
+    LOGD("Load Document setting root view");
+    auto rootComponent = view->CreateComponent();
+    std::list<RefPtr<Component>> stackChildren;
+    stackChildren.emplace_back(rootComponent);
+    auto rootStackComponent = AceType::MakeRefPtr<StackComponent>(
+        Alignment::TOP_LEFT, StackFit::INHERIT, Overflow::OBSERVABLE, stackChildren);
+    rootStackComponent->SetMainStackSize(MainStackSize::MAX);
+    auto rootComposed = AceType::MakeRefPtr<ComposedComponent>("0", "root");
+    rootComposed->SetChild(rootStackComponent);
+    page->SetRootComponent(rootComposed);
+
+    page->SetPageTransition(view->BuildPageTransitionComponent());
+    // We are done, tell to the JSAgePage
+    page->SetPageCreated();
+    page->SetDeclarativeOnPageAppearCallback([view]() { view->FireOnShow(); });
+    page->SetDeclarativeOnPageDisAppearCallback([view]() { view->FireOnHide(); });
+    page->SetDeclarativeOnPageRefreshCallback([view]() { view->MarkNeedUpdate(); });
+
+    if (page->IsUsePluginComponent()) {
+        LOGI("Load Document UsePluginComponent");
+        if (!page->GetPluginComponentJsonData().empty()) {
+            view->ExecuteUpdateWithValueParams(page->GetPluginComponentJsonData());
+        }
+    }
+
+    return JS_UNDEFINED;
+}
+
+static JSValue JsGetPreviewComponentFlag(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    LOGD("Get PreviewComponentFlag start");
+    if (ctx == nullptr) {
+        LOGE("ctx is nullptr. Failed!");
+        return JS_UNDEFINED;
+    }
+    auto* instance = QJSDeclarativeEngineInstance::UnWrapEngineInstance(ctx);
+    if (!instance) {
+        LOGE("QJS context has no ref to engine instance. Failed!");
+        return JS_UNDEFINED;
+    }
+    bool isComponentPreview = instance->GetPreviewFlag();
+    return JS_NewBool(ctx, isComponentPreview);
+}
+
+static JSValue JsStorePreviewComponents(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
+{
+    LOGD("Store PreviewerComponents start");
+    if (argc < 3) {
+        return JS_ThrowSyntaxError(ctx, "storePreviewComponents requires at least three arguments.");
+    }
+    if (!JS_IsNumber(argv[0])) {
+        return JS_ThrowSyntaxError(ctx, "parameter action must be number");
+    }
+    if (ctx == nullptr) {
+        LOGE("ctx is nullptr. Failed!");
+        return JS_UNDEFINED;
+    }
+    int32_t numOfComponent = 0;
+    if (JS_ToInt32(ctx, &numOfComponent, argv[0]) < 0) {
+        return JS_ThrowSyntaxError(ctx, "The arg is wrong, must be uint32 value");
+    }
+    if (numOfComponent * 2 != argc - 1) {
+        return JS_ThrowSyntaxError(ctx, "The number of components is wrong.");
+    }
+    auto* instance = QJSDeclarativeEngineInstance::UnWrapEngineInstance(ctx);
+    if (!instance) {
+        LOGE("QJS context has no ref to engine instance. Failed!");
+        return JS_UNDEFINED;
+    }
+    for (int32_t index = 1; index <= numOfComponent; index++) {
+        if (!JS_IsString(argv[2 * index - 1]) || JS_IsUndefined(argv[2 * index])) {
+            LOGE("The %{private}d component passed by StorePreviewComponents has wrong type", index);
+            return JS_UNDEFINED;
+        }
+        ScopedString componentName(ctx, argv[2 * index - 1]);
+        std::string name = componentName.get();
+        JSValue jsView = JS_DupValue(ctx, argv[2 * index]);
+        instance->AddPreviewComponent(name, jsView);
+    }
+    return JS_UNDEFINED;
+}
+#endif
+
 static JSValue JsLoadDocument(JSContext* ctx, JSValueConst new_target, int argc, JSValueConst* argv)
 {
     LOGD("Load Document");
@@ -805,6 +914,11 @@ void JsRegisterViews(BindingTarget globalObj)
 {
     JSContext* ctx = QJSContext::Current();
 
+#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
+    QJSUtils::DefineGlobalFunction(ctx, JsPreviewComponent, "previewComponent", 0);
+    QJSUtils::DefineGlobalFunction(ctx, JsGetPreviewComponentFlag, "getPreviewComponentFlag", 0);
+    QJSUtils::DefineGlobalFunction(ctx, JsStorePreviewComponents, "storePreviewComponents", 3);
+#endif
     QJSUtils::DefineGlobalFunction(ctx, JsLoadDocument, "loadDocument", 1);
     QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorTree, "getInspectorTree", 0);
     QJSUtils::DefineGlobalFunction(ctx, JsGetInspectorByKey, "getInspectorByKey", 1);
@@ -870,7 +984,7 @@ void JsRegisterViews(BindingTarget globalObj)
     JSFlexImpl::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
-    JSScrollBar::JSBind(globalObj),
+    JSScrollBar::JSBind(globalObj);
     JSToggle::JSBind(globalObj);
     JSSideBar::JSBind(globalObj);
     JSSlider::JSBind(globalObj);
