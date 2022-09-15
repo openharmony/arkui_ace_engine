@@ -77,7 +77,7 @@ bool RunArgsParser::Parse(const std::string& contents)
     aceRunArgs_.configChanges = rootJson->GetString("configChanges", "");
     aceRunArgs_.isRound = rootJson->GetBool("isRound", false);
     aceRunArgs_.formsEnabled = rootJson->GetBool("formsEnabled", false);
-    aceRunArgs_.physicalDeviceFontsEnabled = rootJson->GetBool("physicalDeviceFontsEnabled", false);
+    aceRunArgs_.containerSdkPath = rootJson->GetString("containerSdkPath", "");
     aceRunArgs_.themeId = rootJson->GetUInt("themeId", Platform::THEME_ID_LIGHT);
     aceRunArgs_.viewWidth = rootJson->GetInt("viewWidth", 0);
     aceRunArgs_.viewHeight = rootJson->GetInt("viewHeight", 0);
