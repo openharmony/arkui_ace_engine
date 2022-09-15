@@ -93,7 +93,7 @@ public:
 private:
     template<typename T>
     struct NodeCompare {
-        bool operator()(const T& nodeLeft, const T& nodeRight)
+        bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
             auto left = nodeLeft.Upgrade();
             auto right = nodeRight.Upgrade();
