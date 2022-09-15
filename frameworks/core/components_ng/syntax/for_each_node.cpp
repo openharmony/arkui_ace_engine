@@ -55,7 +55,7 @@ void ForEachNode::CompareAndUpdateChildren()
 {
     ACE_SCOPED_TRACE("ForEachNode::CompareAndUpdateChildren");
 
-    LOGD("Local update for ForEachNode nodeId: %{public}d ....", nodeId_);
+    LOGD("Local update for ForEachElement, elmtId: %{public}d ....", nodeId_);
 
     // result of id gen function of most re-recent render
     // create a map for quicker find/search

@@ -42,15 +42,15 @@ RefPtr<IfElseNode> IfElseNode::GetOrCreateIfElseNode(int32_t nodeId)
  * how if else works:
  *
  * the transpiler generated JS code is like this(simplified, but main points shown):
- *
+ * 
  * this.observeComponentCreation(..., () => {
  * If.create();
  * if (condition1) {
  *    this.ifElseBranchUpdateFunction(compilerGeneratedUniqueConstBranchId, () =>
  *          code for children first render
  *    })
- * } else if (condition2) {
- *    this.ifElseBranchUpdateFunction(compilerGeneratedUniqueConstBranchId, () =>
+ * } else if (condition2) { 
+*    this.ifElseBranchUpdateFunction(compilerGeneratedUniqueConstBranchId, () =>
  *          code for children first render
  *    })
  * } else {
@@ -58,19 +58,19 @@ RefPtr<IfElseNode> IfElseNode::GetOrCreateIfElseNode(int32_t nodeId)
  *    If.setBranchId(compilerGeneratedUniqueConstBranchId)
  * }
  * If.pop()
- *
+ * 
  * - if re-renders whenever one of the variables used in 'condition' during last render has changed.
- *      - the dependent variables can change from one render of if to the next, depending if 'condition1' and
+ *      - the dependent variables can change from one render of if to the next, depending if 'condition1' and 
  *        'condition2' bind to different variables.
  *      - If can re-render, but the branch does not change, e.g. if 'condition1' is (this.i > 20)
  *        then If will re-render whenever i changes.
- *
- * - eDSL to JS traspiler generates a unique id for each branch of the code inside.
+ * 
+ * - eDSL to JS traspiler generates a unique id for each branch of the code inside. 
  *   Thereby the framework can detect that the branch has actually changed.
  *   In this case ViewPU.ifElseBranchUpdateFunction will call IfElseNode::SetBranchId to upate
  *   and it will execute the 2nd parameter lambda function to re-generate the children.
- *
- * - In case of if without else, or if ... else if ... , eDSL to JS traspiler generates
+ * 
+ * - In case of if without else, or if ... else if ... , eDSL to JS traspiler generates 
  *   an extra else clause in which to set the branchId (calls IfElseNode::SetBranchId)
  *
  * - IfElseNode::FlushUpdateAndMarkDirty is called upon If.Pop()  FIXME
