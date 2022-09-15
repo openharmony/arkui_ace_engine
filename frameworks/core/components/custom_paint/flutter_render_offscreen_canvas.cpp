@@ -254,6 +254,17 @@ void FlutterRenderOffscreenCanvas::Clip()
     skCanvas_->clipPath(skPath_);
 }
 
+void FlutterRenderOffscreenCanvas::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    if (path == nullptr) {
+        LOGE("Clip failed in offscreenCanvas, target path is null.");
+        return;
+    }
+    ParsePath2D(path);
+    Path2DClip();
+    skPath2d_.reset();
+}
+
 void FlutterRenderOffscreenCanvas::FillRect(Rect rect)
 {
     SkPaint paint;
@@ -1003,6 +1014,11 @@ void FlutterRenderOffscreenCanvas::Path2DFill()
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
         cacheBitmap_.eraseColor(0);
     }
+}
+
+void FlutterRenderOffscreenCanvas::Path2DClip()
+{
+    skCanvas_->clipPath(skPath_);
 }
 
 void FlutterRenderOffscreenCanvas::UpdateLineDash(SkPaint& paint)
