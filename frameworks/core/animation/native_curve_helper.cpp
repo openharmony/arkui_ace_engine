@@ -35,6 +35,9 @@ Rosen::RSAnimationTimingCurve NativeCurveHelper::ToNativeCurve(const RefPtr<Curv
     } else if (auto springMotionCurve = AceType::DynamicCast<ResponsiveSpringMotion>(curve)) {
         return Rosen::RSAnimationTimingCurve::CreateSpring(springMotionCurve->GetResponse(),
             springMotionCurve->GetDampingRatio(), springMotionCurve->GetBlendDuration());
+    } else if (auto stepsCurve = AceType::DynamicCast<StepsCurve>(curve)) {
+        return Rosen::RSAnimationTimingCurve::CreateStepsCurve(stepsCurve->steps_,
+            static_cast<Rosen::StepsCurvePosition>(stepsCurve->position_));
     } else {
         return Rosen::RSAnimationTimingCurve::CreateCustomCurve(
             [weak = WeakPtr<Curve>(curve)](float fraction) -> float {
