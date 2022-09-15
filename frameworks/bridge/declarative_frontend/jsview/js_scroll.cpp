@@ -114,6 +114,11 @@ void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
                     }
                     return scrollInfo;
                 };
+        // NG
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ScrollView::SetOnScrollBegin(onScrollBegin);
+            return;
+        }
 
         auto scrollComponent =
             AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -129,6 +134,18 @@ void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
+        // NG
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
+                (const Dimension& xOffset, const Dimension& yOffset) {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    auto params = ConvertToJSValues(xOffset, yOffset);
+                    func->Call(JSRef<JSObject>(), params.size(), params.data());
+                };
+            NG::ScrollView::SetOnScroll(onScroll);
+            return;
+        }
+
         auto onScroll = EventMarker(
             [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -137,12 +154,8 @@ void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
                     return;
                 }
                 auto params = ConvertToJSValues(eventInfo->GetScrollX(), eventInfo->GetScrollY());
-                func->Call(JSRef<JSObject>(), params.size(), params.data());
+                func->Call(JSRef<JSObject>(), 2, params.data());
             });
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ScrollView::SetOnScroll(onScroll);
-            return;
-        }
         auto scrollComponent =
             AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (scrollComponent) {
@@ -158,6 +171,18 @@ void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
+        // NG
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto scrollEdge = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
+                (const NG::ScrollEdge& side) {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    auto params = ConvertToJSValues(side);
+                    func->Call(JSRef<JSObject>(), 1, params.data());
+                };
+            NG::ScrollView::SetOnScrollEdge(scrollEdge);
+            return;
+        }
+
         auto onScroll = EventMarker(
             [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -177,10 +202,6 @@ void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
                 auto param = ConvertToJSValue(eventType);
                 func->Call(JSRef<JSObject>(), 1, &param);
             });
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::ScrollView::SetOnScrollEdge(onScroll);
-            return;
-        }
         auto scrollComponent =
             AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (scrollComponent) {
@@ -196,14 +217,22 @@ void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto scrollEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
+                () {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    func->Call(JSRef<JSObject>(), 0, nullptr);
+                };
+            NG::ScrollView::SetOnScrollEnd(scrollEnd);
+            return;
+        }
+
         auto onScrollStop = EventMarker(
             [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 func->Call(JSRef<JSObject>(), 0, nullptr);
             });
         if (Container::IsCurrentUseNewPipeline()) {
-            NG::ScrollView::SetOnScrollEnd(onScrollStop);
-            return;
         }
         auto scrollComponent =
             AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

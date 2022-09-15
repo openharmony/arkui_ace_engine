@@ -21,6 +21,26 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
+
+enum ScrollEventType {
+    SCROLL_TOP = 0,
+    SCROLL_END,
+    SCROLL_EDGE,
+};
+
+// which edge is reached
+enum ScrollEdge {
+    TOP = 0,
+    LEFT,
+    BOTTOM,
+    RIGHT,
+};
+
+using OnScrollEvent = std::function<void(Dimension, Dimension)>;
+using ScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
+using ScrollEdgeEvent = std::function<void(ScrollEdge)>;
+using ScrollEndEvent = std::function<void()>;
+
 class ScrollEventHub : public EventHub {
     DECLARE_ACE_TYPE(ScrollEventHub, EventHub)
 
@@ -28,24 +48,51 @@ public:
     ScrollEventHub() = default;
     ~ScrollEventHub() override = default;
 
-    void SetOnScroll(const EventMarker& onScroll)
+    OnScrollEvent GetOnScrollEvent()
+    {
+        return onScroll_;
+    }
+
+    void SetOnScroll(const OnScrollEvent& onScroll)
     {
         onScroll_ = onScroll;
     }
 
-    void SetOnScrollEdge(const EventMarker& onScroll)
+    ScrollEdgeEvent GetScrollEdgeEvent()
     {
-        onScrollEdge_ = onScroll;
+        return onScrollEdge_;
     }
 
-    void SetOnScrollEnd(const EventMarker& onScroll)
+    void SetOnScrollEdge(const ScrollEdgeEvent& event)
     {
-        onScrollEdge_ = onScroll;
+        onScrollEdge_ = event;
     }
+
+    ScrollEndEvent GetScrollEndEvent()
+    {
+        return onScrollEnd_;
+    }
+
+    void SetOnScrollEnd(const ScrollEndEvent& event)
+    {
+        onScrollEnd_ = event;
+    }
+
+    ScrollBeginEvent GetScrollBeginEvent()
+    {
+        return onScrollBegin_;
+    }
+
+    void SetOnScrollBegin(const ScrollBeginEvent& event)
+    {
+        onScrollBegin_ = event;
+    }
+
 private:
-    EventMarker onScroll_;
-    EventMarker onScrollEnd_;
-    EventMarker onScrollEdge_;
+    OnScrollEvent onScroll_;
+    ScrollBeginEvent onScrollBegin_;
+    ScrollEndEvent onScrollEnd_;
+    ScrollEdgeEvent onScrollEdge_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ScrollEventHub);
 };

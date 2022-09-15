@@ -18,7 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "core/components/common/properties/color.h"
-#include "frameworks/core/event/ace_event_handler.h"
+#include "frameworks/core/components_ng/pattern/scroll/scroll_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,9 +28,10 @@ public:
     static void SetAxis(Axis axis);
     static void SetScrollBarColor(const Color& color);
     static void SetScrollBarWidth(const Dimension& width);
-    static void SetOnScroll(const EventMarker& onScroll);
-    static void SetOnScrollEdge(const EventMarker& onScroll);
-    static void SetOnScrollEnd(const EventMarker& onScrollEnd);
+    static void SetOnScroll(const OnScrollEvent& event);
+    static void SetOnScrollBegin(const ScrollBeginEvent& event);
+    static void SetOnScrollEdge(const ScrollEdgeEvent& event);
+    static void SetOnScrollEnd(const ScrollEndEvent& event);
 };
 
 } // namespace OHOS::Ace::NG

@@ -47,30 +47,39 @@ void ScrollView::SetScrollBarColor(const Color& color)
     ACE_UPDATE_PAINT_PROPERTY(ScrollPaintProperty, ScrollBarColor, color);
 }
 
-void ScrollView::SetOnScroll(const EventMarker &onScroll)
+void ScrollView::SetOnScroll(const OnScrollEvent &event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScroll(onScroll);
+    eventHub->SetOnScroll(event);
 }
 
-void ScrollView::SetOnScrollEdge(const EventMarker &onScroll)
+void ScrollView::SetOnScrollEdge(const ScrollEdgeEvent &event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScroll(onScroll);
+    eventHub->SetOnScrollEdge(event);
 }
 
-void ScrollView::SetOnScrollEnd(const EventMarker &onScrollEnd)
+void ScrollView::SetOnScrollEnd(const ScrollEndEvent &event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScroll(onScrollEnd);
+    eventHub->SetOnScrollEnd(event);
+}
+
+void ScrollView::SetOnScrollBegin(const ScrollBeginEvent &event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollBegin(event);
 }
 } // namespace OHOS::Ace::NG
