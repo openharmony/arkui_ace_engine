@@ -20,6 +20,10 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/property.h"
 
+namespace OHOS::Ace {
+enum class BlurStyle;
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 
 struct BackgroundProperty {
@@ -37,6 +41,11 @@ struct TransformProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformTranslate, Vector3F);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector4F);
+};
+
+struct DecorationProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurRadius, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurStyle, BlurStyle);
 };
 
 } // namespace OHOS::Ace::NG

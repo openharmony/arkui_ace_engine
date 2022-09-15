@@ -4927,6 +4927,11 @@ void JSViewAbstract::SetColorBlend(Color color)
 
 void JSViewAbstract::SetBackdropBlur(float radius)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        Dimension dimensionRadius(radius, DimensionUnit::PX);
+        NG::ViewAbstract::SetBackdropBlur(dimensionRadius);
+        return;
+    }
     auto decoration = GetBackDecoration();
     SetBlurRadius(decoration, radius);
 }

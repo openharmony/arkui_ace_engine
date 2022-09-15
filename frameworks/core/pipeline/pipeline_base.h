@@ -48,6 +48,7 @@ class OffscreenCanvas;
 class Window;
 class FontManager;
 class ManagerInterface;
+enum class FrontendType;
 
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -479,8 +480,13 @@ public:
     void PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
     virtual void FlushReload() {}
+    virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
+    FrontendType GetFrontendType() const
+    {
+        return frontendType_;
+    }
 
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
@@ -506,6 +512,7 @@ protected:
     double dipScale_ = 1.0;
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
+    FrontendType frontendType_;
 
     std::stack<bool> pendingImplicitLayout_;
     std::unique_ptr<Window> window_;

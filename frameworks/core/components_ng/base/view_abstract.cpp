@@ -240,6 +240,11 @@ void ViewAbstract::SetRotate(const NG::Vector4F& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformRotate, value);
 }
 
+void ViewAbstract::SetBackdropBlur(const Dimension& radius)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackBlurRadius, radius);
+}
+
 void ViewAbstract::Pop()
 {
     ViewStackProcessor::GetInstance()->Pop();
