@@ -30,6 +30,7 @@ public:
     std::unique_ptr<OHOS::Ace::JsonValue> ToJsonObject() const override;
     std::string GetIcon(void) const;
     std::string GetSearchButton(void) const;
+    std::string GetColor(void) const;
 
 private:
     OHOS::Ace::RefPtr<OHOS::Ace::RenderSearch> GetRenderSearch() const;
