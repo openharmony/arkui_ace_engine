@@ -45,6 +45,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/core/image/image_object.cpp",
     "$ace_root/frameworks/core/image/image_provider.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
+    "$ace_root/frameworks/core/mock/mock_ace_application_info.cpp",
     "imageloader_fuzzer.cpp",
   ]
 
