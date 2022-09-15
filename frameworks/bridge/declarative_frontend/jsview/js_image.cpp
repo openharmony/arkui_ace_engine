@@ -34,11 +34,15 @@ std::unique_ptr<ImageModel> ImageModel::instance = nullptr;
 ImageModel* ImageModel::GetInstance()
 {
     if (!instance) {
+#ifdef NG_BUILD
+        instance.reset(new NG::ImageModelNG());
+#else
         if (Container::IsCurrentUseNewPipeline()) {
             instance.reset(new NG::ImageModelNG());
         } else {
             instance.reset(new Framework::ImageModelImpl());
         }
+#endif
     }
     return instance.get();
 }
@@ -164,7 +168,7 @@ void JSImage::Create(const JSCallbackInfo& info)
     auto noPixMap = ParseJsMedia(info[0], src);
 
     RefPtr<PixelMap> pixMap = nullptr;
-#if defined(IMAGE_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED)
     if (!noPixMap) {
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
@@ -388,7 +392,7 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
         }
 
         auto builderObj = JSRef<JSObject>::Cast(ret);
-#if !defined(PREVIEW)
+#if defined(PIXEL_MAP_SUPPORTED)
         auto pixmap = builderObj->GetProperty("pixelMap");
         itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
 #endif

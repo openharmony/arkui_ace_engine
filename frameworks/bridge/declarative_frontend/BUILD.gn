@@ -400,10 +400,12 @@ template("declarative_js_engine_ng") {
       "jsview/js_view_functions.cpp",
       "sharedata/js_share_data.cpp",
 
+      # jsviews
+      "jsview/js_image.cpp",
+
       # jsview bindings
       "jsview/bindings/js_column_binding.cpp",
       "jsview/bindings/js_container_base_binding.cpp",
-      "jsview/bindings/js_image_binding.cpp",
       "jsview/bindings/js_lazy_foreach_binding.cpp",
       "jsview/bindings/js_list_binding.cpp",
       "jsview/bindings/js_list_item_binding.cpp",
@@ -417,7 +419,6 @@ template("declarative_js_engine_ng") {
       "ng/jsview/js_column.cpp",
       "ng/jsview/js_container_base.cpp",
       "ng/jsview/js_flex.cpp",
-      "ng/jsview/js_image.cpp",
       "ng/jsview/js_interactable_view.cpp",
       "ng/jsview/js_lazy_foreach.cpp",
       "ng/jsview/js_list.cpp",

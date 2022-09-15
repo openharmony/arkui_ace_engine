@@ -190,7 +190,11 @@ void StaticImageObject::UploadToGpuForRender(
         auto callback = [successCallback, imageSource, taskExecutor, imageCache,
                 imageSize, key, id = Container::CurrentId()]
                 (flutter::SkiaGPUObject<SkImage> image, sk_sp<SkData> compressData) {
+#ifdef NG_BUILD
+            if (!image.skia_object() && !compressData.get()) {
+#else
             if (!image.get() && !compressData.get()) {
+#endif
                 ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
                     "Image data may be broken or absent in upload callback.");
             }

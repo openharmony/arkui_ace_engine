@@ -323,6 +323,11 @@ bool JSViewAbstract::ParseJsAnimatableDimensionVp(const JSRef<JSVal>& jsValue, A
     return false;
 }
 
+bool JSViewAbstract::ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, DragItemInfo& dragInfo)
+{
+    return false;
+}
+
 void JSViewAbstract::JsUseAlign(const JSCallbackInfo& info) {}
 
 void JSViewAbstract::JsGridSpan(const JSCallbackInfo& info) {}
