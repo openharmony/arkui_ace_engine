@@ -396,6 +396,11 @@ template("ace_core_source_set") {
       deps += [ "$ace_root/frameworks/core/components_v2/ability_component:ace_core_components_ability_v2_$platform" ]
     }
 
+    if (defined(config.apng_image_support) && config.apng_image_support) {
+      defines += [ "APNG_IMAGE_SUPPORT" ]
+      deps += [ "$ace_root/frameworks/core/image/apng:ace_core_apng_$platform" ]
+    }
+
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       if (!use_mingw_win && !use_mac && !use_linux) {
