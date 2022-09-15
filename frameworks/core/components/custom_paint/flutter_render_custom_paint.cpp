@@ -1135,9 +1135,26 @@ void FlutterRenderCustomPaint::Path2DFill(const Offset& offset)
     }
 }
 
+void FlutterRenderCustomPaint::Path2DClip()
+{
+    skCanvas_->clipPath(skPath2d_);
+}
+
 void FlutterRenderCustomPaint::Clip()
 {
     skCanvas_->clipPath(skPath_);
+}
+
+void FlutterRenderCustomPaint::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    if (path == nullptr) {
+        LOGE("Clip failed, target path is null.");
+        return;
+    }
+    auto offset = Offset(0, 0);
+    ParsePath2D(offset, path);
+    Path2DClip();
+    skPath2d_.reset();
 }
 
 void FlutterRenderCustomPaint::BeginPath()

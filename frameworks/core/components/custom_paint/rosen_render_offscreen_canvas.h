@@ -62,6 +62,7 @@ public:
     void Fill() override;
     void Fill(const RefPtr<CanvasPath2D>& path) override;
     void Clip() override;
+    void Clip(const RefPtr<CanvasPath2D>& path) override;
     void PutImageData(const ImageData& imageData) override;
     void DrawImage(const CanvasImage& canvasImage, double width, double height) override;
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& image) override;
@@ -131,6 +132,7 @@ private:
     void Path2DClosePath(const PathArgs& args);
     void Path2DStroke();
     void Path2DFill();
+    void Path2DClip();
     void ParsePath2D(const RefPtr<CanvasPath2D>& path);
     void TranspareCmdToPath(const RefPtr<CanvasPath2D>& path);
     bool IsPointInPathByColor(double x, double y, SkPath& path, SkColor colorMatch);
