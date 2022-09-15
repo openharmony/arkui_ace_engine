@@ -23,6 +23,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/video/render_texture.h"
 #include "core/pipeline/layers/clip_layer.h"
+#include "core/pipeline/layers/hole_layer.h"
 #include "core/pipeline/layers/picture_layer.h"
 #include "core/pipeline/layers/texture_layer.h"
 
@@ -45,12 +46,14 @@ private:
     void PerformLayout() override;
 
     void AddTextureLayer();
+    void AddHoleLayer();
     void AddBackgroundLayer();
     void DrawBackground();
     void AddGaussianFuzzy(RenderContext& context, const Offset& offset);
     void InitGaussianFuzzyParas();
 
     RefPtr<Flutter::TextureLayer> textureLayer_;
+    RefPtr<Flutter::HoleLayer> holeLayer_;
     RefPtr<Flutter::ClipLayer> layer_;
     RefPtr<Flutter::PictureLayer> backgroundLayer_;
     bool needDrawBackground_ = false;
