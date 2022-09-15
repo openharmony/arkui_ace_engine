@@ -414,7 +414,6 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
     if (event.button == MouseButton::LEFT_BUTTON) {
         if (event.action == MouseAction::PRESS) {
             UpdateStartSelection(DEFAULT_SELECT_INDEX, event.GetOffset(), true, false);
-            AddOutOfRectCallbackToContext();
         } else if (event.action == MouseAction::MOVE) {
             int32_t start = GetEditingValue().selection.baseOffset;
             int32_t end = GetCursorPositionForClick(event.GetOffset());
@@ -428,7 +427,6 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         Offset rightClickOffset = event.GetOffset();
         ShowTextOverlay(rightClickOffset, false, true);
-        AddOutOfRectCallbackToContext();
     }
 
     return false;
@@ -615,7 +613,6 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     if (context) {
         context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
     }
-    AddOutOfRectCallbackToContext();
 }
 
 void RenderTextField::OnTapCallback()
@@ -715,7 +712,6 @@ void RenderTextField::OnDoubleClick(const ClickInfo& clickInfo)
     LOGI("text field accept double click, position: %{public}d, selection: %{public}s", clickPosition,
         selection.ToString().c_str());
     MarkNeedRender();
-    AddOutOfRectCallbackToContext();
 }
 
 void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
@@ -743,7 +739,6 @@ void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
     bool isPassword = (keyboard_ == TextInputType::VISIBLE_PASSWORD);
     UpdateStartSelection(DEFAULT_SELECT_INDEX, longPressPosition, singleHandle || isPassword, true);
     ShowTextOverlay(longPressPosition, false);
-    AddOutOfRectCallbackToContext();
 }
 
 void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHandle, bool isUsingMouse)
@@ -1006,7 +1001,7 @@ void RenderTextField::ResetOnFocusForTextFieldManager()
     }
 }
 
-bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling)
+bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
     if (!enabled_) {
         LOGD("TextField is not enabled.");
@@ -1031,7 +1026,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
             LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
             inputMethod->SetCallingWindow(context->GetWindowId());
         }
-        inputMethod->Attach(textChangeListener_);
+        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard);
 #else
         if (!HasConnection()) {
             AttachIme();
