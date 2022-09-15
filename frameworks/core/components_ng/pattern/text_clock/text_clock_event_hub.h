@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-using ChangeEvent = std::function<void(const std::string)>;
+using ChangeEvent = std::function<void(const uint64_t)>;
 
 class TextClockEventHub : public EventHub {
     DECLARE_ACE_TYPE(TextClockEventHub, EventHub)
@@ -36,10 +36,10 @@ public:
         changeEvent_ = std::move(changeEvent);
     }
 
-    void FireChangeEvent(std::string value) const
+    void FireChangeEvent(uint64_t value) const
     {
         if (changeEvent_) {
-            changeEvent_(std::move(value));
+            changeEvent_(value);
         }
     }
 
