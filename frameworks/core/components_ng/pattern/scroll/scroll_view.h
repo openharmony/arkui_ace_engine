@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_VIEW_H
 
 #include "base/geometry/axis.h"
-#include "base/utils/macros.h"
-#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
+#include "frameworks/core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -26,6 +26,11 @@ class ACE_EXPORT ScrollView {
 public:
     static void Create();
     static void SetAxis(Axis axis);
+    static void SetScrollBarColor(const Color& color);
+    static void SetScrollBarWidth(const Dimension& width);
+    static void SetOnScroll(const EventMarker& onScroll);
+    static void SetOnScrollEdge(const EventMarker& onScroll);
+    static void SetOnScrollEnd(const EventMarker& onScrollEnd);
 };
 
 } // namespace OHOS::Ace::NG

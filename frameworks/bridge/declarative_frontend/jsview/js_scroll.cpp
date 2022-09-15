@@ -139,6 +139,10 @@ void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
                 auto params = ConvertToJSValues(eventInfo->GetScrollX(), eventInfo->GetScrollY());
                 func->Call(JSRef<JSObject>(), params.size(), params.data());
             });
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ScrollView::SetOnScroll(onScroll);
+            return;
+        }
         auto scrollComponent =
             AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (scrollComponent) {
@@ -173,6 +177,10 @@ void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
                 auto param = ConvertToJSValue(eventType);
                 func->Call(JSRef<JSObject>(), 1, &param);
             });
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ScrollView::SetOnScrollEdge(onScroll);
+            return;
+        }
         auto scrollComponent =
             AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (scrollComponent) {
@@ -193,6 +201,10 @@ void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 func->Call(JSRef<JSObject>(), 0, nullptr);
             });
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ScrollView::SetOnScrollEnd(onScrollStop);
+            return;
+        }
         auto scrollComponent =
             AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (scrollComponent) {
@@ -245,8 +257,17 @@ void JSScroll::SetScrollBar(int displayMode)
 
 void JSScroll::SetScrollBarWidth(const std::string& scrollBarWidth)
 {
+    if (scrollBarWidth.empty()) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ScrollView::SetScrollBarWidth(StringUtils::StringToDimension(scrollBarWidth));
+        return;
+    }
+
     auto scrollComponent = AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!scrollComponent || scrollBarWidth.empty()) {
+    if (!scrollComponent) {
         return;
     }
     scrollComponent->SetScrollBarWidth(StringUtils::StringToDimension(scrollBarWidth));
@@ -254,8 +275,17 @@ void JSScroll::SetScrollBarWidth(const std::string& scrollBarWidth)
 
 void JSScroll::SetScrollBarColor(const  std::string& scrollBarColor)
 {
+    if (scrollBarColor.empty()) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ScrollView::SetScrollBarColor(Color::FromString(scrollBarColor));
+        return;
+    }
+
     auto scrollComponent = AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!scrollComponent || scrollBarColor.empty()) {
+    if (!scrollComponent) {
         return;
     }
     scrollComponent->SetScrollBarColor(Color::FromString(scrollBarColor));
