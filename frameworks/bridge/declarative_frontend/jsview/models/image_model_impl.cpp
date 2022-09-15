@@ -114,7 +114,7 @@ void ImageModelImpl::Create(const std::string& src, bool noPixMap, RefPtr<PixelM
         return;
     }
 
-#if defined(IMAGE_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED)
     image->SetPixmap(pixMap);
 #endif
 }
