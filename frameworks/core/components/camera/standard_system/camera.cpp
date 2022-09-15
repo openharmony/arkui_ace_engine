@@ -709,8 +709,8 @@ void Camera::CreateCamera()
         LOGE("Get Camera Manager Failed");
         return;
     }
-    std::vector<sptr<OHOS::CameraStandard::CameraInfo>> cameraObjList;
-    cameraObjList = camManagerObj->GetCameras();
+    std::vector<sptr<OHOS::CameraStandard::CameraDevice>> cameraObjList;
+    cameraObjList = camManagerObj->GetSupportedCameras();
     if (cameraObjList.empty()) {
         LOGE("Get Cameras Failed");
         return;
