@@ -869,7 +869,7 @@ void JSViewPartialUpdate::ComponentToElementLocalizedUpdate(const UpdateFuncResu
             element->GetElementId());
         // special case, because new IfElement will be created
         if (AceType::DynamicCast<IfElseElement>(element) != nullptr) {
-            JSIfElse::ComponentToElementLocalizedUpdate(mainComponent, element);
+            IfElseElement::ComponentToElementLocalizedUpdate(mainComponent, element);
         } else if (AceType::DynamicCast<GridLayoutItemElement>(element) != nullptr) {
             // VSP::Finish returns swapped compared to reg
             AceType::DynamicCast<SoleChildElement>(element)->LocalizedUpdateWithItemComponent(

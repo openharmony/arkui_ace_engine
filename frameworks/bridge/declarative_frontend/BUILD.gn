@@ -254,6 +254,7 @@ template("declarative_js_engine") {
       "jsview/bindings/js_text_binding.cpp",
 
       # Models implemenations for classic fw
+      "jsview/models/if_else_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
     ]
 

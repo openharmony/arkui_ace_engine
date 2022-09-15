@@ -15,6 +15,8 @@
     // delcrations of C++ exposed classes
     "src/lib/common/environment_setting.d.ts",
     "src/lib/common/storage.d.ts",
+    "src/lib/common/ifelse_native.d.ts",
+
     // interfaces
     "src/lib/common/i_environment_backend.ts",
     "src/lib/common/i_property_subscriber.ts",
