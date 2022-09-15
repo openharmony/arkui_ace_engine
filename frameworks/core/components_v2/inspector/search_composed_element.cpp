@@ -26,7 +26,8 @@ namespace OHOS::Ace::V2 {
 
 const std::unordered_map<std::string, std::function<std::string(const SearchComposedElement&)>> CREATE_JSON_MAP {
     { "icon", [](const SearchComposedElement& inspector) { return inspector.GetIcon(); } },
-    { "searchButton", [](const SearchComposedElement& inspector) { return inspector.GetSearchButton(); } }
+    { "searchButton", [](const SearchComposedElement& inspector) { return inspector.GetSearchButton(); } },
+    { "placeholderColor", [](const SearchComposedElement& inspector) { return inspector.GetColor(); } }
 };
 
 void SearchComposedElement::Dump(void)
@@ -60,6 +61,23 @@ std::string SearchComposedElement::GetSearchButton(void) const
     auto renderSearch = GetRenderSearch();
     std::string searchButton = renderSearch ? renderSearch->GetSearchComponent()->GetSearchText() : "";
     return searchButton;
+}
+
+std::string SearchComposedElement::GetColor(void) const
+{
+    auto renderSearch = GetRenderSearch();
+    if (!renderSearch) {
+        return "";
+    }
+    auto component = renderSearch->GetSearchComponent();
+    if (!component) {
+        return "";
+    }
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(component->GetChild());
+    if (!textFieldComponent) {
+        return "";
+    }
+    return textFieldComponent->GetPlaceholderColor().ColorToString();
 }
 
 OHOS::Ace::RefPtr<OHOS::Ace::RenderSearch> SearchComposedElement::GetRenderSearch() const

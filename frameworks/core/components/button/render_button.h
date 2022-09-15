@@ -125,6 +125,11 @@ public:
         return buttonComponent_->GetBackgroundColor();
     }
 
+    double GetRadius() const
+    {
+        return rrectRadius_;
+    }
+
     void SendAccessibilityEvent();
 
 protected:
