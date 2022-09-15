@@ -63,6 +63,7 @@ Note:If the text contains special characters, please escape them according to th
             <filefilter name="binaryFileTypePolicyFilter" desc="二进制文件校验策略的过滤条件" >
                 <filteritem type="filepath" name="frameworks/base/resource/binary/mac/.*.o" desc="来源于代码仓foundation/arkui/ace_engine/frameworks/base/resource/binary下的svg编译而来。现有的objcopy工具链在mac上不能用，使用开源工具转换成.o。"/>
                 <filteritem type="filepath" name="frameworks/base/network/cacert.pem" desc="三方库libcurl使用的公钥证书文件，curl官网下载得到。"/>
+                <filteritem type="filepath" name="adapter/ohos/services/uiservice/dialog_ui/share_picker_dialog/share_picker_dialog.hap" desc="系统分享弹框预置hap"/>
             </filefilter>
             <filefilter name="binaryFileTypePolicyFilter" desc="二进制文件校验策略的过滤条件" >
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/broken.bmp" desc="自造的二进制图片"/>
