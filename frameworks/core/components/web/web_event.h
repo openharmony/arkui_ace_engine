@@ -476,7 +476,7 @@ public:
 private:
     RefPtr<SslSelectCertResult> result_;
     std::string host_;
-    int32_t port_;
+    int32_t port_ = -1;
     std::vector<std::string> keyTypes_;
     std::vector<std::string> issuers_;
 };

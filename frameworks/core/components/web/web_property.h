@@ -248,7 +248,6 @@ public:
 
     void ClearClientAuthenticationCache()
     {
-        LOGI("ClearClientAuthenticationCache");
         if (clearClientAuthenticationCacheImpl_) {
             clearClientAuthenticationCacheImpl_();
         }

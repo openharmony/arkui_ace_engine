@@ -235,7 +235,9 @@ public:
 
     void HandleConfirm(const JSCallbackInfo& args)
     {
-        LOGW("JSWebSslSelectCert::HandleConfirm");
+        if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsString()) {
+            return;
+        }
         std::string privateKeyFile = args[0]->ToString();
         std::string certChainFile = args[1]->ToString();
         if (result_) {
@@ -1745,12 +1747,12 @@ void JSWeb::OnSslSelectCertRequest(const JSCallbackInfo& args)
     auto jsCallback = [func = std::move(jsFunc)]
         (const BaseEventInfo* info) -> bool {
             ACE_SCORING_EVENT("OnSslSelectCertRequest CallBack");
-            if (func == nullptr) {
+            if (!func) {
                 LOGW("function is null");
                 return false;
             }
             auto eventInfo = TypeInfoHelper::DynamicCast<WebSslSelectCertEvent>(info);
-            if (eventInfo == nullptr) {
+            if (!eventInfo) {
                 LOGW("eventInfo is null");
                 return false;
             }

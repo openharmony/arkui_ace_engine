@@ -123,7 +123,7 @@ class SslSelectCertResultOhos : public SslSelectCertResult {
     DECLARE_ACE_TYPE(SslSelectCertResultOhos, SslSelectCertResult)
 
 public:
-    SslSelectCertResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslSelectCertResult> result)
+    explicit SslSelectCertResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslSelectCertResult> result)
         : result_(result) {}
 
     void HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile) override;
