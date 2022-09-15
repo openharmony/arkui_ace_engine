@@ -92,6 +92,7 @@ public:
     virtual void Stroke(const Offset& offset) = 0;
     virtual void Stroke(const Offset& offset, const RefPtr<CanvasPath2D>& path) = 0;
     virtual void Clip() = 0;
+    virtual void Clip(const RefPtr<CanvasPath2D>& path) = 0;
     virtual void BeginPath() = 0;
     virtual void ClosePath() = 0;
 
