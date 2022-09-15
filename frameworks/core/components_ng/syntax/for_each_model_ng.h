@@ -23,27 +23,25 @@
 #include <vector>
 
 #include "base/utils/macros.h"
+#include "core/components_ng/syntax/for_each_model.h"
 
 namespace OHOS::Ace::NG {
-struct ForEachFunc {
-    std::function<std::vector<std::string>()> idGenFunc_;
-    std::function<void(int32_t index)> itemGenFunc_;
-};
 
-class ACE_EXPORT ForEach {
+class ACE_EXPORT ForEachModelNG : public ForEachModel{
 public:
-    static void Create(const ForEachFunc& ForEachFunc);
+    virtual ~ForEachModelNG() override = default;
+    void Pop() override;
+    
+    void Create(const std::string& compilerGenId, const OHOS::Ace::ForEachFunc& ForEachFunc) override;
+    const std::list<std::string>& GetCurrentIdList(int32_t nodeId) override;
 
-    static const std::list<std::string>& GetCurrentIdList(int32_t nodeId);
-
-    static void SetNewIds(std::list<std::string>&& newIds);
+    void SetNewIds(std::list<std::string>&& newIds) override;
 
     // Partial Update path.
-    static void Create();
+    void Create() override;
 
-    static void CreateNewChildStart(const std::string& id);
-
-    static void CreateNewChildFinish(const std::string& id);
+    void CreateNewChildStart(const std::string& id) override;
+    void CreateNewChildFinish(const std::string& id) override;
 };
 } // namespace OHOS::Ace::NG
 

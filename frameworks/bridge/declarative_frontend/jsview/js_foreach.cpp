@@ -16,34 +16,47 @@
 #include "bridge/declarative_frontend/jsview/js_foreach.h"
 
 #include <string>
-
 #include "base/memory/referenced.h"
+#include "core/components_ng/syntax/for_each_model_ng.h"
+#include "bridge/declarative_frontend/jsview/models/for_each_model_impl.h"
 #include "bridge/declarative_frontend/engine/functions/js_foreach_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
-#include "core/components/foreach/for_each_component.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/syntax/for_each.h"
-#include "core/components_part_upd/foreach/foreach_component.h"
-#include "core/components_part_upd/foreach/foreach_element.h"
-#include "core/components_v2/common/element_proxy.h"
+
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ForEachModel> ForEachModel::instance = nullptr;
+
+ForEachModel* ForEachModel::GetInstance()
+{
+    if (!instance) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance.reset(new NG::ForEachModelNG());
+        } else {
+            instance.reset(new Framework::ForEachModelImpl());
+        }
+    }
+    return instance.get();
+}
+} // namespace OHOS::Ace
+
 
 namespace OHOS::Ace::Framework {
 
+// Create(...)
+// NG:       no params
+// Classic:  cmpilerGenId, array, itemGenFunc, idGenFunction
 void JSForEach::Create(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUsePartialUpdate()) {
-        if (Container::IsCurrentUseNewPipeline()) {
-            CreateForPartialUpdateNG();
-        } else {
-            CreateForPartialUpdate();
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        ForEachModel::GetInstance()->Create();
         return;
     }
 
     if (info.Length() < 4 || !info[2]->IsObject() || !info[3]->IsFunction() ||
         (!info[0]->IsNumber() && !info[0]->IsString()) || info[1]->IsUndefined() || !info[1]->IsObject()) {
-        LOGE("invalid arguments for ForEach");
+        LOGE("Invalid arguments for ForEach");
         return;
     }
 
@@ -59,58 +72,19 @@ void JSForEach::Create(const JSCallbackInfo& info)
         jsForEachFunction = AceType::MakeRefPtr<JsForEachFunction>(jsArray, JSRef<JSFunc>::Cast(jsViewMapperFunc));
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ForEachFunc forEachFunc = { [jsForEachFunction]() { return jsForEachFunction->ExecuteIdentityMapper(); },
+        OHOS::Ace::ForEachFunc forEachFunc = { [jsForEachFunction]() { return jsForEachFunction->ExecuteIdentityMapper(); },
             [jsForEachFunction](int32_t index) { jsForEachFunction->ExecuteBuilderForIndex(index); } };
-        NG::ForEach::Create(forEachFunc);
-        return;
+        ForEachModel::GetInstance()->Create(info[0]->ToString(), forEachFunc);
     }
-
-    auto* viewStack = ViewStackProcessor::GetInstance();
-    std::string viewId = viewStack->ProcessViewId(info[0]->ToString());
-    viewStack->Push(AceType::MakeRefPtr<ForEachComponent>(viewId, "ForEach"));
-
-    std::vector<std::string> keys = jsForEachFunction->ExecuteIdentityMapper();
-    for (size_t i = 0; i < keys.size(); i++) {
-        keys[i].insert(0, "-");
-        keys[i].insert(0, info[0]->ToString());
-        viewStack->PushKey(keys[i]);
-
-        viewStack->Push(AceType::MakeRefPtr<MultiComposedComponent>(viewStack->GetKey(), "ForEachItem"));
-        jsForEachFunction->ExecuteBuilderForIndex(i);
-        viewStack->PopContainer();
-
-        viewStack->PopKey();
-    }
-}
-
-void JSForEach::CreateForPartialUpdate()
-{
-    // create ForEachComponent and push to stack
-    const auto elmtId = ViewStackProcessor::GetInstance()->ClaimElementId();
-    const auto elmtIdS = std::to_string(elmtId);
-    auto forEachComponent = AceType::MakeRefPtr<OHOS::Ace::PartUpd::ForEachComponent>(elmtIdS, "ForEach");
-    forEachComponent->SetElementId(elmtId);
-    ViewStackProcessor::GetInstance()->Push(forEachComponent);
-}
-
-void JSForEach::CreateForPartialUpdateNG()
-{
-    // create ForEachComponent and push to stack
-    NG::ForEach::Create();
-}
 
 void JSForEach::Pop()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewStackProcessor::GetInstance()->PopContainer();
-        return;
-    }
-    ViewStackProcessor::GetInstance()->PopContainer();
+    ForEachModel::GetInstance()->Pop();
 }
 
+// partial update / NG only
 // signature
-// elmtId : number
+// nodeId/elmtId : number
 // idList : string[]
 // returns bool, true on success
 void JSForEach::GetIdArray(const JSCallbackInfo& info)
@@ -130,13 +104,8 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
     }
 
     const auto elmtId = info[0]->ToNumber<int32_t>();
-    std::list<std::string> cppList;
-    if (Container::IsCurrentUseNewPipeline()) {
-        cppList = NG::ForEach::GetCurrentIdList(elmtId);
-    } else {
-        cppList = OHOS::Ace::V2::ForEachElementLookup::GetIdArray(elmtId);
-    }
-
+    std::list<std::string> cppList =  ForEachModel::GetInstance()->GetCurrentIdList(elmtId);
+    
     size_t index = 0;
     for (const auto& id : cppList) {
         LOGD("  array id %{public}d - '%{public}s'", static_cast<int32_t>(index), id.c_str());
@@ -145,9 +114,10 @@ void JSForEach::GetIdArray(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(index > 0)));
 }
 
+// partial update / NG only
 // signature
-// elmtId : number
-// idList : string[]
+// nodeId/elmtId : number   // FIXME, not used!
+// idList : string[] 
 // no return value
 void JSForEach::SetIdArray(const JSCallbackInfo& info)
 {
@@ -168,26 +138,7 @@ void JSForEach::SetIdArray(const JSCallbackInfo& info)
         newIdArr.insert(newIdArr.end(), value);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ForEach::SetNewIds(std::move(newIdArr));
-        return;
-    }
-
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<PartUpd::ForEachComponent>(stack->GetMainComponent());
-    component->SetIdArray(newIdArr);
-
-    // re-render case
-    // children of IfElement will be replaced
-    // mark them as removed in ElementRegistry
-    auto forEachElement =
-        ElementRegister::GetInstance()->GetSpecificItemById<PartUpd::ForEachElement>(component->GetElementId());
-    if (!forEachElement) {
-        // first render case
-        return;
-    }
-
-    forEachElement->RemoveUnusedChildElementsFromRegistery(newIdArr);
+        ForEachModel::GetInstance()->SetNewIds(std::move(newIdArr));
 }
 
 // signature is
@@ -201,16 +152,7 @@ void JSForEach::CreateNewChildStart(const JSCallbackInfo& info)
     }
 
     const auto id = info[0]->ToString();
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ForEach::CreateNewChildStart(id);
-        return;
-    }
-
-    LOGD("Start create child with array id %{public}s.", id.c_str());
-    auto* stack = ViewStackProcessor::GetInstance();
-    stack->PushKey(id);
-    const auto stacksKey = stack->GetKey();
-    stack->Push(AceType::MakeRefPtr<MultiComposedComponent>(stacksKey, "ForEachItem"));
+        ForEachModel::GetInstance()->CreateNewChildStart(id);
 }
 
 // signature is
@@ -224,15 +166,7 @@ void JSForEach::CreateNewChildFinish(const JSCallbackInfo& info)
     }
 
     const auto id = info[0]->ToString();
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ForEach::CreateNewChildFinish(id);
-        return;
-    }
-
-    LOGD("Finish create child with array id %{public}s.", id.c_str());
-    auto* stack = ViewStackProcessor::GetInstance();
-    stack->PopKey();
-    stack->PopContainer();
+    ForEachModel::GetInstance()->CreateNewChildFinish(id);
 }
 
 void JSForEach::JSBind(BindingTarget globalObj)
