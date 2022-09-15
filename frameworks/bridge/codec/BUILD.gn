@@ -15,6 +15,7 @@ import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 ohos_source_set("data_codec") {
+  subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   configs = [ "$ace_root:ace_config" ]
 

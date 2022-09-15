@@ -18,6 +18,7 @@ template("pa_backend") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     configs = [ "$ace_root:ace_config" ]
 

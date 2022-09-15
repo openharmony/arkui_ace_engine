@@ -137,6 +137,7 @@ template("build_component") {
         configs += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config" ]
       }
       part_name = ace_engine_part
+      subsystem_name = ace_engine_subsystem
     }
   }
 

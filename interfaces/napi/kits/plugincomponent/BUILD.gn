@@ -53,6 +53,6 @@ ohos_shared_library("plugincomponent") {
   ]
 
   relative_install_dir = "module"
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }

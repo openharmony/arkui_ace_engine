@@ -76,6 +76,6 @@ ohos_shared_library("ark_debugger") {
 
   configs = [ ":ark_debugger_config" ]
 
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }

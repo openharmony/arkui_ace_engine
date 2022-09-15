@@ -41,5 +41,5 @@ gen_sa_dialog_js("dialog_picker_js_files_etc") {
   ]
   dialog_name = "dialog_picker_service"
   part_name = ace_engine_part
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
 }
