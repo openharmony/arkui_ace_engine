@@ -24,6 +24,7 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+
 class ACE_EXPORT FormLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(FormLayoutProperty, LayoutProperty);
 

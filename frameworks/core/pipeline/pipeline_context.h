@@ -31,14 +31,12 @@
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
-#include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/flush_event.h"
 #include "core/animation/page_transition_listener.h"
 #include "core/animation/schedule_task.h"
-#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/focus_animation_manager.h"
 #include "core/common/platform_res_register.h"
@@ -513,11 +511,6 @@ public:
 
     void MovePage(const Offset& rootRect, double offsetHeight);
 
-    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
-    {
-        drawDelegate_ = std::move(delegate);
-    }
-
     void SetBuildAfterCallback(const std::function<void()>& callback) override
     {
         buildAfterCallback_.emplace_back(callback);
@@ -572,16 +565,6 @@ public:
     bool IsBuildingFirstPage() const
     {
         return buildingFirstPage_;
-    }
-
-    const RefPtr<SharedImageManager>& GetSharedImageManager() const
-    {
-        return sharedImageManager_;
-    }
-
-    void SetSharedImageManager(const RefPtr<SharedImageManager>& sharedImageManager)
-    {
-        sharedImageManager_ = sharedImageManager;
     }
 
     using UpdateWindowBlurDrawOpHandler = std::function<void(void)>;
@@ -737,11 +720,6 @@ public:
         contextMenu_ = contextMenu;
     }
 
-    double GetDensity() const
-    {
-        return density_;
-    }
-
     void SetClipHole(double left, double top, double width, double height);
 
     const Rect& GetTransparentHole() const
@@ -773,29 +751,6 @@ public:
     {
         return isHoleValid_;
     }
-
-    void SetPluginOffset(const Offset& offset)
-    {
-        pluginOffset_ = offset;
-    }
-
-    Offset GetPluginOffset() const
-    {
-        return pluginOffset_;
-    }
-
-    void SetPluginEventOffset(const Offset& offset)
-    {
-        pluginEventOffset_ = offset;
-    }
-
-    Offset GetPluginEventOffset() const
-    {
-        return pluginEventOffset_;
-    }
-
-    void SetTouchPipeline(WeakPtr<PipelineContext> context);
-    void RemoveTouchPipeline(WeakPtr<PipelineContext> context);
 
     void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
 
@@ -1155,7 +1110,6 @@ private:
     RefPtr<RootElement> rootElement_;
     WeakPtr<FocusNode> dirtyFocusNode_;
     WeakPtr<FocusNode> dirtyFocusScope_;
-    RefPtr<SharedImageManager> sharedImageManager_;
     std::list<std::function<void()>> buildAfterCallback_;
     RefPtr<RenderFactory> renderFactory_;
     UpdateWindowBlurRegionHandler updateWindowBlurRegionHandler_;
@@ -1231,7 +1185,6 @@ private:
     uint32_t modalColor_ = 0x00000000;
     bool isFullWindow_ = false;
     std::list<RefPtr<RenderNode>> hoverNodes_;
-    std::unique_ptr<DrawDelegate> drawDelegate_;
     std::function<void(std::function<void()>&&)> screenOffCallback_;
     std::function<void(std::function<void()>&&)> screenOnCallback_;
 #if defined(ENABLE_NATIVE_VIEW)
@@ -1253,10 +1206,6 @@ private:
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
-
-    std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;
-    Offset pluginOffset_ { 0, 0 };
-    Offset pluginEventOffset_ { 0, 0 };
 
     bool isShiftDown_ = false;
     bool isCtrlDown_ = false;

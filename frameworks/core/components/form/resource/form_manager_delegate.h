@@ -21,6 +21,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/resource/form_manager_resource.h"
 #include "core/components/form/resource/form_request_data.h"
+#include "core/pipeline/pipeline_base.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_js_info.h"
@@ -33,18 +34,17 @@ class FormManagerDelegate : public FormManagerResource {
     DECLARE_ACE_TYPE(FormManagerDelegate, FormManagerResource);
 
 public:
-    using onFormAcquiredCallbackForJava
-        = std::function<void(int64_t, const std::string&, const std::string&, const std::string&)>;
+    using onFormAcquiredCallbackForJava =
+        std::function<void(int64_t, const std::string&, const std::string&, const std::string&)>;
     using OnFormUpdateCallbackForJava = std::function<void(int64_t, const std::string&)>;
-    using OnFormAcquiredCallback
-        = std::function<void(int64_t, const std::string&, const std::string&, const std::string&,
-        const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&, const AppExecFwk::FormJsInfo&)>;
-    using OnFormUpdateCallback = std::function<void(int64_t, const std::string&,
-        const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&)>;
+    using OnFormAcquiredCallback = std::function<void(int64_t, const std::string&, const std::string&,
+        const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&, const AppExecFwk::FormJsInfo&)>;
+    using OnFormUpdateCallback =
+        std::function<void(int64_t, const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
 
-    enum class State: char {
+    enum class State : char {
         WAITINGFORSIZE,
         CREATING,
         CREATED,
@@ -54,11 +54,11 @@ public:
 
     FormManagerDelegate() = delete;
     ~FormManagerDelegate() override;
-    explicit FormManagerDelegate(const WeakPtr<PipelineContext>& context)
-        : FormManagerResource("formAdaptor", context),
-          state_(State::WAITINGFORSIZE) {}
+    explicit FormManagerDelegate(const WeakPtr<PipelineBase>& context)
+        : FormManagerResource("formAdaptor", context), state_(State::WAITINGFORSIZE)
+    {}
 
-    void AddForm(const WeakPtr<PipelineContext>& context, const RequestFormInfo& info);
+    void AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);
     void ReleasePlatformResource();
 
     void AddFormAcquireCallback(const OnFormAcquiredCallback& callback);
@@ -68,13 +68,13 @@ public:
 
     void OnActionEvent(const std::string& action);
 #ifdef OHOS_STANDARD_SYSTEM
-    void ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJsInfo);
+    void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
     void OnDeathReceived();
 #endif
 
 private:
-    void CreatePlatformResource(const WeakPtr<PipelineContext>& context, const RequestFormInfo& info);
+    void CreatePlatformResource(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);
     void Stop();
     void RegisterEvent();
     void UnregisterEvent();
@@ -83,7 +83,7 @@ private:
     void OnFormAcquired(const std::string& param);
     void OnFormUpdate(const std::string& param);
     void OnFormError(const std::string& param);
-    bool ParseAction(const std::string& action, AAFwk::Want &want);
+    bool ParseAction(const std::string& action, AAFwk::Want& want);
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;

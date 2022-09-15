@@ -23,6 +23,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
+#include "core/components_ng/pattern/form/form_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,6 +39,10 @@ public:
     static void SetOnError(FormCallback&& onError);
     static void SetOnUninstall(FormCallback&& onUninstall);
     static void SetOnRouter(FormCallback&& onRouter);
+
+private:
+    static RefPtr<FormNode> GetOrCreateFormNode(
+        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 };
 
 } // namespace OHOS::Ace::NG

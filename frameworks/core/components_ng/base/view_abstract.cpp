@@ -215,6 +215,11 @@ void ViewAbstract::SetAlign(Alignment alignment)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 
+void ViewAbstract::SetVisibility(VisibleType visible)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
+}
+
 void ViewAbstract::SetOpacity(double opacity)
 {
     ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);

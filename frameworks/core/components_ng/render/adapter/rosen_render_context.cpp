@@ -297,7 +297,7 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
             continue;
         }
         auto rsnode = rosenRenderContext->GetRSNode();
-        if (rsnode) {
+        if (rsnode && child->IsVisible()) {
             rsNode_->AddChild(rsnode, -1);
         }
     }

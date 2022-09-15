@@ -17,6 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -116,9 +117,21 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         isContraintNoChanged_ = true;
     }
 
+    if (!host->IsVisible()) {
+        isActive_ = false;
+    }
     if (parentConstraint) {
         geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
         layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
+        VisibleType visible = VisibleType::VISIBLE;
+        auto layoutProperty = host->GetLayoutProperty();
+        if (layoutProperty) {
+            visible = layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
+        }
+        if (visible == VisibleType::GONE) {
+            layoutProperty_->UpdateSelfIdealSize(SizeF());
+            layoutProperty_->UpdateCalcSelfIdealSize(CalcSize(CalcLength(0), CalcLength(0)));
+        }
     } else {
         LayoutConstraintF layoutConstraint;
         layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());

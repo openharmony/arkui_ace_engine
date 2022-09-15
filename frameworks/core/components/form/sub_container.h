@@ -18,8 +18,10 @@
 
 #include "ashmem.h"
 #include "form_ashmem.h"
+
 #include "base/thread/task_executor.h"
 #include "core/common/frontend.h"
+#include "core/components_ng/pattern/form/form_pattern.h"
 #include "frameworks/bridge/card_frontend/card_frontend.h"
 #include "frameworks/core/pipeline/pipeline_context.h"
 
@@ -30,8 +32,8 @@ class ACE_EXPORT SubContainer : public virtual AceType {
 public:
     using OnFormAcquiredCallback = std::function<void(const size_t)>;
 
-    explicit SubContainer(const WeakPtr<PipelineContext>& context) : outSidePipelineContext_(context) {}
-    SubContainer(const WeakPtr<PipelineContext>& context, int32_t instanceId)
+    explicit SubContainer(const WeakPtr<PipelineBase>& context) : outSidePipelineContext_(context) {}
+    SubContainer(const WeakPtr<PipelineBase>& context, int32_t instanceId)
         : outSidePipelineContext_(context), instanceId_(instanceId)
     {}
     ~SubContainer() = default;
@@ -45,7 +47,7 @@ public:
     void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,
         std::vector<int32_t>& fileDescriptorArray);
     void GetImageDataFromAshmem(
-        const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineContext>& pipelineContext, int len);
+        const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
     void ProcessSharedImage(const std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap);
 
     void SetFormElement(const WeakPtr<Element>& element)
@@ -68,7 +70,7 @@ public:
         return taskExecutor_;
     }
 
-    RefPtr<PipelineContext> GetPipelineContext() const
+    RefPtr<PipelineBase> GetPipelineContext() const
     {
         return pipelineContext_;
     }
@@ -104,11 +106,21 @@ public:
         cardWindowConfig_ = cardWindowConfig;
     }
 
+    void SetFormPattern(const WeakPtr<NG::FormPattern>& formPattern)
+    {
+        formPattern_ = formPattern;
+    }
+
+    const WeakPtr<NG::FormPattern>& GetFormPattern() const
+    {
+        return formPattern_;
+    }
+
 private:
     RefPtr<CardFrontend> frontend_;
     RefPtr<TaskExecutor> taskExecutor_;
-    RefPtr<PipelineContext> pipelineContext_;
-    WeakPtr<PipelineContext> outSidePipelineContext_;
+    RefPtr<PipelineBase> pipelineContext_;
+    WeakPtr<PipelineBase> outSidePipelineContext_;
     RefPtr<AssetManager> assetManager_;
     int32_t instanceId_;
 
@@ -125,6 +137,9 @@ private:
     Dimension rootWidht_ = 0.0_vp;
     Dimension rootHeight_ = 0.0_vp;
     double density_ = 1.0f;
+
+    // Use for NG.
+    WeakPtr<NG::FormPattern> formPattern_;
 };
 
 } // namespace OHOS::Ace

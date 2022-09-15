@@ -76,7 +76,7 @@ bool RenderPlugin::TouchTest(const Point& globalPoint,
 
     auto context = GetContext().Upgrade();
     if (context) {
-        context->SetTouchPipeline(WeakPtr<PipelineContext>(subContext));
+        context->SetTouchPipeline(WeakPtr<PipelineBase>(subContext));
     }
     return true;
 }

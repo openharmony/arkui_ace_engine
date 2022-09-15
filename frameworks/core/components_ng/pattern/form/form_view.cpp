@@ -22,16 +22,37 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
-#include "core/components_ng/pattern/form/form_paint_property.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
+RefPtr<FormNode> FormView::GetOrCreateFormNode(
+    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+{
+    auto formNode = ElementRegister::GetInstance()->GetSpecificItemById<FormNode>(nodeId);
+    if (formNode) {
+        if (formNode->GetTag() == tag) {
+            return formNode;
+        }
+        ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
+        auto parent = formNode->GetParent();
+        if (parent) {
+            parent->RemoveChild(formNode);
+        }
+    }
+
+    auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
+    formNode = AceType::MakeRefPtr<FormNode>(tag, nodeId, pattern, false);
+    formNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(formNode);
+    return formNode;
+}
+
 void FormView::Create(const RequestFormInfo& formInfo)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
+    auto frameNode = GetOrCreateFormNode(
         V2::FORM_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<FormPattern>(); });
     stack->Push(frameNode);
 
@@ -51,6 +72,7 @@ void FormView::SetSize(const Dimension& width, const Dimension& height)
     formInfo.width = width;
     formInfo.height = height;
     property->UpdateRequestFormInfo(formInfo);
+    property->UpdateCalcSelfIdealSize(CalcSize(NG::CalcLength(width), NG::CalcLength(height)));
 }
 
 void FormView::SetDimension(int32_t dimension)
@@ -83,7 +105,7 @@ void FormView::SetAllowUpdate(bool allowUpdate)
 
 void FormView::SetVisible(VisibleType visible)
 {
-    ACE_UPDATE_PAINT_PROPERTY(FormPaintProperty, Visibility, visible);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
 }
 
 void FormView::SetModuleName(const std::string& moduleName)

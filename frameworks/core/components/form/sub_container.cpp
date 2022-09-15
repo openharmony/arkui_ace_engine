@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/common/container_scope.h"
 #include "core/components/form/sub_container.h"
 
 #include <cstdint>
 
 #include "ashmem.h"
+
 #include "adapter/ohos/entrance/file_asset_provider.h"
+#include "base/utils/utils.h"
+#include "core/common/container_scope.h"
+#include "core/components_ng/pattern/form/form_layout_property.h"
 #include "frameworks/core/common/flutter/flutter_asset_manager.h"
 #include "frameworks/core/common/flutter/flutter_task_executor.h"
 #include "frameworks/core/components/form/form_element.h"
@@ -72,7 +75,7 @@ void SubContainer::Destroy()
 
     auto outPipelineContext = outSidePipelineContext_.Upgrade();
     if (outPipelineContext) {
-        outPipelineContext->RemoveTouchPipeline(WeakPtr<PipelineContext>(pipelineContext_));
+        outPipelineContext->RemoveTouchPipeline(WeakPtr<PipelineBase>(pipelineContext_));
     }
 
     assetManager_.Reset();
@@ -81,12 +84,24 @@ void SubContainer::Destroy()
 
 void SubContainer::UpdateRootElementSize()
 {
-    auto formComponent = AceType::DynamicCast<FormComponent>(formComponent_);
     Dimension rootWidth = 0.0_vp;
     Dimension rootHeight = 0.0_vp;
-    if (formComponent) {
-        rootWidth = formComponent->GetWidth();
-        rootHeight = formComponent->GetHeight();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto form = formPattern_.Upgrade();
+        CHECK_NULL_VOID(form);
+        auto layoutProperty = form->GetLayoutProperty<NG::FormLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto formInfo = layoutProperty->GetRequestFormInfo();
+        if (formInfo.has_value()) {
+            rootWidth = formInfo->width;
+            rootHeight = formInfo->height;
+        }
+    } else {
+        auto formComponent = AceType::DynamicCast<FormComponent>(formComponent_);
+        if (formComponent) {
+            rootWidth = formComponent->GetWidth();
+            rootHeight = formComponent->GetHeight();
+        }
     }
 
     if (rootWidht_ == rootWidth && rootHeight_ == rootHeight) {
@@ -97,7 +112,8 @@ void SubContainer::UpdateRootElementSize()
     surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidth);
     surfaceHeight_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootHeight);
     if (pipelineContext_) {
-        pipelineContext_->SetRootSize(density_, rootWidth.Value(), rootHeight.Value());
+        pipelineContext_->SetRootSize(
+            density_, static_cast<int32_t>(rootWidth.Value()), static_cast<int32_t>(rootHeight.Value()));
     }
 }
 
@@ -206,22 +222,21 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
 
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto container = weak.Upgrade();
-        if (!container) {
-            LOGE("ActionEventHandler sub container is null!");
-            return;
-        }
-        auto form = AceType::DynamicCast<FormElement>(container->GetFormElement().Upgrade());
-        if (!form) {
-            LOGE("ActionEventHandler form is null!");
-            return;
-        }
+        CHECK_NULL_VOID(container);
 
-        form->OnActionEvent(action);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto form = container->GetFormPattern().Upgrade();
+            CHECK_NULL_VOID(form);
+            form->OnActionEvent(action);
+        } else {
+            auto form = AceType::DynamicCast<FormElement>(container->GetFormElement().Upgrade());
+            CHECK_NULL_VOID(form);
+            form->OnActionEvent(action);
+        }
     };
     pipelineContext_->SetActionEventHandler(actionEventHandler);
 
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
-
     taskExecutor_->PostTask(
         [weakContext]() {
             auto context = weakContext.Upgrade();
@@ -239,6 +254,14 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
     if (frontend_) {
         frontend_->SetDensity(density_);
         UpdateSurfaceSize();
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto pattern = formPattern_.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pipelineContext_->SetDrawDelegate(pattern->GetDrawDelegate());
+        frontend_->RunPage(0, "", data);
+        return;
     }
 
     auto form = AceType::DynamicCast<FormElement>(GetFormElement().Upgrade());
@@ -291,7 +314,7 @@ void SubContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
     RefPtr<SharedImageManager> sharedImageManager;
     if (!pipelineCtx->GetSharedImageManager()) {
         sharedImageManager = AceType::MakeRefPtr<SharedImageManager>(pipelineCtx->GetTaskExecutor());
-        GetPipelineContext()->SetSharedImageManager(sharedImageManager);
+        pipelineCtx->SetSharedImageManager(sharedImageManager);
     } else {
         sharedImageManager = pipelineCtx->GetSharedImageManager();
     }
@@ -351,7 +374,7 @@ void SubContainer::UpdateSharedImage(
 }
 
 void SubContainer::GetImageDataFromAshmem(
-    const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineContext>& pipelineContext, int len)
+    const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len)
 {
     bool ret = ashmem.MapReadOnlyAshmem();
     // if any exception causes a [return] before [AddSharedImage], the memory image will not show because [RenderImage]
@@ -375,8 +398,8 @@ void SubContainer::GetImageDataFromAshmem(
     }
 }
 
-void SubContainer::UpdateCard(const std::string content,
-    const std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap)
+void SubContainer::UpdateCard(
+    const std::string content, const std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap)
 {
     if (!frontend_) {
         LOGE("update card fial due to could not find card front end");

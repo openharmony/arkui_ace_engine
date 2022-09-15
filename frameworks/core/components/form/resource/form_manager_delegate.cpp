@@ -82,7 +82,7 @@ void FormManagerDelegate::Stop()
 
 void FormManagerDelegate::UnregisterEvent()
 {
-    auto context = context_.Upgrade();
+    auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     if (!context) {
         LOGE("fail to get context when unregister event");
         return;
@@ -93,7 +93,7 @@ void FormManagerDelegate::UnregisterEvent()
     resRegister->UnregisterEvent(MakeEventHash(FORM_EVENT_ON_ERROR));
 }
 
-void FormManagerDelegate::AddForm(const WeakPtr<PipelineContext>& context, const RequestFormInfo& info)
+void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     // dynamic add new form should release the running form first.
@@ -163,12 +163,12 @@ std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info)
     return paramStream.str();
 }
 
-void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineContext>& context, const RequestFormInfo& info)
+void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info)
 {
     context_ = context;
     state_ = State::CREATING;
 
-    auto pipelineContext = context.Upgrade();
+    auto pipelineContext = DynamicCast<PipelineContext>(context_.Upgrade());
     if (!pipelineContext) {
         state_ = State::CREATEFAILED;
         OnFormError("internal error");
@@ -219,7 +219,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineContext>&
 
 void FormManagerDelegate::RegisterEvent()
 {
-    auto context = context_.Upgrade();
+    auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     if (!context) {
         LOGE("register event error due null context, will not receive form manager event");
         return;

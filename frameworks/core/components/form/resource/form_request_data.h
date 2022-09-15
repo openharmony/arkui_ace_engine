@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_RESOURCE_FORM_REQUEST_DATA_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_RESOURCE_FORM_REQUEST_DATA_H
 
+#include <sstream>
 #include <string>
+
+#include "base/geometry/dimension.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 

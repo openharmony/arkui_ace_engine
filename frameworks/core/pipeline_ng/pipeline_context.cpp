@@ -29,6 +29,7 @@
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
+#include "core/components/box/drag_drop_event.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -275,6 +277,21 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, false);
+
+        for (const auto& weakContext : touchPluginPipelineContext_) {
+            auto pipelineContext = DynamicCast<OHOS::Ace::PipelineContext>(weakContext.Upgrade());
+            if (!pipelineContext) {
+                continue;
+            }
+            auto pluginPoint =
+                point.UpdateScalePoint(viewScale_, static_cast<float>(pipelineContext->GetPluginEventOffset().GetX()),
+                    static_cast<float>(pipelineContext->GetPluginEventOffset().GetY()), point.id);
+            auto eventManager = pipelineContext->GetEventManager();
+            if (eventManager) {
+                eventManager->SetInstanceId(pipelineContext->GetInstanceId());
+            }
+            pipelineContext->OnTouchEvent(pluginPoint, true);
+        }
     }
 
     if (scalePoint.type == TouchType::MOVE) {

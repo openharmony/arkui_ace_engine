@@ -25,9 +25,11 @@
 #include "base/geometry/dimension.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
+#include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/window_animation_config.h"
@@ -482,6 +484,49 @@ public:
 
     virtual void FlushReloadTransition() {}
 
+    double GetDensity() const
+    {
+        return density_;
+    }
+
+    void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
+    void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
+
+    void SetPluginOffset(const Offset& offset)
+    {
+        pluginOffset_ = offset;
+    }
+
+    Offset GetPluginOffset() const
+    {
+        return pluginOffset_;
+    }
+
+    void SetPluginEventOffset(const Offset& offset)
+    {
+        pluginEventOffset_ = offset;
+    }
+
+    Offset GetPluginEventOffset() const
+    {
+        return pluginEventOffset_;
+    }
+
+    const RefPtr<SharedImageManager>& GetSharedImageManager() const
+    {
+        return sharedImageManager_;
+    }
+
+    void SetSharedImageManager(const RefPtr<SharedImageManager>& sharedImageManager)
+    {
+        sharedImageManager_ = sharedImageManager;
+    }
+
+    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
+    {
+        drawDelegate_ = std::move(delegate);
+    }
+
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -526,6 +571,12 @@ protected:
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
+
+    Offset pluginOffset_ { 0, 0 };
+    Offset pluginEventOffset_ { 0, 0 };
+    std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
+    RefPtr<SharedImageManager> sharedImageManager_;
+    std::unique_ptr<DrawDelegate> drawDelegate_;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;

@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/form/form_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #if !defined(WEARABLE_PRODUCT)
@@ -134,7 +135,6 @@ void JSForm::AllowUpdate(const JSCallbackInfo& info)
     }
 
     auto allowUpdate = info[0]->ToBoolean();
-
     if (Container::IsCurrentUseNewPipeline()) {
         NG::FormView::SetAllowUpdate(allowUpdate);
         return;
@@ -154,9 +154,8 @@ void JSForm::SetVisibility(const JSCallbackInfo& info)
     }
 
     auto type = info[0]->ToNumber<int32_t>();
-
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::FormView::SetVisible(VisibleType(type));
+        NG::ViewAbstract::SetVisibility(VisibleType(type));
         return;
     }
 
@@ -173,7 +172,6 @@ void JSForm::SetModuleName(const JSCallbackInfo& info)
     }
 
     auto moduleName = info[0]->ToString();
-
     if (Container::IsCurrentUseNewPipeline()) {
         NG::FormView::SetModuleName(moduleName);
         return;
@@ -221,7 +219,7 @@ void JSForm::JsOnError(const JSCallbackInfo& info)
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Form.onAcquired");
+            ACE_SCORING_EVENT("Form.onError");
             std::vector<std::string> keys = { "errcode", "msg" };
             func->Execute(keys, param);
         };
@@ -252,7 +250,7 @@ void JSForm::JsOnUninstall(const JSCallbackInfo& info)
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onUninstall = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Form.onAcquired");
+            ACE_SCORING_EVENT("Form.onUninstall");
             std::vector<std::string> keys = { "id" };
             func->Execute(keys, param);
         };
@@ -283,7 +281,7 @@ void JSForm::JsOnRouter(const JSCallbackInfo& info)
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onRouter = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("Form.onAcquired");
+            ACE_SCORING_EVENT("Form.onRouter");
             std::vector<std::string> keys = { "action" };
             func->Execute(keys, param);
         };

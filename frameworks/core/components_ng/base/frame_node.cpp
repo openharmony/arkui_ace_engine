@@ -18,6 +18,7 @@
 #include <list>
 
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
@@ -25,6 +26,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -49,6 +51,7 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
     eventHub_ = pattern->CreateEventHub();
     // first create make layout property dirty.
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    layoutProperty_->SetHost(WeakClaim(this));
 }
 
 FrameNode::~FrameNode()
@@ -239,9 +242,10 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     RefPtr<LayoutWrapper> layoutWrapper;
     UpdateLayoutPropertyFlag();
     layoutWrapper = CreateLayoutWrapper();
+    auto isActive = layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), offset = GetParentGlobalOffset(),
-                    forceUseMainThread]() {
-        layoutWrapper->SetActive();
+                    forceUseMainThread, isActive]() {
+        layoutWrapper->SetActive(isActive);
         layoutWrapper->SetRootMeasureNode();
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Measure");
@@ -288,18 +292,25 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
 
 LayoutConstraintF FrameNode::GetLayoutConstraint() const
 {
+    auto visible = layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE);
+    LayoutConstraintF layoutConstraint;
     if (geometryNode_->GetParentLayoutConstraint().has_value()) {
-        return geometryNode_->GetParentLayoutConstraint().value();
+        layoutConstraint = geometryNode_->GetParentLayoutConstraint().value();
+    } else {
+        layoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+        auto rootWidth = PipelineContext::GetCurrentRootWidth();
+        auto rootHeight = PipelineContext::GetCurrentRootHeight();
+        layoutConstraint.percentReference.SetWidth(rootWidth);
+        layoutConstraint.percentReference.SetHeight(rootHeight);
+        layoutConstraint.maxSize.SetHeight(rootWidth);
+        layoutConstraint.maxSize.SetHeight(rootHeight);
     }
-    LayoutConstraintF LayoutConstraint;
-    LayoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
-    auto rootWidth = PipelineContext::GetCurrentRootWidth();
-    auto rootHeight = PipelineContext::GetCurrentRootHeight();
-    LayoutConstraint.percentReference.SetWidth(rootWidth);
-    LayoutConstraint.percentReference.SetHeight(rootHeight);
-    LayoutConstraint.maxSize.SetHeight(rootWidth);
-    LayoutConstraint.maxSize.SetHeight(rootHeight);
-    return LayoutConstraint;
+
+    if (visible == VisibleType::GONE) {
+        layoutConstraint.selfIdealSize = OptionalSizeF(SizeF());
+        layoutProperty_->UpdateCalcSelfIdealSize(CalcSize(CalcLength(0), CalcLength(0)));
+    }
+    return layoutConstraint;
 }
 
 OffsetF FrameNode::GetParentGlobalOffset() const
