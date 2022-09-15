@@ -226,6 +226,7 @@ void JSNavigation::SetHideTitleBar(bool hide)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::NavigationView::SetHideTitleBar(hide);
+        return;
     }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
@@ -240,6 +241,7 @@ void JSNavigation::SetHideBackButton(bool hide)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::NavigationView::SetHideBackButton(hide);
+        return;
     }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
@@ -252,6 +254,7 @@ void JSNavigation::SetHideToolBar(bool hide)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::NavigationView::SetHideToolBar(hide);
+        return;
     }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
