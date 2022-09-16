@@ -1371,14 +1371,15 @@ void JSWeb::Create(const JSCallbackInfo& info)
     std::string webSrc;
     std::optional<std::string> dstSrc;
     RefPtr<WebComponent> webComponent;
-    if (ParseJsMedia(srcValue, webSrc)) {
+    if (srcValue->IsString()) {
+        dstSrc = srcValue->ToString();
+    } else if (ParseJsMedia(srcValue, webSrc)) {
         int np = static_cast<int>(webSrc.find_first_of("/"));
         if (np < 0) {
             dstSrc = webSrc;
         } else {
             dstSrc = webSrc.erase(np, 1);
         }
-        LOGI("JSWeb::Create src:%{public}s", dstSrc->c_str());
     }
 
     if (!dstSrc) {
@@ -1386,6 +1387,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         return;
     }
 
+    LOGI("JSWeb::Create src:%{public}s", dstSrc->c_str());
     auto controllerObj = paramObject->GetProperty("controller");
     if (!controllerObj->IsObject()) {
         LOGI("web create error, controllerObj is invalid");
