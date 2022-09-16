@@ -18,6 +18,7 @@
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine_loader.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "napi_remote_object.h"
 
 namespace OHOS::Ace {
 
@@ -104,116 +105,129 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
     };
 
     builder.insertCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                 const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value) -> int32_t {
+                                 const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
+                                 const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return 0;
         }
-        return jsBackendEngine->Insert(uri, value);
+        return jsBackendEngine->Insert(uri, value, callingInfo);
     };
 
     builder.callCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const std::string& method,
-                               const std::string& arg, const AppExecFwk::PacMap& pacMap)
+                               const std::string& arg, const AppExecFwk::PacMap& pacMap,
+                               const CallingInfo& callingInfo)
         -> std::shared_ptr<AppExecFwk::PacMap> {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return nullptr;
         }
-        return jsBackendEngine->Call(method, arg, pacMap);
+        return jsBackendEngine->Call(method, arg, pacMap, callingInfo);
     };
 
     builder.queryCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const Uri& uri,
                                 const std::vector<std::string>& columns,
-                                const OHOS::NativeRdb::DataAbilityPredicates& predicates)
+                                const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+                                const CallingInfo& callingInfo)
         -> std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return nullptr;
         }
-        return jsBackendEngine->Query(uri, columns, predicates);
+        return jsBackendEngine->Query(uri, columns, predicates, callingInfo);
     };
 
     builder.updateCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const Uri& uri,
                                  const OHOS::NativeRdb::ValuesBucket& value,
-                                 const OHOS::NativeRdb::DataAbilityPredicates& predicates) -> int32_t {
+                                 const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+                                 const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return 0;
         }
-        return jsBackendEngine->Update(uri, value, predicates);
+        return jsBackendEngine->Update(uri, value, predicates, callingInfo);
     };
 
     builder.deleteCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                 const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates) -> int32_t {
+                                 const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+                                 const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return 0;
         }
-        return jsBackendEngine->Delete(uri, predicates);
+        return jsBackendEngine->Delete(uri, predicates, callingInfo);
     };
 
     builder.batchInsertCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const Uri& uri,
-                                      const std::vector<OHOS::NativeRdb::ValuesBucket>& values) -> int32_t {
+                                      const std::vector<OHOS::NativeRdb::ValuesBucket>& values,
+                                      const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return 0;
         }
-        return jsBackendEngine->BatchInsert(uri, values);
+        return jsBackendEngine->BatchInsert(uri, values, callingInfo);
     };
 
     builder.getTypeCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                  const Uri& uri) -> std::string {
+                                  const Uri& uri,
+                                  const CallingInfo& callingInfo) -> std::string {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return std::string();
         }
-        return jsBackendEngine->GetType(uri);
+        return jsBackendEngine->GetType(uri, callingInfo);
     };
 
     builder.getFileTypesCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                       const Uri& uri, const std::string& mimeTypeFilter) -> std::vector<std::string> {
+                                       const Uri& uri, const std::string& mimeTypeFilter,
+                                       const CallingInfo& callingInfo) -> std::vector<std::string> {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return std::vector<std::string>();
         }
-        return jsBackendEngine->GetFileTypes(uri, mimeTypeFilter);
+        return jsBackendEngine->GetFileTypes(uri, mimeTypeFilter, callingInfo);
     };
 
     builder.openFileCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                   const Uri& uri, const std::string& mode) -> int32_t {
+                                   const Uri& uri, const std::string& mode,
+                                   const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return 0;
         }
-        return jsBackendEngine->OpenFile(uri, mode);
+        return jsBackendEngine->OpenFile(uri, mode, callingInfo);
     };
 
     builder.openRawFileCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                      const Uri& uri, const std::string& mode) -> int32_t {
+                                      const Uri& uri, const std::string& mode,
+                                      const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return 0;
         }
-        return jsBackendEngine->OpenRawFile(uri, mode);
+        return jsBackendEngine->OpenRawFile(uri, mode, callingInfo);
     };
 
     builder.normalizeUriCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                       const Uri& uri) -> Uri {
+                                       const Uri& uri,
+                                       const CallingInfo& callingInfo) -> Uri {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return Uri("");
         }
-        return jsBackendEngine->NormalizeUri(uri);
+        return jsBackendEngine->NormalizeUri(uri, callingInfo);
     };
 
     builder.denormalizeUriCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                         const Uri& uri) -> Uri {
+                                         const Uri& uri,
+                                         const CallingInfo& callingInfo) -> Uri {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return Uri("");
         }
-        return jsBackendEngine->DenormalizeUri(uri);
+        return jsBackendEngine->DenormalizeUri(uri, callingInfo);
     };
+
     builder.destroyApplicationCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
                                              const std::string& packageName) {
         auto jsBackendEngine = weakEngine.Upgrade();
