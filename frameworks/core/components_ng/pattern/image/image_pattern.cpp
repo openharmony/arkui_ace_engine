@@ -161,6 +161,13 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     imagePaintConfig.imageInterpolation_ =
         imageRenderProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE);
     imagePaintConfig.imageRepeat_ = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NOREPEAT);
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    bool isRightToLeft = pipelineCtx ? pipelineCtx->IsRightToLeft() : false;
+    imagePaintConfig.needFlipCanvasHorizontally_ = isRightToLeft && imageRenderProperty->GetMatchTextDirection().value_or(false);
+    auto colorFilterMatrix = imageRenderProperty->GetColorFilter();
+    if (colorFilterMatrix.has_value()) {
+        imagePaintConfig.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
+    }
     if (lastCanvasImage_) {
         return MakeRefPtr<ImagePaintMethod>(lastCanvasImage_, imagePaintConfig);
     }
