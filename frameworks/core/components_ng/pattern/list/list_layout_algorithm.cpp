@@ -112,7 +112,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         maxLaneLength_ = ConvertToPx(listLayoutProperty->GetLaneMaxLength().value(),
             listLayoutProperty->GetLayoutConstraint()->scaleProperty, mainSize);
     }
-    listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::CENTER);
+    listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
     CalculateLanes(listLayoutProperty->GetLayoutConstraint().value(), axis);
 
     cachedCount_ = listLayoutProperty->GetCachedCount().value_or(0);
