@@ -131,9 +131,9 @@ ImageSourceInfo::ImageSourceInfo(
     if (count > 1) {
         LOGW("multi image source set, only one will be load.");
     }
-    cacheKey_ = std::to_string(std::hash<std::string> {}(src_)) +
-                std::to_string(static_cast<int32_t>(resourceId_)) +
-                std::to_string(Container::CurrentId());
+    auto name = src_ + AceApplicationInfo::GetInstance().GetAbilityName();
+    cacheKey_ = std::to_string(std::hash<std::string> {}(name)) +
+                std::to_string(static_cast<int32_t>(resourceId_));
 }
 
 SrcType ImageSourceInfo::ResolveSrcType() const
