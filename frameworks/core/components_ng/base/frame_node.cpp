@@ -211,6 +211,20 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
+        if (!renderContext_->HasBorderColor()) {
+            renderContext_->UpdateBorderColor(
+                BorderColorProperty { renderContext_->GetBorderColor()->leftColor.value_or(Color::BLACK),
+                    renderContext_->GetBorderColor()->topColor.value_or(Color::BLACK),
+                    renderContext_->GetBorderColor()->rightColor.value_or(Color::BLACK),
+                    renderContext_->GetBorderColor()->bottomColor.value_or(Color::BLACK) });
+        }
+        if (!renderContext_->HasBorderStyle()) {
+            renderContext_->UpdateBorderStyle(
+                BorderStyleProperty { renderContext_->GetBorderStyle()->styleLeft.value_or(BorderStyle::SOLID),
+                    renderContext_->GetBorderStyle()->styleTop.value_or(BorderStyle::SOLID),
+                    renderContext_->GetBorderStyle()->styleRight.value_or(BorderStyle::SOLID),
+                    renderContext_->GetBorderStyle()->styleBottom.value_or(BorderStyle::SOLID) });
+        }
         if (layoutProperty_->GetLayoutConstraint().has_value()) {
             renderContext_->UpdateBorderWidth(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
                 ScaleProperty::CreateScaleProperty(),
