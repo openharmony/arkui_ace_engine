@@ -44,7 +44,7 @@ public:
     AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
-        bool useCurrentEventRunner = false, bool isSubContainer = false);
+        bool useCurrentEventRunner = false, bool isSubContainer = false, bool useNewPipeline = false);
     ~AceContainer() override = default;
 
     void Initialize() override;
@@ -282,6 +282,11 @@ public:
         const std::string& colorMode, const std::string& inputDevice, const std::string& languageTag);
 
     void UpdateFrondend(bool needReloadTransition);
+
+    bool IsUseStageModel() const override
+    {
+        return useStageModel_;
+    }
 
 private:
     void InitializeFrontend();
