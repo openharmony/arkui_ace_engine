@@ -969,7 +969,7 @@ void AceContainer::AddAssetPath(
     }
 }
 
-void AceContainer::AddLibPath(int32_t instanceId, const std::string& libPath)
+void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     if (!container) {

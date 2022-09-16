@@ -3140,7 +3140,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 
     ACE_DCHECK(delegate);
     if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
         if (!packagePath.empty()) {
             nativeEngine->SetPackagePath(packagePath);
         }

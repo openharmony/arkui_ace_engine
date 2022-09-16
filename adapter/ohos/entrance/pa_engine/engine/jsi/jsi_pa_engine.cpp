@@ -534,7 +534,7 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
         if (!packagePath.empty()) {
             auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
             arkNativeEngine->SetPackagePath(packagePath);
