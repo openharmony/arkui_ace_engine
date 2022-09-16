@@ -30,7 +30,7 @@ public:
     static void Create(const std::string& content);
     static void SetFontSize(const Dimension& value);
     static void SetTextColor(const Color& value);
-    static void SetItalicFontStyle(const ItalicFontStyle& value);
+    static void SetItalicFontStyle(const Ace::FontStyle& value);
     static void SetFontWeight(const FontWeight& value);
     static void SetFontFamily(const std::vector<std::string>& value);
     static void SetTextDecoration(const TextDecoration& value);

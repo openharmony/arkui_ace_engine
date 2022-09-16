@@ -44,6 +44,7 @@ public:
     static void JsCommonRemoteMessage(const JSCallbackInfo& info);
 
     static void UpdateEventTarget(NodeId nodeId, BaseEventInfo& info);
+    static std::function<void()> GetRemoteMessageEventCallback(const JSCallbackInfo& info);
 
 protected:
     static void JsRemoteMessage(const JSCallbackInfo& info, EventMarker& eventMarker);
@@ -53,7 +54,6 @@ private:
         const JSCallbackInfo& info, int32_t countNum = DEFAULT_TAP_COUNTS, int32_t fingerNum = DEFAULT_TAP_FINGERS);
     static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);
     static RefPtr<Gesture> GetRemoteMessageTapGesture(const JSCallbackInfo& info);
-    static std::function<void()> GetRemoteMessageEventCallback(const JSCallbackInfo& info);
     static void SplitString(const std::string& str, char tag, std::vector<std::string>& strList);
 }; // class JSInteractableView
 

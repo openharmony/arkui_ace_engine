@@ -134,7 +134,7 @@ void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
-    auto align = Alignment::TOP_LEFT;
+    auto align = Alignment::CENTER;
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }

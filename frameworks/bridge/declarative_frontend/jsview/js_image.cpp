@@ -31,22 +31,22 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<ImageModel> ImageModel::instance = nullptr;
+std::unique_ptr<ImageModel> ImageModel::instance_ = nullptr;
 
 ImageModel* ImageModel::GetInstance()
 {
-    if (!instance) {
+    if (!instance_) {
 #ifdef NG_BUILD
-        instance.reset(new NG::ImageModelNG());
+        instance_.reset(new NG::ImageModelNG());
 #else
         if (Container::IsCurrentUseNewPipeline()) {
-            instance.reset(new NG::ImageModelNG());
+            instance_.reset(new NG::ImageModelNG());
         } else {
-            instance.reset(new Framework::ImageModelImpl());
+            instance_.reset(new Framework::ImageModelImpl());
         }
 #endif
     }
-    return instance.get();
+    return instance_.get();
 }
 
 } // namespace OHOS::Ace

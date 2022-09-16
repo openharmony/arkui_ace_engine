@@ -32,7 +32,7 @@ namespace OHOS::Ace {
 class ImageModel {
 public:
     static ImageModel* GetInstance();
-    virtual ~ImageModel() {};
+    virtual ~ImageModel() = default;
 
     virtual void SetAlt(const std::string& src) = 0;
     virtual void SetBlur(double blur) = 0;
@@ -46,7 +46,7 @@ public:
     virtual void Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) = 0;
     virtual void SetImageFill(Color color) = 0;
-    virtual void SetImageInterpolation(ImageInterpolation iterpolation) = 0;
+    virtual void SetImageInterpolation(ImageInterpolation interpolation) = 0;
     virtual void SetImageRepeat(ImageRepeat imageRepeat) = 0;
     virtual void SetImageRenderMode(ImageRenderMode imageRenderMode) = 0;
     virtual bool IsSrcSvgImage() = 0;
@@ -54,7 +54,7 @@ public:
     virtual void SetSyncMode(bool syncMode) = 0;
     virtual void SetColorFilterMatrix(const std::vector<float>& matrix) = 0;
     virtual void SetOnDragStartId(const OnDragFunc& onDragStartId) = 0;
-    virtual void SetOnDragEnterId(const OnDropFunc&  onDragStartId) = 0;
+    virtual void SetOnDragEnterId(const OnDropFunc& onDragStartId) = 0;
     virtual void SetOnDragLeaveId(const OnDropFunc& onDragStartId) = 0;
     virtual void SetOnDragMoveId(const OnDropFunc& onDragMoveId) = 0;
     virtual void SetOnDropId(const OnDropFunc& onDropId) = 0;
@@ -62,8 +62,8 @@ public:
     virtual bool UpdateDragItemInfo(DragItemInfo& itemInfo) = 0;
 
 private:
-    static std::unique_ptr<ImageModel> instance;
+    static std::unique_ptr<ImageModel> instance_;
 };
 
-} // namespace OHOS::Ace::Framework
+} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_H
