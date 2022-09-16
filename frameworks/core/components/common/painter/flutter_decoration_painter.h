@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "core/components/image/render_image.h"
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/layers/clip_layer.h"
+#include "core/components_ng/render/decoration_painter.h"
 
 namespace flutter {
 class Canvas;
@@ -44,8 +45,8 @@ class Border;
 class Offset;
 class Size;
 
-class FlutterDecorationPainter : public virtual AceType {
-    DECLARE_ACE_TYPE(FlutterDecorationPainter, AceType);
+class FlutterDecorationPainter : public virtual NG::DecorationPainter {
+    DECLARE_ACE_TYPE(FlutterDecorationPainter, NG::DecorationPainter);
 
 public:
     FlutterDecorationPainter(
@@ -53,8 +54,6 @@ public:
     ~FlutterDecorationPainter() override = default;
 
     static void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas);
-
-    static float ConvertRadiusToSigma(float radius);
 
     void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context,
         const sk_sp<SkImage>& image, bool paintBorder = true);

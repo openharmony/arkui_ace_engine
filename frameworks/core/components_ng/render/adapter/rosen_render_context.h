@@ -97,6 +97,7 @@ public:
 
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
+    void UpdateBackBlurRadius(const Dimension& radius) override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;

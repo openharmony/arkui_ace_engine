@@ -178,6 +178,11 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushMessages();
 }
 
+void PipelineContext::FlushBuild()
+{
+    FlushDirtyNodeUpdate();
+}
+
 void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);

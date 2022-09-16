@@ -40,12 +40,12 @@ namespace {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 
-void AnimateToForStageMode(const RefPtr<PipelineContext>& pipelineContext, AnimationOption& option,
+void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     const JSCallbackInfo& info, std::function<void()>& onFinishEvent)
 {
     auto triggerId = Container::CurrentId();
     AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
-        auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        auto context = container->GetPipelineContext();
         if (!context) {
             // pa container do not have pipeline context.
             return;
@@ -70,7 +70,7 @@ void AnimateToForStageMode(const RefPtr<PipelineContext>& pipelineContext, Anima
     JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
     jsAnimateToFunc->Call(info[1]);
     AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
-        auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        auto context = container->GetPipelineContext();
         if (!context) {
             // pa container do not have pipeline context.
             return;
@@ -93,7 +93,7 @@ void AnimateToForStageMode(const RefPtr<PipelineContext>& pipelineContext, Anima
     pipelineContext->CloseImplicitAnimation();
 }
 
-void AnimateToForFaMode(const RefPtr<PipelineContext>& pipelineContext, AnimationOption& option,
+void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     const JSCallbackInfo& info, std::function<void()>& onFinishEvent)
 {
     pipelineContext->FlushBuild();
@@ -247,7 +247,7 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
 
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
 
     AnimationOption option = CreateAnimation(animationArgs);

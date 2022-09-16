@@ -153,6 +153,8 @@ public:
 
     const RefPtr<OverlayManager>& GetOverlayManager();
 
+    void FlushBuild() override;
+
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;

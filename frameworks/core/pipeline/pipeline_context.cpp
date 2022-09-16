@@ -136,7 +136,6 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId),
       platformResRegister_(std::move(platformResRegister)), timeProvider_(g_defaultTimeProvider)
 {
-    frontendType_ = frontend->GetType();
     RegisterEventHandler(frontend->GetEventHandler());
     focusAnimationManager_ = AceType::MakeRefPtr<FocusAnimationManager>();
     sharedTransitionController_ = AceType::MakeRefPtr<SharedTransitionController>(AceType::WeakClaim(this));
@@ -156,8 +155,6 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, 0),
       timeProvider_(g_defaultTimeProvider)
 {
-    frontendType_ = frontend->GetType();
-
     RegisterEventHandler(frontend->GetEventHandler());
 
     focusAnimationManager_ = AceType::MakeRefPtr<FocusAnimationManager>();

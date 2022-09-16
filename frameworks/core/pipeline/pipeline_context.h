@@ -69,7 +69,6 @@ namespace OHOS::Ace {
 class CardTransitionController;
 class ComposedElement;
 class FontManager;
-enum class FrontendType;
 class OverlayElement;
 class RenderNode;
 class RenderFocusAnimation;
@@ -273,11 +272,6 @@ public:
     void OnSystemBarHeightChanged(double statusBar, double navigationBar) override;
 
     void OnSurfaceDestroyed() override;
-
-    FrontendType GetFrontendType() const
-    {
-        return frontendType_;
-    }
 
     RefPtr<PlatformResRegister> GetPlatformResRegister() const
     {
@@ -606,7 +600,7 @@ public:
 
     AnimationOption GetExplicitAnimationOption() const override;
 
-    void FlushBuild();
+    void FlushBuild() override;
 
     void SetUseLiteStyle(bool useLiteStyle)
     {
@@ -1244,7 +1238,6 @@ private:
     bool isFirstPage_ = true;
     bool buildingFirstPage_ = false;
     bool forbidPlatformQuit_ = false;
-    FrontendType frontendType_;
     std::string photoCachePath_;
     AnimationOption explicitAnimationOption_;
     std::map<int32_t, RefPtr<Animator>> explicitAnimators_;

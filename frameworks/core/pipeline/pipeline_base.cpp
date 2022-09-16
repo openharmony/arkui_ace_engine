@@ -39,6 +39,8 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
       weakFrontend_(frontend), instanceId_(instanceId)
 {
+    CHECK_NULL_VOID(frontend);
+    frontendType_ = frontend->GetType();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
