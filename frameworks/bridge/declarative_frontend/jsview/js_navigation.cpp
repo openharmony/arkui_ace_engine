@@ -175,17 +175,19 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
                 NG::NavigationView::SetCustomTitle(customNode);
                 return;
             }
-            ScopedViewStackProcessor builderViewStackProcessor;
-            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
-            ACE_SCORING_EVENT("Navigation.title.builder");
-            jsBuilderFunc.Execute();
             auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
             auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
             if (!navigationContainer) {
                 LOGI("component is not navigationContainer.");
                 return;
             }
-            navigationContainer->GetDeclaration()->customTitle = ViewStackProcessor::GetInstance()->Finish();
+            {
+                ScopedViewStackProcessor builderViewStackProcessor;
+                JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+                ACE_SCORING_EVENT("Navigation.title.builder");
+                jsBuilderFunc.Execute();
+                navigationContainer->GetDeclaration()->customTitle = ViewStackProcessor::GetInstance()->Finish();
+            }
         }
     } else {
         LOGE("arg is not [String|Function].");
@@ -288,17 +290,19 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
             NG::NavigationView::SetCustomToolBar(customNode);
             return;
         }
-        ScopedViewStackProcessor builderViewStackProcessor;
-        JsFunction jsBuilderFunc(builderFuncParam);
-        jsBuilderFunc.Execute();
         auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
         auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
         if (!navigationContainer) {
             LOGI("component is not navigationContainer.");
             return;
         }
-        RefPtr<Component> builderGeneratedRootComponent = ViewStackProcessor::GetInstance()->Finish();
-        navigationContainer->GetDeclaration()->toolBarBuilder = builderGeneratedRootComponent;
+        {
+            ScopedViewStackProcessor builderViewStackProcessor;
+            JsFunction jsBuilderFunc(builderFuncParam);
+            jsBuilderFunc.Execute();
+            RefPtr<Component> builderGeneratedRootComponent = ViewStackProcessor::GetInstance()->Finish();
+            navigationContainer->GetDeclaration()->toolBarBuilder = builderGeneratedRootComponent;
+        }
         return;
     }
 
@@ -358,17 +362,19 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
                 NG::NavigationView::SetCustomMenu(customNode);
                 return;
             }
-            ScopedViewStackProcessor builderViewStackProcessor;
-            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
-            ACE_SCORING_EVENT("Navigation.menu.builder");
-            jsBuilderFunc.Execute();
             auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
             auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
             if (!navigationContainer) {
                 LOGI("component is not navigationContainer.");
                 return;
             }
-            navigationContainer->GetDeclaration()->customMenus = ViewStackProcessor::GetInstance()->Finish();
+            {
+                ScopedViewStackProcessor builderViewStackProcessor;
+                JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+                ACE_SCORING_EVENT("Navigation.menu.builder");
+                jsBuilderFunc.Execute();
+                navigationContainer->GetDeclaration()->customMenus = ViewStackProcessor::GetInstance()->Finish();
+            }
         }
     } else {
         LOGE("arg is not [String|Function].");
