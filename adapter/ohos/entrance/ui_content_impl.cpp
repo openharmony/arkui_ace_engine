@@ -39,6 +39,7 @@
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
+#include "adapter/ohos/entrance/utils.h"
 #include "base/geometry/rect.h"
 #include "base/log/log.h"
 #include "base/log/ace_trace.h"
@@ -455,15 +456,22 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
     }
     if (appInfo && flutterAssetManager) {
+        /* Note: DO NOT modify the sequence of adding libPath  */
         std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+        std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
+        std::vector<std::string> libPaths;
+        if (!quickFixLibraryPath.empty()) {
+            std::string libPath = GenerateFullPath(context->GetBundleCodeDir(), quickFixLibraryPath);
+            libPaths.push_back(libPath);
+            LOGI("napi quick fix lib path = %{private}s", libPath.c_str());
+        }
         if (!nativeLibraryPath.empty()) {
-            if (nativeLibraryPath.back() == '/') {
-                nativeLibraryPath.pop_back();
-            }
-            std::string libPath = context->GetBundleCodeDir();
-            libPath += (libPath.back() == '/') ? nativeLibraryPath : "/" + nativeLibraryPath;
+            std::string libPath = GenerateFullPath(context->GetBundleCodeDir(), nativeLibraryPath);
+            libPaths.push_back(libPath);
             LOGI("napi lib path = %{private}s", libPath.c_str());
-            flutterAssetManager->SetLibPath(libPath);
+        }
+        if (!libPaths.empty()) {
+            flutterAssetManager->SetLibPath(libPaths);
         }
     }
 
@@ -982,5 +990,4 @@ void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pix
     LOGI("set app icon");
     pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
 }
-
 } // namespace OHOS::Ace
