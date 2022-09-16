@@ -22,14 +22,14 @@
 
 namespace OHOS::Ace::NG {
 
-enum ScrollEventType {
+enum class ScrollEventType {
     SCROLL_TOP = 0,
     SCROLL_END,
     SCROLL_EDGE,
 };
 
 // which edge is reached
-enum ScrollEdge {
+enum class ScrollEdge {
     TOP = 0,
     LEFT,
     BOTTOM,
@@ -53,9 +53,9 @@ public:
         return onScroll_;
     }
 
-    void SetOnScroll(const OnScrollEvent& onScroll)
+    void SetOnScroll(OnScrollEvent&& onScroll)
     {
-        onScroll_ = onScroll;
+        onScroll_ = std::move(onScroll);
     }
 
     ScrollEdgeEvent GetScrollEdgeEvent()
@@ -63,9 +63,9 @@ public:
         return onScrollEdge_;
     }
 
-    void SetOnScrollEdge(const ScrollEdgeEvent& event)
+    void SetOnScrollEdge(ScrollEdgeEvent&& event)
     {
-        onScrollEdge_ = event;
+        onScrollEdge_ = std::move(event);
     }
 
     ScrollEndEvent GetScrollEndEvent()
@@ -73,9 +73,9 @@ public:
         return onScrollEnd_;
     }
 
-    void SetOnScrollEnd(const ScrollEndEvent& event)
+    void SetOnScrollEnd(ScrollEndEvent&& event)
     {
-        onScrollEnd_ = event;
+        onScrollEnd_ = std::move(event);
     }
 
     ScrollBeginEvent GetScrollBeginEvent()
@@ -83,9 +83,9 @@ public:
         return onScrollBegin_;
     }
 
-    void SetOnScrollBegin(const ScrollBeginEvent& event)
+    void SetOnScrollBegin(ScrollBeginEvent&& event)
     {
-        onScrollBegin_ = event;
+        onScrollBegin_ = std::move(event);
     }
 
 private:

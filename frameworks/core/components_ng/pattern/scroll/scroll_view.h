@@ -28,10 +28,10 @@ public:
     static void SetAxis(Axis axis);
     static void SetScrollBarColor(const Color& color);
     static void SetScrollBarWidth(const Dimension& width);
-    static void SetOnScroll(const OnScrollEvent& event);
-    static void SetOnScrollBegin(const ScrollBeginEvent& event);
-    static void SetOnScrollEdge(const ScrollEdgeEvent& event);
-    static void SetOnScrollEnd(const ScrollEndEvent& event);
+    static void SetOnScroll(OnScrollEvent&& event);
+    static void SetOnScrollBegin(ScrollBeginEvent&& event);
+    static void SetOnScrollEdge(ScrollEdgeEvent&& event);
+    static void SetOnScrollEnd(ScrollEndEvent&& event);
 };
 
 } // namespace OHOS::Ace::NG

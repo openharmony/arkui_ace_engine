@@ -116,7 +116,7 @@ void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
                 };
         // NG
         if (Container::IsCurrentUseNewPipeline()) {
-            NG::ScrollView::SetOnScrollBegin(onScrollBegin);
+            NG::ScrollView::SetOnScrollBegin(std::move(onScrollBegin));
             return;
         }
 
@@ -142,7 +142,7 @@ void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
                     auto params = ConvertToJSValues(xOffset, yOffset);
                     func->Call(JSRef<JSObject>(), params.size(), params.data());
                 };
-            NG::ScrollView::SetOnScroll(onScroll);
+            NG::ScrollView::SetOnScroll(std::move(onScroll));
             return;
         }
 
@@ -179,7 +179,7 @@ void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
                     auto params = ConvertToJSValues(side);
                     func->Call(JSRef<JSObject>(), 1, params.data());
                 };
-            NG::ScrollView::SetOnScrollEdge(scrollEdge);
+            NG::ScrollView::SetOnScrollEdge(std::move(scrollEdge));
             return;
         }
 
@@ -217,13 +217,14 @@ void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
+        // NG
         if (Container::IsCurrentUseNewPipeline()) {
             auto scrollEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
                 () {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                     func->Call(JSRef<JSObject>(), 0, nullptr);
                 };
-            NG::ScrollView::SetOnScrollEnd(scrollEnd);
+            NG::ScrollView::SetOnScrollEnd(std::move(scrollEnd));
             return;
         }
 
@@ -302,7 +303,7 @@ void JSScroll::SetScrollBarWidth(const std::string& scrollBarWidth)
     scrollComponent->SetScrollBarWidth(StringUtils::StringToDimension(scrollBarWidth));
 }
 
-void JSScroll::SetScrollBarColor(const  std::string& scrollBarColor)
+void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
 {
     if (scrollBarColor.empty()) {
         return;
