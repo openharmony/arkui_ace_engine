@@ -107,12 +107,15 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
-    bool useCurrentEventRunner, bool isSubAceContainer)
+    bool useCurrentEventRunner, bool isSubAceContainer, bool useNewPipeline)
     : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), runtimeContext_(std::move(runtimeContext)),
       abilityInfo_(std::move(abilityInfo)), useCurrentEventRunner_(useCurrentEventRunner),
       isSubContainer_(isSubAceContainer)
 {
     ACE_DCHECK(callback);
+    if (useNewPipeline) {
+        SetUseNewPipeline();
+    }
     if (!isSubContainer_) {
         InitializeTask();
     }
