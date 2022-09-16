@@ -785,15 +785,13 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
     size_t lastIdx = 0;
     double selectedItemMainSize = selectedItem_ ? GetMainSize(selectedItem_->GetLayoutSize()) : 0.0;
 
-    double totalLaneCrossSize = 0;
     for (auto iter = items_.begin(); iter != items_.end();) {
         RefPtr<RenderListItem> child;
         double childMainSize = 0.0;
         double childCrossSize = 0.0;
         std::vector<RefPtr<RenderListItem>> itemSet;
         // start set child position in a row
-        int32_t rowIndex;
-        for (rowIndex = 0; rowIndex < lanes_; rowIndex++) {
+        for (int32_t rowIndex = 0; rowIndex < lanes_; rowIndex++) {
             child = *iter;
             auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
             if (itemGroup && rowIndex > 0) {
@@ -808,9 +806,10 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
                 break;
             }
         }
-        totalLaneCrossSize = std::max(childCrossSize, totalLaneCrossSize);
-        auto offsetCross = CalculateLaneCrossOffset(crossSize, totalLaneCrossSize);
-        auto offset = MakeValue<Offset>(curMainPos, offsetCross);
+        if (!fixedCrossSize_) {
+            crossSize = std::max(crossSize, childCrossSize);
+        }
+        auto offset = MakeValue<Offset>(curMainPos, 0.0);
         if (chainAnimation_) {
             double chainDelta = GetChainDelta(index);
             auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(child);
@@ -821,7 +820,10 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
         }
         // set item position for one row
         for (size_t i = 0; i < itemSet.size(); i++) {
-            auto position = offset + MakeValue<Offset>(0.0, childCrossSize / itemSet.size() * i);
+            auto itemGroup = AceType::DynamicCast<RenderListItemGroup>(itemSet[i]);
+            double itemCrossSize = itemGroup ? crossSize : crossSize / lanes_;
+            auto offsetCross = CalculateLaneCrossOffset(itemCrossSize, GetCrossSize(itemSet[i]->GetLayoutSize()));
+            auto position = offset + MakeValue<Offset>(0.0, itemCrossSize * i + offsetCross);
             if (isRightToLeft_) {
                 if (IsVertical()) {
                     position = MakeValue<Offset>(
@@ -876,9 +878,6 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
 
         childMainSize += spaceWidth_;
         if (LessNotEqual(curMainPos, mainSize) && GreatNotEqual(curMainPos + childMainSize, 0.0)) {
-            if (!fixedCrossSize_) {
-                crossSize = std::max(crossSize, childCrossSize);
-            }
             firstIdx = std::min(firstIdx, index);
             lastIdx = std::max(lastIdx, index);
         }
