@@ -160,7 +160,7 @@ void JSList::JsHeight(const JSCallbackInfo& info)
 void JSList::SetListItemAlign(int32_t itemAlignment)
 {
     JSViewSetProperty(
-        &V2::ListComponent::SetListItemAlign, itemAlignment, LIST_ITEM_ALIGN_TABLE, V2::ListItemAlign::CENTER);
+        &V2::ListComponent::SetListItemAlign, itemAlignment, LIST_ITEM_ALIGN_TABLE, V2::ListItemAlign::START);
 }
 
 void JSList::SetLanes(const JSCallbackInfo& info)
