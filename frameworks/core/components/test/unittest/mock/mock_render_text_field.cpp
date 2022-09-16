@@ -142,7 +142,7 @@ void RenderTextField::ResetOnFocusForTextFieldManager()
 {
 }
 
-bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling)
+bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
     return false;
 }
