@@ -209,8 +209,7 @@ void SslErrorResultOhos::HandleCancel()
     }
 }
 
-void SslSelectCertResultOhos::HandleConfirm(const std::string& privateKeyFile,
-    const std::string& certChainFile)
+void SslSelectCertResultOhos::HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile)
 {
     if (result_) {
         result_->Confirm(privateKeyFile, certChainFile);
@@ -744,7 +743,28 @@ bool WebDelegate::LoadDataWithRichText()
     if (!context) {
         return false;
     }
-    // TODO: add ng web pattern.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        auto webData = webPattern->GetWebData();
+        CHECK_NULL_RETURN(webData, false);
+        const std::string& data = webData.value();
+        if (data.empty()) {
+            return false;
+        }
+
+        context->PostAsyncEvent([weak = WeakClaim(this), data]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->LoadWithDataAndBaseUrl("", data, "", "", "");
+            }
+        });
+        return true;
+    }
+
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, false);
     if (webCom->GetData().empty()) {
@@ -1357,27 +1377,33 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
     onHttpErrorReceiveV2_ = useNewPipe ? eventHub->GetOnHttpErrorReceiveEvent()
                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                              webCom->GetHttpErrorEventId(), oldContext);
-    // TODO: add ng impl.
-    if (!useNewPipe) {
-        onRequestFocusV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webCom->GetRequestFocusEventId(), oldContext);
-        onDownloadStartV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webCom->GetDownloadStartEventId(), oldContext);
-        onRenderExitedV2_ =
-            AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(webCom->GetRenderExitedId(), oldContext);
-        onRefreshAccessedHistoryV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webCom->GetRefreshAccessedHistoryId(), oldContext);
-        onResourceLoadV2_ =
-            AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(webCom->GetResourceLoadId(), oldContext);
-        onScaleChangeV2_ =
-            AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(webCom->GetScaleChangeId(), oldContext);
-        onPermissionRequestV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webCom->GetPermissionRequestEventId(), oldContext);
-        onSearchResultReceiveV2_ = AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-            webCom->GetSearchResultReceiveEventId(), oldContext);
-        onScrollV2_ =
-            AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(webCom->GetScrollId(), oldContext);
-    }
+    onRequestFocusV2_ = useNewPipe ? eventHub->GetOnRequestFocusEvent()
+                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                         webCom->GetRequestFocusEventId(), oldContext);
+    onDownloadStartV2_ = useNewPipe ? eventHub->GetOnDownloadStartEvent()
+                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                          webCom->GetDownloadStartEventId(), oldContext);
+    onRenderExitedV2_ = useNewPipe ? eventHub->GetOnRenderExitedEvent()
+                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                         webCom->GetRenderExitedId(), oldContext);
+    onRefreshAccessedHistoryV2_ = useNewPipe ? eventHub->GetOnRefreshAccessedHistoryEvent()
+                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                   webCom->GetRefreshAccessedHistoryId(), oldContext);
+    onResourceLoadV2_ = useNewPipe ? eventHub->GetOnResourceLoadEvent()
+                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                         webCom->GetResourceLoadId(), oldContext);
+    onScaleChangeV2_ = useNewPipe ? eventHub->GetOnScaleChangeEvent()
+                                  : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                        webCom->GetScaleChangeId(), oldContext);
+    onPermissionRequestV2_ = useNewPipe ? eventHub->GetOnPermissionRequestEvent()
+                                        : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                              webCom->GetPermissionRequestEventId(), oldContext);
+    onSearchResultReceiveV2_ = useNewPipe ? eventHub->GetOnSearchResultReceiveEvent()
+                                          : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetSearchResultReceiveEventId(), oldContext);
+    onScrollV2_ = useNewPipe ? eventHub->GetOnScrollEvent()
+                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                   webCom->GetScrollId(), oldContext);
 }
 
 void WebDelegate::RegisterOHOSWebEventAndMethord()
@@ -1424,7 +1450,7 @@ void WebDelegate::SetWebCallBack()
         }
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         webController->SetLoadUrlImpl([weak = WeakClaim(this), uiTaskExecutor](
-            std::string url, const std::map<std::string, std::string>& httpHeaders) {
+                                          std::string url, const std::map<std::string, std::string>& httpHeaders) {
             uiTaskExecutor.PostTask([weak, url, httpHeaders]() {
                 auto delegate = weak.Upgrade();
                 if (delegate) {
@@ -1499,8 +1525,8 @@ void WebDelegate::SetWebCallBack()
             }
             return false;
         });
-        webController->SetExecuteTypeScriptImpl([weak = WeakClaim(this), uiTaskExecutor](
-            std::string jscode, std::function<void(const std::string)>&& callback) {
+        webController->SetExecuteTypeScriptImpl([weak = WeakClaim(this), uiTaskExecutor](std::string jscode,
+                                                    std::function<void(const std::string)>&& callback) {
             uiTaskExecutor.PostTask([weak, jscode, callback]() {
                 auto delegate = weak.Upgrade();
                 if (delegate) {
@@ -1518,119 +1544,105 @@ void WebDelegate::SetWebCallBack()
                     }
                 });
             });
-        webController->SetRefreshImpl(
-            [weak = WeakClaim(this), uiTaskExecutor]() {
-                uiTaskExecutor.PostTask([weak]() {
-                    auto delegate = weak.Upgrade();
-                    if (delegate) {
-                        delegate->Refresh();
-                    }
-                });
-            });
-        webController->SetStopLoadingImpl(
-            [weak = WeakClaim(this), uiTaskExecutor]() {
-                uiTaskExecutor.PostTask([weak]() {
-                    auto delegate = weak.Upgrade();
-                    if (delegate) {
-                        delegate->StopLoading();
-                    }
-                });
-            });
-        webController->SetGetHitTestResultImpl(
-            [weak = WeakClaim(this)]() {
+        webController->SetRefreshImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
                 auto delegate = weak.Upgrade();
                 if (delegate) {
-                    return delegate->GetHitTestResult();
+                    delegate->Refresh();
                 }
-                return 0;
             });
-        webController->SetGetHitTestValueImpl(
-            [weak = WeakClaim(this)](HitTestResult& result) {
+        });
+        webController->SetStopLoadingImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
                 auto delegate = weak.Upgrade();
                 if (delegate) {
-                    delegate->GetHitTestValue(result);
+                    delegate->StopLoading();
                 }
             });
-        webController->SetGetPageHeightImpl(
-            [weak = WeakClaim(this)]() {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    return delegate->GetPageHeight();
-                }
-                return 0;
-            });
-        webController->SetGetWebIdImpl(
-            [weak = WeakClaim(this)]() {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    return delegate->GetWebId();
-                }
-                return -1;
-            });
-        webController->SetGetTitleImpl(
-            [weak = WeakClaim(this)]() {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    return delegate->GetTitle();
-                }
-                return std::string();
-            });
-        webController->SetCreateMsgPortsImpl(
-            [weak = WeakClaim(this)](std::vector<RefPtr<WebMessagePort>>& ports) {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    delegate->CreateWebMessagePorts(ports);
-                }
-            });
-        webController->SetPostWebMessageImpl(
-            [weak = WeakClaim(this)](std::string& message, std::vector<RefPtr<WebMessagePort>>& ports,
-                std::string& uri) {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    delegate->PostWebMessage(message, ports, uri);
-                }
-            });
-        webController->SetGetDefaultUserAgentImpl(
-            [weak = WeakClaim(this)]() {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    return delegate->GetDefaultUserAgent();
-                }
-                return std::string();
-            });
-        webController->SetSaveCookieSyncImpl(
-            [weak = WeakClaim(this)]() {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    return delegate->SaveCookieSync();
-                }
-                return false;
-            });
-        webController->SetSetCookieImpl(
-            [weak = WeakClaim(this)](const std::string& url, const std::string& value) {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    return delegate->SetCookie(url, value);
-                }
-                return false;
-            });
-        webController->SetGetCookieImpl(
-            [weak = WeakClaim(this)](const std::string& url) {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    return delegate->GetCookie(url);
-                }
-                return std::string();
-            });
-        webController->SetDeleteEntirelyCookieImpl(
-            [weak = WeakClaim(this)]() {
-                auto delegate = weak.Upgrade();
-                if (delegate) {
-                    delegate->DeleteEntirelyCookie();
-                }
-            });
-        webController->SetWebViewJavaScriptResultCallBackImpl([weak = WeakClaim(this), uiTaskExecutor](
-            WebController::JavaScriptCallBackImpl&& javaScriptCallBackImpl) {
+        });
+        webController->SetGetHitTestResultImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->GetHitTestResult();
+            }
+            return 0;
+        });
+        webController->SetGetHitTestValueImpl([weak = WeakClaim(this)](HitTestResult& result) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->GetHitTestValue(result);
+            }
+        });
+        webController->SetGetPageHeightImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->GetPageHeight();
+            }
+            return 0;
+        });
+        webController->SetGetWebIdImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->GetWebId();
+            }
+            return -1;
+        });
+        webController->SetGetTitleImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->GetTitle();
+            }
+            return std::string();
+        });
+        webController->SetCreateMsgPortsImpl([weak = WeakClaim(this)](std::vector<RefPtr<WebMessagePort>>& ports) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->CreateWebMessagePorts(ports);
+            }
+        });
+        webController->SetPostWebMessageImpl([weak = WeakClaim(this)](std::string& message,
+                                                 std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->PostWebMessage(message, ports, uri);
+            }
+        });
+        webController->SetGetDefaultUserAgentImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->GetDefaultUserAgent();
+            }
+            return std::string();
+        });
+        webController->SetSaveCookieSyncImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->SaveCookieSync();
+            }
+            return false;
+        });
+        webController->SetSetCookieImpl([weak = WeakClaim(this)](const std::string& url, const std::string& value) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->SetCookie(url, value);
+            }
+            return false;
+        });
+        webController->SetGetCookieImpl([weak = WeakClaim(this)](const std::string& url) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->GetCookie(url);
+            }
+            return std::string();
+        });
+        webController->SetDeleteEntirelyCookieImpl([weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->DeleteEntirelyCookie();
+            }
+        });
+        webController->SetWebViewJavaScriptResultCallBackImpl(
+            [weak = WeakClaim(this), uiTaskExecutor](WebController::JavaScriptCallBackImpl&& javaScriptCallBackImpl) {
                 uiTaskExecutor.PostTask([weak, javaScriptCallBackImpl]() {
                     auto delegate = weak.Upgrade();
                     if (delegate) {
@@ -1638,83 +1650,77 @@ void WebDelegate::SetWebCallBack()
                     }
                 });
             });
-        webController->SetAddJavascriptInterfaceImpl([weak = WeakClaim(this), uiTaskExecutor](
-            std::string objectName, const std::vector<std::string>& methodList) {
-                uiTaskExecutor.PostTask([weak, objectName, methodList]() {
-                    auto delegate = weak.Upgrade();
-                    if (delegate) {
-                        delegate->AddJavascriptInterface(objectName, methodList);
-                    }
-                });
+        webController->SetAddJavascriptInterfaceImpl([weak = WeakClaim(this), uiTaskExecutor](std::string objectName,
+                                                         const std::vector<std::string>& methodList) {
+            uiTaskExecutor.PostTask([weak, objectName, methodList]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->AddJavascriptInterface(objectName, methodList);
+                }
             });
+        });
         webController->LoadInitJavascriptInterface();
-        webController->SetRemoveJavascriptInterfaceImpl([weak = WeakClaim(this), uiTaskExecutor](
-            std::string objectName, const std::vector<std::string>& methodList) {
-                uiTaskExecutor.PostTask([weak, objectName, methodList]() {
-                    auto delegate = weak.Upgrade();
-                    if (delegate) {
-                        delegate->RemoveJavascriptInterface(objectName, methodList);
-                    }
-                });
+        webController->SetRemoveJavascriptInterfaceImpl([weak = WeakClaim(this), uiTaskExecutor](std::string objectName,
+                                                            const std::vector<std::string>& methodList) {
+            uiTaskExecutor.PostTask([weak, objectName, methodList]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->RemoveJavascriptInterface(objectName, methodList);
+                }
             });
-        webController->SetOnInactiveImpl(
-            [weak = WeakClaim(this), uiTaskExecutor]() {
-                uiTaskExecutor.PostTask([weak]() {
-                    auto delegate = weak.Upgrade();
-                    if (delegate) {
-                        delegate->OnInactive();
-                    }
-                });
+        });
+        webController->SetOnInactiveImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->OnInactive();
+                }
             });
-        webController->SetOnActiveImpl(
-            [weak = WeakClaim(this), uiTaskExecutor]() {
-                uiTaskExecutor.PostTask([weak]() {
-                    auto delegate = weak.Upgrade();
-                    if (delegate) {
-                        delegate->OnActive();
-                    }
-                });
+        });
+        webController->SetOnActiveImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->OnActive();
+                }
             });
-        webController->SetZoomImpl(
-            [weak = WeakClaim(this), uiTaskExecutor](float factor) {
-                uiTaskExecutor.PostTask([weak, factor]() {
-                    auto delegate = weak.Upgrade();
-                    if (delegate) {
-                        delegate->Zoom(factor);
-                    }
-                });
+        });
+        webController->SetZoomImpl([weak = WeakClaim(this), uiTaskExecutor](float factor) {
+            uiTaskExecutor.PostTask([weak, factor]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->Zoom(factor);
+                }
             });
-        webController->SetZoomInImpl(
-            [weak = WeakClaim(this), uiTaskExecutor]() {
-                bool result = false;
-                uiTaskExecutor.PostSyncTask([weak, &result]() {
-                    auto delegate = weak.Upgrade();
-                    if (delegate) {
-                        result = delegate->ZoomIn();
-                    }
-                });
-                return result;
+        });
+        webController->SetZoomInImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            bool result = false;
+            uiTaskExecutor.PostSyncTask([weak, &result]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    result = delegate->ZoomIn();
+                }
             });
-        webController->SetZoomOutImpl(
-            [weak = WeakClaim(this), uiTaskExecutor]() {
-                bool result = false;
-                uiTaskExecutor.PostSyncTask([weak, &result]() {
-                    auto delegate = weak.Upgrade();
-                    if (delegate) {
-                        result = delegate->ZoomOut();
-                    }
-                });
-                return result;
+            return result;
+        });
+        webController->SetZoomOutImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            bool result = false;
+            uiTaskExecutor.PostSyncTask([weak, &result]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    result = delegate->ZoomOut();
+                }
             });
-        webController->SetRequestFocusImpl(
-            [weak = WeakClaim(this), uiTaskExecutor]() {
-                uiTaskExecutor.PostTask([weak]() {
-                    auto delegate = weak.Upgrade();
-                    if (delegate) {
-                        delegate->RequestFocus();
-                    }
-                });
+            return result;
+        });
+        webController->SetRequestFocusImpl([weak = WeakClaim(this), uiTaskExecutor]() {
+            uiTaskExecutor.PostTask([weak]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->RequestFocus();
+                }
             });
+        });
 
         webController->SetSearchAllAsyncImpl([weak = WeakClaim(this), uiTaskExecutor](const std::string& searchStr) {
             uiTaskExecutor.PostTask([weak, searchStr]() {
@@ -1832,22 +1838,22 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
         setting->PutDomStorageEnabled(webPattern->GetDomStorageAccessEnabledValue(false));
         setting->PutIsCreateWindowsByJavaScriptAllowed(true);
         setting->PutJavaScriptEnabled(webPattern->GetJsEnabledValue(true));
-        // TODO: add ng pattern get with default value.
-        setting->PutEnableRawFileAccess(true);
+        setting->PutEnableRawFileAccess(webPattern->GetFileAccessEnabledValue(true));
         setting->PutEnableContentAccess(true);
-        setting->PutLoadImageFromNetworkDisabled(false);
-        setting->PutImageLoadingAllowed(true);
-        setting->PutAccessModeForSecureOriginLoadFromInsecure(
-            static_cast<OHOS::NWeb::NWebPreference::AccessMode>(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW));
-        setting->PutZoomingFunctionEnabled(true);
-        setting->PutGeolocationAllowed(true);
-        setting->PutCacheMode(static_cast<OHOS::NWeb::NWebPreference::CacheModeFlag>(WebCacheMode::DEFAULT));
-        setting->PutLoadWithOverviewMode(true);
-        setting->PutEnableRawFileAccessFromFileURLs(true);
-        setting->PutDatabaseAllowed(false);
-        setting->PutZoomingForTextFactor(DEFAULT_TEXT_ZOOM_RATIO);
-        setting->PutWebDebuggingAccess(false);
-        setting->PutMediaPlayGestureAccess(true);
+        setting->PutLoadImageFromNetworkDisabled(webPattern->GetOnLineImageAccessEnabledValue(false));
+        setting->PutImageLoadingAllowed(webPattern->GetImageAccessEnabledValue(true));
+        setting->PutAccessModeForSecureOriginLoadFromInsecure(static_cast<OHOS::NWeb::NWebPreference::AccessMode>(
+            webPattern->GetMixedModeValue(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW)));
+        setting->PutZoomingFunctionEnabled(webPattern->GetZoomAccessEnabledValue(true));
+        setting->PutGeolocationAllowed(webPattern->GetGeolocationAccessEnabledValue(true));
+        setting->PutCacheMode(static_cast<OHOS::NWeb::NWebPreference::CacheModeFlag>(
+            webPattern->GetCacheModeValue(WebCacheMode::DEFAULT)));
+        setting->PutLoadWithOverviewMode(webPattern->GetOverviewModeAccessEnabledValue(true));
+        setting->PutEnableRawFileAccessFromFileURLs(webPattern->GetFileFromUrlAccessEnabledValue(true));
+        setting->PutDatabaseAllowed(webPattern->GetDatabaseAccessEnabledValue(false));
+        setting->PutZoomingForTextFactor(webPattern->GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
+        setting->PutWebDebuggingAccess(webPattern->GetWebDebuggingAccessEnabledValue(false));
+        setting->PutMediaPlayGestureAccess(webPattern->GetMediaPlayGestureAccessValue(true));
         return;
     }
     auto component = webComponent_.Upgrade();
@@ -2554,10 +2560,17 @@ void WebDelegate::OnPageFinished(const std::string& param)
 
 void WebDelegate::OnProgressChanged(int param)
 {
-    // TODO: add ng event.
+    auto eventParam = std::make_shared<LoadWebProgressChangeEvent>(param);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        webEventHub->FireOnProgressChangeEvent(eventParam);
+        return;
+    }
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_VOID(webCom);
-    auto eventParam = std::make_shared<LoadWebProgressChangeEvent>(param);
     webCom->OnProgressChange(eventParam.get());
 }
 
@@ -2604,43 +2617,77 @@ bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> messa
         CHECK_NULL_RETURN(webPattern, false);
         auto webEventHub = webPattern->GetWebEventHub();
         CHECK_NULL_RETURN(webEventHub, false);
-        return webEventHub->FireOnConsole(param);
+        auto propOnConsoleEvent = webEventHub->GetOnConsoleEvent();
+        CHECK_NULL_RETURN(webEventHub, false);
+        return propOnConsoleEvent(param);
     }
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, false);
     return webCom->OnConsole(param.get());
 }
 
-bool WebDelegate::OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType)
+bool WebDelegate::OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType)
 {
-    // TODO: add ng event.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_RETURN(webEventHub, false);
+        return webEventHub->FireOnCommonDialogEvent(info, dialogEventType);
+    }
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, false);
-    return webCom->OnCommonDialog(info, dialogEventType);
+    return webCom->OnCommonDialog(info.get(), dialogEventType);
 }
 
-bool WebDelegate::OnHttpAuthRequest(const BaseEventInfo* info)
+bool WebDelegate::OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info)
 {
-    // TODO: add ng event.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_RETURN(webEventHub, false);
+        auto propOnHttpAuthRequestEvent = webEventHub->GetOnHttpAuthRequestEvent();
+        CHECK_NULL_RETURN(webEventHub, false);
+        return propOnHttpAuthRequestEvent(info);
+    }
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, false);
-    return webCom->OnHttpAuthRequest(info);
+    return webCom->OnHttpAuthRequest(info.get());
 }
 
-bool WebDelegate::OnSslErrorRequest(const BaseEventInfo* info)
+bool WebDelegate::OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_RETURN(webEventHub, false);
+        auto propOnSslErrorEvent = webEventHub->GetOnSslErrorRequestEvent();
+        CHECK_NULL_RETURN(webEventHub, false);
+        return propOnSslErrorEvent(info);
+    }
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, false);
-    return webCom->OnSslErrorRequest(info);
+    return webCom->OnSslErrorRequest(info.get());
 }
 
-bool WebDelegate::OnSslSelectCertRequest(const BaseEventInfo* info)
+bool WebDelegate::OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_RETURN(webEventHub, false);
+        auto propOnSslSelectCertRequestEvent = webEventHub->GetOnSslSelectCertRequestEvent();
+        CHECK_NULL_RETURN(webEventHub, false);
+        return propOnSslSelectCertRequestEvent(info);
+    }
     auto webCom = webComponent_.Upgrade();
     if (!webCom) {
         return false;
     }
-    return webCom->OnSslSelectCertRequest(info);
+    return webCom->OnSslSelectCertRequest(info.get());
 }
 
 void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,
@@ -2700,18 +2747,32 @@ void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResource
 
 bool WebDelegate::IsEmptyOnInterceptRequest()
 {
-    // TODO: add ng pattern.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_RETURN(webEventHub, false);
+        return webEventHub->GetOnInterceptRequestEvent() == nullptr;
+    }
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, true);
     return webCom->IsEmptyOnInterceptRequest();
 }
 
-RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const BaseEventInfo* info)
+RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info)
 {
-    // TODO: add ng event.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, nullptr);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_RETURN(webEventHub, nullptr);
+        auto propOnInterceptRequestEvent = webEventHub->GetOnInterceptRequestEvent();
+        CHECK_NULL_RETURN(propOnInterceptRequestEvent, nullptr);
+        return propOnInterceptRequestEvent(info);
+    }
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, nullptr);
-    return webCom->OnInterceptRequest(info);
+    return webCom->OnInterceptRequest(info.get());
 }
 
 void WebDelegate::OnRequestFocus()
@@ -2779,28 +2840,52 @@ void WebDelegate::OnRouterPush(const std::string& param)
     OHOS::Ace::Framework::DelegateClient::GetInstance().RouterPush(param);
 }
 
-bool WebDelegate::OnFileSelectorShow(const BaseEventInfo* info)
+bool WebDelegate::OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info)
 {
-    // TODO: add ng event.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_RETURN(webEventHub, false);
+        auto propOnFileSelectorShowEvent = webEventHub->GetOnFileSelectorShowEvent();
+        CHECK_NULL_RETURN(propOnFileSelectorShowEvent, false);
+        return propOnFileSelectorShowEvent(info);
+    }
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, false);
-    return webCom->OnFileSelectorShow(info);
+    return webCom->OnFileSelectorShow(info.get());
 }
 
-bool WebDelegate::OnContextMenuShow(const BaseEventInfo* info)
+bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
 {
-    // TODO: add ng event.
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_RETURN(webEventHub, false);
+        auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
+        CHECK_NULL_RETURN(propOnContextMenuShowEvent, false);
+        return propOnContextMenuShowEvent(info);
+    }
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, false);
-    return webCom->OnContextMenuShow(info);
+    return webCom->OnContextMenuShow(info.get());
 }
 
 bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
 {
-    // TODO: add ng event.
+    auto param = std::make_shared<UrlLoadInterceptEvent>(data);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_RETURN(webPattern, false);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_RETURN(webEventHub, false);
+        auto propOnUrlLoadInterceptEvent = webEventHub->GetOnUrlLoadInterceptEvent();
+        CHECK_NULL_RETURN(propOnUrlLoadInterceptEvent, false);
+        return propOnUrlLoadInterceptEvent(param);
+    }
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, false);
-    auto param = std::make_shared<UrlLoadInterceptEvent>(data);
     return webCom->OnUrlLoadIntercept(param.get());
 }
 
