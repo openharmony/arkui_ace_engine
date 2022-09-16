@@ -53,7 +53,7 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
 
 FrameNode::~FrameNode()
 {
-    pattern_->DetachFromFrameNode();
+    pattern_->DetachFromFrameNode(this);
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(

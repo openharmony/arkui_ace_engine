@@ -113,7 +113,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
-    void OnDetachFromFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
