@@ -17,12 +17,32 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
+#include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType)
+{
+    switch (touchType) {
+        case TouchType::DOWN:
+            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_DOWN;
+        case TouchType::UP:
+            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UP;
+        case TouchType::MOVE:
+            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_MOVE;
+        case TouchType::CANCEL:
+            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_CANCEL;
+        default:
+            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
+    }
+}
+} // namespace
+
 XComponentPattern::XComponentPattern(const std::string& id, const std::string& type, const std::string& libraryname,
     const RefPtr<XComponentController>& xcomponentController)
     : id_(id), type_(type), libraryname_(libraryname), xcomponentController_(xcomponentController)
@@ -232,6 +252,9 @@ void XComponentPattern::InitEvent()
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitTouchEvent(gestureHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    InitMouseEvent(inputHub);
+    InitMouseHoverEvent(inputHub);
 }
 
 void XComponentPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -249,6 +272,38 @@ void XComponentPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
 
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
+{
+    if (mouseEvent_) {
+        return;
+    }
+
+    auto mouseTask = [weak = WeakClaim(this)](const MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(info);
+        }
+    };
+
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnMouseEvent(mouseEvent_);
+}
+
+void XComponentPattern::InitMouseHoverEvent(const RefPtr<InputEventHub>& inputHub)
+{
+    if (mouseHoverEvent_) {
+        return;
+    }
+    auto mouseHoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseHoverEvent(isHover);
+        }
+    };
+    mouseHoverEvent_ = MakeRefPtr<InputEvent>(std::move(mouseHoverTask));
+    inputHub->AddOnHoverEvent(mouseHoverEvent_);
 }
 
 void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -278,20 +333,89 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     NativeXComponentDispatchTouchEvent(touchEventPoint_);
 }
 
-OH_NativeXComponent_TouchEventType XComponentPattern::ConvertNativeXComponentTouchEvent(const TouchType& touchType)
+void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
 {
-    switch (touchType) {
-        case TouchType::DOWN:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_DOWN;
-        case TouchType::UP:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UP;
-        case TouchType::MOVE:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_MOVE;
-        case TouchType::CANCEL:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_CANCEL;
+    OH_NativeXComponent_MouseEvent mouseEventPoint;
+    mouseEventPoint.x = static_cast<float>(info.GetLocalLocation().GetX());
+    mouseEventPoint.y = static_cast<float>(info.GetLocalLocation().GetY());
+    mouseEventPoint.screenX = static_cast<float>(info.GetScreenLocation().GetX());
+    mouseEventPoint.screenY = static_cast<float>(info.GetScreenLocation().GetY());
+    switch (info.GetAction()) {
+        case MouseAction::PRESS:
+            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_PRESS;
+            break;
+        case MouseAction::RELEASE:
+            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_RELEASE;
+            break;
+        case MouseAction::MOVE:
+            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_MOVE;
+            break;
         default:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
+            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_NONE;
+            break;
     }
+    switch (info.GetButton()) {
+        case MouseButton::LEFT_BUTTON:
+            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_LEFT_BUTTON;
+            break;
+        case MouseButton::RIGHT_BUTTON:
+            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_RIGHT_BUTTON;
+            break;
+        case MouseButton::MIDDLE_BUTTON:
+            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_MIDDLE_BUTTON;
+            break;
+        case MouseButton::BACK_BUTTON:
+            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_BACK_BUTTON;
+            break;
+        case MouseButton::FORWARD_BUTTON:
+            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_FORWARD_BUTTON;
+            break;
+        default:
+            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_NONE_BUTTON;
+            break;
+    }
+    mouseEventPoint.timestamp = info.GetTimeStamp().time_since_epoch().count();
+    NativeXComponentDispatchMouseEvent(mouseEventPoint);
+}
+
+void XComponentPattern::HandleMouseHoverEvent(bool isHover)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, isHover] {
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXComp != nullptr && nXCompImpl) {
+                const auto* callback = nXCompImpl->GetMouseEventCallback();
+                if (callback != nullptr && callback->DispatchHoverEvent != nullptr) {
+                    callback->DispatchHoverEvent(nXComp, isHover);
+                }
+            } else {
+                LOGE("Native XComponent nullptr");
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, mouseEvent] {
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXComp != nullptr && nXCompImpl) {
+                nXCompImpl->SetMouseEvent(mouseEvent);
+                auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
+                const auto* callback = nXCompImpl->GetMouseEventCallback();
+                if (callback != nullptr && callback->DispatchMouseEvent != nullptr) {
+                    callback->DispatchMouseEvent(nXComp, surface);
+                }
+            } else {
+                LOGE("Native XComponent nullptr");
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void XComponentPattern::SetTouchPoint(

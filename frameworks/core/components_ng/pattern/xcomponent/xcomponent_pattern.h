@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "core/components/xcomponent/resource/native_texture.h"
 #include "core/components/xcomponent/xcomponent_component.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
@@ -92,6 +93,7 @@ public:
     void NativeXComponentChange(float width, float height);
     void NativeXComponentDestroy();
     void NativeXComponentDispatchTouchEvent(const OH_NativeXComponent_TouchEvent& touchEvent);
+    void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
 
     void XComponentSizeInit(float textureWidth, float textureHeight);
     void XComponentSizeChange(float textureWidth, float textureHeight);
@@ -118,13 +120,16 @@ private:
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
+    void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
+    void HandleMouseEvent(const MouseInfo& info);
+    void InitMouseHoverEvent(const RefPtr<InputEventHub>& inputHub);
+    void HandleMouseHoverEvent(bool isHover);
     ExternalEvent CreateExternalEvent();
     void CreateSurface();
     void SetMethodCall();
     void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
     void SetTouchPoint(
         const std::list<TouchLocationInfo>& touchInfoList, int64_t timeStamp, const TouchType& touchType);
-    static OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType);
 
     std::string id_;
     std::string type_;
@@ -140,6 +145,8 @@ private:
 
     RefPtr<TouchEventImpl> touchEvent_;
     OH_NativeXComponent_TouchEvent touchEventPoint_;
+    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> mouseHoverEvent_;
 };
 } // namespace OHOS::Ace::NG
 
