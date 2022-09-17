@@ -199,6 +199,7 @@ void PipelineContext::SetupRootElement()
     stageNode->MountToParent(rootNode_);
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
+    fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     LOGI("SetupRootElement success!");
 }
 
@@ -210,6 +211,11 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
 const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 {
     return overlayManager_;
+}
+
+const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
+{
+    return fullScreenManager_;
 }
 
 void PipelineContext::SetRootRect(double width, double height, double offset)

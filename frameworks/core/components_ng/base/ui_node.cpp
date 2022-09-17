@@ -76,6 +76,12 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     return result;
 }
 
+int32_t UINode::RemoveChildAndReturnIndex(const RefPtr<UINode>& child)
+{
+    auto result = RemoveChild(child);
+    return std::distance(children_.begin(), result);
+}
+
 void UINode::RemoveChildAtIndex(int32_t index)
 {
     if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
