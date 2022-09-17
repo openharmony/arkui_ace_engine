@@ -107,7 +107,7 @@ bool OnJsCommonDialog(
         }
         auto delegate = webClientImpl->GetWebDelegate();
         if (delegate) {
-            jsResult = delegate->OnCommonDialog(param.get(), dialogEventType);
+            jsResult = delegate->OnCommonDialog(param, dialogEventType);
         }
         },
         OHOS::Ace::TaskExecutor::TaskType::JS);
@@ -323,7 +323,7 @@ std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInte
         return nullptr;
     }
     task->PostSyncTask([&delegate, &webResponse, &param] {
-            webResponse = delegate->OnInterceptRequest(param.get());
+            webResponse = delegate->OnInterceptRequest(param);
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
 
     if (webResponse == nullptr) {
@@ -421,7 +421,7 @@ bool WebClientImpl::OnFileSelectorShow(
         }
         auto delegate = webClient->GetWebDelegate();
         if (delegate) {
-            jsResult = delegate->OnFileSelectorShow(param.get());
+            jsResult = delegate->OnFileSelectorShow(param);
         }
         },
         OHOS::Ace::TaskExecutor::TaskType::JS);
@@ -478,7 +478,7 @@ bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthRe
             }
             auto delegate = webClient->webDelegate_.Upgrade();
             if (delegate) {
-                jsResult = delegate->OnHttpAuthRequest(param.get());
+                jsResult = delegate->OnHttpAuthRequest(param);
             }
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
 
@@ -505,7 +505,7 @@ bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorRe
             }
             auto delegate = webClient->webDelegate_.Upgrade();
             if (delegate) {
-                jsResult = delegate->OnSslErrorRequest(param.get());
+                jsResult = delegate->OnSslErrorRequest(param);
             }
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
 
@@ -537,7 +537,7 @@ bool WebClientImpl::OnSslSelectCertRequestByJS(
             }
             auto delegate = webClient->webDelegate_.Upgrade();
             if (delegate) {
-                jsResult = delegate->OnSslSelectCertRequest(param.get());
+                jsResult = delegate->OnSslSelectCertRequest(param);
             }
         }, OHOS::Ace::TaskExecutor::TaskType::JS);
 
@@ -572,7 +572,7 @@ bool WebClientImpl::RunContextMenu(
         }
         auto delegate = webClient->GetWebDelegate();
         if (delegate) {
-            jsResult = delegate->OnContextMenuShow(param.get());
+            jsResult = delegate->OnContextMenuShow(param);
         }
         },
         OHOS::Ace::TaskExecutor::TaskType::JS);
