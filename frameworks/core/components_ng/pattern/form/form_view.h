@@ -30,7 +30,6 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT FormView {
 public:
     static void Create(const RequestFormInfo& formInfo);
-    static void SetSize(const Dimension& width, const Dimension& height);
     static void SetDimension(int32_t dimension);
     static void SetAllowUpdate(bool allowUpdate);
     static void SetVisible(VisibleType visible);
@@ -39,10 +38,6 @@ public:
     static void SetOnError(FormCallback&& onError);
     static void SetOnUninstall(FormCallback&& onUninstall);
     static void SetOnRouter(FormCallback&& onRouter);
-
-private:
-    static RefPtr<FormNode> GetOrCreateFormNode(
-        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 };
 
 } // namespace OHOS::Ace::NG

@@ -104,7 +104,7 @@ void JSForm::SetSize(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::FormView::SetSize(width, height);
+        JSViewAbstract::JsSize(info);
         return;
     }
 

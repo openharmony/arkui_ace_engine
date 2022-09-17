@@ -27,52 +27,14 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<FormNode> FormView::GetOrCreateFormNode(
-    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
-{
-    auto formNode = ElementRegister::GetInstance()->GetSpecificItemById<FormNode>(nodeId);
-    if (formNode) {
-        if (formNode->GetTag() == tag) {
-            return formNode;
-        }
-        ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
-        auto parent = formNode->GetParent();
-        if (parent) {
-            parent->RemoveChild(formNode);
-        }
-    }
-
-    auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
-    formNode = AceType::MakeRefPtr<FormNode>(tag, nodeId, pattern, false);
-    formNode->InitializePatternAndContext();
-    ElementRegister::GetInstance()->AddUINode(formNode);
-    return formNode;
-}
-
 void FormView::Create(const RequestFormInfo& formInfo)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto frameNode = GetOrCreateFormNode(
+    auto frameNode = FormNode::GetOrCreateFormNode(
         V2::FORM_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<FormPattern>(); });
     stack->Push(frameNode);
 
     ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, RequestFormInfo, formInfo);
-}
-
-void FormView::SetSize(const Dimension& width, const Dimension& height)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
-    CHECK_NULL_VOID(property);
-    if (!property->HasRequestFormInfo()) {
-        return;
-    }
-    auto formInfo = property->GetRequestFormInfoValue();
-    formInfo.width = width;
-    formInfo.height = height;
-    property->UpdateRequestFormInfo(formInfo);
-    property->UpdateCalcSelfIdealSize(CalcSize(NG::CalcLength(width), NG::CalcLength(height)));
 }
 
 void FormView::SetDimension(int32_t dimension)

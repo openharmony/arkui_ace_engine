@@ -46,4 +46,26 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
     return HitTestResult::STOP_BUBBLING;
 }
 
+RefPtr<FormNode> FormNode::GetOrCreateFormNode(
+    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+{
+    auto formNode = ElementRegister::GetInstance()->GetSpecificItemById<FormNode>(nodeId);
+    if (formNode) {
+        if (formNode->GetTag() == tag) {
+            return formNode;
+        }
+        ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
+        auto parent = formNode->GetParent();
+        if (parent) {
+            parent->RemoveChild(formNode);
+        }
+    }
+
+    auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
+    formNode = AceType::MakeRefPtr<FormNode>(tag, nodeId, pattern, false);
+    formNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(formNode);
+    return formNode;
+}
+
 } // namespace OHOS::Ace::NG

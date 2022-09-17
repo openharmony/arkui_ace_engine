@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/form/form_pattern.h"
 
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
@@ -40,12 +41,24 @@ void FormPattern::OnAttachToFrameNode()
 void FormPattern::OnModifyDone()
 {
     InitFormManagerDelegate();
+}
 
+bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    if (config.skipMeasure && config.skipLayout) {
+        return false;
+    }
+
+    auto size = dirty->GetGeometryNode()->GetFrameSize();
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_RETURN(layoutProperty, false);
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
+    info.width = Dimension(size.Width());
+    info.height = Dimension(size.Height());
+    layoutProperty->UpdateRequestFormInfo(info);
+
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension) {
@@ -67,12 +80,13 @@ void FormPattern::OnModifyDone()
             subContainer_->UpdateRootElementSize();
             subContainer_->UpdateSurfaceSize();
         }
-        return;
+        return false;
     }
     CreateCardContainer();
     if (formManagerBridge_) {
         formManagerBridge_->AddForm(host->GetContext(), info);
     }
+    return false;
 }
 
 void FormPattern::InitFormManagerDelegate()
