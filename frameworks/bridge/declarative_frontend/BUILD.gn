@@ -257,6 +257,7 @@ template("declarative_js_engine") {
       "jsview/models/for_each_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
+      "jsview/models/text_field_model_impl.cpp",
     ]
 
     # rich components needed by phone and TV. wearable like watch do not need them
