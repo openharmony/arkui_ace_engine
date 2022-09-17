@@ -53,25 +53,31 @@ void XComponentPattern::OnAttachToFrameNode()
     auto host = GetHost();
     renderSurface_->SetRenderContext(host->GetRenderContext());
     renderSurface_->InitSurface();
+    renderSurface_->UpdateXComponentConfig();
     InitEvent();
     SetMethodCall();
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateBackgroundColor(Color::BLACK);
 }
 
-void XComponentPattern::OnDetachFromFrameNode()
+void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    if (!hasXComponentInit_) {
+    if (!hasXComponentInit_ || frameNode == nullptr) {
         return;
     }
     NativeXComponentDestroy();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireSurfaceDestroyEvent();
-    // TODO: cannot execute properly for the jsi engine has destroyed
     eventHub->FireDestroyEvent();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetTaskExecutor()->PostTask(
+        [eventHub] {
+            if (eventHub) {
+                eventHub->FireSurfaceDestroyEvent();
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void XComponentPattern::SetMethodCall()
@@ -156,17 +162,22 @@ void XComponentPattern::NativeXComponentChange(float width, float height)
 
 void XComponentPattern::NativeXComponentDestroy()
 {
-    // TODO: need to use pipelineContext to ensure the following run on JS thread
-    auto nXCompImpl = nativeXComponentImpl_.Upgrade();
-    if (nativeXComponent_ != nullptr && nXCompImpl) {
-        auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
-        const auto* callback = nXCompImpl->GetCallback();
-        if (callback != nullptr && callback->OnSurfaceDestroyed != nullptr) {
-            callback->OnSurfaceDestroyed(nativeXComponent_, surface);
-        }
-    } else {
-        LOGE("Native XComponent nullptr");
-    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_] {
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXComp != nullptr && nXCompImpl) {
+                auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
+                const auto* callback = nXCompImpl->GetCallback();
+                if (callback != nullptr && callback->OnSurfaceDestroyed != nullptr) {
+                    callback->OnSurfaceDestroyed(nXComp, surface);
+                }
+            } else {
+                LOGE("Native XComponent nullptr");
+            }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void XComponentPattern::NativeXComponentOffset(double x, double y)

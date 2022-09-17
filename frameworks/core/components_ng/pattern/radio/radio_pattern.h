@@ -89,7 +89,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
-    void OnDetachFromFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
     void OnClick();
     void UpdateState();
