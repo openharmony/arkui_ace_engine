@@ -160,4 +160,13 @@ void VideoView::SetOnUpdate(EventCallback&& onUpdate)
     eventHub->SetOnUpdate(std::move(onUpdate));
 }
 
+void VideoView::SetOnFullScreenChange(EventCallback&& onFullScreenChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnFullScreenChange(std::move(onFullScreenChange));
+}
+
 } // namespace OHOS::Ace::NG

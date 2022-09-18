@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/full_screen/full_screen_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/event/touch_event.h"
@@ -149,6 +150,8 @@ public:
 
     void SetRootRect(double width, double height, double offset) override;
 
+    const RefPtr<FullScreenManager>& GetFullScreenManager();
+
     const RefPtr<StageManager>& GetStageManager();
 
     const RefPtr<OverlayManager>& GetOverlayManager();
@@ -206,6 +209,7 @@ private:
     RefPtr<FrameNode> rootNode_;
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
+    RefPtr<FullScreenManager> fullScreenManager_;
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);

@@ -21,8 +21,14 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "core/components/declaration/button/button_declaration.h"
 #include "core/components/video/video_utils.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/video/video_event_hub.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -33,6 +39,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SECONDS_PER_HOUR = 3600;
 constexpr int32_t MILLISECONDS_TO_SECONDS = 1000;
+constexpr float CONTROL_BAR_SPACE = 15.0;
 } // namespace
 
 VideoPattern::VideoPattern(const RefPtr<VideoControllerV2>& videoController) : videoControllerV2_(videoController) {}
@@ -305,25 +312,104 @@ void VideoPattern::OnAttachToFrameNode()
 
 void VideoPattern::OnModifyDone()
 {
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
     if (!hasInit_) {
-        auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
         if (layoutProperty->HasPosterImageInfo()) {
-            auto host = GetHost();
-            auto children = host->GetChildren();
-            if (!children.empty()) {
-                children.clear();
+            bool isExist = false;
+            for (const auto& child : children) {
+                if (child->GetTag() == V2::IMAGE_ETS_TAG) {
+                    isExist = true;
+                    break;
+                }
             }
-            auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
-            auto posterNode =
-                FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>(posterSourceInfo));
-            CHECK_NULL_VOID(posterNode);
-            auto posterLayoutProperty = posterNode->GetLayoutProperty<ImageLayoutProperty>();
-            posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
-            host->AddChild(posterNode);
+            if (!isExist) {
+                auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
+                auto posterNode = FrameNode::CreateFrameNode(
+                    V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>(posterSourceInfo));
+                CHECK_NULL_VOID(posterNode);
+                auto posterLayoutProperty = posterNode->GetLayoutProperty<ImageLayoutProperty>();
+                posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
+                host->AddChild(posterNode);
+            }
         }
     }
     hasInit_ = true;
+    // Create the control bar
+    if (layoutProperty->HasControls() && layoutProperty->GetControlsValue(false)) {
+        bool isExist = false;
+        for (const auto& child : children) {
+            if (child->GetTag() == V2::ROW_ETS_TAG) {
+                isExist = true;
+                break;
+            }
+        }
+        if (!isExist) {
+            auto controlBar = CreateControlBar();
+
+            host->AddChild(controlBar);
+        }
+    } else {
+        for (const auto& child : children) {
+            if (child->GetTag() == V2::ROW_ETS_TAG) {
+                host->RemoveChild(child);
+                host->RebuildRenderContextTree();
+                auto context = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(context);
+                context->RequestFrame();
+                break;
+            }
+        }
+    }
     UpdateMediaPlayer();
+}
+
+RefPtr<FrameNode> VideoPattern::CreateControlBar()
+{
+    auto controlBar = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(controlBar, nullptr);
+    auto controlBarLayoutProperty = controlBar->GetLayoutProperty<LinearLayoutProperty>();
+    controlBarLayoutProperty->UpdateSpace(Dimension(CONTROL_BAR_SPACE));
+
+    auto startClickCallback = [weak = WeakClaim(this)](GestureEvent& /*info*/) {
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        videoPattern->Start();
+    };
+    auto startButton = CreateButton("start", startClickCallback);
+    CHECK_NULL_RETURN(startButton, nullptr);
+    controlBar->AddChild(startButton);
+
+    auto existFullClickCallback = [weak = WeakClaim(this)](GestureEvent& /*info*/) {
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        videoPattern->ExitFullScreen();
+    };
+    auto existFullButton = CreateButton("existFullScreen", existFullClickCallback);
+    CHECK_NULL_RETURN(existFullButton, nullptr);
+    controlBar->AddChild(existFullButton);
+
+    auto renderContext = controlBar->GetRenderContext();
+    renderContext->UpdateBackgroundColor(Color::GRAY);
+    return controlBar;
+}
+
+RefPtr<FrameNode> VideoPattern::CreateButton(const std::string& label, GestureEventFunc clickCallback)
+{
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    CHECK_NULL_RETURN(buttonNode, nullptr);
+    auto btnEventHub = buttonNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(btnEventHub, nullptr);
+    btnEventHub->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(label);
+    buttonNode->AddChild(textNode);
+    return buttonNode;
 }
 
 void VideoPattern::SetMethodCall()
@@ -364,12 +450,15 @@ void VideoPattern::SetMethodCall()
             }
         });
     });
-    videoController->SetRequestFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isPortrait) {
-        uiTaskExecutor.PostTask([weak, isPortrait]() {
+    videoController->SetRequestFullscreenImpl([weak = WeakClaim(this), uiTaskExecutor](bool isFullScreen) {
+        uiTaskExecutor.PostTask([weak, isFullScreen]() {
             auto pattern = weak.Upgrade();
             if (pattern) {
-                pattern->OnPreFullScreen(isPortrait);
-                pattern->FullScreen();
+                if (isFullScreen) {
+                    pattern->FullScreen();
+                } else {
+                    pattern->ExitFullScreen();
+                }
             }
         });
     });
@@ -408,10 +497,12 @@ void VideoPattern::Start()
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         const auto& children = host->GetChildren();
-        if (!children.empty()) {
-            host->RemoveChild(children.back());
-            host->RebuildRenderContextTree();
-            context->RequestFrame();
+        for (const auto& child : children) {
+            if (child->GetTag() == V2::IMAGE_ETS_TAG) {
+                host->RemoveChild(child);
+                host->RebuildRenderContextTree();
+                context->RequestFrame();
+            }
         }
         LOGD("Video Start");
         auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
@@ -459,19 +550,37 @@ void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode
     }
 }
 
-void VideoPattern::OnPreFullScreen(bool isPortrait)
+void VideoPattern::OnFullScreenChange(bool isFullScreen)
 {
-    // TODO
+    auto json = JsonUtil::Create(true);
+    json->Put("fullscreen", isFullScreen);
+    auto param = json->ToString();
+    auto eventHub = GetEventHub<VideoEventHub>();
+    eventHub->FireFullScreenChangeEvent(param);
 }
 
 void VideoPattern::FullScreen()
 {
-    // TODO
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    OnFullScreenChange(true);
+    auto fullScreenManager = context->GetFullScreenManager();
+    CHECK_NULL_VOID(fullScreenManager);
+    fullScreenManager->RequestFullScreen(host);
 }
 
 void VideoPattern::ExitFullScreen()
 {
-    // TODO
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    OnFullScreenChange(false);
+    auto fullScreenManager = context->GetFullScreenManager();
+    CHECK_NULL_VOID(fullScreenManager);
+    fullScreenManager->ExitFullScreen(host);
 }
 
 } // namespace OHOS::Ace::NG
