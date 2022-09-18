@@ -181,12 +181,10 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushBuild()
 {
-    LOGI("zhangxiao: PipelineContext::FlushBuild()1111111111111111111");
     FlushDirtyNodeUpdate();
     
     decltype(buildFinishCallbacks_) buildFinishCallbacks(std::move(buildFinishCallbacks_));
     for(const auto& func : buildFinishCallbacks){
-        LOGI("zhangxiao: PipelineContext::FlushBuild()");
         if(func){
             func();
         }
@@ -422,7 +420,6 @@ void PipelineContext::Destroy()
 void PipelineContext::AddCallBack(std::function<void()> callback)
 {
     buildFinishCallbacks_.push_back(callback);
-    LOGI("zhangxiao: PipelineContext::AddCallBack: %d", buildFinishCallbacks_.size());
 }
 
 } // namespace OHOS::Ace::NG
