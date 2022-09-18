@@ -26,15 +26,15 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
-#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/container.h"
 #include "core/components/box/box_component.h"
 #include "core/components/common/properties/border_image.h"
+#include "core/components/menu/menu_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/transform/transform_component.h"
 #include "core/pipeline/base/component.h"
-#include "core/components/menu/menu_component.h"
 #include "frameworks/core/gestures/tap_gesture.h"
 
 namespace OHOS::Ace::Framework {
@@ -264,6 +264,22 @@ public:
         return pipelineContext;
     }
 
+    template<typename T>
+    static RefPtr<T> GetTheme()
+    {
+        auto pipelineContext = GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("pipelineContext is null!");
+            return nullptr;
+        }
+        auto themeManager = pipelineContext->GetThemeManager();
+        if (!themeManager) {
+            LOGE("themeManager is null!");
+            return nullptr;
+        }
+        return themeManager->GetTheme<T>();
+    }
+
 protected:
     /**
      * box properties setter
@@ -303,22 +319,6 @@ protected:
         const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
     static bool ParseAndSetTranslateTransition(
         const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
-
-    template<typename T>
-    static RefPtr<T> GetTheme()
-    {
-        auto pipelineContext = GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("pipelineContext is null!");
-            return nullptr;
-        }
-        auto themeManager = pipelineContext->GetThemeManager();
-        if (!themeManager) {
-            LOGE("themeManager is null!");
-            return nullptr;
-        }
-        return themeManager->GetTheme<T>();
-    }
 
     template<typename T>
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)
