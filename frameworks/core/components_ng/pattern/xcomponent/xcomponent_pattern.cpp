@@ -43,7 +43,7 @@ OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const Touch
 }
 } // namespace
 
-XComponentPattern::XComponentPattern(const std::string& id, const std::string& type, const std::string& libraryname,
+XComponentPattern::XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
     const RefPtr<XComponentController>& xcomponentController)
     : id_(id), type_(type), libraryname_(libraryname), xcomponentController_(xcomponentController)
 {}
@@ -51,13 +51,17 @@ XComponentPattern::XComponentPattern(const std::string& id, const std::string& t
 void XComponentPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
-    renderSurface_->SetRenderContext(host->GetRenderContext());
-    renderSurface_->InitSurface();
-    renderSurface_->UpdateXComponentConfig();
-    InitEvent();
-    SetMethodCall();
     auto renderContext = host->GetRenderContext();
-    renderContext->UpdateBackgroundColor(Color::BLACK);
+    if (type_ == XComponentType::SURFACE) {
+        renderSurface_->SetRenderContext(host->GetRenderContext());
+        renderSurface_->InitSurface();
+        renderSurface_->UpdateXComponentConfig();
+        InitEvent();
+        SetMethodCall();
+        renderContext->UpdateBackgroundColor(Color::BLACK);
+    } else {
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
 }
 
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -65,19 +69,21 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (!hasXComponentInit_ || frameNode == nullptr) {
         return;
     }
-    NativeXComponentDestroy();
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->FireDestroyEvent();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->GetTaskExecutor()->PostTask(
-        [eventHub] {
-            if (eventHub) {
-                eventHub->FireSurfaceDestroyEvent();
-            }
-        },
-        TaskExecutor::TaskType::JS);
+    if (type_ == XComponentType::SURFACE) {
+        NativeXComponentDestroy();
+        auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireDestroyEvent();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->GetTaskExecutor()->PostTask(
+            [eventHub] {
+                if (eventHub) {
+                    eventHub->FireSurfaceDestroyEvent();
+                }
+            },
+            TaskExecutor::TaskType::JS);
+    }
 }
 
 void XComponentPattern::SetMethodCall()
@@ -106,7 +112,7 @@ void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHei
 
 bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+    if (type_ == XComponentType::COMPONENT || config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
     auto geometryNode = dirty->GetGeometryNode();
@@ -223,7 +229,7 @@ void XComponentPattern::XComponentSizeInit(float textureWidth, float textureHeig
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
-    if (renderSurface_->IsSurfaceValid()) {
+    if (renderSurface_->IsSurfaceValid() && type_ == XComponentType::SURFACE) {
         float viewScale = context->GetViewScale();
         renderSurface_->CreateNativeWindow();
         renderSurface_->AdjustNativeWindowSize(

@@ -530,6 +530,8 @@ enum class VisibleType {
     GONE,
 };
 
+enum class XComponentType { SURFACE = 0, COMPONENT };
+
 inline constexpr uint32_t STATE_NORMAL = 0;
 inline constexpr uint32_t STATE_PRESSED = 1;
 inline constexpr uint32_t STATE_FOCUS = 1 << 1;

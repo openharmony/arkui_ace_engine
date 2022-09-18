@@ -23,12 +23,14 @@
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/xcomponent/resource/native_texture.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -39,13 +41,26 @@ class XComponentPattern : public Pattern {
 
 public:
     XComponentPattern() = default;
-    XComponentPattern(const std::string& id, const std::string& type, const std::string& libraryname,
+    XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
         const RefPtr<XComponentController>& xcomponentController);
     ~XComponentPattern() override = default;
 
+    bool IsAtomicNode() const override
+    {
+        return type_ == XComponentType::SURFACE;
+    }
+
     std::optional<std::string> GetSurfaceNodeName() const override
     {
+        if (type_ == XComponentType::COMPONENT) {
+            return std::nullopt;
+        }
         return id_ + "Surface";
+    }
+
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<XComponentLayoutProperty>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -132,7 +147,7 @@ private:
         const std::list<TouchLocationInfo>& touchInfoList, int64_t timeStamp, const TouchType& touchType);
 
     std::string id_;
-    std::string type_;
+    XComponentType type_;
     std::string libraryname_;
     RefPtr<XComponentController> xcomponentController_;
 
