@@ -17,6 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/property/layout_constraint.h"

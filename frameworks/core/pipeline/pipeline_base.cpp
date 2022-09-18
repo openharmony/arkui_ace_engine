@@ -460,4 +460,20 @@ bool PipelineBase::CloseImplicitAnimation()
 #endif
 }
 
+void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context)
+{
+    auto result = std::find(touchPluginPipelineContext_.begin(), touchPluginPipelineContext_.end(), context);
+    if (result == touchPluginPipelineContext_.end()) {
+        touchPluginPipelineContext_.emplace_back(context);
+    }
+}
+
+void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
+{
+    auto result = std::find(touchPluginPipelineContext_.begin(), touchPluginPipelineContext_.end(), context);
+    if (result != touchPluginPipelineContext_.end()) {
+        touchPluginPipelineContext_.erase(result);
+    }
+}
+
 } // namespace OHOS::Ace

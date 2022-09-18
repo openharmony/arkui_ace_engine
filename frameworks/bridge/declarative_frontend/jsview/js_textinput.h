@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/core/components/text_field/text_field_controller.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTINPUT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTINPUT_H
@@ -26,9 +26,6 @@ class JSTextInput : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
-
-private:
-    static void InitDefaultStyle();
 };
 
 class JSTextInputController final : public Referenced {
@@ -40,13 +37,13 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSTextInputController* scroller);
     void CaretPosition(int32_t caretPosition);
-    void SetController(const RefPtr<TextFieldController>& controller)
+    void SetController(const RefPtr<TextFieldControllerBase>& controller)
     {
         controller_ = controller;
     }
 
 private:
-    RefPtr<TextFieldController> controller_;
+    RefPtr<TextFieldControllerBase> controller_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextInputController);
 };
 

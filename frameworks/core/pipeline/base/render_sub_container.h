@@ -26,7 +26,7 @@ class RenderSubContainer : public RenderNode {
 public:
     RenderSubContainer() : RenderNode(false) {}
 
-    virtual RefPtr<PipelineContext> GetSubPipelineContext() = 0;
+    virtual RefPtr<PipelineBase> GetSubPipelineContext() = 0;
 };
 
 } // namespace OHOS::Ace

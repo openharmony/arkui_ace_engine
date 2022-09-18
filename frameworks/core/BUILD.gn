@@ -405,7 +405,10 @@ template("ace_core_source_set") {
         config.form_components_support) {
       if (!use_mingw_win && !use_mac && !use_linux) {
         sources += [ "common/form_manager.cpp" ]
-        deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
+        deps += [
+          "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform",
+          "$ace_root/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform",
+        ]
         external_deps = [ "form_fwk:form_manager" ]
       }
     }
@@ -653,6 +656,12 @@ template("ace_core_ng_source_set") {
     if (defined(config.web_components_support) &&
         config.web_components_support) {
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
+    }
+    if (defined(config.form_components_support) &&
+        config.form_components_support) {
+      if (!use_mingw_win && !use_mac && !use_linux) {
+        deps += [ "$ace_root/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform" ]
+      }
     }
     cflags_cc = []
     cflags_cc += invoker.cflags_cc

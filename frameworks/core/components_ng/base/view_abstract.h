@@ -23,6 +23,7 @@
 #include "base/geometry/ng/vector.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
@@ -56,6 +57,7 @@ public:
 
     // layout
     static void SetAlign(Alignment alignment);
+    static void SetVisibility(VisibleType visible);
 
     // transform
     static void SetScale(const NG::VectorF& value);

@@ -42,15 +42,14 @@ public:
     using ErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using Method = std::string;
 
-    FormManagerResource(const std::string& type, const WeakPtr<PipelineContext>& context)
-        : type_(type), context_(context)
+    FormManagerResource(const std::string& type, const WeakPtr<PipelineBase>& context) : type_(type), context_(context)
     {}
     virtual ~FormManagerResource() = default;
 
     void Release(const std::function<void(bool)>& onRelease = nullptr);
 
-    void CallResRegisterMethod(const Method& method, const std::string& param,
-                               const std::function<void(std::string&)>& callback = nullptr);
+    void CallResRegisterMethod(
+        const Method& method, const std::string& param, const std::function<void(std::string&)>& callback = nullptr);
 
     int64_t GetId() const
     {
@@ -79,7 +78,7 @@ protected:
     int64_t id_ = INVALID_ID;
     std::string hash_;
     std::string type_;
-    WeakPtr<PipelineContext> context_;
+    WeakPtr<PipelineBase> context_;
 };
 
 } // namespace OHOS::Ace

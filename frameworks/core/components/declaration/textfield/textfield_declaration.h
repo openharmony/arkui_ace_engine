@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_TEXTFIELD_TEXTFIELD_DECLARATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_TEXTFIELD_TEXTFIELD_DECLARATION_H
 
+#include "bridge/common/dom/dom_type.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
@@ -25,8 +26,6 @@
 #include "core/components/declaration/input/input_declaration.h"
 #include "core/components/text_field/text_field_controller.h"
 #include "core/pipeline/base/component.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
-#include "frameworks/core/components/text_field/text_field_controller.h"
 
 namespace OHOS::Ace {
 
@@ -74,11 +73,6 @@ struct TextFieldAttribute : Attribute {
 
     // Menu options of text overlay
     std::vector<InputOption> inputOptions;
-};
-
-enum class InputStyle {
-    DEFAULT,
-    INLINE,
 };
 
 struct TextFieldStyle : Style {

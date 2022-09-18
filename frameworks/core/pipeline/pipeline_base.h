@@ -25,9 +25,11 @@
 #include "base/geometry/dimension.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
+#include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/window_animation_config.h"
@@ -488,6 +490,14 @@ public:
         return frontendType_;
     }
 
+    double GetDensity() const
+    {
+        return density_;
+    }
+
+    void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
+    void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
+
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -533,6 +543,8 @@ protected:
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
+
+    std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;

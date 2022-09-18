@@ -25,6 +25,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/geometry_property.h"
@@ -33,8 +34,12 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+
+class FrameNode;
+
 class ACE_EXPORT LayoutProperty : public Property {
     DECLARE_ACE_TYPE(LayoutProperty, Property);
 
@@ -226,6 +231,12 @@ public:
     PaddingPropertyF CreatePaddingWithoutBorder();
     PaddingPropertyF CreatePaddingAndBorder();
 
+    void SetHost(const WeakPtr<FrameNode>& host);
+    RefPtr<FrameNode> GetHost() const;
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(Visibility, VisibleType, PROPERTY_UPDATE_MEASURE);
+    void OnVisibilityUpdate(VisibleType visible) const;
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -246,6 +257,7 @@ private:
     std::unique_ptr<FlexItemProperty> flexItemProperty_;
     std::optional<MeasureType> measureType_;
 
+    WeakPtr<FrameNode> host_;
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
 } // namespace OHOS::Ace::NG
