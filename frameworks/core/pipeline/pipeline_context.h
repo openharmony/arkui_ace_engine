@@ -31,14 +31,12 @@
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
-#include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/flush_event.h"
 #include "core/animation/page_transition_listener.h"
 #include "core/animation/schedule_task.h"
-#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/focus_animation_manager.h"
 #include "core/common/platform_res_register.h"
@@ -731,11 +729,6 @@ public:
         contextMenu_ = contextMenu;
     }
 
-    double GetDensity() const
-    {
-        return density_;
-    }
-
     void SetClipHole(double left, double top, double width, double height);
 
     const Rect& GetTransparentHole() const
@@ -787,9 +780,6 @@ public:
     {
         return pluginEventOffset_;
     }
-
-    void SetTouchPipeline(WeakPtr<PipelineContext> context);
-    void RemoveTouchPipeline(WeakPtr<PipelineContext> context);
 
     void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
 
@@ -1247,7 +1237,6 @@ private:
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
 
-    std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;
     Offset pluginOffset_ { 0, 0 };
     Offset pluginEventOffset_ { 0, 0 };
 

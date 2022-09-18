@@ -52,7 +52,7 @@ void FlutterRenderPlugin::NotifyPaintFinish()
 {
     auto context = GetContext().Upgrade();
     if (context) {
-        auto pluginContext = GetSubPipelineContext();
+        auto pluginContext = DynamicCast<PipelineContext>(GetSubPipelineContext());
         if (pluginContext) {
             layer_->SetOffset(pluginContext->GetPluginOffset().GetX(), pluginContext->GetPluginOffset().GetY());
         }

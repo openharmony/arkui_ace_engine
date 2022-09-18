@@ -17,6 +17,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -208,4 +209,25 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
     return ConvertToPaddingPropertyF(
         padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
 }
+
+void LayoutProperty::SetHost(const WeakPtr<FrameNode>& host)
+{
+    host_ = host;
+}
+
+RefPtr<FrameNode> LayoutProperty::GetHost() const
+{
+    return host_.Upgrade();
+}
+
+void LayoutProperty::OnVisibilityUpdate(VisibleType /* visible */) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 } // namespace OHOS::Ace::NG

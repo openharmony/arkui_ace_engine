@@ -63,7 +63,7 @@ bool RenderForm::TouchTest(const Point& globalPoint,
     if (!InTouchRectList(transformPoint, GetTouchRectList())) {
         return false;
     }
-    auto subContext = GetSubPipelineContext();
+    auto subContext = DynamicCast<PipelineContext>(GetSubPipelineContext());
     if (!subContext) {
         LOGE("subContext is null");
         return false;
@@ -72,7 +72,7 @@ bool RenderForm::TouchTest(const Point& globalPoint,
 
     auto context = GetContext().Upgrade();
     if (context) {
-        context->SetTouchPipeline(WeakPtr<PipelineContext>(subContext));
+        context->SetTouchPipeline(WeakPtr<PipelineBase>(subContext));
     }
     return true;
 }

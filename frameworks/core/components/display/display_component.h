@@ -27,12 +27,6 @@ enum class DisplayStateAttribute {
     OPACITY,
 };
 
-enum class VisibleType {
-    VISIBLE,
-    INVISIBLE,
-    GONE,
-};
-
 class ACE_EXPORT DisplayComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(DisplayComponent, SoleChildComponent);
 
