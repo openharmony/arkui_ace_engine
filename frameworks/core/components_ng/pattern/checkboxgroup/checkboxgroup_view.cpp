@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/checkbox/checkbox_view.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_view.h"
 
 #include <string>
 
@@ -21,46 +21,42 @@
 #include "core/components/picker/picker_value_element.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-void CheckBoxView::Create(
-    const std::optional<std::string>& name, const std::optional<std::string>& groupName, const std::string& tagName)
+void CheckBoxGroupView::Create(const std::optional<std::string>& groupName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<CheckBoxPattern>(); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CHECKBOXGROUP_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
-    if (name.has_value()) {
-        eventHub->SetName(name.value());
-    }
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     if (groupName.has_value()) {
         eventHub->SetGroupName(groupName.value());
     }
 
-    // ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, false);
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, false);
 }
 
-void CheckBoxView::SetSelect(bool isSelected)
+void CheckBoxGroupView::SetSelectAll(bool isSelected)
 {
-    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isSelected);
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, isSelected);
 }
 
-void CheckBoxView::SetSelectedColor(Color color)
+void CheckBoxGroupView::SetSelectedColor(Color color)
 {
-    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, color);
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, color);
 }
 
-void CheckBoxView::SetOnChange(ChangeEvent&& onChange)
+void CheckBoxGroupView::SetOnChange(GroupChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }

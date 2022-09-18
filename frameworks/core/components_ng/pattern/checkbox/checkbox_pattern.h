@@ -61,10 +61,40 @@ public:
         return MakeRefPtr<CheckBoxEventHub>();
     }
 
+    const std::optional<std::string>& GetPreName()
+    {
+        return preName_;
+    }
+
+    const std::optional<std::string>& GetPreGroup()
+    {
+        return preGroup_;
+    }
+
+    void SetPreName(const std::string& name)
+    {
+        preName_ = name;
+    }
+
+    void SetPreGroup(const std::string& group)
+    {
+        preGroup_ = group;
+    }
+
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
     void OnClick();
+
+    void UpdateState();
+    void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
+        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, bool isSelected);
+
+    void CheckBoxGroupIsTrue();
+
+    std::optional<std::string> preName_;
+    std::optional<std::string> preGroup_;
 
     RefPtr<ClickEvent> clickListener_;
 

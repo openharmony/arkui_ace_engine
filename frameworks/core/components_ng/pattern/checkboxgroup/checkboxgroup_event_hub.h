@@ -13,50 +13,40 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_EVENT_HUB_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_EVENT_HUB_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_EVENT_HUB_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
+#include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
-using ChangeEvent = std::function<void(const bool)>;
+using GroupChangeEvent = std::function<void(const CheckboxGroupResult& info)>;
 
-class CheckBoxEventHub : public EventHub {
-    DECLARE_ACE_TYPE(CheckBoxEventHub, EventHub)
+class CheckBoxGroupEventHub : public EventHub {
+    DECLARE_ACE_TYPE(CheckBoxGroupEventHub, EventHub)
 
 public:
-    CheckBoxEventHub() = default;
+    CheckBoxGroupEventHub() = default;
+    ~CheckBoxGroupEventHub() override = default;
 
-    ~CheckBoxEventHub() override = default;
-
-    void SetOnChange(ChangeEvent&& changeEvent)
+    void SetOnChange(GroupChangeEvent&& changeEvent)
     {
         changeEvent_ = std::move(changeEvent);
     }
 
-    void UpdateChangeEvent(bool select) const
+    void UpdateChangeEvent(const CheckboxGroupResult& info) const
     {
         if (changeEvent_) {
-            changeEvent_(select);
+            changeEvent_(info);
         }
-    }
-
-    const std::string& GetName()
-    {
-        return name_;
     }
 
     const std::string& GetGroupName()
     {
         return groupname_;
-    }
-
-    void SetName(const std::string& name)
-    {
-        name_ = name;
     }
 
     void SetGroupName(const std::string& groupname)
@@ -65,11 +55,10 @@ public:
     }
 
 private:
-    ChangeEvent changeEvent_;
-    std::string name_;
+    GroupChangeEvent changeEvent_;
     std::string groupname_;
 
-    ACE_DISALLOW_COPY_AND_MOVE(CheckBoxEventHub);
+    ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupEventHub);
 };
 
 } // namespace OHOS::Ace::NG

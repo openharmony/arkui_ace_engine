@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_method.h"
 
 #include <optional>
 
@@ -25,25 +25,26 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme_manager.h"
-#include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
-#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
-CanvasDrawFunction CheckBoxPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+
+CanvasDrawFunction CheckBoxGroupPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
     InitializeParam();
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
-        auto checkbox = weak.Upgrade();
-        if (checkbox) {
-            checkbox->PaintCheckBox(canvas, paintWrapper);
+        auto checkboxgroup = weak.Upgrade();
+        if (checkboxgroup) {
+            checkboxgroup->PaintCheckBox(canvas, paintWrapper);
         }
     };
     return paintFunc;
 }
 
-void CheckBoxPaintMethod::InitializeParam()
+void CheckBoxGroupPaintMethod::InitializeParam()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -55,20 +56,16 @@ void CheckBoxPaintMethod::InitializeParam()
     shadowColor_ = checkBoxTheme->GetShadowColor();
 }
 
-void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const
+void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
     CHECK_NULL_VOID(paintWrapper);
-    auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
+    auto paintProperty = DynamicCast<CheckBoxGroupPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     auto contentSize = paintWrapper->GetContentSize();
-    bool isSelected = false;
-    if (paintProperty->HasCheckBoxSelect()) {
-        isSelected = paintProperty->GetCheckBoxSelectValue();
-    }
-
+    auto status = paintProperty->GetSelectStatus();
     auto color = activeColor_;
-    if (paintProperty->HasCheckBoxSelectedColor()) {
-        color = paintProperty->GetCheckBoxSelectedColorValue();
+    if (paintProperty->HasCheckBoxGroupSelectedColor()) {
+        color = paintProperty->GetCheckBoxGroupSelectedColorValue();
     }
     auto offset = paintWrapper->GetContentOffset();
 
@@ -83,21 +80,27 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
     contentSize.SetWidth(contentSize.Width() - borderWidth_);
     contentSize.SetHeight(contentSize.Height() - borderWidth_);
 
-    if (isSelected) {
+    if (status == CheckBoxGroupPaintProperty::SelectStatus::ALL) {
         brush.SetColor(ToRSColor(color));
         brush.SetAntiAlias(true);
         DrawActiveBorder(canvas, paintOffset, brush, contentSize);
         pen.SetColor(ToRSColor(Color::WHITE));
         DrawCheck(canvas, paintOffset, pen, contentSize);
-    } else {
+    } else if (status == CheckBoxGroupPaintProperty::SelectStatus::NONE) {
         pen.SetColor(ToRSColor(Color::GRAY));
         brush.SetColor(ToRSColor(Color::WHITE));
         brush.SetAlpha(50);
         DrawUnselected(canvas, paintOffset, pen, brush, contentSize);
+    } else {
+        brush.SetColor(ToRSColor(color));
+        brush.SetAntiAlias(true);
+        DrawActiveBorder(canvas, paintOffset, brush, contentSize);
+        pen.SetColor(ToRSColor(Color::WHITE));
+        DrawPart(canvas, paintOffset, pen, contentSize);
     }
 }
 
-void CheckBoxPaintMethod::DrawUnselected(
+void CheckBoxGroupPaintMethod::DrawUnselected(
     RSCanvas& canvas, const OffsetF& origin, RSPen& pen, RSBrush& brush, SizeF& paintSize) const
 {
     pen.SetColor(ToRSColor(Color::GRAY));
@@ -111,7 +114,7 @@ void CheckBoxPaintMethod::DrawUnselected(
     canvas.DrawRoundRect(rrect);
 }
 
-void CheckBoxPaintMethod::DrawActiveBorder(
+void CheckBoxGroupPaintMethod::DrawActiveBorder(
     RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const
 {
     float originX = paintOffset.GetX();
@@ -122,7 +125,8 @@ void CheckBoxPaintMethod::DrawActiveBorder(
     canvas.DrawRoundRect(rrect);
 }
 
-void CheckBoxPaintMethod::DrawCheck(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const
+void CheckBoxGroupPaintMethod::DrawCheck(
+    RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const
 {
     constexpr float CHECK_MARK_START_X_POSITION = 0.25f;
     constexpr float CHECK_MARK_START_Y_POSITION = 0.49f;
@@ -146,7 +150,7 @@ void CheckBoxPaintMethod::DrawCheck(RSCanvas& canvas, const OffsetF& origin, RSP
     path.LineTo(originX + middle.GetX(), originY + middle.GetY());
     shadowPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     shadowPen.SetWidth(checkStroke_);
-    
+
     shadowPen.SetColor(ToRSColor(shadowColor_));
 
     canvas.AttachPen(shadowPen);
@@ -161,4 +165,32 @@ void CheckBoxPaintMethod::DrawCheck(RSCanvas& canvas, const OffsetF& origin, RSP
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
 }
+
+void CheckBoxGroupPaintMethod::DrawPart(
+    RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const
+{
+    constexpr float CHECK_MARK_PART_START_X_POSITION = 0.20f;
+    constexpr float CHECK_MARK_PART_END_Y_POSITION = 0.80f;
+    constexpr float CHECK_MARK_PART_Y_POSITION = 0.50f;
+
+    RSPath path;
+    RSPen shadowPen = RSPen(pen);
+
+    float originX = origin.GetX();
+    float originY = origin.GetY();
+
+    const Offset start =
+        Offset(paintSize.Width() * CHECK_MARK_PART_START_X_POSITION, paintSize.Width() * CHECK_MARK_PART_Y_POSITION);
+    const Offset end =
+        Offset(paintSize.Width() * CHECK_MARK_PART_END_Y_POSITION, paintSize.Width() * CHECK_MARK_PART_Y_POSITION);
+
+    path.MoveTo(originX + start.GetX(), originY + start.GetY());
+    path.LineTo(originX + end.GetX(), originY + end.GetY());
+    shadowPen.SetColor(ToRSColor(shadowColor_));
+    canvas.AttachPen(shadowPen);
+    canvas.DrawPath(path);
+    canvas.AttachPen(pen);
+    canvas.DrawPath(path);
+}
+
 } // namespace OHOS::Ace::NG
