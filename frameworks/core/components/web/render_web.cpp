@@ -701,7 +701,8 @@ bool RenderWeb::IsTouchHandleShow(
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
 {
     if (handle->GetAlpha() > 0 &&
-        handle->GetY() >= handle->GetEdgeHeight()) {
+        GreatOrEqual(handle->GetY(), handle->GetEdgeHeight()) &&
+        GreatNotEqual(GetLayoutSize().Height(), handle->GetY())) {
         return true;
     }
     return false;
@@ -833,6 +834,9 @@ void RenderWeb::OnTouchSelectionChanged(
             showTextOveralyMenu_ = false;
             showStartTouchHandle_ = IsTouchHandleShow(insertHandle);
             showEndTouchHandle_ = IsTouchHandleShow(insertHandle);
+            if (!showStartTouchHandle_) {
+                return;
+            }
             textOverlay_ = CreateTextOverlay(insertHandle, startSelectionHandle, endSelectionHandle);
             PushTextOverlayToStack();
         }
@@ -842,6 +846,10 @@ void RenderWeb::OnTouchSelectionChanged(
     if (overlayType == INSERT_OVERLAY) {
         showStartTouchHandle_ = IsTouchHandleShow(insertHandle);
         showEndTouchHandle_ = IsTouchHandleShow(insertHandle);
+        if (!showStartTouchHandle_) {
+            PopTextOverlay();
+            return;
+        }
         float lineHeight = GreatNotEqual(insertHandle->GetEdgeHeight(), insertHandle->GetY()) ?
             insertHandle->GetY() : insertHandle->GetEdgeHeight();
         textOverlay_->SetStartHandleHeight(lineHeight);
