@@ -242,10 +242,9 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     RefPtr<LayoutWrapper> layoutWrapper;
     UpdateLayoutPropertyFlag();
     layoutWrapper = CreateLayoutWrapper();
-    auto isActive = layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
     auto task = [layoutWrapper, layoutConstraint = GetLayoutConstraint(), offset = GetParentGlobalOffset(),
-                    forceUseMainThread, isActive]() {
-        layoutWrapper->SetActive(isActive);
+                    forceUseMainThread]() {
+        layoutWrapper->SetActive();
         layoutWrapper->SetRootMeasureNode();
         {
             ACE_SCOPED_TRACE("LayoutWrapper::Measure");
@@ -292,24 +291,17 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
 
 LayoutConstraintF FrameNode::GetLayoutConstraint() const
 {
-    auto visible = layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE);
-    LayoutConstraintF layoutConstraint;
     if (geometryNode_->GetParentLayoutConstraint().has_value()) {
-        layoutConstraint = geometryNode_->GetParentLayoutConstraint().value();
-    } else {
-        layoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
-        auto rootWidth = PipelineContext::GetCurrentRootWidth();
-        auto rootHeight = PipelineContext::GetCurrentRootHeight();
-        layoutConstraint.percentReference.SetWidth(rootWidth);
-        layoutConstraint.percentReference.SetHeight(rootHeight);
-        layoutConstraint.maxSize.SetHeight(rootWidth);
-        layoutConstraint.maxSize.SetHeight(rootHeight);
+        return geometryNode_->GetParentLayoutConstraint().value();
     }
-
-    if (visible == VisibleType::GONE) {
-        layoutConstraint.selfIdealSize = OptionalSizeF(SizeF());
-        layoutProperty_->UpdateCalcSelfIdealSize(CalcSize(CalcLength(0), CalcLength(0)));
-    }
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    auto rootWidth = PipelineContext::GetCurrentRootWidth();
+    auto rootHeight = PipelineContext::GetCurrentRootHeight();
+    layoutConstraint.percentReference.SetWidth(rootWidth);
+    layoutConstraint.percentReference.SetHeight(rootHeight);
+    layoutConstraint.maxSize.SetHeight(rootWidth);
+    layoutConstraint.maxSize.SetHeight(rootHeight);
     return layoutConstraint;
 }
 
@@ -345,6 +337,12 @@ void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
+    if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
+        auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
+        layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
+        return layoutWrapper;
+    }
+
     pattern_->BeforeCreateLayoutWrapper();
     isLayoutDirtyMarked_ = false;
     auto flag = layoutProperty_->GetPropertyChangeFlag();
@@ -487,7 +485,7 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
 
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
 {
-    if (isActive_) {
+    if (isActive_ && IsVisible()) {
         visibleList.emplace_back(Claim(this));
     }
 }

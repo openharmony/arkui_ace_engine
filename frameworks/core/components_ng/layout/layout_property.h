@@ -232,7 +232,10 @@ public:
     PaddingPropertyF CreatePaddingAndBorder();
 
     void SetHost(const WeakPtr<FrameNode>& host);
-    const WeakPtr<FrameNode>& GetHost() const;
+    RefPtr<FrameNode> GetHost() const;
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(Visibility, VisibleType, PROPERTY_UPDATE_MEASURE);
+    void OnVisibilityUpdate(VisibleType visible) const;
 
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
@@ -253,9 +256,6 @@ private:
     std::unique_ptr<PositionProperty> positionProperty_;
     std::unique_ptr<FlexItemProperty> flexItemProperty_;
     std::optional<MeasureType> measureType_;
-
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(Visibility, VisibleType, PROPERTY_UPDATE_MEASURE);
-    void OnVisibilityUpdate(VisibleType visible) const;
 
     WeakPtr<FrameNode> host_;
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);

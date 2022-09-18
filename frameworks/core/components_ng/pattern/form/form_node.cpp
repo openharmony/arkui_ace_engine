@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components/form/sub_container.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
+#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -33,7 +34,7 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
     CHECK_NULL_RETURN(pattern, HitTestResult::BUBBLING);
     auto subContainer = pattern->GetSubContainer();
     CHECK_NULL_RETURN(subContainer, HitTestResult::BUBBLING);
-    auto subContext = subContainer->GetPipelineContext();
+    auto subContext = DynamicCast<OHOS::Ace::PipelineContext>(subContainer->GetPipelineContext());
     CHECK_NULL_RETURN(subContext, HitTestResult::BUBBLING);
     auto selfGlobalOffset = GetGeometryNode()->GetParentGlobalOffset() + GetGeometryNode()->GetFrameOffset();
     subContext->SetPluginEventOffset(Offset(selfGlobalOffset.GetX(), selfGlobalOffset.GetY()));

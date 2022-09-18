@@ -492,41 +492,6 @@ public:
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
     void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
 
-    void SetPluginOffset(const Offset& offset)
-    {
-        pluginOffset_ = offset;
-    }
-
-    Offset GetPluginOffset() const
-    {
-        return pluginOffset_;
-    }
-
-    void SetPluginEventOffset(const Offset& offset)
-    {
-        pluginEventOffset_ = offset;
-    }
-
-    Offset GetPluginEventOffset() const
-    {
-        return pluginEventOffset_;
-    }
-
-    const RefPtr<SharedImageManager>& GetSharedImageManager() const
-    {
-        return sharedImageManager_;
-    }
-
-    void SetSharedImageManager(const RefPtr<SharedImageManager>& sharedImageManager)
-    {
-        sharedImageManager_ = sharedImageManager;
-    }
-
-    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
-    {
-        drawDelegate_ = std::move(delegate);
-    }
-
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
     {
@@ -572,11 +537,7 @@ protected:
     StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
 
-    Offset pluginOffset_ { 0, 0 };
-    Offset pluginEventOffset_ { 0, 0 };
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
-    RefPtr<SharedImageManager> sharedImageManager_;
-    std::unique_ptr<DrawDelegate> drawDelegate_;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;

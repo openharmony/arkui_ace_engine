@@ -215,18 +215,19 @@ void LayoutProperty::SetHost(const WeakPtr<FrameNode>& host)
     host_ = host;
 }
 
-const WeakPtr<FrameNode>& LayoutProperty::GetHost() const
+RefPtr<FrameNode> LayoutProperty::GetHost() const
 {
-    return host_;
+    return host_.Upgrade();
 }
 
 void LayoutProperty::OnVisibilityUpdate(VisibleType /* visible */) const
 {
-    auto host = GetHost().Upgrade();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
+    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 } // namespace OHOS::Ace::NG

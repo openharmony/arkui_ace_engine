@@ -140,8 +140,8 @@ void SubContainer::UpdateSurfaceSize()
         TaskExecutor::TaskType::UI);
 }
 
-void SubContainer::RunCard(const int64_t id, const std::string path, const std::string module, const std::string data,
-    const std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap, const std::string formSrc)
+void SubContainer::RunCard(int64_t id, const std::string& path, const std::string& module, const std::string& data,
+    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc)
 {
     if (id == runningCardId_) {
         LOGE("the card is showing, no need run again");
@@ -225,7 +225,7 @@ void SubContainer::RunCard(const int64_t id, const std::string path, const std::
         CHECK_NULL_VOID(container);
 
         if (Container::IsCurrentUseNewPipeline()) {
-            auto form = container->GetFormPattern().Upgrade();
+            auto form = container->GetFormPattern();
             CHECK_NULL_VOID(form);
             form->OnActionEvent(action);
         } else {
@@ -306,7 +306,7 @@ void SubContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
         LOGE("picNameArray is null!");
         return;
     }
-    auto pipelineCtx = GetPipelineContext();
+    auto pipelineCtx = DynamicCast<PipelineContext>(GetPipelineContext());
     if (!pipelineCtx) {
         LOGE("pipeline context is null!");
         return;
@@ -391,7 +391,9 @@ void SubContainer::GetImageDataFromAshmem(
             strerror(errno), picName.c_str(), len, ashmem.GetAshmemFd());
         return;
     }
-    RefPtr<SharedImageManager> sharedImageManager = pipelineContext->GetSharedImageManager();
+    auto context = DynamicCast<PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    RefPtr<SharedImageManager> sharedImageManager = context->GetSharedImageManager();
     if (sharedImageManager) {
         // read image data from shared memory and save a copy to sharedImageManager
         sharedImageManager->AddSharedImage(picName, std::vector<uint8_t>(imageData, imageData + len));
@@ -399,7 +401,7 @@ void SubContainer::GetImageDataFromAshmem(
 }
 
 void SubContainer::UpdateCard(
-    const std::string content, const std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap)
+    const std::string& content, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap)
 {
     if (!frontend_) {
         LOGE("update card fial due to could not find card front end");

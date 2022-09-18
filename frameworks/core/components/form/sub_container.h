@@ -39,9 +39,10 @@ public:
     ~SubContainer() = default;
 
     void Initialize();
-    void RunCard(const int64_t id, const std::string path, const std::string module, const std::string data,
-        std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap, const std::string formSrc);
-    void UpdateCard(const std::string content, std::map<std::string, sptr<AppExecFwk::FormAshmem>> imageDataMap);
+    void RunCard(int64_t id, const std::string& path, const std::string& module, const std::string& data,
+        const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc);
+    void UpdateCard(
+        const std::string& content, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap);
     void Destroy();
     void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
     void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,
@@ -111,15 +112,15 @@ public:
         formPattern_ = formPattern;
     }
 
-    const WeakPtr<NG::FormPattern>& GetFormPattern() const
+    RefPtr<NG::FormPattern> GetFormPattern() const
     {
-        return formPattern_;
+        return formPattern_.Upgrade();
     }
 
 private:
     RefPtr<CardFrontend> frontend_;
     RefPtr<TaskExecutor> taskExecutor_;
-    RefPtr<PipelineBase> pipelineContext_;
+    RefPtr<PipelineContext> pipelineContext_;
     WeakPtr<PipelineBase> outSidePipelineContext_;
     RefPtr<AssetManager> assetManager_;
     int32_t instanceId_;

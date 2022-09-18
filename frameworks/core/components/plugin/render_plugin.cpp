@@ -67,7 +67,7 @@ bool RenderPlugin::TouchTest(const Point& globalPoint,
     if (!InTouchRectList(transformPoint, GetTouchRectList())) {
         return false;
     }
-    auto subContext = GetSubPipelineContext();
+    auto subContext = DynamicCast<PipelineContext>(GetSubPipelineContext());
     if (!subContext) {
         LOGE("subContext is null");
         return false;

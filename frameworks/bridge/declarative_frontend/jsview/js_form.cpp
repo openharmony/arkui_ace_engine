@@ -72,6 +72,11 @@ void JSForm::Create(const JSCallbackInfo& info)
 
 void JSForm::SetSize(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsSize(info);
+        return;
+    }
+
     if (info.Length() == 0 || !info[0]->IsObject()) {
         LOGW("form set size fail due to FormComponent construct param is empty or type is not Object");
     }
@@ -87,9 +92,6 @@ void JSForm::SetSize(const JSCallbackInfo& info)
             width = StringUtils::StringToDimension(widthValue->ToString(), true);
         }
     }
-    if (!width.IsValid()) {
-        width = 0.0_vp;
-    }
 
     JSRef<JSVal> heightValue = sizeObj->GetProperty("height");
     if (!heightValue->IsNull() && !heightValue->IsEmpty()) {
@@ -99,18 +101,9 @@ void JSForm::SetSize(const JSCallbackInfo& info)
             height = StringUtils::StringToDimension(heightValue->ToString(), true);
         }
     }
-    if (!height.IsValid()) {
-        height = 0.0_vp;
-    }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsSize(info);
-        return;
-    }
-
     auto form = AceType::DynamicCast<FormComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (form) {
-        form->SetCardSize(width, height);
+        form->SetCardSize(width.IsValid() ? width : 0.0_vp, height.IsValid() ? height : 0.0_vp);
     }
 }
 

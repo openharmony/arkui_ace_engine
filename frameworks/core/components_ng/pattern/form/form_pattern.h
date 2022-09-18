@@ -53,7 +53,6 @@ public:
     const RefPtr<SubContainer>& GetSubContainer() const;
 
 private:
-    void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 

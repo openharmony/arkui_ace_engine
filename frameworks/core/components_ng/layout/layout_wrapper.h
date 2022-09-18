@@ -119,9 +119,9 @@ public:
         return isActive_;
     }
 
-    void SetActive(bool isActive = true)
+    void SetActive()
     {
-        isActive_ = isActive;
+        isActive_ = true;
     }
 
     bool IsRootMeasureNode() const

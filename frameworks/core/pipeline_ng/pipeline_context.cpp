@@ -29,7 +29,6 @@
 #include "core/common/container.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
-#include "core/components/box/drag_drop_event.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
