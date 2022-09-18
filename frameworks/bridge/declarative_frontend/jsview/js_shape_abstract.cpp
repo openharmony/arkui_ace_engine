@@ -16,12 +16,18 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/pattern/shape/shape_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        SetNgStrokeDashArray(info);
+        return;
+    }
+
     if (info.Length() < 1 || !info[0]->IsArray()) {
         LOGE("info is not array");
         return;
@@ -64,6 +70,41 @@ void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
     component->SetStrokeDashArray(dashArray);
 }
 
+void JSShapeAbstract::SetNgStrokeDashArray(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsArray()) {
+        LOGE("info is not array");
+        return;
+    }
+
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
+    int32_t length = static_cast<int32_t>(array->Length());
+    if (length <= 0) {
+        LOGE("info is invalid");
+        return;
+    }
+    std::vector<Dimension> dashArray;
+    for (int32_t i = 0; i < length; i++) {
+        JSRef<JSVal> value = array->GetValueAt(i);
+        Dimension dim;
+        if (ParseJsDimensionVp(value, dim)) {
+            dashArray.emplace_back(dim);
+        }
+    }
+    if (length != static_cast<int32_t>(dashArray.size())) {
+        LOGE("ParseJsDimensionVp failed");
+        return;
+    }
+    // if odd,add twice
+    if ((static_cast<uint32_t>(length) & 1)) {
+        for (int32_t i = 0; i < length; i++) {
+            dashArray.emplace_back(dashArray[i]);
+        }
+    }
+    NG::ShapeView::SetStrokeDashArray(dashArray);
+    info.SetReturnValue(info.This());
+}
+
 void JSShapeAbstract::SetStroke(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -72,6 +113,10 @@ void JSShapeAbstract::SetStroke(const JSCallbackInfo& info)
     }
     Color strokeColor;
     if (!ParseJsColor(info[0], strokeColor)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ShapeView::SetStroke(strokeColor);
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
@@ -88,7 +133,10 @@ void JSShapeAbstract::SetFill(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-
+    if (Container::IsCurrentUseNewPipeline()) {
+        SetNgFill(info);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::ShapeComponent>(stack->GetMainComponent());
     if (!component) {
@@ -106,6 +154,22 @@ void JSShapeAbstract::SetFill(const JSCallbackInfo& info)
     }
 }
 
+void JSShapeAbstract::SetNgFill(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (info[0]->IsString() && info[0]->ToString() == "none") {
+        NG::ShapeView::SetFill(Color::TRANSPARENT);
+    } else {
+        Color fillColor;
+        if (ParseJsColor(info[0], fillColor)) {
+            NG::ShapeView::SetFill(fillColor);
+        }
+    }
+}
+
 void JSShapeAbstract::SetStrokeDashOffset(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -114,6 +178,10 @@ void JSShapeAbstract::SetStrokeDashOffset(const JSCallbackInfo& info)
     }
     Dimension offset;
     if (!ParseJsDimensionVp(info[0], offset)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ShapeView::SetStrokeDashOffset(offset);
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
@@ -126,6 +194,10 @@ void JSShapeAbstract::SetStrokeDashOffset(const JSCallbackInfo& info)
 
 void JSShapeAbstract::SetStrokeLineCap(int lineCap)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ShapeView::SetStrokeLineCap(lineCap);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::ShapeComponent>(stack->GetMainComponent());
     if (!component) {
@@ -143,6 +215,10 @@ void JSShapeAbstract::SetStrokeLineCap(int lineCap)
 
 void JSShapeAbstract::SetStrokeLineJoin(int lineJoin)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ShapeView::SetStrokeLineJoin(lineJoin);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::ShapeComponent>(stack->GetMainComponent());
     if (!component) {
@@ -160,6 +236,10 @@ void JSShapeAbstract::SetStrokeLineJoin(int lineJoin)
 
 void JSShapeAbstract::SetStrokeMiterLimit(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        SetNgStrokeMiterLimit(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -179,8 +259,28 @@ void JSShapeAbstract::SetStrokeMiterLimit(const JSCallbackInfo& info)
     }
 }
 
+void JSShapeAbstract::SetNgStrokeMiterLimit(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    double miterLimit;
+    if (!ParseJsDouble(info[0], miterLimit)) {
+        return;
+    }
+
+    if (GreatOrEqual(miterLimit, 1.0)) {
+        NG::ShapeView::SetStrokeMiterLimit(miterLimit);
+    }
+}
+
 void JSShapeAbstract::SetStrokeOpacity(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        SetNgStrokeOpacity(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -197,8 +297,25 @@ void JSShapeAbstract::SetStrokeOpacity(const JSCallbackInfo& info)
     }
 }
 
+void JSShapeAbstract::SetNgStrokeOpacity(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    double strokeOpacity;
+    if (!ParseJsDouble(info[0], strokeOpacity)) {
+        return;
+    }
+    NG::ShapeView::SetStrokeOpacity(strokeOpacity);
+}
+
 void JSShapeAbstract::SetFillOpacity(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        SetNgFillOpacity(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -215,8 +332,25 @@ void JSShapeAbstract::SetFillOpacity(const JSCallbackInfo& info)
     }
 }
 
+void JSShapeAbstract::SetNgFillOpacity(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    double fillOpacity;
+    if (!ParseJsDouble(info[0], fillOpacity)) {
+        return;
+    }
+    NG::ShapeView::SetFillOpacity(fillOpacity);
+}
+
 void JSShapeAbstract::SetStrokeWidth(const JSCallbackInfo& info)
 {
+    if(Container::IsCurrentUseNewPipeline()){
+        SetNgStrokeWidth(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -237,8 +371,27 @@ void JSShapeAbstract::SetStrokeWidth(const JSCallbackInfo& info)
     }
 }
 
+void JSShapeAbstract::SetNgStrokeWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Dimension lineWidth;
+    if (!ParseJsDimensionVp(info[0], lineWidth)) {
+        return;
+    }
+    if (GreatOrEqual(lineWidth.Value(), 0.0)) {
+        NG::ShapeView::SetStrokeWidth(lineWidth);
+    }
+}
+
 void JSShapeAbstract::SetAntiAlias(bool antiAlias)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ShapeView::SetAntiAlias(antiAlias);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::ShapeComponent>(stack->GetMainComponent());
     if (component) {
@@ -374,7 +527,7 @@ void JSShapeAbstract::ObjectHeight(const JSRef<JSVal>& jsValue)
         LOGE("Value is less than zero");
         return;
     }
-    if(Container::IsCurrentUseNewPipeline()){
+    if (Container::IsCurrentUseNewPipeline()) {
         JSViewAbstract::JsHeight(jsValue);
         return;
     }

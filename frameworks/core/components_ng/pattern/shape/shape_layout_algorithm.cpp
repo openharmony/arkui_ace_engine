@@ -13,22 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_LINE_PAINTER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_LINE_PAINTER_H
+#include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
 
-#include "base/geometry/ng/radius.h"
-#include "base/geometry/ng/rect_t.h"
-#include "core/components_ng/pattern/shape/line_paint_property.h"
-#include "core/components_ng/render/drawing.h"
+#include <string>
+
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 
-class LinePainter {
-public:
-    LinePainter() = default;
-    ~LinePainter() = default;
-    static void DrawLine(RSCanvas& canvas, const LinePaintProperty& LinePaintProperty);
-};
-
+std::optional<SizeF> ShapeLayoutAlgorithm::MeasureContent(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    if (contentConstraint.selfIdealSize.IsValid()) {
+        return contentConstraint.selfIdealSize.ConvertToSizeT();
+    }
+    return std::nullopt;
+}
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_LINE_PAINTER_H

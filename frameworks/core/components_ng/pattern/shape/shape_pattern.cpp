@@ -13,22 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_LINE_PAINTER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_LINE_PAINTER_H
+#include "core/components_ng/pattern/shape/shape_pattern.h"
 
-#include "base/geometry/ng/radius.h"
-#include "base/geometry/ng/rect_t.h"
-#include "core/components_ng/pattern/shape/line_paint_property.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
-
-class LinePainter {
-public:
-    LinePainter() = default;
-    ~LinePainter() = default;
-    static void DrawLine(RSCanvas& canvas, const LinePaintProperty& LinePaintProperty);
-};
-
+bool ShapePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
+{
+    if (skipMeasure || dirty->SkipMeasureContent()) {
+        return false;
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_LINE_PAINTER_H

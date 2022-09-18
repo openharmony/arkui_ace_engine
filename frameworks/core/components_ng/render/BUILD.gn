@@ -32,6 +32,7 @@ build_component_ng("render_ng") {
     "rect_painter.cpp",
     "render_context_creator.cpp",
     "render_surface_creator.cpp",
+    "shape_painter.cpp"
   ]
 
   if (enable_ng_build) {

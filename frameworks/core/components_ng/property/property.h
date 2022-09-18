@@ -189,7 +189,7 @@ public:                                                        \
         return prop##name##_.reset();                          \
     }                                                          \
                                                                \
-private:                                                       \
+protected:                                                       \
     std::optional<type> prop##name##_;
 
 #define ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(name, type, changeFlag) \

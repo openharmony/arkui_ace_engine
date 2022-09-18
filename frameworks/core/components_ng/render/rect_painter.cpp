@@ -16,31 +16,38 @@
 #include "core/components_ng/render/rect_painter.h"
 
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/shape_painter.h"
 
 namespace OHOS::Ace::NG {
 
-void RectPainter::DrawRect(RSCanvas& canvas, const RectF& rect, const Radius& topLeftRadius,
-    const Radius& topRightRadius, const Radius& bottomLeftRadius, const Radius& bottomRightRadius)
+void RectPainter::DrawRect(RSCanvas& canvas, const RectF& rect, RectPaintProperty& rectPaintProperty)
 {
     RSPen pen;
-    // TODO: add suppourt in shape
-    pen.SetAntiAlias(true);
-    pen.SetWidth(5);
-    pen.SetColor(ToRSColor(Color::BLACK));
-    canvas.AttachPen(pen);
-
+    RSBrush brush;
+    ShapePainter::SetPan(pen, rectPaintProperty);
+    ShapePainter::SetBrush(brush, rectPaintProperty);
     std::vector<RSRPoint> radiusXY(4);
-    radiusXY[0].SetX(static_cast<float>(topLeftRadius.GetX().ConvertToPx()));
-    radiusXY[0].SetY(static_cast<float>(topLeftRadius.GetY().ConvertToPx()));
-    radiusXY[1].SetX(static_cast<float>(topRightRadius.GetX().ConvertToPx()));
-    radiusXY[1].SetY(static_cast<float>(topRightRadius.GetY().ConvertToPx()));
-    radiusXY[2].SetX(static_cast<float>(bottomRightRadius.GetX().ConvertToPx()));
-    radiusXY[2].SetY(static_cast<float>(bottomRightRadius.GetY().ConvertToPx()));
-    radiusXY[3].SetX(static_cast<float>(bottomLeftRadius.GetX().ConvertToPx()));
-    radiusXY[3].SetY(static_cast<float>(bottomLeftRadius.GetY().ConvertToPx()));
-
+    if (rectPaintProperty.GetTopLeftRadius()) {
+        radiusXY[0].SetX(static_cast<float>(rectPaintProperty.GetTopLeftRadiusValue().GetX().ConvertToPx()));
+        radiusXY[0].SetY(static_cast<float>(rectPaintProperty.GetTopLeftRadiusValue().GetY().ConvertToPx()));
+    }
+    if (rectPaintProperty.GetTopRightRadius()) {
+        radiusXY[1].SetX(static_cast<float>(rectPaintProperty.GetTopRightRadiusValue().GetX().ConvertToPx()));
+        radiusXY[1].SetY(static_cast<float>(rectPaintProperty.GetTopRightRadiusValue().GetY().ConvertToPx()));
+    }
+    if (rectPaintProperty.GetBottomRightRadius()) {
+        radiusXY[2].SetX(static_cast<float>(rectPaintProperty.GetBottomRightRadiusValue().GetX().ConvertToPx()));
+        radiusXY[2].SetY(static_cast<float>(rectPaintProperty.GetBottomRightRadiusValue().GetY().ConvertToPx()));
+    }
+    if (rectPaintProperty.GetBottomLeftRadius()) {
+        radiusXY[3].SetX(static_cast<float>(rectPaintProperty.GetBottomLeftRadiusValue().GetX().ConvertToPx()));
+        radiusXY[3].SetY(static_cast<float>(rectPaintProperty.GetBottomLeftRadiusValue().GetY().ConvertToPx()));
+    }
+    canvas.AttachPen(pen);
+    canvas.AttachBrush(brush);
     RSRoundRect rSRoundRect(
         RSRRect(rect.GetX(), rect.GetY(), rect.Width() + rect.GetX(), rect.Height() + rect.GetY()), radiusXY);
     canvas.DrawRoundRect(rSRoundRect);

@@ -188,9 +188,9 @@ public:
 
     void RebuildRenderContextTree() override;
 
-private:
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
+private:
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
 

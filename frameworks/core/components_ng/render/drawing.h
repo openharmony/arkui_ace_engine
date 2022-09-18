@@ -22,6 +22,7 @@
 #include "rosen_text/ui/font_collection.h"
 #include "rosen_text/ui/typography.h"
 #include "rosen_text/ui/typography_create.h"
+#include "utils/scalar.h"
 
 namespace OHOS::Ace {
 
@@ -46,6 +47,7 @@ using RSBitmap = Rosen::Drawing::Bitmap;
 using RSBitmapFormat = Rosen::Drawing::BitmapFormat;
 using RSColorType = Rosen::Drawing::ColorType;
 using RSAlphaType = Rosen::Drawing::AlphaType;
+using RSScalar = Rosen::Drawing::scalar;
 
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;
