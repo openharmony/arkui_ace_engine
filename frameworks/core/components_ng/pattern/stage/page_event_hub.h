@@ -39,7 +39,7 @@ public:
     void AddCheckBoxGroupToGroup(const std::string& group, const RefPtr<FrameNode>& checkBoxFrameNode);
     void RemoveCheckBoxFromGroup(const std::string& group, const RefPtr<FrameNode>& radioFrameNode);
 
-    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& GetCheckBoxGroupMap()
+    const std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& GetCheckBoxGroupMap()
     {
         return checkBoxGroupNotify_;
     }

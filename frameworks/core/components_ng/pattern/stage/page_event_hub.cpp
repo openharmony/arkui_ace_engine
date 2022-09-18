@@ -60,7 +60,6 @@ void PageEventHub::AddCheckBoxToGroup(const std::string& group, const RefPtr<Fra
 
 void PageEventHub::AddCheckBoxGroupToGroup(const std::string& group, const RefPtr<FrameNode>& checkBoxGroupFrameNode)
 {
-    // 判断是否已经存在同名的CheckBoxGroup，如果已经存在，不加入map
     const auto& list = checkBoxGroupNotify_[group];
     for (auto&& item : list) {
         auto node = item.Upgrade();

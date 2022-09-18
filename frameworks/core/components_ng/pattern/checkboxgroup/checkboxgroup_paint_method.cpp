@@ -69,8 +69,8 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
     }
     auto offset = paintWrapper->GetContentOffset();
 
-    RSPen pen = RSPen();
-    RSBrush brush = RSBrush();
+    RSPen pen;
+    RSBrush brush;
 
     OffsetF paintOffset = OffsetF(offset.GetX(), offset.GetY());
     pen.SetWidth(borderWidth_);

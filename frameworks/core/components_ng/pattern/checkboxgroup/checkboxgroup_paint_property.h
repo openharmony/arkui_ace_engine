@@ -36,8 +36,6 @@ public:
         paintProperty->UpdatePaintProperty(this);
         paintProperty->propCheckBoxGroupSelect_ = CloneCheckBoxGroupSelect();
         paintProperty->propCheckBoxGroupSelectedColor_ = CloneCheckBoxGroupSelectedColor();
-
-        // paintProperty->propStatus_ = CloneCheckBoxGroupSelectedStatus();
         paintProperty->propStatus_ = propStatus_;
 
         return paintProperty;
@@ -68,11 +66,22 @@ public:
         propStatus_ = status;
     }
 
+    bool GetIsCheckBoxCallbackDealed()
+    {
+        return isCheckBoxCallbackDealed_;
+    }
+
+    void SetIsCheckBoxCallbackDealed(bool dealed)
+    {
+        isCheckBoxCallbackDealed_ = true;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupSelect, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CheckBoxGroupSelectedColor, Color, PROPERTY_UPDATE_RENDER);
 
 private:
     SelectStatus propStatus_ = SelectStatus::NONE;
+    bool isCheckBoxCallbackDealed_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -158,7 +158,7 @@ public:
 
     void FlushBuild() override;
 
-    void AddCallBack(std::function<void()> callback);
+    void AddCallBack(std::function<void()>&& callback);
 
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
@@ -173,6 +173,8 @@ protected:
 
 private:
     void FlushTouchEvents();
+
+    void FlushBuildFinishCallbacks();
 
     template<typename T>
     struct NodeCompare {

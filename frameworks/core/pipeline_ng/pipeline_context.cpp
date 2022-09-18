@@ -182,10 +182,14 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 void PipelineContext::FlushBuild()
 {
     FlushDirtyNodeUpdate();
-    
+    FlushBuildFinishCallbacks();
+}
+
+void PipelineContext::FlushBuildFinishCallbacks()
+{
     decltype(buildFinishCallbacks_) buildFinishCallbacks(std::move(buildFinishCallbacks_));
-    for(const auto& func : buildFinishCallbacks){
-        if(func){
+    for (const auto& func : buildFinishCallbacks) {
+        if (func) {
             func();
         }
     }
@@ -417,9 +421,9 @@ void PipelineContext::Destroy()
     overlayManager_.Reset();
 }
 
-void PipelineContext::AddCallBack(std::function<void()> callback)
+void PipelineContext::AddCallBack(std::function<void()>&& callback)
 {
-    buildFinishCallbacks_.push_back(callback);
+    buildFinishCallbacks_.emplace_back(std::move(callback));
 }
 
 } // namespace OHOS::Ace::NG

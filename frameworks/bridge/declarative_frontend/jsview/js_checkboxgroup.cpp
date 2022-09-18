@@ -65,7 +65,7 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
 void JSCheckboxGroup::Create(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        auto checkboxGroup = std::optional<std::string>();
+        std::optional<std::string> checkboxGroup;
         if ((info.Length() >= 1) && info[0]->IsObject()) {
             auto paramObject = JSRef<JSObject>::Cast(info[0]);
             auto group = paramObject->GetProperty("group");

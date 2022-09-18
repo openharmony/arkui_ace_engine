@@ -134,18 +134,21 @@ void CheckBoxPattern::UpdateState()
     auto group = eventHub->GetGroupName();
     if (!preGroup.has_value()) {
         pageEventHub->AddCheckBoxToGroup(group, host);
-
-        if (!paintProperty->HasCheckBoxSelect()) {
-            auto callback = [this]() { CheckBoxGroupIsTrue(); };
-            PipelineContext::GetCurrentContext()->AddCallBack(callback);
-        }
-
-    } else {
-        if (preGroup.value() != group) {
-            pageEventHub->RemoveCheckBoxFromGroup(preGroup.value(), host);
-            pageEventHub->AddCheckBoxToGroup(group, host);
-        }
+        auto callback = [weak = WeakClaim(this)]() {
+            auto checkbox = weak.Upgrade();
+            if(checkbox){
+                checkbox->CheckBoxGroupIsTrue();
+            }
+        };
+        PipelineContext::GetCurrentContext()->AddCallBack(callback);
+        pattern->SetPreGroup(group);
+        return;
     }
+    if (preGroup.value() != group) {
+        pageEventHub->RemoveCheckBoxFromGroup(preGroup.value(), host);
+        pageEventHub->AddCheckBoxToGroup(group, host);
+    }
+
     pattern->SetPreGroup(group);
 
     bool isSelected = false;
@@ -259,14 +262,11 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
     std::vector<std::string> vec;
 
     RefPtr<FrameNode> checkBoxGroupNode;
-    bool AllSelectIsNull = true;
+    bool allSelectIsNull = true;
     const auto& list = checkBoxGroupMap[group];
 
     for (auto&& item : list) {
         auto node = item.Upgrade();
-        if (node == checkBoxFrameNode) {
-            continue;
-        }
         if (!node) {
             continue;
         }
@@ -278,24 +278,45 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
         CHECK_NULL_VOID(paintProperty);
 
         if (paintProperty->HasCheckBoxSelect()) {
-            AllSelectIsNull = false;
+            allSelectIsNull = false;
+        } else {
+            paintProperty->UpdateCheckBoxSelect(false);
         }
     }
 
     CHECK_NULL_VOID(checkBoxGroupNode);
-    bool checkBoxSelect = false;
-    if (AllSelectIsNull) {
-        auto paintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
-        if (!paintProperty->HasCheckBoxGroupSelect() || !paintProperty->GetCheckBoxGroupSelectValue()) {
-            checkBoxSelect = false;
-        } else {
-            checkBoxSelect = true;
-            paintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
-            paintProperty->UpdateCheckBoxGroupSelect(true);
+    auto groupPaintProperty = checkBoxGroupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    if (groupPaintProperty->GetIsCheckBoxCallbackDealed()) {
+        return;
+    }
+    if (allSelectIsNull) {
+        if (groupPaintProperty->GetCheckBoxGroupSelectValue()) {
+            groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+            groupPaintProperty->UpdateCheckBoxGroupSelect(true);
             checkBoxGroupNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            for (auto&& item : list) {
+                auto node = item.Upgrade();
+                if (!node) {
+                    continue;
+                }
+                if (node->GetTag() == V2::CHECKBOXGROUP_ETS_TAG) {
+                    continue;
+                }
+                auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
+                CHECK_NULL_VOID(paintProperty);
+                paintProperty->UpdateCheckBoxSelect(true);
+                node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            }
         }
+    }
+    if (!allSelectIsNull) {
+        bool allIsSame = true;
+        bool selfSelect = paintProperty->GetCheckBoxSelectValue();
         for (auto&& item : list) {
             auto node = item.Upgrade();
+            if (node == checkBoxFrameNode) {
+                continue;
+            }
             if (!node) {
                 continue;
             }
@@ -304,17 +325,21 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
             }
             auto paintProperty = node->GetPaintProperty<CheckBoxPaintProperty>();
             CHECK_NULL_VOID(paintProperty);
-            if (!paintProperty->HasCheckBoxSelect()) {
-                paintProperty->UpdateCheckBoxSelect(checkBoxSelect);
-                node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            if (selfSelect != paintProperty->GetCheckBoxSelectValue()) {
+                allIsSame = false;
             }
+            node->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
-    }
-    if (!AllSelectIsNull) {
-        if (!paintProperty->HasCheckBoxSelect()) {
-            paintProperty->UpdateCheckBoxSelect(false);
+        if (allIsSame && paintProperty->GetCheckBoxSelectValue()) {
+            groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+        } else if (allIsSame && !paintProperty->GetCheckBoxSelectValue()) {
+            groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::NONE);
+        } else {
+            groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
         }
+        checkBoxGroupNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    groupPaintProperty->SetIsCheckBoxCallbackDealed(true);
 }
 
 } // namespace OHOS::Ace::NG

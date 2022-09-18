@@ -90,10 +90,9 @@ private:
     void UpdateState();
     void UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select);
     void UpdateRepeatedGroupStatus(const RefPtr<FrameNode>& frameNode, bool select);
-    void UpdateCheckBoxStatus(const RefPtr<FrameNode>& checkBoxGroupFrameNode,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap, bool select);
-    void UpdateCheckBoxGroupStatusByOtherCheckBox(const RefPtr<FrameNode>& checkBoxGroupFrameNode,
-        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& checkBoxGroupMap);
+    void UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNode,
+        std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap, std::string group,
+        bool select);
 
     std::optional<std::string> preGroup_;
     bool isAddToMap_ = true;
