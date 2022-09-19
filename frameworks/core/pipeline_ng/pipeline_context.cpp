@@ -139,6 +139,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
+    auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
+    if (hasAninmation) {
+        RequestFrame();
+    }
     FlushAnimation(GetTimeFromExternalTimer());
     FlushPipelineWithoutAnimation();
 }

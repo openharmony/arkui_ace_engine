@@ -444,6 +444,13 @@ void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDr
         });
 }
 
+void RosenRenderContext::FlushModifyer( std::shared_ptr<Rosen::RSModifierBase>&& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+    rsNode_->AddModifier(modifier);
+}
+
 void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)
 {
     CHECK_NULL_VOID(rsNode_);

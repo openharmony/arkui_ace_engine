@@ -45,6 +45,11 @@ public:
 
     void SetTaskRunner(RefPtr<TaskExecutor> taskExecutor, int32_t id);
 
+    bool FlushCustomAnimation(uint64_t timeStamp) override
+    {
+        return rsUIDirector_->RunningCustomAnimation(timeStamp);
+    }
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

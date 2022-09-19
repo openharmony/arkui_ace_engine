@@ -19,10 +19,13 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/render/paint_wrapper.h"
-
+namespace OHOS::Rosen {
+class RSModifierBase;
+}
 namespace OHOS::Ace::NG {
 // NodePaintMethod class are primarily used to generate methods for node content layer drawing, foreground layer
 // drawing, and overlay layer drawing.
+using RSModifierBase = Rosen::RSModifierBase;
 class NodePaintMethod : public virtual AceType {
     DECLARE_ACE_TYPE(NodePaintMethod, AceType)
 
@@ -44,6 +47,13 @@ public:
     {
         return nullptr;
     }
+
+    virtual std::shared_ptr<RSModifierBase> GetModifyer(PaintWrapper* paintWrapper)
+    {
+        return nullptr;
+    }
+
+    virtual void UpDateModifyer(PaintWrapper* paintWrapper) {}
 };
 } // namespace OHOS::Ace::NG
 

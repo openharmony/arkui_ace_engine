@@ -117,6 +117,7 @@ template("build_component_ng") {
 
       if (platform == "ohos") {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics" ]
+        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
       } else {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
       }
@@ -127,7 +128,6 @@ template("build_component_ng") {
         configs += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config" ]
         deps += [
           "//foundation/graphic/graphic_2d/rosen/modules/composer:libcomposer",
-          "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
         ]
         include_dirs +=
             [ "//foundation/window/window_manager/interfaces/innerkits" ]

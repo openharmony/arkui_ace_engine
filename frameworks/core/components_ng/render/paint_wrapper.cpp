@@ -32,6 +32,13 @@ PaintWrapper::~PaintWrapper() = default;
 void PaintWrapper::SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintImpl)
 {
     nodePaintImpl_ = nodePaintImpl;
+    CHECK_NULL_VOID(nodePaintImpl_);
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_VOID(renderContext);
+    auto modifier = nodePaintImpl_->GetModifyer(this);
+    if (modifier) {
+        renderContext->FlushModifyer(std::move(modifier));
+    }
 }
 
 void PaintWrapper::FlushRender()
@@ -40,6 +47,12 @@ void PaintWrapper::FlushRender()
 
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
+
+    auto modifier = nodePaintImpl_->GetModifyer(this);
+    if (modifier) {
+        nodePaintImpl_->UpDateModifyer(this);
+        return;
+    }
 
     renderContext->StartRecording();
 
