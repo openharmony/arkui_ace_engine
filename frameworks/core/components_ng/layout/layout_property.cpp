@@ -69,6 +69,9 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->positionProperty_) {
         positionProperty_ = std::make_unique<PositionProperty>(*layoutProperty->positionProperty_);
     }
+    if (layoutProperty->flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>(*layoutProperty->flexItemProperty_);
+    }
     measureType_ = layoutProperty->measureType_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
 }
@@ -102,7 +105,9 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
                 parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
-            layoutConstraint_->UpdateSelfIdealSizeWithCheck(
+            LOGD("CalcLayoutConstraint->selfIdealSize = %{public}s",
+                calcLayoutConstraint_->selfIdealSize.value().ToString().c_str());
+            layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
                 ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
                     parentConstraint.percentReference));
         }

@@ -65,6 +65,15 @@ struct LayoutConstraintT {
         return !(*this == layoutConstraint);
     }
 
+    bool UpdateIllegalSelfIdealSizeWithCheck(const OptionalSize<T>& size)
+    {
+        if (selfIdealSize == size) {
+            return false;
+        }
+        selfIdealSize.UpdateIllegalSizeWithCheck(size);
+        return true;
+    }
+
     bool UpdateSelfIdealSizeWithCheck(const OptionalSize<T>& size)
     {
         if (selfIdealSize == size) {
