@@ -100,6 +100,7 @@ public:
     void Stroke();
     void Stroke(const RefPtr<CanvasPath2D>& path);
     void Clip();
+    void Clip(const RefPtr<CanvasPath2D>& path);
     void BeginPath();
     void ClosePath();
     void Restore();
