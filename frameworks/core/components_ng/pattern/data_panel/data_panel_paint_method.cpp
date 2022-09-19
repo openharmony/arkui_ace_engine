@@ -40,6 +40,7 @@ constexpr float FIXED_WIDTH = 1.0f;
 constexpr float HALF_CIRCLE = 180.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
 constexpr float DIAMETER_TO_THICKNESS_RATIO = 0.12;
+constexpr Color BACKGROUND_COLOR = Color(0x4C000000);
 
 } // namespace
 
@@ -87,7 +88,7 @@ void DataPanelPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) c
     arcData.startAngle = 0.0f;
     auto dataValues = paintProperty->GetValues();
     std::vector<double> values = dataValues.value();
-    PaintTrackBackground(canvas, arcData, Color::GRAY);
+    PaintTrackBackground(canvas, arcData, BACKGROUND_COLOR);
     double proportions = 1.0;
     auto max = paintProperty->GetMax();
     double maxValue = max.value();
@@ -184,7 +185,7 @@ void DataPanelPaintMethod::PaintBackground(
 {
     auto offset = paintWrapper->GetContentOffset();
     RSBrush brush;
-    brush.SetColor(ToRSColor(Color::GRAY));
+    brush.SetColor(ToRSColor(BACKGROUND_COLOR));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     RSRect rRect(offset.GetX(), offset.GetY(), totalWidth + offset.GetX(), height + offset.GetY());
