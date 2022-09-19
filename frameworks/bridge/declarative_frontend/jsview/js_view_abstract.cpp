@@ -736,6 +736,10 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
         return;
     }
 
+    if (opacity < 0) {
+        opacity = 1.0;
+    }
+    
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ViewAbstract::SetOpacity(opacity);
         return;
