@@ -173,7 +173,7 @@ void PipelineContext::FlushMessages()
 
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
-    FlushDirtyNodeUpdate();
+    FlushBuild();
     FlushTouchEvents();
     taskScheduler_.FlushTask();
     FlushMessages();
@@ -182,6 +182,17 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 void PipelineContext::FlushBuild()
 {
     FlushDirtyNodeUpdate();
+    FlushBuildFinishCallbacks();
+}
+
+void PipelineContext::FlushBuildFinishCallbacks()
+{
+    decltype(buildFinishCallbacks_) buildFinishCallbacks(std::move(buildFinishCallbacks_));
+    for (const auto& func : buildFinishCallbacks) {
+        if (func) {
+            func();
+        }
+    }
 }
 
 void PipelineContext::SetupRootElement()
@@ -408,6 +419,11 @@ void PipelineContext::Destroy()
     rootNode_.Reset();
     stageManager_.Reset();
     overlayManager_.Reset();
+}
+
+void PipelineContext::AddCallBack(std::function<void()>&& callback)
+{
+    buildFinishCallbacks_.emplace_back(std::move(callback));
 }
 
 } // namespace OHOS::Ace::NG

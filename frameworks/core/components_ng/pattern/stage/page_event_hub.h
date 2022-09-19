@@ -35,8 +35,19 @@ public:
     void RemoveRadioFromGroup(const std::string& group, const RefPtr<FrameNode>& radioFrameNode);
     void UpdateRadioGroupValue(const std::string& group, const RefPtr<FrameNode>& radioFrameNode);
 
+    void AddCheckBoxToGroup(const std::string& group, const RefPtr<FrameNode>& checkBoxFrameNode);
+    void AddCheckBoxGroupToGroup(const std::string& group, const RefPtr<FrameNode>& checkBoxFrameNode);
+    void RemoveCheckBoxFromGroup(const std::string& group, const RefPtr<FrameNode>& radioFrameNode);
+
+    const std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>>& GetCheckBoxGroupMap()
+    {
+        return checkBoxGroupNotify_;
+    }
+
 private:
     std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> radioGroupNotify_;
+
+    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupNotify_;
 };
 
 } // namespace OHOS::Ace::NG

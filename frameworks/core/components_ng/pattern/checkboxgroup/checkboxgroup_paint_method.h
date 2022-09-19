@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_CHECKBOX_CHECKBOX_PAINT_METHOD_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_CHECKBOX_CHECKBOX_PAINT_METHOD_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_CHECKBOXGROUP_CHECKBOXGROUP_PAINT_METHOD_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_CHECKBOXGROUP_CHECKBOXGROUP_PAINT_METHOD_H
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
@@ -24,13 +24,13 @@
 
 namespace OHOS::Ace::NG {
 
-class CheckBoxPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(CheckBoxPaintMethod, NodePaintMethod)
+class CheckBoxGroupPaintMethod : public NodePaintMethod {
+    DECLARE_ACE_TYPE(CheckBoxGroupPaintMethod, NodePaintMethod)
 
 public:
-    CheckBoxPaintMethod() = default;
+    CheckBoxGroupPaintMethod() = default;
 
-    ~CheckBoxPaintMethod() override = default;
+    ~CheckBoxGroupPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
@@ -40,6 +40,7 @@ private:
     void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, RSBrush& brush, SizeF& paintSize) const;
     void DrawActiveBorder(RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
     void DrawCheck(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
+    void DrawPart(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
 
     float borderWidth_ = 0.0f;
     float borderRadius_ = 0.0f;

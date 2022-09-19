@@ -158,6 +158,8 @@ public:
 
     void FlushBuild() override;
 
+    void AddCallBack(std::function<void()>&& callback);
+
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
@@ -171,6 +173,8 @@ protected:
 
 private:
     void FlushTouchEvents();
+
+    void FlushBuildFinishCallbacks();
 
     template<typename T>
     struct NodeCompare {
@@ -205,6 +209,8 @@ private:
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
     std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
     std::list<TouchEvent> touchEvents_;
+
+    std::list<std::function<void()>> buildFinishCallbacks_;
 
     RefPtr<FrameNode> rootNode_;
     RefPtr<StageManager> stageManager_;
