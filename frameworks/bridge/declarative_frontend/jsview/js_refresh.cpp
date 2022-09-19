@@ -15,7 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "core/components/refresh/refresh_component.h"
 #include "core/components/refresh/refresh_theme.h"
@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/refresh/refresh_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
 namespace OHOS::Ace::Framework {
 
 void ParseRefreshingObject(
@@ -65,7 +66,7 @@ void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& re
             auto newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
             func->ExecuteJS(1, &newJSVal);
         };
-        NG::RefreshView::SetChangeEvent(std::move(eventMarker));
+        NG::RefreshView::SetChangeEvent(eventMarker);
     }
 }
 
@@ -109,7 +110,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
         NG::RefreshView::SetShowTimeDistance(theme->GetShowTimeDistance());
         NG::RefreshView::SetTextStyle(theme->GetTextStyle());
         NG::RefreshView::SetProgressColor(theme->GetProgressColor());
-        NG::RefreshView::SetBackgroundColor(theme->GetBackgroundColor());
+        NG::RefreshView::SetProgressBackgroundColor(theme->GetBackgroundColor());
 
         if (refreshing->IsBoolean()) {
             NG::RefreshView::SetRefreshing(refreshing->ToBoolean());
@@ -195,7 +196,7 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
             auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
             func->ExecuteJS(1, &newJSVal);
         };
-        NG::RefreshView::SetOnStateChange(std::move(onStateChange));
+        NG::RefreshView::SetOnStateChange(onStateChange);
         return;
     }
 
@@ -215,7 +216,7 @@ void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
             auto newJSVal = JSRef<JSVal>::Make();
             func->ExecuteJS(1, &newJSVal);
         };
-        NG::RefreshView::SetOnRefreshing(std::move(onRefreshing));
+        NG::RefreshView::SetOnRefreshing(onRefreshing);
         return;
     }
     if (!JSViewBindEvent(&RefreshComponent::SetOnRefreshing, args)) {

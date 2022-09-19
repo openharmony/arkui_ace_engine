@@ -17,13 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REFRESH_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
-#include "base/utils/noncopyable.h"
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
+
 using StateChangeEvent = std::function<void(const int32_t)>;
 using ChangeEvent = std::function<void(const std::string)>;
 using RefreshingEvent = std::function<void()>;
+
 class RefreshEventHub : public EventHub {
     DECLARE_ACE_TYPE(RefreshEventHub, EventHub)
 
@@ -74,4 +75,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_EVENT_HUB_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REFRESH_EVENT_HUB_H

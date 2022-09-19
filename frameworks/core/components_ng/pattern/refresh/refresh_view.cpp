@@ -29,10 +29,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-inline constexpr char REFRESH_LAST_UPDATED[] = "refresh.last_updated"; // I18n for last updated
-inline constexpr int32_t MIN_FRICTION_RATIO = 0;
-inline constexpr int32_t MAX_FRICTION_RATIO = 100;
-inline constexpr int32_t DEFAULT_INDICATOR_OFFSET = 16.0;
+
 void RefreshView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -41,18 +38,6 @@ void RefreshView::Create()
         V2::REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(
-        RefreshLayoutProperty, IndicatorOffset, Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP));
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsUseOffset, false);
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsShowLastTime, true);
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshStatus, RefreshStatus::INACTIVE);
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ScrollableOffset, OffsetF(0.0, 0.0));
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ShowTimeOffset, OffsetF(0.0, 0.0));
-    auto lastTimeText = Localization::GetInstance()->GetEntryLetters(REFRESH_LAST_UPDATED);
-    ACE_UPDATE_PAINT_PROPERTY(RefreshRenderProperty, LastTimeText, lastTimeText);
-    auto timeText = StringUtils::FormatString("");
-    ACE_UPDATE_PAINT_PROPERTY(RefreshRenderProperty, TimeText, timeText);
-    LOGI("RefreshView::Create ok");
 }
 
 void RefreshView::Pop()
@@ -67,11 +52,10 @@ void RefreshView::Pop()
     CHECK_NULL_VOID(layoutProperty);
     auto refreshRenderProperty = refreshNode->GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(refreshRenderProperty);
+
     auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_VOID(textChild);
-    textChild->SetVisible(false);
     refreshNode->AddChild(textChild);
-
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(refreshRenderProperty->GetTimeTextValue());
@@ -85,6 +69,7 @@ void RefreshView::Pop()
     textLayoutProperty->UpdateFontFamily(textStyle->GetFontFamilies());
     textLayoutProperty->UpdateTextDecoration(textStyle->GetTextDecoration());
     textLayoutProperty->UpdateTextDecorationColor(textStyle->GetTextDecorationColor());
+    textLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
 
     auto progressChild = FrameNode::CreateFrameNode(V2::PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<ProgressPattern>());
     CHECK_NULL_VOID(progressChild);
@@ -100,11 +85,11 @@ void RefreshView::Pop()
     progressLayoutProperty->UpdateStrokeWidth(Dimension(15, DimensionUnit::VP));
     progressPaintProperty->UpdateScaleCount(15);
     progressPaintProperty->UpdateScaleWidth(Dimension(5, DimensionUnit::VP));
-    progressChild->SetVisible(false);
+    progressLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
 }
 void RefreshView::SetRefreshing(bool isRefreshing)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefreshing, isRefreshing);
+    ACE_UPDATE_PAINT_PROPERTY(RefreshRenderProperty, IsRefreshing, isRefreshing);
 }
 
 void RefreshView::SetRefreshDistance(const Dimension& refreshDistance)
@@ -172,7 +157,7 @@ void RefreshView::SetProgressColor(const Color& progressColor)
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ProgressColor, progressColor);
 }
 
-void RefreshView::SetBackgroundColor(const Color& backgroundColor)
+void RefreshView::SetProgressBackgroundColor(const Color& backgroundColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, BackgroundColor, backgroundColor);
 }

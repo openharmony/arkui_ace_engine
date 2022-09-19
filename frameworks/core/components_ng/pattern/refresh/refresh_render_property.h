@@ -23,7 +23,6 @@
 
 namespace OHOS::Ace::NG {
 
-// PaintProperty are used to set render properties.
 class RefreshRenderProperty : public PaintProperty {
     DECLARE_ACE_TYPE(RefreshRenderProperty, PaintProperty)
 
@@ -35,6 +34,7 @@ public:
     {
         auto paintProperty = MakeRefPtr<RefreshRenderProperty>();
         paintProperty->UpdatePaintProperty(this);
+        paintProperty->propIsRefreshing_ = CloneIsRefreshing();
         paintProperty->propTimeText_ = CloneTimeText();
         paintProperty->propLastTimeText_ = CloneLastTimeText();
         return paintProperty;
@@ -43,12 +43,14 @@ public:
     void Reset() override
     {
         PaintProperty::Reset();
+        ResetIsRefreshing();
         ResetTimeText();
         ResetLastTimeText();
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TimeText, std::string, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LastTimeText, std::string, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsRefreshing, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TimeText, std::string, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LastTimeText, std::string, PROPERTY_UPDATE_LAYOUT);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RefreshRenderProperty);
@@ -56,4 +58,4 @@ private:
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ABILITY_COMPONENT_RENDER_PROPERTY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_RENDER_PROPERTY_H

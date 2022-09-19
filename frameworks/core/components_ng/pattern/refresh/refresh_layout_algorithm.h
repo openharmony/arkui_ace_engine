@@ -24,9 +24,7 @@
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 
 namespace OHOS::Ace::NG {
-class PipelineContext;
 
-// TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT RefreshLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(RefreshLayoutAlgorithm, BoxLayoutAlgorithm);
 
@@ -39,9 +37,9 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    void PerformLayout(LayoutWrapper* layoutWrapper); 
+    static void PerformLayout(LayoutWrapper* layoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(RefreshLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_REFRESH_LAYOUT_ALGORITHM_H

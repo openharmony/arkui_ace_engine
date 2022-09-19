@@ -22,12 +22,13 @@
 #include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
-#include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace::NG {
+
 class ACE_EXPORT RefreshView {
 public:
     static void Create();
+    static void Pop();
     static void SetRefreshing(bool isRefreshing);
     static void SetRefreshDistance(const Dimension& refreshDistance);
     static void SetUseOffset(bool isUseOffset);
@@ -41,15 +42,13 @@ public:
     static void SetMaxDistance(const Dimension& maxDistance);
     static void SetIsShowLastTime(bool IsShowlastTime);
     static void SetShowTimeDistance(const Dimension& showTimeDistance);
- 
+
     static void SetTextStyle(const TextStyle& textStyle);
     static void SetProgressColor(const Color& progressColor);
-    static void SetBackgroundColor(const Color& backgroundColor);
-    static void Pop();
+    static void SetProgressBackgroundColor(const Color& backgroundColor);
     static void SetOnStateChange(StateChangeEvent&& stateChange);
     static void SetOnRefreshing(RefreshingEvent&& refreshing);
     static void SetChangeEvent(ChangeEvent&& changeEvent);
-    
 };
 } // namespace OHOS::Ace::NG
 

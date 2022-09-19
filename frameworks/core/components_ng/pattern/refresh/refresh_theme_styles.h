@@ -16,12 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REFRESH_STYLES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REFRESH_STYLES_H
 
-#include "core/components/common/properties/text_style.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
-#include "core/components/refresh/refresh_theme.h"
-#include "core/components/theme/theme_manager.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/property/property.h"
+
 namespace OHOS::Ace::NG {
 
 struct RefreshStyle {
@@ -38,4 +37,4 @@ struct RefreshStyle {
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_REFRESH_STYLES_H

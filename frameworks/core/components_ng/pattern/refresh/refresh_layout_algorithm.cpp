@@ -15,26 +15,20 @@
 
 #include "core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 
-#include <unicode/uchar.h>
-
-#include "base/i18n/localization.h"
 #include "base/utils/utils.h"
-#include "core/components/font/constants_converter.h"
-#include "core/components/refresh/refresh_theme.h"
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/font_collection.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
 RefreshLayoutAlgorithm::RefreshLayoutAlgorithm() = default;
 
 std::optional<SizeF> RefreshLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& contentConstraint, LayoutWrapper*  /*layoutWrapper*/)
 {
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();
@@ -69,28 +63,23 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     }
     auto layoutProperty = AceType::DynamicCast<NG::RefreshLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
+
     // Update child position.
     int32_t index = 0;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto paddingOffsetChild = paddingOffset;
         auto alignChild = align;
         if (index == layoutWrapper->GetTotalChildCount() - 2) {
-            paddingOffsetChild += layoutProperty->GetShowTimeOffsetValue() / 2;
+            paddingOffsetChild += layoutProperty->GetShowTimeOffsetValue();
             alignChild = Alignment::TOP_CENTER;
         } else if (index == layoutWrapper->GetTotalChildCount() - 1) {
-            paddingOffsetChild += layoutProperty->GetScrollableOffsetValue();
+            paddingOffsetChild += layoutProperty->GetLoadingProcessOffsetValue();
             alignChild = Alignment::TOP_CENTER;
         }
         auto translate = Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetFrameSize(), alignChild) +
                          paddingOffsetChild;
         child->GetGeometryNode()->SetFrameOffset(translate);
         index++;
-    }
-    // Update content position.
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
-    if (content) {
-        auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
-        content->SetOffset(translate);
     }
 }
 

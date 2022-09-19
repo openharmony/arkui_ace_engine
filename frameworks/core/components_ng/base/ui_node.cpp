@@ -98,12 +98,11 @@ RefPtr<UINode> UINode::GetChildAtIndex(int32_t index)
     if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
         return nullptr;
     }
-    int32_t count = 0;
-    for (const auto& child : children_) {
-        if (count == index) {
-            return child;
-        }
-        count++;
+    auto iter = children_.begin();
+    std::advance(iter, index);
+    if (iter != children_.end()) {
+
+        return *iter;
     }
     return nullptr;
 }
