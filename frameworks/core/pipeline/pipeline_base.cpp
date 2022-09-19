@@ -17,6 +17,7 @@
 
 #include <fstream>
 
+#include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
@@ -458,6 +459,19 @@ bool PipelineBase::CloseImplicitAnimation()
 #else
     return false;
 #endif
+}
+
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+    if (onVsyncProfiler_) {
+        AceTracker::Start();
+    }
+    FlushVsync(nanoTimestamp, frameCount);
+    if (onVsyncProfiler_) {
+        onVsyncProfiler_(AceTracker::Stop());
+    }
 }
 
 void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context)

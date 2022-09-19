@@ -83,12 +83,6 @@ public:
         return false;
     }
 
-    // Called by window when received vsync signal.
-    void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) override
-    {
-        FlushVsync(nanoTimestamp, frameCount);
-    }
-
     void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override {}
 
     // Called by view when idle event.
