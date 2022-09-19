@@ -1617,11 +1617,10 @@ void JSWeb::OnProgressChange(const JSCallbackInfo& args)
             ContainerScope scope(instanceId);
             auto context = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            // need to execute in ui.
-            context->PostSyncEvent([execCtx, func = func, info]() {
+            context->PostAsyncEvent([execCtx, func = func, info]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info.get());
-                JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+                func->ExecuteWithValue(*eventInfo);
             });
         };
         NG::WebView::SetProgressChangeImpl(std::move(uiCallback));
@@ -1994,7 +1993,7 @@ void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
             ContainerScope scope(instanceId);
             auto context = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            context->PostAsyncEvent([execCtx, func = func, &keyEventInfo]() {
+            context->PostSyncEvent([execCtx, func = func, &keyEventInfo]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 func->Execute(keyEventInfo);
             });
@@ -2763,7 +2762,7 @@ void JSWeb::OnMouse(const JSCallbackInfo& args)
             ContainerScope scope(instanceId);
             auto context = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            context->PostAsyncEvent([execCtx, func = func, &info]() {
+            context->PostSyncEvent([execCtx, func = func, &info]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 func->Execute(info);
             });
@@ -3125,7 +3124,7 @@ void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
             ContainerScope scope(instanceId);
             auto context = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            context->PostAsyncEvent([execCtx, func = func, info, &extraParams]() {
+            context->PostSyncEvent([execCtx, func = func, info, &extraParams]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 func->Execute(info, extraParams);
             });
@@ -3155,7 +3154,7 @@ void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
             ContainerScope scope(instanceId);
             auto context = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            context->PostAsyncEvent([execCtx, func = func, info, &extraParams]() {
+            context->PostSyncEvent([execCtx, func = func, info, &extraParams]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 func->Execute(info, extraParams);
             });
@@ -3185,7 +3184,7 @@ void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
             ContainerScope scope(instanceId);
             auto context = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            context->PostAsyncEvent([execCtx, func = func, info, &extraParams]() {
+            context->PostSyncEvent([execCtx, func = func, info, &extraParams]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 func->Execute(info, extraParams);
             });
@@ -3215,7 +3214,7 @@ void JSWeb::JsOnDrop(const JSCallbackInfo& info)
             ContainerScope scope(instanceId);
             auto context = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(context);
-            context->PostAsyncEvent([execCtx, func = func, info, &extraParams]() {
+            context->PostSyncEvent([execCtx, func = func, info, &extraParams]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("onDrop");
                 func->Execute(info, extraParams);
