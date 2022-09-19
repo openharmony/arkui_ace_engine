@@ -20,8 +20,8 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_ng/pattern/full_screen/full_screen_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/event/touch_event.h"

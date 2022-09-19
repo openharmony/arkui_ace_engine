@@ -14,21 +14,6 @@
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 
-build_component_ng("base_ng") {
-  sources = [
-    "frame_node.cpp",
-    "geometry_node.cpp",
-    "ui_node.cpp",
-    "view_abstract.cpp",
-    "view_stack_processor.cpp",
-  ]
-  component_ng_deps = [
-    "event_ng",
-    "layout_ng",
-    "manager_ng",
-    "pattern_ability_component_ng",
-    "pattern_ng",
-    "property_ng",
-    "render_ng",
-  ]
+build_component_ng("manager_ng") {
+  sources = [ "full_screen/full_screen_manager.cpp" ]
 }
