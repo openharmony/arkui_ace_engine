@@ -118,7 +118,11 @@ Dimension ThemeConstants::GetDimension(uint32_t key) const
         if (!resAdapter_) {
             return ERROR_VALUE_DIMENSION;
         }
-        return resAdapter_->GetDimension(key);
+        auto result = resAdapter_->GetDimension(key);
+        if (NearZero(result.Value())) {
+            result = StringUtils::StringToDimension(resAdapter_->GetString(key));
+        }
+        return result;
     }
     const auto& valueWrapper = GetValue(key);
     if (!ValueTypeMatch(valueWrapper, key, ThemeConstantsType::DIMENSION)) {
