@@ -34,11 +34,14 @@ public:
     void Update() override;
 
     // added for partial update
-    int32_t BranchId()
+    int32_t GetBranchId()
     {
         return branchId_;
     }
 
+    static void ComponentToElementLocalizedUpdate(
+        const RefPtr<Component>& component, RefPtr<Element>& element);
+        
 private:
     int32_t branchId_ = -1;
 };

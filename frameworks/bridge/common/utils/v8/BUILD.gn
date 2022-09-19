@@ -69,7 +69,7 @@ ohos_shared_library("ace_v8_helper") {
   }
 
   part_name = ace_engine_part
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
 }
 
 ohos_source_set("ace_v8_helper_static") {

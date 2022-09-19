@@ -390,19 +390,23 @@ void AceAbility::OnStart(const Want& want)
         auto assetBasePathStr = { "assets/js/" + srcPath + "/", std::string("assets/js/share/") };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
     }
+
+    /* Note: DO NOT modify the sequence of adding libPath  */
     std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+    std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
+    std::vector<std::string> libPaths;
+    if (!quickFixLibraryPath.empty()) {
+        std::string libPath = GenerateFullPath(GetBundleCodePath(), quickFixLibraryPath);
+        libPaths.push_back(libPath);
+        LOGI("napi quick fix lib path = %{private}s", libPath.c_str());
+    }
     if (!nativeLibraryPath.empty()) {
-        if (nativeLibraryPath.back() == '/') {
-            nativeLibraryPath.pop_back();
-        }
-        std::string libPath = GetBundleCodePath();
-        if (libPath.back() == '/') {
-            libPath += nativeLibraryPath;
-        } else {
-            libPath += "/" + nativeLibraryPath;
-        }
+        std::string libPath = GenerateFullPath(GetBundleCodePath(), nativeLibraryPath);
+        libPaths.push_back(libPath);
         LOGI("napi lib path = %{private}s", libPath.c_str());
-        Platform::AceContainer::AddLibPath(abilityId_, libPath);
+    }
+    if (!libPaths.empty()) {
+        Platform::AceContainer::AddLibPath(abilityId_, libPaths);
     }
 
     if (!useNewPipe) {
@@ -461,6 +465,19 @@ void AceAbility::OnStart(const Want& want)
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
     if (context != nullptr) {
         context->SetActionEventHandler(actionEventHandler);
+    }
+
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(context);
+    if (pipelineContext) {
+        pipelineContext->SetGetWindowRectImpl([window]() -> Rect {
+            Rect rect;
+            if (!window) {
+                return rect;
+            }
+            auto windowRect = window->GetRect();
+            rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+            return rect;
+        });
     }
 
     // get url
@@ -911,6 +928,5 @@ uint32_t AceAbility::GetBackgroundColor()
     LOGI("AceAbilityHandler::GetBackgroundColor, value is %{public}u", bgColor);
     return bgColor;
 }
-
 } // namespace Ace
 } // namespace OHOS

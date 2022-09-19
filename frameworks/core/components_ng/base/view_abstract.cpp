@@ -224,6 +224,11 @@ void ViewAbstract::SetAlign(Alignment alignment)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 
+void ViewAbstract::SetVisibility(VisibleType visible)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
+}
+
 void ViewAbstract::SetOpacity(double opacity)
 {
     ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
@@ -289,6 +294,18 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param)
     popupNode->MarkModifyDone();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
     overlayManager->UpdatePopupNode(targetId, popupInfo);
+}
+
+void ViewAbstract::SetBackdropBlur(const Dimension& radius)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackBlurRadius, radius);
+}
+
+void ViewAbstract::SetInspectorId(const std::string& inspectorId)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateInspectorId(inspectorId);
 }
 
 void ViewAbstract::Pop()

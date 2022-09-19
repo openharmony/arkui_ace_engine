@@ -18,5 +18,5 @@ ohos_prebuilt_etc("cacert.pem") {
   relative_install_dir = "ssl/certs"
   source = "cacert.pem"
   part_name = ace_engine_part
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
 }

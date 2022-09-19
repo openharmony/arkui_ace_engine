@@ -36,10 +36,24 @@ void WebPattern::OnAttachToFrameNode()
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
+    InitEvent();
+}
+
+void WebPattern::InitEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    InitTouchEvent(gestureHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    InitMouseEvent(inputHub);
+}
+
+void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -67,6 +81,47 @@ void WebPattern::OnAttachToFrameNode()
     };
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
+{
+    if (mouseEvent_) {
+        return;
+    }
+
+    auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(info);
+        }
+    };
+
+    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnMouseEvent(mouseEvent_);
+}
+
+void WebPattern::HandleMouseEvent(MouseInfo& info)
+{
+    OnMouseEvent(info);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onMouseEvent = eventHub->GetOnMouseEvent();
+    CHECK_NULL_VOID(onMouseEvent);
+    onMouseEvent(info);
+}
+
+void WebPattern::OnMouseEvent(const MouseInfo& info)
+{
+    if (!delegate_) {
+        LOGE("delegate_ is nullptr");
+        return;
+    }
+
+    auto localLocation = info.GetLocalLocation();
+    delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), info.GetButton(), info.GetAction(), 1);
 }
 
 bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -112,6 +167,125 @@ void WebPattern::OnJsEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnMediaPlayGestureAccessUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateMediaPlayGestureAccess(value);
+    }
+}
+
+void WebPattern::OnFileAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateAllowFileAccess(value);
+    }
+}
+
+void WebPattern::OnOnLineImageAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateBlockNetworkImage(value);
+    }
+}
+
+void WebPattern::OnDomStorageAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateDomStorageEnabled(value);
+    }
+}
+
+void WebPattern::OnImageAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateLoadsImagesAutomatically(value);
+    }
+}
+
+void WebPattern::OnMixedModeUpdate(MixedModeContent value)
+{
+    if (delegate_) {
+        delegate_->UpdateMixedContentMode(value);
+    }
+}
+
+void WebPattern::OnZoomAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateSupportZoom(value);
+    }
+}
+
+void WebPattern::OnGeolocationAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateGeolocationEnabled(value);
+    }
+}
+
+void WebPattern::OnUserAgentUpdate(std::string value)
+{
+    if (delegate_) {
+        delegate_->UpdateUserAgent(value);
+    }
+}
+
+void WebPattern::OnCacheModeUpdate(WebCacheMode value)
+{
+    if (delegate_) {
+        delegate_->UpdateCacheMode(value);
+    }
+}
+
+void WebPattern::OnOverviewModeAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateOverviewModeEnabled(value);
+    }
+}
+
+void WebPattern::OnFileFromUrlAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateFileFromUrlEnabled(value);
+    }
+}
+
+void WebPattern::OnDatabaseAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateDatabaseEnabled(value);
+    }
+}
+
+void WebPattern::OnTextZoomRatioUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateTextZoomRatio(value);
+    }
+}
+
+void WebPattern::OnWebDebuggingAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateWebDebuggingAccess(value);
+    }
+}
+
+void WebPattern::OnBackgroundColorUpdate(int32_t value)
+{
+    if (delegate_) {
+        delegate_->UpdateBackgroundColor(value);
+    }
+}
+
+void WebPattern::OnInitialScaleUpdate(float value)
+{
+    if (delegate_) {
+        delegate_->UpdateInitialScale(value);
+    }
+}
+
 void WebPattern::OnModifyDone()
 {
     // called in each update function.
@@ -132,7 +306,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateBlockNetworkImage(!GetOnLineImageAccessEnabledValue(true));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(true));
         delegate_->UpdateLoadsImagesAutomatically(GetImageAccessEnabledValue(true));
-        delegate_->UpdateMixedContentMode(GetMixedContentModeValue(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW));
+        delegate_->UpdateMixedContentMode(GetMixedModeValue(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW));
         delegate_->UpdateSupportZoom(GetZoomAccessEnabledValue(true));
         delegate_->UpdateDomStorageEnabled(GetDomStorageAccessEnabledValue(false));
         delegate_->UpdateGeolocationEnabled(GetGeolocationAccessEnabledValue(true));
@@ -140,9 +314,9 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateOverviewModeEnabled(GetOverviewModeAccessEnabledValue(true));
         delegate_->UpdateFileFromUrlEnabled(GetFileFromUrlAccessEnabledValue(false));
         delegate_->UpdateDatabaseEnabled(GetDatabaseAccessEnabledValue(false));
-        delegate_->UpdateTextZoomRatio(GetTextZoomRatioNumValue(DEFAULT_TEXT_ZOOM_RATIO));
+        delegate_->UpdateTextZoomRatio(GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
         delegate_->UpdateWebDebuggingAccess(GetWebDebuggingAccessEnabledValue(false));
-        delegate_->UpdateMediaPlayGestureAccess(GetNeedGestureAccessValue(true));
+        delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
     }
 
     // update bgcolor.

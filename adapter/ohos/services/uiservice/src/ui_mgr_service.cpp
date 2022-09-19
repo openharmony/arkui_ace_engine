@@ -264,6 +264,18 @@ int32_t UIMgrService::RemoteDialogCallback(int32_t id, const std::string& event,
     return errorCode;
 }
 
+int UIMgrService::Dump(int fd, const std::vector<std::u16string>& args)
+{
+    dprintf(fd, "total callbacks: %u\n", callbackMap_.size());
+    if (!callbackMap_.empty()) {
+        dprintf(fd, "callback keys: \n");
+    }
+    for (const auto& callback : callbackMap_) {
+        dprintf(fd, "  %s\n", callback.first.c_str());
+    }
+    return UI_SERVICE_NO_ERROR;
+}
+
 void UIMgrService::OnStart()
 {
     HILOG_INFO("Ace ui manager service OnStart");

@@ -123,7 +123,7 @@ class SslSelectCertResultOhos : public SslSelectCertResult {
     DECLARE_ACE_TYPE(SslSelectCertResultOhos, SslSelectCertResult)
 
 public:
-    SslSelectCertResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslSelectCertResult> result)
+    explicit SslSelectCertResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslSelectCertResult> result)
         : result_(result) {}
 
     void HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile) override;
@@ -327,7 +327,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
     void OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
-    RefPtr<WebResponse> OnInterceptRequest(const BaseEventInfo* info);
+    RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool IsEmptyOnInterceptRequest();
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
@@ -337,10 +337,10 @@ public:
     void OnGeolocationPermissionsShowPrompt(
         const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
     void OnRequestFocus();
-    bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType);
-    bool OnHttpAuthRequest(const BaseEventInfo* info);
-    bool OnSslErrorRequest(const BaseEventInfo* info);
-    bool OnSslSelectCertRequest(const BaseEventInfo* info);
+    bool OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType);
+    bool OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);
@@ -349,8 +349,8 @@ public:
     void OnRouterPush(const std::string& param);
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason);
     void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed);
-    bool OnFileSelectorShow(const BaseEventInfo* info);
-    bool OnContextMenuShow(const BaseEventInfo* info);
+    bool OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);

@@ -136,23 +136,28 @@ public:
     void OnCommandApplication(const std::string& intent, int startId) override;
 
     // data
-    int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value) override;
+    int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
+        const CallingInfo& callingInfo) override;
     std::shared_ptr<AppExecFwk::PacMap> Call(const std::string& method,
-        const std::string& arg, const AppExecFwk::PacMap& pacMap) override;
+        const std::string& arg, const AppExecFwk::PacMap& pacMap,
+        const CallingInfo& callingInfo) override;
 	
-    int32_t BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values) override;
+    int32_t BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values,
+        const CallingInfo& callingInfo) override;
     std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(const Uri& uri, const std::vector<std::string>& columns,
-        const OHOS::NativeRdb::DataAbilityPredicates& predicates) override;
+        const OHOS::NativeRdb::DataAbilityPredicates& predicates, const CallingInfo& callingInfo) override;
     int32_t Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
-        const OHOS::NativeRdb::DataAbilityPredicates& predicates) override;
-    int32_t Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates) override;
+        const OHOS::NativeRdb::DataAbilityPredicates& predicates, const CallingInfo& callingInfo) override;
+    int32_t Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+        const CallingInfo& callingInfo) override;
 
-    std::string GetType(const Uri& uri) override;
-    std::vector<std::string> GetFileTypes(const Uri& uri, const std::string& mimeTypeFilter) override;
-    int32_t OpenFile(const Uri& uri, const std::string& mode) override;
-    int32_t OpenRawFile(const Uri& uri, const std::string& mode) override;
-    Uri NormalizeUri(const Uri& uri) override;
-    Uri DenormalizeUri(const Uri& uri) override;
+    std::string GetType(const Uri& uri, const CallingInfo& callingInfo) override;
+    std::vector<std::string> GetFileTypes(const Uri& uri, const std::string& mimeTypeFilter,
+        const CallingInfo& callingInfo) override;
+    int32_t OpenFile(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo) override;
+    int32_t OpenRawFile(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo) override;
+    Uri NormalizeUri(const Uri& uri, const CallingInfo& callingInfo) override;
+    Uri DenormalizeUri(const Uri& uri, const CallingInfo& callingInfo) override;
 
     // service
     sptr<IRemoteObject> OnConnectService(const OHOS::AAFwk::Want& want) override;
@@ -177,7 +182,8 @@ private:
     shared_ptr<JsValue> GetPaFunc(const std::string& funcName);
     shared_ptr<JsValue> CallFunc(const shared_ptr<JsValue>& func);
     shared_ptr<JsValue> CallFunc(const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv);
-    shared_ptr<JsValue> CallAsyncFunc(const shared_ptr<JsValue>& func, std::vector<shared_ptr<JsValue>>& argv);
+    shared_ptr<JsValue> CallFunc(const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo);
+    shared_ptr<JsValue> CallAsyncFunc(const shared_ptr<JsValue>& func, std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo);
     shared_ptr<JsValue> NativeValueToJsValue(NativeValue* nativeValue);
     shared_ptr<JsValue> WantToJsValue(const OHOS::AAFwk::Want& want);
     void StartService();

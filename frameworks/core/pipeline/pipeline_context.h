@@ -31,14 +31,12 @@
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
-#include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/flush_event.h"
 #include "core/animation/page_transition_listener.h"
 #include "core/animation/schedule_task.h"
-#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/focus_animation_manager.h"
 #include "core/common/platform_res_register.h"
@@ -69,7 +67,6 @@ namespace OHOS::Ace {
 class CardTransitionController;
 class ComposedElement;
 class FontManager;
-enum class FrontendType;
 class OverlayElement;
 class RenderNode;
 class RenderFocusAnimation;
@@ -229,9 +226,6 @@ public:
     // if return false, then this event needs platform to handle it.
     bool OnRotationEvent(const RotationEvent& event) const override;
 
-    // Called by window when received vsync signal.
-    void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) override;
-
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
@@ -273,11 +267,6 @@ public:
     void OnSystemBarHeightChanged(double statusBar, double navigationBar) override;
 
     void OnSurfaceDestroyed() override;
-
-    FrontendType GetFrontendType() const
-    {
-        return frontendType_;
-    }
 
     RefPtr<PlatformResRegister> GetPlatformResRegister() const
     {
@@ -606,7 +595,7 @@ public:
 
     AnimationOption GetExplicitAnimationOption() const override;
 
-    void FlushBuild();
+    void FlushBuild() override;
 
     void SetUseLiteStyle(bool useLiteStyle)
     {
@@ -737,11 +726,6 @@ public:
         contextMenu_ = contextMenu;
     }
 
-    double GetDensity() const
-    {
-        return density_;
-    }
-
     void SetClipHole(double left, double top, double width, double height);
 
     const Rect& GetTransparentHole() const
@@ -793,9 +777,6 @@ public:
     {
         return pluginEventOffset_;
     }
-
-    void SetTouchPipeline(WeakPtr<PipelineContext> context);
-    void RemoveTouchPipeline(WeakPtr<PipelineContext> context);
 
     void SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector);
 
@@ -1107,7 +1088,7 @@ private:
 
     template<typename T>
     struct NodeCompare {
-        bool operator()(const T& nodeLeft, const T& nodeRight)
+        bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
@@ -1121,7 +1102,7 @@ private:
 
     template<typename T>
     struct NodeCompareWeak {
-        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak)
+        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak) const
         {
             auto nodeLeft = nodeLeftWeak.Upgrade();
             auto nodeRight = nodeRightWeak.Upgrade();
@@ -1244,7 +1225,6 @@ private:
     bool isFirstPage_ = true;
     bool buildingFirstPage_ = false;
     bool forbidPlatformQuit_ = false;
-    FrontendType frontendType_;
     std::string photoCachePath_;
     AnimationOption explicitAnimationOption_;
     std::map<int32_t, RefPtr<Animator>> explicitAnimators_;
@@ -1254,7 +1234,6 @@ private:
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
 
-    std::vector<WeakPtr<PipelineContext>> touchPluginPipelineContext_;
     Offset pluginOffset_ { 0, 0 };
     Offset pluginEventOffset_ { 0, 0 };
 

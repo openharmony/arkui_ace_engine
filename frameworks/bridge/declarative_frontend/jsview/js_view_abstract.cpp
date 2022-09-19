@@ -820,6 +820,10 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
         return;
     }
 
+    if (opacity < 0) {
+        opacity = 1.0;
+    }
+    
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ViewAbstract::SetOpacity(opacity);
         return;
@@ -4469,6 +4473,11 @@ void JSViewAbstract::JsGroupDefaultFocus(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsKey(const std::string& key)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetInspectorId(key);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (component) {
         component->SetInspectorKey(key);
@@ -5028,6 +5037,11 @@ void JSViewAbstract::SetColorBlend(Color color)
 
 void JSViewAbstract::SetBackdropBlur(float radius)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        Dimension dimensionRadius(radius, DimensionUnit::PX);
+        NG::ViewAbstract::SetBackdropBlur(dimensionRadius);
+        return;
+    }
     auto decoration = GetBackDecoration();
     SetBlurRadius(decoration, radius);
 }

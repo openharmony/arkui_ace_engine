@@ -25,6 +25,7 @@
 namespace OHOS::Ace {
 namespace {
 
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_STRING_SIZE_STANDARD = 8;
 constexpr uint32_t COLOR_STRING_BASE = 16;
 constexpr uint32_t RGB_SUB_MATCH_SIZE = 4;
@@ -122,7 +123,13 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha)
     // parse uint32_t color string.
     auto uint32Color = StringUtils::StringToUint(colorStr);
     if (uint32Color > 0) {
-        return Color(uint32Color);
+        Color value;
+        if (uint32Color >> COLOR_ALPHA_OFFSET == 0) {
+            value = Color(uint32Color).ChangeAlpha(MAX_ALPHA);
+        } else {
+            value = Color(uint32Color);
+        }
+        return value;
     }
 
     // Default color.

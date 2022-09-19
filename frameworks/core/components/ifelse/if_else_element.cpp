@@ -22,20 +22,61 @@ namespace OHOS::Ace {
 bool IfElseElement::CanUpdate(const RefPtr<Component>& newComponent)
 {
     auto ifElseComponent = AceType::DynamicCast<IfElseComponent>(newComponent);
-    return ifElseComponent ? branchId_ == ifElseComponent->BranchId() : false;
+    return ifElseComponent ? branchId_ == ifElseComponent->GetBranchId() : false;
 }
 
 void IfElseElement::Update()
 {
-    MultiComposedElement::Update();
-
     auto ifElseComponent = AceType::DynamicCast<IfElseComponent>(component_);
     if (!ifElseComponent) {
         LOGW("IfElseElement: component MUST be instance of IfElseComponent");
         return;
     }
 
-    branchId_ = ifElseComponent->BranchId();
+    MultiComposedElement::Update();
+    branchId_ = ifElseComponent->GetBranchId();
+
+    LOGD("update, branchId: %d", branchId_);
 }
 
+void IfElseElement::ComponentToElementLocalizedUpdate(const RefPtr<Component>& component, RefPtr<Element>& element)
+{
+    RefPtr<IfElseElement> ifElseElement = AceType::DynamicCast<IfElseElement>(element);
+    if (!ifElseElement) {
+        LOGE("%{public}s is not a IfElseElement. Internal Error!", AceType::TypeName(element));
+        return;
+    }
+
+    RefPtr<IfElseComponent> ifElseComponent = AceType::DynamicCast<IfElseComponent>(component);
+    if (!ifElseComponent) {
+        LOGE("%{public}s is not a IfElseComponent. Internal Error!", AceType::TypeName(component));
+        return;
+    }
+
+    LOGD("Component branch id %d, Element branch id %d", 
+        ifElseComponent->GetBranchId(), ifElseElement->GetBranchId());
+
+    if (ifElseComponent->GetBranchId() == ifElseElement->GetBranchId()) {
+        LOGD("Unchanged branchId. No updates to be done.");
+        return;
+    }
+
+    // even though the IfElement will be deleted, do not put to list of deleted elements
+    // because new Element with same elmtId will be created
+    ElementRegister::GetInstance()->RemoveItemSilently(ifElseElement->GetElementId());
+    ifElseElement->UnregisterChildrenForPartialUpdates();
+
+    auto ifElseParentElement = ifElseElement->GetElementParent().Upgrade();
+    LOGD("Doing a deep update IfElseElement <- %{public}s ...", AceType::TypeName(ifElseComponent));
+    LOGD("IfElse element slot: %{public}d, renderSlot: %{public}d", ifElseElement->GetSlot(),
+        ifElseElement->GetRenderSlot());
+    LOGD("   IfElseElement parent Element is %{public}s", AceType::TypeName(ifElseParentElement));
+
+    ifElseParentElement->UpdateChildWithSlot(
+        ifElseElement, ifElseComponent, ifElseElement->GetSlot(), ifElseElement->GetRenderSlot());
+
+    ifElseElement->branchId_ = ifElseComponent->GetBranchId();
+
+    LOGD("Doing a deep update on IfElseElement - DONE");
+}
 } // namespace OHOS::Ace

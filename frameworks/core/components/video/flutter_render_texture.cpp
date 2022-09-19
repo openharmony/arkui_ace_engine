@@ -28,6 +28,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/display/render_display.h"
 #include "core/pipeline/base/flutter_render_context.h"
+#include "core/pipeline/layers/hole_layer.h"
 
 namespace OHOS::Ace {
 
@@ -45,10 +46,21 @@ void FlutterRenderTexture::Paint(RenderContext& context, const Offset& offset)
     const Size& layout = GetLayoutSize();
 
     layer_->SetClip(0.0, layout.Width(), 0.0, layout.Height(), Flutter::Clip::NONE);
+
+    // Should not create both hole and texture layer, clear it.
+    if ((holeLayer_ && textureId_ != INVALID_TEXTURE) || (textureLayer_ && textureId_ == INVALID_TEXTURE)) {
+        layer_->RemoveChildren();
+        backgroundLayer_.Reset();
+        textureLayer_.Reset();
+        holeLayer_.Reset();
+    }
+
     AddBackgroundLayer();
 
     if (textureId_ != INVALID_TEXTURE) {
         AddTextureLayer();
+    } else {
+        AddHoleLayer();
     }
 
     RenderNode::Paint(context, offset);
@@ -78,6 +90,17 @@ void FlutterRenderTexture::AddTextureLayer()
     textureLayer_->SetOffset(alignmentX_, alignmentY_);
 
     layer_->AddChildren(textureLayer_);
+}
+
+void FlutterRenderTexture::AddHoleLayer()
+{
+    if (!holeLayer_) {
+        holeLayer_ = AceType::MakeRefPtr<HoleLayer>(drawSize_.Width(), drawSize_.Height());
+    } else {
+        holeLayer_->SetSize(drawSize_.Width(), drawSize_.Height());
+    }
+    holeLayer_->SetOffset(alignmentX_, alignmentY_);
+    layer_->AddChildren(holeLayer_);
 }
 
 void FlutterRenderTexture::InitGaussianFuzzyParas()
@@ -130,7 +153,6 @@ void FlutterRenderTexture::SetIsAddGaussianFuzzy(bool isAddGaussianFuzzy)
         }
     }
 }
-
 
 void FlutterRenderTexture::AddBackgroundLayer()
 {

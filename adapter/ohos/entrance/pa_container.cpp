@@ -356,7 +356,7 @@ void PaContainer::AddAssetPath(
     }
 }
 
-void PaContainer::AddLibPath(int32_t instanceId, const std::string& libPath)
+void PaContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath)
 {
     auto container = AceType::DynamicCast<PaContainer>(AceEngine::Get().GetContainer(instanceId));
     if (!container) {

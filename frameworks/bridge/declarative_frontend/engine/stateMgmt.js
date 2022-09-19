@@ -3061,6 +3061,16 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
         
     }
+    // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
+    ifElseBranchUpdateFunction(branchId, branchfunc) {
+        const oldBranchid = If.getBranchId();
+        if (branchId == oldBranchid) {
+            
+            return;
+        }
+        If.branchId(branchId);
+        branchfunc();
+    }
     /*
       partual updates for ForEach
       The processing steps in re-render case are

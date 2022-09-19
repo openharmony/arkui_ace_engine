@@ -72,6 +72,6 @@ ohos_shared_library("ui_service_mgr") {
     "window_manager:libdm",
   ]
 
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }

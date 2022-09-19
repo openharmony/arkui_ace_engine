@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
@@ -80,12 +81,6 @@ public:
     bool OnRotationEvent(const RotationEvent& event) const override
     {
         return false;
-    }
-
-    // Called by window when received vsync signal.
-    void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) override
-    {
-        FlushVsync(nanoTimestamp, frameCount);
     }
 
     void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override {}
@@ -149,9 +144,15 @@ public:
 
     void SetRootRect(double width, double height, double offset) override;
 
+    const RefPtr<FullScreenManager>& GetFullScreenManager();
+
     const RefPtr<StageManager>& GetStageManager();
 
     const RefPtr<OverlayManager>& GetOverlayManager();
+
+    void FlushBuild() override;
+
+    void AddCallBack(std::function<void()>&& callback);
 
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
@@ -167,9 +168,11 @@ protected:
 private:
     void FlushTouchEvents();
 
+    void FlushBuildFinishCallbacks();
+
     template<typename T>
     struct NodeCompare {
-        bool operator()(const T& nodeLeft, const T& nodeRight)
+        bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
@@ -183,7 +186,7 @@ private:
 
     template<typename T>
     struct NodeCompareWeak {
-        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak)
+        bool operator()(const T& nodeLeftWeak, const T& nodeRightWeak) const
         {
             auto nodeLeft = nodeLeftWeak.Upgrade();
             auto nodeRight = nodeRightWeak.Upgrade();
@@ -201,9 +204,12 @@ private:
     std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
     std::list<TouchEvent> touchEvents_;
 
+    std::list<std::function<void()>> buildFinishCallbacks_;
+
     RefPtr<FrameNode> rootNode_;
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
+    RefPtr<FullScreenManager> fullScreenManager_;
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);

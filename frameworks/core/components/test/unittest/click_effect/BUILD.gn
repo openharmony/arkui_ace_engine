@@ -31,7 +31,7 @@ ohos_unittest("ClickSpringEffectTest") {
     "$ace_root/frameworks/core/components/test:json",
   ]
 
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
 

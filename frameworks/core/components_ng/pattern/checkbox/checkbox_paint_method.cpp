@@ -52,6 +52,7 @@ void CheckBoxPaintMethod::InitializeParam()
     borderRadius_ = checkBoxTheme->GetBorderRadius().ConvertToPx();
     checkStroke_ = checkBoxTheme->GetCheckStroke().ConvertToPx();
     activeColor_ = checkBoxTheme->GetActiveColor();
+    shadowColor_ = checkBoxTheme->GetShadowColor();
 }
 
 void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const
@@ -145,6 +146,9 @@ void CheckBoxPaintMethod::DrawCheck(RSCanvas& canvas, const OffsetF& origin, RSP
     path.LineTo(originX + middle.GetX(), originY + middle.GetY());
     shadowPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     shadowPen.SetWidth(checkStroke_);
+    
+    shadowPen.SetColor(ToRSColor(shadowColor_));
+
     canvas.AttachPen(shadowPen);
     canvas.DrawPath(path);
     canvas.AttachPen(pen);

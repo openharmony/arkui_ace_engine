@@ -51,6 +51,6 @@ ohos_shared_library("connectserver_debugger") {
 
   configs = [ ":connectserver_debugger_config" ]
 
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }

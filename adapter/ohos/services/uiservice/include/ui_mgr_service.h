@@ -85,6 +85,8 @@ public:
 
     int32_t RemoteDialogCallback(int32_t id, const std::string& event, const std::string& params) override;
 
+    int Dump(int fd, const std::vector<std::u16string>& args) override;
+
     /**
      * GetEventHandler, get the ui_service manager service's handler.
      *

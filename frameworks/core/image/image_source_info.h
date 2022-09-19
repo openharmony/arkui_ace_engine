@@ -29,6 +29,7 @@ namespace OHOS::Ace {
 class ImageSourceInfo {
 public:
     static bool IsSVGSource(const std::string& imageSrc, InternalResource::ResourceId resourceId);
+    static bool IsPngSource(const std::string& src, InternalResource::ResourceId resourceId);
     static SrcType ResolveURIType(const std::string& uri);
     static bool IsValidBase64Head(const std::string& uri, const std::string& pattern);
     static bool IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern);
@@ -107,6 +108,10 @@ public:
                pixmap_;
     }
 
+    bool isPng() const
+    {
+        return isPng_;
+    }
     bool IsSvg() const
     {
         return isSvg_;
@@ -197,6 +202,7 @@ private:
     InternalResource::ResourceId resourceId_ = InternalResource::ResourceId::NO_ID;
     RefPtr<PixelMap> pixmap_;
     bool isSvg_ = false;
+    bool isPng_ = false;
 
     // only Svg will set it.
     std::optional<Color> fillColor_;

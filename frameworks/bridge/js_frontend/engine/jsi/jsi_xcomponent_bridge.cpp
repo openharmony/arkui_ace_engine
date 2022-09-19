@@ -37,6 +37,18 @@ JsiXComponentBridge::~JsiXComponentBridge()
         delete nativeXComponent_;
         nativeXComponent_ = nullptr;
     }
+    // render context must be release on js thread.
+    auto currentContainer = Container::Current();
+    if (currentContainer) {
+        auto taskExecutor = currentContainer->GetTaskExecutor();
+        if (taskExecutor) {
+            taskExecutor->PostTask([ renderContext = std::move(renderContext_) ] () mutable {
+                LOGD("render context must be release on js thread.");
+                renderContext.reset();
+            },
+            TaskExecutor::TaskType::JS);
+        }
+    }
 }
 
 void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, NodeId id, const std::string& args)
