@@ -218,7 +218,7 @@ public:
     static void JsClip(const JSCallbackInfo& info);
     static void JsMask(const JSCallbackInfo& info);
 
-    static void JsKey(const std::string& text);
+    static void JsKey(const std::string& key);
     static void JsId(const std::string& id);
 
     static void JsFocusable(const JSCallbackInfo& info);

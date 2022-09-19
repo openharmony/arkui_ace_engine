@@ -397,11 +397,14 @@ void JSViewAbstract::JsOnBlur(const JSCallbackInfo& args) {}
 
 void JSViewAbstract::JsTabIndex(const JSCallbackInfo& info) {}
 
-void JSViewAbstract::JsKey(const std::string& key) {}
+void JSViewAbstract::JsKey(const std::string& key)
+{
+    JsId(key);
+}
 
 void JSViewAbstract::JsId(const std::string& id)
 {
-    JsKey(id);
+    NG::ViewAbstract::SetInspectorId(id);
 }
 
 void JSViewAbstract::JsRestoreId(int32_t restoreId) {}

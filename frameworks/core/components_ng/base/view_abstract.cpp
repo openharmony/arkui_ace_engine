@@ -250,6 +250,13 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
     ACE_UPDATE_RENDER_CONTEXT(BackBlurRadius, radius);
 }
 
+void ViewAbstract::SetInspectorId(const std::string& inspectorId)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateInspectorId(inspectorId);
+}
+
 void ViewAbstract::Pop()
 {
     ViewStackProcessor::GetInstance()->Pop();

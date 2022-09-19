@@ -4372,6 +4372,11 @@ void JSViewAbstract::JsGroupDefaultFocus(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsKey(const std::string& key)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetInspectorId(key);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     if (component) {
         component->SetInspectorKey(key);
