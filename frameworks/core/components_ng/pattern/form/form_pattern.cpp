@@ -250,7 +250,7 @@ void FormPattern::FireOnErrorEvent(const std::string& code, const std::string& m
 
 void FormPattern::FireOnUninstallEvent(int64_t id) const
 {
-    LOGI("FireOnUninstallEvent id: %{public}lld", id);
+    LOGI("FireOnUninstallEvent id: %{public}s", std::to_string(id).c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<FormEventHub>();
@@ -262,7 +262,7 @@ void FormPattern::FireOnUninstallEvent(int64_t id) const
 
 void FormPattern::FireOnAcquiredEvent(int64_t id) const
 {
-    LOGI("FireOnAcquiredEvent id: %{public}lld", id);
+    LOGI("FireOnAcquiredEvent id: %{public}s", std::to_string(id).c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<FormEventHub>();
