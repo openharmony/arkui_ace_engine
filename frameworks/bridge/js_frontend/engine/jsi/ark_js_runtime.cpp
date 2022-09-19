@@ -20,6 +20,7 @@
 #include "frameworks/base/log/log_wrapper.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
+#include "frameworks/core/common/connect_server_manager.h"
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 namespace OHOS::Ace::Framework {
@@ -97,6 +98,20 @@ void ArkJSRuntime::SetLogPrint(LOG_PRINT out)
     print_ = out;
 }
 
+bool ArkJSRuntime::StartDebugger()
+{
+    bool ret = false;
+#if !defined(PREVIEW)
+    if (!libPath_.empty()) {
+#if !defined(ANDROID_PLATFORM)
+        ConnectServerManager::Get().AddInstance(instanceId_);
+#endif
+        ret = JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_, debuggerPostTask_);
+    }
+#endif
+    return ret;
+}
+
 shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::string& src)
 {
     return NewUndefined();
@@ -105,12 +120,6 @@ shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::str
 bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath)
 {
     JSExecutionScope executionScope(vm_);
-#if !defined(PREVIEW)
-    if (!libPath_.empty()) {
-        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_,
-            debuggerPostTask_);
-    }
-#endif
     LocalScope scope(vm_);
     bool ret = JSNApi::Execute(vm_, buffer, size, PANDA_MAIN_FUNCTION, filePath);
     HandleUncaughtException();
@@ -120,12 +129,6 @@ bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std
 bool ArkJSRuntime::ExecuteJsBin(const std::string& fileName)
 {
     JSExecutionScope executionScope(vm_);
-#if !defined(PREVIEW)
-    if (!libPath_.empty()) {
-        JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_,
-            debuggerPostTask_);
-    }
-#endif
     LocalScope scope(vm_);
     bool ret = JSNApi::Execute(vm_, fileName, PANDA_MAIN_FUNCTION);
     HandleUncaughtException();
