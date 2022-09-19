@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/full_screen/full_screen_manager.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -89,6 +89,7 @@ void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)
 
     originalParent_.erase(iterOfParent);
     originGeometryNode_.erase(iterOfGeometryNode);
+    // TODO: need to reserve the value set by developers
     frameNode->UpdateLayoutConstraint(layoutConstraint);
     frameNode->MountToParent(parent, slot);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

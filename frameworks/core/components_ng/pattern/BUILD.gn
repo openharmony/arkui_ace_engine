@@ -37,7 +37,6 @@ build_component_ng("pattern_ng") {
     "divider/divider_view.cpp",
     "flex/flex_layout_algorithm.cpp",
     "flex/flex_view.cpp",
-    "full_screen/full_screen_manager.cpp",
     "grid/grid_item_view.cpp",
     "grid/grid_layout_algorithm.cpp",
     "grid/grid_pattern.cpp",
