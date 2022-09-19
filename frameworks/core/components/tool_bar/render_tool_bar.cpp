@@ -15,6 +15,7 @@
 
 #include "core/components/tool_bar/render_tool_bar.h"
 
+#include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/tool_bar/tool_bar_component.h"
 
 namespace OHOS::Ace {
@@ -82,7 +83,7 @@ double RenderToolBar::GetMaxWidthBasedOnGridType(
     const RefPtr<GridColumnInfo>& info, GridSizeType type) const
 {
     double margin = NormalizeToPx(info->GetParent()->GetMarginLeft());
-    if (type == GridSizeType::SM) {
+    if (type == GridSizeType::SM || type == GridSizeType::XS) {
         double width = info->GetWidth(4);
         if (toolBarsSize_ > 3) {
             width += margin * 2;
@@ -90,19 +91,18 @@ double RenderToolBar::GetMaxWidthBasedOnGridType(
             actualWidth_ += margin;
         }
         return width;
-    } else if (type == GridSizeType::MD) {
+    }
+    if (type == GridSizeType::MD) {
         actualWidth_ += margin;
         if (toolBarsSize_ <= 3) {
             double dipScale = NormalizeToPx(info->GetParent()->GetGutterWidth());
             actualWidth_ += info->GetWidth(1) + dipScale;
             return info->GetWidth(6);
-        } else {
-            return info->GetWidth(8);
-        }
-    } else {
-        LOGI("GetMaxWidthBasedOnGridType is undefined");
-        return info->GetMaxWidth();
+        } 
+        return info->GetWidth(8);
     }
+    LOGI("GetMaxWidthBasedOnGridType is undefined");
+    return info->GetMaxWidth();
 }
 
 } // namespace OHOS::Ace
