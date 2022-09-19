@@ -24,6 +24,7 @@
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
@@ -346,5 +347,19 @@ HWTEST_F(SwiperPropertyTestNg, SwiperPaintPropertyTest0015, TestSize.Level1)
         EXPECT_FALSE(swiperLayoutProperty == nullptr);
         EXPECT_EQ(swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL), direction);
     }
+}
+
+/**
+ * @tc.name: SwiperPropertyTest0016
+ * @tc.desc: set id into Swiper and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPropertyTestNg, SwiperPropertyTest0016, TestSize.Level1)
+{
+    SwiperView::Create();
+    ViewAbstract::SetInspectorId(V2::SWIPER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    EXPECT_EQ(frameNode->GetInspectorId().value_or(""), V2::SWIPER_ETS_TAG);
 }
 } // namespace OHOS::Ace::NG

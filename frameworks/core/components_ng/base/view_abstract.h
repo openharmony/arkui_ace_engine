@@ -80,6 +80,9 @@ public:
     // flex properties
     static void SetAlignSelf(int32_t value);
 
+    // inspector
+    static void SetInspectorId(const std::string& inspectorId);
+
     static void Pop();
 };
 } // namespace OHOS::Ace::NG
