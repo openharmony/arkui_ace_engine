@@ -226,9 +226,6 @@ public:
     // if return false, then this event needs platform to handle it.
     bool OnRotationEvent(const RotationEvent& event) const override;
 
-    // Called by window when received vsync signal.
-    void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) override;
-
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 

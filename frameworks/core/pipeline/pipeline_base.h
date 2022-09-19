@@ -110,7 +110,7 @@ public:
     virtual bool OnRotationEvent(const RotationEvent& event) const = 0;
 
     // Called by window when received vsync signal.
-    virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
+    virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by view
     virtual void OnDragEvent(int32_t x, int32_t y, DragEventAction action) = 0;
