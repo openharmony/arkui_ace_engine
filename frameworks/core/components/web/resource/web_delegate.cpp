@@ -172,6 +172,13 @@ void ResultOhos::Cancel()
     }
 }
 
+void FullScreenExitHandlerOhos::ExitFullScreen()
+{
+    if (handler_) {
+        handler_->ExitFullScreen();
+    }
+}
+
 bool AuthResultOhos::Confirm(std::string& userName, std::string& pwd)
 {
     if (result_) {
@@ -1365,6 +1372,9 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
     onTitleReceiveV2_ = useNewPipe ? eventHub->GetOnTitleReceiveEvent()
                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                          webCom->GetTitleReceiveEventId(), oldContext);
+    onFullScreenExitV2_ = useNewPipe ? eventHub->GetOnFullScreenExitEvent()
+                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetOnFullScreenExitEventId(), oldContext);
     onGeolocationHideV2_ = useNewPipe ? eventHub->GetOnGeolocationHideEvent()
                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                             webCom->GetGeolocationHideEventId(), oldContext);
@@ -2582,6 +2592,26 @@ void WebDelegate::OnReceivedTitle(const std::string& param)
     }
 }
 
+void WebDelegate::OnFullScreenExit()
+{
+    auto param = std::make_shared<FullScreenExitEvent>(false);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->ExitFullScreen();
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnFullScreenExitEvent = webEventHub->GetOnFullScreenExitEvent();
+        CHECK_NULL_VOID(propOnFullScreenExitEvent);
+        propOnFullScreenExitEvent(param);
+        return;
+    }
+    // ace 2.0
+    if (onFullScreenExitV2_) {
+        onFullScreenExitV2_(param);
+    }
+}
+
 void WebDelegate::OnGeolocationPermissionsHidePrompt()
 {
     // ace 2.0
@@ -2638,6 +2668,24 @@ bool WebDelegate::OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, Dia
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, false);
     return webCom->OnCommonDialog(info.get(), dialogEventType);
+}
+
+void WebDelegate::OnFullScreenEnter(const std::shared_ptr<BaseEventInfo>& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->RequestFullScreen();
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnFullScreenEnterEvent = webEventHub->GetOnFullScreenEnterEvent();
+        CHECK_NULL_VOID(propOnFullScreenEnterEvent);
+        propOnFullScreenEnterEvent(info);
+        return;
+    }
+    auto webCom = webComponent_.Upgrade();
+    CHECK_NULL_VOID(webCom);
+    webCom->OnFullScreenEnter(info.get());
 }
 
 bool WebDelegate::OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info)

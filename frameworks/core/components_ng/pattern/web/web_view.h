@@ -39,10 +39,12 @@ public:
     static void SetJsEnabled(bool isJsEnabled);
     static void SetProgressChangeImpl(OnWebAsyncFunc&& onProgressChangeImpl);
     static void SetTitleReceiveEventId(OnWebAsyncFunc&& titleReceiveEventId);
+    static void SetFullScreenExitEventId(OnWebAsyncFunc&& fullScreenExitEventId);
     static void SetGeolocationHideEventId(OnWebAsyncFunc&& geolocationHideEventId);
     static void SetGeolocationShowEventId(OnWebAsyncFunc&& geolocationShowEventId);
     static void SetRequestFocusEventId(OnWebAsyncFunc&& requestFocusEventId);
     static void SetDownloadStartEventId(OnWebAsyncFunc&& downloadStartEventId);
+    static void SetOnFullScreenEnterImpl(OnWebAsyncFunc&& onFullScreenEnterImpl);
     static void SetOnHttpAuthRequestImpl(OnWebSyncFunc&& onHttpAuthRequestImpl);
     static void SetOnSslErrorRequestImpl(OnWebSyncFunc&& onSslErrorRequestImpl);
     static void SetOnSslSelectCertRequestImpl(OnWebSyncFunc&& onSslSelectCertRequestImpl);

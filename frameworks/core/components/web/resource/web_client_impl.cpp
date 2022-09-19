@@ -210,6 +210,31 @@ void WebClientImpl::OnPageTitle(const std::string &title)
     delegate->OnReceivedTitle(title);
 }
 
+void WebClientImpl::OnFullScreenExit()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnFullScreenExit();
+}
+
+void WebClientImpl::OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler)
+{
+    ContainerScope scope(instanceId_);
+    auto param = std::make_shared<FullScreenEnterEvent>(AceType::MakeRefPtr<FullScreenExitHandlerOhos>(handler));
+    auto task = Container::CurrentTaskExecutor();
+    if (task == nullptr) {
+        LOGW("can't get task executor");
+        return;
+    }
+    task->PostSyncTask([webClient = this, &param] {
+            CHECK_NULL_VOID(webClient);
+            auto delegate = webClient->webDelegate_.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            delegate->OnFullScreenEnter(param);
+    }, OHOS::Ace::TaskExecutor::TaskType::JS);
+}
+
 void WebClientImpl::OnGeolocationHide()
 {
     ContainerScope scope(instanceId_);

@@ -128,6 +128,16 @@ public:
         return declaration_->GetTitleReceiveEventId();
     }
 
+    void SetOnFullScreenExitEventId(const EventMarker& fullScreenExitEventId)
+    {
+        declaration_->SetOnFullScreenExitEventId(fullScreenExitEventId);
+    }
+
+    const EventMarker& GetOnFullScreenExitEventId() const
+    {
+        return declaration_->GetOnFullScreenExitEventId();
+    }
+
     void SetGeolocationHideEventId(const EventMarker& geolocationHideEventId)
     {
         declaration_->SetGeolocationHideEventId(geolocationHideEventId);
@@ -507,6 +517,18 @@ public:
         }
     }
 
+    using OnFullScreenEnterImpl = std::function<void(const BaseEventInfo* info)>;
+    void OnFullScreenEnter(const BaseEventInfo* info) const
+    {
+        if (onFullScreenEnterImpl_) {
+            onFullScreenEnterImpl_(info);
+        }
+    }
+    void SetOnFullScreenEnterImpl(OnFullScreenEnterImpl&& onFullScreenEnterImpl)
+    {
+        onFullScreenEnterImpl_ = std::move(onFullScreenEnterImpl);
+    }
+
     using OnHttpAuthRequestImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnHttpAuthRequest(const BaseEventInfo* info) const
     {
@@ -751,6 +773,7 @@ private:
     OnCommonDialogImpl onBeforeUnloadImpl_;
     OnConsoleImpl consoleImpl_;
     OnFileSelectorShowImpl onFileSelectorShowImpl_;
+    OnFullScreenEnterImpl onFullScreenEnterImpl_;
     OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
     OnSslErrorRequestImpl onSslErrorRequestImpl_;

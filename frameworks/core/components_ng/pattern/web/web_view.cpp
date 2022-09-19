@@ -98,6 +98,13 @@ void WebView::SetTitleReceiveEventId(OnWebAsyncFunc&& titleReceiveEventId)
     webEventHub->SetOnTitleReceiveEvent(std::move(titleReceiveEventId));
 }
 
+void WebView::SetFullScreenExitEventId(OnWebAsyncFunc&& fullScreenExitEventId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFullScreenExitEvent(std::move(fullScreenExitEventId));
+}
+
 void WebView::SetGeolocationHideEventId(OnWebAsyncFunc&& geolocationHideEventId)
 {
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
@@ -124,6 +131,13 @@ void WebView::SetDownloadStartEventId(OnWebAsyncFunc&& downloadStartEventId)
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnDownloadStartEvent(std::move(downloadStartEventId));
+}
+
+void WebView::SetOnFullScreenEnterImpl(OnWebAsyncFunc&& onFullScreenEnterImpl)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFullScreenEnterEvent(std::move(onFullScreenEnterImpl));
 }
 
 void WebView::SetOnHttpAuthRequestImpl(OnWebSyncFunc&& onHttpAuthRequestImpl)
