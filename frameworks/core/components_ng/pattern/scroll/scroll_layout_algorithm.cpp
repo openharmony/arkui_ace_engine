@@ -30,9 +30,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-void UpdateChildConstraint(Axis axis, const SizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
+void UpdateChildConstraint(Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint)
 {
-    contentConstraint.parentIdealSize = OptionalSizeF(selfIdealSize);
+    contentConstraint.parentIdealSize = selfIdealSize;
     if (axis == Axis::VERTICAL) {
         contentConstraint.maxSize.SetHeight(Infinity<float>());
     } else {
@@ -49,16 +49,11 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize = CreateIdealSize(constraint.value(), axis, layoutProperty->GetMeasureType(), true);
-    if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
-        LOGE("the scroll is infinity, error");
-        return;
-    }
+    auto idealSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_CONTENT);
 
     // Calculate child layout constraint.
-    auto padding = layoutProperty->CreatePaddingAndBorder();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    UpdateChildConstraint(axis, idealSize - padding.Size(), childLayoutConstraint);
+    UpdateChildConstraint(axis, idealSize, childLayoutConstraint);
 
     // Measure child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
@@ -70,16 +65,15 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Use child size when self idea size of scroll is not setted.
     auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
-    if (!constraint->selfIdealSize.Width().has_value()) {
+    if (!idealSize.Width()) {
         idealSize.SetWidth(childSize.Width());
     }
-    if (!constraint->selfIdealSize.Height().has_value()) {
+    if (!idealSize.Height()) {
         idealSize.SetHeight(childSize.Height());
     }
-
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetFrameSize(idealSize);
+    auto selfSize = idealSize.ConvertToSizeT();
+    selfSize.Constrain(constraint->minSize, constraint->maxSize);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
 }
 
 void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

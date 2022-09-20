@@ -50,21 +50,27 @@ public:
         return ConvertToPx(property->GetItemSpace().value_or(0.0_px), scale).value_or(0);
     }
 
-    static LayoutConstraintF CreateChildConstraint(const RefPtr<SwiperLayoutProperty>& property, const SizeF& idealSize)
+    static LayoutConstraintF CreateChildConstraint(
+        const RefPtr<SwiperLayoutProperty>& property, const OptionalSizeF& idealSize)
     {
         auto layoutConstraint = property->CreateChildConstraint();
-        layoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
+        layoutConstraint.parentIdealSize = idealSize;
         if (IsStretch(property)) {
             auto displayCount = property->GetDisplayCount().value_or(1);
             auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);
             auto itemSpace = GetItemSpace(property);
-            SizeF selfIdealSize = idealSize;
+            auto childSelfIdealSize = idealSize;
             if (axis == Axis::HORIZONTAL) {
-                selfIdealSize.SetWidth((idealSize.Width() - itemSpace * displayCount) / displayCount);
+                if (idealSize.Width()) {
+                    childSelfIdealSize.SetWidth((idealSize.Width().value() - itemSpace * displayCount) / displayCount);
+                }
             } else if (axis == Axis::VERTICAL) {
-                selfIdealSize.SetHeight((idealSize.Height() - itemSpace * displayCount) / displayCount);
+                if (idealSize.Height()) {
+                    childSelfIdealSize.SetHeight(
+                        (idealSize.Height().value() - itemSpace * displayCount) / displayCount);
+                }
             }
-            layoutConstraint.selfIdealSize = OptionalSizeF(selfIdealSize);
+            layoutConstraint.selfIdealSize = childSelfIdealSize;
             return layoutConstraint;
         }
 

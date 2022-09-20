@@ -82,6 +82,11 @@ void ViewAbstract::SetMaxHeight(const CalcLength& height)
     layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
 }
 
+void ViewAbstract::SetAspectRatio(float ratio)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AspectRatio, ratio);
+}
+
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);

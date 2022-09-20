@@ -15,6 +15,8 @@
 
 #include "core/components_ng/layout/layout_property.h"
 
+#include <optional>
+
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -106,6 +108,50 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         }
     }
     CheckSelfIdealSize();
+    CheckAspectRatio();
+}
+
+void LayoutProperty::CheckAspectRatio()
+{
+    auto hasAspectRatio = magicItemProperty_ ? magicItemProperty_->HasAspectRatio() : false;
+    if (!hasAspectRatio) {
+        return;
+    }
+    auto aspectRatio = magicItemProperty_->GetAspectRatioValue();
+    // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and aspectRatio are
+    // all set, the height is not used.
+    auto maxWidth = layoutConstraint_->maxSize.Width();
+    auto maxHeight = layoutConstraint_->maxSize.Height();
+    if (maxHeight > maxWidth / aspectRatio) {
+        maxHeight = maxWidth / aspectRatio;
+    }
+    layoutConstraint_->maxSize.SetWidth(maxWidth);
+    layoutConstraint_->maxSize.SetHeight(maxHeight);
+    std::optional<float> selfWidth;
+    std::optional<float> selfHeight;
+    if (layoutConstraint_->selfIdealSize.Width()) {
+        selfWidth = layoutConstraint_->selfIdealSize.Width().value();
+        selfHeight = selfWidth.value() / aspectRatio;
+    } else if (layoutConstraint_->selfIdealSize.Height()) {
+        selfHeight = layoutConstraint_->selfIdealSize.Height().value();
+        selfWidth = selfHeight.value() * aspectRatio;
+    }
+
+    if (selfWidth.value_or(0) > maxWidth) {
+        selfWidth = maxWidth;
+        selfHeight = selfWidth.value() / aspectRatio;
+    }
+    if (selfHeight.value_or(0) > maxHeight) {
+        selfHeight = maxHeight;
+        selfWidth = selfHeight.value() * aspectRatio;
+    }
+    if (selfHeight) {
+        layoutConstraint_->selfIdealSize.SetHeight(selfHeight);
+    }
+    if (selfWidth) {
+        layoutConstraint_->selfIdealSize.SetWidth(selfWidth);
+    }
+    // TODO: after measure done, need to check AspectRatio again.
 }
 
 void LayoutProperty::CheckSelfIdealSize()
@@ -143,8 +189,9 @@ LayoutConstraintF LayoutProperty::CreateChildConstraint() const
         layoutConstraint.maxSize.SetHeight(layoutConstraint.parentIdealSize.Height().value());
         layoutConstraint.percentReference.SetHeight(layoutConstraint.parentIdealSize.Height().value());
     }
-    // for child constraint, reset current selfIdealSize.
+    // for child constraint, reset current selfIdealSize and minSize.
     layoutConstraint.selfIdealSize.Reset();
+    layoutConstraint.minSize.Reset();
     return layoutConstraint;
 }
 

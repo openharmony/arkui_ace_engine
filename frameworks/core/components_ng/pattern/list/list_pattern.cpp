@@ -20,8 +20,8 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -37,7 +37,7 @@ float CalculateFriction(float gamma)
     }
     return SCROLL_RATIO * static_cast<float>(std::pow(1.0 - gamma, SQUARE));
 }
-}
+} // namespace
 
 void ListPattern::OnAttachToFrameNode()
 {
@@ -48,6 +48,10 @@ void ListPattern::OnAttachToFrameNode()
 
 void ListPattern::OnModifyDone()
 {
+    if (!isInitialized_) {
+        jumpIndex_ = GetLayoutProperty<ListLayoutProperty>()->GetInitialIndex().value_or(0);
+        isInitialized_ = true;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
@@ -131,13 +135,12 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(host, false);
     auto listEventHub = host->GetEventHub<ListEventHub>();
     CHECK_NULL_RETURN(listEventHub, false);
-    if (currentOffset_ != lastOffset_) {    
-        if (startIndex_ != listLayoutAlgorithm->GetStartIndex() ||
-                endIndex_ != listLayoutAlgorithm->GetEndIndex()) {
-                    auto onScrollIndex = listEventHub->GetOnScrollIndex();
-                    if (onScrollIndex) {
-                        onScrollIndex(startIndex_, endIndex_);
-                    }
+    if (currentOffset_ != lastOffset_) {
+        if (startIndex_ != listLayoutAlgorithm->GetStartIndex() || endIndex_ != listLayoutAlgorithm->GetEndIndex()) {
+            auto onScrollIndex = listEventHub->GetOnScrollIndex();
+            if (onScrollIndex) {
+                onScrollIndex(startIndex_, endIndex_);
+            }
         }
         bool scrollUpToCrossLine = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
         bool scrollDownToCrossLine = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
@@ -162,10 +165,10 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     startIndex_ = listLayoutAlgorithm->GetStartIndex();
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
-    
+
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     // TODO: now only support spring effect
-    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
     playEdgeEffectAnimation_ = false;
     if (currentOffset_ != lastOffset_) {
         if (startIndex_ == 0 && itemPosition_[0].first >= 0) {
@@ -179,6 +182,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             }
         }
     }
+    jumpIndex_.reset();
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
 }
 
@@ -207,7 +211,7 @@ void ListPattern::PlaySpringAnimation(double dragVelocity)
     constexpr float SPRING_SCROLL_MASS = 0.5f;
     constexpr float SPRING_SCROLL_STIFFNESS = 100.0f;
     constexpr float SPRING_SCROLL_DAMPING = 15.55635f;
-    const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY = 
+    const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
         AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
     ExtentPair extentPair = ExtentPair(0.0, 0.0);
     float friction = CalculateFriction(std::abs(currentOffset_) / MainSize());

@@ -281,7 +281,6 @@ public:
         return themeManager->GetTheme<T>();
     }
 
-protected:
     /**
      * box properties setter
      */
