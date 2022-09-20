@@ -30,6 +30,36 @@
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+
+struct MouseClickInfo {
+    double x = -1;
+    double y = -1;
+    TimeStamp start;
+};
+
+#ifdef OHOS_STANDARD_SYSTEM
+struct TouchInfo {
+    double x = -1;
+    double y = -1;
+    int32_t id = -1;
+};
+
+struct TouchHandleState {
+    int32_t id = -1;
+    int32_t x = -1;
+    int32_t y = -1;
+    int32_t edge_height = 0;
+};
+
+enum WebOverlayType {
+    INSERT_OVERLAY,
+    SELECTION_OVERLAY,
+    INVALID_OVERLAY
+};
+#endif
+}
+
 class WebPattern : public Pattern {
     DECLARE_ACE_TYPE(WebPattern, Pattern);
 
@@ -133,7 +163,7 @@ private:
     void OnMixedModeUpdate(MixedModeContent value);
     void OnZoomAccessEnabledUpdate(bool value);
     void OnGeolocationAccessEnabledUpdate(bool value);
-    void OnUserAgentUpdate(std::string value);
+    void OnUserAgentUpdate(const std::string& value);
     void OnCacheModeUpdate(WebCacheMode value);
     void OnOverviewModeAccessEnabledUpdate(bool value);
     void OnFileFromUrlAccessEnabledUpdate(bool value);
@@ -148,6 +178,8 @@ private:
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void HandleMouseEvent(MouseInfo& info);
     void OnMouseEvent(const MouseInfo& info);
+    bool HandleDoubleClickEvent(const MouseInfo& info);
+    void SendDoubleClickEvent(const MouseClickInfo& info);
 
     void HandleTouchDown(const TouchEventInfo& info, bool fromOverlay);
 
@@ -173,6 +205,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> mouseHoverEvent_;
     bool isUrlLoaded_ = false;
+    std::queue<MouseClickInfo> doubleClickQueue_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };

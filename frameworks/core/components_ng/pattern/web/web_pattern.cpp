@@ -24,6 +24,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t SINGLE_CLICK_NUM = 1;
+constexpr int32_t DOUBLE_CLICK_NUM = 2;
+constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5f;
+
 WebPattern::WebPattern(std::string webSrc, const RefPtr<WebController>& webController)
     : webSrc_(std::move(webSrc)), webController_(webController)
 {}
@@ -120,8 +124,52 @@ void WebPattern::OnMouseEvent(const MouseInfo& info)
         return;
     }
 
+    // TODO:web request when mouse release
+
     auto localLocation = info.GetLocalLocation();
-    delegate_->OnMouseEvent(localLocation.GetX(), localLocation.GetY(), info.GetButton(), info.GetAction(), 1);
+    if (!HandleDoubleClickEvent(info)) {
+        delegate_->OnMouseEvent(
+            localLocation.GetX(), localLocation.GetY(), info.GetButton(), info.GetAction(), SINGLE_CLICK_NUM);
+    }
+}
+
+bool WebPattern::HandleDoubleClickEvent(const MouseInfo& info)
+{
+    if (info.GetButton() != MouseButton::LEFT_BUTTON || info.GetAction() != MouseAction::PRESS) {
+        return false;
+    }
+    auto localLocation = info.GetLocalLocation();
+    MouseClickInfo clickInfo;
+    clickInfo.x = localLocation.GetX();
+    clickInfo.y = localLocation.GetY();
+    clickInfo.start = info.GetTimeStamp();
+    if (doubleClickQueue_.empty()) {
+        doubleClickQueue_.push(clickInfo);
+        return false;
+    }
+    std::chrono::duration<float> timeout_ = clickInfo.start - doubleClickQueue_.back().start;
+    if (timeout_.count() < DEFAULT_DBCLICK_INTERVAL) {
+        SendDoubleClickEvent(clickInfo);
+        std::queue<MouseClickInfo> empty;
+        swap(empty, doubleClickQueue_);
+        return true;
+    }
+    if (doubleClickQueue_.size() == 1) {
+        doubleClickQueue_.push(clickInfo);
+        return false;
+    }
+    doubleClickQueue_.pop();
+    doubleClickQueue_.push(clickInfo);
+    return false;
+}
+
+void WebPattern::SendDoubleClickEvent(const MouseClickInfo& info)
+{
+    if (!delegate_) {
+        LOGE("Touch cancel delegate_ is nullptr");
+        return;
+    }
+    delegate_->OnMouseEvent(info.x, info.y, MouseButton::LEFT_BUTTON, MouseAction::PRESS, DOUBLE_CLICK_NUM);
 }
 
 bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -223,7 +271,7 @@ void WebPattern::OnGeolocationAccessEnabledUpdate(bool value)
     }
 }
 
-void WebPattern::OnUserAgentUpdate(std::string value)
+void WebPattern::OnUserAgentUpdate(const std::string& value)
 {
     if (delegate_) {
         delegate_->UpdateUserAgent(value);
