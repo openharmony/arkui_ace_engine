@@ -53,6 +53,9 @@ private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void RegisterScrollBeginTask();
+    void RegisterOnScrollTask();
+
     RefPtr<ScrollableEvent> scrollableEvent_;
     Axis axis_ = Axis::VERTICAL;
     float currentOffset_ = 0.0f;

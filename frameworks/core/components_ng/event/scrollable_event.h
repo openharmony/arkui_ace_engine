@@ -26,6 +26,8 @@
 
 namespace OHOS::Ace::NG {
 
+using OnScrollCallback = std::function<void(Dimension, Dimension)>;
+
 class GestureEventHub;
 
 class ScrollableEvent : public Referenced {
@@ -59,6 +61,19 @@ public:
         return scrollBeginCallback_;
     }
 
+    void SetOnScrollCallback(OnScrollCallback&& onScrollCallback)
+    {
+        if (!onScrollCallback) {
+            return;
+        }
+        onScrollCallback_ = std::move(onScrollCallback);
+    }
+
+    const OnScrollCallback& GetOnScrollCallback() const
+    {
+        return onScrollCallback_;
+    }
+
     Axis GetAxis() const
     {
         return axis_;
@@ -66,6 +81,7 @@ public:
 
 private:
     ScrollPositionCallback callback_;
+    OnScrollCallback onScrollCallback_;
     ScrollBeginCallback scrollBeginCallback_;
     Axis axis_ = Axis::VERTICAL;
 };

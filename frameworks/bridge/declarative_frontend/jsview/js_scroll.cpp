@@ -114,6 +114,11 @@ void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
                     }
                     return scrollInfo;
                 };
+        // NG
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ScrollView::SetOnScrollBegin(std::move(onScrollBegin));
+            return;
+        }
 
         auto scrollComponent =
             AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -129,6 +134,18 @@ void JSScroll::OnScrollBeginCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
+        // NG
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
+                (const Dimension& xOffset, const Dimension& yOffset) {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    auto params = ConvertToJSValues(xOffset, yOffset);
+                    func->Call(JSRef<JSObject>(), params.size(), params.data());
+                };
+            NG::ScrollView::SetOnScroll(std::move(onScroll));
+            return;
+        }
+
         auto onScroll = EventMarker(
             [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -154,6 +171,18 @@ void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
+        // NG
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto scrollEdge = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
+                (const NG::ScrollEdge& side) {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    auto params = ConvertToJSValues(side);
+                    func->Call(JSRef<JSObject>(), 1, params.data());
+                };
+            NG::ScrollView::SetOnScrollEdge(std::move(scrollEdge));
+            return;
+        }
+
         auto onScroll = EventMarker(
             [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -188,6 +217,17 @@ void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
 void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
+        // NG
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto scrollEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
+                () {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    func->Call(JSRef<JSObject>(), 0, nullptr);
+                };
+            NG::ScrollView::SetOnScrollEnd(std::move(scrollEnd));
+            return;
+        }
+
         auto onScrollStop = EventMarker(
             [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -245,17 +285,35 @@ void JSScroll::SetScrollBar(int displayMode)
 
 void JSScroll::SetScrollBarWidth(const std::string& scrollBarWidth)
 {
+    if (scrollBarWidth.empty()) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ScrollView::SetScrollBarWidth(StringUtils::StringToDimension(scrollBarWidth));
+        return;
+    }
+
     auto scrollComponent = AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!scrollComponent || scrollBarWidth.empty()) {
+    if (!scrollComponent) {
         return;
     }
     scrollComponent->SetScrollBarWidth(StringUtils::StringToDimension(scrollBarWidth));
 }
 
-void JSScroll::SetScrollBarColor(const  std::string& scrollBarColor)
+void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
 {
+    if (scrollBarColor.empty()) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ScrollView::SetScrollBarColor(Color::FromString(scrollBarColor));
+        return;
+    }
+
     auto scrollComponent = AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!scrollComponent || scrollBarColor.empty()) {
+    if (!scrollComponent) {
         return;
     }
     scrollComponent->SetScrollBarColor(Color::FromString(scrollBarColor));

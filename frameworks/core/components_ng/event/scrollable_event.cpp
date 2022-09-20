@@ -39,6 +39,26 @@ void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     }
 }
 
+// runs OnScroll and OnScrollBegin callbacks
+void runScrollBeginCallback(const RefPtr<ScrollableEvent>& task, double& offset, bool vertical)
+{
+    auto dx = (vertical) ? Dimension(0) : Dimension(offset);
+    auto dy = (vertical) ? Dimension(offset) : Dimension(0);
+
+    auto onScrollCallback = task->GetOnScrollCallback();
+    if (onScrollCallback) {
+        onScrollCallback(dx, dy);
+    }
+
+    // Modifies offset based on developer's OnScrollBegin callback
+    auto scrollBeginCallback = task->GetScrollBeginCallback();
+    if (scrollBeginCallback) {
+        ScrollInfo info  = scrollBeginCallback(dx, dy);
+        // scrollBeginCallback returns dx/dy Remain -- true offset set by developer
+        offset = (vertical) ? info.dy.Value() : info.dx.Value();
+    }
+}
+
 void ScrollableActuator::InitializeScrollable()
 {
     if (scrollableEvents_.empty()) {
@@ -58,13 +78,8 @@ void ScrollableActuator::InitializeScrollable()
             }
             bool canScroll = true;
             for (const auto& task : actuator->scrollableEvents_[axis]) {
-                if (task->GetScrollBeginCallback()) {
-                    if (axis == Axis::VERTICAL) {
-                        task->GetScrollBeginCallback()(Dimension(0), Dimension(offset));
-                    } else {
-                        task->GetScrollBeginCallback()(Dimension(offset), Dimension(0));
-                    }
-                }
+                // modifies offset
+                runScrollBeginCallback(task, offset, (axis == Axis::VERTICAL));
                 canScroll = task->GetScrollPositionCallback()(offset, source) && canScroll;
             }
             return canScroll;
