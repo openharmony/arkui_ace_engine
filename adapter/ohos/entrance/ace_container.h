@@ -21,6 +21,7 @@
 #include "ability_context.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
+#include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_ability.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
@@ -265,6 +266,16 @@ public:
         return windowName_;
     }
 
+    void SetWindowId(uint32_t windowId)
+    {
+        windowId_ = windowId;
+    }
+
+    uint32_t GetWindowId()
+    {
+        return windowId_;
+    }
+
     void SetWindowPos(int32_t left, int32_t top);
 
     void SetIsSubContainer(bool isSubContainer)
@@ -321,6 +332,7 @@ private:
     bool useCurrentEventRunner_ = false;
     sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
     std::string windowName_;
+    uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
 
     bool isSubContainer_ = false;
     int32_t parentId_ = 0;
