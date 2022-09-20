@@ -20,14 +20,13 @@ template("utilsecurec_source") {
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
-    sources = [ "//commonlibrary/c_utils/base/src/securec/vsnprintf_s_p.c" ]
     if (platform == "windows") {
-      sources += [
-        "//commonlibrary/c_utils/base/src/securec/memset_s.c",
-        "//commonlibrary/c_utils/base/src/securec/securecutil.c",
-        "//commonlibrary/c_utils/base/src/securec/secureinput_w.c",
-        "//commonlibrary/c_utils/base/src/securec/secureprintoutput_a.c",
-        "//commonlibrary/c_utils/base/src/securec/secureprintoutput_w.c",
+      sources = [
+        "//third_party/bounds_checking_function/src/memset_s.c",
+        "//third_party/bounds_checking_function/src/securecutil.c",
+        "//third_party/bounds_checking_function/src/secureinput_w.c",
+        "//third_party/bounds_checking_function/src/secureprintoutput_a.c",
+        "//third_party/bounds_checking_function/src/secureprintoutput_w.c",
       ]
       cflags = [ "-Wno-inconsistent-dllimport" ]
     }
