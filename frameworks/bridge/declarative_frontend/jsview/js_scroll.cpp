@@ -154,7 +154,7 @@ void JSScroll::OnScrollCallback(const JSCallbackInfo& args)
                     return;
                 }
                 auto params = ConvertToJSValues(eventInfo->GetScrollX(), eventInfo->GetScrollY());
-                func->Call(JSRef<JSObject>(), 2, params.data());
+                func->Call(JSRef<JSObject>(), params.size(), params.data());
             });
         auto scrollComponent =
             AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
