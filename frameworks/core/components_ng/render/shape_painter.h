@@ -13,22 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_LINE_PAINTER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_LINE_PAINTER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SHAPE_PAINTER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SHAPE_PAINTER_H
 
 #include "base/geometry/ng/radius.h"
 #include "base/geometry/ng/rect_t.h"
-#include "core/components_ng/pattern/shape/line_paint_property.h"
+#include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-
-class LinePainter {
+class ShapePainter {
 public:
-    LinePainter() = default;
-    ~LinePainter() = default;
-    static void DrawLine(RSCanvas& canvas, const LinePaintProperty& LinePaintProperty);
+    ShapePainter() = default;
+    ~ShapePainter() = default;
+    static void SetPan(RSPen& pen, const ShapePaintProperty& shapePaintProperty);
+    static void SetBrush(RSBrush& brush, const ShapePaintProperty& shapePaintProperty);
 };
-
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_LINE_PAINTER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SHAPE_PAINTER_H

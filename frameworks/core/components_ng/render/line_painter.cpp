@@ -18,19 +18,18 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/shape/line_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/shape_painter.h"
 
 namespace OHOS::Ace::NG {
-void LinePainter::DrawLine(RSCanvas& canvas, const ShapePoint& startPoint, const ShapePoint& endPoint)
+void LinePainter::DrawLine(RSCanvas& canvas, const LinePaintProperty& linePaintProperty)
 {
     RSPen pen;
-    // TODO: add suppourt in shape
-    pen.SetAntiAlias(true);
-    pen.SetWidth(5.0);
-    pen.SetColor(ToRSColor(Color::BLACK));
+    ShapePainter::SetPan(pen, linePaintProperty);
     canvas.AttachPen(pen);
-
-    PointF startPoint_ = PointF(startPoint.first.ConvertToPx(), startPoint.second.ConvertToPx());
-    PointF endPoint_ = PointF(endPoint.first.ConvertToPx(), endPoint.second.ConvertToPx());
+    PointF startPoint_ = PointF(linePaintProperty.GetStartPointValue().first.ConvertToPx(),
+        linePaintProperty.GetStartPointValue().second.ConvertToPx());
+    PointF endPoint_ = PointF(linePaintProperty.GetEndPointValue().first.ConvertToPx(),
+        linePaintProperty.GetEndPointValue().second.ConvertToPx());
     canvas.DrawLine(ToRSPonit(startPoint_), ToRSPonit(endPoint_));
 }
 } // namespace OHOS::Ace::NG

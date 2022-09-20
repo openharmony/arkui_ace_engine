@@ -31,6 +31,7 @@
 #include "core/common/container.h"
 #include "core/components/box/box_component.h"
 #include "core/components/common/properties/border_image.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/transform/transform_component.h"
