@@ -56,6 +56,7 @@ const char IMPORTANT_YES[] = "yes";
 const char IMPORTANT_NO[] = "no";
 const char IMPORTANT_NO_HIDE_DES[] = "no-hide-descendants";
 const char LIST_TAG[] = "List";
+const char SIDEBARCONTAINER_TAG[] = "SideBarContainer";
 constexpr int32_t INVALID_PARENT_ID = -2100000;
 constexpr int32_t DEFAULT_PARENT_ID = 2100000;
 constexpr int32_t ROOT_STACK_BASE = 1100000;
@@ -171,6 +172,16 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
         Accessibility::Rect bounds(leftTopX, leftTopY, rightBottomX, rightBottomY);
         nodeInfo.SetRectInScreen(bounds);
     } else {
+        if (node->GetTag() == SIDEBARCONTAINER_TAG) {
+            Rect sideBarRect = node->GetRect();
+            for (const auto& childNode : node->GetChildList()) {
+                sideBarRect = sideBarRect.CombineRect(childNode->GetRect());
+            }
+            leftTopX = static_cast<int>(sideBarRect.Left()) + manager->GetWindowLeft();
+            leftTopY = static_cast<int>(sideBarRect.Top()) + manager->GetWindowTop();
+            rightBottomX = static_cast<int>(sideBarRect.Right()) + manager->GetWindowLeft();
+            rightBottomY = static_cast<int>(sideBarRect.Bottom()) + manager->GetWindowLeft();
+        }
         Accessibility::Rect bounds(leftTopX, leftTopY, rightBottomX, rightBottomY);
         nodeInfo.SetRectInScreen(bounds);
         nodeInfo.SetComponentId(static_cast<int>(node->GetNodeId()));
