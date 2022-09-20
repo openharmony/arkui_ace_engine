@@ -19,7 +19,6 @@
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/transform_scalar.h"
 
 namespace OHOS::Ace::NG {
 void ShapePainter::SetPan(RSPen& pen, const ShapePaintProperty& shapePaintProperty)
@@ -79,11 +78,11 @@ void ShapePainter::SetPan(RSPen& pen, const ShapePaintProperty& shapePaintProper
         auto lineDashState = shapePaintProperty.GetStrokeDashArrayValue();
         RSScalar intervals[lineDashState.size()];
         for (size_t i = 0; i < lineDashState.size(); ++i) {
-            intervals[i] = DoubleToRSScalar(lineDashState[i].ConvertToPx());
+            intervals[i] = static_cast<RSScalar>(lineDashState[i].ConvertToPx());
         }
         RSScalar phase = 0.0f;
         if (shapePaintProperty.HasStrokeDashOffset()) {
-            phase = DoubleToRSScalar(shapePaintProperty.GetStrokeDashOffsetValue().ConvertToPx());
+            phase = static_cast<RSScalar>(shapePaintProperty.GetStrokeDashOffsetValue().ConvertToPx());
         }
         pen.SetPathEffect(RSPathEffect::CreateDashPathEffect(intervals, lineDashState.size(), phase));
     }

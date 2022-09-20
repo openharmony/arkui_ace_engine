@@ -34,6 +34,7 @@ public:
     static void SetStrokeMiterLimit(const JSCallbackInfo& info);
     static void SetStrokeOpacity(const JSCallbackInfo& info);
     static void SetFillOpacity(const JSCallbackInfo& info);
+    static void SetNgFill(const JSCallbackInfo& info);
     static void SetStrokeWidth(const JSCallbackInfo& info);
     static void SetAntiAlias(bool antiAlias);
     static void JsWidth(const JSCallbackInfo& info);
@@ -62,12 +63,6 @@ protected:
     static void SetNgSize(const JSCallbackInfo& info);
     static void SetWidth(const JSRef<JSVal>& jsValue);
     static void SetHeight(const JSRef<JSVal>& jsValue);
-    static void SetNgFill(const JSCallbackInfo& info);
-    static void SetNgStrokeDashArray(const JSCallbackInfo& info);
-    static void SetNgStrokeMiterLimit(const JSCallbackInfo& info);
-    static void SetNgStrokeOpacity(const JSCallbackInfo& info);
-    static void SetNgFillOpacity(const JSCallbackInfo& info);
-    static void SetNgStrokeWidth(const JSCallbackInfo& info);
     void ObjectWidth(const JSRef<JSVal>& jsValue);
     void ObjectHeight(const JSRef<JSVal>& jsValue);
     RefPtr<BasicShape> basicShape_;

@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 
-#include "bridge/declarative_frontend/jsview/js_shape.h"
-#include "core/common/container.h"
 #include "core/components/shape/shape_component.h"
 #include "core/components_ng/pattern/shape/line_view.h"
 #include "frameworks/base/memory/referenced.h"

@@ -47,14 +47,6 @@ public:
     static void SetBitmapMesh(const JSCallbackInfo& info);
 
 private:
-    static void SetNgFill(const JSCallbackInfo& info);
-    static void SetNgStrokeLineCap(int lineCap);
-    static void SetNgStrokeLineJoin(int lineJoin);
-    static void SetNgStrokeMiterLimit(const JSCallbackInfo& info);
-    static void SetNgStrokeOpacity(const JSCallbackInfo& info);
-    static void SetNgFillOpacity(const JSCallbackInfo& info);
-    static void SetNgStrokeWidth(const JSCallbackInfo& info);
-    static void SetNgStrokeDashArray(const JSCallbackInfo& info);
     static void InitBox(const JSCallbackInfo& info);
 };
 
