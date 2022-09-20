@@ -233,8 +233,6 @@ void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 func->Call(JSRef<JSObject>(), 0, nullptr);
             });
-        if (Container::IsCurrentUseNewPipeline()) {
-        }
         auto scrollComponent =
             AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (scrollComponent) {
