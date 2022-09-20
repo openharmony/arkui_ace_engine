@@ -168,7 +168,6 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         MeasureInItemMode(layoutWrapper);
     }
-
 }
 
 float FlexLayoutAlgorithm::GetStretchCrossLimit() const

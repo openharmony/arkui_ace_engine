@@ -46,6 +46,7 @@ using RSBitmap = Rosen::Drawing::Bitmap;
 using RSBitmapFormat = Rosen::Drawing::BitmapFormat;
 using RSColorType = Rosen::Drawing::ColorType;
 using RSAlphaType = Rosen::Drawing::AlphaType;
+using RSClipOp = Rosen::Drawing::ClipOp;
 
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;

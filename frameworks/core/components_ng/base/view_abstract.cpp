@@ -18,9 +18,14 @@
 #include <optional>
 #include <utility>
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 void ViewAbstract::SetWidth(const CalcLength& width)
@@ -243,6 +248,48 @@ void ViewAbstract::SetTranslate(const NG::Vector3F& value)
 void ViewAbstract::SetRotate(const NG::Vector4F& value)
 {
     ACE_UPDATE_RENDER_CONTEXT(TransformRotate, value);
+}
+
+void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param)
+{
+    auto msg = param->GetMessage();
+    auto isShow = param->IsShow();
+    LOGI("ViewAbstract::BindPopup, msg is %{public}s", msg.c_str());
+    auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto popupInfo = overlayManager->GetPopupInfo(targetId);
+    if (popupInfo.isCurrentOnShow == isShow) {
+        LOGI("No need to change popup show flag.");
+        return;
+    }
+    popupInfo.markNeedUpdate = true;
+    auto popupId = popupInfo.popupId;
+    auto popupNode = popupInfo.popupNode;
+    // Create new popup.
+    if (popupInfo.popupId == -1 || !popupNode) {
+        popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
+        popupId = popupNode->GetId();
+    } else {
+        // TODO: update is not completed.
+        LOGI("Update pop node.");
+    }
+    // update PopupInfo props
+    popupInfo.popupId = popupId;
+    popupInfo.markNeedUpdate = isShow;
+    popupInfo.popupNode = popupNode;
+    popupNode->MarkModifyDone();
+    popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
 void ViewAbstract::SetBackdropBlur(const Dimension& radius)
