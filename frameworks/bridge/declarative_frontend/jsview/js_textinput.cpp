@@ -15,8 +15,11 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 
+#include <optional>
+#include <string>
 #include <vector>
 
+#include "core/common/container.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
@@ -29,77 +32,6 @@
 #include "frameworks/core/components/text_field/textfield_theme.h"
 
 namespace OHOS::Ace::Framework {
-
-namespace {
-
-const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
-constexpr Dimension INNER_PADDING = 0.0_vp;
-
-} // namespace
-
-void JSTextInput::InitDefaultStyle()
-{
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto stack = ViewStackProcessor::GetInstance();
-    auto textInputComponent = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
-    auto theme = GetTheme<TextFieldTheme>();
-    if (!boxComponent || !textInputComponent || !theme) {
-        return;
-    }
-
-    textInputComponent->SetCursorColor(theme->GetCursorColor());
-    textInputComponent->SetCursorRadius(theme->GetCursorRadius());
-    textInputComponent->SetPlaceholderColor(theme->GetPlaceholderColor());
-    textInputComponent->SetFocusBgColor(theme->GetFocusBgColor());
-    textInputComponent->SetFocusPlaceholderColor(theme->GetFocusPlaceholderColor());
-    textInputComponent->SetFocusTextColor(theme->GetFocusTextColor());
-    textInputComponent->SetBgColor(theme->GetBgColor());
-    textInputComponent->SetTextColor(theme->GetTextColor());
-    textInputComponent->SetSelectedColor(theme->GetSelectedColor());
-    textInputComponent->SetHoverColor(theme->GetHoverColor());
-    textInputComponent->SetPressColor(theme->GetPressColor());
-    textInputComponent->SetNeedFade(theme->NeedFade());
-    textInputComponent->SetShowEllipsis(theme->ShowEllipsis());
-
-    TextStyle textStyle = textInputComponent->GetTextStyle();
-    textStyle.SetTextColor(theme->GetTextColor());
-    textStyle.SetFontSize(theme->GetFontSize());
-    textStyle.SetFontWeight(theme->GetFontWeight());
-    textStyle.SetFontFamilies(INPUT_FONT_FAMILY_VALUE);
-    textInputComponent->SetTextStyle(textStyle);
-    textInputComponent->SetEditingStyle(textStyle);
-    textInputComponent->SetPlaceHoldStyle(textStyle);
-
-    textInputComponent->SetCountTextStyle(theme->GetCountTextStyle());
-    textInputComponent->SetOverCountStyle(theme->GetOverCountStyle());
-    textInputComponent->SetCountTextStyleOuter(theme->GetCountTextStyleOuter());
-    textInputComponent->SetOverCountStyleOuter(theme->GetOverCountStyleOuter());
-
-    textInputComponent->SetErrorTextStyle(theme->GetErrorTextStyle());
-    textInputComponent->SetErrorSpacing(theme->GetErrorSpacing());
-    textInputComponent->SetErrorIsInner(theme->GetErrorIsInner());
-    textInputComponent->SetErrorBorderWidth(theme->GetErrorBorderWidth());
-    textInputComponent->SetErrorBorderColor(theme->GetErrorBorderColor());
-
-    RefPtr<Decoration> decoration = AceType::MakeRefPtr<Decoration>();
-    // Need to update when UX of PC supported.
-    auto edge = theme->GetPadding();
-    edge.SetTop(INNER_PADDING);
-    edge.SetBottom(INNER_PADDING);
-    decoration->SetPadding(edge);
-    decoration->SetBackgroundColor(theme->GetBgColor());
-    decoration->SetBorderRadius(theme->GetBorderRadius());
-    const auto& boxDecoration = boxComponent->GetBackDecoration();
-    if (boxDecoration) {
-        decoration->SetImage(boxDecoration->GetImage());
-        decoration->SetGradient(boxDecoration->GetGradient());
-    }
-    textInputComponent->SetOriginBorder(decoration->GetBorder());
-    textInputComponent->SetDecoration(decoration);
-    textInputComponent->SetIconSize(theme->GetIconSize());
-    textInputComponent->SetIconHotZoneSize(theme->GetIconHotZoneSize());
-    textInputComponent->SetHeight(theme->GetHeight());
-}
 
 void JSTextInput::JSBind(BindingTarget globalObj)
 {
@@ -152,60 +84,15 @@ void JSTextInput::JSBind(BindingTarget globalObj)
 
 void JSTextInput::Create(const JSCallbackInfo& info)
 {
-    RefPtr<TextFieldComponent> textInputComponent = AceType::MakeRefPtr<TextFieldComponent>();
-    ViewStackProcessor::GetInstance()->ClaimElementId(textInputComponent);
-    textInputComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-    // default type is text, default action is done.
-    textInputComponent->SetTextInputType(TextInputType::TEXT);
-    textInputComponent->SetAction(TextInputAction::DONE);
-    textInputComponent->SetInspectorTag("TextInput");
-    textInputComponent->SetHoverAnimationType(HoverAnimationType::BOARD);
-    ViewStackProcessor::GetInstance()->Push(textInputComponent);
-    InitDefaultStyle();
-    Border boxBorder;
-    auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    auto theme = GetTheme<TextFieldTheme>();
-    if (boxComponent->GetBackDecoration()) {
-        boxBorder = boxComponent->GetBackDecoration()->GetBorder();
-    }
-    JSTextField::UpdateDecoration(boxComponent, textInputComponent, boxBorder, theme);
-
-    JSInteractableView::SetFocusable(true);
-    JSInteractableView::SetFocusNode(true);
-
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGI("TextInput create without argument");
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-
-    std::string placeholder;
-    if (ParseJsString(paramObject->GetProperty("placeholder"), placeholder)) {
-        textInputComponent->SetPlaceholder(placeholder);
-    }
-
-    std::string text;
-    if (ParseJsString(paramObject->GetProperty("text"), text)) {
-        textInputComponent->SetValue(text);
-    }
-
-    auto controllerObj = paramObject->GetProperty("controller");
-    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
-        JSTextInputController* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextInputController>();
-        if (jsController) {
-            jsController->SetController(textInputComponent->GetTextFieldController());
-        }
-    } else {
-        LOGI("controller do not configured");
-    }
+    JSTextField::CreateTextInput(info);
 }
 
 void JSTextInputController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextInputController>::Declare("TextInputController");
     JSClass<JSTextInputController>::Method("caretPosition", &JSTextInputController::CaretPosition);
-    JSClass<JSTextInputController>::Bind(globalObj, JSTextInputController::Constructor,
-                                         JSTextInputController::Destructor);
+    JSClass<JSTextInputController>::Bind(
+        globalObj, JSTextInputController::Constructor, JSTextInputController::Destructor);
 }
 
 void JSTextInputController::Constructor(const JSCallbackInfo& args)

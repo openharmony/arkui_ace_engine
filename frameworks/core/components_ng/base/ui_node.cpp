@@ -45,7 +45,8 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot)
 
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
-        LOGW("Child element is already existed");
+        LOGW("Child node already exists. Existing child nodeId %{public}d, add. child nodeId nodeId %{public}d", 
+            (*it)->GetId(), child->GetId());
         return;
     }
 
@@ -73,6 +74,12 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     auto result = children_.erase(iter);
     MarkNeedSyncRenderTree();
     return result;
+}
+
+int32_t UINode::RemoveChildAndReturnIndex(const RefPtr<UINode>& child)
+{
+    auto result = RemoveChild(child);
+    return std::distance(children_.begin(), result);
 }
 
 void UINode::RemoveChildAtIndex(int32_t index)

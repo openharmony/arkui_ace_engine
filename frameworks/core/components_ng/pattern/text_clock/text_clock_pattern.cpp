@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 
+#include <ctime>
 #include <string>
 #include <sys/time.h>
 
@@ -28,6 +29,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
+constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t BASE_YEAR = 1900;
 constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
@@ -35,8 +37,8 @@ const std::string DEFAULT_FORMAT = "hhmmss";
 
 int32_t GetSystemTimeZone()
 {
-    struct timeval currentTime;
-    struct timezone timeZone;
+    struct timeval currentTime {};
+    struct timezone timeZone {};
     gettimeofday(&currentTime, &timeZone);
     int32_t hoursWest = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
     return hoursWest;
@@ -48,13 +50,15 @@ TextClockPattern::TextClockPattern()
     textClockController_ = MakeRefPtr<TextClockController>();
 }
 
-void TextClockPattern::OnAttachToFrameNode() {
+void TextClockPattern::OnAttachToFrameNode()
+{
     InitTextClockController();
     InitUpdateTimeTextCallBack();
 }
 
 void TextClockPattern::OnModifyDone()
 {
+    hourWest_ = GetHoursWest();
     UpdateTimeText();
 }
 
@@ -82,7 +86,7 @@ void TextClockPattern::InitTextClockController()
 
 void TextClockPattern::InitUpdateTimeTextCallBack()
 {
-    if(!timeCallback_) {
+    if (!timeCallback_) {
         timeCallback_ = ([wp = WeakClaim(this)]() {
             auto textClock = wp.Upgrade();
             if (textClock) {
@@ -115,8 +119,8 @@ void TextClockPattern::UpdateTimeText()
 
 void TextClockPattern::RequestUpdateForNextSecond()
 {
-    auto timeOfZone = GetTimeOfZone(GetHoursWest());
-    auto timeUsec = timeOfZone.timeUsec_;
+    struct timeval currentTime {};
+    gettimeofday(&currentTime, nullptr);
     /**
      * 1 second = 1000 millisecond = 1000000 microsecond.
      * Millisecond is abbreviated as msec. Microsecond is abbreviated as usec.
@@ -126,7 +130,8 @@ void TextClockPattern::RequestUpdateForNextSecond()
      * so add an additional millisecond to modify the loss of precision during division
      */
     int32_t delayTime =
-        (INTERVAL_OF_U_SECOND - static_cast<int32_t>(timeUsec)) / MICROSECONDS_OF_MILLISECOND + 1; // millisecond
+        (INTERVAL_OF_U_SECOND - static_cast<int32_t>(currentTime.tv_usec)) / MICROSECONDS_OF_MILLISECOND +
+        1; // millisecond
 
     auto context = UINode::GetContext();
     CHECK_NULL_VOID(context);
@@ -151,22 +156,22 @@ void TextClockPattern::UpdateTimeTextCallBack()
 
 std::string TextClockPattern::GetCurrentFormatDateTime()
 {
-    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    auto* local = std::localtime(&now);
-    if (local == nullptr) {
+    time_t utc = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    time_t localTime = (hourWest_ == GetSystemTimeZone()) ? utc : utc - (hourWest_ * TOTAL_SECONDS_OF_HOUR);
+
+    auto* timeZoneTime = std::localtime(&localTime);
+    if (timeZoneTime == nullptr) {
         LOGE("Get localtime failed.");
         return "";
     }
-    // This is for i18n date time
+    // This is for i18n date time.
     DateTime dateTime;
-    dateTime.year = local->tm_year + BASE_YEAR;
-    dateTime.month = local->tm_mon;
-    dateTime.day = local->tm_mday;
-
-    TimeOfZone timeOfZone = GetTimeOfZone(GetHoursWest());
-    dateTime.hour = timeOfZone.hour24_;
-    dateTime.minute = timeOfZone.minute_;
-    dateTime.second = timeOfZone.second_;
+    dateTime.year = timeZoneTime->tm_year + BASE_YEAR;
+    dateTime.month = timeZoneTime->tm_mon;
+    dateTime.day = timeZoneTime->tm_mday;
+    dateTime.hour = timeZoneTime->tm_hour;
+    dateTime.minute = timeZoneTime->tm_min;
+    dateTime.second = timeZoneTime->tm_sec;
 
     std::string time = Localization::GetInstance()->FormatDateTime(dateTime, GetFormat());
     return time;
@@ -176,7 +181,7 @@ void TextClockPattern::FireChangeEvent() const
 {
     auto textClockEventHub = GetEventHub<TextClockEventHub>();
     CHECK_NULL_VOID(textClockEventHub);
-    textClockEventHub->FireChangeEvent(GetMilliseconds());
+    textClockEventHub->FireChangeEvent(std::to_string(GetMilliseconds()));
 }
 
 std::string TextClockPattern::GetFormat() const

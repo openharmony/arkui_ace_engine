@@ -151,7 +151,7 @@ private:
     std::optional<int32_t> lanes_;
     std::optional<float> minLaneLength_;
     std::optional<float> maxLaneLength_;
-    V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::CENTER;
+    V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
     bool playEdgeEffectAnimation_ = false;
     float edgeEffectOffset_ = 0.0f;

@@ -20,17 +20,18 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/event/event_hub.h"
 
-#define ACE_WEB_EVENT_PROPERTY(name)                                                                           \
+#define ACE_WEB_EVENT_PROPERTY(name, type)                                                                     \
 public:                                                                                                        \
-    void Set##name##Event(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& prop##name##Event) \
+    void Set##name##Event(std::function<type(const std::shared_ptr<BaseEventInfo>& info)>&& prop##name##Event) \
     {                                                                                                          \
         prop##name##Event_ = std::move(prop##name##Event);                                                     \
     }                                                                                                          \
                                                                                                                \
-    const std::function<void(const std::shared_ptr<BaseEventInfo>& info)>& Get##name##Event() const            \
+    const std::function<type(const std::shared_ptr<BaseEventInfo>& info)>& Get##name##Event() const            \
     {                                                                                                          \
         return prop##name##Event_;                                                                             \
     }                                                                                                          \
+                                                                                                               \
     void Fire##name##Event(const std::shared_ptr<BaseEventInfo>& info) const                                   \
     {                                                                                                          \
         if (prop##name##Event_) {                                                                              \
@@ -39,7 +40,7 @@ public:                                                                         
     }                                                                                                          \
                                                                                                                \
 private:                                                                                                       \
-    std::function<void(const std::shared_ptr<BaseEventInfo>& info)> prop##name##Event_;
+    std::function<type(const std::shared_ptr<BaseEventInfo>& info)> prop##name##Event_;
 
 namespace OHOS::Ace::NG {
 class WebEventHub : public EventHub {
@@ -49,35 +50,152 @@ public:
     WebEventHub() = default;
     ~WebEventHub() override = default;
 
-    using OnConsoleImpl = std::function<bool(const std::shared_ptr<BaseEventInfo>& info)>;
-    void SetOnConsoleEvent(OnConsoleImpl&& OnConsoleImpl)
+    void SetOnCommonDialogEvent(std::function<bool(const std::shared_ptr<BaseEventInfo>& info)>&& onCommonDialogImpl,
+        DialogEventType dialogEventType)
     {
-        onConsoleImpl_ = std::move(OnConsoleImpl);
+        switch (dialogEventType) {
+            case DialogEventType::DIALOG_EVENT_ALERT:
+                onAlertImpl_ = std::move(onCommonDialogImpl);
+                break;
+            case DialogEventType::DIALOG_EVENT_CONFIRM:
+                onConfirmImpl_ = std::move(onCommonDialogImpl);
+                break;
+            case DialogEventType::DIALOG_EVENT_PROMPT:
+                onPromptImpl_ = std::move(onCommonDialogImpl);
+                break;
+            case DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD:
+                onBeforeUnloadImpl_ = std::move(onCommonDialogImpl);
+                break;
+            default:
+                break;
+        }
     }
 
-    const OnConsoleImpl& GetOnConsoleEvent() const
+    bool FireOnCommonDialogEvent(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType) const
     {
-        return onConsoleImpl_;
-    }
-
-    bool FireOnConsole(const std::shared_ptr<BaseEventInfo>& info)
-    {
-        if (onConsoleImpl_) {
-            return onConsoleImpl_(info);
+        if (dialogEventType == DialogEventType::DIALOG_EVENT_ALERT && onAlertImpl_) {
+            return onAlertImpl_(info);
+        }
+        if (dialogEventType == DialogEventType::DIALOG_EVENT_CONFIRM && onConfirmImpl_) {
+            return onConfirmImpl_(info);
+        }
+        if (dialogEventType == DialogEventType::DIALOG_EVENT_PROMPT && onPromptImpl_) {
+            return onPromptImpl_(info);
+        }
+        if (dialogEventType == DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD && onBeforeUnloadImpl_) {
+            return onBeforeUnloadImpl_(info);
         }
         return false;
     }
 
-    ACE_WEB_EVENT_PROPERTY(OnPageStarted);
-    ACE_WEB_EVENT_PROPERTY(OnPageFinished);
-    ACE_WEB_EVENT_PROPERTY(OnTitleReceive);
-    ACE_WEB_EVENT_PROPERTY(OnGeolocationHide);
-    ACE_WEB_EVENT_PROPERTY(OnGeolocationShow);
-    ACE_WEB_EVENT_PROPERTY(OnErrorReceive);
-    ACE_WEB_EVENT_PROPERTY(OnHttpErrorReceive);
+    void SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&& propOnKeyEvent)
+    {
+        propOnKeyEvent_ = propOnKeyEvent;
+    }
+
+    const std::function<void(KeyEventInfo& keyEventInfo)>& GetOnKeyEvent() const
+    {
+        return propOnKeyEvent_;
+    }
+
+    void SetOnMouseEvent(std::function<void(MouseInfo& info)>&& propOnMouseEvent)
+    {
+        propOnMouseEvent_ = propOnMouseEvent;
+    }
+
+    const std::function<void(MouseInfo& info)>& GetOnMouseEvent() const
+    {
+        return propOnMouseEvent_;
+    }
+
+    void SetOnDragStartEvent(const OnDragFunc& propOnDragStartEvent)
+    {
+        propOnDragStartEvent_ = propOnDragStartEvent;
+    }
+
+    const OnDragFunc& GetOnDragEvent() const
+    {
+        return propOnDragStartEvent_;
+    }
+
+    void SetOnDragEnterEvent(const OnDropFunc& propOnDragEnterEvent)
+    {
+        propOnDragEnterEvent_ = propOnDragEnterEvent;
+    }
+
+    const OnDropFunc& GetOnDragEnterEvent() const
+    {
+        return propOnDragEnterEvent_;
+    }
+
+    void SetOnDragMoveEvent(const OnDropFunc& propOnDragMoveEvent)
+    {
+        propOnDragMoveEvent_ = propOnDragMoveEvent;
+    }
+
+    const OnDropFunc& GetOnDragMoveEvent() const
+    {
+        return propOnDragMoveEvent_;
+    }
+
+    void SetOnDragLeaveEvent(const OnDropFunc& propOnDragLeaveEvent)
+    {
+        propOnDragLeaveEvent_ = propOnDragLeaveEvent;
+    }
+
+    const OnDropFunc& GetOnDragLeaveEvent() const
+    {
+        return propOnDragLeaveEvent_;
+    }
+
+    void SetOnDropEvent(const OnDropFunc& propOnDropEvent)
+    {
+        propOnDropEvent_ = propOnDropEvent;
+    }
+
+    const OnDropFunc& GetOnDropEvent() const
+    {
+        return propOnDropEvent_;
+    }
+
+    ACE_WEB_EVENT_PROPERTY(OnPageStarted, void);
+    ACE_WEB_EVENT_PROPERTY(OnPageFinished, void);
+    ACE_WEB_EVENT_PROPERTY(OnHttpErrorReceive, void);
+    ACE_WEB_EVENT_PROPERTY(OnErrorReceive, void);
+    ACE_WEB_EVENT_PROPERTY(OnConsole, bool);
+    ACE_WEB_EVENT_PROPERTY(OnProgressChange, void);
+    ACE_WEB_EVENT_PROPERTY(OnTitleReceive, void);
+    ACE_WEB_EVENT_PROPERTY(OnGeolocationHide, void);
+    ACE_WEB_EVENT_PROPERTY(OnGeolocationShow, void);
+    ACE_WEB_EVENT_PROPERTY(OnRequestFocus, void);
+    ACE_WEB_EVENT_PROPERTY(OnDownloadStart, void);
+    ACE_WEB_EVENT_PROPERTY(OnHttpAuthRequest, bool);
+    ACE_WEB_EVENT_PROPERTY(OnSslErrorRequest, bool);
+    ACE_WEB_EVENT_PROPERTY(OnSslSelectCertRequest, bool);
+    ACE_WEB_EVENT_PROPERTY(OnInterceptRequest, RefPtr<WebResponse>);
+    ACE_WEB_EVENT_PROPERTY(OnUrlLoadIntercept, bool);
+    ACE_WEB_EVENT_PROPERTY(OnFileSelectorShow, bool);
+    ACE_WEB_EVENT_PROPERTY(OnContextMenuShow, bool);
+    ACE_WEB_EVENT_PROPERTY(OnRenderExited, void);
+    ACE_WEB_EVENT_PROPERTY(OnRefreshAccessedHistory, void);
+    ACE_WEB_EVENT_PROPERTY(OnResourceLoad, void);
+    ACE_WEB_EVENT_PROPERTY(OnScaleChange, void);
+    ACE_WEB_EVENT_PROPERTY(OnScroll, void);
+    ACE_WEB_EVENT_PROPERTY(OnPermissionRequest, void);
+    ACE_WEB_EVENT_PROPERTY(OnSearchResultReceive, void);
 
 private:
-    OnConsoleImpl onConsoleImpl_;
+    std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;
+    std::function<void(MouseInfo& info)> propOnMouseEvent_;
+    OnDragFunc propOnDragStartEvent_;
+    OnDropFunc propOnDragEnterEvent_;
+    OnDropFunc propOnDragMoveEvent_;
+    OnDropFunc propOnDragLeaveEvent_;
+    OnDropFunc propOnDropEvent_;
+    std::function<bool(const std::shared_ptr<BaseEventInfo>& info)> onAlertImpl_;
+    std::function<bool(const std::shared_ptr<BaseEventInfo>& info)> onConfirmImpl_;
+    std::function<bool(const std::shared_ptr<BaseEventInfo>& info)> onPromptImpl_;
+    std::function<bool(const std::shared_ptr<BaseEventInfo>& info)> onBeforeUnloadImpl_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WebEventHub);
 };

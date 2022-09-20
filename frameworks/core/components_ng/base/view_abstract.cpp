@@ -215,6 +215,11 @@ void ViewAbstract::SetAlign(Alignment alignment)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
 
+void ViewAbstract::SetVisibility(VisibleType visible)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
+}
+
 void ViewAbstract::SetOpacity(double opacity)
 {
     ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
@@ -238,6 +243,18 @@ void ViewAbstract::SetTranslate(const NG::Vector3F& value)
 void ViewAbstract::SetRotate(const NG::Vector4F& value)
 {
     ACE_UPDATE_RENDER_CONTEXT(TransformRotate, value);
+}
+
+void ViewAbstract::SetBackdropBlur(const Dimension& radius)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackBlurRadius, radius);
+}
+
+void ViewAbstract::SetInspectorId(const std::string& inspectorId)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateInspectorId(inspectorId);
 }
 
 void ViewAbstract::Pop()

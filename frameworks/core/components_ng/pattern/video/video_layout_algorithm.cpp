@@ -22,6 +22,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float COEFFICIENT = 2.0;
 SizeF CalculateFitContain(const SizeF& videoSize, const SizeF& layoutSize)
 {
     double layoutRatio = NearZero(layoutSize.Height()) ? 0.0 : layoutSize.Width() / layoutSize.Height();
@@ -74,14 +75,20 @@ void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto parentGlobalOffset = layoutWrapper->GetGeometryNode()->GetParentGlobalOffset();
     auto contentOffset = layoutWrapper->GetGeometryNode()->GetContentOffset();
     auto offset = frameLayoutOffset + parentGlobalOffset;
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Layout(offset);
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
             child->GetGeometryNode()->SetFrameOffset(offset);
             child->GetGeometryNode()->SetContentOffset(contentOffset);
+        } else if (child->GetHostTag() == V2::ROW_ETS_TAG) {
+            auto controlTabOffset = offset;
+            controlTabOffset.SetY(controlTabOffset.GetY() + frameSize.Height() / COEFFICIENT);
+            child->GetGeometryNode()->SetFrameOffset(controlTabOffset);
         }
     }
 }
+
 void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     PerformMeasureSelf(layoutWrapper);
@@ -99,6 +106,7 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 }
+
 std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {

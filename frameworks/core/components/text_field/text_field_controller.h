@@ -15,37 +15,36 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_FIELD_TEXT_FIELD_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_FIELD_TEXT_FIELD_CONTROLLER_H
+
 #include <functional>
+#include <utility>
+
 #include "base/memory/ace_type.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {
 
 class Element;
 
-class ACE_EXPORT TextFieldController : public AceType {
-    DECLARE_ACE_TYPE(TextFieldController, AceType);
+class ACE_EXPORT TextFieldController : public TextFieldControllerBase {
+    DECLARE_ACE_TYPE(TextFieldController, TextFieldControllerBase);
+
 public:
     void SetHandler(WeakPtr<Element> element)
     {
-        element_ = element;
+        element_ = std::move(element);
     }
 
-    void Focus(bool focus);
+    void Focus(bool focus) override;
 
-    void ShowError(const std::string& errorText);
-    void Delete();
-    void Insert(const std::string& args);
+    void ShowError(const std::string& errorText) override;
+    void Delete() override;
+    void Insert(const std::string& args) override;
 
-    void CaretPosition(int32_t caretPosition);
-
-    void SetCaretPosition(std::function<void(const int32_t)> setCaretPosition)
-    {
-        setCaretPosition_ = setCaretPosition;
-    }
+    void CaretPosition(int32_t caretPosition) override;
 
 private:
     WeakPtr<Element> element_;
-    std::function<void(const int32_t)> setCaretPosition_;
 };
 
 } // namespace OHOS::Ace

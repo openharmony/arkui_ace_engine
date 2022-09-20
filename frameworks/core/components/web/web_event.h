@@ -436,7 +436,7 @@ public:
 };
 
 class ACE_EXPORT WebSslSelectCertEvent : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(WebSSslSelectCertEvent, BaseEventInfo);
+    DECLARE_RELATIONSHIP_OF_CLASSES(WebSslSelectCertEvent, BaseEventInfo);
 
 public:
     WebSslSelectCertEvent(const RefPtr<SslSelectCertResult>& result,
@@ -476,7 +476,7 @@ public:
 private:
     RefPtr<SslSelectCertResult> result_;
     std::string host_;
-    int32_t port_;
+    int32_t port_ = -1;
     std::vector<std::string> keyTypes_;
     std::vector<std::string> issuers_;
 };

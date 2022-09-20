@@ -542,16 +542,14 @@ public:
     using OnSslSelectCertRequestImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnSslSelectCertRequest(const BaseEventInfo* info) const
     {
-        LOGI("OnSslSelectCertRequest");
         if (onSslSelectCertRequestImpl_) {
-            LOGI("web_component.h OnSslSelectCertRequest onSslSelectCertRequestImpl_");
             return onSslSelectCertRequestImpl_(info);
         }
         return false;
     }
     void SetOnSslSelectCertRequestImpl(OnSslSelectCertRequestImpl && impl)
     {
-        if (impl == nullptr) {
+        if (!impl) {
             return;
         }
         onSslSelectCertRequestImpl_ = std::move(impl);

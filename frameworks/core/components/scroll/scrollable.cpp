@@ -179,10 +179,6 @@ void Scrollable::HandleTouchDown()
 {
     LOGD("handle touch down");
     isTouching_ = true;
-
-    if (outBoundaryCallback_ && !outBoundaryCallback_()) {
-        return;
-    }
     // If animation still runs, first stop it.
     springController_->Stop();
     if (!controller_->IsStopped()) {
@@ -191,6 +187,7 @@ void Scrollable::HandleTouchDown()
         // Resets values.
         currentPos_ = 0.0;
     }
+    LOGD("handle touch down has already stopped the animation");
 }
 
 void Scrollable::HandleTouchUp()

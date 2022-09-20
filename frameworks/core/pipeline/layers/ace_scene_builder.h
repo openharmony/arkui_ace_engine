@@ -43,6 +43,7 @@ public:
     void PushSvgMask(const sk_sp<SkSVGDOM>& svgDom, double x, double y, double scaleX, double scaleY) override;
     void PushPathMask(const SkPaint& maskPaint, const SkPath& maskPath) override;
     void PushFilter(const SkPaint& filterPaint) override;
+    void PushHole(double dx, double dy, double width, double height, int32_t holeId) override {}
     void Pop() override;
 
     std::unique_ptr<flutter::OHOS::LayerTree> GetLayerTree() const;

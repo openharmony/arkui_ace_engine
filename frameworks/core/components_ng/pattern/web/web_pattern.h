@@ -98,24 +98,24 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, Type, std::string);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, UserAgent, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, FileAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OnLineImageAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DomStorageAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ImageAccessEnabled, bool);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MixedContentMode, MixedModeContent);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MixedMode, MixedModeContent);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ZoomAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GeolocationAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, UserAgent, std::string);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CacheMode, WebCacheMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverviewModeAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, FileFromUrlAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DatabaseAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextZoomRatio, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebDebuggingAccessEnabled, bool);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextZoomRatioNum, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackgroundColor, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, InitialScale, float);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CacheMode, WebCacheMode);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NeedGestureAccess, bool);
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -125,24 +125,29 @@ private:
     void OnWebSrcUpdate();
     void OnWebDataUpdate();
     void OnJsEnabledUpdate(bool value);
-    // TODO: add impl.
-    void OnTypeUpdate(const std::string& value) {}
-    void OnUserAgentUpdate(const std::string& value) {}
-    void OnFileAccessEnabledUpdate(bool value) {}
-    void OnOnLineImageAccessEnabledUpdate(bool value) {}
-    void OnDomStorageAccessEnabledUpdate(bool value) {}
-    void OnImageAccessEnabledUpdate(bool value) {}
-    void OnMixedContentModeUpdate(bool MixedModeContent) {}
-    void OnZoomAccessEnabledUpdate(bool value) {}
-    void OnGeolocationAccessEnabledUpdate(bool value) {}
-    void OnOverviewModeAccessEnabledUpdate(bool value) {}
-    void OnFileFromUrlAccessEnabledUpdate(bool value) {}
-    void OnDatabaseAccessEnabledUpdate(bool value) {}
-    void OnWebDebuggingAccessEnabledUpdate(bool value) {}
-    void OnTextZoomRatioNumUpdate(int32_t value) {}
-    void OnInitialScaleUpdate(float value) {}
-    void OnCacheModeUpdate(WebCacheMode value) {}
-    void OnNeedGestureAccessUpdate(bool value) {}
+    void OnMediaPlayGestureAccessUpdate(bool value);
+    void OnFileAccessEnabledUpdate(bool value);
+    void OnOnLineImageAccessEnabledUpdate(bool value);
+    void OnDomStorageAccessEnabledUpdate(bool value);
+    void OnImageAccessEnabledUpdate(bool value);
+    void OnMixedModeUpdate(MixedModeContent value);
+    void OnZoomAccessEnabledUpdate(bool value);
+    void OnGeolocationAccessEnabledUpdate(bool value);
+    void OnUserAgentUpdate(std::string value);
+    void OnCacheModeUpdate(WebCacheMode value);
+    void OnOverviewModeAccessEnabledUpdate(bool value);
+    void OnFileFromUrlAccessEnabledUpdate(bool value);
+    void OnDatabaseAccessEnabledUpdate(bool value);
+    void OnTextZoomRatioUpdate(int32_t value);
+    void OnWebDebuggingAccessEnabledUpdate(bool value);
+    void OnBackgroundColorUpdate(int32_t value);
+    void OnInitialScaleUpdate(float value);
+
+    void InitEvent();
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
+    void HandleMouseEvent(MouseInfo& info);
+    void OnMouseEvent(const MouseInfo& info);
 
     void HandleTouchDown(const TouchEventInfo& info, bool fromOverlay);
 
@@ -165,6 +170,8 @@ private:
     RefPtr<WebDelegate> delegate_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> mouseHoverEvent_;
     bool isUrlLoaded_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);

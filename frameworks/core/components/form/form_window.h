@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 
 class ACE_EXPORT FormWindow : public Window {
 public:
-    explicit FormWindow(WeakPtr<PipelineContext> context) : Window(nullptr), outSidePipelineContext_(context) {}
+    explicit FormWindow(const WeakPtr<PipelineBase>& context) : Window(nullptr), outSidePipelineContext_(context) {}
     ~FormWindow() = default;
 
     void RequestFrame() override;
@@ -42,7 +42,7 @@ public:
     void SetVsyncCallback(AceVsyncCallback&& callback) override;
 
 private:
-    WeakPtr<PipelineContext> outSidePipelineContext_;
+    WeakPtr<PipelineBase> outSidePipelineContext_;
 
     ACE_DISALLOW_COPY_AND_MOVE(FormWindow);
 };

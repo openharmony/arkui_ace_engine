@@ -25,6 +25,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -187,6 +188,14 @@ public:
     }
 
     void RebuildRenderContextTree() override;
+
+    bool IsVisible() const
+    {
+        return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
+    void OnInspectorIdUpdate(const std::string& /*unused*/) {}
 
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 

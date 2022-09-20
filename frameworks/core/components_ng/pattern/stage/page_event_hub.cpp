@@ -15,8 +15,12 @@
 
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 
+#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -47,6 +51,34 @@ void PageEventHub::UpdateRadioGroupValue(const std::string& group, const RefPtr<
         }
         pattern->UpdateUncheckStatus(node);
     }
+}
+
+void PageEventHub::AddCheckBoxToGroup(const std::string& group, const RefPtr<FrameNode>& checkBoxFrameNode)
+{
+    checkBoxGroupNotify_[group].push_back(checkBoxFrameNode);
+}
+
+void PageEventHub::AddCheckBoxGroupToGroup(const std::string& group, const RefPtr<FrameNode>& checkBoxGroupFrameNode)
+{
+    const auto& list = checkBoxGroupNotify_[group];
+    for (auto&& item : list) {
+        auto node = item.Upgrade();
+        if (!node) {
+            continue;
+        }
+        if (node->GetTag() == V2::CHECKBOXGROUP_ETS_TAG) {
+            auto pattern = checkBoxGroupFrameNode->GetPattern<CheckBoxGroupPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsAddToMap(false);
+            return;
+        }
+    }
+    checkBoxGroupNotify_[group].push_back(checkBoxGroupFrameNode);
+}
+
+void PageEventHub::RemoveCheckBoxFromGroup(const std::string& group, const RefPtr<FrameNode>& checkBoxFrameNode)
+{
+    checkBoxGroupNotify_[group].remove(checkBoxFrameNode);
 }
 
 } // namespace OHOS::Ace::NG

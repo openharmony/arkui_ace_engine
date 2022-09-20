@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/syntax/for_each.h"
+#include "core/components_ng/syntax/for_each_model_ng.h"
 
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -23,26 +23,19 @@
 
 namespace OHOS::Ace::NG {
 
-void ForEach::Create(const ForEachFunc& ForEachFunc)
+void ForEachModelNG::Pop()
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto forEachNode = ForEachNode::GetOrCreateForEachNode(nodeId);
-    stack->Push(forEachNode);
-
-    if (!ForEachFunc.idGenFunc_ || !ForEachFunc.itemGenFunc_) {
-        LOGE("for each func is nullptr");
-        return;
-    }
-
-    // for no partial update, not support update.
-    std::vector<std::string> keys = ForEachFunc.idGenFunc_();
-    for (size_t i = 0; i < keys.size(); i++) {
-        ForEachFunc.itemGenFunc_(static_cast<int32_t>(i));
-    }
+    stack->PopContainer();
 }
 
-void ForEach::Create()
+// FIXME, change to emply implementation
+void ForEachModelNG::Create(const std::string& compilerGenId, const OHOS::Ace::ForEachFunc& ForEachFunc)
+{
+    LOGE("Create (with 2 params) unsupported by ForEachModelNG");
+}
+
+void ForEachModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -54,13 +47,14 @@ void ForEach::Create()
     forEachNode->CreateTempItems();
 }
 
-const std::list<std::string>& ForEach::GetCurrentIdList(int32_t nodeId)
+const std::list<std::string>& ForEachModelNG::GetCurrentIdList(int32_t nodeId)
 {
+    // FIXME: is the nodeId needed, or can we do lile SetNewIds ?
     auto forEachNode = ForEachNode::GetOrCreateForEachNode(nodeId);
     return forEachNode->GetTempIds();
 }
 
-void ForEach::SetNewIds(std::list<std::string>&& newIds)
+void ForEachModelNG::SetNewIds(std::list<std::string>&& newIds)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto node = AceType::DynamicCast<ForEachNode>(stack->GetMainElementNode());
@@ -68,7 +62,7 @@ void ForEach::SetNewIds(std::list<std::string>&& newIds)
     node->SetIds(std::move(newIds));
 }
 
-void ForEach::CreateNewChildStart(const std::string& id)
+void ForEachModelNG::CreateNewChildStart(const std::string& id)
 {
     LOGD("Start create child with array id %{public}s.", id.c_str());
     auto* stack = NG::ViewStackProcessor::GetInstance();
@@ -77,7 +71,7 @@ void ForEach::CreateNewChildStart(const std::string& id)
     stack->Push(AceType::MakeRefPtr<SyntaxItem>(stacksKey));
 }
 
-void ForEach::CreateNewChildFinish(const std::string& id)
+void ForEachModelNG::CreateNewChildFinish(const std::string& id)
 {
     LOGD("Finish create child with array id %{public}s.", id.c_str());
     auto* stack = ViewStackProcessor::GetInstance();

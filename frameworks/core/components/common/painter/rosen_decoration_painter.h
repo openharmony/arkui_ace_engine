@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,12 +27,14 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/image/render_image.h"
-#include "core/pipeline/base/rosen_render_context.h"
+#include "core/components_ng/render/decoration_painter.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
 
 class SkPath;
 class SkPaint;
 class SkRRect;
 class SkShader;
+class SkImage;
 struct SkSize;
 
 namespace OHOS::Ace {
@@ -41,8 +43,8 @@ class Border;
 class Offset;
 class Size;
 
-class RosenDecorationPainter : public virtual AceType {
-    DECLARE_ACE_TYPE(RosenDecorationPainter, AceType);
+class RosenDecorationPainter : public virtual NG::DecorationPainter {
+    DECLARE_ACE_TYPE(RosenDecorationPainter, NG::DecorationPainter);
 
 public:
     RosenDecorationPainter(
@@ -52,8 +54,6 @@ public:
     static void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas);
 
     static void PaintShadow(const SkPath& path, const Shadow& shadow, const std::shared_ptr<RSNode>& rsNode);
-
-    static float ConvertRadiusToSigma(float radius);
 
     static void PaintGrayScale(const SkRRect& outerRRect, SkCanvas* canvas, const Dimension& grayscale,
         const Color& color);

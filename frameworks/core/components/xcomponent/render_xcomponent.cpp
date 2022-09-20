@@ -439,26 +439,21 @@ bool RenderXComponent::NativeXComponentDispatchMouseEvent(const OH_NativeXCompon
         LOGE("NativeXComponentDispatchMouseEvent context null");
         return false;
     }
-    float scale = pipelineContext->GetViewScale();
-    float diffX = mouseEvent.x - position_.GetX() * scale;
-    float diffY = mouseEvent.y - position_.GetY() * scale;
-    if ((diffX >= 0) && (diffX <= drawSize_.Width() * scale) && (diffY >= 0) && (diffY <= drawSize_.Height() * scale)) {
-        pipelineContext->GetTaskExecutor()->PostTask(
-            [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, mouseEvent] {
-                auto nXCompImpl = weakNXCompImpl.Upgrade();
-                if (nXComp != nullptr && nXCompImpl) {
-                    nXCompImpl->SetMouseEvent(mouseEvent);
-                    auto surface = const_cast<void*>(nXCompImpl->GetSurface());
-                    auto callback = nXCompImpl->GetMouseEventCallback();
-                    if (callback != nullptr && callback->DispatchMouseEvent != nullptr) {
-                        callback->DispatchMouseEvent(nXComp, surface);
-                    }
-                } else {
-                    LOGE("Native XComponent nullptr");
+    pipelineContext->GetTaskExecutor()->PostTask(
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, mouseEvent] {
+            auto nXCompImpl = weakNXCompImpl.Upgrade();
+            if (nXComp != nullptr && nXCompImpl) {
+                nXCompImpl->SetMouseEvent(mouseEvent);
+                auto surface = const_cast<void*>(nXCompImpl->GetSurface());
+                auto callback = nXCompImpl->GetMouseEventCallback();
+                if (callback != nullptr && callback->DispatchMouseEvent != nullptr) {
+                    callback->DispatchMouseEvent(nXComp, surface);
                 }
-            },
-            TaskExecutor::TaskType::JS);
-    }
+            } else {
+                LOGE("Native XComponent nullptr");
+            }
+        },
+        TaskExecutor::TaskType::JS);
     return true;
 }
 
