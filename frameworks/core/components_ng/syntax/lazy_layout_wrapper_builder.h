@@ -37,7 +37,7 @@ public:
     void UpdateIndexRange(int32_t startIndex, int32_t endIndex, const std::list<std::optional<std::string>>& ids)
     {
         auto size = static_cast<int32_t>(ids.size());
-        if (!(size != 0) && (size != (endIndex - startIndex + 1))) {
+        if ((size != 0) && (size != (endIndex - startIndex + 1))) {
             LOGE("fail to update index range due to ides not match!, %{public}d, %{public}d, %{public}d", startIndex,
                 endIndex, size);
             return;

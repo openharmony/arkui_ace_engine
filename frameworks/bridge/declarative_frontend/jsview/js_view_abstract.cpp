@@ -823,7 +823,7 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
     if (opacity < 0) {
         opacity = 1.0;
     }
-    
+
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ViewAbstract::SetOpacity(opacity);
         return;
@@ -1437,6 +1437,10 @@ void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGW("Position is not supported");
+        return;
+    }
     AnimatableDimension x;
     AnimatableDimension y;
     if (ParseLocationProps(info, x, y)) {
@@ -1449,6 +1453,10 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGW("MarkAnchor is not supported");
+        return;
+    }
     AnimatableDimension x;
     AnimatableDimension y;
     if (ParseLocationProps(info, x, y)) {
@@ -1460,6 +1468,10 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGW("Offset is not supported");
+        return;
+    }
     AnimatableDimension x;
     AnimatableDimension y;
     if (ParseLocationProps(info, x, y)) {
@@ -1505,6 +1517,11 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetAspectRatio(static_cast<float>(value));
+        return;
+    }
+
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
     if (!boxComponent) {
         LOGE("boxComponent is null");
@@ -2139,6 +2156,10 @@ void JSViewAbstract::JsPadding(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGW("Margin is not support");
+        return;
+    }
     JSViewAbstract::ParseMarginOrPadding(info, true);
 }
 
@@ -2152,6 +2173,7 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
 
     if (info[0]->IsObject()) {
         if (Container::IsCurrentUseNewPipeline()) {
+            // TODO: Add Margin case.
             JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
             NG::PaddingProperty padding;
             Dimension leftDimen;
@@ -4307,6 +4329,10 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGW("Clip is not supported");
+        return;
+    }
     if (info.Length() > 0) {
         auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
         if (info[0]->IsObject()) {
@@ -4326,6 +4352,10 @@ void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsMask(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGW("Mask is not supported");
+        return;
+    }
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (maskShape == nullptr) {

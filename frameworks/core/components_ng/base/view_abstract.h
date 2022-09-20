@@ -39,10 +39,13 @@ public:
     static void SetMinHeight(const CalcLength& minHeight);
     static void SetMaxWidth(const CalcLength& maxWidth);
     static void SetMaxHeight(const CalcLength& maxHeight);
+
+    static void SetAspectRatio(float ratio);
+    static void SetLayoutWeight(int32_t value);
+
     static void SetBackgroundColor(const Color& color);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
-    static void SetLayoutWeight(int32_t value);
     static void SetBorderRadius(const BorderRadiusProperty& value);
     static void SetBorderRadius(const Dimension& value);
     static void SetBorderColor(const Color& value);

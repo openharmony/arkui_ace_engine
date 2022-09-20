@@ -136,6 +136,16 @@ public:
         }
     }
 
+    void UpdateAspectRatio(float ratio)
+    {
+        if (!magicItemProperty_) {
+            magicItemProperty_ = std::make_unique<MagicItemProperty>();
+        }
+        if (magicItemProperty_->UpdateAspectRatio(ratio)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
     void UpdateMeasureType(MeasureType measureType)
     {
         if (measureType_ == measureType) {
@@ -190,7 +200,8 @@ public:
         }
     }
 
-    void UpdateFlexGrow(const int32_t flexGrow, bool updateFlag = false) {
+    void UpdateFlexGrow(const int32_t flexGrow, bool updateFlag = false)
+    {
         if (!flexItemProperty_) {
             flexItemProperty_ = std::make_unique<FlexItemProperty>();
         }
@@ -199,7 +210,8 @@ public:
         }
     }
 
-    void UpdateFlexShrink(const int32_t flexShrink, bool updateFlag = false) {
+    void UpdateFlexShrink(const int32_t flexShrink, bool updateFlag = false)
+    {
         if (!flexItemProperty_) {
             flexItemProperty_ = std::make_unique<FlexItemProperty>();
         }
@@ -208,7 +220,8 @@ public:
         }
     }
 
-    void UpdateAlignSelf(const FlexAlign& flexAlign, bool updateFlag = false) {
+    void UpdateAlignSelf(const FlexAlign& flexAlign, bool updateFlag = false)
+    {
         if (!flexItemProperty_) {
             flexItemProperty_ = std::make_unique<FlexItemProperty>();
         }
@@ -245,6 +258,8 @@ protected:
 private:
     // This will call after ModifyLayoutConstraint.
     void CheckSelfIdealSize();
+
+    void CheckAspectRatio();
 
     std::optional<LayoutConstraintF> layoutConstraint_;
     std::optional<LayoutConstraintF> contentConstraint_;

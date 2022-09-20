@@ -352,7 +352,8 @@ void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
-        auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
+        auto layoutWrapper =
+            MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
         return layoutWrapper;
     }
@@ -361,6 +362,8 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     isLayoutDirtyMarked_ = false;
     auto flag = layoutProperty_->GetPropertyChangeFlag();
     auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+    LOGD("%{public}s create layout wrapper: %{public}x, %{public}d, %{public}d", GetTag().c_str(), flag, forceMeasure,
+        forceLayout);
     do {
         if (CheckNeedMeasure(flag) || forceMeasure) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));

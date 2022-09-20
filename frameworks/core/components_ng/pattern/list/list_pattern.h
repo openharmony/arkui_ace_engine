@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
+#include <optional>
+
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -39,13 +41,12 @@ public:
         auto listLayoutProperty = GetHost()->GetLayoutProperty<ListLayoutProperty>();
         V2::ItemDivider itemDivider;
         auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
-        auto axis = listLayoutProperty->GetListDirection().value_or(Axis::HORIZONTAL);
-        auto vertical = axis == Axis::VERTICAL ? true : false;
-        return MakeRefPtr<ListPaintMethod>(divider, startIndex_, endIndex_,
-            vertical, std::move(itemPosition_));
+        auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+        auto drawVertical = (axis == Axis::HORIZONTAL);
+        return MakeRefPtr<ListPaintMethod>(divider, startIndex_, endIndex_, drawVertical, std::move(itemPosition_));
     }
 
-    bool IsAtomicNode() const override 
+    bool IsAtomicNode() const override
     {
         return false;
     }
@@ -63,8 +64,10 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto listLayoutAlgorithm = MakeRefPtr<ListLayoutAlgorithm>(startIndex_, endIndex_);
+        if (jumpIndex_) {
+            listLayoutAlgorithm->SetIndex(jumpIndex_.value());
+        }
         listLayoutAlgorithm->SetCurrentOffset(currentOffset_);
-        currentOffset_ = 0;
         listLayoutAlgorithm->SetIsInitialized(isInitialized_);
         listLayoutAlgorithm->SetPlayEdgeEffectAnimation(playEdgeEffectAnimation_);
         return listLayoutAlgorithm;
@@ -86,7 +89,7 @@ public:
     {
         return maxListItemIndex_;
     }
-    
+
     void SetIsScroll(bool isScroll)
     {
         isScroll_ = isScroll;
@@ -113,7 +116,7 @@ public:
     }
 
     Axis GetDirection() const;
-    
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -125,13 +128,15 @@ private:
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<Animator> springController_;
     int32_t maxListItemIndex_ = 0;
-    int32_t startIndex_ = 0;
-    int32_t endIndex_ = 0;
+    int32_t startIndex_ = -1;
+    int32_t endIndex_ = -1;
     bool isInitialized_ = false;
     bool playEdgeEffectAnimation_ = false;
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
-    
+
+    std::optional<int32_t> jumpIndex_;
+
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool isScroll_ = false;
     bool scrollStop_ = false;

@@ -77,6 +77,11 @@ public:
         density_ = density;
     }
 
+    virtual bool FlushCustomAnimation(uint64_t timeStamp)
+    {
+        return false;
+    }
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
