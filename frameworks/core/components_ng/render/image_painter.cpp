@@ -97,17 +97,36 @@ void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const Imag
     RSBrush brush;
     RSFilter filter;
     filter.SetFilterQuality(RSFilter::FilterQuality(imagePaintConfig.imageInterpolation_));
-    if (ImageRenderMode::TEMPLATE == imagePaintConfig.renderMode_) {
-        RSColorMatrix grayMatrix;
-        grayMatrix.SetArray(GRAY_COLOR_MATRIX);
-        filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(grayMatrix));
+    // note that [colorFilter] has higher priority to [renderMode], because the [ImageRenderMode::TEMPLATE] is actually
+    // a special value of colorFilter
+    if (ImageRenderMode::TEMPLATE == imagePaintConfig.renderMode_ || imagePaintConfig.colorFilter_) {
+        RSColorMatrix colorFilterMatrix;
+        if (imagePaintConfig.colorFilter_) {
+            colorFilterMatrix.SetArray(imagePaintConfig.colorFilter_->data());
+        } else if (ImageRenderMode::TEMPLATE == imagePaintConfig.renderMode_) {
+            colorFilterMatrix.SetArray(GRAY_COLOR_MATRIX);
+        }
+        filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorFilterMatrix));
     }
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
+
+    if (imagePaintConfig.needFlipCanvasHorizontally_) {
+        ImagePainter::FlipHorizontal(canvas, offset.GetX(), imagePaintConfig.dstRect_.Width());
+    }
+
     brush.SetFilter(filter);
     canvas.AttachBrush(brush);
     canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_));
     canvas.Restore();
+}
+
+void ImagePainter::FlipHorizontal(RSCanvas& canvas, double horizontalOffset, double drawRectWidth)
+{
+    double horizontalMoveDelta = -1.0 * (horizontalOffset + drawRectWidth / 2.0);
+    canvas.Translate(-1.0 * horizontalMoveDelta, 0.0);
+    canvas.Scale(-1.0, 1.0);
+    canvas.Translate(horizontalMoveDelta, 0.0);
 }
 
 void ImagePainter::DrawImageWithRepeat(
