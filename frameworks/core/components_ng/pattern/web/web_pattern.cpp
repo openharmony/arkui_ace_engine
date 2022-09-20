@@ -272,6 +272,13 @@ void WebPattern::OnWebDebuggingAccessEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnPinchSmoothModeEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdatePinchSmoothModeEnabled(value);
+    }
+}
+
 void WebPattern::OnBackgroundColorUpdate(int32_t value)
 {
     if (delegate_) {
@@ -317,6 +324,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateTextZoomRatio(GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
         delegate_->UpdateWebDebuggingAccess(GetWebDebuggingAccessEnabledValue(false));
         delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
+        delegate_->UpdatePinchSmoothModeEnabled(GetPinchSmoothModeEnabledValue(false));
     }
 
     // update bgcolor.

@@ -393,4 +393,10 @@ void WebView::SetOnDropId(const OnDropFunc& onDropId)
     webEventHub->SetOnDropEvent(std::move(onDropId));
 }
 
+void WebView::SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdatePinchSmoothModeEnabled(isPinchSmoothModeEnabled);
+}
 } // namespace OHOS::Ace::NG
