@@ -29,7 +29,8 @@ class Clipboard : public AceType {
 public:
     ~Clipboard() override = default;
 
-    virtual void SetData(const std::string& data, CopyOptions copyOption = CopyOptions::InApp) = 0;
+    virtual void SetData(
+        const std::string& data, CopyOptions copyOption = CopyOptions::InApp, bool isDragData = false) = 0;
     virtual void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false) = 0;
     virtual void SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption = CopyOptions::InApp) = 0;
     virtual void GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback,
