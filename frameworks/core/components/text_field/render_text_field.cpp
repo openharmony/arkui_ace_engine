@@ -329,9 +329,9 @@ void RenderTextField::OnPaintFinish()
     UpdateOverlay();
     InitAccessibilityEventListener();
     UpdateAccessibilityPosition();
-    auto layoutParamChanged = lastLayoutParam_.value() == GetLayoutParam();
+    auto layoutParamChanged = lastLayoutParam_.has_value() ? lastLayoutParam_.value() == GetLayoutParam() : true;
     if (layoutParamChanged) {
-        lastLayoutParam_ = std::make_optional(GetLayoutParam());
+        lastLayoutParam_ = GetLayoutParam();
     }
     bool needNotifyChangeEvent = !isValueFromFront_ || layoutParamChanged;
     // If height or lines is changed, make needNotifyChangeEvent_ true to notify change event.
@@ -359,7 +359,7 @@ void RenderTextField::OnPaintFinish()
 void RenderTextField::PerformLayout()
 {
     if (!lastLayoutParam_.has_value()) {
-        lastLayoutParam_ = std::make_optional(GetLayoutParam());
+        lastLayoutParam_.emplace(GetLayoutParam());
     }
 
     if (GetEditingValue().text.empty()) {
