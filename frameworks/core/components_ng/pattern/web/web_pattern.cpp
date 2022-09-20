@@ -464,6 +464,13 @@ void WebPattern::OnInitialScaleUpdate(float value)
     }
 }
 
+void WebPattern::OnMultiWindowAccessEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateMultiWindowAccess(value);
+    }
+}
+
 void WebPattern::OnModifyDone()
 {
     // called in each update function.
@@ -496,6 +503,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateWebDebuggingAccess(GetWebDebuggingAccessEnabledValue(false));
         delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
         delegate_->UpdatePinchSmoothModeEnabled(GetPinchSmoothModeEnabledValue(false));
+        delegate_->UpdateMultiWindowAccess(GetMultiWindowAccessEnabledValue(false));
         if (GetUserAgent()) {
             delegate_->UpdateUserAgent(GetUserAgent().value());
         }

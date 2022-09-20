@@ -235,6 +235,23 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebAccessRequest> request_;
 };
 
+class WebWindowNewHandlerOhos : public WebWindowNewHandler {
+    DECLARE_ACE_TYPE(WebWindowNewHandlerOhos, WebWindowNewHandler)
+
+public:
+    WebWindowNewHandlerOhos(const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler)
+        : handler_(handler) {}
+
+    void SetWebController(int32_t id) override;
+
+    bool IsFrist() const override;
+
+    int32_t GetId() const override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebControllerHandler> handler_;
+};
+
 enum class DragAction {
     DRAG_START = 0,
     DRAG_ENTER,
@@ -310,6 +327,7 @@ public:
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
     void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
+    void UpdateMultiWindowAccess(bool isMultiWindowAccessEnabled);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
@@ -374,6 +392,9 @@ public:
     bool LoadDataWithRichText();
     void OnSearchResultReceive(int activeMatchOrdinal, int numberOfMatches, bool isDoneCounting);
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
+    void OnWindowNew(const std::string& targetUrl, bool isAlert, bool isUserTrigger,
+        const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler);
+    void OnWindowExit();
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -487,6 +508,7 @@ private:
     EventCallbackV2 onScrollV2_;
     EventCallbackV2 onPermissionRequestV2_;
     EventCallbackV2 onSearchResultReceiveV2_;
+    EventCallbackV2 onWindowExitV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;
