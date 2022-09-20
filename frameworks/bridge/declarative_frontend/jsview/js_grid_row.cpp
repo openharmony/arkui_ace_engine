@@ -32,7 +32,7 @@ void InheritGridRowOption(const RefPtr<V2::GridContainerSize>& gridContainerSize
     std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT])
 {
     if (!containerSizeArray[0].has_value()) {
-        containerSizeArray[0] = 1;
+        containerSizeArray[0] = V2::DEFAULT_COLUMN_NUMBER;
     }
     for (size_t i = 1; i < MAX_NUMBER_BREAKPOINT; i++) {
         if (!containerSizeArray[i].has_value()) {
