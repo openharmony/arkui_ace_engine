@@ -35,7 +35,6 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 
 constexpr Dimension DEFAULT_FONT_SIZE = 14.0_fp;

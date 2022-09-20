@@ -23,6 +23,7 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+
 // PaintProperty are used to set render properties.
 class BubbleRenderProperty : public PaintProperty {
     DECLARE_ACE_TYPE(BubbleRenderProperty, PaintProperty)

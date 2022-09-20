@@ -28,6 +28,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+
 class ACE_EXPORT BubbleView {
 public:
     static RefPtr<FrameNode> CreateBubbleNode(

@@ -363,20 +363,15 @@ void BubblePaintMethod::BuildTopLinePath(RSPath& path, float arrowOffset, float 
 
 void BubblePaintMethod::BuildCornerPath(RSPath& path, const Placement& placement, float radius)
 {
+    // TODO: need to complete this function
     switch (placement) {
         case Placement::TOP_LEFT:
-            // path.ArcTo(radius, radius, 0.0f, childOffset_.GetX() + radius, childOffset_.GetY());
             break;
         case Placement::TOP_RIGHT:
-            // path.ArcTo(radius, radius, 0.0f, childOffset_.GetX() + childSize_.Width(), childOffset_.GetY() + radius);
             break;
         case Placement::BOTTOM_RIGHT:
-            // path.ArcTo(radius, radius, 0.0f, childOffset_.GetX() + childSize_.Width() - radius, childOffset_.GetY() +
-            // childSize_.Height());
             break;
         case Placement::BOTTOM_LEFT:
-            // path.ArcTo(radius, radius, 0.0f, childOffset_.GetX(), childOffset_.GetY() + childSize_.Height() -
-            // radius);
             break;
         default:
             break;

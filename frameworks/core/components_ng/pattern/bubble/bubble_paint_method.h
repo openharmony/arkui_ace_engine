@@ -28,6 +28,7 @@
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
+
 class ACE_EXPORT BubblePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(BubblePaintMethod, NodePaintMethod)
 public:

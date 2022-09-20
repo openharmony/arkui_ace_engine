@@ -32,7 +32,7 @@ class BubblePattern : public Pattern {
 
 public:
     BubblePattern() = default;
-    explicit BubblePattern(int32_t id, const std::string& tag) : targetNodeId_(id), targetTag_(tag) {}
+    BubblePattern(int32_t id, const std::string& tag) : targetNodeId_(id), targetTag_(tag) {}
     ~BubblePattern() override = default;
 
     bool IsAtomicNode() const override
