@@ -322,23 +322,23 @@ extern uint8_t* _binary_container_modal_window_split_left_png_end;
 
 // binary/container_modal_window_defocus_close.png
 extern uint8_t _binary_container_modal_window_defocus_close_png_start[];
-extern uint8_t _binary_container_modal_window_defocus_close_png_end[];
+extern uint8_t* _binary_container_modal_window_defocus_close_png_end;
 
 // binary/container_modal_window_defocus_maximize.png
 extern uint8_t _binary_container_modal_window_defocus_maximize_png_start[];
-extern uint8_t _binary_container_modal_window_defocus_maximize_png_end[];
+extern uint8_t* _binary_container_modal_window_defocus_maximize_png_end;
 
 // binary/container_modal_window_defocus_minimize.png
 extern uint8_t _binary_container_modal_window_defocus_minimize_png_start[];
-extern uint8_t _binary_container_modal_window_defocus_minimize_png_end[];
+extern uint8_t* _binary_container_modal_window_defocus_minimize_png_end;
 
 // binary/container_modal_window_defocus_recover.png
 extern uint8_t _binary_container_modal_window_defocus_recover_png_start[];
-extern uint8_t _binary_container_modal_window_defocus_recover_png_end[];
+extern uint8_t* _binary_container_modal_window_defocus_recover_png_end;
 
 // binary/container_modal_window_defocus_split_left.png
 extern uint8_t _binary_container_modal_window_defocus_split_left_png_start[];
-extern uint8_t _binary_container_modal_window_defocus_split_left_png_end[];
+extern uint8_t* _binary_container_modal_window_defocus_split_left_png_end;
 
 namespace OHOS::Ace {
 namespace {
