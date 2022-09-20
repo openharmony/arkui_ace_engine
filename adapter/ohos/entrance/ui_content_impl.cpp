@@ -506,6 +506,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         return;
     }
     container->SetWindowName(window_->GetWindowName());
+    container->SetWindowId(window_->GetWindowId());
 
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);

@@ -383,6 +383,7 @@ void AceAbility::OnStart(const Want& want)
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
     container->SetWindowName(window->GetWindowName());
+    container->SetWindowId(window->GetWindowId());
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), abilityId_);
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
