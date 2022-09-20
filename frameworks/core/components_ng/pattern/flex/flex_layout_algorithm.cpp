@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 
+#include "base/geometry/axis.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -226,7 +228,8 @@ LayoutConstraintF FlexLayoutAlgorithm::MakeLayoutConstraint(
 LayoutConstraintF FlexLayoutAlgorithm::MakeLayoutConstraintWithLimit(float maxMainAxisLimit, bool isStretch) const
 {
     LayoutConstraintF layoutConstraint;
-    auto parentLayoutConstraint = layoutWrapper_->GetLayoutProperty()->GetLayoutConstraint();
+    const auto parentLayoutConstraint = layoutWrapper_->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& padding = layoutWrapper_->GetLayoutProperty()->GetPaddingProperty();
     float minCrossAxisLimit = 0.0f;
     float maxCrossAxisLimit = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)
                                   ? parentLayoutConstraint->maxSize.Height()
@@ -242,41 +245,31 @@ LayoutConstraintF FlexLayoutAlgorithm::MakeLayoutConstraintWithLimit(float maxMa
         layoutConstraint.UpdateSelfIdealSizeWithCheck(
             OptionalSizeF(maxCrossAxisLimit, std::optional<float>(maxMainAxisLimit)));
     }
+    MinusPaddingToConstraint(padding, layoutConstraint);
     return layoutConstraint;
 }
 
 void FlexLayoutAlgorithm::MeasureInWeightMode(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    const auto& parentIdealSize = layoutConstraint->parentIdealSize;
     auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
-    OptionalSizeF realSize;
-    /**
-     * check selfIdealSize and matchParent.
-     */
-    do {
-        realSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
-        if (realSize.IsValid()) {
-            break;
-        }
-
-        if (measureType == MeasureType::MATCH_PARENT) {
-            realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
-        }
-    } while (false);
+    auto realSize = CreateIdealSize(layoutConstraint.value(),
+        direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE ? Axis::HORIZONTAL
+                                                                                     : Axis::VERTICAL,
+        measureType, true);
     /**
      * get the user defined main axis size and cross axis size.
      */
     SizeF maxSize;
     maxSize.UpdateSizeWithCheck(layoutConstraint->maxSize);
-    maxSize.UpdateSizeWhenSmaller(realSize.ConvertToSizeT());
+    maxSize.UpdateSizeWhenSmaller(realSize);
     float maxMainAxisSize = GetMainAxisSizeHelper(maxSize, direction_);
     mainSize_ = maxMainAxisSize;
     if (NearEqual(maxMainAxisSize, Infinity<float>())) {
         LOGW("not supported infinite size");
         return;
     }
-    selfIdealCrossAxisSize_ = GetCrossAxisSizeHelper(realSize.ConvertToSizeT(), direction_);
+    selfIdealCrossAxisSize_ = GetCrossAxisSizeHelper(realSize, direction_);
     BaselineProperties baselineProperties;
     auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     float allocatedSize = allocatedSize_;
@@ -353,8 +346,9 @@ void FlexLayoutAlgorithm::MeasureInWeightMode(LayoutWrapper* layoutWrapper)
         RedoLayoutForStretchMagicNode();
     }
 
-    realSize.UpdateIllegalSizeWithCheck(GetCalcSizeHelper(maxMainAxisSize, crossAxisSize_, direction_));
-    layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
+    realSize.UpdateIllegalSizeWithCheck(
+        GetCalcSizeHelper(maxMainAxisSize, crossAxisSize_, direction_).ConvertToSizeT());
+    layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
 }
 
 void FlexLayoutAlgorithm::MeasureInIndexMode(LayoutWrapper* layoutWrapper) {}
@@ -362,32 +356,21 @@ void FlexLayoutAlgorithm::MeasureInIndexMode(LayoutWrapper* layoutWrapper) {}
 void FlexLayoutAlgorithm::MeasureInItemMode(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    const auto& parentIdealSize = layoutConstraint->parentIdealSize;
     auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
-    OptionalSizeF realSize;
-    /**
-     * check selfIdealSize and matchParent.
-     */
-    do {
-        realSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
-        if (realSize.IsValid()) {
-            break;
-        }
-
-        if (measureType == MeasureType::MATCH_PARENT) {
-            realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
-        }
-    } while (false);
+    auto realSize = CreateIdealSize(layoutConstraint.value(),
+        direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE ? Axis::HORIZONTAL
+                                                                                     : Axis::VERTICAL,
+        measureType, true);
     SizeF maxSize;
     maxSize.UpdateSizeWithCheck(layoutConstraint->maxSize);
-    maxSize.UpdateSizeWhenSmaller(realSize.ConvertToSizeT());
+    maxSize.UpdateSizeWhenSmaller(realSize);
     float maxMainAxisSize = GetMainAxisSizeHelper(maxSize, direction_);
     mainSize_ = maxMainAxisSize;
     if (NearEqual(maxMainAxisSize, Infinity<float>())) {
         LOGW("not supported infinite size");
         return;
     }
-    selfIdealCrossAxisSize_ = GetCrossAxisSizeHelper(realSize.ConvertToSizeT(), direction_);
+    selfIdealCrossAxisSize_ = GetCrossAxisSizeHelper(realSize, direction_);
 
     BaselineProperties baselineProperties;
     FlexItemProperties flexItemProperties;
@@ -434,8 +417,9 @@ void FlexLayoutAlgorithm::MeasureInItemMode(LayoutWrapper* layoutWrapper)
      */
     ResizeItems(flexItemProperties, baselineProperties);
     auto layoutList = (*magicNodes_.rbegin()).second;
-    realSize.UpdateIllegalSizeWithCheck(GetCalcSizeHelper(maxMainAxisSize, crossAxisSize_, direction_));
-    layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
+    realSize.UpdateIllegalSizeWithCheck(
+        GetCalcSizeHelper(maxMainAxisSize, crossAxisSize_, direction_).ConvertToSizeT());
+    layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
 }
 
 void FlexLayoutAlgorithm::ResizeItems(const FlexItemProperties& flexItemProps, BaselineProperties& baselineProps)
@@ -487,9 +471,6 @@ void FlexLayoutAlgorithm::RedoLayoutFlexItem(
     const MagicLayoutNode& flexItem, float flexSize, BaselineProperties& baselineProps, float& allocatedFlexSpace)
 {
     auto mainFlexExtent = flexSize + GetMainAxisSize(flexItem.layoutWrapper);
-    // auto childMainContent = GetMainAxisSize(
-    //     flexItem.layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint()->selfIdealSize.ConvertToSizeT(),
-    //     direction_);
     allocatedSize_ -= GetMainAxisSize(flexItem.layoutWrapper);
     const auto& layoutConstraint = MakeLayoutConstraint(
         mainFlexExtent, flexItem.layoutConstraint, GetSelfAlign(flexItem.layoutWrapper) == FlexAlign::STRETCH, false);

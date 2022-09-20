@@ -24,8 +24,8 @@
 namespace OHOS::Ace::NG {
 
 struct FlexItemProperties {
-    float totalShrink = 0.0;
-    float totalGrow = 0.0;
+    float totalShrink = 0.0f;
+    float totalGrow = 0.0f;
     RefPtr<LayoutWrapper> lastShrinkChild;
     RefPtr<LayoutWrapper> lastGrowChild;
 };
