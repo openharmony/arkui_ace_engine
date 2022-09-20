@@ -21,6 +21,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
 
@@ -60,6 +61,19 @@ public:
     const RefPtr<InputEventHub>& GetInputEventHub() const
     {
         return inputEventHub_;
+    }
+
+    const RefPtr<FocusHub>& GetOrCreateFocusHub()
+    {
+        if (!focusHub_) {
+            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this));
+        }
+        return focusHub_;
+    }
+
+    const RefPtr<FocusHub>& GetFocusHub() const
+    {
+        return focusHub_;
     }
 
     void AttachHost(const WeakPtr<FrameNode>& host);
@@ -120,6 +134,7 @@ private:
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;
     RefPtr<InputEventHub> inputEventHub_;
+    RefPtr<FocusHub> focusHub_;
 
     std::function<void()> onAppear_;
     std::function<void()> onDisappear_;

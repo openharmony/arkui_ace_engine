@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/event/touch_event.h"
@@ -52,6 +53,8 @@ public:
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT);
+    RefPtr<FrameNode> GetFocusParent() const;
+    void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
     void Clean();
     void RemoveChildAtIndex(int32_t index);
 
@@ -165,7 +168,6 @@ public:
     virtual void RebuildRenderContextTree();
 
 protected:
-
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {
         for (const auto& child : children_) {

@@ -272,6 +272,21 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
     return false;
 }
 
+bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode)
+{
+    CHECK_NULL_RETURN(focusNode, false);
+    LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
+        event.action, event.repeatTime);
+    auto focusNodeHub = focusNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusNodeHub, false);
+    if (focusNodeHub->HandleKeyEvent(event)) {
+        LOGI("Default focus system handled this event");
+        return true;
+    }
+    LOGI("Use platform to handle this event");
+    return false;
+}
+
 void EventManager::MouseTest(const MouseEvent& event, const RefPtr<RenderNode>& renderNode)
 {
     if (!renderNode) {
