@@ -71,6 +71,7 @@ private:
     bool vertical_ = false;
     TabBarMode tabBarMode_ = TabBarMode::SCROLLABLE;
     Edge padding_;
+    std::optional<Color> indicatorColor_;
 };
 
 } // namespace OHOS::Ace::Framework

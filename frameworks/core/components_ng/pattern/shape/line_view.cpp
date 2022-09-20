@@ -41,5 +41,4 @@ void LineView::EndPoint(const ShapePoint& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(LinePaintProperty, EndPoint, value);
 }
-
 } // namespace OHOS::Ace::NG

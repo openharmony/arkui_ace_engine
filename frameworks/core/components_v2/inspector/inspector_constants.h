@@ -406,6 +406,8 @@ ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[];
 
 // ability_component
 ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[];
+// Popup
+ACE_EXPORT extern const char POPUP_ETS_TAG[];
 
 // bar item
 ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[];

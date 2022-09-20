@@ -3482,7 +3482,7 @@ std::vector<double> RenderGridLayout::ParseArgsWithAutoFill(const std::string& a
 
 std::vector<double> RenderGridLayout::ParseArgs(const std::string& args, double size, double gap)
 {
-    if (GetRepeat(args) != "") {
+    if (args.find(REPEAT_PREFIX) != std::string::npos && args.find(UNIT_AUTO_FILL) != std::string::npos) {
         return ParseArgsWithAutoFill(args, size, gap);
     } else {
         return ParseArgsInner(PreParseArgs(args), size, gap);
