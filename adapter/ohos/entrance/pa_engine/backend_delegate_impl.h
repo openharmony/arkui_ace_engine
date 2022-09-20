@@ -24,6 +24,7 @@
 #include "data_ability_predicates.h"
 #include "form_provider_info.h"
 #include "iremote_object.h"
+#include "napi_remote_object.h"
 #include "pac_map.h"
 #include "values_bucket.h"
 #include "want.h"
@@ -42,22 +43,27 @@ using LoadJsCallback = std::function<void(const std::string& url, const OHOS::AA
 using JsMessageDispatcherSetterCallback = std::function<void(const RefPtr<JsMessageDispatcher>&)>;
 using PaEventCallback = std::function<void(const std::string&, const std::string&)>;
 using DestroyApplicationCallback = std::function<void(const std::string& packageName)>;
-using InsertCallback = std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value)>;
+using InsertCallback = std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
+    const CallingInfo& callingInfo)>;
 using CallCallback = std::function<std::shared_ptr<AppExecFwk::PacMap>(const std::string& method,
-    const std::string& arg, const AppExecFwk::PacMap& pacMap)>;
+    const std::string& arg, const AppExecFwk::PacMap& pacMap, const CallingInfo& callingInfo)>;
 using QueryCallback = std::function<std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet>(
-    const Uri& uri, const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates)>;
+    const Uri& uri, const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+    const CallingInfo& callingInfo)>;
 using UpdateCallback = std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
-    const OHOS::NativeRdb::DataAbilityPredicates& predicates)>;
-using DeleteCallback = std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates)>;
+    const OHOS::NativeRdb::DataAbilityPredicates& predicates, const CallingInfo& callingInfo)>;
+using DeleteCallback = std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+    const CallingInfo& callingInfo)>;
 using BatchInsertCallback =
-    std::function<int32_t(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values)>;
-using GetTypeCallback = std::function<std::string(const Uri& uri)>;
-using GetFileTypesCallback = std::function<std::vector<std::string>(const Uri& uri, const std::string& mimeTypeFilter)>;
-using OpenFileCallback = std::function<int32_t(const Uri& uri, const std::string& mode)>;
-using OpenRawFileCallback = std::function<int32_t(const Uri& uri, const std::string& mode)>;
-using NormalizeUriCallback = std::function<Uri(const Uri& uri)>;
-using DenormalizeUriCallback = std::function<Uri(const Uri& uri)>;
+    std::function<int32_t(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values,
+    const CallingInfo& callingInfo)>;
+using GetTypeCallback = std::function<std::string(const Uri& uri, const CallingInfo& callingInfo)>;
+using GetFileTypesCallback = std::function<std::vector<std::string>(const Uri& uri, const std::string& mimeTypeFilter,
+    const CallingInfo& callingInfo)>;
+using OpenFileCallback = std::function<int32_t(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo)>;
+using OpenRawFileCallback = std::function<int32_t(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo)>;
+using NormalizeUriCallback = std::function<Uri(const Uri& uri, const CallingInfo& callingInfo)>;
+using DenormalizeUriCallback = std::function<Uri(const Uri& uri, const CallingInfo& callingInfo)>;
 using ConnectCallback = std::function<sptr<IRemoteObject>(const OHOS::AAFwk::Want& want)>;
 using DisConnectCallback = std::function<void(const OHOS::AAFwk::Want& want)>;
 using CreateFormCallback = std::function<void(const OHOS::AAFwk::Want& want)>;
