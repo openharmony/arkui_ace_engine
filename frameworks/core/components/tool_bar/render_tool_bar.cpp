@@ -97,7 +97,7 @@ double RenderToolBar::GetMaxWidthBasedOnGridType(
             double dipScale = NormalizeToPx(info->GetParent()->GetGutterWidth());
             actualWidth_ += info->GetWidth(1) + dipScale;
             return info->GetWidth(6);
-        } 
+        }
         return info->GetWidth(8);
     }
     LOGI("GetMaxWidthBasedOnGridType is undefined");
