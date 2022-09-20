@@ -101,7 +101,6 @@ double RenderToolBar::GetMaxWidthBasedOnGridType(
         return info->GetWidth(8);
     }
     LOGI("GetMaxWidthBasedOnGridType is undefined");
-    LOGI("ZTE GRIDSizeType = %{public}d", type);
     return info->GetMaxWidth();
 }
 
