@@ -90,6 +90,8 @@ public:
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
+    virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
+    virtual void UpdateBackShadow(const Shadow& shadow) {}
 
     // Add Transform in group
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
@@ -109,6 +111,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
 
     ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
+    ACE_DEFINE_PROPERTY_GROUP(FrontDecoration, DecorationProperty);
 
     // TODO Add BorderRadius in group.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);

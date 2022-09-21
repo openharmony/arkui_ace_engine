@@ -18,6 +18,7 @@
 
 #include "base/geometry/ng/vector.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
@@ -52,6 +53,8 @@ struct TransformProperty {
 struct DecorationProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurRadius, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurStyle, BlurStyle);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
 };
 
 } // namespace OHOS::Ace::NG

@@ -4210,6 +4210,10 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
     if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
         shadows.begin()->SetColor(color);
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetBackShadow(shadows[0]);
+        return;
+    }
     auto backDecoration = GetBackDecoration();
     backDecoration->SetShadows(shadows);
 }
@@ -5082,6 +5086,11 @@ void JSViewAbstract::SetMargin(const Dimension& value)
 
 void JSViewAbstract::SetBlur(float radius)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        Dimension dimensionRadius(radius, DimensionUnit::PX);
+        NG::ViewAbstract::SetFrontBlur(dimensionRadius);
+        return;
+    }
     auto decoration = GetFrontDecoration();
     SetBlurRadius(decoration, radius);
 }
