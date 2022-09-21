@@ -383,7 +383,9 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
     if ((!backDecoration_) || backDecoration_->GetImage() ||
         (backDecoration_->GetBackgroundColor() != Color::TRANSPARENT) || !(backDecoration_->GetGradient().IsValid())) {
         // no need to paint gradient
-        rsNode->SetBackgroundShader(nullptr);
+        if (backDecoration_->GetGradient().GetType() == GradientType::SWEEP) {
+            rsNode->SetBackgroundShader(nullptr);
+        }
         return;
     }
 
