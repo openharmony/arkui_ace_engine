@@ -23,7 +23,9 @@
 #include "base/geometry/ng/vector.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
@@ -37,10 +39,13 @@ public:
     static void SetMinHeight(const CalcLength& minHeight);
     static void SetMaxWidth(const CalcLength& maxWidth);
     static void SetMaxHeight(const CalcLength& maxHeight);
+
+    static void SetAspectRatio(float ratio);
+    static void SetLayoutWeight(int32_t value);
+
     static void SetBackgroundColor(const Color& color);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
-    static void SetLayoutWeight(int32_t value);
     static void SetBorderRadius(const BorderRadiusProperty& value);
     static void SetBorderRadius(const Dimension& value);
     static void SetBorderColor(const Color& value);
@@ -51,8 +56,12 @@ public:
     static void SetBorderStyle(const BorderStyleProperty& value);
     static void SetOpacity(double opacity);
 
+    // back decoration
+    static void SetBackdropBlur(const Dimension& radius);
+
     // layout
     static void SetAlign(Alignment alignment);
+    static void SetVisibility(VisibleType visible);
 
     // transform
     static void SetScale(const NG::VectorF& value);
@@ -74,6 +83,13 @@ public:
 
     // flex properties
     static void SetAlignSelf(int32_t value);
+    static void SetFlexShrink(float value);
+    static void SetFlexGrow(float value);
+
+    // Bind properties
+    static void BindPopup(const RefPtr<PopupParam>& param);
+    // inspector
+    static void SetInspectorId(const std::string& inspectorId);
 
     static void Pop();
 };

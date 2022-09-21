@@ -261,6 +261,10 @@ void JSGrid::JSBind(BindingTarget globalObj)
 
 void JSGrid::SetScrollBar(int32_t displayMode)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGW("ScrollBar is not supported");
+        return;
+    }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (!grid) {

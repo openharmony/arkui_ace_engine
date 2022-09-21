@@ -15,8 +15,11 @@
 
 #include "core/components_ng/layout/layout_property.h"
 
+#include <optional>
+
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -66,6 +69,9 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     if (layoutProperty->positionProperty_) {
         positionProperty_ = std::make_unique<PositionProperty>(*layoutProperty->positionProperty_);
     }
+    if (layoutProperty->flexItemProperty_) {
+        flexItemProperty_ = std::make_unique<FlexItemProperty>(*layoutProperty->flexItemProperty_);
+    }
     measureType_ = layoutProperty->measureType_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
 }
@@ -99,12 +105,58 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
                 parentConstraint.scaleProperty, parentConstraint.percentReference));
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
-            layoutConstraint_->UpdateSelfIdealSizeWithCheck(
+            LOGD("CalcLayoutConstraint->selfIdealSize = %{public}s",
+                calcLayoutConstraint_->selfIdealSize.value().ToString().c_str());
+            layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
                 ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
                     parentConstraint.percentReference));
         }
     }
     CheckSelfIdealSize();
+    CheckAspectRatio();
+}
+
+void LayoutProperty::CheckAspectRatio()
+{
+    auto hasAspectRatio = magicItemProperty_ ? magicItemProperty_->HasAspectRatio() : false;
+    if (!hasAspectRatio) {
+        return;
+    }
+    auto aspectRatio = magicItemProperty_->GetAspectRatioValue();
+    // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and aspectRatio are
+    // all set, the height is not used.
+    auto maxWidth = layoutConstraint_->maxSize.Width();
+    auto maxHeight = layoutConstraint_->maxSize.Height();
+    if (maxHeight > maxWidth / aspectRatio) {
+        maxHeight = maxWidth / aspectRatio;
+    }
+    layoutConstraint_->maxSize.SetWidth(maxWidth);
+    layoutConstraint_->maxSize.SetHeight(maxHeight);
+    std::optional<float> selfWidth;
+    std::optional<float> selfHeight;
+    if (layoutConstraint_->selfIdealSize.Width()) {
+        selfWidth = layoutConstraint_->selfIdealSize.Width().value();
+        selfHeight = selfWidth.value() / aspectRatio;
+    } else if (layoutConstraint_->selfIdealSize.Height()) {
+        selfHeight = layoutConstraint_->selfIdealSize.Height().value();
+        selfWidth = selfHeight.value() * aspectRatio;
+    }
+
+    if (selfWidth.value_or(0) > maxWidth) {
+        selfWidth = maxWidth;
+        selfHeight = selfWidth.value() / aspectRatio;
+    }
+    if (selfHeight.value_or(0) > maxHeight) {
+        selfHeight = maxHeight;
+        selfWidth = selfHeight.value() * aspectRatio;
+    }
+    if (selfHeight) {
+        layoutConstraint_->selfIdealSize.SetHeight(selfHeight);
+    }
+    if (selfWidth) {
+        layoutConstraint_->selfIdealSize.SetWidth(selfWidth);
+    }
+    // TODO: after measure done, need to check AspectRatio again.
 }
 
 void LayoutProperty::CheckSelfIdealSize()
@@ -142,8 +194,9 @@ LayoutConstraintF LayoutProperty::CreateChildConstraint() const
         layoutConstraint.maxSize.SetHeight(layoutConstraint.parentIdealSize.Height().value());
         layoutConstraint.percentReference.SetHeight(layoutConstraint.parentIdealSize.Height().value());
     }
-    // for child constraint, reset current selfIdealSize.
+    // for child constraint, reset current selfIdealSize and minSize.
     layoutConstraint.selfIdealSize.Reset();
+    layoutConstraint.minSize.Reset();
     return layoutConstraint;
 }
 
@@ -208,4 +261,25 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
     return ConvertToPaddingPropertyF(
         padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
 }
+
+void LayoutProperty::SetHost(const WeakPtr<FrameNode>& host)
+{
+    host_ = host;
+}
+
+RefPtr<FrameNode> LayoutProperty::GetHost() const
+{
+    return host_.Upgrade();
+}
+
+void LayoutProperty::OnVisibilityUpdate(VisibleType /* visible */) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 } // namespace OHOS::Ace::NG

@@ -45,6 +45,7 @@ public:
     static void SetOnSeeking(EventCallback&& onSeeking);
     static void SetOnSeeked(EventCallback&& onSeeked);
     static void SetOnUpdate(EventCallback&& onUpdate);
+    static void SetOnFullScreenChange(EventCallback&& onFullScreenChange);
 };
 } // namespace OHOS::Ace::NG
 

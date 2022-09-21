@@ -58,9 +58,9 @@ public:
         return std::nullopt;
     }
 
-    void DetachFromFrameNode()
+    void DetachFromFrameNode(FrameNode* frameNode)
     {
-        OnDetachFromFrameNode();
+        OnDetachFromFrameNode(frameNode);
         frameNode_.Reset();
     }
 
@@ -210,7 +210,7 @@ public:
 
 protected:
     virtual void OnAttachToFrameNode() {}
-    virtual void OnDetachFromFrameNode() {}
+    virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
 
 private:
     WeakPtr<FrameNode> frameNode_;

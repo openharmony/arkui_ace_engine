@@ -91,4 +91,14 @@ void ImageView::SetOnComplete(CompleteEvent&& onComplete)
     eventHub->SetOnComplete(std::move(onComplete));
 }
 
+void ImageView::SetColorFilterMatrix(const std::vector<float>& matrix)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix);
+}
+
+void ImageView::SetMatchTextDirection(bool matchTextDirection)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, matchTextDirection);
+}
+
 } // namespace OHOS::Ace::NG

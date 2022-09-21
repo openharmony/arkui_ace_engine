@@ -99,7 +99,7 @@ private:
     void Pause();
     void Stop();
     void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
-    void OnPreFullScreen(bool isPortrait);
+    void OnFullScreenChange(bool isFullScreen);
     void FullScreen();
     void ExitFullScreen();
     void UpdateLooping();
@@ -113,6 +113,9 @@ private:
     void OnCompletion();
 
     void IntTimeToText(uint32_t time, std::string& timeText) const;
+
+    RefPtr<FrameNode> CreateControlBar();
+    static RefPtr<FrameNode> CreateButton(const std::string& label, GestureEventFunc clickCallback);
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();

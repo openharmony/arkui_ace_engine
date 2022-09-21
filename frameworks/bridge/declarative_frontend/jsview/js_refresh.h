@@ -16,15 +16,15 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_REFRESH_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_REFRESH_H
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSRefresh : public JSViewAbstract, public JSInteractableView {
+class JSRefresh : public JSContainerBase {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
-
+    static void Pop();
     static void OnStateChange(const JSCallbackInfo& args);
     static void OnRefreshing(const JSCallbackInfo& args);
 };

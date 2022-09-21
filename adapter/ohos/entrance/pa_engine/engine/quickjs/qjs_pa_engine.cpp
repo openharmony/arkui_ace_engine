@@ -450,7 +450,7 @@ bool QjsPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     nativeEngine_->CheckUVLoop();
 #endif
     if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
         if (!packagePath.empty()) {
             auto qjsNativeEngine = static_cast<QuickJSNativeEngine*>(nativeEngine_);
             qjsNativeEngine->SetPackagePath(packagePath);
@@ -914,7 +914,7 @@ void QjsPaEngine::UnloadLibrary()
     dlclose(libDataAbility_);
 }
 
-int32_t QjsPaEngine::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value)
+int32_t QjsPaEngine::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value, const CallingInfo& callingInfo)
 {
     LOGI("Insert");
     JSContext* ctx = engineInstance_->GetQjsContext();
@@ -939,7 +939,7 @@ int32_t QjsPaEngine::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
 }
 
 std::shared_ptr<AppExecFwk::PacMap> QjsPaEngine::Call(const std::string& method,
-    const std::string& arg, const AppExecFwk::PacMap& pacMap)
+    const std::string& arg, const AppExecFwk::PacMap& pacMap, const CallingInfo& callingInfo)
 {
     LOGD("QjsPaEngine Call");
     std::shared_ptr<AppExecFwk::PacMap> resultSet = nullptr;
@@ -947,7 +947,8 @@ std::shared_ptr<AppExecFwk::PacMap> QjsPaEngine::Call(const std::string& method,
 }
 
 std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> QjsPaEngine::Query(
-    const Uri& uri, const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates)
+    const Uri& uri, const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+    const CallingInfo& callingInfo)
 {
     LOGI("Query");
     std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> resultSet = nullptr;
@@ -1007,7 +1008,7 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> QjsPaEngine::Query(
 }
 
 int32_t QjsPaEngine::Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
-    const OHOS::NativeRdb::DataAbilityPredicates& predicates)
+    const OHOS::NativeRdb::DataAbilityPredicates& predicates, const CallingInfo& callingInfo)
 {
     LOGI("Update");
     JSContext* ctx = engineInstance_->GetQjsContext();
@@ -1042,7 +1043,8 @@ int32_t QjsPaEngine::Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     return GetJsInt32Val(ctx, retVal);
 }
 
-int32_t QjsPaEngine::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates)
+int32_t QjsPaEngine::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+    const CallingInfo& callingInfo)
 {
     LOGI("Delete");
     JSContext* ctx = engineInstance_->GetQjsContext();
@@ -1073,7 +1075,8 @@ int32_t QjsPaEngine::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPr
     return GetJsInt32Val(ctx, retVal);
 }
 
-int32_t QjsPaEngine::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values)
+int32_t QjsPaEngine::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values,
+    const CallingInfo& callingInfo)
 {
     LOGI("BatchInsert");
     JSContext* ctx = engineInstance_->GetQjsContext();
@@ -1111,7 +1114,7 @@ int32_t QjsPaEngine::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeR
     return GetJsInt32Val(ctx, retVal);
 }
 
-std::string QjsPaEngine::GetType(const Uri& uri)
+std::string QjsPaEngine::GetType(const Uri& uri, const CallingInfo& callingInfo)
 {
     LOGI("GetType");
     JSContext* ctx = engineInstance_->GetQjsContext();
@@ -1131,7 +1134,8 @@ std::string QjsPaEngine::GetType(const Uri& uri)
     return GetJsStringVal(ctx, retVal);
 }
 
-std::vector<std::string> QjsPaEngine::GetFileTypes(const Uri& uri, const std::string& mimeTypeFilter)
+std::vector<std::string> QjsPaEngine::GetFileTypes(const Uri& uri, const std::string& mimeTypeFilter,
+    const CallingInfo& callingInfo)
 {
     LOGI("GetFileTypes");
     JSContext* ctx = engineInstance_->GetQjsContext();
@@ -1165,7 +1169,7 @@ std::vector<std::string> QjsPaEngine::GetFileTypes(const Uri& uri, const std::st
     return ret;
 }
 
-int32_t QjsPaEngine::OpenFile(const Uri& uri, const std::string& mode)
+int32_t QjsPaEngine::OpenFile(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo)
 {
     LOGI("OpenFile");
     JSContext* ctx = engineInstance_->GetQjsContext();
@@ -1186,7 +1190,7 @@ int32_t QjsPaEngine::OpenFile(const Uri& uri, const std::string& mode)
     return GetJsInt32Val(ctx, retVal);
 }
 
-int32_t QjsPaEngine::OpenRawFile(const Uri& uri, const std::string& mode)
+int32_t QjsPaEngine::OpenRawFile(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo)
 {
     LOGI("OpenRawFile");
     JSContext* ctx = engineInstance_->GetQjsContext();
@@ -1207,7 +1211,7 @@ int32_t QjsPaEngine::OpenRawFile(const Uri& uri, const std::string& mode)
     return GetJsInt32Val(ctx, retVal);
 }
 
-Uri QjsPaEngine::NormalizeUri(const Uri& uri)
+Uri QjsPaEngine::NormalizeUri(const Uri& uri, const CallingInfo& callingInfo)
 {
     LOGI("NormalizeUri");
     JSContext* ctx = engineInstance_->GetQjsContext();
@@ -1229,7 +1233,7 @@ Uri QjsPaEngine::NormalizeUri(const Uri& uri)
     return Uri(GetJsStringVal(ctx, retVal));
 }
 
-Uri QjsPaEngine::DenormalizeUri(const Uri& uri)
+Uri QjsPaEngine::DenormalizeUri(const Uri& uri, const CallingInfo& callingInfo)
 {
     LOGI("DenormalizeUri");
     JSContext* ctx = engineInstance_->GetQjsContext();

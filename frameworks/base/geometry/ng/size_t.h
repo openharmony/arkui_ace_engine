@@ -483,24 +483,32 @@ public:
         return isModified;
     }
 
-    void UpdateIllegalSizeWithCheck(const OptionalSize& size)
+    bool UpdateIllegalSizeWithCheck(const OptionalSize& size)
     {
+        bool isModified = false;
         if (!width_ && size.Width()) {
             width_ = size.Width();
+            isModified = true;
         }
         if (!height_ && size.Height()) {
             height_ = size.Height();
+            isModified = true;
         }
+        return isModified;
     }
 
-    void UpdateIllegalSizeWithCheck(const SizeT<T>& size)
+    bool UpdateIllegalSizeWithCheck(const SizeT<T>& size)
     {
+        bool isModified = false;
         if (!width_.has_value() && NonNegative(size.Width())) {
             width_ = size.Width();
+            isModified = true;
         }
         if (!height_.has_value() && NonNegative(size.Height())) {
             height_ = size.Height();
+            isModified = true;
         }
+        return isModified;
     }
 
     bool UpdateSizeWhenLarger(const SizeT<T>& size)

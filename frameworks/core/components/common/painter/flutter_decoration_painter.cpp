@@ -39,7 +39,6 @@ namespace {
 
 constexpr int32_t DOUBLE_WIDTH = 2;
 constexpr int32_t DASHED_LINE_LENGTH = 3;
-constexpr float BLUR_SIGMA_SCALE = 0.57735f;
 constexpr float TOP_START = 225.0f;
 constexpr float TOP_END = 270.0f;
 constexpr float RIGHT_START = 315.0f;
@@ -1883,11 +1882,6 @@ sk_sp<SkShader> FlutterDecorationPainter::CreateGradientShader(const Gradient& g
             break;
     }
     return ptr->CreateGradientShader();
-}
-
-float FlutterDecorationPainter::ConvertRadiusToSigma(float radius)
-{
-    return radius > 0.0f ? BLUR_SIGMA_SCALE * radius + SK_ScalarHalf : 0.0f;
 }
 
 bool FlutterDecorationPainter::CheckBorderEdgeForRRect(const Border& border)

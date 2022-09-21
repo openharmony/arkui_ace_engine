@@ -53,6 +53,7 @@ void SubwindowOhos::InitContainer()
         LOGI("Window is null, need create a new window");
         OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
         auto parentWindowName = Platform::AceContainer::GetContainer(parentContainerId_)->GetWindowName();
+        auto parentWindowId = Platform::AceContainer::GetContainer(parentContainerId_)->GetWindowId();
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
         if (parentWindow == nullptr) {
@@ -63,7 +64,7 @@ void SubwindowOhos::InitContainer()
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_FLOAT);
         } else {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-            windowOption->SetParentName(parentWindowName);
+            windowOption->SetParentId(parentWindowId);
         }
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);

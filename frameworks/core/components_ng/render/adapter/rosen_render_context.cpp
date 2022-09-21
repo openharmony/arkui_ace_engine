@@ -32,6 +32,7 @@
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/render/decoration_painter.h"
 
 namespace OHOS::Ace::NG {
 RosenRenderContext::~RosenRenderContext()
@@ -431,6 +432,30 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
         []() {});
     hoveredColor_ = hoverColorTo;
     isHoveredBoard_ = isHovered;
+}
+
+void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
+{
+    auto& backDecoration = GetOrCreateBackDecoration();
+    if (backDecoration->CheckBlurRadius(radius)) {
+        return;
+    }
+    backDecoration->UpdateBlurRadius(radius);
+
+    auto pipelineBase = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineBase);
+    std::shared_ptr<Rosen::RSFilter> backFilter = nullptr;
+    if (backDecoration->HasBlurStyle() && backDecoration->GetBlurStyleValue() != BlurStyle::NoMaterial) {
+        backFilter = Rosen::RSFilter::CreateMaterialFilter(
+            static_cast<int>(backDecoration->GetBlurStyleValue()), pipelineBase->GetDipScale());
+    } else if (radius.IsValid()) {
+        float radiusPx = pipelineBase->NormalizeToPx(radius);
+        float backblurRadius = DecorationPainter::ConvertRadiusToSigma(radiusPx);
+        backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
+    }
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBackgroundFilter(backFilter);
+    RequestNextFrame();
 }
 
 } // namespace OHOS::Ace::NG

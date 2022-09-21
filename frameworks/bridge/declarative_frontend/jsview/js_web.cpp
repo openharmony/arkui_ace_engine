@@ -235,7 +235,9 @@ public:
 
     void HandleConfirm(const JSCallbackInfo& args)
     {
-        LOGW("JSWebSslSelectCert::HandleConfirm");
+        if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsString()) {
+            return;
+        }
         std::string privateKeyFile = args[0]->ToString();
         std::string certChainFile = args[1]->ToString();
         if (result_) {
@@ -256,6 +258,7 @@ public:
             result_->HandleIgnore();
         }
     }
+
 private:
     static void Constructor(const JSCallbackInfo& args)
     {
@@ -714,6 +717,7 @@ public:
         LOGI("intercept set response status is %{public}d", isReady);
         response_->SetResponseStatus(isReady);
     }
+
 private:
     static void Constructor(const JSCallbackInfo& args)
     {
@@ -1369,14 +1373,15 @@ void JSWeb::Create(const JSCallbackInfo& info)
     std::string webSrc;
     std::optional<std::string> dstSrc;
     RefPtr<WebComponent> webComponent;
-    if (ParseJsMedia(srcValue, webSrc)) {
+    if (srcValue->IsString()) {
+        dstSrc = srcValue->ToString();
+    } else if (ParseJsMedia(srcValue, webSrc)) {
         int np = static_cast<int>(webSrc.find_first_of("/"));
         if (np < 0) {
             dstSrc = webSrc;
         } else {
             dstSrc = webSrc.erase(np, 1);
         }
-        LOGI("JSWeb::Create src:%{public}s", dstSrc->c_str());
     }
 
     if (!dstSrc) {
@@ -1384,6 +1389,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         return;
     }
 
+    LOGI("JSWeb::Create src:%{public}s", dstSrc->c_str());
     auto controllerObj = paramObject->GetProperty("controller");
     if (!controllerObj->IsObject()) {
         LOGI("web create error, controllerObj is invalid");
@@ -1438,6 +1444,30 @@ void JSWeb::OnCommonDialog(const JSCallbackInfo& args, int dialogEventType)
     }
     auto jsFunc =
         AceType::MakeRefPtr<JsEventFunction<WebDialogEvent, 1>>(JSRef<JSFunc>::Cast(args[0]), WebDialogEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) -> bool {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(context, false);
+            // need to execute in ui.
+            bool result = false;
+            context->PostSyncEvent([execCtx, func = func, info, &result]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<WebDialogEvent>(info.get());
+                JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+                if (message->IsBoolean()) {
+                    result = message->ToBoolean();
+                } else {
+                    result = false;
+                }
+            });
+            return result;
+        };
+        NG::WebView::SetOnCommonDialogImpl(std::move(uiCallback), static_cast<DialogEventType>(dialogEventType));
+        return;
+    }
     auto jsCallback = [func = std::move(jsFunc)](const BaseEventInfo* info) -> bool {
         ACE_SCORING_EVENT("OnCommonDialog CallBack");
         if (func == nullptr) {
@@ -1580,6 +1610,22 @@ void JSWeb::OnProgressChange(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebProgressChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebProgressChangeEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info.get());
+                func->ExecuteWithValue(*eventInfo);
+            });
+        };
+        NG::WebView::SetProgressChangeImpl(std::move(uiCallback));
+        return;
+    }
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
@@ -1596,6 +1642,23 @@ void JSWeb::OnTitleReceive(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebTitleReceiveEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebTitleReceiveEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            // need to execute in ui.
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebTitleReceiveEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetTitleReceiveEventId(std::move(uiCallback));
+        return;
+    }
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -1613,6 +1676,22 @@ void JSWeb::OnGeolocationHide(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebGeolocationHideEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebGeolocationHideEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebGeolocationHideEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetGeolocationHideEventId(std::move(uiCallback));
+        return;
+    }
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -1630,6 +1709,22 @@ void JSWeb::OnGeolocationShow(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebGeolocationShowEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebGeolocationShowEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebGeolocationShowEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetGeolocationShowEventId(std::move(uiCallback));
+        return;
+    }
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -1647,6 +1742,22 @@ void JSWeb::OnRequestFocus(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebRequestFocusEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), LoadWebRequestFocusEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebRequestFocusEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetRequestFocusEventId(std::move(uiCallback));
+        return;
+    }
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -1665,6 +1776,22 @@ void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DownloadStartEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), DownloadStartEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<DownloadStartEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetDownloadStartEventId(std::move(uiCallback));
+        return;
+    }
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -1683,6 +1810,30 @@ void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebHttpAuthEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WebHttpAuthEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) -> bool {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(context, false);
+            // need to execute in ui.
+            bool result = false;
+            context->PostSyncEvent([execCtx, func = func, info, &result]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<WebHttpAuthEvent>(info.get());
+                JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+                if (message->IsBoolean()) {
+                    result = message->ToBoolean();
+                } else {
+                    result = false;
+                }
+            });
+            return result;
+        };
+        NG::WebView::SetOnHttpAuthRequestImpl(std::move(uiCallback));
+        return;
+    }
     auto jsCallback = [func = std::move(jsFunc)](const BaseEventInfo* info) -> bool {
         ACE_SCORING_EVENT("onHttpAuthRequest CallBack");
         if (func == nullptr) {
@@ -1712,6 +1863,30 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebSslErrorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WebSslErrorEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) -> bool {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(context, false);
+            // need to execute in ui.
+            bool result = false;
+            context->PostSyncEvent([execCtx, func = func, info, &result]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslErrorEvent>(info.get());
+                JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+                if (message->IsBoolean()) {
+                    result = message->ToBoolean();
+                } else {
+                    result = false;
+                }
+            });
+            return result;
+        };
+        NG::WebView::SetOnSslErrorRequestImpl(std::move(uiCallback));
+        return;
+    }
     auto jsCallback = [func = std::move(jsFunc)](const BaseEventInfo* info) -> bool {
         ACE_SCORING_EVENT("OnSslErrorRequest CallBack");
         if (func == nullptr) {
@@ -1740,32 +1915,59 @@ void JSWeb::OnSslSelectCertRequest(const JSCallbackInfo& args)
         LOGE("param is invalid.");
         return;
     }
-    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebSslSelectCertEvent, 1>>(JSRef<JSFunc>::Cast(args[0]),
-        WebSslSelectCertEventToJSValue);
-    auto jsCallback = [func = std::move(jsFunc)]
-        (const BaseEventInfo* info) -> bool {
-            ACE_SCORING_EVENT("OnSslSelectCertRequest CallBack");
-            if (func == nullptr) {
-                LOGW("function is null");
-                return false;
-            }
-            auto eventInfo = TypeInfoHelper::DynamicCast<WebSslSelectCertEvent>(info);
-            if (eventInfo == nullptr) {
-                LOGW("eventInfo is null");
-                return false;
-            }
-            JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
-            if (result->IsBoolean()) {
-                return result->ToBoolean();
-            }
-            return false;
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebSslSelectCertEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), WebSslSelectCertEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) -> bool {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(context, false);
+            // need to execute in ui.
+            bool result = false;
+            context->PostSyncEvent([execCtx, func = func, info, &result]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslSelectCertEvent>(info.get());
+                JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+                if (message->IsBoolean()) {
+                    result = message->ToBoolean();
+                } else {
+                    result = false;
+                }
+            });
+            return result;
         };
+        NG::WebView::SetOnSslSelectCertRequestImpl(std::move(uiCallback));
+        return;
+    }
+    auto jsCallback = [func = std::move(jsFunc)](const BaseEventInfo* info) -> bool {
+        ACE_SCORING_EVENT("OnSslSelectCertRequest CallBack");
+        if (!func) {
+            LOGW("function is null");
+            return false;
+        }
+        auto eventInfo = TypeInfoHelper::DynamicCast<WebSslSelectCertEvent>(info);
+        if (!eventInfo) {
+            LOGW("eventInfo is null");
+            return false;
+        }
+        JSRef<JSVal> result = func->ExecuteWithValue(*eventInfo);
+        if (result->IsBoolean()) {
+            return result->ToBoolean();
+        }
+        return false;
+    };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     webComponent->SetOnSslSelectCertRequestImpl(std::move(jsCallback));
 }
 
 void JSWeb::MediaPlayGestureAccess(bool isNeedGestureAccess)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetMediaPlayGestureAccess(isNeedGestureAccess);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -1784,6 +1986,21 @@ void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
     }
 
     RefPtr<JsKeyFunction> jsOnKeyEventFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyEventFunc), instanceId](
+                              KeyEventInfo& keyEventInfo) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostSyncEvent([execCtx, func = func, &keyEventInfo]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute(keyEventInfo);
+            });
+        };
+        NG::WebView::SetOnKeyEventCallback(std::move(uiCallback));
+        return;
+    }
     auto onKeyEventId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyEventFunc)](
                             KeyEventInfo& keyEventInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -1925,6 +2142,36 @@ void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<OnInterceptRequestEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), OnInterceptRequestEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) -> RefPtr<WebResponse> {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(context, nullptr);
+            // need to execute in ui.
+            RefPtr<WebResponse> result = nullptr;
+            context->PostSyncEvent([execCtx, func = func, info, &result]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<OnInterceptRequestEvent>(info.get());
+                JSRef<JSVal> obj = func->ExecuteWithValue(*eventInfo);
+                if (!obj->IsObject()) {
+                    LOGI("hap return value is null");
+                    result = nullptr;
+                    return;
+                }
+                auto jsResponse = JSRef<JSObject>::Cast(obj)->Unwrap<JSWebResourceResponse>();
+                if (jsResponse) {
+                    result = jsResponse->GetResponseObj();
+                } else {
+                    result = nullptr;
+                }
+            });
+            return result;
+        };
+        NG::WebView::SetOnInterceptRequest(std::move(uiCallback));
+        return;
+    }
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](
                           const BaseEventInfo* info) -> RefPtr<WebResponse> {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
@@ -1956,6 +2203,30 @@ void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<UrlLoadInterceptEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), UrlLoadInterceptEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) -> bool {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(context, false);
+            // need to execute in ui.
+            bool result = false;
+            context->PostSyncEvent([execCtx, func = func, info, &result]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<UrlLoadInterceptEvent>(info.get());
+                JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+                if (message->IsBoolean()) {
+                    result = message->ToBoolean();
+                } else {
+                    result = false;
+                }
+            });
+            return result;
+        };
+        NG::WebView::SetOnUrlLoadIntercept(std::move(uiCallback));
+        return;
+    }
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](
                           const BaseEventInfo* info) -> bool {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
@@ -1996,6 +2267,30 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
 
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FileSelectorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), FileSelectorEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) -> bool {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(context, false);
+            // need to execute in ui.
+            bool result = false;
+            context->PostSyncEvent([execCtx, func = func, info, &result]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info.get());
+                JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+                if (message->IsBoolean()) {
+                    result = message->ToBoolean();
+                } else {
+                    result = false;
+                }
+            });
+            return result;
+        };
+        NG::WebView::SetOnFileSelectorShow(std::move(uiCallback));
+        return;
+    }
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](
                           const BaseEventInfo* info) -> bool {
         ACE_SCORING_EVENT("OnFileSelectorShow CallBack");
@@ -2041,6 +2336,30 @@ void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ContextMenuEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ContextMenuEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) -> bool {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(context, false);
+            // need to execute in ui.
+            bool result = false;
+            context->PostSyncEvent([execCtx, func = func, info, &result]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<ContextMenuEvent>(info.get());
+                JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+                if (message->IsBoolean()) {
+                    result = message->ToBoolean();
+                } else {
+                    result = false;
+                }
+            });
+            return result;
+        };
+        NG::WebView::SetOnContextMenuShow(std::move(uiCallback));
+        return;
+    }
     auto jsCallback = [func = std::move(jsFunc)](const BaseEventInfo* info) -> bool {
         ACE_SCORING_EVENT("onContextMenuShow CallBack");
         if (func == nullptr) {
@@ -2090,6 +2409,10 @@ void JSWeb::ContentAccessEnabled(bool isContentAccessEnabled)
 
 void JSWeb::FileAccessEnabled(bool isFileAccessEnabled)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetFileAccessEnabled(isFileAccessEnabled);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2101,6 +2424,10 @@ void JSWeb::FileAccessEnabled(bool isFileAccessEnabled)
 
 void JSWeb::OnLineImageAccessEnabled(bool isOnLineImageAccessEnabled)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetOnLineImageAccessEnabled(isOnLineImageAccessEnabled);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2112,6 +2439,10 @@ void JSWeb::OnLineImageAccessEnabled(bool isOnLineImageAccessEnabled)
 
 void JSWeb::DomStorageAccessEnabled(bool isDomStorageAccessEnabled)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetDomStorageAccessEnabled(isDomStorageAccessEnabled);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2123,6 +2454,10 @@ void JSWeb::DomStorageAccessEnabled(bool isDomStorageAccessEnabled)
 
 void JSWeb::ImageAccessEnabled(bool isImageAccessEnabled)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetImageAccessEnabled(isImageAccessEnabled);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2134,12 +2469,6 @@ void JSWeb::ImageAccessEnabled(bool isImageAccessEnabled)
 
 void JSWeb::MixedMode(int32_t mixedMode)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
-    if (!webComponent) {
-        LOGE("JSWeb: MainComponent is null.");
-        return;
-    }
     auto mixedContentMode = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
     switch (mixedMode) {
         case 0:
@@ -2152,11 +2481,25 @@ void JSWeb::MixedMode(int32_t mixedMode)
             mixedContentMode = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
             break;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetMixedMode(mixedContentMode);
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
     webComponent->SetMixedMode(mixedContentMode);
 }
 
 void JSWeb::ZoomAccessEnabled(bool isZoomAccessEnabled)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetZoomAccessEnabled(isZoomAccessEnabled);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2168,6 +2511,10 @@ void JSWeb::ZoomAccessEnabled(bool isZoomAccessEnabled)
 
 void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetGeolocationAccessEnabled(isGeolocationAccessEnabled);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2193,6 +2540,10 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
 
 void JSWeb::UserAgent(const std::string& userAgent)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetUserAgent(userAgent);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2226,6 +2577,22 @@ void JSWeb::OnRenderExited(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<RenderExitedEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), RenderExitedEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<RenderExitedEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetRenderExitedId(std::move(uiCallback));
+        return;
+    }
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -2245,6 +2612,22 @@ void JSWeb::OnRefreshAccessedHistory(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<RefreshAccessedHistoryEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), RefreshAccessedHistoryEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<RefreshAccessedHistoryEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetRefreshAccessedHistoryId(std::move(uiCallback));
+        return;
+    }
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -2257,12 +2640,6 @@ void JSWeb::OnRefreshAccessedHistory(const JSCallbackInfo& args)
 
 void JSWeb::CacheMode(int32_t cacheMode)
 {
-    auto stack = ViewStackProcessor::GetInstance();
-    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
-    if (!webComponent) {
-        LOGE("JSWeb: MainComponent is null.");
-        return;
-    }
     auto mode = WebCacheMode::DEFAULT;
     switch (cacheMode) {
         case 0:
@@ -2281,11 +2658,25 @@ void JSWeb::CacheMode(int32_t cacheMode)
             mode = WebCacheMode::DEFAULT;
             break;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetCacheMode(mode);
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
     webComponent->SetCacheMode(mode);
 }
 
 void JSWeb::OverviewModeAccess(bool isOverviewModeAccessEnabled)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetOverviewModeAccessEnabled(isOverviewModeAccessEnabled);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2297,6 +2688,10 @@ void JSWeb::OverviewModeAccess(bool isOverviewModeAccessEnabled)
 
 void JSWeb::FileFromUrlAccess(bool isFileFromUrlAccessEnabled)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetFileFromUrlAccessEnabled(isFileFromUrlAccessEnabled);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2308,6 +2703,10 @@ void JSWeb::FileFromUrlAccess(bool isFileFromUrlAccessEnabled)
 
 void JSWeb::DatabaseAccess(bool isDatabaseAccessEnabled)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetDatabaseAccessEnabled(isDatabaseAccessEnabled);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2319,6 +2718,10 @@ void JSWeb::DatabaseAccess(bool isDatabaseAccessEnabled)
 
 void JSWeb::TextZoomRatio(int32_t textZoomRatioNum)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetTextZoomRatio(textZoomRatioNum);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2330,6 +2733,10 @@ void JSWeb::TextZoomRatio(int32_t textZoomRatioNum)
 
 void JSWeb::WebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetWebDebuggingAccessEnabled(isWebDebuggingAccessEnabled);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2348,6 +2755,21 @@ void JSWeb::OnMouse(const JSCallbackInfo& args)
     }
 
     RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args[0]));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnMouseFunc), instanceId](
+                              MouseInfo& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostSyncEvent([execCtx, func = func, &info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute(info);
+            });
+        };
+        NG::WebView::SetOnMouseEventCallback(std::move(uiCallback));
+        return;
+    }
     auto onMouseId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnMouseFunc)](MouseInfo& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onMouse");
@@ -2374,6 +2796,22 @@ void JSWeb::OnResourceLoad(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ResourceLoadEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ResourceLoadEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<ResourceLoadEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetResourceLoadId(std::move(uiCallback));
+        return;
+    }
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -2400,6 +2838,22 @@ void JSWeb::OnScaleChange(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ScaleChangeEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), ScaleChangeEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<ScaleChangeEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetScaleChangeId(std::move(uiCallback));
+        return;
+    }
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -2426,6 +2880,22 @@ void JSWeb::OnScroll(const JSCallbackInfo& args)
     }
     auto jsFunc =
         AceType::MakeRefPtr<JsEventFunction<OnScrollEvent, 1>>(JSRef<JSFunc>::Cast(args[0]), ScrollEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<OnScrollEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetScrollId(std::move(uiCallback));
+        return;
+    }
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -2454,6 +2924,22 @@ void JSWeb::OnPermissionRequest(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebPermissionRequestEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), PermissionRequestEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetPermissionRequestEventId(std::move(uiCallback));
+        return;
+    }
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -2474,6 +2960,10 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], backgroundColor)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetBackgroundColor(backgroundColor.GetValue());
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2485,6 +2975,10 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
 
 void JSWeb::InitialScale(float scale)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetInitialScale(scale);
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2517,6 +3011,22 @@ void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<SearchResultReceiveEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), SearchResultReceiveEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<SearchResultReceiveEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetSearchResultReceiveEventId(std::move(uiCallback));
+        return;
+    }
     auto eventMarker =
         EventMarker([execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -2530,6 +3040,46 @@ void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
 void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
 {
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc), instanceId](
+                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
+            ContainerScope scope(instanceId);
+            DragItemInfo itemInfo;
+            auto context = PipelineBase::GetCurrentContext();
+            if (!context) {
+                return itemInfo;
+            }
+            // need to execute in ui.
+            context->PostSyncEvent([execCtx, func = func, info, &extraParams, &itemInfo]() -> void {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto ret = func->Execute(info, extraParams);
+                if (!ret->IsObject()) {
+                    LOGE("builder param is not an object.");
+                    return;
+                }
+                auto component = ParseDragItemComponent(ret);
+                if (component) {
+                    LOGI("use custom builder param.");
+                    itemInfo.customComponent = component;
+                    return;
+                }
+
+                auto builderObj = JSRef<JSObject>::Cast(ret);
+#if !defined(WINDOWS_PLATFORM) and !defined(MAC_PLATFORM)
+                auto pixmap = builderObj->GetProperty("pixelMap");
+                itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
+#endif
+                auto extraInfo = builderObj->GetProperty("extraInfo");
+                ParseJsString(extraInfo, itemInfo.extraInfo);
+                component = ParseDragItemComponent(builderObj->GetProperty("builder"));
+                itemInfo.customComponent = component;
+            });
+            return itemInfo;
+        };
+        NG::WebView::SetOnDragStartId(std::move(uiCallback));
+        return;
+    }
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
         DragItemInfo itemInfo;
@@ -2567,6 +3117,21 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
 void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
 {
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc), instanceId](
+                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostSyncEvent([execCtx, func = func, info, &extraParams]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute(info, extraParams);
+            });
+        };
+        NG::WebView::SetOnDragEnterId(std::move(uiCallback));
+        return;
+    }
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -2582,6 +3147,21 @@ void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
 void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
 {
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc), instanceId](
+                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostSyncEvent([execCtx, func = func, info, &extraParams]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute(info, extraParams);
+            });
+        };
+        NG::WebView::SetOnDragMoveId(std::move(uiCallback));
+        return;
+    }
     auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -2597,6 +3177,21 @@ void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
 void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
 {
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc), instanceId](
+                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostSyncEvent([execCtx, func = func, info, &extraParams]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute(info, extraParams);
+            });
+        };
+        NG::WebView::SetOnDragLeaveId(std::move(uiCallback));
+        return;
+    }
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -2612,6 +3207,22 @@ void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
 void JSWeb::JsOnDrop(const JSCallbackInfo& info)
 {
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc), instanceId](
+                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostSyncEvent([execCtx, func = func, info, &extraParams]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("onDrop");
+                func->Execute(info, extraParams);
+            });
+        };
+        NG::WebView::SetOnDropId(std::move(uiCallback));
+        return;
+    }
     auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
                         const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

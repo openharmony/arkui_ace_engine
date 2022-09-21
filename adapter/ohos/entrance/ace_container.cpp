@@ -107,12 +107,15 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool isArkApp,
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
-    bool useCurrentEventRunner, bool isSubAceContainer)
+    bool useCurrentEventRunner, bool isSubAceContainer, bool useNewPipeline)
     : instanceId_(instanceId), type_(type), isArkApp_(isArkApp), runtimeContext_(std::move(runtimeContext)),
       abilityInfo_(std::move(abilityInfo)), useCurrentEventRunner_(useCurrentEventRunner),
       isSubContainer_(isSubAceContainer)
 {
     ACE_DCHECK(callback);
+    if (useNewPipeline) {
+        SetUseNewPipeline();
+    }
     if (!isSubContainer_) {
         InitializeTask();
     }
@@ -702,7 +705,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     HdcRegister::Get().StartHdcRegister(instanceId);
-    ConnectServerManager::Get().AddInstance(instanceId);
+    ConnectServerManager::Get();
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
     auto front = aceContainer->GetFrontend();
@@ -969,7 +972,7 @@ void AceContainer::AddAssetPath(
     }
 }
 
-void AceContainer::AddLibPath(int32_t instanceId, const std::string& libPath)
+void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     if (!container) {

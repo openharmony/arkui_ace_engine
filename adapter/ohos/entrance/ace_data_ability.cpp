@@ -101,19 +101,22 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want)
     }
     std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
     if (appInfo) {
+        /* Note: DO NOT modify the sequence of adding libPath  */
         std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+        std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
+        std::vector<std::string> libPaths;
+        if (!quickFixLibraryPath.empty()) {
+            std::string libPath = GenerateFullPath(GetBundleCodePath(), quickFixLibraryPath);
+            libPaths.push_back(libPath);
+            LOGI("napi quick fix lib path = %{private}s", libPath.c_str());
+        }
         if (!nativeLibraryPath.empty()) {
-            if (nativeLibraryPath.back() == '/') {
-                nativeLibraryPath.pop_back();
-            }
-            std::string libPath = GetBundleCodePath();
-            if (libPath.back() == '/') {
-                libPath += nativeLibraryPath;
-            } else {
-                libPath += "/" + nativeLibraryPath;
-            }
+            std::string libPath = GenerateFullPath(GetBundleCodePath(), nativeLibraryPath);
+            libPaths.push_back(libPath);
             LOGI("napi lib path = %{private}s", libPath.c_str());
-            Platform::PaContainer::AddLibPath(abilityId_, libPath);
+        }
+        if (!libPaths.empty()) {
+            Platform::PaContainer::AddLibPath(abilityId_, libPaths);
         }
     }
 

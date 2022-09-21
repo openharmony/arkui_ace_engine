@@ -54,6 +54,7 @@ namespace {
 const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
+static std::atomic<int32_t> gInstanceId = 0;
 
 FrontendType GetFrontendType(const std::string& frontendType)
 {
@@ -163,7 +164,6 @@ private:
     AcePlatformStartAbility onStartAbility_;
 };
 
-int32_t AceAbility::instanceId_ = 0;
 const std::string AceAbility::START_PARAMS_KEY = "__startParams";
 const std::string AceAbility::PAGE_URI = "url";
 const std::string AceAbility::CONTINUE_PARAMS_KEY = "__remoteData";
@@ -221,6 +221,11 @@ bool AceWindowListener::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axis
 {
     CHECK_NULL_RETURN(callbackOwner_, false);
     return callbackOwner_->OnInputEvent(axisEvent);
+}
+
+AceAbility::AceAbility()
+{
+    abilityId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
 }
 
 void AceAbility::OnStart(const Want& want)
@@ -378,6 +383,7 @@ void AceAbility::OnStart(const Want& want)
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
     container->SetWindowName(window->GetWindowName());
+    container->SetWindowId(window->GetWindowId());
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), abilityId_);
     // create view.
     auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
@@ -390,19 +396,23 @@ void AceAbility::OnStart(const Want& want)
         auto assetBasePathStr = { "assets/js/" + srcPath + "/", std::string("assets/js/share/") };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, assetBasePathStr);
     }
+
+    /* Note: DO NOT modify the sequence of adding libPath  */
     std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+    std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
+    std::vector<std::string> libPaths;
+    if (!quickFixLibraryPath.empty()) {
+        std::string libPath = GenerateFullPath(GetBundleCodePath(), quickFixLibraryPath);
+        libPaths.push_back(libPath);
+        LOGI("napi quick fix lib path = %{private}s", libPath.c_str());
+    }
     if (!nativeLibraryPath.empty()) {
-        if (nativeLibraryPath.back() == '/') {
-            nativeLibraryPath.pop_back();
-        }
-        std::string libPath = GetBundleCodePath();
-        if (libPath.back() == '/') {
-            libPath += nativeLibraryPath;
-        } else {
-            libPath += "/" + nativeLibraryPath;
-        }
+        std::string libPath = GenerateFullPath(GetBundleCodePath(), nativeLibraryPath);
+        libPaths.push_back(libPath);
         LOGI("napi lib path = %{private}s", libPath.c_str());
-        Platform::AceContainer::AddLibPath(abilityId_, libPath);
+    }
+    if (!libPaths.empty()) {
+        Platform::AceContainer::AddLibPath(abilityId_, libPaths);
     }
 
     if (!useNewPipe) {
@@ -461,6 +471,19 @@ void AceAbility::OnStart(const Want& want)
     auto context = Platform::AceContainer::GetContainer(abilityId_)->GetPipelineContext();
     if (context != nullptr) {
         context->SetActionEventHandler(actionEventHandler);
+    }
+
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(context);
+    if (pipelineContext) {
+        pipelineContext->SetGetWindowRectImpl([window]() -> Rect {
+            Rect rect;
+            if (!window) {
+                return rect;
+            }
+            auto windowRect = window->GetRect();
+            rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+            return rect;
+        });
     }
 
     // get url
@@ -911,6 +934,5 @@ uint32_t AceAbility::GetBackgroundColor()
     LOGI("AceAbilityHandler::GetBackgroundColor, value is %{public}u", bgColor);
     return bgColor;
 }
-
 } // namespace Ace
 } // namespace OHOS

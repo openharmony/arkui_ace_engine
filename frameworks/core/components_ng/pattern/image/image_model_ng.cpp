@@ -45,6 +45,7 @@ void ImageModelNG::SetImageFit(int32_t value)
 
 void ImageModelNG::SetMatchTextDirection(bool value)
 {
+    NG::ImageView::SetMatchTextDirection(value);
 }
 
 void ImageModelNG::SetFitMaxSize(bool value)
@@ -111,6 +112,7 @@ void ImageModelNG::SetSyncMode(bool syncMode)
 
 void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
 {
+    NG::ImageView::SetColorFilterMatrix(matrix);
 }
 
 void ImageModelNG::SetOnDragStartId(const OnDragFunc& onDragStartId)

@@ -18,10 +18,11 @@
 #include "base/geometry/axis.h"
 #include "base/utils/utils.h"
 #include "core/components/scroll/scrollable.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -46,7 +47,8 @@ void ScrollPattern::OnModifyDone()
     }
 
     axis_ = axis;
-    auto task = [weak = WeakClaim(this)](double offset, int32_t source) {
+    // scrollPosition callback
+    auto offsetTask = [weak = WeakClaim(this)](double offset, int32_t source) {
         if (source != SCROLL_FROM_START) {
             auto pattern = weak.Upgrade();
             if (pattern) {
@@ -64,8 +66,25 @@ void ScrollPattern::OnModifyDone()
         gestureHub->RemoveScrollableEvent(scrollableEvent_);
     }
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
-    scrollableEvent_->SetScrollPositionCallback(std::move(task));
+
+    scrollableEvent_->SetScrollPositionCallback(std::move(offsetTask));
+    RegisterOnScrollTask();
+    RegisterScrollBeginTask();
     gestureHub->AddScrollableEvent(scrollableEvent_);
+}
+
+void ScrollPattern::RegisterOnScrollTask()
+{
+    auto eventHub = GetHost()->GetEventHub<ScrollEventHub>();
+    auto onScrollEvent = eventHub->GetOnScrollEvent();
+    scrollableEvent_->SetOnScrollCallback(std::move(onScrollEvent));
+}
+
+void ScrollPattern::RegisterScrollBeginTask()
+{
+    auto eventHub = GetHost()->GetEventHub<ScrollEventHub>();
+    auto scrollBeginEvent = eventHub->GetScrollBeginEvent();
+    scrollableEvent_->SetScrollBeginCallback(std::move(scrollBeginEvent));
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

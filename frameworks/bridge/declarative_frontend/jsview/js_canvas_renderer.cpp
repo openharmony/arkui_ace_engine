@@ -1502,14 +1502,46 @@ void JSCanvasRenderer::JsStroke(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsClip(const JSCallbackInfo& info)
 {
-    // clip() uses non-zero fillRule for default
+    std::string ruleStr = "";
+    if (info.Length() == 1 && info[0]->IsString()) {
+        // clip(rule) uses fillRule specified by the application developers
+        JSViewAbstract::ParseJsString(info[0], ruleStr);
+    } else if (info.Length() == 2) {
+        // clip(path, rule) uses fillRule specified by the application developers
+        JSViewAbstract::ParseJsString(info[1], ruleStr);
+    }
     auto fillRule = CanvasFillRule::NONZERO;
-    if (isOffscreen_) {
-        offscreenCanvas_->SetFillRuleForPath(fillRule);
-        offscreenCanvas_->Clip();
-    } else {
-        pool_->UpdateFillRuleForPath(fillRule);
-        pool_->Clip();
+    if (ruleStr == "nonzero") {
+        fillRule = CanvasFillRule::NONZERO;
+    } else if (ruleStr == "evenodd") {
+        fillRule = CanvasFillRule::EVENODD;
+    }
+
+    if (info.Length() == 0 ||
+        (info.Length() == 1 && info[0]->IsString())) {
+        if (isOffscreen_) {
+            offscreenCanvas_->SetFillRuleForPath(fillRule);
+            offscreenCanvas_->Clip();
+        } else {
+            pool_->UpdateFillRuleForPath(fillRule);
+            pool_->Clip();
+        }
+    } else if (info.Length() == 2 ||
+        (info.Length() == 1 && info[0]->IsObject())) {
+        JSPath2D* jsCanvasPath = JSRef<JSObject>::Cast(info[0])->Unwrap<JSPath2D>();
+        if (jsCanvasPath == nullptr) {
+            LOGE("The arg is wrong, it is supposed to have JSPath2D argument");
+            return;
+        }
+        auto path = jsCanvasPath->GetCanvasPath2d();
+
+        if (isOffscreen_) {
+            offscreenCanvas_->SetFillRuleForPath2D(fillRule);
+            offscreenCanvas_->Clip(path);
+        } else {
+            pool_->UpdateFillRuleForPath2D(fillRule);
+            pool_->Clip(path);
+        }
     }
 }
 

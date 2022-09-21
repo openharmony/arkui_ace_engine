@@ -36,7 +36,7 @@ public:
     void OnBlur() override;
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
 
-    bool RequestKeyboard(bool needStartTwinkling = false);
+    bool RequestKeyboard(bool needStartTwinkling = false, bool needShowSoftKeyboard = true);
     void CloseKeyboard(bool forceClose = false);
     void ShowError(const std::string& errorText);
     void Delete();

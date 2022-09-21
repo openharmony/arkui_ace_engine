@@ -202,6 +202,7 @@ void JSVideo::JsOnStart(const JSCallbackInfo& args)
             func->Execute(keys, param);
         };
         NG::VideoView::SetOnStart(std::move(onStart));
+        return;
     }
     auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
@@ -224,6 +225,7 @@ void JSVideo::JsOnPause(const JSCallbackInfo& args)
             func->Execute(keys, param);
         };
         NG::VideoView::SetOnPause(std::move(onPause));
+        return;
     }
     auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
@@ -246,6 +248,7 @@ void JSVideo::JsOnFinish(const JSCallbackInfo& args)
             func->Execute(keys, param);
         };
         NG::VideoView::SetOnFinish(std::move(onFinish));
+        return;
     }
     auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
@@ -259,6 +262,18 @@ void JSVideo::JsOnFinish(const JSCallbackInfo& args)
 
 void JSVideo::JsOnFullscreenChange(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+        auto OnFullScreenChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](
+                                      const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Video.OnFullScreenChange");
+            std::vector<std::string> keys = { "fullscreen" };
+            func->Execute(keys, param);
+        };
+        NG::VideoView::SetOnFullScreenChange(std::move(OnFullScreenChange));
+        return;
+    }
     auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
     if (!videoComponent) {
@@ -280,6 +295,7 @@ void JSVideo::JsOnPrepared(const JSCallbackInfo& args)
             func->Execute(keys, param);
         };
         NG::VideoView::SetOnPrepared(std::move(onPrepared));
+        return;
     }
     auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
@@ -302,6 +318,7 @@ void JSVideo::JsOnSeeking(const JSCallbackInfo& args)
             func->Execute(keys, param);
         };
         NG::VideoView::SetOnSeeking(std::move(onSeeking));
+        return;
     }
     auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
@@ -324,6 +341,7 @@ void JSVideo::JsOnSeeked(const JSCallbackInfo& args)
             func->Execute(keys, param);
         };
         NG::VideoView::SetOnSeeked(std::move(onSeeked));
+        return;
     }
     auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
@@ -346,6 +364,7 @@ void JSVideo::JsOnUpdate(const JSCallbackInfo& args)
             func->Execute(keys, param);
         };
         NG::VideoView::SetOnUpdate(std::move(onUpdate));
+        return;
     }
     auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());
@@ -368,6 +387,7 @@ void JSVideo::JsOnError(const JSCallbackInfo& args)
             func->Execute(keys, param);
         };
         NG::VideoView::SetOnError(std::move(onError));
+        return;
     }
     auto* stack = ViewStackProcessor::GetInstance();
     auto videoComponent = AceType::DynamicCast<VideoComponentV2>(stack->GetMainComponent());

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 
 #include <list>
+#include <unordered_map>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -35,19 +36,41 @@ struct ToastInfo {
     }
 };
 
+struct PopupInfo {
+    int32_t popupId = -1;
+    WeakPtr<FrameNode> target;
+    RefPtr<FrameNode> popupNode;
+    bool markNeedUpdate = false;
+    bool isCurrentOnShow = false;
+};
+
 // StageManager is the base class for root render node to perform page switch.
 class ACE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
 
 public:
     explicit OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode) {}
-    ~OverlayManager() override = default;
+    ~OverlayManager() override
+    {
+        LOGI("OverlayManager Destructor.");
+        popupMap_.clear();
+        toastStack_.clear();
+    }
+
+    void UpdatePopupNode(int32_t targetId, const PopupInfo& popup);
+
+    const PopupInfo& GetPopupInfo(int32_t targetId)
+    {
+        return popupMap_[targetId];
+    }
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
     void PopToast(int32_t toastId);
 
 private:
     std::list<NG::ToastInfo> toastStack_;
+    // Key: target Id, Value: PopupInfo
+    std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     WeakPtr<UINode> rootNodeWeak_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);

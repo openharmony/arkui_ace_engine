@@ -25,24 +25,24 @@
 namespace OHOS::Ace::NG {
 
 struct WebPatternProperty {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(Type, std::string);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(UserAgent, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(JsEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MediaPlayGestureAccess, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FileAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OnLineImageAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DomStorageAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageAccessEnabled, bool);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(MixedContentMode, MixedModeContent);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(MixedMode, MixedModeContent);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ZoomAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GeolocationAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(UserAgent, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(CacheMode, WebCacheMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverviewModeAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FileFromUrlAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DatabaseAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextZoomRatio, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebDebuggingAccessEnabled, bool);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextZoomRatioNum, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundColor, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(InitialScale, float);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(CacheMode, WebCacheMode);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(NeedGestureAccess, bool);
 };
 
 } // namespace OHOS::Ace::NG

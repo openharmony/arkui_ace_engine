@@ -38,6 +38,8 @@ public:
     static void SetAlt(const std::string& altSrc);
     static void SetOnError(ErrorEvent&& onError);
     static void SetOnComplete(CompleteEvent&& onComplete);
+    static void SetColorFilterMatrix(const std::vector<float>& matrix);
+    static void SetMatchTextDirection(bool matchTextDirection);
 };
 } // namespace OHOS::Ace::NG
 

@@ -65,7 +65,9 @@ extern const char _binary_jsEnumStyle_abc_end[];
 namespace OHOS::Ace::Framework {
 namespace {
 
-#ifdef APP_USE_ARM
+#if defined(ANDROID_PLATFORM)
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
+#elif defined(APP_USE_ARM)
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
@@ -201,6 +203,8 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
+
+    runtime_->StartDebugger();
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
@@ -780,7 +784,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 #endif
 
         if (delegate && delegate->GetAssetManager()) {
-            std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+            std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
             if (!packagePath.empty()) {
                 auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
                 arkNativeEngine->SetPackagePath(packagePath);
@@ -916,7 +920,7 @@ void JsiDeclarativeEngine::RegisterAssetFunc()
 void JsiDeclarativeEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
     RegisterOffWorkerFunc();
 #endif
     RegisterAssetFunc();
@@ -926,7 +930,7 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
     std::string basePath = delegate->GetAssetPath(fileName);
     if (!basePath.empty()) {
         std::string abcPath = basePath.append(fileName);

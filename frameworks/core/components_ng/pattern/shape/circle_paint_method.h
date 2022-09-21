@@ -18,6 +18,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/render/circle_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
@@ -27,16 +28,30 @@ class ACE_EXPORT CirclePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CirclePaintMethod, NodePaintMethod)
 public:
     CirclePaintMethod() = default;
+    explicit CirclePaintMethod(const RefPtr<ShapePaintProperty>& shapePaintProperty)
+        : propertiesFromAncestor_(shapePaintProperty)
+    {}
     ~CirclePaintMethod() override = default;
+
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
+        auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintWrapper->GetPaintProperty());
+        if (!shapePaintProperty) {
+            return nullptr;
+        }
+
+        if (propertiesFromAncestor_) {
+            shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
+        }
         float height = paintWrapper->GetContentSize().Height();
         float width = paintWrapper->GetContentSize().Width();
         float radius = (width > height ? height : width) * 0.5;
-        return [value = radius](RSCanvas& canvas) { CirclePainter::DrawCircle(canvas, value); };
+        return [value = radius, shapePaintProperty](
+                   RSCanvas& canvas) { CirclePainter::DrawCircle(canvas, value, *shapePaintProperty); };
     }
 
 private:
+    RefPtr<ShapePaintProperty> propertiesFromAncestor_;
     ACE_DISALLOW_COPY_AND_MOVE(CirclePaintMethod);
 };
 

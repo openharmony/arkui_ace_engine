@@ -32,6 +32,8 @@ struct ImagePaintConfig {
     ImageRenderMode renderMode_ = ImageRenderMode::ORIGINAL;
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRepeat imageRepeat_ = ImageRepeat::NOREPEAT;
+    std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
+    bool needFlipCanvasHorizontally_ = false;
 };
 
 class ImagePainter {
@@ -45,6 +47,8 @@ public:
 
     static void ApplyImageFit(
         ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect);
+
+    static void FlipHorizontal(RSCanvas& canvas, double horizontalOffset, double drawRectWidth);
 
 private:
     RefPtr<CanvasImage> canvasImage_;

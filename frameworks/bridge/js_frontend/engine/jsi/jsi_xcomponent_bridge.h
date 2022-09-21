@@ -31,7 +31,7 @@ class JsiXComponentBridge : public BaseXComponentBridge {
 
 public:
     JsiXComponentBridge();
-    ~JsiXComponentBridge();
+    ~JsiXComponentBridge() override;
     void HandleContext(const shared_ptr<JsRuntime>& runtime, NodeId id, const std::string& args);
 
     void OnJsEngineDestroy() override

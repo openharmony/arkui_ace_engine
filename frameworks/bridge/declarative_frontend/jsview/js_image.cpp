@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 
+#include "core/common/container.h"
+
 #if !defined(PREVIEW)
 #include <dlfcn.h>
 #endif
@@ -34,16 +36,20 @@ std::unique_ptr<ImageModel> ImageModel::instance = nullptr;
 ImageModel* ImageModel::GetInstance()
 {
     if (!instance) {
+#ifdef NG_BUILD
+        instance.reset(new NG::ImageModelNG());
+#else
         if (Container::IsCurrentUseNewPipeline()) {
             instance.reset(new NG::ImageModelNG());
         } else {
             instance.reset(new Framework::ImageModelImpl());
         }
+#endif
     }
     return instance.get();
 }
 
-}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -109,7 +115,7 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             JSRef<JSFunc>::Cast(args[0]), LoadImageSuccEventToJSValue);
 
         auto onComplete = [execCtx = args.GetExecutionContext(), func = std::move(jsLoadSuccFunc)](
-            const LoadImageSuccessEvent& info) {
+                              const LoadImageSuccessEvent& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onComplete");
             func->Execute(info);
@@ -126,7 +132,8 @@ void JSImage::OnError(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto jsLoadFailFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageFailEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageFailEventToJSValue);
-        auto onError = [execCtx = args.GetExecutionContext(), func = std::move(jsLoadFailFunc)](const LoadImageFailEvent& info) {
+        auto onError = [execCtx = args.GetExecutionContext(), func = std::move(jsLoadFailFunc)](
+                           const LoadImageFailEvent& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onError");
             func->Execute(info);
@@ -164,7 +171,7 @@ void JSImage::Create(const JSCallbackInfo& info)
     auto noPixMap = ParseJsMedia(info[0], src);
 
     RefPtr<PixelMap> pixMap = nullptr;
-#if defined(IMAGE_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED)
     if (!noPixMap) {
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
@@ -176,13 +183,17 @@ void JSImage::Create(const JSCallbackInfo& info)
 void JSImage::JsBorder(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorder(info);
-    SetBorder(GetBackDecoration()->GetBorder());
+    if (!Container::IsCurrentUseNewPipeline()) {
+        SetBorder(GetBackDecoration()->GetBorder());
+    }
 }
 
 void JSImage::JsBorderRadius(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorderRadius(info);
-    SetBorder(GetBackDecoration()->GetBorder());
+    if (!Container::IsCurrentUseNewPipeline()) {
+        SetBorder(GetBackDecoration()->GetBorder());
+    }
 }
 
 void JSImage::SetSourceSize(const JSCallbackInfo& info)
@@ -333,11 +344,8 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("objectRepeat", &JSImage::SetImageRepeat, opt);
     JSClass<JSImage>::StaticMethod("interpolation", &JSImage::SetImageInterpolation, opt);
     JSClass<JSImage>::StaticMethod("colorFilter", &JSImage::SetColorFilter, opt);
-    // Are those needed, we inherit from JSViewAbstract
-    JSClass<JSImage>::StaticMethod("borderStyle", &JSViewAbstract::JsBorderStyle);
-    JSClass<JSImage>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
+
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
-    JSClass<JSImage>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
     JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -388,7 +396,7 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
         }
 
         auto builderObj = JSRef<JSObject>::Cast(ret);
-#if !defined(PREVIEW)
+#if defined(PIXEL_MAP_SUPPORTED)
         auto pixmap = builderObj->GetProperty("pixelMap");
         itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
 #endif

@@ -20,7 +20,7 @@
 #include <string>
 
 #include "viewport_config.h"
-#include "foundation/multimedia/image_standard/interfaces/innerkits/include/pixel_map.h"
+#include "foundation/multimedia/image_framework/interfaces/innerkits/include/pixel_map.h"
 
 namespace OHOS {
 

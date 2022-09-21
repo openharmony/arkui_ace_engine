@@ -136,7 +136,7 @@ void FlutterRenderContext::SetOffSet(
             if (!renderPlugin) {
                 return;
             }
-            auto pluginContext = renderPlugin->GetSubPipelineContext();
+            auto pluginContext = DynamicCast<PipelineContext>(renderPlugin->GetSubPipelineContext());
             if (!pluginContext) {
                 return;
             }
