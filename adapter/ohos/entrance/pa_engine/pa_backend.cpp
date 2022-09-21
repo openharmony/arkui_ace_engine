@@ -15,10 +15,11 @@
 
 #include "adapter/ohos/entrance/pa_engine/pa_backend.h"
 
+#include "napi_remote_object.h"
+
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine_loader.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "napi_remote_object.h"
 
 namespace OHOS::Ace {
 
@@ -69,7 +70,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
     // builder callback
     BackendDelegateImplBuilder builder;
     builder.loadCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                const std::string &url, const OHOS::AAFwk::Want& want) {
+                               const std::string& url, const OHOS::AAFwk::Want& want) {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return;
@@ -104,8 +105,8 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         jsBackendEngine->FireSyncEvent(eventId, param);
     };
 
-    builder.insertCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                 const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
+    builder.insertCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const Uri& uri,
+                                 const OHOS::NativeRdb::ValuesBucket& value,
                                  const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
@@ -116,8 +117,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
 
     builder.callCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const std::string& method,
                                const std::string& arg, const AppExecFwk::PacMap& pacMap,
-                               const CallingInfo& callingInfo)
-        -> std::shared_ptr<AppExecFwk::PacMap> {
+                               const CallingInfo& callingInfo) -> std::shared_ptr<AppExecFwk::PacMap> {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return nullptr;
@@ -125,11 +125,10 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         return jsBackendEngine->Call(method, arg, pacMap, callingInfo);
     };
 
-    builder.queryCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const Uri& uri,
-                                const std::vector<std::string>& columns,
-                                const OHOS::NativeRdb::DataAbilityPredicates& predicates,
-                                const CallingInfo& callingInfo)
-        -> std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> {
+    builder.queryCallback =
+        [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const Uri& uri,
+            const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+            const CallingInfo& callingInfo) -> std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return nullptr;
@@ -148,8 +147,8 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         return jsBackendEngine->Update(uri, value, predicates, callingInfo);
     };
 
-    builder.deleteCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                 const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+    builder.deleteCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const Uri& uri,
+                                 const OHOS::NativeRdb::DataAbilityPredicates& predicates,
                                  const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
@@ -169,8 +168,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
     };
 
     builder.getTypeCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                  const Uri& uri,
-                                  const CallingInfo& callingInfo) -> std::string {
+                                  const Uri& uri, const CallingInfo& callingInfo) -> std::string {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return std::string();
@@ -178,8 +176,8 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         return jsBackendEngine->GetType(uri, callingInfo);
     };
 
-    builder.getFileTypesCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                       const Uri& uri, const std::string& mimeTypeFilter,
+    builder.getFileTypesCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const Uri& uri,
+                                       const std::string& mimeTypeFilter,
                                        const CallingInfo& callingInfo) -> std::vector<std::string> {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
@@ -189,8 +187,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
     };
 
     builder.openFileCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                   const Uri& uri, const std::string& mode,
-                                   const CallingInfo& callingInfo) -> int32_t {
+                                   const Uri& uri, const std::string& mode, const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return 0;
@@ -198,9 +195,8 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         return jsBackendEngine->OpenFile(uri, mode, callingInfo);
     };
 
-    builder.openRawFileCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                      const Uri& uri, const std::string& mode,
-                                      const CallingInfo& callingInfo) -> int32_t {
+    builder.openRawFileCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const Uri& uri,
+                                      const std::string& mode, const CallingInfo& callingInfo) -> int32_t {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return 0;
@@ -209,8 +205,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
     };
 
     builder.normalizeUriCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                       const Uri& uri,
-                                       const CallingInfo& callingInfo) -> Uri {
+                                       const Uri& uri, const CallingInfo& callingInfo) -> Uri {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return Uri("");
@@ -219,8 +214,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
     };
 
     builder.denormalizeUriCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                         const Uri& uri,
-                                         const CallingInfo& callingInfo) -> Uri {
+                                         const Uri& uri, const CallingInfo& callingInfo) -> Uri {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return Uri("");
@@ -256,7 +250,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
     };
 
     builder.commandCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                     const OHOS::AAFwk::Want& want, int startId) {
+                                  const OHOS::AAFwk::Want& want, int startId) {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return;
@@ -273,8 +267,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         jsBackendEngine->OnCreate(want);
     };
 
-    builder.deleteFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                     const int64_t formId) {
+    builder.deleteFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const int64_t formId) {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return;
@@ -291,8 +284,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         jsBackendEngine->OnTriggerEvent(formId, message);
     };
 
-    builder.updateFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                     const int64_t formId) {
+    builder.updateFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const int64_t formId) {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return;
@@ -300,8 +292,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         jsBackendEngine->OnUpdate(formId);
     };
 
-    builder.castTemptoNormalCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-                                           const int64_t formId) {
+    builder.castTemptoNormalCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](const int64_t formId) {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return;
@@ -337,7 +328,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
     };
 
     builder.commandCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-            const OHOS::AAFwk::Want &want, int startId) {
+                                  const OHOS::AAFwk::Want& want, int startId) {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return;
@@ -346,7 +337,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
     };
 
     builder.shareFormCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-            int64_t formId, OHOS::AAFwk::WantParams &wantParams) {
+                                    int64_t formId, OHOS::AAFwk::WantParams& wantParams) {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return false;
@@ -354,8 +345,7 @@ void PaBackend::InitializeBackendDelegate(const RefPtr<TaskExecutor>& taskExecut
         return jsBackendEngine->OnShare(formId, wantParams);
     };
 
-    builder.dumpHeapSnapshotCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](
-            bool isPrivate) {
+    builder.dumpHeapSnapshotCallback = [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)](bool isPrivate) {
         auto jsBackendEngine = weakEngine.Upgrade();
         if (!jsBackendEngine) {
             return;
@@ -394,14 +384,12 @@ void PaBackend::OnCommand(const std::string& intent, int startId)
     delegate_->OnApplicationCommand(intent, startId);
 }
 
-void PaBackend::OnCommand(const OHOS::AAFwk::Want &want, int startId)
+void PaBackend::OnCommand(const OHOS::AAFwk::Want& want, int startId)
 {
     delegate_->OnCommand(want, startId);
 }
 
-void PaBackend::RunPa(const std::string& url)
-{
-}
+void PaBackend::RunPa(const std::string& url) {}
 
 void PaBackend::TransferJsResponseData(int callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
@@ -448,8 +436,8 @@ int32_t PaBackend::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& v
     return delegate_->Insert(uri, value);
 }
 
-std::shared_ptr<AppExecFwk::PacMap> PaBackend::Call(const Uri& uri,
-    const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
+std::shared_ptr<AppExecFwk::PacMap> PaBackend::Call(
+    const Uri& uri, const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
 {
     return delegate_->Call(uri, method, arg, pacMap);
 }
@@ -511,7 +499,7 @@ void PaBackend::RunPa(const std::string& url, const OHOS::AAFwk::Want& want)
     delegate_->RunPa(url, want);
 }
 
-void PaBackend::OnCreate(const OHOS::AAFwk::Want &want)
+void PaBackend::OnCreate(const OHOS::AAFwk::Want& want)
 {
     delegate_->OnCreate(want);
 }
@@ -556,7 +544,7 @@ void PaBackend::OnDisConnect(const OHOS::AAFwk::Want& want)
     delegate_->OnDisConnect(want);
 }
 
-bool PaBackend::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+bool PaBackend::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
 {
     return delegate_->OnShare(formId, wantParams);
 }
