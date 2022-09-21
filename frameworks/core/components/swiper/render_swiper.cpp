@@ -3322,27 +3322,46 @@ void RenderSwiper::OnPaintFinish()
         return;
     }
 
+    bool isDeclarative = true;
+    auto context = GetContext().Upgrade();
+    if (context) {
+        isDeclarative = context->GetIsDeclarative();
+    }
+
     Rect itemRect;
     Rect viewPortRect(GetGlobalOffset(), GetChildViewPort());
+    RefPtr<OHOS::Ace::RenderNode> itemWithChildAccessibilityNode;
     for (const auto& item : GetChildren()) {
-        auto node = item->GetAccessibilityNode().Upgrade();
+        // RenderSwiper's children are RenderDisplay who's accessibility node is the same with RenderSwiper in v2,
+        // see SwiperComponent::AppendChild and RenderElement::SetAccessibilityNode
+        if (isDeclarative) {
+            itemWithChildAccessibilityNode = item->GetFirstChild();
+        } else {
+            itemWithChildAccessibilityNode = item;
+        }
+
+        if (!itemWithChildAccessibilityNode) {
+            continue;
+        }
+
+        auto node = itemWithChildAccessibilityNode->GetAccessibilityNode().Upgrade();
         if (!node) {
             continue;
         }
         bool visible = GetVisible();
         if (visible) {
-            itemRect.SetSize(item->GetLayoutSize());
-            itemRect.SetOffset(item->GetGlobalOffset());
+            itemRect.SetSize(itemWithChildAccessibilityNode->GetLayoutSize());
+            itemRect.SetOffset(itemWithChildAccessibilityNode->GetGlobalOffset());
             visible = itemRect.IsIntersectWith(viewPortRect);
         }
-        item->SetAccessibilityVisible(visible);
+        itemWithChildAccessibilityNode->SetAccessibilityVisible(visible);
         if (visible) {
             Rect clampRect = itemRect.Constrain(viewPortRect);
             if (clampRect != itemRect) {
-                item->SetAccessibilityRect(clampRect);
+                itemWithChildAccessibilityNode->SetAccessibilityRect(clampRect);
             }
         } else {
-            item->NotifyPaintFinish();
+            itemWithChildAccessibilityNode->NotifyPaintFinish();
         }
     }
 }
