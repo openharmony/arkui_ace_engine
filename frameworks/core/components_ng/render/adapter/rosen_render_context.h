@@ -27,6 +27,7 @@
 #include "base/geometry/dimension_offset.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/render/render_context.h"
 
@@ -101,6 +102,12 @@ public:
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
+    void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) override;
+    void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
+    void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
+    void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) override;
+    void OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle) override;
+
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void UpdateBorderWidth(const BorderWidthPropertyF& value) override;
@@ -114,8 +121,13 @@ private:
 
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
+    DataReadyNotifyTask CreateBgImageDataReadyCallback();
+    LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
+    void PaintBackground();
+
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
+    RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<Canvas> recordingCanvas_;
     RefPtr<Canvas> rosenCanvas_;
     bool isHoveredScale_ = false;

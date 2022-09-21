@@ -1862,6 +1862,18 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
         return;
     }
 
+    int32_t repeatIndex = 0;
+    if (info.Length() == 2 && info[1]->IsNumber()) {
+        repeatIndex = info[1]->ToNumber<int32_t>();
+    }
+    auto repeat = static_cast<ImageRepeat>(repeatIndex);
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetBackgroundImageRepeat(repeat);
+        NG::ViewAbstract::SetBackgroundImage(src);
+        return;
+    }
+
     auto decoration = GetBackDecoration();
     if (!decoration) {
         LOGE("The decoration is nullptr.");
@@ -1878,11 +1890,6 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
         image->SetParsedSrc(src);
     }
 
-    int32_t repeatIndex = 0;
-    if (info.Length() == 2 && info[1]->IsNumber()) {
-        repeatIndex = info[1]->ToNumber<int32_t>();
-    }
-    auto repeat = static_cast<ImageRepeat>(repeatIndex);
     image->SetImageRepeat(repeat);
     decoration->SetImage(image);
 }
@@ -1891,6 +1898,10 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsBackgroundBlurStyle", info, checkList)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetBackgroundBlurStyle(static_cast<BlurStyle>(info[0]->ToNumber<int32_t>()));
         return;
     }
     auto decoration = GetBackDecoration();
@@ -1908,15 +1919,6 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBackgroundImageSize", info, checkList)) {
         return;
-    }
-    auto decoration = GetBackDecoration();
-    if (!decoration) {
-        LOGE("The decoration is nullptr.");
-        return;
-    }
-    auto image = decoration->GetImage();
-    if (!image) {
-        image = AceType::MakeRefPtr<BackgroundImage>();
     }
     BackgroundImageSize bgImgSize;
     if (info[0]->IsNumber()) {
@@ -1950,14 +1952,9 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
         bgImgSize.SetSizeTypeY(typeHeight);
         bgImgSize.SetSizeValueY(valueHeight);
     }
-    image->SetImageSize(bgImgSize);
-    decoration->SetImage(image);
-}
 
-void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
-{
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
-    if (!CheckJSCallbackInfo("JsBackgroundImagePosition", info, checkList)) {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetBackgroundImageSize(bgImgSize);
         return;
     }
     auto decoration = GetBackDecoration();
@@ -1968,6 +1965,16 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
     auto image = decoration->GetImage();
     if (!image) {
         image = AceType::MakeRefPtr<BackgroundImage>();
+    }
+    image->SetImageSize(bgImgSize);
+    decoration->SetImage(image);
+}
+
+void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsBackgroundImagePosition", info, checkList)) {
+        return;
     }
     BackgroundImagePosition bgImgPosition;
     if (info[0]->IsNumber()) {
@@ -2030,6 +2037,20 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
             typeY = DimensionUnit::PERCENT;
         }
         SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetBackgroundImagePosition(bgImgPosition);
+        return;
+    }
+
+    auto decoration = GetBackDecoration();
+    if (!decoration) {
+        LOGE("The decoration is nullptr.");
+        return;
+    }
+    auto image = decoration->GetImage();
+    if (!image) {
+        image = AceType::MakeRefPtr<BackgroundImage>();
     }
     image->SetImagePosition(bgImgPosition);
     decoration->SetImage(image);
