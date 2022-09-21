@@ -233,7 +233,7 @@ void JSIndexer::SetSelectedFont(const JSCallbackInfo& args)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         if (args.Length() >= 1 && args[0]->IsObject()) {
-            auto textStyle = indexerComponent->GetActiveTextStyle();
+            TextStyle textStyle;
             GetFontContent(args, textStyle);
             NG::IndexerView::SetSelectedFont(textStyle);
         }
@@ -254,7 +254,7 @@ void JSIndexer::SetPopupFont(const JSCallbackInfo& args)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         if (args.Length() >= 1 && args[0]->IsObject()) {
-            auto textStyle = indexerComponent->GetActiveTextStyle();
+            TextStyle textStyle;
             GetFontContent(args, textStyle);
             NG::IndexerView::SetPopupFont(textStyle);
         }
@@ -275,7 +275,7 @@ void JSIndexer::SetFont(const JSCallbackInfo& args)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         if (args.Length() >= 1 && args[0]->IsObject()) {
-            auto textStyle = indexerComponent->GetActiveTextStyle();
+            TextStyle textStyle;
             GetFontContent(args, textStyle);
             NG::IndexerView::SetFont(textStyle);
         }
