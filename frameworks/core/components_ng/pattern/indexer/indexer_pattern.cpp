@@ -65,7 +65,7 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
     if (itemSizeRender_ > 0) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto layoutProperty = host->GetLayoutProperty();
+        auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         auto size = SizeF(itemSizeRender_, itemSizeRender_ * itemCount_);
         auto padding = layoutProperty->CreatePaddingAndBorder();
@@ -75,12 +75,12 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
         int32_t itemIndex = static_cast<int32_t>((touchPosition.GetY() - top) / itemSizeRender_);
         selected_ = itemIndex;
 
-        if (indexerLayoutProperty->GetArrayValue().has_value()) {
-            arrayValue_ = indexerLayoutProperty->GetArrayValue().value();
+        if (layoutProperty->GetArrayValue().has_value()) {
+            arrayValue_ = layoutProperty->GetArrayValue().value();
             itemCount_ = arrayValue_.size();
         }
-        if (!isInitialized_ && indexerLayoutProperty->GetSelected().has_value()) {
-            selected_ = indexerLayoutProperty->GetSelected().value();
+        if (!isInitialized_ && layoutProperty->GetSelected().has_value()) {
+            selected_ = layoutProperty->GetSelected().value();
         }
         isInitialized_ = true;
         if (itemCount_ <= 0) {

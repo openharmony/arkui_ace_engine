@@ -86,20 +86,35 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.UpdateSelfIdealSizeWithCheck(OptionalSizeF(itemSizeRender_, itemSizeRender_));
         childLayoutProperty->UpdateAlignment(Alignment::CENTER);
         
-        childLayoutProperty->UpdateTextColor(color_);
-        auto fontSize = font_.GetFontSize();
-        childLayoutProperty->UpdateFontSize(fontSize);
-        auto fontWeight = font_.GetFontWeight();
-        childLayoutProperty->UpdateFontWeight(fontWeight);
+        if (index == selected_) {
+            childLayoutProperty->UpdateTextColor(selectedColor_);
+            auto fontSize = selectedFont_.GetFontSize();
+            childLayoutProperty->UpdateFontSize(fontSize);
+            auto fontWeight = selectedFont_.GetFontWeight();
+            childLayoutProperty->UpdateFontWeight(fontWeight);
 
-        auto childFrameNode = childWrapper->GetHostNode();
-        auto childRenderContext = childFrameNode->GetRenderContext();
-        childRenderContext->ResetBlendBgColor();
+            auto childFrameNode = childWrapper->GetHostNode();
+            auto childRenderContext = childFrameNode->GetRenderContext();
+            childRenderContext->BlendBgColor(selectedBackgroundColor_);
             
-        Dimension radius = Dimension(BOX_RADIUS);
-        BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-        childRenderContext->UpdateBorderRadius(borderRadius);
-        
+            Dimension radius = Dimension(BOX_RADIUS);
+            BorderRadiusProperty borderRadius { radius, radius, radius, radius };
+            childRenderContext->UpdateBorderRadius(borderRadius);
+        } else {
+            childLayoutProperty->UpdateTextColor(color_);
+            auto fontSize = font_.GetFontSize();
+            childLayoutProperty->UpdateFontSize(fontSize);
+            auto fontWeight = font_.GetFontWeight();
+            childLayoutProperty->UpdateFontWeight(fontWeight);
+
+            auto childFrameNode = childWrapper->GetHostNode();
+            auto childRenderContext = childFrameNode->GetRenderContext();
+            childRenderContext->ResetBlendBgColor();
+            
+            Dimension radius = Dimension(BOX_RADIUS);
+            BorderRadiusProperty borderRadius { radius, radius, radius, radius };
+            childRenderContext->UpdateBorderRadius(borderRadius);
+        }
         childWrapper->Measure(childLayoutConstraint);
     }
 
