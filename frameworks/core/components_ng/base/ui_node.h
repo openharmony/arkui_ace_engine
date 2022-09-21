@@ -54,7 +54,7 @@ public:
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT);
     void Clean();
     void RemoveChildAtIndex(int32_t index);
-
+    RefPtr<UINode> GetChildAtIndex(int32_t index);
     void AttachToMainTree();
     void DetachFromMainTree();
 
