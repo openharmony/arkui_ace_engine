@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_view.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -73,6 +75,65 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
         int32_t itemIndex = static_cast<int32_t>((touchPosition.GetY() - top) / itemSizeRender_);
         selected_ = itemIndex;
 
+        if (indexerLayoutProperty->GetArrayValue().has_value()) {
+            arrayValue_ = indexerLayoutProperty->GetArrayValue().value();
+            itemCount_ = arrayValue_.size();
+        }
+        if (!isInitialized_ && indexerLayoutProperty->GetSelected().has_value()) {
+            selected_ = indexerLayoutProperty->GetSelected().value();
+        }
+        isInitialized_ = true;
+        if (itemCount_ <= 0) {
+            LOGE("AlphabetIndexer arrayValue size is less than 0");
+            return;
+        }
+
+        auto color = layoutProperty->GetColor().value_or(Color::BLACK);
+        auto selectedColor = layoutProperty->GetSelectedColor().value_or(Color::BLACK);
+        auto popupColor = layoutProperty->GetPopupColor().value_or(Color::BLACK);
+        auto selectedBackgroundColor = layoutProperty->GetSelectedBackgroundColor().value_or(Color::BLACK);
+        auto usingPopup = layoutProperty->GetUsingPopup().value_or(false);
+        TextStyle textStyle;
+        auto selectedFont = layoutProperty->GetSelectedFont().value_or(textStyle);
+        auto popupFont = layoutProperty->GetPopupFont().value_or(textStyle);
+        auto font = layoutProperty->GetFont().value_or(textStyle);
+
+        int32_t index = 0;
+        auto childrenNode = host->GetChildren();
+        for (auto iter = childrenNode.begin(); iter != childrenNode.end(); iter++) {
+            auto childNode = AceType::DynamicCast<FrameNode>(*(iter));
+            auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
+            if (index == selected_) {
+                nodeLayoutProperty->UpdateTextColor(selectedColor);
+                auto fontSize = selectedFont.GetFontSize();
+                nodeLayoutProperty->UpdateFontSize(fontSize);
+                auto fontWeight = selectedFont.GetFontWeight();
+                nodeLayoutProperty->UpdateFontWeight(fontWeight);
+
+                auto childRenderContext = childNode->GetRenderContext();
+                childRenderContext->BlendBgColor(selectedBackgroundColor);
+            } else if (index == itemCount_) {
+                if (usingPopup) {
+                    nodeLayoutProperty->UpdateContext(arrayValue_[selected_]);
+                    nodeLayoutProperty->UpdateTextColor(popupColor);
+                    auto fontSize = popupFont.GetFontSize();
+                    nodeLayoutProperty->UpdateFontSize(fontSize);
+                    auto fontWeight = popupFont.GetFontWeight();
+                    nodeLayoutProperty->UpdateFontWeight(fontWeight);
+                }
+            } else {
+                nodeLayoutProperty->UpdateTextColor(color);
+                auto fontSize = font.GetFontSize();
+                nodeLayoutProperty->UpdateFontSize(fontSize);
+                auto fontWeight = font.GetFontWeight();
+                nodeLayoutProperty->UpdateFontWeight(fontWeight);
+
+                auto childRenderContext = childNode->GetRenderContext();
+                childRenderContext->ResetBlendBgColor();
+            }
+            index++;
+        }
+    
         auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
         CHECK_NULL_VOID(indexerEventHub);
         

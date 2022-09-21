@@ -94,7 +94,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
         auto childFrameNode = childWrapper->GetHostNode();
         auto childRenderContext = childFrameNode->GetRenderContext();
-        childRenderContext->BlendBgColor(backgroundColor_);
+        childRenderContext->ResetBlendBgColor();
             
         Dimension radius = Dimension(BOX_RADIUS);
         BorderRadiusProperty borderRadius { radius, radius, radius, radius };
