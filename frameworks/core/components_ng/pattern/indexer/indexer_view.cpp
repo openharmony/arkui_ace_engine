@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 
 void IndexerView::Create(std::vector<std::string> arrayValue, int32_t selected)
 {
+    // TODO:需要考虑更新场景
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =

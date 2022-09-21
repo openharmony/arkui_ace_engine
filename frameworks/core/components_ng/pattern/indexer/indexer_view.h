@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDEXER_INDEXER_VIEW_H
 
 #include "core/components_v2/indexer/indexer_component.h"
-
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
@@ -26,19 +25,17 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT IndexerView {
 public:
-    static void Create(std::vector<std::string> arrayValue, int32_t selected);
-    // static void SetArrayValue(std::vector<std::string> arrayValue);
-    // static void SetSelected(int32_t selected);
-    static void SetColor(Color color);
-    static void SetSelectedColor(Color selectedColor);
-    static void SetPopupColor(Color popupColor);
-    static void SetSelectedBackgroundColor(Color selectedBackgroundColor);
-    static void SetPopupBackground(Color popupBackground);
+    static void Create(const std::vector<std::string>& arrayValue, int32_t selected);
+    static void SetColor(const Color& color);
+    static void SetSelectedColor(const Color& selectedColor);
+    static void SetPopupColor(const Color& popupColor);
+    static void SetSelectedBackgroundColor(const Color& selectedBackgroundColor);
+    static void SetPopupBackground(const Color& popupBackground);
     static void SetUsingPopup(bool usingPopup);
     static void SetSelectedFont(const TextStyle& selectedFont);
     static void SetPopupFont(const TextStyle& popupFont);
     static void SetFont(const TextStyle& font);
-    static void SetItemSize(Dimension itemSize);
+    static void SetItemSize(const Dimension& itemSize);
     static void SetAlignStyle(V2::AlignStyle alignStyle);
     static void SetOnSelected(OnSelectedEvent&& onSelected);
     static void SetOnRequestPopupData(OnRequestPopupDataEvent&& onRequestPopupData);

@@ -76,7 +76,7 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         itemSizeRender_ = maxSize.Height() / itemCount_;
     }
-
+    // TODO:移动到onModifyDone
     auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
     for (int32_t index = 0; index < itemCount_; index++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
@@ -85,27 +85,21 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(childLayoutProperty);
         childLayoutConstraint.UpdateSelfIdealSizeWithCheck(OptionalSizeF(itemSizeRender_, itemSizeRender_));
         childLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        if (index == selected_) {
-            // childLayoutProperty->UpdateTextColor(selectedColor_);
-            // auto fontSize = selectedFont_.GetFontSize();
-            // childLayoutProperty->UpdateFontSize(fontSize);
-            // auto fontWeight = selectedFont_.GetFontWeight();
-            // childLayoutProperty->UpdateFontWeight(fontWeight);
+        
+        childLayoutProperty->UpdateTextColor(color_);
+        auto fontSize = font_.GetFontSize();
+        childLayoutProperty->UpdateFontSize(fontSize);
+        auto fontWeight = font_.GetFontWeight();
+        childLayoutProperty->UpdateFontWeight(fontWeight);
+
+        auto childFrameNode = childWrapper->GetHostNode();
+        auto childRenderContext = childFrameNode->GetRenderContext();
+        childRenderContext->BlendBgColor(backgroundColor_);
             
-            // auto childFrameNode = childWrapper->GetHostNode();
-            // auto childRenderContext = childFrameNode->GetRenderContext();
-            // childRenderContext->BlendBgColor(selectedBackgroundColor_);
-            
-            // Dimension radius = Dimension(BOX_RADIUS);
-            // BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-            // childRenderContext->UpdateBorderRadius(borderRadius);
-        } else {
-            // childLayoutProperty->UpdateTextColor(color_);
-            // auto fontSize = font_.GetFontSize();
-            // childLayoutProperty->UpdateFontSize(fontSize);
-            // auto fontWeight = font_.GetFontWeight();
-            // childLayoutProperty->UpdateFontWeight(fontWeight);
-        }
+        Dimension radius = Dimension(BOX_RADIUS);
+        BorderRadiusProperty borderRadius { radius, radius, radius, radius };
+        childRenderContext->UpdateBorderRadius(borderRadius);
+        
         childWrapper->Measure(childLayoutConstraint);
     }
 
@@ -118,19 +112,19 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.UpdateSelfIdealSizeWithCheck(OptionalSizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE));
         childLayoutProperty->UpdateAlignment(Alignment::CENTER);
         childLayoutProperty->UpdateContent(arrayValue_[selected_]);
-        // childLayoutProperty->UpdateTextColor(popupColor_);
-        // auto fontSize = popupFont_.GetFontSize();
-        // childLayoutProperty->UpdateFontSize(fontSize);
-        // auto fontWeight = popupFont_.GetFontWeight();
-        // childLayoutProperty->UpdateFontWeight(fontWeight);
+        childLayoutProperty->UpdateTextColor(popupColor_);
+        auto fontSize = popupFont_.GetFontSize();
+        childLayoutProperty->UpdateFontSize(fontSize);
+        auto fontWeight = popupFont_.GetFontWeight();
+        childLayoutProperty->UpdateFontWeight(fontWeight);
         
-        // auto childFrameNode = childWrapper->GetHostNode();
-        // auto childRenderContext = childFrameNode->GetRenderContext();
-        // childRenderContext->BlendBgColor(popupBackground_);
+        auto childFrameNode = childWrapper->GetHostNode();
+        auto childRenderContext = childFrameNode->GetRenderContext();
+        childRenderContext->BlendBgColor(popupBackground_);
 
-        // Dimension radius = Dimension(BUBBLE_BOX_RADIUS);
-        // BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-        // childRenderContext->UpdateBorderRadius(borderRadius);
+        Dimension radius = Dimension(BUBBLE_BOX_RADIUS);
+        BorderRadiusProperty borderRadius { radius, radius, radius, radius };
+        childRenderContext->UpdateBorderRadius(borderRadius);
         
         childWrapper->Measure(childLayoutConstraint);
     }
@@ -195,6 +189,5 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         
         childWrapper->Layout(parentOffset);
     }
-    return;
 }
 } // namespace OHOS::Ace::NG

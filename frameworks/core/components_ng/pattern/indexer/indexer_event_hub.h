@@ -34,9 +34,9 @@ public:
     IndexerEventHub() = default;
     ~IndexerEventHub() override = default;
 
-    void SetOnSelected(const OnSelectedEvent&& onSelected)
+    void SetOnSelected(OnSelectedEvent&& onSelected)
     {
-        onSelectedEvent_ = onSelected;
+        onSelectedEvent_ = std::move(onSelected);
     }
 
     const OnSelectedEvent& GetOnSelected() const
@@ -44,9 +44,9 @@ public:
         return onSelectedEvent_;
     }
 
-    void SetOnRequestPopupData(const OnRequestPopupDataEvent&& onRequestPopupData)
+    void SetOnRequestPopupData(OnRequestPopupDataEvent&& onRequestPopupData)
     {
-        onRequestPopupDataEvent_ = onRequestPopupData;
+        onRequestPopupDataEvent_ = std::move(onRequestPopupData);
     }
 
     const OnRequestPopupDataEvent& GetOnRequestPopupData() const
@@ -54,9 +54,9 @@ public:
         return onRequestPopupDataEvent_;
     }
 
-    void SetOnPopupSelected(const OnPopupSelectedEvent&& onPopupSelected)
+    void SetOnPopupSelected(OnPopupSelectedEvent&& onPopupSelected)
     {
-        onPopupSelectedEvent_ = onPopupSelected;
+        onPopupSelectedEvent_ = std::move(onPopupSelected);
     }
 
     const OnPopupSelectedEvent& GetOnPopupSelected() const

@@ -54,7 +54,6 @@ bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     isInitialized_ = indexerLayoutAlgorithm->GetIsInitialized();
     selected_ = indexerLayoutAlgorithm->GetSelected();
     itemSizeRender_ = indexerLayoutAlgorithm->GetItemSizeRender();
-    UpdateIndexer(dirty);
     return false;
 }
 
@@ -84,6 +83,7 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 
         auto onRequestPopupData = indexerEventHub->GetOnRequestPopupData();
         if (onRequestPopupData && itemIndex >= 0 && itemIndex < itemCount_) {
+            // TODO: 需要接受返回值覆盖默认的弹窗文本
             onRequestPopupData(itemIndex);
         }
 
@@ -92,98 +92,6 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
             onPopupSelected(itemIndex);
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-}
-
-void IndexerPattern::UpdateIndexer(const RefPtr<LayoutWrapper>& layoutWrapper)
-{
-    auto indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(indexerLayoutProperty);
-    
-    if (indexerLayoutProperty->GetArrayValue().has_value()) {
-        arrayValue_ = indexerLayoutProperty->GetArrayValue().value();
-        itemCount_ = arrayValue_.size();
-    }
-    if (!isInitialized_ && indexerLayoutProperty->GetSelected().has_value()) {
-        selected_ = indexerLayoutProperty->GetSelected().value();
-    }
-    isInitialized_ = true;
-
-    auto color = indexerLayoutProperty->GetColor().value_or(Color::BLACK);
-    auto selectedColor = indexerLayoutProperty->GetSelectedColor().value_or(Color::BLACK);
-    auto popupColor = indexerLayoutProperty->GetPopupColor().value_or(Color::BLACK);
-    auto selectedBackgroundColor = indexerLayoutProperty->GetSelectedBackgroundColor().value_or(Color::BLACK);
-    auto popupBackground = indexerLayoutProperty->GetPopupBackground().value_or(Color::BLACK);
-    auto usingPopup = indexerLayoutProperty->GetUsingPopup().value_or(false);
-    TextStyle textStyle;
-    auto selectedFont = indexerLayoutProperty->GetSelectedFont().value_or(textStyle);
-    auto popupFont = indexerLayoutProperty->GetPopupFont().value_or(textStyle);
-    auto font = indexerLayoutProperty->GetFont().value_or(textStyle);
-
-    if (itemCount_ <= 0) {
-        LOGE("AlphabetIndexer arrayValue size is less than 0");
-        return;
-    }
-
-    auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
-    for (int32_t index = 0; index < itemCount_; index++) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        CHECK_NULL_VOID(childWrapper);
-        auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
-        CHECK_NULL_VOID(childLayoutProperty);
-        childLayoutConstraint.UpdateSelfIdealSizeWithCheck(OptionalSizeF(itemSizeRender_, itemSizeRender_));
-        childLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        if (index == selected_) {
-            childLayoutProperty->UpdateTextColor(selectedColor);
-            auto fontSize = selectedFont.GetFontSize();
-            childLayoutProperty->UpdateFontSize(fontSize);
-            auto fontWeight = selectedFont.GetFontWeight();
-            childLayoutProperty->UpdateFontWeight(fontWeight);
-
-            auto childFrameNode = childWrapper->GetHostNode();
-            auto childRenderContext = childFrameNode->GetRenderContext();
-            childRenderContext->BlendBgColor(selectedBackgroundColor);
-            
-            Dimension radius = Dimension(BOX_RADIUS);
-            BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-            childRenderContext->UpdateBorderRadius(borderRadius);
-        } else {
-            childLayoutProperty->UpdateTextColor(color);
-            auto fontSize = font.GetFontSize();
-            childLayoutProperty->UpdateFontSize(fontSize);
-            auto fontWeight = font.GetFontWeight();
-            childLayoutProperty->UpdateFontWeight(fontWeight);
-
-            auto childFrameNode = childWrapper->GetHostNode();
-            auto childRenderContext = childFrameNode->GetRenderContext();
-            childRenderContext->BlendBgColor(Color::WHITE);
-
-            Dimension radius = Dimension(BOX_RADIUS);
-            BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-            childRenderContext->UpdateBorderRadius(borderRadius);
-        }
-    }
-    if (usingPopup) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(itemCount_);
-        CHECK_NULL_VOID(childWrapper);
-        auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
-        CHECK_NULL_VOID(childLayoutProperty);
-        
-        childLayoutConstraint.UpdateSelfIdealSizeWithCheck(OptionalSizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE));
-        childLayoutProperty->UpdateContent(arrayValue_[selected_]);
-        childLayoutProperty->UpdateTextColor(popupColor);
-        auto fontSize = popupFont.GetFontSize();
-        childLayoutProperty->UpdateFontSize(fontSize);
-        auto fontWeight = popupFont.GetFontWeight();
-        childLayoutProperty->UpdateFontWeight(fontWeight);
-        
-        auto childFrameNode = childWrapper->GetHostNode();
-        auto childRenderContext = childFrameNode->GetRenderContext();
-        childRenderContext->BlendBgColor(popupBackground);
-
-        Dimension radius = Dimension(BUBBLE_BOX_RADIUS);
-        BorderRadiusProperty borderRadius { radius, radius, radius, radius };
-        childRenderContext->UpdateBorderRadius(borderRadius);
     }
 }
 } // namespace OHOS::Ace::NG

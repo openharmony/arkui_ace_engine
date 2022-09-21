@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+// TODO:创建主题文件，将这些和component的公共类放到主题文件里
 namespace {
 constexpr double BUBBLE_POSITION_X = -168.0;
 constexpr double BUBBLE_POSITION_Y = 96.0;
@@ -66,7 +67,6 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void OnTouchDown(const TouchEventInfo& info);
-    void UpdateIndexer(const RefPtr<LayoutWrapper>& layoutWrapper);
     
     RefPtr<TouchEventImpl> touchListener_;
     bool isInitialized_ = false;

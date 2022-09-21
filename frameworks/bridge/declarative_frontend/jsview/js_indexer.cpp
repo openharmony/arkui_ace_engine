@@ -33,39 +33,6 @@ const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::Alig
 
 void JSIndexer::Create(const JSCallbackInfo& args)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (args.Length() >= 1 && args[0]->IsObject()) {
-            auto param = JsonUtil::ParseJsonString(args[0]->ToString());
-            if (!param || param->IsNull()) {
-                LOGE("JSIndexer::Create param is null");
-                return;
-            }
-            std::vector<std::string> indexerArray;
-
-            auto arrayVal = param->GetValue("arrayValue");
-            if (!arrayVal || !arrayVal->IsArray()) {
-                LOGW("info is invalid");
-                return;
-            }
-
-            size_t length = static_cast<uint32_t>(arrayVal->GetArraySize());
-            if (length <= 0) {
-                LOGE("info is invalid");
-                return;
-            }
-            for (size_t i = 0; i < length; i++) {
-                auto value = arrayVal->GetArrayItem(i);
-                if (!value) {
-                    return;
-                }
-                indexerArray.emplace_back(value->GetString());
-            }
-
-            auto selectedVal = param->GetInt("selected", 0);
-            NG::IndexerView::Create(indexerArray, selectedVal);
-        }
-    }
-
     if (args.Length() >= 1 && args[0]->IsObject()) {
         auto param = JsonUtil::ParseJsonString(args[0]->ToString());
         if (!param || param->IsNull()) {
@@ -94,6 +61,10 @@ void JSIndexer::Create(const JSCallbackInfo& args)
         }
 
         auto selectedVal = param->GetInt("selected", 0);
+
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::IndexerView::Create(indexerArray, selectedVal);
+        }
 
         auto indexerComponent =
             AceType::MakeRefPtr<V2::IndexerComponent>(indexerArray, selectedVal);
