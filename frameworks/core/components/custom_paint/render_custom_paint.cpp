@@ -65,6 +65,7 @@ void RenderCustomPaint::Update(const RefPtr<Component>& component)
         }
     }
     MarkNeedLayout();
+    MarkNeedRender();
 }
 
 void RenderCustomPaint::PerformLayout()
