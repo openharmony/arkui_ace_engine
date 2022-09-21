@@ -149,7 +149,7 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
     auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
 
     // measure normal node.
-    auto maxMainSize = GetMainSize(childConstraint.maxSize, isVertical);
+    auto maxMainSize = GetMainAxisSize(childConstraint.maxSize, isVertical);
     for (auto& child : linearMeasureProperty.relativeNodes) {
         child->Measure(childConstraint);
         linearMeasureProperty.allocatedSize += GetMainAxisSize(AceType::RawPtr(child), isVertical);
