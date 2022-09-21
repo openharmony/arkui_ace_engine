@@ -43,25 +43,26 @@ using LoadJsCallback = std::function<void(const std::string& url, const OHOS::AA
 using JsMessageDispatcherSetterCallback = std::function<void(const RefPtr<JsMessageDispatcher>&)>;
 using PaEventCallback = std::function<void(const std::string&, const std::string&)>;
 using DestroyApplicationCallback = std::function<void(const std::string& packageName)>;
-using InsertCallback = std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
-    const CallingInfo& callingInfo)>;
+using InsertCallback =
+    std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value, const CallingInfo& callingInfo)>;
 using CallCallback = std::function<std::shared_ptr<AppExecFwk::PacMap>(const std::string& method,
     const std::string& arg, const AppExecFwk::PacMap& pacMap, const CallingInfo& callingInfo)>;
-using QueryCallback = std::function<std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet>(
-    const Uri& uri, const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+using QueryCallback = std::function<std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet>(const Uri& uri,
+    const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
     const CallingInfo& callingInfo)>;
 using UpdateCallback = std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
     const OHOS::NativeRdb::DataAbilityPredicates& predicates, const CallingInfo& callingInfo)>;
-using DeleteCallback = std::function<int32_t(const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
-    const CallingInfo& callingInfo)>;
-using BatchInsertCallback =
-    std::function<int32_t(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values,
-    const CallingInfo& callingInfo)>;
+using DeleteCallback = std::function<int32_t(
+    const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates, const CallingInfo& callingInfo)>;
+using BatchInsertCallback = std::function<int32_t(
+    const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values, const CallingInfo& callingInfo)>;
 using GetTypeCallback = std::function<std::string(const Uri& uri, const CallingInfo& callingInfo)>;
-using GetFileTypesCallback = std::function<std::vector<std::string>(const Uri& uri, const std::string& mimeTypeFilter,
-    const CallingInfo& callingInfo)>;
-using OpenFileCallback = std::function<int32_t(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo)>;
-using OpenRawFileCallback = std::function<int32_t(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo)>;
+using GetFileTypesCallback = std::function<std::vector<std::string>(
+    const Uri& uri, const std::string& mimeTypeFilter, const CallingInfo& callingInfo)>;
+using OpenFileCallback =
+    std::function<int32_t(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo)>;
+using OpenRawFileCallback =
+    std::function<int32_t(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo)>;
 using NormalizeUriCallback = std::function<Uri(const Uri& uri, const CallingInfo& callingInfo)>;
 using DenormalizeUriCallback = std::function<Uri(const Uri& uri, const CallingInfo& callingInfo)>;
 using ConnectCallback = std::function<sptr<IRemoteObject>(const OHOS::AAFwk::Want& want)>;
@@ -72,8 +73,8 @@ using TriggerEventCallback = std::function<void(const int64_t formId, const std:
 using UpdateFormCallback = std::function<void(const int64_t formId)>;
 using CastTemptoNormalCallback = std::function<void(const int64_t formId)>;
 using VisibilityChangedCallback = std::function<void(const std::map<int64_t, int32_t>& formEventsMap)>;
-using AcquireStateCallback = std::function<int32_t(const OHOS::AAFwk::Want &want)>;
-using CommandCallback = std::function<void(const OHOS::AAFwk::Want &want, int startId)>;
+using AcquireStateCallback = std::function<int32_t(const OHOS::AAFwk::Want& want)>;
+using CommandCallback = std::function<void(const OHOS::AAFwk::Want& want, int startId)>;
 using CommandApplicationCallback = std::function<void(const std::string& intent, int startId)>;
 using ShareFormCallback = std::function<bool(int64_t formId, OHOS::AAFwk::WantParams& wntParams)>;
 using DumpHeapSnapshotCallback = std::function<void(bool isPrivate)>;
@@ -163,10 +164,10 @@ public:
         const std::string& eventId, const std::string& param, const std::string& jsonArgs, std::string& result);
 
     // special JsEventHandler
-    void OnApplicationDestroy(const std::string &packageName);
-    sptr<IRemoteObject> OnConnect(const OHOS::AAFwk::Want &want);
-    void OnDisConnect(const OHOS::AAFwk::Want &want);
-    void OnCommand(const OHOS::AAFwk::Want &want, int startId);
+    void OnApplicationDestroy(const std::string& packageName);
+    sptr<IRemoteObject> OnConnect(const OHOS::AAFwk::Want& want);
+    void OnDisConnect(const OHOS::AAFwk::Want& want);
+    void OnCommand(const OHOS::AAFwk::Want& want, int startId);
     void OnApplicationCommand(const std::string& intent, int startId);
     void DumpHeapSnapshot(bool isPrivate);
 
@@ -179,8 +180,8 @@ public:
     void MethodChannel(const std::string& methodName, std::string& jsonStr);
 
     int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value);
-    std::shared_ptr<AppExecFwk::PacMap> Call(const Uri& uri,
-        const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap);
+    std::shared_ptr<AppExecFwk::PacMap> Call(
+        const Uri& uri, const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap);
     std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(const Uri& uri, const std::vector<std::string>& columns,
         const OHOS::NativeRdb::DataAbilityPredicates& predicates);
     int32_t Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
@@ -195,14 +196,14 @@ public:
     Uri NormalizeUri(const Uri& uri);
     Uri DenormalizeUri(const Uri& uri);
 
-    void OnCreate(const OHOS::AAFwk::Want &want);
+    void OnCreate(const OHOS::AAFwk::Want& want);
     void OnDelete(const int64_t formId);
     void OnTriggerEvent(const int64_t formId, const std::string& message);
     void OnUpdate(const int64_t formId);
     void OnCastTemptoNormal(const int64_t formId);
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap);
     int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want);
-    bool OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams);
+    bool OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams);
 
 private:
     void LoadPa(const std::string& url, const OHOS::AAFwk::Want& want);

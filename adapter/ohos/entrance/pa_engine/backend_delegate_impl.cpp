@@ -48,11 +48,9 @@ BackendDelegateImpl::BackendDelegateImpl(const BackendDelegateImplBuilder& build
       deleteCallback_(builder.deleteFormCallback), triggerEventCallback_(builder.triggerEventCallback),
       updateCallback_(builder.updateFormCallback), castTemptoNormalCallback_(builder.castTemptoNormalCallback),
       visibilityChangedCallback_(builder.visibilityChangedCallback),
-      acquireStateCallback_(builder.acquireStateCallback),
-      commandCallback_(builder.commandCallback), shareFormCallback_(builder.shareFormCallback),
-      dumpHeapSnapshotCallback_(builder.dumpHeapSnapshotCallback),
-      manifestParser_(AceType::MakeRefPtr<Framework::ManifestParser>()),
-      type_(builder.type),
+      acquireStateCallback_(builder.acquireStateCallback), commandCallback_(builder.commandCallback),
+      shareFormCallback_(builder.shareFormCallback), dumpHeapSnapshotCallback_(builder.dumpHeapSnapshotCallback),
+      manifestParser_(AceType::MakeRefPtr<Framework::ManifestParser>()), type_(builder.type),
       taskExecutor_(builder.taskExecutor)
 {}
 
@@ -321,12 +319,13 @@ int32_t BackendDelegateImpl::Insert(const Uri& uri, const OHOS::NativeRdb::Value
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("BackendDelegateImpl Insert get callingInfo is %{public}u", callingInfo.callingTokenId);
     taskExecutor_->PostSyncTask(
-        [insert = insert_, &ret, uri, value, callingInfo] { ret = insert(uri, value, callingInfo); }, TaskExecutor::TaskType::JS);
+        [insert = insert_, &ret, uri, value, callingInfo] { ret = insert(uri, value, callingInfo); },
+        TaskExecutor::TaskType::JS);
     return ret;
 }
 
-std::shared_ptr<AppExecFwk::PacMap> BackendDelegateImpl::Call(const Uri& uri,
-    const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
+std::shared_ptr<AppExecFwk::PacMap> BackendDelegateImpl::Call(
+    const Uri& uri, const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
 {
     std::shared_ptr<AppExecFwk::PacMap> ret = nullptr;
     CallingInfo callingInfo;
@@ -345,8 +344,8 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> BackendDelegateImpl::Query(
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("BackendDelegateImpl Query get callingInfo is %{public}u", callingInfo.callingTokenId);
-    taskExecutor_->PostSyncTask(
-        [query = query_, &ret, uri, columns, predicates, callingInfo] { ret = query(uri, columns, predicates, callingInfo); },
+    taskExecutor_->PostSyncTask([query = query_, &ret, uri, columns, predicates,
+                                    callingInfo] { ret = query(uri, columns, predicates, callingInfo); },
         TaskExecutor::TaskType::JS);
     return ret;
 }
@@ -358,8 +357,8 @@ int32_t BackendDelegateImpl::Update(const Uri& uri, const OHOS::NativeRdb::Value
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("BackendDelegateImpl Update get callingInfo is %{public}u", callingInfo.callingTokenId);
-    taskExecutor_->PostSyncTask(
-        [update = update_, &ret, uri, value, predicates, callingInfo] { ret = update(uri, value, predicates, callingInfo); },
+    taskExecutor_->PostSyncTask([update = update_, &ret, uri, value, predicates,
+                                    callingInfo] { ret = update(uri, value, predicates, callingInfo); },
         TaskExecutor::TaskType::JS);
     return ret;
 }
@@ -370,8 +369,8 @@ int32_t BackendDelegateImpl::Delete(const Uri& uri, const OHOS::NativeRdb::DataA
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("BackendDelegateImpl Delete get callingInfo is %{public}u", callingInfo.callingTokenId);
-    taskExecutor_->PostSyncTask(
-        [deleteCallback = delete_, &ret, uri, predicates, callingInfo] { ret = deleteCallback(uri, predicates, callingInfo); },
+    taskExecutor_->PostSyncTask([deleteCallback = delete_, &ret, uri, predicates,
+                                    callingInfo] { ret = deleteCallback(uri, predicates, callingInfo); },
         TaskExecutor::TaskType::JS);
     return ret;
 }
@@ -382,7 +381,8 @@ int32_t BackendDelegateImpl::BatchInsert(const Uri& uri, const std::vector<OHOS:
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("BackendDelegateImpl BatchInsert get callingInfo is %{public}u", callingInfo.callingTokenId);
-    taskExecutor_->PostSyncTask([batchInsert = batchInsert_, &ret, uri, values, callingInfo] { ret = batchInsert(uri, values, callingInfo); },
+    taskExecutor_->PostSyncTask(
+        [batchInsert = batchInsert_, &ret, uri, values, callingInfo] { ret = batchInsert(uri, values, callingInfo); },
         TaskExecutor::TaskType::JS);
     return ret;
 }
@@ -393,7 +393,8 @@ std::string BackendDelegateImpl::GetType(const Uri& uri)
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("BackendDelegateImpl GetType get callingInfo is %{public}u", callingInfo.callingTokenId);
-    taskExecutor_->PostSyncTask([getType = getType_, &ret, uri, callingInfo] { ret = getType(uri, callingInfo); }, TaskExecutor::TaskType::JS);
+    taskExecutor_->PostSyncTask(
+        [getType = getType_, &ret, uri, callingInfo] { ret = getType(uri, callingInfo); }, TaskExecutor::TaskType::JS);
     return ret;
 }
 
@@ -403,8 +404,8 @@ std::vector<std::string> BackendDelegateImpl::GetFileTypes(const Uri& uri, const
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("BackendDelegateImpl GetFileTypes get callingInfo is %{public}u", callingInfo.callingTokenId);
-    taskExecutor_->PostSyncTask(
-        [getFileTypes = getFileTypes_, &ret, uri, mimeTypeFilter, callingInfo] { ret = getFileTypes(uri, mimeTypeFilter, callingInfo); },
+    taskExecutor_->PostSyncTask([getFileTypes = getFileTypes_, &ret, uri, mimeTypeFilter,
+                                    callingInfo] { ret = getFileTypes(uri, mimeTypeFilter, callingInfo); },
         TaskExecutor::TaskType::JS);
     return ret;
 }
@@ -416,7 +417,8 @@ int32_t BackendDelegateImpl::OpenFile(const Uri& uri, const std::string& mode)
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("BackendDelegateImpl OpenFile get callingInfo is %{public}u", callingInfo.callingTokenId);
     taskExecutor_->PostSyncTask(
-        [openFile = openFile_, &ret, uri, mode, callingInfo] { ret = openFile(uri, mode, callingInfo); }, TaskExecutor::TaskType::JS);
+        [openFile = openFile_, &ret, uri, mode, callingInfo] { ret = openFile(uri, mode, callingInfo); },
+        TaskExecutor::TaskType::JS);
     return ret;
 }
 
@@ -427,7 +429,8 @@ int32_t BackendDelegateImpl::OpenRawFile(const Uri& uri, const std::string& mode
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("BackendDelegateImpl OpenRawFile get callingInfo is %{public}u", callingInfo.callingTokenId);
     taskExecutor_->PostSyncTask(
-        [openRawFile = openRawFile_, &ret, uri, mode, callingInfo] { ret = openRawFile(uri, mode, callingInfo); }, TaskExecutor::TaskType::JS);
+        [openRawFile = openRawFile_, &ret, uri, mode, callingInfo] { ret = openRawFile(uri, mode, callingInfo); },
+        TaskExecutor::TaskType::JS);
     return ret;
 }
 
@@ -438,7 +441,8 @@ Uri BackendDelegateImpl::NormalizeUri(const Uri& uri)
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("BackendDelegateImpl NormalizeUri get callingInfo is %{public}u", callingInfo.callingTokenId);
     taskExecutor_->PostSyncTask(
-        [normalizeUri = normalizeUri_, &ret, uri, callingInfo] { ret = normalizeUri(uri, callingInfo); }, TaskExecutor::TaskType::JS);
+        [normalizeUri = normalizeUri_, &ret, uri, callingInfo] { ret = normalizeUri(uri, callingInfo); },
+        TaskExecutor::TaskType::JS);
     return ret;
 }
 
@@ -449,7 +453,8 @@ Uri BackendDelegateImpl::DenormalizeUri(const Uri& uri)
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("BackendDelegateImpl DenormalizeUri get callingInfo is %{public}u", callingInfo.callingTokenId);
     taskExecutor_->PostSyncTask(
-        [denormalizeUri = denormalizeUri_, &ret, uri, callingInfo] { ret = denormalizeUri(uri, callingInfo); }, TaskExecutor::TaskType::JS);
+        [denormalizeUri = denormalizeUri_, &ret, uri, callingInfo] { ret = denormalizeUri(uri, callingInfo); },
+        TaskExecutor::TaskType::JS);
     return ret;
 }
 
@@ -506,16 +511,16 @@ void BackendDelegateImpl::OnVisibilityChanged(const std::map<int64_t, int32_t>& 
         TaskExecutor::TaskType::JS);
 }
 
-int32_t BackendDelegateImpl::OnAcquireFormState(const OHOS::AAFwk::Want &want)
+int32_t BackendDelegateImpl::OnAcquireFormState(const OHOS::AAFwk::Want& want)
 {
-    auto ret = (int32_t) AppExecFwk::FormState::UNKNOWN;
+    auto ret = (int32_t)AppExecFwk::FormState::UNKNOWN;
     taskExecutor_->PostSyncTask(
         [acquireStateCallback = acquireStateCallback_, &ret, want] { ret = acquireStateCallback(want); },
         TaskExecutor::TaskType::JS);
     return ret;
 }
 
-void BackendDelegateImpl::OnCommand(const OHOS::AAFwk::Want &want, int startId)
+void BackendDelegateImpl::OnCommand(const OHOS::AAFwk::Want& want, int startId)
 {
     taskExecutor_->PostTask([commandCallback = commandCallback_, want, startId] { commandCallback(want, startId); },
         TaskExecutor::TaskType::JS);
@@ -581,13 +586,11 @@ bool BackendDelegateImpl::GetResourceData(const std::string& fileUri, std::vecto
     return true;
 }
 
-bool BackendDelegateImpl::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+bool BackendDelegateImpl::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
 {
     bool result = false;
-    taskExecutor_->PostSyncTask(
-        [shareFormCallback = shareFormCallback_, formId, &wantParams, &result] () {
-            result = shareFormCallback(formId, wantParams);
-        },
+    taskExecutor_->PostSyncTask([shareFormCallback = shareFormCallback_, formId, &wantParams,
+                                    &result]() { result = shareFormCallback(formId, wantParams); },
         TaskExecutor::TaskType::JS);
 
     return result;
