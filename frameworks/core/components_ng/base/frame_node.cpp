@@ -538,7 +538,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
     const auto& rect = geometryNode_->GetFrame().GetRect();
-    LOGI("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
+    LOGD("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
 
     if (!rect.IsInRegion(parentLocalPoint)) {
         return HitTestResult::OUT_OF_REGION;
@@ -577,6 +577,11 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
     }
     result.splice(result.end(), std::move(newComingTargets));
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    if (gestureHub) {
+        gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result);
+    }
+
     if (preventBubbling) {
         return HitTestResult::STOP_BUBBLING;
     }

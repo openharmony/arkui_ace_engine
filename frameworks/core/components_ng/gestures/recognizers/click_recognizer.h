@@ -13,29 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_CLICK_RECOGNIZER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_CLICK_RECOGNIZER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_CLICK_RECOGNIZER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_CLICK_RECOGNIZER_H
 
 #include <functional>
 
 #include "base/thread/cancelable_callback.h"
-#include "core/gestures/multi_fingers_recognizer.h"
-#include "core/gestures/gesture_info.h"
-#include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/gestures/gesture_info.h"
+#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/focus/focus_node.h"
 
-namespace OHOS::Ace {
+namespace OHOS::Ace::NG {
 
 class ClickRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(ClickRecognizer, MultiFingersRecognizer);
 
 public:
     ClickRecognizer() = default;
-    ClickRecognizer(const WeakPtr<PipelineBase>& context, int32_t fingers, int32_t count)
-        : count_(count), context_(context)
+    ClickRecognizer(int32_t fingers, int32_t count) : count_(count)
     {
         fingers_ = fingers;
     }
-    explicit ClickRecognizer(const WeakPtr<PipelineBase>& context) : context_(context) {}
     ~ClickRecognizer() override = default;
 
     void OnAccepted() override;
@@ -82,12 +80,11 @@ private:
     ClickCallback onClick_;
     ClickCallback remoteMessage_;
     bool useCatchMode_ = true;
-    WeakPtr<PipelineBase> context_;
     CancelableCallback<void()> fingerDeadlineTimer_;
     CancelableCallback<void()> tapDeadlineTimer_;
     std::map<int32_t, TouchEvent> touchPoints_;
 };
 
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_CLICK_RECOGNIZER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_CLICK_RECOGNIZER_H

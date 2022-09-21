@@ -18,12 +18,12 @@
 
 #include "core/components_ng/base/geometry_node.h"
 #include "core/event/key_event.h"
+#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
 
 class FrameNode;
 class FocusHub;
-class ClickInfo;
 class EventHub;
 
 using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;

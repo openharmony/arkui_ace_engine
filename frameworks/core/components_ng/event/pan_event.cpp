@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -38,7 +39,7 @@ PanEventActuator::PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventH
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    panRecognizer_ = MakeRefPtr<PanRecognizer>(frameNode->GetContext(), fingers_, direction_, distance_);
+    panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
 }
 
 void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,

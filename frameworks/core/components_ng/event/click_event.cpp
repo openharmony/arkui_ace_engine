@@ -18,7 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "core/gestures/click_recognizer.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -38,7 +38,7 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    auto clickRecognizer = MakeRefPtr<ClickRecognizer>(frameNode->GetContext());
+    auto clickRecognizer = MakeRefPtr<ClickRecognizer>();
     auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);

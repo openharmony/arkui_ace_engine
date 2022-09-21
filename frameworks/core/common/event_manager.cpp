@@ -17,6 +17,7 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/key_event.h"
@@ -68,7 +69,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         return;
     }
     // first clean.
-    referee_->CleanGestureScope(touchPoint.id);
+    refereeNG_->CleanGestureScope(touchPoint.id);
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
@@ -220,6 +221,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
 
         if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
             referee_->CleanGestureScope(point.id);
+            refereeNG_->CleanGestureScope(point.id);
             touchTestResults_.erase(point.id);
         }
 
@@ -539,6 +541,7 @@ EventManager::EventManager()
 {
     LOGI("EventManger Constructor.");
     referee_ = AceType::MakeRefPtr<GestureReferee>();
+    refereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
 }
 
 } // namespace OHOS::Ace

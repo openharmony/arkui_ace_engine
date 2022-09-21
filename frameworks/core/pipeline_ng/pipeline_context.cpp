@@ -372,7 +372,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             eventManager_->DispatchTouchEvent(lastMoveEvent.value());
         }
     }
-
     eventManager_->DispatchTouchEvent(scalePoint);
     hasIdleTasks_ = true;
     window_->RequestFrame();
@@ -440,7 +439,6 @@ void PipelineContext::FlushTouchEvents()
                 touchPoints.emplace_front(scalePoint);
             }
         }
-
         auto maxSize = touchPoints.size();
         for (auto iter = touchPoints.rbegin(); iter != touchPoints.rend(); ++iter) {
             maxSize--;
