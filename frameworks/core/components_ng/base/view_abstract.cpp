@@ -395,4 +395,9 @@ void ViewAbstract::Pop()
 {
     ViewStackProcessor::GetInstance()->Pop();
 }
+
+void ViewAbstract::SetTransition(const TransitionOptions& options)
+{
+    ACE_UPDATE_RENDER_CONTEXT(Transition, options);
+}
 } // namespace OHOS::Ace::NG

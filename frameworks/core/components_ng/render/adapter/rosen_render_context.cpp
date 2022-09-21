@@ -21,6 +21,7 @@
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
+#include "render_service_client/core/pipeline/rs_node_map.h"
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
@@ -35,8 +36,10 @@
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/decoration_painter.h"
+#include "frameworks/core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
+
 RosenRenderContext::~RosenRenderContext()
 {
     StopRecordingIfNeeded();
@@ -404,11 +407,11 @@ void RosenRenderContext::RebuildFrame(FrameNode* /*self*/, const std::list<RefPt
     ReCreateRsNodeTree(children);
 }
 
-void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
+std::list<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNodes(
+    const std::list<RefPtr<FrameNode>>& frameChildren)
 {
-    CHECK_NULL_VOID(rsNode_);
-    rsNode_->ClearChildren();
-    for (const auto& child : children) {
+    std::list<std::shared_ptr<Rosen::RSNode>> rsNodes;
+    for (const auto& child : frameChildren) {
         if (!child) {
             continue;
         }
@@ -418,9 +421,75 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
         }
         auto rsnode = rosenRenderContext->GetRSNode();
         if (rsnode) {
-            rsNode_->AddChild(rsnode, -1);
+            rsNodes.emplace_back(rsnode);
         }
     }
+    return rsNodes;
+}
+
+bool RosenRenderContext::GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen::RSNode>>& nowRSNodes,
+    std::list<std::shared_ptr<Rosen::RSNode>>& toRemoveRSNodes,
+    std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>>& toAddRSNodesAndIndex)
+{
+    CHECK_NULL_RETURN(rsNode_, false);
+    const auto& preRSNodesID = rsNode_->GetChildren();
+    std::unordered_set<std::shared_ptr<Rosen::RSNode>> nowRSNodesSet;
+    std::unordered_set<std::shared_ptr<Rosen::RSNode>> preRSNodesSet;
+    // get previous rsnode children set and now rsnode children set
+    for (const auto& node : nowRSNodes) {
+        nowRSNodesSet.insert(node);
+    }
+    for (const auto& id : preRSNodesID) {
+        auto preNode = Rosen::RSNodeMap::Instance().GetNode<Rosen::RSNode>(id);
+        preRSNodesSet.insert(preNode);
+    }
+    // get the difference
+    for (const auto& node : preRSNodesSet) {
+        if (nowRSNodesSet.find(node) == nowRSNodesSet.end()) {
+            toRemoveRSNodes.emplace_back(node);
+        }
+    }
+    int cntIndex = 0;
+    for (const auto& node : nowRSNodes) {
+        if (preRSNodesSet.find(node) == preRSNodesSet.end()) {
+            toAddRSNodesAndIndex.emplace_back(node, cntIndex);
+        }
+        cntIndex++;
+    }
+    return !toRemoveRSNodes.empty() || !toAddRSNodesAndIndex.empty();
+}
+
+void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
+{
+    CHECK_NULL_VOID(rsNode_);
+    const auto& nowRSNodes = GetChildrenRSNodes(children);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto option = pipeline->GetExplicitAnimationOption();
+    // if no explicit animation, cannot animate
+    if (!option.GetCurve()) {
+        rsNode_->ClearChildren();
+        for (const auto& rsnode : nowRSNodes) {
+            rsNode_->AddChild(rsnode, -1);
+        }
+        return;
+    }
+    // do transition animate
+    std::list<std::shared_ptr<Rosen::RSNode>> toRemoveRSNodes;
+    std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>> toAddRSNodesAndIndex;
+    bool diffRes = GetRSNodeTreeDiff(nowRSNodes, toRemoveRSNodes, toAddRSNodesAndIndex);
+    if (!diffRes) {
+        return;
+    }
+    AnimationUtils::Animate(option, [rsParentNode = rsNode_, &removing = toRemoveRSNodes,
+        &adding = toAddRSNodesAndIndex]() {
+        for (auto& node : removing) {
+            rsParentNode->RemoveChild(node);
+        }
+        for (auto& [node, index] : adding) {
+            rsParentNode->AddChild(node, index);
+        }
+    });
 }
 
 void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
@@ -603,6 +672,54 @@ void RosenRenderContext::UpdateBackShadow(const Shadow& shadow)
     rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
     rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
     RequestNextFrame();
+}
+
+void RosenRenderContext::UpdateTransition(const TransitionOptions& options)
+{
+    if (options.Type == TransitionType::ALL || options.Type == TransitionType::APPEARING) {
+        if (!propTransitionAppearing_) {
+            propTransitionAppearing_ = std::make_unique<TransitionOptions>(options);
+        } else {
+            *propTransitionAppearing_ = options;
+        }
+        propTransitionAppearing_->Type = TransitionType::APPEARING;
+        transitionAppearingEffect_ = GetRSTransitionWithoutType(*propTransitionAppearing_);
+    }
+    if (options.Type == TransitionType::ALL || options.Type == TransitionType::DISAPPEARING) {
+        if (!propTransitionDisappearing_) {
+            propTransitionDisappearing_ = std::make_unique<TransitionOptions>(options);
+        } else {
+            *propTransitionDisappearing_ = options;
+        }
+        propTransitionDisappearing_->Type = TransitionType::DISAPPEARING;
+        transitionDisappearingEffect_ = GetRSTransitionWithoutType(*propTransitionDisappearing_);
+    }
+    rsNode_->SetTransitionEffect(Rosen::RSTransitionEffect::Asymmetric(
+        HasAppearingTransition() ? transitionAppearingEffect_ : Rosen::RSTransitionEffect::Create(),
+        HasDisappearingTransition() ? transitionDisappearingEffect_ : Rosen::RSTransitionEffect::Create()));
+}
+
+std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWithoutType(
+    const TransitionOptions& options)
+{
+    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
+    if (options.HasOpacity()) {
+        effect = effect->Opacity(options.GetOpacityValue());
+    }
+    if (options.HasTranslate()) {
+        const auto& translate = options.GetTranslateValue();
+        effect = effect->Translate({translate.x.ConvertToPx(), translate.y.ConvertToPx(),
+            translate.z.ConvertToPx()});
+    }
+    if (options.HasScale()) {
+        const auto& scale = options.GetScaleValue();
+        effect = effect->Scale({scale.xScale, scale.yScale, scale.zScale});
+    }
+    if (options.HasRotate()) {
+        const auto& rotate = options.GetRotateValue();
+        effect = effect->Rotate({rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.angle});
+    }
+    return effect;
 }
 
 } // namespace OHOS::Ace::NG

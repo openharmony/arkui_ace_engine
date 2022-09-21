@@ -24,6 +24,7 @@
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Rosen::Drawing {
 class Canvas;
@@ -88,6 +89,7 @@ public:
 
     virtual void AnimateHoverEffectScale(bool isHovered) {}
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
+    virtual void UpdateTransition(const TransitionOptions& options) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
@@ -118,6 +120,9 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
+    // Transition Options
+    ACE_DEFINE_PROPERTY_GROUP(TransitionAppearing, TransitionOptions);
+    ACE_DEFINE_PROPERTY_GROUP(TransitionDisappearing, TransitionOptions);
 
 protected:
     RenderContext() = default;

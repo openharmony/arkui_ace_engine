@@ -29,6 +29,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewAbstract {
@@ -102,6 +103,8 @@ public:
     static void BindPopup(const RefPtr<PopupParam>& param);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
+    // transition
+    static void SetTransition(const TransitionOptions& options);
 
     static void Pop();
 };

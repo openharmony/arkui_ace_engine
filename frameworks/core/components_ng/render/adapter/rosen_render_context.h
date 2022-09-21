@@ -102,6 +102,21 @@ public:
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateBackShadow(const Shadow& shadow) override;
 
+    void UpdateTransition(const TransitionOptions& options) override;
+    bool HasAppearingTransition() const
+    {
+        return transitionAppearingEffect_ != nullptr;
+    }
+    bool HasDisappearingTransition() const
+    {
+        return transitionDisappearingEffect_ != nullptr;
+    }
+
+    static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
+        const std::list<RefPtr<FrameNode>>& frameChildren);
+
+    static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(const TransitionOptions& options);
+
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) override;
@@ -122,6 +137,9 @@ private:
     void OnTransformRotateUpdate(const Vector4F& value) override;
 
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
+    bool GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen::RSNode>>& nowRSNodes,
+        std::list<std::shared_ptr<Rosen::RSNode>>& toRemoveRSNodes,
+        std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>>& toAddRSNodesAndIndex);
 
     DataReadyNotifyTask CreateBgImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
@@ -136,6 +154,8 @@ private:
     bool isHoveredBoard_ = false;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
+    std::shared_ptr<Rosen::RSTransitionEffect> transitionAppearingEffect_ = nullptr;
+    std::shared_ptr<Rosen::RSTransitionEffect> transitionDisappearingEffect_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };
