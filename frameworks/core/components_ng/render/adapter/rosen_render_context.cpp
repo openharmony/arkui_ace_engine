@@ -569,4 +569,40 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
     RequestNextFrame();
 }
 
+void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
+{
+    auto& frontDecoration = GetOrCreateFrontDecoration();
+    if (frontDecoration->CheckBlurRadius(radius)) {
+        return;
+    }
+    frontDecoration->UpdateBlurRadius(radius);
+    
+    auto pipelineBase = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineBase);
+    std::shared_ptr<Rosen::RSFilter> frontFilter = nullptr;
+    if (radius.IsValid()) {
+        float radiusPx = radius.ConvertToPx();
+        float frontBlurRadius = DecorationPainter::ConvertRadiusToSigma(radiusPx);
+        frontFilter = Rosen::RSFilter::CreateBlurFilter(frontBlurRadius, frontBlurRadius);
+    }
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetFilter(frontFilter);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::UpdateBackShadow(const Shadow& shadow)
+{
+    auto& backDecoration = GetOrCreateBackDecoration();
+    if (backDecoration->CheckBackShadow(shadow)) {
+        return;
+    }
+    backDecoration->UpdateBackShadow(shadow);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetShadowRadius(shadow.GetBlurRadius());
+    rsNode_->SetShadowColor(shadow.GetColor().GetValue());
+    rsNode_->SetShadowOffsetX(shadow.GetOffset().GetX());
+    rsNode_->SetShadowOffsetY(shadow.GetOffset().GetY());
+    RequestNextFrame();
+}
+
 } // namespace OHOS::Ace::NG

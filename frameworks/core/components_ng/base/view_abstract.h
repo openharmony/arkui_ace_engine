@@ -61,8 +61,10 @@ public:
     static void SetBorderStyle(const BorderStyleProperty& value);
     static void SetOpacity(double opacity);
 
-    // back decoration
+    // decoration
     static void SetBackdropBlur(const Dimension& radius);
+    static void SetFrontBlur(const Dimension& radius);
+    static void SetBackShadow(const Shadow& shadow);
 
     // layout
     static void SetAlign(Alignment alignment);

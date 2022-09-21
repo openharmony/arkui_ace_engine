@@ -339,6 +339,16 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
     ACE_UPDATE_RENDER_CONTEXT(BackBlurRadius, radius);
 }
 
+void ViewAbstract::SetFrontBlur(const Dimension& radius)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontBlurRadius, radius);
+}
+
+void ViewAbstract::SetBackShadow(const Shadow& shadow)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
+}
+
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
