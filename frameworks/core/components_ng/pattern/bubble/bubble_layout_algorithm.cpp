@@ -118,6 +118,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
     padding_ = popupTheme->GetPadding();
     border_.SetBorderRadius(popupTheme->GetRadius());
     targetSpace_ = popupTheme->GetTargetSpace();
+    placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     InitArrowState(layoutProp);
     float scaledBubbleSpacing = BUBBLE_SPACING.ConvertToPx();
     OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
@@ -136,7 +137,6 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
     OffsetF originOffset =
         GetPositionWithPlacement(childSize, topPosition, bottomPosition, topArrowPosition, bottomArrowPosition);
     OffsetF childPosition = originOffset;
-    placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     arrowPlacement_ = placement_;
 
     // Fit popup to screen range.
