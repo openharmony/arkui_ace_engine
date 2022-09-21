@@ -57,7 +57,7 @@
 #include "pixel_map_napi.h"
 #endif
 
-#if defined(PREVIEW)
+#if defined(PREVIEW) || defined(ANDROID_PLATFORM)
 extern const char _binary_strip_native_min_abc_start[];
 extern const char _binary_strip_native_min_abc_end[];
 #endif
@@ -66,7 +66,9 @@ namespace OHOS::Ace::Framework {
 
 const int SYSTEM_BASE = 10;
 
-#ifdef APP_USE_ARM
+#if defined(ANDROID_PLATFORM)
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
+#elif defined(APP_USE_ARM)
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
@@ -2973,7 +2975,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     RegisterI18nPluralRulesModule();
 
     // load jsfwk
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
     if (!runtime_->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
         LOGE("Failed to load js framework!");
         return false;
@@ -3332,7 +3334,7 @@ bool JsiEngine::ExecuteAbc(const std::string &fileName)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
     std::string basePath = delegate->GetAssetPath(fileName);
     if (!basePath.empty()) {
         std::string abcPath = basePath.append(fileName);
@@ -3348,7 +3350,7 @@ bool JsiEngine::ExecuteAbc(const std::string &fileName)
         LOGD("GetAssetContent \"%{private}s\" failed.", fileName.c_str());
         return true;
     }
-    if (!runtime->EvaluateJsCode(content.data(), content.size())) {
+    if (!runtime->EvaluateJsCode(content.data(), content.size(), fileName)) {
         LOGE("EvaluateJsCode \"%{private}s\" failed.", fileName.c_str());
         return false;
     }
