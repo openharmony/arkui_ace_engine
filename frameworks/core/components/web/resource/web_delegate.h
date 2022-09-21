@@ -296,6 +296,7 @@ public:
     void UpdateDatabaseEnabled(const bool& isDatabaseAccessEnabled);
     void UpdateTextZoomRatio(const int32_t& textZoomRatioNum);
     void UpdateWebDebuggingAccess(bool isWebDebuggingAccessEnabled);
+    void UpdatePinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     void UpdateMediaPlayGestureAccess(bool isNeedGestureAccess);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);

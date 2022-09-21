@@ -43,6 +43,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(InitialScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CacheMode, WebCacheMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(NeedGestureAccess, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(PinchSmoothModeEnabled, bool);
 };
 
 } // namespace OHOS::Ace::NG

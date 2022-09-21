@@ -32,6 +32,7 @@ public:
     static void SetOnErrorReceive(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& onErrorReceive);
     static void SetOnConsole(std::function<bool(const std::shared_ptr<BaseEventInfo>& info)>&& onConsole);
     static void SetJsEnabled(bool isJsEnabled);
+    static void SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
 };
 } // namespace OHOS::Ace::NG
 
