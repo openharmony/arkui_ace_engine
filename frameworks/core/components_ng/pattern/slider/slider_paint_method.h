@@ -30,12 +30,12 @@ class ACE_EXPORT SliderPaintMethod : public NodePaintMethod {
 public:
     static constexpr float HALF = 0.5f;
     struct Parameters {
-        float trackThickness;
-        float blockDiameter;
-        float sliderLength;
-        float borderBlank;
-        float stepRatio;
-        float valueRatio;
+        float trackThickness = 0.0f;
+        float blockDiameter = 0.0f;
+        float sliderLength = 0.0f;
+        float borderBlank = 0.0f;
+        float stepRatio = 0.0f;
+        float valueRatio = 0.0f;
     };
     explicit SliderPaintMethod(const Parameters& parameters)
         : parameters_(parameters) {};
