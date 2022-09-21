@@ -546,6 +546,9 @@ class AppStorage extends LocalStorage {
     static Size() {
         return AppStorage.GetOrCreate().size();
     }
+    static StaticClear() {
+        return AppStorage.GetOrCreate().clear();
+    }
     static Clear() {
         return AppStorage.GetOrCreate().clear();
     }

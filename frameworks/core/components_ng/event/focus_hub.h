@@ -38,10 +38,8 @@ enum class FocusType : int32_t {
 class ACE_EXPORT FocusHub : public Referenced {
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE)
-    {
-        eventHub_ = eventHub;
-        focusType_ = type;
-    }
+        : eventHub_(eventHub), focusType_(type)
+    {}
     ~FocusHub() override = default;
 
     RefPtr<FrameNode> GetFrameNode() const;
@@ -84,31 +82,31 @@ public:
         return currentFocus_;
     }
 
-    void SetOnFocusCallback(OnFocusFunc& onFocusCallback)
+    void SetOnFocusCallback(OnFocusFunc&& onFocusCallback)
     {
         onFocusCallback_ = std::move(onFocusCallback);
     }
-    void SetOnBlurCallback(OnBlurFunc& onBlurCallback)
+    void SetOnBlurCallback(OnBlurFunc&& onBlurCallback)
     {
         onBlurCallback_ = std::move(onBlurCallback);
     }
-    void SetOnFocusInternal(OnFocusFunc& onFocusInternal)
+    void SetOnFocusInternal(OnFocusFunc&& onFocusInternal)
     {
         onFocusInternal_ = std::move(onFocusInternal);
     }
-    void SetOnBlurInteral(OnBlurFunc& onBlurInternal)
+    void SetOnBlurInternal(OnBlurFunc&& onBlurInternal)
     {
         onBlurInternal_ = std::move(onBlurInternal);
     }
-    void SetOnPreFocusCallback(OnPreFocusFunc& onPreFocusCallback)
+    void SetOnPreFocusCallback(OnPreFocusFunc&& onPreFocusCallback)
     {
         onPreFocusCallback_ = std::move(onPreFocusCallback);
     }
-    void SetOnKeyEventInteral(HandleKeyEventFunc& onKeyEventInternal)
+    void SetOnKeyEventInternal(HandleKeyEventFunc&& onKeyEventInternal)
     {
         handleKeyEvent_ = std::move(onKeyEventInternal);
     }
-    void SetOnKeyCallback(OnKeyCallbackFunc& onKeyCallback)
+    void SetOnKeyCallback(OnKeyCallbackFunc&& onKeyCallback)
     {
         onKeyEventCallback_ = std::move(onKeyCallback);
     }
@@ -117,7 +115,7 @@ public:
         onClickEventCallback_ = std::move(onClickCallback);
     }
 
-    void FlushChildrendFocusHub();
+    void FlushChildrenFocusHub();
 
     void GetChildren(std::list<RefPtr<FocusHub>>& children) const;
 

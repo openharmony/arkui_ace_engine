@@ -19,6 +19,8 @@
 #include <regex>
 #include <vector>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
@@ -312,6 +314,26 @@ bool ParseLocationProps(const JSCallbackInfo& info, AnimatableDimension& x, Anim
     bool hasX = JSViewAbstract::ParseJsAnimatableDimensionVp(xVal, x);
     bool hasY = JSViewAbstract::ParseJsAnimatableDimensionVp(yVal, y);
     return hasX || hasY;
+}
+
+NG::OffsetT<Dimension> ParseNGLocation(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("ParseLocationProps", info, checkList)) {
+        return {};
+    }
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> xVal = sizeObj->GetProperty("x");
+    JSRef<JSVal> yVal = sizeObj->GetProperty("y");
+    Dimension dimenX;
+    if (!JSViewAbstract::ParseJsDimensionVp(xVal, dimenX)) {
+        LOGW("the x prop is illegal");
+    }
+    Dimension dimenY;
+    if (!JSViewAbstract::ParseJsDimensionVp(yVal, dimenY)) {
+        LOGW("the y prop is illegal");
+    }
+    return { dimenX, dimenY };
 }
 
 #ifndef WEARABLE_PRODUCT
@@ -1439,7 +1461,7 @@ void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("Position is not supported");
+        NG::ViewAbstract::SetPosition(ParseNGLocation(info));
         return;
     }
     AnimatableDimension x;
@@ -1455,7 +1477,7 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
 void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("MarkAnchor is not supported");
+        NG::ViewAbstract::MarkAnchor(ParseNGLocation(info));
         return;
     }
     AnimatableDimension x;
@@ -1470,7 +1492,7 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
 void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("Offset is not supported");
+        NG::ViewAbstract::SetOffset(ParseNGLocation(info));
         return;
     }
     AnimatableDimension x;
@@ -3639,6 +3661,12 @@ void JSViewAbstract::JsZIndex(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         zIndex = info[0]->ToNumber<int>();
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetZIndex(zIndex);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
     if (renderComponent) {
@@ -4450,7 +4478,7 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
         NG::ViewAbstract::SetOnKeyEvent(std::move(onKeyEvent));
         return;
     }
-    
+
     RefPtr<JsKeyFunction> jsOnKeyFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
     auto onKeyId = EventMarker(
         [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyFunc)](BaseEventInfo* info) {

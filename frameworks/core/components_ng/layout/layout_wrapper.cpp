@@ -143,6 +143,21 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 
     layoutAlgorithm_->Measure(this);
 
+    // check aspect radio.
+    const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
+    auto hasAspectRatio = magicItemProperty ? magicItemProperty->HasAspectRatio() : false;
+    if (hasAspectRatio) {
+        auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+        // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and aspectRatio
+        // are all set, the height is not used.
+        auto width = geometryNode_->GetFrameSize().Width();
+        LOGD("aspect ratio affects, origin width: %{public}f, height: %{public}f", width,
+            geometryNode_->GetFrameSize().Height());
+        auto height = width / aspectRatio;
+        LOGD("aspect ratio affects, new width: %{public}f, height: %{public}f", width, height);
+        geometryNode_->SetFrameSize(SizeF({ width, height }));
+    }
+
     LOGD("on Measure Done: %{public}s, Size: %{public}s", GetHostTag().c_str(),
         geometryNode_->GetFrameSize().ToString().c_str());
 }

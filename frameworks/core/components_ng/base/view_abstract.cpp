@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/view_abstract.h"
 
+#include <cstdint>
 #include <optional>
 #include <utility>
 
@@ -252,21 +253,21 @@ void ViewAbstract::SetOnFocus(OnFocusFunc&& onFocusCallback)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetOnFocusCallback(onFocusCallback);
+    focusHub->SetOnFocusCallback(std::move(onFocusCallback));
 }
 
 void ViewAbstract::SetOnBlur(OnBlurFunc&& onBlurCallback)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetOnBlurCallback(onBlurCallback);
+    focusHub->SetOnBlurCallback(std::move(onBlurCallback));
 }
 
 void ViewAbstract::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetOnKeyCallback(onKeyCallback);
+    focusHub->SetOnKeyCallback(std::move(onKeyCallback));
 }
 
 void ViewAbstract::SetOnAppear(std::function<void()>&& onAppear)
@@ -305,6 +306,26 @@ void ViewAbstract::SetVisibility(VisibleType visible)
 void ViewAbstract::SetOpacity(double opacity)
 {
     ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
+}
+
+void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(Position, value);
+}
+
+void ViewAbstract::SetOffset(const OffsetT<Dimension>& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(Offset, value);
+}
+
+void ViewAbstract::MarkAnchor(const OffsetT<Dimension>& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(Anchor, value);
+}
+
+void ViewAbstract::SetZIndex(int32_t value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(ZIndex, value);
 }
 
 void ViewAbstract::SetScale(const NG::VectorF& value)

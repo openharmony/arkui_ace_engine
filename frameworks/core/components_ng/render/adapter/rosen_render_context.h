@@ -25,6 +25,7 @@
 #include "third_party/skia/include/core/SkRefCnt.h"
 
 #include "base/geometry/dimension_offset.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -49,6 +50,8 @@ public:
     void RemoveFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
     void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) override;
+
+    void OnModifyDone() override;
 
     void ResetBlendBgColor() override;
 
@@ -121,7 +124,14 @@ private:
     void OnTransformTranslateUpdate(const Vector3F& value) override;
     void OnTransformRotateUpdate(const Vector4F& value) override;
 
+    void OnPositionUpdate(const OffsetT<Dimension>& value) override;
+    void OnOffsetUpdate(const OffsetT<Dimension>& value) override;
+    void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
+    void OnZIndexUpdate(int32_t value) override;
+
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
+
+    RectF AdjustPaintRect();
 
     DataReadyNotifyTask CreateBgImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
@@ -134,6 +144,7 @@ private:
     RefPtr<Canvas> rosenCanvas_;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
+    bool isPositionChanged_ = false;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 

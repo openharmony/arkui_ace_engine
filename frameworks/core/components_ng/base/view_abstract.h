@@ -19,8 +19,11 @@
 #include <cstdint>
 #include <functional>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
+#include "base/geometry/offset.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
@@ -69,6 +72,14 @@ public:
     // layout
     static void SetAlign(Alignment alignment);
     static void SetVisibility(VisibleType visible);
+
+    // position
+    static void SetPosition(const OffsetT<Dimension>& value);
+    static void SetOffset(const OffsetT<Dimension>& value);
+    static void MarkAnchor(const OffsetT<Dimension>& value);
+
+    // render position
+    static void SetZIndex(int32_t value);
 
     // transform
     static void SetScale(const NG::VectorF& value);
