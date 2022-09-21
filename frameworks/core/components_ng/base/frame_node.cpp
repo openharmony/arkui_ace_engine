@@ -187,10 +187,6 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
     bool parentOriginChange =
         geometryNode_->GetParentGlobalOffset() != dirty->GetGeometryNode()->GetParentGlobalOffset();
-    if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
-        renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
-    }
-
     // fire OnAreaChanged event.
     if (eventHub_->HasOnAreaChanged() && (frameSizeChange || frameOffsetChange || parentOriginChange)) {
         eventHub_->FireOnAreaChanged(geometryNode_->GetFrameRect(), geometryNode_->GetParentGlobalOffset(),
@@ -198,6 +194,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     }
 
     SetGeometryNode(dirty->GetGeometryNode());
+    if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
+        renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
+    }
+
     // clean layout flag.
     layoutProperty_->CleanDirty();
     DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
@@ -433,6 +433,7 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
+    renderContext_->OnModifyDone();
 }
 
 void FrameNode::OnMountToParentDone() {

@@ -55,7 +55,7 @@ std::string FocusHub::GetFrameName() const
     return frameNode ? frameNode->GetTag() : "NULL";
 }
 
-void FocusHub::FlushChildrendFocusHub()
+void FocusHub::FlushChildrenFocusHub()
 {
     std::list<RefPtr<FrameNode>> childrenNode;
     auto frameNode = GetFrameNode();
@@ -128,7 +128,7 @@ void FocusHub::DumpFocusNodeTree(int32_t depth)
 
 void FocusHub::DumpFocusScopeTree(int32_t depth)
 {
-    FlushChildrendFocusHub();
+    FlushChildrenFocusHub();
     if (DumpLog::GetInstance().GetDumpFile()) {
         // DumpFocus();
         std::string information = GetFrameNode()->GetTag();
@@ -177,9 +177,7 @@ bool FocusHub::RequestFocusImmediately()
     return true;
 }
 
-void FocusHub::UpdateAccessibilityFocusInfo()
-{
-}
+void FocusHub::UpdateAccessibilityFocusInfo() {}
 
 void FocusHub::LostFocus()
 {
@@ -206,7 +204,7 @@ bool FocusHub::IsFocusableScope()
     if (!IsFocusableNode()) {
         return false;
     }
-    FlushChildrendFocusHub();
+    FlushChildrenFocusHub();
     // TODO: Contaner without child can be focusable
     return std::any_of(focusNodes_.begin(), focusNodes_.end(),
         [](const RefPtr<FocusHub>& focusNode) { return focusNode->IsFocusableNode(); });
@@ -281,7 +279,7 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
 bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
 {
     ACE_DCHECK(IsCurrentFocus());
-    FlushChildrendFocusHub();
+    FlushChildrenFocusHub();
     if (itLastFocusNode_ != focusNodes_.end() && (*itLastFocusNode_)->HandleKeyEvent(keyEvent)) {
         return true;
     }
@@ -338,7 +336,7 @@ void FocusHub::RefreshParentFocusable(bool focusable)
     if (focusType_ != FocusType::SCOPE) {
         return;
     }
-    FlushChildrendFocusHub();
+    FlushChildrenFocusHub();
     for (auto& item : focusNodes_) {
         if (focusable != item->IsParentFocusable()) {
             item->SetParentFocusable(focusable);
@@ -347,16 +345,14 @@ void FocusHub::RefreshParentFocusable(bool focusable)
     }
 }
 
-void FocusHub::OnClick(const KeyEvent& event)
-{
-}
+void FocusHub::OnClick(const KeyEvent& event) {}
 
 void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
 {
     if (focusType_ != FocusType::SCOPE) {
         return;
     }
-    FlushChildrendFocusHub();
+    FlushChildrenFocusHub();
     auto it = std::find(focusNodes_.begin(), focusNodes_.end(), focusNode);
     ACE_DCHECK(it != focusNodes_.end());
 
@@ -375,7 +371,7 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
 
 bool FocusHub::GoToNextFocus(bool reverse, const RectF& rect)
 {
-    FlushChildrendFocusHub();
+    FlushChildrenFocusHub();
     if (focusNodes_.empty()) {
         LOGW("%{public}s has no next child focus node to go.", GetFrameName().c_str());
         return false;
@@ -388,9 +384,9 @@ bool FocusHub::GoToNextFocus(bool reverse, const RectF& rect)
         if (itNewFocusNode == focusNodes_.begin()) {
             itNewFocusNode = focusNodes_.end();
             return false;
-        } else {
-            --itNewFocusNode;
         }
+        --itNewFocusNode;
+
         while (itNewFocusNode != focusNodes_.begin()) {
             if (TryRequestFocus(*itNewFocusNode, rect)) {
                 return true;
@@ -431,7 +427,7 @@ bool FocusHub::TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& r
 
 bool FocusHub::CalculatePosition()
 {
-    FlushChildrendFocusHub();
+    FlushChildrenFocusHub();
     if (itLastFocusNode_ == focusNodes_.end()) {
         return false;
     }
@@ -499,7 +495,7 @@ void FocusHub::OnBlurNode()
 
 void FocusHub::OnFocusScope()
 {
-    FlushChildrendFocusHub();
+    FlushChildrenFocusHub();
     if (focusNodes_.empty()) {
         return;
     }
@@ -527,7 +523,7 @@ void FocusHub::OnFocusScope()
 
 void FocusHub::OnBlurScope()
 {
-    FlushChildrendFocusHub();
+    FlushChildrenFocusHub();
     OnBlurNode();
     if (itLastFocusNode_ != focusNodes_.end() && *itLastFocusNode_) {
         (*itLastFocusNode_)->LostFocus();
@@ -540,7 +536,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
         return IsFocusable();
     }
 
-    FlushChildrendFocusHub();
+    FlushChildrenFocusHub();
     if (focusNodes_.empty()) {
         return false;
     }

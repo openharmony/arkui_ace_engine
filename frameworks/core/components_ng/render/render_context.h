@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
@@ -67,6 +69,8 @@ public:
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
 
     virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}
+
+    virtual void OnModifyDone() {}
 
     virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) {}
 
@@ -115,7 +119,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
     ACE_DEFINE_PROPERTY_GROUP(FrontDecoration, DecorationProperty);
 
-    // TODO Add BorderRadius in group.
+    // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
@@ -123,6 +127,15 @@ public:
     // Transition Options
     ACE_DEFINE_PROPERTY_GROUP(TransitionAppearing, TransitionOptions);
     ACE_DEFINE_PROPERTY_GROUP(TransitionDisappearing, TransitionOptions);
+
+    // Position.
+    ACE_DEFINE_PROPERTY_GROUP(PositionProperty, RenderPositionProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Position, OffsetT<Dimension>);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Offset, OffsetT<Dimension>);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Anchor, OffsetT<Dimension>);
+
+    // zIndex.
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ZIndex, int32_t);
 
 protected:
     RenderContext() = default;
@@ -143,6 +156,11 @@ protected:
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
     virtual void OnTransformRotateUpdate(const Vector4F& value) {}
+
+    virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnZIndexUpdate(int32_t value) {}
 
 private:
     std::function<void()> requestFrame_;
