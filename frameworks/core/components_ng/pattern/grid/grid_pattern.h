@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/grid/grid_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -40,20 +40,26 @@ public:
         return MakeRefPtr<GridLayoutProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+
+    void SetMultiSelectable(bool multiSelectable)
     {
-        auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
-        CHECK_NULL_RETURN(gridLayoutProperty, nullptr);
-        std::vector<std::string> cols;
-        StringUtils::StringSplitter(gridLayoutProperty->GetColumnsTemplate().value_or(""), ' ', cols);
-        std::vector<std::string> rows;
-        StringUtils::StringSplitter(gridLayoutProperty->GetRowsTemplate().value_or(""), ' ', rows);
-        auto crossCount = cols.empty() ? Infinity<uint32_t>() : cols.size();
-        auto mainCount = rows.empty() ? Infinity<uint32_t>() : rows.size();
-        if (!gridLayoutProperty->IsVertical()) {
-            std::swap(crossCount, mainCount);
-        }
-        return MakeRefPtr<GridLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+        multiSelectable_ = multiSelectable;
+    }
+
+    bool MultiSelectable() const
+    {
+        return multiSelectable_;
+    }
+
+    void SetSupportAnimation(bool supportAnimation)
+    {
+        supportAnimation_ = supportAnimation;
+    }
+
+    bool SupportAnimation() const
+    {
+        return supportAnimation_;
     }
 
 private:
@@ -65,6 +71,9 @@ private:
 
     GridLayoutInfo gridLayoutInfo_;
     RefPtr<ScrollableEvent> scrollableEvent_;
+
+    bool multiSelectable_ = false;
+    bool supportAnimation_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
