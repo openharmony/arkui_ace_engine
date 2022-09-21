@@ -102,6 +102,16 @@ void ViewAbstract::SetAlignSelf(int32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, static_cast<FlexAlign>(value));
 }
 
+void ViewAbstract::SetFlexShrink(float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, value);
+}
+
+void ViewAbstract::SetFlexGrow(float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexGrow, value);
+}
+
 void ViewAbstract::SetPadding(const CalcLength& value)
 {
     PaddingProperty padding;

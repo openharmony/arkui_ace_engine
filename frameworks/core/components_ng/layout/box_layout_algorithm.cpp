@@ -114,10 +114,10 @@ void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
                 auto childSize = child->GetGeometryNode()->GetFrameSize();
                 childFrame = childFrame > childSize ? childFrame : childSize;
             }
-            childFrame.Constrain(minSize, maxSize);
             AddPaddingToSize(padding, childFrame);
             frameSize.UpdateIllegalSizeWithCheck(childFrame);
         }
+        frameSize.Constrain(minSize, maxSize);
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     } while (false);
 

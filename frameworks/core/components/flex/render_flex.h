@@ -141,7 +141,7 @@ private:
      */
     void LayoutFlexItem(RefPtr<RenderFlexItem>& flexItem, FlexItemProperties& flexItemProperties);
 
-    void RelayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double flexSize, BaselineProperties& baselineProps,
+    void RedoLayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double flexSize, BaselineProperties& baselineProps,
         double& allocatedFlexSpace);
 
     void LayoutInfinityChild(const RefPtr<RenderNode>& item, double mainSize, BaselineProperties& baselineProperties);
@@ -185,10 +185,10 @@ private:
 
     LayoutParam MakeStretchInnerLayoutParam(const RefPtr<RenderNode>& item) const;
     LayoutParam MakeLayoutParamWithLimit(double minMainLimit, double maxMainLimit, bool isStretch) const;
-    LayoutParam MakeConstrainedLayoutParam(double mainFlexExtent, const LayoutParam& constraint, bool isStretch,
-        bool supportZerolayout = false) const;
+    LayoutParam MakeConstrainedLayoutParam(
+        double mainFlexExtent, const LayoutParam& constraint, bool isStretch, bool supportZerolayout = false) const;
 
-    void ResizeByItem(const RefPtr<RenderNode>& item, double &allocatedSize);
+    void ResizeByItem(const RefPtr<RenderNode>& item, double& allocatedSize);
     void CheckSizeValidity(const RefPtr<RenderNode>& item);
     Size GetConstrainedSize(double mainSize);
     double GetAvailableMainSize();

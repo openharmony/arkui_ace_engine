@@ -200,7 +200,7 @@ public:
         }
     }
 
-    void UpdateFlexGrow(const int32_t flexGrow, bool updateFlag = false)
+    void UpdateFlexGrow(const float flexGrow)
     {
         if (!flexItemProperty_) {
             flexItemProperty_ = std::make_unique<FlexItemProperty>();
@@ -210,7 +210,7 @@ public:
         }
     }
 
-    void UpdateFlexShrink(const int32_t flexShrink, bool updateFlag = false)
+    void UpdateFlexShrink(const float flexShrink)
     {
         if (!flexItemProperty_) {
             flexItemProperty_ = std::make_unique<FlexItemProperty>();
@@ -220,7 +220,7 @@ public:
         }
     }
 
-    void UpdateAlignSelf(const FlexAlign& flexAlign, bool updateFlag = false)
+    void UpdateAlignSelf(const FlexAlign& flexAlign)
     {
         if (!flexItemProperty_) {
             flexItemProperty_ = std::make_unique<FlexItemProperty>();

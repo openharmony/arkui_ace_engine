@@ -1661,6 +1661,10 @@ void JSViewAbstract::JsFlexGrow(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetFlexGrow(static_cast<float>(value));
+        return;
+    }
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     flexItem->SetFlexGrow(value);
 }
@@ -1673,6 +1677,10 @@ void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
     }
     double value = 0.0;
     if (!ParseJsDouble(info[0], value)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetFlexShrink(static_cast<float>(value));
         return;
     }
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();

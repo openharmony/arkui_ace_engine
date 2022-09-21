@@ -83,6 +83,8 @@ public:
 
     // flex properties
     static void SetAlignSelf(int32_t value);
+    static void SetFlexShrink(float value);
+    static void SetFlexGrow(float value);
 
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam>& param);

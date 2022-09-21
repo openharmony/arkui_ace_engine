@@ -30,7 +30,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-float GetMainSize(LayoutWrapper* layoutWrapper, bool isVertical)
+float GetMainAxisSize(LayoutWrapper* layoutWrapper, bool isVertical)
 {
     float size = 0.0f;
     if (!isVertical) {
@@ -41,7 +41,7 @@ float GetMainSize(LayoutWrapper* layoutWrapper, bool isVertical)
     return size;
 }
 
-float GetCrossSize(LayoutWrapper* layoutWrapper, bool isVertical)
+float GetCrossAxisSize(LayoutWrapper* layoutWrapper, bool isVertical)
 {
     float size = 0.0f;
     if (!isVertical) {
@@ -52,7 +52,7 @@ float GetCrossSize(LayoutWrapper* layoutWrapper, bool isVertical)
     return size;
 }
 
-float GetMainSize(const SizeF& size, bool isVertical)
+float GetMainAxisSize(const SizeF& size, bool isVertical)
 {
     if (!isVertical) {
         return size.Width();
@@ -149,11 +149,11 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
     auto childConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
 
     // measure normal node.
-    auto maxMainSize = GetMainSize(childConstraint.maxSize, isVertical);
+    auto maxMainSize = GetMainAxisSize(childConstraint.maxSize, isVertical);
     for (auto& child : linearMeasureProperty.relativeNodes) {
         child->Measure(childConstraint);
-        linearMeasureProperty.allocatedSize += GetMainSize(AceType::RawPtr(child), isVertical);
-        auto crossSize = GetCrossSize(AceType::RawPtr(child), isVertical);
+        linearMeasureProperty.allocatedSize += GetMainAxisSize(AceType::RawPtr(child), isVertical);
+        auto crossSize = GetCrossAxisSize(AceType::RawPtr(child), isVertical);
         linearMeasureProperty.crossSize =
             linearMeasureProperty.crossSize > crossSize ? linearMeasureProperty.crossSize : crossSize;
         if (isVertical) {
@@ -169,11 +169,11 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
 
     // measure weight node.
     if (!linearMeasureProperty.weightNodes.empty()) {
-        float remainSize = GetMainSize(idealSize, isVertical) - linearMeasureProperty.allocatedSize -
+        float remainSize = GetMainAxisSize(idealSize, isVertical) - linearMeasureProperty.allocatedSize -
                            linearMeasureProperty.space * static_cast<float>(linearMeasureProperty.weightNodes.size());
         if (LessNotEqual(remainSize, 0.0)) {
             LOGW("the remain size is less than zero, use mainSize to measure weight node");
-            remainSize = GetMainSize(idealSize, isVertical);
+            remainSize = GetMainAxisSize(idealSize, isVertical);
         }
         for (auto& child : linearMeasureProperty.weightNodes) {
             auto childMainSize = remainSize *
@@ -181,9 +181,9 @@ void LinearLayoutUtils::Measure(LayoutWrapper* layoutWrapper, bool isVertical)
                                  linearMeasureProperty.totalFlexWeight;
             SetIdealMainSize(childConstraint, childMainSize, isVertical);
             child->Measure(childConstraint);
-            linearMeasureProperty.allocatedSize += GetMainSize(AceType::RawPtr(child), isVertical);
+            linearMeasureProperty.allocatedSize += GetMainAxisSize(AceType::RawPtr(child), isVertical);
             linearMeasureProperty.allocatedSize += linearMeasureProperty.space;
-            auto crossSize = GetCrossSize(AceType::RawPtr(child), isVertical);
+            auto crossSize = GetCrossAxisSize(AceType::RawPtr(child), isVertical);
             linearMeasureProperty.crossSize =
                 linearMeasureProperty.crossSize > crossSize ? linearMeasureProperty.crossSize : crossSize;
         }
