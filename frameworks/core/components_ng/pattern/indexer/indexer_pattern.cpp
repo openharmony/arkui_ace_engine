@@ -71,7 +71,7 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
         MinusPaddingToSize(padding, size);
         auto top = padding.top.value_or(0.0f);
 
-        int32_t itemIndex = static_cast<int32_t>(touchPosition.GetY() / itemSizeRender_);
+        int32_t itemIndex = static_cast<int32_t>((touchPosition.GetY() - top) / itemSizeRender_);
         selected_ = itemIndex;
 
         auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
