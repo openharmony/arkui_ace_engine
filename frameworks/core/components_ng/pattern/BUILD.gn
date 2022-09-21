@@ -16,6 +16,8 @@ import(
 
 build_component_ng("pattern_ng") {
   sources = [
+    "blank/blank_pattern.cpp",
+    "blank/blank_view.cpp",
     "bubble/bubble_layout_algorithm.cpp",
     "bubble/bubble_paint_method.cpp",
     "bubble/bubble_pattern.cpp",
