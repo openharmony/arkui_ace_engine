@@ -292,7 +292,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     std::chrono::microseconds microseconds(keyEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.timeStamp = time;
-    event.key = KeyToString(static_cast<int32_t>(event.code));
+    event.key = MMI::KeyEvent::KeyCodeToString(keyEvent->GetKeyCode());
     event.deviceId = keyEvent->GetDeviceId();
     event.sourceType = SourceType::KEYBOARD;
     std::string pressedKeyStr = "Pressed Keys: ";

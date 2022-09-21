@@ -138,6 +138,37 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
     parent->AddChild(AceType::Claim(this), slot);
 }
 
+RefPtr<FrameNode> UINode::GetFocusParent() const
+{
+    auto parentUi = GetParent();
+    auto parentFrame = parentUi ? AceType::DynamicCast<FrameNode>(parentUi) : nullptr;
+    while (parentFrame) {
+        auto type = parentFrame->GetFocusType();
+        if (type == FocusType::SCOPE) {
+            return parentFrame;
+        }
+        if (type == FocusType::NODE) {
+            return nullptr;
+        }
+        parentUi = parentFrame->GetParent();
+        parentFrame = parentUi ? AceType::DynamicCast<FrameNode>(parentUi) : nullptr;
+    }
+    return nullptr;
+}
+
+void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
+{
+    auto uiChildren = GetChildren();
+    for (const auto& uiChild : uiChildren) {
+        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild);
+        if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
+            children.emplace_back(frameChild);
+        } else {
+            uiChild->GetFocusChildren(children);
+        }
+    }
+}
+
 void UINode::AttachToMainTree()
 {
     if (onMainTree_) {

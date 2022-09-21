@@ -171,12 +171,46 @@ void PipelineContext::FlushMessages()
     window_->FlushTasks();
 }
 
+void PipelineContext::FlushFocus()
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
+    auto focusNode = dirtyFocusNode_.Upgrade();
+    if (!focusNode || focusNode->GetFocusType() == FocusType::DISABLE) {
+        dirtyFocusNode_.Reset();
+    } else {
+        auto focusNodeHub = focusNode->GetFocusHub();
+        if (focusNodeHub) {
+            focusNodeHub->RequestFocusImmediately();
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        return;
+    }
+    auto focusScope = dirtyFocusScope_.Upgrade();
+    if (!focusScope || focusNode->GetFocusType() == FocusType::DISABLE) {
+        dirtyFocusScope_.Reset();
+    } else {
+        auto focusScopeHub = focusScope->GetFocusHub();
+        if (focusScopeHub) {
+            focusScopeHub->RequestFocusImmediately();
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        return;
+    }
+    if (rootNode_ && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
+        rootNode_->GetFocusHub()->RequestFocusImmediately();
+    }
+}
+
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
     FlushBuild();
     FlushTouchEvents();
     taskScheduler_.FlushTask();
     FlushMessages();
+    FlushFocus();
 }
 
 void PipelineContext::FlushBuild()
@@ -208,6 +242,9 @@ void PipelineContext::SetupRootElement()
     layoutConstraint.selfIdealSize = idealSize;
     layoutConstraint.maxSize = idealSize;
     rootNode_->UpdateLayoutConstraint(layoutConstraint);
+    auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
+    rootFocusHub->SetFocusType(FocusType::SCOPE);
+    rootFocusHub->SetFocusable(true);
     window_->SetRootFrameNode(rootNode_);
     rootNode_->AttachToMainTree();
 
@@ -353,6 +390,34 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     }
 }
 
+bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
+{
+    ACE_DCHECK(!params.empty());
+
+    if (params[0] == "-element") {
+    } else if (params[0] == "-render") {
+    } else if (params[0] == "-focus") {
+        if (rootNode_->GetFocusHub()) {
+            rootNode_->GetFocusHub()->DumpFocusTree(0);
+        }
+    } else if (params[0] == "-layer") {
+    } else if (params[0] == "-frontend") {
+#ifndef WEARABLE_PRODUCT
+    } else if (params[0] == "-multimodal") {
+#endif
+    } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
+    } else if (params[0] == "-rotation" && params.size() >= 2) {
+    } else if (params[0] == "-animationscale" && params.size() >= 2) {
+    } else if (params[0] == "-velocityscale" && params.size() >= 2) {
+    } else if (params[0] == "-scrollfriction" && params.size() >= 2) {
+    } else if (params[0] == "-threadstuck" && params.size() >= 3) {
+    } else {
+        return false;
+    }
+    return true;
+}
+
+
 void PipelineContext::FlushTouchEvents()
 {
     CHECK_RUN_ON(UI);
@@ -409,6 +474,11 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
     window_->RequestFrame();
+}
+
+bool PipelineContext::OnKeyEvent(const KeyEvent& event)
+{
+    return eventManager_->DispatchKeyEventNG(event, rootNode_);
 }
 
 void PipelineContext::Destroy()

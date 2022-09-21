@@ -227,6 +227,48 @@ void ViewAbstract::SetOnHover(OnHoverEventFunc&& onHoverEventFunc)
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
 }
 
+void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverAnimation(hoverEffect);
+}
+
+void ViewAbstract::SetFocusType(FocusType type)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusType(type);
+}
+
+void ViewAbstract::SetFocusable(bool focusable)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(focusable);
+}
+
+void ViewAbstract::SetOnFocus(OnFocusFunc&& onFocusCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnFocusCallback(onFocusCallback);
+}
+
+void ViewAbstract::SetOnBlur(OnBlurFunc&& onBlurCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnBlurCallback(onBlurCallback);
+}
+
+void ViewAbstract::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnKeyCallback(onKeyCallback);
+}
+
 void ViewAbstract::SetOnAppear(std::function<void()>&& onAppear)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
@@ -248,13 +290,6 @@ void ViewAbstract::SetOnAreaChanged(
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnAreaChanged(std::move(onAreaChanged));
-}
-
-void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
-{
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetHoverAnimation(hoverEffect);
 }
 
 void ViewAbstract::SetAlign(Alignment alignment)
