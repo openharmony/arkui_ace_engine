@@ -120,6 +120,7 @@ void FrameNode::InitializePatternAndContext()
         }
         frameNode->hasPendingRequest_ = true;
     });
+    renderContext_->SetHostNode(WeakClaim(this));
 }
 
 void FrameNode::DumpInfo()

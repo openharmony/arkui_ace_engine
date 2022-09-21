@@ -45,10 +45,11 @@ public:
 
     static RefPtr<RenderContext> Create();
 
-    void SetRequestFrame(const std::function<void()>& requestFrame)
-    {
-        requestFrame_ = requestFrame;
-    }
+    void SetRequestFrame(const std::function<void()>& requestFrame);
+    void RequestNextFrame() const;
+
+    void SetHostNode(const WeakPtr<FrameNode>& host);
+    RefPtr<FrameNode> GetHost() const;
 
     virtual void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) {}
 
@@ -85,13 +86,6 @@ public:
 
     virtual void Restore() = 0;
 
-    void RequestNextFrame() const
-    {
-        if (requestFrame_) {
-            requestFrame_();
-        }
-    }
-
     virtual void AnimateHoverEffectScale(bool isHovered) {}
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
 
@@ -105,8 +99,13 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector4F);
 
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundColor, Color);
-    
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImage, ImageSourceInfo);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageRepeat, ImageRepeat);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSize, BackgroundImageSize);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImagePosition, BackgroundImagePosition);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundBlurStyle, BlurStyle);
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
 
     ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
@@ -121,6 +120,12 @@ protected:
     RenderContext() = default;
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
+    virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
+    virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
+    virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
+    virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
+    virtual void OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle) {}
+
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
@@ -133,6 +138,7 @@ protected:
 
 private:
     std::function<void()> requestFrame_;
+    WeakPtr<FrameNode> host_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };

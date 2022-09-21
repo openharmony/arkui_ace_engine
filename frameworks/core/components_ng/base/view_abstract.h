@@ -44,6 +44,11 @@ public:
     static void SetLayoutWeight(int32_t value);
 
     static void SetBackgroundColor(const Color& color);
+    static void SetBackgroundImage(const std::string& src);
+    static void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat);
+    static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
+    static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
+    static void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
     static void SetBorderRadius(const BorderRadiusProperty& value);

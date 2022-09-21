@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -90,6 +91,32 @@ void ViewAbstract::SetAspectRatio(float ratio)
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
+}
+
+void ViewAbstract::SetBackgroundImage(const std::string& src)
+{
+    ImageSourceInfo imageSourceInfo(src);
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, imageSourceInfo);
+}
+
+void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat);
+}
+
+void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize);
+}
+
+void ViewAbstract::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition);
+}
+
+void ViewAbstract::SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundBlurStyle, bgBlurStyle);
 }
 
 void ViewAbstract::SetLayoutWeight(int32_t value)
