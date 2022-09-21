@@ -22,7 +22,9 @@
 #include <unordered_map>
 
 #include "form_provider_info.h"
+#include "js_backend_timer_module.h"
 #include "napi/native_node_api.h"
+#include "napi_common_ability.h"
 #include "napi_common_want.h"
 #include "napi_remote_object.h"
 #include "third_party/quickjs/message_server.h"
@@ -47,9 +49,6 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/quickjs/qjs_utils.h"
-#include "js_backend_timer_module.h"
-
-#include "napi_common_ability.h"
 
 namespace OHOS::Ace {
 
@@ -938,16 +937,16 @@ int32_t QjsPaEngine::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     return GetJsInt32Val(ctx, retVal);
 }
 
-std::shared_ptr<AppExecFwk::PacMap> QjsPaEngine::Call(const std::string& method,
-    const std::string& arg, const AppExecFwk::PacMap& pacMap, const CallingInfo& callingInfo)
+std::shared_ptr<AppExecFwk::PacMap> QjsPaEngine::Call(
+    const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap, const CallingInfo& callingInfo)
 {
     LOGD("QjsPaEngine Call");
     std::shared_ptr<AppExecFwk::PacMap> resultSet = nullptr;
     return resultSet;
 }
 
-std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> QjsPaEngine::Query(
-    const Uri& uri, const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> QjsPaEngine::Query(const Uri& uri,
+    const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
     const CallingInfo& callingInfo)
 {
     LOGI("Query");
@@ -1043,8 +1042,8 @@ int32_t QjsPaEngine::Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     return GetJsInt32Val(ctx, retVal);
 }
 
-int32_t QjsPaEngine::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
-    const CallingInfo& callingInfo)
+int32_t QjsPaEngine::Delete(
+    const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates, const CallingInfo& callingInfo)
 {
     LOGI("Delete");
     JSContext* ctx = engineInstance_->GetQjsContext();
@@ -1075,8 +1074,8 @@ int32_t QjsPaEngine::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPr
     return GetJsInt32Val(ctx, retVal);
 }
 
-int32_t QjsPaEngine::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values,
-    const CallingInfo& callingInfo)
+int32_t QjsPaEngine::BatchInsert(
+    const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values, const CallingInfo& callingInfo)
 {
     LOGI("BatchInsert");
     JSContext* ctx = engineInstance_->GetQjsContext();
@@ -1134,8 +1133,8 @@ std::string QjsPaEngine::GetType(const Uri& uri, const CallingInfo& callingInfo)
     return GetJsStringVal(ctx, retVal);
 }
 
-std::vector<std::string> QjsPaEngine::GetFileTypes(const Uri& uri, const std::string& mimeTypeFilter,
-    const CallingInfo& callingInfo)
+std::vector<std::string> QjsPaEngine::GetFileTypes(
+    const Uri& uri, const std::string& mimeTypeFilter, const CallingInfo& callingInfo)
 {
     LOGI("GetFileTypes");
     JSContext* ctx = engineInstance_->GetQjsContext();
@@ -1524,10 +1523,10 @@ int32_t QjsPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want& want)
     return formState;
 }
 
-void QjsPaEngine::OnCommand(const OHOS::AAFwk::Want &want, int startId)
+void QjsPaEngine::OnCommand(const OHOS::AAFwk::Want& want, int startId)
 {
     LOGI("OnCommand");
-    JSContext *ctx = engineInstance_->GetQjsContext();
+    JSContext* ctx = engineInstance_->GetQjsContext();
     ACE_DCHECK(ctx);
 
     Framework::QJSHandleScope handleScope(ctx);
@@ -1546,10 +1545,7 @@ void QjsPaEngine::OnCommand(const OHOS::AAFwk::Want &want, int startId)
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine_), want);
     NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
     JSValue jsWant = (JSValue)*nativeWant;
-    JSValueConst argv[] = {
-        jsWant,
-        JS_NewInt32(ctx, startId)
-    };
+    JSValueConst argv[] = { jsWant, JS_NewInt32(ctx, startId) };
     JSValue retVal = Framework::QJSUtils::Call(ctx, onCommandFunc, JS_UNDEFINED, countof(argv), argv);
     if (JS_IsException(retVal)) {
         LOGE("Qjs onCommand FAILED!");
@@ -1558,7 +1554,7 @@ void QjsPaEngine::OnCommand(const OHOS::AAFwk::Want &want, int startId)
     JS_FreeValue(ctx, retVal);
 }
 
-bool QjsPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+bool QjsPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
 {
     LOGD("PA: QjsPaEngine OnShare, begin");
     // call onCreate
@@ -1576,13 +1572,12 @@ bool QjsPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
 
     auto nativeValue = reinterpret_cast<NativeValue*>(&retVal);
     if (nativeValue->TypeOf() != NativeValueType::NATIVE_OBJECT) {
-        LOGE("%{public}s OnShare return value`s type is %{public}d", __func__,
-            static_cast<int>(nativeValue->TypeOf()));
+        LOGE("%{public}s OnShare return value`s type is %{public}d", __func__, static_cast<int>(nativeValue->TypeOf()));
         return false;
     }
 
-    if (!OHOS::AppExecFwk::UnwrapWantParams(reinterpret_cast<napi_env>(nativeEngine_),
-        reinterpret_cast<napi_value>(nativeValue), wantParams)) {
+    if (!OHOS::AppExecFwk::UnwrapWantParams(
+            reinterpret_cast<napi_env>(nativeEngine_), reinterpret_cast<napi_value>(nativeValue), wantParams)) {
         LOGE("%{public}s OnShare UnwrapWantParams failed, return false", __func__);
         return false;
     }
