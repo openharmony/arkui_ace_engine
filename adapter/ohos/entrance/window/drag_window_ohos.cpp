@@ -182,7 +182,7 @@ void DragWindowOhos::DrawPixelMap(const RefPtr<PixelMap>& pixelmap)
         LOGE("the pixmap is nullptr");
         return;
     }
-    auto rect = dragWindow_->GetRect();
+    auto rect = dragWindow_->GetRequestRect();
     auto surfaceNode = dragWindow_->GetSurfaceNode();
     rsUiDirector_ = Rosen::RSUIDirector::Create();
     rsUiDirector_->Init();
