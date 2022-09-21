@@ -235,6 +235,12 @@ void CanvasTaskPool::Clip()
     PushTask(task);
 }
 
+void CanvasTaskPool::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    auto task = [path](RenderCustomPaint& interface, const Offset& offset) { interface.Clip(path); };
+    PushTask(task);
+}
+
 void CanvasTaskPool::BeginPath()
 {
     auto task = [](RenderCustomPaint& interface, const Offset& offset) { interface.BeginPath(); };
