@@ -345,6 +345,7 @@ template("ace_core_source_set") {
     deps += [
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
       "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/gestures:ace_core_components_gestures_ng_$platform",
       "$ace_root/frameworks/core/components_ng/image_provider:ace_core_components_image_provider_ng_$platform",
       "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
       "$ace_root/frameworks/core/components_ng/manager:ace_core_components_manager_ng_$platform",
@@ -641,6 +642,7 @@ template("ace_core_ng_source_set") {
     deps += [
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
       "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/gestures:ace_core_components_gestures_ng_$platform",
       "$ace_root/frameworks/core/components_ng/image_provider:ace_core_components_image_provider_ng_$platform",
       "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
       "$ace_root/frameworks/core/components_ng/manager:ace_core_components_manager_ng_$platform",

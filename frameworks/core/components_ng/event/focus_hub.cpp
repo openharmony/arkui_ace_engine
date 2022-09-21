@@ -22,7 +22,6 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/event/ace_event_handler.h"
-#include "core/gestures/click_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 

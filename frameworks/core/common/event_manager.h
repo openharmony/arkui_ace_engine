@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -129,6 +130,11 @@ public:
         return referee_;
     }
 
+    RefPtr<NG::GestureReferee> GetGestureRefereeNG()
+    {
+        return refereeNG_;
+    }
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
@@ -146,6 +152,7 @@ private:
     int32_t instanceId_ = 0;
     bool inSelectedRect_ = false;
     RefPtr<GestureReferee> referee_;
+    RefPtr<NG::GestureReferee> refereeNG_;
 };
 
 } // namespace OHOS::Ace

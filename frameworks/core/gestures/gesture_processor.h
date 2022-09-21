@@ -19,6 +19,7 @@
 #include <stack>
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/gestures/gesture_group.h"
 #include "core/gestures/gesture_group.h"
 #include "core/gestures/single_child_gesture.h"
 
@@ -95,10 +96,51 @@ public:
         return gesture;
     }
 
+    void PushGestureNG(const RefPtr<NG::Gesture>& gesture)
+    {
+        gestureStackNG_.push(gesture);
+    }
+
+    void PopGestureNG()
+    {
+        if (gestureStackNG_.size() <= 1) {
+            return;
+        }
+
+        auto gesture = gestureStackNG_.top();
+        gestureStackNG_.pop();
+
+        auto gestureGroup = AceType::DynamicCast<NG::GestureGroup>(gestureStackNG_.top());
+        if (gestureGroup) {
+            gestureGroup->AddGesture(gesture);
+        }
+    }
+
+    RefPtr<NG::Gesture> TopGestureNG()
+    {
+        if (gestureStackNG_.empty()) {
+            return nullptr;
+        }
+        return gestureStackNG_.top();
+    }
+
+    RefPtr<NG::Gesture> FinishGestureNG()
+    {
+        if (gestureStackNG_.empty()) {
+            return nullptr;
+        }
+
+        auto gesture = gestureStackNG_.top();
+        gestureStackNG_.pop();
+
+        return gesture;
+    }
+
 private:
     GesturePriority priority_ = GesturePriority::Low;
     GestureMask gestureMask_ = GestureMask::Normal;
     std::stack<RefPtr<Gesture>> gestureStack_;
+    std::stack<RefPtr<NG::Gesture>> gestureStackNG_;
 };
 } // namespace OHOS::Ace
 

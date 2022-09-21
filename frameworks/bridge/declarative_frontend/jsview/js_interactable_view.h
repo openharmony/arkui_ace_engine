@@ -19,6 +19,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components_ng/gestures/tap_gesture.h"
 #include "frameworks/core/gestures/tap_gesture.h"
 #include "frameworks/core/pipeline/base/component.h"
 
