@@ -54,6 +54,7 @@ namespace {
 const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
+static std::atomic<int32_t> gInstanceId = 0;
 
 FrontendType GetFrontendType(const std::string& frontendType)
 {
@@ -163,7 +164,6 @@ private:
     AcePlatformStartAbility onStartAbility_;
 };
 
-int32_t AceAbility::instanceId_ = 0;
 const std::string AceAbility::START_PARAMS_KEY = "__startParams";
 const std::string AceAbility::PAGE_URI = "url";
 const std::string AceAbility::CONTINUE_PARAMS_KEY = "__remoteData";
@@ -221,6 +221,11 @@ bool AceWindowListener::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axis
 {
     CHECK_NULL_RETURN(callbackOwner_, false);
     return callbackOwner_->OnInputEvent(axisEvent);
+}
+
+AceAbility::AceAbility()
+{
+    abilityId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
 }
 
 void AceAbility::OnStart(const Want& want)
