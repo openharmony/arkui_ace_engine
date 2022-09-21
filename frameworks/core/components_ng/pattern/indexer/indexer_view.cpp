@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 
-void IndexerView::Create(std::vector<std::string> arrayValue, int32_t selected)
+void IndexerView::Create(const std::vector<std::string>& arrayValue, int32_t selected)
 {
     // TODO:需要考虑更新场景
     auto* stack = ViewStackProcessor::GetInstance();
@@ -48,27 +48,27 @@ void IndexerView::Create(std::vector<std::string> arrayValue, int32_t selected)
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Selected, selected);
 }
 
-void IndexerView::SetColor(Color color)
+void IndexerView::SetColor(const Color& color)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Color, color);
 }
 
-void IndexerView::SetSelectedColor(Color selectedColor)
+void IndexerView::SetSelectedColor(const Color& selectedColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedColor, selectedColor);
 }
 
-void IndexerView::SetPopupColor(Color popupColor)
+void IndexerView::SetPopupColor(const Color& popupColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupColor, popupColor);
 }
 
-void IndexerView::SetSelectedBackgroundColor(Color selectedBackgroundColor)
+void IndexerView::SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedBackgroundColor, selectedBackgroundColor);
 }
 
-void IndexerView::SetPopupBackground(Color popupBackground)
+void IndexerView::SetPopupBackground(const Color& popupBackground)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupBackground, popupBackground);
 }
@@ -93,7 +93,7 @@ void IndexerView::SetFont(const TextStyle& font)
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Font, font);
 }
 
-void IndexerView::SetItemSize(Dimension itemSize)
+void IndexerView::SetItemSize(const Dimension& itemSize)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ItemSize, itemSize);
 }

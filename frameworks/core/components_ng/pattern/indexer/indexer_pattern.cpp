@@ -114,7 +114,7 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
                 childRenderContext->BlendBgColor(selectedBackgroundColor);
             } else if (index == itemCount_) {
                 if (usingPopup) {
-                    nodeLayoutProperty->UpdateContext(arrayValue_[selected_]);
+                    nodeLayoutProperty->UpdateContent(arrayValue_[selected_]);
                     nodeLayoutProperty->UpdateTextColor(popupColor);
                     auto fontSize = popupFont.GetFontSize();
                     nodeLayoutProperty->UpdateFontSize(fontSize);
