@@ -65,7 +65,7 @@ public:
         return hasAction_;
     }
 
-    void SetPlacement(const Placement placement)
+    void SetPlacement(const Placement& placement)
     {
         placement_ = placement;
     }

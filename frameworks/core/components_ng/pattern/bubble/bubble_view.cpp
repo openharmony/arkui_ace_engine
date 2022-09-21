@@ -69,6 +69,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         popupPaintProp->UpdateBackgroundColor(param->GetBackgroundColor());
     }
     popupPaintProp->UpdateAutoCancel(!param->HasAction());
+    popupPaintProp->UpdatePlacement(param->GetPlacement());
     // TODO: onstateChange.
     // Create child
     RefPtr<FrameNode> child;
@@ -87,7 +88,6 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
 
 RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message)
 {
-    // only check Message now, need to move these params into BubbleView.
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();

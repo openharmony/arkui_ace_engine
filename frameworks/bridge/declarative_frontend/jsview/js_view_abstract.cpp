@@ -397,6 +397,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](
                                              const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("Popup.onStateChange");
                 func->Execute(keys, param);
             };
             popupParam->SetOnStateChange(onStateChangeCallback);
@@ -428,6 +429,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
                 auto touchCallback = [execCtx = info.GetExecutionContext(), func = std::move(actionFunc)](
                                          TouchEventInfo&) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("primaryButton.action");
                     LOGI("Call primary touch");
                     func->Execute();
                 };
@@ -469,6 +471,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
                 auto touchCallback = [execCtx = info.GetExecutionContext(), func = std::move(actionFunc)](
                                          TouchEventInfo&) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("secondaryButton.action");
                     LOGI("Call primary touch");
                     func->Execute();
                 };
