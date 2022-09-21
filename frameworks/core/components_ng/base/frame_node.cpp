@@ -435,6 +435,10 @@ void FrameNode::MarkModifyDone()
     pattern_->OnModifyDone();
 }
 
+void FrameNode::OnMountToParentDone() {
+    pattern_->OnMountToParentDone();
+}
+
 void FrameNode::FlushUpdateAndMarkDirty()
 {
     MarkDirtyNode();

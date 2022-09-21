@@ -93,21 +93,21 @@ void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, LinearMeasureProperty
 
 float CalculateCrossOffset(float parent, float child, FlexAlign flexAlign)
 {
-    float offfset = 0;
+    float offset = 0;
     switch (flexAlign) {
         case FlexAlign::FLEX_START:
-            offfset = 0;
+            offset = 0;
             break;
         case FlexAlign::FLEX_END:
-            offfset = parent - child;
+            offset = parent - child;
             break;
         case FlexAlign::CENTER:
-            offfset = (parent - child) / 2;
+            offset = (parent - child) / 2;
             break;
         default:
             break;
     }
-    return offfset;
+    return offset;
 }
 
 } // namespace

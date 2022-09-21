@@ -93,6 +93,8 @@ public:
         MarkDirtyNode(extraFlag);
     }
 
+    void OnMountToParentDone();
+
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
     RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
