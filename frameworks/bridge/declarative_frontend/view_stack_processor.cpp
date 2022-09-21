@@ -641,6 +641,7 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
         // we should not touch itemChildComponent as it's already marked.
         //    (head)       (tail)      (unchanged)
         // mainComponent - others - itemChildComponent
+        Component::MergeRSNode(mainComponent);
         Component::MergeRSNode(components);
         if (itemChildComponent) {
             components.emplace_back(itemChildComponent);
