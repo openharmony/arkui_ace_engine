@@ -33,7 +33,7 @@ void ShapePainter::SetPan(RSPen& pen, const ShapePaintProperty& shapePaintProper
         int lineCap = shapePaintProperty.GetStrokeLineCapValue();
         if (static_cast<int>(RSPen::CapStyle::FLAT_CAP) == lineCap) {
             pen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
-        } else if (static_cast<int>(RSPen::CapStyle::SQUARE_CAP) == lineCap) {
+        } else if (static_cast<int>(shapePaintProperty.SQUARE_CAP) == lineCap) {
             pen.SetCapStyle(RSPen::CapStyle::SQUARE_CAP);
         } else {
             pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);

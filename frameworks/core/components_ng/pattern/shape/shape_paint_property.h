@@ -34,6 +34,7 @@ public:
     const double STOKE_OPACITY_DEFAULT = 1.0f;
     const Dimension STOKE_WIDTH_DEFAULT = Dimension(1.0f);
     const bool ANTIALIAS_DEFAULT = true;
+    const int SQUARE_CAP = 2;
 
     ShapePaintProperty() = default;
     ~ShapePaintProperty() override = default;
