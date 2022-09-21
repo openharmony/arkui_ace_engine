@@ -1699,6 +1699,13 @@ void FrontendDelegateImpl::OnPageDestroy(int32_t pageId)
         [weak = AceType::WeakClaim(this), pageId] {
             auto delegate = weak.Upgrade();
             if (delegate) {
+                auto iter = delegate->pageMap_.find(pageId);
+                if (iter != delegate->pageMap_.end()) {
+                    auto page = iter->second;
+                    if (page) {
+                        page->OnJsEngineDestroy();
+                    }
+                }
                 delegate->destroyPage_(pageId);
                 delegate->RecyclePageId(pageId);
             }
