@@ -741,7 +741,7 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
         }
     }
     auto endSize = result.size();
-    return (dispatchSuccess || beforeSize != endSize) && IsNotSiblingAddRecognizerToResult();
+    return dispatchSuccess || (beforeSize != endSize && IsNotSiblingAddRecognizerToResult());
 }
 
 RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Point& parentLocalPoint)

@@ -1544,6 +1544,7 @@ void RenderBox::OnTouchTestHit(
     if (touchRecognizer_) {
         touchRecognizer_->SetCoordinateOffset(coordinateOffset);
         result.emplace_back(touchRecognizer_);
+        MarkIsNotSiblingAddRecognizerToResult(false);
     }
     if (onClick_) {
         onClick_->SetCoordinateOffset(coordinateOffset);
