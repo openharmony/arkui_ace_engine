@@ -19,7 +19,10 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/indexer/indexer_event_hub.h"
+#include "core/components_ng/pattern/indexer/indexer_view.h"
 #include "core/components_v2/indexer/indexer_component.h"
+#include "core/components_v2/indexer/indexer_event_info.h"
 #include "core/components_v2/indexer/render_indexer.h"
 
 namespace OHOS::Ace::Framework {
@@ -30,6 +33,39 @@ const std::vector<V2::AlignStyle> ALIGN_STYLE = { V2::AlignStyle::LEFT, V2::Alig
 
 void JSIndexer::Create(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args.Length() >= 1 && args[0]->IsObject()) {
+            auto param = JsonUtil::ParseJsonString(args[0]->ToString());
+            if (!param || param->IsNull()) {
+                LOGE("JSIndexer::Create param is null");
+                return;
+            }
+            std::vector<std::string> indexerArray;
+
+            auto arrayVal = param->GetValue("arrayValue");
+            if (!arrayVal || !arrayVal->IsArray()) {
+                LOGW("info is invalid");
+                return;
+            }
+
+            size_t length = static_cast<uint32_t>(arrayVal->GetArraySize());
+            if (length <= 0) {
+                LOGE("info is invalid");
+                return;
+            }
+            for (size_t i = 0; i < length; i++) {
+                auto value = arrayVal->GetArrayItem(i);
+                if (!value) {
+                    return;
+                }
+                indexerArray.emplace_back(value->GetString());
+            }
+
+            auto selectedVal = param->GetInt("selected", 0);
+            NG::IndexerView::Create(indexerArray, selectedVal);
+        }
+    }
+
     if (args.Length() >= 1 && args[0]->IsObject()) {
         auto param = JsonUtil::ParseJsonString(args[0]->ToString());
         if (!param || param->IsNull()) {
@@ -79,6 +115,10 @@ void JSIndexer::SetSelectedColor(const JSCallbackInfo& args)
     if (!ParseJsColor(args[0], color)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::IndexerView::SetSelectedColor(color);
+        return;
+    }
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (indexerComponent) {
@@ -96,6 +136,10 @@ void JSIndexer::SetColor(const JSCallbackInfo& args)
     }
     Color color;
     if (!ParseJsColor(args[0], color)) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::IndexerView::SetColor(color);
         return;
     }
     auto indexerComponent =
@@ -117,6 +161,10 @@ void JSIndexer::SetPopupColor(const JSCallbackInfo& args)
     if (!ParseJsColor(args[0], color)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::IndexerView::SetPopupColor(color);
+        return;
+    }
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (indexerComponent) {
@@ -136,6 +184,10 @@ void JSIndexer::SetSelectedBackgroundColor(const JSCallbackInfo& args)
     if (!ParseJsColor(args[0], color)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::IndexerView::SetSelectedBackgroundColor(color);
+        return;
+    }
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (indexerComponent) {
@@ -153,6 +205,10 @@ void JSIndexer::SetPopupBackground(const JSCallbackInfo& args)
     if (!ParseJsColor(args[0], color)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::IndexerView::SetPopupBackground(color);
+        return;
+    }
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (indexerComponent) {
@@ -162,6 +218,10 @@ void JSIndexer::SetPopupBackground(const JSCallbackInfo& args)
 
 void JSIndexer::SetUsingPopup(bool state)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::IndexerView::SetUsingPopup(state);
+        return;
+    }
     auto indexerComponent =
         AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (indexerComponent) {
@@ -171,6 +231,14 @@ void JSIndexer::SetUsingPopup(bool state)
 
 void JSIndexer::SetSelectedFont(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args.Length() >= 1 && args[0]->IsObject()) {
+            auto textStyle = indexerComponent->GetActiveTextStyle();
+            GetFontContent(args, textStyle);
+            NG::IndexerView::SetSelectedFont(textStyle);
+        }
+        return;
+    }
     if (args.Length() >= 1 && args[0]->IsObject()) {
         auto indexerComponent =
             AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -184,6 +252,14 @@ void JSIndexer::SetSelectedFont(const JSCallbackInfo& args)
 
 void JSIndexer::SetPopupFont(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args.Length() >= 1 && args[0]->IsObject()) {
+            auto textStyle = indexerComponent->GetActiveTextStyle();
+            GetFontContent(args, textStyle);
+            NG::IndexerView::SetPopupFont(textStyle);
+        }
+        return;
+    }
     if (args.Length() >= 1 && args[0]->IsObject()) {
         auto indexerComponent =
             AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -197,6 +273,14 @@ void JSIndexer::SetPopupFont(const JSCallbackInfo& args)
 
 void JSIndexer::SetFont(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args.Length() >= 1 && args[0]->IsObject()) {
+            auto textStyle = indexerComponent->GetActiveTextStyle();
+            GetFontContent(args, textStyle);
+            NG::IndexerView::SetFont(textStyle);
+        }
+        return;
+    }
     if (args.Length() >= 1 && args[0]->IsObject()) {
         auto indexerComponent =
             AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -210,6 +294,17 @@ void JSIndexer::SetFont(const JSCallbackInfo& args)
 
 void JSIndexer::JsOnSelected(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto onSelected = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const int32_t selected) {
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                auto params = ConvertToJSValues(selected);
+                func->Call(JSRef<JSObject>(), params.size(), params.data());
+            };
+            NG::IndexerView::SetOnSelected(onSelected);
+        }
+        return;
+    }
     if (args[0]->IsFunction()) {
         auto onSelected = EventMarker(
             [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
@@ -232,6 +327,38 @@ void JSIndexer::JsOnSelected(const JSCallbackInfo& args)
 
 void JSIndexer::JsOnRequestPopupData(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto requestPopupData = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
+                (const int32_t selected) {
+                    std::vector<std::string> popupData;
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, popupData);
+                    auto params = ConvertToJSValues(selected);
+                    JSRef<JSArray> result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+                    if (result.IsEmpty()) {
+                        LOGE("Error calling onRequestPopupData result is empty.");
+                        return popupData;
+                    }
+
+                    if (!result->IsArray()) {
+                        LOGE("Error calling onRequestPopupData result is not array.");
+                        return popupData;
+                    }
+
+                    for (size_t i = 0; i < result->Length(); i++) {
+                        if (result->GetValueAt(i)->IsString()) {
+                            auto item = result->GetValueAt(i);
+                            popupData.emplace_back(item->ToString());
+                        } else {
+                            LOGE("Error calling onRequestPopupData index %{public}zu is not string.", i);
+                        }
+                    }
+                    return popupData;
+            };
+            NG::IndexerView::SetOnRequestPopupData(requestPopupData);
+        }
+        return;
+    }
     if (args[0]->IsFunction()) {
         auto requestPopupData =
             [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]
@@ -271,6 +398,17 @@ void JSIndexer::JsOnRequestPopupData(const JSCallbackInfo& args)
 
 void JSIndexer::JsOnPopupSelected(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args[0]->IsFunction()) {
+            auto onPopupSelected = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const int32_t selected) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto params = ConvertToJSValues(selected);
+                func->Call(JSRef<JSObject>(), params.size(), params.data());
+            };
+            NG::IndexerView::SetOnPopupSelected(onPopupSelected);
+        }
+        return;
+    }
     if (args[0]->IsFunction()) {
         auto onPopupSelected = EventMarker(
             [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](const BaseEventInfo* info) {
@@ -321,6 +459,14 @@ void JSIndexer::GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle)
 
 void JSIndexer::SetItemSize(const JSCallbackInfo& args)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (args.Length() >= 1) {
+            Dimension value;
+            if (ParseJsDimensionVp(args[0], value)) {
+                NG::IndexerView::SetItemSize(value);
+            }
+        }
+    }
     if (args.Length() >= 1) {
         Dimension value;
         if (ParseJsDimensionVp(args[0], value)) {
@@ -335,6 +481,11 @@ void JSIndexer::SetItemSize(const JSCallbackInfo& args)
 
 void JSIndexer::SetAlignStyle(int32_t value)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (value >= 0 && value < static_cast<int32_t>(ALIGN_STYLE.size())) {
+            NG::IndexerView::SetAlignStyle(ALIGN_STYLE[value]);
+        }
+    }
     if (value >= 0 && value < static_cast<int32_t>(ALIGN_STYLE.size())) {
         auto indexerComponent =
                 AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
