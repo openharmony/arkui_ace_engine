@@ -15,10 +15,12 @@
 
 #include "core/components_ng/pattern/divider/divider_view.h"
 
+#include "core/components/divider/divider_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void DividerView::Create()
@@ -28,6 +30,7 @@ void DividerView::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
     stack->Push(frameNode);
+    LoadTheme(frameNode);
 }
 
 void DividerView::Vertical(bool value)
@@ -49,4 +52,20 @@ void DividerView::LineCap(const Ace::LineCap& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, LineCap, value);
 }
+
+void DividerView::LoadTheme(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<DividerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto castDividerRenderProperty = frameNode->GetLayoutProperty<DividerRenderProperty>();
+    if (castDividerRenderProperty) {
+        castDividerRenderProperty->UpdateDividerColor(theme->GetColor());
+    }
+}
+
 } // namespace OHOS::Ace::NG
