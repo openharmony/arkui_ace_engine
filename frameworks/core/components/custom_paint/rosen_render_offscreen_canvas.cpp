@@ -249,6 +249,17 @@ void RosenRenderOffscreenCanvas::Clip()
     skCanvas_->clipPath(skPath_);
 }
 
+void RosenRenderOffscreenCanvas::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    if (path == nullptr) {
+        LOGE("Clip failed in offscreenCanvas, target path is null.");
+        return;
+    }
+    ParsePath2D(path);
+    Path2DClip();
+    skPath2d_.reset();
+}
+
 void RosenRenderOffscreenCanvas::FillRect(Rect rect)
 {
     SkPaint paint;
@@ -1112,6 +1123,11 @@ void RosenRenderOffscreenCanvas::Path2DFill()
         skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
         cacheBitmap_.eraseColor(0);
     }
+}
+
+void RosenRenderOffscreenCanvas::Path2DClip()
+{
+    skCanvas_->clipPath(skPath2d_);
 }
 
 void RosenRenderOffscreenCanvas::UpdateLineDash(SkPaint& paint)
