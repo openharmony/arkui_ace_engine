@@ -1060,6 +1060,53 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
         matrix[8], matrix[9], matrix[10], matrix[11], matrix[12], matrix[13], matrix[14], matrix[15], option);
 }
 
+NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>& transitionArgs)
+{
+    bool hasEffect = false;
+    NG::TransitionOptions transitionOption;
+    transitionOption.Type = ParseTransitionType(transitionArgs->GetString("type", "All"));
+    if (transitionArgs->Contains("opacity")) {
+        double opacity = 0.0;
+        ParseJsonDouble(transitionArgs->GetValue("opacity"), opacity);
+        transitionOption.UpdateOpacity(opacity);
+        hasEffect = true;
+    }
+    if (transitionArgs->Contains("translate")) {
+        auto translateArgs = transitionArgs->GetObject("translate");
+        // default: x, y, z (0.0, 0.0, 0.0)
+        NG::TranslateOptions translate;
+        ParseJsTranslate(translateArgs, translate.x, translate.y, translate.z);
+        transitionOption.UpdateTranslate(translate);
+        hasEffect = true;
+    }
+    if (transitionArgs->Contains("scale")) {
+        auto scaleArgs = transitionArgs->GetObject("scale");
+        // default: x, y, z (1.0, 1.0, 1.0), centerX, centerY 50% 50%;
+        NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+        ParseJsScale(scaleArgs, scale.xScale, scale.yScale, scale.zScale, scale.centerX, scale.centerY);
+        transitionOption.UpdateScale(scale);
+        hasEffect = true;
+    }
+    if (transitionArgs->Contains("rotate")) {
+        auto rotateArgs = transitionArgs->GetObject("rotate");
+        // default: dx, dy, dz (0.0, 0.0, 0.0), angle 0, centerX, centerY 50% 50%;
+        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
+        std::optional<float> angle;
+        ParseJsRotate(rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX,
+            rotate.centerY, angle);
+        if (angle.has_value()) {
+            rotate.angle = angle.value();
+            transitionOption.UpdateRotate(rotate);
+            hasEffect = true;
+        }
+    }
+    if (!hasEffect) {
+        // default transition
+        transitionOption = NG::TransitionOptions::GetDefaultTransition(transitionOption.Type);
+    }
+    return transitionOption;
+}
+
 void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
     LOGD("JsTransition");
@@ -1068,6 +1115,10 @@ void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
         return;
     }
     if (info.Length() == 0) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewAbstract::SetTransition(NG::TransitionOptions::GetDefaultTransition(TransitionType::ALL));
+            return;
+        }
         SetDefaultTransition(TransitionType::ALL);
         return;
     }
@@ -1076,6 +1127,11 @@ void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
         return;
     }
     auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto options = ParseTransition(transitionArgs);
+        NG::ViewAbstract::SetTransition(options);
+        return;
+    }
     ParseAndSetTransitionOption(transitionArgs);
 }
 
@@ -4649,6 +4705,9 @@ void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
 void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsTransition(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     if (ViewStackProcessor::GetInstance()->HasDisplayComponent()) {
         auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
         display->DisableLayer(true);
