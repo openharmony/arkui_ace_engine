@@ -18,8 +18,9 @@
 
 #include "base/geometry/ng/vector.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/shadow.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
 
