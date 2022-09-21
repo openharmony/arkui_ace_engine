@@ -16,7 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_view.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
