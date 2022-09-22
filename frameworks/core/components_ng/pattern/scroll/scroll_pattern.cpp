@@ -76,7 +76,9 @@ void ScrollPattern::OnModifyDone()
 void ScrollPattern::RegisterOnScrollTask()
 {
     auto eventHub = GetHost()->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
     auto onScrollEvent = eventHub->GetOnScrollEvent();
+    CHECK_NULL_VOID(onScrollEvent);
     scrollableEvent_->SetOnScrollCallback(std::move(onScrollEvent));
 }
 

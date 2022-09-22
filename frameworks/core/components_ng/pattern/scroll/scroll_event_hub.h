@@ -48,7 +48,7 @@ public:
     ScrollEventHub() = default;
     ~ScrollEventHub() override = default;
 
-    OnScrollEvent GetOnScrollEvent()
+    const OnScrollEvent& GetOnScrollEvent()
     {
         return onScroll_;
     }
@@ -58,7 +58,7 @@ public:
         onScroll_ = std::move(onScroll);
     }
 
-    ScrollEdgeEvent GetScrollEdgeEvent()
+    const ScrollEdgeEvent& GetScrollEdgeEvent()
     {
         return onScrollEdge_;
     }
@@ -68,7 +68,7 @@ public:
         onScrollEdge_ = std::move(event);
     }
 
-    ScrollEndEvent GetScrollEndEvent()
+    const ScrollEndEvent& GetScrollEndEvent()
     {
         return onScrollEnd_;
     }
@@ -78,7 +78,7 @@ public:
         onScrollEnd_ = std::move(event);
     }
 
-    ScrollBeginEvent GetScrollBeginEvent()
+    const ScrollBeginEvent& GetScrollBeginEvent()
     {
         return onScrollBegin_;
     }
