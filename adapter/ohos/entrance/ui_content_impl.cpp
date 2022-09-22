@@ -203,6 +203,7 @@ public:
             return;
         }
 
+        ContainerScope scope(instanceId_);
         taskExecutor->PostTask([] { SubwindowManager::GetInstance()->ClearMenu(); }, TaskExecutor::TaskType::UI);
     }
 
