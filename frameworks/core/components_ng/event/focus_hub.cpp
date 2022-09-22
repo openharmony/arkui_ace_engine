@@ -150,7 +150,6 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
 
 bool FocusHub::RequestFocusImmediately()
 {
-    LOGI("Node: %{public}s request focus immediately", GetFrameName().c_str());
     auto context = NG::PipelineContext::GetCurrentContext();
 
     if (IsCurrentFocus()) {
