@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_UI_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_UI_NODE_H
 
+#include <cstdint>
 #include <list>
-#include <stdint.h>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/memory/ace_type.h"

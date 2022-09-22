@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT BlankView {
 public:
     static void Create();
-    static void SetBlankMin(Dimension blankMin);
+    static void SetBlankMin(const Dimension& blankMin);
 };
 
 } // namespace OHOS::Ace::NG

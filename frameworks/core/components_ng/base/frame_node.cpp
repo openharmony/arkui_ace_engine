@@ -436,7 +436,8 @@ void FrameNode::MarkModifyDone()
     renderContext_->OnModifyDone();
 }
 
-void FrameNode::OnMountToParentDone() {
+void FrameNode::OnMountToParentDone()
+{
     pattern_->OnMountToParentDone();
 }
 
