@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/common/ace_page.h"
 #include "core/components/box/box_component_helper.h"
@@ -437,56 +438,62 @@ void JSButton::JsPadding(const JSCallbackInfo& info)
 void JSButton::JsOnClick(const JSCallbackInfo& info)
 {
     LOGD("JSButton JsOnClick");
-    if (info[0]->IsFunction()) {
-        auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-        if (!inspector) {
-            LOGE("fail to get inspector for on click event");
-            return;
-        }
-        auto impl = inspector->GetInspectorFunctionImpl();
+    if (!info[0]->IsFunction()) {
+        LOGE("OnClick parameter need a function.");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSInteractableView::JsOnClick(info);
+        return;
+    }
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    if (!inspector) {
+        LOGE("fail to get inspector for on click event");
+        return;
+    }
+    auto impl = inspector->GetInspectorFunctionImpl();
 
-        RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto clickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
-                           GestureEvent& info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            if (impl) {
-                impl->UpdateEventInfo(info);
-            }
-            ACE_SCORING_EVENT("onClick");
-            func->Execute(info);
-        };
-        RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(DEFAULT_TAP_COUNTS, DEFAULT_TAP_FINGERS);
-        if (!tapGesture) {
-            LOGE("tapGesture is null");
-            return;
+    RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto clickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
+                        GestureEvent& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        if (impl) {
+            impl->UpdateEventInfo(info);
         }
-        tapGesture->SetOnActionId(clickId);
-        auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        if (tapGesture) {
-            box->SetOnClick(tapGesture);
-        }
+        ACE_SCORING_EVENT("onClick");
+        func->Execute(info);
+    };
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(DEFAULT_TAP_COUNTS, DEFAULT_TAP_FINGERS);
+    if (!tapGesture) {
+        LOGE("tapGesture is null");
+        return;
+    }
+    tapGesture->SetOnActionId(clickId);
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    if (tapGesture) {
+        box->SetOnClick(tapGesture);
+    }
 
-        RefPtr<JsClickFunction> jsClickEventFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        EventMarker clickEventId([execCtx = info.GetExecutionContext(), func = std::move(jsClickEventFunc), impl](
-                                     const BaseEventInfo* info) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-            auto newInfo = *clickInfo;
-            if (impl) {
-                impl->UpdateEventInfo(newInfo);
-            }
-            ACE_SCORING_EVENT("Button.onClick");
-            func->Execute(newInfo);
-        });
-        auto buttonComponent =
-            AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (buttonComponent) {
-            buttonComponent->SetKeyEnterEventId(clickEventId);
+    RefPtr<JsClickFunction> jsClickEventFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+    EventMarker clickEventId([execCtx = info.GetExecutionContext(), func = std::move(jsClickEventFunc), impl](
+                                    const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+        auto newInfo = *clickInfo;
+        if (impl) {
+            impl->UpdateEventInfo(newInfo);
         }
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
-        if (focusableComponent) {
-            focusableComponent->SetOnClickId(clickEventId);
-        }
+        ACE_SCORING_EVENT("Button.onClick");
+        func->Execute(newInfo);
+    });
+    auto buttonComponent =
+        AceType::DynamicCast<ButtonComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (buttonComponent) {
+        buttonComponent->SetKeyEnterEventId(clickEventId);
+    }
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+    if (focusableComponent) {
+        focusableComponent->SetOnClickId(clickEventId);
     }
 }
 
