@@ -1626,6 +1626,7 @@ void RenderTextField::UpdateIcon(const RefPtr<TextFieldComponent>& textField)
             imageComponent = AceType::MakeRefPtr<ImageComponent>(iconSrc_);
             imageComponent->SetImageFill(imageFill_);
         }
+        imageComponent->SetSyncMode(true);
         imageComponent->SetWidth(textField->GetIconSize());
         imageComponent->SetHeight(textField->GetIconSize());
         if (textDirection_ == TextDirection::RTL) {
@@ -1665,6 +1666,7 @@ void RenderTextField::UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textF
     } else {
         showImage = AceType::MakeRefPtr<ImageComponent>(showIconSrc_);
     }
+    showImage->SetSyncMode(true);
     showImage->SetWidth(textField->GetIconSize());
     showImage->SetHeight(textField->GetIconSize());
 
@@ -1684,6 +1686,7 @@ void RenderTextField::UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textF
     } else {
         hideImage = AceType::MakeRefPtr<ImageComponent>(hideIconSrc_);
     }
+    hideImage->SetSyncMode(true);
     hideImage->SetWidth(textField->GetIconSize());
     hideImage->SetHeight(textField->GetIconSize());
 

@@ -67,6 +67,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     if (isDisableMouseLeft_ && event.sourceType == SourceType::MOUSE) {
         LOGI("mouse left button is disabled for long press recognizer.");
+        AddToReferee(event.id, AceType::Claim(this));
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
     if (fingers_ > MAX_FINGERS) {
