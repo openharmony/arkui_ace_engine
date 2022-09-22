@@ -82,6 +82,7 @@ void ClickRecognizer::OnAccepted()
         info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
+        info.SetTarget(GetEventTarget().value_or(EventTarget()));
         onClick_(info);
     }
 
@@ -303,6 +304,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
+        info.SetTarget(GetEventTarget().value_or(EventTarget()));
         (*onAction)(info);
     }
 }
