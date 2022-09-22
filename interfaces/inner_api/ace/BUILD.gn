@@ -32,7 +32,7 @@ ohos_shared_library("ace_uicontent") {
     "${ace_root}/interfaces/inner_api/ace/hot_reloader.cpp",
     "${ace_root}/interfaces/inner_api/ace/ui_content.cpp",
   ]
-  external_deps = [ "multimedia_image_standard:image" ]
+  external_deps = [ "multimedia_image_framework:image" ]
 
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
