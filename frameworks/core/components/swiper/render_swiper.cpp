@@ -1964,6 +1964,7 @@ void RenderSwiper::UpdateIndicatorPosition(SwiperIndicatorData& indicatorData)
     double indicatorWidth = indicatorData.indicatorPaintData.width;
     double indicatorHeight = indicatorData.indicatorPaintData.height;
     double stableOffset = NormalizeToPx(INDICATOR_PADDING_TOP_DEFAULT) + (hotZoneMaxSize_ + hotZoneRealSize_) * 0.5;
+    auto layoutSize = GetLayoutSize();
 
     if (indicator_->GetLeft().Value() != SwiperIndicator::DEFAULT_POSITION) {
         int32_t left = GetValidEdgeLength(swiperWidth_, indicatorWidth, indicator_->GetLeft());
@@ -1975,7 +1976,7 @@ void RenderSwiper::UpdateIndicatorPosition(SwiperIndicatorData& indicatorData)
         position.SetX(swiperWidth_ - indicatorWidth - right);
     } else {
         if (axis_ == Axis::HORIZONTAL) {
-            position.SetX((swiperWidth_ - indicatorWidth) / 2.0);
+            position.SetX((layoutSize.Width() - indicatorWidth) / 2.0);
         } else {
             // horizontal line of indicator zone is stable.
             double currentX = swiperWidth_ - stableOffset;
@@ -1997,7 +1998,7 @@ void RenderSwiper::UpdateIndicatorPosition(SwiperIndicatorData& indicatorData)
             double currentY = swiperHeight_ - stableOffset;
             position.SetY(currentY);
         } else {
-            position.SetY((swiperHeight_ - indicatorHeight) / 2.0);
+            position.SetY((layoutSize.Height() - indicatorHeight) / 2.0);
         }
     }
 
