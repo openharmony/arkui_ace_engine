@@ -116,6 +116,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, InitialScale, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CacheMode, WebCacheMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NeedGestureAccess, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, PinchSmoothModeEnabled, bool);
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -143,6 +144,7 @@ private:
     void OnInitialScaleUpdate(float value) {}
     void OnCacheModeUpdate(WebCacheMode value) {}
     void OnNeedGestureAccessUpdate(bool value) {}
+    void OnPinchSmoothModeEnabledUpdate(bool value);
 
     void HandleTouchDown(const TouchEventInfo& info, bool fromOverlay);
 

@@ -1167,6 +1167,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDragLeave", &JSWeb::JsOnDragLeave);
     JSClass<JSWeb>::StaticMethod("onDrop", &JSWeb::JsOnDrop);
     JSClass<JSWeb>::StaticMethod("onScroll", &JSWeb::OnScroll);
+    JSClass<JSWeb>::StaticMethod("pinchSmoothMode", &JSWeb::PinchSmoothModeEnabled);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2624,5 +2625,20 @@ void JSWeb::JsOnDrop(const JSCallbackInfo& info)
     if (webComponent) {
         webComponent->SetOnDropId(onDropId);
     }
+}
+
+void JSWeb::PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetPinchSmoothModeEnabled(isPinchSmoothModeEnabled);
+        return;
+    }
+    auto stack = ViewStackProcessor::GetInstance();
+    auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
+    if (!webComponent) {
+        LOGE("JSWeb: MainComponent is null.");
+        return;
+    }
+    webComponent->SetPinchSmoothModeEnabled(isPinchSmoothModeEnabled);
 }
 } // namespace OHOS::Ace::Framework

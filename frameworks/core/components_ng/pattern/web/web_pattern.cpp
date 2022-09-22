@@ -112,6 +112,13 @@ void WebPattern::OnJsEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnPinchSmoothModeEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdatePinchSmoothModeEnabled(value);
+    }
+}
+
 void WebPattern::OnModifyDone()
 {
     // called in each update function.
@@ -143,6 +150,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateTextZoomRatio(GetTextZoomRatioNumValue(DEFAULT_TEXT_ZOOM_RATIO));
         delegate_->UpdateWebDebuggingAccess(GetWebDebuggingAccessEnabledValue(false));
         delegate_->UpdateMediaPlayGestureAccess(GetNeedGestureAccessValue(true));
+        delegate_->UpdatePinchSmoothModeEnabled(GetPinchSmoothModeEnabledValue(false));
     }
 
     // update bgcolor.

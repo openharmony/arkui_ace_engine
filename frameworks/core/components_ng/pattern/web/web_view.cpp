@@ -78,4 +78,10 @@ void WebView::SetJsEnabled(bool isJsEnabled)
     webPattern->UpdateJsEnabled(isJsEnabled);
 }
 
+void WebView::SetPinchSmoothModeEnabled(bool isPinchSmoothModeEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdatePinchSmoothModeEnabled(isPinchSmoothModeEnabled);
+}
 } // namespace OHOS::Ace::NG
