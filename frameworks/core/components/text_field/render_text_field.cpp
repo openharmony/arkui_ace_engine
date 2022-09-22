@@ -629,14 +629,14 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
         StartTwinkling();
         ShowTextOverlay(globalPosition, true);
     }
-    auto context = GetContext().Upgrade();
-    if (context) {
-        context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
-    }
 }
 
 void RenderTextField::OnTapCallback()
 {
+    auto context = GetContext().Upgrade();
+    if (context) {
+        context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
+    }
     if (isFocusOnTouch_ && tapCallback_) {
         onTapCallbackResult_ = tapCallback_();
     }
