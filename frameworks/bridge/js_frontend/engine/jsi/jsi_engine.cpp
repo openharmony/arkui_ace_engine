@@ -3007,7 +3007,7 @@ void JsiEngineInstance::InitGroupJsBridge()
 
 bool JsiEngineInstance::FireJsEvent(const std::string& eventStr)
 {
-    LOGI("JsiEngineInstance FireJsEvent");
+    LOGD("JsiEngineInstance FireJsEvent");
     if (!runningPage_) {
         LOGW("js engine instance running page is not valid.");
         return false;

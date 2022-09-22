@@ -963,7 +963,7 @@ void AceContainer::AddAssetPath(
     if (flutterAssetManager && !packagePath.empty()) {
         auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
         if (assetProvider->Initialize(packagePath, paths)) {
-            LOGI("Push AssetProvider to queue.");
+            LOGD("Push AssetProvider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
     }

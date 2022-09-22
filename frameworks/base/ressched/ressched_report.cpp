@@ -52,7 +52,7 @@ void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& pay
     payload[BUNDLE_NAME] = aceApplicationInfo.GetPackageName();
     payload[ABILITY_NAME] = aceApplicationInfo.GetAbilityName();
     for (auto& pair : payload) {
-        LOGI("DataReport:  %{public}s :  %{public}s", pair.first.c_str(), pair.second.c_str());
+        LOGD("DataReport:  %{public}s :  %{public}s", pair.first.c_str(), pair.second.c_str());
     }
 }
 }

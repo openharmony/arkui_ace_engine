@@ -522,7 +522,7 @@ void EventManager::ClearResults()
 
 EventManager::EventManager()
 {
-    LOGI("EventManger Constructor.");
+    LOGD("EventManger Constructor.");
     referee_ = AceType::MakeRefPtr<GestureReferee>();
 }
 
