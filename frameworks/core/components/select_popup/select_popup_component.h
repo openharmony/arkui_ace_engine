@@ -289,6 +289,11 @@ public:
         return dialogShowed_;
     }
 
+    void SetIsCustomMenu(bool isCustomMenu)
+    {
+        isCustomMenu_ = isCustomMenu;
+    }
+
 private:
     RefPtr<BoxComponent> InitializeInnerBox(const RefPtr<ScrollComponent>& scroll);
     void HandleOptionClick(std::size_t index);
@@ -301,6 +306,7 @@ private:
     Offset selectRightBottom_;
     bool isMenu_ = false;
     bool isContextMenu_ = false;
+    bool isCustomMenu_ = false;
     std::vector<RefPtr<OptionComponent>> options_;
     std::string title_;
     RefPtr<SelectTheme> theme_;
