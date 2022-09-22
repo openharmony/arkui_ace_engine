@@ -506,7 +506,7 @@ void Animator::Finish()
         return;
     }
     if (status_ == Status::STOPPED) {
-        LOGW("Already stop, do not need finish again. id: %{public}d", controllerId_);
+        LOGD("Already stop, do not need finish again. id: %{public}d", controllerId_);
         return;
     }
     LOGD("animation finish. id: %{public}d", controllerId_);
@@ -663,7 +663,7 @@ void Animator::StartInner(bool alwaysNotify)
 {
     CHECK_RUN_ON(UI);
     if (status_ == Status::RUNNING) {
-        LOGW("controller already running, do not need start again. skip it. id: %{public}d", controllerId_);
+        LOGD("controller already running, do not need start again. skip it. id: %{public}d", controllerId_);
         if (toggleDirectionPending_) {
             toggleDirectionPending_ = false;
             isCurDirection_ = !isCurDirection_;
