@@ -434,7 +434,8 @@ void FrameNode::MarkModifyDone()
     pattern_->OnModifyDone();
 }
 
-void FrameNode::OnMountToParentDone() {
+void FrameNode::OnMountToParentDone()
+{
     pattern_->OnMountToParentDone();
 }
 

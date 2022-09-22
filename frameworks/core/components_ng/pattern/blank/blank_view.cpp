@@ -37,7 +37,7 @@ void BlankView::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, 0.0f);
 }
 
-void BlankView::SetBlankMin(Dimension blankMin)
+void BlankView::SetBlankMin(const Dimension& blankMin)
 {
     auto blankNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(blankNode);
