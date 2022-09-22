@@ -2618,7 +2618,7 @@ bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> messa
         auto webEventHub = webPattern->GetWebEventHub();
         CHECK_NULL_RETURN(webEventHub, false);
         auto propOnConsoleEvent = webEventHub->GetOnConsoleEvent();
-        CHECK_NULL_RETURN(webEventHub, false);
+        CHECK_NULL_RETURN(propOnConsoleEvent, false);
         return propOnConsoleEvent(param);
     }
     auto webCom = webComponent_.Upgrade();
@@ -2648,7 +2648,7 @@ bool WebDelegate::OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info)
         auto webEventHub = webPattern->GetWebEventHub();
         CHECK_NULL_RETURN(webEventHub, false);
         auto propOnHttpAuthRequestEvent = webEventHub->GetOnHttpAuthRequestEvent();
-        CHECK_NULL_RETURN(webEventHub, false);
+        CHECK_NULL_RETURN(propOnHttpAuthRequestEvent, false);
         return propOnHttpAuthRequestEvent(info);
     }
     auto webCom = webComponent_.Upgrade();
@@ -2664,7 +2664,7 @@ bool WebDelegate::OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info)
         auto webEventHub = webPattern->GetWebEventHub();
         CHECK_NULL_RETURN(webEventHub, false);
         auto propOnSslErrorEvent = webEventHub->GetOnSslErrorRequestEvent();
-        CHECK_NULL_RETURN(webEventHub, false);
+        CHECK_NULL_RETURN(propOnSslErrorEvent, false);
         return propOnSslErrorEvent(info);
     }
     auto webCom = webComponent_.Upgrade();
@@ -2680,7 +2680,7 @@ bool WebDelegate::OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& i
         auto webEventHub = webPattern->GetWebEventHub();
         CHECK_NULL_RETURN(webEventHub, false);
         auto propOnSslSelectCertRequestEvent = webEventHub->GetOnSslSelectCertRequestEvent();
-        CHECK_NULL_RETURN(webEventHub, false);
+        CHECK_NULL_RETURN(propOnSslSelectCertRequestEvent, false);
         return propOnSslSelectCertRequestEvent(info);
     }
     auto webCom = webComponent_.Upgrade();

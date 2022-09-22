@@ -351,7 +351,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateBackgroundColor(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue()));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
-        delegate_->UpdateBlockNetworkImage(!GetOnLineImageAccessEnabledValue(true));
+        delegate_->UpdateBlockNetworkImage(GetOnLineImageAccessEnabledValue(true));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(true));
         delegate_->UpdateLoadsImagesAutomatically(GetImageAccessEnabledValue(true));
         delegate_->UpdateMixedContentMode(GetMixedModeValue(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW));
@@ -365,6 +365,12 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateTextZoomRatio(GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
         delegate_->UpdateWebDebuggingAccess(GetWebDebuggingAccessEnabledValue(false));
         delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
+        if (GetUserAgent()) {
+            delegate_->UpdateUserAgent(GetUserAgent().value());
+        }
+        if (GetInitialScale()) {
+            delegate_->UpdateInitialScale(GetInitialScale().value());
+        }
     }
 
     // update bgcolor.
