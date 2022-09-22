@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/flex/flex_component_v2.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/wrap/render_wrap.h"
 #include "core/components_v2/inspector/utils.h"
@@ -126,7 +127,8 @@ void FlexComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>
         LOGE("get GetFlexElement failed");
         return;
     }
-    flexElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
+    auto newFlexItemComponent = FlexComponentV2::AddFlexItemComponent(newComponent);
+    flexElement->UpdateChildWithSlot(nullptr, newFlexItemComponent, slot, slot);
     flexElement->MarkDirty();
 }
 
@@ -138,7 +140,8 @@ void FlexComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Compone
         return;
     }
     auto child = flexElement->GetChildBySlot(slot);
-    flexElement->UpdateChildWithSlot(child, newComponent, slot, slot);
+    auto newFlexItemComponent = FlexComponentV2::AddFlexItemComponent(newComponent);
+    flexElement->UpdateChildWithSlot(child, newFlexItemComponent, slot, slot);
     flexElement->MarkDirty();
 }
 
