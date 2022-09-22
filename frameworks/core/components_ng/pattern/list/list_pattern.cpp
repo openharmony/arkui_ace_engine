@@ -111,7 +111,11 @@ void ListPattern::OnModifyDone()
     }
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL));
     scrollableEvent_->SetScrollPositionCallback(std::move(task));
-    scrollableEvent_->SetScrollBeginCallback(std::move(scrollBeginTask));
+    auto listEventHub = host->GetEventHub<ListEventHub>();
+    auto onScrollBegin = listEventHub->GetOnScrollBegin();
+    if (onScrollBegin) {
+        scrollableEvent_->SetScrollBeginCallback(std::move(scrollBeginTask));
+    }
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
@@ -129,19 +133,22 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (listLayoutAlgorithm->GetMaxListItemIndex().has_value()) {
         maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex().value();
     }
+    auto finalOffset = listLayoutAlgorithm->GetCurrentOffset();
+    auto adjustOffset = currentDelta_ - finalOffset;
+    totalOffset_ = totalOffset_ - adjustOffset;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto listEventHub = host->GetEventHub<ListEventHub>();
     CHECK_NULL_RETURN(listEventHub, false);
-    if (currentOffset_ != lastOffset_) {
+    if (totalOffset_ != lastOffset_) {
         if (startIndex_ != listLayoutAlgorithm->GetStartIndex() || endIndex_ != listLayoutAlgorithm->GetEndIndex()) {
             auto onScrollIndex = listEventHub->GetOnScrollIndex();
             if (onScrollIndex) {
                 onScrollIndex(startIndex_, endIndex_);
             }
         }
-        bool scrollUpToCrossLine = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(currentOffset_, 0.0);
-        bool scrollDownToCrossLine = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(currentOffset_, 0.0);
+        bool scrollUpToCrossLine = GreatNotEqual(lastOffset_, 0.0) && LessOrEqual(totalOffset_, 0.0);
+        bool scrollDownToCrossLine = LessNotEqual(lastOffset_, 0.0) && GreatOrEqual(totalOffset_, 0.0);
         if ((startIndex_ == 0) && (scrollUpToCrossLine || scrollDownToCrossLine)) {
             auto onReachStart = listEventHub->GetOnReachStart();
             if (onReachStart) {
@@ -168,7 +175,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     // TODO: now only support spring effect
     auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::NONE);
     playEdgeEffectAnimation_ = false;
-    if (currentOffset_ != lastOffset_) {
+    if (totalOffset_ != lastOffset_) {
         if (startIndex_ == 0 && itemPosition_[0].first >= 0) {
             if (edgeEffect == EdgeEffect::SPRING) {
                 PlaySpringAnimation(0.0);
@@ -181,13 +188,15 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         }
     }
     jumpIndex_.reset();
+    currentDelta_ = 0.0f;
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
 }
 
 void ListPattern::UpdateCurrentOffset(float offset)
 {
-    lastOffset_ = currentOffset_;
-    currentOffset_ = currentOffset_ - offset;
+    currentDelta_ = currentDelta_ - offset;
+    lastOffset_ = totalOffset_;
+    totalOffset_ = totalOffset_ - offset;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -212,13 +221,13 @@ void ListPattern::PlaySpringAnimation(double dragVelocity)
     const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
         AceType::MakeRefPtr<SpringProperty>(SPRING_SCROLL_MASS, SPRING_SCROLL_STIFFNESS, SPRING_SCROLL_DAMPING);
     ExtentPair extentPair = ExtentPair(0.0, 0.0);
-    float friction = CalculateFriction(std::abs(currentOffset_) / MainSize());
+    float friction = CalculateFriction(std::abs(totalOffset_) / MainSize());
     auto scrollMotion = AceType::MakeRefPtr<ScrollMotion>(
-        currentOffset_, dragVelocity * friction, extentPair, extentPair, DEFAULT_OVER_SPRING_PROPERTY);
+        totalOffset_, dragVelocity * friction, extentPair, extentPair, DEFAULT_OVER_SPRING_PROPERTY);
     scrollMotion->AddListener([weak = AceType::WeakClaim(this)](double position) {
         auto list = weak.Upgrade();
         if (list) {
-            list->UpdateCurrentOffset(list->currentOffset_ - static_cast<float>(position));
+            list->UpdateCurrentOffset(-static_cast<float>(position));
         }
     });
     springController_->AddStopListener([weak = AceType::WeakClaim(this)]() {});
