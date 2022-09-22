@@ -16,6 +16,7 @@
 #include "core/components_ng/event/scrollable_event.h"
 
 #include "base/geometry/offset.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -39,52 +40,18 @@ void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     }
 }
 
-// runs OnScroll and OnScrollBegin callbacks
-void runScrollBeginCallback(const RefPtr<ScrollableEvent>& task, double& offset, bool vertical)
-{
-    auto dx = (vertical) ? Dimension(0) : Dimension(offset);
-    auto dy = (vertical) ? Dimension(offset) : Dimension(0);
-
-    auto onScrollCallback = task->GetOnScrollCallback();
-    if (onScrollCallback) {
-        onScrollCallback(dx, dy);
-    }
-
-    // Modifies offset based on developer's OnScrollBegin callback
-    auto scrollBeginCallback = task->GetScrollBeginCallback();
-    if (scrollBeginCallback) {
-        ScrollInfo info  = scrollBeginCallback(dx, dy);
-        // scrollBeginCallback returns dx/dy Remain -- true offset set by developer
-        offset = (vertical) ? info.dy.Value() : info.dx.Value();
-    }
-}
-
 void ScrollableActuator::InitializeScrollable()
 {
+    scrollables_.clear();
     if (scrollableEvents_.empty()) {
         return;
     }
     auto gestureEventHub = gestureEventHub_.Upgrade();
     auto host = gestureEventHub ? gestureEventHub->GetFrameNode() : nullptr;
-    if (!host) {
-        LOGE("the host is nullptr");
-        return;
-    }
-    for (const auto& [axis, events] : scrollableEvents_) {
-        auto callback = [weak = WeakClaim(this), axis = axis](double offset, int32_t source) {
-            auto actuator = weak.Upgrade();
-            if (!actuator) {
-                return true;
-            }
-            bool canScroll = true;
-            for (const auto& task : actuator->scrollableEvents_[axis]) {
-                // modifies offset
-                runScrollBeginCallback(task, offset, (axis == Axis::VERTICAL));
-                canScroll = task->GetScrollPositionCallback()(offset, source) && canScroll;
-            }
-            return canScroll;
-        };
-        auto scrollable = MakeRefPtr<Scrollable>(std::move(callback), axis);
+    CHECK_NULL_VOID(host);
+    for (const auto& [axis, event] : scrollableEvents_) {
+        auto scrollable = MakeRefPtr<Scrollable>(event->GetScrollPositionCallback(), axis);
+        scrollable->SetOnScrollBegin(event->GetScrollBeginCallback());
         scrollable->Initialize(host->GetContext());
         scrollables_[axis] = scrollable;
     }
