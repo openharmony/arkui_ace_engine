@@ -220,6 +220,9 @@ public:
 
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
+    bool IsResponseRegion() const;
+    void MarkResponseRegion(bool isResponseRegion);
+
 private:
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
@@ -243,7 +246,10 @@ private:
     // dump self info.
     void DumpInfo() override;
 
-    HitTestMode GetHitTestMode() const;
+    HitTestMode GetHitTestMode() const override;
+    bool GetTouchable() const;
+    std::vector<RectF> GetResponseRegionList();
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
@@ -261,6 +267,7 @@ private:
     bool hasPendingRequest_ = false;
 
     bool isActive_ = false;
+    bool isResponseRegion_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

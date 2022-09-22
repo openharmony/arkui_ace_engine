@@ -92,6 +92,9 @@ public:
     static void SetOnAreaChanged(
         std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&&
             onAreaChanged);
+    static void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
+    static void SetTouchable(bool touchable);
+    static void SetHitTestMode(HitTestMode hitTestMode);
 
     // flex properties
     static void SetAlignSelf(int32_t value);
