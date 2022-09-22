@@ -1840,7 +1840,7 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
         setting->PutJavaScriptEnabled(webPattern->GetJsEnabledValue(true));
         setting->PutEnableRawFileAccess(webPattern->GetFileAccessEnabledValue(true));
         setting->PutEnableContentAccess(true);
-        setting->PutLoadImageFromNetworkDisabled(webPattern->GetOnLineImageAccessEnabledValue(false));
+        setting->PutLoadImageFromNetworkDisabled(!webPattern->GetOnLineImageAccessEnabledValue(true));
         setting->PutImageLoadingAllowed(webPattern->GetImageAccessEnabledValue(true));
         setting->PutAccessModeForSecureOriginLoadFromInsecure(static_cast<OHOS::NWeb::NWebPreference::AccessMode>(
             webPattern->GetMixedModeValue(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW)));
