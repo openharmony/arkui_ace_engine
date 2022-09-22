@@ -70,11 +70,11 @@ void ListPattern::OnModifyDone()
                     Dimension offsetPX = Dimension(offset);
                     Dimension offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
                     if (source == SCROLL_FROM_UPDATE) {
-                        onScroll(offsetVP, V2::ScrollState(SCROLL_STATE_SCROLL));
+                        onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_SCROLL));
                     } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
-                        onScroll(offsetVP, V2::ScrollState(SCROLL_STATE_FLING));
+                        onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_FLING));
                     } else {
-                        onScroll(offsetVP, V2::ScrollState(SCROLL_STATE_IDLE));
+                        onScroll(offsetVP, static_cast<V2::ScrollState>(SCROLL_STATE_IDLE));
                     }
                 }
                 if (pattern->GetScrollState() == SCROLL_FROM_UPDATE && source == SCROLL_FROM_ANIMATION) {
@@ -87,19 +87,17 @@ void ListPattern::OnModifyDone()
 
     auto scrollBeginTask = [weak = WeakClaim(this)](Dimension dx, Dimension dy) {
         ScrollInfo scrollInfo;
-        scrollInfo.dx = Dimension(0);
-        scrollInfo.dy = Dimension(0);
+        scrollInfo.dx = dx;
+        scrollInfo.dy = dy;
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            auto host = pattern->GetHost();
-            auto listEventHub = host->GetEventHub<ListEventHub>();
-            CHECK_NULL_RETURN(listEventHub, scrollInfo);
-            auto onScrollBegin = listEventHub->GetOnScrollBegin();
-            if (onScrollBegin) {
-                onScrollBegin(dx, dy);
-                scrollInfo.dx = dx;
-                scrollInfo.dy = dy;
-            }
+        CHECK_NULL_RETURN(pattern, scrollInfo);
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, scrollInfo);
+        auto listEventHub = host->GetEventHub<ListEventHub>();
+        CHECK_NULL_RETURN(listEventHub, scrollInfo);
+        auto onScrollBegin = listEventHub->GetOnScrollBegin();
+        if (onScrollBegin) {
+            scrollInfo = onScrollBegin(dx, dy);
         }
         return scrollInfo;
     };
