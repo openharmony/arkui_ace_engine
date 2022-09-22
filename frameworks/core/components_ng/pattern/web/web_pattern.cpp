@@ -232,7 +232,7 @@ void WebPattern::OnFileAccessEnabledUpdate(bool value)
 void WebPattern::OnOnLineImageAccessEnabledUpdate(bool value)
 {
     if (delegate_) {
-        delegate_->UpdateBlockNetworkImage(value);
+        delegate_->UpdateBlockNetworkImage(!value);
     }
 }
 
@@ -351,7 +351,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateBackgroundColor(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue()));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
-        delegate_->UpdateBlockNetworkImage(GetOnLineImageAccessEnabledValue(true));
+        delegate_->UpdateBlockNetworkImage(!GetOnLineImageAccessEnabledValue(true));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(true));
         delegate_->UpdateLoadsImagesAutomatically(GetImageAccessEnabledValue(true));
         delegate_->UpdateMixedContentMode(GetMixedModeValue(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW));
