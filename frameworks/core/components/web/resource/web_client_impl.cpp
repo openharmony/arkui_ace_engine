@@ -232,7 +232,7 @@ void WebClientImpl::OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHa
             auto delegate = webClient->webDelegate_.Upgrade();
             CHECK_NULL_VOID(delegate);
             delegate->OnFullScreenEnter(param);
-    }, OHOS::Ace::TaskExecutor::TaskType::JS);
+        }, OHOS::Ace::TaskExecutor::TaskType::JS);
 }
 
 void WebClientImpl::OnGeolocationHide()
