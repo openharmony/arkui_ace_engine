@@ -47,11 +47,53 @@ void ListElement::PerformBuild()
         return;
     }
     UpdateChildren(listComponent->GetChildren());
+    listItemRange_.clear();
 }
 
 void ListElement::Apply(const RefPtr<Element>& child)
 {
     // Nothing to do
+}
+
+size_t ListElement::FindItemStartIndex(size_t startIndex, size_t index)
+{
+    auto component = GetComponentByIndex(index);
+    auto listItem = AceType::DynamicCast<ListItemComponent>(component);
+    if (!listItem) {
+        return index;
+    }
+    for (size_t idx = index; idx > startIndex; idx--) {
+        component = GetComponentByIndex(idx - 1);
+        listItem = AceType::DynamicCast<ListItemComponent>(component);
+        if (!listItem) {
+            return idx;
+        }
+    }
+    if (startIndex == 0) {
+        return 0;
+    }
+    return INVALID_INDEX;
+}
+
+size_t ListElement::FindItemStartIndex(size_t index)
+{
+    auto it = listItemRange_.upper_bound(index);
+    if (it == listItemRange_.begin()) {
+        size_t startIdx = FindItemStartIndex(0, index);
+        listItemRange_[startIdx] = index;
+        return startIdx;
+    }
+    it--;
+    if (it->second >= index) {
+        return it->first;
+    }
+    size_t startIdx = FindItemStartIndex(it->second, index);
+    if (startIdx != INVALID_INDEX) {
+        listItemRange_[startIdx] = index;
+        return startIdx;
+    }
+    it->second = index;
+    return it->first;
 }
 
 RefPtr<RenderListItem> ListElement::RequestListItem(size_t index)
