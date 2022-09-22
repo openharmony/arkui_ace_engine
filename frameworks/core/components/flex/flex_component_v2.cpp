@@ -22,10 +22,9 @@
 #include "frameworks/core/components/ifelse/if_else_component.h"
 
 namespace OHOS::Ace {
-namespace {
 
 // If flexShrink is not defined, use 1.0 as default in Flex
-void ChangeShrinkValueInFlexComponent(const RefPtr<Component>& component)
+void FlexComponentV2::ChangeShrinkValueInFlexComponent(const RefPtr<Component>& component)
 {
     auto flexItem = AceType::DynamicCast<FlexItemComponent>(component);
     if (!flexItem) {
@@ -36,7 +35,7 @@ void ChangeShrinkValueInFlexComponent(const RefPtr<Component>& component)
     }
 }
 
-RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component)
+RefPtr<Component> FlexComponentV2::AddFlexItemComponent(const RefPtr<Component>& component)
 {
     if (AceType::InstanceOf<FlexItemComponent>(component)) {
         ChangeShrinkValueInFlexComponent(component);
@@ -89,8 +88,6 @@ RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component)
     }
 
     return component;
-}
-
 }
 
 void FlexComponentV2::OnChildAppended(const RefPtr<Component>& child)
