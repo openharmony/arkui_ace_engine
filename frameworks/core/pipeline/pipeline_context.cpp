@@ -2231,8 +2231,7 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
-    LOGI("OnSurfaceDensityChanged density_(%{public}lf)", density_);
-    LOGI("OnSurfaceDensityChanged dipScale_(%{public}lf)", dipScale_);
+    LOGI("OnSurfaceDensityChanged density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
     isDensityUpdate_ = density != density_;
     density_ = density;
     if (!NearZero(viewScale_)) {
