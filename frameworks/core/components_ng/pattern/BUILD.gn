@@ -89,6 +89,7 @@ build_component_ng("pattern_ng") {
     "shape/circle_layout_algorithm.cpp",
     "shape/circle_pattern.cpp",
     "shape/circle_view.cpp",
+    "shape/ellipse_view.cpp",
     "shape/line_layout_algorithm.cpp",
     "shape/line_pattern.cpp",
     "shape/line_view.cpp",
