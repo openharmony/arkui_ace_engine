@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_PIPELINE_NG_CONTEXT_H
 
+#include <functional>
+#include <list>
 #include <utility>
 
 #include "base/memory/referenced.h"
@@ -201,9 +203,8 @@ private:
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
     std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
-    std::list<TouchEvent> touchEvents_;
-
     std::list<std::function<void()>> buildFinishCallbacks_;
+    std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
     RefPtr<StageManager> stageManager_;

@@ -23,6 +23,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
+#include "base/utils/macros.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/box/drag_drop_event.h"
@@ -65,7 +66,7 @@ protected:
     std::function<void(const int32_t)> setCaretPosition_;
 };
 
-class TextFieldModel {
+class ACE_EXPORT TextFieldModel {
 public:
     static TextFieldModel* GetInstance();
     virtual ~TextFieldModel() = default;

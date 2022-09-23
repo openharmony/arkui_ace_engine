@@ -60,7 +60,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     baselineOffset_ = static_cast<float>(baselineOffset);
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
-    return SizeF(static_cast<float>(GetTextWidth()), heightFinal);
+    float widthFinal = std::min(static_cast<float>(GetTextWidth()), contentConstraint.maxSize.Width());
+    return SizeF(widthFinal, heightFinal);
 }
 
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content)
@@ -117,11 +118,11 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
     if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
-        pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
+            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
         return false;
     }
     if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
-        pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
+            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
         return false;
     }
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
@@ -134,7 +135,7 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     }
     double stepSize = 0.0;
     if (!step.NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(),
-        contentConstraint.maxSize.Height(), stepSize)) {
+            contentConstraint.maxSize.Height(), stepSize)) {
         return false;
     }
     while (GreatOrEqual(maxFontSize, minFontSize)) {
@@ -180,7 +181,7 @@ double TextLayoutAlgorithm::GetTextWidth() const
 {
     CHECK_NULL_RETURN(paragraph_, 0.0);
     // TODO: need check Line count
-    return paragraph_->GetLongestLine();
+    return paragraph_->GetMaxWidth();
 }
 
 const std::shared_ptr<RSParagraph>& TextLayoutAlgorithm::GetParagraph()
