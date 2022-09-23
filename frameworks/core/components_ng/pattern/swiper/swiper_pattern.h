@@ -56,6 +56,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        CalculateCacheRange();
         auto layoutAlgorithm = MakeRefPtr<SwiperLayoutAlgorithm>(currentIndex_, startIndex_, endIndex_);
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetTargetIndex(targetIndex_);
