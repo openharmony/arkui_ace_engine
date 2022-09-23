@@ -645,6 +645,10 @@ bool JSViewAbstract::ParseAndSetOpacityTransition(
     if (transitionArgs->Contains("opacity")) {
         double opacity = 0.0;
         JSViewAbstract::ParseJsonDouble(transitionArgs->GetValue("opacity"), opacity);
+        if (GreatNotEqual(opacity, 1.0) || opacity < 0) {
+            LOGW("set opacity in transition to %{public}f, over range, use default opacity 0", opacity);
+            opacity = 0.0;
+        }
         auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
         if (!display) {
             LOGE("display component is null.");
@@ -846,7 +850,8 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
         return;
     }
 
-    if (opacity < 0) {
+    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
+        LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
         opacity = 1.0;
     }
 
@@ -1093,6 +1098,10 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
     if (transitionArgs->Contains("opacity")) {
         double opacity = 0.0;
         ParseJsonDouble(transitionArgs->GetValue("opacity"), opacity);
+        if (GreatNotEqual(opacity, 1.0) || opacity < 0) {
+            LOGW("set opacity in transition to %{public}f, over range, use default opacity 0", opacity);
+            opacity = 0.0;
+        }
         transitionOption.UpdateOpacity(opacity);
         hasEffect = true;
     }
@@ -1793,6 +1802,10 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
     auto id = info[0]->ToString();
     if (id.empty()) {
         LOGE("JsSharedTransition: id is empty.");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGE("new framework does not implement sharedTransition now");
         return;
     }
     auto sharedTransitionComponent = ViewStackProcessor::GetInstance()->GetSharedTransitionComponent();
@@ -4727,6 +4740,9 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsOpacity(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     if (ViewStackProcessor::GetInstance()->HasDisplayComponent()) {
         auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
         display->DisableLayer(true);

@@ -518,7 +518,7 @@ bool RosenRenderContext::GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen
     std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>>& toAddRSNodesAndIndex)
 {
     CHECK_NULL_RETURN(rsNode_, false);
-    const auto& preRSNodesID = rsNode_->GetChildren();
+    auto preRSNodesID = rsNode_->GetChildren();
     std::unordered_set<std::shared_ptr<Rosen::RSNode>> nowRSNodesSet;
     std::unordered_set<std::shared_ptr<Rosen::RSNode>> preRSNodesSet;
     // get previous rsnode children set and now rsnode children set
@@ -548,7 +548,7 @@ bool RosenRenderContext::GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen
 void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
 {
     CHECK_NULL_VOID(rsNode_);
-    const auto& nowRSNodes = GetChildrenRSNodes(children);
+    auto nowRSNodes = GetChildrenRSNodes(children);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto option = pipeline->GetExplicitAnimationOption();

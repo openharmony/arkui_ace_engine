@@ -20,8 +20,9 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
-#include "core/components_ng/property/property.h"
 #include "core/animation/animation_pub.h"
+#include "core/components_ng/property/property.h"
+
 
 namespace OHOS::Ace::NG {
 
@@ -29,7 +30,7 @@ struct TranslateOptions {
     Dimension x;
     Dimension y;
     Dimension z;
-    bool operator == (const TranslateOptions& other) const
+    bool operator==(const TranslateOptions& other) const
     {
         return x == other.x && y == other.y && z == other.z;
     }
@@ -45,18 +46,19 @@ struct ScaleOptions {
     Dimension centerX;
     Dimension centerY;
     ScaleOptions(float xScale, float yScale, float zScale, const Dimension& centerX, const Dimension& centerY)
-        : xScale(xScale), yScale(yScale), zScale(zScale), centerX(centerX), centerY(centerY) {}
+        : xScale(xScale), yScale(yScale), zScale(zScale), centerX(centerX), centerY(centerY)
+    {}
     ScaleOptions() = default;
-    bool operator == (const ScaleOptions& other) const
+    bool operator==(const ScaleOptions& other) const
     {
-        return NearEqual(xScale, other.xScale) && NearEqual(yScale, other.yScale)
-            && NearEqual(zScale, other.zScale) && NearEqual(centerX, other.centerX)
-            && NearEqual(centerY, other.centerY);
+        return NearEqual(xScale, other.xScale) && NearEqual(yScale, other.yScale) &&
+               NearEqual(zScale, other.zScale) && NearEqual(centerX, other.centerX) &&
+               NearEqual(centerY, other.centerY);
     }
     std::string ToString() const
     {
-        return "scale:[" + std::to_string(xScale) + "," + std::to_string(yScale) + "," + std::to_string(zScale)
-                    + "," + centerX.ToString() + "," + centerY.ToString() + "]";
+        return "scale:[" + std::to_string(xScale) + "," + std::to_string(yScale) + "," + std::to_string(zScale) +
+               "," + centerX.ToString() + "," + centerY.ToString() + "]";
     }
 };
 struct RotateOptions {
@@ -67,21 +69,23 @@ struct RotateOptions {
     float angle = 0.0f;
     Dimension centerX;
     Dimension centerY;
-    RotateOptions(float xDirection, float yDirection, float zDirection, float angle,
-        const Dimension& centerX, const Dimension& centerY): xDirection(xDirection), yDirection(yDirection),
-        zDirection(zDirection), angle(angle), centerX(centerX), centerY(centerY) {}
+    RotateOptions(float xDirection, float yDirection, float zDirection, float angle, const Dimension& centerX,
+        const Dimension& centerY)
+        : xDirection(xDirection), yDirection(yDirection), zDirection(zDirection), angle(angle), centerX(centerX),
+          centerY(centerY)
+    {}
     RotateOptions() = default;
-    bool operator == (const RotateOptions& other) const
+    bool operator==(const RotateOptions& other) const
     {
-        return NearEqual(angle, other.angle) && NearEqual(xDirection, other.xDirection)
-            && NearEqual(yDirection, other.yDirection) && NearEqual(zDirection, other.zDirection)
-            && NearEqual(centerX, other.centerX) && NearEqual(centerY, other.centerY);
+        return NearEqual(angle, other.angle) && NearEqual(xDirection, other.xDirection) &&
+               NearEqual(yDirection, other.yDirection) && NearEqual(zDirection, other.zDirection) &&
+               NearEqual(centerX, other.centerX) && NearEqual(centerY, other.centerY);
     }
     std::string ToString() const
     {
-        return "rotate:[" + std::to_string(xDirection) + "," + std::to_string(yDirection) + ","
-            + std::to_string(zDirection) + "," + centerX.ToString() + "," + centerY.ToString()
-            + ", angle:" + std::to_string(angle) + "]";
+        return "rotate:[" + std::to_string(xDirection) + "," + std::to_string(yDirection) + "," +
+               std::to_string(zDirection) + "," + centerX.ToString() + "," + centerY.ToString() +
+               ", angle:" + std::to_string(angle) + "]";
     }
 };
 struct TransitionOptions {
@@ -97,21 +101,21 @@ struct TransitionOptions {
         options.UpdateOpacity(0.0f);
         return options;
     }
-    bool operator == (const TransitionOptions& other) const
+    bool operator==(const TransitionOptions& other) const
     {
-        return NearEqual(Type, other.Type) && NearEqual(propOpacity, other.propOpacity)
-            && NearEqual(propTranslate, other.propTranslate) && NearEqual(propScale, other.propScale)
-            && NearEqual(propRotate, other.propRotate);
+        return NearEqual(Type, other.Type) && NearEqual(propOpacity, other.propOpacity) &&
+               NearEqual(propTranslate, other.propTranslate) && NearEqual(propScale, other.propScale) &&
+               NearEqual(propRotate, other.propRotate);
     }
     std::string ToString() const
     {
         std::stringstream ss;
         ss << "type:"
-           << (Type == TransitionType::ALL ? "all" : (Type==TransitionType::APPEARING ? "appear" : "disappear"))
-           << ", opacity:" << (HasOpacity() ? std::to_string(GetOpacityValue()) : "none")
-           << ", " << (HasTranslate() ? GetTranslate()->ToString() : "translate: none")
-           << ", " << (HasScale() ? GetScale()->ToString() : "scale: none")
-           << ", " << (HasRotate() ? GetRotate()->ToString() : "rotate: none");
+           << (Type == TransitionType::ALL ? "all" : (Type == TransitionType::APPEARING ? "appear" : "disappear"))
+           << ", opacity:" << (HasOpacity() ? std::to_string(GetOpacityValue()) : "none") << ", "
+           << (HasTranslate() ? GetTranslate()->ToString() : "translate: none") << ", "
+           << (HasScale() ? GetScale()->ToString() : "scale: none") << ", "
+           << (HasRotate() ? GetRotate()->ToString() : "rotate: none");
         return ss.str();
     }
 };
