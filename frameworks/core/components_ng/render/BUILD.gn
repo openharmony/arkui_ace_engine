@@ -19,6 +19,7 @@ build_component_ng("render_ng") {
     "adapter/skia_canvas.cpp",
     "adapter/skia_canvas_image.cpp",
     "adapter/skia_color_filter.cpp",
+    "adapter/skia_decoration_painter.cpp",
     "adapter/skia_paint.cpp",
     "adapter/txt_font_collection.cpp",
     "adapter/txt_paragraph.cpp",

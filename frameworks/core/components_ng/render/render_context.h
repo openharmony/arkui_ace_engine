@@ -98,6 +98,7 @@ public:
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackShadow(const Shadow& shadow) {}
+    virtual void UpdateLinearGradient(const NG::Gradient& gradient) {}
 
     // Add Transform in group
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);

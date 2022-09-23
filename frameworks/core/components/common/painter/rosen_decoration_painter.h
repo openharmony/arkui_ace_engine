@@ -27,7 +27,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/image/render_image.h"
-#include "core/components_ng/render/decoration_painter.h"
+#include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
 class SkPath;
@@ -43,8 +43,8 @@ class Border;
 class Offset;
 class Size;
 
-class RosenDecorationPainter : public virtual NG::DecorationPainter {
-    DECLARE_ACE_TYPE(RosenDecorationPainter, NG::DecorationPainter);
+class RosenDecorationPainter : public virtual NG::SkiaDecorationPainter {
+    DECLARE_ACE_TYPE(RosenDecorationPainter, NG::SkiaDecorationPainter);
 
 public:
     RosenDecorationPainter(
