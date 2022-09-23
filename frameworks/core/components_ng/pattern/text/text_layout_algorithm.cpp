@@ -60,6 +60,8 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     baselineOffset_ = static_cast<float>(baselineOffset);
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
+    auto baselineDistance = paragraph_->GetAlphabeticBaseline() + std::max(GetBaselineOffset(), 0.0f);
+    layoutWrapper->GetGeometryNode()->SetBaselineDistance(baselineDistance);
     return SizeF(static_cast<float>(GetTextWidth()), heightFinal);
 }
 
@@ -117,11 +119,11 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
     if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
-        pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
+            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
         return false;
     }
     if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(),
-        pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
+            pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
         return false;
     }
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
@@ -134,7 +136,7 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     }
     double stepSize = 0.0;
     if (!step.NormalizeToPx(pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(),
-        contentConstraint.maxSize.Height(), stepSize)) {
+            contentConstraint.maxSize.Height(), stepSize)) {
         return false;
     }
     while (GreatOrEqual(maxFontSize, minFontSize)) {
