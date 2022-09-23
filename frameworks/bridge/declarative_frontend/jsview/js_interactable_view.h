@@ -19,6 +19,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components_ng/gestures/tap_gesture.h"
 #include "frameworks/core/gestures/tap_gesture.h"
 #include "frameworks/core/pipeline/base/component.h"
 
@@ -44,6 +45,7 @@ public:
     static void JsCommonRemoteMessage(const JSCallbackInfo& info);
 
     static void UpdateEventTarget(NodeId nodeId, BaseEventInfo& info);
+    static std::function<void()> GetRemoteMessageEventCallback(const JSCallbackInfo& info);
 
 protected:
     static void JsRemoteMessage(const JSCallbackInfo& info, EventMarker& eventMarker);
@@ -53,7 +55,6 @@ private:
         const JSCallbackInfo& info, int32_t countNum = DEFAULT_TAP_COUNTS, int32_t fingerNum = DEFAULT_TAP_FINGERS);
     static EventMarker GetEventMarker(const JSCallbackInfo& info, const std::vector<std::string>& keys);
     static RefPtr<Gesture> GetRemoteMessageTapGesture(const JSCallbackInfo& info);
-    static std::function<void()> GetRemoteMessageEventCallback(const JSCallbackInfo& info);
     static void SplitString(const std::string& str, char tag, std::vector<std::string>& strList);
 }; // class JSInteractableView
 

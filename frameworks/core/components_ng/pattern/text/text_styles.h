@@ -21,12 +21,11 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-using ItalicFontStyle = Ace::FontStyle;
 
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, ItalicFontStyle);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, TextDecoration);

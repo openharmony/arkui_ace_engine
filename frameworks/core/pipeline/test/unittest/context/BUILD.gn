@@ -116,6 +116,7 @@ ohos_unittest("PipelineContextTest") {
     "//foundation/arkui/ace_engine/frameworks/core/components/theme/theme_constants.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/components/theme/theme_manager.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/components/theme/theme_utils.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/gesture_referee.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/event/back_end_event_manager.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/event/multimodal/multimodal_manager.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/event/multimodal/multimodal_scene.cpp",

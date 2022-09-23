@@ -25,8 +25,10 @@
 #include "third_party/skia/include/core/SkRefCnt.h"
 
 #include "base/geometry/dimension_offset.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/render/render_context.h"
 
@@ -48,6 +50,8 @@ public:
     void RemoveFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
     void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) override;
+
+    void OnModifyDone() override;
 
     void ResetBlendBgColor() override;
 
@@ -98,9 +102,32 @@ public:
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
+    void UpdateFrontBlurRadius(const Dimension& radius) override;
+    void UpdateBackShadow(const Shadow& shadow) override;
+
+    void UpdateTransition(const TransitionOptions& options) override;
+    bool HasAppearingTransition() const
+    {
+        return transitionAppearingEffect_ != nullptr;
+    }
+    bool HasDisappearingTransition() const
+    {
+        return transitionDisappearingEffect_ != nullptr;
+    }
+
+    static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
+        const std::list<RefPtr<FrameNode>>& frameChildren);
+
+    static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(const TransitionOptions& options);
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;
+    void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) override;
+    void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
+    void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
+    void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) override;
+    void OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle) override;
+
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void UpdateBorderWidth(const BorderWidthPropertyF& value) override;
@@ -112,16 +139,34 @@ private:
     void OnTransformTranslateUpdate(const Vector3F& value) override;
     void OnTransformRotateUpdate(const Vector4F& value) override;
 
+    void OnPositionUpdate(const OffsetT<Dimension>& value) override;
+    void OnOffsetUpdate(const OffsetT<Dimension>& value) override;
+    void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
+    void OnZIndexUpdate(int32_t value) override;
+
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
+    bool GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen::RSNode>>& nowRSNodes,
+        std::list<std::shared_ptr<Rosen::RSNode>>& toRemoveRSNodes,
+        std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>>& toAddRSNodesAndIndex);
+
+    RectF AdjustPaintRect();
+
+    DataReadyNotifyTask CreateBgImageDataReadyCallback();
+    LoadSuccessNotifyTask CreateBgImageLoadSuccessCallback();
+    void PaintBackground();
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
     SkPictureRecorder* recorder_ = nullptr;
+    RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<Canvas> recordingCanvas_;
     RefPtr<Canvas> rosenCanvas_;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
+    bool isPositionChanged_ = false;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
+    std::shared_ptr<Rosen::RSTransitionEffect> transitionAppearingEffect_ = nullptr;
+    std::shared_ptr<Rosen::RSTransitionEffect> transitionDisappearingEffect_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

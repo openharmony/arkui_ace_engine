@@ -180,7 +180,7 @@ void TransitionElement::ApplyAnimation(TweenOption& transitionOption)
 
     tween->SetOption(transitionOption);
     if (!tween->ApplyKeyframes()) {
-        LOGW("Apply transition option failed. tween apply option fail.");
+        LOGD("Apply transition option failed. tween apply option fail.");
     }
     tween->ApplyOptions();
 }

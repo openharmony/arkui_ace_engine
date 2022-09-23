@@ -45,6 +45,7 @@ private:
     float borderRadius_ = 0.0f;
     float checkStroke_ = 0.0f;
     Color activeColor_ = Color::BLUE;
+    Color shadowColor_ = Color::WHITE;
 };
 } // namespace OHOS::Ace::NG
 

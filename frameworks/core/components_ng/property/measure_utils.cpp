@@ -286,17 +286,29 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
         }
 
         if (measureType == MeasureType::MATCH_PARENT_CROSS_AXIS) {
-            auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, axis);
-            if (parentCrossSize) {
-                SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+            auto selfSize = GetCrossAxisSize(idealSize, axis);
+            if (!selfSize) {
+                auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, axis);
+                if (parentCrossSize) {
+                    SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+                } else {
+                    parentCrossSize = GetCrossAxisSize(layoutConstraint.maxSize, axis);
+                    SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+                }
             }
             break;
         }
 
         if (measureType == MeasureType::MATCH_PARENT_MAIN_AXIS) {
-            auto parentCrossSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
-            if (parentCrossSize) {
-                SetMainAxisSize(parentCrossSize.value(), axis, idealSize);
+            auto selfSize = GetMainAxisSize(idealSize, axis);
+            auto parentMainSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
+            if (!selfSize) {
+                if (parentMainSize) {
+                    SetMainAxisSize(parentMainSize.value(), axis, idealSize);
+                } else {
+                    parentMainSize = GetMainAxisSize(layoutConstraint.maxSize, axis);
+                    SetMainAxisSize(parentMainSize.value(), axis, idealSize);
+                }
             }
             break;
         }

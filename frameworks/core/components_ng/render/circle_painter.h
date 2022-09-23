@@ -27,7 +27,7 @@ class CirclePainter {
 public:
     CirclePainter() = default;
     ~CirclePainter() = default;
-    static void DrawCircle(RSCanvas& canvas, float radius);
+    static void DrawCircle(RSCanvas& canvas, float radius, const ShapePaintProperty& shapePaintProperty);
 };
 
 } // namespace OHOS::Ace::NG

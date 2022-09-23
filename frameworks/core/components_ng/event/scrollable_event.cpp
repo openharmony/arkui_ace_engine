@@ -16,6 +16,7 @@
 #include "core/components_ng/event/scrollable_event.h"
 
 #include "base/geometry/offset.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -41,35 +42,16 @@ void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
 
 void ScrollableActuator::InitializeScrollable()
 {
+    scrollables_.clear();
     if (scrollableEvents_.empty()) {
         return;
     }
     auto gestureEventHub = gestureEventHub_.Upgrade();
     auto host = gestureEventHub ? gestureEventHub->GetFrameNode() : nullptr;
-    if (!host) {
-        LOGE("the host is nullptr");
-        return;
-    }
-    for (const auto& [axis, events] : scrollableEvents_) {
-        auto callback = [weak = WeakClaim(this), axis = axis](double offset, int32_t source) {
-            auto actuator = weak.Upgrade();
-            if (!actuator) {
-                return true;
-            }
-            bool canScroll = true;
-            for (const auto& task : actuator->scrollableEvents_[axis]) {
-                if (task->GetScrollBeginCallback()) {
-                    if (axis == Axis::VERTICAL) {
-                        task->GetScrollBeginCallback()(Dimension(0), Dimension(offset));
-                    } else {
-                        task->GetScrollBeginCallback()(Dimension(offset), Dimension(0));
-                    }
-                }
-                canScroll = task->GetScrollPositionCallback()(offset, source) && canScroll;
-            }
-            return canScroll;
-        };
-        auto scrollable = MakeRefPtr<Scrollable>(std::move(callback), axis);
+    CHECK_NULL_VOID(host);
+    for (const auto& [axis, event] : scrollableEvents_) {
+        auto scrollable = MakeRefPtr<Scrollable>(event->GetScrollPositionCallback(), axis);
+        scrollable->SetOnScrollBegin(event->GetScrollBeginCallback());
         scrollable->Initialize(host->GetContext());
         scrollables_[axis] = scrollable;
     }

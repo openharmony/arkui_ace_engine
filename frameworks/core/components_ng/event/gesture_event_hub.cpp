@@ -15,10 +15,11 @@
 
 #include "core/components_ng/event/gesture_event_hub.h"
 
+#include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/gestures/exclusive_recognizer.h"
-#include "core/gestures/parallel_recognizer.h"
+#include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
+#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -34,28 +35,7 @@ RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
 bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     TouchTestResult& innerTargets, TouchTestResult& finalResult)
 {
-    auto eventHub = eventHub_.Upgrade();
-    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
-
-    if (scrollableActuator_) {
-        // TODO: need to change scrollable to be gesture recognizer to make gesture referee works.
-        scrollableActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
-    }
-
-    if (touchEventActuator_) {
-        touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
-    }
-
-    if (clickEventActuator_) {
-        clickEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
-    }
-
-    if (panEventActuator_) {
-        panEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
-    }
-
     std::list<RefPtr<GestureRecognizer>> innerRecognizers;
-
     for (auto const& eventTarget : innerTargets) {
         auto recognizer = AceType::DynamicCast<GestureRecognizer>(eventTarget);
         if (recognizer) {
@@ -64,8 +44,23 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
             finalResult.push_back(eventTarget);
         }
     }
-
     ProcessTouchTestHierarchy(coordinateOffset, touchRestrict, innerRecognizers, finalResult);
+
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+    if (scrollableActuator_) {
+        // TODO: need to change scrollable to be gesture recognizer to make gesture referee works.
+        scrollableActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
+    }
+    if (touchEventActuator_) {
+        touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
+    }
+    if (clickEventActuator_) {
+        clickEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
+    }
+    if (panEventActuator_) {
+        panEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, finalResult);
+    }
 
     return false;
 }
@@ -89,8 +84,11 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
     if (innerRecognizers.size() == 1) {
         current = *innerRecognizers.begin();
     } else if (innerRecognizers.size() > 1) {
-        current = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(innerRecognizers));
-        current->SetCoordinateOffset(offset);
+        if (!innerExclusiveRecognizer_) {
+            innerExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(innerRecognizers));
+            innerExclusiveRecognizer_->SetCoordinateOffset(offset);
+        }
+        current = innerExclusiveRecognizer_;
     }
 
     if (recreateGesture_) {
@@ -118,8 +116,11 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             }
 
             if (recognizers.size() > 1) {
-                current = AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers));
-                current->SetCoordinateOffset(offset);
+                if (!externalParallelRecognizer_ || recreateGesture_) {
+                    externalParallelRecognizer_ = AceType::MakeRefPtr<ParallelRecognizer>(std::move(recognizers));
+                    externalParallelRecognizer_->SetCoordinateOffset(offset);
+                }
+                current = externalParallelRecognizer_;
             } else if (recognizers.size() == 1) {
                 current = *recognizers.begin();
             }
@@ -133,8 +134,11 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
             }
 
             if (recognizers.size() > 1) {
-                current = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers));
-                current->SetCoordinateOffset(offset);
+                if (!externalExclusiveRecognizer_ || recreateGesture_) {
+                    externalExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers));
+                    externalExclusiveRecognizer_->SetCoordinateOffset(offset);
+                }
+                current = externalExclusiveRecognizer_;
             } else if (recognizers.size() == 1) {
                 current = *recognizers.begin();
             }
@@ -154,7 +158,7 @@ void GestureEventHub::UpdateGestureHierarchy()
         auto iter = gestures_.begin();
         auto recognizerIter = gestureHierarchy_.begin();
         for (; iter != gestures_.end(); iter++, recognizerIter++) {
-            auto newRecognizer = (*iter)->CreateRecognizer(host->GetContext());
+            auto newRecognizer = (*iter)->CreateRecognizer();
             success = success && (*recognizerIter)->ReconcileFrom(newRecognizer);
             if (!success) {
                 break;
@@ -172,7 +176,7 @@ void GestureEventHub::UpdateGestureHierarchy()
         if (!gesture) {
             continue;
         }
-        auto recognizer = gesture->CreateRecognizer(host->GetContext());
+        auto recognizer = gesture->CreateRecognizer();
         if (!recognizer) {
             continue;
         }
@@ -183,6 +187,39 @@ void GestureEventHub::UpdateGestureHierarchy()
         gestureHierarchy_.emplace_back(recognizer);
     }
     gestures_.clear();
+}
+
+void GestureEventHub::CombineIntoExclusiveRecognizer(const PointF& globalPoint, const PointF& localPoint,
+    TouchTestResult& result)
+{
+    TouchTestResult finalResult;
+    std::list<RefPtr<GestureRecognizer>> recognizers;
+    const auto coordinateOffset = globalPoint - localPoint;
+    auto offset = Offset(coordinateOffset.GetX(), coordinateOffset.GetY());
+    for (auto const& eventTarget : result) {
+        auto recognizer = AceType::DynamicCast<GestureRecognizer>(eventTarget);
+        if (recognizer) {
+            recognizers.push_back(std::move(recognizer));
+        } else {
+            finalResult.push_back(eventTarget);
+        }
+    }
+
+    RefPtr<GestureRecognizer> current;
+    if (recognizers.size() == 1) {
+        current = *recognizers.begin();
+    } else if (recognizers.size() > 1) {
+        if (!nodeExclusiveRecognizer_) {
+            nodeExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(recognizers));
+            nodeExclusiveRecognizer_->SetCoordinateOffset(offset);
+        }
+        current = nodeExclusiveRecognizer_;
+    }
+
+    if (current) {
+        finalResult.emplace_back(std::move(current));
+    }
+    result.swap(finalResult);
 }
 
 } // namespace OHOS::Ace::NG

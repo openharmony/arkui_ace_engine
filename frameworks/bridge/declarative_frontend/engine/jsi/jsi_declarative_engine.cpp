@@ -203,6 +203,8 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
+
+    runtime_->StartDebugger();
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
@@ -698,6 +700,17 @@ void JsiDeclarativeEngineInstance::SetDebuggerPostTask()
     std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
 }
 
+void JsiDeclarativeEngineInstance::RegisterFaPlugin()
+{
+    shared_ptr<JsValue> global = runtime_->GetGlobal();
+    shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime_, "requireNapi");
+    if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime_)) {
+        LOGW("requireNapi func not found");
+    }
+    std::vector<shared_ptr<JsValue>> argv = { runtime_->NewString("FeatureAbility") };
+    requireNapiFunc->Call(runtime_, global, argv, argv.size());
+}
+
 // -----------------------
 // Start JsiDeclarativeEngine
 // -----------------------
@@ -793,6 +806,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     } else {
         LOGI("Using sharedRuntime, UVLoop handled by AbilityRuntime");
     }
+    engineInstance_->RegisterFaPlugin();
 
     return result;
 }

@@ -705,7 +705,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     HdcRegister::Get().StartHdcRegister(instanceId);
-    ConnectServerManager::Get().AddInstance(instanceId);
+    ConnectServerManager::Get();
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
     auto front = aceContainer->GetFrontend();
@@ -966,7 +966,7 @@ void AceContainer::AddAssetPath(
     if (flutterAssetManager && !packagePath.empty()) {
         auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
         if (assetProvider->Initialize(packagePath, paths)) {
-            LOGI("Push AssetProvider to queue.");
+            LOGD("Push AssetProvider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
     }

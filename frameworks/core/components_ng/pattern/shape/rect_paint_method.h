@@ -26,40 +26,34 @@ class ACE_EXPORT RectPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(RectPaintMethod, NodePaintMethod)
 public:
     RectPaintMethod() = default;
+    RectPaintMethod(const RefPtr<ShapePaintProperty>& shape_paint_property)
+        : propertiesFromAncestor_(shape_paint_property)
+    {}
     ~RectPaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
         auto rectPaintProperty = DynamicCast<RectPaintProperty>(paintWrapper->GetPaintProperty());
+        if (!rectPaintProperty) {
+            return nullptr;
+        }
+        if (propertiesFromAncestor_) {
+            rectPaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
+        }
         rect_.SetSize(paintWrapper->GetContentSize());
         rect_.SetOffset(paintWrapper->GetContentOffset());
-        if(rectPaintProperty->GetTopLeftRadius()){
-            topLeftRadius_ = rectPaintProperty->GetTopLeftRadiusValue();
-        }
 
-        if(rectPaintProperty->GetTopRightRadius()){
-            topRightRadius_ = rectPaintProperty->GetTopRightRadiusValue();
-        }
-
-        if(rectPaintProperty->GetBottomLeftRadius()){
-            bottomLeftRadius_ = rectPaintProperty->GetBottomLeftRadiusValue();
-        }
-
-        if(rectPaintProperty->GetBottomRightRadius()){
-            bottomRightRadius_ = rectPaintProperty->GetBottomRightRadiusValue();
-        }
-        return [rect = rect_, topLeftRadius = topLeftRadius_, topRightRadius = topRightRadius_,
-                   bottomLeftRadius = bottomLeftRadius_, bottomRightRadius = bottomRightRadius_](RSCanvas& canvas) {
-            RectPainter::DrawRect(canvas, rect, topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius);
-        };
+        return [rect = rect_, rectPaintProperty](
+                   RSCanvas& canvas) { RectPainter::DrawRect(canvas, rect, *rectPaintProperty); };
     }
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(RectPaintMethod);
+    RectF rect_;
     Radius topLeftRadius_;
     Radius topRightRadius_;
     Radius bottomLeftRadius_;
     Radius bottomRightRadius_;
-    RectF rect_;
+    RefPtr<ShapePaintProperty> propertiesFromAncestor_;
+    ACE_DISALLOW_COPY_AND_MOVE(RectPaintMethod);
 };
 
 } // namespace OHOS::Ace::NG

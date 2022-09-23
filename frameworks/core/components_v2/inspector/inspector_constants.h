@@ -319,6 +319,10 @@ ACE_EXPORT extern const char GRID_COL_ETS_TAG[];
 ACE_EXPORT extern const char GRID_ROW_COMPONENT_TAG[];
 ACE_EXPORT extern const char GRID_ROW_ETS_TAG[];
 
+// relativeContainer
+ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[];
+ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[];
+
 // menu
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[];
 ACE_EXPORT extern const char MENU_TAG[];
@@ -406,6 +410,8 @@ ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[];
 
 // ability_component
 ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[];
+// Popup
+ACE_EXPORT extern const char POPUP_ETS_TAG[];
 
 // bar item
 ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[];

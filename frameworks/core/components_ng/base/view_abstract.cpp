@@ -15,12 +15,19 @@
 
 #include "core/components_ng/base/view_abstract.h"
 
+#include <cstdint>
 #include <optional>
 #include <utility>
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/image/image_source_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 void ViewAbstract::SetWidth(const CalcLength& width)
@@ -77,9 +84,40 @@ void ViewAbstract::SetMaxHeight(const CalcLength& height)
     layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
 }
 
+void ViewAbstract::SetAspectRatio(float ratio)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AspectRatio, ratio);
+}
+
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
+}
+
+void ViewAbstract::SetBackgroundImage(const std::string& src)
+{
+    ImageSourceInfo imageSourceInfo(src);
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, imageSourceInfo);
+}
+
+void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat);
+}
+
+void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize);
+}
+
+void ViewAbstract::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition);
+}
+
+void ViewAbstract::SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundBlurStyle, bgBlurStyle);
 }
 
 void ViewAbstract::SetLayoutWeight(int32_t value)
@@ -90,6 +128,16 @@ void ViewAbstract::SetLayoutWeight(int32_t value)
 void ViewAbstract::SetAlignSelf(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AlignSelf, static_cast<FlexAlign>(value));
+}
+
+void ViewAbstract::SetFlexShrink(float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexShrink, value);
+}
+
+void ViewAbstract::SetFlexGrow(float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexGrow, value);
 }
 
 void ViewAbstract::SetPadding(const CalcLength& value)
@@ -180,6 +228,48 @@ void ViewAbstract::SetOnHover(OnHoverEventFunc&& onHoverEventFunc)
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
 }
 
+void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverAnimation(hoverEffect);
+}
+
+void ViewAbstract::SetFocusType(FocusType type)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusType(type);
+}
+
+void ViewAbstract::SetFocusable(bool focusable)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(focusable);
+}
+
+void ViewAbstract::SetOnFocus(OnFocusFunc&& onFocusCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnFocusCallback(std::move(onFocusCallback));
+}
+
+void ViewAbstract::SetOnBlur(OnBlurFunc&& onBlurCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnBlurCallback(std::move(onBlurCallback));
+}
+
+void ViewAbstract::SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnKeyCallback(std::move(onKeyCallback));
+}
+
 void ViewAbstract::SetOnAppear(std::function<void()>&& onAppear)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
@@ -203,13 +293,6 @@ void ViewAbstract::SetOnAreaChanged(
     eventHub->SetOnAreaChanged(std::move(onAreaChanged));
 }
 
-void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
-{
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetHoverAnimation(hoverEffect);
-}
-
 void ViewAbstract::SetAlign(Alignment alignment)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
@@ -223,6 +306,26 @@ void ViewAbstract::SetVisibility(VisibleType visible)
 void ViewAbstract::SetOpacity(double opacity)
 {
     ACE_UPDATE_RENDER_CONTEXT(Opacity, opacity);
+}
+
+void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(Position, value);
+}
+
+void ViewAbstract::SetOffset(const OffsetT<Dimension>& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(Offset, value);
+}
+
+void ViewAbstract::MarkAnchor(const OffsetT<Dimension>& value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(Anchor, value);
+}
+
+void ViewAbstract::SetZIndex(int32_t value)
+{
+    ACE_UPDATE_RENDER_CONTEXT(ZIndex, value);
 }
 
 void ViewAbstract::SetScale(const NG::VectorF& value)
@@ -245,13 +348,77 @@ void ViewAbstract::SetRotate(const NG::Vector4F& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformRotate, value);
 }
 
+void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param)
+{
+    auto msg = param->GetMessage();
+    auto isShow = param->IsShow();
+    LOGI("ViewAbstract::BindPopup, msg is %{public}s", msg.c_str());
+    auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto popupInfo = overlayManager->GetPopupInfo(targetId);
+    if (popupInfo.isCurrentOnShow == isShow) {
+        LOGI("No need to change popup show flag.");
+        return;
+    }
+    popupInfo.markNeedUpdate = true;
+    auto popupId = popupInfo.popupId;
+    auto popupNode = popupInfo.popupNode;
+    // Create new popup.
+    if (popupInfo.popupId == -1 || !popupNode) {
+        popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
+        popupId = popupNode->GetId();
+    } else {
+        // TODO: update is not completed.
+        LOGI("Update pop node.");
+    }
+    // update PopupInfo props
+    popupInfo.popupId = popupId;
+    popupInfo.markNeedUpdate = isShow;
+    popupInfo.popupNode = popupNode;
+    popupNode->MarkModifyDone();
+    popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    overlayManager->UpdatePopupNode(targetId, popupInfo);
+}
+
 void ViewAbstract::SetBackdropBlur(const Dimension& radius)
 {
     ACE_UPDATE_RENDER_CONTEXT(BackBlurRadius, radius);
 }
 
+void ViewAbstract::SetFrontBlur(const Dimension& radius)
+{
+    ACE_UPDATE_RENDER_CONTEXT(FrontBlurRadius, radius);
+}
+
+void ViewAbstract::SetBackShadow(const Shadow& shadow)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
+}
+
+void ViewAbstract::SetInspectorId(const std::string& inspectorId)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateInspectorId(inspectorId);
+}
+
 void ViewAbstract::Pop()
 {
     ViewStackProcessor::GetInstance()->Pop();
+}
+
+void ViewAbstract::SetTransition(const TransitionOptions& options)
+{
+    ACE_UPDATE_RENDER_CONTEXT(Transition, options);
 }
 } // namespace OHOS::Ace::NG

@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINE_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINE_PAINT_METHOD_H
 
-#include "base/geometry/ng/size_t.h"
-#include "base/log/log_wrapper.h"
-#include "core/components_ng/base/geometry_node.h"
+#include <utility>
+
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/line_paint_property.h"
 #include "core/components_ng/render/line_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
@@ -32,11 +32,14 @@ public:
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
         auto linePaintProperty = DynamicCast<LinePaintProperty>(paintWrapper->GetPaintProperty());
+        if (!linePaintProperty) {
+            return nullptr;
+        }
+
         if (!linePaintProperty->GetStartPoint() || !linePaintProperty->GetEndPoint()) {
             return nullptr;
         }
-        return [startPoint = linePaintProperty->GetStartPointValue(), endPoint = linePaintProperty->GetEndPointValue()](
-                   RSCanvas& canvas) { LinePainter::DrawLine(canvas, startPoint, endPoint); };
+        return [linePaintProperty](RSCanvas& canvas) { LinePainter::DrawLine(canvas, *linePaintProperty); };
     }
 
 private:

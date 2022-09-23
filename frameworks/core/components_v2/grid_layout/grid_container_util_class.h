@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace::V2 {
 
+constexpr int32_t DEFAULT_COLUMN_NUMBER = 12;
 struct GridContainerSize : public AceType {
     GridContainerSize() = default;
     explicit GridContainerSize(int32_t column)
@@ -35,12 +36,12 @@ struct GridContainerSize : public AceType {
         xl = column;
         xxl = column;
     };
-    int32_t xs = 12;
-    int32_t sm = 12;
-    int32_t md = 12;
-    int32_t lg = 12;
-    int32_t xl = 12;
-    int32_t xxl = 12;
+    int32_t xs = DEFAULT_COLUMN_NUMBER;
+    int32_t sm = DEFAULT_COLUMN_NUMBER;
+    int32_t md = DEFAULT_COLUMN_NUMBER;
+    int32_t lg = DEFAULT_COLUMN_NUMBER;
+    int32_t xl = DEFAULT_COLUMN_NUMBER;
+    int32_t xxl = DEFAULT_COLUMN_NUMBER;
 };
 
 enum class BreakPointsReference {

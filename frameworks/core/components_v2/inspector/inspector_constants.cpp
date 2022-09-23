@@ -310,6 +310,10 @@ ACE_EXPORT extern const char GRID_COL_ETS_TAG[] = "GridColComponent";
 ACE_EXPORT extern const char GRID_ROW_COMPONENT_TAG[] = "GridRowComponent";
 ACE_EXPORT extern const char GRID_ROW_ETS_TAG[] = "GridRowComponent";
 
+// relativeContainer
+ACE_EXPORT extern const char RELATIVE_CONTAINER_COMPONENT_TAG[] = "RelativeContainer";
+ACE_EXPORT extern const char RELATIVE_CONTAINER_ETS_TAG[] = "RelativeContainer";
+
 // menu
 ACE_EXPORT extern const char MENU_COMPONENT_TAG[] = "MenuComponent";
 ACE_EXPORT extern const char MENU_TAG[] = "menu";
@@ -397,6 +401,8 @@ ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[] = "XComponent";
 
 // ability_component
 ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[] = "AbilityComponent";
+// Popup
+ACE_EXPORT extern const char POPUP_ETS_TAG[] = "Popup";
 
 // bar item
 ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[] = "BarItem";

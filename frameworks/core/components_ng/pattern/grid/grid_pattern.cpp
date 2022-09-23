@@ -31,6 +31,11 @@ void GridPattern::OnModifyDone()
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
     gridLayoutInfo_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
+
+    if (gridLayoutProperty->GetColumnsTemplate().has_value() && gridLayoutProperty->GetRowsTemplate().has_value()) {
+        LOGD("use fixed grid template");
+        return;
+    }
     AddScrollEvent();
 }
 

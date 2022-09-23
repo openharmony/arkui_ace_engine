@@ -1953,19 +1953,6 @@ void PipelineContext::SetCardViewAccessibilityParams(const std::string& key, boo
     accessibilityManager->SetCardViewParams(key, focus);
 }
 
-void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
-{
-    CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
-    if (onVsyncProfiler_) {
-        AceTracker::Start();
-    }
-    FlushVsync(nanoTimestamp, frameCount);
-    if (onVsyncProfiler_) {
-        onVsyncProfiler_(AceTracker::Stop());
-    }
-}
-
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
@@ -2244,8 +2231,7 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
-    LOGI("OnSurfaceDensityChanged density_(%{public}lf)", density_);
-    LOGI("OnSurfaceDensityChanged dipScale_(%{public}lf)", dipScale_);
+    LOGI("OnSurfaceDensityChanged density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
     isDensityUpdate_ = density != density_;
     density_ = density;
     if (!NearZero(viewScale_)) {

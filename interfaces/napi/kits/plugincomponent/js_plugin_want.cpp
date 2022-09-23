@@ -60,7 +60,6 @@ napi_value AceWrapElementName(napi_env env, const ElementName& elementName)
     NAPI_CALL(env, napi_create_object(env, &jsObject));
 
     napi_value jsValue = nullptr;
-    HILOG_INFO("%{public}s called. deviceID=%{public}s", __func__, elementName.GetDeviceID().c_str());
     NAPI_CALL(env, napi_create_string_utf8(env, elementName.GetDeviceID().c_str(), NAPI_AUTO_LENGTH, &jsValue));
     NAPI_CALL(env, napi_set_named_property(env, jsObject, "deviceId", jsValue));
 

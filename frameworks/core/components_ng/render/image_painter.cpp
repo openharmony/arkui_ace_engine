@@ -97,17 +97,36 @@ void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const Imag
     RSBrush brush;
     RSFilter filter;
     filter.SetFilterQuality(RSFilter::FilterQuality(imagePaintConfig.imageInterpolation_));
-    if (ImageRenderMode::TEMPLATE == imagePaintConfig.renderMode_) {
-        RSColorMatrix grayMatrix;
-        grayMatrix.SetArray(GRAY_COLOR_MATRIX);
-        filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(grayMatrix));
+    // note that [colorFilter] has higher priority to [renderMode], because the [ImageRenderMode::TEMPLATE] is actually
+    // a special value of colorFilter
+    if (ImageRenderMode::TEMPLATE == imagePaintConfig.renderMode_ || imagePaintConfig.colorFilter_) {
+        RSColorMatrix colorFilterMatrix;
+        if (imagePaintConfig.colorFilter_) {
+            colorFilterMatrix.SetArray(imagePaintConfig.colorFilter_->data());
+        } else if (ImageRenderMode::TEMPLATE == imagePaintConfig.renderMode_) {
+            colorFilterMatrix.SetArray(GRAY_COLOR_MATRIX);
+        }
+        filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorFilterMatrix));
     }
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
+
+    if (imagePaintConfig.needFlipCanvasHorizontally_) {
+        ImagePainter::FlipHorizontal(canvas, offset.GetX(), imagePaintConfig.dstRect_.Width());
+    }
+
     brush.SetFilter(filter);
     canvas.AttachBrush(brush);
     canvasImage_->DrawToRSCanvas(canvas, ToRSRect(imagePaintConfig.srcRect_), ToRSRect(imagePaintConfig.dstRect_));
     canvas.Restore();
+}
+
+void ImagePainter::FlipHorizontal(RSCanvas& canvas, double horizontalOffset, double drawRectWidth)
+{
+    double horizontalMoveDelta = -1.0 * (horizontalOffset + drawRectWidth / 2.0);
+    canvas.Translate(-1.0 * horizontalMoveDelta, 0.0);
+    canvas.Scale(-1.0, 1.0);
+    canvas.Translate(horizontalMoveDelta, 0.0);
 }
 
 void ImagePainter::DrawImageWithRepeat(
@@ -207,6 +226,99 @@ void ImagePainter::ApplyImageFit(
             break;
     }
     srcRect.ApplyScale(viewScale);
+}
+
+OffsetF ImagePainter::CalculateBgImagePosition(const SizeF& boxPaintSize_, const SizeF& imageRenderSize_,
+    const std::optional<BackgroundImagePosition>& bgImgPositionOpt)
+{
+    OffsetF offset(.0, .0);
+    if (bgImgPositionOpt == std::nullopt) {
+        return offset;
+    }
+    const auto& bgImgPosition = bgImgPositionOpt.value();
+    if (bgImgPosition.GetSizeTypeX() == BackgroundImagePositionType::PX) {
+        offset.SetX(bgImgPosition.GetSizeValueX());
+    } else {
+        offset.SetX(
+            bgImgPosition.GetSizeValueX() * (boxPaintSize_.Width() - imageRenderSize_.Width()) / PERCENT_TRANSLATE);
+    }
+
+    if (bgImgPosition.GetSizeTypeY() == BackgroundImagePositionType::PX) {
+        offset.SetY(bgImgPosition.GetSizeValueY());
+    } else {
+        offset.SetY(
+            bgImgPosition.GetSizeValueY() * (boxPaintSize_.Height() - imageRenderSize_.Height()) / PERCENT_TRANSLATE);
+    }
+    return offset;
+}
+
+SizeF ImagePainter::CalculateBgImageSize(
+    const SizeF& boxPaintSize_, const SizeF& srcSize, const std::optional<BackgroundImageSize>& bgImageSizeOpt)
+{
+    SizeF sizeRet(srcSize.Width(), srcSize.Height());
+    if (bgImageSizeOpt == std::nullopt || NearZero(srcSize.Width()) || NearZero(srcSize.Height()) ||
+        NearZero(boxPaintSize_.Width()) || NearZero(boxPaintSize_.Height())) {
+        return sizeRet;
+    }
+    float renderSizeX = 0.0;
+    float renderSizeY = 0.0;
+    float srcAspectRatio = srcSize.Width() / srcSize.Height();
+    float paintAspectRatio = boxPaintSize_.Width() / boxPaintSize_.Height();
+    auto bgImageSize = bgImageSizeOpt.value();
+    auto bgImageSizeTypeX = bgImageSize.GetSizeTypeX();
+    switch (bgImageSizeTypeX) {
+        case BackgroundImageSizeType::COVER:
+            renderSizeX = paintAspectRatio >= srcAspectRatio
+                              ? boxPaintSize_.Width()
+                              : srcSize.Width() * (boxPaintSize_.Height() / srcSize.Height());
+            break;
+        case BackgroundImageSizeType::CONTAIN:
+            renderSizeX = paintAspectRatio >= srcAspectRatio
+                              ? srcSize.Width() * (boxPaintSize_.Height() / srcSize.Height())
+                              : boxPaintSize_.Width();
+            break;
+        case BackgroundImageSizeType::LENGTH:
+            renderSizeX = bgImageSize.GetSizeValueX();
+            break;
+        case BackgroundImageSizeType::PERCENT:
+            renderSizeX = boxPaintSize_.Width() * bgImageSize.GetSizeValueX() / PERCENT_TRANSLATE;
+            break;
+        default:
+            break;
+    }
+    auto bgImageSizeTypeY = bgImageSize.GetSizeTypeY();
+    switch (bgImageSizeTypeY) {
+        case BackgroundImageSizeType::COVER:
+            renderSizeY = paintAspectRatio >= srcAspectRatio
+                              ? srcSize.Height() * (boxPaintSize_.Width() / srcSize.Width())
+                              : boxPaintSize_.Height();
+            break;
+        case BackgroundImageSizeType::CONTAIN:
+            renderSizeY = paintAspectRatio >= srcAspectRatio
+                              ? boxPaintSize_.Height()
+                              : srcSize.Height() * (boxPaintSize_.Width() / srcSize.Width());
+            break;
+        case BackgroundImageSizeType::LENGTH:
+            renderSizeY = bgImageSize.GetSizeValueY();
+            break;
+        case BackgroundImageSizeType::PERCENT:
+            renderSizeY = boxPaintSize_.Height() * bgImageSize.GetSizeValueY() / PERCENT_TRANSLATE;
+            break;
+        default:
+            break;
+    }
+    if (bgImageSize.GetSizeTypeX() == BackgroundImageSizeType::AUTO &&
+        bgImageSize.GetSizeTypeY() == BackgroundImageSizeType::AUTO) {
+        renderSizeX = srcSize.Width();
+        renderSizeY = srcSize.Height();
+    } else if (bgImageSize.GetSizeTypeX() == BackgroundImageSizeType::AUTO) {
+        renderSizeX = srcSize.Width() * (renderSizeY / srcSize.Height());
+    } else if (bgImageSize.GetSizeTypeY() == BackgroundImageSizeType::AUTO) {
+        renderSizeY = srcSize.Height() * (renderSizeX / srcSize.Width());
+    }
+    sizeRet.SetWidth(renderSizeX);
+    sizeRet.SetHeight(renderSizeY);
+    return sizeRet;
 }
 
 } // namespace OHOS::Ace::NG

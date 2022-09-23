@@ -78,20 +78,33 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
 
 void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
 {
-    if (args[0]->IsFunction()) {
-        RefPtr<JsKeyFunction> jsOnKeyFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-        auto onKeyId = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyFunc)](BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto keyInfo = TypeInfoHelper::DynamicCast<KeyEventInfo>(info);
-                ACE_SCORING_EVENT("onKey");
-                func->Execute(*keyInfo);
-            },
-            "onKey", 0);
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-        if (focusableComponent) {
-            focusableComponent->SetOnKeyId(onKeyId);
-        }
+    if (!args[0]->IsFunction()) {
+        LOGE("OnKeyEvent args need a function.");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent)](KeyEventInfo& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onKey");
+            func->Execute(info);
+        };
+        NG::ViewAbstract::SetOnKeyEvent(std::move(onKeyEvent));
+        return;
+    }
+
+    RefPtr<JsKeyFunction> jsOnKeyFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto onKeyId = EventMarker(
+        [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyFunc)](BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto keyInfo = TypeInfoHelper::DynamicCast<KeyEventInfo>(info);
+            ACE_SCORING_EVENT("onKey");
+            func->Execute(*keyInfo);
+        },
+        "onKey", 0);
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (focusableComponent) {
+        focusableComponent->SetOnKeyId(onKeyId);
     }
 }
 

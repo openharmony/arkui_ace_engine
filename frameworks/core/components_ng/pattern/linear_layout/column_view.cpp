@@ -17,6 +17,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -37,6 +38,8 @@ void ColumnView::Create(const std::optional<Dimension>& space)
     } else {
         LOGE("Column: the space value is illegal due to space is less than zero");
     }
+    ViewAbstract::SetFocusType(FocusType::SCOPE);
+    ViewAbstract::SetFocusable(true);
 }
 
 void ColumnView::AlignItems(FlexAlign flexAlign)

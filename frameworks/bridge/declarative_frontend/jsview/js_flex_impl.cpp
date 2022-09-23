@@ -45,7 +45,7 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
 {
     std::list<RefPtr<Component>> children;
     if (info.Length() < 1) {
-        LOGI("No input args, use default row setting");
+        LOGD("No input args, use default row setting");
         if (Container::IsCurrentUseNewPipeline()) {
             NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
             return;
@@ -58,7 +58,7 @@ void JSFlexImpl::Create(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsObject()) {
-        LOGW("arg is not a object, use default row setting");
+        LOGD("arg is not a object, use default row setting");
         if (Container::IsCurrentUseNewPipeline()) {
             NG::FlexView::Create(FlexDirection::ROW, FlexAlign::FLEX_START, FlexAlign::STRETCH);
             return;

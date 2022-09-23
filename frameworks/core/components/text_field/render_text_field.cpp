@@ -329,9 +329,9 @@ void RenderTextField::OnPaintFinish()
     UpdateOverlay();
     InitAccessibilityEventListener();
     UpdateAccessibilityPosition();
-    auto layoutParamChanged = lastLayoutParam_.value() == GetLayoutParam();
+    auto layoutParamChanged = lastLayoutParam_.has_value() ? lastLayoutParam_.value() == GetLayoutParam() : true;
     if (layoutParamChanged) {
-        lastLayoutParam_ = std::make_optional(GetLayoutParam());
+        lastLayoutParam_ = GetLayoutParam();
     }
     bool needNotifyChangeEvent = !isValueFromFront_ || layoutParamChanged;
     // If height or lines is changed, make needNotifyChangeEvent_ true to notify change event.
@@ -359,7 +359,7 @@ void RenderTextField::OnPaintFinish()
 void RenderTextField::PerformLayout()
 {
     if (!lastLayoutParam_.has_value()) {
-        lastLayoutParam_ = std::make_optional(GetLayoutParam());
+        lastLayoutParam_.emplace(GetLayoutParam());
     }
 
     if (GetEditingValue().text.empty()) {
@@ -417,7 +417,6 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
     if (event.button == MouseButton::LEFT_BUTTON) {
         if (event.action == MouseAction::PRESS) {
             UpdateStartSelection(DEFAULT_SELECT_INDEX, event.GetOffset(), true, false);
-            AddOutOfRectCallbackToContext();
         } else if (event.action == MouseAction::MOVE) {
             int32_t start = GetEditingValue().selection.baseOffset;
             int32_t end = GetCursorPositionForClick(event.GetOffset());
@@ -431,7 +430,6 @@ bool RenderTextField::HandleMouseEvent(const MouseEvent& event)
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         Offset rightClickOffset = event.GetOffset();
         ShowTextOverlay(rightClickOffset, false, true);
-        AddOutOfRectCallbackToContext();
     }
 
     return false;
@@ -631,15 +629,14 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
         StartTwinkling();
         ShowTextOverlay(globalPosition, true);
     }
-    auto context = GetContext().Upgrade();
-    if (context) {
-        context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
-    }
-    AddOutOfRectCallbackToContext();
 }
 
 void RenderTextField::OnTapCallback()
 {
+    auto context = GetContext().Upgrade();
+    if (context) {
+        context->SetClickPosition(GetGlobalOffset() + Size(0, GetLayoutSize().Height()));
+    }
     if (isFocusOnTouch_ && tapCallback_) {
         onTapCallbackResult_ = tapCallback_();
     }
@@ -733,7 +730,6 @@ void RenderTextField::OnDoubleClick(const ClickInfo& clickInfo)
     LOGI("text field accept double click, position: %{public}d, selection: %{public}s", clickPosition,
         selection.ToString().c_str());
     MarkNeedRender();
-    AddOutOfRectCallbackToContext();
 }
 
 void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
@@ -761,7 +757,6 @@ void RenderTextField::OnLongPress(const LongPressInfo& longPressInfo)
     bool isPassword = (keyboard_ == TextInputType::VISIBLE_PASSWORD);
     UpdateStartSelection(DEFAULT_SELECT_INDEX, longPressPosition, singleHandle || isPassword, true);
     ShowTextOverlay(longPressPosition, false);
-    AddOutOfRectCallbackToContext();
 }
 
 void RenderTextField::ShowTextOverlay(const Offset& showOffset, bool isSingleHandle, bool isUsingMouse)
@@ -1024,7 +1019,7 @@ void RenderTextField::ResetOnFocusForTextFieldManager()
     }
 }
 
-bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling)
+bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
     if (!enabled_) {
         LOGD("TextField is not enabled.");
@@ -1049,7 +1044,7 @@ bool RenderTextField::RequestKeyboard(bool isFocusViewChanged, bool needStartTwi
             LOGI("RequestKeyboard set calling window id is : %{public}d", context->GetWindowId());
             inputMethod->SetCallingWindow(context->GetWindowId());
         }
-        inputMethod->Attach(textChangeListener_);
+        inputMethod->Attach(textChangeListener_, needShowSoftKeyboard);
 #else
         if (!HasConnection()) {
             AttachIme();
@@ -1631,6 +1626,7 @@ void RenderTextField::UpdateIcon(const RefPtr<TextFieldComponent>& textField)
             imageComponent = AceType::MakeRefPtr<ImageComponent>(iconSrc_);
             imageComponent->SetImageFill(imageFill_);
         }
+        imageComponent->SetSyncMode(true);
         imageComponent->SetWidth(textField->GetIconSize());
         imageComponent->SetHeight(textField->GetIconSize());
         if (textDirection_ == TextDirection::RTL) {
@@ -1670,6 +1666,7 @@ void RenderTextField::UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textF
     } else {
         showImage = AceType::MakeRefPtr<ImageComponent>(showIconSrc_);
     }
+    showImage->SetSyncMode(true);
     showImage->SetWidth(textField->GetIconSize());
     showImage->SetHeight(textField->GetIconSize());
 
@@ -1689,6 +1686,7 @@ void RenderTextField::UpdatePasswordIcon(const RefPtr<TextFieldComponent>& textF
     } else {
         hideImage = AceType::MakeRefPtr<ImageComponent>(hideIconSrc_);
     }
+    hideImage->SetSyncMode(true);
     hideImage->SetWidth(textField->GetIconSize());
     hideImage->SetHeight(textField->GetIconSize());
 

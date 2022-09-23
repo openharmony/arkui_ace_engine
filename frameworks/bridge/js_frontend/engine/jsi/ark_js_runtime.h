@@ -64,6 +64,7 @@ public:
     bool InitializeFromExistVM(EcmaVM* vm);
     void Reset() override;
     void SetLogPrint(LOG_PRINT out) override;
+    bool StartDebugger() override;
     shared_ptr<JsValue> EvaluateJsCode(const std::string& src) override;
     bool EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath = "") override;
     bool ExecuteJsBin(const std::string& fileName) override;
