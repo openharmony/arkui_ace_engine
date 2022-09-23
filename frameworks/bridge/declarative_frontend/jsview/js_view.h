@@ -48,7 +48,7 @@ public:
     virtual RefPtr<Component> CreateComponent() = 0;
     RefPtr<PageTransitionComponent> BuildPageTransitionComponent();
 
-    virtual RefPtr<NG::CustomNode> CreateUINode()
+    virtual RefPtr<NG::CustomNode> CreateUINode(const RefPtr<NG::FrameNode>& pageNode = nullptr)
     {
         LOGE("Internal error. Not implemented");
         return nullptr;
@@ -153,7 +153,7 @@ public:
 
     // TODO: delete this after the toolchain for partial update is ready.
     RefPtr<NG::UINode> InternalRender();
-    RefPtr<NG::CustomNode> CreateUINode() override;
+    RefPtr<NG::CustomNode> CreateUINode(const RefPtr<NG::FrameNode>& pageNode = nullptr) override;
 
     void MarkNeedUpdate() override;
 
@@ -252,7 +252,7 @@ public:
     RefPtr<Component> CreateComponent() override;
 
     RefPtr<NG::UINode> InitialUIRender();
-    RefPtr<NG::CustomNode> CreateUINode() override;
+    RefPtr<NG::CustomNode> CreateUINode(const RefPtr<NG::FrameNode>& pageNode = nullptr) override;
 
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);

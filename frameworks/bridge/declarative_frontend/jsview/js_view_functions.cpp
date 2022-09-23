@@ -14,11 +14,16 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
+// #include "frameworks/bridge/declarative_frontend/jsview/js_view_measure_layout.h"
+#include <cstddef>
 
 #include "base/log/ace_trace.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline/base/composed_element.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_measure_layout.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -50,6 +55,7 @@ void ViewFunctions::InitViewFunctions(
 
     JSRef<JSVal> jsAppearFunc = jsObject->GetProperty("aboutToAppear");
     if (jsAppearFunc->IsFunction()) {
+        LOGD("%s, receive js function aboutToAppear", OHOS::Ace::DEVTAG.c_str());
         jsAppearFunc_ = JSRef<JSFunc>::Cast(jsAppearFunc);
     }
 
@@ -58,6 +64,18 @@ void ViewFunctions::InitViewFunctions(
         jsDisappearFunc_ = JSRef<JSFunc>::Cast(jsDisappearFunc);
     } else {
         LOGD("aboutToDisappear is not a function");
+    }
+
+    JSRef<JSVal> jsLayoutFunc = jsObject->GetProperty("onLayout");
+    if (jsLayoutFunc->IsFunction()) {
+        LOGD("%s, receive js function onLayout", OHOS::Ace::DEVTAG.c_str());
+        jsLayoutFunc_ = JSRef<JSFunc>::Cast(jsLayoutFunc);
+    }
+
+    JSRef<JSVal> jsMeasureFunc = jsObject->GetProperty("onMeasure");
+    if (jsMeasureFunc->IsFunction()) {
+        LOGD("%s, receive js function onMeasure", OHOS::Ace::DEVTAG.c_str());
+        jsMeasureFunc_ = JSRef<JSFunc>::Cast(jsMeasureFunc);
     }
 
     JSRef<JSVal> jsAboutToBeDeletedFunc = jsObject->GetProperty("aboutToBeDeleted");
@@ -161,6 +179,110 @@ void ViewFunctions::ExecuteAppear()
 void ViewFunctions::ExecuteDisappear()
 {
     ExecuteFunction(jsDisappearFunc_, "aboutToDisappear");
+}
+
+namespace {
+
+JSRef<JSObject> genConstraint(const std::optional<NG::LayoutConstraintF>& parentConstraint)
+{
+    auto minSize = parentConstraint->minSize;
+    auto maxSize = parentConstraint->maxSize;
+    JSRef<JSObject> constraint = JSRef<JSObject>::New();
+    constraint->SetProperty<double>("minWidth", minSize.Width());
+    constraint->SetProperty<double>("minHeight", minSize.Height());
+    constraint->SetProperty<double>("maxWidth", maxSize.Width());
+    constraint->SetProperty<double>("maxHeight", maxSize.Height());
+    return constraint;
+}
+
+JSRef<JSArray> genChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
+{
+    JSRef<JSArray> childInfo = JSRef<JSArray>::New();
+    size_t index = 0;
+    for (const auto& iter : children) {
+        JSRef<JSObject> info = JSRef<JSObject>::New();
+        info->SetProperty<std::string>("name", iter->GetGeometryNode()->GetFrameSize().ToString());
+        childInfo->SetValueAt(index++, info);
+    }
+    return childInfo;
+}
+
+} // namespace
+
+void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
+{
+    LOGD("%s, ExecuteLayout ------------------------------------------------ in", OHOS::Ace::DEVTAG.c_str());
+
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+
+    auto jsConstraint = genConstraint(parentConstraint);
+    auto childArray = genChildArray(children);
+
+    JSRef<JSVal> params[2] = { childArray, jsConstraint };
+
+    layoutChildren_ = layoutWrapper->GetAllChildrenWithBuild();
+    iterLayoutChildren_ = layoutChildren_.begin();
+    parentGlobalOffset = layoutWrapper->GetGeometryNode()->GetParentGlobalOffset();
+
+    jsLayoutFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
+    LOGD("%s, ExecuteLayout ------------------------------------------------ out", OHOS::Ace::DEVTAG.c_str());
+}
+
+void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
+{
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+    LOGD("%s, ExecuteMeasure ------------------------------------------------ in", OHOS::Ace::DEVTAG.c_str());
+    LOGD("%s, do Measure, info, child size %d", OHOS::Ace::DEVTAG.c_str(), children.size());
+
+    for (const auto& child : children) {
+        auto childGeometryNode = child->GetGeometryNode();
+        auto childFrameSize = childGeometryNode->GetFrameSize();
+        auto childFrameOffset = childGeometryNode->GetFrameOffset();
+        LOGD("%s, do Measure child info, %s, %s", OHOS::Ace::DEVTAG.c_str(), childFrameSize.ToString().c_str(),
+            childFrameOffset.ToString().c_str());
+    }
+    JSRef<JSVal> params[2];
+
+    auto minSize = parentConstraint->minSize;
+    auto maxSize = parentConstraint->maxSize;
+    JSRef<JSObject> constraint = JSRef<JSObject>::New();
+    constraint->SetProperty<double>("minWidth", minSize.Width());
+    constraint->SetProperty<double>("minHeight", minSize.Height());
+    constraint->SetProperty<double>("maxWidth", maxSize.Width());
+    constraint->SetProperty<double>("maxHeight", maxSize.Height());
+
+    JSRef<JSArray> childInfo = JSRef<JSArray>::New();
+    size_t index = 0;
+    for (const auto& iter : children) {
+        JSRef<JSObject> info = JSRef<JSObject>::New();
+        info->SetProperty<std::string>("name", iter->GetGeometryNode()->GetFrameSize().ToString());
+        childInfo->SetValueAt(index++, info);
+    }
+
+    params[0] = childInfo;
+    params[1] = constraint;
+
+    measureChildren_ = children;
+    iterMeasureChildren_ = measureChildren_.begin();
+    measureDefaultConstraint_ = parentConstraint.value();
+
+    jsMeasureFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
+
+    LOGD("%s, do Measure, info: %s, %s", OHOS::Ace::DEVTAG.c_str(), minSize.ToString().c_str(),
+        maxSize.ToString().c_str());
+    LOGD("%s, ExecuteMeasure ------------------------------------------------ out", OHOS::Ace::DEVTAG.c_str());
+}
+
+bool ViewFunctions::HasLayout() const
+{
+    return !jsLayoutFunc_.IsEmpty();
+}
+
+bool ViewFunctions::HasMeasure() const
+{
+    return !jsMeasureFunc_.IsEmpty();
 }
 
 void ViewFunctions::ExecuteAboutToBeDeleted()

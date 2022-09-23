@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/custom/custom_node_layout_algorithm.h"
 
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -24,6 +25,7 @@ namespace OHOS::Ace::NG {
 
 void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    LOGD("%s, CustomNodeLayoutAlgorithm::Measure, in", OHOS::Ace::DEVTAG.c_str());
     auto host = DynamicCast<CustomNode>(layoutWrapper->GetHostNode());
     if (renderFunction_ && host) {
         {
@@ -44,10 +46,32 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
 
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    for (auto&& child : children) {
-        child->Measure(layoutConstraint);
+    // call js measure
+    if (layoutWrapper->GetGeometryNode()->Measure(layoutWrapper)) {
+        LOGD("%s, CustomNodeLayoutAlgorithm::Measure, %d", OHOS::Ace::DEVTAG.c_str(), children.size());
+    } else {
+        LOGD("%s, CustomNodeLayoutAlgorithm::Measure, default measure", OHOS::Ace::DEVTAG.c_str());
+        for (auto&& child : children) {
+            child->Measure(layoutConstraint);
+        }
     }
+
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+}
+
+void CustomNodeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    LOGD("%s, CustomNodeLayoutAlgorithm::Layout, %d", OHOS::Ace::DEVTAG.c_str(),
+        layoutWrapper->GetAllChildrenWithBuild().size());
+    PerformLayout(layoutWrapper);
+    if (layoutWrapper->GetGeometryNode()->Layout(layoutWrapper)) {
+        LOGD("%s, CustomNodeLayoutAlgorithm::Layout, custom layout", OHOS::Ace::DEVTAG.c_str());
+    } else {
+        LOGD("%s, CustomNodeLayoutAlgorithm::Layout, default layout", OHOS::Ace::DEVTAG.c_str());
+        for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+            child->Layout();
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

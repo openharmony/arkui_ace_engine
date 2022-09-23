@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 
 #include <string>
+#include <utility>
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
@@ -25,6 +26,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -173,7 +175,7 @@ RefPtr<Component> JSViewFullUpdate::CreateComponent()
     return composedComponent;
 }
 
-RefPtr<NG::CustomNode> JSViewFullUpdate::CreateUINode()
+RefPtr<NG::CustomNode> JSViewFullUpdate::CreateUINode(const RefPtr<NG::FrameNode>& pageNode)
 {
     ACE_SCOPED_TRACE("JSView::CreateSpecializedComponent");
     // create component, return new something, need to set proper ID
@@ -598,13 +600,13 @@ RefPtr<Component> JSViewPartialUpdate::InitialRender()
     return buildComponent;
 }
 
-RefPtr<NG::CustomNode> JSViewPartialUpdate::CreateUINode()
+RefPtr<NG::CustomNode> JSViewPartialUpdate::CreateUINode(const RefPtr<NG::FrameNode>& pageNode)
 {
     ACE_SCOPED_TRACE("JSViewPartialUpdate::CreateSpecializedComponent");
     auto viewId = NG::ViewStackProcessor::GetInstance()->ClaimNodeId();
     viewId_ = std::to_string(viewId);
     auto key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(viewId_);
-    LOGD("Creating CustomNode with claimed elmtId %{public}d.", viewId);
+    LOGD("%s Creating CustomNode with claimed elmtId %{public}d.", OHOS::Ace::DEVTAG.c_str(), viewId);
     auto customNode = NG::CustomNode::CreateCustomNode(viewId, key);
     node_ = customNode;
 
@@ -655,6 +657,45 @@ RefPtr<NG::CustomNode> JSViewPartialUpdate::CreateUINode()
         jsView->node_.Reset();
     };
     customNode->SetDestroyFunction(std::move(removeFunction));
+
+    auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+        LOGD("%s, call js measure in", OHOS::Ace::DEVTAG.c_str());
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        LOGD("%s, call js measure execute", OHOS::Ace::DEVTAG.c_str());
+        jsView->jsViewFunction_->ExecuteMeasure(layoutWrapper);
+    };
+    LOGD("%s, set js measure start", OHOS::Ace::DEVTAG.c_str());
+    if (jsViewFunction_->HasMeasure()) {
+        LOGD("%s, set js measure start 1", OHOS::Ace::DEVTAG.c_str());
+        RefPtr<NG::FrameNode> node;
+        if (pageNode) {
+            LOGD("%s, set js measure start 2", OHOS::Ace::DEVTAG.c_str());
+            node = pageNode;
+        } else {
+            LOGD("%s, set js measure start 3", OHOS::Ace::DEVTAG.c_str());
+            node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        }
+        node->GetGeometryNode()->SetMeasureFunction(std::move(measureFunc));
+    }
+
+    auto layoutFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        LOGD("%s, call js layout", OHOS::Ace::DEVTAG.c_str());
+        jsView->jsViewFunction_->ExecuteLayout(layoutWrapper);
+    };
+    LOGD("%s, set js layout", OHOS::Ace::DEVTAG.c_str());
+    if (jsViewFunction_->HasLayout()) {
+        RefPtr<NG::FrameNode> node;
+        if (pageNode) {
+            node = pageNode;
+        } else {
+            node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        }
+        node->GetGeometryNode()->SetLayoutFunction(std::move(layoutFunc));
+    }
+
     return customNode;
 }
 
@@ -711,7 +752,7 @@ void JSViewPartialUpdate::MarkNeedUpdate()
  */
 void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
 {
-    LOGD("Creating new JSViewPartialUpdate for partial update");
+    LOGD("%s Creating new JSViewPartialUpdate for partial update", OHOS::Ace::DEVTAG.c_str());
     ACE_DCHECK(Container::IsCurrentUsePartialUpdate());
 
     if (info[0]->IsObject()) {

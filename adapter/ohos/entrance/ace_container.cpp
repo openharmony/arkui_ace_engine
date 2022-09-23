@@ -1027,7 +1027,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     }
     resRegister_ = aceView_->GetPlatformResRegister();
     if (useNewPipeline_) {
-        LOGI("New pipeline version creating...");
+        LOGI("%s, New pipeline version creating...", OHOS::Ace::DEVTAG.c_str());
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
             std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     } else {

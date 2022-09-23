@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline/base/composed_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -48,6 +49,8 @@ public:
     void ExecuteRerender();
     void ExecuteAppear();
     void ExecuteDisappear();
+    void ExecuteMeasure(NG::LayoutWrapper* layoutWrapper);
+    void ExecuteLayout(NG::LayoutWrapper* layoutWrapper);
     void ExecuteAboutToBeDeleted();
     void ExecuteAboutToRender();
     void ExecuteOnRenderDone();
@@ -58,6 +61,8 @@ public:
     void ExecuteUpdateWithValueParams(const std::string& jsonData);
 
     bool HasPageTransition() const;
+    bool HasMeasure() const;
+    bool HasLayout() const;
 
     void ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo);
     void ExecuteFunctionWithParams(JSWeak<JSFunc>& func, const char* debugInfo, const std::string& jsonData);
@@ -75,6 +80,8 @@ private:
     JSWeak<JSObject> jsObject_;
     JSWeak<JSFunc> jsAppearFunc_;
     JSWeak<JSFunc> jsDisappearFunc_;
+    JSWeak<JSFunc> jsMeasureFunc_;
+    JSWeak<JSFunc> jsLayoutFunc_;
     JSWeak<JSFunc> jsAboutToRenderFunc_;
     JSWeak<JSFunc> jsAboutToBeDeletedFunc_;
     JSWeak<JSFunc> jsRenderDoneFunc_;

@@ -181,6 +181,22 @@ public:
         return parentLayoutConstraint_;
     }
 
+    bool Measure(NG::LayoutWrapper* layoutWrapper);
+
+    bool Layout(NG::LayoutWrapper* layoutWrapper);
+
+    void SetLayoutFunction(std::function<void(NG::LayoutWrapper* layoutWrapper)>&& layoutFunc)
+    {
+        layoutFunc_ = std::move(layoutFunc);
+    }
+
+    void SetMeasureFunction(std::function<void(NG::LayoutWrapper* layoutWrapper)>&& measureFunc)
+    {
+        measureFunc_ = std::move(measureFunc);
+        LOGD("%s, set js measure start GeometryNode::SetMeasureFunction, %p, %p", OHOS::Ace::DEVTAG.c_str(), this,
+            &measureFunc_);
+    }
+
     void SetBaselineDistance(float baselineDistance)
     {
         baselineDistance_ = baselineDistance;
@@ -205,6 +221,9 @@ private:
     std::unique_ptr<GeometryProperty> content_;
 
     OffsetF parentGlobalOffset_;
+
+    std::function<void(NG::LayoutWrapper* layoutWrapper)> layoutFunc_;
+    std::function<void(NG::LayoutWrapper* layoutWrapper)> measureFunc_;
 };
 } // namespace OHOS::Ace::NG
 

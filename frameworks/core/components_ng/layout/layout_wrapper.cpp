@@ -106,6 +106,7 @@ std::string LayoutWrapper::GetHostTag() const
 // This will call child and self measure process.
 void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    LOGD("%s, do Measure, child size: %d", OHOS::Ace::DEVTAG.c_str(), childrenMap_.size());
     if (!layoutAlgorithm_ || layoutAlgorithm_->SkipMeasure()) {
         LOGD("the layoutAlgorithm skip measure");
         return;
@@ -172,6 +173,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
 // Called to perform layout children.
 void LayoutWrapper::Layout()
 {
+    LOGD("%s, do Layout", OHOS::Ace::DEVTAG.c_str());
     if (!layoutAlgorithm_ || layoutAlgorithm_->SkipLayout()) {
         LOGD("the layoutAlgorithm skip layout");
         return;
