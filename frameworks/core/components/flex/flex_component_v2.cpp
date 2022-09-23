@@ -21,9 +21,8 @@
 #include "frameworks/core/components/ifelse/if_else_component.h"
 
 namespace OHOS::Ace {
-namespace {
 
-RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component)
+RefPtr<Component> FlexComponentV2::AddFlexItemComponent(const RefPtr<Component>& component)
 {
     if (AceType::InstanceOf<FlexItemComponent>(component)) {
         return component;
@@ -66,8 +65,6 @@ RefPtr<Component> AddFlexItemComponent(const RefPtr<Component>& component)
     }
 
     return component;
-}
-
 }
 
 void FlexComponentV2::OnChildAppended(const RefPtr<Component>& child)
