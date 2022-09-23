@@ -966,6 +966,9 @@ public:
                 }
                 items.emplace_back(idx + 1, it->second);
                 children_.erase(it);
+                if (idx == 0) {
+                    break;
+                }
             }
         }
 
