@@ -174,8 +174,14 @@ void ResultOhos::Cancel()
 
 void FullScreenExitHandlerOhos::ExitFullScreen()
 {
-    if (handler_) {
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    CHECK_NULL_VOID(handler_);
+    if (Container::IsCurrentUseNewPipeline()) {
+        // notify chromium to exit fullscreen mode.
         handler_->ExitFullScreen();
+        // notify web component in arkui to exit fullscreen mode.
+        delegate->ExitFullScreen();
     }
 }
 
@@ -1365,7 +1371,7 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
 
     onPageFinishedV2_ = useNewPipe ? eventHub->GetOnPageFinishedEvent()
                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetPageFinishedEventId(), oldContext);
+                                       webCom->GetPageFinishedEventId(), oldContext);
     onPageStartedV2_ = useNewPipe ? eventHub->GetOnPageStartedEvent()
                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                         webCom->GetPageStartedEventId(), oldContext);
@@ -1374,7 +1380,7 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
                                          webCom->GetTitleReceiveEventId(), oldContext);
     onFullScreenExitV2_ = useNewPipe ? eventHub->GetOnFullScreenExitEvent()
                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                          webCom->GetOnFullScreenExitEventId(), oldContext);
+                                            webCom->GetOnFullScreenExitEventId(), oldContext);
     onGeolocationHideV2_ = useNewPipe ? eventHub->GetOnGeolocationHideEvent()
                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                             webCom->GetGeolocationHideEventId(), oldContext);
@@ -2592,13 +2598,21 @@ void WebDelegate::OnReceivedTitle(const std::string& param)
     }
 }
 
+void WebDelegate::ExitFullScreen()
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->ExitFullScreen();
+    }
+}
+
 void WebDelegate::OnFullScreenExit()
 {
     auto param = std::make_shared<FullScreenExitEvent>(false);
     if (Container::IsCurrentUseNewPipeline()) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
-        webPattern->ExitFullScreen();
         auto webEventHub = webPattern->GetWebEventHub();
         CHECK_NULL_VOID(webEventHub);
         auto propOnFullScreenExitEvent = webEventHub->GetOnFullScreenExitEvent();
@@ -2670,8 +2684,10 @@ bool WebDelegate::OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, Dia
     return webCom->OnCommonDialog(info.get(), dialogEventType);
 }
 
-void WebDelegate::OnFullScreenEnter(const std::shared_ptr<BaseEventInfo>& info)
+void WebDelegate::OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler)
 {
+    auto param = std::make_shared<FullScreenEnterEvent>(AceType::MakeRefPtr<FullScreenExitHandlerOhos>(
+        handler, WeakClaim(this)));
     if (Container::IsCurrentUseNewPipeline()) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -2680,12 +2696,12 @@ void WebDelegate::OnFullScreenEnter(const std::shared_ptr<BaseEventInfo>& info)
         CHECK_NULL_VOID(webEventHub);
         auto propOnFullScreenEnterEvent = webEventHub->GetOnFullScreenEnterEvent();
         CHECK_NULL_VOID(propOnFullScreenEnterEvent);
-        propOnFullScreenEnterEvent(info);
+        propOnFullScreenEnterEvent(param);
         return;
     }
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_VOID(webCom);
-    webCom->OnFullScreenEnter(info.get());
+    webCom->OnFullScreenEnter(param.get());
 }
 
 bool WebDelegate::OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info)

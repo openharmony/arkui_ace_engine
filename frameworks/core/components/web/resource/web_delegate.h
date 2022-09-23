@@ -96,10 +96,12 @@ class FullScreenExitHandlerOhos : public FullScreenExitHandler {
     DECLARE_ACE_TYPE(FullScreenExitHandlerOhos, FullScreenExitHandler)
 
 public:
-    FullScreenExitHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler) : handler_(handler) {}
+    FullScreenExitHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler, WeakPtr<WebDelegate> webDelegate)
+        : handler_(handler), webDelegate_(webDelegate) {}
     void ExitFullScreen() override;
 private:
     std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler_;
+    WeakPtr<WebDelegate> webDelegate_;
 };
 
 class AuthResultOhos : public AuthResult {
@@ -343,13 +345,13 @@ public:
     void OnPageFinished(const std::string& param);
     void OnProgressChanged(int param);
     void OnReceivedTitle(const std::string& param);
+    void ExitFullScreen();
     void OnFullScreenExit();
     void OnGeolocationPermissionsHidePrompt();
     void OnGeolocationPermissionsShowPrompt(
         const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
     void OnRequestFocus();
     bool OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType);
-    void OnFullScreenEnter(const std::shared_ptr<BaseEventInfo>& info);
     bool OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
@@ -357,6 +359,7 @@ public:
         const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
+    void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler);
     bool OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message);
     void OnRouterPush(const std::string& param);
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason);
