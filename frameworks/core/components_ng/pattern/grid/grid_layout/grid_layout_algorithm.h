@@ -18,7 +18,7 @@
 
 #include <utility>
 
-#include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"

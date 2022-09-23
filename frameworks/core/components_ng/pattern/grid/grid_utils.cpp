@@ -31,7 +31,7 @@ std::vector<float> GridUtils::ParseArgs(const std::string& args, float size, flo
     if (args.empty()) {
         return lens;
     }
-    float frSum = 0.0;
+    float frSum = 0.0f;
     std::vector<std::string> strs;
     StringUtils::StringSplitter(args, ' ', strs);
     for (const auto& str : strs) {

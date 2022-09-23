@@ -178,8 +178,8 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(
     positionX += col * columnsGap;
 
     // Calculate the size for current child.
-    float rowLen = 0.0;
-    float colLen = 0.0;
+    float rowLen = 0.0f;
+    float colLen = 0.0f;
     for (int32_t i = 0; i < rowSpan; ++i) {
         rowLen += gridCells_.at(row + i).at(col).Height();
     }

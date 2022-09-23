@@ -892,7 +892,7 @@ void RenderGridLayout::PerformLayout()
     if (isDynamicGrid_) {
         InitialDynamicGridProp();
     } else {
-        InitialGridProp(); // 初始化每个栅格的宽高
+        InitialGridProp();
     }
     allocatedRowSizes_.clear();
     allocatedRowSizes_.insert(allocatedRowSizes_.begin(), rowCount_ + 1, 0.0);

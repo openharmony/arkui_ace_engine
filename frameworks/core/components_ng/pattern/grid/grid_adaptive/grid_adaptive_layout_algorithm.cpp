@@ -15,10 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 
 namespace OHOS::Ace::NG {
 

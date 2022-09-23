@@ -16,9 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_ITEM_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_ITEM_LAYOUT_PROPERTY_H
 
-#include "core/components/common/properties/scroll_bar.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
