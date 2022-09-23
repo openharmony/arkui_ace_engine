@@ -40,7 +40,8 @@ struct BaselineProperties {
     float maxDistanceAboveBaseline = 0.0f;
     float maxDistanceBelowBaseline = 0.0f;
 
-    void Reset() {
+    void Reset()
+    {
         maxBaselineDistance = 0.0f;
         maxDistanceAboveBaseline = 0.0f;
         maxDistanceBelowBaseline = 0.0f;
