@@ -81,6 +81,7 @@ private:
     void ResizeItems(const FlexItemProperties& flexItemProps);
     void RedoLayoutFlexItem(
         const MagicLayoutNode& flexItem, float flexSize, float& allocatedFlexSpace);
+    void RelayoutForStretchFlexNode(const FlexItemProperties& flexItemProperties);
 
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;

@@ -136,7 +136,7 @@ public:
         return parentLayoutConstraint_;
     }
 
-    void SetBaselineDistance(const float baselineDistance)
+    void SetBaselineDistance(float baselineDistance)
     {
         baselineDistance_ = baselineDistance;
     }
@@ -150,7 +150,7 @@ private:
     // the layoutConstraint of prev measure task.
     std::optional<LayoutConstraintF> parentLayoutConstraint_;
 
-    std::optional<float> baselineDistance_ = std::nullopt;
+    std::optional<float> baselineDistance_;
 
     // the frame size in parent local coordinate.
     GeometryProperty frame_;
