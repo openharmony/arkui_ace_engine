@@ -40,8 +40,8 @@ namespace OHOS::Ace {
 class ConnectionCallback : public Rosen::IWindowExtensionCallback {
 public:
     ACE_DISALLOW_COPY_AND_MOVE(ConnectionCallback);
-    ConnectionCallback(WeakPtr<RenderNode> node, int32_t instanceId)
-        : node_(std::move(node)), instanceId_(instanceId) {}
+    ConnectionCallback(WeakPtr<RenderNode> node, int32_t instanceId) : node_(std::move(node)), instanceId_(instanceId)
+    {}
     ~ConnectionCallback() override = default;
     void OnWindowReady(const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode) override
     {
@@ -137,8 +137,7 @@ public:
         CHECK_NULL_VOID(rsSurfaceNode);
         rsOriginNode_ = std::static_pointer_cast<Rosen::RSSurfaceNode>(
             AceType::DynamicCast<NG::RosenRenderContext>(context)->GetRSNode());
-        auto task = [weak = originNode_, rsNode = rsSurfaceNode,
-                        instanceId = instanceId_]() {
+        auto task = [weak = originNode_, rsNode = rsSurfaceNode, instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
             auto node = weak.Upgrade();
             if (!node) {
@@ -157,8 +156,7 @@ public:
     void OnExtensionDisconnected() override
     {
         LOGI("window extension disconnect");
-        auto task = [weak = originNode_, rsNode = rsOriginNode_,
-                        instanceId = instanceId_]() {
+        auto task = [weak = originNode_, rsNode = rsOriginNode_, instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
             auto node = weak.Upgrade();
             if (!node) {
@@ -227,8 +225,8 @@ void RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
 void WantConverter(const std::string& want, AppExecFwk::ElementName& element)
 {
     auto json = JsonUtil::ParseJsonString(want);
-    element.SetAbilityName(json->GetValue("ability")->GetString());
-    element.SetBundleName(json->GetValue("bundle")->GetString());
+    element.SetAbilityName(json->GetValue("abilityName")->GetString());
+    element.SetBundleName(json->GetValue("bundleName")->GetString());
 }
 
 void WindowExtensionConnectionAdapterOhos::ConnectExtension(const RefPtr<NG::FrameNode>& node)
