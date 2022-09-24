@@ -122,7 +122,6 @@ public:
     }
 
 private:
-    RefPtr<FullScreenExitHandler> fullScreenExitHandler_;
     static void Constructor(const JSCallbackInfo& args)
     {
         auto jsFullScreenExitHandler = Referenced::MakeRefPtr<JSFullScreenExitHandler>();
@@ -136,6 +135,7 @@ private:
             jsFullScreenExitHandler->DecRefCount();
         }
     }
+    RefPtr<FullScreenExitHandler> fullScreenExitHandler_;
 };
 
 class JSWebHttpAuth : public Referenced {
@@ -1767,6 +1767,7 @@ void JSWeb::OnFullScreenExit(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnFullScreenExitEventId(eventMarker);
 }
 
@@ -1806,6 +1807,7 @@ void JSWeb::OnFullScreenEnter(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnFullScreenEnterImpl(std::move(jsCallback));
 }
 

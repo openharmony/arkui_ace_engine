@@ -96,8 +96,8 @@ class FullScreenExitHandlerOhos : public FullScreenExitHandler {
     DECLARE_ACE_TYPE(FullScreenExitHandlerOhos, FullScreenExitHandler)
 
 public:
-    FullScreenExitHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler, WeakPtr<WebDelegate> webDelegate)
-        : handler_(handler), webDelegate_(webDelegate) {}
+    FullScreenExitHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler,
+        WeakPtr<WebDelegate> webDelegate) : handler_(handler), webDelegate_(webDelegate) {}
     void ExitFullScreen() override;
 private:
     std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler_;
