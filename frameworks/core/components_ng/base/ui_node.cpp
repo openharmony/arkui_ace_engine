@@ -354,4 +354,18 @@ int32_t UINode::TotalChildCount() const
     return count;
 }
 
+int32_t UINode::GetChildIndexById(int32_t id)
+{
+    int32_t pos = 0;
+    auto iter = children_.begin();
+    while (iter != GetChildren().end()) {
+        if (id == (*iter)->GetId()) {
+            return pos;
+        }
+        pos++;
+        iter++;
+    }
+    return -1;
+}
+
 } // namespace OHOS::Ace::NG

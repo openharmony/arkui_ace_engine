@@ -19,6 +19,8 @@
 #include <regex>
 #include <vector>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
@@ -315,6 +317,26 @@ bool ParseLocationProps(const JSCallbackInfo& info, AnimatableDimension& x, Anim
     return hasX || hasY;
 }
 
+NG::OffsetT<Dimension> ParseNGLocation(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("ParseLocationProps", info, checkList)) {
+        return {};
+    }
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> xVal = sizeObj->GetProperty("x");
+    JSRef<JSVal> yVal = sizeObj->GetProperty("y");
+    Dimension dimenX;
+    if (!JSViewAbstract::ParseJsDimensionVp(xVal, dimenX)) {
+        LOGW("the x prop is illegal");
+    }
+    Dimension dimenY;
+    if (!JSViewAbstract::ParseJsDimensionVp(yVal, dimenY)) {
+        LOGW("the y prop is illegal");
+    }
+    return { dimenX, dimenY };
+}
+
 #ifndef WEARABLE_PRODUCT
 const std::vector<Placement> PLACEMENT = { Placement::LEFT, Placement::RIGHT, Placement::TOP, Placement::BOTTOM,
     Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT, Placement::LEFT_TOP,
@@ -398,6 +420,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys](
                                              const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("Popup.onStateChange");
                 func->Execute(keys, param);
             };
             popupParam->SetOnStateChange(onStateChangeCallback);
@@ -429,6 +452,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
                 auto touchCallback = [execCtx = info.GetExecutionContext(), func = std::move(actionFunc)](
                                          TouchEventInfo&) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("primaryButton.action");
                     LOGI("Call primary touch");
                     func->Execute();
                 };
@@ -470,6 +494,7 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
                 auto touchCallback = [execCtx = info.GetExecutionContext(), func = std::move(actionFunc)](
                                          TouchEventInfo&) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                    ACE_SCORING_EVENT("secondaryButton.action");
                     LOGI("Call primary touch");
                     func->Execute();
                 };
@@ -621,6 +646,10 @@ bool JSViewAbstract::ParseAndSetOpacityTransition(
     if (transitionArgs->Contains("opacity")) {
         double opacity = 0.0;
         JSViewAbstract::ParseJsonDouble(transitionArgs->GetValue("opacity"), opacity);
+        if (GreatNotEqual(opacity, 1.0) || opacity < 0) {
+            LOGW("set opacity in transition to %{public}f, over range, use default opacity 0", opacity);
+            opacity = 0.0;
+        }
         auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
         if (!display) {
             LOGE("display component is null.");
@@ -822,7 +851,8 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
         return;
     }
 
-    if (opacity < 0) {
+    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
+        LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
         opacity = 1.0;
     }
 
@@ -1061,6 +1091,57 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
         matrix[8], matrix[9], matrix[10], matrix[11], matrix[12], matrix[13], matrix[14], matrix[15], option);
 }
 
+NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>& transitionArgs)
+{
+    bool hasEffect = false;
+    NG::TransitionOptions transitionOption;
+    transitionOption.Type = ParseTransitionType(transitionArgs->GetString("type", "All"));
+    if (transitionArgs->Contains("opacity")) {
+        double opacity = 0.0;
+        ParseJsonDouble(transitionArgs->GetValue("opacity"), opacity);
+        if (GreatNotEqual(opacity, 1.0) || opacity < 0) {
+            LOGW("set opacity in transition to %{public}f, over range, use default opacity 0", opacity);
+            opacity = 0.0;
+        }
+        transitionOption.UpdateOpacity(opacity);
+        hasEffect = true;
+    }
+    if (transitionArgs->Contains("translate")) {
+        auto translateArgs = transitionArgs->GetObject("translate");
+        // default: x, y, z (0.0, 0.0, 0.0)
+        NG::TranslateOptions translate;
+        ParseJsTranslate(translateArgs, translate.x, translate.y, translate.z);
+        transitionOption.UpdateTranslate(translate);
+        hasEffect = true;
+    }
+    if (transitionArgs->Contains("scale")) {
+        auto scaleArgs = transitionArgs->GetObject("scale");
+        // default: x, y, z (1.0, 1.0, 1.0), centerX, centerY 50% 50%;
+        NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+        ParseJsScale(scaleArgs, scale.xScale, scale.yScale, scale.zScale, scale.centerX, scale.centerY);
+        transitionOption.UpdateScale(scale);
+        hasEffect = true;
+    }
+    if (transitionArgs->Contains("rotate")) {
+        auto rotateArgs = transitionArgs->GetObject("rotate");
+        // default: dx, dy, dz (0.0, 0.0, 0.0), angle 0, centerX, centerY 50% 50%;
+        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
+        std::optional<float> angle;
+        ParseJsRotate(rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX,
+            rotate.centerY, angle);
+        if (angle.has_value()) {
+            rotate.angle = angle.value();
+            transitionOption.UpdateRotate(rotate);
+            hasEffect = true;
+        }
+    }
+    if (!hasEffect) {
+        // default transition
+        transitionOption = NG::TransitionOptions::GetDefaultTransition(transitionOption.Type);
+    }
+    return transitionOption;
+}
+
 void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
     LOGD("JsTransition");
@@ -1069,6 +1150,10 @@ void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
         return;
     }
     if (info.Length() == 0) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewAbstract::SetTransition(NG::TransitionOptions::GetDefaultTransition(TransitionType::ALL));
+            return;
+        }
         SetDefaultTransition(TransitionType::ALL);
         return;
     }
@@ -1077,6 +1162,11 @@ void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
         return;
     }
     auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto options = ParseTransition(transitionArgs);
+        NG::ViewAbstract::SetTransition(options);
+        return;
+    }
     ParseAndSetTransitionOption(transitionArgs);
 }
 
@@ -1445,7 +1535,7 @@ void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("Position is not supported");
+        NG::ViewAbstract::SetPosition(ParseNGLocation(info));
         return;
     }
     AnimatableDimension x;
@@ -1461,7 +1551,7 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
 void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("MarkAnchor is not supported");
+        NG::ViewAbstract::MarkAnchor(ParseNGLocation(info));
         return;
     }
     AnimatableDimension x;
@@ -1476,7 +1566,7 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
 void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGW("Offset is not supported");
+        NG::ViewAbstract::SetOffset(ParseNGLocation(info));
         return;
     }
     AnimatableDimension x;
@@ -1718,6 +1808,10 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
     auto id = info[0]->ToString();
     if (id.empty()) {
         LOGE("JsSharedTransition: id is empty.");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGE("new framework does not implement sharedTransition now");
         return;
     }
     auto sharedTransitionComponent = ViewStackProcessor::GetInstance()->GetSharedTransitionComponent();
@@ -3645,6 +3739,12 @@ void JSViewAbstract::JsZIndex(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         zIndex = info[0]->ToNumber<int>();
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetZIndex(zIndex);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
     if (renderComponent) {
@@ -4456,7 +4556,7 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
         NG::ViewAbstract::SetOnKeyEvent(std::move(onKeyEvent));
         return;
     }
-    
+
     RefPtr<JsKeyFunction> jsOnKeyFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
     auto onKeyId = EventMarker(
         [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyFunc)](BaseEventInfo* info) {
@@ -4646,6 +4746,9 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsOpacity(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     if (ViewStackProcessor::GetInstance()->HasDisplayComponent()) {
         auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
         display->DisableLayer(true);
@@ -4655,6 +4758,9 @@ void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
 void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsTransition(info);
+    if (Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
     if (ViewStackProcessor::GetInstance()->HasDisplayComponent()) {
         auto display = ViewStackProcessor::GetInstance()->GetDisplayComponent();
         display->DisableLayer(true);

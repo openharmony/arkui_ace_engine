@@ -232,7 +232,7 @@ void WebPattern::OnFileAccessEnabledUpdate(bool value)
 void WebPattern::OnOnLineImageAccessEnabledUpdate(bool value)
 {
     if (delegate_) {
-        delegate_->UpdateBlockNetworkImage(value);
+        delegate_->UpdateBlockNetworkImage(!value);
     }
 }
 
@@ -365,6 +365,12 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateTextZoomRatio(GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
         delegate_->UpdateWebDebuggingAccess(GetWebDebuggingAccessEnabledValue(false));
         delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
+        if (GetUserAgent()) {
+            delegate_->UpdateUserAgent(GetUserAgent().value());
+        }
+        if (GetInitialScale()) {
+            delegate_->UpdateInitialScale(GetInitialScale().value());
+        }
     }
 
     // update bgcolor.

@@ -67,7 +67,7 @@ public:
         if (jumpIndex_) {
             listLayoutAlgorithm->SetIndex(jumpIndex_.value());
         }
-        listLayoutAlgorithm->SetCurrentOffset(currentOffset_);
+        listLayoutAlgorithm->SetCurrentOffset(currentDelta_);
         listLayoutAlgorithm->SetIsInitialized(isInitialized_);
         listLayoutAlgorithm->SetPlayEdgeEffectAnimation(playEdgeEffectAnimation_);
         return listLayoutAlgorithm;
@@ -132,8 +132,10 @@ private:
     int32_t endIndex_ = -1;
     bool isInitialized_ = false;
     bool playEdgeEffectAnimation_ = false;
-    float currentOffset_ = 0.0f;
+    float totalOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
+
+    float currentDelta_ = 0.0f;
 
     std::optional<int32_t> jumpIndex_;
 

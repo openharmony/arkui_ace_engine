@@ -19,8 +19,11 @@
 #include <cstdint>
 #include <functional>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
+#include "base/geometry/offset.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
@@ -29,6 +32,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewAbstract {
@@ -70,6 +74,14 @@ public:
     static void SetAlign(Alignment alignment);
     static void SetVisibility(VisibleType visible);
 
+    // position
+    static void SetPosition(const OffsetT<Dimension>& value);
+    static void SetOffset(const OffsetT<Dimension>& value);
+    static void MarkAnchor(const OffsetT<Dimension>& value);
+
+    // render position
+    static void SetZIndex(int32_t value);
+
     // transform
     static void SetScale(const NG::VectorF& value);
     static void SetPivot(const DimensionOffset& value);
@@ -105,6 +117,8 @@ public:
     static void BindPopup(const RefPtr<PopupParam>& param);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
+    // transition
+    static void SetTransition(const TransitionOptions& options);
 
     static void Pop();
 };

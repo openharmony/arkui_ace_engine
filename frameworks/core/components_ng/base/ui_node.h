@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_UI_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_UI_NODE_H
 
+#include <cstdint>
 #include <list>
 
 #include "base/geometry/ng/point_t.h"
@@ -69,6 +70,8 @@ public:
     }
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
+
+    int32_t GetChildIndexById(int32_t id);
 
     RefPtr<UINode> GetParent() const
     {

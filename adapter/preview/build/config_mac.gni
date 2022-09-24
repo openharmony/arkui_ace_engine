@@ -27,7 +27,6 @@ if (enable_ark_preview) {
   }
   js_engines += [ ark_engine ]
   build_for_preview = true
-  use_external_icu = "shared"
 } else {
   qjs_engine = {
     engine_name = "qjs"

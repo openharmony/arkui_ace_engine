@@ -24,6 +24,7 @@ public:
     static void OpenImplicitAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
     static bool CloseImplicitAnimation();
+    static void Animate(const AnimationOption& option, const std::function<void()>& wrapFinishCallback);
 };
 } // namespace OHOS::Ace
 

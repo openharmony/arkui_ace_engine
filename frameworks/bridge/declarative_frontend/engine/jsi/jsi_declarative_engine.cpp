@@ -1078,7 +1078,9 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
 
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-
+    if (LoadJsWithModule(url)) {
+        return true;
+    }
     // get js bundle content
     shared_ptr<JsValue> jsCode = runtime->NewUndefined();
     shared_ptr<JsValue> jsAppCode = runtime->NewUndefined();

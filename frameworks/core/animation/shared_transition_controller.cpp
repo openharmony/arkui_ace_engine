@@ -132,7 +132,7 @@ void SharedTransitionController::KickoffSharedTransition(TransitionEvent event, 
     }
     hasSharedTransition_ = PrepareTransition(overlay);
     if (!hasSharedTransition_) {
-        LOGI("No shared elements found. event: %{public}d. dest page id: %{public}d", event_, pageId);
+        LOGD("No shared elements found. event: %{public}d. dest page id: %{public}d", event_, pageId);
         return;
     }
 
