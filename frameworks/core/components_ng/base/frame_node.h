@@ -223,6 +223,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
     void OnInspectorIdUpdate(const std::string& /*unused*/) {}
 
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
     bool IsResponseRegion() const;

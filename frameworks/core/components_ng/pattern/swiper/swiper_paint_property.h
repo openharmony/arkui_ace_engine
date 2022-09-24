@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_PAINT_PROPERTY_H
 
 #include "core/animation/curve.h"
+#include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/paint_property.h"
@@ -28,6 +29,9 @@ struct SwiperAnimationStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AutoPlayInterval, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Duration, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Curve, RefPtr<Curve>);
+
+    static const int32_t DEFAULT_INTERVAL = 3000;
+    static const int32_t DEFAULT_DURATION = 400;
 };
 
 class SwiperPaintProperty : public PaintProperty {
@@ -59,6 +63,22 @@ public:
         ResetDisableSwipe();
         ResetEdgeEffect();
         ResetFadeColor();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        PaintProperty::ToJsonValue(json);
+
+        json->Put("autoPlay", GetAutoPlay().value_or(false) ? "true" : "false");
+        json->Put(
+            "interval", std::to_string(GetAutoPlayInterval().value_or(SwiperAnimationStyle::DEFAULT_INTERVAL)).c_str());
+        json->Put("loop", GetLoop().value_or(true) ? "true" : "false");
+        json->Put("duration", std::to_string(GetDuration().value_or(SwiperAnimationStyle::DEFAULT_DURATION)).c_str());
+        json->Put("disableSwipe", GetDisableSwipe().value_or(false) ? "true" : "false");
+        static const char* EDGE_EFFECT[] = { "EdgeEffect.Spring", "EdgeEffect.Fade", "EdgeEffect.None" };
+        json->Put("effectMode", EDGE_EFFECT[static_cast<int32_t>(GetEdgeEffect().value_or(EdgeEffect::SPRING))]);
+        json->Put("curve",
+            GetCurve().has_value() ? Curves::ToString(GetCurve().value()).c_str() : Curves::DEFAULT_CURVE_NAME.c_str());
     }
 
     ACE_DEFINE_PROPERTY_GROUP(SwiperAnimationStyle, SwiperAnimationStyle);

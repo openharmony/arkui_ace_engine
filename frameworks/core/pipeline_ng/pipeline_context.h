@@ -49,6 +49,11 @@ public:
 
     void SetupRootElement() override;
 
+    const RefPtr<FrameNode>& GetRootElement() const
+    {
+        return rootNode_;
+    }
+
     void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback) override
     {}
 

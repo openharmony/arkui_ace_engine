@@ -44,6 +44,8 @@ public:
     static const RefPtr<AnticipateCurve> ANTICIPATE;
     static const RefPtr<CubicCurve> MAGNETIC;
     static const RefPtr<ElasticsCurve> ELASTICS;
+    static const std::string DEFAULT_CURVE_NAME;
+    static std::string ToString(const RefPtr<Curve>& curve);
 };
 
 } // namespace OHOS::Ace

@@ -168,7 +168,7 @@ public:                                                            \
 
 #define ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(name, type) \
 public:                                                        \
-    const std::optional<type>& Get##name()                     \
+    const std::optional<type>& Get##name() const               \
     {                                                          \
         return prop##name##_;                                  \
     }                                                          \
@@ -271,6 +271,16 @@ public:                                                             \
         }                                               \
         return NearEqual(prop##name.value(), value);    \
     }
+
+#define ACE_PROPERTY_TO_JSON_VALUE(target, type) \
+    do {                                         \
+        if (target) {                            \
+            (target)->ToJsonValue(json);         \
+        } else {                                 \
+            type p;                              \
+            p.ToJsonValue(json);                 \
+        }                                        \
+    } while (false)
 
 class ACE_EXPORT Property : public virtual AceType {
     DECLARE_ACE_TYPE(Property, AceType);
