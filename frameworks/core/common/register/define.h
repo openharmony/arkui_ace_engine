@@ -16,6 +16,7 @@
 #ifndef HDC_TEST
 #define HDC_TEST
 
+#include <sys/un.h>
 #include <unistd.h>
 #include <cstdio>
 #include <cstdlib>
