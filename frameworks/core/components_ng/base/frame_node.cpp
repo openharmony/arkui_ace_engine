@@ -315,7 +315,7 @@ LayoutConstraintF FrameNode::GetLayoutConstraint() const
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     layoutConstraint.percentReference.SetWidth(rootWidth);
     layoutConstraint.percentReference.SetHeight(rootHeight);
-    layoutConstraint.maxSize.SetHeight(rootWidth);
+    layoutConstraint.maxSize.SetWidth(rootWidth);
     layoutConstraint.maxSize.SetHeight(rootHeight);
     return layoutConstraint;
 }
