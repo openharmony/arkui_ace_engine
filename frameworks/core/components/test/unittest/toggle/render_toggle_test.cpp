@@ -84,7 +84,7 @@ HWTEST_F(RenderToggleTest, RenderToggleTest001, TestSize.Level1)
     /**
      * @tc.steps: step4. Restore state of toggle component.
      * @tc.expected: step4. The state is correct.
-     */  
+     */
     renderToggle->SetRestoreInfo(expectStateResult);
     renderToggle->Update(toggleComponent);
     EXPECT_TRUE(toggleComponent->GetCheckedState());
@@ -92,14 +92,14 @@ HWTEST_F(RenderToggleTest, RenderToggleTest001, TestSize.Level1)
     /**
      * @tc.steps: step5. Second Update doesn't restore the state.
      * @tc.expected: step5. The stored string is empty.
-     */ 
+     */
     renderToggle->Update(toggleComponent);
     EXPECT_TRUE(renderToggle->GetRestoreInfo().empty());
 
     /**
      * @tc.steps: step6. Restore state from invalid json string.
      * @tc.expected: step6. The state is unchanged.
-     */  
+     */
     std::string invalidInfo = "checked\":false,\"isPressed\":false";
     renderToggle->SetRestoreInfo(invalidInfo);
     renderToggle->Update(toggleComponent);

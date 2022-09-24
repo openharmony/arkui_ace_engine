@@ -1278,18 +1278,28 @@ void RenderFlex::OnVisibleChanged()
 
 std::string RenderFlex::ProvideRestoreInfo()
 {
+    if (GetChildren().empty()) {
+        return "";
+    }
+
     if (isTabs_) {
         auto childNode = GetChildren().front();
+        if (!childNode || childNode->GetChildren().empty()) {
+            return "";
+        }
         auto childChildNode = childNode->GetChildren().front();
+        if (!childChildNode) {
+            return "";
+        }
         isTabs_ = false;
         return childChildNode->ProvideRestoreInfo();
-    } 
+    }
 
     if (isTabContent_) {
         auto childNode = GetChildren().back();
         auto childChildNode = childNode->GetChildren().front();
         isTabContent_ = false;
-        return childChildNode->ProvideRestoreInfo(); 
+        return childChildNode->ProvideRestoreInfo();
     }
     
     return "";

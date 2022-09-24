@@ -110,7 +110,7 @@ HWTEST_F(RenderSwiperTest, RenderSwiperTestContinuation001, TestSize.Level1)
     /**
      * @tc.steps: step3. Restore index state of swiper component.
      * @tc.expected: step3. The index state is correct.
-     */  
+     */
     swiperIndicator->SetRestoreInfo(expectStateResult);
     auto mockContext = MockRenderCommon::GetMockContext();
     swiperIndicator->Attach(mockContext);
@@ -120,14 +120,14 @@ HWTEST_F(RenderSwiperTest, RenderSwiperTestContinuation001, TestSize.Level1)
     /**
      * @tc.steps: step4. Second Update doesn't restore the state.
      * @tc.expected: step4. The stored string is empty.
-     */ 
+     */
     swiperIndicator->Update(swiperComponent);
     EXPECT_TRUE(swiperIndicator->GetRestoreInfo().empty());
 
     /**
      * @tc.steps: step5. Restore index state from invalid json string.
      * @tc.expected: step5. The index state is unchanged.
-     */  
+     */
     std::string invalidInfo = "index\":0,\"currentIndex\":2,\"swipeToIndex\":-1";
     swiperIndicator->SetRestoreInfo(invalidInfo);
     swiperIndicator->Update(swiperComponent);

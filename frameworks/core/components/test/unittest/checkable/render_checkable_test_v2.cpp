@@ -123,7 +123,7 @@ HWTEST_F(RenderCheckableTestV2, RenderCheckableContinuation001, TestSize.Level1)
     /**
      * @tc.steps: step3. Store checked state of checkbox component.
      * @tc.expected: step3. The return string is correct.
-     */    
+     */
     std::string info = renderCheckbox->ProvideRestoreInfo();
     std::string expectStateResult = "1";
     EXPECT_EQ(info, expectStateResult);
@@ -131,7 +131,7 @@ HWTEST_F(RenderCheckableTestV2, RenderCheckableContinuation001, TestSize.Level1)
     /**
      * @tc.steps: step4. Restore checked state of checkbox component.
      * @tc.expected: step4. The checked state is correct.
-     */  
+     */
     renderCheckbox->SetRestoreInfo(expectStateResult);
     renderCheckbox->Update(checkboxComponent);
     EXPECT_TRUE(renderCheckbox->GetChecked());
@@ -139,7 +139,7 @@ HWTEST_F(RenderCheckableTestV2, RenderCheckableContinuation001, TestSize.Level1)
     /**
      * @tc.steps: step5. Second Update doesn't restore the state.
      * @tc.expected: step5. The stored string is empty.
-     */ 
+     */
     renderCheckbox->Update(checkboxComponent);
     EXPECT_TRUE(renderCheckbox->GetRestoreInfo().empty());
 
@@ -171,7 +171,7 @@ HWTEST_F(RenderCheckableTestV2, RenderCheckableContinuation002, TestSize.Level1)
     /**
      * @tc.steps: step3. Store checked state of switch component.
      * @tc.expected: step3. The return string is correct.
-     */    
+     */
     std::string info = renderSwitch->ProvideRestoreInfo();
     std::string expectStateResult = "1";
     EXPECT_EQ(info, expectStateResult);
@@ -187,7 +187,7 @@ HWTEST_F(RenderCheckableTestV2, RenderCheckableContinuation002, TestSize.Level1)
     /**
      * @tc.steps: step5. Second Update doesn't restore the state.
      * @tc.expected: step5. The stored string is empty.
-     */ 
+     */
     renderSwitch->Update(switchComponent);
     EXPECT_TRUE(renderSwitch->GetRestoreInfo().empty());
 
@@ -231,7 +231,7 @@ HWTEST_F(RenderCheckableTestV2, RenderCheckableContinuation003, TestSize.Level1)
     /**
      * @tc.steps: step4. Restore checked state of radio component.
      * @tc.expected: step4. The checked state is correct.
-     */  
+     */
     renderRadio->SetRestoreInfo(expectStateResult);
     renderRadio->Update(radioComponent);
     EXPECT_TRUE(renderRadio->GetChecked());
@@ -241,14 +241,14 @@ HWTEST_F(RenderCheckableTestV2, RenderCheckableContinuation003, TestSize.Level1)
     /**
      * @tc.steps: step5. Second Update doesn't restore the state.
      * @tc.expected: step5. The stored string is empty.
-     */ 
+     */
     renderRadio->Update(radioComponent);
     EXPECT_TRUE(renderRadio->GetRestoreInfo().empty());
 
     /**
      * @tc.steps: step6. Restore state from invalid json string.
      * @tc.expected: step6. The state is unchanged.
-     */  
+     */
     std::string invalidInfo = "checked\":true,\"radioValue\":\"radio1\",\"groupValue\":\"radio2";
     renderRadio->SetRestoreInfo(invalidInfo);
     renderRadio->Update(radioComponent);

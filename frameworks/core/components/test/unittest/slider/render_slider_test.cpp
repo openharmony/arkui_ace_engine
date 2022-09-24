@@ -251,13 +251,21 @@ HWTEST_F(RenderSliderTest, RenderSliderTest006, TestSize.Level1)
      * @tc.expected: step3. The return string is correct.
      */
     std::string info = renderSlider->ProvideRestoreInfo();
-    std::string expectStateResult = "{\"value\":50,\"showTips\":false,\"showSteps\":false,\"thickness\":4,\"min\":0,\"max\":100,\"step\":1}";
+    std::string expectStateResult = "{"
+                                    "\"value\":50,"
+                                    "\"showTips\":false,"
+                                    "\"showSteps\":false,"
+                                    "\"thickness\":4,"
+                                    "\"min\":0,"
+                                    "\"max\":100,"
+                                    "\"step\":1"
+                                    "}";
     EXPECT_EQ(info, expectStateResult);
 
     /**
      * @tc.steps: step4. Restore value of slider component.
      * @tc.expected: step4. The value is correct.
-     */  
+     */
     renderSlider->SetRestoreInfo(expectStateResult);
     renderSlider->Update(sliderComponent);
     EXPECT_EQ(renderSlider->GetValue(), 50.0);
@@ -265,15 +273,21 @@ HWTEST_F(RenderSliderTest, RenderSliderTest006, TestSize.Level1)
     /**
      * @tc.steps: step5. Second Update doesn't restore the state.
      * @tc.expected: step5. The stored string is empty.
-     */ 
+     */
     renderSlider->Update(sliderComponent);
     EXPECT_TRUE(renderSlider->GetRestoreInfo().empty());
 
     /**
      * @tc.steps: step6. Restore state from invalid json string.
      * @tc.expected: step6. The state is unchanged.
-     */  
-    std::string invalidInfo = "value\":60,\"showTips\":false,\"showSteps\":false,\"thickness\":4,\"min\":0,\"max\":100,\"step\":1";
+     */
+    std::string invalidInfo = "value\":60,"
+                              "\"showTips\":false,"
+                              "\"showSteps\":false,"
+                              "\"thickness\":4,"
+                              "\"min\":0,"
+                              "\"max\":100,"
+                              "\"step\":1";
     renderSlider->SetRestoreInfo(invalidInfo);
     renderSlider->Update(sliderComponent);
     EXPECT_EQ(renderSlider->GetValue(), 50.0);

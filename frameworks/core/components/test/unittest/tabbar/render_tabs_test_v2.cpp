@@ -82,7 +82,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation001, TestSize.Level1)
     /**
      * @tc.steps: step3. Store index state of tabbar component.
      * @tc.expected: step3. The return string is correct.
-     */    
+     */
     std::string info = renderFlex->ProvideRestoreInfo();
     std::string expectStateResult = "{\"index\":2,\"OffsetX\":0,\"OffsetY\":0}";
     EXPECT_EQ(info, expectStateResult);
@@ -90,7 +90,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation001, TestSize.Level1)
     /**
      * @tc.steps: step4. Restore index state of tabbar component.
      * @tc.expected: step4. The index state is correct.
-     */  
+     */
     renderFlex->SetRestoreInfo(expectStateResult);
     renderTabBar->Update(tabBarComponent);
     EXPECT_EQ(renderTabBar->GetIndex(), 2);
@@ -98,14 +98,14 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation001, TestSize.Level1)
     /**
      * @tc.steps: step5. Second Update doesn't restore the state.
      * @tc.expected: step5. The stored string is empty.
-     */ 
+     */
     renderTabBar->Update(tabBarComponent);
     EXPECT_TRUE(renderFlex->GetRestoreInfo().empty());
 
     /**
      * @tc.steps: step6. Restore state from invalid json string.
      * @tc.expected: step6. The state is unchanged.
-     */  
+     */
     std::string invalidInfo = "{\"index\":3,\"OffsetX\":0,\"OffsetY\":0}";
     renderTabBar->SetRestoreInfo(invalidInfo);
     renderTabBar->Update(tabBarComponent);
@@ -147,7 +147,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation002, TestSize.Level1)
     RefPtr<RenderBox> renderBox = AceType::MakeRefPtr<RenderBox>();
     RefPtr<RenderTabContent> renderTabContent = AceType::MakeRefPtr<RenderTabContent>();
     auto mockContext = MockRenderCommon::GetMockContext();
-    renderTabContent->Attach(mockContext);    
+    renderTabContent->Attach(mockContext);
     renderFlex->Update(flexComponent);
     renderBox->AddChild(renderTabContent);
     renderFlex->AddChild(renderBox);
@@ -155,7 +155,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation002, TestSize.Level1)
     /**
      * @tc.steps: step3. Store index state of tabcontent component.
      * @tc.expected: step3. The return string is correct.
-     */    
+     */
     std::string info = renderTabContent->ProvideRestoreInfo();
     std::string expectStateResult = "0";
     EXPECT_EQ(info, expectStateResult);
@@ -163,7 +163,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation002, TestSize.Level1)
     /**
      * @tc.steps: step4. Restore index state of tabcontent component.
      * @tc.expected: step4. The index state is correct.
-     */  
+     */
     renderTabContent->SetRestoreInfo(expectStateResult);
     renderTabContent->Update(tabContentComponent);
     EXPECT_EQ(renderTabContent->GetCurrentIndex(), 0);
@@ -171,7 +171,7 @@ HWTEST_F(RenderTabsTestV2, RenderTabsContinuation002, TestSize.Level1)
     /**
      * @tc.steps: step5. Second Update doesn't restore the state.
      * @tc.expected: step5. The stored string is empty.
-     */ 
+     */
     renderTabContent->Update(tabContentComponent);
     EXPECT_TRUE(renderFlex->GetRestoreInfo().empty());
 

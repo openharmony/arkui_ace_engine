@@ -100,7 +100,6 @@ void RenderTabBar::FlushIndex(const RefPtr<TabController>& controller)
 	
     ApplyRestoreInfo(controller);
 
-	
     LOGD("focus index_ %{public}d tabsSize_ %{public}d, index %{public}d, initial %{public}d, pending %{public}d",
         index_, tabsSize_, index, controller->GetInitialIndex(), controller->GetIndex());
     controller->SetIndexWithoutChangeContent(index_);

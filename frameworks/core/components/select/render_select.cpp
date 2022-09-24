@@ -75,7 +75,7 @@ std::string RenderSelect::ProvideRestoreInfo()
         if (optionComponent->GetSelected()) {
             index_ = index;
             break;
-        } 
+        }
     }
     return std::to_string(index_);
 }

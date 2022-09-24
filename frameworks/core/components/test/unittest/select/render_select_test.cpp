@@ -75,8 +75,6 @@ HWTEST_F(RenderSelectTest, RenderSelectContinuation001, TestSize.Level1)
         } else {
             option->SetSelectable(false);
             option->SetSelected(false);
-            // RefPtr<TextComponent> text = AceType::MakeRefPtr<TextComponent>("test");
-            // option->SetText(text);
         }
         select->InsertSelectOption(option, i);
     }
@@ -90,7 +88,7 @@ HWTEST_F(RenderSelectTest, RenderSelectContinuation001, TestSize.Level1)
     /**
      * @tc.steps: step3. Store index state of select component.
      * @tc.expected: step3. The return string is correct.
-     */    
+     */
     std::string info = renderSelect->ProvideRestoreInfo();
     std::string expectStateResult = "2";
     EXPECT_EQ(info, expectStateResult);
