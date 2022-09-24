@@ -25,6 +25,14 @@ class IndexerElement : public ComponentGroupElement, public FocusNode {
 
 public:
     void PerformBuild() override;
+    bool CanUpdate(const RefPtr<Component>& newComponent) override
+    {
+        auto context = context_.Upgrade();
+        if (context && context->GetIsDeclarative()) {
+            return false;
+        }
+        return true;
+    }
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INDEXER_INDEXER_ELEMENT_H
