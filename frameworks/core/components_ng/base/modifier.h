@@ -42,6 +42,12 @@ struct AnimateConfig {
     bool autoReverse = false;
 };
 
+struct DrawingContext {
+    RSCanvas& canvas;
+    float width = 0;
+    float height = 0;
+};
+
 template<typename T>
 class ContentModifier : public Modifier {
     DECLARE_ACE_TYPE(ContentModifier, Modifier);
@@ -49,7 +55,7 @@ class ContentModifier : public Modifier {
 public:
     explicit ContentModifier(T prop) : initValue_(prop) {}
     ~ContentModifier() override = default;
-    virtual void onDraw(RSCanvas& canvas, const T& prop) = 0;
+    virtual void onDraw(DrawingContext& Context, const T& prop) = 0;
     T GetInitValue()
     {
         return initValue_;

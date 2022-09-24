@@ -23,17 +23,14 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
-#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Rosen::Drawing {
 class Canvas;
 }
-// namespace OHOS::Rosen {
-// class RSModifierBase;
-// }
 namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
@@ -42,7 +39,6 @@ class Modifier;
 
 using RSCanvas = Rosen::Drawing::Canvas;
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
-// using RSModifierBase = Rosen::RSModifierBase;
 
 // RenderContext is used for render node to paint.
 class RenderContext : public virtual AceType {

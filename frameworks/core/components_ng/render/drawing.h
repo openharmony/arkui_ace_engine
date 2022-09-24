@@ -65,6 +65,9 @@ using RSColorQuad = rosen::ColorQuad;
 using RSShaderEffect = rosen::ShaderEffect;
 using RSTileMode = rosen::TileMode;
 using RSShaderEffect = rosen::ShaderEffect;
+using RSColorQuad = rosen::ColorQuad;
+using RSShaderEffect = rosen::ShaderEffect;
+using RSTileMode = rosen::TileMode;
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H

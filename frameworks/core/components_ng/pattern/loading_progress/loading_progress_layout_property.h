@@ -19,6 +19,7 @@
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
+    
 class ACE_EXPORT LoadingProgressLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(LoadingProgressLayoutProperty, LayoutProperty);
 

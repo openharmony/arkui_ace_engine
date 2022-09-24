@@ -66,7 +66,8 @@ public:
         std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
         RSCanvas canvas(&skCanvas);
         if (modifier_ && property_) {
-            modifier_->onDraw(canvas, property_->Get());
+            DrawingContext context_ = { canvas, context.width, context.height };
+            modifier_->onDraw(context_, property_->Get());
         }
     }
 

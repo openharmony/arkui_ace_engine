@@ -34,7 +34,6 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        // auto property_ = std::make_shared<RSAnimatableProperty<float>>(0);
         auto loadingProgressModifier_ = AceType::MakeRefPtr<LoadingProgressModifier>();
         return MakeRefPtr<LoadingProgressPaintMethod>(loadingProgressModifier_);
     }

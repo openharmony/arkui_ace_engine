@@ -18,6 +18,7 @@
 #include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG {
+    
 LoadingProgressLayoutAlgorithm::LoadingProgressLayoutAlgorithm() = default;
 
 std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(

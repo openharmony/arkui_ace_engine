@@ -21,18 +21,13 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_modifer.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
-// #include "core/components_ng/render/modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
 
-const float SPEED = 0.5f;
 namespace OHOS::Ace::NG {
+    
 class ACE_EXPORT LoadingProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(LoadingProgressPaintMethod, NodePaintMethod)
 public:
-    // LoadingProgressPaintMethod(std::shared_ptr<LoadingProgressModifier> loadingProgressModifier,
-    //     std::shared_ptr<RSAnimatableProperty<float>> property)
-    //     : loadingProgressModifier_(loadingProgressModifier), property_(property)
-    // {}
     explicit LoadingProgressPaintMethod(const RefPtr<LoadingProgressModifier>& loadingProgressModifier)
         : loadingProgressModifier_(loadingProgressModifier)
     {}
@@ -51,23 +46,15 @@ public:
 
     void UpdateModifier(PaintWrapper* paintWrapper) override
     {
-        // std::shared_ptr<RSAnimatableProperty<float>> property = property_;
-        // RSAnimationTimingProtocol protocol;
-        // protocol.SetSpeed(SPEED);
-        // protocol.SetAutoReverse(false);
-        // protocol.SetRepeatCount(-1);
-        // RSNode::Animate(
-        //     protocol, RSAnimationTimingCurve::LINEAR, [property]() { property->Set(FULL_COUNT); }, []() {});
+        constexpr float speedOfModifier = 0.1f;
         if (loadingProgressModifier_) {
             loadingProgressModifier_->UpdateModifier(
-                { .speed = SPEED, .repeatTimes = -1, .autoReverse = false }, FULL_COUNT);
+                { .speed = speedOfModifier, .repeatTimes = -1, .autoReverse = false }, FULL_COUNT);
         }
     }
 
 private:
     Color color_ = Color::BLUE;
-    // std::shared_ptr<LoadingProgressModifier> loadingProgressModifier_;
-    // std::shared_ptr<RSAnimatableProperty<float>> property_;
     RefPtr<LoadingProgressModifier> loadingProgressModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressPaintMethod);
 };

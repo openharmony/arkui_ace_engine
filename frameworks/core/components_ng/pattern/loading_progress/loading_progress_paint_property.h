@@ -20,6 +20,7 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+    
 class ACE_EXPORT LoadingProgressPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(LoadingProgressPaintProperty, PaintProperty);
 

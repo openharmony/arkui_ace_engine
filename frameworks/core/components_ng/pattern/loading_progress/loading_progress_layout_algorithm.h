@@ -19,7 +19,6 @@
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
-class PipelineContext;
 
 class ACE_EXPORT LoadingProgressLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(LoadingProgressLayoutAlgorithm, BoxLayoutAlgorithm);

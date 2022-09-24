@@ -22,6 +22,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+    
 void LoadingProgressView::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
