@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MODIFIER_H
 
 #include <functional>
-#include "nocopyable.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -34,7 +33,7 @@ public:
     ~Modifier() override = default;
 
 private:
-    DISALLOW_COPY_AND_MOVE(Modifier);
+    ACE_DISALLOW_COPY_AND_MOVE(Modifier);
 };
 
 struct AnimateConfig {
@@ -45,7 +44,7 @@ struct AnimateConfig {
 
 template<typename T>
 class ContentModifier : public Modifier {
-    DECLARE_ACE_TYPE(ContentModifier<T>, Modifier);
+    DECLARE_ACE_TYPE(ContentModifier, Modifier);
 
 public:
     explicit ContentModifier(T prop) : initValue_(prop) {}
@@ -70,8 +69,20 @@ public:
 private:
     T initValue_;
     std::function<void(const AnimateConfig&, const T&)> updateFunc_;
-    DISALLOW_COPY_AND_MOVE(ContentModifier);
+    ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
 };
+
+#define DECLARE_MODIFIER_TYPED_CLASS(classname, template_class, type) \
+    class classname : public template_class<type> {                   \
+        DECLARE_ACE_TYPE(classname, template_class);                  \
+                                                                      \
+    public:                                                           \
+        explicit classname(type value) : template_class(value) {}     \
+        ~classname() override = default;                              \
+        ACE_DISALLOW_COPY_AND_MOVE(classname);                        \
+    };
+
+DECLARE_MODIFIER_TYPED_CLASS(ContentModifierFloat, ContentModifier, float);
 
 } // namespace OHOS::Ace::NG
 

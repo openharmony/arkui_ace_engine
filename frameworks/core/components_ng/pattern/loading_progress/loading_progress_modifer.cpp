@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 
-LoadingProgressModifier::LoadingProgressModifier() : ContentModifier<float>(0.0) {}
+LoadingProgressModifier::LoadingProgressModifier() : ContentModifierFloat(0.0) {}
 
 // void LoadingProgressModifier::DrawRing(RSDrawingContext& context, float date, float scale_) const
 // {

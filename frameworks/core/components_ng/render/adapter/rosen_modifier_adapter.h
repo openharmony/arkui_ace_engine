@@ -19,7 +19,7 @@
 #include <functional>
 #include <memory>
 
-#include "nocopyable.h"
+#include "include/core/SkCanvas.h"
 #include "render_service_client/core/modifier/rs_extended_modifier.h"
 #include "render_service_client/core/modifier/rs_modifier.h"
 #include "render_service_client/core/ui/rs_node.h"
@@ -45,13 +45,6 @@ template<typename T>
 using RSOverlayStyleModifier = Rosen::RSOverlayStyleModifier<T>;
 using RSDrawingContext = Rosen::RSDrawingContext;
 
-#define CONVERT_MODIFIER(modifier, modifierType, propertyType)                                                 \
-    if (AceType::InstanceOf<modifierType<propertyType>>(modifier)) {                                           \
-        auto castModifier = AceType::DynamicCast<modifierType<propertyType>>(modifier);                        \
-        return std::make_shared<modifierType##Adapter<propertyType>>(                                          \
-            castModifier, std::make_shared<RSAnimatableProperty<propertyType>>(castModifier->GetInitValue())); \
-    }
-
 template<typename T>
 class ContentModifierAdapter : public RSContentStyleModifier<RSAnimatableProperty<T>> {
 public:
@@ -69,7 +62,9 @@ public:
 
     void Draw(RSDrawingContext& context) const override
     {
-        RSCanvas canvas(context.canvas);
+        // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
+        std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
+        RSCanvas canvas(&skCanvas);
         if (modifier_ && property_) {
             modifier_->onDraw(canvas, property_->Get());
         }
@@ -90,18 +85,20 @@ private:
     RefPtr<ContentModifier<T>> modifier_;
     std::shared_ptr<RSAnimatableProperty<T>> property_;
 
-    DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);
+    ACE_DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);
 };
+
+#define CONVERT_MODIFIER(modifier, srcType, dstType, propertyType)                                             \
+    if (AceType::InstanceOf<srcType>(modifier)) {                                                              \
+        auto castModifier = AceType::DynamicCast<srcType>(modifier);                                           \
+        return std::make_shared<dstType<propertyType>>(                                                        \
+            castModifier, std::make_shared<RSAnimatableProperty<propertyType>>(castModifier->GetInitValue())); \
+    }
 
 inline std::shared_ptr<RSModifierBase> ConvertModifier(const RefPtr<Modifier>& modifier)
 {
     // should manually add convert type here
-    CONVERT_MODIFIER(modifier, ContentModifier, float);
-    // if (AceType::InstanceOf<ContentModifier<float>>(modifier)) {
-    //     auto castModifier = AceType::DynamicCast<ContentModifier<float>>(modifier);
-    //     return std::make_shared<ContentModifierAdapter<float>>(
-    //         castModifier, std::make_shared<RSAnimatableProperty<float>>(castModifier->GetInitValue()));
-    // }
+    CONVERT_MODIFIER(modifier, ContentModifierFloat, ContentModifierAdapter, float);
     return nullptr;
 }
 

@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFIER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFIER_H
 
 #include "include/core/SkColor.h"
-#include "nocopyable.h"
 
+#include "base/memory/ace_type.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/property/property.h"
-// #include "core/components_ng/render/modifier.h"
 #include "core/components_ng/base/modifier.h"
 
 namespace OHOS::Ace::NG {
@@ -44,12 +43,9 @@ const float ROTATEX = 80.f;
 const float ROTATEY = -45.f;
 const float ROTATEZ = 20.f;
 
-// class LoadingProgressModifier : public RSContentStyleModifier<RSAnimatableProperty<float>> {
-class LoadingProgressModifier : public ContentModifier<float> {
+class LoadingProgressModifier : public ContentModifierFloat {
+    DECLARE_ACE_TYPE(LoadingProgressModifier, ContentModifierFloat);
 public:
-    // LoadingProgressModifier(const std::shared_ptr<RSAnimatableProperty<float>>& property)
-    //     : Rosen::RSContentStyleModifier<RSAnimatableProperty<float>>(property)
-    // {}
     LoadingProgressModifier();
     ~LoadingProgressModifier() override = default;
     void onDraw(RSCanvas& canvas, const float& date) override
@@ -85,8 +81,8 @@ public:
 private:
     SkColor color_ = SK_ColorBLUE;
 
-    DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
+    ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFIER_H
