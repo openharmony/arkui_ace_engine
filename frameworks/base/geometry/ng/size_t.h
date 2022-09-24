@@ -54,6 +54,11 @@ public:
         return axis == Axis::HORIZONTAL ? width_ : height_;
     }
 
+    T CrossSize(Axis axis) const
+    {
+        return axis == Axis::HORIZONTAL ? height_ : width_;
+    }
+
     void SetWidth(T width)
     {
         width_ = width;
@@ -337,6 +342,11 @@ public:
     const std::optional<T>& MainSize(Axis axis) const
     {
         return axis == Axis::HORIZONTAL ? width_ : height_;
+    }
+
+    const std::optional<T>& CrossSize(Axis axis) const
+    {
+        return axis == Axis::HORIZONTAL ? height_ : width_;
     }
 
     void SetWidth(T width)

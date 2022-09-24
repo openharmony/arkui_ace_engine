@@ -19,15 +19,17 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
+// Effect when rowsTemplate and columnsTemplate are not setted, this algorithm effect these attribute:
+// columnsGap | rowsGap | layoutDirection | maxCount | minCount | cellLength.
 class ACE_EXPORT GridAdaptiveLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(GridAdaptiveLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    GridAdaptiveLayoutAlgorithm(GridLayoutInfo gridLayoutInfo, uint32_t crossCount, uint32_t mainCount)
-        : gridLayoutInfo_(std::move(gridLayoutInfo)), crossCount_(crossCount), mainCount_(mainCount) {};
+    explicit GridAdaptiveLayoutAlgorithm(GridLayoutInfo gridLayoutInfo) : gridLayoutInfo_(std::move(gridLayoutInfo)) {};
     ~GridAdaptiveLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -36,10 +38,18 @@ public:
     GridLayoutInfo GetGridLayoutInfo();
 
 private:
+    OffsetF CalculateChildOffset(int32_t index, LayoutWrapper* layoutWrapper) const;
+
     GridLayoutInfo gridLayoutInfo_;
 
-    uint32_t crossCount_ = 0;
-    uint32_t mainCount_ = 0;
+    // cell size of grid.
+    SizeF gridCellSize_;
+    // grid cell count in main axis.
+    int32_t mainCount_ = 0;
+    // grid cell count in cross axis.
+    int32_t crossCount_ = 0;
+    // total count has shown.
+    int32_t displayCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridAdaptiveLayoutAlgorithm);
 };

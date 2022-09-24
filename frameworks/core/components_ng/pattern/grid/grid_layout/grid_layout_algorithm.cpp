@@ -51,9 +51,7 @@ LayoutConstraintF GridLayoutAlgorithm::CreateChildConstraint(const SizeF& idealS
     colLen += (colSpan - 1) * columnsGap;
 
     layoutConstraint.maxSize = SizeF(colLen, rowLen);
-    if (!layoutConstraint.selfIdealSize.IsValid()) {
-        layoutConstraint.selfIdealSize = OptionalSizeF(SizeF(colLen, rowLen));
-    }
+    layoutConstraint.selfIdealSize.UpdateIllegalSizeWithCheck(SizeF(colLen, rowLen));
     return layoutConstraint;
 }
 

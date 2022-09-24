@@ -40,7 +40,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
         return MakeRefPtr<GridLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }
     if (rows.empty() && cols.empty()) {
-        return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+        return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(gridLayoutInfo_);
     }
     return MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
 }
