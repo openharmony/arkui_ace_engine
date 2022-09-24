@@ -515,6 +515,9 @@ void RenderButton::SetChildrenLayoutSize()
         }
     }
     innerLayoutParam.SetMaxSize(Size(maxWidth, height));
+    if (GetChildren().empty()) {
+        childrenSize_ = Size();
+    }
     for (const auto& child : GetChildren()) {
         child->Layout(innerLayoutParam);
         childrenSize_.SetWidth(child->GetLayoutSize().Width());
