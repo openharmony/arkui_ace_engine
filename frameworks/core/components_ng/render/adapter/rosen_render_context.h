@@ -121,7 +121,7 @@ public:
 
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(const TransitionOptions& options);
 
-    void FlushModifyer(std::shared_ptr<Rosen::RSModifierBase>&& modifier) override;
+    void FlushModifier(const RefPtr<Modifier>& modifier) override;
 
 private:
     void OnBackgroundColorUpdate(const Color& value) override;

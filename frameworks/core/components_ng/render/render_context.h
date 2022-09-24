@@ -31,17 +31,18 @@
 namespace OHOS::Rosen::Drawing {
 class Canvas;
 }
-namespace OHOS::Rosen {
-class RSModifierBase;
-}
+// namespace OHOS::Rosen {
+// class RSModifierBase;
+// }
 namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
+class Modifier;
 
 using RSCanvas = Rosen::Drawing::Canvas;
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
-using RSModifierBase = Rosen::RSModifierBase;
+// using RSModifierBase = Rosen::RSModifierBase;
 
 // RenderContext is used for render node to paint.
 class RenderContext : public virtual AceType {
@@ -64,7 +65,7 @@ public:
 
     virtual void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
 
-    virtual void FlushModifyer(std::shared_ptr<RSModifierBase>&& modifier) {}
+    virtual void FlushModifier(const RefPtr<Modifier>& modifier) {}
 
     virtual void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
 

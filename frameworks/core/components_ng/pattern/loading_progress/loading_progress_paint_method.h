@@ -16,10 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PROGRESS_LOADING_PROGRESS_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PROGRESS_LOADING_PROGRESS_PAINT_METHOD_H
 
+#include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_modifer.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
-#include "core/components_ng/render/modifier.h"
+// #include "core/components_ng/render/modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 const float SPEED = 0.5f;
@@ -27,13 +29,16 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT LoadingProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(LoadingProgressPaintMethod, NodePaintMethod)
 public:
-    LoadingProgressPaintMethod(std::shared_ptr<LoadingProgressModifier> loadingProgressModifier,
-        std::shared_ptr<RSAnimatableProperty<float>> property)
-        : loadingProgressModifier_(loadingProgressModifier), property_(property)
+    // LoadingProgressPaintMethod(std::shared_ptr<LoadingProgressModifier> loadingProgressModifier,
+    //     std::shared_ptr<RSAnimatableProperty<float>> property)
+    //     : loadingProgressModifier_(loadingProgressModifier), property_(property)
+    // {}
+    explicit LoadingProgressPaintMethod(const RefPtr<LoadingProgressModifier>& loadingProgressModifier)
+        : loadingProgressModifier_(loadingProgressModifier)
     {}
     ~LoadingProgressPaintMethod() override = default;
 
-    std::shared_ptr<RSModifierBase> GetModifyer(PaintWrapper* paintWrapper) override
+    RefPtr<Modifier> GetModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(loadingProgressModifier_, nullptr);
         auto paintProperty = DynamicCast<LoadingProgressPaintProperty>(paintWrapper->GetPaintProperty());
@@ -44,21 +49,26 @@ public:
         return loadingProgressModifier_;
     }
 
-    void UpDateModifyer(PaintWrapper* paintWrapper) override
+    void UpdateModifier(PaintWrapper* paintWrapper) override
     {
-        std::shared_ptr<RSAnimatableProperty<float>> property = property_;
-        RSAnimationTimingProtocol protocol;
-        protocol.SetSpeed(SPEED);
-        protocol.SetAutoReverse(false);
-        protocol.SetRepeatCount(-1);
-        RSNode::Animate(
-            protocol, RSAnimationTimingCurve::LINEAR, [property]() { property->Set(FULL_COUNT); }, []() {});
+        // std::shared_ptr<RSAnimatableProperty<float>> property = property_;
+        // RSAnimationTimingProtocol protocol;
+        // protocol.SetSpeed(SPEED);
+        // protocol.SetAutoReverse(false);
+        // protocol.SetRepeatCount(-1);
+        // RSNode::Animate(
+        //     protocol, RSAnimationTimingCurve::LINEAR, [property]() { property->Set(FULL_COUNT); }, []() {});
+        if (loadingProgressModifier_) {
+            loadingProgressModifier_->UpdateModifier(
+                { .speed = SPEED, .repeatTimes = -1, .autoReverse = false }, FULL_COUNT);
+        }
     }
 
 private:
     Color color_ = Color::BLUE;
-    std::shared_ptr<LoadingProgressModifier> loadingProgressModifier_;
-    std::shared_ptr<RSAnimatableProperty<float>> property_;
+    // std::shared_ptr<LoadingProgressModifier> loadingProgressModifier_;
+    // std::shared_ptr<RSAnimatableProperty<float>> property_;
+    RefPtr<LoadingProgressModifier> loadingProgressModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressPaintMethod);
 };
 

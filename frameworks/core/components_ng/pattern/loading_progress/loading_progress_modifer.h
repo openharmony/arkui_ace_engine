@@ -17,12 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFER_H
 
 #include "include/core/SkColor.h"
+#include "nocopyable.h"
 
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/modifier.h"
+// #include "core/components_ng/render/modifier.h"
+#include "core/components_ng/base/modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -42,37 +44,39 @@ const float ROTATEX = 80.f;
 const float ROTATEY = -45.f;
 const float ROTATEZ = 20.f;
 
-class LoadingProgressModifier : public RSContentStyleModifier<RSAnimatableProperty<float>> {
+// class LoadingProgressModifier : public RSContentStyleModifier<RSAnimatableProperty<float>> {
+class LoadingProgressModifier : public ContentModifier<float> {
 public:
-    LoadingProgressModifier(const std::shared_ptr<RSAnimatableProperty<float>>& property)
-        : Rosen::RSContentStyleModifier<RSAnimatableProperty<float>>(property)
-    {}
-    virtual ~LoadingProgressModifier() = default;
-    void Draw(RSDrawingContext& context) const override
+    // LoadingProgressModifier(const std::shared_ptr<RSAnimatableProperty<float>>& property)
+    //     : Rosen::RSContentStyleModifier<RSAnimatableProperty<float>>(property)
+    // {}
+    LoadingProgressModifier();
+    ~LoadingProgressModifier() override = default;
+    void onDraw(RSCanvas& canvas, const float& date) override
     {
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto pipeline = container->GetPipelineContext();
-        CHECK_NULL_VOID(pipeline);
-        auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_VOID(themeManager);
-        auto parogressTheme = themeManager->GetTheme<ProgressTheme>();
-        float date = property_->Get();
-        float scale_ = 1.0;
-        scale_ = std::min((context.width / (ORBIT_RADIUS.ConvertToPx() + COMET_WIDTH.ConvertToPx())),
-            (context.height / (RING_RADIUS.ConvertToPx() * 2 * (1 + RING_MOVEMENT)) + RING_WIDTH.ConvertToPx() * HALF));
-        scale_ = scale_ / 2;
-        if (date > COUNT) {
-            DrawRing(context, date, scale_);
-            DrawOrbit(context, date, scale_);
-        } else {
-            DrawOrbit(context, date, scale_);
-            DrawRing(context, date, scale_);
-        }
+        // auto container = Container::Current();
+        // CHECK_NULL_VOID(container);
+        // auto pipeline = container->GetPipelineContext();
+        // CHECK_NULL_VOID(pipeline);
+        // auto themeManager = pipeline->GetThemeManager();
+        // CHECK_NULL_VOID(themeManager);
+        // auto parogressTheme = themeManager->GetTheme<ProgressTheme>();
+        // float date = property_->Get();
+        // float scale_ = 1.0;
+        // scale_ = std::min((context.width / (ORBIT_RADIUS.ConvertToPx() + COMET_WIDTH.ConvertToPx())),
+        //     (context.height / (RING_RADIUS.ConvertToPx() * 2 * (1 + RING_MOVEMENT)) + RING_WIDTH.ConvertToPx() * HALF));
+        // scale_ = scale_ / 2;
+        // if (date > COUNT) {
+        //     DrawRing(context, date, scale_);
+        //     DrawOrbit(context, date, scale_);
+        // } else {
+        //     DrawOrbit(context, date, scale_);
+        //     DrawRing(context, date, scale_);
+        // }
     }
 
-    void DrawRing(RSDrawingContext& context, float date, float scale_) const;
-    void DrawOrbit(RSDrawingContext& context, float date, float scale_) const;
+    // void DrawRing(RSDrawingContext& context, float date, float scale_) const;
+    // void DrawOrbit(RSDrawingContext& context, float date, float scale_) const;
     void SetColor(Color color)
     {
         color_ = SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue());
@@ -80,6 +84,8 @@ public:
 
 private:
     SkColor color_ = SK_ColorBLUE;
+
+    DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
 };
 } // namespace OHOS::Ace::NG
 
