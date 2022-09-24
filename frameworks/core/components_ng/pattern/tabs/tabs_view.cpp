@@ -51,6 +51,7 @@ void TabsView::Create()
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateLoop(false);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateCachedCount(0);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto swiperController = swiperPattern->GetSwiperController();

@@ -120,6 +120,7 @@ void FrameNode::InitializePatternAndContext()
         }
         frameNode->hasPendingRequest_ = true;
     });
+    renderContext_->SetHostNode(WeakClaim(this));
 }
 
 void FrameNode::DumpInfo()
@@ -186,10 +187,6 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
     bool parentOriginChange =
         geometryNode_->GetParentGlobalOffset() != dirty->GetGeometryNode()->GetParentGlobalOffset();
-    if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
-        renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
-    }
-
     // fire OnAreaChanged event.
     if (eventHub_->HasOnAreaChanged() && (frameSizeChange || frameOffsetChange || parentOriginChange)) {
         eventHub_->FireOnAreaChanged(geometryNode_->GetFrameRect(), geometryNode_->GetParentGlobalOffset(),
@@ -197,6 +194,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     }
 
     SetGeometryNode(dirty->GetGeometryNode());
+    if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
+        renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
+    }
+
     // clean layout flag.
     layoutProperty_->CleanDirty();
     DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
@@ -352,7 +353,8 @@ void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
-        auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
+        auto layoutWrapper =
+            MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
         return layoutWrapper;
     }
@@ -361,6 +363,8 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     isLayoutDirtyMarked_ = false;
     auto flag = layoutProperty_->GetPropertyChangeFlag();
     auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+    LOGD("%{public}s create layout wrapper: %{public}x, %{public}d, %{public}d", GetTag().c_str(), flag, forceMeasure,
+        forceLayout);
     do {
         if (CheckNeedMeasure(flag) || forceMeasure) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
@@ -429,6 +433,12 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
+    renderContext_->OnModifyDone();
+}
+
+void FrameNode::OnMountToParentDone()
+{
+    pattern_->OnMountToParentDone();
 }
 
 void FrameNode::FlushUpdateAndMarkDirty()
@@ -534,7 +544,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
     const auto& rect = geometryNode_->GetFrame().GetRect();
-    LOGI("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
+    LOGD("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
 
     if (!rect.IsInRegion(parentLocalPoint)) {
         return HitTestResult::OUT_OF_REGION;
@@ -573,6 +583,11 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
     }
     result.splice(result.end(), std::move(newComingTargets));
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    if (gestureHub) {
+        gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result);
+    }
+
     if (preventBubbling) {
         return HitTestResult::STOP_BUBBLING;
     }

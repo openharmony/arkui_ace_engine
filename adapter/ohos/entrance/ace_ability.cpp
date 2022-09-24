@@ -54,6 +54,7 @@ namespace {
 const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
+static int32_t g_instanceId = 0;
 
 FrontendType GetFrontendType(const std::string& frontendType)
 {
@@ -163,7 +164,6 @@ private:
     AcePlatformStartAbility onStartAbility_;
 };
 
-int32_t AceAbility::instanceId_ = 0;
 const std::string AceAbility::START_PARAMS_KEY = "__startParams";
 const std::string AceAbility::PAGE_URI = "url";
 const std::string AceAbility::CONTINUE_PARAMS_KEY = "__remoteData";
@@ -223,10 +223,13 @@ bool AceWindowListener::OnInputEvent(const std::shared_ptr<MMI::AxisEvent>& axis
     return callbackOwner_->OnInputEvent(axisEvent);
 }
 
+AceAbility::AceAbility() = default;
+
 void AceAbility::OnStart(const Want& want)
 {
     Ability::OnStart(want);
     LOGI("AceAbility::OnStart called");
+    abilityId_ = g_instanceId++;
     static std::once_flag onceFlag;
     auto abilityContext = GetAbilityContext();
     std::call_once(onceFlag, [abilityContext]() {
@@ -508,6 +511,7 @@ void AceAbility::OnStop()
     LOGI("AceAbility::OnStop called ");
     Ability::OnStop();
     Platform::AceContainer::DestroyContainer(abilityId_);
+    abilityId_ = -1;
     LOGI("AceAbility::OnStop called End");
 }
 

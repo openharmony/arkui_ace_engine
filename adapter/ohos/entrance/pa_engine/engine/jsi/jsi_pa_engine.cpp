@@ -18,6 +18,7 @@
 #include <dlfcn.h>
 
 #include "form_provider_info.h"
+#include "js_backend_timer_module.h"
 #include "napi/native_node_api.h"
 #include "napi_common_ability.h"
 #include "napi_common_want.h"
@@ -29,7 +30,6 @@
 #include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
-#include "js_backend_timer_module.h"
 
 extern const char _binary_paMgmt_abc_start[];
 extern const char _binary_paMgmt_abc_end[];
@@ -268,8 +268,8 @@ void JsiPaEngineInstance::EvaluateJsCode()
     }
 
     // load paMgmt.js
-    bool result = runtime_->EvaluateJsCode(
-        (uint8_t *)_binary_paMgmt_abc_start, _binary_paMgmt_abc_end - _binary_paMgmt_abc_start);
+    bool result =
+        runtime_->EvaluateJsCode((uint8_t*)_binary_paMgmt_abc_start, _binary_paMgmt_abc_end - _binary_paMgmt_abc_start);
     if (!result) {
         LOGE("EvaluateJsCode paMgmt abc failed");
     }
@@ -525,9 +525,7 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     nativeEngine_ = new ArkNativeEngine(const_cast<EcmaVM*>(vm), static_cast<void*>(this));
     engineInstance_->SetArkNativeEngine(nativeEngine_);
     ACE_DCHECK(delegate);
-    delegate->AddTaskObserver([nativeEngine = nativeEngine_]() {
-        nativeEngine->Loop(LOOP_NOWAIT);
-    });
+    delegate->AddTaskObserver([nativeEngine = nativeEngine_]() { nativeEngine->Loop(LOOP_NOWAIT); });
     JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine_, delegate);
     SetPostTask(nativeEngine_);
 #if !defined(PREVIEW)
@@ -717,12 +715,11 @@ shared_ptr<JsValue> JsiPaEngine::GetPaFunc(const std::string& funcName)
 
 shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func)
 {
-    const std::vector<shared_ptr<JsValue>>& argv = { };
+    const std::vector<shared_ptr<JsValue>>& argv = {};
     return CallFunc(func, argv);
 }
 
-shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func,
-    const std::vector<shared_ptr<JsValue>>& argv)
+shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv)
 {
     LOGD("JsiPaEngine CallFunc");
     ACE_DCHECK(engineInstance_);
@@ -740,8 +737,8 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func,
     return func->Call(runtime, global, argv, argv.size());
 }
 
-shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func,
-    const std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo)
+shared_ptr<JsValue> JsiPaEngine::CallFunc(
+    const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo)
 {
     LOGD("JsiPaEngine CallFunc");
     ACE_DCHECK(engineInstance_);
@@ -766,8 +763,8 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func,
     return func->Call(runtime, global, argv, argv.size());
 }
 
-shared_ptr<JsValue> JsiPaEngine::CallAsyncFunc(const shared_ptr<JsValue>& func,
-    std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo)
+shared_ptr<JsValue> JsiPaEngine::CallAsyncFunc(
+    const shared_ptr<JsValue>& func, std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo)
 {
     LOGD("JsiPaEngine CallAsyncFunc");
     ACE_DCHECK(engineInstance_);
@@ -912,10 +909,7 @@ void JsiPaEngine::OnCommandApplication(const std::string& intent, int startId)
     LOGI("JsiPaEngine OnCommandApplication");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewString(intent),
-        runtime->NewInt32(startId)
-    };
+    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(intent), runtime->NewInt32(startId) };
     auto func = GetPaFunc("onCommand");
     CallFunc(func, argv);
 }
@@ -976,8 +970,8 @@ std::string JsiPaEngine::IncludeTag(const std::string& jsonString, const std::st
     return result;
 }
 
-std::shared_ptr<AppExecFwk::PacMap> JsiPaEngine::Call(const std::string& method,
-    const std::string& arg, const AppExecFwk::PacMap& pacMap, const CallingInfo& callingInfo)
+std::shared_ptr<AppExecFwk::PacMap> JsiPaEngine::Call(
+    const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap, const CallingInfo& callingInfo)
 {
     LOGD("JsiPaEngine Call");
     ACE_DCHECK(engineInstance_);
@@ -1015,7 +1009,8 @@ std::shared_ptr<AppExecFwk::PacMap> JsiPaEngine::Call(const std::string& method,
     return result;
 }
 
-int32_t JsiPaEngine::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values, const CallingInfo& callingInfo)
+int32_t JsiPaEngine::BatchInsert(
+    const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values, const CallingInfo& callingInfo)
 {
     LOGI("JsiPaEngine BatchInsert");
     ACE_DCHECK(engineInstance_);
@@ -1050,8 +1045,9 @@ int32_t JsiPaEngine::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeR
     return arkJSValue->ToInt32(runtime);
 }
 
-std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> JsiPaEngine::Query(
-    const Uri& uri, const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates, const CallingInfo& callingInfo)
+std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> JsiPaEngine::Query(const Uri& uri,
+    const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+    const CallingInfo& callingInfo)
 {
     LOGI("JsiPaEngine Query");
     ACE_DCHECK(engineInstance_);
@@ -1101,8 +1097,8 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> JsiPaEngine::Query(
         return resultSet;
     }
 
-    NativeValue* nativeValue = ArkNativeEngine::ArkValueToNativeValue(
-        nativeEngine_, arkJSValue->GetValue(arkJSRuntime));
+    NativeValue* nativeValue =
+        ArkNativeEngine::ArkValueToNativeValue(nativeEngine_, arkJSValue->GetValue(arkJSRuntime));
     if (nativeValue == nullptr) {
         LOGE("JsiPaEngine nativeValue is nullptr");
         return resultSet;
@@ -1153,7 +1149,8 @@ int32_t JsiPaEngine::Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     return arkJSValue->ToInt32(runtime);
 }
 
-int32_t JsiPaEngine::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates, const CallingInfo& callingInfo)
+int32_t JsiPaEngine::Delete(
+    const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates, const CallingInfo& callingInfo)
 {
     LOGI("JsiPaEngine Delete");
     ACE_DCHECK(engineInstance_);
@@ -1203,7 +1200,8 @@ std::string JsiPaEngine::GetType(const Uri& uri, const CallingInfo& callingInfo)
     return arkJSValue->ToString(runtime);
 }
 
-std::vector<std::string> JsiPaEngine::GetFileTypes(const Uri& uri, const std::string& mimeTypeFilter, const CallingInfo& callingInfo)
+std::vector<std::string> JsiPaEngine::GetFileTypes(
+    const Uri& uri, const std::string& mimeTypeFilter, const CallingInfo& callingInfo)
 {
     LOGD("JsiPaEngine GetFileTypes");
     ACE_DCHECK(engineInstance_);
@@ -1327,8 +1325,8 @@ sptr<IRemoteObject> JsiPaEngine::OnConnectService(const OHOS::AAFwk::Want& want)
     }
 
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
-    NativeValue* nativeValue = ArkNativeEngine::ArkValueToNativeValue(
-        nativeEngine_, arkJSValue->GetValue(arkJSRuntime));
+    NativeValue* nativeValue =
+        ArkNativeEngine::ArkValueToNativeValue(nativeEngine_, arkJSValue->GetValue(arkJSRuntime));
     if (nativeValue == nullptr) {
         LOGE("JsiPaEngine nativeValue is nullptr");
         return nullptr;
@@ -1346,15 +1344,12 @@ void JsiPaEngine::OnDisconnectService(const OHOS::AAFwk::Want& want)
     CallFunc(func, argv);
 }
 
-void JsiPaEngine::OnCommand(const OHOS::AAFwk::Want &want, int startId)
+void JsiPaEngine::OnCommand(const OHOS::AAFwk::Want& want, int startId)
 {
     LOGI("JsiPaEngine OnCommand");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        WantToJsValue(want),
-        runtime->NewInt32(startId)
-    };
+    const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want), runtime->NewInt32(startId) };
     auto func = GetPaFunc("onCommand");
     CallFunc(func, argv);
 }
@@ -1394,8 +1389,8 @@ void JsiPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
     if (formImageData != nullptr) {
         std::map<std::string, int> rawImageDataMap;
         auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-        NativeValue* nativeValue = ArkNativeEngine::ArkValueToNativeValue(nativeEngine_,
-            std::static_pointer_cast<ArkJSValue>(formImageData)->GetValue(arkJSRuntime));
+        NativeValue* nativeValue = ArkNativeEngine::ArkValueToNativeValue(
+            nativeEngine_, std::static_pointer_cast<ArkJSValue>(formImageData)->GetValue(arkJSRuntime));
         UnwrapRawImageDataMap(nativeEngine_, nativeValue, rawImageDataMap);
         for (const auto& data : rawImageDataMap) {
             formData.AddImageData(data.first, data.second);
@@ -1419,10 +1414,8 @@ void JsiPaEngine::OnTriggerEvent(const int64_t formId, const std::string& messag
     LOGI("JsiPaEngine OnTriggerEvent");
     ACE_DCHECK(engineInstance_);
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = {
-        runtime->NewString(std::to_string(formId)),
-        runtime->NewString(message)
-    };
+    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(std::to_string(formId)),
+        runtime->NewString(message) };
     auto func = GetPaFunc("onEvent");
     CallFunc(func, argv);
 }
@@ -1467,7 +1460,7 @@ void JsiPaEngine::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEven
     CallFunc(func, argv);
 }
 
-int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want &want)
+int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want& want)
 {
     LOGI("JsiPaEngine OnAcquireFormState");
     ACE_DCHECK(engineInstance_);
@@ -1499,7 +1492,7 @@ int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want &want)
     return formState;
 }
 
-bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
+bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
 {
     LOGD("JsiPaEngine OnShare, create");
     ACE_DCHECK(engineInstance_);
@@ -1541,13 +1534,12 @@ bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams)
     }
 
     if (nativeValue->TypeOf() != NativeValueType::NATIVE_OBJECT) {
-        LOGE("%{public}s OnShare return value`s type is %{public}d", __func__,
-            static_cast<int>(nativeValue->TypeOf()));
+        LOGE("%{public}s OnShare return value`s type is %{public}d", __func__, static_cast<int>(nativeValue->TypeOf()));
         return false;
     }
 
-    if (!OHOS::AppExecFwk::UnwrapWantParams(reinterpret_cast<napi_env>(nativeEngine_),
-        reinterpret_cast<napi_value>(nativeValue), wantParams)) {
+    if (!OHOS::AppExecFwk::UnwrapWantParams(
+            reinterpret_cast<napi_env>(nativeEngine_), reinterpret_cast<napi_value>(nativeValue), wantParams)) {
         LOGE("%{public}s OnShare UnwrapWantParams failed, return false", __func__);
         return false;
     }

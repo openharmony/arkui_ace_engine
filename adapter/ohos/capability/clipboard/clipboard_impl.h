@@ -26,7 +26,8 @@ public:
     ~ClipboardImpl() override = default;
 
     // Implement Clipboard
-    void SetData(const std::string& data, CopyOptions copyOption = CopyOptions::InApp) override;
+    void SetData(
+        const std::string& data, CopyOptions copyOption = CopyOptions::InApp, bool isDragData = false) override;
     void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false) override;
     void SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption = CopyOptions::InApp) override;
     void GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode = false) override;

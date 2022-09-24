@@ -24,8 +24,8 @@
 
 namespace OHOS::Ace::NG {
 struct FlexItemProperty {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexGrow, int32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexShrink, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexGrow, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexShrink, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignSelf, FlexAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexBasis, CalcLength);
 };

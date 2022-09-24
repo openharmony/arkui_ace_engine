@@ -106,6 +106,9 @@ void ViewStackProcessor::Pop()
         return;
     }
     currentNode->MountToParent(parent);
+    auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_VOID(currentFrameNode);
+    currentFrameNode->OnMountToParentDone();
     LOGD("ViewStackProcessor Pop size %{public}zu", elementsStack_.size());
 }
 

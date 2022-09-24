@@ -29,6 +29,7 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -92,6 +93,8 @@ public:
         MarkDirtyNode(extraFlag);
     }
 
+    void OnMountToParentDone();
+
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
     RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
@@ -147,6 +150,26 @@ public:
     RefPtr<InputEventHub> GetOrCreateInputEventHub() const
     {
         return eventHub_->GetOrCreateInputEventHub();
+    }
+
+    RefPtr<FocusHub> GetOrCreateFocusHub() const
+    {
+        return eventHub_->GetOrCreateFocusHub();
+    }
+
+    RefPtr<FocusHub> GetFocusHub() const
+    {
+        return eventHub_->GetFocusHub();
+    }
+
+    FocusType GetFocusType() const
+    {
+        FocusType type = FocusType::DISABLE;
+        auto focusHub = GetFocusHub();
+        if (focusHub) {
+            type = focusHub->GetFocusType();
+        }
+        return type;
     }
 
     const RefPtr<LayoutProperty>& GetLayoutProperty() const

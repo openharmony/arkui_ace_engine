@@ -65,10 +65,7 @@ public:
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
-    bool OnKeyEvent(const KeyEvent& event) override
-    {
-        return false;
-    }
+    bool OnKeyEvent(const KeyEvent& event) override;
 
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
@@ -158,7 +155,9 @@ protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
+    void FlushFocus();
     void FlushAnimation(uint64_t nanoTimestamp) override;
+    bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
     void FlushUITasks() override
     {
@@ -210,6 +209,8 @@ private:
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
     RefPtr<FullScreenManager> fullScreenManager_;
+    WeakPtr<FrameNode> dirtyFocusNode_;
+    WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);

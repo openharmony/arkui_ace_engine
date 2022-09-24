@@ -102,6 +102,8 @@ public:
 
     virtual void OnModifyDone() {}
 
+    virtual void OnMountToParentDone() {}
+
     virtual bool IsRootPattern() const
     {
         return false;

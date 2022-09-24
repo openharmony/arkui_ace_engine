@@ -37,6 +37,7 @@
 #include "core/components/transform/transform_component.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/core/gestures/tap_gesture.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -89,6 +90,7 @@ public:
     static void JsRotateY(const JSCallbackInfo& info);
     static void JsTransform(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);
+    static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
     static void ParseAndSetTransitionOption(std::unique_ptr<JsonValue>& transitionArgs);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
@@ -224,6 +226,7 @@ public:
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
+    static void JsOnKeyEvent(const JSCallbackInfo& args);
     static void JsOnFocus(const JSCallbackInfo& args);
     static void JsOnBlur(const JSCallbackInfo& args);
     static void JsTabIndex(const JSCallbackInfo& info);
@@ -281,7 +284,6 @@ public:
         return themeManager->GetTheme<T>();
     }
 
-protected:
     /**
      * box properties setter
      */

@@ -136,12 +136,10 @@ public:
     void OnCommandApplication(const std::string& intent, int startId) override;
 
     // data
-    int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
-        const CallingInfo& callingInfo) override;
-    std::shared_ptr<AppExecFwk::PacMap> Call(const std::string& method,
-        const std::string& arg, const AppExecFwk::PacMap& pacMap,
-        const CallingInfo& callingInfo) override;
-	
+    int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value, const CallingInfo& callingInfo) override;
+    std::shared_ptr<AppExecFwk::PacMap> Call(const std::string& method, const std::string& arg,
+        const AppExecFwk::PacMap& pacMap, const CallingInfo& callingInfo) override;
+
     int32_t BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values,
         const CallingInfo& callingInfo) override;
     std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(const Uri& uri, const std::vector<std::string>& columns,
@@ -152,8 +150,8 @@ public:
         const CallingInfo& callingInfo) override;
 
     std::string GetType(const Uri& uri, const CallingInfo& callingInfo) override;
-    std::vector<std::string> GetFileTypes(const Uri& uri, const std::string& mimeTypeFilter,
-        const CallingInfo& callingInfo) override;
+    std::vector<std::string> GetFileTypes(
+        const Uri& uri, const std::string& mimeTypeFilter, const CallingInfo& callingInfo) override;
     int32_t OpenFile(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo) override;
     int32_t OpenRawFile(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo) override;
     Uri NormalizeUri(const Uri& uri, const CallingInfo& callingInfo) override;
@@ -162,17 +160,17 @@ public:
     // service
     sptr<IRemoteObject> OnConnectService(const OHOS::AAFwk::Want& want) override;
     void OnDisconnectService(const OHOS::AAFwk::Want& want) override;
-    void OnCommand(const OHOS::AAFwk::Want &want, int startId) override;
+    void OnCommand(const OHOS::AAFwk::Want& want, int startId) override;
 
     // form
-    void OnCreate(const OHOS::AAFwk::Want &want) override;
+    void OnCreate(const OHOS::AAFwk::Want& want) override;
     void OnDelete(const int64_t formId) override;
     void OnTriggerEvent(const int64_t formId, const std::string& message) override;
     void OnUpdate(const int64_t formId) override;
     void OnCastTemptoNormal(const int64_t formId) override;
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
-    int32_t OnAcquireFormState(const OHOS::AAFwk::Want &want) override;
-    bool OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams) override;
+    int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want) override;
+    bool OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams) override;
     void DumpHeapSnapshot(bool isPrivate) override;
 
 private:
@@ -182,8 +180,10 @@ private:
     shared_ptr<JsValue> GetPaFunc(const std::string& funcName);
     shared_ptr<JsValue> CallFunc(const shared_ptr<JsValue>& func);
     shared_ptr<JsValue> CallFunc(const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv);
-    shared_ptr<JsValue> CallFunc(const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo);
-    shared_ptr<JsValue> CallAsyncFunc(const shared_ptr<JsValue>& func, std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo);
+    shared_ptr<JsValue> CallFunc(
+        const shared_ptr<JsValue>& func, const std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo);
+    shared_ptr<JsValue> CallAsyncFunc(
+        const shared_ptr<JsValue>& func, std::vector<shared_ptr<JsValue>>& argv, const CallingInfo& callingInfo);
     shared_ptr<JsValue> NativeValueToJsValue(NativeValue* nativeValue);
     shared_ptr<JsValue> WantToJsValue(const OHOS::AAFwk::Want& want);
     void StartService();
@@ -197,8 +197,8 @@ private:
     std::string ExcludeTag(const std::string& jsonString, const std::string& tagString);
     std::string IncludeTag(const std::string& jsonString, const std::string& tagString);
     std::shared_ptr<AppExecFwk::PacMap> BuildPacMap(const napi_env& env, const napi_value& arg);
-    void SetPacMapObject(std::shared_ptr<AppExecFwk::PacMap> pacMap,
-        const napi_env& env, std::string keyStr, napi_value value);
+    void SetPacMapObject(
+        std::shared_ptr<AppExecFwk::PacMap> pacMap, const napi_env& env, std::string keyStr, napi_value value);
     std::string UnwrapStringFromJS(napi_env env, napi_value param, const std::string& defaultValue = "");
     std::vector<std::string> ConvertStringVector(napi_env env, napi_value jsValue);
 

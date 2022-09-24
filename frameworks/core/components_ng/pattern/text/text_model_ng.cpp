@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text/text_view.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/frame_node.h"
@@ -22,7 +22,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void TextView::Create(const std::string& content)
+void TextModelNG::Create(const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -33,84 +33,124 @@ void TextView::Create(const std::string& content)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
 }
 
-void TextView::SetFontSize(const Dimension& value)
+void TextModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
 }
 
-void TextView::SetTextColor(const Color& value)
+void TextModelNG::SetTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
 }
 
-void TextView::SetItalicFontStyle(const NG::ItalicFontStyle& value)
+void TextModelNG::SetItalicFontStyle(Ace::FontStyle value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, value);
 }
 
-void TextView::SetFontWeight(const Ace::FontWeight& value)
+void TextModelNG::SetFontWeight(Ace::FontWeight value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
 }
 
-void TextView::SetFontFamily(const std::vector<std::string>& value)
+void TextModelNG::SetFontFamily(const std::vector<std::string>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value);
 }
 
-void TextView::SetTextAlign(const Ace::TextAlign& value)
+void TextModelNG::SetTextAlign(Ace::TextAlign value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value);
 }
 
-void TextView::SetTextOverflow(const Ace::TextOverflow& value)
+void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value);
 }
 
-void TextView::SetMaxLines(const uint32_t& value)
+void TextModelNG::SetMaxLines(uint32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value);
 }
 
-void TextView::SetLineHeight(const Dimension& value)
+void TextModelNG::SetLineHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineHeight, value);
 }
 
-void TextView::SetTextDecoration(const Ace::TextDecoration& value)
+void TextModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecoration, value);
 }
 
-void TextView::SetTextDecorationColor(const Color& value)
+void TextModelNG::SetTextDecorationColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationColor, value);
 }
 
-void TextView::SetBaselineOffset(const Dimension& value)
+void TextModelNG::SetBaselineOffset(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, value);
 }
 
-void TextView::SetTextCase(const Ace::TextCase& value)
+void TextModelNG::SetTextCase(Ace::TextCase value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value);
 }
 
-void TextView::SetLetterSpacing(const Dimension& value)
+void TextModelNG::SetLetterSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, value);
 }
 
-void TextView::SetAdaptMinFontSize(const Dimension& value)
+void TextModelNG::SetAdaptMinFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMinFontSize, value);
 }
 
-void TextView::SetAdaptMaxFontSize(const Dimension& value)
+void TextModelNG::SetAdaptMaxFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value);
+}
+
+void TextModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
+{
+    LOGE("no support OnClick");
+}
+
+void TextModelNG::SetRemoteMessage(std::function<void()>&& event)
+{
+    LOGE("no support RemoteMessage");
+}
+
+void TextModelNG::SetCopyOption(CopyOptions copyOption)
+{
+    LOGE("no support CopyOption");
+}
+
+void TextModelNG::SetOnDragStartId(const OnDragFunc& onDragStartId)
+{
+    LOGE("no support SetOnDragStartId");
+}
+
+void TextModelNG::SetOnDragEnterId(const OnDropFunc& onDragEnterId)
+{
+    LOGE("no support SetOnDragEnterId");
+}
+
+void TextModelNG::SetOnDragMoveId(const OnDropFunc& onDragMoveId)
+{
+    LOGE("no support SetOnDragMoveId");
+}
+
+void TextModelNG::SetOnDragLeaveId(const OnDropFunc& onDragLeaveId)
+{
+    LOGE("no support SetOnDragLeaveId");
+}
+
+void TextModelNG::SetOnDropId(const OnDropFunc& onDropId)
+{
+    LOGE("no support SetOnDropId");
 }
 
 } // namespace OHOS::Ace::NG

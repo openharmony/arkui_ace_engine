@@ -16,40 +16,36 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/flex/flex_layout_styles.h"
 
 namespace OHOS::Ace::NG {
 
-//struct FlexMeasureProperty {
-//    SizeF realSize;
-//    float crossSize = 0.0;
-//    float allocatedSize = 0.0;
-//    FlexDirection direction;
-//    std::list<RefPtr<LayoutWrapper>> relativeNodes;
-//    std::list<RefPtr<LayoutWrapper>> weightNodes;
-//    std::set<RefPtr<LayoutWrapper>> infinityLayoutNodes;
-//    std::map<int32_t, std::list<RefPtr<LayoutWrapper>>> magicNodes;
-//    std::map<int32_t, float> magicNodeWeights;
-//    float totalFlexWeight = 0;
-//    int32_t maxDisplayPriority = 0;
-//    FlexLayoutMode layoutMode = FlexLayoutMode::FLEX_ITEM_MODE;
-//    float space = 0.0;
-//
-//};
+struct FlexItemProperties {
+    float totalShrink = 0.0f;
+    float totalGrow = 0.0f;
+    RefPtr<LayoutWrapper> lastShrinkChild;
+    RefPtr<LayoutWrapper> lastGrowChild;
+};
 
 struct MagicLayoutNode {
     LayoutConstraintF layoutConstraint;
     RefPtr<LayoutWrapper> layoutWrapper;
 };
 
-
 struct BaselineProperties {
     float maxBaselineDistance = 0.0f;
     float maxDistanceAboveBaseline = 0.0f;
     float maxDistanceBelowBaseline = 0.0f;
+
+    void Reset()
+    {
+        maxBaselineDistance = 0.0f;
+        maxDistanceAboveBaseline = 0.0f;
+        maxDistanceBelowBaseline = 0.0f;
+    }
 };
 
 class ACE_EXPORT FlexLayoutAlgorithm : public LayoutAlgorithm {
@@ -69,30 +65,29 @@ private:
     void MeasureInWeightMode(LayoutWrapper* layoutWrapper);
     void MeasureInIndexMode(LayoutWrapper* layoutWrapper);
     void MeasureInItemMode(LayoutWrapper* layoutWrapper);
-    void MeasureMagicNodes(LayoutWrapper* layoutWrapper, BaselineProperties& baselineProperties);
-    void ResizeByItem(const RefPtr<LayoutWrapper>& layoutWrapper, float& allocatedSize);
-    float GetMainSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
-    float GetMainSize(const SizeF& size, FlexDirection direction) const;
-    float GetCrossSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
-    float GetCrossSize(const SizeF& size, FlexDirection direction) const;
-    void RelayoutForStretchMagicNode();
+    void MeasureMagicNodes(LayoutWrapper* layoutWrapper);
+    void ResizeFlexSizeByItem(const RefPtr<LayoutWrapper>& layoutWrapper, float& allocatedSize);
+    float GetMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
+    float GetCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
+    void RedoLayoutForStretchMagicNode();
     void CheckSizeValidity(const RefPtr<LayoutWrapper>& layoutWrapper);
-    void CheckBaselineProperties(const RefPtr<LayoutWrapper>& layoutWrapper, BaselineProperties& baselineProperties);
+    void CheckBaselineProperties(const RefPtr<LayoutWrapper>& layoutWrapper);
     void CalculateSpace(float remainSpace, float& frontSpace, float& betweenSpace) const;
-    void PlaceChildren(LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace, const BaselineProperties& baselineProperties);
-    bool IsStartTopLeft(FlexDirection direction, TextDirection textDirection) const;
-    FlexAlign GetSelfAlign(const RefPtr<LayoutWrapper>&  layoutWrapper) const;
+    void PlaceChildren(LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace);
+    FlexAlign GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     TextDirection AdjustTextDirectionByDir() const;
-    FlexDirection FlipAxis(FlexDirection direction) const;
-    LayoutConstraintF MakeLayoutConstraint(float mainFlexExtent, const LayoutConstraintF& constraint, bool isStretch, bool supportZero = false) const;
-    LayoutConstraintF MakeLayoutConstraintWithLimit(float minMainLimit, float maxMainLimit, bool isStretch) const;
-    float GetStretchCrossLimit() const;
-    OptionalSizeF GetCalcSize(float mainSize, float crossSize);
+    LayoutConstraintF MakeLayoutConstraint(
+        float mainFlexExtent, const LayoutConstraintF& constraint, bool isStretch, bool supportZero = false) const;
+    float GetStretchCrossAxisLimit() const;
+    void ResizeItems(const FlexItemProperties& flexItemProps);
+    void RedoLayoutFlexItem(
+        const MagicLayoutNode& flexItem, float flexSize, float& allocatedFlexSpace);
+    void RelayoutForStretchFlexNode(const FlexItemProperties& flexItemProperties);
 
     OptionalSizeF realSize_;
-    float mainSize_ = 0.0f;
-    float crossSize_ = 0.0f;
-    float selfIdealCrossSize_ = -1.0f;
+    float mainAxisSize_ = 0.0f;
+    float crossAxisSize_ = 0.0f;
+    float selfIdealCrossAxisSize_ = -1.0f;
     float allocatedSize_ = 0.0f;
     float space_ = 0.0f;
     bool isCrossInfinite_ = false;
@@ -111,6 +106,7 @@ private:
     FlexLayoutMode layoutMode_ = FlexLayoutMode::FLEX_ITEM_MODE;
     FlexDirection direction_ = FlexDirection::ROW;
     friend class LinearLayoutUtils;
+    BaselineProperties baselineProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutAlgorithm);
 };

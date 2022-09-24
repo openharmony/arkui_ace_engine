@@ -59,6 +59,9 @@ public:
 
     void SetHoverAnimation(HoverEffectType type)
     {
+        if (!mouseEventActuator_) {
+            mouseEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        }
         hoverEffectType_ = type;
     }
     HoverEffectType GetHoverEffect()

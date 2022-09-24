@@ -22,7 +22,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_view.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,7 +32,7 @@ namespace {
 const std::string CREATE_VALUE = "Hello World";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
-const NG::ItalicFontStyle ITALIC_FONT_STYLE_VALUE = NG::ItalicFontStyle::ITALIC;
+const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const Ace::TextAlign TEXT_ALIGN_VALUE = Ace::TextAlign::CENTER;
@@ -50,7 +50,7 @@ const Dimension ADAPT_MAX_FONT_SIZE_VALUE = Dimension(200, DimensionUnit::PX);
 struct TestProperty {
     std::optional<Dimension> fontSizeValue = std::nullopt;
     std::optional<Color> textColorValue = std::nullopt;
-    std::optional<NG::ItalicFontStyle> italicFontStyleValue = std::nullopt;
+    std::optional<Ace::FontStyle> italicFontStyleValue = std::nullopt;
     std::optional<Ace::FontWeight> fontWeightValue = std::nullopt;
     std::optional<std::vector<std::string>> fontFamilyValue = std::nullopt;
     std::optional<Ace::TextAlign> textAlignValue = std::nullopt;
@@ -84,51 +84,52 @@ void TextPatternTestNg::TearDown() {}
 RefPtr<FrameNode> TextPatternTestNg::CreateTextParagraph(
     const std::string& createValue, const TestProperty& testProperty)
 {
-    TextView::Create(createValue);
+    TextModelNG textModel;
+    textModel.Create(createValue);
     if (testProperty.fontSizeValue.has_value()) {
-        TextView::SetFontSize(testProperty.fontSizeValue.value());
+        textModel.SetFontSize(testProperty.fontSizeValue.value());
     }
     if (testProperty.textColorValue.has_value()) {
-        TextView::SetTextColor(testProperty.textColorValue.value());
+        textModel.SetTextColor(testProperty.textColorValue.value());
     }
     if (testProperty.italicFontStyleValue.has_value()) {
-        TextView::SetItalicFontStyle(testProperty.italicFontStyleValue.value());
+        textModel.SetItalicFontStyle(testProperty.italicFontStyleValue.value());
     }
     if (testProperty.fontWeightValue.has_value()) {
-        TextView::SetFontWeight(testProperty.fontWeightValue.value());
+        textModel.SetFontWeight(testProperty.fontWeightValue.value());
     }
     if (testProperty.fontFamilyValue.has_value()) {
-        TextView::SetFontFamily(testProperty.fontFamilyValue.value());
+        textModel.SetFontFamily(testProperty.fontFamilyValue.value());
     }
     if (testProperty.textAlignValue.has_value()) {
-        TextView::SetTextAlign(testProperty.textAlignValue.value());
+        textModel.SetTextAlign(testProperty.textAlignValue.value());
     }
     if (testProperty.textOverflowValue.has_value()) {
-        TextView::SetTextOverflow(testProperty.textOverflowValue.value());
+        textModel.SetTextOverflow(testProperty.textOverflowValue.value());
     }
     if (testProperty.maxLinesValue.has_value()) {
-        TextView::SetMaxLines(testProperty.maxLinesValue.value());
+        textModel.SetMaxLines(testProperty.maxLinesValue.value());
     }
     if (testProperty.lineHeightValue.has_value()) {
-        TextView::SetLineHeight(testProperty.lineHeightValue.value());
+        textModel.SetLineHeight(testProperty.lineHeightValue.value());
     }
     if (testProperty.textDecorationValue.has_value()) {
-        TextView::SetTextDecoration(testProperty.textDecorationValue.value());
+        textModel.SetTextDecoration(testProperty.textDecorationValue.value());
     }
     if (testProperty.textDecorationColorValue.has_value()) {
-        TextView::SetTextDecorationColor(testProperty.textDecorationColorValue.value());
+        textModel.SetTextDecorationColor(testProperty.textDecorationColorValue.value());
     }
     if (testProperty.baselineOffsetValue.has_value()) {
-        TextView::SetBaselineOffset(testProperty.baselineOffsetValue.value());
+        textModel.SetBaselineOffset(testProperty.baselineOffsetValue.value());
     }
     if (testProperty.textCaseValue.has_value()) {
-        TextView::SetTextCase(testProperty.textCaseValue.value());
+        textModel.SetTextCase(testProperty.textCaseValue.value());
     }
     if (testProperty.adaptMinFontSize.has_value()) {
-        TextView::SetAdaptMinFontSize(testProperty.adaptMinFontSize.value());
+        textModel.SetAdaptMinFontSize(testProperty.adaptMinFontSize.value());
     }
     if (testProperty.adaptMaxFontSize.has_value()) {
-        TextView::SetAdaptMaxFontSize(testProperty.adaptMaxFontSize.value());
+        textModel.SetAdaptMaxFontSize(testProperty.adaptMaxFontSize.value());
     }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop

@@ -19,8 +19,11 @@
 #include <cstdint>
 #include <functional>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
+#include "base/geometry/offset.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
@@ -29,6 +32,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewAbstract {
@@ -39,10 +43,18 @@ public:
     static void SetMinHeight(const CalcLength& minHeight);
     static void SetMaxWidth(const CalcLength& maxWidth);
     static void SetMaxHeight(const CalcLength& maxHeight);
+
+    static void SetAspectRatio(float ratio);
+    static void SetLayoutWeight(int32_t value);
+
     static void SetBackgroundColor(const Color& color);
+    static void SetBackgroundImage(const std::string& src);
+    static void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat);
+    static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
+    static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
+    static void SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
-    static void SetLayoutWeight(int32_t value);
     static void SetBorderRadius(const BorderRadiusProperty& value);
     static void SetBorderRadius(const Dimension& value);
     static void SetBorderColor(const Color& value);
@@ -53,12 +65,22 @@ public:
     static void SetBorderStyle(const BorderStyleProperty& value);
     static void SetOpacity(double opacity);
 
-    // back decoration
+    // decoration
     static void SetBackdropBlur(const Dimension& radius);
+    static void SetFrontBlur(const Dimension& radius);
+    static void SetBackShadow(const Shadow& shadow);
 
     // layout
     static void SetAlign(Alignment alignment);
     static void SetVisibility(VisibleType visible);
+
+    // position
+    static void SetPosition(const OffsetT<Dimension>& value);
+    static void SetOffset(const OffsetT<Dimension>& value);
+    static void MarkAnchor(const OffsetT<Dimension>& value);
+
+    // render position
+    static void SetZIndex(int32_t value);
 
     // transform
     static void SetScale(const NG::VectorF& value);
@@ -72,6 +94,11 @@ public:
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
     static void SetOnHover(OnHoverEventFunc&& onHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
+    static void SetFocusType(FocusType type);
+    static void SetFocusable(bool focusable);
+    static void SetOnFocus(OnFocusFunc&& onFocusCallback);
+    static void SetOnBlur(OnBlurFunc&& onBlurCallback);
+    static void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback);
     static void SetOnAppear(std::function<void()>&& onAppear);
     static void SetOnDisappear(std::function<void()>&& onDisappear);
     static void SetOnAreaChanged(
@@ -80,11 +107,15 @@ public:
 
     // flex properties
     static void SetAlignSelf(int32_t value);
+    static void SetFlexShrink(float value);
+    static void SetFlexGrow(float value);
 
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam>& param);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
+    // transition
+    static void SetTransition(const TransitionOptions& options);
 
     static void Pop();
 };

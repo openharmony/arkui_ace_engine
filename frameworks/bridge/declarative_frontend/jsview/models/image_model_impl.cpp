@@ -15,12 +15,12 @@
 
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -94,10 +94,7 @@ void ImageModelImpl::SetOnError(std::function<void(const LoadImageFailEvent& inf
 
 void ImageModelImpl::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
 {
-
-    auto onFinishEvent = EventMarker([func = std::move(callback)]() {
-        func();
-    });
+    auto onFinishEvent = EventMarker([func = std::move(callback)]() { func(); });
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     image->SetSvgAnimatorFinishEvent(onFinishEvent);
 }
@@ -187,7 +184,7 @@ void ImageModelImpl::SetOnDragStartId(const OnDragFunc& onDragStartId)
     }
 }
 
-void ImageModelImpl::SetOnDragEnterId(const OnDropFunc&  onDragStartId)
+void ImageModelImpl::SetOnDragEnterId(const OnDropFunc& onDragStartId)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {

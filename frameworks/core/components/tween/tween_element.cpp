@@ -772,7 +772,7 @@ void TweenElement::CreateColorAnimation(const RefPtr<PropertyAnimatable>& animat
     }
     auto& colorAnimation = option.GetColorAnimation();
     if (!colorAnimation) {
-        LOGE("create color animation with null. skip it.");
+        LOGD("create color animation with null. skip it.");
         return;
     }
     PropertyAnimatableType propertyType;

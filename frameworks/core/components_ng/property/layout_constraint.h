@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_LAYOUT_CONSTRAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_LAYOUT_CONSTRAINT_H
 
-#include <optional>
 #include <algorithm>
+#include <optional>
 #include <string>
 
 #include "base/geometry/ng/size_t.h"
@@ -73,12 +73,28 @@ struct LayoutConstraintT {
         return selfIdealSize.UpdateSizeWithCheck(size);
     }
 
+    bool UpdateIllegalSelfIdealSizeWithCheck(const OptionalSize<T>& size)
+    {
+        if (selfIdealSize == size) {
+            return false;
+        }
+        return selfIdealSize.UpdateIllegalSizeWithCheck(size);
+    }
+
     bool UpdateParentIdealSizeWithCheck(const OptionalSize<T>&& size)
     {
         if (parentIdealSize == size) {
             return false;
         }
         return parentIdealSize.UpdateSizeWithCheck(size);
+    }
+
+    bool UpdateIllegalParentIdealSizeWithCheck(const OptionalSize<T>&& size)
+    {
+        if (parentIdealSize == size) {
+            return false;
+        }
+        return parentIdealSize.UpdateIllegalSizeWithCheck(size);
     }
 
     bool UpdateMaxSizeWithCheck(const SizeT<T>& size)

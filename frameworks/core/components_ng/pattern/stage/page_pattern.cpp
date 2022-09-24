@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace::NG {
 
@@ -24,6 +25,7 @@ void PagePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
 }
 

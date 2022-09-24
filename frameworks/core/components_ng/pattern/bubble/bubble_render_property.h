@@ -40,6 +40,7 @@ public:
         paintProperty->propUseCustom_ = CloneUseCustom();
         paintProperty->propBackgroundColor_ = CloneBackgroundColor();
         paintProperty->propArrowOffset_ = CloneArrowOffset();
+        paintProperty->propPlacement_ = ClonePlacement();
         return paintProperty;
     }
 
@@ -51,6 +52,7 @@ public:
         ResetEnableArrow();
         ResetMaskColor();
         ResetUseCustom();
+        ResetPlacement();
         ResetArrowOffset();
     }
 

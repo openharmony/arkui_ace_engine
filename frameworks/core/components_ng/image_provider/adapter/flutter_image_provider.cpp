@@ -218,7 +218,7 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& imageObjWp, cons
         flutterCanvasImage->set_image(std::move(skiaGpuObjSkImage));
         auto canvasImage = CanvasImage::Create(&flutterCanvasImage);
 #endif
-        auto uploadTask = [objWp, loadCallbacks](RefPtr<CanvasImage> canvasImage) {
+        auto uploadTask = [objWp, loadCallbacks](const RefPtr<CanvasImage>& canvasImage) {
             // when upload success, update canvas image to ImageObject and trigger loadSuccessCallback_
             auto obj = objWp.Upgrade();
             CHECK_NULL_VOID(obj);
