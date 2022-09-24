@@ -19,24 +19,23 @@ import("//foundation/arkui/ace_engine/interfaces/napi/kits/napi_lib.gni")
 
 if (is_standard_system) {
   system_resource_hap_path =
-      get_label_info("//utils/system_resources/systemres:systemres_hap",
+      get_label_info("//base/global/system_resources/systemres:systemres_hap",
                      "target_out_dir") + "/SystemResources.hap"
   system_resource_path =
-      get_label_info("//utils/system_resources/systemres:systemres_hap",
+      get_label_info("//base/global/system_resources/systemres:systemres_hap",
                      "target_out_dir") + "/resources"
 } else {
   system_resource_hap_path =
-      get_label_info("//utils/system_resources/systemres:systemres_hap",
+      get_label_info("//base/global/system_resources/systemres:systemres_hap",
                      "target_gen_dir") + "/SystemResources.hap"
   system_resource_path =
-      get_label_info("//utils/system_resources/systemres:systemres_hap",
+      get_label_info("//base/global/system_resources/systemres:systemres_hap",
                      "target_gen_dir") + "/resources"
 }
 
 action("get_system_resource") {
   script = "get_system_resources.sh"
-  deps =
-      [ "//utils/system_resources/systemres:systemres_hap($current_toolchain)" ]
+  deps = [ "//base/global/system_resources/systemres:systemres_hap($current_toolchain)" ]
   args = [
     rebase_path(system_resource_hap_path),
     rebase_path(system_resource_path),
@@ -112,8 +111,8 @@ if (is_standard_system) {
     # Add some resources
     # Add ohos fonts
     sources += [
+      "//base/global/system_resources/fonts",
       "//foundation/arkui/ace_engine/adapter/preview/sdk/fontconfig.json",
-      "//utils/system_resources/fonts",
     ]
 
     # Add the dynamic library with the same name on the mac and windows system here.
