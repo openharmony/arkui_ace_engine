@@ -28,6 +28,7 @@ struct ImagePaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageRepeat, ImageRepeat);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ColorFilter, std::vector<float>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MatchTextDirection, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SvgFillColor, Color);
 };
 
 // PaintProperty are used to set render properties.
@@ -58,6 +59,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, ImageRepeat, ImageRepeat, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, ColorFilter, std::vector<float>, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, MatchTextDirection, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, SvgFillColor, Color, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

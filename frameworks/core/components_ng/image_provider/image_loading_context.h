@@ -59,6 +59,8 @@ public:
     bool GetNeedResize() const;
     std::optional<SizeF> GetSourceSize() const;
     bool NeedAlt() const;
+    const std::optional<Color>& GetSvgFillColor() const;
+    void SetSvgFillColor(const std::optional<Color>& svgFillColorOpt);
 
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
@@ -110,6 +112,7 @@ private:
     SizeF dstSize_;
     bool needResize_ = true;
     ImageFit imageFit_ = ImageFit::COVER;
+    std::optional<Color> svgFillColorOpt_;
     std::unique_ptr<std::pair<Dimension, Dimension>> sourceSizePtr_ = nullptr;
     bool needAlt_ = true;
     std::function<void()> updateParamsCallback_ = nullptr;

@@ -40,6 +40,7 @@ public:
     static void SetOnComplete(CompleteEvent&& onComplete);
     static void SetColorFilterMatrix(const std::vector<float>& matrix);
     static void SetMatchTextDirection(bool matchTextDirection);
+    static void SetSvgFillColor(const Color& color);
 };
 } // namespace OHOS::Ace::NG
 

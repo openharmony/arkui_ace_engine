@@ -122,7 +122,7 @@ void ImageModelImpl::SetImageSourceSize(const std::pair<Dimension, Dimension>& s
     image->SetImageSourceSize(size);
 }
 
-void ImageModelImpl::SetImageFill(Color color)
+void ImageModelImpl::SetImageFill(const Color& color)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     image->SetImageFill(color);
