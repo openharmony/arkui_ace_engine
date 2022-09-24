@@ -411,6 +411,7 @@ public:
         }
         viewStack->PushKey(key);
         itemGenFunc_->Call(JSRef<JSObject>(), 1, &result);
+        viewStack->PopContainer();
         viewStack->PopKey();
         if (parentView_) {
             parentView_->ResetLazyForEachProcess();
