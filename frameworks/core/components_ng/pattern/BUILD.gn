@@ -16,6 +16,9 @@ import(
 
 build_component_ng("pattern_ng") {
   sources = [
+    "badge/badge_layout_algorithm.cpp",
+    "badge/badge_pattern.cpp",
+    "badge/badge_view.cpp",
     "blank/blank_pattern.cpp",
     "blank/blank_view.cpp",
     "bubble/bubble_layout_algorithm.cpp",

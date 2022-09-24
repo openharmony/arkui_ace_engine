@@ -222,6 +222,16 @@ public:
 
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
+    std::string& GetNodeName()
+    {
+        return nodeName_;
+    }
+
+    void SetNodeName(std::string& nodeName)
+    {
+        nodeName_ = nodeName;
+    }
+
 private:
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
@@ -263,6 +273,8 @@ private:
     bool hasPendingRequest_ = false;
 
     bool isActive_ = false;
+
+    std::string nodeName_;
 
     friend class RosenRenderContext;
     friend class RenderContext;
