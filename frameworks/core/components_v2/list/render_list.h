@@ -263,6 +263,11 @@ public:
         focusIndex_ = focusIndex;
     }
 
+    int32_t GetLanes() const
+    {
+        return lanes_;
+    }
+
 protected:
     void UpdateAccessibilityAttr();
     void UpdateAccessibilityScrollAttr();

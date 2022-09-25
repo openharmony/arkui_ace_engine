@@ -36,6 +36,9 @@ public:
 
 private:
     RefPtr<Flutter::ClipLayer> layer_;
+    void PaintDivider(RenderContext& context);
+    void DrawDividerOnNode(SkCanvas* skCanvas, const SkPaint& paint, bool isVertical,
+        double startCrossAxis, double mainAxis, double endCrossAxis);
 
     ACE_DISALLOW_COPY_AND_MOVE(FlutterRenderList);
 };
