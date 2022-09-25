@@ -1442,6 +1442,10 @@ bool VideoElement::IsDeclarativePara()
 void VideoElement::OnStartBtnClick()
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    if (!mediaPlayer_) {
+        LOGE("Media Player is empty");
+        return;
+    }
     if (mediaPlayer_->IsPlaying()) {
 #else
     if (isPlaying_) {
