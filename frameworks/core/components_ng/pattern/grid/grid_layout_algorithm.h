@@ -84,7 +84,7 @@ private:
 
     LayoutConstraintF MakeMeasureConstraintForGridItem(float mainSize, float crossSize, uint32_t itemFractionCount,
         const RefPtr<GridLayoutProperty>& gridLayoutProperty) const;
-    void StripItemsOutOfViewport();
+    void StripItemsOutOfViewport(LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize);
 
     GridLayoutInfo gridLayoutInfo_;

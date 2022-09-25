@@ -71,7 +71,7 @@ private:
 };
 
 class GestureReferee : public virtual AceType {
-    DECLARE_ACE_TYPE(GestureRefereeNG, AceType);
+    DECLARE_ACE_TYPE(GestureReferee, AceType);
 public:
     GestureReferee() = default;
     ~GestureReferee() = default;

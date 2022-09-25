@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_layout_algorithm.h"
 
+#include <list>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -47,7 +49,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float mainSize = GetMainAxisSize(idealSize, axis);
     float crossSize = GetCrossAxisSize(idealSize, axis);
     FillGridViewportAndMeasureChildren(mainSize, crossSize, gridLayoutProperty, layoutWrapper);
-    StripItemsOutOfViewport();
+    StripItemsOutOfViewport(layoutWrapper);
 }
 
 void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -184,6 +186,7 @@ void GridLayoutAlgorithm::MeasureRecordedItems(float mainSize, float crossSize,
         }
         float lineHeight = -1.0f;
         int32_t currentIndex = 0;
+
         // One record is like [0: 1fr] or [1: 2fr]
         for (const auto& gridItemRecord : gridMatrixIter->second) {
             currentIndex = gridItemRecord.first;
@@ -199,6 +202,7 @@ void GridLayoutAlgorithm::MeasureRecordedItems(float mainSize, float crossSize,
             // Record end index. When fill new line, the [endIndex_] will be the first item index to request
             gridLayoutInfo_.endIndex_ = gridItemRecord.first;
         }
+
         if (lineHeight > 0) { // Means at least one item has been measured
             gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_] = lineHeight;
             mainLength += lineHeight;
@@ -229,7 +233,6 @@ float GridLayoutAlgorithm::FillNewLineForward(
     // 2. [lineHight] means width of a column when the Grid is horizontal;
     // Other params are also named according to this principle.
     float lineHeight = -1.0f;
-    float measuredItemsWidth = 0.0f;
     auto currentIndex = gridLayoutInfo_.startIndex_;
     // TODO: need to consider [colunmStart]\[columsEnd] of [GridItem]
     // TODO: shoule we use policy of adaptive layout according to size of [GridItem] ?
@@ -257,7 +260,6 @@ float GridLayoutAlgorithm::FillNewLineForward(
 
         // Step3. Measure [GridItem]
         auto itemSize = itemWrapper->GetGeometryNode()->GetFrameSize();
-        measuredItemsWidth += GetCrossAxisSize(itemSize, gridLayoutInfo_.axis_);
         lineHeight = std::max(GetMainAxisSize(itemSize, gridLayoutInfo_.axis_), lineHeight);
         // TODO: get [colunmStart]\[columsEnd] of [GridItem]
         gridLayoutInfo_.gridMatrix_[gridLayoutInfo_.startMainLineIndex_][currentIndex] = 1;
@@ -279,7 +281,6 @@ float GridLayoutAlgorithm::FillNewLineBackward(
     // 2. [lineHight] means width of a column when the Grid is horizontal;
     // Other params are also named according to this principle.
     float lineHeight = -1.0f;
-    float measuredItemsWidth = 0.0f;
     auto currentIndex = gridLayoutInfo_.endIndex_ + 1;
     currentMainLineIndex_++; // if it fails to fill a new line backward, do [currentMainLineIndex_--]
     // TODO: need to consider [colunmStart]\[columsEnd] of [GridItem]
@@ -299,7 +300,6 @@ float GridLayoutAlgorithm::FillNewLineBackward(
 
         // Step3. Measure [GridItem]
         auto itemSize = itemWrapper->GetGeometryNode()->GetFrameSize();
-        measuredItemsWidth += GetCrossAxisSize(itemSize, gridLayoutInfo_.axis_);
         lineHeight = std::max(GetMainAxisSize(itemSize, gridLayoutInfo_.axis_), lineHeight);
         // TODO: get [colunmStart]\[columsEnd] of [GridItem]
         gridLayoutInfo_.gridMatrix_[currentMainLineIndex_][currentIndex] = 1;
@@ -316,29 +316,33 @@ float GridLayoutAlgorithm::FillNewLineBackward(
     }
     return lineHeight;
 }
-void GridLayoutAlgorithm::StripItemsOutOfViewport()
+void GridLayoutAlgorithm::StripItemsOutOfViewport(LayoutWrapper* layoutWrapper)
 {
     // Erase records that are out of viewport
-    // TODO: add cache and inactive item
     // 1. Erase records that are on top of viewport
     if (gridLayoutInfo_.lineHeightMap_.empty() || gridLayoutInfo_.gridMatrix_.empty()) {
         return;
     }
-    int32_t startIndexInMap = gridLayoutInfo_.lineHeightMap_.begin()->first;
-    for (int32_t i = startIndexInMap; i < gridLayoutInfo_.startMainLineIndex_; i++) {
-        gridLayoutInfo_.lineHeightMap_.erase(i);
-        gridLayoutInfo_.gridMatrix_.erase(i);
+    std::list<int32_t> removeRows;
+    for (const auto& [rowIndex, rowIndexMap] : gridLayoutInfo_.gridMatrix_) {
+        if (rowIndex < gridLayoutInfo_.startMainLineIndex_) {
+            for (auto&& [index, fr] : rowIndexMap) {
+                layoutWrapper->RemoveChildInRenderTree(index);
+            }
+            removeRows.emplace_back(rowIndex);
+        }
+        if (rowIndex > gridLayoutInfo_.endMainLineIndex_) {
+            for (auto&& [index, fr] : rowIndexMap) {
+                layoutWrapper->RemoveChildInRenderTree(index);
+            }
+            removeRows.emplace_back(rowIndex);
+        }
     }
-
-    // 2. Erase records that are under viewport
-    if (gridLayoutInfo_.lineHeightMap_.empty() || gridLayoutInfo_.gridMatrix_.empty()) {
-        return;
+    for (const auto& index : removeRows) {
+        gridLayoutInfo_.gridMatrix_.erase(index);
+        gridLayoutInfo_.lineHeightMap_.erase(index);
     }
-    for (int32_t i = gridLayoutInfo_.endMainLineIndex_ + 1;
-         i < static_cast<int32_t>(gridLayoutInfo_.lineHeightMap_.size()); i++) {
-        gridLayoutInfo_.lineHeightMap_.erase(i);
-        gridLayoutInfo_.gridMatrix_.erase(i);
-    }
+    LOGD("grid item size : %{public}d", static_cast<int32_t>(gridLayoutInfo_.gridMatrix_.size()));
 }
 
 LayoutConstraintF GridLayoutAlgorithm::MakeMeasureConstraintForGridItem(float mainSize, float crossSize,
