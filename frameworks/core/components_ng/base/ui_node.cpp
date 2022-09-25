@@ -101,7 +101,6 @@ RefPtr<UINode> UINode::GetChildAtIndex(int32_t index)
     auto iter = children_.begin();
     std::advance(iter, index);
     if (iter != children_.end()) {
-
         return *iter;
     }
     return nullptr;
@@ -330,6 +329,22 @@ HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentL
     for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
         auto& child = *iter;
         auto hitResult = child->MouseTest(globalPoint, parentLocalPoint, onMouseResult, onHoverResult, hoverNode);
+        if (hitResult == HitTestResult::STOP_BUBBLING) {
+            return HitTestResult::STOP_BUBBLING;
+        }
+        if (hitResult == HitTestResult::BUBBLING) {
+            hitTestResult = HitTestResult::BUBBLING;
+        }
+    }
+    return hitTestResult;
+}
+
+HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
+{
+    HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
+    for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
+        auto& child = *iter;
+        auto hitResult = child->AxisTest(globalPoint, parentLocalPoint, onAxisResult);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }
