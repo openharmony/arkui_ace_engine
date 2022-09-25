@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/stack/stack_view.h"
+#include "core/components_ng/pattern/stack/stack_model_ng.h"
 
 #include "base/log/ace_trace.h"
 #include "core/components_ng/base/frame_node.h"
@@ -23,7 +23,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void StackView::Create()
+
+void StackModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -32,9 +33,10 @@ void StackView::Create()
     stack->Push(frameNode);
 }
 
-void StackView::Create(Alignment alignment)
+void StackModelNG::Create(Alignment alignment)
 {
     Create();
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
 }
+
 } // namespace OHOS::Ace::NG

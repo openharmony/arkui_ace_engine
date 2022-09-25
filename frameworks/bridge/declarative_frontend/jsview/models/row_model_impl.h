@@ -13,17 +13,21 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_ROW_MODEL_IMPL_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_ROW_MODEL_IMPL_H
+
+#include "base/utils/macros.h"
+#include "core/components_ng/pattern/linear_layout/row_model.h"
 
 namespace OHOS::Ace::Framework {
 
-void JSContainerBase::JSBind()
-{
-    JSClass<JSContainerBase>::Declare("JSContainerBase");
-    // staticmethods
-    MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSContainerBase>::StaticMethod("pop", &JSContainerBase::Pop, opt);
-    JSClass<JSContainerBase>::Inherit<JSViewAbstract>();
-}
+class RowModelImpl : public RowModel {
+public:
+    void Create(const std::optional<Dimension>& space, AlignDeclaration* declaration, const std::string& tag) override;
+    void SetAlignItems(FlexAlign flexAlign) override;
+    void SetJustifyContent(FlexAlign flexAlign) override;
+    void CreateWithWrap() override;
+};
 
 } // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_ROW_MODEL_IMPL_H

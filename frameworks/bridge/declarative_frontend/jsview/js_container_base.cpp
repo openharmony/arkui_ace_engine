@@ -16,16 +16,37 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/container_model.h"
+#include "core/components_ng/pattern/container_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/container_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<ContainerModel> ContainerModel::instance_ = nullptr;
+
+ContainerModel* ContainerModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::ContainerModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ContainerModelNG());
+        } else {
+            instance_.reset(new Framework::ContainerModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 void JSContainerBase::Pop()
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewStackProcessor::GetInstance()->PopContainer();
-        return;
-    }
-    ViewStackProcessor::GetInstance()->PopContainer();
+    ContainerModel::GetInstance()->Pop();
 }
 
 void JSContainerBase::JSBind()

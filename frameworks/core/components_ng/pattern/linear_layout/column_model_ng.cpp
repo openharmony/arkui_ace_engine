@@ -13,21 +13,23 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/linear_layout/row_view.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 
-#include "base/utils/utils.h"
+#include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void RowView::Create(const std::optional<Dimension>& space)
+
+void ColumnModelNG::Create(const std::optional<Dimension>& space, AlignDeclaration*, const std::string&)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+        V2::COLUMN_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     stack->Push(frameNode);
     if (!space) {
         return;
@@ -35,16 +37,18 @@ void RowView::Create(const std::optional<Dimension>& space)
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value());
     } else {
-        LOGE("Row: the space value is illegal due to space is less than zero");
+        LOGE("Column: the space value is illegal due to space is less than zero");
     }
+    ViewAbstract::SetFocusType(FocusType::SCOPE);
+    ViewAbstract::SetFocusable(true);
 }
 
-void RowView::AlignItems(FlexAlign flexAlign)
+void ColumnModelNG::SetAlignItems(FlexAlign flexAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign);
 }
 
-void RowView::JustifyContent(FlexAlign flexAlign)
+void ColumnModelNG::SetJustifyContent(FlexAlign flexAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign);
 }

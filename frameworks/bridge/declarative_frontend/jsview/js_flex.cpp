@@ -15,29 +15,44 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex.h"
 
-#include "core/components/wrap/wrap_component.h"
+#include "core/components_ng/pattern/flex/flex_model.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/flex_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/core/components_ng/pattern/flex/flex_model_ng.h"
 
+namespace OHOS::Ace {
+
+std::unique_ptr<FlexModel> FlexModel::instance_ = nullptr;
+
+FlexModel* FlexModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::FlexModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::FlexModelNG());
+        } else {
+            instance_.reset(new Framework::FlexModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
 void JSFlex::SetFillParent()
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto flex = AceType::DynamicCast<FlexComponent>(component);
-    if (flex) {
-        flex->SetMainAxisSize(MainAxisSize::MAX);
-    }
+    FlexModel::GetInstance()->SetFillParent();
 }
 
 void JSFlex::SetWrapContent()
 {
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto flex = AceType::DynamicCast<FlexComponent>(component);
-    if (flex) {
-        flex->SetMainAxisSize(MainAxisSize::MIN);
-    }
+    FlexModel::GetInstance()->SetWrapContent();
 }
 
 void JSFlex::SetJustifyContent(int32_t value)
@@ -47,16 +62,7 @@ void JSFlex::SetJustifyContent(int32_t value)
         (value == static_cast<int32_t>(FlexAlign::SPACE_AROUND)) ||
         (value == static_cast<int32_t>(FlexAlign::SPACE_BETWEEN)) ||
         (value == static_cast<int32_t>(FlexAlign::SPACE_EVENLY))) {
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto flex = AceType::DynamicCast<FlexComponent>(component);
-        if (flex) {
-            flex->SetMainAxisAlign((FlexAlign)value);
-        } else {
-            auto wrap = AceType::DynamicCast<WrapComponent>(component);
-            if (wrap) {
-                wrap->SetMainAlignment((WrapAlignment)value);
-            }
-        }
+        FlexModel::GetInstance()->SetJustifyContent(value);
     } else {
         LOGE("invalid value for justifyContent");
     }
@@ -67,16 +73,7 @@ void JSFlex::SetAlignItems(int32_t value)
     if ((value == static_cast<int32_t>(FlexAlign::FLEX_START)) ||
         (value == static_cast<int32_t>(FlexAlign::FLEX_END)) || (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
         (value == static_cast<int32_t>(FlexAlign::STRETCH))) {
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto flex = AceType::DynamicCast<FlexComponent>(component);
-        if (flex) {
-            flex->SetCrossAxisAlign((FlexAlign)value);
-        } else {
-            auto wrap = AceType::DynamicCast<WrapComponent>(component);
-            if (wrap) {
-                wrap->SetCrossAlignment((WrapAlignment)value);
-            }
-        }
+        FlexModel::GetInstance()->SetAlignItems(value);
     } else {
         LOGE("invalid value for justifyContent");
     }
@@ -89,11 +86,7 @@ void JSFlex::SetAlignContent(int32_t value)
         (value == static_cast<int32_t>(WrapAlignment::SPACE_AROUND)) ||
         (value == static_cast<int32_t>(WrapAlignment::SPACE_BETWEEN)) ||
         (value == static_cast<int32_t>(WrapAlignment::STRETCH))) {
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto wrap = AceType::DynamicCast<WrapComponent>(component);
-        if (wrap) {
-            wrap->SetAlignment((WrapAlignment)value);
-        }
+        FlexModel::GetInstance()->SetAlignContent(value);
     } else {
         LOGE("invalid value for justifyContent");
     }
@@ -112,19 +105,7 @@ void JSFlex::JsHeight(const JSCallbackInfo& info)
 void JSFlex::SetHeight(const JSRef<JSVal>& jsValue)
 {
     JSViewAbstract::JsHeight(jsValue);
-    if (Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto columComponent = AceType::DynamicCast<ColumnComponent>(component);
-    auto rowComponent = AceType::DynamicCast<RowComponent>(component);
-    if (columComponent) {
-        columComponent->SetMainAxisSize(MainAxisSize::MAX);
-    }
-    if (rowComponent) {
-        rowComponent->SetCrossAxisSize(CrossAxisSize::MAX);
-    }
+    FlexModel::GetInstance()->SetHasHeight();
 }
 
 void JSFlex::JsWidth(const JSCallbackInfo& info)
@@ -140,19 +121,7 @@ void JSFlex::JsWidth(const JSCallbackInfo& info)
 void JSFlex::SetWidth(const JSRef<JSVal>& jsValue)
 {
     JSViewAbstract::JsWidth(jsValue);
-    if (Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-
-    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto columComponent = AceType::DynamicCast<ColumnComponent>(component);
-    auto rowComponent = AceType::DynamicCast<RowComponent>(component);
-    if (columComponent) {
-        columComponent->SetCrossAxisSize(CrossAxisSize::MAX);
-    }
-    if (rowComponent) {
-        rowComponent->SetMainAxisSize(MainAxisSize::MAX);
-    }
+    FlexModel::GetInstance()->SetHasWidth();
 }
 
 void JSFlex::JsSize(const JSCallbackInfo& info)
