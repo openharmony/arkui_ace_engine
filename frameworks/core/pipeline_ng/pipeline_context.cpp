@@ -479,6 +479,21 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     return eventManager_->DispatchKeyEventNG(event, rootNode_);
 }
 
+void PipelineContext::OnAxisEvent(const AxisEvent& event)
+{
+    // Need develop here: CTRL+AXIS = Pinch event
+
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    LOGD("AxisEvent (x,y): (%{public}f,%{public}f), horizontalAxis: %{public}f, verticalAxis: %{public}f, action: "
+         "%{public}d",
+        scaleEvent.x, scaleEvent.y, scaleEvent.horizontalAxis, scaleEvent.verticalAxis, scaleEvent.action);
+
+    // Need develop here: AxisEvent to touchTest pan recognizer
+
+    eventManager_->AxisTest(scaleEvent, rootNode_);
+    eventManager_->DispatchAxisEventNG(scaleEvent);
+}
+
 void PipelineContext::Destroy()
 {
     taskScheduler_.CleanUp();

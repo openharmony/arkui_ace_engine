@@ -186,6 +186,9 @@ public:
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
 
+    HitTestResult AxisTest(
+        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
+
     void AnimateHoverEffect(bool isHovered) const
     {
         auto renderContext = GetRenderContext();

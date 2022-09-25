@@ -149,8 +149,11 @@ public:
     virtual HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode);
 
-    // In the request to re-layout the scene, needs to obtain the changed state of the child node for the creation of
-    // parent's layout wrapper
+    virtual HitTestResult AxisTest(
+        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult);
+
+    // In the request to re-layout the scene, needs to obtain the changed state of the child node for the creation
+    // of parent's layout wrapper
     virtual void UpdateLayoutPropertyFlag();
 
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);

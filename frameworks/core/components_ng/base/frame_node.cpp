@@ -643,4 +643,52 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
     }
     return HitTestResult::BUBBLING;
 }
+
+HitTestResult FrameNode::AxisTest(
+    const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
+{
+    const auto& rect = geometryNode_->GetFrame().GetRect();
+    LOGD("AxisTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
+        GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    // TODO: disableTouchEvent || disabled_ need handle
+
+    // TODO: Region need change to RectList
+    if (!rect.IsInRegion(parentLocalPoint)) {
+        return HitTestResult::OUT_OF_REGION;
+    }
+
+    bool preventBubbling = false;
+
+    const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
+    const auto& children = GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        auto childHitResult = child->AxisTest(globalPoint, localPoint, onAxisResult);
+        if (childHitResult == HitTestResult::STOP_BUBBLING) {
+            preventBubbling = true;
+        }
+        // In normal process, the node block the brother node.
+        if (childHitResult == HitTestResult::BUBBLING) {
+            // TODO: add hit test mode judge.
+            break;
+        }
+    }
+
+    AxisTestResult axisResult;
+    bool isPrevent = false;
+    auto inputHub = eventHub_->GetInputEventHub();
+    if (inputHub) {
+        const auto coordinateOffset = globalPoint - localPoint;
+        isPrevent = inputHub->ProcessAxisTestHit(coordinateOffset, axisResult);
+    }
+
+    if (!preventBubbling) {
+        preventBubbling = isPrevent;
+        onAxisResult.splice(onAxisResult.end(), std::move(axisResult));
+    }
+    if (preventBubbling) {
+        return HitTestResult::STOP_BUBBLING;
+    }
+    return HitTestResult::BUBBLING;
+}
 } // namespace OHOS::Ace::NG
