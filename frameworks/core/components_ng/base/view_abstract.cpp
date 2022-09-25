@@ -405,6 +405,11 @@ void ViewAbstract::SetBackShadow(const Shadow& shadow)
     ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
 }
 
+void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
+{
+    ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
+}
+
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

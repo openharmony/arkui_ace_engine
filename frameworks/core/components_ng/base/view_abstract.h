@@ -33,6 +33,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/gradient_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewAbstract {
@@ -69,6 +70,7 @@ public:
     static void SetBackdropBlur(const Dimension& radius);
     static void SetFrontBlur(const Dimension& radius);
     static void SetBackShadow(const Shadow& shadow);
+    static void SetLinearGradient(const NG::Gradient& gradient);
 
     // layout
     static void SetAlign(Alignment alignment);

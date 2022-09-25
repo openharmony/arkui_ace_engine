@@ -4029,7 +4029,13 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
         LOGE("arg is not a object.");
         return;
     }
-
+    if (Container::IsCurrentUseNewPipeline()) {
+        // new pipeline
+        NG::Gradient newGradient;
+        NewJsLinearGradient(info, newGradient);
+        NG::ViewAbstract::SetLinearGradient(newGradient);
+        return;
+    }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
     if (!argsPtrItem || argsPtrItem->IsNull()) {
         LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
@@ -4089,7 +4095,6 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
     lineGradient.SetRepeat(repeating);
     // color stops
     GetGradientColorStops(lineGradient, argsPtrItem->GetValue("colors"));
-
     auto stack = ViewStackProcessor::GetInstance();
     if (!stack->IsVisualStateSet()) {
         auto decoration = GetBackDecoration();
@@ -4109,6 +4114,65 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
                 BoxStateAttribute::GRADIENT, GetBackDecoration()->GetGradient(), VisualState::NORMAL);
         }
     }
+}
+
+void JSViewAbstract::NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& newGradient)
+{
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+        info.ReturnSelf();
+        return;
+    }
+    newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    // angle
+    std::optional<float> degree;
+    GetAngle("angle", argsPtrItem, degree);
+    if (degree) {
+        newGradient.GetLinearGradient()->angle = Dimension(degree.value(), DimensionUnit::PX);
+        degree.reset();
+    }
+    // direction
+    auto direction =
+        static_cast<GradientDirection>(argsPtrItem->GetInt("direction", static_cast<int32_t>(GradientDirection::NONE)));
+    switch (direction) {
+        case GradientDirection::LEFT:
+            newGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
+            break;
+        case GradientDirection::RIGHT:
+            newGradient.GetLinearGradient()->linearX = NG::GradientDirection::RIGHT;
+            break;
+        case GradientDirection::TOP:
+            newGradient.GetLinearGradient()->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::BOTTOM:
+            newGradient.GetLinearGradient()->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::LEFT_TOP:
+            newGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
+            newGradient.GetLinearGradient()->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::LEFT_BOTTOM:
+            newGradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
+            newGradient.GetLinearGradient()->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::RIGHT_TOP:
+            newGradient.GetLinearGradient()->linearX = NG::GradientDirection::RIGHT;
+            newGradient.GetLinearGradient()->linearY = NG::GradientDirection::TOP;
+            break;
+        case GradientDirection::RIGHT_BOTTOM:
+            newGradient.GetLinearGradient()->linearX = NG::GradientDirection::RIGHT;
+            newGradient.GetLinearGradient()->linearY = NG::GradientDirection::BOTTOM;
+            break;
+        case GradientDirection::NONE:
+        case GradientDirection::START_TO_END:
+        case GradientDirection::END_TO_START:
+        default:
+            break;
+    }
+    auto repeating = argsPtrItem->GetBool("repeating", false);
+    newGradient.SetRepeat(repeating);
+    NewGetGradientColorStops(newGradient, argsPtrItem->GetValue("colors"));
 }
 
 void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
@@ -5418,6 +5482,41 @@ void JSViewAbstract::GetGradientColorStops(Gradient& gradient, const std::unique
 
     for (int32_t i = 0; i < colorStops->GetArraySize(); i++) {
         GradientColor gradientColor;
+        auto item = colorStops->GetArrayItem(i);
+        if (item && !item->IsNull() && item->IsArray() && item->GetArraySize() >= 1) {
+            auto colorParams = item->GetArrayItem(0);
+            // color
+            Color color;
+            if (!ParseJsonColor(colorParams, color)) {
+                LOGE("parse colorParams failed");
+                continue;
+            }
+            gradientColor.SetColor(color);
+            gradientColor.SetHasValue(false);
+            // stop value
+            if (item->GetArraySize() <= 1) {
+                continue;
+            }
+            auto stopValue = item->GetArrayItem(1);
+            double value = 0.0;
+            if (ParseJsonDouble(stopValue, value)) {
+                value = std::clamp(value, 0.0, 1.0);
+                gradientColor.SetHasValue(true);
+                gradientColor.SetDimension(Dimension(value * 100.0, DimensionUnit::PERCENT));
+            }
+            gradient.AddColor(gradientColor);
+        }
+    }
+}
+
+void JSViewAbstract::NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& colorStops)
+{
+    if (!colorStops || colorStops->IsNull() || !colorStops->IsArray()) {
+        return;
+    }
+
+    for (int32_t i = 0; i < colorStops->GetArraySize(); i++) {
+        NG::GradientColor gradientColor;
         auto item = colorStops->GetArrayItem(i);
         if (item && !item->IsNull() && item->IsArray() && item->GetArraySize() >= 1) {
             auto colorParams = item->GetArrayItem(0);
