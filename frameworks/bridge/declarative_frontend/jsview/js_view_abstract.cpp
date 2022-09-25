@@ -1788,6 +1788,10 @@ void JSViewAbstract::JsDisplayPriority(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], value)) {
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetDisplayIndex(static_cast<float>(value));
+        return;
+    }
     auto flexItem = ViewStackProcessor::GetInstance()->GetFlexItemComponent();
     flexItem->SetDisplayIndex(value);
 }
