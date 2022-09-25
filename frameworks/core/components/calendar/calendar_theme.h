@@ -23,6 +23,16 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
+namespace {
+
+    constexpr Color DEFAULT_DAY_COLOR = Color(0xE1181819);
+    constexpr Color DEFAULT_NON_CURRENT_MONTH_DAY_COLOR = Color(0x4B181819);
+    constexpr Color DEFAULT_WEEKEND_DAY_COLOR = Color(0x7D181819);
+    constexpr Color DEFAULT_WEEKEND_LUNAR_COLOR = Color(0x7D181819);
+    constexpr Color DEFAULT_NON_CURRENT_MONTH_LUNAR_COLOR = Color(0x75181819);
+    constexpr Color DEFAULT_LUNAR_COLOR = Color(0x96181819);
+
+} // namespace
 
 struct CalendarThemeStructure {
     std::string dayFontWeight = "500";
@@ -253,23 +263,23 @@ public:
             theme->cardCalendarTheme_.focusedAreaBackgroundColor =
                 pattern->GetAttr<Color>("card_area_bg_color_focused", Color::BLUE);
             theme->cardCalendarTheme_.dayColor =
-                pattern->GetAttr<Color>("card_day_color", Color::BLACK);
+                pattern->GetAttr<Color>("card_day_color", DEFAULT_DAY_COLOR);
             theme->cardCalendarTheme_.weekColor =
                 pattern->GetAttr<Color>("card_week_color", Color::BLACK);
             theme->cardCalendarTheme_.nonCurrentMonthDayColor =
-                pattern->GetAttr<Color>("card_uncurrent_month_day_color", Color::BLACK);
+                pattern->GetAttr<Color>("card_uncurrent_month_day_color", DEFAULT_NON_CURRENT_MONTH_DAY_COLOR);
             theme->cardCalendarTheme_.weekendDayColor =
-                pattern->GetAttr<Color>("card_weekend_color", Color::BLACK);
+                pattern->GetAttr<Color>("card_weekend_color", DEFAULT_WEEKEND_DAY_COLOR);
             theme->cardCalendarTheme_.weekendLunarColor =
-                pattern->GetAttr<Color>("card_weekend_lunar_color", Color::BLACK);
+                pattern->GetAttr<Color>("card_weekend_lunar_color", DEFAULT_WEEKEND_LUNAR_COLOR);
             theme->cardCalendarTheme_.nonCurrentMonthLunarColor =
-                pattern->GetAttr<Color>("card_uncurrent_month_lunar_color", Color::BLACK);
+                pattern->GetAttr<Color>("card_uncurrent_month_lunar_color", DEFAULT_NON_CURRENT_MONTH_LUNAR_COLOR);
             theme->cardCalendarTheme_.todayColor =
                 pattern->GetAttr<Color>("card_today_color", Color::WHITE);
             theme->cardCalendarTheme_.todayLunarColor =
                 pattern->GetAttr<Color>("card_today_lunar_color", Color::WHITE);
             theme->cardCalendarTheme_.lunarColor =
-                pattern->GetAttr<Color>("card_lunar_color", Color::BLACK);
+                pattern->GetAttr<Color>("card_lunar_color", DEFAULT_LUNAR_COLOR);
             theme->cardCalendarTheme_.markLunarColor =
                 pattern->GetAttr<Color>("card_mark_lunar_color", Color::BLUE);
             theme->cardCalendarTheme_.titleTextColor =
