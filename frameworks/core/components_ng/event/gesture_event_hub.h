@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/event/touch_event.h"
@@ -148,6 +149,22 @@ public:
         clickEventActuator_->RemoveClickEvent(clickEvent);
     }
 
+    void AddLongPressEvent(const RefPtr<LongPressEvent>& event)
+    {
+        if (!longPressEventActuator_) {
+            longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
+        }
+        longPressEventActuator_->AddLongPressEvent(event);
+    }
+
+    void RemoveLongPressEvent(const RefPtr<LongPressEvent>& event)
+    {
+        if (!longPressEventActuator_) {
+            return;
+        }
+        longPressEventActuator_->RemoveLongPressEvent(event);
+    }
+
     // Set by user define, which will replace old one.
     void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, float distance)
     {
@@ -191,8 +208,7 @@ public:
         hitTestMode_ = hitTestMode;
     }
 
-    void CombineIntoExclusiveRecognizer(const PointF& globalPoint, const PointF& localPoint,
-        TouchTestResult& result);
+    void CombineIntoExclusiveRecognizer(const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result);
 
     bool IsResponseRegion() const
     {
@@ -211,6 +227,9 @@ public:
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
     {
         responseRegion_ = responseRegion;
+        if (!responseRegion_.empty()) {
+            isResponseRegion_ = true;
+        }
     }
 
     bool GetTouchable() const
@@ -233,6 +252,7 @@ private:
     RefPtr<ScrollableActuator> scrollableActuator_;
     RefPtr<TouchEventActuator> touchEventActuator_;
     RefPtr<ClickEventActuator> clickEventActuator_;
+    RefPtr<LongPressEventActuator> longPressEventActuator_;
     RefPtr<PanEventActuator> panEventActuator_;
     RefPtr<ExclusiveRecognizer> innerExclusiveRecognizer_;
     RefPtr<ExclusiveRecognizer> externalExclusiveRecognizer_;

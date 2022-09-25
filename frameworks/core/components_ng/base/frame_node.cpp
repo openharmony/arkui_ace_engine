@@ -25,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
@@ -570,7 +571,7 @@ bool FrameNode::GetTouchable() const
 bool FrameNode::IsResponseRegion() const
 {
     auto gestureHub = eventHub_->GetGestureEventHub();
-    return gestureHub ? gestureHub->IsResponseRegion() : true;
+    return gestureHub ? gestureHub->IsResponseRegion() : false;
 }
 
 void FrameNode::MarkResponseRegion(bool isResponseRegion)
@@ -584,14 +585,16 @@ void FrameNode::MarkResponseRegion(bool isResponseRegion)
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
-    const auto& rect = geometryNode_->GetFrame().GetRect();
-    LOGD("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
-
-    if ((!rect.IsInRegion(parentLocalPoint) || !GetTouchable()) && !IsResponseRegion()) {
-        return HitTestResult::OUT_OF_REGION;
+    auto responseRegionList = GetResponseRegionList();
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGE("TouchTest: point is %{public}s in %{public}s", parentLocalPoint.ToString().c_str(), GetTag().c_str());
+        for (const auto& rect : responseRegionList) {
+            LOGD("TouchTest: responseRegionList is %{public}s, point is %{public}s", rect.ToString().c_str(),
+                parentLocalPoint.ToString().c_str());
+        }
     }
-
-    if (IsResponseRegion() && !InResponseRegionList(parentLocalPoint, GetResponseRegionList())) {
+    if ((!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) && !IsResponseRegion()) {
+        LOGE("TouchTest: point is out of region in %{public}s", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
 
@@ -602,8 +605,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     // group.
     TouchTestResult newComingTargets;
     const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
-    // TODO: add hit test mode.
     const auto& children = GetChildren();
+    bool consumed = false;
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
             break;
@@ -613,6 +616,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
+            consumed = true;
             if (child->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
                 break;
             }
@@ -620,12 +624,14 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
         // In normal process, the node block the brother node.
         if (childHitResult == HitTestResult::BUBBLING && child->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
-            // TODO: add hit test mode judge.
+            consumed = true;
             break;
         }
     }
 
-    if (!preventBubbling && GetHitTestMode() != HitTestMode::HTMNONE) {
+    if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&
+        InResponseRegionList(parentLocalPoint, responseRegionList)) {
+        consumed = true;
         auto gestureHub = eventHub_->GetGestureEventHub();
         if (gestureHub) {
             TouchTestResult finalResult;
@@ -644,7 +650,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     if (preventBubbling) {
         return HitTestResult::STOP_BUBBLING;
     }
-    return HitTestResult::BUBBLING;
+    return consumed ? HitTestResult::BUBBLING : HitTestResult::OUT_OF_REGION;
 }
 
 std::vector<RectF> FrameNode::GetResponseRegionList()
@@ -657,14 +663,19 @@ std::vector<RectF> FrameNode::GetResponseRegionList()
         return responseRegionList;
     }
 
+    if (gestureHub->GetResponseRegion().empty()) {
+        responseRegionList.emplace_back(rect);
+        return responseRegionList;
+    }
+
     auto scaleProperty = ScaleProperty::CreateScaleProperty();
-    for (auto& region : gestureHub->GetResponseRegion()) {
+    for (const auto& region : gestureHub->GetResponseRegion()) {
         auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
         auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
         auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
         auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
-        RectF responseRegion(rect.GetOffset().GetX() + x.value(),
-            rect.GetOffset().GetY() + y.value(), width.value(), height.value());
+        RectF responseRegion(
+            rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(), height.value());
         responseRegionList.emplace_back(responseRegion);
     }
     return responseRegionList;
@@ -672,7 +683,7 @@ std::vector<RectF> FrameNode::GetResponseRegionList()
 
 bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const
 {
-    for (auto& rect : responseRegionList) {
+    for (const auto& rect : responseRegionList) {
         if (rect.IsInRegion(parentLocalPoint)) {
             return true;
         }
