@@ -1127,8 +1127,8 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
         // default: dx, dy, dz (0.0, 0.0, 0.0), angle 0, centerX, centerY 50% 50%;
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX,
-            rotate.centerY, angle);
+        ParseJsRotate(
+            rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX, rotate.centerY, angle);
         if (angle.has_value()) {
             rotate.angle = angle.value();
             transitionOption.UpdateRotate(rotate);
@@ -1710,6 +1710,11 @@ void JSViewAbstract::SetVisibility(const JSCallbackInfo& info)
 
     if (!info[0]->IsNumber()) {
         LOGE("SetVisibility: The first param type is not number, invalid.");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetVisibility(VisibleType(info[0]->ToNumber<int32_t>()));
         return;
     }
 
