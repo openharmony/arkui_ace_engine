@@ -956,7 +956,18 @@ void WebDelegate::RequestFocus()
             if (!delegate) {
                 return;
             }
-            // TODO: add ng frameNode.
+
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto eventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(eventHub);
+                auto focusHub = eventHub->GetOrCreateFocusHub();
+                CHECK_NULL_VOID(focusHub);
+
+                focusHub->RequestFocusImmediately();
+            }
+
             auto webCom = delegate->webComponent_.Upgrade();
             CHECK_NULL_VOID(webCom);
             webCom->RequestFocus();
