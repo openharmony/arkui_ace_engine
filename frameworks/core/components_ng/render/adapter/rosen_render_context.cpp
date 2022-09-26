@@ -34,6 +34,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
+#include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/image_painter.h"
@@ -443,6 +444,13 @@ void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDr
             RSCanvas rsCanvas(&canvas);
             contentDraw(rsCanvas);
         });
+}
+
+void RosenRenderContext::FlushModifier(const RefPtr<Modifier>& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+    rsNode_->AddModifier(ConvertModifier(modifier));
 }
 
 void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)

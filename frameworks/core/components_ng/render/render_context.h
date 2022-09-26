@@ -23,10 +23,10 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
-#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Rosen::Drawing {
 class Canvas;
@@ -35,6 +35,7 @@ namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
+class Modifier;
 
 using RSCanvas = Rosen::Drawing::Canvas;
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
@@ -59,6 +60,8 @@ public:
     virtual void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) {}
 
     virtual void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
+
+    virtual void FlushModifier(const RefPtr<Modifier>& modifier) {}
 
     virtual void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
 
