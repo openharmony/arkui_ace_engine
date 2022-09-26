@@ -1938,11 +1938,8 @@ void RenderList::CalculateMainScrollExtent(double curMainPos, double mainSize)
         useEstimateCurrentOffset_ = false;
         startIndexOffset_ = startIndex_ * averageItemHeight;
     }
-    if (estimatedHeight_ <= GetMainSize(GetLayoutSize()) && scrollBar_) {
-        LOGD("SetScrollable false, do not show scroll bar.");
-        scrollBar_->SetScrollable(false);
-    } else {
-        scrollBar_->SetScrollable(true);
+    if (scrollBar_) {
+        scrollBar_->SetScrollable(estimatedHeight_ > GetMainSize(GetLayoutSize()));
     }
 }
 

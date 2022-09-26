@@ -730,9 +730,10 @@ void JsFrontend::DumpFrontend() const
     int32_t routerIndex = 0;
     std::string routerName;
     std::string routerPath;
-    if (delegate_) {
-        delegate_->GetState(routerIndex, routerName, routerPath);
+    if (!delegate_) {
+        return;
     }
+    delegate_->GetState(routerIndex, routerName, routerPath);
 
     if (DumpLog::GetInstance().GetDumpFile()) {
         DumpLog::GetInstance().AddDesc("Components: " + std::to_string(delegate_->GetComponentsCount()));

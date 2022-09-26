@@ -331,8 +331,8 @@ void AceAbility::OnStart(const Want& want)
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePathStr, srcPath);
     bool isArkApp = GetIsArkFromConfig(packagePathStr);
 
-    AceApplicationInfo::GetInstance().SetAbilityName(info->name);
-    std::string moduleName = info->moduleName;
+    AceApplicationInfo::GetInstance().SetAbilityName(info ? info->name : "");
+    std::string moduleName = info ? info->moduleName : "";
     std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
     std::vector<ModuleInfo> moduleList = appInfo->moduleInfos;
 

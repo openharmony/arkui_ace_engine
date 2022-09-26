@@ -180,10 +180,10 @@ void DOMSwitch::PrepareSpecializedComponent()
     if (switchChild_->GetShowText()) {
         return;
     }
-    if (boxComponent_->GetHeightDimension().Value() < 0.0 && theme) {
+    if (boxComponent_ && boxComponent_->GetHeightDimension().Value() < 0.0 && theme) {
         boxComponent_->SetHeight(theme->GetHeight().Value(), theme->GetHeight().Unit());
     }
-    if (boxComponent_->GetWidthDimension().Value() < 0.0 && theme) {
+    if (boxComponent_ && boxComponent_->GetWidthDimension().Value() < 0.0 && theme) {
         boxComponent_->SetWidth(theme->GetWidth().Value(), theme->GetWidth().Unit());
     }
 #ifndef WEARABLE_PRODUCT

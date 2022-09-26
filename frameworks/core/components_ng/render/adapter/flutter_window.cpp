@@ -60,7 +60,7 @@ void FlutterWindow::Destroy()
 {
     LOG_DESTROY();
     auto window = flutter::ace::WindowManager::GetWindow(id_);
-    if (!window) {
+    if (window != nullptr) {
         window->SetBeginFrameCallback(nullptr);
     }
     rootNode_.Reset();

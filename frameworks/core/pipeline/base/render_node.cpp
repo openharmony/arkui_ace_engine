@@ -1327,38 +1327,37 @@ void RenderNode::UpdateAll(const RefPtr<Component>& component)
     disabled_ = component->IsDisabledStatus();
     isFirstNode_ = component->IsFirstNode();
     auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
-    positionParam_ = renderComponent->GetPositionParam();
-    if (renderComponent) {
-        motionPathOption_ = renderComponent->GetMotionPathOption();
-#ifdef ENABLE_ROSEN_BACKEND
-        if (SystemProperties::GetRosenBackendEnabled() && motionPathOption_.IsValid()) {
-            if (auto rsNode = GetRSNode()) {
-                auto nativeMotionOption = std::make_shared<Rosen::RSMotionPathOption>(
-                    NativeCurveHelper::ToNativeMotionPathOption(motionPathOption_,
-                        positionParam_.type == PositionType::PTOFFSET));
-                rsNode->SetMotionPathOption(nativeMotionOption);
-            }
-        }
-#endif
-
-        if (!NearEqual(flexWeight_, renderComponent->GetFlexWeight())) {
-            auto parentFlex = GetParent().Upgrade();
-            if (parentFlex) {
-                parentFlex->MarkNeedLayout();
-            }
-        }
-        flexWeight_ = renderComponent->GetFlexWeight();
-        displayIndex_ = renderComponent->GetDisplayIndex();
-        displayIndexSetted_ = renderComponent->GetDisplayIndexSetted();
-        isIgnored_ = renderComponent->IsIgnored();
-        interceptTouchEvent_ = renderComponent->InterceptEvent();
-        if (renderComponent->IsCustomComponent()) {
-            onLayoutReady_ =
-                AceAsyncEvent<void(const std::string&)>::Create(renderComponent->GetOnLayoutReadyMarker(), context_);
-        }
-    } else {
+    if (!renderComponent) {
         LOGE("renderComponent is null");
         return;
+    }
+    positionParam_ = renderComponent->GetPositionParam();
+    motionPathOption_ = renderComponent->GetMotionPathOption();
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled() && motionPathOption_.IsValid()) {
+        if (auto rsNode = GetRSNode()) {
+            auto nativeMotionOption =
+                std::make_shared<Rosen::RSMotionPathOption>(NativeCurveHelper::ToNativeMotionPathOption(
+                    motionPathOption_, positionParam_.type == PositionType::PTOFFSET));
+            rsNode->SetMotionPathOption(nativeMotionOption);
+        }
+    }
+#endif
+
+    if (!NearEqual(flexWeight_, renderComponent->GetFlexWeight())) {
+        auto parentFlex = GetParent().Upgrade();
+        if (parentFlex) {
+            parentFlex->MarkNeedLayout();
+        }
+    }
+    flexWeight_ = renderComponent->GetFlexWeight();
+    displayIndex_ = renderComponent->GetDisplayIndex();
+    displayIndexSetted_ = renderComponent->GetDisplayIndexSetted();
+    isIgnored_ = renderComponent->IsIgnored();
+    interceptTouchEvent_ = renderComponent->InterceptEvent();
+    if (renderComponent->IsCustomComponent()) {
+        onLayoutReady_ =
+            AceAsyncEvent<void(const std::string&)>::Create(renderComponent->GetOnLayoutReadyMarker(), context_);
     }
     auto context = context_.Upgrade();
     if (context != nullptr) {
