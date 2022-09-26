@@ -239,8 +239,14 @@ void JSText::SetTextAlign(int32_t value)
     component->SetTextStyle(std::move(textStyle));
 }
 
-void JSText::SetAlign(int32_t value)
+void JSText::SetAlign(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsNumber()) {
+        LOGE("arg is not number");
+        return;
+    }
+
+    auto value = info[0]->ToNumber<int32_t>();
     auto component = GetComponent();
     if (!component) {
         LOGE("component is not valid");
