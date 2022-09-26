@@ -349,6 +349,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     const auto& geometryNode = frameNode->GetGeometryNode();
     if (rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE) {
         rect = geometryNode->GetContent() ? geometryNode->GetContent()->GetRect() : RectF();
+        rect.SetOffset(geometryNode->GetFrameOffset() + geometryNode->GetContentOffset());
     } else {
         rect = geometryNode->GetFrameRect();
     }
