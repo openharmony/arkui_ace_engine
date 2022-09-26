@@ -15,9 +15,35 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
+#include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+
+RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
+{
+    auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(gridLayoutProperty, nullptr);
+    std::vector<std::string> cols;
+    StringUtils::StringSplitter(gridLayoutProperty->GetColumnsTemplate().value_or(""), ' ', cols);
+    std::vector<std::string> rows;
+    StringUtils::StringSplitter(gridLayoutProperty->GetRowsTemplate().value_or(""), ' ', rows);
+    auto crossCount = cols.empty() ? Infinity<int32_t>() : cols.size();
+    auto mainCount = rows.empty() ? Infinity<int32_t>() : rows.size();
+    if (!gridLayoutProperty->IsVertical()) {
+        std::swap(crossCount, mainCount);
+    }
+
+    if (!rows.empty() && !cols.empty()) {
+        return MakeRefPtr<GridLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+    }
+    if (rows.empty() && cols.empty()) {
+        return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(gridLayoutInfo_);
+    }
+    return MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+}
 
 void GridPattern::OnAttachToFrameNode()
 {

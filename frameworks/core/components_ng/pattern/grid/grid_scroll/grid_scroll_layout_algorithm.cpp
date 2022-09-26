@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/grid/grid_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 
 #include <list>
 
@@ -28,7 +28,7 @@
 
 namespace OHOS::Ace::NG {
 
-void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
@@ -52,7 +52,7 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     StripItemsOutOfViewport(layoutWrapper);
 }
 
-void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
@@ -92,7 +92,7 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
-void GridLayoutAlgorithm::FillGridViewportAndMeasureChildren(
+void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     float mainSize, float crossSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty, LayoutWrapper* layoutWrapper)
 {
     float mainLength = gridLayoutInfo_.currentOffset_;
@@ -115,7 +115,7 @@ void GridLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     }
 }
 
-void GridLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize,
+void GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize,
     const RefPtr<GridLayoutProperty>& gridLayoutProperty, LayoutWrapper* layoutWrapper, float& mainLength)
 {
     if (LessOrEqual(
@@ -139,7 +139,7 @@ void GridLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize,
 
 // When a moving up event comes, the [currrentOffset_] may have been reduced too much than the items really need to
 // be moved up, so we need to modify [currrentOffset_] accrording to previous position.
-void GridLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
+void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
 {
     // Step1. Calculate total length of all items in viewport. [lengthOfItemsInViewport] must be greater than or equal
     // to viewport height
@@ -157,7 +157,7 @@ void GridLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
     gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
 }
 
-void GridLayoutAlgorithm::FillBlankAtEnd(float mainSize, float crossSize,
+void GridScrollLayoutAlgorithm::FillBlankAtEnd(float mainSize, float crossSize,
     const RefPtr<GridLayoutProperty>& gridLayoutProperty, LayoutWrapper* layoutWrapper, float& mainLength)
 {
     // When [mainLength] is still less than [mainSize], do [FillNewLineBackward] repeatedly until filling up the lower
@@ -173,7 +173,7 @@ void GridLayoutAlgorithm::FillBlankAtEnd(float mainSize, float crossSize,
     };
 }
 
-void GridLayoutAlgorithm::MeasureRecordedItems(float mainSize, float crossSize,
+void GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float crossSize,
     const RefPtr<GridLayoutProperty>& gridLayoutProperty, LayoutWrapper* layoutWrapper, float& mainLength)
 {
     currentMainLineIndex_ = gridLayoutInfo_.startMainLineIndex_ - 1;
@@ -225,7 +225,7 @@ void GridLayoutAlgorithm::MeasureRecordedItems(float mainSize, float crossSize,
     gridLayoutInfo_.endMainLineIndex_ = runOutOfRecord ? --currentMainLineIndex_ : currentMainLineIndex_;
 }
 
-float GridLayoutAlgorithm::FillNewLineForward(
+float GridScrollLayoutAlgorithm::FillNewLineForward(
     float crossSize, float mainSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty, LayoutWrapper* layoutWrapper)
 {
     // To make the code more convinient to read, we name a param in situation of vertical, for exacmple:
@@ -273,10 +273,10 @@ float GridLayoutAlgorithm::FillNewLineForward(
     return lineHeight;
 }
 
-float GridLayoutAlgorithm::FillNewLineBackward(
+float GridScrollLayoutAlgorithm::FillNewLineBackward(
     float crossSize, float mainSize, const RefPtr<GridLayoutProperty>& gridLayoutProperty, LayoutWrapper* layoutWrapper)
 {
-    // To make the code more convinient to read, we name a param in situation of vertical, for exacmple:
+    // To make the code more convenient to read, we name a param in situation of vertical, for example:
     // 1. [lineHight] means height of a row when the Grid is vertical;
     // 2. [lineHight] means width of a column when the Grid is horizontal;
     // Other params are also named according to this principle.
@@ -316,7 +316,7 @@ float GridLayoutAlgorithm::FillNewLineBackward(
     }
     return lineHeight;
 }
-void GridLayoutAlgorithm::StripItemsOutOfViewport(LayoutWrapper* layoutWrapper)
+void GridScrollLayoutAlgorithm::StripItemsOutOfViewport(LayoutWrapper* layoutWrapper)
 {
     // Erase records that are out of viewport
     // 1. Erase records that are on top of viewport
@@ -345,7 +345,7 @@ void GridLayoutAlgorithm::StripItemsOutOfViewport(LayoutWrapper* layoutWrapper)
     LOGD("grid item size : %{public}d", static_cast<int32_t>(gridLayoutInfo_.gridMatrix_.size()));
 }
 
-LayoutConstraintF GridLayoutAlgorithm::MakeMeasureConstraintForGridItem(float mainSize, float crossSize,
+LayoutConstraintF GridScrollLayoutAlgorithm::MakeMeasureConstraintForGridItem(float mainSize, float crossSize,
     uint32_t itemFractionCount, const RefPtr<GridLayoutProperty>& gridLayoutProperty) const
 {
     float itemMainSize =
@@ -373,13 +373,13 @@ LayoutConstraintF GridLayoutAlgorithm::MakeMeasureConstraintForGridItem(float ma
     return itemConstraint;
 }
 
-GridLayoutInfo GridLayoutAlgorithm::GetGridLayoutInfo()
+GridLayoutInfo GridScrollLayoutAlgorithm::GetGridLayoutInfo()
 {
     return std::move(gridLayoutInfo_);
 }
 
 // only for debug use
-void GridLayoutAlgorithm::PrintGridMatrix(const std::map<int32_t, std::map<int32_t, uint32_t>>& gridMatrix)
+void GridScrollLayoutAlgorithm::PrintGridMatrix(const std::map<int32_t, std::map<int32_t, uint32_t>>& gridMatrix)
 {
     for (const auto& record : gridMatrix) {
         for (const auto& item : record.second) {
@@ -390,7 +390,7 @@ void GridLayoutAlgorithm::PrintGridMatrix(const std::map<int32_t, std::map<int32
 }
 
 // only for debug use
-void GridLayoutAlgorithm::PrintLineHeightMap(const std::map<int32_t, float>& lineHeightMap)
+void GridScrollLayoutAlgorithm::PrintLineHeightMap(const std::map<int32_t, float>& lineHeightMap)
 {
     for (const auto& record : lineHeightMap) {
         LOGD("line height -- line: %{public}d, lineHeight: %{public}f", record.first, record.second);
