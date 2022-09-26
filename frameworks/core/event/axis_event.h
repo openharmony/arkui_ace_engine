@@ -124,7 +124,7 @@ struct AxisEvent final {
 };
 
 class AxisInfo : public BaseEventInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(MouseInfo, BaseEventInfo);
+    DECLARE_RELATIONSHIP_OF_CLASSES(AxisInfo, BaseEventInfo);
 
 public:
     AxisInfo() : BaseEventInfo("onAxis") {}
