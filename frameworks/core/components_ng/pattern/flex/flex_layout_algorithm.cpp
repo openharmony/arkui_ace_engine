@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 
 #include "base/geometry/axis.h"
+#include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -109,6 +110,9 @@ void FlexLayoutAlgorithm::CheckSizeValidity(const RefPtr<LayoutWrapper>& layoutW
     ++validSizeCount_;
 }
 
+/**
+ * Check and record baseline distance.
+ */
 void FlexLayoutAlgorithm::CheckBaselineProperties(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
     bool isChildBaselineAlign = false;
@@ -140,7 +144,7 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
     maxDisplayPriority_ = 0;
     layoutWrapper_ = layoutWrapper;
     auto layoutProperty = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    // CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(layoutProperty);
     direction_ = layoutProperty->GetFlexDirection().value_or(FlexDirection::ROW);
     mainAxisAlign_ = layoutProperty->GetMainAxisAlignValue(FlexAlign::FLEX_START);
     secondaryMeasureList_.clear();
@@ -172,7 +176,7 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
         if (!magicNodes_.count(childDisplayPriority)) {
             magicNodes_.insert(
                 std::map<int32_t, std::list<MagicLayoutNode>>::value_type(childDisplayPriority, { node }));
-            if (GreatOrEqual(childLayoutWeight, 0.0f)) {
+            if (GreatNotEqual(childLayoutWeight, 0.0f)) {
                 magicNodeWeights_.insert(std::map<int32_t, float>::value_type(childDisplayPriority, childLayoutWeight));
             }
         } else {
@@ -181,7 +185,7 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
                 magicNodeWeights_[childDisplayPriority] += childLayoutWeight;
             }
         }
-        totalFlexWeight_ += GreatOrEqual(childLayoutWeight, 0.0f) ? childLayoutWeight : 0.0f;
+        totalFlexWeight_ += GreatNotEqual(childLayoutWeight, 0.0f) ? childLayoutWeight : 0.0f;
         maxDisplayPriority_ = std::max(childDisplayPriority, maxDisplayPriority_);
     }
 }
@@ -202,7 +206,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
     if (GreatNotEqual(totalFlexWeight_, 0.0f)) {
         /**
          * The child elements with layoutWeight=0 are measured first.
-         * Measure the sub elements of layoutWeight>1 based on the remaining space.
+         * Then, measure the sub elements of layoutWeight>1 based on the remaining space.
          * If the total main axis size of the element is larger than the main axis size of Flex, the lower priority
          * element will be deleted.
          */
@@ -368,7 +372,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(FlexItemProperties& flexIte
     float allocatedFlexSpace = 0;
     std::function<float(const RefPtr<LayoutWrapper>&)> getFlex;
     RefPtr<LayoutWrapper> lastChild;
-    if (GreatOrEqual(remainSpace, 0.0f) || GreatNotEqual(maxDisplayPriority_, 1.0f)) {
+    if (GreatOrEqual(remainSpace, 0.0f) || GreatNotEqual(maxDisplayPriority_, 1)) {
         getFlex = [](const RefPtr<LayoutWrapper>& item) -> float {
             const auto& flexItemProperty = item->GetLayoutProperty()->GetFlexItemProperty();
             float ret = 0.0f;
@@ -394,7 +398,6 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(FlexItemProperties& flexIte
     auto iter = secondaryMeasureList_.rbegin();
     while (iter != secondaryMeasureList_.rend()) {
         auto child = *iter;
-        // for (auto& child : childList) {
         bool needSecondaryLayout = false;
         auto childLayoutWrapper = child.layoutWrapper;
         if (GetSelfAlign(childLayoutWrapper) == FlexAlign::STRETCH) {
@@ -404,7 +407,7 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(FlexItemProperties& flexIte
         if (LessOrEqual(totalFlexWeight_, 0.0f)) {
             float itemFlex = getFlex(child.layoutWrapper);
             float flexSize = child.layoutWrapper == lastChild ? (remainSpace - allocatedFlexSpace)
-                             : GreatOrEqual(remainSpace, 0.0f) || GreatNotEqual(maxDisplayPriority_, 1.0f)
+                             : GreatOrEqual(remainSpace, 0.0f) || GreatNotEqual(maxDisplayPriority_, 1)
                                  ? spacePerFlex * itemFlex
                                  : spacePerFlex * itemFlex * GetMainAxisSize(child.layoutWrapper);
             if (!NearZero(flexSize)) {
@@ -417,7 +420,6 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(FlexItemProperties& flexIte
             childLayoutWrapper->Measure(child.layoutConstraint);
             CheckBaselineProperties(child.layoutWrapper);
         }
-        // }
         iter++;
     }
 }
