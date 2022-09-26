@@ -349,6 +349,8 @@ RectF RosenRenderContext::AdjustPaintRect()
     const auto& geometryNode = frameNode->GetGeometryNode();
     if (rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE) {
         rect = geometryNode->GetContent() ? geometryNode->GetContent()->GetRect() : RectF();
+        auto frameRect = geometryNode->GetFrameRect();
+        rect.SetOffset(rect.GetOffset() + frameRect.GetOffset());
     } else {
         rect = geometryNode->GetFrameRect();
     }
@@ -567,15 +569,15 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     if (!diffRes) {
         return;
     }
-    AnimationUtils::Animate(option, [rsParentNode = rsNode_, &removing = toRemoveRSNodes,
-        &adding = toAddRSNodesAndIndex]() {
-        for (auto& node : removing) {
-            rsParentNode->RemoveChild(node);
-        }
-        for (auto& [node, index] : adding) {
-            rsParentNode->AddChild(node, index);
-        }
-    });
+    AnimationUtils::Animate(
+        option, [rsParentNode = rsNode_, &removing = toRemoveRSNodes, &adding = toAddRSNodesAndIndex]() {
+            for (auto& node : removing) {
+                rsParentNode->RemoveChild(node);
+            }
+            for (auto& [node, index] : adding) {
+                rsParentNode->AddChild(node, index);
+            }
+        });
 }
 
 void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
@@ -794,16 +796,15 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
     }
     if (options.HasTranslate()) {
         const auto& translate = options.GetTranslateValue();
-        effect = effect->Translate({translate.x.ConvertToPx(), translate.y.ConvertToPx(),
-            translate.z.ConvertToPx()});
+        effect = effect->Translate({ translate.x.ConvertToPx(), translate.y.ConvertToPx(), translate.z.ConvertToPx() });
     }
     if (options.HasScale()) {
         const auto& scale = options.GetScaleValue();
-        effect = effect->Scale({scale.xScale, scale.yScale, scale.zScale});
+        effect = effect->Scale({ scale.xScale, scale.yScale, scale.zScale });
     }
     if (options.HasRotate()) {
         const auto& rotate = options.GetRotateValue();
-        effect = effect->Rotate({rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.angle});
+        effect = effect->Rotate({ rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.angle });
     }
     return effect;
 }
