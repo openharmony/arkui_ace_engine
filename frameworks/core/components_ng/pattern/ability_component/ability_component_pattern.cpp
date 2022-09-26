@@ -24,9 +24,11 @@ namespace OHOS::Ace::NG {
 
 void AbilityComponentPattern::OnModifyDone()
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    int32_t windowId = pipelineContext->GetWindowId();
     adapter_ = WindowExtensionConnectionProxy::CreateAdapter();
     if (adapter_) {
-        adapter_->ConnectExtension(GetHost());
+        adapter_->ConnectExtension(GetHost(), windowId);
     }
     LOGI("connect to windows extension begin %{public}s", GetHost()->GetTag().c_str());
 }
