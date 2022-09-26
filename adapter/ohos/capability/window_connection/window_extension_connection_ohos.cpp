@@ -231,7 +231,7 @@ void WantConverter(const std::string& want, AppExecFwk::ElementName& element)
     element.SetBundleName(json->GetValue("bundle")->GetString());
 }
 
-void WindowExtensionConnectionAdapterOhos::ConnectExtension(const RefPtr<NG::FrameNode>& node)
+void WindowExtensionConnectionAdapterOhos::ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId)
 {
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OS_ACCOUNT_EXISTS)
     LOGI("connect to windows extension begin");
@@ -262,14 +262,14 @@ void WindowExtensionConnectionAdapterOhos::ConnectExtension(const RefPtr<NG::Fra
         instanceId = container->GetInstanceId();
     }
     sptr<Rosen::IWindowExtensionCallback> callback = new NGConnectionCallback(node, instanceId);
-    windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), callback);
+    windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), windowId, callback);
 #else
     LOGI("unrosen engine doesn't support ability component");
 #endif
 }
 
 void WindowExtensionConnectionAdapterOhos::ConnectExtension(
-    const std::string& want, const Rect& rect, WeakPtr<RenderNode> node)
+    const std::string& want, const Rect& rect, WeakPtr<RenderNode> node, int32_t windowId)
 {
     LOGI("ConnectExtension rect: %{public}s", rect.ToString().c_str());
 #if defined(ENABLE_ROSEN_BACKEND) && defined(OS_ACCOUNT_EXISTS)
@@ -292,7 +292,7 @@ void WindowExtensionConnectionAdapterOhos::ConnectExtension(
         instanceId = container->GetInstanceId();
     }
     sptr<Rosen::IWindowExtensionCallback> callback = new ConnectionCallback(node, instanceId);
-    windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), callback);
+    windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), windowId, callback);
 #else
     LOGI("unrosen engine doesn't support ability component");
 #endif
