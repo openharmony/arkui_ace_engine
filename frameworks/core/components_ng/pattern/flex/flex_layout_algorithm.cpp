@@ -136,7 +136,6 @@ void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
     mainAxisSize_ = 0.0f;
     crossAxisSize_ = 0.0f;
     allocatedSize_ = 0.0f;
-    layoutMode_ = FlexLayoutMode::FLEX_WEIGHT_MODE;
     totalFlexWeight_ = 0.0f;
     maxDisplayPriority_ = 0;
     layoutWrapper_ = layoutWrapper;
@@ -185,8 +184,6 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
         totalFlexWeight_ += GreatOrEqual(childLayoutWeight, 0.0f) ? childLayoutWeight : 0.0f;
         maxDisplayPriority_ = std::max(childDisplayPriority, maxDisplayPriority_);
     }
-    layoutMode_ =
-        LessOrEqual(totalFlexWeight_, 0.0f) ? FlexLayoutMode::FLEX_ITEM_MODE : FlexLayoutMode::FLEX_WEIGHT_MODE;
 }
 
 void FlexLayoutAlgorithm::ResizeFlexSizeByItem(const RefPtr<LayoutWrapper>& childLayoutWrapper)
@@ -194,7 +191,6 @@ void FlexLayoutAlgorithm::ResizeFlexSizeByItem(const RefPtr<LayoutWrapper>& chil
     float mainAxisSize = GetMainAxisSize(childLayoutWrapper);
     if (GreatOrEqual(mainAxisSize, Infinity<float>())) {
         mainAxisSize = 0.0f;
-        infinityLayoutNodes_.insert(childLayoutWrapper);
     }
     crossAxisSize_ = std::max(crossAxisSize_, GetCrossAxisSize(childLayoutWrapper));
     allocatedSize_ += mainAxisSize;
