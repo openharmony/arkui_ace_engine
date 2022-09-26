@@ -90,6 +90,16 @@ public:
     void RemoveNode(const RefPtr<AccessibilityNode>& node);
     void Mount(int32_t slot);
 
+    void SetWindowId(int32_t windowId)
+    {
+        windowId_ = windowId;
+    }
+
+    int32_t GetWindowId() const
+    {
+        return windowId_;
+    }
+
     void SetIsRootNode(bool isRootNode)
     {
         isRootNode_ = isRootNode;
@@ -826,6 +836,7 @@ protected:
     // inner use, don't need to barrierfree
     NodeId nodeId_ = -1;
     int32_t pageId_ = -1;
+    int32_t windowId_ = 0;
     bool isRootNode_ = false;
     std::string inputType_;
     WeakPtr<AccessibilityNode> parentNode_;
