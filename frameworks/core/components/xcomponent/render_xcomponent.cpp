@@ -370,6 +370,7 @@ void RenderXComponent::HandleMouseHoverEvent(MouseState mouseState)
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         LOGE("NativeXComponentDispatchMouseEvent context null");
+        return;
     }
     pipelineContext->GetTaskExecutor()->PostTask(
         [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, mouseState] {

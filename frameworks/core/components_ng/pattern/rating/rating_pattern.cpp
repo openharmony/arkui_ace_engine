@@ -438,8 +438,7 @@ void RatingPattern::OnModifyDone()
 
     ImageSourceInfo backgroundImageSourceInfo =
         ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(GetImageSourceInfoFromTheme(0b100));
-    if (!backgroundImageLoadingCtx_ ||
-        (backgroundImageLoadingCtx_ && backgroundImageLoadingCtx_->GetSourceInfo() != backgroundImageSourceInfo)) {
+    if (!backgroundImageLoadingCtx_ || backgroundImageLoadingCtx_->GetSourceInfo() != backgroundImageSourceInfo) {
         LoadNotifier loadNotifierBackgroundImage(
             CreateDataReadyCallback(0b100), CreateLoadSuccessCallback(0b100), CreateLoadFailCallback(0b100));
         backgroundImageLoadingCtx_ =

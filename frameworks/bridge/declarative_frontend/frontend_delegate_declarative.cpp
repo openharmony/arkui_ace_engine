@@ -1559,7 +1559,10 @@ void FrontendDelegateDeclarative::LoadPage(
     page->SetPageParams(params);
     page->SetFlushCallback([weak = AceType::WeakClaim(this), isMainPage, isRestore](const RefPtr<JsAcePage>& acePage) {
         auto delegate = weak.Upgrade();
-        if (delegate && acePage) {
+        if (!delegate) {
+            return;
+        }
+        if (acePage) {
             delegate->FlushPageCommand(acePage, acePage->GetUrl(), isMainPage, isRestore);
         } else {
             LOGE("flush callback called unexpected");

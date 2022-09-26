@@ -428,7 +428,13 @@ bool AceAbility::OperateComponent(const std::string& attrsJson)
     }
 
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        return false;
+    }
     auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        return false;
+    }
     taskExecutor->PostTask(
         [attrsJson, instanceId = ACE_INSTANCE_ID] {
             ContainerScope scope(instanceId);

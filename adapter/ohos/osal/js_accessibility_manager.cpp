@@ -384,6 +384,9 @@ bool FindAccessibilityFocus(const RefPtr<AccessibilityNode>& node, RefPtr<Access
 
 bool FindInputFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>& resultNode)
 {
+    if (!node) {
+        return false;
+    }
     LOGI("FindFocus nodeId(%{public}d focus(%{public}d))", node->GetNodeId(), node->GetFocusedState());
     if (!node->GetFocusedState() && (node->GetParentId() != -1)) {
         return false;
