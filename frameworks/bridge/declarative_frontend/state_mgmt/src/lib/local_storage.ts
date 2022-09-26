@@ -35,7 +35,7 @@ class LocalStorage extends NativeLocalStorage {
    */
   constructor(initializingProperties: Object = {}) {
     super();
-    console.log(`${this.constructor.name} constructor: initializing with Object: ${JSON.stringify(initializingProperties)} .`)
+    console.debug(`${this.constructor.name} constructor: initializing with Object: ${JSON.stringify(initializingProperties)} .`)
     this.storage_ = new Map<string, ObservedPropertyAbstract<any>>();
     Object.keys(initializingProperties).filter((propName) => initializingProperties[propName] != undefined).forEach((propName) =>
       this.addNewPropertyInternal(propName, initializingProperties[propName])
@@ -142,10 +142,10 @@ class LocalStorage extends NativeLocalStorage {
 
     var p: ObservedPropertyAbstract<T> = this.storage_.get(propName);
     if (p) {
-      console.log(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) update existing property`);
+      console.debug(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) update existing property`);
       p.set(newValue);
     } else {
-      console.log(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) create new entry and set value`);
+      console.debug(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) create new entry and set value`);
       this.addNewPropertyInternal(propName, newValue);
     }
     return true;
@@ -295,7 +295,7 @@ class LocalStorage extends NativeLocalStorage {
       var p: ObservedPropertyAbstract<any> = this.storage_.get(propName);
       p.aboutToBeDeleted();
     }
-    console.log(`${this.constructor.name}.deleteAll: success`);
+    console.debug(`${this.constructor.name}.deleteAll: success`);
   }
 
   /**
