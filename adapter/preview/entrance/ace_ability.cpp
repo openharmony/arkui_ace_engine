@@ -20,13 +20,14 @@
 #include "unicode/putil.h"
 #endif
 
+#include "third_party/skia/include/core/SkFontMgr.h"
+
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/ace_container.h"
+#include "adapter/preview/entrance/event_dispatcher.h"
 #include "adapter/preview/inspector/inspector_client.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
-#include "third_party/skia/include/core/SkFontMgr.h"
-#include "adapter/preview/entrance/event_dispatcher.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -70,14 +71,20 @@ void AdaptDeviceType(AceRunArgs& runArgs)
 }
 #endif
 
-void SetPhysicalDeviceFonts(bool& physicalDeviceFontsEnabled)
+void SetFontMgrConfig(const std::string& containerSdkPath)
 {
-    if (physicalDeviceFontsEnabled) {
-        LOGI("Use physical devices fonts.");
+    // To check if use ohos or container fonts.
+    std::string runtimeOS;
+    std::string containerFontBasePath;
+    if (containerSdkPath.empty()) {
+        runtimeOS = "OHOS";
     } else {
-        LOGI("Use fonts installed on pc.");
+        runtimeOS = "OHOS_Container";
+        containerFontBasePath = containerSdkPath + DELIMITER + "resources" + DELIMITER + "fonts" + DELIMITER;
     }
-    SkFontMgr::setPhysicalDeviceFonts(physicalDeviceFontsEnabled);
+    LOGI("Runtime OS is %{public}s, and the container fontBasePath is %{public}s", runtimeOS.c_str(),
+        containerFontBasePath.c_str());
+    SkFontMgr::SetFontMgrConfig(runtimeOS, containerFontBasePath);
 }
 
 std::string GetCustomAssetPath(std::string assetPath)
@@ -146,8 +153,9 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
         return nullptr;
     }
     AceApplicationInfo::GetInstance().SetLocale(runArgs.language, runArgs.region, runArgs.script, "");
-    // To check if use physical device fonts. Use Pc font by default.
-    SetPhysicalDeviceFonts(runArgs.physicalDeviceFontsEnabled);
+
+    SetFontMgrConfig(runArgs.containerSdkPath);
+
     auto controller = FlutterDesktopCreateWindow(
         runArgs.deviceWidth, runArgs.deviceHeight, runArgs.windowTitle.c_str(), runArgs.onRender);
     EventDispatcher::GetInstance().SetGlfwWindowController(controller);
@@ -423,11 +431,11 @@ bool AceAbility::OperateComponent(const std::string& attrsJson)
     auto taskExecutor = container->GetTaskExecutor();
     taskExecutor->PostTask(
         [attrsJson, instanceId = ACE_INSTANCE_ID] {
-          ContainerScope scope(instanceId);
-          bool result = OHOS::Ace::Framework::InspectorClient::GetInstance().OperateComponent(attrsJson);
-          if (!result) {
-              OHOS::Ace::Framework::InspectorClient::GetInstance().CallFastPreviewErrorCallback(attrsJson);
-          }
+            ContainerScope scope(instanceId);
+            bool result = OHOS::Ace::Framework::InspectorClient::GetInstance().OperateComponent(attrsJson);
+            if (!result) {
+                OHOS::Ace::Framework::InspectorClient::GetInstance().CallFastPreviewErrorCallback(attrsJson);
+            }
         },
         TaskExecutor::TaskType::UI);
     return true;

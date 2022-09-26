@@ -19,9 +19,9 @@
 #include <functional>
 #include <string>
 
-#include "base/utils/macros.h"
-#include "base/utils/device_type.h"
 #include "base/utils/device_config.h"
+#include "base/utils/device_type.h"
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace::Platform {
 
@@ -85,11 +85,13 @@ struct ACE_FORCE_EXPORT_WITH_PREVIEW AceRunArgs {
     AceVersion aceVersion = AceVersion::ACE_1_0;
 
     bool formsEnabled = false;
-    bool physicalDeviceFontsEnabled = true;
 
     SendRenderDataCallback onRender = nullptr;
     SendCurrentRouterCallback onRouterChange = nullptr;
     FastPreviewErrorCallback onError = nullptr;
+
+    // Container sdk path.
+    std::string containerSdkPath = "";
 };
 
 } // namespace OHOS::Ace::Platform
