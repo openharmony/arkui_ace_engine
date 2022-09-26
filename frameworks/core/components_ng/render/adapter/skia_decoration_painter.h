@@ -17,10 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_SKIA_DECORATION_PAINTER_H
 
 #include "include/core/SkMaskFilter.h"
+#include "include/core/SkRRect.h"
 #include "include/core/SkShader.h"
+#include "include/core/SkPath.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "core/components/common/properties/clip_path.h"
 
 namespace OHOS::Ace::NG {
 class SkiaDecorationPainter : public virtual AceType {
@@ -35,8 +38,23 @@ public:
         return radius > 0.0f ? BlurSigmaScale * radius + SK_ScalarHalf : 0.0f;
     }
 
-    static sk_sp<SkShader> CreateGradientShader(
-        const NG::Gradient& gradient, const SizeF& size);
+    static sk_sp<SkShader> CreateGradientShader(const NG::Gradient& gradient, const SizeF& size);
+    static SkPath SkiaCreateSkPath(const RefPtr<BasicShape>& basicShape, const SizeF& size);
+    static void SkiaCreateInset(
+        const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, SkPath& skPath);
+    static void SkiaCreateCircle(
+        const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, SkPath& skPath);
+    static void SkiaCreateEllipse(
+        const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, SkPath& skPath);
+    static void SkiaCreatePolygon(
+        const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, SkPath& skPath);
+    static void SkiaCreatePath(
+        const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, SkPath& skPath);
+    static void SkiaCreateRect(
+        const RefPtr<BasicShape>& basicShape, const SizeF& size, const OffsetF& position, SkPath& skPath);
+    static float SkiaDimensionToPx(const Dimension& value, const SizeF& size, LengthMode type);
+    static float SkiaGetFloatRadiusValue(
+        const Dimension& src, const Dimension& dest, const SizeF& size, LengthMode type);
 };
 } // namespace OHOS::Ace::NG
 

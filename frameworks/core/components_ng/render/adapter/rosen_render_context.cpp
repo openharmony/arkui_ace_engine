@@ -127,6 +127,11 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
         SizeF frameSize(paintRect.Width(), paintRect.Height());
         PaintDecoration(frameSize);
     }
+
+    if (propClip_) {
+        SizeF frameSize(paintRect.Width(), paintRect.Height());
+        PaintClip(frameSize);
+    }
 }
 
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
@@ -846,6 +851,42 @@ void RosenRenderContext::UpdateLinearGradient(const NG::Gradient& gradient)
             RequestNextFrame();
         }
     }
+}
+
+void RosenRenderContext::PaintClip(const SizeF& frameSize)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto& clip = GetOrCreateClip();
+    if (clip->HasClipShape()) {
+        auto clipShape = clip->GetClipShapeValue();
+        auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(clipShape.GetBasicShape(), frameSize);
+        if (skPath.isEmpty()) {
+            return;
+        }
+        rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
+    }
+}
+
+void RosenRenderContext::OnClipShapeUpdate(const ClipPathNG& clipPath)
+{
+    auto& clip = GetOrCreateClip();
+    if (clip->UpdateClipShape(clipPath)) {
+        auto frameNode = GetHost();
+        if (frameNode) {
+            SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
+            if (frameSize.Width() != 0 && frameSize.Height() != 0) {
+                PaintClip(frameSize);
+            }
+            RequestNextFrame();
+        }
+    }
+}
+
+void RosenRenderContext::OnClipEdgeUpdate(bool isClip)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetClipToBounds(isClip);
+    RequestNextFrame();
 }
 
 } // namespace OHOS::Ace::NG

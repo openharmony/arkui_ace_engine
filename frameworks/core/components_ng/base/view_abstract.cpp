@@ -453,4 +453,14 @@ void ViewAbstract::SetTransition(const TransitionOptions& options)
 {
     ACE_UPDATE_RENDER_CONTEXT(Transition, options);
 }
+
+void ViewAbstract::SetClipPath(const ClipPathNG& clipPath)
+{
+    ACE_UPDATE_RENDER_CONTEXT(ClipShape, clipPath);
+}
+
+void ViewAbstract::SetEdgeClip(bool isClip)
+{
+    ACE_UPDATE_RENDER_CONTEXT(ClipEdge, isClip);
+}
 } // namespace OHOS::Ace::NG
