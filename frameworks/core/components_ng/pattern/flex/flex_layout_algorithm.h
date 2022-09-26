@@ -84,21 +84,16 @@ private:
     float selfIdealCrossAxisSize_ = -1.0f;
     float allocatedSize_ = 0.0f;
     float space_ = 0.0f;
-    bool isCrossInfinite_ = false;
-    bool stretchToParent_ = false;
     float totalFlexWeight_ = 0.0f;
-    float maxDisplayPriority_ = 0.0f;
+    int32_t maxDisplayPriority_ = 0;
     int32_t validSizeCount_ = 0;
     FlexAlign crossAxisAlign_ = FlexAlign::FLEX_START;
     FlexAlign mainAxisAlign_ = FlexAlign::FLEX_START;
 
     RefPtr<LayoutWrapper> layoutWrapper_;
-    std::list<RefPtr<LayoutWrapper>> weightNodes_;
-    std::set<RefPtr<LayoutWrapper>> infinityLayoutNodes_;
-    std::map<float, std::list<MagicLayoutNode>> magicNodes_;
-    std::map<float, float> magicNodeWeights_;
+    std::map<int32_t, std::list<MagicLayoutNode>> magicNodes_;
+    std::map<int32_t, float> magicNodeWeights_;
     std::list<MagicLayoutNode> secondaryMeasureList_;
-    FlexLayoutMode layoutMode_ = FlexLayoutMode::FLEX_ITEM_MODE;
     FlexDirection direction_ = FlexDirection::ROW;
     friend class LinearLayoutUtils;
     BaselineProperties baselineProperties_;

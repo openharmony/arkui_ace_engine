@@ -111,7 +111,7 @@ public:
     static void SetAlignSelf(int32_t value);
     static void SetFlexShrink(float value);
     static void SetFlexGrow(float value);
-    static void SetDisplayIndex(float value);
+    static void SetDisplayIndex(int32_t value);
 
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam>& param);

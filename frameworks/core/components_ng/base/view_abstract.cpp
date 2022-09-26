@@ -140,7 +140,7 @@ void ViewAbstract::SetFlexGrow(float value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexGrow, value);
 }
 
-void ViewAbstract::SetDisplayIndex(float value)
+void ViewAbstract::SetDisplayIndex(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, DisplayIndex, value);
 }

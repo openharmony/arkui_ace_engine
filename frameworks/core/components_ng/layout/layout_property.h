@@ -230,7 +230,7 @@ public:
         }
     }
 
-    void UpdateDisplayIndex(const float displayIndex)
+    void UpdateDisplayIndex(int32_t displayIndex)
     {
         if (!flexItemProperty_) {
             flexItemProperty_ = std::make_unique<FlexItemProperty>();

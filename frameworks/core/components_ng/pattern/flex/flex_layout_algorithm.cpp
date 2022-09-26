@@ -24,7 +24,10 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
+
+/**
+ * Get the main axis direction based on direction.
+ */
 FlexDirection FlipAxis(FlexDirection direction)
 {
     if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
@@ -33,6 +36,9 @@ FlexDirection FlipAxis(FlexDirection direction)
     return FlexDirection::ROW;
 }
 
+/**
+ * Determine whether to start the layout from the upper left corner
+ */
 bool IsStartTopLeft(FlexDirection direction, TextDirection textDirection)
 {
     switch (direction) {
@@ -77,7 +83,6 @@ OptionalSizeF GetCalcSizeHelper(float mainAxisSize, float crossAxisSize, FlexDir
     }
     return size;
 }
-} // namespace
 
 float FlexLayoutAlgorithm::GetMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
@@ -123,6 +128,9 @@ void FlexLayoutAlgorithm::CheckBaselineProperties(const RefPtr<LayoutWrapper>& l
     }
 }
 
+/**
+ * Initialize the FlexLayoutAlgorithm property.
+ */
 void FlexLayoutAlgorithm::InitFlexProperties(LayoutWrapper* layoutWrapper)
 {
     mainAxisSize_ = 0.0f;
@@ -154,22 +162,23 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
         auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
         node.layoutWrapper = child;
         node.layoutConstraint = childLayoutConstraint;
-        float childDisplayPriority = 0.0f;
-        float childLayoutWeight = -1.0f;
+        int32_t childDisplayPriority = 1;
+        float childLayoutWeight = 0.0f;
         if (childMagicItemProperty) {
-            childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(-1.0f);
+            childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
         }
         if (childFlexItemProperty) {
-            childDisplayPriority = childFlexItemProperty->GetDisplayIndex().value_or(0.0f);
+            childDisplayPriority = childFlexItemProperty->GetDisplayIndex().value_or(1);
         }
         if (!magicNodes_.count(childDisplayPriority)) {
-            magicNodes_.insert(std::map<float, std::list<MagicLayoutNode>>::value_type(childDisplayPriority, { node }));
-            if (childLayoutWeight > 0) {
-                magicNodeWeights_.insert(std::map<float, float>::value_type(childDisplayPriority, childLayoutWeight));
+            magicNodes_.insert(
+                std::map<int32_t, std::list<MagicLayoutNode>>::value_type(childDisplayPriority, { node }));
+            if (GreatOrEqual(childLayoutWeight, 0.0f)) {
+                magicNodeWeights_.insert(std::map<int32_t, float>::value_type(childDisplayPriority, childLayoutWeight));
             }
         } else {
             magicNodes_[childDisplayPriority].emplace_back(node);
-            if (childLayoutWeight > 0) {
+            if (GreatNotEqual(childLayoutWeight, 0.0f)) {
                 magicNodeWeights_[childDisplayPriority] += childLayoutWeight;
             }
         }
@@ -297,7 +306,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
             }
             iter++;
         }
-    } else if (GreatNotEqual(maxDisplayPriority_, 1.0f)) {
+    } else if (GreatNotEqual(maxDisplayPriority_, 1)) {
         auto iter = magicNodes_.rbegin();
         while (iter != magicNodes_.rend()) {
             auto childList = iter->second;
@@ -481,12 +490,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
  */
 float FlexLayoutAlgorithm::GetStretchCrossAxisLimit() const
 {
-    float crossAxisLimit = 0.0f;
-    if (GreatNotEqual(selfIdealCrossAxisSize_, -1.0f)) {
-        crossAxisLimit = selfIdealCrossAxisSize_;
-    } else {
-        crossAxisLimit = crossAxisSize_;
-    }
+    float crossAxisLimit = GreatNotEqual(selfIdealCrossAxisSize_, -1.0f) ? selfIdealCrossAxisSize_ : crossAxisSize_;
     return crossAxisLimit;
 }
 
@@ -583,6 +587,7 @@ void FlexLayoutAlgorithm::PlaceChildren(LayoutWrapper* layoutWrapper, float fron
                     float distance = child->GetBaselineDistance();
                     childCrossPos = baselineProperties_.maxBaselineDistance - distance;
                 }
+                break;
             default:
                 break;
         }
