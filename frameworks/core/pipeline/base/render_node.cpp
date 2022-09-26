@@ -918,7 +918,6 @@ bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
                 MouseHoverExitTest();
             }
             mouseState_ = MouseState::NONE;
-            HandleMouseHoverEvent(MouseState::NONE);
         }
         return false;
     }
@@ -945,7 +944,6 @@ bool RenderNode::MouseHoverTest(const Point& parentLocalPoint)
             MouseHoverEnterTest();
         }
         mouseState_ = MouseState::HOVER;
-        HandleMouseHoverEvent(MouseState::HOVER);
     }
     return true;
 }
