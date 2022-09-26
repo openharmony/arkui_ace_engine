@@ -173,6 +173,15 @@ ACE_EXPORT extern const char CIRCLE_ETS_TAG[];
 // ellipse
 ACE_EXPORT extern const char ELLIPSE_ETS_TAG[];
 
+//path
+ACE_EXPORT extern const char PATH_ETS_TAG[];
+
+//polygon
+ACE_EXPORT extern const char POLYGON_ETS_TAG[];
+
+//polyline
+ACE_EXPORT extern const char POLYLINE_ETS_TAG[];
+
 // shape
 ACE_EXPORT extern const char SHAPE_COMPONENT_TAG[];
 ACE_EXPORT extern const char SHAPE_ETS_TAG[];

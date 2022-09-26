@@ -27,7 +27,7 @@ class EllipsePainter {
 public:
     EllipsePainter() = default;
     ~EllipsePainter() = default;
-    static void DrawEllipse(RSCanvas& canvas,const RectF& rect, const ShapePaintProperty& shapePaintProperty);
+    static void DrawEllipse(RSCanvas& canvas, const RectF& rect, const ShapePaintProperty& shapePaintProperty);
 };
 
 } // namespace OHOS::Ace::NG

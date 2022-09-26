@@ -13,22 +13,27 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/ellipse_painter.h"
+#include "include/utils/SkParsePath.h"
 
-#include "base/geometry/ng/rect_t.h"
-#include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/path_painter.h"
 #include "core/components_ng/render/shape_painter.h"
+#include "core/components_ng/render/sk_painter.h"
 
 namespace OHOS::Ace::NG {
-void EllipsePainter::DrawEllipse(RSCanvas& canvas, const RectF& rect, const ShapePaintProperty& shapePaintProperty)
+void PathPainter::DrawPath(RSCanvas& canvas, const PathPaintProperty& pathPaintProperty)
 {
     RSPen pen;
     RSBrush brush;
-    ShapePainter::SetPan(pen, shapePaintProperty);
-    ShapePainter::SetBrush(brush, shapePaintProperty);
+    ShapePainter::SetPan(pen, pathPaintProperty);
+    ShapePainter::SetBrush(brush, pathPaintProperty);
     canvas.AttachPen(pen);
     canvas.AttachBrush(brush);
-    canvas.DrawOval(RSRRect(rect.GetX(), rect.GetY(), rect.GetX() + rect.Width(), rect.GetY() + rect.Height()));
+    if (!pathPaintProperty.HasCommands()) {
+        return;
+    }
+    SkPainter::DrawPath(canvas, pathPaintProperty.GetCommandsValue(), pathPaintProperty);
 }
 } // namespace OHOS::Ace::NG

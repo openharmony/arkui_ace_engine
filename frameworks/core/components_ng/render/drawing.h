@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H
 
 #include "draw/canvas.h"
+#include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "drawing/engine_adapter/impl_interface/bitmap_impl.h"
 #include "image/image.h"
 #include "rosen_text/ui/font_collection.h"
@@ -49,6 +50,7 @@ using RSColorType = Rosen::Drawing::ColorType;
 using RSAlphaType = Rosen::Drawing::AlphaType;
 using RSScalar = Rosen::Drawing::scalar;
 using RSClipOp = Rosen::Drawing::ClipOp;
+using RSSkCanvas = Rosen::Drawing::SkiaCanvas;
 
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;
