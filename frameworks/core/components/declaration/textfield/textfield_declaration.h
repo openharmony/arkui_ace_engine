@@ -388,6 +388,10 @@ public:
     RefPtr<Decoration> GetDecoration() const
     {
         auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
+        if (!style.decoration) {
+            LOGE("GetStyle returns errStyle, contains null decoration");
+            style.decoration = AceType::MakeRefPtr<Decoration>();
+        }
         return style.decoration;
     }
 
