@@ -58,6 +58,10 @@ using RSParagraphBuilder = rosen::TypographyCreate;
 using RSFontCollection = rosen::FontCollection;
 using RSParagraphStyle = rosen::TypographyStyle;
 using RSTextStyle = rosen::TextStyle;
+using RSColorQuad = rosen::ColorQuad;
+using RSShaderEffect = rosen::ShaderEffect;
+using RSTileMode = rosen::TileMode;
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H
