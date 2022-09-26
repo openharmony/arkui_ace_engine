@@ -25,12 +25,12 @@
 namespace OHOS::Ace {
 namespace {
 
-    constexpr Color DEFAULT_DAY_COLOR = Color(0xE1181819);
-    constexpr Color DEFAULT_NON_CURRENT_MONTH_DAY_COLOR = Color(0x4B181819);
-    constexpr Color DEFAULT_WEEKEND_DAY_COLOR = Color(0x7D181819);
-    constexpr Color DEFAULT_WEEKEND_LUNAR_COLOR = Color(0x7D181819);
-    constexpr Color DEFAULT_NON_CURRENT_MONTH_LUNAR_COLOR = Color(0x75181819);
-    constexpr Color DEFAULT_LUNAR_COLOR = Color(0x96181819);
+constexpr Color DEFAULT_DAY_COLOR = Color(0xE1181819);
+constexpr Color DEFAULT_NON_CURRENT_MONTH_DAY_COLOR = Color(0x4B181819);
+constexpr Color DEFAULT_WEEKEND_DAY_COLOR = Color(0x7D181819);
+constexpr Color DEFAULT_WEEKEND_LUNAR_COLOR = Color(0x7D181819);
+constexpr Color DEFAULT_NON_CURRENT_MONTH_LUNAR_COLOR = Color(0x75181819);
+constexpr Color DEFAULT_LUNAR_COLOR = Color(0x96181819);
 
 } // namespace
 
