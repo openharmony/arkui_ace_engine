@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,31 +21,9 @@
 
 #include "base/memory/ace_type.h"
 #include "core/animation/curves.h"
+#include "core/animation/page_transition_common.h"
 
 namespace OHOS::Ace {
-
-enum class PageTransitionType {
-    ENTER,      // current page enter not specify route type.
-    EXIT,       // current page exit not specify route type.
-    ENTER_POP,  // top page pop from route stack, current page on top.
-    ENTER_PUSH, // current page push into route stack.
-    EXIT_POP,   // current page pop from route stack.
-    EXIT_PUSH,  // another page push info route stack.
-};
-
-enum class RouteType {
-    NONE,
-    PUSH,
-    POP,
-};
-
-enum class SlideEffect {
-    NONE,
-    LEFT,
-    RIGHT,
-    TOP,
-    BOTTOM,
-};
 
 using PageTransitionEventFunc = std::function<void(RouteType, const float&)>;
 
