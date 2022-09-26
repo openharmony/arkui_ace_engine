@@ -293,6 +293,28 @@ void ViewAbstract::SetOnAreaChanged(
     eventHub->SetOnAreaChanged(std::move(onAreaChanged));
 }
 
+void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->MarkResponseRegion(true);
+    gestureHub->SetResponseRegion(responseRegion);
+}
+
+void ViewAbstract::SetTouchable(bool touchable)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTouchable(touchable);
+}
+
+void ViewAbstract::SetHitTestMode(HitTestMode hitTestMode)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetHitTestMode(hitTestMode);
+}
+
 void ViewAbstract::SetAlign(Alignment alignment)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);

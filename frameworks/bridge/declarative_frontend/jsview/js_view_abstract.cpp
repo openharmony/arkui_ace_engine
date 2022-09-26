@@ -57,6 +57,7 @@
 #include "core/components/option/option_component.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/gestures/long_press_gesture.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -1293,6 +1294,11 @@ void JSViewAbstract::JsResponseRegion(const JSCallbackInfo& info)
 
     std::vector<DimensionRect> result;
     if (!JSViewAbstract::ParseJsResponseRegionArray(info[0], result)) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewAbstract::SetResponseRegion(result);
         return;
     }
 
@@ -5779,6 +5785,13 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
         LOGE("JsHitTestBehavior: The arg is wrong, it is supposed to have 1 arguments");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::HitTestMode hitTestModeNG = NG::HitTestMode::HTMDEFAULT;
+        hitTestModeNG = static_cast<NG::HitTestMode>(info[0]->ToNumber<int32_t>());
+        NG::ViewAbstract::SetHitTestMode(hitTestModeNG);
         return;
     }
 
