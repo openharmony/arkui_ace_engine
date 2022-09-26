@@ -15,11 +15,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_CIRCLE_PATTERN_H
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/circle_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/circle_paint_method.h"
+#include "core/components_ng/pattern/shape/shape_paint_property.h"
 
 namespace OHOS::Ace::NG {
 class CirclePattern : public Pattern {
@@ -31,12 +33,29 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<CirclePaintMethod>();
+        auto curFrameNode = GetHost();
+        CHECK_NULL_RETURN(curFrameNode, nullptr);
+        ShapePaintProperty propertiesFromAncestor;
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
+        while (parentFrameNode) {
+            auto parentPaintProperty = parentFrameNode->GetPaintProperty<ShapePaintProperty>();
+            if (parentPaintProperty) {
+                propertiesFromAncestor.UpdateShapeProperty(parentPaintProperty);
+            }
+            curFrameNode = parentFrameNode;
+            parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
+        }
+        return MakeRefPtr<CirclePaintMethod>(DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone()));
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<CircleLayoutAlgorithm>();
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<ShapePaintProperty>();
     }
 
 private:

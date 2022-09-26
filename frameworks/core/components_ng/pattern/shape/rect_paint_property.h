@@ -20,11 +20,12 @@
 #include "base/geometry/ng/radius.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT RectPaintProperty : public PaintProperty {
+class ACE_EXPORT RectPaintProperty : public ShapePaintProperty {
     DECLARE_ACE_TYPE(RectPaintProperty, PaintProperty);
 
 public:
@@ -33,17 +34,28 @@ public:
     RefPtr<PaintProperty> Clone() const override
     {
         auto value = MakeRefPtr<RectPaintProperty>();
-        value->PaintProperty::UpdatePaintProperty(DynamicCast<RectPaintProperty>(this));
+        value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
         value->propTopLeftRadius_ = CloneTopLeftRadius();
         value->propTopRightRadius_ = CloneTopRightRadius();
         value->propBottomLeftRadius_ = CloneBottomLeftRadius();
         value->propBottomRightRadius_ = CloneBottomRightRadius();
+        value->propFill_ = CloneFill();
+        value->propFillOpacity_ = CloneFillOpacity();
+        value->propStroke_ = CloneStroke();
+        value->propStrokeWidth_ = CloneStrokeWidth();
+        value->propStrokeOpacity_ = CloneStrokeOpacity();
+        value->propStrokeDashArray_ = CloneStrokeDashArray();
+        value->propStrokeDashOffset_ = CloneStrokeDashOffset();
+        value->propStrokeLineCap_ = CloneStrokeLineCap();
+        value->propStrokeLineJoin_ = CloneStrokeLineJoin();
+        value->propStrokeMiterLimit_ = CloneStrokeMiterLimit();
+        value->propAntiAlias_ = CloneAntiAlias();
         return value;
     }
 
     void Reset() override
     {
-        PaintProperty::Reset();
+        ShapePaintProperty::Reset();
         ResetBottomLeftRadius();
         ResetBottomRightRadius();
         ResetTopLeftRadius();

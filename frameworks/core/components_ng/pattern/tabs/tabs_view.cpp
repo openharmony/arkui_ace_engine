@@ -51,6 +51,7 @@ void TabsView::Create()
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateLoop(false);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateCachedCount(0);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto swiperController = swiperPattern->GetSwiperController();
@@ -58,10 +59,10 @@ void TabsView::Create()
     // Create TabBar to contain TabBar of TabContent.
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId,
         [swiperController]() { return AceType::MakeRefPtr<TabBarPattern>(swiperController); });
-    if (!hasSwiperNode) {
+    if (!hasTabBarNode) {
         tabBarNode->MountToParent(tabsNode);
     }
-    if (!hasTabBarNode) {
+    if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
     }
     ViewStackProcessor::GetInstance()->Push(tabsNode);

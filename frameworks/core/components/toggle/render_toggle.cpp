@@ -255,9 +255,11 @@ void RenderToggle::PerformLayout()
     Size childrenSize;
     if (!GetChildren().empty()) {
         child = GetChildren().front();
-        child->Layout(innerLayoutParam);
-        childrenSize.SetWidth(child->GetLayoutSize().Width());
-        childrenSize.SetHeight(child->GetLayoutSize().Height());
+        if (child) {
+            child->Layout(innerLayoutParam);
+            childrenSize.SetWidth(child->GetLayoutSize().Width());
+            childrenSize.SetHeight(child->GetLayoutSize().Height());
+        }
     }
     double width = widthDefined_ ? toggleSize_.Width() : childrenSize.Width();
     double height = toggleSize_.Height();

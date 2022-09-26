@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -79,6 +80,12 @@ public:
     bool DispatchTabIndexEvent(
         const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage);
 
+    // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
+    // platform will handle it.
+    bool DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode);
+    bool DispatchTabIndexEventNG(
+        const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode, const RefPtr<FocusGroup>& curPage);
+
     // Distribute the rotation event to the corresponding render tree or requested render node. If the render is not
     // processed, return false and the platform will handle it.
     static bool DispatchRotationEvent(
@@ -97,6 +104,9 @@ public:
 
     void AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode);
     bool DispatchAxisEvent(const AxisEvent& event);
+
+    void AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode);
+    bool DispatchAxisEventNG(const AxisEvent& event);
 
     void ClearResults();
     void SetInstanceId(int32_t instanceId)
@@ -123,12 +133,18 @@ public:
         return referee_;
     }
 
+    RefPtr<NG::GestureReferee> GetGestureRefereeNG()
+    {
+        return refereeNG_;
+    }
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
     MouseTestResult currHoverTestResults_;
     MouseTestResult lastHoverTestResults_;
+    AxisTestResult axisTestResults_;
     WeakPtr<NG::FrameNode> lastHoverNode_;
     WeakPtr<NG::FrameNode> currHoverNode_;
     TouchTestResult axisTouchTestResult_;
@@ -140,6 +156,7 @@ private:
     int32_t instanceId_ = 0;
     bool inSelectedRect_ = false;
     RefPtr<GestureReferee> referee_;
+    RefPtr<NG::GestureReferee> refereeNG_;
 };
 
 } // namespace OHOS::Ace

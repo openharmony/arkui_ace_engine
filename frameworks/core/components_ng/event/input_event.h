@@ -29,6 +29,8 @@ public:
 
     explicit InputEvent(OnHoverEventFunc&& callback) : onHoverCallback_(std::move(callback)) {}
 
+    explicit InputEvent(OnAxisEventFunc&& callback) : onAxisCallback_(std::move(callback)) {}
+
     ~InputEvent() override = default;
 
     const OnMouseEventFunc& GetOnMouseEventFunc() const
@@ -39,6 +41,11 @@ public:
     const OnHoverEventFunc& GetOnHoverEventFunc() const
     {
         return onHoverCallback_;
+    }
+
+    const OnAxisEventFunc& GetOnAxisEventFunc() const
+    {
+        return onAxisCallback_;
     }
 
     void operator()(MouseInfo& info) const
@@ -55,9 +62,17 @@ public:
         }
     }
 
+    void operator()(AxisInfo& info) const
+    {
+        if (onAxisCallback_) {
+            onAxisCallback_(info);
+        }
+    }
+
 private:
     OnMouseEventFunc onMouseCallback_;
     OnHoverEventFunc onHoverCallback_;
+    OnAxisEventFunc onAxisCallback_;
 };
 
 class ACE_EXPORT InputEventActuator : public virtual AceType {
@@ -74,6 +89,13 @@ public:
         userCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
     }
     void ReplaceInputEvent(OnHoverEventFunc&& callback)
+    {
+        if (userCallback_) {
+            userCallback_.Reset();
+        }
+        userCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
+    }
+    void ReplaceInputEvent(OnAxisEventFunc&& callback)
     {
         if (userCallback_) {
             userCallback_.Reset();
@@ -103,9 +125,13 @@ public:
     void OnCollectHoverEvent(
         const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, MouseTestResult& onHoverResult);
 
+    void OnCollectAxisEvent(
+        const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, AxisTestResult& onAxisResult);
+
 private:
     WeakPtr<InputEventHub> inputEventHub_;
     RefPtr<MouseEventTarget> eventTarget_;
+    RefPtr<AxisEventTarget> axisEventTarget_;
     std::list<RefPtr<InputEvent>> inputEvents_;
     RefPtr<InputEvent> userCallback_;
 };

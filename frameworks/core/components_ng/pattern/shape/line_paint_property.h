@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_LINE_PAINT_PROPERTY_H
 
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 
@@ -24,8 +25,8 @@ namespace OHOS::Ace::NG {
 
 using ShapePoint = std::pair<Dimension, Dimension>;
 
-class ACE_EXPORT LinePaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(LinePaintProperty, PaintProperty);
+class ACE_EXPORT LinePaintProperty : public ShapePaintProperty {
+    DECLARE_ACE_TYPE(LinePaintProperty, ShapePaintProperty);
 
 public:
     LinePaintProperty() = default;
@@ -36,12 +37,23 @@ public:
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
         value->propStartPoint_ = CloneStartPoint();
         value->propEndPoint_ = CloneEndPoint();
+        value->propFill_ = CloneFill();
+        value->propFillOpacity_ = CloneFillOpacity();
+        value->propStroke_ = CloneStroke();
+        value->propStrokeWidth_ = CloneStrokeWidth();
+        value->propStrokeOpacity_ = CloneStrokeOpacity();
+        value->propStrokeDashArray_ = CloneStrokeDashArray();
+        value->propStrokeDashOffset_ = CloneStrokeDashOffset();
+        value->propStrokeLineCap_ = CloneStrokeLineCap();
+        value->propStrokeLineJoin_ = CloneStrokeLineJoin();
+        value->propStrokeMiterLimit_ = CloneStrokeMiterLimit();
+        value->propAntiAlias_ = CloneAntiAlias();
         return value;
     }
 
     void Reset() override
     {
-        PaintProperty::Reset();
+        ShapePaintProperty::Reset();
         ResetStartPoint();
         ResetEndPoint();
     }

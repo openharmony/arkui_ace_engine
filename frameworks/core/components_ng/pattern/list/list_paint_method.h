@@ -21,17 +21,19 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_v2/list/list_component.h"
-#include "core/components_ng/render/divider_painter.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ListPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ListPaintMethod, NodePaintMethod)
 public:
-    ListPaintMethod(const V2::ItemDivider& divider, int32_t startIndex, int32_t endIndex,
-        bool vertical, const ListLayoutAlgorithm::PositionMap& itemPosition) : divider_(divider),
-        startIndex_(startIndex), endIndex_(endIndex), vertical_(vertical), itemPosition_(itemPosition) {}
+    ListPaintMethod(const V2::ItemDivider& divider, int32_t startIndex, int32_t endIndex, bool vertical,
+        ListLayoutAlgorithm::PositionMap&& itemPosition)
+        : divider_(divider), startIndex_(startIndex), endIndex_(endIndex), vertical_(vertical),
+          itemPosition_(std::move(itemPosition))
+    {}
     ~ListPaintMethod() override = default;
 
     CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;

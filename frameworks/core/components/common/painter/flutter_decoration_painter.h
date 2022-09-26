@@ -31,7 +31,7 @@
 #include "core/components/image/render_image.h"
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/layers/clip_layer.h"
-#include "core/components_ng/render/decoration_painter.h"
+#include "core/components_ng/render/adapter/skia_decoration_painter.h"
 
 namespace flutter {
 class Canvas;
@@ -45,8 +45,8 @@ class Border;
 class Offset;
 class Size;
 
-class FlutterDecorationPainter : public virtual NG::DecorationPainter {
-    DECLARE_ACE_TYPE(FlutterDecorationPainter, NG::DecorationPainter);
+class FlutterDecorationPainter : public virtual NG::SkiaDecorationPainter {
+    DECLARE_ACE_TYPE(FlutterDecorationPainter, NG::SkiaDecorationPainter);
 
 public:
     FlutterDecorationPainter(

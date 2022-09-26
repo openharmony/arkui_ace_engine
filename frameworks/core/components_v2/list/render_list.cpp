@@ -446,11 +446,9 @@ void RenderList::CalculateLanes()
         LOGE("unexpected situation, set lanes to 1, maxLanes: %{public}f, minLanes: %{public}f, minLaneLength_: "
             "%{public}f, maxLaneLength_: %{public}f", maxLanes, minLanes, minLaneLength_, maxLaneLength_);
     } while (0);
-    if (lanes_ != lanes) { // if lanes changes, layout from item 0
-        lanes_ = lanes;
-        currentOffset_ = 0.0;
-        startIndex_ = 0;
-        startIndexOffset_ = 0.0;
+    lanes_ = lanes;
+    if (lanes > 1) { // if lanes changes, adjust startIndex_
+        startIndex_ -= GetItemRelativeIndex(startIndex_) % lanes;
     }
 }
 
@@ -564,9 +562,9 @@ void RenderList::RequestNewItemsAtStartForLaneList()
             ++newItemCntInLine;
         } while (0);
         bool singleLaneDoneAddItem = (lanes_ == 1) && !breakWhenRequestNewItem;
-        bool multiLaneDoneSupplyOneLine = (lanes_ > 1) && (newItemCntInLine == lanes_);
-        bool multiLaneStartSupplyLine = (itemGroup || breakWhenRequestNewItem) && (newItemCntInLine >= 1);
-        if (singleLaneDoneAddItem || multiLaneDoneSupplyOneLine || multiLaneStartSupplyLine) {
+        bool isLaneStart = !itemGroup && (lanes_ > 1) && (GetItemRelativeIndex(startIndex_ - 1) % lanes_ == 0);
+        bool multiLaneSupplyLine = (itemGroup || breakWhenRequestNewItem || isLaneStart) && (newItemCntInLine >= 1);
+        if (singleLaneDoneAddItem || multiLaneSupplyLine) {
             currentOffset_ -= lineMainSize + spaceWidth_;
             startIndexOffset_ -= lineMainSize + spaceWidth_;
             newItemCntInLine = 0;
@@ -1639,6 +1637,20 @@ void RenderList::RecycleListItem(size_t index)
     }
 }
 
+size_t RenderList::FindItemStartIndex(size_t index)
+{
+    auto generator = itemGenerator_.Upgrade();
+    if (generator) {
+        return generator->FindItemStartIndex(index);
+    }
+    return 0;
+}
+
+size_t RenderList::GetItemRelativeIndex(size_t index)
+{
+    return index - FindItemStartIndex(index);
+}
+
 size_t RenderList::TotalCount()
 {
     auto generator = itemGenerator_.Upgrade();
@@ -1926,11 +1938,8 @@ void RenderList::CalculateMainScrollExtent(double curMainPos, double mainSize)
         useEstimateCurrentOffset_ = false;
         startIndexOffset_ = startIndex_ * averageItemHeight;
     }
-    if (estimatedHeight_ <= GetMainSize(GetLayoutSize()) && scrollBar_) {
-        LOGD("SetScrollable false, do not show scroll bar.");
-        scrollBar_->SetScrollable(false);
-    } else {
-        scrollBar_->SetScrollable(true);
+    if (scrollBar_) {
+        scrollBar_->SetScrollable(estimatedHeight_ > GetMainSize(GetLayoutSize()));
     }
 }
 

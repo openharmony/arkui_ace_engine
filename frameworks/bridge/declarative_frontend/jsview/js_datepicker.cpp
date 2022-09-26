@@ -14,7 +14,9 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
+#include <utility>
 
+#include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -23,6 +25,7 @@
 #include "core/components/picker/picker_date_component.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components/picker/picker_time_component.h"
+#include "core/components_ng/pattern/picker/datepicker_view.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace::Framework {
@@ -150,6 +153,10 @@ void JSDatePicker::Create(const JSCallbackInfo& info)
 
 void JSDatePicker::SetLunar(bool isLunar)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::DatePickerView::SetShowLunar(isLunar);
+        return;
+    }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto datePicker = AceType::DynamicCast<PickerDateComponent>(component);
     if (!datePicker) {
@@ -174,6 +181,19 @@ void JSDatePicker::OnChange(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsFunction()) {
         LOGI("info not function");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), DatePickerChangeEventToJSValue);
+        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* index) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("datePicker.onChange");
+            const auto *eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
+            func->Execute(*eventInfo);
+        };
+        NG::DatePickerView::SetOnChange(std::move(onChange));
         return;
     }
 
@@ -248,8 +268,6 @@ PickerTime JSDatePicker::ParseTime(const JSRef<JSVal>& timeVal)
 
 void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
 {
-    auto datePicker = AceType::MakeRefPtr<PickerDateComponent>();
-    ViewStackProcessor::GetInstance()->ClaimElementId(datePicker);
     auto startDate = paramObj->GetProperty("start");
     auto endDate = paramObj->GetProperty("end");
     auto selectedDate = paramObj->GetProperty("selected");
@@ -262,6 +280,21 @@ void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
     if (startDays > endDays || selectedDays < startDays || selectedDays > endDays) {
         LOGE("date error");
     }
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("datePicker Theme is null");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::DatePickerView::CreateDatePicker();
+        NG::DatePickerView::SetStartDate(parseStartDate);
+        NG::DatePickerView::SetEndDate(parseEndDate);
+        NG::DatePickerView::SetSelectedDate(parseSelectedDate);
+        return;
+    }
+
+    auto datePicker = AceType::MakeRefPtr<PickerDateComponent>();
+    ViewStackProcessor::GetInstance()->ClaimElementId(datePicker);
     if (startDate->IsObject()) {
         datePicker->SetStartDate(parseStartDate);
     }
@@ -274,12 +307,6 @@ void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
 
     datePicker->SetIsDialog(false);
     datePicker->SetHasButtons(false);
-
-    auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("datePicker Theme is null");
-        return;
-    }
 
     datePicker->SetTheme(theme);
     ViewStackProcessor::GetInstance()->Push(datePicker);

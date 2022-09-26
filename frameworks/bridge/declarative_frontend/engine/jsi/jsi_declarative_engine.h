@@ -135,6 +135,8 @@ public:
         rootViewMap_.emplace(pageId, value);
     }
 
+    void RegisterFaPlugin(); // load ReatureAbility plugin
+
 #if defined(PREVIEW)
     bool CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
     {

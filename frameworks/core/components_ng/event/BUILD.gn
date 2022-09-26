@@ -18,6 +18,7 @@ build_component_ng("event_ng") {
   sources = [
     "click_event.cpp",
     "event_hub.cpp",
+    "focus_hub.cpp",
     "gesture_event_hub.cpp",
     "input_event.cpp",
     "input_event_hub.cpp",

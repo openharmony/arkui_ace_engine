@@ -251,13 +251,13 @@ template("declarative_js_engine") {
       "jsview/bindings/js_list_binding.cpp",
       "jsview/bindings/js_row_binding.cpp",
       "jsview/bindings/js_stack_binding.cpp",
-      "jsview/bindings/js_text_binding.cpp",
 
       # Models implemenations for classic fw
       "jsview/models/for_each_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
       "jsview/models/text_field_model_impl.cpp",
+      "jsview/models/text_model_impl.cpp",
     ]
 
     # rich components needed by phone and TV. wearable like watch do not need them
@@ -404,6 +404,7 @@ template("declarative_js_engine_ng") {
 
       # jsviews
       "jsview/js_image.cpp",
+      "jsview/js_text.cpp",
 
       # jsview bindings
       "jsview/bindings/js_column_binding.cpp",
@@ -413,7 +414,6 @@ template("declarative_js_engine_ng") {
       "jsview/bindings/js_list_item_binding.cpp",
       "jsview/bindings/js_row_binding.cpp",
       "jsview/bindings/js_stack_binding.cpp",
-      "jsview/bindings/js_text_binding.cpp",
       "jsview/bindings/js_view_abstract_binding.cpp",
       "jsview/bindings/js_view_binding.cpp",
 
@@ -427,7 +427,6 @@ template("declarative_js_engine_ng") {
       "ng/jsview/js_list_item.cpp",
       "ng/jsview/js_row.cpp",
       "ng/jsview/js_stack.cpp",
-      "ng/jsview/js_text.cpp",
       "ng/jsview/js_view.cpp",
       "ng/jsview/js_view_abstract.cpp",
     ]

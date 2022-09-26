@@ -40,10 +40,8 @@ void CheckBoxView::Create(
         eventHub->SetName(name.value());
     }
     if (groupName.has_value()) {
-        eventHub->SetGroupname(groupName.value());
+        eventHub->SetGroupName(groupName.value());
     }
-
-    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, false);
 }
 
 void CheckBoxView::SetSelect(bool isSelected)

@@ -21,7 +21,12 @@ namespace OHOS::Ace::NG {
 
 InputEventActuator::InputEventActuator(const WeakPtr<InputEventHub>& inputEventHub) : inputEventHub_(inputEventHub)
 {
+    auto refInputEventHub = inputEventHub_.Upgrade();
+    CHECK_NULL_VOID(refInputEventHub);
+    auto frameNode = refInputEventHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     eventTarget_ = MakeRefPtr<MouseEventTarget>();
+    axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag());
 }
 
 void InputEventActuator::OnCollectMouseEvent(const OffsetF& coordinateOffset,
@@ -81,6 +86,36 @@ void InputEventActuator::OnCollectHoverEvent(
     eventTarget_->SetCoordinateOffset(coordinateOffset);
     eventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
     onHoverResult.emplace_back(eventTarget_);
+}
+
+void InputEventActuator::OnCollectAxisEvent(
+    const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, AxisTestResult& onAxisResult)
+{
+    auto inputEventHub = inputEventHub_.Upgrade();
+    CHECK_NULL_VOID(inputEventHub);
+    auto frameNode = inputEventHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    if (inputEvents_.empty() && !userCallback_) {
+        return;
+    }
+
+    auto onAxisCallback = [weak = WeakClaim(this)](AxisInfo& info) {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        for (const auto& callback : actuator->inputEvents_) {
+            if (callback) {
+                (*callback)(info);
+            }
+        }
+        if (actuator->userCallback_) {
+            (*actuator->userCallback_)(info);
+        }
+    };
+    axisEventTarget_->SetOnAxisCallback(onAxisCallback);
+    axisEventTarget_->SetCoordinateOffset(coordinateOffset);
+    axisEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
+    onAxisResult.emplace_back(axisEventTarget_);
 }
 
 } // namespace OHOS::Ace::NG

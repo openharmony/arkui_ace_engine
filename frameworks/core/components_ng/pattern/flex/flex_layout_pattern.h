@@ -16,13 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_LAYOUT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_LAYOUT_PATTERN_H
 
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 class FlexLayoutPattern : public Pattern {
-    
+    DECLARE_ACE_TYPE(FlexLayoutPattern, Pattern);
+
 public:
     FlexLayoutPattern() = default;
     ~FlexLayoutPattern() override = default;

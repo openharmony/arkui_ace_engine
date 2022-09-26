@@ -174,6 +174,20 @@ public:
         return needForceSyncRenderTree_;
     }
 
+    float GetBaselineDistance() const
+    {
+        if (children_.empty()) {
+            return geometryNode_->GetBaselineDistance();
+        }
+        float distance = 0.0;
+        for (const auto& child : children_) {
+            float childBaseline = child->GetBaselineDistance();
+            childBaseline += child->GetGeometryNode()->GetFrameRect().GetY();
+            distance = NearZero(distance) ? childBaseline : std::min(distance, childBaseline);
+        }
+        return distance;
+    }
+
 private:
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     std::list<RefPtr<LayoutWrapper>> children_;

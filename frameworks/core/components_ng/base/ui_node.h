@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_UI_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_UI_NODE_H
 
+#include <cstdint>
 #include <list>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/event/touch_event.h"
@@ -52,9 +54,11 @@ public:
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT);
+    RefPtr<FrameNode> GetFocusParent() const;
+    void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
     void Clean();
     void RemoveChildAtIndex(int32_t index);
-
+    RefPtr<UINode> GetChildAtIndex(int32_t index);
     void AttachToMainTree();
     void DetachFromMainTree();
 
@@ -66,6 +70,8 @@ public:
     }
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
+
+    int32_t GetChildIndexById(int32_t id);
 
     RefPtr<UINode> GetParent() const
     {
@@ -139,12 +145,19 @@ public:
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result);
+    virtual HitTestMode GetHitTestMode() const
+    {
+        return HitTestMode::HTMDEFAULT;
+    }
 
     virtual HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode);
 
-    // In the request to re-layout the scene, needs to obtain the changed state of the child node for the creation of
-    // parent's layout wrapper
+    virtual HitTestResult AxisTest(
+        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult);
+
+    // In the request to re-layout the scene, needs to obtain the changed state of the child node for the creation
+    // of parent's layout wrapper
     virtual void UpdateLayoutPropertyFlag();
 
     virtual void AdjustParentLayoutFlag(PropertyChangeFlag& flag);
@@ -165,7 +178,6 @@ public:
     virtual void RebuildRenderContextTree();
 
 protected:
-
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {
         for (const auto& child : children_) {

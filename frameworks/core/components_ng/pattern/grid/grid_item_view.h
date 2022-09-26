@@ -19,13 +19,22 @@
 #include <functional>
 
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/grid/grid_item_event_hub.h"
 
 namespace OHOS::Ace::NG {
+
 class ACE_EXPORT GridItemView {
 public:
     static void Create(std::function<void(int32_t)>&& deepRenderFunc);
     static void Create();
+    static void SetRowStart(int32_t value);
+    static void SetRowEnd(int32_t value);
+    static void SetColumnStart(int32_t value);
+    static void SetColumnEnd(int32_t value);
+    static void SetForceRebuild(bool value);
+    static void SetSelectable(bool value);
+    static void SetOnSelect(SelectFunc&& onSelect);
 };
-} // namespace OHOS::Ace::NG
 
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_VIEW_H

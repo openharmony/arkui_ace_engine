@@ -589,9 +589,10 @@ void RenderText::RegisterCallbacksToOverlay()
         textOverlayManager->PushTextOverlayToStack(textOverlay, pipelineContext);
 
         auto text = weak.Upgrade();
-        if (text) {
-            text->UpdateOverlay();
+        if (!text) {
+            return;
         }
+        text->UpdateOverlay();
         text->MarkIsOverlayShowed(true);
     };
     if (clipboard_) {

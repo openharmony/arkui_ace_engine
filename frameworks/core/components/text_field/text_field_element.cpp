@@ -183,6 +183,7 @@ void TextFieldElement::OnFocus()
         textField->StartTwinkling();
         textField->OnEditChange(true);
     }
+    RequestKeyboard(true, false);
     FocusNode::OnFocus();
     auto context = context_.Upgrade();
     if (context && context->GetIsTabKeyPressed() && renderNode_) {
@@ -229,7 +230,7 @@ void TextFieldElement::CloseKeyboard(bool forceClose)
     }
 }
 
-bool TextFieldElement::RequestKeyboard(bool needStartTwinkling)
+bool TextFieldElement::RequestKeyboard(bool needStartTwinkling, bool needShowSoftKeyboard)
 {
     if (!enabled_) {
         return false;
@@ -238,7 +239,7 @@ bool TextFieldElement::RequestKeyboard(bool needStartTwinkling)
     if (RequestFocusImmediately()) {
         auto textField = DynamicCast<RenderTextField>(renderNode_);
         if (textField) {
-            if (textField->RequestKeyboard(!editingMode_, needStartTwinkling)) {
+            if (textField->RequestKeyboard(!editingMode_, needStartTwinkling, needShowSoftKeyboard)) {
                 editingMode_ = true;
             }
             textField->OnEditChange(true);

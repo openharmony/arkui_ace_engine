@@ -16,11 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/property.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
@@ -32,6 +35,7 @@ namespace OHOS::Ace::NG {
 class GeometryNode;
 class RenderPropertyNode;
 class FrameNode;
+class Modifier;
 
 using RSCanvas = Rosen::Drawing::Canvas;
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
@@ -45,16 +49,19 @@ public:
 
     static RefPtr<RenderContext> Create();
 
-    void SetRequestFrame(const std::function<void()>& requestFrame)
-    {
-        requestFrame_ = requestFrame;
-    }
+    void SetRequestFrame(const std::function<void()>& requestFrame);
+    void RequestNextFrame() const;
+
+    void SetHostNode(const WeakPtr<FrameNode>& host);
+    RefPtr<FrameNode> GetHost() const;
 
     virtual void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) {}
 
     virtual void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) {}
 
     virtual void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
+
+    virtual void FlushModifier(const RefPtr<Modifier>& modifier) {}
 
     virtual void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
 
@@ -65,6 +72,8 @@ public:
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
 
     virtual void SyncGeometryProperties(GeometryNode* geometryNode) {}
+
+    virtual void OnModifyDone() {}
 
     virtual void InitContext(bool isRoot, const std::optional<std::string>& surfaceName) {}
 
@@ -85,17 +94,14 @@ public:
 
     virtual void Restore() = 0;
 
-    void RequestNextFrame() const
-    {
-        if (requestFrame_) {
-            requestFrame_();
-        }
-    }
-
     virtual void AnimateHoverEffectScale(bool isHovered) {}
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
+    virtual void UpdateTransition(const TransitionOptions& options) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
+    virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
+    virtual void UpdateBackShadow(const Shadow& shadow) {}
+    virtual void UpdateLinearGradient(const NG::Gradient& gradient) {}
 
     // Add Transform in group
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
@@ -105,22 +111,46 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector4F);
 
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundColor, Color);
-    
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImage, ImageSourceInfo);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageRepeat, ImageRepeat);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSize, BackgroundImageSize);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImagePosition, BackgroundImagePosition);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundBlurStyle, BlurStyle);
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
 
     ACE_DEFINE_PROPERTY_GROUP(BackDecoration, DecorationProperty);
+    ACE_DEFINE_PROPERTY_GROUP(FrontDecoration, DecorationProperty);
 
-    // TODO Add BorderRadius in group.
+    // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderRadius, BorderRadiusProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
+    // Transition Options
+    ACE_DEFINE_PROPERTY_GROUP(TransitionAppearing, TransitionOptions);
+    ACE_DEFINE_PROPERTY_GROUP(TransitionDisappearing, TransitionOptions);
+
+    // Position.
+    ACE_DEFINE_PROPERTY_GROUP(PositionProperty, RenderPositionProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Position, OffsetT<Dimension>);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Offset, OffsetT<Dimension>);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(PositionProperty, Anchor, OffsetT<Dimension>);
+
+    // zIndex.
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ZIndex, int32_t);
 
 protected:
     RenderContext() = default;
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
+    virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
+    virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
+    virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
+    virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
+    virtual void OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle) {}
+
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
@@ -131,8 +161,14 @@ protected:
     virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
     virtual void OnTransformRotateUpdate(const Vector4F& value) {}
 
+    virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
+    virtual void OnZIndexUpdate(int32_t value) {}
+
 private:
     std::function<void()> requestFrame_;
+    WeakPtr<FrameNode> host_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };

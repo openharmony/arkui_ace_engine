@@ -78,20 +78,33 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
 
 void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
 {
-    if (args[0]->IsFunction()) {
-        RefPtr<JsKeyFunction> jsOnKeyFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
-        auto onKeyId = EventMarker(
-            [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyFunc)](BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                auto keyInfo = TypeInfoHelper::DynamicCast<KeyEventInfo>(info);
-                ACE_SCORING_EVENT("onKey");
-                func->Execute(*keyInfo);
-            },
-            "onKey", 0);
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
-        if (focusableComponent) {
-            focusableComponent->SetOnKeyId(onKeyId);
-        }
+    if (!args[0]->IsFunction()) {
+        LOGE("OnKeyEvent args need a function.");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+        auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent)](KeyEventInfo& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onKey");
+            func->Execute(info);
+        };
+        NG::ViewAbstract::SetOnKeyEvent(std::move(onKeyEvent));
+        return;
+    }
+
+    RefPtr<JsKeyFunction> jsOnKeyFunc = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto onKeyId = EventMarker(
+        [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyFunc)](BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto keyInfo = TypeInfoHelper::DynamicCast<KeyEventInfo>(info);
+            ACE_SCORING_EVENT("onKey");
+            func->Execute(*keyInfo);
+        },
+        "onKey", 0);
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(true);
+    if (focusableComponent) {
+        focusableComponent->SetOnKeyId(onKeyId);
     }
 }
 
@@ -154,6 +167,13 @@ void JSInteractableView::JsOnDelete(const JSCallbackInfo& info)
 
 void JSInteractableView::JsTouchable(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info[0]->IsBoolean()) {
+            NG::ViewAbstract::SetTouchable(info[0]->ToBoolean());
+        }
+        return;
+    }
+
     if (info[0]->IsBoolean()) {
         auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
         if (!mainComponent) {

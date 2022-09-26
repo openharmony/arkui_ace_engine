@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +33,13 @@ PaintWrapper::~PaintWrapper() = default;
 void PaintWrapper::SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintImpl)
 {
     nodePaintImpl_ = nodePaintImpl;
+    CHECK_NULL_VOID(nodePaintImpl_);
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_VOID(renderContext);
+    auto modifier = nodePaintImpl_->GetModifier(this);
+    if (modifier) {
+        renderContext->FlushModifier(modifier);
+    }
 }
 
 void PaintWrapper::FlushRender()
@@ -40,6 +48,12 @@ void PaintWrapper::FlushRender()
 
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
+
+    auto modifier = nodePaintImpl_->GetModifier(this);
+    if (modifier) {
+        nodePaintImpl_->UpdateModifier(this);
+        return;
+    }
 
     renderContext->StartRecording();
 

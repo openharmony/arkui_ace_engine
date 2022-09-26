@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
 
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -136,6 +137,9 @@ void JSGrid::SetColumnsGap(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], colGap)) {
         return;
     }
+
+    SET_PROP_FOR_NG(ColumnsGap, Dimension, colGap);
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
@@ -153,6 +157,9 @@ void JSGrid::SetRowsGap(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], rowGap)) {
         return;
     }
+
+    SET_PROP_FOR_NG(RowsGap, Dimension, rowGap);
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
@@ -194,21 +201,37 @@ void JSGrid::JsGridHeight(const JSCallbackInfo& info)
 void JSGrid::JsOnScrollIndex(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
-        auto onScrolled = EventMarker(
-            [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])](const BaseEventInfo* event) {
-                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-                auto eventInfo = TypeInfoHelper::DynamicCast<V2::GridEventInfo>(event);
-                if (!eventInfo) {
-                    return;
-                }
-                auto params = ConvertToJSValues(eventInfo->GetScrollIndex());
-                func->Call(JSRef<JSObject>(), params.size(), params.data());
-            });
+        LOGE("param not valid, need function");
+        return;
+    }
 
-        auto grid = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-        if (grid) {
-            grid->SetScrolledEvent(onScrolled);
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsOnScrollToIndexFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onScrollToIndex = [execCtx = info.GetExecutionContext(), func = std::move(jsOnScrollToIndexFunc)](
+                                   int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Grid.onScrollToIndex");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(index));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        NG::GridView::SetOnScrollToIndex(std::move(onScrollToIndex));
+        return;
+    }
+
+    auto onScrolled = EventMarker(
+        [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])](const BaseEventInfo* event) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            auto eventInfo = TypeInfoHelper::DynamicCast<V2::GridEventInfo>(event);
+            if (!eventInfo) {
+                return;
+            }
+            auto params = ConvertToJSValues(eventInfo->GetScrollIndex());
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        });
+
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (grid) {
+        grid->SetScrolledEvent(onScrolled);
     }
 }
 
@@ -261,18 +284,26 @@ void JSGrid::JSBind(BindingTarget globalObj)
 
 void JSGrid::SetScrollBar(int32_t displayMode)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGW("ScrollBar is not supported");
+        return;
+    }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (!grid) {
         return;
     }
-    if (displayMode >= 0 && displayMode < static_cast<int32_t>(DISPLAY_MODE.size())) {
-        grid->SetScrollBar(DISPLAY_MODE[displayMode]);
+    if (displayMode < 0 || displayMode >= static_cast<int32_t>(DISPLAY_MODE.size())) {
+        LOGE("Param is not valid");
+        return;
     }
+    SET_PROP_FOR_NG(ScrollBarMode, DisplayMode, DISPLAY_MODE[displayMode]);
+    grid->SetScrollBar(DISPLAY_MODE[displayMode]);
 }
 
 void JSGrid::SetScrollBarColor(const std::string& color)
 {
+    SET_PROP_FOR_NG(ScrollBarColor, Color, Color::FromString(color));
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
@@ -282,6 +313,7 @@ void JSGrid::SetScrollBarColor(const std::string& color)
 
 void JSGrid::SetScrollBarWidth(const std::string& width)
 {
+    SET_PROP_FOR_NG(ScrollBarWidth, Dimension, StringUtils::StringToDimensionWithUnit(width));
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
@@ -291,6 +323,7 @@ void JSGrid::SetScrollBarWidth(const std::string& width)
 
 void JSGrid::SetCachedCount(int32_t cachedCount)
 {
+    SET_PROP_FOR_NG(CachedCount, int32_t, cachedCount);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
@@ -300,6 +333,7 @@ void JSGrid::SetCachedCount(int32_t cachedCount)
 
 void JSGrid::SetEditMode(bool editMode)
 {
+    SET_PROP_FOR_NG(Editable, bool, editMode);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
@@ -309,6 +343,7 @@ void JSGrid::SetEditMode(bool editMode)
 
 void JSGrid::SetMaxCount(int32_t maxCount)
 {
+    SET_PROP_FOR_NG(MaxCount, int32_t, maxCount);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
@@ -318,6 +353,7 @@ void JSGrid::SetMaxCount(int32_t maxCount)
 
 void JSGrid::SetMinCount(int32_t minCount)
 {
+    SET_PROP_FOR_NG(MinCount, int32_t, minCount);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
@@ -327,6 +363,7 @@ void JSGrid::SetMinCount(int32_t minCount)
 
 void JSGrid::CellLength(int32_t cellLength)
 {
+    SET_PROP_FOR_NG(CellLength, int32_t, cellLength);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
@@ -336,6 +373,7 @@ void JSGrid::CellLength(int32_t cellLength)
 
 void JSGrid::SetSupportAnimation(bool supportAnimation)
 {
+    SET_PROP_FOR_NG(SupportAnimation, bool, supportAnimation);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {
@@ -365,12 +403,16 @@ void JSGrid::SetEdgeEffect(int32_t value)
 
 void JSGrid::SetLayoutDirection(int32_t value)
 {
-    if (value >= 0 && value < static_cast<int32_t>(LAYOUT_DIRECTION.size())) {
-        auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
-        if (grid) {
-            grid->SetDirection(LAYOUT_DIRECTION[value]);
-        }
+    if (value < 0 && value >= static_cast<int32_t>(LAYOUT_DIRECTION.size())) {
+        LOGE("Param is not valid");
+        return;
+    }
+    SET_PROP_FOR_NG(LayoutDirection, FlexDirection, LAYOUT_DIRECTION[value]);
+
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
+    if (grid) {
+        grid->SetDirection(LAYOUT_DIRECTION[value]);
     }
 }
 
@@ -398,6 +440,18 @@ void JSGrid::JsOnGridDragEnter(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onItemDragEnter = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+                                   const ItemDragInfo& dragInfo) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Grid.onItemDragEnter");
+            func->ItemDragEnterExecute(dragInfo);
+        };
+        NG::GridView::SetOnItemDragEnter(std::move(onItemDragEnter));
+        return;
+    }
+
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                                  const ItemDragInfo& dragInfo) {
@@ -417,6 +471,18 @@ void JSGrid::JsOnGridDragMove(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
         LOGE("fail to bind onItemDragMove event due to info is not function");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onItemDragMove = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+                                  const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Grid.onItemDragMove");
+            func->ItemDragMoveExecute(dragInfo, itemIndex, insertIndex);
+        };
+        NG::GridView::SetOnItemDragMove(std::move(onItemDragMove));
         return;
     }
 
@@ -442,6 +508,18 @@ void JSGrid::JsOnGridDragLeave(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onItemDragLeave = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+                                   const ItemDragInfo& dragInfo, int32_t itemIndex) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Grid.onItemDragLeave");
+            func->ItemDragLeaveExecute(dragInfo, itemIndex);
+        };
+        NG::GridView::SetOnItemDragLeave(std::move(onItemDragLeave));
+        return;
+    }
+
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                                  const ItemDragInfo& dragInfo, int32_t itemIndex) {
@@ -461,6 +539,38 @@ void JSGrid::JsOnGridDragStart(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
         LOGE("fail to bind onItemDragStart event due to info is not function");
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onItemDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc)](
+                                   const ItemDragInfo& dragInfo, int32_t itemIndex) -> RefPtr<NG::UINode> {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+            ACE_SCORING_EVENT("Grid.onItemDragStart");
+            auto ret = func->ItemDragStartExecute(dragInfo, itemIndex);
+            if (!ret->IsObject()) {
+                LOGE("builder param is not an object.");
+                return nullptr;
+            }
+
+            auto builderObj = JSRef<JSObject>::Cast(ret);
+            auto builder = builderObj->GetProperty("builder");
+            if (!builder->IsFunction()) {
+                LOGE("builder param is not a function.");
+                return nullptr;
+            }
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+            CHECK_NULL_RETURN(builderFunc, nullptr);
+            // use another VSP instance while executing the builder function
+            NG::ScopedViewStackProcessor builderViewStackProcessor;
+            {
+                builderFunc->Execute();
+            }
+            auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+            return customNode;
+        };
+        NG::GridView::SetOnItemDragStart(std::move(onItemDragStart));
         return;
     }
 
@@ -513,6 +623,18 @@ void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+        auto onItemDrop = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+                              const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Grid.onItemDrop");
+            func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
+        };
+        NG::GridView::SetOnItemDrop(std::move(onItemDrop));
+        return;
+    }
+
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
                             const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
@@ -530,6 +652,7 @@ void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
 
 void JSGrid::SetMultiSelectable(bool multiSelectable)
 {
+    SET_PROP_FOR_NG(MultiSelectable, bool, multiSelectable);
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     if (grid) {

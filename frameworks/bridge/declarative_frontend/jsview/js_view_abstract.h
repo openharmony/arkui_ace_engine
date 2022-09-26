@@ -31,11 +31,14 @@
 #include "core/common/container.h"
 #include "core/components/box/box_component.h"
 #include "core/components/common/properties/border_image.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/transform/transform_component.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/pipeline/base/component.h"
 #include "frameworks/core/gestures/tap_gesture.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -74,6 +77,8 @@ public:
     static void GetAngle(
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
+    static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
+    static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<MenuComponent> menuComponent);
 
     static void JsScale(const JSCallbackInfo& info);
@@ -88,6 +93,7 @@ public:
     static void JsRotateY(const JSCallbackInfo& info);
     static void JsTransform(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);
+    static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
     static void ParseAndSetTransitionOption(std::unique_ptr<JsonValue>& transitionArgs);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
@@ -218,11 +224,12 @@ public:
     static void JsClip(const JSCallbackInfo& info);
     static void JsMask(const JSCallbackInfo& info);
 
-    static void JsKey(const std::string& text);
+    static void JsKey(const std::string& key);
     static void JsId(const std::string& id);
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
+    static void JsOnKeyEvent(const JSCallbackInfo& args);
     static void JsOnFocus(const JSCallbackInfo& args);
     static void JsOnBlur(const JSCallbackInfo& args);
     static void JsTabIndex(const JSCallbackInfo& info);
@@ -280,7 +287,6 @@ public:
         return themeManager->GetTheme<T>();
     }
 
-protected:
     /**
      * box properties setter
      */

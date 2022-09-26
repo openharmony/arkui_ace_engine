@@ -33,7 +33,19 @@ public:
     ~RectPattern() override = default;
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<RectPaintMethod>();
+        auto curFrameNode = GetHost();
+        CHECK_NULL_RETURN(curFrameNode, nullptr);
+        ShapePaintProperty propertiesFromAncestor;
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
+        while (parentFrameNode) {
+            auto parentPaintProperty = parentFrameNode->GetPaintProperty<ShapePaintProperty>();
+            if (parentPaintProperty) {
+                propertiesFromAncestor.UpdateShapeProperty(parentPaintProperty);
+            }
+            curFrameNode = parentFrameNode;
+            parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
+        }
+        return MakeRefPtr<RectPaintMethod>(DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone()));
     }
     RefPtr<PaintProperty> CreatePaintProperty() override
     {

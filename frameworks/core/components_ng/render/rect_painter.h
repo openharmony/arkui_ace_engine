@@ -18,6 +18,7 @@
 
 #include "base/geometry/ng/radius.h"
 #include "base/geometry/ng/rect_t.h"
+#include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
@@ -25,8 +26,7 @@ class RectPainter {
 public:
     RectPainter() = default;
     ~RectPainter() = default;
-    static void DrawRect(RSCanvas& canvas, const RectF& rect, const Radius& topLeftRadius, const Radius& topRightRadius,
-        const Radius& bottomLeftRadius, const Radius& bottomRightRadius);
+    static void DrawRect(RSCanvas& canvas, const RectF& rect, RectPaintProperty& rectPaintProperty);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_RECT_PAINTER_H

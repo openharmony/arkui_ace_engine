@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/flex/flex_layout_styles.h"
 #include "core/components_ng/property/property.h"
 
-
 namespace OHOS::Ace::NG {
 class ACE_EXPORT FlexLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(FlexLayoutProperty, LayoutProperty);

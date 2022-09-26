@@ -20,8 +20,8 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/full_screen/full_screen_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_ng/pattern/full_screen/full_screen_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/event/touch_event.h"
@@ -65,28 +65,19 @@ public:
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
-    bool OnKeyEvent(const KeyEvent& event) override
-    {
-        return false;
-    }
+    bool OnKeyEvent(const KeyEvent& event) override;
 
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
 
     // Called by view when axis event received.
-    void OnAxisEvent(const AxisEvent& event) override {}
+    void OnAxisEvent(const AxisEvent& event) override;
 
     // Called by container when rotation event received.
     // if return false, then this event needs platform to handle it.
     bool OnRotationEvent(const RotationEvent& event) const override
     {
         return false;
-    }
-
-    // Called by window when received vsync signal.
-    void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) override
-    {
-        FlushVsync(nanoTimestamp, frameCount);
     }
 
     void OnDragEvent(int32_t x, int32_t y, DragEventAction action) override {}
@@ -158,11 +149,15 @@ public:
 
     void FlushBuild() override;
 
+    void AddCallBack(std::function<void()>&& callback);
+
 protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushMessages() override;
+    void FlushFocus();
     void FlushAnimation(uint64_t nanoTimestamp) override;
+    bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
     void FlushUITasks() override
     {
@@ -171,6 +166,8 @@ protected:
 
 private:
     void FlushTouchEvents();
+
+    void FlushBuildFinishCallbacks();
 
     template<typename T>
     struct NodeCompare {
@@ -206,10 +203,14 @@ private:
     std::set<WeakPtr<CustomNode>, NodeCompareWeak<WeakPtr<CustomNode>>> dirtyNodes_;
     std::list<TouchEvent> touchEvents_;
 
+    std::list<std::function<void()>> buildFinishCallbacks_;
+
     RefPtr<FrameNode> rootNode_;
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
     RefPtr<FullScreenManager> fullScreenManager_;
+    WeakPtr<FrameNode> dirtyFocusNode_;
+    WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
     bool hasIdleTasks_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);

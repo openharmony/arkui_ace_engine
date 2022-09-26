@@ -18,12 +18,15 @@
 
 #include <list>
 
+#include "base/geometry/ng/point_t.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
+#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,25 +35,25 @@ enum class HitTestMode {
      *  Both self and children respond to the hit test for touch events,
      *  but block hit test of the other nodes which is masked by this node.
      */
-    DEFAULT = 0,
+    HTMDEFAULT = 0,
 
     /**
      * Self respond to the hit test for touch events,
      * but block hit test of children and other nodes which is masked by this node.
      */
-    BLOCK,
+    HTMBLOCK,
 
     /**
      * Self and child respond to the hit test for touch events,
      * and allow hit test of other nodes which is masked by this node.
      */
-    TRANSPARENT,
+    HTMTRANSPARENT,
 
     /**
      * Self not respond to the hit test for touch events,
      * but children respond to the hit test for touch events.
      */
-    NONE
+    HTMNONE
 };
 
 enum class HitTestResult {
@@ -70,7 +73,7 @@ public:
     explicit GestureEventHub(const WeakPtr<EventHub>& eventHub);
     ~GestureEventHub() override = default;
 
-    void AddGesture(const RefPtr<Gesture>& gesture)
+    void AddGesture(const RefPtr<NG::Gesture>& gesture)
     {
         if (!recreateGesture_) {
             gestures_.clear();
@@ -188,6 +191,38 @@ public:
         hitTestMode_ = hitTestMode;
     }
 
+    void CombineIntoExclusiveRecognizer(const PointF& globalPoint, const PointF& localPoint,
+        TouchTestResult& result);
+
+    bool IsResponseRegion() const
+    {
+        return isResponseRegion_;
+    }
+    void MarkResponseRegion(bool isResponseRegion)
+    {
+        isResponseRegion_ = isResponseRegion;
+    }
+
+    const std::vector<DimensionRect>& GetResponseRegion() const
+    {
+        return responseRegion_;
+    }
+
+    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
+    {
+        responseRegion_ = responseRegion;
+    }
+
+    bool GetTouchable() const
+    {
+        return touchable_;
+    }
+
+    void SetTouchable(bool touchable)
+    {
+        touchable_ = touchable;
+    }
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<GestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult);
@@ -199,12 +234,19 @@ private:
     RefPtr<TouchEventActuator> touchEventActuator_;
     RefPtr<ClickEventActuator> clickEventActuator_;
     RefPtr<PanEventActuator> panEventActuator_;
+    RefPtr<ExclusiveRecognizer> innerExclusiveRecognizer_;
+    RefPtr<ExclusiveRecognizer> externalExclusiveRecognizer_;
+    RefPtr<ExclusiveRecognizer> nodeExclusiveRecognizer_;
+    RefPtr<ParallelRecognizer> externalParallelRecognizer_;
 
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
-    std::list<RefPtr<Gesture>> gestures_;
+    std::list<RefPtr<NG::Gesture>> gestures_;
     std::list<RefPtr<GestureRecognizer>> gestureHierarchy_;
-    HitTestMode hitTestMode_ = HitTestMode::DEFAULT;
+    HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;
+    bool isResponseRegion_ = false;
+    std::vector<DimensionRect> responseRegion_;
+    bool touchable_ = true;
 };
 
 } // namespace OHOS::Ace::NG

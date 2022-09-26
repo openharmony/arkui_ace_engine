@@ -31,6 +31,9 @@ void ConnectServer::RunServer()
         int appPid = getpid();
         std::string pidStr = std::to_string(appPid);
         std::string sockName = '\0' + pidStr + bundleName_;
+        if (sockName.size() > 102) { // 102 : the longest len that boost socket can support
+            sockName = sockName.substr(0, 102);
+        }
         localSocket::endpoint endPoint(sockName);
         localSocket::socket socket(ioContext);
         localSocket::acceptor acceptor(ioContext, endPoint);

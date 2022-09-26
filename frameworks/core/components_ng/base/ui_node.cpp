@@ -93,6 +93,19 @@ void UINode::RemoveChildAtIndex(int32_t index)
     MarkNeedSyncRenderTree();
 }
 
+RefPtr<UINode> UINode::GetChildAtIndex(int32_t index)
+{
+    if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
+        return nullptr;
+    }
+    auto iter = children_.begin();
+    std::advance(iter, index);
+    if (iter != children_.end()) {
+        return *iter;
+    }
+    return nullptr;
+}
+
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode)
 {
     if (!oldNode) {
@@ -122,6 +135,37 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot)
 {
     CHECK_NULL_VOID(parent);
     parent->AddChild(AceType::Claim(this), slot);
+}
+
+RefPtr<FrameNode> UINode::GetFocusParent() const
+{
+    auto parentUi = GetParent();
+    auto parentFrame = parentUi ? AceType::DynamicCast<FrameNode>(parentUi) : nullptr;
+    while (parentFrame) {
+        auto type = parentFrame->GetFocusType();
+        if (type == FocusType::SCOPE) {
+            return parentFrame;
+        }
+        if (type == FocusType::NODE) {
+            return nullptr;
+        }
+        parentUi = parentFrame->GetParent();
+        parentFrame = parentUi ? AceType::DynamicCast<FrameNode>(parentUi) : nullptr;
+    }
+    return nullptr;
+}
+
+void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
+{
+    auto uiChildren = GetChildren();
+    for (const auto& uiChild : uiChildren) {
+        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild);
+        if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
+            children.emplace_back(frameChild);
+        } else {
+            uiChild->GetFocusChildren(children);
+        }
+    }
 }
 
 void UINode::AttachToMainTree()
@@ -295,6 +339,22 @@ HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentL
     return hitTestResult;
 }
 
+HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
+{
+    HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
+    for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
+        auto& child = *iter;
+        auto hitResult = child->AxisTest(globalPoint, parentLocalPoint, onAxisResult);
+        if (hitResult == HitTestResult::STOP_BUBBLING) {
+            return HitTestResult::STOP_BUBBLING;
+        }
+        if (hitResult == HitTestResult::BUBBLING) {
+            hitTestResult = HitTestResult::BUBBLING;
+        }
+    }
+    return hitTestResult;
+}
+
 int32_t UINode::FrameCount() const
 {
     return TotalChildCount();
@@ -307,6 +367,20 @@ int32_t UINode::TotalChildCount() const
         count += child->FrameCount();
     }
     return count;
+}
+
+int32_t UINode::GetChildIndexById(int32_t id)
+{
+    int32_t pos = 0;
+    auto iter = children_.begin();
+    while (iter != GetChildren().end()) {
+        if (id == (*iter)->GetId()) {
+            return pos;
+        }
+        pos++;
+        iter++;
+    }
+    return -1;
 }
 
 } // namespace OHOS::Ace::NG

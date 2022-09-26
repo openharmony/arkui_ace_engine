@@ -193,6 +193,14 @@ bool RenderScroll::UpdateOffset(Offset& delta, int32_t source)
     if (IsAtTop() && HandleRefreshEffect(-delta.GetY(), source, currentOffset_.GetY())) {
         return true;
     }
+    if ((IsAtBottom() && GetMainOffset(delta) > 0.0) || (IsAtTop() && GetMainOffset(delta) < 0.0)) {
+        if (!scrollEffect_) {
+            return false;
+        }
+        if (scrollEffect_->IsNoneEffect()) {
+            return false;
+        }
+    }
     if (!ScrollPageCheck(delta, source)) {
         return false;
     }
