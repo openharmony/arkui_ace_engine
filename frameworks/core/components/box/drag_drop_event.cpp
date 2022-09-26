@@ -16,6 +16,7 @@
 
 #include "core/components/box/drag_drop_event.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/gestures/long_press_recognizer.h"
@@ -107,7 +108,7 @@ void DragDropEvent::MergeClipboardData(const RefPtr<PipelineContext>& context, c
                 auto clipboardAllData = JsonUtil::Create(true);
                 clipboardAllData->Put("preData", data.c_str());
                 clipboardAllData->Put("newData", addData.c_str());
-                dragDropNode->clipboard_->SetData(clipboardAllData->ToString());
+                dragDropNode->clipboard_->SetData(clipboardAllData->ToString(), CopyOptions::Local, true);
             }
         };
         clipboardCallback_ = callback;
