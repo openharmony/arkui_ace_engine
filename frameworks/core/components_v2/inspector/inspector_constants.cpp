@@ -169,6 +169,15 @@ const char CIRCLE_ETS_TAG[] = "Circle";
 //ellipse
 const char ELLIPSE_ETS_TAG[] = "Ellipse";
 
+//path
+const char PATH_ETS_TAG[] = "Path";
+
+//polygon
+const char POLYGON_ETS_TAG[] = "Polygon";
+
+//polyline
+const char POLYLINE_ETS_TAG[] = "Polyline";
+
 // shape
 const char SHAPE_COMPONENT_TAG[] = "ShapeComponent";
 const char SHAPE_ETS_TAG[] = "Shape";

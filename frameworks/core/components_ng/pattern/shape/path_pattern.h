@@ -12,24 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_PATTERN_H
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/shape/ellipse_paint_method.h"
+#include "core/components_ng/pattern/shape/path_paint_method.h"
+#include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 
 namespace OHOS::Ace::NG {
-class EllipsePattern : public Pattern {
-    DECLARE_ACE_TYPE(EllipsePattern, Pattern);
+class PathPattern : public Pattern {
+    DECLARE_ACE_TYPE(PathPattern, Pattern);
 
 public:
-    EllipsePattern() = default;
-    ~EllipsePattern() override = default;
+    PathPattern() = default;
+    ~PathPattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
@@ -45,7 +46,7 @@ public:
             curFrameNode = parentFrameNode;
             parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
         }
-        return MakeRefPtr<EllipsePaintMethod>(DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone()));
+        return MakeRefPtr<PathPaintMethod>(DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone()));
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -55,14 +56,13 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        return MakeRefPtr<ShapePaintProperty>();
+        return MakeRefPtr<PathPaintProperty>();
     }
-
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
-    ACE_DISALLOW_COPY_AND_MOVE(EllipsePattern);
+    ACE_DISALLOW_COPY_AND_MOVE(PathPattern);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_ELLIPSE_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_PATTERN_H

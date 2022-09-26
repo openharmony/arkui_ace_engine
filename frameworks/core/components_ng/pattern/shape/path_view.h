@@ -13,22 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CIRCLE_PAINTER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CIRCLE_PAINTER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_VIEW_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_VIEW_H
 
-#include "base/geometry/ng/radius.h"
-#include "base/geometry/ng/rect_t.h"
-#include "core/components_ng/pattern/shape/shape_paint_property.h"
-#include "core/components_ng/render/drawing.h"
+#include <string>
+
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
 
-class CirclePainter {
+class ACE_EXPORT PathView {
 public:
-    CirclePainter() = default;
-    ~CirclePainter() = default;
-    static void DrawCircle(RSCanvas& canvas, float radius, const ShapePaintProperty& shapePaintProperty);
+    static void Create();
+    static void SetCommands(const std::string& pathCmd);
 };
 
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CIRCLE_PAINTER_H
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_VIEW_H

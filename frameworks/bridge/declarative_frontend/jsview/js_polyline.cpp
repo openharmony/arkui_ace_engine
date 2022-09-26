@@ -15,7 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
 
+#include "core/common/container.h"
 #include "core/components/shape/shape_component.h"
+#include "core/components_ng/pattern/shape/polygon_view.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -24,6 +26,11 @@ namespace OHOS::Ace::Framework {
 
 void JSPolyline::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::PolygonView::Create(false);
+        JSShapeAbstract::SetNgSize(info);
+        return;
+    }
     RefPtr<Component> polylineComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::POLYLINE);
     ViewStackProcessor::GetInstance()->ClaimElementId(polylineComponent);
     ViewStackProcessor::GetInstance()->Push(polylineComponent);
@@ -49,14 +56,10 @@ void JSPolyline::JSPoints(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-    auto polyline = AceType::DynamicCast<ShapeComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     ShapePoint point;
     ShapePoints points;
+
     JSRef<JSArray> pointsArray = JSRef<JSArray>::Cast(info[0]);
-    if (!polyline) {
-        LOGE("polylineComponent is null.");
-        return;
-    }
     if (pointsArray->Length() < 2) {
         LOGE("Polyline  have at least 2 points");
         return;
@@ -80,6 +83,15 @@ void JSPolyline::JSPoints(const JSCallbackInfo& info)
                 return;
             }
             points.push_back(point);
+        }
+        if(Container::IsCurrentUseNewPipeline()){
+            NG::PolygonView::SetPoints(points);
+            return;
+        }
+        auto polyline = AceType::DynamicCast<ShapeComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+        if (!polyline) {
+            LOGE("polylineComponent is null.");
+            return;
         }
         polyline->SetPoints(points);
     }

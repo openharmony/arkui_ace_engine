@@ -15,9 +15,11 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
 
+#include "base/geometry/ng/image_mesh.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/common/container.h"
+#include "core/components_ng/pattern/shape/shape_group_view.h"
 #include "core/components_ng/pattern/shape/shape_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -465,6 +467,10 @@ void JSShape::SetBitmapMesh(const JSCallbackInfo& info)
         return;
     }
     if (!ParseJsInteger(rowValue, row)) {
+        return;
+    }
+    if(Container::IsCurrentUseNewPipeline()){
+        //NG::ShapeGroupView::SetBitmapMesh(NG::ImageMesh(mesh,column,row));
         return;
     }
     auto stack = ViewStackProcessor::GetInstance();
