@@ -53,6 +53,7 @@ private:
     std::vector<std::string> sources_;
     std::vector<std::string> names_;
     std::vector<std::string> mappings_;
+    std::vector<std::string> nameMap_;
     std::vector<SourceMapInfo> afterPos_;
 
     std::vector<std::string> HandleMappings(const std::string& mapping);
