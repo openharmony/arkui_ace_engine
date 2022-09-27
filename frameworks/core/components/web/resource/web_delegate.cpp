@@ -172,6 +172,19 @@ void ResultOhos::Cancel()
     }
 }
 
+void FullScreenExitHandlerOhos::ExitFullScreen()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    CHECK_NULL_VOID(handler_);
+    if (Container::IsCurrentUseNewPipeline()) {
+        // notify chromium to exit fullscreen mode.
+        handler_->ExitFullScreen();
+        // notify web component in arkui to exit fullscreen mode.
+        delegate->ExitFullScreen();
+    }
+}
+
 bool AuthResultOhos::Confirm(std::string& userName, std::string& pwd)
 {
     if (result_) {
@@ -1369,13 +1382,16 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context, sptr<Surface
 
     onPageFinishedV2_ = useNewPipe ? eventHub->GetOnPageFinishedEvent()
                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
-                                         webCom->GetPageFinishedEventId(), oldContext);
+                                       webCom->GetPageFinishedEventId(), oldContext);
     onPageStartedV2_ = useNewPipe ? eventHub->GetOnPageStartedEvent()
                                   : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                         webCom->GetPageStartedEventId(), oldContext);
     onTitleReceiveV2_ = useNewPipe ? eventHub->GetOnTitleReceiveEvent()
                                    : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                          webCom->GetTitleReceiveEventId(), oldContext);
+    onFullScreenExitV2_ = useNewPipe ? eventHub->GetOnFullScreenExitEvent()
+                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                            webCom->GetOnFullScreenExitEventId(), oldContext);
     onGeolocationHideV2_ = useNewPipe ? eventHub->GetOnGeolocationHideEvent()
                                       : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                             webCom->GetGeolocationHideEventId(), oldContext);
@@ -2593,6 +2609,34 @@ void WebDelegate::OnReceivedTitle(const std::string& param)
     }
 }
 
+void WebDelegate::ExitFullScreen()
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->ExitFullScreen();
+    }
+}
+
+void WebDelegate::OnFullScreenExit()
+{
+    auto param = std::make_shared<FullScreenExitEvent>(false);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnFullScreenExitEvent = webEventHub->GetOnFullScreenExitEvent();
+        CHECK_NULL_VOID(propOnFullScreenExitEvent);
+        propOnFullScreenExitEvent(param);
+        return;
+    }
+    // ace 2.0
+    if (onFullScreenExitV2_) {
+        onFullScreenExitV2_(param);
+    }
+}
+
 void WebDelegate::OnGeolocationPermissionsHidePrompt()
 {
     // ace 2.0
@@ -2649,6 +2693,26 @@ bool WebDelegate::OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, Dia
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, false);
     return webCom->OnCommonDialog(info.get(), dialogEventType);
+}
+
+void WebDelegate::OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler)
+{
+    auto param = std::make_shared<FullScreenEnterEvent>(AceType::MakeRefPtr<FullScreenExitHandlerOhos>(
+        handler, WeakClaim(this)));
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->RequestFullScreen();
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnFullScreenEnterEvent = webEventHub->GetOnFullScreenEnterEvent();
+        CHECK_NULL_VOID(propOnFullScreenEnterEvent);
+        propOnFullScreenEnterEvent(param);
+        return;
+    }
+    auto webCom = webComponent_.Upgrade();
+    CHECK_NULL_VOID(webCom);
+    webCom->OnFullScreenEnter(param.get());
 }
 
 bool WebDelegate::OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info)

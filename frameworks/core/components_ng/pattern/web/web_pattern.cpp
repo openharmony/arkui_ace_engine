@@ -553,4 +553,26 @@ bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>
     }
     return true;
 }
+
+void WebPattern::RequestFullScreen()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto fullScreenManager = context->GetFullScreenManager();
+    CHECK_NULL_VOID(fullScreenManager);
+    fullScreenManager->RequestFullScreen(host);
+}
+
+void WebPattern::ExitFullScreen()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto fullScreenManager = context->GetFullScreenManager();
+    CHECK_NULL_VOID(fullScreenManager);
+    fullScreenManager->ExitFullScreen(host);
+}
 } // namespace OHOS::Ace::NG

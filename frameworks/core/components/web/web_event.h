@@ -576,6 +576,50 @@ private:
     std::string title_;
 };
 
+class ACE_EXPORT FullScreenExitHandler : public AceType {
+    DECLARE_ACE_TYPE(FullScreenExitHandler, AceType)
+
+public:
+    FullScreenExitHandler() = default;
+    ~FullScreenExitHandler() = default;
+
+    virtual void ExitFullScreen() = 0;
+};
+
+class ACE_EXPORT FullScreenEnterEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FullScreenEnterEvent, BaseEventInfo);
+
+public:
+    FullScreenEnterEvent(const RefPtr<FullScreenExitHandler>& handler)
+        : BaseEventInfo("FullScreenEnterEvent"), handler_(handler) {}
+    ~FullScreenEnterEvent() = default;
+
+    const RefPtr<FullScreenExitHandler>& GetHandler() const
+    {
+        return handler_;
+    }
+
+private:
+    RefPtr<FullScreenExitHandler> handler_;
+};
+
+class ACE_EXPORT FullScreenExitEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(FullScreenExitEvent, BaseEventInfo);
+
+public:
+    explicit FullScreenExitEvent(bool fullscreen = false)
+        : BaseEventInfo("FullScreenExitEvent"), fullscreen_(fullscreen) {}
+    ~FullScreenExitEvent() = default;
+
+    bool IsFullScreen() const
+    {
+        return fullscreen_;
+    }
+
+private:
+    bool fullscreen_ = false;
+};
+
 class ACE_EXPORT UrlLoadInterceptEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(UrlLoadInterceptEvent, BaseEventInfo);
 
