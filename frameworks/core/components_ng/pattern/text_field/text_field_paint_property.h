@@ -33,7 +33,9 @@ public:
     {
         auto value = MakeRefPtr<TextFieldPaintProperty>();
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
+        value->propInputStyle_ = CloneInputStyle();
         value->propCursorColor_ = CloneCursorColor();
+        value->propBackgroundColor_ = CloneBackgroundColor();
         return value;
     }
 
@@ -41,10 +43,13 @@ public:
     {
         PaintProperty::Reset();
         ResetCursorColor();
+        ResetInputStyle();
+        ResetBackgroundColor();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CursorColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputStyle, InputStyle, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_RENDER);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPaintProperty);

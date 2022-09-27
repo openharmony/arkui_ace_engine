@@ -36,16 +36,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-// const RefPtr<TextFieldTheme>& GetTextFieldThemeFromPipeline()
-// {
-//     auto pipeline = PipelineContext::GetCurrentContext();
-//     CHECK_NULL_RETURN(pipeline, nullptr);
-//     auto themeManager = pipeline->GetThemeManager();
-//     CHECK_NULL_RETURN(themeManager, defaultHeight.ConvertToPx());
-//     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
-// }
-}
+
 void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
@@ -78,7 +69,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(themeManager, std::nullopt);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
-
     TextStyle textStyle;
     if (textFieldLayoutProperty->HasValue()) {
         UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle);
@@ -135,8 +125,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto contentSize = content->GetRect().GetSize();
-    auto translate = Alignment::GetAlignPosition(size, contentSize, align) + paddingOffset;
-    content->SetOffset(translate);
+    auto contentOffset = Alignment::GetAlignPosition(size, contentSize, align) + paddingOffset;
+    content->SetOffset(contentOffset);
     // update text rect.
     auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
     textRect_.SetOffset(textOffset);
@@ -181,9 +171,9 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
     if (layoutProperty->HasPlaceholderMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetPlaceholderMaxLines().value());
     }
-    // if (layoutProperty->HasPlaceholderItalicFontStyle()) {
-    //     textStyle.SetFontStyle(layoutProperty->GetPlaceholderItalicFontStyle().value());
-    // }
+    if (layoutProperty->HasPlaceholderItalicFontStyle()) {
+        textStyle.SetFontStyle(layoutProperty->GetPlaceholderItalicFontStyle().value());
+    }
     if (layoutProperty->HasPlaceholderTextAlign()) {
         textStyle.SetTextAlign(layoutProperty->GetPlaceholderTextAlign().value());
     }

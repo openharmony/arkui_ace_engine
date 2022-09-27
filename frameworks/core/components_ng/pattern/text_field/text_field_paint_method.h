@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_PAINT_METHOD_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_PAINT_METHOD_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PAINT_METHOD_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_PAINT_METHOD_H
 
 #include <utility>
 
@@ -27,13 +27,13 @@
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT TextPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(TextPaintMethod, NodePaintMethod)
+class ACE_EXPORT TextFieldPaintMethod : public NodePaintMethod {
+    DECLARE_ACE_TYPE(TextFieldPaintMethod, NodePaintMethod)
 public:
-    TextPaintMethod(std::shared_ptr<RSParagraph>  paragraph, float baselineOffset)
+    TextFieldPaintMethod(std::shared_ptr<RSParagraph> paragraph, float baselineOffset)
         : paragraph_(std::move(paragraph)), baselineOffset_(baselineOffset)
     {}
-    ~TextPaintMethod() override = default;
+    ~TextFieldPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
@@ -44,11 +44,23 @@ public:
                    RSCanvas& canvas) { paragraph->Paint(&canvas, paintOffset.GetX(), paintOffset.GetY()); };
     }
 
+    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override
+    {
+        return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
+            auto textField = weak.Upgrade();
+            if (textField) {
+                textField->PaintMask(canvas, paintWrapper);
+            }
+        };
+    }
+
+    void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
+
 private:
     std::shared_ptr<RSParagraph> paragraph_;
     float baselineOffset_;
 
-    ACE_DISALLOW_COPY_AND_MOVE(TextPaintMethod);
+    ACE_DISALLOW_COPY_AND_MOVE(TextFieldPaintMethod);
 };
 
 } // namespace OHOS::Ace::NG

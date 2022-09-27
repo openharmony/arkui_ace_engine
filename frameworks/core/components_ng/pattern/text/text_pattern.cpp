@@ -18,7 +18,6 @@
 #include <stack>
 
 #include "base/utils/utils.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas.h"

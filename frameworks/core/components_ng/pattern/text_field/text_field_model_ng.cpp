@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
 #include "base/utils/utils.h"
+#include "core/common/ime/text_edit_controller.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -41,12 +42,25 @@ RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
         if (placeholder) {
             textFieldLayoutProperty->UpdatePlaceholder(placeholder.value());
         }
-        // for text input, the max line is one.
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
     }
-    // TODO: add controller.
-    return nullptr;
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    auto radius = textFieldTheme->GetBorderRadius();
+    SetCaretColor(textFieldTheme->GetCursorColor());
+    BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
+    renderContext->UpdateBorderRadius(borderRadius);
+    return pattern->GetTextFieldController();
 };
 
 RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextArea(
@@ -162,24 +176,12 @@ void TextFieldModelNG::SetOnChange(std::function<void(const std::string&)>&& fun
 }
 
 // TODO: add text overlay.
-void TextFieldModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
-{
+void TextFieldModelNG::SetOnCopy(std::function<void(const std::string&)>&& func) {}
 
-}
+void TextFieldModelNG::SetOnCut(std::function<void(const std::string&)>&& func) {}
 
-void TextFieldModelNG::SetOnCut(std::function<void(const std::string&)>&& func)
-{
+void TextFieldModelNG::SetOnPaste(std::function<void(const std::string&)>&& func) {}
 
-}
-
-void TextFieldModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
-{
-
-}
-
-void TextFieldModelNG::SetCopyOption(CopyOptions copyOption)
-{
-
-}
+void TextFieldModelNG::SetCopyOption(CopyOptions copyOption) {}
 
 } // namespace OHOS::Ace::NG

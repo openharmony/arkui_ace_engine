@@ -212,7 +212,7 @@ public:                                                                         
 
 #define ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(name, type)   \
 public:                                                          \
-    const std::optional<type>& Get##name()                       \
+    const std::optional<type>& Get##name() const                 \
     {                                                            \
         return prop##name##_;                                    \
     }                                                            \
@@ -223,7 +223,7 @@ public:                                                          \
     const type& Get##name##Value() const                         \
     {                                                            \
         return prop##name##_.value();                            \
-    }                                                             \
+    }                                                            \
     const type& Get##name##Value(const type& defaultValue) const \
     {                                                            \
         if (!Has##name()) {                                      \
