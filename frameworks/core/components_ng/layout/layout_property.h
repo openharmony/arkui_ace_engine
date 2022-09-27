@@ -230,6 +230,16 @@ public:
         }
     }
 
+    void UpdateDisplayIndex(int32_t displayIndex)
+    {
+        if (!flexItemProperty_) {
+            flexItemProperty_ = std::make_unique<FlexItemProperty>();
+        }
+        if (flexItemProperty_->UpdateDisplayIndex(displayIndex)) {
+            propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        }
+    }
+
     void UpdateContentConstraint();
 
     LayoutConstraintF CreateChildConstraint() const;

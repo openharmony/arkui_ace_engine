@@ -140,6 +140,11 @@ void ViewAbstract::SetFlexGrow(float value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexGrow, value);
 }
 
+void ViewAbstract::SetDisplayIndex(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, DisplayIndex, value);
+}
+
 void ViewAbstract::SetPadding(const CalcLength& value)
 {
     PaddingProperty padding;
