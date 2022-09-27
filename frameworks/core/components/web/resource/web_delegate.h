@@ -92,6 +92,18 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebJSDialogResult> result_;
 };
 
+class FullScreenExitHandlerOhos : public FullScreenExitHandler {
+    DECLARE_ACE_TYPE(FullScreenExitHandlerOhos, FullScreenExitHandler)
+
+public:
+    FullScreenExitHandlerOhos(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler,
+        WeakPtr<WebDelegate> webDelegate) : handler_(handler), webDelegate_(webDelegate) {}
+    void ExitFullScreen() override;
+private:
+    std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler_;
+    WeakPtr<WebDelegate> webDelegate_;
+};
+
 class AuthResultOhos : public AuthResult {
     DECLARE_ACE_TYPE(AuthResultOhos, AuthResult)
 
@@ -123,7 +135,7 @@ class SslSelectCertResultOhos : public SslSelectCertResult {
     DECLARE_ACE_TYPE(SslSelectCertResultOhos, SslSelectCertResult)
 
 public:
-    SslSelectCertResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslSelectCertResult> result)
+    explicit SslSelectCertResultOhos(std::shared_ptr<OHOS::NWeb::NWebJSSslSelectCertResult> result)
         : result_(result) {}
 
     void HandleConfirm(const std::string& privateKeyFile, const std::string& certChainFile) override;
@@ -327,30 +339,33 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
     void OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
-    RefPtr<WebResponse> OnInterceptRequest(const BaseEventInfo* info);
+    RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool IsEmptyOnInterceptRequest();
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
     void OnProgressChanged(int param);
     void OnReceivedTitle(const std::string& param);
+    void ExitFullScreen();
+    void OnFullScreenExit();
     void OnGeolocationPermissionsHidePrompt();
     void OnGeolocationPermissionsShowPrompt(
         const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
     void OnRequestFocus();
-    bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType);
-    bool OnHttpAuthRequest(const BaseEventInfo* info);
-    bool OnSslErrorRequest(const BaseEventInfo* info);
-    bool OnSslSelectCertRequest(const BaseEventInfo* info);
+    bool OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType);
+    bool OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
+    void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler);
     bool OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message);
     void OnRouterPush(const std::string& param);
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason);
     void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed);
-    bool OnFileSelectorShow(const BaseEventInfo* info);
-    bool OnContextMenuShow(const BaseEventInfo* info);
+    bool OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info);
+    bool OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);
@@ -456,6 +471,7 @@ private:
     EventCallbackV2 onPageStartedV2_;
     EventCallbackV2 onProgressChangeV2_;
     EventCallbackV2 onTitleReceiveV2_;
+    EventCallbackV2 onFullScreenExitV2_;
     EventCallbackV2 onGeolocationHideV2_;
     EventCallbackV2 onGeolocationShowV2_;
     EventCallbackV2 onRequestFocusV2_;

@@ -17,6 +17,7 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/key_event.h"
@@ -68,7 +69,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         return;
     }
     // first clean.
-    referee_->CleanGestureScope(touchPoint.id);
+    refereeNG_->CleanGestureScope(touchPoint.id);
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
@@ -220,6 +221,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& point)
 
         if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
             referee_->CleanGestureScope(point.id);
+            refereeNG_->CleanGestureScope(point.id);
             touchTestResults_.erase(point.id);
         }
 
@@ -265,6 +267,21 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
     LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
         event.action, event.repeatTime);
     if (focusNode->HandleKeyEvent(event)) {
+        LOGI("Default focus system handled this event");
+        return true;
+    }
+    LOGI("Use platform to handle this event");
+    return false;
+}
+
+bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode)
+{
+    CHECK_NULL_RETURN(focusNode, false);
+    LOGD("The key code is %{public}d, the key action is %{public}d, the repeat time is %{public}d.", event.code,
+        event.action, event.repeatTime);
+    auto focusNodeHub = focusNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusNodeHub, false);
+    if (focusNodeHub->HandleKeyEvent(event)) {
         LOGI("Default focus system handled this event");
         return true;
     }
@@ -497,6 +514,31 @@ bool EventManager::DispatchAxisEvent(const AxisEvent& event)
     return true;
 }
 
+void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode)
+{
+    if (!frameNode) {
+        LOGW("renderNode is null.");
+        return;
+    }
+    const NG::PointF point { event.x, event.y };
+    frameNode->AxisTest(point, point, axisTestResults_);
+}
+
+bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
+{
+    if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0) {
+        return false;
+    }
+    LOGD("DispatchAxisEventNG, action is %{public}d, axis is %{public}f / %{public}f / %{public}f", event.action,
+        event.horizontalAxis, event.verticalAxis, event.pinchAxisScale);
+    for (const auto& axisTarget : axisTestResults_) {
+        if (axisTarget && axisTarget->HandleAxisEvent(event)) {
+            return true;
+        }
+    }
+    return true;
+}
+
 bool EventManager::DispatchRotationEvent(
     const RotationEvent& event, const RefPtr<RenderNode>& renderNode, const RefPtr<RenderNode>& requestFocusNode)
 {
@@ -522,8 +564,9 @@ void EventManager::ClearResults()
 
 EventManager::EventManager()
 {
-    LOGI("EventManger Constructor.");
+    LOGD("EventManger Constructor.");
     referee_ = AceType::MakeRefPtr<GestureReferee>();
+    refereeNG_ = AceType::MakeRefPtr<NG::GestureReferee>();
 }
 
 } // namespace OHOS::Ace

@@ -43,7 +43,7 @@ public:
         pluginContainer_ = container;
     }
 
-    RefPtr<PipelineContext> GetSubPipelineContext() override
+    RefPtr<PipelineBase> GetSubPipelineContext() override
     {
         auto context = pluginContainer_.Upgrade();
         if (context) {

@@ -97,4 +97,15 @@ RefPtr<Component> GridLayoutTestUtils::CreateDragComponent(std::string rows, std
     component->SetCellLength(CELL_LENGTH_VALUE_TEST);
     return component;
 }
+
+RefPtr<RenderBox> GridLayoutTestUtils::CreateRenderBox(double width, double height)
+{
+    RefPtr<RenderBox> renderBox = AceType::MakeRefPtr<MockRenderBox>();
+    RefPtr<BoxComponent> boxComponent = AceType::MakeRefPtr<BoxComponent>();
+    boxComponent->SetWidth(width);
+    boxComponent->SetHeight(height);
+    renderBox->Update(boxComponent);
+    return renderBox;
+}
+
 } // namespace OHOS::Ace

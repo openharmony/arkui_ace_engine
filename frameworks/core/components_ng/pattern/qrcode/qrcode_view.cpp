@@ -30,6 +30,8 @@ void QRCodeView::Create(const std::string& value)
         V2::QRCODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<QRCodePattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Value, value);
+    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, Color::BLACK);
+    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, Color::WHITE);
 }
 
 void QRCodeView::SetQRCodeColor(Color color)

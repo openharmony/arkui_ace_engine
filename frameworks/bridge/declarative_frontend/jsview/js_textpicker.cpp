@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/text_picker/textpicker_view.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -77,6 +78,13 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         LOGE("selected is out of range");
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextPickerView::Create();
+        NG::TextPickerView::SetRange(getRangeVector);
+        NG::TextPickerView::SetSelected(selected);
+        return;
+    }
+
     RefPtr<Component> pickerTextComponent = AceType::MakeRefPtr<OHOS::Ace::PickerTextComponent>();
     ViewStackProcessor::GetInstance()->Push(pickerTextComponent);
     JSInteractableView::SetFocusable(false);
@@ -105,15 +113,19 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
 
 void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
 {
+    Dimension height;
+    if (!ParseJsDimensionFp(info[0], height)) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::TextPickerView::SetDefaultPickerItemHeight(height);
+        return;
+    }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto TextPicker = AceType::DynamicCast<PickerTextComponent>(component);
     if (!TextPicker) {
         LOGE("PickerTextComponent is null");
-        return;
-    }
-
-    Dimension height;
-    if (!ParseJsDimensionFp(info[0], height)) {
         return;
     }
 
@@ -138,6 +150,21 @@ void JSTextPicker::OnCancel(const JSCallbackInfo& info)
 
 void JSTextPicker::OnChange(const JSCallbackInfo& info)
 {
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto jsFunc = JSRef<JSFunc>::Cast(info[0]);
+        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                            const std::string& value, double index) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("TextPicker.onChange");
+            auto params = ConvertToJSValues(value, index);
+            func->Call(JSRef<JSObject>(), static_cast<int>(params.size()), params.data());
+        };
+        NG::TextPickerView::SetOnChange(std::move(onChange));
+        return;
+    }
     if (!JSViewBindEvent(&PickerBaseComponent::SetOnTextChange, info)) {
         LOGW("Failed to bind event");
     }

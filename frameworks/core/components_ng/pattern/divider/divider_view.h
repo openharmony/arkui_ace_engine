@@ -20,8 +20,10 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+
 class ACE_EXPORT DividerView {
 public:
     static void Create();
@@ -29,7 +31,10 @@ public:
     static void DividerColor(const Color& value);
     static void StrokeWidth(const Dimension& value);
     static void LineCap(const LineCap& value);
+private:
+    static void LoadTheme(const RefPtr<FrameNode>& frameNode);
 };
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIVIDER_DIVIDER_VIEW_H

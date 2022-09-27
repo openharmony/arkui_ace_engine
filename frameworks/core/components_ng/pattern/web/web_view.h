@@ -20,18 +20,70 @@
 #include <string>
 
 #include "core/components/web/web_property.h"
+#include "core/components/box/drag_drop_event.h"
 
 namespace OHOS::Ace::NG {
+
+using OnWebSyncFunc = std::function<bool(const std::shared_ptr<BaseEventInfo>& info)>;
+using OnWebAsyncFunc = std::function<void(const std::shared_ptr<BaseEventInfo>& info)>;
+
 class ACE_EXPORT WebView {
 public:
     static void Create(const std::string& src, const RefPtr<WebController>& webController);
-    static void SetOnPageStart(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& onPageStart);
-    static void SetOnPageFinish(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& onPageEnd);
-    static void SetOnHttpErrorReceive(
-        std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& onHttpErrorReceive);
-    static void SetOnErrorReceive(std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& onErrorReceive);
-    static void SetOnConsole(std::function<bool(const std::shared_ptr<BaseEventInfo>& info)>&& onConsole);
+    static void SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType);
+    static void SetOnPageStart(OnWebAsyncFunc&& onPageStart);
+    static void SetOnPageFinish(OnWebAsyncFunc&& onPageEnd);
+    static void SetOnHttpErrorReceive(OnWebAsyncFunc&& onHttpErrorReceive);
+    static void SetOnErrorReceive(OnWebAsyncFunc&& onErrorReceive);
+    static void SetOnConsole(OnWebSyncFunc&& onConsole);
     static void SetJsEnabled(bool isJsEnabled);
+    static void SetProgressChangeImpl(OnWebAsyncFunc&& onProgressChangeImpl);
+    static void SetTitleReceiveEventId(OnWebAsyncFunc&& titleReceiveEventId);
+    static void SetFullScreenExitEventId(OnWebAsyncFunc&& fullScreenExitEventId);
+    static void SetGeolocationHideEventId(OnWebAsyncFunc&& geolocationHideEventId);
+    static void SetGeolocationShowEventId(OnWebAsyncFunc&& geolocationShowEventId);
+    static void SetRequestFocusEventId(OnWebAsyncFunc&& requestFocusEventId);
+    static void SetDownloadStartEventId(OnWebAsyncFunc&& downloadStartEventId);
+    static void SetOnFullScreenEnterImpl(OnWebAsyncFunc&& onFullScreenEnterImpl);
+    static void SetOnHttpAuthRequestImpl(OnWebSyncFunc&& onHttpAuthRequestImpl);
+    static void SetOnSslErrorRequestImpl(OnWebSyncFunc&& onSslErrorRequestImpl);
+    static void SetOnSslSelectCertRequestImpl(OnWebSyncFunc&& onSslSelectCertRequestImpl);
+    static void SetMediaPlayGestureAccess(bool isNeedGestureAccess);
+    static void SetOnKeyEventCallback(std::function<void(KeyEventInfo& keyEventInfo)>&& onKeyEventId);
+    static void SetOnInterceptRequest(
+        std::function<RefPtr<WebResponse>(const std::shared_ptr<BaseEventInfo>& info)>&& onInterceptRequestImpl);
+    static void SetOnUrlLoadIntercept(OnWebSyncFunc&& onUrlLoadInterceptImpl);
+    static void SetOnFileSelectorShow(OnWebSyncFunc&& onFileSelectorShowImpl);
+    static void SetOnContextMenuShow(OnWebSyncFunc&& onContextMenuImpl);
+    static void SetFileAccessEnabled(bool isFileAccessEnabled);
+    static void SetOnLineImageAccessEnabled(bool isOnLineImageAccessEnabled);
+    static void SetDomStorageAccessEnabled(bool isDomStorageAccessEnabled);
+    static void SetImageAccessEnabled(bool isImageAccessEnabled);
+    static void SetMixedMode(MixedModeContent mixedContentMode);
+    static void SetZoomAccessEnabled(bool isZoomAccessEnabled);
+    static void SetGeolocationAccessEnabled(bool isGeolocationAccessEnabled);
+    static void SetUserAgent(const std::string& userAgent);
+    static void SetRenderExitedId(OnWebAsyncFunc&& renderExitedId);
+    static void SetRefreshAccessedHistoryId(OnWebAsyncFunc&& refreshAccessedHistoryId);
+    static void SetCacheMode(WebCacheMode mode);
+    static void SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled);
+    static void SetFileFromUrlAccessEnabled(bool isFileFromUrlAccessEnabled);
+    static void SetDatabaseAccessEnabled(bool isDatabaseAccessEnabled);
+    static void SetTextZoomRatio(int32_t textZoomRatioNum);
+    static void SetWebDebuggingAccessEnabled(bool isWebDebuggingAccessEnabled);
+    static void SetOnMouseEventCallback(std::function<void(MouseInfo& info)>&& onMouseId);
+    static void SetResourceLoadId(OnWebAsyncFunc&& resourceLoadId);
+    static void SetScaleChangeId(OnWebAsyncFunc&& scaleChangeId);
+    static void SetScrollId(OnWebAsyncFunc&& scrollId);
+    static void SetPermissionRequestEventId(OnWebAsyncFunc&& permissionRequestEventId);
+    static void SetBackgroundColor(int32_t backgroundColor);
+    static void SetInitialScale(float scale);
+    static void SetSearchResultReceiveEventId(OnWebAsyncFunc&& searchResultReceiveEventId);
+    static void SetOnDragStartId(const OnDragFunc& onDragStartId);
+    static void SetOnDragEnterId(const OnDropFunc& onDragEnterId);
+    static void SetOnDragMoveId(const OnDropFunc& onDragMoveId);
+    static void SetOnDragLeaveId(const OnDropFunc& onDragLeaveId);
+    static void SetOnDropId(const OnDropFunc& onDropId);
 };
 } // namespace OHOS::Ace::NG
 

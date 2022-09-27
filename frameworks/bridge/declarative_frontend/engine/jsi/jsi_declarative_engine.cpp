@@ -65,7 +65,9 @@ extern const char _binary_jsEnumStyle_abc_end[];
 namespace OHOS::Ace::Framework {
 namespace {
 
-#ifdef APP_USE_ARM
+#if defined(ANDROID_PLATFORM)
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
+#elif defined(APP_USE_ARM)
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
@@ -201,6 +203,8 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
+
+    runtime_->StartDebugger();
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
@@ -696,6 +700,17 @@ void JsiDeclarativeEngineInstance::SetDebuggerPostTask()
     std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
 }
 
+void JsiDeclarativeEngineInstance::RegisterFaPlugin()
+{
+    shared_ptr<JsValue> global = runtime_->GetGlobal();
+    shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime_, "requireNapi");
+    if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime_)) {
+        LOGW("requireNapi func not found");
+    }
+    std::vector<shared_ptr<JsValue>> argv = { runtime_->NewString("FeatureAbility") };
+    requireNapiFunc->Call(runtime_, global, argv, argv.size());
+}
+
 // -----------------------
 // Start JsiDeclarativeEngine
 // -----------------------
@@ -780,7 +795,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 #endif
 
         if (delegate && delegate->GetAssetManager()) {
-            std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+            std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
             if (!packagePath.empty()) {
                 auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
                 arkNativeEngine->SetPackagePath(packagePath);
@@ -791,6 +806,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     } else {
         LOGI("Using sharedRuntime, UVLoop handled by AbilityRuntime");
     }
+    engineInstance_->RegisterFaPlugin();
 
     return result;
 }
@@ -916,7 +932,7 @@ void JsiDeclarativeEngine::RegisterAssetFunc()
 void JsiDeclarativeEngine::RegisterWorker()
 {
     RegisterInitWorkerFunc();
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(ANDROID_PLATFORM) && !defined(LINUX_PLATFORM)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
     RegisterOffWorkerFunc();
 #endif
     RegisterAssetFunc();
@@ -926,7 +942,7 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
     std::string basePath = delegate->GetAssetPath(fileName);
     if (!basePath.empty()) {
         std::string abcPath = basePath.append(fileName);
@@ -1001,6 +1017,9 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
             }
         }
 #if !defined(PREVIEW)
+        if (LoadJsWithModule(urlName)) {
+            return;
+        }
         if (!ExecuteAbc(urlName)) {
             return;
         }
@@ -1059,7 +1078,9 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
 
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-
+    if (LoadJsWithModule(url)) {
+        return true;
+    }
     // get js bundle content
     shared_ptr<JsValue> jsCode = runtime->NewUndefined();
     shared_ptr<JsValue> jsAppCode = runtime->NewUndefined();

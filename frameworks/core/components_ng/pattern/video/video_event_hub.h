@@ -121,6 +121,17 @@ public:
         }
     }
 
+    void SetOnFullScreenChange(EventCallback&& onFullScreenChange)
+    {
+        onFullScreenChange_ = std ::move(onFullScreenChange);
+    }
+    void FireFullScreenChangeEvent(const std::string& param)
+    {
+        if (onFullScreenChange_) {
+            onFullScreenChange_(param);
+        }
+    }
+
 private:
     EventCallback onStart_;
     EventCallback onPause_;
@@ -130,6 +141,7 @@ private:
     EventCallback onSeeking_;
     EventCallback onSeeked_;
     EventCallback onUpdate_;
+    EventCallback onFullScreenChange_;
 };
 
 } // namespace OHOS::Ace::NG

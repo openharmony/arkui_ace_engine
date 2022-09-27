@@ -294,10 +294,10 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
         SkRRect::MakeRect(SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom()));
         SkRect focusRect = SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom());
     Color bgColor = pipeline->GetAppBgColor();
-    if (backDecoration_->GetHasBorderImageSource() || backDecoration_->GetHasBorderImageGradient()) {
-        FetchImageData();
-    }
     if (backDecoration_) {
+        if (backDecoration_->GetHasBorderImageSource() || backDecoration_->GetHasBorderImageGradient()) {
+            FetchImageData();
+        }
         auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
         if (canvas == nullptr) {
             LOGE("Paint canvas is null.");
@@ -383,7 +383,9 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
     if ((!backDecoration_) || backDecoration_->GetImage() ||
         (backDecoration_->GetBackgroundColor() != Color::TRANSPARENT) || !(backDecoration_->GetGradient().IsValid())) {
         // no need to paint gradient
-        rsNode->SetBackgroundShader(nullptr);
+        if (backDecoration_->GetGradient().GetType() == GradientType::SWEEP) {
+            rsNode->SetBackgroundShader(nullptr);
+        }
         return;
     }
 

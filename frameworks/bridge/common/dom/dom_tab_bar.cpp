@@ -83,7 +83,11 @@ bool DOMTabBar::SetSpecializedStyle(const std::pair<std::string, std::string>& s
                 } else {
                     node.padding_.SetLeft(node.ParseDimension(val));
                 }
-            } },
+            } },  
+        { DOM_INDICATOR_COLOR,
+            [](const std::string& val, DOMTabBar& node) {
+               node.indicatorColor_= node.ParseColor(val);
+            }},    
     };
     auto operatorIter = styleOperators.find(style.first);
     if (operatorIter != styleOperators.end()) {
@@ -160,6 +164,9 @@ void DOMTabBar::ResetInitializedStyle()
     }
     RefPtr<TabTheme> theme = GetTheme<TabTheme>();
     if (theme) {
+        if(indicatorColor_.has_value()){
+           tabBarChild_->SetIndicatorColor(indicatorColor_.value());
+        }
         tabBarChild_->InitStyle(theme);
         if (vertical_) {
             if (LessOrEqual(GetWidth().Value(), 0.0)) {

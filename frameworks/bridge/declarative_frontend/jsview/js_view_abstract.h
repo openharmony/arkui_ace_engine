@@ -26,16 +26,19 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
-#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/container.h"
 #include "core/components/box/box_component.h"
 #include "core/components/common/properties/border_image.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/menu/menu_component.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components/transform/transform_component.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/pipeline/base/component.h"
-#include "core/components/menu/menu_component.h"
 #include "frameworks/core/gestures/tap_gesture.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -74,6 +77,8 @@ public:
     static void GetAngle(
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
+    static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
+    static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void ExecMenuBuilder(RefPtr<JsFunction> builderFunc, RefPtr<MenuComponent> menuComponent);
 
     static void JsScale(const JSCallbackInfo& info);
@@ -88,6 +93,7 @@ public:
     static void JsRotateY(const JSCallbackInfo& info);
     static void JsTransform(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);
+    static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
     static void ParseAndSetTransitionOption(std::unique_ptr<JsonValue>& transitionArgs);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
@@ -194,7 +200,7 @@ public:
     static void Pop();
 
     static void JsOnDragStart(const JSCallbackInfo& info);
-    static bool ParseDragItem(const JSRef<JSVal>& info);
+    static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, DragItemInfo& dragInfo);
     static RefPtr<Component> ParseDragItemComponent(const JSRef<JSVal>& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
@@ -218,11 +224,12 @@ public:
     static void JsClip(const JSCallbackInfo& info);
     static void JsMask(const JSCallbackInfo& info);
 
-    static void JsKey(const std::string& text);
+    static void JsKey(const std::string& key);
     static void JsId(const std::string& id);
 
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
+    static void JsOnKeyEvent(const JSCallbackInfo& args);
     static void JsOnFocus(const JSCallbackInfo& args);
     static void JsOnBlur(const JSCallbackInfo& args);
     static void JsTabIndex(const JSCallbackInfo& info);
@@ -264,7 +271,22 @@ public:
         return pipelineContext;
     }
 
-protected:
+    template<typename T>
+    static RefPtr<T> GetTheme()
+    {
+        auto pipelineContext = GetPipelineContext();
+        if (!pipelineContext) {
+            LOGE("pipelineContext is null!");
+            return nullptr;
+        }
+        auto themeManager = pipelineContext->GetThemeManager();
+        if (!themeManager) {
+            LOGE("themeManager is null!");
+            return nullptr;
+        }
+        return themeManager->GetTheme<T>();
+    }
+
     /**
      * box properties setter
      */
@@ -303,22 +325,6 @@ protected:
         const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
     static bool ParseAndSetTranslateTransition(
         const std::unique_ptr<JsonValue>& transitionArgs, TransitionType transitionType);
-
-    template<typename T>
-    static RefPtr<T> GetTheme()
-    {
-        auto pipelineContext = GetPipelineContext();
-        if (!pipelineContext) {
-            LOGE("pipelineContext is null!");
-            return nullptr;
-        }
-        auto themeManager = pipelineContext->GetThemeManager();
-        if (!themeManager) {
-            LOGE("themeManager is null!");
-            return nullptr;
-        }
-        return themeManager->GetTheme<T>();
-    }
 
     template<typename T>
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)

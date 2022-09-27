@@ -43,6 +43,14 @@ public:
         SetSize(size);
     }
 
+    RectT(const OffsetF& topLeftPoint, const OffsetF& bottomRightPoint)
+    {
+        SetOffset(topLeftPoint);
+        OffsetF sizeOffset = bottomRightPoint - topLeftPoint;
+        SizeF size(sizeOffset.GetX(), sizeOffset.GetY());
+        SetSize(size);
+    }
+
     void Reset()
     {
         x_ = 0;

@@ -58,7 +58,7 @@ foreach(item, ace_platforms) {
         ohos_shared_library("libace_debug") {
           deps = [ "$ace_root/build:libace_static_debug_${item.name}" ]
           part_name = ace_engine_part
-          subsystem_name = "arkui"
+          subsystem_name = ace_engine_subsystem
         }
       }
     }
@@ -119,10 +119,11 @@ foreach(item, ace_platforms) {
     ohos_shared_library("libace") {
       deps = [ "$ace_root/build:libace_static_ohos" ]
       part_name = ace_engine_part
-      subsystem_name = "arkui"
+      subsystem_name = ace_engine_subsystem
     }
 
     ohos_source_set("ace_ohos_unittest_base") {
+      subsystem_name = ace_engine_subsystem
       part_name = ace_engine_part
       testonly = true
       sources = [

@@ -19,7 +19,7 @@ namespace OHOS::Ace::NG {
 CanvasDrawFunction ListPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
 {
     double constrainStrokeWidth = divider_.strokeWidth.Value();
-    auto geometryNode = paintWrapper->GetGeometryNode();
+    const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetFrameSize();
     double dividerLength = 0.0;
     if (vertical_) {
@@ -27,14 +27,12 @@ CanvasDrawFunction ListPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWr
     } else {
         dividerLength = frameSize.Width() - divider_.startMargin.Value() - divider_.endMargin.Value();
     }
-    DividerPainter dividerPainter(constrainStrokeWidth, dividerLength,
-        vertical_, divider_.color, LineCap::SQUARE);
-    
+    DividerPainter dividerPainter(constrainStrokeWidth, dividerLength, vertical_, divider_.color, LineCap::SQUARE);
+
     int32_t startIndex = startIndex_;
     int32_t endIndex = endIndex_;
-    
-    return [dividerPainter, startIndex, endIndex, itemPosition = std::move(itemPosition_)](RSCanvas& canvas) {
-        dividerPainter.DrawListLines(canvas, startIndex, endIndex, itemPosition);
-    };
+
+    return [dividerPainter, startIndex, endIndex, itemPosition = std::move(itemPosition_)](
+               RSCanvas& canvas) { dividerPainter.DrawListLines(canvas, startIndex, endIndex, itemPosition); };
 }
 } // namespace OHOS::Ace::NG

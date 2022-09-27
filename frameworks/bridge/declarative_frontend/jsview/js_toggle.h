@@ -39,6 +39,7 @@ public:
     static void OnChange(const JSCallbackInfo& info);
     static void SelectedColor(const JSCallbackInfo& info);
     static void SwitchPointColor(const JSCallbackInfo& info);
+    static void SetBackgroundColor(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

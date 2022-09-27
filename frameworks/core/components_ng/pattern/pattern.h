@@ -58,9 +58,9 @@ public:
         return std::nullopt;
     }
 
-    void DetachFromFrameNode()
+    void DetachFromFrameNode(FrameNode* frameNode)
     {
-        OnDetachFromFrameNode();
+        OnDetachFromFrameNode(frameNode);
         frameNode_.Reset();
     }
 
@@ -101,6 +101,8 @@ public:
     virtual void OnContextAttached() {}
 
     virtual void OnModifyDone() {}
+
+    virtual void OnMountToParentDone() {}
 
     virtual bool IsRootPattern() const
     {
@@ -210,7 +212,7 @@ public:
 
 protected:
     virtual void OnAttachToFrameNode() {}
-    virtual void OnDetachFromFrameNode() {}
+    virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
 
 private:
     WeakPtr<FrameNode> frameNode_;

@@ -659,8 +659,7 @@ void DOMNode::UpdatePseudoStyle(bool isBackendChange)
     }
     // Triggered by backend, elements may processing build or layout now. So post a new task to UI thread.
     auto context = GetPipelineContext().Upgrade();
-    if (!context) {
-        LOGE("Context is null!");
+    if (!context || !context->GetTaskExecutor()) {
         return;
     }
     context->GetTaskExecutor()->PostTask(

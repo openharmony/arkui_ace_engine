@@ -19,8 +19,10 @@ template("ace_core_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
+    platform = invoker.platform
 
     # add common source file needed by all product platform here
     sources = [
@@ -58,6 +60,7 @@ template("ace_core_source_set") {
       # common
       "common/ace_application_info.cpp",
       "common/ace_engine.cpp",
+      "common/anr_thread.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
       "common/container_scope.cpp",
@@ -192,6 +195,10 @@ template("ace_core_source_set") {
       "common/flutter/flutter_task_executor.cpp",
       "common/flutter/flutter_window.cpp",
     ]
+
+    if (platform == "ohos") {
+      sources -= [ "common/anr_thread.cpp" ]
+    }
 
     # add sources needed by phone and TV. wearable like watch do not need them
     if (!is_wearable_product) {
@@ -338,8 +345,10 @@ template("ace_core_source_set") {
     deps += [
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
       "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/gestures:ace_core_components_gestures_ng_$platform",
       "$ace_root/frameworks/core/components_ng/image_provider:ace_core_components_image_provider_ng_$platform",
       "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/manager:ace_core_components_manager_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_$platform",
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
@@ -389,11 +398,19 @@ template("ace_core_source_set") {
       deps += [ "$ace_root/frameworks/core/components_v2/ability_component:ace_core_components_ability_v2_$platform" ]
     }
 
+    if (defined(config.apng_image_support) && config.apng_image_support) {
+      defines += [ "APNG_IMAGE_SUPPORT" ]
+      deps += [ "$ace_root/frameworks/core/image/apng:ace_core_apng_$platform" ]
+    }
+
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       if (!use_mingw_win && !use_mac && !use_linux) {
         sources += [ "common/form_manager.cpp" ]
-        deps += [ "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform" ]
+        deps += [
+          "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform",
+          "$ace_root/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform",
+        ]
         external_deps = [ "form_fwk:form_manager" ]
       }
     }
@@ -436,8 +453,10 @@ template("ace_core_ng_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
+    platform = invoker.platform
 
     # add common source file needed by all product platform here
     sources = [
@@ -473,6 +492,7 @@ template("ace_core_ng_source_set") {
       # common
       "common/ace_application_info.cpp",
       "common/ace_engine.cpp",
+      "common/anr_thread.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
       "common/container_scope.cpp",
@@ -536,9 +556,8 @@ template("ace_core_ng_source_set") {
 
       # image
       "image/animated_image_player.cpp",
-
-      #"image/flutter_image_cache.cpp",
       "image/image_cache.cpp",
+      "image/image_compressor.cpp",
       "image/image_loader.cpp",
       "image/image_object.cpp",
       "image/image_provider.cpp",
@@ -565,8 +584,6 @@ template("ace_core_ng_source_set") {
       "components/common/properties/color_factory.cpp",
       "components/common/properties/decoration.cpp",
       "components/common/properties/edge.cpp",
-
-      # "components/common/properties/motion_path_evaluator.cpp",
       "components/common/properties/page_transition_option.cpp",
       "components/common/properties/scroll_bar.cpp",
       "components/common/properties/shadow.cpp",
@@ -586,6 +603,7 @@ template("ace_core_ng_source_set") {
       "components/font/constants_converter.cpp",
       "components/font/font_loader_creator.cpp",
       "components/font/font_manager_creator.cpp",
+      "components/picker/picker_data.cpp",
       "components/scroll/scrollable.cpp",
       "components/theme/app_theme.cpp",
       "components/theme/icon_theme.cpp",
@@ -602,6 +620,10 @@ template("ace_core_ng_source_set") {
       "common/flutter/flutter_task_executor.cpp",
     ]
 
+    if (platform == "ohos") {
+      sources -= [ "common/anr_thread.cpp" ]
+    }
+
     configs = [ "$ace_root:ace_config" ]
 
     deps = [
@@ -612,15 +634,17 @@ template("ace_core_ng_source_set") {
     if (enable_ng_build) {
       deps += [
         "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_$platform",
-        "$ace_flutter_engine_root_new/skia:ace_skia_dev_$platform",
+        "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_$platform",
       ]
     }
 
     deps += [
       "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_$platform",
       "$ace_root/frameworks/core/components_ng/event:ace_core_components_event_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/gestures:ace_core_components_gestures_ng_$platform",
       "$ace_root/frameworks/core/components_ng/image_provider:ace_core_components_image_provider_ng_$platform",
       "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/manager:ace_core_components_manager_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_$platform",
@@ -635,6 +659,12 @@ template("ace_core_ng_source_set") {
     if (defined(config.web_components_support) &&
         config.web_components_support) {
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
+    }
+    if (defined(config.form_components_support) &&
+        config.form_components_support) {
+      if (!use_mingw_win && !use_mac && !use_linux) {
+        deps += [ "$ace_root/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform" ]
+      }
     }
     cflags_cc = []
     cflags_cc += invoker.cflags_cc

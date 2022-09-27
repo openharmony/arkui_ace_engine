@@ -46,7 +46,7 @@ const char* LOG_TAGS[] = {
 
 constexpr uint32_t LOG_DOMAINS[] = {
     0xD003900,
-    0xD003B00,
+    0xC0D0,
 };
 
 constexpr LogType LOG_TYPES[] = {

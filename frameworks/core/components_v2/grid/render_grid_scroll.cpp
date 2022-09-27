@@ -345,17 +345,17 @@ bool RenderGridScroll::GetGridSize()
 void RenderGridScroll::BuildGrid(std::vector<double>& main, std::vector<double>& cross)
 {
     if (useScrollable_ == SCROLLABLE::NO_SCROLL) {
-        main = ParseArgs(PreParseRows(), rowSize_, rowGap_);
-        cross = ParseArgs(PreParseCols(), colSize_, colGap_);
+        main = ParseArgs(GetRowTemplate(), rowSize_, rowGap_);
+        cross = ParseArgs(GetColumnsTemplate(), colSize_, colGap_);
     } else if (useScrollable_ == SCROLLABLE::VERTICAL) {
-        cross = ParseArgs(PreParseCols(), colSize_, colGap_);
+        cross = ParseArgs(GetColumnsTemplate(), colSize_, colGap_);
         int32_t col = 0;
         for (auto width : cross) {
             metaData_[col] = Size(width, Size::INFINITE_SIZE);
             ++col;
         }
     } else if (useScrollable_ == SCROLLABLE::HORIZONTAL) {
-        cross = ParseArgs(PreParseRows(), rowSize_, rowGap_);
+        cross = ParseArgs(GetRowTemplate(), rowSize_, rowGap_);
         int32_t row = 0;
         for (auto height : cross) {
             metaData_[row] = Size(Size::INFINITE_SIZE, height);

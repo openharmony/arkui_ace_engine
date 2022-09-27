@@ -19,6 +19,7 @@ template("ace_osal_ohos_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
     if (is_standard_system) {
@@ -39,12 +40,14 @@ template("ace_osal_ohos_source_set") {
       configs = [ "$ace_root:ace_config" ]
     }
     include_dirs = [
+      "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include",
       "//commonlibrary/c_utils/base/include",
       "//foundation/window/window_manager/interfaces/innerkits",
     ]
 
     sources = [
       "ace_trace.cpp",
+      "anr_thread.cpp",
       "event_report.cpp",
       "exception_handler.cpp",
       "frame_report.cpp",
@@ -71,6 +74,7 @@ template("ace_osal_ohos_source_set") {
       ]
       external_deps += [
         "ability_base:want",
+        "input:libmmi-client",
         "multimedia_image_standard:image",
         "napi:ace_napi",
       ]
@@ -88,8 +92,12 @@ template("ace_osal_ohos_source_set") {
     } else {
       external_deps += [ "multimedia_image:image" ]
     }
-    sources += [ "pixel_map_ohos.cpp" ]
+    sources += [
+      "mouse_style_ohos.cpp",
+      "pixel_map_ohos.cpp",
+    ]
     external_deps += [
+      "hicollie_native:libhicollie",
       "hisysevent_native:libhisysevent",
       "hitrace_native:libhitrace",
     ]

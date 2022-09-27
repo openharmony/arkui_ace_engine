@@ -18,6 +18,7 @@
 
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 
@@ -46,12 +47,20 @@ public:
         return layoutAlgorithm;
     }
 
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<ScrollEventHub>();
+    }
+
     void UpdateCurrentOffset(float offset);
 
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    void RegisterScrollBeginTask();
+    void RegisterOnScrollTask();
 
     RefPtr<ScrollableEvent> scrollableEvent_;
     Axis axis_ = Axis::VERTICAL;

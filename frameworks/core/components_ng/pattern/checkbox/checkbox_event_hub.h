@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_EVENT_HUB_H
 
-#include <string>
-
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -51,7 +49,7 @@ public:
         return name_;
     }
 
-    const std::string& GetGroupname()
+    const std::string& GetGroupName()
     {
         return groupname_;
     }
@@ -61,7 +59,7 @@ public:
         name_ = name;
     }
 
-    void SetGroupname(const std::string& groupname)
+    void SetGroupName(const std::string& groupname)
     {
         groupname_ = groupname;
     }

@@ -26,6 +26,8 @@
 
 namespace OHOS::Ace::NG {
 
+using OnScrollCallback = std::function<void(Dimension, Dimension)>;
+
 class GestureEventHub;
 
 class ScrollableEvent : public Referenced {
@@ -59,6 +61,19 @@ public:
         return scrollBeginCallback_;
     }
 
+    void SetOnScrollCallback(OnScrollCallback&& onScrollCallback)
+    {
+        if (!onScrollCallback) {
+            return;
+        }
+        onScrollCallback_ = std::move(onScrollCallback);
+    }
+
+    const OnScrollCallback& GetOnScrollCallback() const
+    {
+        return onScrollCallback_;
+    }
+
     Axis GetAxis() const
     {
         return axis_;
@@ -66,6 +81,7 @@ public:
 
 private:
     ScrollPositionCallback callback_;
+    OnScrollCallback onScrollCallback_;
     ScrollBeginCallback scrollBeginCallback_;
     Axis axis_ = Axis::VERTICAL;
 };
@@ -78,13 +94,13 @@ public:
 
     void AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
-        scrollableEvents_[scrollableEvent->GetAxis()].emplace_back(scrollableEvent);
+        scrollableEvents_[scrollableEvent->GetAxis()] = scrollableEvent;
         initialized_ = false;
     }
 
     void RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
     {
-        scrollableEvents_[scrollableEvent->GetAxis()].remove(scrollableEvent);
+        scrollableEvents_.erase(scrollableEvent->GetAxis());
         initialized_ = false;
     }
 
@@ -94,7 +110,7 @@ public:
 private:
     void InitializeScrollable();
 
-    std::unordered_map<Axis, std::list<RefPtr<ScrollableEvent>>> scrollableEvents_;
+    std::unordered_map<Axis, RefPtr<ScrollableEvent>> scrollableEvents_;
     std::unordered_map<Axis, RefPtr<Scrollable>> scrollables_;
     WeakPtr<GestureEventHub> gestureEventHub_;
     bool initialized_ = false;

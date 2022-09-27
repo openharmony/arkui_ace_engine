@@ -21,19 +21,44 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
-#include "core/components/declaration/text/text_declaration.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/pattern/text/text_view.h"
+#include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container.h"
+#include "core/components_ng/pattern/text/text_model.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/event/ace_event_handler.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<TextModel> TextModel::instance_ = nullptr;
+
+TextModel* TextModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::TextModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::TextModelNG());
+        } else {
+            instance_.reset(new Framework::TextModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 namespace {
 
-constexpr Dimension DEFAULT_FONT_SIZE = 30.0_px;
 const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
@@ -45,34 +70,13 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 void JSText::SetWidth(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsWidth(info);
-    if (Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    if (!box) {
-        LOGE("box is not valid");
-        return;
-    }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-    component->SetMaxWidthLayout(box->GetWidthDimension().IsValid());
+    TextModel::GetInstance()->OnSetWidth();
 }
 
 void JSText::SetHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
-    if (Container::IsCurrentUseNewPipeline()) {
-        return;
-    }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    if (!box) {
-        LOGE("box is not valid");
-        return;
-    }
-    box->SetBoxClipFlag(true);
+    TextModel::GetInstance()->OnSetHeight();
 }
 
 void JSText::SetFontSize(const JSCallbackInfo& info)
@@ -85,37 +89,12 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetFontSize(fontSize);
-        return;
-    }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetFontSize(fontSize);
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetFontSize(fontSize);
 }
 
 void JSText::SetFontWeight(const std::string& value)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetFontWeight(ConvertStrToFontWeight(value));
-        return;
-    }
-
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
 }
 
 void JSText::SetTextColor(const JSCallbackInfo& info)
@@ -128,19 +107,7 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], textColor)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetTextColor(textColor);
-        return;
-    }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetTextColor(textColor);
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetTextColor(textColor);
 }
 
 void JSText::SetTextOverflow(const JSCallbackInfo& info)
@@ -161,18 +128,7 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
             LOGE("Text: textOverflow(%{public}d) illegal value", overflow);
             break;
         }
-        if (Container::IsCurrentUseNewPipeline()) {
-            NG::TextView::SetTextOverflow(TEXT_OVERFLOWS[overflow]);
-            break;
-        }
-        auto component = GetComponent();
-        if (!component) {
-            LOGE("component is not valid");
-            break;
-        }
-        auto textStyle = component->GetTextStyle();
-        textStyle.SetTextOverflow(TEXT_OVERFLOWS[overflow]);
-        component->SetTextStyle(textStyle);
+        TextModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
     } while (false);
 
     info.SetReturnValue(info.This());
@@ -180,19 +136,7 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
 
 void JSText::SetMaxLines(int32_t value)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetMaxLines(value);
-        return;
-    }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetMaxLines(value);
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetMaxLines(value);
 }
 
 void JSText::SetFontStyle(int32_t value)
@@ -201,21 +145,7 @@ void JSText::SetFontStyle(int32_t value)
         LOGE("Text fontStyle(%{public}d) illegal value", value);
         return;
     }
-
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetItalicFontStyle(FONT_STYLES[value]);
-        return;
-    }
-
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetFontStyle(FONT_STYLES[value]);
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
 }
 
 void JSText::SetTextAlign(int32_t value)
@@ -224,38 +154,13 @@ void JSText::SetTextAlign(int32_t value)
         LOGE("Text: TextAlign(%d) expected positive number", value);
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetTextAlign(TEXT_ALIGNS[value]);
-        return;
-    }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetTextAlign(TEXT_ALIGNS[value]);
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
 }
 
-void JSText::SetAlign(int32_t value)
+void JSText::SetAlign(const JSCallbackInfo& info)
 {
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-    Alignment alignment = ParseAlignment(value);
-    if (NearEqual(alignment.GetHorizontal(), -1.0)) {
-        component->SetAlignment(TextAlign::LEFT);
-    } else if (NearEqual(alignment.GetHorizontal(), 0.0)) {
-        component->SetAlignment(TextAlign::CENTER);
-    } else if (NearEqual(alignment.GetHorizontal(), 1.0)) {
-        component->SetAlignment(TextAlign::RIGHT);
-    }
-    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    box->SetAlignment(alignment);
+    JSViewAbstract::JsAlign(info);
+    TextModel::GetInstance()->OnSetAlign();
 }
 
 void JSText::SetLineHeight(const JSCallbackInfo& info)
@@ -268,19 +173,7 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetLineHeight(value);
-        return;
-    }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetLineHeight(value);
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetLineHeight(value);
 }
 
 void JSText::SetFontFamily(const JSCallbackInfo& info)
@@ -294,19 +187,7 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
         LOGE("Parse FontFamilies failed");
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetFontFamily(fontFamilies);
-        return;
-    }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetFontFamilies(fontFamilies);
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
 void JSText::SetMinFontSize(const JSCallbackInfo& info)
@@ -319,19 +200,7 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetAdaptMinFontSize(fontSize);
-        return;
-    }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetAdaptMinFontSize(fontSize);
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetAdaptMinFontSize(fontSize);
 }
 
 void JSText::SetMaxFontSize(const JSCallbackInfo& info)
@@ -344,19 +213,7 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], fontSize)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetAdaptMaxFontSize(fontSize);
-        return;
-    }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetAdaptMaxFontSize(fontSize);
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetAdaptMaxFontSize(fontSize);
 }
 
 void JSText::SetLetterSpacing(const JSCallbackInfo& info)
@@ -369,40 +226,16 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetLetterSpacing(value);
-        return;
-    }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetLetterSpacing(value);
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetLetterSpacing(value);
 }
 
 void JSText::SetTextCase(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_CASES.size())) {
-        LOGE("Text textCase(%d) illegal value", value);
+        LOGE("Text textCase(%{public}d) illegal value", value);
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetTextCase(TEXT_CASES[value]);
-        return;
-    }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetTextCase(TEXT_CASES[value]);
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetTextCase(TEXT_CASES[value]);
 }
 
 void JSText::SetBaselineOffset(const JSCallbackInfo& info)
@@ -415,19 +248,7 @@ void JSText::SetBaselineOffset(const JSCallbackInfo& info)
     if (!ParseJsDimensionFp(info[0], value)) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::SetBaselineOffset(value);
-        return;
-    }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-
-    auto textStyle = component->GetTextStyle();
-    textStyle.SetBaselineOffset(value);
-    component->SetTextStyle(textStyle);
+    TextModel::GetInstance()->SetBaselineOffset(value);
 }
 
 void JSText::SetDecoration(const JSCallbackInfo& info)
@@ -451,45 +272,28 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
             colorVal = result;
         }
 
-        if (Container::IsCurrentUseNewPipeline()) {
-            if (textDecoration) {
-                NG::TextView::SetTextDecoration(textDecoration.value());
-            }
-            if (colorVal) {
-                NG::TextView::SetTextDecorationColor(colorVal.value());
-            }
-            break;
-        }
-
-        auto component = GetComponent();
-        if (!component) {
-            LOGE("component is not valid");
-            break;
-        }
-        auto textStyle = component->GetTextStyle();
         if (textDecoration) {
-            textStyle.SetTextDecoration(textDecoration.value());
+            TextModel::GetInstance()->SetTextDecoration(textDecoration.value());
         }
         if (colorVal) {
-            textStyle.SetTextDecorationColor(colorVal.value());
+            TextModel::GetInstance()->SetTextDecorationColor(colorVal.value());
         }
-        component->SetTextStyle(textStyle);
     } while (false);
     info.SetReturnValue(info.This());
 }
 
 void JSText::JsOnClick(const JSCallbackInfo& info)
 {
-    if (info[0]->IsFunction()) {
-        auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-        if (!inspector) {
-            LOGE("fail to get inspector for on click event");
-            return;
-        }
-        auto impl = inspector->GetInspectorFunctionImpl();
-        RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onClickId = EventMarker(
-            [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](const BaseEventInfo* info) {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSInteractableView::JsOnClick(info);
+    } else {
+#ifndef NG_BUILD
+        if (info[0]->IsFunction()) {
+            auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+            auto impl = inspector ? inspector->GetInspectorFunctionImpl() : nullptr;
+            RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
+            auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl](
+                                 const BaseEventInfo* info) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 LOGD("About to call onclick method on js");
                 const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
@@ -499,35 +303,18 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
                 }
                 ACE_SCORING_EVENT("Text.onClick");
                 func->Execute(newInfo);
-            });
-        auto click = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();
-        if (click) {
-            click->SetOnClickId(onClickId);
+            };
+            TextModel::GetInstance()->SetOnClick(std::move(onClickId));
         }
-        auto component = GetComponent();
-        if (component) {
-            component->SetOnClick(onClickId);
-        }
-
-        auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
-        if (focusableComponent) {
-            focusableComponent->SetOnClickId(onClickId);
-        }
+#endif
     }
 }
 
 void JSText::JsRemoteMessage(const JSCallbackInfo& info)
 {
-    EventMarker remoteMessageEventId;
-    JSInteractableView::JsRemoteMessage(info, remoteMessageEventId);
-    auto click = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();
-    if (click) {
-        click->SetRemoteMessageId(remoteMessageEventId);
-    }
-    auto textComponent = GetComponent();
-    if (textComponent) {
-        textComponent->SetRemoteMessageEvent(remoteMessageEventId);
-    }
+    JSInteractableView::JsCommonRemoteMessage(info);
+    auto callback = JSInteractableView::GetRemoteMessageEventCallback(info);
+    TextModel::GetInstance()->SetRemoteMessage(std::move(callback));
 }
 
 void JSText::Create(const JSCallbackInfo& info)
@@ -537,32 +324,7 @@ void JSText::Create(const JSCallbackInfo& info)
         ParseJsString(info[0], data);
     }
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::TextView::Create(data);
-        return;
-    }
-
-    auto textComponent = AceType::MakeRefPtr<TextComponentV2>(data);
-    ViewStackProcessor::GetInstance()->ClaimElementId(textComponent);
-    ViewStackProcessor::GetInstance()->Push(textComponent);
-    JSInteractableView::SetFocusable(false);
-    JSInteractableView::SetFocusNode(false);
-
-    // Init text style, allowScale is not supported in declarative.
-    auto textStyle = textComponent->GetTextStyle();
-    textStyle.SetAllowScale(false);
-    textStyle.SetFontSize(DEFAULT_FONT_SIZE);
-    textComponent->SetTextStyle(textStyle);
-}
-
-RefPtr<TextComponentV2> JSText::GetComponent()
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    if (!stack) {
-        return nullptr;
-    }
-    auto component = AceType::DynamicCast<TextComponentV2>(stack->GetMainComponent());
-    return component;
+    TextModel::GetInstance()->Create(data);
 }
 
 void JSText::SetCopyOption(const JSCallbackInfo& info)
@@ -570,22 +332,17 @@ void JSText::SetCopyOption(const JSCallbackInfo& info)
     if (info.Length() == 0) {
         return;
     }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
     auto copyOptions = CopyOptions::None;
     if (info[0]->IsNumber()) {
         auto emunNumber = info[0]->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
     }
-    LOGI("copy option: %{public}d", copyOptions);
-    component->SetCopyOption(copyOptions);
+    TextModel::GetInstance()->SetCopyOption(copyOptions);
 }
 
 void JSText::JsOnDragStart(const JSCallbackInfo& info)
 {
+    CHECK_NULL_VOID(info[0]->IsFunction());
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragStartId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> DragItemInfo {
@@ -597,6 +354,7 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
             LOGE("builder param is not an object.");
             return itemInfo;
         }
+#ifndef NG_BUILD
         auto component = ParseDragItemComponent(ret);
         if (component) {
             LOGI("use custom builder param.");
@@ -613,19 +371,16 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
         ParseJsString(extraInfo, itemInfo.extraInfo);
         component = ParseDragItemComponent(builderObj->GetProperty("builder"));
         itemInfo.customComponent = component;
+#endif
         return itemInfo;
     };
 
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-    component->SetOnDragStartId(onDragStartId);
+    TextModel::GetInstance()->SetOnDragStartId(onDragStartId);
 }
 
 void JSText::JsOnDragEnter(const JSCallbackInfo& info)
 {
+    CHECK_NULL_VOID(info[0]->IsFunction());
     RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -633,16 +388,12 @@ void JSText::JsOnDragEnter(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onDragEnter");
         func->Execute(info, extraParams);
     };
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-    component->SetOnDragEnterId(onDragEnterId);
+    TextModel::GetInstance()->SetOnDragEnterId(onDragEnterId);
 }
 
 void JSText::JsOnDragMove(const JSCallbackInfo& info)
 {
+    CHECK_NULL_VOID(info[0]->IsFunction());
     RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -650,16 +401,12 @@ void JSText::JsOnDragMove(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onDragMove");
         func->Execute(info, extraParams);
     };
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-    component->SetOnDragMoveId(onDragMoveId);
+    TextModel::GetInstance()->SetOnDragMoveId(onDragMoveId);
 }
 
 void JSText::JsOnDragLeave(const JSCallbackInfo& info)
 {
+    CHECK_NULL_VOID(info[0]->IsFunction());
     RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -667,16 +414,12 @@ void JSText::JsOnDragLeave(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onDragLeave");
         func->Execute(info, extraParams);
     };
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-    component->SetOnDragLeaveId(onDragLeaveId);
+    TextModel::GetInstance()->SetOnDragLeaveId(onDragLeaveId);
 }
 
 void JSText::JsOnDrop(const JSCallbackInfo& info)
 {
+    CHECK_NULL_VOID(info[0]->IsFunction());
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
                         const RefPtr<DragEvent>& info, const std::string& extraParams) {
@@ -684,12 +427,7 @@ void JSText::JsOnDrop(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onDrop");
         func->Execute(info, extraParams);
     };
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
-        return;
-    }
-    component->SetOnDropId(onDropId);
+    TextModel::GetInstance()->SetOnDropId(onDropId);
 }
 
 void JSText::JsFocusable(const JSCallbackInfo& info)
@@ -700,6 +438,49 @@ void JSText::JsFocusable(const JSCallbackInfo& info)
     }
     JSInteractableView::SetFocusable(info[0]->IsBoolean());
     JSInteractableView::SetFocusNode(false);
+}
+
+void JSText::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSText>::Declare("Text");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSText>::StaticMethod("create", &JSText::Create, opt);
+    JSClass<JSText>::StaticMethod("width", &JSText::SetWidth);
+    JSClass<JSText>::StaticMethod("height", &JSText::SetHeight);
+    JSClass<JSText>::StaticMethod("fontColor", &JSText::SetTextColor, opt);
+    JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
+    JSClass<JSText>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
+    JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
+    JSClass<JSText>::StaticMethod("textOverflow", &JSText::SetTextOverflow, opt);
+    JSClass<JSText>::StaticMethod("fontStyle", &JSText::SetFontStyle, opt);
+    JSClass<JSText>::StaticMethod("align", &JSText::SetAlign, opt);
+    JSClass<JSText>::StaticMethod("textAlign", &JSText::SetTextAlign, opt);
+    JSClass<JSText>::StaticMethod("lineHeight", &JSText::SetLineHeight, opt);
+    JSClass<JSText>::StaticMethod("fontFamily", &JSText::SetFontFamily, opt);
+    JSClass<JSText>::StaticMethod("minFontSize", &JSText::SetMinFontSize, opt);
+    JSClass<JSText>::StaticMethod("maxFontSize", &JSText::SetMaxFontSize, opt);
+    JSClass<JSText>::StaticMethod("letterSpacing", &JSText::SetLetterSpacing, opt);
+    JSClass<JSText>::StaticMethod("textCase", &JSText::SetTextCase, opt);
+    JSClass<JSText>::StaticMethod("baselineOffset", &JSText::SetBaselineOffset, opt);
+    JSClass<JSText>::StaticMethod("decoration", &JSText::SetDecoration);
+    JSClass<JSText>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSText>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSText>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSText>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSText>::StaticMethod("remoteMessage", &JSText::JsRemoteMessage);
+    JSClass<JSText>::StaticMethod("copyOption", &JSText::SetCopyOption);
+    JSClass<JSText>::StaticMethod("onClick", &JSText::JsOnClick);
+    JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
+    JSClass<JSText>::StaticMethod("onDragEnter", &JSText::JsOnDragEnter);
+    JSClass<JSText>::StaticMethod("onDragMove", &JSText::JsOnDragMove);
+    JSClass<JSText>::StaticMethod("onDragLeave", &JSText::JsOnDragLeave);
+    JSClass<JSText>::StaticMethod("onDrop", &JSText::JsOnDrop);
+    JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
+    JSClass<JSText>::Inherit<JSContainerBase>();
+    JSClass<JSText>::Inherit<JSViewAbstract>();
+    JSClass<JSText>::Bind<>(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

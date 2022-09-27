@@ -21,6 +21,7 @@
 #include "core/components/slider/slider_component.h"
 #include "core/components/slider/slider_element.h"
 #include "core/components/slider/slider_theme.h"
+#include "core/components_ng/pattern/slider/slider_view.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
 namespace OHOS::Ace::Framework {
@@ -68,10 +69,10 @@ double GetValue(double value, double max, double min)
 
 void JSSlider::Create(const JSCallbackInfo& info)
 {
-    double value = 0;   // value:Current progress value. The default value is 0.
-    double min = 0;     // min:Set the minimum value. The default value is 0.
-    double max = 100;   // max:Set the maximum value. The default value is 100.
-    double step = 1;    // step:Sets the sliding jump value of the slider. The default value is 1.
+    double value = 0; // value:Current progress value. The default value is 0.
+    double min = 0;   // min:Set the minimum value. The default value is 0.
+    double max = 100; // max:Set the maximum value. The default value is 100.
+    double step = 1;  // step:Sets the sliding jump value of the slider. The default value is 1.
     bool reverse = false;
 
     if (!info[0]->IsObject()) {
@@ -117,31 +118,40 @@ void JSSlider::Create(const JSCallbackInfo& info)
 
     value = GetValue(value, max, min);
 
-    auto sliderComponent = AceType::MakeRefPtr<OHOS::Ace::SliderComponent>(value, step, min, max);
-    ViewStackProcessor::GetInstance()->ClaimElementId(sliderComponent);
-    auto sliderMode = SliderStyle::OUTSET;
+    auto sliderStyle = SliderStyle::OUTSET;
+    auto sliderMode = SliderMode::OUTSET;
     if (!getStyle->IsNull() && getStyle->IsNumber()) {
-        sliderMode = static_cast<SliderStyle>(getStyle->ToNumber<int32_t>());
+        sliderStyle = static_cast<SliderStyle>(getStyle->ToNumber<int32_t>());
     }
-
-    if (sliderMode == SliderStyle::INSET) {
-        sliderComponent->SetSliderMode(SliderMode::INSET);
-    } else if (sliderMode == SliderStyle::CAPSULE) {
-        sliderComponent->SetSliderMode(SliderMode::CAPSULE);
+    if (sliderStyle == SliderStyle::INSET) {
+        sliderMode = SliderMode::INSET;
+    } else if (sliderStyle == SliderStyle::CAPSULE) {
+        sliderMode = SliderMode::CAPSULE;
     } else {
-        sliderComponent->SetSliderMode(SliderMode::OUTSET);
+        sliderMode = SliderMode::OUTSET;
     }
 
     auto sliderDirection = Axis::HORIZONTAL;
     if (!direction->IsNull() && direction->IsNumber()) {
         sliderDirection = static_cast<Axis>(direction->ToNumber<int32_t>());
     }
-    sliderComponent->SetDirection(sliderDirection);
-    if (sliderDirection == Axis::VERTICAL) {
-        sliderComponent->SetDirection(Axis::VERTICAL);
-    } else {
-        sliderComponent->SetDirection(Axis::HORIZONTAL);
+    if (sliderDirection != Axis::VERTICAL) {
+        sliderDirection = Axis::HORIZONTAL;
     }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SliderView::Create(
+            static_cast<float>(value), static_cast<float>(step), static_cast<float>(min), static_cast<float>(max));
+        NG::SliderView::SetSliderMode(sliderMode);
+        NG::SliderView::SetDirection(sliderDirection);
+        NG::SliderView::SetReverse(reverse);
+        return;
+    }
+
+    auto sliderComponent = AceType::MakeRefPtr<OHOS::Ace::SliderComponent>(value, step, min, max);
+    ViewStackProcessor::GetInstance()->ClaimElementId(sliderComponent);
+    sliderComponent->SetSliderMode(sliderMode);
+    sliderComponent->SetDirection(sliderDirection);
 
     auto theme = GetTheme<SliderTheme>();
     if (!theme) {
@@ -167,6 +177,10 @@ void JSSlider::SetThickness(const JSCallbackInfo& info)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SliderView::SetThickness(value);
+        return;
+    }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto slider = AceType::DynamicCast<SliderComponent>(component);
     if (!slider) {
@@ -182,7 +196,15 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
+    Color colorVal;
+    if (!ParseJsColor(info[0], colorVal)) {
+        return;
+    }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SliderView::SetBlockColor(colorVal);
+        return;
+    }
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto slider = AceType::DynamicCast<SliderComponent>(component);
     if (!slider) {
@@ -195,10 +217,7 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
         return;
     }
 
-    Color colorVal;
-    if (ParseJsColor(info[0], colorVal)) {
-        block->SetBlockColor(colorVal);
-    }
+    block->SetBlockColor(colorVal);
 }
 
 void JSSlider::SetTrackColor(const JSCallbackInfo& info)
@@ -207,6 +226,15 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
+    Color colorVal;
+    if (!ParseJsColor(info[0], colorVal)) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SliderView::SetTrackBackgroundColor(colorVal);
+        return;
+    }
 
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto slider = AceType::DynamicCast<SliderComponent>(component);
@@ -220,10 +248,7 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
         return;
     }
 
-    Color colorVal;
-    if (ParseJsColor(info[0], colorVal))  {
-        track->SetBackgroundColor(colorVal);
-    }
+    track->SetBackgroundColor(colorVal);
 }
 
 void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
@@ -232,6 +257,15 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
+    Color colorVal;
+    if (!ParseJsColor(info[0], colorVal)) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SliderView::SetSelectColor(colorVal);
+        return;
+    }
 
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto slider = AceType::DynamicCast<SliderComponent>(component);
@@ -245,10 +279,7 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
         return;
     }
 
-    Color colorVal;
-    if (ParseJsColor(info[0], colorVal))  {
-        track->SetSelectColor(colorVal);
-    }
+    track->SetSelectColor(colorVal);
 }
 
 void JSSlider::SetMinLabel(const JSCallbackInfo& info)
@@ -258,8 +289,12 @@ void JSSlider::SetMinLabel(const JSCallbackInfo& info)
         return;
     }
 
-    if (!info[0]->IsNumber()) {
-        LOGE("arg is not number.");
+    if (!info[0]->IsString()) {
+        LOGE("arg is not string.");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SliderView::SetMinLabel(info[0]->ToNumber<float>());
         return;
     }
 
@@ -269,7 +304,7 @@ void JSSlider::SetMinLabel(const JSCallbackInfo& info)
         LOGE("Slider Component is null");
         return;
     }
-    Slider->SetMinValue(info[0]->ToNumber<double>());
+    Slider->SetMinValue(StringUtils::StringToDouble(info[0]->ToString()));
 }
 
 void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
@@ -279,8 +314,12 @@ void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
         return;
     }
 
-    if (!info[0]->IsNumber()) {
-        LOGE("arg is not number.");
+    if (!info[0]->IsString()) {
+        LOGE("arg is not string.");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SliderView::SetMaxLabel(info[0]->ToNumber<float>());
         return;
     }
 
@@ -290,7 +329,7 @@ void JSSlider::SetMaxLabel(const JSCallbackInfo& info)
         LOGE("Slider Component is null");
         return;
     }
-    Slider->SetMaxValue(info[0]->ToNumber<double>());
+    Slider->SetMaxValue(StringUtils::StringToDouble(info[0]->ToString()));
 }
 
 void JSSlider::SetShowSteps(const JSCallbackInfo& info)
@@ -302,6 +341,10 @@ void JSSlider::SetShowSteps(const JSCallbackInfo& info)
 
     if (!info[0]->IsBoolean()) {
         LOGE("arg is not bool.");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SliderView::SetShowSteps(info[0]->ToBoolean());
         return;
     }
 
@@ -325,6 +368,10 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
         LOGE("arg is not bool.");
         return;
     }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SliderView::SetShowTips(info[0]->ToBoolean());
+        return;
+    }
 
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto Slider = AceType::DynamicCast<SliderComponent>(component);
@@ -337,9 +384,24 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
 
 void JSSlider::OnChange(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGW("Must contain at least 1 argument");
+        return;
+    }
+    if (!info[0]->IsFunction()) {
+        LOGW("Argument is not a function object");
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SliderView::SetOnChange(
+            JsEventCallback<void(float, int32_t)>(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0])));
+        return;
+    }
     if (!JSViewBindEvent(&SliderComponent::SetOnChange, info)) {
         LOGW("Failed to bind event");
+        return;
     }
+
     info.ReturnSelf();
 }
 

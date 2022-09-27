@@ -18,6 +18,7 @@
 #include <list>
 
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
@@ -25,6 +26,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -49,11 +51,12 @@ FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Patter
     eventHub_ = pattern->CreateEventHub();
     // first create make layout property dirty.
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    layoutProperty_->SetHost(WeakClaim(this));
 }
 
 FrameNode::~FrameNode()
 {
-    pattern_->DetachFromFrameNode();
+    pattern_->DetachFromFrameNode(this);
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -117,6 +120,7 @@ void FrameNode::InitializePatternAndContext()
         }
         frameNode->hasPendingRequest_ = true;
     });
+    renderContext_->SetHostNode(WeakClaim(this));
 }
 
 void FrameNode::DumpInfo()
@@ -132,6 +136,7 @@ void FrameNode::DumpInfo()
 void FrameNode::OnAttachToMainTree()
 {
     UINode::OnAttachToMainTree();
+    eventHub_->FireOnAppear();
     if (!hasPendingRequest_) {
         return;
     }
@@ -139,6 +144,22 @@ void FrameNode::OnAttachToMainTree()
     CHECK_NULL_VOID(context);
     context->RequestFrame();
     hasPendingRequest_ = false;
+
+    if (IsResponseRegion()) {
+        auto parent = GetParent();
+        while (parent) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+            if (frameNode) {
+                frameNode->MarkResponseRegion(true);
+            }
+            parent = parent->GetParent();
+        }
+    }
+}
+
+void FrameNode::OnDetachFromMainTree()
+{
+    eventHub_->FireOnDisappear();
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -175,10 +196,19 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     bool frameOffsetChange = geometryNode_->GetFrameOffset() != dirty->GetGeometryNode()->GetFrameOffset();
     bool contentSizeChange = geometryNode_->GetContentSize() != dirty->GetGeometryNode()->GetContentSize();
     bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
+    bool parentOriginChange =
+        geometryNode_->GetParentGlobalOffset() != dirty->GetGeometryNode()->GetParentGlobalOffset();
+    // fire OnAreaChanged event.
+    if (eventHub_->HasOnAreaChanged() && (frameSizeChange || frameOffsetChange || parentOriginChange)) {
+        eventHub_->FireOnAreaChanged(geometryNode_->GetFrameRect(), geometryNode_->GetParentGlobalOffset(),
+            dirty->GetGeometryNode()->GetFrameRect(), dirty->GetGeometryNode()->GetParentGlobalOffset());
+    }
+
+    SetGeometryNode(dirty->GetGeometryNode());
     if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
         renderContext_->SyncGeometryProperties(RawPtr(dirty->GetGeometryNode()));
     }
-    SetGeometryNode(dirty->GetGeometryNode());
+
     // clean layout flag.
     layoutProperty_->CleanDirty();
     DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
@@ -196,6 +226,20 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
     // update border.
     if (layoutProperty_->GetBorderWidthProperty()) {
+        if (!renderContext_->HasBorderColor()) {
+            renderContext_->UpdateBorderColor(
+                BorderColorProperty { renderContext_->GetBorderColor()->leftColor.value_or(Color::BLACK),
+                    renderContext_->GetBorderColor()->topColor.value_or(Color::BLACK),
+                    renderContext_->GetBorderColor()->rightColor.value_or(Color::BLACK),
+                    renderContext_->GetBorderColor()->bottomColor.value_or(Color::BLACK) });
+        }
+        if (!renderContext_->HasBorderStyle()) {
+            renderContext_->UpdateBorderStyle(
+                BorderStyleProperty { renderContext_->GetBorderStyle()->styleLeft.value_or(BorderStyle::SOLID),
+                    renderContext_->GetBorderStyle()->styleTop.value_or(BorderStyle::SOLID),
+                    renderContext_->GetBorderStyle()->styleRight.value_or(BorderStyle::SOLID),
+                    renderContext_->GetBorderStyle()->styleBottom.value_or(BorderStyle::SOLID) });
+        }
         if (layoutProperty_->GetLayoutConstraint().has_value()) {
             renderContext_->UpdateBorderWidth(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
                 ScaleProperty::CreateScaleProperty(),
@@ -276,15 +320,15 @@ LayoutConstraintF FrameNode::GetLayoutConstraint() const
     if (geometryNode_->GetParentLayoutConstraint().has_value()) {
         return geometryNode_->GetParentLayoutConstraint().value();
     }
-    LayoutConstraintF LayoutConstraint;
-    LayoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
     auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
-    LayoutConstraint.percentReference.SetWidth(rootWidth);
-    LayoutConstraint.percentReference.SetHeight(rootHeight);
-    LayoutConstraint.maxSize.SetHeight(rootWidth);
-    LayoutConstraint.maxSize.SetHeight(rootHeight);
-    return LayoutConstraint;
+    layoutConstraint.percentReference.SetWidth(rootWidth);
+    layoutConstraint.percentReference.SetHeight(rootHeight);
+    layoutConstraint.maxSize.SetHeight(rootWidth);
+    layoutConstraint.maxSize.SetHeight(rootHeight);
+    return layoutConstraint;
 }
 
 OffsetF FrameNode::GetParentGlobalOffset() const
@@ -319,10 +363,19 @@ void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
+    if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
+        auto layoutWrapper =
+            MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
+        layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
+        return layoutWrapper;
+    }
+
     pattern_->BeforeCreateLayoutWrapper();
     isLayoutDirtyMarked_ = false;
     auto flag = layoutProperty_->GetPropertyChangeFlag();
     auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+    LOGD("%{public}s create layout wrapper: %{public}x, %{public}d, %{public}d", GetTag().c_str(), flag, forceMeasure,
+        forceLayout);
     do {
         if (CheckNeedMeasure(flag) || forceMeasure) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
@@ -391,6 +444,22 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
+    if (IsResponseRegion()) {
+        auto parent = GetParent();
+        while (parent) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+            if (frameNode) {
+                frameNode->MarkResponseRegion(true);
+            }
+            parent = parent->GetParent();
+        }
+    }
+    renderContext_->OnModifyDone();
+}
+
+void FrameNode::OnMountToParentDone()
+{
+    pattern_->OnMountToParentDone();
 }
 
 void FrameNode::FlushUpdateAndMarkDirty()
@@ -461,7 +530,7 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
 
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
 {
-    if (isActive_) {
+    if (isActive_ && IsVisible()) {
         visibleList.emplace_back(Claim(this));
     }
 }
@@ -489,16 +558,40 @@ bool FrameNode::IsAtomicNode() const
 HitTestMode FrameNode::GetHitTestMode() const
 {
     auto gestureHub = eventHub_->GetGestureEventHub();
-    return gestureHub ? gestureHub->GetHitTestMode() : HitTestMode::DEFAULT;
+    return gestureHub ? gestureHub->GetHitTestMode() : HitTestMode::HTMDEFAULT;
+}
+
+bool FrameNode::GetTouchable() const
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    return gestureHub ? gestureHub->GetTouchable() : true;
+}
+
+bool FrameNode::IsResponseRegion() const
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    return gestureHub ? gestureHub->IsResponseRegion() : true;
+}
+
+void FrameNode::MarkResponseRegion(bool isResponseRegion)
+{
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    if (gestureHub) {
+        gestureHub->MarkResponseRegion(isResponseRegion);
+    }
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
     const auto& rect = geometryNode_->GetFrame().GetRect();
-    LOGI("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
+    LOGD("TouchTest: type is %{public}s, the region is %{public}s", GetTag().c_str(), rect.ToString().c_str());
 
-    if (!rect.IsInRegion(parentLocalPoint)) {
+    if ((!rect.IsInRegion(parentLocalPoint) || !GetTouchable()) && !IsResponseRegion()) {
+        return HitTestResult::OUT_OF_REGION;
+    }
+
+    if (IsResponseRegion() && !InResponseRegionList(parentLocalPoint, GetResponseRegionList())) {
         return HitTestResult::OUT_OF_REGION;
     }
 
@@ -512,19 +605,27 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     // TODO: add hit test mode.
     const auto& children = GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
+            break;
+        }
+
         const auto& child = *iter;
         auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
-            break;
+            if (child->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
+                break;
+            }
         }
+
         // In normal process, the node block the brother node.
-        if (childHitResult == HitTestResult::BUBBLING) {
+        if (childHitResult == HitTestResult::BUBBLING && child->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
             // TODO: add hit test mode judge.
             break;
         }
     }
-    if (!preventBubbling) {
+
+    if (!preventBubbling && GetHitTestMode() != HitTestMode::HTMNONE) {
         auto gestureHub = eventHub_->GetGestureEventHub();
         if (gestureHub) {
             TouchTestResult finalResult;
@@ -535,10 +636,48 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
     }
     result.splice(result.end(), std::move(newComingTargets));
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    if (gestureHub) {
+        gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result);
+    }
+
     if (preventBubbling) {
         return HitTestResult::STOP_BUBBLING;
     }
     return HitTestResult::BUBBLING;
+}
+
+std::vector<RectF> FrameNode::GetResponseRegionList()
+{
+    const auto& rect = geometryNode_->GetFrame().GetRect();
+    std::vector<RectF> responseRegionList;
+    auto gestureHub = eventHub_->GetGestureEventHub();
+    if (!gestureHub) {
+        responseRegionList.emplace_back(rect);
+        return responseRegionList;
+    }
+
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    for (auto& region : gestureHub->GetResponseRegion()) {
+        auto x = ConvertToPx(region.GetOffset().GetX(), scaleProperty, rect.Width());
+        auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
+        auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
+        auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
+        RectF responseRegion(rect.GetOffset().GetX() + x.value(),
+            rect.GetOffset().GetY() + y.value(), width.value(), height.value());
+        responseRegionList.emplace_back(responseRegion);
+    }
+    return responseRegionList;
+}
+
+bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const
+{
+    for (auto& rect : responseRegionList) {
+        if (rect.IsInRegion(parentLocalPoint)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -573,7 +712,7 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
 
     MouseTestResult mouseResult;
     MouseTestResult hoverResult;
-    bool isPrevent = true;
+    bool isPrevent = false;
     auto mouseHub = eventHub_->GetInputEventHub();
     if (mouseHub) {
         const auto coordinateOffset = globalPoint - localPoint;
@@ -584,6 +723,54 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
     if (!preventBubbling) {
         preventBubbling = isPrevent;
         onMouseResult.splice(onMouseResult.end(), std::move(mouseResult));
+    }
+    if (preventBubbling) {
+        return HitTestResult::STOP_BUBBLING;
+    }
+    return HitTestResult::BUBBLING;
+}
+
+HitTestResult FrameNode::AxisTest(
+    const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
+{
+    const auto& rect = geometryNode_->GetFrame().GetRect();
+    LOGD("AxisTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
+        GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    // TODO: disableTouchEvent || disabled_ need handle
+
+    // TODO: Region need change to RectList
+    if (!rect.IsInRegion(parentLocalPoint)) {
+        return HitTestResult::OUT_OF_REGION;
+    }
+
+    bool preventBubbling = false;
+
+    const auto localPoint = parentLocalPoint - geometryNode_->GetFrameOffset();
+    const auto& children = GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        auto childHitResult = child->AxisTest(globalPoint, localPoint, onAxisResult);
+        if (childHitResult == HitTestResult::STOP_BUBBLING) {
+            preventBubbling = true;
+        }
+        // In normal process, the node block the brother node.
+        if (childHitResult == HitTestResult::BUBBLING) {
+            // TODO: add hit test mode judge.
+            break;
+        }
+    }
+
+    AxisTestResult axisResult;
+    bool isPrevent = false;
+    auto inputHub = eventHub_->GetInputEventHub();
+    if (inputHub) {
+        const auto coordinateOffset = globalPoint - localPoint;
+        isPrevent = inputHub->ProcessAxisTestHit(coordinateOffset, axisResult);
+    }
+
+    if (!preventBubbling) {
+        preventBubbling = isPrevent;
+        onAxisResult.splice(onAxisResult.end(), std::move(axisResult));
     }
     if (preventBubbling) {
         return HitTestResult::STOP_BUBBLING;

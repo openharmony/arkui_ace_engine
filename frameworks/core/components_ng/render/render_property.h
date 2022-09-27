@@ -16,14 +16,28 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_PROPERTY_H
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/shadow.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/gradient_property.h"
+#include "core/image/image_source_info.h"
+
+namespace OHOS::Ace {
+enum class BlurStyle;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 
 struct BackgroundProperty {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImage, ImageSourceInfo);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageRepeat, ImageRepeat);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageSize, BackgroundImageSize);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImagePosition, BackgroundImagePosition);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundBlurStyle, BlurStyle);
 };
 
 struct BorderProperty {
@@ -34,10 +48,23 @@ struct BorderProperty {
 
 struct TransformProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformScale, VectorF);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, VectorF);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformTranslate, Vector3F);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector3F);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformAngle, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector4F);
+};
+
+struct DecorationProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurRadius, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BlurStyle, BlurStyle);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FrontBlurRadius, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LinearGradient, NG::Gradient);
+};
+
+struct RenderPositionProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Position, OffsetT<Dimension>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Offset, OffsetT<Dimension>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Anchor, OffsetT<Dimension>);
 };
 
 } // namespace OHOS::Ace::NG

@@ -34,6 +34,6 @@ ohos_shared_library("ace_uicontent") {
   ]
   external_deps = [ "multimedia_image_standard:image" ]
 
-  subsystem_name = "arkui"
+  subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }

@@ -54,8 +54,7 @@ void TextFieldController::Delete()
 void TextFieldController::CaretPosition(int32_t caretPosition)
 {
     if (caretPosition < 0) {
-        LOGW("Input caretPosition is not valid.");
-        return;
+        caretPosition = 0;
     }
 
     if (setCaretPosition_) {

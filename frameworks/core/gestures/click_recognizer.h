@@ -20,19 +20,10 @@
 
 #include "base/thread/cancelable_callback.h"
 #include "core/gestures/multi_fingers_recognizer.h"
+#include "core/gestures/gesture_info.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
-
-class ClickInfo : public BaseEventInfo, public TouchLocationInfo {
-    DECLARE_RELATIONSHIP_OF_CLASSES(ClickInfo, BaseEventInfo, TouchLocationInfo);
-
-public:
-    explicit ClickInfo(int32_t fingerId) : BaseEventInfo("onClick"), TouchLocationInfo(fingerId) {}
-    ~ClickInfo() override = default;
-};
-
-using ClickCallback = std::function<void(const ClickInfo&)>;
 
 class ClickRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(ClickRecognizer, MultiFingersRecognizer);

@@ -600,6 +600,16 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionEndId_;
     std::unique_ptr<GestureEventNoParameter> onActionCancelId_;
 };
+
+class ClickInfo : public BaseEventInfo, public TouchLocationInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(ClickInfo, BaseEventInfo, TouchLocationInfo);
+
+public:
+    explicit ClickInfo(int32_t fingerId) : BaseEventInfo("onClick"), TouchLocationInfo(fingerId) {}
+    ~ClickInfo() override = default;
+};
+using ClickCallback = std::function<void(const ClickInfo&)>;
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_GESTURES_GESTURE_INFO_H

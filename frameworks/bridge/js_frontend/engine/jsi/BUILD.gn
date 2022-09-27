@@ -33,7 +33,11 @@ es2abc_gen_abc("gen_strip_native_min_abc") {
 
 gen_obj("abc_strip_native_min") {
   input = base_output_path + "/strip.native.min.abc"
-  abcstripnativemin_obj_path = base_output_path + "/strip_native_min.c"
+  if (use_mac || use_mingw_win || use_ios || use_linux) {
+    abcstripnativemin_obj_path = base_output_path + "/strip_native_min.c"
+  } else {
+    abcstripnativemin_obj_path = base_output_path + "/strip_native_min.o"
+  }
   output = abcstripnativemin_obj_path
   snapshot_dep = [ ":gen_strip_native_min_abc" ]
 }
@@ -42,6 +46,7 @@ template("js_engine_ark") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
 
@@ -88,6 +93,11 @@ template("js_engine_ark") {
       deps += [
         ":gen_obj_src_abc_strip_native_min",
         "//foundation/arkui/napi/native_engine/impl/ark:ace_napi_impl_ark",
+      ]
+    } else if (defined(config.build_for_android) && config.build_for_android) {
+      deps += [
+        ":gen_obj_src_abc_strip_native_min",
+        "//third_party/jsframework:ark_build",
       ]
     } else {
       sources += [ "jsi_utils.cpp" ]

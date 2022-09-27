@@ -72,8 +72,9 @@ void TabBarComponent::InitStyle(const RefPtr<TabTheme>& theme)
 
     auto indicatorPadding = Edge(0.0, theme->GetActiveIndicatorPadding().Value(), 0.0,
         theme->GetActiveIndicatorPadding().Value(), theme->GetActiveIndicatorPadding().Unit());
+    Color activeIndicatorColor = HasIndicatorColor() ? GetIndicatorColor() : theme->GetActiveIndicatorColor();
     indicator_ = AceType::MakeRefPtr<TabBarIndicatorComponent>(
-        indicatorPadding, theme->GetActiveIndicatorColor(), theme->GetActiveIndicatorWidth());
+        indicatorPadding, activeIndicatorColor, theme->GetActiveIndicatorWidth());
     indicator_->SetPadding(indicatorPadding);
 
     auto deviceType = SystemProperties::GetDeviceType();

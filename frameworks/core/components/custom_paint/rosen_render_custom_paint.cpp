@@ -208,10 +208,16 @@ bool RosenRenderCustomPaint::CreateSurface(double viewScale)
         LOGE("surface_ is nullptr");
         return false;
     }
-    skCanvas_ = surface_->getCanvas();
+    skCanvas_ = std::unique_ptr<SkCanvas>(surface_->getCanvas());
     lastLayoutSize_ = GetLayoutSize();
     skCanvas_->drawColor(0x0);
 
+    auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale,
+        SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
+    cacheBitmap_.reset();
+    cacheBitmap_.allocPixels(imageInfo);
+    cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
+    cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
     return true;
 #else
     return false;
@@ -223,10 +229,13 @@ void RosenRenderCustomPaint::CreateBitmap(double viewScale)
     auto imageInfo = SkImageInfo::Make(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale,
         SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
     canvasCache_.reset();
+    cacheBitmap_.reset();
     canvasCache_.allocPixels(imageInfo);
+    cacheBitmap_.allocPixels(imageInfo);
     canvasCache_.eraseColor(SK_ColorTRANSPARENT);
-    bitmapCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
-    skCanvas_ = bitmapCanvas_.get();
+    cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
+    skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
+    cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
 }
 
 void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
@@ -415,7 +424,6 @@ void RosenRenderCustomPaint::FillRect(const Offset& offset, const Rect& rect)
 {
     SkPaint paint;
     paint.setAntiAlias(antiAlias_);
-    InitPaintBlend(paint);
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
     SkRect skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
@@ -423,7 +431,7 @@ void RosenRenderCustomPaint::FillRect(const Offset& offset, const Rect& rect)
     if (HasShadow()) {
         SkPath path;
         path.addRect(skRect);
-        RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas_);
+        RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas_.get());
     }
     if (fillState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
@@ -434,20 +442,26 @@ void RosenRenderCustomPaint::FillRect(const Offset& offset, const Rect& rect)
     if (globalState_.HasGlobalAlpha()) {
         paint.setAlphaf(globalState_.GetAlpha()); // update the global alpha after setting the color
     }
-    skCanvas_->drawRect(skRect, paint);
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawRect(skRect, paint);
+    } else {
+        InitPaintBlend(cachePaint_);
+        cacheCanvas_->drawRect(skRect, paint);
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
 }
 
 void RosenRenderCustomPaint::StrokeRect(const Offset& offset, const Rect& rect)
 {
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
-    InitPaintBlend(paint);
     SkRect skRect = SkRect::MakeLTRB(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
         rect.Right() + offset.GetX(), offset.GetY() + rect.Bottom());
     if (HasShadow()) {
         SkPath path;
         path.addRect(skRect);
-        RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas_);
+        RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas_.get());
     }
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
@@ -455,7 +469,14 @@ void RosenRenderCustomPaint::StrokeRect(const Offset& offset, const Rect& rect)
     if (strokeState_.GetPattern().IsValid()) {
         UpdatePaintShader(strokeState_.GetPattern(), paint);
     }
-    skCanvas_->drawRect(skRect, paint);
+        if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawRect(skRect, paint);
+    } else {
+        InitPaintBlend(cachePaint_);
+        cacheCanvas_->drawRect(skRect, paint);
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
 }
 
 void RosenRenderCustomPaint::ClearRect(const Offset& offset, const Rect& rect)
@@ -583,12 +604,12 @@ void RosenRenderCustomPaint::PaintText(const Offset& offset, double x, double y,
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
         auto shadowOffsetY = shadow_.GetOffset().GetY();
-        paragraph_->Paint(skCanvas_, dx + shadowOffsetX, dy + shadowOffsetY);
+        paragraph_->Paint(skCanvas_.get(), dx + shadowOffsetX, dy + shadowOffsetY);
         skCanvas_->restore();
         return;
     }
 
-    paragraph_->Paint(skCanvas_, dx, dy);
+    paragraph_->Paint(skCanvas_.get(), dx, dy);
 }
 
 double RosenRenderCustomPaint::GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
@@ -840,9 +861,8 @@ void RosenRenderCustomPaint::Fill(const Offset& offset)
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
-    InitPaintBlend(paint);
     if (HasShadow()) {
-        RosenDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_);
+        RosenDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
     }
     if (fillState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
@@ -853,7 +873,14 @@ void RosenRenderCustomPaint::Fill(const Offset& offset)
     if (globalState_.HasGlobalAlpha()) {
         paint.setAlphaf(globalState_.GetAlpha());
     }
-    skCanvas_->drawPath(skPath_, paint);
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawPath(skPath_, paint);
+    } else {
+        InitPaintBlend(cachePaint_);
+        cacheCanvas_->drawPath(skPath_, paint);
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
 }
 
 void RosenRenderCustomPaint::Fill(const Offset& offset, const RefPtr<CanvasPath2D>& path)
@@ -871,9 +898,8 @@ void RosenRenderCustomPaint::Stroke(const Offset& offset)
 {
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
-    InitPaintBlend(paint);
     if (HasShadow()) {
-        RosenDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_);
+        RosenDecorationPainter::PaintShadow(skPath_, shadow_, skCanvas_.get());
     }
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
@@ -881,7 +907,14 @@ void RosenRenderCustomPaint::Stroke(const Offset& offset)
     if (strokeState_.GetPattern().IsValid()) {
         UpdatePaintShader(strokeState_.GetPattern(), paint);
     }
-    skCanvas_->drawPath(skPath_, paint);
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawPath(skPath_, paint);
+    } else {
+        InitPaintBlend(cachePaint_);
+        cacheCanvas_->drawPath(skPath_, paint);
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
 }
 
 void RosenRenderCustomPaint::Stroke(const Offset& offset, const RefPtr<CanvasPath2D>& path)
@@ -1050,9 +1083,8 @@ void RosenRenderCustomPaint::Path2DStroke(const Offset& offset)
 {
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
-    InitPaintBlend(paint);
     if (HasShadow()) {
-        RosenDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_);
+        RosenDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
     }
     if (strokeState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, strokeState_.GetGradient());
@@ -1060,7 +1092,14 @@ void RosenRenderCustomPaint::Path2DStroke(const Offset& offset)
     if (strokeState_.GetPattern().IsValid()) {
         UpdatePaintShader(strokeState_.GetPattern(), paint);
     }
-    skCanvas_->drawPath(skPath2d_, paint);
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawPath(skPath2d_, paint);
+    } else {
+        InitPaintBlend(cachePaint_);
+        cacheCanvas_->drawPath(skPath2d_, paint);
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
 }
 
 void RosenRenderCustomPaint::Path2DFill(const Offset& offset)
@@ -1069,9 +1108,8 @@ void RosenRenderCustomPaint::Path2DFill(const Offset& offset)
     paint.setAntiAlias(antiAlias_);
     paint.setColor(fillState_.GetColor().GetValue());
     paint.setStyle(SkPaint::Style::kFill_Style);
-    InitPaintBlend(paint);
     if (HasShadow()) {
-        RosenDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_);
+        RosenDecorationPainter::PaintShadow(skPath2d_, shadow_, skCanvas_.get());
     }
     if (fillState_.GetGradient().IsValid()) {
         UpdatePaintShader(offset, paint, fillState_.GetGradient());
@@ -1082,12 +1120,36 @@ void RosenRenderCustomPaint::Path2DFill(const Offset& offset)
     if (globalState_.HasGlobalAlpha()) {
         paint.setAlphaf(globalState_.GetAlpha());
     }
-    skCanvas_->drawPath(skPath2d_, paint);
+    if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
+        skCanvas_->drawPath(skPath2d_, paint);
+    } else {
+        InitPaintBlend(cachePaint_);
+        cacheCanvas_->drawPath(skPath2d_, paint);
+        skCanvas_->drawBitmap(cacheBitmap_, 0, 0, &cachePaint_);
+        cacheBitmap_.eraseColor(0);
+    }
+}
+
+void RosenRenderCustomPaint::Path2DClip()
+{
+    skCanvas_->clipPath(skPath2d_);
 }
 
 void RosenRenderCustomPaint::Clip()
 {
     skCanvas_->clipPath(skPath_);
+}
+
+void RosenRenderCustomPaint::Clip(const RefPtr<CanvasPath2D>& path)
+{
+    if (path == nullptr) {
+        LOGE("Fill failed, target path is null.");
+        return;
+    }
+    auto offset = Offset(0, 0);
+    ParsePath2D(offset, path);
+    Path2DClip();
+    skPath2d_.reset();
 }
 
 void RosenRenderCustomPaint::BeginPath()
@@ -1359,7 +1421,7 @@ void RosenRenderCustomPaint::ImageObjFailed()
 
 void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImage& canvasImage)
 {
-    const auto skCanvas = skCanvas_;
+    const auto skCanvas = skCanvas_.get();
     // Make the ImageSourceInfo
     canvasImage_ = canvasImage;
     loadingSource_ = ImageSourceInfo(canvasImage.src);

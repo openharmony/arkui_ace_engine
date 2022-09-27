@@ -23,6 +23,7 @@
 #include "data_ability_predicates.h"
 #include "form_provider_info.h"
 #include "iremote_object.h"
+#include "napi_remote_object.h"
 #include "pac_map.h"
 #include "values_bucket.h"
 #include "want.h"
@@ -57,22 +58,27 @@ public:
 
     virtual void DestroyApplication(const std::string& packageName) = 0;
 
-    virtual int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value) = 0;
-    virtual std::shared_ptr<AppExecFwk::PacMap> Call(const std::string& method,
-        const std::string& arg, const AppExecFwk::PacMap& pacMap) = 0;
+    virtual int32_t Insert(
+        const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value, const CallingInfo& callingInfo) = 0;
+    virtual std::shared_ptr<AppExecFwk::PacMap> Call(const std::string& method, const std::string& arg,
+        const AppExecFwk::PacMap& pacMap, const CallingInfo& callingInfo) = 0;
     virtual std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> Query(const Uri& uri,
-        const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates) = 0;
+        const std::vector<std::string>& columns, const OHOS::NativeRdb::DataAbilityPredicates& predicates,
+        const CallingInfo& callingInfo) = 0;
     virtual int32_t Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value,
-        const OHOS::NativeRdb::DataAbilityPredicates& predicates) = 0;
-    virtual int32_t Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates) = 0;
+        const OHOS::NativeRdb::DataAbilityPredicates& predicates, const CallingInfo& callingInfo) = 0;
+    virtual int32_t Delete(
+        const Uri& uri, const OHOS::NativeRdb::DataAbilityPredicates& predicates, const CallingInfo& callingInfo) = 0;
 
-    virtual int32_t BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values) = 0;
-    virtual std::string GetType(const Uri& uri) = 0;
-    virtual std::vector<std::string> GetFileTypes(const Uri& uri, const std::string& mimeTypeFilter) = 0;
-    virtual int32_t OpenFile(const Uri& uri, const std::string& mode) = 0;
-    virtual int32_t OpenRawFile(const Uri& uri, const std::string& mode) = 0;
-    virtual Uri NormalizeUri(const Uri& uri) = 0;
-    virtual Uri DenormalizeUri(const Uri& uri) = 0;
+    virtual int32_t BatchInsert(
+        const Uri& uri, const std::vector<OHOS::NativeRdb::ValuesBucket>& values, const CallingInfo& callingInfo) = 0;
+    virtual std::string GetType(const Uri& uri, const CallingInfo& callingInfo) = 0;
+    virtual std::vector<std::string> GetFileTypes(
+        const Uri& uri, const std::string& mimeTypeFilter, const CallingInfo& callingInfo) = 0;
+    virtual int32_t OpenFile(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo) = 0;
+    virtual int32_t OpenRawFile(const Uri& uri, const std::string& mode, const CallingInfo& callingInfo) = 0;
+    virtual Uri NormalizeUri(const Uri& uri, const CallingInfo& callingInfo) = 0;
+    virtual Uri DenormalizeUri(const Uri& uri, const CallingInfo& callingInfo) = 0;
     virtual sptr<IRemoteObject> OnConnectService(const OHOS::AAFwk::Want& want) = 0;
     virtual void OnDisconnectService(const OHOS::AAFwk::Want& want) = 0;
     virtual void OnCreate(const OHOS::AAFwk::Want& want) = 0;
@@ -81,12 +87,12 @@ public:
     virtual void OnUpdate(const int64_t formId) = 0;
     virtual void OnCastTemptoNormal(const int64_t formId) = 0;
     virtual void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) = 0;
-    virtual int32_t OnAcquireFormState(const OHOS::AAFwk::Want &want) = 0;
-    virtual void OnCommand(const OHOS::AAFwk::Want &want, int startId) = 0;
-    virtual bool OnShare(int64_t formId, OHOS::AAFwk::WantParams &wantParams) = 0;
+    virtual int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want) = 0;
+    virtual void OnCommand(const OHOS::AAFwk::Want& want, int startId) = 0;
+    virtual bool OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams) = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) = 0;
 
-    void SetFormData(const AppExecFwk::FormProviderData &formProviderData)
+    void SetFormData(const AppExecFwk::FormProviderData& formProviderData)
     {
         formProviderData_ = formProviderData;
     }

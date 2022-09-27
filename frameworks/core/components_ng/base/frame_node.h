@@ -25,9 +25,11 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -91,6 +93,8 @@ public:
         MarkDirtyNode(extraFlag);
     }
 
+    void OnMountToParentDone();
+
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
     RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
@@ -148,6 +152,26 @@ public:
         return eventHub_->GetOrCreateInputEventHub();
     }
 
+    RefPtr<FocusHub> GetOrCreateFocusHub() const
+    {
+        return eventHub_->GetOrCreateFocusHub();
+    }
+
+    RefPtr<FocusHub> GetFocusHub() const
+    {
+        return eventHub_->GetFocusHub();
+    }
+
+    FocusType GetFocusType() const
+    {
+        FocusType type = FocusType::DISABLE;
+        auto focusHub = GetFocusHub();
+        if (focusHub) {
+            type = focusHub->GetFocusType();
+        }
+        return type;
+    }
+
     const RefPtr<LayoutProperty>& GetLayoutProperty() const
     {
         return layoutProperty_;
@@ -161,6 +185,9 @@ public:
 
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
+
+    HitTestResult AxisTest(
+        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
 
     void AnimateHoverEffect(bool isHovered) const
     {
@@ -188,9 +215,29 @@ public:
 
     void RebuildRenderContextTree() override;
 
-private:
+    bool IsVisible() const
+    {
+        return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
+    void OnInspectorIdUpdate(const std::string& /*unused*/) {}
+
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
 
+    std::string& GetNodeName()
+    {
+        return nodeName_;
+    }
+
+    void SetNodeName(std::string& nodeName)
+    {
+        nodeName_ = nodeName;
+    }
+    bool IsResponseRegion() const;
+    void MarkResponseRegion(bool isResponseRegion);
+
+private:
     void UpdateLayoutPropertyFlag() override;
     void AdjustParentLayoutFlag(PropertyChangeFlag& flag) override;
 
@@ -207,13 +254,16 @@ private:
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
 
-    void OnDetachFromMainTree() override {}
+    void OnDetachFromMainTree() override;
     void OnAttachToMainTree() override;
 
     // dump self info.
     void DumpInfo() override;
 
-    HitTestMode GetHitTestMode() const;
+    HitTestMode GetHitTestMode() const override;
+    bool GetTouchable() const;
+    std::vector<RectF> GetResponseRegionList();
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
@@ -231,6 +281,9 @@ private:
     bool hasPendingRequest_ = false;
 
     bool isActive_ = false;
+    bool isResponseRegion_ = false;
+
+    std::string nodeName_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

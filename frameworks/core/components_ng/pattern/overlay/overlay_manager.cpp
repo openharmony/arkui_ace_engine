@@ -95,4 +95,34 @@ void OverlayManager::PopToast(int32_t toastId)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popup)
+{
+    popupMap_[targetId] = popup;
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    if (!popup.markNeedUpdate || !popup.popupNode) {
+        return;
+    }
+    popupMap_[targetId].markNeedUpdate = false;
+    auto rootChildren = rootNode->GetChildren();
+    auto iter = std::find(rootChildren.begin(), rootChildren.end(), popup.popupNode);
+    if (iter != rootChildren.end()) {
+        // Pop popup
+        if (!popup.isCurrentOnShow) {
+            return;
+        }
+        LOGI("begin pop");
+        rootNode->RemoveChild(popup.popupNode);
+    } else {
+        // Push popup
+        if (popup.isCurrentOnShow) {
+            return;
+        }
+        LOGE("begin push");
+        popupMap_[targetId].popupNode->MountToParent(rootNode);
+    }
+    popupMap_[targetId].isCurrentOnShow = !popup.isCurrentOnShow;
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 } // namespace OHOS::Ace::NG

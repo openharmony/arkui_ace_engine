@@ -47,7 +47,7 @@ public:
         subContainer_ = container;
     }
 
-    RefPtr<PipelineContext> GetSubPipelineContext() override
+    RefPtr<PipelineBase> GetSubPipelineContext() override
     {
         auto context = subContainer_.Upgrade();
         if (context) {

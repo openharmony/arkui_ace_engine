@@ -72,6 +72,7 @@ public:
     void Stroke(const Offset& offset) override;
     void Stroke(const Offset& offset, const RefPtr<CanvasPath2D>& path) override;
     void Clip() override;
+    void Clip(const RefPtr<CanvasPath2D>& path) override;
     void BeginPath() override;
     void ClosePath() override;
     void Restore() override;
@@ -125,6 +126,7 @@ private:
     void Path2DClosePath(const Offset& offset, const PathArgs& args);
     void Path2DStroke(const Offset& offset);
     void Path2DFill(const Offset& offset);
+    void Path2DClip();
     void ParsePath2D(const Offset& offset, const RefPtr<CanvasPath2D>& path);
     void InitImageCallbacks();
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
@@ -140,10 +142,12 @@ private:
     // Specifically refers to the class Path2D in canvas.d.ts
     SkPath skPath2d_;
     SkPaint imagePaint_;
+    SkPaint cachePaint_;
+    SkBitmap cacheBitmap_;
     SkBitmap canvasCache_;
     SkBitmap webglBitmap_;
-    std::unique_ptr<SkCanvas> bitmapCanvas_;
-    SkCanvas* skCanvas_;
+    std::unique_ptr<SkCanvas> skCanvas_;
+    std::unique_ptr<SkCanvas> cacheCanvas_;
 #ifdef CANVAS_USE_GPU
     void InitializeEglContext();
 

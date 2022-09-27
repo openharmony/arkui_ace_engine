@@ -59,6 +59,9 @@ public:
 
     void SetHoverAnimation(HoverEffectType type)
     {
+        if (!mouseEventActuator_) {
+            mouseEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        }
         hoverEffectType_ = type;
     }
     HoverEffectType GetHoverEffect()
@@ -91,9 +94,27 @@ public:
         hoverEventActuator_->RemoveInputEvent(onHoverEvent);
     }
 
+    void AddOnAxisEvent(const RefPtr<InputEvent>& onAxisEvent)
+    {
+        if (!axisEventActuator_) {
+            axisEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        }
+        axisEventActuator_->AddInputEvent(onAxisEvent);
+    }
+
+    void RemoveOnAxisEvent(const RefPtr<InputEvent>& onAxisEvent)
+    {
+        if (!axisEventActuator_) {
+            return;
+        }
+        axisEventActuator_->RemoveInputEvent(onAxisEvent);
+    }
+
     // the return value means prevents event bubbling.
     bool ProcessMouseTestHit(const OffsetF& coordinateOffset, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode);
+
+    bool ProcessAxisTestHit(const OffsetF& coordinateOffset, AxisTestResult& onAxisResult);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -103,6 +124,7 @@ private:
     WeakPtr<EventHub> eventHub_;
     RefPtr<InputEventActuator> mouseEventActuator_;
     RefPtr<InputEventActuator> hoverEventActuator_;
+    RefPtr<InputEventActuator> axisEventActuator_;
     HoverEffectType hoverEffectType_ = HoverEffectType::UNKNOWN;
 };
 

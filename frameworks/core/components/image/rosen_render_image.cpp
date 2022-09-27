@@ -274,10 +274,8 @@ void RosenRenderImage::UpdatePixmap(const RefPtr<PixelMap>& pixmap)
     LOGD("update pixmap");
     imageObj_ = MakeRefPtr<PixelMapImageObject>(pixmap);
     image_ = nullptr;
-    curSourceInfo_.Reset();
     rawImageSize_ = imageObj_->GetImageSize();
     rawImageSizeUpdated_ = true;
-    imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
     MarkNeedLayout();
 }
 
@@ -288,7 +286,7 @@ void RosenRenderImage::Update(const RefPtr<Component>& component)
     imageLoadingStatus_ = (sourceInfo_ != curSourceInfo_) ? ImageLoadingStatus::UPDATING : imageLoadingStatus_;
     UpdateRenderAltImage(component);
     if (proceedPreviousLoading_) {
-        LOGI("Proceed previous loading, imageSrc is %{public}s, image loading status: %{public}d",
+        LOGI("Proceed previous loading, imageSrc is %{private}s, image loading status: %{public}d",
             sourceInfo_.ToString().c_str(), imageLoadingStatus_);
         return;
     }
@@ -477,6 +475,9 @@ void RosenRenderImage::ProcessPixmapForPaint()
         imageObj_->ClearData();
         return;
     }
+    // pixelMap render finished
+    curSourceInfo_ = sourceInfo_;
+    imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
     FireLoadEvent(rawImageSize_);
     RemoveChild(renderAltImage_);
     renderAltImage_ = nullptr;

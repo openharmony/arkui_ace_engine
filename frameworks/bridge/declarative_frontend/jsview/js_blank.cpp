@@ -16,11 +16,19 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_blank.h"
 
 #include "core/components/box/box_component.h"
+#include "core/components_ng/pattern/blank/blank_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-
 namespace OHOS::Ace::Framework {
 void JSBlank::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        Dimension blankMin;
+        NG::BlankView::Create();
+        if (info.Length() >= 1 && ParseJsDimensionVp(info[0], blankMin)) {
+            NG::BlankView::SetBlankMin(blankMin);
+        }
+        return;
+    }
     auto specializedBox = AceType::MakeRefPtr<OHOS::Ace::BoxComponent>();
     // specialized component should be firstly pushed.
     ViewStackProcessor::GetInstance()->ClaimElementId(specializedBox);

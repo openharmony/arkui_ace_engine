@@ -16,12 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H
 
+#include "utils/camera3d.h"
 #include "draw/canvas.h"
 #include "drawing/engine_adapter/impl_interface/bitmap_impl.h"
 #include "image/image.h"
 #include "rosen_text/ui/font_collection.h"
 #include "rosen_text/ui/typography.h"
 #include "rosen_text/ui/typography_create.h"
+#include "utils/scalar.h"
 
 namespace OHOS::Ace {
 
@@ -35,7 +37,9 @@ using RSPen = Rosen::Drawing::Pen;
 using RSColor = Rosen::Drawing::Color;
 using RSRect = Rosen::Drawing::RectF;
 using RSRoundRect = Rosen::Drawing::RoundRect;
+using RSRRect = Rosen::Drawing::Rect;
 using RSPoint = Rosen::Drawing::PointF;
+using RSRPoint = Rosen::Drawing::Point;
 using RSBlendMode = Rosen::Drawing::BlendMode;
 using RSSamplingOptions = Rosen::Drawing::SamplingOptions;
 using RSRoundRect = Rosen::Drawing::RoundRect;
@@ -44,6 +48,10 @@ using RSBitmap = Rosen::Drawing::Bitmap;
 using RSBitmapFormat = Rosen::Drawing::BitmapFormat;
 using RSColorType = Rosen::Drawing::ColorType;
 using RSAlphaType = Rosen::Drawing::AlphaType;
+using RSScalar = Rosen::Drawing::scalar;
+using RSClipOp = Rosen::Drawing::ClipOp;
+using RSMatrix = Rosen::Drawing::Matrix;
+using RSCamera3D = Rosen::Drawing::Camera3D;
 
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;
@@ -53,6 +61,13 @@ using RSParagraphBuilder = rosen::TypographyCreate;
 using RSFontCollection = rosen::FontCollection;
 using RSParagraphStyle = rosen::TypographyStyle;
 using RSTextStyle = rosen::TextStyle;
+using RSColorQuad = rosen::ColorQuad;
+using RSShaderEffect = rosen::ShaderEffect;
+using RSTileMode = rosen::TileMode;
+using RSShaderEffect = rosen::ShaderEffect;
+using RSColorQuad = rosen::ColorQuad;
+using RSShaderEffect = rosen::ShaderEffect;
+using RSTileMode = rosen::TileMode;
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_H

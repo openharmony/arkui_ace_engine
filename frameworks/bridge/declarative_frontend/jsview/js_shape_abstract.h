@@ -34,6 +34,7 @@ public:
     static void SetStrokeMiterLimit(const JSCallbackInfo& info);
     static void SetStrokeOpacity(const JSCallbackInfo& info);
     static void SetFillOpacity(const JSCallbackInfo& info);
+    static void SetNgFill(const JSCallbackInfo& info);
     static void SetStrokeWidth(const JSCallbackInfo& info);
     static void SetAntiAlias(bool antiAlias);
     static void JsWidth(const JSCallbackInfo& info);
@@ -59,6 +60,7 @@ public:
     void ObjectFill(const JSCallbackInfo& info);
 protected:
     static void SetSize(const JSCallbackInfo& info);
+    static void SetNgSize(const JSCallbackInfo& info);
     static void SetWidth(const JSRef<JSVal>& jsValue);
     static void SetHeight(const JSRef<JSVal>& jsValue);
     void ObjectWidth(const JSRef<JSVal>& jsValue);

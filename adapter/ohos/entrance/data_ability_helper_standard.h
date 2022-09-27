@@ -59,6 +59,7 @@ private:
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper_;
     std::shared_ptr<AppExecFwk::DataAbilityHelper> dataAbilityHelper_;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext_;
+    std::weak_ptr<OHOS::AppExecFwk::Context> context_;
     std::shared_ptr<OHOS::Uri> uri_;
     DataAbilityThumbnailQueryImpl dataAbilityThumbnailQueryImpl_;
     std::unique_ptr<Media::PixelMap> pixmap_;

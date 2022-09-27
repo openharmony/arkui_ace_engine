@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,6 +69,7 @@ enum class CursorMoveSkip {
 
 class RenderTextField : public RenderNode, public TextInputClient, public ValueChangeObserver {
     DECLARE_ACE_TYPE(RenderTextField, RenderNode, TextInputClient, ValueChangeObserver);
+
 public:
     ~RenderTextField() override;
 
@@ -88,7 +89,7 @@ public:
     void Dump() override;
 
     bool OnKeyEvent(const KeyEvent& event);
-    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling = false);
+    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling = false, bool needShowSoftKeyboard = true);
     bool CloseKeyboard(bool forceClose = false);
     void ShowError(const std::string& errorText, bool resetToStart = true);
     void ShowTextOverlay(const Offset& showOffset, bool isSingleHandle, bool isUsingMouse = false);
@@ -102,7 +103,10 @@ public:
     void SetIsOverlayShowed(bool isOverlayShowed, bool needStartTwinkling = true);
     void UpdateFocusAnimation();
     const TextEditingValue& GetEditingValue() const;
-    const TextEditingValue& GetPreEditingValue() const;
+    const TextEditingValue& GetPreEditingValue() const;   
+    double GetEditingBoxY() const override;
+    double GetEditingBoxTopY() const override;
+    bool GetEditingBoxModel() const override;
     void Delete(int32_t start, int32_t end);
     void CursorMoveLeft(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
     void CursorMoveRight(CursorMoveSkip skip = CursorMoveSkip::CHARACTER);
@@ -347,6 +351,7 @@ public:
     {
         return inputStyle_;
     }
+
 protected:
     // Describe where caret is and how tall visually.
     struct CaretMetrics {
@@ -381,6 +386,7 @@ protected:
     void OnDoubleClick(const ClickInfo& clickInfo);
     void OnLongPress(const LongPressInfo& longPressInfo);
     bool HandleMouseEvent(const MouseEvent& event) override;
+    void HandleMouseHoverEvent(MouseState mouseState) override;
     void AnimateMouseHoverEnter() override;
     void AnimateMouseHoverExit() override;
 
@@ -415,7 +421,7 @@ protected:
     static bool IsSelectiveDevice()
     {
         return (SystemProperties::GetDeviceType() != DeviceType::TV &&
-            SystemProperties::GetDeviceType() != DeviceType::WATCH);
+                SystemProperties::GetDeviceType() != DeviceType::WATCH);
     }
 
     void AddOutOfRectCallbackToContext();
@@ -501,12 +507,12 @@ protected:
     CopyOptions copyOption_ = CopyOptions::Distributed;
 
     bool showPasswordIcon_ = true; // Whether show password icon, effect only type is password.
-    bool showCounter_ = false; // Whether show counter, 10/100 means maxlength is 100 and 10 has been inputted.
-    bool overCount_ = false;   // Whether count of text is over limit.
-    bool obscure_ = false;     // Obscure the text, for example, password.
+    bool showCounter_ = false;     // Whether show counter, 10/100 means maxlength is 100 and 10 has been inputted.
+    bool overCount_ = false;       // Whether count of text is over limit.
+    bool obscure_ = false;         // Obscure the text, for example, password.
     bool passwordRecord_ = true;   // Record the status of password display or non-display.
-    bool enabled_ = true;      // Whether input is disable of enable.
-    bool needFade_ = false;    // Fade in/out text when overflow.
+    bool enabled_ = true;          // Whether input is disable of enable.
+    bool needFade_ = false;        // Fade in/out text when overflow.
     bool blockRightShade_ = false;
     bool isValueFromFront_ = false;           // Is value from developer-set.
     bool isValueFromRemote_ = false;          // Remote value coming form typing, other is from clopboard.

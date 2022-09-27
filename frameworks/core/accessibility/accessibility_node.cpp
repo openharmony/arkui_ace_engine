@@ -417,7 +417,7 @@ void AccessibilityNode::SetOperableInfo()
         } else if (inputType_ == INPUT_TYPE_PASSWORD) {
             isPassword_ = true;
         } else {
-            LOGW("node type %{public}s not support input event", tag_.c_str());
+            LOGD("node type %{public}s not support input event", tag_.c_str());
         }
     }
 }

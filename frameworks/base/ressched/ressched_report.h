@@ -35,15 +35,12 @@ public:
     void ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param = {});
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});
-    void MarkNeedUpdate();
-    void DispatchTouchEventStart(const TouchType& touchType);
-    void DispatchTouchEventEnd();
+    void OnTouchEvent(const TouchType& touchType);
 
 private:
     ResSchedReport() {}
     ~ResSchedReport() {}
     ReportDataFunc reportDataFunc_ = nullptr;
-    bool isInTouchDownUp_ = false;
 };
 
 class ACE_EXPORT ResSchedReportScope final {

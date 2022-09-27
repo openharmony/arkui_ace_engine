@@ -2011,6 +2011,7 @@ void RenderSwiper::UpdateIndicatorPosition(SwiperIndicatorData& indicatorData)
     double indicatorWidth = indicatorData.indicatorPaintData.width;
     double indicatorHeight = indicatorData.indicatorPaintData.height;
     double stableOffset = NormalizeToPx(INDICATOR_PADDING_TOP_DEFAULT) + (hotZoneMaxSize_ + hotZoneRealSize_) * 0.5;
+    auto layoutSize = GetLayoutSize();
 
     if (indicator_->GetLeft().Value() != SwiperIndicator::DEFAULT_POSITION) {
         int32_t left = GetValidEdgeLength(swiperWidth_, indicatorWidth, indicator_->GetLeft());
@@ -2022,7 +2023,7 @@ void RenderSwiper::UpdateIndicatorPosition(SwiperIndicatorData& indicatorData)
         position.SetX(swiperWidth_ - indicatorWidth - right);
     } else {
         if (axis_ == Axis::HORIZONTAL) {
-            position.SetX((swiperWidth_ - indicatorWidth) / 2.0);
+            position.SetX((layoutSize.Width() - indicatorWidth) / 2.0);
         } else {
             // horizontal line of indicator zone is stable.
             double currentX = swiperWidth_ - stableOffset;
@@ -2044,7 +2045,7 @@ void RenderSwiper::UpdateIndicatorPosition(SwiperIndicatorData& indicatorData)
             double currentY = swiperHeight_ - stableOffset;
             position.SetY(currentY);
         } else {
-            position.SetY((swiperHeight_ - indicatorHeight) / 2.0);
+            position.SetY((layoutSize.Height() - indicatorHeight) / 2.0);
         }
     }
 
@@ -3324,27 +3325,46 @@ void RenderSwiper::OnPaintFinish()
         return;
     }
 
+    bool isDeclarative = true;
+    auto context = GetContext().Upgrade();
+    if (context) {
+        isDeclarative = context->GetIsDeclarative();
+    }
+
     Rect itemRect;
     Rect viewPortRect(GetGlobalOffset(), GetChildViewPort());
+    RefPtr<OHOS::Ace::RenderNode> itemWithChildAccessibilityNode;
     for (const auto& item : GetChildren()) {
-        auto node = item->GetAccessibilityNode().Upgrade();
+        // RenderSwiper's children are RenderDisplay who's accessibility node is the same with RenderSwiper in v2,
+        // see SwiperComponent::AppendChild and RenderElement::SetAccessibilityNode
+        if (isDeclarative) {
+            itemWithChildAccessibilityNode = item->GetFirstChild();
+        } else {
+            itemWithChildAccessibilityNode = item;
+        }
+
+        if (!itemWithChildAccessibilityNode) {
+            continue;
+        }
+
+        auto node = itemWithChildAccessibilityNode->GetAccessibilityNode().Upgrade();
         if (!node) {
             continue;
         }
         bool visible = GetVisible();
         if (visible) {
-            itemRect.SetSize(item->GetLayoutSize());
-            itemRect.SetOffset(item->GetGlobalOffset());
+            itemRect.SetSize(itemWithChildAccessibilityNode->GetLayoutSize());
+            itemRect.SetOffset(itemWithChildAccessibilityNode->GetGlobalOffset());
             visible = itemRect.IsIntersectWith(viewPortRect);
         }
-        item->SetAccessibilityVisible(visible);
+        itemWithChildAccessibilityNode->SetAccessibilityVisible(visible);
         if (visible) {
             Rect clampRect = itemRect.Constrain(viewPortRect);
             if (clampRect != itemRect) {
-                item->SetAccessibilityRect(clampRect);
+                itemWithChildAccessibilityNode->SetAccessibilityRect(clampRect);
             }
         } else {
-            item->NotifyPaintFinish();
+            itemWithChildAccessibilityNode->NotifyPaintFinish();
         }
     }
 }

@@ -83,6 +83,12 @@ struct AxisEvent final {
             .deviceId = deviceId,
             .sourceType = sourceType };
     }
+
+    Offset GetOffset() const
+    {
+        return Offset(x, y);
+    }
+
     AxisDirection GetDirection() const
     {
         uint32_t verticalFlag = 0;
@@ -117,11 +123,178 @@ struct AxisEvent final {
     }
 };
 
+class AxisInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(AxisInfo, BaseEventInfo);
+
+public:
+    AxisInfo() : BaseEventInfo("onAxis") {}
+    AxisInfo(const AxisEvent& event, const Offset& localLocation, const EventTarget& target) : BaseEventInfo("onAxis")
+    {
+        action_ = event.action;
+        verticalAxis_ = static_cast<float>(event.verticalAxis);
+        horizontalAxis_ = static_cast<float>(event.horizontalAxis);
+        pinchAxisScale_ = static_cast<float>(event.pinchAxisScale);
+        globalLocation_ = event.GetOffset();
+        localLocation_ = localLocation;
+        screenLocation_ = Offset();
+        SetTimeStamp(event.time);
+        SetDeviceId(event.deviceId);
+        SetSourceDevice(event.sourceType);
+        SetTarget(target);
+    }
+    ~AxisInfo() override = default;
+
+    void SetAction(AxisAction action)
+    {
+        action_ = action;
+    }
+
+    AxisAction GetAction() const
+    {
+        return action_;
+    }
+
+    void SetVerticalAxis(float axis)
+    {
+        verticalAxis_ = axis;
+    }
+
+    float GetVerticalAxis() const
+    {
+        return verticalAxis_;
+    }
+
+    void SetHorizontalAxis(float axis)
+    {
+        horizontalAxis_ = axis;
+    }
+
+    float GetHorizontalAxis() const
+    {
+        return horizontalAxis_;
+    }
+
+    void SetPinchAxisScale(float scale)
+    {
+        pinchAxisScale_ = scale;
+    }
+
+    float GetPinchAxisScale() const
+    {
+        return pinchAxisScale_;
+    }
+
+    AxisInfo& SetGlobalLocation(const Offset& globalLocation)
+    {
+        globalLocation_ = globalLocation;
+        return *this;
+    }
+    AxisInfo& SetLocalLocation(const Offset& localLocation)
+    {
+        localLocation_ = localLocation;
+        return *this;
+    }
+
+    AxisInfo& SetScreenLocation(const Offset& screenLocation)
+    {
+        screenLocation_ = screenLocation;
+        return *this;
+    }
+
+    const Offset& GetScreenLocation() const
+    {
+        return screenLocation_;
+    }
+
+    const Offset& GetLocalLocation() const
+    {
+        return localLocation_;
+    }
+    const Offset& GetGlobalLocation() const
+    {
+        return globalLocation_;
+    }
+
+private:
+    AxisAction action_ = AxisAction::NONE;
+    float verticalAxis_ = 0.0;
+    float horizontalAxis_ = 0.0;
+    float pinchAxisScale_ = 0.0;
+    // global position at which the touch point contacts the screen.
+    Offset globalLocation_;
+    // Different from global location, The local location refers to the location of the contact point relative to the
+    // current node which has the recognizer.
+    Offset localLocation_;
+    Offset screenLocation_;
+};
+
+using OnAxisEventFunc = std::function<void(AxisInfo&)>;
+using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
+
 class AxisEventTarget : public virtual AceType {
     DECLARE_ACE_TYPE(AxisEventTarget, AceType);
 
 public:
-    virtual void HandleEvent(const AxisEvent& event) = 0;
+    AxisEventTarget() = default;
+    AxisEventTarget(std::string frameName) : frameName_(std::move(frameName)) {}
+    ~AxisEventTarget() override = default;
+
+    void SetOnAxisCallback(const OnAxisEventFunc& onAxisCallback)
+    {
+        onAxisCallback_ = onAxisCallback;
+    }
+
+    void SetCoordinateOffset(const NG::OffsetF& coordinateOffset)
+    {
+        coordinateOffset_ = coordinateOffset;
+    }
+
+    void SetGetEventTargetImpl(const GetEventTargetImpl& getEventTargetImpl)
+    {
+        getEventTargetImpl_ = getEventTargetImpl;
+    }
+
+    std::optional<EventTarget> GetEventTarget() const
+    {
+        if (getEventTargetImpl_) {
+            return getEventTargetImpl_();
+        }
+        return std::nullopt;
+    }
+
+    void SetFrameName(const std::string& frameName)
+    {
+        frameName_ = frameName;
+    }
+
+    std::string GetFrameName() const
+    {
+        return frameName_;
+    }
+
+    bool HandleAxisEvent(const AxisEvent& event)
+    {
+        if (!onAxisCallback_) {
+            return false;
+        }
+        Offset localLocation = Offset(
+            event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
+        AxisInfo info = AxisInfo(event, localLocation, GetEventTarget().value_or(EventTarget()));
+        LOGD("HandleAxisEvent: Node: %{public}s, Action: %{public}d, HorizontalAxis: %{public}f, VeriticalAxis: "
+             "%{public}f, PinchAxis: %{public}f",
+            frameName_.c_str(), info.GetAction(), info.GetHorizontalAxis(), info.GetVerticalAxis(),
+            info.GetPinchAxisScale());
+        onAxisCallback_(info);
+        return true;
+    }
+
+    virtual void HandleEvent(const AxisEvent& event) {}
+
+private:
+    OnAxisEventFunc onAxisCallback_;
+    NG::OffsetF coordinateOffset_;
+    GetEventTargetImpl getEventTargetImpl_;
+    std::string frameName_ = "Unknown";
 };
 
 using AxisTestResult = std::list<RefPtr<AxisEventTarget>>;

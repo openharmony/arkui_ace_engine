@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 
 #include "core/components/shape/shape_component.h"
+#include "core/components_ng/pattern/shape/line_view.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -39,6 +40,11 @@ void JSLine::JSBind(BindingTarget globalObj)
 
 void JSLine::Create(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::LineView::Create();
+        SetNgSize(info);
+        return;
+    }
     RefPtr<ShapeComponent> lineComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::LINE);
     ViewStackProcessor::GetInstance()->ClaimElementId(lineComponent);
     lineComponent->SetStroke(Color::BLACK);
@@ -52,14 +58,18 @@ void JSLine::SetStart(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
+    JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(info[0]);
+    ShapePoint startPoint;
+    SetPoint(pointArray, startPoint);
+    if(Container::IsCurrentUseNewPipeline()){
+        NG::LineView::StartPoint(startPoint);
+        return;
+    }
     auto line = AceType::DynamicCast<ShapeComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!line) {
         LOGE("startPointComponent is null.");
         return;
     }
-    JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(info[0]);
-    ShapePoint startPoint;
-    SetPoint(pointArray, startPoint);
     line->SetStart(startPoint);
 }
 
@@ -69,14 +79,18 @@ void JSLine::SetEnd(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
+    JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(info[0]);
+    ShapePoint endPoint;
+    SetPoint(pointArray, endPoint);
+    if(Container::IsCurrentUseNewPipeline()){
+        NG::LineView::EndPoint(endPoint);
+        return;
+    }
     auto line = AceType::DynamicCast<ShapeComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!line) {
         LOGE("startPointComponent is null.");
         return;
     }
-    JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(info[0]);
-    ShapePoint endPoint;
-    SetPoint(pointArray, endPoint);
     line->SetEnd(endPoint);
 }
 

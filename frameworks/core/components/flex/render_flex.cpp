@@ -45,9 +45,8 @@ double GetMainAxisValue(const Size& size, FlexDirection direction)
 
 inline bool IsNonRelativePosition(PositionType pos)
 {
-    return ((pos != PositionType::PTRELATIVE) &&
-            (pos != PositionType::PTSEMI_RELATIVE) &&
-            (pos != PositionType::PTOFFSET));
+    return (
+        (pos != PositionType::PTRELATIVE) && (pos != PositionType::PTSEMI_RELATIVE) && (pos != PositionType::PTOFFSET));
 }
 
 } // namespace
@@ -483,7 +482,7 @@ void RenderFlex::RelayoutForStretchFlexNode(const FlexItemProperties& flexItemPr
             double flexSize = 0.0;
             flexSize = flexItem == flexItemProperties.lastGrowChild ? remainSpace - allocatedFlexSpace
                                                                     : spacePerFlex * flexItem->GetFlexGrow();
-            RelayoutFlexItem(flexItem, flexSize, baselineProperties, allocatedFlexSpace);
+            RedoLayoutFlexItem(flexItem, flexSize, baselineProperties, allocatedFlexSpace);
         } else if (crossAxisAlign_ == FlexAlign::STRETCH && flexItem->GetStretchFlag()) {
             flexItem->Layout(
                 MakeConstrainedLayoutParam(GetMainSize(flexItem), flexItem->GetNormalizedConstraints(), true));
@@ -631,7 +630,7 @@ void RenderFlex::ResizeItems(const FlexItemProperties& flexItemProps, BaselinePr
         double flexSize = (flexItem == lastChild) ? (remainSpace - allocatedFlexSpace)
                                                   : ((remainSpace > 0) ? spacePerFlex * itemFlex
                                                                        : spacePerFlex * itemFlex * GetMainSize(item));
-        RelayoutFlexItem(flexItem, flexSize, baselineProps, allocatedFlexSpace);
+        RedoLayoutFlexItem(flexItem, flexSize, baselineProps, allocatedFlexSpace);
     }
 }
 
@@ -804,7 +803,7 @@ void RenderFlex::LayoutFlexItem(RefPtr<RenderFlexItem>& flexItem, FlexItemProper
     flexItemProperties.totalGrow += itemGrow;
 }
 
-void RenderFlex::RelayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double flexSize,
+void RenderFlex::RedoLayoutFlexItem(const RefPtr<RenderFlexItem>& flexItem, double flexSize,
     BaselineProperties& baselineProps, double& allocatedFlexSpace)
 {
     bool canItemStretch = flexItem->MustStretch() || ((GetSelfAlign(flexItem) == FlexAlign::STRETCH) &&
@@ -980,7 +979,7 @@ void RenderFlex::ClearChildrenLists()
     stretchNodes_.clear();
 }
 
-void RenderFlex::ResizeByItem(const RefPtr<RenderNode>& item, double &allocatedSize)
+void RenderFlex::ResizeByItem(const RefPtr<RenderNode>& item, double& allocatedSize)
 {
     double mainSize = GetMainSize(item);
     if (NearEqual(mainSize, Size::INFINITE_SIZE)) {

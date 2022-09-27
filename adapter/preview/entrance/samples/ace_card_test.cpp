@@ -82,7 +82,6 @@ int main(int argc, const char* argv[])
         .deviceHeight = CARD_DEFAULT_HEIGHT,
         .formsEnabled = true,
         .onRender = std::move(renderCallback),
-        .physicalDeviceFontsEnabled = false,
     };
     if (argc == MAX_ARGS_COUNT && !std::strcmp(argv[1], MODEL_STAGE)) {
         args.assetPath = assetPathEtsStage;

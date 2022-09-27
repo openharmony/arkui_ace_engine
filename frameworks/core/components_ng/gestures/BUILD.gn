@@ -1,0 +1,42 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import(
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
+
+build_component_ng("gestures_ng") {
+  sources = [
+    # gestures
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/gesture_group.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/gesture_referee.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/long_press_gesture.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/pan_gesture.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/pinch_gesture.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/rotation_gesture.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/swipe_gesture.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/gestures/tap_gesture.cpp",
+
+    # recognizers
+    "recognizers/click_recognizer.cpp",
+    "recognizers/exclusive_recognizer.cpp",
+    "recognizers/gesture_recognizer.cpp",
+    "recognizers/long_press_recognizer.cpp",
+    "recognizers/multi_fingers_recognizer.cpp",
+    "recognizers/pan_recognizer.cpp",
+    "recognizers/parallel_recognizer.cpp",
+    "recognizers/pinch_recognizer.cpp",
+    "recognizers/rotation_recognizer.cpp",
+    "recognizers/sequenced_recognizer.cpp",
+    "recognizers/swipe_recognizer.cpp",
+  ]
+}

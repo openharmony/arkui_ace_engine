@@ -37,6 +37,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -138,6 +139,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
+    auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
+    if (hasAninmation) {
+        RequestFrame();
+    }
     FlushAnimation(GetTimeFromExternalTimer());
     FlushPipelineWithoutAnimation();
 }
@@ -170,12 +175,62 @@ void PipelineContext::FlushMessages()
     window_->FlushTasks();
 }
 
+void PipelineContext::FlushFocus()
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACK();
+    auto focusNode = dirtyFocusNode_.Upgrade();
+    if (!focusNode || focusNode->GetFocusType() == FocusType::DISABLE) {
+        dirtyFocusNode_.Reset();
+    } else {
+        auto focusNodeHub = focusNode->GetFocusHub();
+        if (focusNodeHub) {
+            focusNodeHub->RequestFocusImmediately();
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        return;
+    }
+    auto focusScope = dirtyFocusScope_.Upgrade();
+    if (!focusScope || focusNode->GetFocusType() == FocusType::DISABLE) {
+        dirtyFocusScope_.Reset();
+    } else {
+        auto focusScopeHub = focusScope->GetFocusHub();
+        if (focusScopeHub) {
+            focusScopeHub->RequestFocusImmediately();
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        return;
+    }
+    if (rootNode_ && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
+        rootNode_->GetFocusHub()->RequestFocusImmediately();
+    }
+}
+
 void PipelineContext::FlushPipelineWithoutAnimation()
 {
-    FlushDirtyNodeUpdate();
+    FlushBuild();
     FlushTouchEvents();
     taskScheduler_.FlushTask();
     FlushMessages();
+    FlushFocus();
+}
+
+void PipelineContext::FlushBuild()
+{
+    FlushDirtyNodeUpdate();
+    FlushBuildFinishCallbacks();
+}
+
+void PipelineContext::FlushBuildFinishCallbacks()
+{
+    decltype(buildFinishCallbacks_) buildFinishCallbacks(std::move(buildFinishCallbacks_));
+    for (const auto& func : buildFinishCallbacks) {
+        if (func) {
+            func();
+        }
+    }
 }
 
 void PipelineContext::SetupRootElement()
@@ -191,6 +246,9 @@ void PipelineContext::SetupRootElement()
     layoutConstraint.selfIdealSize = idealSize;
     layoutConstraint.maxSize = idealSize;
     rootNode_->UpdateLayoutConstraint(layoutConstraint);
+    auto rootFocusHub = rootNode_->GetOrCreateFocusHub();
+    rootFocusHub->SetFocusType(FocusType::SCOPE);
+    rootFocusHub->SetFocusable(true);
     window_->SetRootFrameNode(rootNode_);
     rootNode_->AttachToMainTree();
 
@@ -199,6 +257,7 @@ void PipelineContext::SetupRootElement()
     stageNode->MountToParent(rootNode_);
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
+    fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     LOGI("SetupRootElement success!");
 }
 
@@ -210,6 +269,11 @@ const RefPtr<StageManager>& PipelineContext::GetStageManager()
 const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 {
     return overlayManager_;
+}
+
+const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
+{
+    return fullScreenManager_;
 }
 
 void PipelineContext::SetRootRect(double width, double height, double offset)
@@ -275,6 +339,21 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, false);
+
+        for (const auto& weakContext : touchPluginPipelineContext_) {
+            auto pipelineContext = DynamicCast<OHOS::Ace::PipelineContext>(weakContext.Upgrade());
+            if (!pipelineContext) {
+                continue;
+            }
+            auto pluginPoint =
+                point.UpdateScalePoint(viewScale_, static_cast<float>(pipelineContext->GetPluginEventOffset().GetX()),
+                    static_cast<float>(pipelineContext->GetPluginEventOffset().GetY()), point.id);
+            auto eventManager = pipelineContext->GetEventManager();
+            if (eventManager) {
+                eventManager->SetInstanceId(pipelineContext->GetInstanceId());
+            }
+            pipelineContext->OnTouchEvent(pluginPoint, true);
+        }
     }
 
     if (scalePoint.type == TouchType::MOVE) {
@@ -297,7 +376,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             eventManager_->DispatchTouchEvent(lastMoveEvent.value());
         }
     }
-
     eventManager_->DispatchTouchEvent(scalePoint);
     hasIdleTasks_ = true;
     window_->RequestFrame();
@@ -314,6 +392,34 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
         dipScale_ = density_ / viewScale_;
     }
 }
+
+bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
+{
+    ACE_DCHECK(!params.empty());
+
+    if (params[0] == "-element") {
+    } else if (params[0] == "-render") {
+    } else if (params[0] == "-focus") {
+        if (rootNode_->GetFocusHub()) {
+            rootNode_->GetFocusHub()->DumpFocusTree(0);
+        }
+    } else if (params[0] == "-layer") {
+    } else if (params[0] == "-frontend") {
+#ifndef WEARABLE_PRODUCT
+    } else if (params[0] == "-multimodal") {
+#endif
+    } else if (params[0] == "-accessibility" || params[0] == "-inspector") {
+    } else if (params[0] == "-rotation" && params.size() >= 2) {
+    } else if (params[0] == "-animationscale" && params.size() >= 2) {
+    } else if (params[0] == "-velocityscale" && params.size() >= 2) {
+    } else if (params[0] == "-scrollfriction" && params.size() >= 2) {
+    } else if (params[0] == "-threadstuck" && params.size() >= 3) {
+    } else {
+        return false;
+    }
+    return true;
+}
+
 
 void PipelineContext::FlushTouchEvents()
 {
@@ -337,7 +443,6 @@ void PipelineContext::FlushTouchEvents()
                 touchPoints.emplace_front(scalePoint);
             }
         }
-
         auto maxSize = touchPoints.size();
         for (auto iter = touchPoints.rbegin(); iter != touchPoints.rend(); ++iter) {
             maxSize--;
@@ -371,6 +476,41 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
     window_->RequestFrame();
+}
+
+bool PipelineContext::OnKeyEvent(const KeyEvent& event)
+{
+    return eventManager_->DispatchKeyEventNG(event, rootNode_);
+}
+
+void PipelineContext::OnAxisEvent(const AxisEvent& event)
+{
+    // Need develop here: CTRL+AXIS = Pinch event
+
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    LOGD("AxisEvent (x,y): (%{public}f,%{public}f), horizontalAxis: %{public}f, verticalAxis: %{public}f, action: "
+         "%{public}d",
+        scaleEvent.x, scaleEvent.y, scaleEvent.horizontalAxis, scaleEvent.verticalAxis, scaleEvent.action);
+
+    // Need develop here: AxisEvent to touchTest pan recognizer
+
+    eventManager_->AxisTest(scaleEvent, rootNode_);
+    eventManager_->DispatchAxisEventNG(scaleEvent);
+}
+
+void PipelineContext::Destroy()
+{
+    taskScheduler_.CleanUp();
+    scheduleTasks_.clear();
+    dirtyNodes_.clear();
+    rootNode_.Reset();
+    stageManager_.Reset();
+    overlayManager_.Reset();
+}
+
+void PipelineContext::AddCallBack(std::function<void()>&& callback)
+{
+    buildFinishCallbacks_.emplace_back(std::move(callback));
 }
 
 } // namespace OHOS::Ace::NG

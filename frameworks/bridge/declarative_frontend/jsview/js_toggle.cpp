@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
@@ -46,6 +47,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("size", &JSToggle::JsSize);
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
+    JSClass<JSToggle>::StaticMethod("backgroundColor", &JSToggle::SetBackgroundColor);
 
     JSClass<JSToggle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSToggle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -406,6 +408,24 @@ void JSToggle::JsPadding(const JSCallbackInfo& info)
         checkableComponent->SetHotZoneVerticalPadding(length);
         checkableComponent->SetHorizontalPadding(length);
     }
+}
+
+void JSToggle::SetBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Color backgroundColor;
+    if (!ParseJsColor(info[0], backgroundColor)) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ToggleButtonView::SetBackgroundColor(backgroundColor);
+        return;
+    }
+    JSViewAbstract::JsBackgroundColor(info);
 }
 
 } // namespace OHOS::Ace::Framework

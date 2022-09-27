@@ -25,9 +25,11 @@
 #include "base/geometry/dimension.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
+#include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/window_animation_config.h"
@@ -48,6 +50,7 @@ class OffscreenCanvas;
 class Window;
 class FontManager;
 class ManagerInterface;
+enum class FrontendType;
 
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -107,7 +110,7 @@ public:
     virtual bool OnRotationEvent(const RotationEvent& event) const = 0;
 
     // Called by window when received vsync signal.
-    virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
+    virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by view
     virtual void OnDragEvent(int32_t x, int32_t y, DragEventAction action) = 0;
@@ -479,8 +482,21 @@ public:
     void PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
     virtual void FlushReload() {}
+    virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
+    FrontendType GetFrontendType() const
+    {
+        return frontendType_;
+    }
+
+    double GetDensity() const
+    {
+        return density_;
+    }
+
+    void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
+    void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
 
 protected:
     virtual bool OnDumpInfo(const std::vector<std::string>& params) const
@@ -506,6 +522,7 @@ protected:
     double dipScale_ = 1.0;
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
+    FrontendType frontendType_;
 
     std::stack<bool> pendingImplicitLayout_;
     std::unique_ptr<Window> window_;
@@ -526,6 +543,8 @@ protected:
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
+
+    std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
 
 private:
     StatusBarEventHandler statusBarBgColorEventHandler_;

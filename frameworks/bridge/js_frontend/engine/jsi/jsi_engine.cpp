@@ -57,7 +57,7 @@
 #include "pixel_map_napi.h"
 #endif
 
-#if defined(PREVIEW)
+#if defined(PREVIEW) || defined(ANDROID_PLATFORM)
 extern const char _binary_strip_native_min_abc_start[];
 extern const char _binary_strip_native_min_abc_end[];
 #endif
@@ -66,7 +66,9 @@ namespace OHOS::Ace::Framework {
 
 const int SYSTEM_BASE = 10;
 
-#ifdef APP_USE_ARM
+#if defined(ANDROID_PLATFORM)
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_debugger.so";
+#elif defined(APP_USE_ARM)
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
@@ -2931,6 +2933,7 @@ void JsiEngineInstance::RegisterFaPlugin()
     shared_ptr<JsValue> requireNapiFunc = global->GetProperty(runtime_, "requireNapi");
     if (!requireNapiFunc || !requireNapiFunc->IsFunction(runtime_)) {
         LOGW("requireNapi func not found");
+        return;
     }
     std::vector<shared_ptr<JsValue>> argv = { runtime_->NewString("FeatureAbility") };
     requireNapiFunc->Call(runtime_, global, argv, argv.size());
@@ -2949,8 +2952,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     runtime_->SetLogPrint(PrintLog);
     std::string library_path = "";
     if (debugger_mode) {
-        library_path = ARK_DEBUGGER_LIB_PATH;
-        SetDebuggerPostTask();
+        SetDebuggerPostTask(library_path);
     }
     if (!runtime_->Initialize(library_path, isDebugMode_, GetInstanceId())) {
         LOGE("Js Engine initialize runtime failed");
@@ -2962,6 +2964,8 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
         runtime_->GetGlobal()->SetProperty(runtime_, key, nativeValue);
     }
+
+    runtime_->StartDebugger();
 #endif
 
     RegisterAceModule();
@@ -2973,7 +2977,7 @@ bool JsiEngineInstance::InitJsEnv(bool debugger_mode, const std::unordered_map<s
     RegisterI18nPluralRulesModule();
 
     // load jsfwk
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
     if (!runtime_->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
         LOGE("Failed to load js framework!");
         return false;
@@ -3007,7 +3011,7 @@ void JsiEngineInstance::InitGroupJsBridge()
 
 bool JsiEngineInstance::FireJsEvent(const std::string& eventStr)
 {
-    LOGI("JsiEngineInstance FireJsEvent");
+    LOGD("JsiEngineInstance FireJsEvent");
     if (!runningPage_) {
         LOGW("js engine instance running page is not valid.");
         return false;
@@ -3094,8 +3098,9 @@ bool JsiEngineInstance::CallCurlFunction(const OHOS::Ace::RequestData& requestDa
 }
 #endif
 
-void JsiEngineInstance::SetDebuggerPostTask()
+void JsiEngineInstance::SetDebuggerPostTask(std::string& library_path)
 {
+    library_path = ARK_DEBUGGER_LIB_PATH;
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(frontendDelegate_));
     auto&& postTask = [weakDelegate](std::function<void()>&& task) {
         auto delegate = weakDelegate.Upgrade();
@@ -3140,7 +3145,7 @@ bool JsiEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 
     ACE_DCHECK(delegate);
     if (delegate && delegate->GetAssetManager()) {
-        std::string packagePath = delegate->GetAssetManager()->GetLibPath();
+        std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
         if (!packagePath.empty()) {
             nativeEngine->SetPackagePath(packagePath);
         }
@@ -3332,7 +3337,7 @@ bool JsiEngine::ExecuteAbc(const std::string &fileName)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     auto delegate = engineInstance_->GetDelegate();
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
     std::string basePath = delegate->GetAssetPath(fileName);
     if (!basePath.empty()) {
         std::string abcPath = basePath.append(fileName);
@@ -3348,7 +3353,7 @@ bool JsiEngine::ExecuteAbc(const std::string &fileName)
         LOGD("GetAssetContent \"%{private}s\" failed.", fileName.c_str());
         return true;
     }
-    if (!runtime->EvaluateJsCode(content.data(), content.size())) {
+    if (!runtime->EvaluateJsCode(content.data(), content.size(), fileName)) {
         LOGE("EvaluateJsCode \"%{private}s\" failed.", fileName.c_str());
         return false;
     }

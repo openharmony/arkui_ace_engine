@@ -15,8 +15,8 @@
 
 #include "core/pipeline/pipeline_context.h"
 
-#include <utility>
 #include <unordered_set>
+#include <utility>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -136,7 +136,6 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId),
       platformResRegister_(std::move(platformResRegister)), timeProvider_(g_defaultTimeProvider)
 {
-    frontendType_ = frontend->GetType();
     RegisterEventHandler(frontend->GetEventHandler());
     focusAnimationManager_ = AceType::MakeRefPtr<FocusAnimationManager>();
     sharedTransitionController_ = AceType::MakeRefPtr<SharedTransitionController>(AceType::WeakClaim(this));
@@ -156,8 +155,6 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, 0),
       timeProvider_(g_defaultTimeProvider)
 {
-    frontendType_ = frontend->GetType();
-
     RegisterEventHandler(frontend->GetEventHandler());
 
     focusAnimationManager_ = AceType::MakeRefPtr<FocusAnimationManager>();
@@ -1099,7 +1096,7 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
 {
     ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
-    std::unordered_map<std::string, std::string> params {{"pageUrl", pageComponent->GetPageUrl()}};
+    std::unordered_map<std::string, std::string> params { { "pageUrl", pageComponent->GetPageUrl() } };
     ResSchedReportScope report("push_page", params);
     auto stageElement = stage;
     if (!stageElement) {
@@ -1597,6 +1594,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     auto scalePoint = point.CreateScalePoint(viewScale_);
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
     if (scalePoint.type == TouchType::DOWN) {
         eventManager_->HandleOutOfRectCallback(
             { scalePoint.x, scalePoint.y, scalePoint.sourceType }, rectCallbackList_);
@@ -1612,7 +1610,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             scalePoint, rootElement_->GetRenderNode(), touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
 
         for (size_t i = 0; i < touchPluginPipelineContext_.size(); i++) {
-            auto pipelineContext = touchPluginPipelineContext_[i].Upgrade();
+            auto pipelineContext = DynamicCast<PipelineContext>(touchPluginPipelineContext_[i].Upgrade());
             if (!pipelineContext || !pipelineContext->rootElement_) {
                 continue;
             }
@@ -1648,15 +1646,11 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
             }
         }
         if (lastMoveEvent.has_value()) {
-            ResSchedReport::GetInstance().DispatchTouchEventStart(lastMoveEvent->type);
             eventManager_->DispatchTouchEvent(lastMoveEvent.value());
-            ResSchedReport::GetInstance().DispatchTouchEventEnd();
         }
     }
 
-    ResSchedReport::GetInstance().DispatchTouchEventStart(scalePoint.type);
     eventManager_->DispatchTouchEvent(scalePoint);
-    ResSchedReport::GetInstance().DispatchTouchEventEnd();
     if (scalePoint.type == TouchType::UP) {
         touchPluginPipelineContext_.clear();
         eventManager_->SetInstanceId(GetInstanceId());
@@ -1694,9 +1688,7 @@ void PipelineContext::FlushTouchEvents()
             if (maxSize == 0) {
                 eventManager_->FlushTouchEventsEnd(touchPoints);
             }
-            ResSchedReport::GetInstance().DispatchTouchEventStart((*iter).type);
             eventManager_->DispatchTouchEvent(*iter);
-            ResSchedReport::GetInstance().DispatchTouchEventEnd();
         }
     }
 }
@@ -1959,19 +1951,6 @@ void PipelineContext::SetCardViewAccessibilityParams(const std::string& key, boo
         return;
     }
     accessibilityManager->SetCardViewParams(key, focus);
-}
-
-void PipelineContext::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
-{
-    CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
-    if (onVsyncProfiler_) {
-        AceTracker::Start();
-    }
-    FlushVsync(nanoTimestamp, frameCount);
-    if (onVsyncProfiler_) {
-        onVsyncProfiler_(AceTracker::Stop());
-    }
 }
 
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
@@ -2252,8 +2231,7 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
-    LOGI("OnSurfaceDensityChanged density_(%{public}lf)", density_);
-    LOGI("OnSurfaceDensityChanged dipScale_(%{public}lf)", dipScale_);
+    LOGI("OnSurfaceDensityChanged density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
     isDensityUpdate_ = density != density_;
     density_ = density;
     if (!NearZero(viewScale_)) {
@@ -3589,22 +3567,6 @@ bool PipelineContext::IsVisibleChangeNodeExists(NodeId index) const
         return false;
     }
     return accessibilityManager->IsVisibleChangeNodeExists(index);
-}
-
-void PipelineContext::SetTouchPipeline(WeakPtr<PipelineContext> context)
-{
-    auto result = std::find(touchPluginPipelineContext_.begin(), touchPluginPipelineContext_.end(), context);
-    if (result == touchPluginPipelineContext_.end()) {
-        touchPluginPipelineContext_.emplace_back(context);
-    }
-}
-
-void PipelineContext::RemoveTouchPipeline(WeakPtr<PipelineContext> context)
-{
-    auto result = std::find(touchPluginPipelineContext_.begin(), touchPluginPipelineContext_.end(), context);
-    if (result != touchPluginPipelineContext_.end()) {
-        touchPluginPipelineContext_.erase(result);
-    }
 }
 
 void PipelineContext::SetRSUIDirector(std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector)

@@ -19,8 +19,9 @@
 #include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
-void AnimationUtils::OpenImplicitAnimation(
-    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
+
+namespace {
+Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& option)
 {
     Rosen::RSAnimationTimingProtocol timingProtocol;
     timingProtocol.SetDuration(option.GetDuration());
@@ -32,6 +33,14 @@ void AnimationUtils::OpenImplicitAnimation(
     timingProtocol.SetAutoReverse(option.GetAnimationDirection() == AnimationDirection::ALTERNATE ||
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
     timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
+    return timingProtocol;
+}
+} // namespace
+
+void AnimationUtils::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
+{
+    const auto& timingProtocol = OptionToTimingProtocol(option);
     Rosen::RSNode::OpenImplicitAnimation(timingProtocol, NativeCurveHelper::ToNativeCurve(curve), wrapFinishCallback);
 }
 
@@ -39,5 +48,11 @@ bool AnimationUtils::CloseImplicitAnimation()
 {
     auto animations = Rosen::RSNode::CloseImplicitAnimation();
     return !animations.empty();
+}
+
+void AnimationUtils::Animate(const AnimationOption& option, const std::function<void()>& wrapFinishCallback)
+{
+    const auto& timingProtocol = OptionToTimingProtocol(option);
+    Rosen::RSNode::Animate(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), wrapFinishCallback);
 }
 } // namespace OHOS::Ace

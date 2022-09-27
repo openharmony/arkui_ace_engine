@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,10 @@
 
 #include "core/components/split_container/render_row_split.h"
 
+#include "base/log/log_wrapper.h"
+#include "base/mousestyle/mouse_style.h"
 #include "core/components/flex/render_flex.h"
+#include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/position_layout_utils.h"
 
 namespace OHOS::Ace {
@@ -26,12 +29,19 @@ constexpr size_t DEFAULT_DRAG_INDEX = -1;
 
 } // namespace
 
-
 void RenderRowSplit::HandleDragStart(const Offset& startPoint)
 {
     dragedSplitIndex_ = DEFAULT_DRAG_INDEX;
-    for (std::size_t i = 0; i < splitRects_.size(); i++) {
+    isDragedMoving_ = true;
+    for (std::size_t i = 0; i < splitRects_.size() - 1; i++) {
         if (splitRects_[i].IsInRegion(Point(startPoint.GetX(), startPoint.GetY()))) {
+            auto context = GetContext().Upgrade();
+            if (context) {
+                auto windowId = context->GetWindowId();
+                MouseFormat leftRightStyle = MouseFormat::WEST_EAST;
+                auto mouseStyle = MouseStyle::CreateMouseStyle();
+                mouseStyle->SetPointerStyle(windowId, leftRightStyle);
+            }
             dragedSplitIndex_ = i;
             LOGD("dragedSplitIndex_ = %zu", dragedSplitIndex_);
             break;
@@ -49,13 +59,30 @@ void RenderRowSplit::HandleDragUpdate(const Offset& currentPoint)
         return;
     }
     dragSplitOffset_[dragedSplitIndex_] += (currentPoint.GetX() - startX_);
+    dragSplitOffset_[dragedSplitIndex_] =
+        dragSplitOffset_[dragedSplitIndex_] < 0.0 ? 0.0 : dragSplitOffset_[dragedSplitIndex_];
     startX_ = currentPoint.GetX();
+    auto context = GetContext().Upgrade();
+    if (context) {
+        auto windowId = context->GetWindowId();
+        MouseFormat leftRightStyle = MouseFormat::WEST_EAST;
+        auto mouseStyle = MouseStyle::CreateMouseStyle();
+        mouseStyle->SetPointerStyle(windowId, leftRightStyle);
+    }
     MarkNeedLayout();
 }
 
 void RenderRowSplit::HandleDragEnd(const Offset& endPoint, double velocity)
 {
     startX_ = 0.0;
+    isDragedMoving_ = false;
+    auto context = GetContext().Upgrade();
+    if (context) {
+        auto windowId = context->GetWindowId();
+        MouseFormat defaultStyle = MouseFormat::DEFAULT;
+        auto mouseStyle = MouseStyle::CreateMouseStyle();
+        mouseStyle->SetPointerStyle(windowId, defaultStyle);
+    }
 }
 
 } // namespace OHOS::Ace

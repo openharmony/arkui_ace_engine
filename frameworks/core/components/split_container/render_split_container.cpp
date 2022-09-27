@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,14 @@
 
 #include "core/components/split_container/render_split_container.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
+#include "base/mousestyle/mouse_style.h"
 #include "core/components/display/render_display.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/flex/render_flex_item.h"
 #include "core/components/split_container/split_container_component.h"
+#include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/position_layout_utils.h"
 
 namespace OHOS::Ace {
@@ -110,7 +113,7 @@ void RenderSplitContainer::UpdateDisplayNode()
     double allocatedSize = 0.0;
     double totalMainSize = 0.0;
     for (const auto& node : disableHideNodes_) {
-        auto  layoutSize = node->GetLayoutSize();
+        auto layoutSize = node->GetLayoutSize();
         totalMainSize += splitType_ == SplitType::ROW_SPLIT ? layoutSize.Width() : layoutSize.Height();
     }
 
@@ -162,7 +165,6 @@ void RenderSplitContainer::PerformLayout()
     }
     layoutHeight_ = splitType_ == SplitType::ROW_SPLIT ? maxSize.Height() : 0.0;
     layoutWidth_ = splitType_ == SplitType::ROW_SPLIT ? 0.0 : maxSize.Width();
-
     LayoutChildren();
 
     if (!displayNodes_.empty() || !disableHideNodes_.empty()) {
@@ -211,26 +213,28 @@ void RenderSplitContainer::LayoutChildren()
             layoutHeight_ += GetMainSize(item);
             layoutHeight_ += DEFAULT_SPLIT_HEIGHT;
         }
-
         item->SetPosition(offset);
         childOffsetMain += GetMainSize(item);
-
         if (dragSplitOffset_[index] > 0.0) {
             childOffsetMain += dragSplitOffset_[index];
         }
         double posMain =
             childOffsetMain > DEFAULT_SPLIT_RESPOND_WIDTH ? (childOffsetMain - DEFAULT_SPLIT_RESPOND_WIDTH) : 0.0;
-
+        posMain = childOffsetMain;
         if (splitType_ == SplitType::ROW_SPLIT) {
-            splitRects_.push_back(
-                Rect(posMain, 0, 2 * DEFAULT_SPLIT_RESPOND_WIDTH + DEFAULT_SPLIT_HEIGHT, maxSize.Height()));
+            splitRects_.push_back(Rect(posMain, 0, DEFAULT_SPLIT_HEIGHT, maxSize.Height()));
         } else {
-            splitRects_.push_back(
-                Rect(0, posMain, maxSize.Width(), 2 * DEFAULT_SPLIT_RESPOND_WIDTH + DEFAULT_SPLIT_HEIGHT));
+            splitRects_.push_back(Rect(0, posMain, maxSize.Width(), DEFAULT_SPLIT_HEIGHT));
         }
 
         childOffsetMain += DEFAULT_SPLIT_HEIGHT;
+
         index++;
+    }
+    if (splitType_ == SplitType::ROW_SPLIT) {
+        layoutWidth_ = childOffsetMain > maxSize.Width() ? maxSize.Width() : childOffsetMain;
+    } else {
+        layoutHeight_ = childOffsetMain > maxSize.Height() ? maxSize.Height() : childOffsetMain;
     }
 }
 
@@ -270,5 +274,71 @@ void RenderSplitContainer::OnTouchTestHit(
         result.emplace_back(dragDetector_);
     }
 }
+
+bool RenderSplitContainer::HandleMouseEvent(const MouseEvent& event)
+{
+    if (isDragedMoving_) {
+        return false;
+    }
+    MouseInfo info;
+    info.SetButton(event.button);
+    info.SetAction(event.action);
+    info.SetGlobalLocation(event.GetOffset());
+    info.SetLocalLocation(event.GetOffset() - Offset(GetCoordinatePoint().GetX(), GetCoordinatePoint().GetY()));
+    info.SetScreenLocation(event.GetScreenOffset());
+    info.SetTimeStamp(event.time);
+    if (splitType_ == SplitType::ROW_SPLIT) {
+        for (int32_t i = 0; i < splitRects_.size() - 1; i++) {
+            auto lowBound = splitRects_[i].GetOffset().GetX();
+            auto upBound = splitRects_[i].GetOffset().GetX() + DEFAULT_SPLIT_HEIGHT;
+            if (info.GetLocalLocation().GetX() >= lowBound && info.GetLocalLocation().GetX() <= upBound) {
+                isDraged_ = true;
+                break;
+            } else {
+                isDraged_ = false;
+            }
+        }
+        if (preIsDraged_ != isDraged_) {
+            preIsDraged_ = isDraged_;
+            auto mouseStyle = MouseStyle::CreateMouseStyle();
+            auto context = GetContext().Upgrade();
+            auto windowId = context->GetWindowId();
+            if (isDraged_) {
+                MouseFormat leftRightStyle = MouseFormat::WEST_EAST;
+                mouseStyle->SetPointerStyle(windowId, leftRightStyle);
+            } else {
+                MouseFormat defaultStyle = MouseFormat::DEFAULT;
+                mouseStyle->SetPointerStyle(windowId, defaultStyle);
+            }
+        }
+    } else {
+        for (int32_t i = 0; i < splitRects_.size() - 1; i++) {
+            auto lowBound = splitRects_[i].GetOffset().GetY();
+            auto upBound = splitRects_[i].GetOffset().GetY() + DEFAULT_SPLIT_HEIGHT;
+            if (info.GetLocalLocation().GetY() >= lowBound && info.GetLocalLocation().GetY() <= upBound) {
+                isDraged_ = true;
+                break;
+            } else {
+                isDraged_ = false;
+            }
+        }
+        if (preIsDraged_ != isDraged_) {
+            preIsDraged_ = isDraged_;
+            auto mouseStyle = MouseStyle::CreateMouseStyle();
+            auto context = GetContext().Upgrade();
+            auto windowId = context->GetWindowId();
+            if (isDraged_) {
+                MouseFormat upDownStyle = MouseFormat::NORTH_SOUTH;
+                mouseStyle->SetPointerStyle(windowId, upDownStyle);
+            } else {
+                MouseFormat defaultStyle = MouseFormat::DEFAULT;
+                mouseStyle->SetPointerStyle(windowId, defaultStyle);
+            }
+        }
+    }
+    return true;
+}
+
+void RenderSplitContainer::HandleMouseHoverEvent(MouseState mouseState) {}
 
 } // namespace OHOS::Ace

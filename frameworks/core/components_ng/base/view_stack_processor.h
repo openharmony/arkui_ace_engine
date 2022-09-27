@@ -106,6 +106,15 @@ public:
         return frameNode->GetOrCreateInputEventHub();
     }
 
+    RefPtr<FocusHub> GetMainFrameNodeFocusHub() const
+    {
+        auto frameNode = GetMainFrameNode();
+        if (!frameNode) {
+            return nullptr;
+        }
+        return frameNode->GetOrCreateFocusHub();
+    }
+
     RefPtr<FrameNode> GetMainFrameNode() const;
 
     // Get main component include composed component created by js view.
@@ -262,7 +271,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };
 
-class ScopedViewStackProcessor final {
+class ACE_EXPORT ScopedViewStackProcessor final {
 public:
     ScopedViewStackProcessor();
     ~ScopedViewStackProcessor();

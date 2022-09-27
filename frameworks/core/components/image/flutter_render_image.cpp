@@ -282,10 +282,8 @@ void FlutterRenderImage::UpdatePixmap(const RefPtr<PixelMap>& pixmap)
     LOGD("update pixmap");
     imageObj_ = MakeRefPtr<PixelMapImageObject>(pixmap);
     image_ = nullptr;
-    curSourceInfo_.Reset();
     rawImageSize_ = imageObj_->GetImageSize();
     rawImageSizeUpdated_ = true;
-    imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
     MarkNeedLayout();
 }
 
@@ -426,6 +424,9 @@ void FlutterRenderImage::ProcessPixmapForPaint()
         imageObj_->ClearData();
         return;
     }
+    // pixelMap render finished
+    curSourceInfo_ = sourceInfo_;
+    imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
     FireLoadEvent(rawImageSize_);
     renderAltImage_ = nullptr;
 }

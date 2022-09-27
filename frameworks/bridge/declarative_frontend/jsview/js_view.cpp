@@ -19,7 +19,6 @@
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
-#include "base/ressched/ressched_report.h"
 #include "core/common/container.h"
 #include "core/components/grid_layout/grid_layout_item_element.h"
 #include "core/components/ifelse/if_else_element.h"
@@ -48,7 +47,6 @@ void JSView::MarkNeedUpdate()
 {
     ACE_DCHECK((!GetElement().Invalid()));
     ACE_SCOPED_TRACE("JSView::MarkNeedUpdate");
-    ResSchedReport::GetInstance().MarkNeedUpdate();
 
     if (GetElement().Invalid()) {
         LOGE("Invalid Element weak ref, internal error");
@@ -871,7 +869,7 @@ void JSViewPartialUpdate::ComponentToElementLocalizedUpdate(const UpdateFuncResu
             element->GetElementId());
         // special case, because new IfElement will be created
         if (AceType::DynamicCast<IfElseElement>(element) != nullptr) {
-            JSIfElse::ComponentToElementLocalizedUpdate(mainComponent, element);
+            IfElseElement::ComponentToElementLocalizedUpdate(mainComponent, element);
         } else if (AceType::DynamicCast<GridLayoutItemElement>(element) != nullptr) {
             // VSP::Finish returns swapped compared to reg
             AceType::DynamicCast<SoleChildElement>(element)->LocalizedUpdateWithItemComponent(

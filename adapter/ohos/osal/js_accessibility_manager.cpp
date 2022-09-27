@@ -56,6 +56,7 @@ const char IMPORTANT_YES[] = "yes";
 const char IMPORTANT_NO[] = "no";
 const char IMPORTANT_NO_HIDE_DES[] = "no-hide-descendants";
 const char LIST_TAG[] = "List";
+const char SIDEBARCONTAINER_TAG[] = "SideBarContainer";
 constexpr int32_t INVALID_PARENT_ID = -2100000;
 constexpr int32_t DEFAULT_PARENT_ID = 2100000;
 constexpr int32_t ROOT_STACK_BASE = 1100000;
@@ -151,8 +152,8 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     const RefPtr<JsAccessibilityManager>& manager, int windowId, NodeId rootId)
 {
     LOGD("nodeId:%{public}d", node->GetNodeId());
-    int leftTopX = static_cast<int>(node->GetLeft()) + manager->GetWindowLeft();
-    int leftTopY = static_cast<int>(node->GetTop()) + manager->GetWindowTop();
+    int leftTopX = static_cast<int>(node->GetLeft()) + manager->GetWindowLeft(node->GetWindowId());
+    int leftTopY = static_cast<int>(node->GetTop()) + manager->GetWindowTop(node->GetWindowId());
     int rightBottomX = leftTopX + static_cast<int>(node->GetWidth());
     int rightBottomY = leftTopY + static_cast<int>(node->GetHeight());
     if (manager->isOhosHostCard()) {
@@ -171,6 +172,16 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
         Accessibility::Rect bounds(leftTopX, leftTopY, rightBottomX, rightBottomY);
         nodeInfo.SetRectInScreen(bounds);
     } else {
+        if (node->GetTag() == SIDEBARCONTAINER_TAG) {
+            Rect sideBarRect = node->GetRect();
+            for (const auto& childNode : node->GetChildList()) {
+                sideBarRect = sideBarRect.CombineRect(childNode->GetRect());
+            }
+            leftTopX = static_cast<int>(sideBarRect.Left()) + manager->GetWindowLeft(node->GetWindowId());
+            leftTopY = static_cast<int>(sideBarRect.Top()) + manager->GetWindowTop(node->GetWindowId());
+            rightBottomX = static_cast<int>(sideBarRect.Right()) + manager->GetWindowLeft(node->GetWindowId());
+            rightBottomY = static_cast<int>(sideBarRect.Bottom()) + manager->GetWindowTop(node->GetWindowId());
+        }
         Accessibility::Rect bounds(leftTopX, leftTopY, rightBottomX, rightBottomY);
         nodeInfo.SetRectInScreen(bounds);
         nodeInfo.SetComponentId(static_cast<int>(node->GetNodeId()));
@@ -373,6 +384,9 @@ bool FindAccessibilityFocus(const RefPtr<AccessibilityNode>& node, RefPtr<Access
 
 bool FindInputFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>& resultNode)
 {
+    if (!node) {
+        return false;
+    }
     LOGI("FindFocus nodeId(%{public}d focus(%{public}d))", node->GetNodeId(), node->GetFocusedState());
     if (!node->GetFocusedState() && (node->GetParentId() != -1)) {
         return false;

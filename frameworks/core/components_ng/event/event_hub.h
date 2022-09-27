@@ -16,7 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_EVENT_HUB_H
 
+#include <utility>
+
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/noncopyable.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
 
@@ -58,6 +63,19 @@ public:
         return inputEventHub_;
     }
 
+    const RefPtr<FocusHub>& GetOrCreateFocusHub()
+    {
+        if (!focusHub_) {
+            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this));
+        }
+        return focusHub_;
+    }
+
+    const RefPtr<FocusHub>& GetFocusHub() const
+    {
+        return focusHub_;
+    }
+
     void AttachHost(const WeakPtr<FrameNode>& host);
 
     RefPtr<FrameNode> GetFrameNode() const;
@@ -71,10 +89,58 @@ public:
         }
     }
 
+    void SetOnAppear(std::function<void()>&& onAppear)
+    {
+        onAppear_ = std::move(onAppear);
+    }
+    void FireOnAppear()
+    {
+        if (onAppear_) {
+            onAppear_();
+        }
+    }
+
+    void SetOnDisappear(std::function<void()>&& onDisappear)
+    {
+        onDisappear_ = std::move(onDisappear);
+    }
+    void FireOnDisappear()
+    {
+        if (onDisappear_) {
+            onDisappear_();
+        }
+    }
+
+    using OnAreaChangedFunc =
+        std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
+    void SetOnAreaChanged(OnAreaChangedFunc&& onAreaChanged)
+    {
+        onAreaChanged_ = std::move(onAreaChanged);
+    }
+
+    void FireOnAreaChanged(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)
+    {
+        if (onAreaChanged_) {
+            onAreaChanged_(oldRect, oldOrigin, rect, origin);
+        }
+    }
+
+    bool HasOnAreaChanged() const
+    {
+        return static_cast<bool>(onAreaChanged_);
+    }
+
 private:
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;
     RefPtr<InputEventHub> inputEventHub_;
+    RefPtr<FocusHub> focusHub_;
+
+    std::function<void()> onAppear_;
+    std::function<void()> onDisappear_;
+    OnAreaChangedFunc onAreaChanged_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };
 
 } // namespace OHOS::Ace::NG

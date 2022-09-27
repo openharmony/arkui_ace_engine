@@ -17,6 +17,7 @@
 
 #include <fstream>
 
+#include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
@@ -39,6 +40,8 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
       weakFrontend_(frontend), instanceId_(instanceId)
 {
+    CHECK_NULL_VOID(frontend);
+    frontendType_ = frontend->GetType();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     eventManager_->SetInstanceId(instanceId);
     imageCache_ = ImageCache::Create();
@@ -456,6 +459,35 @@ bool PipelineBase::CloseImplicitAnimation()
 #else
     return false;
 #endif
+}
+
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
+{
+    CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
+    if (onVsyncProfiler_) {
+        AceTracker::Start();
+    }
+    FlushVsync(nanoTimestamp, frameCount);
+    if (onVsyncProfiler_) {
+        onVsyncProfiler_(AceTracker::Stop());
+    }
+}
+
+void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context)
+{
+    auto result = std::find(touchPluginPipelineContext_.begin(), touchPluginPipelineContext_.end(), context);
+    if (result == touchPluginPipelineContext_.end()) {
+        touchPluginPipelineContext_.emplace_back(context);
+    }
+}
+
+void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
+{
+    auto result = std::find(touchPluginPipelineContext_.begin(), touchPluginPipelineContext_.end(), context);
+    if (result != touchPluginPipelineContext_.end()) {
+        touchPluginPipelineContext_.erase(result);
+    }
 }
 
 } // namespace OHOS::Ace

@@ -67,6 +67,24 @@ inline bool GetIsArkFromConfig(const std::string& packagePathStr)
     return virtualMachine.find("ark") != std::string::npos;
 }
 
+inline const std::string GenerateFullPath(const std::string& prePath, const std::string& postPath)
+{
+    if (prePath.empty() && postPath.empty()) {
+        return "";
+    }
+    std::string tmpPostPath = postPath;
+    if (tmpPostPath.back() == '/') {
+        tmpPostPath.pop_back();
+    }
+    std::string fullPath = prePath;
+    if (fullPath.empty() || fullPath.back() == '/') {
+        fullPath += tmpPostPath;
+    } else {
+        fullPath += "/" + tmpPostPath;
+    }
+    return fullPath;
+}
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_UTILS_H

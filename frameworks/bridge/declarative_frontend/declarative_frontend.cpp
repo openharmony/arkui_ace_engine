@@ -492,7 +492,9 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
 
 void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
 {
-    if (Container::IsCurrentUseNewPipeline() && !pageProfile_.empty()) {
+    auto container = Container::Current();
+    auto isStageModel = container ? container->IsUseStageModel() : false;
+    if (!isStageModel && Container::IsCurrentUseNewPipeline() && !pageProfile_.empty()) {
         // In NG structure and fa mode, first load app.js
         CHECK_NULL_VOID(jsEngine_);
         jsEngine_->LoadFaAppSource();

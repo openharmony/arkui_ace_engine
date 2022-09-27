@@ -54,6 +54,11 @@ public:
         return axis == Axis::HORIZONTAL ? width_ : height_;
     }
 
+    T CrossSize(Axis axis) const
+    {
+        return axis == Axis::HORIZONTAL ? height_ : width_;
+    }
+
     void SetWidth(T width)
     {
         width_ = width;
@@ -339,6 +344,11 @@ public:
         return axis == Axis::HORIZONTAL ? width_ : height_;
     }
 
+    const std::optional<T>& CrossSize(Axis axis) const
+    {
+        return axis == Axis::HORIZONTAL ? height_ : width_;
+    }
+
     void SetWidth(T width)
     {
         width_ = width;
@@ -483,24 +493,32 @@ public:
         return isModified;
     }
 
-    void UpdateIllegalSizeWithCheck(const OptionalSize& size)
+    bool UpdateIllegalSizeWithCheck(const OptionalSize& size)
     {
+        bool isModified = false;
         if (!width_ && size.Width()) {
             width_ = size.Width();
+            isModified = true;
         }
         if (!height_ && size.Height()) {
             height_ = size.Height();
+            isModified = true;
         }
+        return isModified;
     }
 
-    void UpdateIllegalSizeWithCheck(const SizeT<T>& size)
+    bool UpdateIllegalSizeWithCheck(const SizeT<T>& size)
     {
+        bool isModified = false;
         if (!width_.has_value() && NonNegative(size.Width())) {
             width_ = size.Width();
+            isModified = true;
         }
         if (!height_.has_value() && NonNegative(size.Height())) {
             height_ = size.Height();
+            isModified = true;
         }
+        return isModified;
     }
 
     bool UpdateSizeWhenLarger(const SizeT<T>& size)

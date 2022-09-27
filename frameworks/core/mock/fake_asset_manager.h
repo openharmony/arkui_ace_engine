@@ -53,11 +53,11 @@ public:
         return "";
     }
 
-    void SetLibPath(const std::string& packagePath) override {}
+    void SetLibPath(const std::vector<std::string>& packagePath) override {}
 
-    std::string GetLibPath() const override
+    std::vector<std::string> GetLibPath() const override
     {
-        return "";
+        return std::vector<std::string>();
     }
 
     void GetAssetList(const std::string& path, std::vector<std::string>& assetList) const override

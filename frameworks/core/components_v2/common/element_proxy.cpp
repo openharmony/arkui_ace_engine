@@ -338,9 +338,6 @@ public:
             LOGD("TabContentItemElementProxy NEW my id, adding: %{public}d ", GetElementId());
             AddSelfToElementRegistry();
             realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
-            LOGD("TabContentItemElementProxy: initial render case, setting elmtId %{public}d, "
-                "realelmtId will be %{public}d",
-                tabContentItemComponent->GetElementId(), realElmtId_);
         }
 
         // Add Tab Bar Item
@@ -1529,18 +1526,18 @@ public:
         auto ifElseComponent = AceType::DynamicCast<IfElseComponent>(component);
         ACE_DCHECK(ifElseComponent);
 
-        if (branchId_ >= 0 && ifElseComponent->BranchId() != branchId_) {
+        if (branchId_ >= 0 && ifElseComponent->GetBranchId() != branchId_) {
             // Clear old children while branch id mismatched
             children_.clear();
         }
 
-        branchId_ = ifElseComponent->BranchId();
+        branchId_ = ifElseComponent->GetBranchId();
         MultiComposedElementProxy::Update(component, startIndex);
     }
 
     void UpdateInternal(const RefPtr<IfElseComponent>& ifElseComponent, size_t startIndex)
     {
-        branchId_ = ifElseComponent->BranchId();
+        branchId_ = ifElseComponent->GetBranchId();
         MultiComposedElementProxy::Update(ifElseComponent, startIndex);
     }
 
@@ -1578,9 +1575,9 @@ public:
 
         LOGD("IfElseElementProxy::LocalizedUpdate with %{public}s elmtId %{public}d, branchId %{public}d->%{public}d",
             AceType::TypeName(ifElseComponent), ifElseComponent->GetElementId(), branchId_,
-            ifElseComponent->BranchId());
+            ifElseComponent->GetBranchId());
 
-        if (ifElseComponent->BranchId() == branchId_) {
+        if (ifElseComponent->GetBranchId() == branchId_) {
             LOGD("IfElseElementProxy::LocalizedUpdat: branchId unchanged, nothing to do.");
             return;
         }

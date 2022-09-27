@@ -84,6 +84,7 @@ template("declarative_js_engine_ark") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
     if (target_cpu == "arm64") {
@@ -118,8 +119,9 @@ template("declarative_js_engine_ark") {
     if (defined(config.build_for_preview) && config.build_for_preview) {
       deps += [ ":gen_obj_src_abc_mock_system_plugin" ]
       sources += [ "utils/jsi_module_searcher.cpp" ]
-    } else if (!defined(config.build_for_android) ||
-               !config.build_for_android) {
+    } else if (defined(config.build_for_android) && config.build_for_android) {
+      sources += [ "jsi_declarative_utils.cpp" ]
+    } else {
       sources += [
         "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp",
         "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_value.cpp",

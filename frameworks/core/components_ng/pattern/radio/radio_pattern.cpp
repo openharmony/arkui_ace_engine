@@ -35,9 +35,9 @@ void RadioPattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
 }
 
-void RadioPattern::OnDetachFromFrameNode()
+void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto host = GetHost();
+    auto host = Claim(frameNode);
     CHECK_NULL_VOID(host);
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
