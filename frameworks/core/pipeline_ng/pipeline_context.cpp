@@ -139,12 +139,16 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
+    FlushAnimation(GetTimeFromExternalTimer());
+    FlushBuild();
+    FlushTouchEvents();
+    taskScheduler_.FlushTask();
     auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
     if (hasAninmation) {
         RequestFrame();
     }
-    FlushAnimation(GetTimeFromExternalTimer());
-    FlushPipelineWithoutAnimation();
+    FlushMessages();
+    FlushFocus();
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -208,14 +212,7 @@ void PipelineContext::FlushFocus()
     }
 }
 
-void PipelineContext::FlushPipelineWithoutAnimation()
-{
-    FlushBuild();
-    FlushTouchEvents();
-    taskScheduler_.FlushTask();
-    FlushMessages();
-    FlushFocus();
-}
+void PipelineContext::FlushPipelineWithoutAnimation() {}
 
 void PipelineContext::FlushBuild()
 {
@@ -419,7 +416,6 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     }
     return true;
 }
-
 
 void PipelineContext::FlushTouchEvents()
 {
