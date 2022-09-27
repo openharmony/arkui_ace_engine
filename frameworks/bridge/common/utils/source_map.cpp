@@ -26,6 +26,7 @@ const char SOURCES[] = "sources";
 const char NAMES[] = "names";
 const char MAPPINGS[] = "mappings";
 const char FILE[] = "file";
+const char NAMEMAP[] = "nameMap";
 const char SOURCE_CONTENT[] = "sourceContent";
 const char SOURCE_ROOT[] = "sourceRoot";
 const char DELIMITER_COMMA = ',';
@@ -73,26 +74,27 @@ MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
 std::string RevSourceMap::GetOriginalNames(const std::string& sourceCode, uint32_t& errorPos) const
 {
     if (sourceCode.empty() || sourceCode.find("SourceCode:\n") == std::string::npos) {
+        LOGE("SourceCode in stack is wrong.");
         return sourceCode;
     }
-    if (names_.size() % 2 != 0) {
-        LOGE("Names in sourcemap is wrong.");
+    if (nameMap_.size() % 2 != 0) {
+        LOGE("NameMap in sourcemap is wrong.");
         return sourceCode;
     }
     std::string jsCode = sourceCode;
     int32_t posDiff = 0;
-    for (uint32_t i = 0; i < names_.size(); i += 2) {
-        auto found = jsCode.find(names_[i]);
+    for (uint32_t i = 0; i < nameMap_.size(); i += 2) {
+        auto found = jsCode.find(nameMap_[i]);
         while (found != std::string::npos) {
-            // names_[i + 1] is the original name of names_[i]
-            jsCode.replace(found, names_[i].length(), names_[i + 1]);
+            // nameMap_[i + 1] is the original name of nameMap_[i]
+            jsCode.replace(found, nameMap_[i].length(), nameMap_[i + 1]);
             if (static_cast<uint32_t>(found) < errorPos) {
                 // sum the errorPos differences to adjust position of ^
-                posDiff += static_cast<int32_t>(names_[i + 1].length()) - static_cast<int32_t>(names_[i].length());
+                posDiff += static_cast<int32_t>(nameMap_[i + 1].length()) - static_cast<int32_t>(nameMap_[i].length());
             }
             // In case there are other variable names not replaced.
             // example:var e = process.a.b + _ohos_process_1.a.b;
-            found = jsCode.find(names_[i], found + names_[i + 1].length());
+            found = jsCode.find(nameMap_[i], found + nameMap_[i + 1].length());
         }
     }
     auto lineBreakPos = jsCode.rfind('\n', jsCode.length() - 2);
@@ -156,7 +158,7 @@ void RevSourceMap::Init(const std::string& sourceMap)
     // second: add the detail into the keyinfo
     for (auto keyInfo : sourceKeyInfo) {
         if (keyInfo == SOURCES || keyInfo == NAMES || keyInfo == MAPPINGS || keyInfo == FILE ||
-            keyInfo == SOURCE_CONTENT || keyInfo == SOURCE_ROOT) {
+            keyInfo == SOURCE_CONTENT || keyInfo == SOURCE_ROOT || keyInfo == NAMEMAP) {
             // record the temp key info
             mark = keyInfo;
         } else if (mark == SOURCES) {
@@ -167,6 +169,8 @@ void RevSourceMap::Init(const std::string& sourceMap)
             mappings_.push_back(keyInfo);
         } else if (mark == FILE) {
             files_.push_back(keyInfo);
+        } else if (mark == NAMEMAP) {
+            nameMap_.push_back(keyInfo);
         } else {
             continue;
         }

@@ -34,6 +34,11 @@ struct VisibleCallbackInfo {
     bool currentVisibleType = false;
 };
 
+struct WindowPos {
+    int32_t left = 0;
+    int32_t top = 0;
+};
+
 class ACE_EXPORT AccessibilityNodeManager : public AccessibilityManager {
     DECLARE_ACE_TYPE(AccessibilityNodeManager, AccessibilityManager);
 
@@ -124,14 +129,22 @@ public:
 
     void UpdateEventTarget(NodeId id, BaseEventInfo& info) override;
 
-    void SetWindowPos(int32_t left, int32_t top) override;
-    int32_t GetWindowLeft()
+    void SetWindowPos(int32_t left, int32_t top, int32_t windowId) override;
+    int32_t GetWindowLeft(int32_t windowId)
     {
-        return windowLeft_;
+        auto windowPos = windowPosMap_.find(windowId);
+        if (windowPos != windowPosMap_.end()) {
+            return windowPos->second.left;
+        }
+        return windowPosMap_.begin()->second.left;
     }
-    int32_t GetWindowTop()
+    int32_t GetWindowTop(int32_t windowId)
     {
-        return windowTop_;
+        auto windowPos = windowPosMap_.find(windowId);
+        if (windowPos != windowPosMap_.end()) {
+            return windowPos->second.top;
+        }
+        return windowPosMap_.begin()->second.top;
     }
 
     bool IsDeclarative();
@@ -150,8 +163,7 @@ protected:
     Offset cardOffset_;
     int32_t cardId_ = 0;
     bool isOhosHostCard_ = false;
-    int32_t windowLeft_ = 0;
-    int32_t windowTop_ = 0;
+    std::map<int32_t, WindowPos> windowPosMap_;
 
 private:
     RefPtr<AccessibilityNode> CreateCommonAccessibilityNode(

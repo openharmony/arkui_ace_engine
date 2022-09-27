@@ -16,9 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H
 
+#include "core/components/common/properties/scroll_bar.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+
+struct ScrollBarProperty {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarMode, DisplayMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarWidth, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollBarColor, Color);
+};
+
 class ACE_EXPORT GridLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(GridLayoutProperty, LayoutProperty);
 
@@ -30,8 +39,16 @@ public:
     {
         auto value = MakeRefPtr<GridLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propRowsTemplate_ = CloneRowsTemplate();
         value->propColumnsTemplate_ = CloneColumnsTemplate();
-        value->propColumnsTemplate_ = CloneColumnsTemplate();
+        value->propRowsGap_ = CloneRowsGap();
+        value->propColumnsGap_ = CloneColumnsGap();
+        value->propCachedCount_ = CloneCachedCount();
+        value->propLayoutDirection_ = CloneLayoutDirection();
+        value->propMaxCount_ = CloneMaxCount();
+        value->propMinCount_ = CloneMinCount();
+        value->propCellLength_ = CloneCellLength();
+        value->propScrollBarProperty_ = CloneScrollBarProperty();
         return value;
     }
 
@@ -40,7 +57,16 @@ public:
         LayoutProperty::Reset();
         ResetColumnsTemplate();
         ResetRowsTemplate();
+        ResetColumnsGap();
+        ResetRowsGap();
+        ResetCachedCount();
+        ResetLayoutDirection();
+        ResetMaxCount();
+        ResetMinCount();
+        ResetCellLength();
+        ResetScrollBarProperty();
     }
+
     bool IsVertical() const
     {
         bool columnsTemplateValid = propColumnsTemplate_.has_value() && !propColumnsTemplate_.value().empty();
@@ -48,6 +74,7 @@ public:
         return columnsTemplateValid ||
                (!columnsTemplateValid && !rowsTemplateValid); // TODO: take layoutDirection into account
     }
+
     bool IsConfiguredScrollable() const
     {
         bool columnsTemplateSet = !propColumnsTemplate_.value_or("").empty();
@@ -59,6 +86,19 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnsTemplate, std::string, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowsTemplate, std::string, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnsGap, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowsGap, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LayoutDirection, FlexDirection, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxCount, int32_t, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinCount, int32_t, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CellLength, int32_t, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Editable, bool, PROPERTY_UPDATE_LAYOUT);
+
+    ACE_DEFINE_PROPERTY_GROUP(ScrollBarProperty, ScrollBarProperty);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarMode, DisplayMode, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarColor, Color, PROPERTY_UPDATE_RENDER);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutProperty);

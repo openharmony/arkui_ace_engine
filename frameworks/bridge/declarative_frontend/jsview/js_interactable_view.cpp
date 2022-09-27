@@ -167,6 +167,13 @@ void JSInteractableView::JsOnDelete(const JSCallbackInfo& info)
 
 void JSInteractableView::JsTouchable(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info[0]->IsBoolean()) {
+            NG::ViewAbstract::SetTouchable(info[0]->ToBoolean());
+        }
+        return;
+    }
+
     if (info[0]->IsBoolean()) {
         auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
         if (!mainComponent) {

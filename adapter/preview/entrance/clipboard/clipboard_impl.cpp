@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::Platform {
 
-void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption)
+void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
 {
     if (!taskExecutor_ || !callbackSetClipboardData_) {
         LOGE("Failed to set the data to clipboard.");

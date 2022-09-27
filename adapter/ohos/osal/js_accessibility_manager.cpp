@@ -152,8 +152,8 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
     const RefPtr<JsAccessibilityManager>& manager, int windowId, NodeId rootId)
 {
     LOGD("nodeId:%{public}d", node->GetNodeId());
-    int leftTopX = static_cast<int>(node->GetLeft()) + manager->GetWindowLeft();
-    int leftTopY = static_cast<int>(node->GetTop()) + manager->GetWindowTop();
+    int leftTopX = static_cast<int>(node->GetLeft()) + manager->GetWindowLeft(node->GetWindowId());
+    int leftTopY = static_cast<int>(node->GetTop()) + manager->GetWindowTop(node->GetWindowId());
     int rightBottomX = leftTopX + static_cast<int>(node->GetWidth());
     int rightBottomY = leftTopY + static_cast<int>(node->GetHeight());
     if (manager->isOhosHostCard()) {
@@ -177,10 +177,10 @@ void UpdateAccessibilityNodeInfo(const RefPtr<AccessibilityNode>& node, Accessib
             for (const auto& childNode : node->GetChildList()) {
                 sideBarRect = sideBarRect.CombineRect(childNode->GetRect());
             }
-            leftTopX = static_cast<int>(sideBarRect.Left()) + manager->GetWindowLeft();
-            leftTopY = static_cast<int>(sideBarRect.Top()) + manager->GetWindowTop();
-            rightBottomX = static_cast<int>(sideBarRect.Right()) + manager->GetWindowLeft();
-            rightBottomY = static_cast<int>(sideBarRect.Bottom()) + manager->GetWindowLeft();
+            leftTopX = static_cast<int>(sideBarRect.Left()) + manager->GetWindowLeft(node->GetWindowId());
+            leftTopY = static_cast<int>(sideBarRect.Top()) + manager->GetWindowTop(node->GetWindowId());
+            rightBottomX = static_cast<int>(sideBarRect.Right()) + manager->GetWindowLeft(node->GetWindowId());
+            rightBottomY = static_cast<int>(sideBarRect.Bottom()) + manager->GetWindowTop(node->GetWindowId());
         }
         Accessibility::Rect bounds(leftTopX, leftTopY, rightBottomX, rightBottomY);
         nodeInfo.SetRectInScreen(bounds);
@@ -384,6 +384,9 @@ bool FindAccessibilityFocus(const RefPtr<AccessibilityNode>& node, RefPtr<Access
 
 bool FindInputFocus(const RefPtr<AccessibilityNode>& node, RefPtr<AccessibilityNode>& resultNode)
 {
+    if (!node) {
+        return false;
+    }
     LOGI("FindFocus nodeId(%{public}d focus(%{public}d))", node->GetNodeId(), node->GetFocusedState());
     if (!node->GetFocusedState() && (node->GetParentId() != -1)) {
         return false;

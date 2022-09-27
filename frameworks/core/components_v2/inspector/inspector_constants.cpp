@@ -371,6 +371,9 @@ ACE_EXPORT extern const char CUSTOMDIALOG_ETS_TAG[] = "CustomDialog";
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_TAG[] = "DatePickerDialog";
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[] = "DatePickerDialog";
 
+// Normal dialog
+ACE_EXPORT extern const char DIALOG_ETS_TAG[] = "Dialog";
+
 // sideBar
 ACE_EXPORT extern const char SIDE_BAR_COMPONENT_TAG[] = "SideBarContainerComponent";
 ACE_EXPORT extern const char SIDE_BAR_ETS_TAG[] = "SideBarContainer";

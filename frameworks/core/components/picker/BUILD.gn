@@ -24,6 +24,7 @@ build_component("picker") {
     "picker_base_element.cpp",
     "picker_column_component.cpp",
     "picker_column_element.cpp",
+    "picker_data.cpp",
     "picker_date_component.cpp",
     "picker_datetime_component.cpp",
     "picker_multitext_component.cpp",

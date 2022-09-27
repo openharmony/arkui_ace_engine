@@ -2979,7 +2979,7 @@ bool RenderGridLayout::HandleMouseEvent(const MouseEvent& event)
         });
     }
 
-    if (context->IsCtrlDown()) {
+    if (context && context->IsCtrlDown()) {
         if (context->IsKeyboardA()) {
             MultiSelectAllWhenCtrlA();
             return true;
@@ -2989,7 +2989,7 @@ bool RenderGridLayout::HandleMouseEvent(const MouseEvent& event)
     }
     selectedItemsWithCtrl_.clear();
 
-    if (context->IsShiftDown()) {
+    if (context && context->IsShiftDown()) {
         HandleMouseEventWhenShiftDown(event);
         return true;
     }

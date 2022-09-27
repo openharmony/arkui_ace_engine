@@ -51,6 +51,11 @@ public:
 
     void SetupRootElement() override;
 
+    const RefPtr<FrameNode>& GetRootElement() const
+    {
+        return rootNode_;
+    }
+
     void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const std::function<void()>& propertyCallback) override
     {}
 
@@ -73,7 +78,7 @@ public:
     void OnMouseEvent(const MouseEvent& event) override;
 
     // Called by view when axis event received.
-    void OnAxisEvent(const AxisEvent& event) override {}
+    void OnAxisEvent(const AxisEvent& event) override;
 
     // Called by container when rotation event received.
     // if return false, then this event needs platform to handle it.

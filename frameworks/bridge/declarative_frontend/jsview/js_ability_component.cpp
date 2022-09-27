@@ -52,6 +52,11 @@ void JSAbilityComponent::Create(const JSCallbackInfo& info)
     // Parse want
     JSRef<JSVal> wantValue = obj->GetProperty("want");
     if (wantValue->IsObject()) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            NG::AbilityComponentView::Create();
+            NG::AbilityComponentView::SetWant(wantValue->ToString());
+            return;
+        }
         component = AceType::MakeRefPtr<OHOS::Ace::AbilityComponent>();
         component->SetWant(wantValue->ToString());
     } else {
@@ -61,8 +66,8 @@ void JSAbilityComponent::Create(const JSCallbackInfo& info)
             LOGI("bundleName or abilityName is undefined");
             return;
         }
-        jsonStr->Put("bundle", obj->GetProperty("bundleName")->ToString().c_str());
-        jsonStr->Put("ability", obj->GetProperty("abilityName")->ToString().c_str());
+        jsonStr->Put("bundleName", obj->GetProperty("bundleName")->ToString().c_str());
+        jsonStr->Put("abilityName", obj->GetProperty("abilityName")->ToString().c_str());
         if (Container::IsCurrentUseNewPipeline()) {
             NG::AbilityComponentView::Create();
             NG::AbilityComponentView::SetWant(jsonStr->ToString());

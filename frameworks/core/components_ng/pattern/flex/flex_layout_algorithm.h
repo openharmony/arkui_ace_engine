@@ -33,12 +33,20 @@ struct FlexItemProperties {
 struct MagicLayoutNode {
     LayoutConstraintF layoutConstraint;
     RefPtr<LayoutWrapper> layoutWrapper;
+    OptionalSizeF calcSize;
 };
 
 struct BaselineProperties {
     float maxBaselineDistance = 0.0f;
     float maxDistanceAboveBaseline = 0.0f;
     float maxDistanceBelowBaseline = 0.0f;
+
+    void Reset()
+    {
+        maxBaselineDistance = 0.0f;
+        maxDistanceAboveBaseline = 0.0f;
+        maxDistanceBelowBaseline = 0.0f;
+    }
 };
 
 class ACE_EXPORT FlexLayoutAlgorithm : public LayoutAlgorithm {
@@ -55,37 +63,27 @@ public:
 private:
     void InitFlexProperties(LayoutWrapper* layoutWrapper);
     void TravelChildrenFlexProps(LayoutWrapper* layoutWrapper);
-    void MeasureInWeightMode(LayoutWrapper* layoutWrapper);
-    void MeasureInIndexMode(LayoutWrapper* layoutWrapper);
-    void MeasureInItemMode(LayoutWrapper* layoutWrapper);
-    void MeasureMagicNodes(LayoutWrapper* layoutWrapper, BaselineProperties& baselineProperties);
-    void ResizeFlexSizeByItem(const RefPtr<LayoutWrapper>& layoutWrapper, float& allocatedSize);
+    void ResizeFlexSizeByItem(const RefPtr<LayoutWrapper>& layoutWrapper);
     float GetMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     float GetCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
-    void RedoLayoutForStretchMagicNode();
     void CheckSizeValidity(const RefPtr<LayoutWrapper>& layoutWrapper);
-    void CheckBaselineProperties(const RefPtr<LayoutWrapper>& layoutWrapper, BaselineProperties& baselineProperties);
+    void CheckBaselineProperties(const RefPtr<LayoutWrapper>& layoutWrapper);
     void CalculateSpace(float remainSpace, float& frontSpace, float& betweenSpace) const;
-    void PlaceChildren(LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace,
-        const BaselineProperties& baselineProperties);
+    void PlaceChildren(LayoutWrapper* layoutWrapper, float frontSpace, float betweenSpace);
     FlexAlign GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     TextDirection AdjustTextDirectionByDir() const;
-    LayoutConstraintF MakeLayoutConstraint(
-        float mainFlexExtent, const LayoutConstraintF& constraint, bool isStretch, bool supportZero = false) const;
-    LayoutConstraintF MakeLayoutConstraintWithLimit(float maxMainAxisLimit, bool isStretch) const;
     float GetStretchCrossAxisLimit() const;
-    void ResizeItems(const FlexItemProperties& flexItemProps, BaselineProperties& baselineProps);
-    void RedoLayoutFlexItem(
-        const MagicLayoutNode& flexItem, float flexSize, BaselineProperties& baselineProps, float& allocatedFlexSpace);
+    void MeasureAndCleanMagicNodes(FlexItemProperties& flexItemProperties);
+    void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties);
+    void UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size);
+    void UpdateLayoutConstraintOnCrossAxis(LayoutConstraintF& layoutConstraint, float size);
 
     OptionalSizeF realSize_;
-    float mainSize_ = 0.0f;
+    float mainAxisSize_ = 0.0f;
     float crossAxisSize_ = 0.0f;
     float selfIdealCrossAxisSize_ = -1.0f;
     float allocatedSize_ = 0.0f;
     float space_ = 0.0f;
-    bool isCrossInfinite_ = false;
-    bool stretchToParent_ = false;
     float totalFlexWeight_ = 0.0f;
     int32_t maxDisplayPriority_ = 0;
     int32_t validSizeCount_ = 0;
@@ -93,13 +91,12 @@ private:
     FlexAlign mainAxisAlign_ = FlexAlign::FLEX_START;
 
     RefPtr<LayoutWrapper> layoutWrapper_;
-    std::list<RefPtr<LayoutWrapper>> weightNodes_;
-    std::set<RefPtr<LayoutWrapper>> infinityLayoutNodes_;
     std::map<int32_t, std::list<MagicLayoutNode>> magicNodes_;
     std::map<int32_t, float> magicNodeWeights_;
-    FlexLayoutMode layoutMode_ = FlexLayoutMode::FLEX_ITEM_MODE;
+    std::list<MagicLayoutNode> secondaryMeasureList_;
     FlexDirection direction_ = FlexDirection::ROW;
     friend class LinearLayoutUtils;
+    BaselineProperties baselineProperties_;
 
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutAlgorithm);
 };

@@ -186,6 +186,9 @@ public:
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
 
+    HitTestResult AxisTest(
+        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
+
     void AnimateHoverEffect(bool isHovered) const
     {
         auto renderContext = GetRenderContext();
@@ -220,7 +223,21 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
     void OnInspectorIdUpdate(const std::string& /*unused*/) {}
 
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
     RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
+
+    std::string& GetNodeName()
+    {
+        return nodeName_;
+    }
+
+    void SetNodeName(std::string& nodeName)
+    {
+        nodeName_ = nodeName;
+    }
+    bool IsResponseRegion() const;
+    void MarkResponseRegion(bool isResponseRegion);
 
 private:
     void UpdateLayoutPropertyFlag() override;
@@ -245,7 +262,10 @@ private:
     // dump self info.
     void DumpInfo() override;
 
-    HitTestMode GetHitTestMode() const;
+    HitTestMode GetHitTestMode() const override;
+    bool GetTouchable() const;
+    std::vector<RectF> GetResponseRegionList();
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
@@ -263,6 +283,9 @@ private:
     bool hasPendingRequest_ = false;
 
     bool isActive_ = false;
+    bool isResponseRegion_ = false;
+
+    std::string nodeName_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

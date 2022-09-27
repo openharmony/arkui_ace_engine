@@ -34,11 +34,12 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
+#include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/core/components_ng/render/decoration_painter.h"
+#include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "frameworks/core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -120,6 +121,11 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
 
     if (bgLoadingCtx_ && bgLoadingCtx_->GetCanvasImage()) {
         PaintBackground();
+    }
+
+    if (propBackDecoration_) {
+        SizeF frameSize(paintRect.Width(), paintRect.Height());
+        PaintDecoration(frameSize);
     }
 }
 
@@ -349,6 +355,7 @@ RectF RosenRenderContext::AdjustPaintRect()
     const auto& geometryNode = frameNode->GetGeometryNode();
     if (rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE) {
         rect = geometryNode->GetContent() ? geometryNode->GetContent()->GetRect() : RectF();
+        rect.SetOffset(geometryNode->GetFrameOffset() + geometryNode->GetContentOffset());
     } else {
         rect = geometryNode->GetFrameRect();
     }
@@ -439,6 +446,13 @@ void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDr
         });
 }
 
+void RosenRenderContext::FlushModifier(const RefPtr<Modifier>& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+    rsNode_->AddModifier(ConvertModifier(modifier));
+}
+
 void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -518,7 +532,7 @@ bool RosenRenderContext::GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen
     std::list<std::pair<std::shared_ptr<Rosen::RSNode>, int>>& toAddRSNodesAndIndex)
 {
     CHECK_NULL_RETURN(rsNode_, false);
-    const auto& preRSNodesID = rsNode_->GetChildren();
+    auto preRSNodesID = rsNode_->GetChildren();
     std::unordered_set<std::shared_ptr<Rosen::RSNode>> nowRSNodesSet;
     std::unordered_set<std::shared_ptr<Rosen::RSNode>> preRSNodesSet;
     // get previous rsnode children set and now rsnode children set
@@ -548,7 +562,7 @@ bool RosenRenderContext::GetRSNodeTreeDiff(const std::list<std::shared_ptr<Rosen
 void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
 {
     CHECK_NULL_VOID(rsNode_);
-    const auto& nowRSNodes = GetChildrenRSNodes(children);
+    auto nowRSNodes = GetChildrenRSNodes(children);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto option = pipeline->GetExplicitAnimationOption();
@@ -716,7 +730,7 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
             static_cast<int>(backDecoration->GetBlurStyleValue()), pipelineBase->GetDipScale());
     } else if (radius.IsValid()) {
         float radiusPx = pipelineBase->NormalizeToPx(radius);
-        float backblurRadius = DecorationPainter::ConvertRadiusToSigma(radiusPx);
+        float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
         backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
     }
     CHECK_NULL_VOID(rsNode_);
@@ -737,7 +751,7 @@ void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
     std::shared_ptr<Rosen::RSFilter> frontFilter = nullptr;
     if (radius.IsValid()) {
         float radiusPx = radius.ConvertToPx();
-        float frontBlurRadius = DecorationPainter::ConvertRadiusToSigma(radiusPx);
+        float frontBlurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
         frontFilter = Rosen::RSFilter::CreateBlurFilter(frontBlurRadius, frontBlurRadius);
     }
     CHECK_NULL_VOID(rsNode_);
@@ -806,6 +820,32 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
         effect = effect->Rotate({rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.angle});
     }
     return effect;
+}
+
+void RosenRenderContext::PaintDecoration(const SizeF& frameSize)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto& backDecoration = GetOrCreateBackDecoration();
+    if (backDecoration->HasLinearGradient()) {
+        auto gradient = backDecoration->GetLinearGradientValue();
+        auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
+        rsNode_->SetBackgroundShader(Rosen::RSShader::CreateRSShader(shader));
+    }
+}
+
+void RosenRenderContext::UpdateLinearGradient(const NG::Gradient& gradient)
+{
+    auto& backDecoration = GetOrCreateBackDecoration();
+    if (backDecoration->UpdateLinearGradient(gradient)) {
+        auto frameNode = GetHost();
+        if (frameNode) {
+            SizeF frameSize = frameNode->GetGeometryNode()->GetFrameSize();
+            if (frameSize.Width() != 0 && frameSize.Height() != 0) {
+                PaintDecoration(frameSize);
+            }
+            RequestNextFrame();
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

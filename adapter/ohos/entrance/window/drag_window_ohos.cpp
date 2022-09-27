@@ -128,6 +128,7 @@ RefPtr<DragWindow> DragWindow::CreateDragWindow(
     option->SetWindowRect({ x - static_cast<int32_t>(width) / 2, y - static_cast<int32_t>(height) / 2, width, height });
     option->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_DRAGGING_EFFECT);
     option->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    option->SetFocusable(false);
     OHOS::sptr<OHOS::Rosen::Window> dragWindow = OHOS::Rosen::Window::Create(windowName, option);
     if (!dragWindow) {
         LOGE("create drag window failed.");

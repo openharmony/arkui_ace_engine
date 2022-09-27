@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/window/window_extension_connection_proxy.h"
 #include "core/components_ng/pattern/ability_component/ability_component_event_hub.h"
+#include "core/components_ng/pattern/ability_component/ability_component_layout_algorithm.h"
 #include "core/components_ng/pattern/ability_component/ability_component_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
@@ -40,10 +41,17 @@ public:
     {
         return MakeRefPtr<AbilityComponentRenderProperty>();
     }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<AbilityComponentEventHub>();
     }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<AbilityComponentLayoutAlgorithm>();
+    }
+
     void OnModifyDone() override;
     void FireConnect();
     void FireDisConnect();

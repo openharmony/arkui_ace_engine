@@ -39,6 +39,14 @@ void LayoutProperty::Reset()
     CleanDirty();
 }
 
+void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    ACE_PROPERTY_TO_JSON_VALUE(calcLayoutConstraint_, MeasureProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(positionProperty_, PositionProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(magicItemProperty_, MagicItemProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(flexItemProperty_, FlexItemProperty);
+}
+
 RefPtr<LayoutProperty> LayoutProperty::Clone() const
 {
     auto layoutProperty = MakeRefPtr<LayoutProperty>();

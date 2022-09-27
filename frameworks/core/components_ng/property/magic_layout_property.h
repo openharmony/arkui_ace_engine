@@ -27,6 +27,13 @@ struct MagicItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LayoutWeight, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AspectRatio, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DisplayPriority, int32_t);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("layoutWeight", propLayoutWeight.value_or(0));
+        json->Put("aspectRatio", propAspectRatio.value_or(0.0));
+        json->Put("displayPriority", propDisplayPriority.value_or(1));
+    }
 };
 } // namespace OHOS::Ace::NG
 

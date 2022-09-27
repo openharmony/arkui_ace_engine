@@ -39,6 +39,10 @@ public:
     {
         return INVALID_INDEX;
     }
+    virtual size_t FindItemStartIndex(size_t  /* index */)
+    {
+        return 0;
+    }
 };
 
 } // namespace OHOS::Ace::V2

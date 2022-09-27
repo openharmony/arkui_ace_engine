@@ -587,8 +587,6 @@ template("ace_core_ng_source_set") {
       "components/common/properties/color_factory.cpp",
       "components/common/properties/decoration.cpp",
       "components/common/properties/edge.cpp",
-
-      # "components/common/properties/motion_path_evaluator.cpp",
       "components/common/properties/page_transition_option.cpp",
       "components/common/properties/scroll_bar.cpp",
       "components/common/properties/shadow.cpp",
@@ -608,6 +606,7 @@ template("ace_core_ng_source_set") {
       "components/font/constants_converter.cpp",
       "components/font/font_loader_creator.cpp",
       "components/font/font_manager_creator.cpp",
+      "components/picker/picker_data.cpp",
       "components/scroll/scrollable.cpp",
       "components/theme/app_theme.cpp",
       "components/theme/icon_theme.cpp",

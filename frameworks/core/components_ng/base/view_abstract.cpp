@@ -140,6 +140,11 @@ void ViewAbstract::SetFlexGrow(float value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexGrow, value);
 }
 
+void ViewAbstract::SetDisplayIndex(int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, DisplayIndex, value);
+}
+
 void ViewAbstract::SetPadding(const CalcLength& value)
 {
     PaddingProperty padding;
@@ -293,6 +298,28 @@ void ViewAbstract::SetOnAreaChanged(
     eventHub->SetOnAreaChanged(std::move(onAreaChanged));
 }
 
+void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->MarkResponseRegion(true);
+    gestureHub->SetResponseRegion(responseRegion);
+}
+
+void ViewAbstract::SetTouchable(bool touchable)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTouchable(touchable);
+}
+
+void ViewAbstract::SetHitTestMode(HitTestMode hitTestMode)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetHitTestMode(hitTestMode);
+}
+
 void ViewAbstract::SetAlign(Alignment alignment)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
@@ -403,6 +430,11 @@ void ViewAbstract::SetFrontBlur(const Dimension& radius)
 void ViewAbstract::SetBackShadow(const Shadow& shadow)
 {
     ACE_UPDATE_RENDER_CONTEXT(BackShadow, shadow);
+}
+
+void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
+{
+    ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
 }
 
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)

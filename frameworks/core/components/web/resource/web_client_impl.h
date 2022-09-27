@@ -79,6 +79,8 @@ public:
     void OnLoadingProgress(int newProgress) override;
     void OnPageTitle(const std::string &title) override;
     void OnGeolocationHide() override;
+    void OnFullScreenExit() override;
+    void OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler) override;
     void OnGeolocationShow(const std::string& origin,
         OHOS::NWeb::NWebGeolocationCallbackInterface* callback) override;
 

@@ -514,6 +514,31 @@ bool EventManager::DispatchAxisEvent(const AxisEvent& event)
     return true;
 }
 
+void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode)
+{
+    if (!frameNode) {
+        LOGW("renderNode is null.");
+        return;
+    }
+    const NG::PointF point { event.x, event.y };
+    frameNode->AxisTest(point, point, axisTestResults_);
+}
+
+bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
+{
+    if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0) {
+        return false;
+    }
+    LOGD("DispatchAxisEventNG, action is %{public}d, axis is %{public}f / %{public}f / %{public}f", event.action,
+        event.horizontalAxis, event.verticalAxis, event.pinchAxisScale);
+    for (const auto& axisTarget : axisTestResults_) {
+        if (axisTarget && axisTarget->HandleAxisEvent(event)) {
+            return true;
+        }
+    }
+    return true;
+}
+
 bool EventManager::DispatchRotationEvent(
     const RotationEvent& event, const RefPtr<RenderNode>& renderNode, const RefPtr<RenderNode>& requestFocusNode)
 {

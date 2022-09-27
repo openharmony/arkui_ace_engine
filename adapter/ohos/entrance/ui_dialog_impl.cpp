@@ -199,14 +199,14 @@ void UIDialogImpl::ShowDialog(const std::string& name, const std::string& params
     auto container = Ace::Platform::AceContainer::GetContainer(dialogId);
     if (!container) {
         LOGE("container is null, set configuration failed.");
-    } else {
-        auto aceResCfg = container->GetResourceConfiguration();
-        aceResCfg.SetOrientation(Ace::SystemProperties::GetDeviceOrientation());
-        aceResCfg.SetDensity(Ace::SystemProperties::GetResolution());
-        aceResCfg.SetDeviceType(Ace::SystemProperties::GetDeviceType());
-        container->SetResourceConfiguration(aceResCfg);
-        container->SetPackagePathStr(resPath);
+        return;
     }
+    auto aceResCfg = container->GetResourceConfiguration();
+    aceResCfg.SetOrientation(Ace::SystemProperties::GetDeviceOrientation());
+    aceResCfg.SetDensity(Ace::SystemProperties::GetResolution());
+    aceResCfg.SetDeviceType(Ace::SystemProperties::GetDeviceType());
+    container->SetResourceConfiguration(aceResCfg);
+    container->SetPackagePathStr(resPath);
 
     Ace::Platform::AceContainer::SetDialogCallback(
         dialogId, [callback = dialogCallback, id = dialogId](const std::string& event, const std::string& params) {

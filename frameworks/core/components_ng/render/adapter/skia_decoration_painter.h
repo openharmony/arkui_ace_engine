@@ -13,24 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_DECORATION_PAINTER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_DECORATION_PAINTER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_SKIA_DECORATION_PAINTER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_SKIA_DECORATION_PAINTER_H
 
 #include "include/core/SkMaskFilter.h"
+#include "include/core/SkShader.h"
+#include "base/geometry/ng/size_t.h"
+#include "base/geometry/ng/rect_t.h"
+#include "core/components_ng/property/gradient_property.h"
 
 namespace OHOS::Ace::NG {
-
-class DecorationPainter : public virtual AceType {
-    DECLARE_ACE_TYPE(DecorationPainter, AceType);
+class SkiaDecorationPainter : public virtual AceType {
+    DECLARE_ACE_TYPE(SkiaDecorationPainter, AceType);
 
 public:
-    DecorationPainter() = default;
-    ~DecorationPainter() override = default;
+    SkiaDecorationPainter() = default;
+    ~SkiaDecorationPainter() override = default;
     static float ConvertRadiusToSigma(float radius)
     {
         constexpr float BlurSigmaScale = 0.57735f;
         return radius > 0.0f ? BlurSigmaScale * radius + SK_ScalarHalf : 0.0f;
     }
+
+    static sk_sp<SkShader> CreateGradientShader(
+        const NG::Gradient& gradient, const SizeF& size);
 };
 } // namespace OHOS::Ace::NG
 

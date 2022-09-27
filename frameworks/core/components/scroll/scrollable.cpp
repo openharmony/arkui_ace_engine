@@ -293,6 +293,10 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
     LOGD("handle drag end, position is %{public}lf and %{public}lf, velocity is %{public}lf",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
+    if (!moved_) {
+        LOGI("It is not moved now,  no need to handle drag end");
+        return;
+    }
     controller_->ClearAllListeners();
     springController_->ClearAllListeners();
     isDragUpdateStop_ = false;

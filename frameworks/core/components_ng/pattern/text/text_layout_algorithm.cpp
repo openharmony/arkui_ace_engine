@@ -60,8 +60,9 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     baselineOffset_ = static_cast<float>(baselineOffset);
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
-    float widthFinal = std::min(static_cast<float>(GetTextWidth()), contentConstraint.maxSize.Width());
-    return SizeF(widthFinal, heightFinal);
+    auto baselineDistance = paragraph_->GetAlphabeticBaseline() + std::max(GetBaselineOffset(), 0.0f);
+    layoutWrapper->GetGeometryNode()->SetBaselineDistance(baselineDistance);
+    return SizeF(static_cast<float>(GetTextWidth()), heightFinal);
 }
 
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content)
