@@ -131,7 +131,7 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     LOGD("Measure: %{public}s, Constraint: %{public}s", GetHostTag().c_str(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
 
-    if (isContraintNoChanged_ && !CheckMeasureFlag(layoutProperty_->GetPropertyChangeFlag())) {
+    if (isContraintNoChanged_ && !CheckNeedMeasure(layoutProperty_->GetPropertyChangeFlag())) {
         LOGD("%{public}s skip measure content, constrain flag: %{public}d, measure flag: %{public}d",
             host->GetTag().c_str(), isContraintNoChanged_, layoutProperty_->GetPropertyChangeFlag());
     } else {
