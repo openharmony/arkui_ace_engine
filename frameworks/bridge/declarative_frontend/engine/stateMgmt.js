@@ -270,12 +270,11 @@ class SubscribableHandler {
                 }
             }
             else {
-                console.error(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+                console.warn(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
             }
         });
     }
     get(target, property) {
-        console.debug(`SubscribableHandler: get '${property.toString()}'.`);
         return (property === SubscribableHandler.IS_OBSERVED_OBJECT) ? true :
             (property === SubscribableHandler.RAW_OBJECT) ? target : target[property];
     }
@@ -470,7 +469,7 @@ class ObservedPropertyAbstract {
                 }
             }
             else {
-                console.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+                console.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
     }
@@ -1330,7 +1329,6 @@ class LocalStorage extends NativeLocalStorage {
             var p = this.storage_.get(propName);
             p.aboutToBeDeleted();
         }
-        /* console.log(`${this.constructor.name}.deleteAll: success`); */
     }
     /**
      * Subscribe to value change notifications of named property
@@ -2057,7 +2055,6 @@ class DistributedStorage {
             console.warn(`DistributedStorage is not aviliable`);
             return;
         }
-        console.error(`DistributedStorage value is object ${key}-${JSON.stringify(value)}`);
         if (typeof value == 'object') {
             this.storage_.set(key, JSON.stringify(value));
             return;

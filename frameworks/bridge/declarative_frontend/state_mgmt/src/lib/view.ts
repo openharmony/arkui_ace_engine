@@ -80,11 +80,11 @@ abstract class View extends NativeView implements
     this.localStoragebackStore_ = undefined;
     if (parent) {
       // this View is not a top-level View
-      console.log(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
+      console.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
       this.localStorage_ = parent.localStorage_;
     } else if (localStorage) {
       this.localStorage_ = localStorage;
-      console.log(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
+      console.debug(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
     }
 
     SubscriberManager.Get().add(this);
@@ -143,7 +143,7 @@ abstract class View extends NativeView implements
   }
 
   public aboutToRender(): void {
-    console.log(`${this.constructor.name}: aboutToRender`);
+    console.debug(`${this.constructor.name}: aboutToRender`);
     // reset
     this.propsUsedForRender = new Set<string>();
     this.isRenderingInProgress = true;
@@ -156,7 +156,7 @@ abstract class View extends NativeView implements
 
   public onRenderDone(): void {
     this.isRenderingInProgress = false;
-    console.log(`${this.constructor.name}: onRenderDone: render performed get access to these properties: ${JSON.stringify(Array.from(this.propsUsedForRender))}.`);
+    console.debug(`${this.constructor.name}: onRenderDone: render performed get access to these properties: ${JSON.stringify(Array.from(this.propsUsedForRender))}.`);
   }
 
 
