@@ -36,7 +36,7 @@ class LocalStorage extends NativeLocalStorage {
    */
   constructor(initializingProperties: Object = {}) {
     super();
-    console.log(`${this.constructor.name} constructor.`)
+    console.debug(`${this.constructor.name} constructor.`)
     this.storage_ = new Map<string, ObservedPropertyAbstract<any>>();
     if (Object.keys(initializingProperties).length) {
       this.initializeProps(initializingProperties);
@@ -155,10 +155,10 @@ class LocalStorage extends NativeLocalStorage {
 
     var p: ObservedPropertyAbstract<T> = this.storage_.get(propName);
     if (p) {
-      console.log(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) update existing property`);
+      console.debug(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) update existing property`);
       p.set(newValue);
     } else {
-      console.log(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) create new entry and set value`);
+      console.debug(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) create new entry and set value`);
       this.addNewPropertyInternal<T>(propName, newValue);
     }
     return true;
@@ -308,7 +308,7 @@ class LocalStorage extends NativeLocalStorage {
       var p: ObservedPropertyAbstract<any> = this.storage_.get(propName);
       p.aboutToBeDeleted();
     }
-    console.log(`${this.constructor.name}.deleteAll: success`);
+    console.debug(`${this.constructor.name}.deleteAll: success`);
   }
 
   /**
@@ -366,7 +366,7 @@ class LocalStorage extends NativeLocalStorage {
       // property named 'storagePropName' not yet in storage
       // add new property to storage
       if (defaultValue === undefined) {
-        console.log(`${this.constructor.name}.__createSync(${storagePropName}, non-existing property and undefined default value. ERROR.`);
+        console.error(`${this.constructor.name}.__createSync(${storagePropName}, non-existing property and undefined default value. ERROR.`);
         return undefined;
       }
 

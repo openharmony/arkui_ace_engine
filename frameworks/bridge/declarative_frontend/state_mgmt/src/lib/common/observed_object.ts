@@ -38,7 +38,7 @@ function Observed<C extends Object>(target: Type<C>): any {
   var original = target;
   // the new constructor behaviour
   var f: any = function (...args: any[]) {
-    console.log(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
+    console.debug(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
     return new ObservedObject<C>(new original(...args), undefined);
   };
 
@@ -95,13 +95,12 @@ class SubscribableHandler {
           (owningProperty as IMultiPropertiesChangeSubscriber).propertyHasChanged(propName);
         }
       } else {
-        console.error(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+        console.warn(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
       }
     });
   }
 
   public get(target: Object, property: PropertyKey): any {
-    console.error(`SubscribableHandler: get '${property.toString()}'.`);
     return (property === SubscribableHandler.IS_OBSERVED_OBJECT) ? true :
       (property === SubscribableHandler.RAW_OBJECT) ? target : target[property];
   }
@@ -122,7 +121,6 @@ class SubscribableHandler {
         if (target[property] == newValue) {
           return true;
         }
-        console.log(`SubscribableHandler: set property '${property.toString()}' to new value'`);
         target[property] = newValue;
         this.notifyPropertyHasChanged(property.toString(), newValue);
         return true;
