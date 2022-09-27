@@ -107,6 +107,7 @@ AceAsyncScopedTrace::AceAsyncScopedTrace(const char* format, ...) : asyncTraceEn
         va_list args;
         va_start(args, format);
         name_ = AceAsyncTraceBeginWithArgv(taskId_, format, args);
+        va_end(args);
     }
 }
 
