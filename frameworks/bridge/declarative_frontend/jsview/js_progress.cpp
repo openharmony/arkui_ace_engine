@@ -17,11 +17,14 @@
 
 #include <cmath>
 
+#include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/progress/progress_component.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components/track/track_component.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/progress/progress_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -45,13 +48,17 @@ void JSProgress::Create(const JSCallbackInfo& info)
 
     auto total = 100;
     auto jsTotal = paramObject->GetProperty("total");
-    if (jsTotal->IsNumber()) {
+    if (jsTotal->IsNumber() && jsTotal->ToNumber<int>() > 0) {
         total = jsTotal->ToNumber<int>();
     } else {
-        LOGE("create progress fail because the total is not value");
+        LOGE("create progress fail because the total is not value or total is less than zero");
     }
 
-    if ((value > total) || (value < 0)) {
+    if (value > total) {
+        LOGE("value is lager than total , set value euqals total");
+        value = total;
+    } else if (value < 0) {
+        LOGE("value is s less than zero, set value euqals zero");
         value = 0;
     }
 
@@ -120,7 +127,25 @@ void JSProgress::JSBind(BindingTarget globalObj)
 
 void JSProgress::SetValue(double value)
 {
+    if (std::isnan(value)) {
+        return;
+    }
+
+    if (value < 0) {
+        LOGE("value is leses than zero , set value euqals zero");
+        value = 0;
+    }
+
     if (Container::IsCurrentUseNewPipeline()) {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+        CHECK_NULL_VOID(progressPaintProperty);
+        auto maxValue = progressPaintProperty->GetMaxValue();
+        if (value > maxValue) {
+            LOGE("value is lager than total , set value euqals total");
+            value = maxValue.value_or(0);
+        }
         NG::ProgressView::SetValue(value);
         return;
     }
@@ -131,11 +156,13 @@ void JSProgress::SetValue(double value)
         LOGI("progress component is null.");
         return;
     }
-    if (std::isnan(value)) {
-        progress->SetValue(0.0);
-    } else {
-        progress->SetValue(value);
+
+    auto maxValue_ = progress->GetMaxValue();
+    if (value > maxValue_) {
+        LOGE("value is lager than total , set value euqals total");
+        value = maxValue_;
     }
+    progress->SetValue(value);
 }
 
 void JSProgress::SetColor(const JSCallbackInfo& info)
@@ -231,6 +258,16 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
         return;
     }
 
+    Color colorVal;
+    if (!ParseJsColor(info[0], colorVal)) {
+        return;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::ProgressView::SetBackgroundColor(colorVal);
+        return;
+    }
+
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto progress = AceType::DynamicCast<ProgressComponent>(component);
     if (!progress) {
@@ -243,10 +280,7 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
         return;
     }
 
-    Color colorVal;
-    if (ParseJsColor(info[0], colorVal)) {
-        track->SetBackgroundColor(colorVal);
-    }
+    track->SetBackgroundColor(colorVal);
 }
 
 } // namespace OHOS::Ace::Framework

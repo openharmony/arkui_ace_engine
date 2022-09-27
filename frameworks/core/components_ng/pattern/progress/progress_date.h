@@ -44,6 +44,7 @@ struct ProgressDate {
 
 struct ProgressStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Color, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Type, ProgressType);
 };
 

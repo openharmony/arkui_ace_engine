@@ -43,9 +43,7 @@ public:
     {
         auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
         CHECK_NULL_RETURN(progressLayoutProperty, nullptr);
-        const auto& progressStyle = progressLayoutProperty->GetProgressStyle();
-        CHECK_NULL_RETURN(progressStyle,  nullptr);
-        ProgressType progressType_ = progressStyle->GetType().value_or(ProgressType::LINEAR);
+        ProgressType progressType_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
         return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_);
     }
 
