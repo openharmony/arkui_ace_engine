@@ -58,7 +58,7 @@ void ListView::SetDivider(const V2::ItemDivider& divider)
 
 void ListView::SetChainAnimation(bool enableChainAnimation)
 {
-    // TODO: chainAnimation 先上空接口
+
 }
 
 void ListView::SetLanes(int32_t lanes)
@@ -88,7 +88,7 @@ void ListView::SetCachedCount(const int32_t& cachedCount)
 
 void ListView::SetSticky(V2::StickyStyle stickyStyle)
 {
-    // TODO: sticky接口废除，先上空实现
+
 }
 
 void ListView::SetOnScroll(OnScrollEvent&& onScroll)
