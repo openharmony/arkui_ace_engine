@@ -72,6 +72,12 @@ void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
             LOGE("touch point is null");
             return;
         }
+
+        // only handle touch event
+        if (info.GetSourceDevice() != SourceType::TOUCH) {
+            return;
+        }
+
         const auto& changedPoint = info.GetChangedTouches().front();
         if (changedPoint.GetTouchType() == TouchType::DOWN) {
             pattern->HandleTouchDown(info, false);
@@ -109,6 +115,15 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent_);
+
+    auto axisTask = [weak = WeakClaim(this)](AxisInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleAxisEvent(info);
+        }
+    };
+    axisEvent_ = MakeRefPtr<InputEvent>(std::move(axisTask));
+    inputHub->AddOnAxisEvent(axisEvent_);
 }
 
 void WebPattern::HandleMouseEvent(MouseInfo& info)
@@ -122,6 +137,17 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
     auto mouseEventCallback = eventHub->GetOnMouseEvent();
     CHECK_NULL_VOID(mouseEventCallback);
     mouseEventCallback(info);
+}
+
+void WebPattern::HandleAxisEvent(AxisInfo& info)
+{
+    if (!delegate_) {
+        LOGE("Delegate_ is nullptr");
+        return;
+    }
+    auto localLocation = info.GetLocalLocation();
+    delegate_->HandleAxisEvent(
+        localLocation.GetX(), localLocation.GetY(), info.GetHorizontalAxis(), info.GetVerticalAxis());
 }
 
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
