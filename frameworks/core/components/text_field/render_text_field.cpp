@@ -1284,7 +1284,7 @@ void RenderTextField::PerformAction(TextInputAction action, bool forceCloseKeybo
         onSubmitEvent_(controller_->GetValue().text);
     }
     if (onSubmit_) {
-        onSubmit_(static_cast<int32_t>(action_));
+        onSubmit_(static_cast<int32_t>(action));
     }
 }
 
@@ -2002,12 +2002,13 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
 {
     std::string appendElement;
     if (event.action == KeyAction::DOWN) {
-        if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_NUMPAD_ENTER) {
+        if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_NUMPAD_ENTER ||
+            event.code == KeyCode::KEY_DPAD_CENTER) {
             if (keyboard_ == TextInputType::MULTILINE) {
                 appendElement = "\n";
-            // normal enter should trigger onSubmit
-            } else if (onSubmit_) {
-                onSubmit_(static_cast<int32_t>(keyboard_));
+            } else {
+                // normal enter should trigger onSubmit
+                PerformAction(action_, true);
             }
         } else if (event.IsNumberKey()) {
             appendElement = event.ConvertCodeToString();
