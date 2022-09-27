@@ -35,11 +35,7 @@ class AceAbility final : public OHOS::AppExecFwk::Ability,
                          public OHOS::Rosen::IInputEventConsumer,
                          public OHOS::Rosen::IAceAbilityHandler {
 public:
-    AceAbility()
-    {
-        abilityId_ = instanceId_;
-        instanceId_++;
-    }
+    AceAbility() = default;
     virtual ~AceAbility() = default;
 
     void OnStart(const OHOS::AAFwk::Want& want) override;
@@ -90,7 +86,7 @@ private:
     static const std::string PAGE_URI;
     static const std::string CONTINUE_PARAMS_KEY;
 
-    int32_t abilityId_ = 0;
+    int32_t abilityId_ = -1;
     float density_ = 1.0f;
     std::string remotePageUrl_;
     std::string remoteData_;
