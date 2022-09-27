@@ -13,21 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_POSITION_PROPERTIES_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_POSITION_PROPERTIES_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_INSPECTOR_INSPECTOR_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_INSPECTOR_INSPECTOR_H
 
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/property/property.h"
+#include "base/utils/macros.h"
+
+#include <string>
 
 namespace OHOS::Ace::NG {
-struct PositionProperty {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(Alignment, Alignment);
-
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
-    {
-        json->Put("align", propAlignment.value_or(Alignment::CENTER).GetAlignmentStr(TextDirection::LTR).c_str());
-    }
+class ACE_EXPORT Inspector {
+public:
+    static std::string GetInspectorNodeByKey(const std::string& key);
+    static std::string GetInspectorTree();
+    static bool SendEventByKey(const std::string& key, int action, const std::string& params);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_POSITION_PROPERTIES_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_INSPECTOR_INSPECTOR_H

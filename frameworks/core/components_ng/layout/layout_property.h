@@ -52,6 +52,8 @@ public:
 
     virtual void Reset();
 
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
+
     const std::optional<LayoutConstraintF>& GetLayoutConstraint() const
     {
         return layoutConstraint_;

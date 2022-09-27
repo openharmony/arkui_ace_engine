@@ -133,6 +133,12 @@ void FrameNode::DumpInfo()
                                                    : "NA"));
 }
 
+void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    ACE_PROPERTY_TO_JSON_VALUE(layoutProperty_, LayoutProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(paintProperty_, PaintProperty);
+}
+
 void FrameNode::OnAttachToMainTree()
 {
     UINode::OnAttachToMainTree();

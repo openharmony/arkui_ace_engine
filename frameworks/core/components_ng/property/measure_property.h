@@ -182,6 +182,42 @@ struct MeasureProperty {
         str.append("selfIdealSize: [").append(selfIdealSize.has_value() ? selfIdealSize->ToString() : "NA").append("]");
         return str;
     }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        std::string width =
+            selfIdealSize.has_value()
+                ? (selfIdealSize.value().Width().has_value() ? selfIdealSize.value().Width().value().ToString() : "-")
+                : "-";
+        std::string height =
+            selfIdealSize.has_value()
+                ? (selfIdealSize.value().Height().has_value() ? selfIdealSize.value().Height().value().ToString() : "-")
+                : "-";
+        json->Put("width", width.c_str());
+        json->Put("height", height.c_str());
+
+        auto jsonSize = JsonUtil::Create(true);
+        jsonSize->Put("width", width.c_str());
+        jsonSize->Put("height", height.c_str());
+        json->Put("size", jsonSize);
+
+        auto jsonConstraintSize = JsonUtil::Create(true);
+        jsonConstraintSize->Put("minWidth",
+            minSize.value_or(CalcSize()).Width().value_or(CalcLength(0, DimensionUnit::VP)).ToString().c_str());
+        jsonConstraintSize->Put("minHeight",
+            minSize.value_or(CalcSize()).Height().value_or(CalcLength(0, DimensionUnit::VP)).ToString().c_str());
+        jsonConstraintSize->Put("maxWidth", maxSize.value_or(CalcSize())
+                                                .Width()
+                                                .value_or(CalcLength(Infinity<double>(), DimensionUnit::VP))
+                                                .ToString()
+                                                .c_str());
+        jsonConstraintSize->Put("maxHeight", maxSize.value_or(CalcSize())
+                                                 .Height()
+                                                 .value_or(CalcLength(Infinity<double>(), DimensionUnit::VP))
+                                                 .ToString()
+                                                 .c_str());
+        json->Put("constraintSize", jsonConstraintSize->ToString().c_str());
+    }
 };
 
 template<typename T>

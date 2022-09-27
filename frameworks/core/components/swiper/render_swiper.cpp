@@ -224,31 +224,7 @@ void RenderSwiper::Update(const RefPtr<Component>& component)
 
     curve_ = swiper->GetCurve();
     if (curve_) {
-        if (curve_ == Curves::EASE) {
-            curveRender_ = "Curves.Ease";
-        } else if (curve_ == Curves::EASE_IN) {
-            curveRender_ = "Curves.EaseIn";
-        } else if (curve_ == Curves::EASE_OUT) {
-            curveRender_ = "Curves.EaseOut";
-        } else if (curve_ == Curves::EASE_IN_OUT) {
-            curveRender_ = "Curves.EaseInOut";
-        } else if (curve_ == Curves::FAST_OUT_SLOW_IN) {
-            curveRender_ = "Curves.FastOutSlowIn";
-        } else if (curve_ == Curves::LINEAR_OUT_SLOW_IN) {
-            curveRender_ = "Curves.LinearOutSlowIn";
-        } else if (curve_ == Curves::FAST_OUT_LINEAR_IN) {
-            curveRender_ = "Curves.FastOutLinearIn";
-        } else if (curve_ == Curves::FRICTION) {
-            curveRender_ = "Curves.Friction";
-        } else if (curve_ == Curves::EXTREME_DECELERATION) {
-            curveRender_ = "Curves.ExtremeDeceleration";
-        } else if (curve_ == Curves::SHARP) {
-            curveRender_ = "Curves.Sharp";
-        } else if (curve_ == Curves::SMOOTH) {
-            curveRender_ = "Curves.Smooth";
-        } else if (curve_ == Curves::LINEAR) {
-            curveRender_ = "Curves.Linear";
-        }
+        curveRender_ = Curves::ToString(curve_);
     }
 
     // Get item count of swiper

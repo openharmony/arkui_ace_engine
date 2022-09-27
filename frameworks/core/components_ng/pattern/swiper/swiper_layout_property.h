@@ -60,6 +60,20 @@ public:
         ResetShowIndicator();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("index", std::to_string(propIndex_.value_or(0)).c_str());
+        json->Put("vertical", propDirection_.value_or(Axis::HORIZONTAL) == Axis::VERTICAL ? "true" : "false");
+        json->Put("indicator", propShowIndicator_.value_or(true) ? "true" : "false");
+        json->Put("itemSpace", propItemSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("cachedCount", propCachedCount_.value_or(1));
+        json->Put("displayMode", propDisplayMode_.value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::AUTO_LINEAR
+                                     ? "SwiperDisplayMode.AutoLinear"
+                                     : "SwiperDisplayMode.Stretch");
+        json->Put("displayCount", propDisplayCount_.value_or(1));
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemSpace, Dimension, PROPERTY_UPDATE_MEASURE);
