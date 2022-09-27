@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_POLYGON_PAINT_PROPERTY_H
 
 #include <string>
+
 #include "core/components/shape/shape_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
@@ -61,5 +62,7 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(PolygonPaintProperty);
 };
+
 } // namespace OHOS::Ace::NG
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_PATH_PAINT_PROPERTY_H

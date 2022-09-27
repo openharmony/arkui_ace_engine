@@ -33,6 +33,7 @@ void JSPolygon::Create(const JSCallbackInfo& info)
     RefPtr<Component> polygonComponent = AceType::MakeRefPtr<OHOS::Ace::ShapeComponent>(ShapeType::POLYGON);
     ViewStackProcessor::GetInstance()->ClaimElementId(polygonComponent);
     ViewStackProcessor::GetInstance()->Push(polygonComponent);
+    JSShapeAbstract::SetSize(info);
 }
 
 void JSPolygon::JSBind(BindingTarget globalObj)

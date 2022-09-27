@@ -13,36 +13,34 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/render/polygon_painter.h"
+
 #include "core/components_ng/pattern/shape/polygon_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/polygon_painter.h"
 #include "core/components_ng/render/shape_painter.h"
 
 namespace OHOS::Ace::NG {
-void PolygonPainter::DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& polygonPaintProperty,bool isClose)
+void PolygonPainter::DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& polygonPaintProperty, bool isClose)
 {
-    LOGE("wch polygon_painter   DrawPolygon    polygonPaintProperty.HasPoints(): %{public}d",
-        polygonPaintProperty.HasPoints());
     if (!polygonPaintProperty.HasPoints()) {
         return;
     }
     RSPen pen;
-    RSBrush brush;
     ShapePainter::SetPan(pen, polygonPaintProperty);
-    ShapePainter::SetBrush(brush, polygonPaintProperty);
     canvas.AttachPen(pen);
-    canvas.AttachBrush(brush);
+    if (isClose) {
+        RSBrush brush;
+        ShapePainter::SetBrush(brush, polygonPaintProperty);
+        canvas.AttachBrush(brush);
+    }
     RSPath path;
     std::vector<RSPoint> points;
-
     for (auto point : polygonPaintProperty.GetPointsValue()) {
-        LOGE("wch polygon_painter   point:   x=%{public}f: %{public}f", point.first.Value(), point.second.Value());
         points.emplace_back(RSPoint(
             static_cast<RSScalar>(point.first.ConvertToPx()), static_cast<RSScalar>(point.second.ConvertToPx())));
     }
-    LOGE("wch polygon_painter   points.empty()    points.empty(): %{public}d", points.empty());
     if (points.empty()) {
         return;
     }

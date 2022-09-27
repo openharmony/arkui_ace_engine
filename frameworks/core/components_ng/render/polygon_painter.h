@@ -27,8 +27,9 @@ class PolygonPainter {
 public:
     PolygonPainter() = default;
     ~PolygonPainter() = default;
-    static void DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& polygonPaintProperty,bool isclose);
+    static void DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& polygonPaintProperty, bool isclose);
 };
 
 } // namespace OHOS::Ace::NG
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_POLYGON_PAINTER_H

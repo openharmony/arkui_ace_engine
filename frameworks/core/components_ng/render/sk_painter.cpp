@@ -48,7 +48,7 @@ void SkPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const Sh
 
 void SkPainter::SetPaint(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty)
 {
-    skPaint.setStyle(SkPaint::Style::kStrokeAndFill_Style);
+    skPaint.setStyle(SkPaint::Style::kStroke_Style);
     if (shapePaintProperty.HasAntiAlias()) {
         skPaint.setAntiAlias(shapePaintProperty.GetAntiAliasValue());
     } else {
@@ -82,9 +82,9 @@ void SkPainter::SetPaint(SkPaint& skPaint, const ShapePaintProperty& shapePaintP
     }
 
     if (shapePaintProperty.HasStrokeWidth()) {
-        skPaint.setStrokeWidth(static_cast<RSScalar>(shapePaintProperty.GetStrokeWidthValue().ConvertToPx()));
+        skPaint.setStrokeWidth(static_cast<SkScalar>(shapePaintProperty.GetStrokeWidthValue().ConvertToPx()));
     } else {
-        skPaint.setStrokeWidth(static_cast<RSScalar>(shapePaintProperty.STOKE_WIDTH_DEFAULT.ConvertToPx()));
+        skPaint.setStrokeWidth(static_cast<SkScalar>(shapePaintProperty.STOKE_WIDTH_DEFAULT.ConvertToPx()));
     }
 
     if (shapePaintProperty.HasStroke()) {
@@ -101,19 +101,19 @@ void SkPainter::SetPaint(SkPaint& skPaint, const ShapePaintProperty& shapePaintP
 
     if (shapePaintProperty.HasStrokeDashArray()) {
         auto lineDashState = shapePaintProperty.GetStrokeDashArrayValue();
-        RSScalar intervals[lineDashState.size()];
+        SkScalar intervals[lineDashState.size()];
         for (size_t i = 0; i < lineDashState.size(); ++i) {
-            intervals[i] = static_cast<RSScalar>(lineDashState[i].ConvertToPx());
+            intervals[i] = static_cast<SkScalar>(lineDashState[i].ConvertToPx());
         }
-        RSScalar phase = 0.0f;
+        SkScalar phase = 0.0f;
         if (shapePaintProperty.HasStrokeDashOffset()) {
-            phase = static_cast<RSScalar>(shapePaintProperty.GetStrokeDashOffsetValue().ConvertToPx());
+            phase = static_cast<SkScalar>(shapePaintProperty.GetStrokeDashOffsetValue().ConvertToPx());
         }
         skPaint.setPathEffect(SkDashPathEffect::Make(intervals, lineDashState.size(), phase));
     }
 
     if (shapePaintProperty.HasStrokeMiterLimit()) {
-        skPaint.setStrokeMiter(static_cast<RSScalar>(shapePaintProperty.GetStrokeMiterLimitValue()));
+        skPaint.setStrokeMiter(static_cast<SkScalar>(shapePaintProperty.GetStrokeMiterLimitValue()));
     }
 }
 } // namespace OHOS::Ace::NG
